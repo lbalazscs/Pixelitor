@@ -1,0 +1,234 @@
+/*
+ * Copyright 2009-2014 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package pixelitor.io;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import pixelitor.Canvas;
+import pixelitor.Composition;
+import pixelitor.layers.BlendingMode;
+import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Layer;
+import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Utils;
+
+import javax.imageio.ImageIO;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
+
+public class OpenRaster {
+    public static void writeOpenRaster(Composition comp, File outFile, boolean addMergedImage) throws IOException {
+        // TODO use try with resources
+        FileOutputStream fos = new FileOutputStream(outFile);
+        ZipOutputStream zos = new ZipOutputStream(fos);
+
+        String stackXML = String.format("<?xml version='1.0' encoding='UTF-8'?>\n" +
+                "<image w=\"%d\" h=\"%d\">\n" +
+                "<stack>\n", comp.getCanvasWidth(), comp.getCanvasHeight());
+
+        int nrLayers = comp.getNrLayers();
+
+        // Reverse iteration: in stack.xml the first element in a stack is the uppermost.
+        for (int i = nrLayers - 1; i >= 0; i--) {
+            Layer layer = comp.getLayer(i);
+            if (layer instanceof ImageLayer) {
+                ImageLayer imageLayer = (ImageLayer) layer;
+                stackXML += String.format(Locale.ENGLISH, "<layer name=\"%s\" visibility=\"%s\" composite-op=\"%s\" opacity=\"%f\" src=\"data/%d.png\" x=\"%d\" y=\"%d\"/>\n",
+                        layer.getName(),
+                        layer.getVisibilityAsORAString(),
+                        layer.getBlendingMode().toSVGName(),
+                        layer.getOpacity(),
+                        i,
+                        imageLayer.getTranslationX(),
+                        imageLayer.getTranslationX());
+                ZipEntry entry = new ZipEntry(String.format("data/%d.png", i));
+                zos.putNextEntry(entry);
+                BufferedImage image = imageLayer.getBufferedImage();
+                ImageIO.write(image, "PNG", zos);
+                zos.closeEntry();
+            }
+        }
+
+        if(addMergedImage) {
+            zos.putNextEntry(new ZipEntry("mergedimage.png"));
+            ImageIO.write(comp.getCompositeImage(), "PNG", zos);
+            zos.closeEntry();
+        }
+
+        // write the stack.xml
+        stackXML += "</stack>\n</image>";
+        zos.putNextEntry(new ZipEntry("stack.xml"));
+        zos.write(stackXML.getBytes("UTF-8"));
+        zos.closeEntry();
+
+        // write the mimetype
+        zos.putNextEntry(new ZipEntry("mimetype"));
+        zos.write("image/openraster".getBytes("UTF-8"));
+        zos.closeEntry();
+        zos.close();
+    }
+
+    public static Composition readOpenRaster(File file) throws IOException, ParserConfigurationException, SAXException {
+        boolean DEBUG = System.getProperty("openraster.debug", "false").equals("true");
+
+        ZipFile zipFile = new ZipFile(file);
+
+        Map<String, BufferedImage> images = new HashMap<>();
+        String stackXML = null;
+
+        Enumeration<? extends ZipEntry> fileEntries = zipFile.entries();
+        while(fileEntries.hasMoreElements()){
+            ZipEntry entry = fileEntries.nextElement();
+            String name = entry.getName();
+
+            if(name.equalsIgnoreCase("stack.xml")) {
+                stackXML = extractString(zipFile.getInputStream(entry));
+            } else if(name.equalsIgnoreCase("mergedimage.png")) {
+                // no need for that
+            } else {
+                String extension = FileExtensionUtils.getFileExtension(name);
+                if("png".equalsIgnoreCase(extension)) {
+                    BufferedImage image = ImageIO.read(zipFile.getInputStream(entry));
+                    images.put(name, image);
+                    if(DEBUG) {
+                        System.out.println(String.format("OpenRaster::readOpenRaster: found png image in zip file at the path '%s'", name));
+                    }
+                }
+            }
+        }
+
+        if(stackXML == null) {
+            throw new IllegalStateException("No stack.xml found.");
+        }
+
+        if(DEBUG) {
+            System.out.println(String.format("OpenRaster::readOpenRaster: stackXML = '%s'", stackXML));
+        }
+
+        Document doc = loadXMLFromString(stackXML);
+        Element documentElement = doc.getDocumentElement();
+        documentElement.normalize();
+        String documentElementNodeName = documentElement.getNodeName();
+        if(!documentElementNodeName.equals("image")) {
+            throw new IllegalStateException(String.format("stack.xml root element is '%s', expected: 'image'",
+                    documentElementNodeName));
+        }
+
+        String w = documentElement.getAttribute("w");
+        int compositionWidth = Integer.parseInt(w);
+        String h = documentElement.getAttribute("h");
+        int compositionHeight = Integer.parseInt(h);
+
+        if(DEBUG) {
+            System.out.println(String.format("OpenRaster::readOpenRaster: w = '%s', h = '%s', compositionWidth = %d, compositionHeight = %d", w, h, compositionWidth, compositionHeight));
+        }
+
+        Composition comp = new Composition(null, file, null, new Canvas(null, compositionWidth, compositionHeight));
+
+        NodeList layers = documentElement.getElementsByTagName("layer");
+        for (int i = layers.getLength() - 1; i >= 0; i--) { // stack.xml contains layers in reverse order
+            Node node = layers.item(i);
+            Element element = (Element) node;
+
+            String layerName = element.getAttribute("name");
+            String layerVisibility = element.getAttribute("visibility");
+            String layerVisible = element.getAttribute("visible");
+            String layerBlendingMode = element.getAttribute("composite-op");
+            String layerOpacity = element.getAttribute("opacity");
+            String layerImageSource = element.getAttribute("src");
+            String layerX = element.getAttribute("x");
+            String layerY = element.getAttribute("y");
+
+            BufferedImage image = images.get(layerImageSource);
+            image = ImageUtils.transformToCompatibleImage(image);
+
+            if(DEBUG) {
+                int imageWidth = image.getWidth();
+                int imageHeight = image.getHeight();
+                System.out.println("OpenRaster::readOpenRaster: imageWidth = " + imageWidth + ", imageHeight = " + imageHeight);
+//                Utils.debugImage(image, layerImageSource);
+            }
+
+            if(layerVisibility == null || layerVisibility.isEmpty()) {
+                //workaround: paint.net exported files use "visible" attribute instead of "visibility"
+                layerVisibility = layerVisible;
+            }
+            boolean visibility = layerVisibility == null ? true : layerVisibility.equals("visible");
+
+            ImageLayer layer = new ImageLayer(comp, image, layerName);
+            layer.setVisible(visibility, false);
+            BlendingMode blendingMode = BlendingMode.fromSVGName(layerBlendingMode);
+
+            if(DEBUG) {
+                System.out.println("OpenRaster::readOpenRaster: blendingMode = " + blendingMode);
+            }
+
+            layer.setBlendingMode(blendingMode, false, false, false);
+            float opacity = Utils.parseFloat(layerOpacity, 1.0f);
+            layer.setOpacity(opacity, false, false, false);
+            int translationX = Utils.parseInt(layerX, 0);
+            layer.setTranslationX(translationX);
+            int translationY = Utils.parseInt(layerY, 0);
+            layer.setTranslationY(translationY);
+
+            if(DEBUG) {
+                System.out.println(String.format("OpenRaster::readOpenRaster: opacity = %.2f, translationX = %d, translationY = %d", opacity, translationX, translationY));
+            }
+
+            comp.addLayerNoGUI(layer);
+        }
+        comp.setActiveLayer(comp.getLayer(0), false);
+        return comp;
+    }
+
+    public static Document loadXMLFromString(String xml) throws ParserConfigurationException, IOException, SAXException {
+        if (xml.startsWith("\uFEFF")) { // starts with UTF BOM character
+            // paint.net exported xml files start with this
+            // see http://www.rgagnon.com/javadetails/java-handle-utf8-file-with-bom.html
+            xml = xml.substring(1);
+        }
+
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        InputSource is = new InputSource(new StringReader(xml));
+        return builder.parse(is);
+    }
+
+    private static String extractString(InputStream is) {
+        Scanner s = new Scanner(is).useDelimiter("\\A");
+        return s.hasNext() ? s.next() : "";
+    }
+}

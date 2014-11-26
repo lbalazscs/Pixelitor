@@ -1,0 +1,238 @@
+/*
+ * Copyright 2009-2014 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package pixelitor.io;
+
+import pixelitor.Composition;
+import pixelitor.PixelitorWindow;
+import pixelitor.utils.AppPreferences;
+import pixelitor.utils.CustomFileChooser;
+import pixelitor.utils.ImagePreviewPanel;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.io.File;
+
+public class FileChooser {
+    private static JFileChooser openFileChooser;
+    private static CustomFileChooser saveFileChooser;
+
+    private static File lastOpenDir = AppPreferences.loadLastOpenDir();
+    private static File lastSaveDir = AppPreferences.loadLastSaveDir();
+
+    public static final FileFilter jpegFilter = new FileNameExtensionFilter("JPEG files", "jpg", "jpeg");
+    private static final FileFilter pngFilter = new FileNameExtensionFilter("PNG files", "png");
+    private static final FileFilter bmpFilter = new FileNameExtensionFilter("BMP files", "bmp");
+    public static final FileFilter gifFilter = new FileNameExtensionFilter("GIF files", "gif");
+    private static final FileFilter pxcFilter = new FileNameExtensionFilter("PXC files", "pxc");
+    public static final FileFilter oraFilter = new FileNameExtensionFilter("OpenRaster files", "ora");
+
+    private static final FileFilter[] DFAULT_OPEN_SAVE_FILTERS = {bmpFilter, gifFilter, jpegFilter, oraFilter, pngFilter, pxcFilter};
+    private static final FileFilter[] NON_DEFAULT_OPEN_SAVE_FILTERS = {};
+
+
+    public static synchronized void initOpenFileChooser() {
+        if (openFileChooser == null) {
+            openFileChooser = new JFileChooser(lastOpenDir);
+
+            setDefaultOpenExtensions();
+
+            ImagePreviewPanel preview = new ImagePreviewPanel();
+            openFileChooser.setAccessory(preview);
+            openFileChooser.addPropertyChangeListener(preview);
+        }
+    }
+
+    public static synchronized void initSaveFileChooser() {
+        if (saveFileChooser == null) {
+            saveFileChooser = new CustomFileChooser(lastSaveDir);
+            saveFileChooser.setDialogTitle("Save As");
+
+            setDefaultSaveExtensions();
+        }
+    }
+
+    public static void open() {
+        initOpenFileChooser();
+
+        int status = openFileChooser.showOpenDialog(PixelitorWindow.getInstance());
+
+        if (status == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = openFileChooser.getSelectedFile();
+            String fileName = selectedFile.getName();
+
+            lastOpenDir = selectedFile.getParentFile();
+
+            if (FileExtensionUtils.isSupportedExtension(fileName, FileExtensionUtils.SUPPORTED_INPUT_EXTENSIONS)) {
+                OpenSaveManager.openFile(selectedFile);
+            } else { // unsupported extension
+                handleUnsupportedExtensionLoading(fileName);
+            }
+        } else if (status == JFileChooser.CANCEL_OPTION) {
+            // cancelled
+        }
+    }
+
+    private static void handleUnsupportedExtensionLoading(String fileName) {
+        String extension = FileExtensionUtils.getFileExtension(fileName);
+        String msg = "Could not load " + fileName + ", because ";
+        if (extension == null) {
+            msg += "it has no extension.";
+        } else {
+            msg += "files of type " + extension + " are not supported.";
+        }
+        JOptionPane.showMessageDialog(PixelitorWindow.getInstance(), msg, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    public static boolean showSaveFileChooserAndSaveComp(Composition comp) {
+        int status = saveFileChooser.showSaveDialog(PixelitorWindow.getInstance());
+
+        if (status == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = saveFileChooser.getSelectedFile();
+            lastSaveDir = selectedFile.getParentFile();
+//            OutputFormat outputFormat = saveFileChooser.getOutputFormat();
+            String extension = saveFileChooser.getExtension();
+            OutputFormat outputFormat =  OutputFormat.valueFromExtension(extension);
+            outputFormat.saveComposition(comp, selectedFile);
+            return true;
+        }
+        if (status == JFileChooser.CANCEL_OPTION) {
+            // save cancelled
+            return false;
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if the file was saved, false if the user cancels the saving
+     */
+    public static boolean saveWithFileChooser(Composition comp) {
+        initSaveFileChooser();
+        String defaultFileName = FileExtensionUtils.getFileNameWOExtension(comp.getName());
+        saveFileChooser.setSelectedFile(new File(defaultFileName));
+        String defaultExtension = FileExtensionUtils.getFileExtension(comp.getName());
+        saveFileChooser.setFileFilter(getFileFilterForExtension(defaultExtension));
+
+        return showSaveFileChooserAndSaveComp(comp);
+    }
+
+    public static File getLastOpenDir() {
+        return lastOpenDir;
+    }
+
+    public static File getLastSaveDir() {
+        return lastSaveDir;
+    }
+
+    public static void setLastOpenDir(File lastOpenDir) {
+        FileChooser.lastOpenDir = lastOpenDir;
+    }
+
+    public static void setLastSaveDir(File lastSaveDir) {
+        FileChooser.lastSaveDir = lastSaveDir;
+    }
+
+    public static FileFilter getFileFilterForExtension(String ext) {
+        if(ext == null) {
+            return jpegFilter; // default
+        } else {
+            ext = ext.toLowerCase();
+        }
+        switch (ext) {
+            case "jpg":
+                return jpegFilter;
+            case "jpeg":
+                return jpegFilter;
+            case "png":
+                return pngFilter;
+            case "bmp":
+                return bmpFilter;
+            case "gif":
+                return gifFilter;
+            case "pxc":
+                return pxcFilter;
+        }
+        return jpegFilter; // default
+    }
+
+    public static void setDefaultOpenExtensions() {
+        addDefaultFilters(openFileChooser);
+    }
+
+    public static void setDefaultSaveExtensions() {
+        addDefaultFilters(saveFileChooser);
+    }
+
+    public static void setOnlyOneSaveExtension(FileFilter filter) {
+        setupFilterToOnlyOneFormat(saveFileChooser, filter);
+    }
+
+    public static void setOnlyOneOpenExtension(FileFilter filter) {
+        setupFilterToOnlyOneFormat(saveFileChooser, filter);
+    }
+
+    private static void addDefaultFilters(JFileChooser chooser) {
+        // remove first the non-default filters in case they are there
+        for (FileFilter filter : NON_DEFAULT_OPEN_SAVE_FILTERS) {
+            chooser.removeChoosableFileFilter(filter);
+        }
+
+        for (FileFilter filter : DFAULT_OPEN_SAVE_FILTERS) {
+            chooser.addChoosableFileFilter(filter);
+        }
+    }
+
+    private static void setupFilterToOnlyOneFormat(JFileChooser chooser, FileFilter chosenFilter) {
+        for (FileFilter filter : DFAULT_OPEN_SAVE_FILTERS) {
+            if(filter != chosenFilter) {
+                chooser.removeChoosableFileFilter(filter);
+            }
+        }
+
+        // if we want to set up a non-default filter, it has to be added now
+        for (FileFilter filter : NON_DEFAULT_OPEN_SAVE_FILTERS) {
+            if(chosenFilter == filter) {
+                chooser.addChoosableFileFilter(chosenFilter);
+            }
+        }
+
+        chooser.setFileFilter(chosenFilter);
+    }
+
+    public static File selectSaveFileForSpecificFormat(FileFilter fileFilter) {
+        File selectedFile = null;
+        try {
+            initSaveFileChooser();
+            setupFilterToOnlyOneFormat(saveFileChooser, fileFilter);
+
+            int status = saveFileChooser.showSaveDialog(PixelitorWindow.getInstance());
+
+            if (status == JFileChooser.APPROVE_OPTION) {
+                selectedFile = saveFileChooser.getSelectedFile();
+                lastSaveDir = selectedFile.getParentFile();
+            }
+            if (status == JFileChooser.CANCEL_OPTION) {
+                // save cancelled
+                return null;
+            }
+            return selectedFile;
+        } finally {
+            setDefaultSaveExtensions();
+        }
+    }
+
+}
