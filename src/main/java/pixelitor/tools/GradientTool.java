@@ -64,7 +64,7 @@ public class GradientTool extends Tool {
 
         toolSettingsPanel.add(new JLabel("Cycling: "));
         // cycle methods cannot be put directly in the JComboBox, because they would be all uppercase
-        cycleMethodSelector = new JComboBox(new String[]{
+        cycleMethodSelector = new JComboBox<>(new String[]{
                 NO_CYCLE_AS_STRING,
                 REFLECT_AS_STRING,
                 REPEAT_AS_STRING});
@@ -75,9 +75,6 @@ public class GradientTool extends Tool {
         toolSettingsPanel.add(new JLabel("Color: "));
         colorTypeSelector = new JComboBox<>(GradientColorType.values());
         toolSettingsPanel.add(colorTypeSelector);
-
-//        p.addSeparator();
-
 
         toolSettingsPanel.add(new JLabel("Invert: "));
         invertCheckBox = new JCheckBox();

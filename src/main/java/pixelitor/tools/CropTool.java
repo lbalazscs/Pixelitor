@@ -46,7 +46,7 @@ import java.awt.geom.Path2D;
  * The crop tool
  */
 public class CropTool extends Tool implements ImageSwitchListener, TransformToolChangeListener {
-    CropToolState state = CropToolState.INITIAL;
+    private CropToolState state = CropToolState.INITIAL;
 
     private TransformSupport transformSupport;
 
@@ -107,7 +107,6 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
 
         state = state.getNextAfterMousePressed();
 
-
         if(state == CropToolState.TRANSFORM) {
             assert transformSupport != null;
             transformSupport.mousePressed(e, ic);
@@ -117,10 +116,6 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
             cropButton.setEnabled(true);
             cancelButton.setEnabled(true);
         }
-//        else {
-//            cancelButton.setEnabled(false);
-//            ic.repaint();
-//        }
     }
 
     @Override
@@ -153,7 +148,6 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
                     throw new IllegalStateException();
                 }
                 Rectangle imageSpaceRectangle = userDrag.createPositiveRectangle();
-//                Rectangle compSpaceRectangle = ic.getZoomLevel().fromImageSpaceToComponent(imageSpaceRectangle);
                 Rectangle compSpaceRectangle = ic.fromImageToComponentSpace(imageSpaceRectangle);
 
                 transformSupport = new TransformSupport(compSpaceRectangle, this);
@@ -256,7 +250,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
 
     @Override
     public void transformToolChangeHappened() {
-//        System.out.println("CropTool::transformToolChangeHappened: WHAT NOW???");
+        // TODO is this necessary?
     }
 
     public void resetStateToInitial() {

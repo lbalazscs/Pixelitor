@@ -28,7 +28,7 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
 /**
- *
+ * The color picker tool
  */
 public class ColorPickerTool extends Tool {
     private final JCheckBox sampleLayerOnly = new JCheckBox("Sample Active Layer Only");

@@ -250,8 +250,6 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         respectSelection = true;
     }
 
-
-
     /**
      * Traces the given shape and paint with the current brush tool
      */
