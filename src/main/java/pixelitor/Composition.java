@@ -682,13 +682,4 @@ public class Composition implements Serializable {
     public int getCanvasHeight() {
         return canvas.getHeight();
     }
-
-//    // hack so that old pxc files can be still loaded
-//    public void setCanvasEverywhere(Canvas canvas) {
-//        this.canvas = canvas;
-//
-//        for (Layer layer : layerList) {
-//            layer.setCanvas(canvas);
-//        }
-//    }
 }

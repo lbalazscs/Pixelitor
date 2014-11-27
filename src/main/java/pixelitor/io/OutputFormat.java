@@ -17,7 +17,6 @@
 package pixelitor.io;
 
 import pixelitor.Composition;
-import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.ImageUtils;
 
@@ -108,10 +107,7 @@ public enum OutputFormat {
 
     public void saveComposition(Composition comp, File file) {
         doSaveComposition(comp, file);
-
-        comp.setDirty(false);
-        comp.setFile(file);
-        RecentFilesMenu.getInstance().addFile(file);
+        OpenSaveManager.afterSaveActions(comp, file);
     }
 
     abstract void doSaveComposition(Composition comp, File file);

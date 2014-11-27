@@ -18,6 +18,7 @@
 package pixelitor.io;
 
 import org.xml.sax.SAXException;
+import pixelitor.AppLogic;
 import pixelitor.Composition;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
@@ -359,6 +360,15 @@ public class OpenSaveManager {
             FileChooser.setDefaultSaveExtensions();
             jpegQuality = DEFAULT_JPEG_QUALITY;
         }
+    }
+
+    public static void afterSaveActions(Composition comp, File file) {
+        // TODO for a multilayered image this should be set only if it was saved in a layered format?
+        comp.setDirty(false);
+
+        comp.setFile(file);
+        RecentFilesMenu.getInstance().addFile(file);
+        AppLogic.showFileSavedMessage(file);
     }
 }
 

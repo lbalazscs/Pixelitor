@@ -16,11 +16,11 @@
  */
 package pixelitor.menus.file;
 
-import pixelitor.AppLogic;
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
 import pixelitor.io.FileChooser;
 import pixelitor.io.OpenRaster;
+import pixelitor.io.OpenSaveManager;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.OKCancelDialog;
 
@@ -62,7 +62,7 @@ public class OpenRasterExportPanel extends JPanel {
                     boolean addMergedImage = p.getExportMergedImage();
                     try {
                         OpenRaster.writeOpenRaster(activeComp, file, addMergedImage);
-                        AppLogic.showFileSavedMessage(file);
+                        OpenSaveManager.afterSaveActions(activeComp, file);
                     } catch (IOException e) {
                         Dialogs.showExceptionDialog(e);
                     }
