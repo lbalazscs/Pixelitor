@@ -69,7 +69,7 @@ public class Pixelitor {
 //        }
 
         try {
-            UIManager.setLookAndFeel(AppPreferences.getDefaultLookAndFeelClass());
+            UIManager.setLookAndFeel(AppPreferences.getLookAndFeelClass());
         } catch (Exception e) {
             Dialogs.showExceptionDialog(e);
         }

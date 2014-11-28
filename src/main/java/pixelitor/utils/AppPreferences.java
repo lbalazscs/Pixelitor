@@ -233,32 +233,18 @@ public final class AppPreferences {
         return retVal;
     }
 
-//    public static boolean loadShowDevelopMenu() {
-//        boolean b = windowUserNode.getBoolean(SHOW_DEVEl_MENU_KEY, false);
-//        return b;
-//    }
-
     private static void saveUndoLevels() {
         mainUserNode.putInt(UNDO_LEVELS_KEY, History.getUndoLevels());
     }
-
-//    private static void saveShowDevelopMenu() {
-//        MenuBar menuBar = (MenuBar) PixelitorWindow.getInstance().getJMenuBar();
-//        boolean b = menuBar.isDevelopMenuShown();
-//        windowUserNode.putBoolean(SHOW_DEVEl_MENU_KEY, b);
-//    }
-
 
     private static void savePreferencesBeforeExit() {
         saveRecentFiles(RecentFilesMenu.getInstance().getRecentFileNamesForSaving());
         saveFramePosition(PixelitorWindow.getInstance());
         saveLastOpenDir();
         saveLastSaveDir();
-//        saveLFClassName();
         saveFgBgColors();
         WorkSpace.saveVisibility();
         saveUndoLevels();
-//        saveShowDevelopMenu();
         TipsOfTheDay.saveNextTipNr();
         saveNewImageSize();
     }
@@ -285,20 +271,7 @@ public final class AppPreferences {
         }
     }
 
-//    private static void saveLFClassName() {
-//        String className = UIManager.getLookAndFeel().getClass().getName();
-//        windowUserNode.put(LOOK_AND_FEEL_KEY, className);
-//    }
-//
-//    public static String loadLFClassName() {
-//        String retVal = windowUserNode.get(LOOK_AND_FEEL_KEY, "");
-//        if (retVal.isEmpty()) {
-//            retVal = getDefaultLookAndFeelClass();
-//        }
-//        return retVal;
-//    }
-
-    public static String getDefaultLookAndFeelClass() {
+    public static String getLookAndFeelClass() {
         UIManager.LookAndFeelInfo[] lookAndFeels = UIManager.getInstalledLookAndFeels();
         for (UIManager.LookAndFeelInfo lookAndFeel : lookAndFeels) {
             if (lookAndFeel.getName().equals("Nimbus")) {

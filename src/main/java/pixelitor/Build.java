@@ -20,8 +20,6 @@ package pixelitor;
  * The type of the build.
  */
 public enum Build {
-    // croptoolissues branch
-    //
 
     DEVELOPMENT {
         private boolean robotTest = false;

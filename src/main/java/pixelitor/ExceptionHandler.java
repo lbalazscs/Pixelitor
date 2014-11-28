@@ -24,7 +24,7 @@ import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Synthesizer;
 
 /**
- *
+ * Handles uncaught exceptions and other errors
  */
 public class ExceptionHandler implements Thread.UncaughtExceptionHandler {
     public static ExceptionHandler INSTANCE = new ExceptionHandler();
@@ -35,7 +35,6 @@ public class ExceptionHandler implements Thread.UncaughtExceptionHandler {
     public void register() {
         Thread.setDefaultUncaughtExceptionHandler(this);
     }
-
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {

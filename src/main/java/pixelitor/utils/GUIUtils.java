@@ -50,7 +50,7 @@ public final class GUIUtils {
             @Override
             public void run() {
                 try {
-                    String lookAndFeelClass = AppPreferences.getDefaultLookAndFeelClass();
+                    String lookAndFeelClass = AppPreferences.getLookAndFeelClass();
                     UIManager.setLookAndFeel(lookAndFeelClass);
                 } catch (Exception e) {
                     Dialogs.showExceptionDialog(e);
