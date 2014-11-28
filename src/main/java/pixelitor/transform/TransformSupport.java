@@ -17,9 +17,9 @@
 package pixelitor.transform;
 
 import pixelitor.ImageComponent;
-import pixelitor.menus.view.ZoomLevel;
 import pixelitor.utils.Utils;
 
+import javax.swing.*;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -30,7 +30,7 @@ import java.awt.event.MouseEvent;
  */
 public class TransformSupport {
     private Handles handles;
-    private Rectangle rect;
+    private Rectangle compSpaceRect;
     private TransformToolChangeListener changeListener;
     private int dragStartX;
     private int dragStartY;
@@ -39,60 +39,60 @@ public class TransformSupport {
 
     // compSpaceRectangle must be given in component-space ("mouse") coordinates
     public TransformSupport(Rectangle compSpaceRectangle, TransformToolChangeListener changeListener) {
-        this.rect = compSpaceRectangle;
+        this.compSpaceRect = compSpaceRectangle;
         this.changeListener = changeListener;
         handles = new Handles(compSpaceRectangle);
     }
 
-    public void paintHandles(Graphics2D g, ZoomLevel zoomLevel) {
-        handles.paint(g, zoomLevel);
+    public void paintHandles(Graphics2D g) {
+        handles.paint(g);
     }
 
     public void mousePressed(MouseEvent e, ImageComponent ic) {
         dragStartX = e.getX();
         dragStartY = e.getY();
-        dragStartRectWidth = (int) rect.getWidth();
-        dragStartRectHeight = (int) rect.getHeight();
+        dragStartRectWidth = (int) compSpaceRect.getWidth();
+        dragStartRectHeight = (int) compSpaceRect.getHeight();
     }
 
-    public void mouseDragged(MouseEvent e, ImageComponent ic) {
+    public void mouseDragged(MouseEvent e, JComponent ic) {
         int cursorType = ic.getCursor().getType();
         int mouseX = e.getX();
         int mouseY = e.getY();
         switch(cursorType) {
             case Cursor.NW_RESIZE_CURSOR:
-                rect.setLocation(mouseX, mouseY);
-                rect.setSize(dragStartRectWidth + (dragStartX - mouseX), dragStartRectHeight + (dragStartY) - mouseY);
+                compSpaceRect.setLocation(mouseX, mouseY);
+                compSpaceRect.setSize(dragStartRectWidth + (dragStartX - mouseX), dragStartRectHeight + (dragStartY) - mouseY);
                 break;
             case Cursor.SE_RESIZE_CURSOR:
-                rect.setSize(dragStartRectWidth + (mouseX - dragStartX), dragStartRectHeight + (mouseY - dragStartY));
+                compSpaceRect.setSize(dragStartRectWidth + (mouseX - dragStartX), dragStartRectHeight + (mouseY - dragStartY));
                 break;
             case Cursor.SW_RESIZE_CURSOR:
-                rect.setLocation(mouseX, rect.getLocation().y);
-                rect.setSize(dragStartRectWidth + (dragStartX - mouseX), dragStartRectHeight + (mouseY - dragStartY));
+                compSpaceRect.setLocation(mouseX, compSpaceRect.getLocation().y);
+                compSpaceRect.setSize(dragStartRectWidth + (dragStartX - mouseX), dragStartRectHeight + (mouseY - dragStartY));
                 break;
             case Cursor.NE_RESIZE_CURSOR:
-                rect.setLocation(rect.getLocation().x, mouseY);
-                rect.setSize(dragStartRectWidth + (mouseX - dragStartX), dragStartRectHeight + (dragStartY - mouseY));
+                compSpaceRect.setLocation(compSpaceRect.getLocation().x, mouseY);
+                compSpaceRect.setSize(dragStartRectWidth + (mouseX - dragStartX), dragStartRectHeight + (dragStartY - mouseY));
                 break;
             case Cursor.N_RESIZE_CURSOR:
-                rect.setLocation(rect.getLocation().x, mouseY);
-                rect.setSize(rect.width, dragStartRectHeight + (dragStartY - mouseY));
+                compSpaceRect.setLocation(compSpaceRect.getLocation().x, mouseY);
+                compSpaceRect.setSize(compSpaceRect.width, dragStartRectHeight + (dragStartY - mouseY));
                 break;
             case Cursor.S_RESIZE_CURSOR:
-                rect.setSize(dragStartRectWidth, dragStartRectHeight + (mouseY - dragStartY));
+                compSpaceRect.setSize(dragStartRectWidth, dragStartRectHeight + (mouseY - dragStartY));
                 break;
             case Cursor.E_RESIZE_CURSOR:
-                rect.setSize(dragStartRectWidth + (mouseX - dragStartX), rect.height);
+                compSpaceRect.setSize(dragStartRectWidth + (mouseX - dragStartX), compSpaceRect.height);
                 break;
             case Cursor.W_RESIZE_CURSOR:
-                rect.setLocation(mouseX, rect.y);
-                rect.setSize(dragStartRectWidth + (dragStartX - mouseX), rect.height);
+                compSpaceRect.setLocation(mouseX, compSpaceRect.y);
+                compSpaceRect.setSize(dragStartRectWidth + (dragStartX - mouseX), compSpaceRect.height);
                 break;
             default:
                 return;
         }
-        handles.updateRect(rect);
+        handles.updateRect(compSpaceRect);
         changeListener.transformToolChangeHappened();
     }
 
@@ -101,8 +101,7 @@ public class TransformSupport {
     }
 
     public Rectangle getRectangle(ImageComponent ic) {
-//        Rectangle imageSpaceRect = zoomLevel.fromComponentSpaceToImage(rect);
-        Rectangle imageSpaceRect = ic.fromComponentToImageSpace(rect);
+        Rectangle imageSpaceRect = ic.fromComponentToImageSpace(compSpaceRect);
         return Utils.toPositiveRectangle(imageSpaceRect);
     }
 
@@ -110,7 +109,7 @@ public class TransformSupport {
     public String toString() {
         return "TransformSupport{" +
                 "handles=" + handles +
-                ", rect=" + rect +
+                ", compSpaceRect=" + compSpaceRect +
                 ", changeListener=" + changeListener +
                 ", dragStartX=" + dragStartX +
                 ", dragStartY=" + dragStartY +

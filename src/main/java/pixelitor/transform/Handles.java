@@ -16,7 +16,6 @@
  */
 package pixelitor.transform;
 
-import pixelitor.menus.view.ZoomLevel;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -48,7 +47,7 @@ public class Handles {
         updateRect(compSpaceRectangle);
     }
 
-    public void paint(Graphics2D g, ZoomLevel zoomLevel) {
+    public void paint(Graphics2D g) {
         BasicStroke bigStroke = new BasicStroke(3);
         BasicStroke smallStroke = new BasicStroke(1);
 

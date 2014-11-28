@@ -20,7 +20,7 @@ package pixelitor;
  * The type of the build.
  */
 public enum Build {
-    // master branch
+    // croptoolissues branch
     //
 
     DEVELOPMENT {

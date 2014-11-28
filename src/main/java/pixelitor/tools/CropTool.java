@@ -205,7 +205,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
             // The zooming is temporarily reset because the transformSupport works in component space
             AffineTransform scaledTransform = g2.getTransform();
             g2.setTransform(unscaledTransform);
-            transformSupport.paintHandles(g2, callingIC.getZoomLevel());
+            transformSupport.paintHandles(g2);
             g2.setTransform(scaledTransform);
         }
     }
