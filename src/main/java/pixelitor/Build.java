@@ -68,7 +68,7 @@ public enum Build {
         }
     };
 
-    public static Build CURRENT = FINAL;
+    public static Build CURRENT = DEVELOPMENT;
 
     public static final String VERSION_NUMBER = "2.2.0";
 

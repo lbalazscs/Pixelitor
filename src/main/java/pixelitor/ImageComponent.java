@@ -127,13 +127,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-//                double previousDrawStartX = drawStartX;
-//                double previousDrawStartY = drawStartY;
-
                 updateDrawStart();
 
-//                double deltaDrawStartX = drawStartX - previousDrawStartX;
-//                double deltaDrawStartY = drawStartY - previousDrawStartY;
                 if(Tools.getCurrentTool() == Tools.CROP) {
                     Tools.CROP.imageComponentResized(ImageComponent.this);
                 }

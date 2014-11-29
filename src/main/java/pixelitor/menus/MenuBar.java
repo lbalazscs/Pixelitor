@@ -525,6 +525,7 @@ public class MenuBar extends JMenuBar {
         MenuFactory.createMenuItem(new Magnify(), null, distortMenu);
         distortMenu.addSeparator();
         MenuFactory.createMenuItem(new JHTurbulentDistortion(), null, distortMenu);
+        MenuFactory.createMenuItem(new JHUnderWater(), null, distortMenu);
         MenuFactory.createMenuItem(new JHWaterRipple(), null, distortMenu);
         MenuFactory.createMenuItem(new JHWaves(), null, distortMenu);
         MenuFactory.createMenuItem(new AngularWaves(), null, distortMenu);
