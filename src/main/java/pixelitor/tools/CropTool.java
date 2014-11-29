@@ -60,6 +60,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
     // The crop rectangle in image space.
     // This variable is used only while the image component is resized
     private Rectangle lastCropRectangle;
+    private JCheckBox allowGrowingCB;
 
     CropTool() {
         super('c', "Crop", "crop_tool_icon.png",
@@ -81,11 +82,14 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
         SliderSpinner maskOpacitySpinner = new SliderSpinner(maskOpacityParam, false, SliderSpinner.TextPosition.WEST);
         toolSettingsPanel.add(maskOpacitySpinner);
 
+        allowGrowingCB = new JCheckBox("Allow Growing", false);
+        toolSettingsPanel.add(allowGrowingCB);
+
         cropButton = new JButton("Crop");
         cropButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ImageComponents.toolCropActiveImage();
+                ImageComponents.toolCropActiveImage(allowGrowingCB.isSelected());
                 ImageComponents.repaintActive();
                 resetStateToInitial();
             }
@@ -191,8 +195,8 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
         Rectangle canvasBounds = canvas.getBounds();
         // We are here in image space because g2 has the transforms applied.
         // We are overriding the clip of g2, therefore we must manually
-        // make sure that we don't paint anything outside the ImageComponent.
-        // canvas.getBounds() is not reliable because ImageComponent might be smaller
+        // make sure that we don't paint anything outside the internal frame.
+        // canvas.getBounds() is not reliable because the internal frame might be smaller
         // so we have to intersect with the view rectangle...
         Rectangle componentSpaceViewRectangle = callingIC.getViewRectangle();
         // ...but first get this to image space...

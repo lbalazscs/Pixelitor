@@ -17,6 +17,7 @@
 package pixelitor.filters.comp;
 
 import pixelitor.AppLogic;
+import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.ImageComponent;
 import pixelitor.history.OneLayerUndoableEdit;
@@ -36,10 +37,15 @@ public final class CompositionUtils {
     private CompositionUtils() {
     }
 
-    public static void cropImage(Composition comp, Rectangle selectionBounds, boolean selection) {
+    public static void cropImage(Composition comp, Rectangle selectionBounds, boolean selection, boolean allowGrowing) {
         if (selectionBounds.width == 0 || selectionBounds.height == 0) {
             // TODO maybe a warning to the user?
             return;
+        }
+
+        Canvas canvas = comp.getCanvas();
+        if(!allowGrowing) {
+            selectionBounds = selectionBounds.intersection(canvas.getBounds());
         }
 
         OneLayerUndoableEdit.createAndAddToHistory(comp, "Crop", false, true);
@@ -54,7 +60,7 @@ public final class CompositionUtils {
             layer.crop(selectionBounds);
         }
 
-        comp.getCanvas().updateSize(selectionBounds.width, selectionBounds.height);
+        canvas.updateSize(selectionBounds.width, selectionBounds.height);
         comp.setDirty(true);
 
         ImageComponent ic = comp.getIC();

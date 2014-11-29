@@ -111,15 +111,16 @@ public class ImageComponents {
 
     /**
      * Crops tha active image based on the crop tool
+     * @param selected
      */
-    public static void toolCropActiveImage() {
+    public static void toolCropActiveImage(boolean allowGrowing) {
         try {
             Composition comp = getActiveComp();
             if (comp == null) {
                 return;
             }
             Rectangle cropRectangle = Tools.CROP.getCropRectangle(comp.getIC());
-            CompositionUtils.cropImage(comp, cropRectangle, false);
+            CompositionUtils.cropImage(comp, cropRectangle, false, allowGrowing);
         } catch (Exception ex) {
             Dialogs.showExceptionDialog(ex);
         }
@@ -137,7 +138,7 @@ public class ImageComponents {
             Selection selection = comp.getSelection();
             if (selection != null) {
                 Rectangle selectionBounds = selection.getShapeBounds();
-                CompositionUtils.cropImage(comp, selectionBounds, true);
+                CompositionUtils.cropImage(comp, selectionBounds, true, true);
             }
         } catch (Exception ex) {
             Dialogs.showExceptionDialog(ex);

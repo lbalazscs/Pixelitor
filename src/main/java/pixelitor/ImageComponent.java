@@ -556,6 +556,10 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         return inverse;
     }
 
+    /**
+     * Returns how much of this ImageComponent is currently visible considering that
+     * the JScrollPane might show only a part of it
+     */
     public Rectangle getViewRectangle() {
         return internalFrame.getScrollPane().getViewport().getViewRect();
     }
