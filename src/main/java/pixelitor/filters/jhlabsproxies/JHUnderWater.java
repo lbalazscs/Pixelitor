@@ -22,6 +22,7 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ReseedNoiseActionParam;
 
 import java.awt.image.BufferedImage;
 
@@ -30,9 +31,9 @@ import java.awt.image.BufferedImage;
  */
 public class JHUnderWater extends FilterWithParametrizedGUI {
     private RangeParam amountParam = new RangeParam("Amount", 0, 100, 50);
-    private RangeParam scaleParam = new RangeParam("Scale", 1, 300, 50);
+    private RangeParam scaleParam = new RangeParam("Scale", 1, 300, 150);
     private RangeParam stretchParam = new RangeParam("Stretch", 1, 50, 1);
-    private RangeParam turbulenceParam = new RangeParam("Turbulence", 0, 100, 0);
+//    private RangeParam turbulenceParam = new RangeParam("Turbulence", 0, 100, 0);
     private RangeParam timeParam = new RangeParam("Time", 100, 1000, 100);
     private AngleParam angleParam = new AngleParam("Angle", 0);
     private IntChoiceParam edgeActionParam =  IntChoiceParam.getEdgeActionChoices(true);
@@ -43,14 +44,15 @@ public class JHUnderWater extends FilterWithParametrizedGUI {
     public JHUnderWater() {
         super("Underwater", true, false);
         setParamSet(new ParamSet(
-                amountParam,
-                scaleParam,
+                amountParam.adjustRangeAccordingToImage(0.1),
+                scaleParam.adjustRangeAccordingToImage(0.3),
                 stretchParam,
                 angleParam,
-                turbulenceParam,
+//                turbulenceParam,
                 timeParam,
                 edgeActionParam,
-                interpolationParam
+                interpolationParam,
+                new ReseedNoiseActionParam()
         ));
     }
 
@@ -63,7 +65,7 @@ public class JHUnderWater extends FilterWithParametrizedGUI {
         filter.setAmount(amountParam.getValue());
         filter.setScale(scaleParam.getValue());
         filter.setStretch(stretchParam.getValue());
-        filter.setTurbulence(turbulenceParam.getValueAsPercentage());
+//        filter.setTurbulence(turbulenceParam.getValueAsPercentage());
         filter.setTime(timeParam.getValueAsPercentage());
         filter.setAngle((float) angleParam.getValueInRadians());
         filter.setEdgeAction(edgeActionParam.getValue());
