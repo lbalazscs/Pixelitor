@@ -45,15 +45,6 @@ public class InternalImageFrame extends JInternalFrame implements InternalFrameL
         scrollPane = new JScrollPane(this.ic);
         this.add(scrollPane);
 
-//        this.getContentPane().setLayout(new GridLayout(1,1));
-//        JPanel background = new JPanel( new GridBagLayout() );
-//        background.add( this.ic, new GridBagConstraints( 0, 0, 1, 1, 1.0, 1.0,
-//                GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets( 0, 0, 0, 0 ), 0, 0 ) );
-//        background.setOpaque(true);
-//        background.setDoubleBuffered(true);
-//        getContentPane().add(scrollPane = new JScrollPane( background ));
-//        background.setBackground(Color.LIGHT_GRAY);
-
         Dimension preferredSize = ic.getPreferredSize();
         setNewSize((int) preferredSize.getWidth(), (int) preferredSize.getHeight(), locationX, locationY);
         this.setVisible(true);

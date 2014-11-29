@@ -42,6 +42,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyVetoException;
 import java.io.File;
@@ -65,11 +66,14 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
     private boolean layerMaskEditing = false;
 
+    // the start of the image if the ImageComponent is resized to bigger
+    // than the canvas, and the image needs to be centralized
     double drawStartX;
     double drawStartY;
 
     /**
-     * Called when a regular file (jpeg, png, etc.) is opened or when a new composition is created or something is pasted
+     * Called when a regular file (jpeg, png, etc.) is opened or when
+     * a new composition is created or something is pasted
      * If the file argument is not null, then the name argument is ignored
      */
     public ImageComponent(File file, String name, BufferedImage baseLayerImage) {
@@ -123,7 +127,16 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
+//                double previousDrawStartX = drawStartX;
+//                double previousDrawStartY = drawStartY;
+
                 updateDrawStart();
+
+//                double deltaDrawStartX = drawStartX - previousDrawStartX;
+//                double deltaDrawStartY = drawStartY - previousDrawStartY;
+                if(Tools.getCurrentTool() == Tools.CROP) {
+                    Tools.CROP.imageComponentResized(ImageComponent.this);
+                }
             }
         });
     }
@@ -449,7 +462,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         Point imageSpacePoint = fromComponentToImageSpace(new Point(mouseX, mouseY), oldZoom);
         Point newComponentSpacePoint = fromImageToComponentSpace(imageSpacePoint, newZoom);
 
-        Rectangle viewRect = internalFrame.getScrollPane().getViewport().getViewRect();
+        Rectangle viewRect = getViewRectangle();
 
         final Rectangle areaThatShouldBeVisible = new Rectangle(
                 newComponentSpacePoint.x - viewRect.width / 2,
@@ -522,4 +535,29 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
                 (int)(input.height * viewScale)
         );
     }
+
+    // TODO untested
+    public AffineTransform getImageToComponentTransform() {
+        AffineTransform t = new AffineTransform();
+        t.translate(drawStartX, drawStartY);
+        t.scale(viewScale, viewScale);
+        return t;
+    }
+
+    // TODO untested
+    public AffineTransform getComponentToImageTransform() {
+        AffineTransform inverse = null;
+        try {
+            inverse = getImageToComponentTransform().createInverse();
+        } catch (NoninvertibleTransformException e) {
+            // should not happen
+            e.printStackTrace();
+        }
+        return inverse;
+    }
+
+    public Rectangle getViewRectangle() {
+        return internalFrame.getScrollPane().getViewport().getViewRect();
+    }
+
 }
