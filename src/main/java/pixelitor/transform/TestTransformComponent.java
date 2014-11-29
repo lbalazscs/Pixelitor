@@ -54,7 +54,10 @@ class TestTransformComponent extends JComponent {
         JFrame f = new JFrame("Test");
         f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        f.add(new TestTransformComponent(new TransformSupport(new Rectangle(50, 50, 200, 100), new TransformToolChangeListener() {
+        f.add(new TestTransformComponent(new TransformSupport(
+                new Rectangle(50, 50, 200, 100),
+                new Rectangle(50, 50, 200, 100),
+                new TransformToolChangeListener() {
             @Override
             public void transformToolChangeHappened() {
 

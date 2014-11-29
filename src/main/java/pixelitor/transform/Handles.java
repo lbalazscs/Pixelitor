@@ -28,7 +28,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- *
+ * The eight handles of the TransformSupport
  */
 public class Handles {
     private Handle upperLeft = new Handle(Cursor.NW_RESIZE_CURSOR);
@@ -77,7 +77,6 @@ public class Handles {
         int lowerLeftY = lowerLeft.getY();
 
         return Utils.toPositiveRectangle(upperLeftX, upperRightX, upperLeftY, lowerLeftY);
-
     }
 
     /**

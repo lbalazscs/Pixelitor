@@ -29,7 +29,7 @@ public class Handle {
     private int y;
 
     private Cursor cursor;
-    private Rectangle shape;
+    private Rectangle shape; // the shape of the handle
 
     public Handle(int cursorType) {
         this.cursor = Cursor.getPredefinedCursor(cursorType);

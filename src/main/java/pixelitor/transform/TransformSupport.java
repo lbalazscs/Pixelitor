@@ -31,15 +31,19 @@ import java.awt.event.MouseEvent;
 public class TransformSupport {
     private Handles handles;
     private Rectangle compSpaceRect;
+    private Rectangle imageSpaceRect; // used only while the image component is resized
     private TransformToolChangeListener changeListener;
     private int dragStartX;
     private int dragStartY;
     private int dragStartRectWidth;
     private int dragStartRectHeight;
 
-    // compSpaceRectangle must be given in component-space ("mouse") coordinates
-    public TransformSupport(Rectangle compSpaceRectangle, TransformToolChangeListener changeListener) {
+    // true while the user is adjusting the handles
+    private boolean adjusting;
+
+    public TransformSupport(Rectangle compSpaceRectangle, Rectangle imageSpaceRect, TransformToolChangeListener changeListener) {
         this.compSpaceRect = compSpaceRectangle;
+        this.imageSpaceRect = imageSpaceRect;
         this.changeListener = changeListener;
         handles = new Handles(compSpaceRectangle);
     }
@@ -59,7 +63,7 @@ public class TransformSupport {
         int cursorType = ic.getCursor().getType();
         int mouseX = e.getX();
         int mouseY = e.getY();
-        switch(cursorType) {
+        switch (cursorType) {
             case Cursor.NW_RESIZE_CURSOR:
                 compSpaceRect.setLocation(mouseX, mouseY);
                 compSpaceRect.setSize(dragStartRectWidth + (dragStartX - mouseX), dragStartRectHeight + (dragStartY) - mouseY);
@@ -92,17 +96,24 @@ public class TransformSupport {
             default:
                 return;
         }
+        adjusting = true;
         handles.updateRect(compSpaceRect);
         changeListener.transformToolChangeHappened();
+    }
+
+    public void mouseReleased() {
+        adjusting = false;
     }
 
     public void mouseMoved(MouseEvent e, ImageComponent ic) {
         handles.setCursorForPoint(e.getX(), e.getY(), ic);
     }
 
-    public Rectangle getRectangle(ImageComponent ic) {
-        Rectangle imageSpaceRect = ic.fromComponentToImageSpace(compSpaceRect);
-        return Utils.toPositiveRectangle(imageSpaceRect);
+    public Rectangle getImageSpaceRectangle(ImageComponent ic) {
+        if(adjusting) {
+            imageSpaceRect = Utils.toPositiveRectangle(ic.fromComponentToImageSpace(compSpaceRect));
+        }
+        return imageSpaceRect;
     }
 
     @Override
@@ -117,5 +128,15 @@ public class TransformSupport {
                 ", dragStartRectHeight=" + dragStartRectHeight +
                 '}';
     }
+
+    /**
+     * Used only while the image component is resized
+     * @param lastCropRectangle - the last crop rectangle in component space
+     */
+    public void setComponentSpaceRect(Rectangle compSpaceRect) {
+        this.compSpaceRect = compSpaceRect;
+        handles.updateRect(compSpaceRect);
+    }
+
 }
 

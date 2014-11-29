@@ -57,6 +57,11 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
     private JButton cancelButton = new JButton("Cancel");
     private JButton cropButton;
 
+    // The crop rectangle in image space.
+    // This variable is used only while the image component is resized
+    private Rectangle lastCropRectangle;
+    private JCheckBox allowGrowingCB;
+
     CropTool() {
         super('c', "Crop", "crop_tool_icon.png",
                 "Click and drag to define the crop area. Hold SPACE down to move the entire region.",
@@ -77,11 +82,14 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
         SliderSpinner maskOpacitySpinner = new SliderSpinner(maskOpacityParam, false, SliderSpinner.TextPosition.WEST);
         toolSettingsPanel.add(maskOpacitySpinner);
 
+        allowGrowingCB = new JCheckBox("Allow Growing", false);
+        toolSettingsPanel.add(allowGrowingCB);
+
         cropButton = new JButton("Crop");
         cropButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ImageComponents.toolCropActiveImage();
+                ImageComponents.toolCropActiveImage(allowGrowingCB.isSelected());
                 ImageComponents.repaintActive();
                 resetStateToInitial();
             }
@@ -150,7 +158,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
                 Rectangle imageSpaceRectangle = userDrag.createPositiveRectangle();
                 Rectangle compSpaceRectangle = ic.fromImageToComponentSpace(imageSpaceRectangle);
 
-                transformSupport = new TransformSupport(compSpaceRectangle, this);
+                transformSupport = new TransformSupport(compSpaceRectangle, imageSpaceRectangle, this);
 
                 state = CropToolState.TRANSFORM;
                 break;
@@ -158,6 +166,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
                 if(transformSupport == null) {
                     throw new IllegalStateException();
                 }
+                transformSupport.mouseReleased();
                 break;
         }
     }
@@ -181,12 +190,23 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
         }
 
         // paint the semi-transparent dark area outside the crop rectangle
-        Shape previousClip = g2.getClip();
+        Shape previousClip = g2.getClip();  // save for later use
+
         Rectangle canvasBounds = canvas.getBounds();
-        Path2D newClip = new Path2D.Double(Path2D.WIND_EVEN_ODD);
-        newClip.append(canvasBounds, false);
-        newClip.append(cropRectangle, false);
-        g2.setClip(newClip);
+        // We are here in image space because g2 has the transforms applied.
+        // We are overriding the clip of g2, therefore we must manually
+        // make sure that we don't paint anything outside the internal frame.
+        // canvas.getBounds() is not reliable because the internal frame might be smaller
+        // so we have to intersect with the view rectangle...
+        Rectangle componentSpaceViewRectangle = callingIC.getViewRectangle();
+        // ...but first get this to image space...
+        Rectangle imageSpaceViewRectangle = callingIC.fromComponentToImageSpace(componentSpaceViewRectangle);
+        // ... and now we can intersect
+        canvasBounds = canvasBounds.intersection(imageSpaceViewRectangle);
+        Path2D darkAreaClip = new Path2D.Double(Path2D.WIND_EVEN_ODD);
+        darkAreaClip.append(canvasBounds, false);
+        darkAreaClip.append(cropRectangle, false);
+        g2.setClip(darkAreaClip);
 
         Color previousColor = g2.getColor();
         g2.setColor(Color.BLACK);
@@ -196,7 +216,6 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
 
         g2.fill(canvasBounds);
 
-        g2.setClip(previousClip);
         g2.setColor(previousColor);
         g2.setComposite(previousComposite);
 
@@ -205,9 +224,14 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
             // The zooming is temporarily reset because the transformSupport works in component space
             AffineTransform scaledTransform = g2.getTransform();
             g2.setTransform(unscaledTransform);
+            // prevents drawing outside the InternalImageFrame/ImageComponent
+            // it is important to call this AFTER setting the unscaled transform
+            g2.setClip(componentSpaceViewRectangle);
             transformSupport.paintHandles(g2);
             g2.setTransform(scaledTransform);
         }
+
+        g2.setClip(previousClip);
     }
 
     /**
@@ -217,13 +241,17 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
     public Rectangle getCropRectangle(ImageComponent ic) {
         switch (state) {
             case INITIAL:
-                return null;
+                lastCropRectangle = null;
+                break;
             case USERDRAG:
-                return userDrag.createPositiveRectangle();
+                lastCropRectangle = userDrag.createPositiveRectangle();
+                break;
             case TRANSFORM:
-                return transformSupport.getRectangle(ic);
+                lastCropRectangle = transformSupport.getImageSpaceRectangle(ic);
+                break;
         }
-        return null;
+
+        return lastCropRectangle;
     }
 
     @Override
@@ -263,4 +291,9 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
         ImageComponents.repaintActive();
     }
 
+    public void imageComponentResized(ImageComponent ic) {
+        if(transformSupport != null && lastCropRectangle != null && state == CropToolState.TRANSFORM) {
+            transformSupport.setComponentSpaceRect(ic.fromImageToComponentSpace(lastCropRectangle));
+        }
+    }
 }
