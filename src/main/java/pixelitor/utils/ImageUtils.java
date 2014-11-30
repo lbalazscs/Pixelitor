@@ -581,6 +581,7 @@ public class ImageUtils {
         assert bounds != null;
 
         Rectangle imageBounds = new Rectangle(0, 0, src.getWidth(), src.getHeight());
+        // TODO SwingUtilities.computeIntersection can do this without allocating a rectangle
         Rectangle intersection = bounds.intersection(imageBounds);
 
         if (intersection.width <= 0 || intersection.height <= 0) {

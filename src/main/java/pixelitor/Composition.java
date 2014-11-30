@@ -360,6 +360,11 @@ public class Composition implements Serializable {
 
 
     private BufferedImage calculateCompositeImage() {
+        // TODO why is this not working
+//        if(getNrLayers() == 1) {
+//            ImageLayer layer = (ImageLayer) getLayer(0); // must be
+//            return layer.getBufferedImage();
+//        }
 
 //        BufferedImage imageSoFar = ImageUtils.createCompatibleImage(getCanvasWidth(), getCanvasHeight());
 

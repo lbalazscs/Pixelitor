@@ -229,6 +229,7 @@ public abstract class Tool {
         Composition comp = affectedArea.getComp();
 
         Rectangle fullImageBounds = new Rectangle(0, 0, fullUntouchedImage.getWidth(), fullUntouchedImage.getHeight());
+        // TODO SwingUtilities.computeIntersection can do this without allocating a rectangle
         Rectangle saveRectangle = rectangleAffectedByTool.intersection(fullImageBounds);
 
         if (!saveRectangle.isEmpty()) {

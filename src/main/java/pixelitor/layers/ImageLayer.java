@@ -639,6 +639,7 @@ public class ImageLayer extends ContentLayer {
 
         bounds.translate(-getTranslationX(), -getTranslationY()); // relative to the image
         Rectangle imageBounds = new Rectangle(0, 0, src.getWidth(), src.getHeight());
+        // TODO SwingUtilities.computeIntersection can do this without allocating a rectangle
         bounds = bounds.intersection(imageBounds);
 
         if (bounds.isEmpty()) {

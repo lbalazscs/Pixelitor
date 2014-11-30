@@ -252,7 +252,14 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     @Override
     public void paint(Graphics g) {
         try {
-            paintComponent(g);  // no borders, no children - but TODO consider double-buffering
+//            long startTime = System.nanoTime();
+
+            // no borders, no children, double-buffering is happening
+            // in the parent
+            paintComponent(g);
+
+//            double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
+//            System.out.println(String.format("ImageComponent::paint: estimatedSeconds = '%.2f'", estimatedSeconds));
         } catch (OutOfMemoryError e) {
             ExceptionHandler.showOutOfMemoryDialog();
         }
@@ -306,6 +313,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         Rectangle clipBounds = g.getClipBounds();
         Rectangle imageRect = new Rectangle((int)drawStartX, (int)drawStartY, maxWidth, maxHeight);
 
+        // TODO SwingUtilities.computeIntersection can do this without allocating a rectangle
         clipBounds = clipBounds.intersection(imageRect);
         g.setClip(clipBounds);
         return false;
