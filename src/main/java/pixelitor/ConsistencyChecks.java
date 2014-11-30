@@ -26,7 +26,8 @@ import javax.swing.*;
 import java.awt.image.BufferedImage;
 
 /**
- *
+ * Consistency checks that run only in developer mode.
+ * They are enabled by the Build setting or by the assertions
  */
 public final class ConsistencyChecks {
     /**

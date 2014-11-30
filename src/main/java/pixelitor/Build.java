@@ -17,7 +17,8 @@
 package pixelitor;
 
 /**
- * The type of the build.
+ * The type of the "build" - in development mode there are additional
+ * menus and runtime checks.
  */
 public enum Build {
 

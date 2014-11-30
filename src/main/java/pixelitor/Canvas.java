@@ -5,7 +5,8 @@ import java.awt.Rectangle;
 import java.io.Serializable;
 
 /**
- * Represents the painting canvas.
+ * The painting canvas represents the size od the composition.
+ * A layer can be bigger than the canvas if it is partially hidden.
  */
 public class Canvas implements Serializable {
     private int width;

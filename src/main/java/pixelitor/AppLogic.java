@@ -33,7 +33,6 @@ import java.util.Collection;
  */
 public final class AppLogic {
     private static final Collection<LayerChangeListener> layerChangeListeners = new ArrayList<>();
-//    private static int numFramesOpen = 0;
 
     private AppLogic() {
     }

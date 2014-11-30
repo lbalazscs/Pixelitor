@@ -173,7 +173,6 @@ public class Composition implements Serializable {
         ((ImageLayer) activeLayer).finishFilterWithPreview(filterName);
     }
 
-
     public void changeImageSimpleFilterFinished(BufferedImage img, ChangeReason changeReason, String opName) {
         setDirty(true);
 
@@ -353,7 +352,6 @@ public class Composition implements Serializable {
         }
 
         setActiveLayer(layerList.get(newIndex), true);
-
 
         assert ConsistencyChecks.fadeCheck(this);
     }
