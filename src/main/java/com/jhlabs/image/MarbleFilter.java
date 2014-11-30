@@ -26,9 +26,8 @@ import java.awt.image.BufferedImage;
 public class MarbleFilter extends TransformFilter {
 
     private float[] sinTable, cosTable;
-    private float xScale = 4;
-    private float yScale = 4;
-    private float amount = 1;
+    private float scale = 4;
+    private float amount = 4;
     private float turbulence = 1;
 
     public MarbleFilter() {
@@ -38,61 +37,27 @@ public class MarbleFilter extends TransformFilter {
     /**
      * Set the X scale of the effect.
      *
-     * @param xScale the scale.
-     * @see #getXScale
+     * @param scale the scale.
+     * @see #getScale
      */
-    public void setXScale(float xScale) {
-        this.xScale = xScale;
+    public void setScale(float scale) {
+        this.scale = scale;
     }
 
     /**
      * Get the X scale of the effect.
      *
      * @return the scale.
-     * @see #setXScale
+     * @see #setScale
      */
-    public float getXScale() {
-        return xScale;
+    public float getScale() {
+        return scale;
     }
 
-    /**
-     * Set the Y scale of the effect.
-     *
-     * @param yScale the scale.
-     * @see #getYScale
-     */
-    public void setYScale(float yScale) {
-        this.yScale = yScale;
-    }
-
-    /**
-     * Get the Y scale of the effect.
-     *
-     * @return the scale.
-     * @see #setYScale
-     */
-    public float getYScale() {
-        return yScale;
-    }
-
-    /**
-     * Set the amount of effect.
-     *
-     * @param amount the amount
-     * @min-value 0
-     * @max-value 1
-     * @see #getAmount
-     */
     public void setAmount(float amount) {
         this.amount = amount;
     }
 
-    /**
-     * Get the amount of effect.
-     *
-     * @return the amount
-     * @see #setAmount
-     */
     public float getAmount() {
         return amount;
     }
@@ -123,18 +88,32 @@ public class MarbleFilter extends TransformFilter {
         sinTable = new float[256];
         cosTable = new float[256];
         for (int i = 0; i < 256; i++) {
-            float angle = ImageMath.TWO_PI * i / 256f * turbulence;
+            float angle = ImageMath.TWO_PI * i / 256.0f * turbulence;
 
-//            sinTable[i] = (float) (-yScale * Math.sin(angle));
-            // Laszlo: subtracted PI/2 from the angle so that the pixels are not shifted predominantly to the right
-            sinTable[i] = (float) (-yScale * Math.sin(angle - ImageMath.HALF_PI));
+            sinTable[i] = (float) (-amount * Math.sin(angle));
+            cosTable[i] = (float) (amount * Math.cos(angle));
+        }
 
-            cosTable[i] = (float) (yScale * Math.cos(angle));
+        // Laszlo: balance the arrays around 0
+        // so that the pixels are not shifted predominantly in one direction
+        float sinAverage = average(sinTable);
+        float cosAverage = average(cosTable);
+        for (int i = 0; i < 256; i++) {
+            sinTable[i] -= sinAverage;
+            cosTable[i] -= cosAverage;
         }
     }
 
+    static float average(float[] input) {
+        float sum = 0f;
+        for (float v : input) {
+            sum += v;
+        }
+        return sum / input.length;
+    }
+
     private int displacementMap(int x, int y) {
-        float noise = Noise.noise2(x / xScale, y / xScale); // mostly between -1 and 1 but not distributed uniformly
+        float noise = Noise.noise2(x / scale, y / scale); // mostly between -1 and 1 but not distributed uniformly
         return PixelUtils.clamp((int) (127 * (1 + noise)));
     }
 
