@@ -1,9 +1,9 @@
 /*
  * @(#)MultiThumbSlider.java
  *
- * $Date: 2009-02-20 01:34:41 -0600 (Fri, 20 Feb 2009) $
+ * $Date: 2014-06-06 20:04:49 +0200 (P, 06 jún. 2014) $
  *
- * Copyright (c) 2009 by Jeremy Wood.
+ * Copyright (c) 2011 by Jeremy Wood.
  * All rights reserved.
  *
  * The copyright of this software is owned by Jeremy Wood. 
@@ -12,10 +12,10 @@
  * Jeremy Wood. For details see accompanying license terms.
  * 
  * This software is probably, but not necessarily, discussed here:
- * http://javagraphics.blogspot.com/
+ * https://javagraphics.java.net/
  * 
- * And the latest version should be available here:
- * https://javagraphics.dev.java.net/
+ * That site should also contain the most recent official version
+ * of this software.  (See the SVN repository for more details.)
  */
 package com.bric.swing;
 
@@ -50,17 +50,17 @@ import javax.swing.event.ChangeListener;
  * <code>doPopup()</code>.  The UI will invoke these methods as needed; this gives the
  * user a chance to edit the values represented at a particular point.
  * <P>Also using the keyboard:
- * <LI>In a horizontal slider, the user can press modifier+left or modifer+right to insert
+ * <ul><LI>In a horizontal slider, the user can press modifier+left or modifer+right to insert
  * a new thumb to the left/right of the currently selected thumb.  (Where "modifier" refers
  * to <code>Toolkit.getDefaultTookit().getMenuShortcutKeyMask()</code>.  On Mac this is META, and on Windows
  * this is CONTROL.)  Likewise on a vertical slider the up/down arrow keys can be used to add
- * thumbs.
- * <LI>The delete/backspace key can be used to remove thumbs.
+ * thumbs.</li>
+ * <LI>The delete/backspace key can be used to remove thumbs.</li>
  * <LI>In a horizontal slider, the down arrow key can be used to invoke <code>doPopup()</code>.
  * This should invoke a <code>JPopupMenu</code> that is keyboard accessible, so the user should be
  * able to navigate this component without a mouse.  Likewise on a vertical slider the right
- * arrow key should do the same.
- * <LI>The space bar or return key invokes <code>doDoubleClick()</code>.</LI>
+ * arrow key should do the same.</li>
+ * <LI>The space bar or return key invokes <code>doDoubleClick()</code>.</LI></ul>
  * <P>Because thumbs can be abstractly inserted, this values each thumb represents should be
  * tween-able.  That is, if there is a value at zero and a value at one, the call
  * <code>getValue(.5f)</code> must return a value that is halfway between those values.
@@ -118,7 +118,7 @@ public abstract class MultiThumbSlider extends JComponent {
 	boolean paintTicks = false;
 	
 	/** ChangeListeners registered with this slider. */
-	List changeListeners;
+	List<ChangeListener> changeListeners;
 	
 	/** The orientation constant for a horizontal slider.
 	 */
@@ -151,7 +151,7 @@ public abstract class MultiThumbSlider extends JComponent {
 	 */
 	public void addChangeListener(ChangeListener l) {
 		if(changeListeners==null)
-			changeListeners = new Vector();
+			changeListeners = new Vector<ChangeListener>();
 		if(changeListeners.contains(l))
 			return;
 		changeListeners.add(l);
@@ -171,7 +171,7 @@ public abstract class MultiThumbSlider extends JComponent {
 			return;
 		for(int a = 0; a<changeListeners.size(); a++) {
 			try {
-				((ChangeListener)changeListeners.get(a)).stateChanged(new ChangeEvent(this));
+				(changeListeners.get(a)).stateChanged(new ChangeEvent(this));
 			} catch(Throwable t) {
 				t.printStackTrace();
 			}
@@ -182,6 +182,7 @@ public abstract class MultiThumbSlider extends JComponent {
 	 * to the next available thumb, or it may shift the focus to the
 	 * next focusable <code>JComponent</code>.
 	 */
+	@Override
 	public void transferFocus() {
 		transferFocus(true);
 	}
@@ -227,6 +228,7 @@ public abstract class MultiThumbSlider extends JComponent {
 	 * to the previous available thumb, or it may shift the focus to the
 	 * previous focusable <code>JComponent</code>.
 	 */
+	@Override
 	public void transferFocusBackward() {
 		transferFocus(false);
 	}

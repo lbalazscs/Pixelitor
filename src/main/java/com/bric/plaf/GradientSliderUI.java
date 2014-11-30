@@ -1,9 +1,9 @@
 /*
  * @(#)GradientSliderUI.java
  *
- * $Date: 2009-10-11 20:21:21 -0500 (Sun, 11 Oct 2009) $
+ * $Date: 2014-06-06 20:04:49 +0200 (P, 06 jún. 2014) $
  *
- * Copyright (c) 2009 by Jeremy Wood.
+ * Copyright (c) 2011 by Jeremy Wood.
  * All rights reserved.
  *
  * The copyright of this software is owned by Jeremy Wood. 
@@ -12,10 +12,10 @@
  * Jeremy Wood. For details see accompanying license terms.
  * 
  * This software is probably, but not necessarily, discussed here:
- * http://javagraphics.blogspot.com/
+ * https://javagraphics.java.net/
  * 
- * And the latest version should be available here:
- * https://javagraphics.dev.java.net/
+ * That site should also contain the most recent official version
+ * of this software.  (See the SVN repository for more details.)
  */
 package com.bric.plaf;
 
@@ -38,34 +38,35 @@ import java.awt.image.BufferedImage;
 import javax.swing.JComponent;
 
 import com.bric.swing.GradientSlider;
+import com.bric.swing.MultiThumbSlider;
 
 /** The UI for the GradientSlider class.
  * 
- * There are 3 properties you can use to customize the UI
+ * There are a few properties you can use to customize the UI
  * of a GradientSlider.  You can set these for each slider
  * by calling:
  * <BR><code>slider.putClientProperty(key,value);</code>
  * <P>Or you can set these globally by calling:
  * <BR><code>UIManager.put(key,value);</code>
- * <P>The three properties are:
- * <P><TABLE BORDER="1" CELLPADDING=5>
+ * <P>The available properties are:
+ * <P><TABLE summary="GradientSliderUI Client Properties" BORDER="1" CELLPADDING=5>
  * <TR>
- * <TD>Property Name</TD><TD>Default Value</TD><TD>Description</DT>
+ * <TD>Property Name</TD><TD>Default Value</TD><TD>Description</td>
  * </TR>
  * <TR>
- * <TD>GradientSlider.useBevel</TD><TD>"false"</TD><TD>If this is <code>true</code>, then this slider will be painted in a rectangle with a bevel effect around the borders.  If this is <code>false</code>, then this slider will be painted in a rounded rectangle.</DT>
+ * <TD>GradientSlider.useBevel</TD><TD>"false"</TD><TD>If this is <code>true</code>, then this slider will be painted in a rectangle with a bevel effect around the borders.  If this is <code>false</code>, then this slider will be painted in a rounded rectangle.</td>
  * </TR>
  * <TR>
- * <TD>GradientSlider.showTranslucency</TD><TD>"true"</TD><TD>If this is <code>true</code>, then the slider will reflect the opacity of the colors in the gradient, and paint a checkered background underneath the colors to indicate opacity.  If this is <code>false</code>, then this slider will always paint with completely opaque colors, although the actual colors may be translucent.</DT>
+ * <TD>GradientSlider.showTranslucency</TD><TD>"true"</TD><TD>If this is <code>true</code>, then the slider will reflect the opacity of the colors in the gradient, and paint a checkered background underneath the colors to indicate opacity.  If this is <code>false</code>, then this slider will always paint with completely opaque colors, although the actual colors may be translucent.</td>
  * </TR>
  * <TR>
  * <TD>GradientSlider.colorPickerIncludesOpacity</TD><TD>"true"</TD><TD>This is used when the user double-clicks a color and a ColorPicker dialog is invoked.  (So this value may not have any meaning if you override <code>GradientSlider.doDoubleClick()</code>.)  This controls whether the opacity/alpha controls are available in that dialog.  This does <i>not</i> control whether translucent colors can be used in this slider: translucent colors are always allowed, if the user can enter them.</TD>
  * </TR>
  * <TR>
- * <TD>MultiThumbSlider.indicateComponent</TD><TD>"true"</TD><TD>If this is <code>true</code>, then the thumbs will only paint on this component when the mouse is inside this slider <i>or</i> when this slider as the keyboard focus.</DT>
+ * <TD>MultiThumbSlider.indicateComponent</TD><TD>"true"</TD><TD>If this is <code>true</code>, then the thumbs will only paint on this component when the mouse is inside this slider <i>or</i> when this slider as the keyboard focus.</td>
  * </TR>
  * <TR>
- * <TD>MultiThumbSlider.indicateThumb</TD><TD>"true"</TD><TD>If this is <code>true</code>, then the thumb the mouse is over will gently fade into a slightly different color.</DT>
+ * <TD>MultiThumbSlider.indicateThumb</TD><TD>"true"</TD><TD>If this is <code>true</code>, then the thumb the mouse is over will gently fade into a slightly different color.</td>
  * </TR>
  * </TABLE>
  *
@@ -83,6 +84,7 @@ public class GradientSliderUI extends MultiThumbSliderUI {
 		super(slider);
 	}
 
+	@Override
 	public int getClickLocationTolerance() {
 		return TRIANGLE_SIZE;
 	}
@@ -123,7 +125,7 @@ public class GradientSliderUI extends MultiThumbSliderUI {
 			((c[a].getBlue() & 0xff) << 0) ;
 		}
 		int max;
-		if(slider.getOrientation()==GradientSlider.HORIZONTAL) {
+		if(slider.getOrientation()==MultiThumbSlider.HORIZONTAL) {
 			max = trackRect.width;
 		} else {
 			max = trackRect.height;
@@ -177,9 +179,10 @@ public class GradientSliderUI extends MultiThumbSliderUI {
 	
 	
 
+	@Override
 	public Dimension getMinimumSize(JComponent s) {
 		Dimension d = super.getMinimumSize(s);
-		if(slider.getOrientation()==GradientSlider.HORIZONTAL) {
+		if(slider.getOrientation()==MultiThumbSlider.HORIZONTAL) {
 			d.height+=2;
 		} else {
 			d.width+=2;
@@ -187,9 +190,10 @@ public class GradientSliderUI extends MultiThumbSliderUI {
 		return d;
 	}
 
+	@Override
 	public Dimension getPreferredSize(JComponent s) {
 		Dimension d = super.getPreferredSize(s);
-		if(slider.getOrientation()==GradientSlider.HORIZONTAL) {
+		if(slider.getOrientation()==MultiThumbSlider.HORIZONTAL) {
 			d.height+=2;
 		} else {
 			d.width+=2;
@@ -197,13 +201,14 @@ public class GradientSliderUI extends MultiThumbSliderUI {
 		return d;
 	}
 
+	@Override
 	protected Rectangle calculateTrackRect() {
 		int w = slider.getWidth();
 		int h = slider.getHeight();
 		
 		Rectangle r = new Rectangle();
 		
-		if(slider.getOrientation()==GradientSlider.HORIZONTAL) {
+		if(slider.getOrientation()==MultiThumbSlider.HORIZONTAL) {
 			r.x = TRIANGLE_SIZE;
 			r.y = 3;
 			r.height = h-TRIANGLE_SIZE-r.y;
@@ -233,6 +238,7 @@ public class GradientSliderUI extends MultiThumbSliderUI {
 		return r;
 	}
 	
+	@Override
 	protected void calculateGeometry() {
 		super.calculateGeometry();
 		calculateImage();
@@ -262,7 +268,7 @@ public class GradientSliderUI extends MultiThumbSliderUI {
 			return trackRect;
 		}
 		
-		if(slider.getOrientation()==GradientSlider.HORIZONTAL) {
+		if(slider.getOrientation()==MultiThumbSlider.HORIZONTAL) {
 			int curve = Math.min(TRIANGLE_SIZE-2,trackRect.height/2);
 			return new RoundRectangle2D.Float(
 					trackRect.x-curve, trackRect.y, 
@@ -278,6 +284,7 @@ public class GradientSliderUI extends MultiThumbSliderUI {
 		}
 	}
 	
+	@Override
 	protected void paintTrack(Graphics2D g) {
 		Composite oldComposite = g.getComposite();
 		float alpha = slider.isEnabled() ? 1 : .5f;
@@ -300,7 +307,7 @@ public class GradientSliderUI extends MultiThumbSliderUI {
 
 		oldTransform = g.getTransform();
 		AffineTransform transform = new AffineTransform();
-		if(slider.getOrientation()==GradientSlider.VERTICAL) {
+		if(slider.getOrientation()==MultiThumbSlider.VERTICAL) {
 			if(slider.isInverted()) {
 				transform.rotate(Math.PI/2, trackRect.x, trackRect.y);	
 			} else {
@@ -341,8 +348,8 @@ public class GradientSliderUI extends MultiThumbSliderUI {
 			int first, last;
 			Color[] colors = ((GradientSlider)slider).getColors();
 			float[] f = slider.getThumbPositions();
-			if( (slider.isInverted()==false && slider.getOrientation()==GradientSlider.HORIZONTAL) ||
-					(slider.isInverted()==true && slider.getOrientation()==GradientSlider.VERTICAL)) {
+			if( (slider.isInverted()==false && slider.getOrientation()==MultiThumbSlider.HORIZONTAL) ||
+					(slider.isInverted()==true && slider.getOrientation()==MultiThumbSlider.VERTICAL)) {
 				first = 0;
 				last = colors.length-1;
 				while(f[first]<0) {
@@ -361,7 +368,7 @@ public class GradientSliderUI extends MultiThumbSliderUI {
 					first--;
 				}
 			}
-			if(slider.getOrientation()==GradientSlider.HORIZONTAL) {
+			if(slider.getOrientation()==MultiThumbSlider.HORIZONTAL) {
 				g.clip(frame);
 				g.setColor(colors[first]);
 				g.fillRect(0, 0, trackRect.x, slider.getHeight());
@@ -395,7 +402,7 @@ public class GradientSliderUI extends MultiThumbSliderUI {
 	}
 
 	protected void paintTick(Graphics2D g,float f,int d) {
-		if(slider.getOrientation()==GradientSlider.HORIZONTAL) {
+		if(slider.getOrientation()==MultiThumbSlider.HORIZONTAL) {
 			int x = (int)(trackRect.x+trackRect.width*f+.5f);
 			int y = trackRect.y+trackRect.height;
 			g.drawLine(x,y,x,y+d);
@@ -410,6 +417,7 @@ public class GradientSliderUI extends MultiThumbSliderUI {
 		}
 	}
 	
+	@Override
 	protected void paintFocus(Graphics2D g) {
 		
 	}
@@ -417,6 +425,7 @@ public class GradientSliderUI extends MultiThumbSliderUI {
 	static GeneralPath hTriangle = null;
 	static GeneralPath vTriangle = null;
 	
+	@Override
 	protected void paintThumbs(Graphics2D g) {
 		if(slider.isEnabled()==false)
 			return;
@@ -454,7 +463,7 @@ public class GradientSliderUI extends MultiThumbSliderUI {
 		
 		for(int a = 0; a<thumbPositions.length; a++) {
 			if(f[a]>=0 && f[a]<=1 && a!=selected) {
-				if(orientation==GradientSlider.HORIZONTAL) {
+				if(orientation==MultiThumbSlider.HORIZONTAL) {
 					dx = thumbPositions[a];
 					shape = hTriangle;
 				} else {
@@ -486,7 +495,7 @@ public class GradientSliderUI extends MultiThumbSliderUI {
 				indication));
 		
 		if(selected!=-1 && f[selected]>=0 && f[selected]<=1) {
-			if(orientation==GradientSlider.HORIZONTAL) {
+			if(orientation==MultiThumbSlider.HORIZONTAL) {
 				dx = thumbPositions[selected];
 				shape = hTriangle;
 			} else {

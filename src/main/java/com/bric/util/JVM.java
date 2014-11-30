@@ -1,21 +1,21 @@
 /*
  * @(#)JVM.java
  *
- * $Date: 2010-01-26 17:38:02 +0100 (K, 26 jan. 2010) $
+ * $Date: 2014-06-06 20:04:49 +0200 (P, 06 jún. 2014) $
  *
- * Copyright (c) 2009 by Jeremy Wood.
+ * Copyright (c) 2011 by Jeremy Wood.
  * All rights reserved.
  *
- * The copyright of this software is owned by Jeremy Wood.
- * You may not use, copy or modify this software, except in
- * accordance with the license agreement you entered into with
+ * The copyright of this software is owned by Jeremy Wood. 
+ * You may not use, copy or modify this software, except in  
+ * accordance with the license agreement you entered into with  
  * Jeremy Wood. For details see accompanying license terms.
- *
+ * 
  * This software is probably, but not necessarily, discussed here:
- * http://javagraphics.blogspot.com/
- *
- * And the latest version should be available here:
- * https://javagraphics.dev.java.net/
+ * https://javagraphics.java.net/
+ * 
+ * That site should also contain the most recent official version
+ * of this software.  (See the SVN repository for more details.)
  */
 package com.bric.util;
 
@@ -25,50 +25,69 @@ import java.security.AccessControlException;
  * <P>Instead of burying a constant like "isQuartz" in its most
  * relevant class (such as OptimizedGraphics2D), it should be
  * stored here so if other classes need to access it they don't
- * necessary have to
+ * necessary have to 
  */
 public class JVM {
 
 	/** Prints basic information about this session's JVM:
-	 * the OS name & version, the Java version, and (on Mac) whether Quartz is being used.
+	 * the OS name &amp; version, the Java version, and (on Mac) whether Quartz is being used.
 	 */
 	public static void printProfile() {
 		System.out.println(getProfile());
 	}
-
+	
 	/** Gets basic information about this session's JVM:
-	 * the OS name & version, the Java version, and (on Mac) whether Quartz is being used.
+	 * the OS name &amp; version, the Java version, and (on Mac) whether Quartz is being used.
 	 */
 	public static String getProfile() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("OS = "+System.getProperty("os.name")+" ("+System.getProperty("os.version")+"), "+System.getProperty("os.arch")+"\n");
 		sb.append("Java Version = "+System.getProperty("java.version")+"\n");
-		if(JVM.isMac) {
-			sb.append("apple.awt.graphics.UseQuartz = "+usingQuartz);
-		}
 		return sb.toString();
 	}
-
+	
 	/** The major Java version being used (1.4, 1.5, 1.6, etc.), or
 	 * -1 if this value couldn't be correctly determined.
 	 */
 	public static final float javaVersion = JVM.getMajorJavaVersion(true);
 
+	private static final String osName = (System.getProperty("os.name").toLowerCase());
+	
 	/** Whether this session is on a Mac. */
-	public static final boolean isMac = (System.getProperty("os.name").toLowerCase().indexOf("mac")!=-1);
+	public static final boolean isMac = (osName.indexOf("mac")!=-1);
+
+	public static final boolean isLinux = (osName.toLowerCase().indexOf("linux")!=-1);
 
 	/** Whether this session is on Windows. */
-	public static final boolean isWindows = (System.getProperty("os.name").toLowerCase().indexOf("windows")!=-1);
+	public static final boolean isWindows = (osName.indexOf("windows")!=-1);
 
 	/** Whether this session is on Vista. */
-    public static final boolean isVista = (System.getProperty("os.name").toLowerCase().indexOf("vista")!=-1);
-
-    public static final boolean isLinux = (System.getProperty("os.name").toLowerCase().indexOf("linux")!=-1);
-
-	/** If on a Mac: whether Quartz is the rendering pipeline. */
-	public static final boolean usingQuartz = isMac && ((javaVersion>0 && javaVersion<1.4f) ||
-		(System.getProperty("apple.awt.graphics.UseQuartz")!=null && System.getProperty("apple.awt.graphics.UseQuartz").equals("true")));
-
+    public static final boolean isVista = (osName.indexOf("vista")!=-1);
+    
+	/** Whether this session is on Windows 7. */
+    public static final boolean isWindows7 = isWindows && (osName.indexOf("7")!=-1);
+    
+	/** Whether this session is on Windows XP. */
+    public static final boolean isWindowsXP = isWindows && (osName.indexOf("xp")!=-1);
+    
+	/** Whether this session is on Windows Vista or Windows 7. */
+    public static final boolean isVistaOrWindows7 = isVista || isWindows7;
+	
+	/** If on a Mac: whether Quartz is the rendering pipeline.
+	 * In applets this may throw a security exception; if this
+	 * cannot be ascertained we assume it is false.
+	 */
+	public static final boolean usingQuartz = isUsingQuartz();
+	
+	private static boolean isUsingQuartz() {
+		try {
+			return isMac && ((javaVersion>0 && javaVersion<1.4f) || (System.getProperty("apple.awt.graphics.UseQuartz")!=null && System.getProperty("apple.awt.graphics.UseQuartz").toString().equals("true")));
+		} catch(AccessControlException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
 	/** This converts the system property "java.version" to a float value.
 	 * This drops rightmost digits until a legitimate float can be parsed.
 	 * <BR>For example, this converts "1.6.0_05" to "1.6".
@@ -77,7 +96,12 @@ public class JVM {
 	 * @throws AccessControlException this may be thrown in unsigned applets!  Beware!
 	 */
 	public static float getMajorJavaVersion() throws AccessControlException {
-		String majorVersion = System.getProperty("java.major.version");
+		String majorVersion = null;
+		try {
+			System.getProperty("java.major.version");
+		} catch(java.security.AccessControlException e) {
+			return -1;
+		}
 		if(majorVersion==null) {
 			String s = System.getProperty("java.version");
 			float f = -1;
@@ -94,8 +118,8 @@ public class JVM {
 		return Float.parseFloat(majorVersion);
 	}
 
-	/**
-	 *
+	/** 
+	 * 
 	 * @param catchSecurityException if true and an exception occurs,
 	 * then -1 is returned.
 	 * @return the major java version, or -1 if this can't be determined/

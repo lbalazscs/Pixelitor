@@ -1,9 +1,9 @@
 /*
  * @(#)PathWriter.java
  *
- * $Date: 2010-03-20 00:56:26 +0100 (Szo, 20 márc. 2010) $
+ * $Date: 2014-06-06 20:04:49 +0200 (P, 06 jún. 2014) $
  *
- * Copyright (c) 2009 by Jeremy Wood.
+ * Copyright (c) 2011 by Jeremy Wood.
  * All rights reserved.
  *
  * The copyright of this software is owned by Jeremy Wood. 
@@ -12,10 +12,10 @@
  * Jeremy Wood. For details see accompanying license terms.
  * 
  * This software is probably, but not necessarily, discussed here:
- * http://javagraphics.blogspot.com/
+ * https://javagraphics.java.net/
  * 
- * And the latest version should be available here:
- * https://javagraphics.dev.java.net/
+ * That site should also contain the most recent official version
+ * of this software.  (See the SVN repository for more details.)
  */
 package com.bric.geom;
 
@@ -34,15 +34,38 @@ import java.awt.geom.PathIterator;
  */
 public abstract class PathWriter {
 	
-	/** Adds a point to the path by moving to the specified coordinates. */
+	/** Adds a point to the path by moving to the specified coordinates. 
+	 * 
+	 * @param x the x-coordinate to move to
+	 * @param y the y-coordinate to move to
+	 */
 	public abstract void moveTo(float x,float y);
-	/** Adds a point to the path by drawing a straight line from the current coordinates to the new specified coordinates. */
+	
+	/** Adds a point to the path by drawing a straight line from the current coordinates to the new specified coordinates.
+	 *
+	 *  @param x the x-coordinate of the end point.
+	 *  @param y the y-coordinate of the end point. 
+	 */
 	public abstract void lineTo(float x,float y);
 	
-	/** Adds a curved segment, defined by two new points, to the path by drawing a Quadratic curve that intersects both the current coordinates and the coordinates (x2, y2), using the specified point (x1, y1) as a quadratic parametric control point. */
+	/** Adds a curved segment, defined by two new points, to the path by drawing a Quadratic curve that intersects both the current coordinates and the coordinates (x2, y2), using the specified point (x1, y1) as a quadratic parametric control point.
+	 *
+	 *  @param cx the x-coordinate of the control point.
+	 *  @param cy the y-coordinate of the control point.
+	 *  @param x the x-coordinate of the end point.
+	 *  @param y the y-coordinate of the end point.
+	 */
 	public abstract void quadTo(float cx,float cy,float x,float y);
 	
-	/** Adds a curved segment, defined by three new points, to the path by drawing a Bezier curve that intersects both the current coordinates and the coordinates (x3, y3), using the specified points (x1, y1) and (x2, y2) as Bezier control points. */
+	/** Adds a curved segment, defined by three new points, to the path by drawing a Bezier curve that intersects both the current coordinates and the coordinates (x3, y3), using the specified points (x1, y1) and (x2, y2) as Bezier control points.
+	 * 
+	 *  @param cx1 the x-coordinate of the first control point.
+	 *  @param cy1 the y-coordinate of the first control point.
+	 *  @param cx2 the x-coordinate of the second control point.
+	 *  @param cy2 the y-coordinate of the second control point.
+	 *  @param x the x-coordinate of the end point.
+	 *  @param y the y-coordinate of the end point.
+	 *  */
 	public abstract void curveTo(float cx1,float cy1,float cx2,float cy2,float x,float y);
 	
 	/** Closes the current subpath by drawing a straight line back to the coordinates of the last moveTo. */

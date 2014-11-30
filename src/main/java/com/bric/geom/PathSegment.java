@@ -1,9 +1,9 @@
 /*
  * @(#)PathSegment.java
  *
- * $Date: 2009-02-22 14:56:51 -0600 (Sun, 22 Feb 2009) $
+ * $Date: 2014-03-13 09:15:48 +0100 (Cs, 13 márc. 2014) $
  *
- * Copyright (c) 2009 by Jeremy Wood.
+ * Copyright (c) 2011 by Jeremy Wood.
  * All rights reserved.
  *
  * The copyright of this software is owned by Jeremy Wood. 
@@ -12,15 +12,14 @@
  * Jeremy Wood. For details see accompanying license terms.
  * 
  * This software is probably, but not necessarily, discussed here:
- * http://javagraphics.blogspot.com/
+ * https://javagraphics.java.net/
  * 
- * And the latest version should be available here:
- * https://javagraphics.dev.java.net/
+ * That site should also contain the most recent official version
+ * of this software.  (See the SVN repository for more details.)
  */
 package com.bric.geom;
 
 import java.awt.geom.AffineTransform;
-import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 
 public abstract class PathSegment {
@@ -203,8 +202,8 @@ public abstract class PathSegment {
 		 * If this is false, then the result may range from [-pi,pi].
 		 * @return the tangent angle (in radians).
 		 */
-		public float getTheta(float t,boolean confine) {
-			float angle = getTheta(t,0);
+		public float getTheta(float t,AffineTransform transform,boolean confine) {
+			float angle = getTheta(t,transform,0);
 			if(confine) {
 				if(angle>Math.PI/2) {
 					angle = angle-(float)Math.PI;
@@ -254,9 +253,9 @@ public abstract class PathSegment {
 		 * assumes t is approached from values less than t.
 		 * @return the tangent angle (in radians).
 		 */
-		public float getTheta(float t,int direction) {
-			float[] x_coeffs = getXCoeffs();
-			float[] y_coeffs = getYCoeffs();
+		public float getTheta(float t,AffineTransform transform, int direction) {
+			float[] x_coeffs = getXCoeffs(transform);
+			float[] y_coeffs = getYCoeffs(transform);
 			float dx, dy;
 			if(x_coeffs.length==2) {
 				dx = x_coeffs[0];
@@ -364,6 +363,7 @@ public abstract class PathSegment {
 			}
 		}
 		
+		@Override
 		public String toString() {
 			return toString((Float)null);
 		}
@@ -458,6 +458,7 @@ public abstract class PathSegment {
 			return t;
 		}
 		
+		@Override
 		public void rotate(float f) {
 			if(f==0) return;
 			
@@ -473,7 +474,7 @@ public abstract class PathSegment {
 			yCoeffs = null;
 		}
 		
-		public void write(GeneralPath dest,float t0,float t1,AffineTransform transform) {
+		public void write(PathWriter dest,float t0,float t1,AffineTransform transform) {
 			if(type==PathIterator.SEG_LINETO) {
 				double[] pt = new double[] {
 						getX(t1), getY(t1)
@@ -494,6 +495,14 @@ public abstract class PathSegment {
 				PathWriter.cubicTo(dest, t0, t1, 
 						x_[0], x_[1], x_[2], x_[3], 
 						y_[0], y_[1], y_[2], y_[3]);
+			} else if(type==PathIterator.SEG_MOVETO) {
+				double[] pt = new double[] {
+						data[0], data[1]
+				};
+				if(transform!=null) {
+					transform.transform(pt, 0, pt, 0, 1);
+				}
+				dest.moveTo((float)pt[0],(float)pt[1]);
 			} else {
 				throw new UnsupportedOperationException(toTypeName(type)+" not supported here.");
 			}

@@ -1,9 +1,9 @@
 /*
  * @(#)ColorPickerPanel.java
  *
- * $Date: 2010-03-20 01:27:24 +0100 (Szo, 20 márc. 2010) $
+ * $Date: 2014-06-06 20:04:49 +0200 (P, 06 jún. 2014) $
  *
- * Copyright (c) 2009 by Jeremy Wood.
+ * Copyright (c) 2011 by Jeremy Wood.
  * All rights reserved.
  *
  * The copyright of this software is owned by Jeremy Wood. 
@@ -12,10 +12,10 @@
  * Jeremy Wood. For details see accompanying license terms.
  * 
  * This software is probably, but not necessarily, discussed here:
- * http://javagraphics.blogspot.com/
+ * https://javagraphics.java.net/
  * 
- * And the latest version should be available here:
- * https://javagraphics.dev.java.net/
+ * That site should also contain the most recent official version
+ * of this software.  (See the SVN repository for more details.)
  */
 package com.bric.swing;
 
@@ -73,6 +73,9 @@ import com.bric.plaf.PlafPaintUtils;
  * <P>The graphic in this panel will be based on either the width or
  * the height of this component: depending on which is smaller.
  *
+ *
+ * @see com.bric.swing.ColorPicker
+ * @see com.bric.swing.ColorPickerDialog
  */
 public class ColorPickerPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
@@ -92,7 +95,7 @@ public class ColorPickerPanel extends JPanel {
 	/** The point used to indicate the selected color. */
 	private Point point = new Point(0,0);
 	
-	private Vector changeListeners = new Vector();
+	private Vector<ChangeListener> changeListeners = new Vector<ChangeListener>();
 	
 	/* Floats from [0,1].  They must be kept distinct, because
 	 * when you convert them to RGB coordinates HSB(0,0,0) and HSB (.5,0,0)
@@ -102,6 +105,7 @@ public class ColorPickerPanel extends JPanel {
 	int red = -1, green = -1, blue = -1;
 	
 	MouseInputListener mouseListener = new MouseInputAdapter() {
+		@Override
 		public void mousePressed(MouseEvent e) {
 			requestFocus();
 			Point p = e.getPoint();
@@ -115,12 +119,14 @@ public class ColorPickerPanel extends JPanel {
 			}
 		}
 
+		@Override
 		public void mouseDragged(MouseEvent e) {
 			mousePressed(e);
 		}
 	};
 	
 	KeyListener keyListener = new KeyAdapter() {
+		@Override
 		public void keyPressed(KeyEvent e) {
 			int dx = 0;
 			int dy = 0;
@@ -166,6 +172,7 @@ public class ColorPickerPanel extends JPanel {
 	
 	ComponentListener componentListener = new ComponentAdapter() {
 
+		@Override
 		public void componentResized(ComponentEvent e) {
 			regeneratePoint();
 			regenerateImage();
@@ -213,7 +220,7 @@ public class ColorPickerPanel extends JPanel {
 		if(changeListeners==null)
 			return;
 		for(int a = 0; a<changeListeners.size(); a++) {
-			ChangeListener l = (ChangeListener)changeListeners.get(a);
+			ChangeListener l = changeListeners.get(a);
 			try {
 				l.stateChanged(new ChangeEvent(this));
 			} catch(RuntimeException e) {
@@ -224,6 +231,7 @@ public class ColorPickerPanel extends JPanel {
 	
 	Insets imagePadding = new Insets(6,6,6,6);
 	
+	@Override
 	public void paint(Graphics g) {
 		super.paint(g);
 
@@ -379,7 +387,7 @@ public class ColorPickerPanel extends JPanel {
 		p.translate(-(getWidth()/2-size/2), -(getHeight()/2-size/2));
 		if(mode==ColorPicker.BRI || mode==ColorPicker.SAT) {
 			//the two circular views:
-			double radius = ((double)size)/2.0;
+			double radius = (size)/2.0;
 			double x = p.getX()-size/2.0;
 			double y = p.getY()-size/2.0;
 			double r = Math.sqrt(x*x+y*y)/radius;
@@ -545,7 +553,7 @@ public class ColorPickerPanel extends JPanel {
 		if(mode==ColorPicker.BRI || mode==ColorPicker.SAT) {
 			float bri2 = this.bri;
 			float sat2 = this.sat;
-			float radius = ((float)size)/2f;
+			float radius = (size)/2f;
 			float hue2;
 			float k = 1.2f; //the number of pixels to antialias
 			for(int y = 0; y<size; y++) {

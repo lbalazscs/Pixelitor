@@ -1,9 +1,9 @@
 /*
  * @(#)MultiThumbSliderUI.java
  *
- * $Date: 2009-02-20 01:34:41 -0600 (Fri, 20 Feb 2009) $
+ * $Date: 2014-06-06 20:04:49 +0200 (P, 06 jún. 2014) $
  *
- * Copyright (c) 2009 by Jeremy Wood.
+ * Copyright (c) 2011 by Jeremy Wood.
  * All rights reserved.
  *
  * The copyright of this software is owned by Jeremy Wood. 
@@ -12,10 +12,10 @@
  * Jeremy Wood. For details see accompanying license terms.
  * 
  * This software is probably, but not necessarily, discussed here:
- * http://javagraphics.blogspot.com/
+ * https://javagraphics.java.net/
  * 
- * And the latest version should be available here:
- * https://javagraphics.dev.java.net/
+ * That site should also contain the most recent official version
+ * of this software.  (See the SVN repository for more details.)
  */
 package com.bric.plaf;
 
@@ -40,11 +40,10 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.JComponent;
-import javax.swing.JSlider;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
 
-import com.bric.swing.GradientSlider;
 import com.bric.swing.MultiThumbSlider;
 
 /** This is the abstract UI for <code>MultiThumbSliders</code>
@@ -98,6 +97,7 @@ public abstract class MultiThumbSliderUI extends ComponentUI implements MouseLis
 		this.slider = slider;
 	}
 
+	@Override
 	public Dimension getMaximumSize(JComponent s) {
 		MultiThumbSlider mySlider = (MultiThumbSlider)s;
 		if(mySlider.getOrientation()==MultiThumbSlider.HORIZONTAL) {
@@ -106,6 +106,7 @@ public abstract class MultiThumbSliderUI extends ComponentUI implements MouseLis
 		return new Dimension(DEPTH, MAX_LENGTH);
 	}
 
+	@Override
 	public Dimension getMinimumSize(JComponent s) {
 		MultiThumbSlider mySlider = (MultiThumbSlider)s;
 		if(mySlider.getOrientation()==MultiThumbSlider.HORIZONTAL) {
@@ -114,6 +115,7 @@ public abstract class MultiThumbSliderUI extends ComponentUI implements MouseLis
 		return new Dimension(DEPTH, MIN_LENGTH);
 	}
 
+	@Override
 	public Dimension getPreferredSize(JComponent s) {
 		MultiThumbSlider mySlider = (MultiThumbSlider)s;
 		if(mySlider.getOrientation()==MultiThumbSlider.HORIZONTAL) {
@@ -296,7 +298,7 @@ public abstract class MultiThumbSliderUI extends ComponentUI implements MouseLis
 
 		int index = getIndex(e);
 		if(index!=-1) {
-			if(slider.getOrientation()==JSlider.HORIZONTAL) {
+			if(slider.getOrientation()==SwingConstants.HORIZONTAL) {
 				dx = -e.getX()+thumbPositions[index];
 			} else {
 				dy = -e.getY()+thumbPositions[index];
@@ -311,13 +313,13 @@ public abstract class MultiThumbSliderUI extends ComponentUI implements MouseLis
 				float k;
 
 				int v;
-				if(slider.getOrientation()==GradientSlider.HORIZONTAL) {
+				if(slider.getOrientation()==MultiThumbSlider.HORIZONTAL) {
 					v = e.getX();
 				} else {
 					v = e.getY();
 				}
 
-				if(slider.getOrientation()==GradientSlider.HORIZONTAL) {
+				if(slider.getOrientation()==MultiThumbSlider.HORIZONTAL) {
 					k = ((float)(v-trackRect.x))/((float)trackRect.width);
 					if(slider.isInverted())
 						k = 1-k;
@@ -343,7 +345,7 @@ public abstract class MultiThumbSliderUI extends ComponentUI implements MouseLis
 
 	private int getIndex(MouseEvent e) {
 		int v;
-		if(slider.getOrientation()==GradientSlider.HORIZONTAL) {
+		if(slider.getOrientation()==MultiThumbSlider.HORIZONTAL) {
 			v = e.getX();
 			if(v<trackRect.x-getClickLocationTolerance()+1 || v>trackRect.x+trackRect.width+getClickLocationTolerance()-1) {
 				return -1; // didn't click in the track;
@@ -434,7 +436,7 @@ public abstract class MultiThumbSliderUI extends ComponentUI implements MouseLis
 			State newState = new State(pressedState);
 			float v;
 			boolean outside;
-			if(slider.getOrientation()==GradientSlider.HORIZONTAL) {
+			if(slider.getOrientation()==MultiThumbSlider.HORIZONTAL) {
 				v = ((float)(e.getX()-trackRect.x))/((float)trackRect.width);
 				if(slider.isInverted())
 					v = 1-v;
@@ -492,7 +494,7 @@ public abstract class MultiThumbSliderUI extends ComponentUI implements MouseLis
 
 	/** This retrieves a property.
 	 * If the component has this property manually set (by calling
-	 * <code>component.putClientProperty()</code), then that value will be returned.
+	 * <code>component.putClientProperty()</code>), then that value will be returned.
 	 * Otherwise this method refers to <code>UIManager.get()</code>.  If that
 	 * value is missing, this returns <code>defaultValue</code>
 	 * 
@@ -790,7 +792,7 @@ public abstract class MultiThumbSliderUI extends ComponentUI implements MouseLis
 			thumbPositions = new int[pos.length];
 			thumbIndications = new float[pos.length];
 		}
-		if(slider.getOrientation()==GradientSlider.HORIZONTAL) {
+		if(slider.getOrientation()==MultiThumbSlider.HORIZONTAL) {
 			for(int a = 0; a<thumbPositions.length; a++) {
 				if(slider.isInverted()==false) {
 					thumbPositions[a] = trackRect.x+(int)(trackRect.width*pos[a]);
@@ -826,10 +828,10 @@ public abstract class MultiThumbSliderUI extends ComponentUI implements MouseLis
 
 	private void nudge(int thumbIndex,int direction) {
 		float pixelFraction;
-		if(slider.getOrientation()==GradientSlider.HORIZONTAL) {
-			pixelFraction = 1f/((float)trackRect.width);
+		if(slider.getOrientation()==MultiThumbSlider.HORIZONTAL) {
+			pixelFraction = 1f/(trackRect.width);
 		} else {
-			pixelFraction = 1f/((float)trackRect.height);
+			pixelFraction = 1f/(trackRect.height);
 		}
 		if(direction<0)
 			pixelFraction *= -1;
@@ -852,6 +854,7 @@ public abstract class MultiThumbSliderUI extends ComponentUI implements MouseLis
 		}
 	}
 
+	@Override
 	public void installUI(JComponent slider) {
 		slider.addMouseListener(this);
 		slider.addMouseMotionListener(this);
@@ -861,6 +864,7 @@ public abstract class MultiThumbSliderUI extends ComponentUI implements MouseLis
 		slider.addPropertyChangeListener(propertyListener);
 	}
 
+	@Override
 	public void paint(Graphics g, JComponent slider2) {
 		if(slider2!=slider)
 			throw new RuntimeException("only use this UI on the GradientSlider it was constructed with");
@@ -887,6 +891,7 @@ public abstract class MultiThumbSliderUI extends ComponentUI implements MouseLis
 	protected abstract void paintFocus(Graphics2D g);
 	protected abstract void paintThumbs(Graphics2D g);
 
+	@Override
 	public void uninstallUI(JComponent slider) {
 		slider.removeMouseListener(this);
 		slider.removeMouseMotionListener(this);

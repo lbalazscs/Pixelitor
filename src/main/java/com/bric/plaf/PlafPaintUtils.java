@@ -1,21 +1,21 @@
 /*
- * @(#)PaintUtils.java
+ * @(#)PlafPaintUtils.java
  *
- * $Date: 2010-01-03 14:20:54 +0100 (V, 03 jan. 2010) $
+ * $Date: 2014-03-16 23:30:29 +0100 (V, 16 márc. 2014) $
  *
- * Copyright (c) 2009 by Jeremy Wood.
+ * Copyright (c) 2011 by Jeremy Wood.
  * All rights reserved.
  *
- * The copyright of this software is owned by Jeremy Wood.
- * You may not use, copy or modify this software, except in
- * accordance with the license agreement you entered into with
+ * The copyright of this software is owned by Jeremy Wood. 
+ * You may not use, copy or modify this software, except in  
+ * accordance with the license agreement you entered into with  
  * Jeremy Wood. For details see accompanying license terms.
- *
+ * 
  * This software is probably, but not necessarily, discussed here:
- * http://javagraphics.blogspot.com/
- *
- * And the latest version should be available here:
- * https://javagraphics.dev.java.net/
+ * https://javagraphics.java.net/
+ * 
+ * That site should also contain the most recent official version
+ * of this software.  (See the SVN repository for more details.)
  */
 package com.bric.plaf;
 
@@ -48,14 +48,14 @@ public class PlafPaintUtils {
 			new Color(255,255,255,100),
 			new Color(255,255,255,150)
 	};
-
+	
 	/** Four shades of black, each with increasing opacity. */
 	final static Color[] blacks = new Color[] {
 			new Color(0,0,0,50),
 			new Color(0,0,0,100),
 			new Color(0,0,0,150)
 	};
-
+	
 	/** @return the color used to indicate when a component has
 	 * focus.  By default this uses the color (64,113,167), but you can
 	 * override this by calling:
@@ -70,47 +70,52 @@ public class PlafPaintUtils {
 			return (Color)obj;
 		return new Color(64,113,167);
 	}
-
+	
 	/** Paints 3 different strokes around a shape to indicate focus.
 	 * The widest stroke is the most transparent, so this achieves a nice
 	 * "glow" effect.
 	 * <P>The catch is that you have to render this underneath the shape,
 	 * and the shape should be filled completely.
-	 *
+	 * 
 	 * @param g the graphics to paint to
 	 * @param shape the shape to outline
 	 * @param pixelSize the number of pixels the outline should cover.
 	 */
 	public static void paintFocus(Graphics2D g,Shape shape,int pixelSize) {
-		Color focusColor = getFocusRingColor();
-		Color[] focusArray = new Color[] {
-			new Color(focusColor.getRed(), focusColor.getGreen(), focusColor.getBlue(),235),
-			new Color(focusColor.getRed(), focusColor.getGreen(), focusColor.getBlue(),130),
-			new Color(focusColor.getRed(), focusColor.getGreen(), focusColor.getBlue(),80)
-		};
-		if(com.bric.util.JVM.usingQuartz) {
-			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
-		} else {
-			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
-		}
-
-		g.setStroke(new BasicStroke(2*pixelSize+1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-		g.setColor(focusArray[2]);
-		g.draw(shape);
-		if(2*pixelSize+1>0) {
-			g.setStroke(new BasicStroke(2*pixelSize-2+1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			g.setColor(focusArray[1]);
+		g = (Graphics2D)g.create();
+		try {
+			Color focusColor = getFocusRingColor();
+			Color[] focusArray = new Color[] {
+				new Color(focusColor.getRed(), focusColor.getGreen(), focusColor.getBlue(),235),
+				new Color(focusColor.getRed(), focusColor.getGreen(), focusColor.getBlue(),130),
+				new Color(focusColor.getRed(), focusColor.getGreen(), focusColor.getBlue(),80)	
+			};
+			if(JVM.usingQuartz) {
+				g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+				g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+			} else {
+				g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+				g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
+			}
+			
+			g.setStroke(new BasicStroke(2*pixelSize+1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			g.setColor(focusArray[2]);
 			g.draw(shape);
-		}
-		if(2*pixelSize-4+1>0) {
-			g.setStroke(new BasicStroke(2*pixelSize-4+1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			g.setColor(focusArray[0]);
-			g.draw(shape);
+			if(2*pixelSize+1>0) {
+				g.setStroke(new BasicStroke(2*pixelSize-2+1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+				g.setColor(focusArray[1]);
+				g.draw(shape);
+			}
+			if(2*pixelSize-4+1>0) {
+				g.setStroke(new BasicStroke(2*pixelSize-4+1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+				g.setColor(focusArray[0]);
+				g.draw(shape);
+			}
+		} finally {
+			g.dispose();
 		}
 	}
-
+	
 	/** Uses translucent shades of white and black to draw highlights
 	 * and shadows around a rectangle, and then frames the rectangle
 	 * with a shade of gray (120).
@@ -126,11 +131,11 @@ public class PlafPaintUtils {
 
 		drawColors(whites,g, r.x, r.y, r.x+r.width, r.y, SwingConstants.NORTH);
 		drawColors(whites,g, r.x, r.y, r.x, r.y+r.height, SwingConstants.WEST);
-
+		
 		g.setColor(new Color(120, 120, 120));
 		g.drawRect(r.x, r.y, r.width, r.height);
 	}
-
+	
 	private static void drawColors(Color[] colors,Graphics g,int x1,int y1,int x2,int y2,int direction) {
 		for(int a = 0; a<colors.length; a++) {
 			g.setColor(colors[colors.length-a-1]);
@@ -145,13 +150,13 @@ public class PlafPaintUtils {
 			}
 		}
 	}
-
+	
 	/** The table used to store vertical gradients. */
-	private static Hashtable verticalGradients;
-
+	private static Hashtable<String, TexturePaint> verticalGradients;
+	
 	/** Create a vertical gradient.  This gradient is stored in a
 	 * table and reused throughout the rest of this session.
-	 *
+	 * 
 	 * @param name an identifying key for this gradient (used to cache it).
 	 * @param height the height of the gradient
 	 * @param y the y offset of the gradient
@@ -164,18 +169,18 @@ public class PlafPaintUtils {
 			float[] positions,
 			Color[] colors) {
 		if(verticalGradients==null) {
-			verticalGradients = new Hashtable();
+			verticalGradients = new Hashtable<String, TexturePaint>();
 		}
-
+		
 		String key = name+" "+height+" "+y;
-		Paint paint = (Paint)verticalGradients.get(key);
+		TexturePaint paint = verticalGradients.get(key);
 		if(paint==null) {
 			height = Math.max(height, 1); //before a component is laid out, it may be 0x0
 			BufferedImage bi = new BufferedImage(1,height,BufferedImage.TYPE_INT_ARGB);
 			int[] array = new int[height];
 			for(int a = 0; a<array.length; a++) {
-				float f = (float)a;
-				f = f/((float)(array.length-1));
+				float f = a;
+				f = f/((array.length-1));
 				boolean hit = false;
 				findMatch : for(int b = 1; b<positions.length; b++) {
 					if(f>=positions[b-1] && f<positions[b]) {
@@ -194,38 +199,41 @@ public class PlafPaintUtils {
 		}
 		return paint;
 	}
-
+	
 	/** Tweens between the two arguments. */
 	private static Color tween(Color c1,Color c2,float p) {
 		int r1 = c1.getRed();
 		int g1 = c1.getGreen();
 		int b1 = c1.getBlue();
 		int a1 = c1.getAlpha();
-
+		
 		int r2 = c2.getRed();
 		int g2 = c2.getGreen();
 		int b2 = c2.getBlue();
 		int a2 = c2.getAlpha();
-
+		
 		return new Color( (int)(r1*(1-p)+r2*p),
 				(int)(g1*(1-p)+g2*p),
 				(int)(b1*(1-p)+b2*p),
-				(int)(a1*(1-p)+a2*p)
+				(int)(a1*(1-p)+a2*p) 
 		);
 	}
 
-	private static Hashtable checkers;
+	private static Hashtable<String, TexturePaint> checkers;
 	public static TexturePaint getCheckerBoard(int checkerSize) {
+		return getCheckerBoard( checkerSize, Color.white, Color.lightGray );
+	}
+	public static TexturePaint getCheckerBoard(int checkerSize,Color color1,Color color2) {
+		String key = checkerSize+" "+color1.toString()+" "+color2.toString();
 		if(checkers==null)
-			checkers = new Hashtable();
-		Integer key = new Integer(checkerSize);
-		TexturePaint paint = (TexturePaint)checkers.get(key);
+			checkers = new Hashtable<String, TexturePaint>();
+		TexturePaint paint = checkers.get(key);
 		if(paint==null) {
 			BufferedImage bi = new BufferedImage(2*checkerSize, 2*checkerSize, BufferedImage.TYPE_INT_RGB);
 			Graphics2D g = bi.createGraphics();
-			g.setColor(Color.white);
+			g.setColor(color1);
 			g.fillRect(0,0,2*checkerSize,2*checkerSize);
-			g.setColor(Color.lightGray);
+			g.setColor(color2);
 			g.fillRect(0,0,checkerSize,checkerSize);
 			g.fillRect(checkerSize,checkerSize,checkerSize,checkerSize);
 			g.dispose();

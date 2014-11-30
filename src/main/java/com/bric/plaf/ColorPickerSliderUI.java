@@ -1,9 +1,9 @@
 /*
  * @(#)ColorPickerSliderUI.java
  *
- * $Date: 2010-03-20 01:18:15 +0100 (Szo, 20 márc. 2010) $
+ * $Date: 2014-03-13 09:15:48 +0100 (Cs, 13 márc. 2014) $
  *
- * Copyright (c) 2009 by Jeremy Wood.
+ * Copyright (c) 2011 by Jeremy Wood.
  * All rights reserved.
  *
  * The copyright of this software is owned by Jeremy Wood. 
@@ -12,10 +12,10 @@
  * Jeremy Wood. For details see accompanying license terms.
  * 
  * This software is probably, but not necessarily, discussed here:
- * http://javagraphics.blogspot.com/
+ * https://javagraphics.java.net/
  * 
- * And the latest version should be available here:
- * https://javagraphics.dev.java.net/
+ * That site should also contain the most recent official version
+ * of this software.  (See the SVN repository for more details.)
  */
 package com.bric.plaf;
 
@@ -34,6 +34,7 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JSlider;
+import javax.swing.SwingConstants;
 import javax.swing.event.MouseInputAdapter;
 import javax.swing.plaf.basic.BasicSliderUI;
 
@@ -58,6 +59,7 @@ public class ColorPickerSliderUI extends BasicSliderUI {
 		super(b);
 		colorPicker = cp;
 		cp.getColorPanel().addComponentListener(new ComponentAdapter() {
+			@Override
 			public void componentResized(ComponentEvent e) {
 				ColorPickerSliderUI.this.calculateGeometry();
 				slider.repaint();
@@ -65,6 +67,7 @@ public class ColorPickerSliderUI extends BasicSliderUI {
 		});
 	}
 
+	@Override
 	public void paintThumb(Graphics g) {
 		int y = thumbRect.y+thumbRect.height/2;
 		Polygon polygon = new Polygon();
@@ -81,12 +84,14 @@ public class ColorPickerSliderUI extends BasicSliderUI {
 		g2.draw(polygon);
 	}
 
+	@Override
 	protected void calculateThumbSize() {
 		super.calculateThumbSize();
 		thumbRect.height+=4;
 		thumbRect.y-=2;
 	}
 
+	@Override
 	protected void calculateTrackRect() {
 		super.calculateTrackRect();
 		ColorPickerPanel cp = colorPicker.getColorPanel();
@@ -99,6 +104,7 @@ public class ColorPickerSliderUI extends BasicSliderUI {
 		trackRect.height = size;
 	}
 
+	@Override
 	public synchronized void paintTrack(Graphics g) {
 		int mode = colorPicker.getMode();
 		if(mode==ColorPicker.HUE || mode==ColorPicker.BRI || mode==ColorPicker.SAT) {
@@ -152,6 +158,7 @@ public class ColorPickerSliderUI extends BasicSliderUI {
 		PlafPaintUtils.drawBevel(g2, r);
 	}
 	
+	@Override
 	public void paintFocus(Graphics g) {}
 
 	/** This overrides the default behavior for this slider
@@ -161,13 +168,14 @@ public class ColorPickerSliderUI extends BasicSliderUI {
 	 * they simply want the color they selected.
 	 */
 	MouseInputAdapter myMouseListener = new MouseInputAdapter() {
+		@Override
 		public void mousePressed(MouseEvent e) {
 			slider.setValueIsAdjusting(true);
 			updateSliderValue(e);
 		}
 		private void updateSliderValue(MouseEvent e) {
 			int v;
-			if(slider.getOrientation()==JSlider.HORIZONTAL) {
+			if(slider.getOrientation()==SwingConstants.HORIZONTAL) {
 				int x = e.getX();
 				v = valueForXPosition(x);
 			} else {
@@ -176,15 +184,18 @@ public class ColorPickerSliderUI extends BasicSliderUI {
 			}
 			slider.setValue(v);
 		}
+		@Override
 		public void mouseReleased(MouseEvent e) {
 			updateSliderValue(e);
 			slider.setValueIsAdjusting(false);
 		}
+		@Override
 		public void mouseDragged(MouseEvent e) {
 			updateSliderValue(e);
 		}
 	};
 
+	@Override
 	protected void installListeners(JSlider slider) {
 		super.installListeners(slider);
 		slider.removeMouseListener(trackListener);
@@ -194,6 +205,7 @@ public class ColorPickerSliderUI extends BasicSliderUI {
 		slider.setOpaque(false);
 	}
 
+	@Override
 	protected void uninstallListeners(JSlider slider) {
 		super.uninstallListeners(slider);
 		slider.removeMouseListener(myMouseListener);
