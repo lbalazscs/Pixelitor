@@ -21,7 +21,7 @@ import pixelitor.filters.gui.ActionParam;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.CoupledRangeParam;
+import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ReseedNoiseActionParam;
@@ -49,7 +49,7 @@ import java.util.Random;
  */
 public class PhotoCollage extends FilterWithParametrizedGUI {
     //    private RangeParam sizeParam = new RangeParam("Image Size", 40, 999, 200);
-    private final CoupledRangeParam sizeParam = new CoupledRangeParam("Photo Size", 40, 999, 200);
+    private final GroupedRangeParam sizeParam = new GroupedRangeParam("Photo Size", 40, 999, 200);
 
     private final RangeParam marginSizeParam = new RangeParam("Margin", 0, 20, 5);
     private final RangeParam imageNumberParam = new RangeParam("Number of Images", 1, 100, 10);
@@ -96,8 +96,8 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         rand.setSeed(seed);
-        int xSize = sizeParam.getFirstValue();
-        int ySize = sizeParam.getSecondValue();
+        int xSize = sizeParam.getValue(0);
+        int ySize = sizeParam.getValue(1);
 
         // fill with the background color
         Graphics2D g = dest.createGraphics();

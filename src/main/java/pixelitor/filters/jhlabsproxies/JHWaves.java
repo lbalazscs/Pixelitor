@@ -18,7 +18,7 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.RippleFilter;
 import pixelitor.filters.FilterWithParametrizedGUI;
-import pixelitor.filters.gui.CoupledRangeParam;
+import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ReseedNoiseActionParam;
@@ -29,14 +29,10 @@ import java.awt.image.BufferedImage;
  * Ripple based on the JHLabs RippleFilter
  */
 public class JHWaves extends FilterWithParametrizedGUI {
-    CoupledRangeParam wavelengthParam = new CoupledRangeParam("Wavelength", 1, 200, 20);
-    CoupledRangeParam amplitudeParam = new CoupledRangeParam("Amplitude", 0, 200, 10);
+    GroupedRangeParam wavelengthParam = new GroupedRangeParam("Wavelength", 1, 200, 20);
+    GroupedRangeParam amplitudeParam = new GroupedRangeParam("Amplitude", 0, 200, 10);
 
-    CoupledRangeParam phaseParam = new CoupledRangeParam("Phase (Time)", 0, 100, 0, false);
-
-//    RangeParam phaseXParam = new RangeParam("Horizontal Phase", 0, 100, 0);
-//    RangeParam phaseYParam = new RangeParam("Vertical Phase", 0, 100, 0);
-
+    GroupedRangeParam phaseParam = new GroupedRangeParam("Phase (Time)", 0, 100, 0, false);
 
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
     private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
@@ -60,8 +56,8 @@ public class JHWaves extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        int xAmplitude = amplitudeParam.getFirstValue();
-        int yAmplitude = amplitudeParam.getSecondValue();
+        int xAmplitude = amplitudeParam.getValue(0);
+        int yAmplitude = amplitudeParam.getValue(1);
 
         if (xAmplitude == 0 && yAmplitude == 0) {
             return src;
@@ -71,16 +67,16 @@ public class JHWaves extends FilterWithParametrizedGUI {
             filter = new RippleFilter();
         }
 
-        int xWavelength = wavelengthParam.getFirstValue();
-        int yWavelength = wavelengthParam.getSecondValue();
+        int xWavelength = wavelengthParam.getValue(0);
+        int yWavelength = wavelengthParam.getValue(1);
 
         filter.setXAmplitude(xAmplitude);
         filter.setXWavelength(xWavelength);
         filter.setYAmplitude(yAmplitude);
         filter.setYWavelength(yWavelength);
         filter.setWaveType(waveType.getValue());
-        filter.setPhaseX(phaseParam.getFirstValueAsPercentage());
-        filter.setPhaseY(phaseParam.getSecondValueAsPercentage());
+        filter.setPhaseX(phaseParam.getValueAsPercentage(0));
+        filter.setPhaseY(phaseParam.getValueAsPercentage(1));
 
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());

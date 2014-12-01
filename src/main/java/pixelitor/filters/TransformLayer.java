@@ -19,7 +19,7 @@ package pixelitor.filters;
 import pixelitor.ImageComponents;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.CoupledRangeParam;
+import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.layers.ImageLayer;
@@ -37,8 +37,8 @@ public class TransformLayer extends FilterWithParametrizedGUI {
     private final ImagePositionParam centerParam = new ImagePositionParam("Center");
     private final AngleParam angleParam = new AngleParam("Rotate Angle", 0);
     private final ColorParam bgColorParam = new ColorParam("Background Color:", Utils.TRANSPARENT_COLOR, true, false);
-    private final CoupledRangeParam scaleParam = new CoupledRangeParam("Scale (%)", 1, 500, 100);
-    private final CoupledRangeParam shearParam = new CoupledRangeParam("Shear", -500, 500, 0);
+    private final GroupedRangeParam scaleParam = new GroupedRangeParam("Scale (%)", 1, 500, 100);
+    private final GroupedRangeParam shearParam = new GroupedRangeParam("Shear", -500, 500, 0);
 
     public TransformLayer() {
         super("Transform Layer", true, false);
@@ -49,7 +49,7 @@ public class TransformLayer extends FilterWithParametrizedGUI {
                 shearParam,
                 bgColorParam
         ));
-        shearParam.setCoupled(false);
+        shearParam.setLinked(false);
     }
 
     @Override
@@ -73,16 +73,16 @@ public class TransformLayer extends FilterWithParametrizedGUI {
 
         AffineTransform transform = AffineTransform.getRotateInstance(theta, centerShiftX, centerShiftY);
 
-        int scaleX = scaleParam.getFirstValue();
-        int scaleY = scaleParam.getSecondValue();
+        int scaleX = scaleParam.getValue(0);
+        int scaleY = scaleParam.getValue(2);
         if ((scaleX != 100) || (scaleY != 100)) {
             transform.translate(centerShiftX, centerShiftY);
             transform.scale(scaleX / 100.0, scaleY / 100.0);
             transform.translate(-centerShiftX, -centerShiftY);
         }
 
-        int shearX = shearParam.getFirstValue();
-        int shearY = shearParam.getSecondValue();
+        int shearX = shearParam.getValue(0);
+        int shearY = shearParam.getValue(1);
         if ((shearX != 0) || (shearY != 0)) {
             transform.translate(centerShiftX, centerShiftY);
             transform.shear(shearX / 100.0, shearY / 100.0);

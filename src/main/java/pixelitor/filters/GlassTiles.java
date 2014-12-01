@@ -16,7 +16,7 @@
  */
 package pixelitor.filters;
 
-import pixelitor.filters.gui.CoupledRangeParam;
+import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.impl.TilesFilter;
@@ -27,11 +27,11 @@ import java.awt.image.BufferedImage;
  * Glass Tiles filter
  */
 public class GlassTiles extends FilterWithParametrizedGUI {
-    private final CoupledRangeParam size = new CoupledRangeParam("Tile Size", 5, 500, 100);
-    private final CoupledRangeParam curvature = new CoupledRangeParam("Curvature", 0, 20, 10);
+    private final GroupedRangeParam size = new GroupedRangeParam("Tile Size", 5, 500, 100);
+    private final GroupedRangeParam curvature = new GroupedRangeParam("Curvature", 0, 20, 10);
 //    private final RangeParam shiftXParam = new RangeParam("Shift Horizontal", 0, 10, 0);
 //    private final RangeParam shiftYParam = new RangeParam("Shift Vertical", 0, 10, 0);
-    private final CoupledRangeParam phase = new CoupledRangeParam("Shift Effect", 0, 10, 0, false);
+    private final GroupedRangeParam phase = new GroupedRangeParam("Shift Effect", 0, 10, 0, false);
 
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices(true);
     private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
@@ -43,7 +43,7 @@ public class GlassTiles extends FilterWithParametrizedGUI {
         setParamSet(new ParamSet(
                 size.adjustRangeAccordingToImage(0.5),
                 curvature,
-                phase,
+                phase.setShowLinkedCB(false),
                 edgeAction,
                 interpolation
         ));
@@ -55,15 +55,15 @@ public class GlassTiles extends FilterWithParametrizedGUI {
             filter = new TilesFilter();
         }
 
-        filter.setSizeX(size.getFirstValue());
-        filter.setSizeY(size.getSecondValue());
-        filter.setCurvatureX(curvature.getFirstValue());
-        filter.setCurvatureY(curvature.getSecondValue());
+        filter.setSizeX(size.getValue(0));
+        filter.setSizeY(size.getValue(1));
+        filter.setCurvatureX(curvature.getValue(0));
+        filter.setCurvatureY(curvature.getValue(1));
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 
-        filter.setShiftX(phase.getFirstValueAsPercentage());
-        filter.setShiftY(phase.getSecondValueAsPercentage());
+        filter.setShiftX(phase.getValueAsPercentage(0));
+        filter.setShiftY(phase.getValueAsPercentage(1));
 
         dest = filter.filter(src, dest);
         return dest;

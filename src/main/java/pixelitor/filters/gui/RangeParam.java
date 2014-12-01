@@ -84,6 +84,10 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
         return defaultValue;
     }
 
+    /**
+     * Resets to the default value.
+     * @param triggerAction should be true if called from a GUI component
+     */
     @Override
     public void reset(boolean triggerAction) {
         if (!triggerAction) {

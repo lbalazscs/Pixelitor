@@ -16,7 +16,7 @@
  */
 package pixelitor.filters;
 
-import pixelitor.filters.gui.CoupledRangeParam;
+import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
@@ -30,7 +30,7 @@ import java.awt.image.BufferedImage;
  */
 public class Magnify extends FilterWithParametrizedGUI {
     private final RangeParam magnification = new RangeParam("Magnification (%)", 1, 500, 150);
-    private final CoupledRangeParam outerRadius = new CoupledRangeParam("Outer Radius", 0, 999, 200);
+    private final GroupedRangeParam outerRadius = new GroupedRangeParam("Outer Radius", 0, 999, 200);
     private final RangeParam outerInnerRadiusRatio = new RangeParam("Outer/Inner Radius Ratio (%)", 100, 999, 200);
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
@@ -60,8 +60,8 @@ public class Magnify extends FilterWithParametrizedGUI {
         filter.setCenterX(center.getRelativeX());
         filter.setCenterY(center.getRelativeY());
 
-        int outerRadiusX = outerRadius.getFirstValue();
-        int outerRadiusY = outerRadius.getSecondValue();
+        int outerRadiusX = outerRadius.getValue(0);
+        int outerRadiusY = outerRadius.getValue(1);
         filter.setOuterRadiusX(outerRadiusX);
         filter.setOuterRadiusY(outerRadiusY);
 

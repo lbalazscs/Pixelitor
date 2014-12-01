@@ -18,7 +18,7 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.SphereFilter;
 import pixelitor.filters.FilterWithParametrizedGUI;
-import pixelitor.filters.gui.CoupledRangeParam;
+import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
@@ -30,7 +30,7 @@ import java.awt.image.BufferedImage;
  * Fisheye based on the JHLabs SphereFilter
  */
 public class JHLensOverImage extends FilterWithParametrizedGUI {
-    private final CoupledRangeParam radius = new CoupledRangeParam("Radius", 0, 999, 200);
+    private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 0, 999, 200);
 
     // less than 100% doesn't create anything usable
     private final RangeParam refractionIndex = new RangeParam("Refraction Index (%)", 100, 300, 150);
@@ -55,8 +55,8 @@ public class JHLensOverImage extends FilterWithParametrizedGUI {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         float refraction = refractionIndex.getValueAsPercentage();
-        int hRadius = radius.getFirstValue();
-        int vRadius = radius.getSecondValue();
+        int hRadius = radius.getValue(0);
+        int vRadius = radius.getValue(1);
 
         if (refraction == 1.0f || hRadius == 0 || vRadius == 0) {
             return src;

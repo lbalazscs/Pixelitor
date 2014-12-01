@@ -19,7 +19,7 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.BoxBlurFilter;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.CoupledRangeParam;
+import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
@@ -31,7 +31,7 @@ import java.awt.image.BufferedImage;
  */
 public class JHBoxBlur extends FilterWithParametrizedGUI {
 
-    private final CoupledRangeParam radius = new CoupledRangeParam("Radius", 0, 100, 0);
+    private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 0, 100, 0);
 
     private final RangeParam numberOfIterations = new RangeParam("Number of Iterations", 1, 10, 3);
 
@@ -50,8 +50,8 @@ public class JHBoxBlur extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        int hRadius = radius.getFirstValue();
-        int vRadius = radius.getSecondValue();
+        int hRadius = radius.getValue(0);
+        int vRadius = radius.getValue(1);
         if ((hRadius == 0) && (vRadius == 0)) {
             return src;
         }

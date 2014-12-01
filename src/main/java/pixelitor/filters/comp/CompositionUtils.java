@@ -39,7 +39,7 @@ public final class CompositionUtils {
 
     public static void cropImage(Composition comp, Rectangle selectionBounds, boolean selection, boolean allowGrowing) {
         if (selectionBounds.width == 0 || selectionBounds.height == 0) {
-            // TODO maybe a warning to the user?
+            // empty selection, can't do anything useful
             return;
         }
 
