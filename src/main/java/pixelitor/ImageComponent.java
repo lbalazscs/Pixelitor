@@ -312,9 +312,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     private static boolean adjustClipBoundsForImage(Graphics g, double drawStartX, double drawStartY, int maxWidth, int maxHeight) {
         Rectangle clipBounds = g.getClipBounds();
         Rectangle imageRect = new Rectangle((int)drawStartX, (int)drawStartY, maxWidth, maxHeight);
-
-        // TODO SwingUtilities.computeIntersection can do this without allocating a rectangle
         clipBounds = clipBounds.intersection(imageRect);
+
         g.setClip(clipBounds);
         return false;
     }

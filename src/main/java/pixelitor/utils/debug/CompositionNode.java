@@ -44,9 +44,9 @@ public class CompositionNode extends DebugNode {
                     node = new ImageLayerNode("Layer - " + layer.getName(), imageLayer);
                 }
                 add(node);
+            } else {
+                addQuotedStringChild("Layer of class", layer.getClass().getName());
             }
-            // TODO only image layers are debugged
-
         }
 
         BufferedImage compositeImage = comp.getCompositeImage();

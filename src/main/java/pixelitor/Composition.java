@@ -148,7 +148,7 @@ public class Composition implements Serializable {
     private void addLayerToGUI(Layer newLayer, int newLayerIndex) {
         LayerButton layerButton = newLayer.getLayerButton();
         ic.addLayerButton(layerButton, newLayerIndex);
-        setActiveLayer(newLayer, false); // TODO maybe this should be added to the history
+        setActiveLayer(newLayer, false);
 
         if (isActiveComp()) {
             AppLogic.activeCompLayerCountChanged(this, layerList.size());

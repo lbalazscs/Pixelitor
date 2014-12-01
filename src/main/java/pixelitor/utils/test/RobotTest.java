@@ -363,7 +363,15 @@ public class RobotTest {
         }
     }
 
-    private static void repeat() {
+    private static void randomZoomOut(Random rand) {
+        ImageComponent ic = ImageComponents.getActiveImageComponent();
+        if (ic != null) {
+            ZoomLevel previous = ic.getZoomLevel().getPrevious();
+            ic.setZoom(previous, false);
+        }
+    }
+
+        private static void repeat() {
         logRobotEvent("repeat");
         PixelitorWindow pw = PixelitorWindow.getInstance();
         pw.dispatchEvent(new KeyEvent(pw, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), KeyEvent.CTRL_MASK, KeyEvent.VK_F, 'F'));
@@ -827,6 +835,13 @@ public class RobotTest {
             @Override
             public void run() {
                 randomZoom(rand);
+            }
+        });
+
+        weightedCaller.registerCallback(5, new Runnable() {
+            @Override
+            public void run() {
+                randomZoomOut(rand);
             }
         });
 

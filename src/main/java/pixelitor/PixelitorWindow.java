@@ -143,16 +143,15 @@ public final class PixelitorWindow extends JFrame {
         desktopPane.getDesktopManager().activateFrame(frame);
     }
 
-    // TODO this is not OK - http://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html
     public static PixelitorWindow getInstance() {
-        if (singleInstance == null) {
-            synchronized (PixelitorWindow.class) {
-                if (singleInstance == null) {
-                    singleInstance = new PixelitorWindow();
-                }
-            }
-        }
-        return singleInstance;
+        return PixelitorWindowHolder.field;
+    }
+
+    /**
+     * See "Effective Java" 2nd edition, Item 71, page 283
+     */
+    private static class PixelitorWindowHolder {
+        static final PixelitorWindow field = new PixelitorWindow();
     }
 
     /**

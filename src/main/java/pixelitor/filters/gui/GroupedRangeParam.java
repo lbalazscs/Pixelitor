@@ -161,8 +161,10 @@ public class GroupedRangeParam extends AbstractGUIParam implements RangeBasedOnI
         for (RangeParam param : rangeParams) {
             param.reset(triggerAction);
         }
-
         // TODO previous code was this - only one was given the triggerAction parameter
+        // possibly it is enough or desirable to set triggerAction to true
+        // only once because the rest happens automatically
+        // TODO also an interesting question is whether the setLinked should be called before this
 //        rangeParam1.reset(false);
 //        rangeParam2.reset(triggerAction);
 
