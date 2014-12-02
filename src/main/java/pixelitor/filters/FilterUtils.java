@@ -43,6 +43,18 @@ public class FilterUtils {
         return filters;
     }
 
+    public static FilterWithParametrizedGUI[] getAnimationFiltersSorted() {
+        List<FilterWithParametrizedGUI> animFilters = new ArrayList<>();
+        for (Filter filter : allFilters) {
+            if(filter instanceof FilterWithParametrizedGUI) {
+                animFilters.add((FilterWithParametrizedGUI) filter);
+            }
+        }
+        FilterWithParametrizedGUI[] filters = animFilters.toArray(new FilterWithParametrizedGUI[animFilters.size()]);
+        Arrays.sort(filters);
+        return filters;
+    }
+
     public static Filter getRandomFilter() {
         return allFilters.get((int) (Math.random() * allFilters.size()));
     }

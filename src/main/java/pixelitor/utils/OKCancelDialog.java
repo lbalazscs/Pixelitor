@@ -33,6 +33,8 @@ import java.awt.event.WindowEvent;
 
 public abstract class OKCancelDialog extends JDialog {
     JComponent formPanel;
+    JLabel messageLabel;
+    private JScrollPane scrollPane;
 
     protected OKCancelDialog(JComponent form, String title) {
         this(form, PixelitorWindow.getInstance(), title, "OK", "Cancel");
@@ -52,12 +54,7 @@ public abstract class OKCancelDialog extends JDialog {
 
         setLayout(new BorderLayout());
 
-        if (addScrollBars) {
-            JScrollPane scrollPane = new JScrollPane(form, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-            add(scrollPane, BorderLayout.CENTER);
-        } else {
-            add(form, BorderLayout.CENTER);
-        }
+        addForm(form, addScrollBars);
 
         JPanel southPanel = new JPanel();
 
@@ -108,7 +105,10 @@ public abstract class OKCancelDialog extends JDialog {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
+                // the user pressed the X button...
+
                 dialogCanceled();
+
             }
         });
 
@@ -124,12 +124,60 @@ public abstract class OKCancelDialog extends JDialog {
         GUIUtils.centerOnScreen(this);
     }
 
-
+    /**
+     * Subclasses should always call super.dialogAccepted() and (if desired) dispose()
+     */
     protected void dialogAccepted() {
+        // TODO this is bad design: setShowHideAllForTab is called ven if the
+        // dialog is not closed
+        // Instead the dialog should listen itself for closing events and set
+        // there
+        // However if the user clicks on X, the WindowAdapter/windowClosed WILL be called
+        // but for dispose not....
+        // TODO anyway it is an error to ALWAYS call super.dialogAccepted() because the
+        // window might not be closed
+        // The point is that setShowHideAllForTab and dispose should be called AT THE SAME TIME
+
+        // turn on again the global keyboard shortcut for Tab
         GlobalKeyboardWatch.setShowHideAllForTab(true);
+
     }
 
+    /**
+     * Subclasses should always call super.dialogCanceled() and dispose()
+     */
     protected void dialogCanceled() {
         GlobalKeyboardWatch.setShowHideAllForTab(true);
     }
+
+    public void setHeaderMessage(String message) {
+        if(messageLabel != null) { // there was a message before
+            remove(messageLabel);
+        }
+        messageLabel = new JLabel(message);
+        add(messageLabel, BorderLayout.NORTH);
+        revalidate();
+    }
+
+    public void changeFormPanel(JPanel panel) {
+        if(scrollPane != null) {
+            remove(scrollPane);
+        } else {
+            remove(formPanel);
+        }
+        formPanel = panel;
+        addForm(formPanel, true);
+        revalidate();
+    }
+
+    private void addForm(JComponent form, boolean addScrollBars) {
+        if (addScrollBars) {
+            scrollPane = new JScrollPane(form, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            add(scrollPane, BorderLayout.CENTER);
+        } else {
+            add(form, BorderLayout.CENTER);
+            scrollPane = null; // so that we later know that we have to remove from the root
+        }
+    }
+
 }
