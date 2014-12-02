@@ -210,9 +210,9 @@ public class MenuBar extends JMenuBar {
 
         fileMenu.addSeparator();
 
-
+        String exitName = JVM.isMac ? "Quit" : "Exit";
         // exit
-        Action exitAction = new AbstractAction("Exit") {
+        Action exitAction = new AbstractAction(exitName) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 AppPreferences.exitApp();

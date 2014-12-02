@@ -158,22 +158,7 @@ public enum ShapeType {
         @Override
         public Shape getShape(UserDrag userDrag) {
             if (unitArrow == null) {
-                float arrowWidth = 0.3f;
-                float arrowHeadWidth = 0.7f;
-                float arrowHeadStart = 0.6f;
-
-                float halfArrowWidth = arrowWidth / 2.0f;
-                float halfArrowHeadWidth = arrowHeadWidth / 2;
-
-                unitArrow = new GeneralPath();
-                unitArrow.moveTo(0.0f, -halfArrowWidth);
-                unitArrow.lineTo(0.0f, halfArrowWidth);
-                unitArrow.lineTo(arrowHeadStart, halfArrowWidth);
-                unitArrow.lineTo(arrowHeadStart, halfArrowHeadWidth);
-                unitArrow.lineTo(1.0f, 0.0f);
-                unitArrow.lineTo(arrowHeadStart, -halfArrowHeadWidth);
-                unitArrow.lineTo(arrowHeadStart, -halfArrowWidth);
-                unitArrow.closePath();
+                unitArrow = Utils.createUnitArrow();
             }
 
             updateCoordinates(userDrag);
@@ -191,6 +176,7 @@ public enum ShapeType {
             transform.rotate(angle);
             return transform.createTransformedShape(unitArrow);
         }
+
 
         @Override
         public String toString() {

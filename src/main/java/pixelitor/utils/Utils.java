@@ -45,6 +45,7 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
@@ -467,5 +468,25 @@ public final class Utils {
         BufferedImage debugImage = new BufferedImage(raster.getMinX() + raster.getWidth(), raster.getMinY() + raster.getHeight(), BufferedImage.TYPE_4BYTE_ABGR_PRE);
         debugImage.setData(raster);
         debugImage(debugImage);
+    }
+
+    public static GeneralPath createUnitArrow() {
+        float arrowWidth = 0.3f;
+        float arrowHeadWidth = 0.7f;
+        float arrowHeadStart = 0.6f;
+
+        float halfArrowWidth = arrowWidth / 2.0f;
+        float halfArrowHeadWidth = arrowHeadWidth / 2;
+
+        GeneralPath unitArrow = new GeneralPath();
+        unitArrow.moveTo(0.0f, -halfArrowWidth);
+        unitArrow.lineTo(0.0f, halfArrowWidth);
+        unitArrow.lineTo(arrowHeadStart, halfArrowWidth);
+        unitArrow.lineTo(arrowHeadStart, halfArrowHeadWidth);
+        unitArrow.lineTo(1.0f, 0.0f);
+        unitArrow.lineTo(arrowHeadStart, -halfArrowHeadWidth);
+        unitArrow.lineTo(arrowHeadStart, -halfArrowWidth);
+        unitArrow.closePath();
+        return unitArrow;
     }
 }
