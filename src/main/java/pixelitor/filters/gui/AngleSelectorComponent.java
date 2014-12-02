@@ -16,7 +16,9 @@
  */
 package pixelitor.filters.gui;
 
+import javax.swing.*;
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -52,5 +54,29 @@ public class AngleSelectorComponent extends AbstractAngleSelectorComponent {
         drawArrow(g2, angle, cx, cy, endX, endY);
     }
 
+    public static void main(String[] args) {
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                buildGUI();
+            }
+        });
+    }
 
+    private static void buildGUI() {
+        try {
+            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
+
+        JFrame f = new JFrame("Test");
+        f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+        f.add(new AngleSelectorComponent(new AngleParam("name", 0)));
+
+        f.pack();
+        f.setLocationRelativeTo(null);
+        f.setVisible(true);
+    }
 }

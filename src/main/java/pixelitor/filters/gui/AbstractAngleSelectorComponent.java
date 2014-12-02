@@ -17,8 +17,12 @@
 package pixelitor.filters.gui;
 
 import javax.swing.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -30,6 +34,9 @@ import java.awt.geom.Line2D;
 public abstract class AbstractAngleSelectorComponent extends JComponent implements MouseListener, MouseMotionListener {
     AngleParam model;
     static final int SIZE = 50;
+    static final Stroke ARROW_STROKE = new BasicStroke(1.7f);
+//    static final Color ARROW_COLOR = new Color(48, 76, 111);
+    static final Color ARROW_COLOR = new Color(45, 66, 85);
 
     int cx;
     int cy;
@@ -85,6 +92,11 @@ public abstract class AbstractAngleSelectorComponent extends JComponent implemen
     }
 
     static void drawArrow(Graphics2D g2, double angle, float startX, float startY, float endX, float endY) {
+        g2.setColor(ARROW_COLOR);
+        g2.setStroke(ARROW_STROKE);
+
+        g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+
         Line2D.Float line = new Line2D.Float(startX, startY, endX, endY);
         g2.draw(line);
 
