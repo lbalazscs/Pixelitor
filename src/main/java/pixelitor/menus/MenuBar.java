@@ -518,6 +518,8 @@ public class MenuBar extends JMenuBar {
         filterMenu.add(distortMenu);
         MenuFactory.createMenuItem(new JHPinch(), null, distortMenu);
         MenuFactory.createMenuItem(new Swirl(), null, distortMenu);
+        MenuFactory.createMenuItem(new UnifiedSwirl(), null, distortMenu);
+
         MenuFactory.createMenuItem(new CircleToSquare(), null, distortMenu);
         MenuFactory.createMenuItem(new JHPerspective(), null, distortMenu);
         distortMenu.addSeparator();

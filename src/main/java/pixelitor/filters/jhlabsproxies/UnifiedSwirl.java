@@ -17,22 +17,33 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.PinchFilter;
+import com.jhlabs.image.SwirlMethod;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.impl.SwirlFilter;
 
 import java.awt.image.BufferedImage;
 
 /**
- * JHPinch
+ * Swirl-Bulge-Pinch filter can use SwirlFilter or PinchFilter
  */
-public class JHPinch extends FilterWithParametrizedGUI {
+public class UnifiedSwirl extends FilterWithParametrizedGUI {
+    private static final int AFFECT_EVERYWHERE = 1;
+    private static final int AFFECT_INSIDE_RADIUS = 2;
+
+    private final IntChoiceParam algorithmChooser = new IntChoiceParam("Affect",
+            new IntChoiceParam.Value[] {
+                    new IntChoiceParam.Value("Everywhere", AFFECT_EVERYWHERE),
+                    new IntChoiceParam.Value("Inside Radius", AFFECT_INSIDE_RADIUS),
+            });
+
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final RangeParam radius = new RangeParam("Radius", 1, 999, 200);
-    private final RangeParam twirlAngle = new RangeParam("Twirl Angle", -360, 360, 90);
+    private final RangeParam twirlAngle = new RangeParam("Swirl Amount", -360, 360, 90);
     private final RangeParam pinchBulgeAmount = new RangeParam("Pinch-Bulge Amount", -100, 100, 50);
     private RangeParam zoomParam = new RangeParam("Zoom (%)", 1, 500, 100);
     private AngleParam rotateResultParam = new AngleParam("Rotate Result", 0);
@@ -41,11 +52,14 @@ public class JHPinch extends FilterWithParametrizedGUI {
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
     private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
 
-    private PinchFilter filter;
+    private SwirlMethod filter;
+    private PinchFilter pinchFilter;
+    private SwirlFilter swirlFilter;
 
-    public JHPinch() {
-        super("Pinch, Bulge, Twirl", true, true);
+    public UnifiedSwirl() {
+        super("Unified Swirl", true, true);
         setParamSet(new ParamSet(
+                algorithmChooser,
                 pinchBulgeAmount,
                 twirlAngle,
                 radius.adjustRangeAccordingToImage(1.0),
@@ -59,22 +73,29 @@ public class JHPinch extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new PinchFilter();
+        int algorithm = algorithmChooser.getValue();
+        if(algorithm == AFFECT_EVERYWHERE) {
+            if(swirlFilter == null) {
+                swirlFilter = new SwirlFilter();
+            }
+            filter = swirlFilter;
+        } else if(algorithm == AFFECT_INSIDE_RADIUS) {
+            if(pinchFilter == null) {
+                pinchFilter = new PinchFilter();
+            }
+            filter = pinchFilter;
         }
 
-        filter.setRadius(radius.getValue());
-
-        filter.setPinchBulgeAmount((-1) * pinchBulgeAmount.getValueAsPercentage());
+        filter.setPinchBulgeAmount(pinchBulgeAmount.getValueAsPercentage());
         filter.setSwirlAmount(2 * twirlAngle.getValueInRadians());
-
+        filter.setRadius(radius.getValue());
         filter.setCenterX(center.getRelativeX());
         filter.setCenterY(center.getRelativeY());
 
         filter.setZoom(zoomParam.getValueAsPercentage());
         filter.setRotateResultAngle((float) rotateResultParam.getValueInIntuitiveRadians());
-        filter.setEdgeAction(edgeAction.getValue());
 
+        filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 
         dest = filter.filter(src, dest);
