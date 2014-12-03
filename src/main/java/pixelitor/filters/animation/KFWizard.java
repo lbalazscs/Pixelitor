@@ -16,11 +16,18 @@
  */
 package pixelitor.filters.animation;
 
+import pixelitor.ChangeReason;
+import pixelitor.ImageComponents;
 import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.gui.ParamSetState;
+import pixelitor.filters.gui.ParametrizedAdjustPanel;
 import pixelitor.utils.GUIUtils;
+import pixelitor.utils.ImageUtils;
 import pixelitor.utils.OKCancelDialog;
 
 import javax.swing.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
 
 /**
  * Wizard for keyframe-based animations
@@ -30,10 +37,14 @@ public class KFWizard {
     private KFWizardState wizardState = KFWizardState.SELECT_FILTER;
     private FilterWithParametrizedGUI filter;
 
+    ParamSetState initialState;
+    ParamSetState finalState;
+
     /**
      * Show the wizard in a dialog
      */
     public void show(JFrame dialogParent) {
+        ParametrizedAdjustPanel.setResetParams(false);
         dialog = new OKCancelDialog(
                 wizardState.getPanel(KFWizard.this),
                 dialogParent,
@@ -42,6 +53,7 @@ public class KFWizard {
 
             @Override
             protected void dialogCanceled() {
+                ParametrizedAdjustPanel.setResetParams(true);
                 wizardState.onWizardCancelled(KFWizard.this);
                 super.dialogCanceled();
                 dispose();
@@ -73,15 +85,47 @@ public class KFWizard {
         dialog.setVisible(true);
     }
 
-    private static void wizardFinished() {
-        System.out.println("Wizard::wizardFinished: CALLED");
-    }
-
     public void setFilter(FilterWithParametrizedGUI filter) {
         this.filter = filter;
     }
 
     public FilterWithParametrizedGUI getFilter() {
         return filter;
+    }
+
+    public void setInitialState(ParamSetState initialState) {
+        this.initialState = initialState;
+    }
+
+    public void setFinalState(ParamSetState finalState) {
+        this.finalState = finalState;
+    }
+
+    private void wizardFinished() {
+        System.out.println("Wizard::wizardFinished: CALLED");
+        int numFrames = 5;
+        double[] time = new double[numFrames];
+        double[] progress = new double[numFrames];
+
+        File file = new File("output.gif");
+        AnimationWriter animationWriter = new AnimGIFWriter(file, 200);
+
+        for (int i = 0; i < time.length; i++) {
+            time[i] = ((double)i) / numFrames;
+            progress[i] = time[i]; // linear
+            System.out.println(String.format("KFWizard::wizardFinished: " +
+                    "time[%d] = %.2f, progress[%d] = %.2f", i, time[i], i, progress[i]));
+            ParamSetState intermediateState = initialState.interpolate(finalState, time[i]);
+            filter.getParamSet().setState(intermediateState);
+            filter.execute(ChangeReason.OP_PREVIEW);
+            BufferedImage image = ImageComponents.getActiveCompositeImage();
+            image = ImageUtils.copyImage(image);
+            animationWriter.addFrame(image);
+//            Utils.debugImage(image, "Step " + i);
+            ImageComponents.getActiveComp().getActiveImageLayer().cancelPreviewing();
+        }
+
+        animationWriter.finish();
+        System.out.println("KFWizard::wizardFinished: file = " + file.getAbsolutePath() + (file.exists() ? " - exists" : " - does not exist!"));
     }
 }

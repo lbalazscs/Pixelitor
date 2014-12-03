@@ -39,7 +39,7 @@ public enum KFWizardState {
 
         @Override
         KFWizardState getNext() {
-            return SELECT_INITIAL_SETTINGS;
+            return INITIAL_FILTER_SETTINGS;
         }
 
         @Override
@@ -60,7 +60,7 @@ public enum KFWizardState {
             FilterWithParametrizedGUI filter = (FilterWithParametrizedGUI) filtersCB.getSelectedItem();
             wizard.setFilter(filter);
         }
-    }, SELECT_INITIAL_SETTINGS {
+    }, INITIAL_FILTER_SETTINGS {
         @Override
         String getHelpMessage() {
             return "<html> Select the <b>initial</b> settings for the filter";
@@ -68,7 +68,7 @@ public enum KFWizardState {
 
         @Override
         KFWizardState getNext() {
-            return SELECT_FINAL_SETTINGS;
+            return FINAL_FILTER_SETTINGS;
         }
 
         @Override
@@ -91,8 +91,9 @@ public enum KFWizardState {
         @Override
         void onMovingToTheNext(KFWizard wizard) {
             ParamSet paramSet = wizard.getFilter().getParamSet();
+            wizard.setInitialState(paramSet.getState());
         }
-    }, SELECT_FINAL_SETTINGS {
+    }, FINAL_FILTER_SETTINGS {
         @Override
         String getHelpMessage() {
             return "<html> Select the <b>final</b> settings for the filter.";
@@ -121,6 +122,10 @@ public enum KFWizardState {
         void onMovingToTheNext(KFWizard wizard) {
             // cancel the previewing
             onWizardCancelled(wizard);
+
+            // save final state
+            ParamSet paramSet = wizard.getFilter().getParamSet();
+            wizard.setFinalState(paramSet.getState());
         }
     }, SELECT_DURATION {
         @Override
