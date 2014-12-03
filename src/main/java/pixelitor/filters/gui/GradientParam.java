@@ -29,7 +29,9 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 /**
- *
+ * Represents a gradient. (Note that unlike other GUIParam implementations,
+ * this is not really a model for the GradientSlider GUI component,
+ * the actual value is stored only inside the GradientSlider)
  */
 public class GradientParam extends AbstractGUIParam {
     private GradientSlider gradientSlider;
@@ -65,7 +67,6 @@ public class GradientParam extends AbstractGUIParam {
                     if (!gradientSlider.isValueAdjusting()) {
                         if (adjustmentListener != null) {
                             String propertyName = evt.getPropertyName();
-//                        System.out.println("GradientParam.propertyChange propertyName = \"" + propertyName + "\"");
                             if (!"ancestor".equals(propertyName)) {
                                 if (!"selected thumb".equals(propertyName)) {
                                     adjustmentListener.paramAdjusted();
@@ -104,7 +105,6 @@ public class GradientParam extends AbstractGUIParam {
 
     @Override
     public void randomize() {
-
         Color[] randomColors = new Color[defaultThumbPositions.length];
         for (int i = 0; i < randomColors.length; i++) {
             randomColors[i] = ImageUtils.getRandomColor(false);
