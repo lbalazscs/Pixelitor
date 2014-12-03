@@ -10,6 +10,7 @@ build.num
 *.ora
 *.exe
 *.ico
+*.gif
 *.zip
 *.7z
 Pixelitor.iml
