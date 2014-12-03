@@ -35,6 +35,7 @@ public abstract class OKCancelDialog extends JDialog {
     JComponent formPanel;
     JLabel messageLabel;
     private JScrollPane scrollPane;
+    private JButton okButton;
 
     protected OKCancelDialog(JComponent form, String title) {
         this(form, PixelitorWindow.getInstance(), title, "OK", "Cancel");
@@ -59,7 +60,7 @@ public abstract class OKCancelDialog extends JDialog {
         JPanel southPanel = new JPanel();
 
 
-        JButton okButton = new JButton(okText);
+        okButton = new JButton(okText);
         JButton cancelButton = new JButton(cancelText);
 
         GlobalKeyboardWatch.setShowHideAllForTab(false);
@@ -122,6 +123,10 @@ public abstract class OKCancelDialog extends JDialog {
 
         pack();
         GUIUtils.centerOnScreen(this);
+    }
+
+    public void setOKButtonEnabled(boolean b) {
+        okButton.setEnabled(b);
     }
 
     /**

@@ -128,7 +128,7 @@ public enum KFWizardState {
             wizard.setFinalState(paramSet.getState());
         }
     }, SELECT_DURATION {
-        DurationPanel durationPanel = new DurationPanel();
+        DurationPanel durationPanel;
 
         @Override
         String getHelpMessage() {
@@ -142,6 +142,7 @@ public enum KFWizardState {
 
         @Override
         JPanel getPanel(KFWizard wizard) {
+            durationPanel = new DurationPanel(wizard);
             return durationPanel;
         }
 
@@ -152,6 +153,7 @@ public enum KFWizardState {
         @Override
         void onMovingToTheNext(KFWizard wizard) {
             wizard.setNumFrames(durationPanel.getNumFrames());
+            wizard.setMillisBetweenFrames(durationPanel.getMillisBetweenFrames());
         }
     };
 

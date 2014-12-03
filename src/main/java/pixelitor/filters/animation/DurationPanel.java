@@ -16,21 +16,66 @@
  */
 package pixelitor.filters.animation;
 
+import pixelitor.utils.GridBagHelper;
+
 import javax.swing.*;
-import java.awt.FlowLayout;
+import java.awt.GridBagLayout;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class DurationPanel extends JPanel {
-    JTextField nrFramesTF = new JTextField(3);
+    JTextField nrSecondsTF = new JTextField("2", 3);
+    JTextField fpsTF = new JTextField("24", 3);
+    int nrFrames;
+    private final JLabel nrFramesLabel;
+    private int fps;
+    private KFWizard wizard;
 
-    public DurationPanel() {
-        super(new FlowLayout());
-        add(new JLabel("Number of frames:"));
-        add(nrFramesTF);
+    public DurationPanel(KFWizard wizard) {
+        super(new GridBagLayout());
+        this.wizard = wizard;
+
+        GridBagHelper.addLabel(this, "Number of seconds:", 0, 0);
+        GridBagHelper.addControl(this, nrSecondsTF);
+
+        KeyAdapter keyAdapter = new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                updateCalculations();
+            }
+        };
+        nrSecondsTF.addKeyListener(keyAdapter);
+
+        GridBagHelper.addLabel(this, "Frames per Second:", 0, 1);
+        GridBagHelper.addControl(this, fpsTF);
+
+        fpsTF.addKeyListener(keyAdapter);
+
+        nrFramesLabel = new JLabel();
+        updateCalculations();
+        GridBagHelper.addLabel(this, "Number of Frames:", 0, 2);
+        GridBagHelper.addControl(this, nrFramesLabel);
+    }
+
+    private void updateCalculations() {
+        try {
+            double nrSeconds = Double.parseDouble(nrSecondsTF.getText().trim());
+            fps = Integer.parseInt(fpsTF.getText().trim());
+            nrFrames = (int) (nrSeconds * fps);
+            nrFramesLabel.setText(String.valueOf(nrFrames));
+            wizard.setNextButtonEnabled(true);
+        } catch (Exception e) {
+            // disable the next button in case of any formatting problem
+            wizard.setNextButtonEnabled(false);
+        }
     }
 
 
     public int getNumFrames() {
-        int nrFrames = Integer.parseInt(nrFramesTF.getText());
         return nrFrames;
+    }
+
+    public int getMillisBetweenFrames() {
+        return (int) (1000.0 / fps);
     }
 }

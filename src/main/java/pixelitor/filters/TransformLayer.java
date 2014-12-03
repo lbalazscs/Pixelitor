@@ -74,7 +74,7 @@ public class TransformLayer extends FilterWithParametrizedGUI {
         AffineTransform transform = AffineTransform.getRotateInstance(theta, centerShiftX, centerShiftY);
 
         int scaleX = scaleParam.getValue(0);
-        int scaleY = scaleParam.getValue(2);
+        int scaleY = scaleParam.getValue(1);
         if ((scaleX != 100) || (scaleY != 100)) {
             transform.translate(centerShiftX, centerShiftY);
             transform.scale(scaleX / 100.0, scaleY / 100.0);

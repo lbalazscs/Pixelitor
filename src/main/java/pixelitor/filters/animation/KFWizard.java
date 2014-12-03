@@ -18,12 +18,14 @@ package pixelitor.filters.animation;
 
 import pixelitor.ChangeReason;
 import pixelitor.ImageComponents;
+import pixelitor.PixelitorWindow;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.ParamSetState;
 import pixelitor.filters.gui.ParametrizedAdjustPanel;
 import pixelitor.utils.GUIUtils;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.OKCancelDialog;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.image.BufferedImage;
@@ -40,6 +42,7 @@ public class KFWizard {
     ParamSetState initialState;
     ParamSetState finalState;
     private int numFrames;
+    private int millisBetweenFrames;
 
     /**
      * Show the wizard in a dialog
@@ -66,8 +69,8 @@ public class KFWizard {
                 wizardState.onMovingToTheNext(KFWizard.this);
                 KFWizardState nextState = wizardState.getNext();
                 if(nextState == null) {
-                    wizardFinished();
                     dispose();
+                    calculateAnimation();
                 } else {
                     JPanel panel = nextState.getPanel(KFWizard.this);
                     dialog.changeFormPanel(panel);
@@ -102,23 +105,26 @@ public class KFWizard {
         this.finalState = finalState;
     }
 
-    private void wizardFinished() {
-        System.out.println("Wizard::wizardFinished: CALLED");
+    private void calculateAnimation() {
+        System.out.println("Wizard::calculateAnimation: CALLED");
 
         double[] time = new double[numFrames];
         double[] progress = new double[numFrames];
 
         File file = new File("output.gif");
-        AnimationWriter animationWriter = new AnimGIFWriter(file, 20);
+        AnimationWriter animationWriter = new AnimGIFWriter(file, millisBetweenFrames);
 
         for (int i = 0; i < time.length; i++) {
             time[i] = ((double)i) / numFrames;
             progress[i] = time[i]; // linear
-            System.out.println(String.format("KFWizard::wizardFinished: " +
-                    "time[%d] = %.2f, progress[%d] = %.2f", i, time[i], i, progress[i]));
+            System.out.println(String.format("KFWizard::calculateAnimation: " +
+                    "time[%d] = %.2f, progress[%d] = %.2f, thread = '%s'", i, time[i], i, progress[i], Thread.currentThread().getName()));
             ParamSetState intermediateState = initialState.interpolate(finalState, time[i]);
             filter.getParamSet().setState(intermediateState);
-            filter.execute(ChangeReason.OP_PREVIEW);
+            //filter.execute(ChangeReason.OP_PREVIEW);
+
+            Utils.executeFilterWithBusyCursor(filter, ChangeReason.OP_PREVIEW, PixelitorWindow.getInstance());
+
             BufferedImage image = ImageComponents.getActiveCompositeImage();
             image = ImageUtils.copyImage(image); // TODO is this necessary?
             animationWriter.addFrame(image);
@@ -127,10 +133,18 @@ public class KFWizard {
         }
 
         animationWriter.finish();
-        System.out.println("KFWizard::wizardFinished: file = " + file.getAbsolutePath() + (file.exists() ? " - exists" : " - does not exist!"));
+        System.out.println("KFWizard::calculateAnimation: file = " + file.getAbsolutePath() + (file.exists() ? " - exists" : " - does not exist!"));
     }
 
     public void setNumFrames(int numFrames) {
         this.numFrames = numFrames;
+    }
+
+    public void setMillisBetweenFrames(int millisBetweenFrames) {
+        this.millisBetweenFrames = millisBetweenFrames;
+    }
+
+    public void setNextButtonEnabled(boolean b) {
+        dialog.setOKButtonEnabled(b);
     }
 }

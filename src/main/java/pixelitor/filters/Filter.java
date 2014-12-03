@@ -116,6 +116,8 @@ public abstract class Filter extends AbstractAction implements Comparable<Filter
     }
 
     public void execute(final ChangeReason changeReason) {
+        // only filters without a GUI call this on the EDT
+
         Utils.executeFilterWithBusyCursor(this, changeReason, PixelitorWindow.getInstance());
     }
 
