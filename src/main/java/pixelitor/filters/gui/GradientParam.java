@@ -18,6 +18,7 @@ package pixelitor.filters.gui;
 
 import com.bric.swing.GradientSlider;
 import com.jhlabs.image.Colormap;
+import com.jhlabs.image.ImageMath;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
@@ -31,7 +32,7 @@ import java.beans.PropertyChangeListener;
  *
  */
 public class GradientParam extends AbstractGUIParam {
-    private final GradientSlider gradientSlider;
+    private GradientSlider gradientSlider;
 
     private final float[] defaultThumbPositions;
     private final Color[] defaultColors;
@@ -46,6 +47,16 @@ public class GradientParam extends AbstractGUIParam {
         this.defaultColors = defaultColors;
 
         // has to be created in the constructor because getValue() can be called early
+        createGradientSlider(defaultThumbPositions, defaultColors);
+
+//        gradientSlider.addChangeListener(new ChangeListener() {
+//            @Override
+//            public void stateChanged(ChangeEvent e) {
+//            }
+//        });
+    }
+
+    public void createGradientSlider(float[] defaultThumbPositions, Color[] defaultColors) {
         gradientSlider = new GradientSlider(GradientSlider.HORIZONTAL, defaultThumbPositions, defaultColors);
         gradientSlider.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
@@ -65,12 +76,6 @@ public class GradientParam extends AbstractGUIParam {
                 }
             }
         });
-
-//        gradientSlider.addChangeListener(new ChangeListener() {
-//            @Override
-//            public void stateChanged(ChangeEvent e) {
-//            }
-//        });
         gradientSlider.putClientProperty("GradientSlider.useBevel", "true");
 
         // if there other controls in the dialog, they will determine the horizontal size
@@ -91,7 +96,6 @@ public class GradientParam extends AbstractGUIParam {
             }
         };
     }
-
 
     @Override
     public int getNrOfGridBagCols() {
@@ -158,12 +162,48 @@ public class GradientParam extends AbstractGUIParam {
 
     @Override
     public ParamState copyState() {
-        // TODO
-        return null;
+        return new GState(gradientSlider.getThumbPositions(), gradientSlider.getColors());
     }
 
     @Override
     public void setState(ParamState state) {
-        // TODO
+        GState gr = (GState) state;
+        createGradientSlider(gr.thumbPositions, gr.colors);
     }
+
+    private static class GState implements ParamState {
+        float[] thumbPositions;
+        Color[] colors;
+
+        public GState(float[] thumbPositions, Color[] colors) {
+            this.thumbPositions = thumbPositions;
+            this.colors = colors;
+        }
+
+        @Override
+        public ParamState interpolate(ParamState endState, double progress) {
+            // This will not work if the number of thumbs changes
+            GState grEndState = (GState) endState;
+
+            float[] interpolatedPositions = new float[thumbPositions.length];
+            for (int i = 0; i < thumbPositions.length; i++) {
+                float initial = thumbPositions[i];
+                float end = grEndState.thumbPositions[i];
+                float interpolated = ImageMath.lerp((float)progress, initial, end);
+                interpolatedPositions[i] = interpolated;
+            }
+
+            Color[] interpolatedColors = new Color[colors.length];
+            for (int i = 0; i < colors.length; i++) {
+                Color initial = colors[i];
+                Color end = grEndState.colors[i];
+                // TODO interpolate in HSB space?
+                Color interpolated = new Color(ImageMath.mixColors((float)progress, initial.getRGB(), end.getRGB()));
+                interpolatedColors[i] = interpolated;
+            }
+
+            return new GState(interpolatedPositions, interpolatedColors);
+        }
+    }
+
 }
