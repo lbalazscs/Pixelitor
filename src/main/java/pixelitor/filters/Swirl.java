@@ -39,16 +39,13 @@ public class Swirl extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        float amount =  amountParam.getValueAsPercentage();
-        int size =  radiusParam.getValue();
-        float zoom = zoomParam.getValueAsPercentage();
         if(filter == null) {
             filter = new SwirlFilter();
         }
 
-        filter.setAmount(amount);
-        filter.setRadius(size);
-        filter.setZoom(zoom);
+        filter.setSwirlAmount(amountParam.getValueAsPercentage());
+        filter.setRadius(radiusParam.getValue());
+        filter.setZoom(zoomParam.getValueAsPercentage());
         filter.setRotateResultAngle((float) rotateResultParam.getValueInIntuitiveRadians());
 
         filter.setCenterX(centerParam.getRelativeX());

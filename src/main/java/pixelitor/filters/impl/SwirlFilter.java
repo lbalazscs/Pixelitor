@@ -1,22 +1,27 @@
 package pixelitor.filters.impl;
 
+import com.jhlabs.image.SwirlMethod;
 import com.jhlabs.image.TransformFilter;
 import net.jafama.FastMath;
 
+import java.awt.Shape;
+import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 
 /**
  * Based on http://stackoverflow.com/questions/225548/resources-for-image-distortion-algorithms
  */
-public class SwirlFilter extends TransformFilter {
-    private float amount;
+public class SwirlFilter extends TransformFilter implements SwirlMethod {
+    private float swirlAmount;
+    private float radius;
     private float radius2;
     private float centerX;
     private float centerY;
     private float zoom;
-    private int cx;
-    private int cy;
+    private float cx;
+    private float cy;
     private float rotateResultAngle;
+    private float pinchBulgeAmount;
 
     public void setCenterX(float centerX) {
         this.centerX = centerX;
@@ -26,11 +31,12 @@ public class SwirlFilter extends TransformFilter {
         this.centerY = centerY;
     }
 
-    public void setAmount(float amount) {
-        this.amount = amount;
+    public void setSwirlAmount(float swirlAmount) {
+        this.swirlAmount = swirlAmount;
     }
 
     public void setRadius(float radius) {
+        this.radius = radius;
         this.radius2 = radius * radius;
     }
 
@@ -45,9 +51,9 @@ public class SwirlFilter extends TransformFilter {
     @Override
     protected void transformInverse(int x, int y, float[] out) {
         float u, v;
-        int dx = x - cx;
-        int dy = y - cy;
-        float angle = (float) (amount * FastMath.exp(-(dx * dx + dy * dy) / (radius2)));
+        float dx = x - cx;
+        float dy = y - cy;
+        float angle = (float) (swirlAmount * FastMath.exp(-(dx * dx + dy * dy) / (radius2)));
 
         angle -= rotateResultAngle;
 
@@ -66,5 +72,16 @@ public class SwirlFilter extends TransformFilter {
 
     public void setRotateResultAngle(float rotateResultAngle) {
         this.rotateResultAngle = rotateResultAngle;
+    }
+
+    public void setPinchBulgeAmount(float pinchBulgeAmount) {
+        this.pinchBulgeAmount = pinchBulgeAmount;
+    }
+
+    @Override
+    public Shape[] getAffectedAreaShapes() {
+        return new Shape[]{
+                new Ellipse2D.Float(cx - radius, cy - radius, 2 * radius, 2 * radius)
+        };
     }
 }
