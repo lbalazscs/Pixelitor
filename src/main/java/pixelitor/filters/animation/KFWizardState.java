@@ -128,7 +128,7 @@ public enum KFWizardState {
             wizard.setFinalState(paramSet.getState());
         }
     }, SELECT_DURATION {
-        JTextField nrFramesTF = new JTextField(3);
+        DurationPanel durationPanel = new DurationPanel();
 
         @Override
         String getHelpMessage() {
@@ -142,10 +142,7 @@ public enum KFWizardState {
 
         @Override
         JPanel getPanel(KFWizard wizard) {
-            JPanel p = new JPanel(new FlowLayout());
-            p.add(new JLabel("Number of frames:"));
-            p.add(nrFramesTF);
-            return p;
+            return durationPanel;
         }
 
         @Override
@@ -154,8 +151,7 @@ public enum KFWizardState {
 
         @Override
         void onMovingToTheNext(KFWizard wizard) {
-            int nrFrames = Integer.parseInt(nrFramesTF.getText());
-            wizard.setNumFrames(nrFrames);
+            wizard.setNumFrames(durationPanel.getNumFrames());
         }
     };
 

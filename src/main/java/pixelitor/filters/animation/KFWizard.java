@@ -109,7 +109,7 @@ public class KFWizard {
         double[] progress = new double[numFrames];
 
         File file = new File("output.gif");
-        AnimationWriter animationWriter = new AnimGIFWriter(file, 200);
+        AnimationWriter animationWriter = new AnimGIFWriter(file, 20);
 
         for (int i = 0; i < time.length; i++) {
             time[i] = ((double)i) / numFrames;
