@@ -16,6 +16,7 @@
  */
 package pixelitor.filters.gui;
 
+import com.jhlabs.image.ImageMath;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -193,12 +194,26 @@ public class AngleParam extends AbstractGUIParam {
 
     @Override
     public ParamState copyState() {
-        // TODO
-        return null;
+        return new APState(angleInRadians);
     }
 
     @Override
     public void setState(ParamState state) {
-        // TODO
+        angleInRadians = ((APState)state).angle;
+    }
+
+    private static class APState implements ParamState {
+        private double angle;
+
+        public APState(double angle) {
+            this.angle = angle;
+        }
+
+        @Override
+        public ParamState interpolate(ParamState endState, double progress) {
+            APState apEndState = (APState) endState;
+            double interpolatedAngle = ImageMath.lerp(progress, angle, apEndState.angle);
+            return new APState(interpolatedAngle);
+        }
     }
 }

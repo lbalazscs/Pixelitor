@@ -39,6 +39,7 @@ public class KFWizard {
 
     ParamSetState initialState;
     ParamSetState finalState;
+    private int numFrames;
 
     /**
      * Show the wizard in a dialog
@@ -103,7 +104,7 @@ public class KFWizard {
 
     private void wizardFinished() {
         System.out.println("Wizard::wizardFinished: CALLED");
-        int numFrames = 5;
+
         double[] time = new double[numFrames];
         double[] progress = new double[numFrames];
 
@@ -119,7 +120,7 @@ public class KFWizard {
             filter.getParamSet().setState(intermediateState);
             filter.execute(ChangeReason.OP_PREVIEW);
             BufferedImage image = ImageComponents.getActiveCompositeImage();
-            image = ImageUtils.copyImage(image);
+            image = ImageUtils.copyImage(image); // TODO is this necessary?
             animationWriter.addFrame(image);
 //            Utils.debugImage(image, "Step " + i);
             ImageComponents.getActiveComp().getActiveImageLayer().cancelPreviewing();
@@ -127,5 +128,9 @@ public class KFWizard {
 
         animationWriter.finish();
         System.out.println("KFWizard::wizardFinished: file = " + file.getAbsolutePath() + (file.exists() ? " - exists" : " - does not exist!"));
+    }
+
+    public void setNumFrames(int numFrames) {
+        this.numFrames = numFrames;
     }
 }

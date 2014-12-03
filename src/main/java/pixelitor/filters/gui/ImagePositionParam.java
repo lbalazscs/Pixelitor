@@ -16,6 +16,8 @@
  */
 package pixelitor.filters.gui;
 
+import com.jhlabs.image.ImageMath;
+
 import javax.swing.*;
 import java.awt.Rectangle;
 
@@ -121,13 +123,31 @@ public class ImagePositionParam extends AbstractGUIParam {
 
     @Override
     public ParamState copyState() {
-        // TODO
-        return null;
+        return new IPPState(relativeX, relativeY);
     }
 
     @Override
     public void setState(ParamState state) {
-        // TODO
+        IPPState s = (IPPState) state;
+        relativeX = (float) s.relativeX;
+        relativeY = (float) s.relativeY;
     }
 
+    private static class IPPState implements ParamState {
+        private double relativeX;
+        private double relativeY;
+
+        public IPPState(double relativeX, double relativeY) {
+            this.relativeX = relativeX;
+            this.relativeY = relativeY;
+        }
+
+        @Override
+        public ParamState interpolate(ParamState endState, double progress) {
+            IPPState ippEndState = (IPPState) endState;
+            double interpolatedX = ImageMath.lerp(progress, relativeX, ippEndState.relativeX);
+            double interpolatedY = ImageMath.lerp(progress, relativeY, ippEndState.relativeX);
+            return new IPPState(interpolatedX, interpolatedY);
+        }
+    }
 }

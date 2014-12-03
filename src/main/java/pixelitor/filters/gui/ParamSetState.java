@@ -31,12 +31,21 @@ public class ParamSetState implements Iterable<ParamState> {
     public ParamSetState(ParamSet originator) {
         for (GUIParam param : originator) {
             if(param.canBeAnimated()) {
-                states.add(param.copyState());
+                ParamState state = param.copyState();
+                if (state == null) {
+                    throw new IllegalArgumentException("State is null for the param " + param.getName());
+                }
+                states.add(state);
             }
         }
     }
 
     private ParamSetState(List<ParamState> states) {
+        for (ParamState state : states) {
+            if (state == null) {
+                throw new IllegalArgumentException("A state is null");
+            }
+        }
         this.states = states;
     }
 

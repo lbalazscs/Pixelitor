@@ -16,6 +16,7 @@
  */
 package pixelitor.filters.gui;
 
+import com.jhlabs.image.ImageMath;
 import pixelitor.utils.SliderSpinner;
 
 import javax.swing.*;
@@ -287,12 +288,30 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
 
     @Override
     public ParamState copyState() {
-        return new RangeParamState(value);
+        return new RPState(value);
     }
 
     @Override
     public void setState(ParamState state) {
-        value = (int) ((RangeParamState)state).getValue();
+        value = (int) ((RPState)state).getValue();
     }
 
+    private static class RPState implements ParamState {
+        double value;
+
+        public RPState(double value) {
+            this.value = value;
+        }
+
+        @Override
+        public RPState interpolate(ParamState endState, double progress) {
+            RPState rpEndState = (RPState) endState;
+            double interpolated = ImageMath.lerp(progress, value, rpEndState.value);
+            return new RPState(interpolated);
+        }
+
+        public double getValue() {
+            return value;
+        }
+    }
 }

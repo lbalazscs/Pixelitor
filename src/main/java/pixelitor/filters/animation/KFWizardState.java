@@ -128,6 +128,8 @@ public enum KFWizardState {
             wizard.setFinalState(paramSet.getState());
         }
     }, SELECT_DURATION {
+        JTextField nrFramesTF = new JTextField(3);
+
         @Override
         String getHelpMessage() {
             return "<html> Select the duration of the animation";
@@ -140,8 +142,9 @@ public enum KFWizardState {
 
         @Override
         JPanel getPanel(KFWizard wizard) {
-            JPanel p = new JPanel();
-            p.add(new JLabel("SELECT_DURATION"));
+            JPanel p = new JPanel(new FlowLayout());
+            p.add(new JLabel("Number of frames:"));
+            p.add(nrFramesTF);
             return p;
         }
 
@@ -151,7 +154,8 @@ public enum KFWizardState {
 
         @Override
         void onMovingToTheNext(KFWizard wizard) {
-
+            int nrFrames = Integer.parseInt(nrFramesTF.getText());
+            wizard.setNumFrames(nrFrames);
         }
     };
 

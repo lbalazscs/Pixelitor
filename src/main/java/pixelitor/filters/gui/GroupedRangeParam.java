@@ -16,6 +16,8 @@
  */
 package pixelitor.filters.gui;
 
+import com.jhlabs.image.ImageMath;
+
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -214,12 +216,43 @@ public class GroupedRangeParam extends AbstractGUIParam implements RangeBasedOnI
 
     @Override
     public ParamState copyState() {
-        // TODO
-        return null;
+        int numParams = rangeParams.length;
+        double[] values = new double[numParams];
+        for (int i = 0; i < numParams; i++) {
+            values[i] = rangeParams[i].getValue();
+        }
+
+        return new GRState(values);
     }
 
     @Override
     public void setState(ParamState state) {
-        // TODO
+        GRState grState = (GRState) state;
+        double[] values = grState.values;
+        for (int i = 0; i < values.length; i++) {
+            double value = values[i];
+            rangeParams[i].setValue((int) value);
+        }
     }
+
+    private static class GRState implements ParamState {
+        private double[] values;
+
+        public GRState(double[] values) {
+            this.values = values;
+        }
+
+        @Override
+        public ParamState interpolate(ParamState endState, double progress) {
+            GRState apEndState = (GRState) endState;
+
+            double interpolatedValues[] = new double[values.length];
+            for (int i = 0; i < values.length; i++) {
+                interpolatedValues[i] = ImageMath.lerp(progress, values[i], apEndState.values[i]);;
+            }
+
+            return new GRState(interpolatedValues);
+        }
+    }
+
 }

@@ -117,12 +117,26 @@ public class ColorParam extends AbstractGUIParam {
 
     @Override
     public ParamState copyState() {
-        // TODO
-        return null;
+        return new CState(color);
     }
 
     @Override
     public void setState(ParamState state) {
-        // TODO
+        this.color = ((CState)state).color;
     }
+
+    private static class CState implements ParamState {
+        private Color color;
+
+        public CState(Color color) {
+            this.color = color;
+        }
+
+        @Override
+        public ParamState interpolate(ParamState endState, double progress) {
+            // TODO
+            return new CState(color);
+        }
+    }
+
 }
