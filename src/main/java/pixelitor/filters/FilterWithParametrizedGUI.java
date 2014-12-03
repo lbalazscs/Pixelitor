@@ -27,7 +27,9 @@ import java.awt.Shape;
 import java.awt.image.BufferedImage;
 
 /**
- *
+ * A filter that keeps its settings in a ParamSet object
+ * The advantage is that subclasses don't need to create their own adjustment GUIs,
+ * they only specify their ParamSet, and the GUI is built automatically
  */
 public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
     private ParamSet paramSet;

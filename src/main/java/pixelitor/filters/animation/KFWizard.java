@@ -50,6 +50,7 @@ public class KFWizard {
             @Override
             protected void dialogAccepted() {
                 // "next" was pressed
+                wizardState.onMovingToTheNext(KFWizard.this);
                 KFWizardState nextState = wizardState.getNext();
                 if(nextState == null) {
                     wizardFinished();

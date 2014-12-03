@@ -16,30 +16,14 @@
  */
 package pixelitor.filters.gui;
 
-import javax.swing.*;
-import java.awt.Rectangle;
-
 /**
- * A filter parameter that can be configured by the user
+ * Captures the state of a GUIParam at a given moment
+ * (like the "Memento" design pattern)
  */
-public interface GUIParam extends Resettable {
-    String getName();
-
-    JComponent createGUI();
-
-    void setAdjustmentListener(ParamAdjustmentListener listener);
-
-    int getNrOfGridBagCols();
-
-    void randomize();
-
-    void setDontTrigger(boolean b);
-
-    void considerImageSize(Rectangle bounds);
-
-    boolean canBeAnimated();
-
-    ParamState copyState();
-
-    void setState(ParamState state);
+public interface ParamState {
+    /**
+     * Calculate a new interpolated ParamState object, where the current object
+     * represents the starting state and the given argument represents the end state
+     */
+    ParamState interpolate(ParamState endState, double progress);
 }

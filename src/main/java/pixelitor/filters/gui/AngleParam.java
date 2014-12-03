@@ -185,4 +185,20 @@ public class AngleParam extends AbstractGUIParam {
     @Override
     public void considerImageSize(Rectangle bounds) {
     }
+
+    @Override
+    public boolean canBeAnimated() {
+        return true;
+    }
+
+    @Override
+    public ParamState copyState() {
+        // TODO
+        return null;
+    }
+
+    @Override
+    public void setState(ParamState state) {
+        // TODO
+    }
 }

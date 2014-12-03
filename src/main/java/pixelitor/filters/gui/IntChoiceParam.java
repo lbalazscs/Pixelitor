@@ -307,4 +307,19 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
     @Override
     public void considerImageSize(Rectangle bounds) {
     }
+
+    @Override
+    public boolean canBeAnimated() {
+        return false;
+    }
+
+    @Override
+    public ParamState copyState() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setState(ParamState state) {
+        throw new UnsupportedOperationException();
+    }
 }

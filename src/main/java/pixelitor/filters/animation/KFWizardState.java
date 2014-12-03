@@ -20,17 +20,18 @@ import pixelitor.ImageComponents;
 import pixelitor.filters.FilterUtils;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.AdjustPanel;
+import pixelitor.filters.gui.ParamSet;
 
 import javax.swing.*;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
  * The states of the keyframe animation export dialog
  */
 public enum KFWizardState {
     SELECT_FILTER {
+        JComboBox<FilterWithParametrizedGUI> filtersCB;
+
         @Override
         String getHelpMessage() {
             return "<html> Here you can create a basic keyframe animation <br>based on the settings of a filter.";
@@ -45,25 +46,19 @@ public enum KFWizardState {
         JPanel getPanel(final KFWizard wizard) {
             JPanel p = new JPanel(new FlowLayout());
             p.add(new JLabel("Select Filter:"));
-            final JComboBox<FilterWithParametrizedGUI> filtersCB = new JComboBox<>(FilterUtils.getAnimationFiltersSorted());
-            filtersCB.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    FilterWithParametrizedGUI filter = (FilterWithParametrizedGUI) filtersCB.getSelectedItem();
-                    wizard.setFilter(filter);
-                }
-            });
-
-            // set the initial selection so that if the user makes no changes, a filter is set in the wizard
-            FilterWithParametrizedGUI filter = (FilterWithParametrizedGUI) filtersCB.getSelectedItem();
-            wizard.setFilter(filter);
-
+            filtersCB = new JComboBox<>(FilterUtils.getAnimationFiltersSorted());
             p.add(filtersCB);
             return p;
         }
 
         @Override
         void onWizardCancelled(KFWizard wizard) {
+        }
+
+        @Override
+        void onMovingToTheNext(KFWizard wizard) {
+            FilterWithParametrizedGUI filter = (FilterWithParametrizedGUI) filtersCB.getSelectedItem();
+            wizard.setFilter(filter);
         }
     }, SELECT_INITIAL_SETTINGS {
         @Override
@@ -92,10 +87,15 @@ public enum KFWizardState {
             ImageComponents.getActiveComp().getActiveImageLayer().cancelPreviewing();
             filter.endDialogSession();
         }
+
+        @Override
+        void onMovingToTheNext(KFWizard wizard) {
+            ParamSet paramSet = wizard.getFilter().getParamSet();
+        }
     }, SELECT_FINAL_SETTINGS {
         @Override
         String getHelpMessage() {
-            return "<html> Select the <b>final</b> settings for the filter";
+            return "<html> Select the <b>final</b> settings for the filter.";
         }
 
         @Override
@@ -116,6 +116,12 @@ public enum KFWizardState {
             ImageComponents.getActiveComp().getActiveImageLayer().cancelPreviewing();
             filter.endDialogSession();
         }
+
+        @Override
+        void onMovingToTheNext(KFWizard wizard) {
+            // cancel the previewing
+            onWizardCancelled(wizard);
+        }
     }, SELECT_DURATION {
         @Override
         String getHelpMessage() {
@@ -129,9 +135,6 @@ public enum KFWizardState {
 
         @Override
         JPanel getPanel(KFWizard wizard) {
-            // cancel the previewing of the previous step
-            SELECT_FINAL_SETTINGS.onWizardCancelled(wizard);
-
             JPanel p = new JPanel();
             p.add(new JLabel("SELECT_DURATION"));
             return p;
@@ -139,6 +142,11 @@ public enum KFWizardState {
 
         @Override
         void onWizardCancelled(KFWizard wizard) {
+        }
+
+        @Override
+        void onMovingToTheNext(KFWizard wizard) {
+
         }
     };
 
@@ -152,4 +160,9 @@ public enum KFWizardState {
      * Called if the wizard was cancelled while in this state
      */
     abstract void onWizardCancelled(KFWizard wizard);
+
+    /**
+     * Called if next was pressed while in this state before moving to the next
+     */
+    abstract void onMovingToTheNext(KFWizard wizard);
 }

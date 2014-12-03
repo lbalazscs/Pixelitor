@@ -100,7 +100,6 @@ public class ParamSet implements Iterable<GUIParam> {
         }
     }
 
-
     public void endPresetAdjusting(boolean trigger) {
         for (GUIParam param : paramList) {
             param.setDontTrigger(false);
@@ -123,6 +122,20 @@ public class ParamSet implements Iterable<GUIParam> {
     public void considerImageSize(Rectangle bounds) {
         for (GUIParam param : paramList) {
             param.considerImageSize(bounds);
+        }
+    }
+
+    public ParamSetState getState() {
+        return new ParamSetState(this);
+    }
+
+    public void setState(ParamSetState newState) {
+        Iterator<ParamState> newStateIterator = newState.iterator();
+        for (GUIParam param : paramList) {
+            if(param.canBeAnimated()) {
+                ParamState newParamState = newStateIterator.next();
+                param.setState(newParamState);
+            }
         }
     }
 }

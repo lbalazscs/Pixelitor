@@ -206,4 +206,20 @@ public class GroupedRangeParam extends AbstractGUIParam implements RangeBasedOnI
     public boolean isLinkable() {
         return linkable;
     }
+
+    @Override
+    public boolean canBeAnimated() {
+        return true;
+    }
+
+    @Override
+    public ParamState copyState() {
+        // TODO
+        return null;
+    }
+
+    @Override
+    public void setState(ParamState state) {
+        // TODO
+    }
 }

@@ -318,6 +318,18 @@ public class ImageMath {
     }
 
     /**
+     * Linear interpolation with doubles.
+     *
+     * @param t the interpolation parameter
+     * @param a the lower interpolation range
+     * @param b the upper interpolation range
+     * @return the interpolated value
+     */
+    public static double lerp(double t, double a, double b) {
+        return a + t * (b - a);
+    }
+
+    /**
      * Linear interpolation.
      *
      * @param t the interpolation parameter

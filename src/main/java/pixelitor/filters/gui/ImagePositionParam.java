@@ -23,7 +23,6 @@ import java.awt.Rectangle;
  * A GUIParam for selecting an image coordinate (relative to the image size)
  */
 public class ImagePositionParam extends AbstractGUIParam {
-
     private float relativeX = 0.5f;
     private float relativeY = 0.5f;
 
@@ -114,4 +113,21 @@ public class ImagePositionParam extends AbstractGUIParam {
     @Override
     public void considerImageSize(Rectangle bounds) {
     }
+
+    @Override
+    public boolean canBeAnimated() {
+        return true;
+    }
+
+    @Override
+    public ParamState copyState() {
+        // TODO
+        return null;
+    }
+
+    @Override
+    public void setState(ParamState state) {
+        // TODO
+    }
+
 }

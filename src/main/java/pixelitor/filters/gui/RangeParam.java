@@ -279,4 +279,20 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
         this.adjustMaxAccordingToImage = true;
         return this;
     }
+
+    @Override
+    public boolean canBeAnimated() {
+        return true;
+    }
+
+    @Override
+    public ParamState copyState() {
+        return new RangeParamState(value);
+    }
+
+    @Override
+    public void setState(ParamState state) {
+        value = (int) ((RangeParamState)state).getValue();
+    }
+
 }

@@ -16,30 +16,23 @@
  */
 package pixelitor.filters.gui;
 
-import javax.swing.*;
-import java.awt.Rectangle;
+import com.jhlabs.image.ImageMath;
 
-/**
- * A filter parameter that can be configured by the user
- */
-public interface GUIParam extends Resettable {
-    String getName();
+public class RangeParamState implements ParamState {
+    double value;
 
-    JComponent createGUI();
+    public RangeParamState(double value) {
+        this.value = value;
+    }
 
-    void setAdjustmentListener(ParamAdjustmentListener listener);
+    @Override
+    public RangeParamState interpolate(ParamState endState, double progress) {
+        RangeParamState rpEndState = (RangeParamState) endState;
+        double interpolated = ImageMath.lerp(progress, value, rpEndState.value);
+        return new RangeParamState(interpolated);
+    }
 
-    int getNrOfGridBagCols();
-
-    void randomize();
-
-    void setDontTrigger(boolean b);
-
-    void considerImageSize(Rectangle bounds);
-
-    boolean canBeAnimated();
-
-    ParamState copyState();
-
-    void setState(ParamState state);
+    public double getValue() {
+        return value;
+    }
 }
