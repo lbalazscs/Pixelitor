@@ -35,7 +35,7 @@ public class Orton extends FilterWithParametrizedGUI {
     public Orton() {
         super("Orton Effect", true, false);
         setParamSet(new ParamSet(
-                blurRadiusParam.adjustRangeAccordingToImage(0.01),
+                blurRadiusParam.adjustRangeToImageSize(0.01),
                 amountParam
         ));
     }

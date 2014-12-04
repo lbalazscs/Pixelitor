@@ -44,8 +44,8 @@ public class JHUnderWater extends FilterWithParametrizedGUI {
     public JHUnderWater() {
         super("Underwater", true, false);
         setParamSet(new ParamSet(
-                amountParam.adjustRangeAccordingToImage(0.1),
-                scaleParam.adjustRangeAccordingToImage(0.3),
+                amountParam.adjustRangeToImageSize(0.1),
+                scaleParam.adjustRangeToImageSize(0.3),
                 stretchParam,
                 angleParam,
 //                turbulenceParam,

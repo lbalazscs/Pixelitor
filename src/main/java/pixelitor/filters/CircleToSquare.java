@@ -45,7 +45,7 @@ public class CircleToSquare extends FilterWithParametrizedGUI {
         super("Circle to Square", true, true);
         setParamSet(new ParamSet(
                 center,
-                radius.adjustRangeAccordingToImage(1.0),
+                radius.adjustRangeToImageSize(1.0),
                 amount,
                 edgeAction,
                 interpolation

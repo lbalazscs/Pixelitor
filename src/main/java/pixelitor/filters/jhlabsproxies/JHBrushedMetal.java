@@ -24,7 +24,7 @@ public class JHBrushedMetal extends FilterWithParametrizedGUI {
         super("Brushed Metal", false, false);
         setParamSet(new ParamSet(
                 colorParam,
-                radiusParam.adjustRangeAccordingToImage(0.5),
+                radiusParam.adjustRangeToImageSize(0.5),
                 amountParam,
                 shineParam
         ));

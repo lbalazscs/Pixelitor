@@ -59,7 +59,7 @@ public class Clouds extends FilterWithParametrizedGUI {
     public Clouds() {
         super("Clouds", false, false);
         setParamSet(new ParamSet(
-                scaleParam.adjustRangeAccordingToImage(0.3),
+                scaleParam.adjustRangeToImageSize(0.3),
                 roughnessParam,
                 color1Param,
                 color2Param,

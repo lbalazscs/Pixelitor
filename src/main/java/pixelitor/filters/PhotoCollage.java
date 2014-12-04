@@ -77,15 +77,15 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
         super("Photo Collage", true, false);
         setParamSet(new ParamSet(
                 imageNumberParam,
-                sizeParam.adjustRangeAccordingToImage(1.0),
+                sizeParam.adjustRangeToImageSize(1.0),
                 randomRotationParam,
                 allowOutsideParam,
-                marginSizeParam.adjustRangeAccordingToImage(0.02),
+                marginSizeParam.adjustRangeToImageSize(0.02),
                 bgColorParam,
                 shadowOpacityParam,
                 shadowAngleParam,
-                shadowDistanceParam.adjustRangeAccordingToImage(0.02),
-                shadowSoftnessParam.adjustRangeAccordingToImage(0.01),
+                shadowDistanceParam.adjustRangeToImageSize(0.02),
+                shadowSoftnessParam.adjustRangeToImageSize(0.01),
                 reseedAction
         ));
 

@@ -52,7 +52,7 @@ public class PinchFilter extends TransformFilter implements SwirlMethod {
      */
     @Override
     public void setSwirlAmount(float angle) {
-        this.angle = angle;
+        this.angle = -angle;
     }
 
     /**

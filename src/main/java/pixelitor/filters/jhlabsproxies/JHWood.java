@@ -47,7 +47,7 @@ public class JHWood extends FilterWithParametrizedGUI {
         super("Wood", false, false);
         setParamSet(new ParamSet(
                 angleParam,
-                scaleParam.adjustRangeAccordingToImage(0.5),
+                scaleParam.adjustRangeToImageSize(0.5),
                 stretchParam,
                 gradientParam,
                 ringsParam,

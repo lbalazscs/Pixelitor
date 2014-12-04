@@ -39,8 +39,8 @@ public class Slice extends FilterWithParametrizedGUI {
     public Slice() {
         super("Slice", true, false);
         setParamSet(new ParamSet(
-                sizeParam.adjustRangeAccordingToImage(0.25),
-                offsetParam.adjustRangeAccordingToImage(0.25),
+                sizeParam.adjustRangeToImageSize(0.25),
+                offsetParam.adjustRangeToImageSize(0.25),
                 shiftHParam,
                 shiftVParam,
                 edgeActionParam

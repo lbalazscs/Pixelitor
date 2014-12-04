@@ -22,7 +22,7 @@ public class JHColorHalftone extends FilterWithParametrizedGUI {
 
     public JHColorHalftone() {
         super("Color Halftone", true, false);
-        setParamSet(new ParamSet(dotRadiusParam.adjustRangeAccordingToImage(1.2),
+        setParamSet(new ParamSet(dotRadiusParam.adjustRangeToImageSize(1.2),
                 cyanScreenAngleParam,
                 magentaScreenAngleParam,
                 yellowScreenAngleParam

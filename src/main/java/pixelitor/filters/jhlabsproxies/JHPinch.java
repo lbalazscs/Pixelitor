@@ -48,7 +48,7 @@ public class JHPinch extends FilterWithParametrizedGUI {
         setParamSet(new ParamSet(
                 pinchBulgeAmount,
                 twirlAngle,
-                radius.adjustRangeAccordingToImage(1.0),
+                radius.adjustRangeToImageSize(1.0),
                 center,
                 zoomParam,
                 rotateResultParam,

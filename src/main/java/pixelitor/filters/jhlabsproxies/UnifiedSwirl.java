@@ -37,17 +37,16 @@ public class UnifiedSwirl extends FilterWithParametrizedGUI {
 
     private final IntChoiceParam algorithmChooser = new IntChoiceParam("Affect",
             new IntChoiceParam.Value[] {
-                    new IntChoiceParam.Value("Everywhere", AFFECT_EVERYWHERE),
+                    new IntChoiceParam.Value("Around Radius", AFFECT_EVERYWHERE),
                     new IntChoiceParam.Value("Inside Radius", AFFECT_INSIDE_RADIUS),
             });
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final RangeParam radius = new RangeParam("Radius", 1, 999, 200);
-    private final RangeParam twirlAngle = new RangeParam("Swirl Amount", -360, 360, 90);
-    private final RangeParam pinchBulgeAmount = new RangeParam("Pinch-Bulge Amount", -100, 100, 50);
+    private final RangeParam swirlAmount = new RangeParam("Swirl Amount", -360, 360, 90);
+    private final RangeParam pinchBulgeAmount = new RangeParam("Pinch-Bulge Amount", -100, 100, 0);
     private RangeParam zoomParam = new RangeParam("Zoom (%)", 1, 500, 100);
     private AngleParam rotateResultParam = new AngleParam("Rotate Result", 0);
-
 
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
     private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
@@ -57,12 +56,12 @@ public class UnifiedSwirl extends FilterWithParametrizedGUI {
     private SwirlFilter swirlFilter;
 
     public UnifiedSwirl() {
-        super("Unified Swirl", true, true);
+        super("Swirl, Pinch, Bulge", true, true);
         setParamSet(new ParamSet(
                 algorithmChooser,
+                swirlAmount,
                 pinchBulgeAmount,
-                twirlAngle,
-                radius.adjustRangeAccordingToImage(1.0),
+                radius.adjustRangeToImageSize(1.0),
                 center,
                 zoomParam,
                 rotateResultParam,
@@ -87,7 +86,7 @@ public class UnifiedSwirl extends FilterWithParametrizedGUI {
         }
 
         filter.setPinchBulgeAmount(pinchBulgeAmount.getValueAsPercentage());
-        filter.setSwirlAmount(2 * twirlAngle.getValueInRadians());
+        filter.setSwirlAmount(swirlAmount.getValueInRadians());
         filter.setRadius(radius.getValue());
         filter.setCenterX(center.getRelativeX());
         filter.setCenterY(center.getRelativeY());

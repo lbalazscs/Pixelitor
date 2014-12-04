@@ -46,7 +46,7 @@ public class JHCaustics extends FilterWithParametrizedGUI {
         super("Caustics", false, false);
         setParamSet(new ParamSet(
                 bgColor,
-                scale.adjustRangeAccordingToImage(0.5),
+                scale.adjustRangeToImageSize(0.5),
                 brightness,
                 turbulence,
                 time,

@@ -47,7 +47,7 @@ public class JHSmear extends FilterWithParametrizedGUI {
     public JHSmear() {
         super("Smear", true, false);
         setParamSet(new ParamSet(
-                distance.adjustRangeAccordingToImage(0.1),
+                distance.adjustRangeToImageSize(0.1),
                 shape,
                 density,
                 angle,

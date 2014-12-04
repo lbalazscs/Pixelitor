@@ -47,7 +47,7 @@ public class AngularWaves extends FilterWithParametrizedGUI {
         super("Angular Waves", true, false);
         setParamSet(new ParamSet(
                 centerParam,
-                radialWLParam.adjustRangeAccordingToImage(0.05),
+                radialWLParam.adjustRangeToImageSize(0.05),
                 amountParam,
                 waveType,
                 phaseParam,

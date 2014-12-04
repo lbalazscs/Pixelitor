@@ -82,7 +82,7 @@ public class JHCells extends FilterWithParametrizedGUI {
                 randomness,
                 gradientParam,
                 bwParam,
-                scaleParam.adjustRangeAccordingToImage(0.5),
+                scaleParam.adjustRangeToImageSize(0.5),
                 stretchParam,
                 angleParam,
                 reseedAction

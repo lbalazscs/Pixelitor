@@ -43,7 +43,7 @@ public class Magnify extends FilterWithParametrizedGUI {
         super("Magnify", true, true);
         setParamSet(new ParamSet(
                 magnification,
-                outerRadius.adjustRangeAccordingToImage(1.0),
+                outerRadius.adjustRangeToImageSize(1.0),
                 outerInnerRadiusRatio,
                 center,
                 edgeAction,

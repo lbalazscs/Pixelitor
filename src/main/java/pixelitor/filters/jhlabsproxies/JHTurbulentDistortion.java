@@ -43,8 +43,8 @@ public class JHTurbulentDistortion extends FilterWithParametrizedGUI {
 
         edgeAction.setDefaultChoice(IntChoiceParam.EDGE_REPEAT_PIXELS);
         setParamSet(new ParamSet(
-                scale.adjustRangeAccordingToImage(0.1),
-                amount.adjustRangeAccordingToImage(0.07),
+                scale.adjustRangeToImageSize(0.1),
+                amount.adjustRangeToImageSize(0.07),
                 turbulence,
                 edgeAction,
                 interpolation,

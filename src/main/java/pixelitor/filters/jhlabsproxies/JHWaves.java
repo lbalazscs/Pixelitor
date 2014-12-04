@@ -44,8 +44,8 @@ public class JHWaves extends FilterWithParametrizedGUI {
     public JHWaves() {
         super("Waves", true, false);
         setParamSet(new ParamSet(
-                wavelengthParam.adjustRangeAccordingToImage(0.2),
-                amplitudeParam.adjustRangeAccordingToImage(0.2),
+                wavelengthParam.adjustRangeToImageSize(0.2),
+                amplitudeParam.adjustRangeToImageSize(0.2),
                 waveType,
                 phaseParam,
                 edgeAction,

@@ -58,7 +58,7 @@ public class JHCrystallize extends FilterWithParametrizedGUI {
     public JHCrystallize() {
         super("Crystallize", true, false);
         setParamSet(new ParamSet(
-                size.adjustRangeAccordingToImage(0.2),
+                size.adjustRangeToImageSize(0.2),
                 edgeThickness,
                 gridType,
                 randomness,

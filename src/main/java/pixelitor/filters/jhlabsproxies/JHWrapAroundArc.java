@@ -44,8 +44,8 @@ public class JHWrapAroundArc extends FilterWithParametrizedGUI {
     public JHWrapAroundArc() {
         super("Wrap Around Arc", true, false);
         setParamSet(new ParamSet(
-                radius.adjustRangeAccordingToImage(1.0),
-                thickness.adjustRangeAccordingToImage(0.5),
+                radius.adjustRangeToImageSize(1.0),
+                thickness.adjustRangeToImageSize(0.5),
                 spread,
                 rotateResult,
                 center,
