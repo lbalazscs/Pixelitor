@@ -17,6 +17,7 @@
 package pixelitor.filters.animation;
 
 import pixelitor.ChangeReason;
+import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.FilterWithParametrizedGUI;
@@ -28,7 +29,10 @@ import pixelitor.utils.OKCancelDialog;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 
 /**
@@ -38,9 +42,8 @@ public class TweenWizard {
     private OKCancelDialog dialog = null;
     private TweenWizardState wizardState = TweenWizardState.SELECT_FILTER;
     private FilterWithParametrizedGUI filter;
-
-    ParamSetState initialState;
-    ParamSetState finalState;
+    private ParamSetState initialState;
+    private ParamSetState finalState;
     private int numFrames;
     private int millisBetweenFrames;
 
@@ -68,7 +71,7 @@ public class TweenWizard {
                 // "next" was pressed
                 wizardState.onMovingToTheNext(TweenWizard.this);
                 TweenWizardState nextState = wizardState.getNext();
-                if(nextState == null) {
+                if (nextState == null) {
                     dispose();
                     calculateAnimation();
                 } else {
@@ -106,34 +109,40 @@ public class TweenWizard {
     }
 
     private void calculateAnimation() {
-        System.out.println("Wizard::calculateAnimation: CALLED");
+        System.out.println("Wizard::calculateAnimation: CALLED, thread = " + Thread.currentThread().getName());
 
-        double[] time = new double[numFrames];
-        double[] progress = new double[numFrames];
+        final ProgressMonitor progressMonitor = new ProgressMonitor(PixelitorWindow.getInstance(),
+                "Progress", "Note", 1, 100);
+        progressMonitor.setProgress(0);
 
-        File file = new File("output.gif");
-        AnimationWriter animationWriter = new AnimGIFWriter(file, millisBetweenFrames);
 
-        for (int i = 0; i < time.length; i++) {
-            time[i] = ((double)i) / numFrames;
-            progress[i] = time[i]; // linear
-            System.out.println(String.format("KFWizard::calculateAnimation: " +
-                    "time[%d] = %.2f, progress[%d] = %.2f, thread = '%s'", i, time[i], i, progress[i], Thread.currentThread().getName()));
-            ParamSetState intermediateState = initialState.interpolate(finalState, time[i]);
-            filter.getParamSet().setState(intermediateState);
-            //filter.execute(ChangeReason.OP_PREVIEW);
+        final RenderFramesTask task = new RenderFramesTask(filter, initialState, finalState, numFrames, millisBetweenFrames);
+        task.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                if ("progress" == evt.getPropertyName()) {
+                    int progress = (Integer) evt.getNewValue();
 
-            Utils.executeFilterWithBusyCursor(filter, ChangeReason.OP_PREVIEW, PixelitorWindow.getInstance());
+                    System.out.println("TweenWizard::propertyChange: progress = " + progress);
 
-            BufferedImage image = ImageComponents.getActiveCompositeImage();
-            image = ImageUtils.copyImage(image); // TODO is this necessary?
-            animationWriter.addFrame(image);
-//            Utils.debugImage(image, "Step " + i);
-            ImageComponents.getActiveComp().getActiveImageLayer().cancelPreviewing();
-        }
+                    progressMonitor.setProgress(progress);
+                    String message =
+                            String.format("Completed %d%%.\n", progress);
+                    progressMonitor.setNote(message);
+                    if (progressMonitor.isCanceled() || task.isDone()) {
+                        Toolkit.getDefaultToolkit().beep();
+                        if (progressMonitor.isCanceled()) {
+                            task.cancel(true);
+                            System.out.println("TweenWizard::propertyChange: Task canceled");
+                        } else {
+                            System.out.println("TweenWizard::propertyChange: Task completed");
+                        }
+                    }
 
-        animationWriter.finish();
-        System.out.println("KFWizard::calculateAnimation: file = " + file.getAbsolutePath() + (file.exists() ? " - exists" : " - does not exist!"));
+                }
+            }
+        });
+        task.execute();
     }
 
     public void setNumFrames(int numFrames) {
@@ -146,5 +155,70 @@ public class TweenWizard {
 
     public void setNextButtonEnabled(boolean b) {
         dialog.setOKButtonEnabled(b);
+    }
+}
+
+class RenderFramesTask extends SwingWorker<Void, Void> {
+    private FilterWithParametrizedGUI filter;
+    private ParamSetState initialState;
+    private ParamSetState finalState;
+    private int numFrames;
+    private int millisBetweenFrames;
+
+    public RenderFramesTask(FilterWithParametrizedGUI filter, ParamSetState initialState, ParamSetState finalState, int numFrames, int millisBetweenFrames) {
+        this.filter = filter;
+        this.initialState = initialState;
+        this.finalState = finalState;
+        this.numFrames = numFrames;
+        this.millisBetweenFrames = millisBetweenFrames;
+    }
+
+    @Override
+    protected Void doInBackground() throws Exception {
+        System.out.println(String.format("RenderFramesTask::doInBackground: called on '%s'", Thread.currentThread().getName()));
+
+        double[] time = new double[numFrames];
+        double[] progress = new double[numFrames];
+
+        File file = new File("output.gif");
+        AnimationWriter animationWriter = new AnimGIFWriter(file, millisBetweenFrames);
+
+        for (int i = 0; i < numFrames; i++) {
+            int percentProgress = (int) ((100.0 * i) / numFrames);
+            setProgress(percentProgress);
+
+            time[i] = ((double) i) / numFrames;
+            progress[i] = time[i]; // linear
+            System.out.println(String.format("RenderFramesTask::doInBackground: " +
+                    "time[%d] = %.2f, progress[%d] = %.2f, thread = '%s'", i, time[i], i, progress[i], Thread.currentThread().getName()));
+            ParamSetState intermediateState = initialState.interpolate(finalState, time[i]);
+            filter.getParamSet().setState(intermediateState);
+            //filter.execute(ChangeReason.OP_PREVIEW);
+
+            System.out.println("RenderFramesTask::doInBackground: before");
+            Utils.executeFilterWithBusyCursor(filter, ChangeReason.OP_PREVIEW, PixelitorWindow.getInstance());
+            System.out.println("RenderFramesTask::doInBackground: after");
+
+            ImageComponent ic = ImageComponents.getActiveImageComponent();
+//            ic.paintImmediately(ic.getBounds());
+            ic.repaint();
+
+            BufferedImage image = ImageComponents.getActiveCompositeImage();
+            image = ImageUtils.copyImage(image); // TODO is this necessary?
+            animationWriter.addFrame(image);
+//            Utils.debugImage(image, "Step " + i);
+        }
+        setProgress(100);
+        ImageComponents.getActiveComp().getActiveImageLayer().cancelPreviewing();
+
+        animationWriter.finish();
+        System.out.println("RenderFramesTask::doInBackground: file = " + file.getAbsolutePath() + (file.exists() ? " - exists" : " - does not exist!"));
+
+        return null;
+    }
+
+    @Override
+    protected void done() {
+        System.out.println("RenderFramesTask::done: CALLED");
     }
 }
