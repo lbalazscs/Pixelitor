@@ -251,7 +251,7 @@ public class ImageComponents {
      */
     public static void increaseZoomForActiveIC() {
         ZoomLevel currentZoom = activeImageComponent.getZoomLevel();
-        ZoomLevel newZoomLevel = currentZoom.getNext();
+        ZoomLevel newZoomLevel = currentZoom.zoomIn();
         activeImageComponent.setZoom(newZoomLevel, false);
     }
 
@@ -260,7 +260,7 @@ public class ImageComponents {
      */
     public static void decreaseZoomForActiveIC() {
         ZoomLevel currentZoom = activeImageComponent.getZoomLevel();
-        ZoomLevel newZoomLevel = currentZoom.getPrevious();
+        ZoomLevel newZoomLevel = currentZoom.zoomOut();
         activeImageComponent.setZoom(newZoomLevel, false);
     }
 }

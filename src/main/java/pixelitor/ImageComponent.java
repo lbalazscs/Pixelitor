@@ -129,7 +129,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
             public void componentResized(ComponentEvent e) {
                 updateDrawStart();
 
-                if(Tools.getCurrentTool() == Tools.CROP) {
+                if (Tools.getCurrentTool() == Tools.CROP) {
                     Tools.CROP.imageComponentResized(ImageComponent.this);
                 }
             }
@@ -311,7 +311,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
      */
     private static boolean adjustClipBoundsForImage(Graphics g, double drawStartX, double drawStartY, int maxWidth, int maxHeight) {
         Rectangle clipBounds = g.getClipBounds();
-        Rectangle imageRect = new Rectangle((int)drawStartX, (int)drawStartY, maxWidth, maxHeight);
+        Rectangle imageRect = new Rectangle((int) drawStartX, (int) drawStartY, maxWidth, maxHeight);
         clipBounds = clipBounds.intersection(imageRect);
 
         g.setClip(clipBounds);
@@ -372,7 +372,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         assert ConsistencyChecks.translationCheck(comp);
 
         if (internalFrame != null) {
-            internalFrame.setNewSize(canvas.getZoomedWidth(), canvas.getZoomedHeight(), -1, -1);
+            internalFrame.setSize(canvas.getZoomedWidth(), canvas.getZoomedHeight(), -1, -1);
         }
         revalidate();
     }
@@ -393,36 +393,45 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         double desktopWidth = desktopSize.getWidth();
         double desktopHeight = desktopSize.getHeight();
 
-        double imageToDesktopHorizontalRatio = imageWidth/ desktopWidth;
+        double imageToDesktopHorizontalRatio = imageWidth / desktopWidth;
         double imageToDesktopVerticalRatio = imageHeight / (desktopHeight - 35); // subtract because of internal frame header
         double maxImageToDesktopRatio = Math.max(imageToDesktopHorizontalRatio, imageToDesktopVerticalRatio);
-
-        // iterate all the zoom levels until it finds the best one
-        ZoomLevel bestZoom = ZoomLevel.Z100;
+        double idealZoomPercent = 100.0 / maxImageToDesktopRatio;
         ZoomLevel[] zoomLevels = ZoomLevel.values();
-        for (ZoomLevel level : zoomLevels) {
-            double inverseZoomRatio = 100.0 / level.getPercentValue();
+        ZoomLevel maximallyZoomedOut = zoomLevels[0];
 
-            if (!alsoZoomInToFitScreen && inverseZoomRatio < 0.99) {
-                // if we do not want to zoom in and we already passed the 100% zoom
-                break;
-            }
-
-            if (maxImageToDesktopRatio < inverseZoomRatio) {
-                bestZoom = level;
-            }
+        if (maximallyZoomedOut.getPercentValue() > idealZoomPercent) {
+            // the image is so big that it will have scroll bars even if it is maximally zoomed out
+            setZoom(maximallyZoomedOut, true);
+            return;
         }
 
-        // evenIfThereIsNoChange is set here to true  because
-        // if layered images are dropped, this is where their size is set
-        setZoom(bestZoom, true);
+        ZoomLevel lastOK = maximallyZoomedOut;
+        // iterate all the zoom levels from zoomed out to zoomed in
+        for (ZoomLevel level : zoomLevels) {
+            if (level.getPercentValue() > idealZoomPercent) {
+                // found one that is too much zoomed in
+                setZoom(lastOK, true);
+                return;
+            }
+            if (!alsoZoomInToFitScreen) { // we don't want to zoom in more than 100%
+                if (lastOK == ZoomLevel.Z100) {
+                    setZoom(lastOK, true);
+                    return;
+                }
+            }
+            lastOK = level;
+        }
+        // if we get here, it means that the image is so small that even at maximal zoom
+        // it fits the screen, set it then to the maximal zoom
+        setZoom(lastOK, true);
     }
 
     /**
      * @return true if there was a change in zoom
      */
-    public boolean setZoom(ZoomLevel newZoomLevel, boolean evenIfThereIsNoChange) {
-        if (this.zoomLevel == newZoomLevel && !evenIfThereIsNoChange) {
+    public boolean setZoom(ZoomLevel newZoomLevel, boolean settingTheInitialSize) {
+        if (this.zoomLevel == newZoomLevel && !settingTheInitialSize) {
             return false;
         }
 
@@ -434,17 +443,35 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
         if (internalFrame != null) {
             setInternalFrameTitle();
-            internalFrame.setNewSize(canvas.getZoomedWidth(), canvas.getZoomedHeight(), -1, -1);
+            internalFrame.setSize(canvas.getZoomedWidth(), canvas.getZoomedHeight(), -1, -1);
         }
+
         revalidate();
-        super.repaint();
+
+//        if(!settingTheInitialSize) {
+
+        // we are already on the EDT, but we want to call this code
+        // only after all pending AWT events have been processed
+        // because then this component will have the final size
+        // and updateDrawStart can calculate correct results
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                updateDrawStart();
+                repaint();
+            }
+        };
+        SwingUtilities.invokeLater(r);
+
+//        }
+
         zoomLevel.getMenuItem().setSelected(true);
         return true;
     }
 
     public void increaseZoom(int mouseX, int mouseY) {
         ZoomLevel oldZoom = zoomLevel;
-        ZoomLevel newZoom = zoomLevel.getNext();
+        ZoomLevel newZoom = zoomLevel.zoomIn();
         if (setZoom(newZoom, false)) {
             zoomToPoint(mouseX, mouseY, oldZoom, newZoom);
         }
@@ -452,7 +479,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
     public void decreaseZoom(int mouseX, int mouseY) {
         ZoomLevel oldZoom = zoomLevel;
-        ZoomLevel newZoom = zoomLevel.getPrevious();
+        ZoomLevel newZoom = zoomLevel.zoomOut();
         if (setZoom(newZoom, false)) {
             zoomToPoint(mouseX, mouseY, oldZoom, newZoom);
         }
@@ -484,8 +511,13 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     }
 
     public void updateDrawStart() {
-        drawStartX = (getWidth() - canvas.getZoomedWidth())/2.0;
-        drawStartY = (getHeight() - canvas.getZoomedHeight())/2.0;
+        int width = getWidth();
+        int canvasZoomedWidth = canvas.getZoomedWidth();
+        int height = getHeight();
+        int canvasZoomedHeight = canvas.getZoomedHeight();
+
+        drawStartX = (width - canvasZoomedWidth) / 2.0;
+        drawStartY = (height - canvasZoomedHeight) / 2.0;
     }
 
     public int componentXToImageSpace(int mouseX) {
@@ -515,7 +547,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     public Point fromImageToComponentSpace(Point input, ZoomLevel zoom) {
         double zoomViewScale = zoom.getViewScale();
         return new Point(
-                (int) (drawStartX + input.x  * zoomViewScale),
+                (int) (drawStartX + input.x * zoomViewScale),
                 (int) (drawStartY + input.y * zoomViewScale)
         );
     }
@@ -524,8 +556,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         return new Rectangle(
                 componentXToImageSpace(input.x),
                 componentYToImageSpace(input.y),
-                (int)(input.width / viewScale),
-                (int)(input.height / viewScale)
+                (int) (input.width / viewScale),
+                (int) (input.height / viewScale)
         );
     }
 
@@ -533,8 +565,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         return new Rectangle(
                 imageXToComponentSpace(input.x),
                 imageYToComponentSpace(input.y),
-                (int)(input.width * viewScale),
-                (int)(input.height * viewScale)
+                (int) (input.width * viewScale),
+                (int) (input.height * viewScale)
         );
     }
 
