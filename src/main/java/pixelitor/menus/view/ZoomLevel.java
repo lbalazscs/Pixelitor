@@ -20,43 +20,44 @@ import java.awt.BasicStroke;
 import java.util.Random;
 
 /**
- *
+ * The available zoom levels
  */
 public enum ZoomLevel {
-    Z12d5 {
+    Z12 {
         @Override
         public double getPercentValue() {
             return 12.5;
         }
 
         @Override
-        public ZoomLevel getNext() {
-            return Z17d7;
+        public ZoomLevel zoomIn() {
+            return Z12plus;
         }
 
         @Override
-        public ZoomLevel getPrevious() {
-            return Z12d5;
+        public ZoomLevel zoomOut() {
+            return Z12;
         }
 
         @Override
         public String toString() {
             return "12.5 %";
         }
-    }, Z17d7 { // 12.5 * sqrt(2)
+    }, Z12plus { // 12.5 * sqrt(2)
+
         @Override
         public double getPercentValue() {
             return 17.677669529663688110021109052621;
         }
 
         @Override
-        public ZoomLevel getNext() {
+        public ZoomLevel zoomIn() {
             return Z25;
         }
 
         @Override
-        public ZoomLevel getPrevious() {
-            return Z12d5;
+        public ZoomLevel zoomOut() {
+            return Z12;
         }
 
         @Override
@@ -71,32 +72,32 @@ public enum ZoomLevel {
         }
 
         @Override
-        public ZoomLevel getNext() {
-            return Z35d3;
+        public ZoomLevel zoomIn() {
+            return Z25plus;
         }
 
         @Override
-        public ZoomLevel getPrevious() {
-            return Z17d7;
+        public ZoomLevel zoomOut() {
+            return Z12plus;
         }
 
         @Override
         public String toString() {
             return "25 %";
         }
-    }, Z35d3 {
+    }, Z25plus {
         @Override
         public double getPercentValue() {
             return 35.355339059327376220042218105242;
         }
 
         @Override
-        public ZoomLevel getNext() {
+        public ZoomLevel zoomIn() {
             return Z50;
         }
 
         @Override
-        public ZoomLevel getPrevious() {
+        public ZoomLevel zoomOut() {
             return Z25;
         }
 
@@ -111,32 +112,32 @@ public enum ZoomLevel {
         }
 
         @Override
-        public ZoomLevel getNext() {
-            return Z70d7;
+        public ZoomLevel zoomIn() {
+            return Z50plus;
         }
 
         @Override
-        public ZoomLevel getPrevious() {
-            return Z35d3;
+        public ZoomLevel zoomOut() {
+            return Z25plus;
         }
 
         @Override
         public String toString() {
             return "50 %";
         }
-    }, Z70d7 {
+    }, Z50plus {
         @Override
         public double getPercentValue() {
             return 70.710678118654752440084436210485;
         }
 
         @Override
-        public ZoomLevel getNext() {
+        public ZoomLevel zoomIn() {
             return Z100;
         }
 
         @Override
-        public ZoomLevel getPrevious() {
+        public ZoomLevel zoomOut() {
             return Z50;
         }
 
@@ -151,29 +152,39 @@ public enum ZoomLevel {
         }
 
         @Override
-        public ZoomLevel getNext() {
-            return Z200;
+        public ZoomLevel zoomIn() {
+            return Z100plus;
         }
 
         @Override
-        public ZoomLevel getPrevious() {
-            return Z70d7;
+        public ZoomLevel zoomOut() {
+            return Z50plus;
         }
 
         @Override
         public String toString() {
             return "100 %";
         }
+    }, Z100plus {
+        @Override
+        public double getPercentValue() {
+            return 141.42135623730950488016887242097;
+        }
 
-//        @Override
-//        public Rectangle fromComponentSpaceToImage(Rectangle input) {
-//            return input;
-//        }
+        @Override
+        public ZoomLevel zoomIn() {
+            return Z200;
+        }
 
-//        @Override
-//        public Rectangle fromImageSpaceToComponent(Rectangle input) {
-//            return input;
-//        }
+        @Override
+        public ZoomLevel zoomOut() {
+            return Z100;
+        }
+
+        @Override
+        public String toString() {
+            return "141.4 %";
+        }
     }, Z200 {
         @Override
         public double getPercentValue() {
@@ -181,18 +192,38 @@ public enum ZoomLevel {
         }
 
         @Override
-        public ZoomLevel getNext() {
-            return Z400;
+        public ZoomLevel zoomIn() {
+            return Z200plus;
         }
 
         @Override
-        public ZoomLevel getPrevious() {
-            return Z100;
+        public ZoomLevel zoomOut() {
+            return Z100plus;
         }
 
         @Override
         public String toString() {
             return "200 %";
+        }
+    }, Z200plus {
+        @Override
+        public double getPercentValue() {
+            return 282.84271247461900976033774484194;
+        }
+
+        @Override
+        public ZoomLevel zoomIn() {
+            return Z400;
+        }
+
+        @Override
+        public ZoomLevel zoomOut() {
+            return Z200;
+        }
+
+        @Override
+        public String toString() {
+            return "282.8 %";
         }
     }, Z400 {
         @Override
@@ -201,18 +232,38 @@ public enum ZoomLevel {
         }
 
         @Override
-        public ZoomLevel getNext() {
-            return Z800;
+        public ZoomLevel zoomIn() {
+            return Z400plus;
         }
 
         @Override
-        public ZoomLevel getPrevious() {
-            return Z200;
+        public ZoomLevel zoomOut() {
+            return Z200plus;
         }
 
         @Override
         public String toString() {
             return "400 %";
+        }
+    }, Z400plus {
+        @Override
+        public double getPercentValue() {
+            return 565.68542494923801952067548968388;
+        }
+
+        @Override
+        public ZoomLevel zoomIn() {
+            return Z800;
+        }
+
+        @Override
+        public ZoomLevel zoomOut() {
+            return Z400;
+        }
+
+        @Override
+        public String toString() {
+            return "565.7 %";
         }
     }, Z800 {
         @Override
@@ -221,18 +272,38 @@ public enum ZoomLevel {
         }
 
         @Override
-        public ZoomLevel getNext() {
-            return Z1600;
+        public ZoomLevel zoomIn() {
+            return Z800plus;
         }
 
         @Override
-        public ZoomLevel getPrevious() {
-            return Z400;
+        public ZoomLevel zoomOut() {
+            return Z400plus;
         }
 
         @Override
         public String toString() {
             return "800 %";
+        }
+    }, Z800plus {
+        @Override
+        public double getPercentValue() {
+            return 1131.3708498984760390413509793678;
+        }
+
+        @Override
+        public ZoomLevel zoomIn() {
+            return Z1600;
+        }
+
+        @Override
+        public ZoomLevel zoomOut() {
+            return Z800;
+        }
+
+        @Override
+        public String toString() {
+            return "1131.4 %";
         }
     }, Z1600 {
         @Override
@@ -241,18 +312,38 @@ public enum ZoomLevel {
         }
 
         @Override
-        public ZoomLevel getNext() {
-            return Z3200;
+        public ZoomLevel zoomIn() {
+            return Z1600plus;
         }
 
         @Override
-        public ZoomLevel getPrevious() {
-            return Z800;
+        public ZoomLevel zoomOut() {
+            return Z800plus;
         }
 
         @Override
         public String toString() {
             return "1600 %";
+        }
+    }, Z1600plus {
+        @Override
+        public double getPercentValue() {
+            return 2262.7416997969520780827019587355;
+        }
+
+        @Override
+        public ZoomLevel zoomIn() {
+            return Z3200;
+        }
+
+        @Override
+        public ZoomLevel zoomOut() {
+            return Z1600;
+        }
+
+        @Override
+        public String toString() {
+            return "2262.7 %";
         }
     }, Z3200 {
         @Override
@@ -261,18 +352,38 @@ public enum ZoomLevel {
         }
 
         @Override
-        public ZoomLevel getNext() {
-            return Z6400;
+        public ZoomLevel zoomIn() {
+            return Z3200plus;
         }
 
         @Override
-        public ZoomLevel getPrevious() {
-            return Z1600;
+        public ZoomLevel zoomOut() {
+            return Z1600plus;
         }
 
         @Override
         public String toString() {
             return "3200 %";
+        }
+    }, Z3200plus {
+        @Override
+        public double getPercentValue() {
+            return 4525.483399593904156165403917471;
+        }
+
+        @Override
+        public ZoomLevel zoomIn() {
+            return Z6400;
+        }
+
+        @Override
+        public ZoomLevel zoomOut() {
+            return Z3200;
+        }
+
+        @Override
+        public String toString() {
+            return "4525.5 %";
         }
     }, Z6400 {
         @Override
@@ -281,13 +392,13 @@ public enum ZoomLevel {
         }
 
         @Override
-        public ZoomLevel getNext() {
+        public ZoomLevel zoomIn() {
             return Z6400;
         }
 
         @Override
-        public ZoomLevel getPrevious() {
-            return Z3200;
+        public ZoomLevel zoomOut() {
+            return Z3200plus;
         }
 
         @Override
@@ -300,24 +411,24 @@ public enum ZoomLevel {
     private BasicStroke innerGeometryStroke;
 
     public BasicStroke getOuterGeometryStroke() {
-        if(outerGeometryStroke == null) {
-            outerGeometryStroke = new BasicStroke((float) (300.0f/ getPercentValue()));
+        if (outerGeometryStroke == null) {
+            outerGeometryStroke = new BasicStroke((float) (300.0f / getPercentValue()));
         }
         return outerGeometryStroke;
     }
 
     public BasicStroke getInnerGeometryStroke() {
-        if(innerGeometryStroke == null) {
-            innerGeometryStroke = new BasicStroke((float) (100.0f/ getPercentValue()));
+        if (innerGeometryStroke == null) {
+            innerGeometryStroke = new BasicStroke((float) (100.0f / getPercentValue()));
         }
         return innerGeometryStroke;
     }
 
     public abstract double getPercentValue();
 
-    public abstract ZoomLevel getNext();
+    public abstract ZoomLevel zoomIn();
 
-    public abstract ZoomLevel getPrevious();
+    public abstract ZoomLevel zoomOut();
 
 //    public Point fromComponentSpaceToImage(Point input) {
 //        double zoom = 100.0 / getPercentValue();

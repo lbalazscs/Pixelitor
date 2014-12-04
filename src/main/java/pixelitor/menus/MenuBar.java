@@ -31,7 +31,7 @@ import pixelitor.PixelitorWindow;
 import pixelitor.TipsOfTheDay;
 import pixelitor.automate.BatchResize;
 import pixelitor.filters.*;
-import pixelitor.filters.animation.KFWizard;
+import pixelitor.filters.animation.TweenWizard;
 import pixelitor.filters.comp.Flip;
 import pixelitor.filters.comp.Rotate;
 import pixelitor.filters.convolve.Convolve;
@@ -174,21 +174,21 @@ public class MenuBar extends JMenuBar {
 
         fileMenu.addSeparator();
 
-        Action exportAnimGIFAction = new AbstractAction("Export Layer Animation...") {
+        Action exportLayerAnim = new AbstractAction("Export Layer Animation...") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 AnimGifExportPanel.showInDialog(pixelitorWindow);
             }
         };
-        MenuFactory.createMenuItem(exportAnimGIFAction, null, fileMenu);
+        MenuFactory.createMenuItem(exportLayerAnim, null, fileMenu);
 
-        AbstractAction exportKFAnim = new AbstractAction("Export Keyframe Animation...") {
+        AbstractAction exportTweeningAnim = new AbstractAction("Export Tweening Animation...") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new KFWizard().show(pixelitorWindow);
+                new TweenWizard().show(pixelitorWindow);
             }
         };
-        MenuFactory.createMenuItem(exportKFAnim, null, fileMenu);
+        MenuFactory.createMenuItem(exportTweeningAnim, null, fileMenu);
 
         fileMenu.addSeparator();
 

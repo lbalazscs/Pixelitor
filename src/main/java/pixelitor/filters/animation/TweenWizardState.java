@@ -28,7 +28,7 @@ import java.awt.FlowLayout;
 /**
  * The states of the keyframe animation export dialog
  */
-public enum KFWizardState {
+public enum TweenWizardState {
     SELECT_FILTER {
         JComboBox<FilterWithParametrizedGUI> filtersCB;
 
@@ -38,12 +38,12 @@ public enum KFWizardState {
         }
 
         @Override
-        KFWizardState getNext() {
+        TweenWizardState getNext() {
             return INITIAL_FILTER_SETTINGS;
         }
 
         @Override
-        JPanel getPanel(final KFWizard wizard) {
+        JPanel getPanel(final TweenWizard wizard) {
             JPanel p = new JPanel(new FlowLayout());
             p.add(new JLabel("Select Filter:"));
             filtersCB = new JComboBox<>(FilterUtils.getAnimationFiltersSorted());
@@ -52,11 +52,11 @@ public enum KFWizardState {
         }
 
         @Override
-        void onWizardCancelled(KFWizard wizard) {
+        void onWizardCancelled(TweenWizard wizard) {
         }
 
         @Override
-        void onMovingToTheNext(KFWizard wizard) {
+        void onMovingToTheNext(TweenWizard wizard) {
             FilterWithParametrizedGUI filter = (FilterWithParametrizedGUI) filtersCB.getSelectedItem();
             wizard.setFilter(filter);
         }
@@ -67,12 +67,12 @@ public enum KFWizardState {
         }
 
         @Override
-        KFWizardState getNext() {
+        TweenWizardState getNext() {
             return FINAL_FILTER_SETTINGS;
         }
 
         @Override
-        JPanel getPanel(KFWizard wizard) {
+        JPanel getPanel(TweenWizard wizard) {
             FilterWithParametrizedGUI filter = wizard.getFilter();
             ImageComponents.getActiveComp().getActiveImageLayer().startPreviewing();
             AdjustPanel adjustPanel = filter.getAdjustPanel();
@@ -82,14 +82,14 @@ public enum KFWizardState {
         }
 
         @Override
-        void onWizardCancelled(KFWizard wizard) {
+        void onWizardCancelled(TweenWizard wizard) {
             FilterWithParametrizedGUI filter = wizard.getFilter();
             ImageComponents.getActiveComp().getActiveImageLayer().cancelPreviewing();
             filter.endDialogSession();
         }
 
         @Override
-        void onMovingToTheNext(KFWizard wizard) {
+        void onMovingToTheNext(TweenWizard wizard) {
             ParamSet paramSet = wizard.getFilter().getParamSet();
             wizard.setInitialState(paramSet.getState());
         }
@@ -100,26 +100,26 @@ public enum KFWizardState {
         }
 
         @Override
-        KFWizardState getNext() {
+        TweenWizardState getNext() {
             return SELECT_DURATION;
         }
 
         @Override
-        JPanel getPanel(KFWizard wizard) {
+        JPanel getPanel(TweenWizard wizard) {
             FilterWithParametrizedGUI filter = wizard.getFilter();
             AdjustPanel adjustPanel = filter.getAdjustPanel();
             return adjustPanel;
         }
 
         @Override
-        void onWizardCancelled(KFWizard wizard) {
+        void onWizardCancelled(TweenWizard wizard) {
             FilterWithParametrizedGUI filter = wizard.getFilter();
             ImageComponents.getActiveComp().getActiveImageLayer().cancelPreviewing();
             filter.endDialogSession();
         }
 
         @Override
-        void onMovingToTheNext(KFWizard wizard) {
+        void onMovingToTheNext(TweenWizard wizard) {
             // cancel the previewing
             onWizardCancelled(wizard);
 
@@ -136,22 +136,22 @@ public enum KFWizardState {
         }
 
         @Override
-        KFWizardState getNext() {
+        TweenWizardState getNext() {
             return null;
         }
 
         @Override
-        JPanel getPanel(KFWizard wizard) {
+        JPanel getPanel(TweenWizard wizard) {
             durationPanel = new DurationPanel(wizard);
             return durationPanel;
         }
 
         @Override
-        void onWizardCancelled(KFWizard wizard) {
+        void onWizardCancelled(TweenWizard wizard) {
         }
 
         @Override
-        void onMovingToTheNext(KFWizard wizard) {
+        void onMovingToTheNext(TweenWizard wizard) {
             wizard.setNumFrames(durationPanel.getNumFrames());
             wizard.setMillisBetweenFrames(durationPanel.getMillisBetweenFrames());
         }
@@ -159,17 +159,17 @@ public enum KFWizardState {
 
     abstract String getHelpMessage();
 
-    abstract KFWizardState getNext();
+    abstract TweenWizardState getNext();
 
-    abstract JPanel getPanel(KFWizard wizard);
+    abstract JPanel getPanel(TweenWizard wizard);
 
     /**
      * Called if the wizard was cancelled while in this state
      */
-    abstract void onWizardCancelled(KFWizard wizard);
+    abstract void onWizardCancelled(TweenWizard wizard);
 
     /**
      * Called if next was pressed while in this state before moving to the next
      */
-    abstract void onMovingToTheNext(KFWizard wizard);
+    abstract void onMovingToTheNext(TweenWizard wizard);
 }

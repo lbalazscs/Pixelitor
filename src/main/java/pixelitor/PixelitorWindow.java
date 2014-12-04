@@ -79,6 +79,7 @@ public final class PixelitorWindow extends JFrame {
         GlobalKeyboardWatch.setAlwaysVisibleComponent(desktopPane);
         GlobalKeyboardWatch.registerBrushSizeActions();
 
+
         new DropTarget(desktopPane, new DropListener());
 
         desktopPane.setBackground(Color.GRAY);
@@ -134,6 +135,7 @@ public final class PixelitorWindow extends JFrame {
 //        pack();
         AppPreferences.loadFramePosition(this);
         setVisible(true);
+        GlobalKeyboardWatch.registerMouseWheelWatching();
     }
 
     public void activateInternalImageFrame(InternalImageFrame frame) {
@@ -266,8 +268,6 @@ public final class PixelitorWindow extends JFrame {
         locationY %= maxHeight;
 
         InternalImageFrame internalFrame = new InternalImageFrame(ImageComponents.getActiveImageComponent(), locationX, locationY);
-
-        internalFrame.setLocation(locationX, locationY);
 
         ImageComponents.getActiveImageComponent().setInternalFrame(internalFrame);
 

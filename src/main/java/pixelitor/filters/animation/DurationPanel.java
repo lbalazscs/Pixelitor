@@ -29,9 +29,9 @@ public class DurationPanel extends JPanel {
     int nrFrames;
     private final JLabel nrFramesLabel;
     private int fps;
-    private KFWizard wizard;
+    private TweenWizard wizard;
 
-    public DurationPanel(KFWizard wizard) {
+    public DurationPanel(TweenWizard wizard) {
         super(new GridBagLayout());
         this.wizard = wizard;
 

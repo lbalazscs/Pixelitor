@@ -46,7 +46,8 @@ public class InternalImageFrame extends JInternalFrame implements InternalFrameL
         this.add(scrollPane);
 
         Dimension preferredSize = ic.getPreferredSize();
-        setNewSize((int) preferredSize.getWidth(), (int) preferredSize.getHeight(), locationX, locationY);
+        setSize((int) preferredSize.getWidth(), (int) preferredSize.getHeight(), locationX, locationY);
+        setLocation(locationX, locationY);
         this.setVisible(true);
     }
 
@@ -88,10 +89,11 @@ public class InternalImageFrame extends JInternalFrame implements InternalFrameL
         Canvas canvas = ic.getCanvas();
         int zoomedWidth = canvas.getZoomedWidth();
         int zoomedHeight = canvas.getZoomedHeight();
-        setNewSize(zoomedWidth, zoomedHeight, locationX, locationY);
+        setSize(zoomedWidth, zoomedHeight, locationX, locationY);
     }
 
-    public void setNewSize(int width, int height, int locationX, int locationY) {
+    public void setSize(int width, int height, int locationX, int locationY) {
+        // if this is a simple resize, then locationX and locationY are -1
         if (locationX == -1) {
             locationX = getLocation().x;
         }

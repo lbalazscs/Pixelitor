@@ -34,9 +34,9 @@ import java.io.File;
 /**
  * Wizard for keyframe-based animations
  */
-public class KFWizard {
+public class TweenWizard {
     private OKCancelDialog dialog = null;
-    private KFWizardState wizardState = KFWizardState.SELECT_FILTER;
+    private TweenWizardState wizardState = TweenWizardState.SELECT_FILTER;
     private FilterWithParametrizedGUI filter;
 
     ParamSetState initialState;
@@ -50,7 +50,7 @@ public class KFWizard {
     public void show(JFrame dialogParent) {
         ParametrizedAdjustPanel.setResetParams(false);
         dialog = new OKCancelDialog(
-                wizardState.getPanel(KFWizard.this),
+                wizardState.getPanel(TweenWizard.this),
                 dialogParent,
                 "Export Keyframe Animation",
                 "Next", "Cancel") {
@@ -58,7 +58,7 @@ public class KFWizard {
             @Override
             protected void dialogCanceled() {
                 ParametrizedAdjustPanel.setResetParams(true);
-                wizardState.onWizardCancelled(KFWizard.this);
+                wizardState.onWizardCancelled(TweenWizard.this);
                 super.dialogCanceled();
                 dispose();
             }
@@ -66,13 +66,13 @@ public class KFWizard {
             @Override
             protected void dialogAccepted() {
                 // "next" was pressed
-                wizardState.onMovingToTheNext(KFWizard.this);
-                KFWizardState nextState = wizardState.getNext();
+                wizardState.onMovingToTheNext(TweenWizard.this);
+                TweenWizardState nextState = wizardState.getNext();
                 if(nextState == null) {
                     dispose();
                     calculateAnimation();
                 } else {
-                    JPanel panel = nextState.getPanel(KFWizard.this);
+                    JPanel panel = nextState.getPanel(TweenWizard.this);
                     dialog.changeFormPanel(panel);
                     dialog.setHeaderMessage(nextState.getHelpMessage());
                     wizardState = nextState;

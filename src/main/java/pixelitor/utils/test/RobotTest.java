@@ -366,7 +366,7 @@ public class RobotTest {
     private static void randomZoomOut(Random rand) {
         ImageComponent ic = ImageComponents.getActiveImageComponent();
         if (ic != null) {
-            ZoomLevel previous = ic.getZoomLevel().getPrevious();
+            ZoomLevel previous = ic.getZoomLevel().zoomOut();
             ic.setZoom(previous, false);
         }
     }
