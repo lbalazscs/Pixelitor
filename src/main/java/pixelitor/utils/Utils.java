@@ -53,7 +53,9 @@ import java.awt.image.DataBuffer;
 import java.awt.image.DirectColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -489,4 +491,31 @@ public final class Utils {
         unitArrow.closePath();
         return unitArrow;
     }
+
+    public static String getCurrentGitBranch() {
+        String cmmd[] = new String[3];
+        cmmd[0] = "bash.exe";
+        cmmd[1] = "-c";
+        cmmd[2] = "cd /cygdrive/c/dev_p/pixelitor bash TEST.sh && bash get_current_branch.sh";
+
+        String result = null;
+
+        Runtime rt = Runtime.getRuntime();
+        try {
+            Process p = rt.exec(cmmd);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            StringBuilder builder = new StringBuilder();
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                builder.append(line);
+                builder.append(System.getProperty("line.separator"));
+            }
+            result = builder.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
 }
