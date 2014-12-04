@@ -46,8 +46,8 @@ public class JHWaterRipple extends FilterWithParametrizedGUI {
         super("Water Ripple", true, true);
         setParamSet(new ParamSet(
                 center,
-                radius.adjustRangeAccordingToImage(1.0),
-                wavelength.adjustRangeAccordingToImage(0.25),
+                radius.adjustRangeToImageSize(1.0),
+                wavelength.adjustRangeToImageSize(0.25),
                 amplitude,
                 phase,
                 edgeAction,

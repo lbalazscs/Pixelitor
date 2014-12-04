@@ -46,9 +46,9 @@ public class JHDropShadow extends FilterWithParametrizedGUI {
         super("Drop Shadow", true, false);
         setParamSet(new ParamSet(
                 angle,
-                distance.adjustRangeAccordingToImage(0.1),
+                distance.adjustRangeToImageSize(0.1),
                 opacity,
-                softness.adjustRangeAccordingToImage(0.025),
+                softness.adjustRangeToImageSize(0.025),
                 color,
                 shadowOnly
         ));

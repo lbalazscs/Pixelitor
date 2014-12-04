@@ -60,7 +60,7 @@ public class JHPixelate extends FilterWithParametrizedGUI {
     public JHPixelate() {
         super("Pixelate", true, false);
         setParamSet(new ParamSet(
-                cellSizeParam.adjustRangeAccordingToImage(0.2),
+                cellSizeParam.adjustRangeToImageSize(0.2),
                 styleParam,
                 typeParam
         ));

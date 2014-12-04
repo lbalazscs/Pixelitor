@@ -7,5 +7,5 @@ public interface RangeBasedOnImageSize {
      * @param ratio the new maximum will be
      * @return itself
      */
-    AbstractGUIParam adjustRangeAccordingToImage(double ratio);
+    AbstractGUIParam adjustRangeToImageSize(double ratio);
 }

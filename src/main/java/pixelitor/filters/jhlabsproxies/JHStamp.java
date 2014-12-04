@@ -48,7 +48,7 @@ public class JHStamp extends FilterWithParametrizedGUI {
         super("Stamp", true, false);
         setParamSet(new ParamSet(
                 lightDarkBalance,
-                smoothness.adjustRangeAccordingToImage(0.05),
+                smoothness.adjustRangeToImageSize(0.05),
                 soften,
                 brightColor,
                 darkColor,

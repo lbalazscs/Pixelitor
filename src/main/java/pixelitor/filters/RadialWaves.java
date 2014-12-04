@@ -48,7 +48,7 @@ public class RadialWaves extends FilterWithParametrizedGUI {
         setParamSet(new ParamSet(
                 centerParam,
                 angularDivisionParam,
-                radialAmplitudeParam.adjustRangeAccordingToImage(1.0),
+                radialAmplitudeParam.adjustRangeToImageSize(1.0),
                 waveType,
                 phaseParam,
                 zoomParam,

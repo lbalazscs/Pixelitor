@@ -61,7 +61,7 @@ public class ValueNoise extends FilterWithParametrizedGUI {
     public ValueNoise() {
         super("Value Noise", false, false);
         setParamSet(new ParamSet(
-                scale.adjustRangeAccordingToImage(0.3),
+                scale.adjustRangeToImageSize(0.3),
                 details,
                 color1Param,
                 color2Param,

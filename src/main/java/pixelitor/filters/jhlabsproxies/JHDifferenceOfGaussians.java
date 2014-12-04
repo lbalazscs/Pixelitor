@@ -39,8 +39,8 @@ public class JHDifferenceOfGaussians extends FilterWithParametrizedGUI {
     public JHDifferenceOfGaussians() {
         super("Difference of Gaussians", true, false);
         setParamSet(new ParamSet(
-                radius1Param.adjustRangeAccordingToImage(0.01),
-                radius2Param.adjustRangeAccordingToImage(0.01),
+                radius1Param.adjustRangeToImageSize(0.01),
+                radius2Param.adjustRangeToImageSize(0.01),
                 normalize,
                 invert
         ));

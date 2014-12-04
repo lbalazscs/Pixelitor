@@ -41,7 +41,7 @@ public class GlassTiles extends FilterWithParametrizedGUI {
     public GlassTiles() {
         super("Glass Tiles", true, false);
         setParamSet(new ParamSet(
-                size.adjustRangeAccordingToImage(0.5),
+                size.adjustRangeToImageSize(0.5),
                 curvature,
                 phase.setShowLinkedCB(false),
                 edgeAction,

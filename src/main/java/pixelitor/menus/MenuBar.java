@@ -516,8 +516,8 @@ public class MenuBar extends JMenuBar {
     private static void initDistortSubmenu(JMenu filterMenu) {
         JMenu distortMenu = new JMenu("Distort");
         filterMenu.add(distortMenu);
-        MenuFactory.createMenuItem(new JHPinch(), null, distortMenu);
-        MenuFactory.createMenuItem(new Swirl(), null, distortMenu);
+//        MenuFactory.createMenuItem(new JHPinch(), null, distortMenu);
+//        MenuFactory.createMenuItem(new Swirl(), null, distortMenu);
         MenuFactory.createMenuItem(new UnifiedSwirl(), null, distortMenu);
 
         MenuFactory.createMenuItem(new CircleToSquare(), null, distortMenu);

@@ -28,7 +28,7 @@ public class Swirl extends FilterWithParametrizedGUI {
         super("Swirl", true, false);
         setParamSet(new ParamSet(
                 amountParam,
-                radiusParam.adjustRangeAccordingToImage(1.0),
+                radiusParam.adjustRangeToImageSize(1.0),
                 centerParam,
                 zoomParam,
                 rotateResultParam,

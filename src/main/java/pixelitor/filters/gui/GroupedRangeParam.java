@@ -183,9 +183,9 @@ public class GroupedRangeParam extends AbstractGUIParam implements RangeBasedOnI
     }
 
     @Override
-    public GroupedRangeParam adjustRangeAccordingToImage(double ratio) {
+    public GroupedRangeParam adjustRangeToImageSize(double ratio) {
         for (RangeParam param : rangeParams) {
-            param.adjustRangeAccordingToImage(ratio);
+            param.adjustRangeToImageSize(ratio);
         }
         return this;
     }

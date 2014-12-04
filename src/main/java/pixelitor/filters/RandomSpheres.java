@@ -85,7 +85,7 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
     public RandomSpheres() {
         super("Random Spheres", true, false);
         setParamSet(new ParamSet(
-                radiusParam.adjustRangeAccordingToImage(0.1),
+                radiusParam.adjustRangeToImageSize(0.1),
                 densityParam,
 //                typeParam,
                 opacityParam,

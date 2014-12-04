@@ -44,7 +44,7 @@ public class JHLensOverImage extends FilterWithParametrizedGUI {
     public JHLensOverImage() {
         super("Lens Over Image", true, true);
         setParamSet(new ParamSet(
-                radius.adjustRangeAccordingToImage(1.0),
+                radius.adjustRangeToImageSize(1.0),
                 refractionIndex,
                 center,
 //                edgeAction,  // edge action doesn't create anything usable in this case

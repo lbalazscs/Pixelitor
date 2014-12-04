@@ -37,7 +37,7 @@ public class JHFrostedGlass extends FilterWithParametrizedGUI {
     public JHFrostedGlass() {
         super("Frosted Glass", true, false);
         edgeAction.setDefaultChoice(IntChoiceParam.EDGE_REPEAT_PIXELS);
-        setParamSet(new ParamSet(amount.adjustRangeAccordingToImage(0.1),
+        setParamSet(new ParamSet(amount.adjustRangeToImageSize(0.1),
                 interpolation,
                 edgeAction));
     }

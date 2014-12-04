@@ -54,7 +54,7 @@ public class PolarTiles extends FilterWithParametrizedGUI {
                 centerParam,
                 numADivisionsParam,
                 numRDivisionsParam,
-                curvatureParam.adjustRangeAccordingToImage(0.02),
+                curvatureParam.adjustRangeToImageSize(0.02),
                 rotateParam,
                 zoomParam,
                 randomnessParam,

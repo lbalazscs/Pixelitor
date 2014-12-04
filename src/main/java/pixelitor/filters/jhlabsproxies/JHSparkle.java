@@ -49,7 +49,7 @@ public class JHSparkle extends FilterWithParametrizedGUI {
                 lightOnly,
                 color,
                 nrOfRays,
-                radius.adjustRangeAccordingToImage(1.0),
+                radius.adjustRangeToImageSize(1.0),
                 shine,
                 randomness
         ));
