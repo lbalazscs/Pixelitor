@@ -41,6 +41,8 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.image.BufferedImage;
@@ -120,6 +122,21 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
         addMouseListener(this);
         addMouseMotionListener(this);
+
+        addMouseWheelListener(new MouseWheelListener() {
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                if (e.isControlDown()) {
+                    int x = e.getX();
+                    int y = e.getY();
+                    if (e.getWheelRotation() < 0) { // up, away from the user
+                        increaseZoom(x, y);
+                    } else {  // down, towards the user
+                        decreaseZoom(x, y);
+                    }
+                }
+            }
+        });
 
         layersPanel = new LayersPanel();
 

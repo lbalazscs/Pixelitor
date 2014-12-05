@@ -24,7 +24,6 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.impl.SwirlFilter;
 
 import java.awt.image.BufferedImage;
 
@@ -32,17 +31,17 @@ import java.awt.image.BufferedImage;
  * Swirl-Bulge-Pinch filter can use SwirlFilter or PinchFilter
  */
 public class UnifiedSwirl extends FilterWithParametrizedGUI {
-    private static final int AFFECT_EVERYWHERE = 1;
-    private static final int AFFECT_INSIDE_RADIUS = 2;
-
-    private final IntChoiceParam algorithmChooser = new IntChoiceParam("Affect",
-            new IntChoiceParam.Value[] {
-                    new IntChoiceParam.Value("Around Radius", AFFECT_EVERYWHERE),
-                    new IntChoiceParam.Value("Inside Radius", AFFECT_INSIDE_RADIUS),
-            });
+//    private static final int AFFECT_EVERYWHERE = 1;
+//    private static final int AFFECT_INSIDE_RADIUS = 2;
+//
+//    private final IntChoiceParam algorithmChooser = new IntChoiceParam("Affect",
+//            new IntChoiceParam.Value[] {
+//                    new IntChoiceParam.Value("Around Radius", AFFECT_EVERYWHERE),
+//                    new IntChoiceParam.Value("Inside Radius", AFFECT_INSIDE_RADIUS),
+//            });
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final RangeParam radius = new RangeParam("Radius", 1, 999, 200);
+    private final RangeParam radius = new RangeParam("Radius", 1, 999, 500);
     private final RangeParam swirlAmount = new RangeParam("Swirl Amount", -360, 360, 90);
     private final RangeParam pinchBulgeAmount = new RangeParam("Pinch-Bulge Amount", -100, 100, 0);
     private RangeParam zoomParam = new RangeParam("Zoom (%)", 1, 500, 100);
@@ -53,12 +52,12 @@ public class UnifiedSwirl extends FilterWithParametrizedGUI {
 
     private SwirlMethod filter;
     private PinchFilter pinchFilter;
-    private SwirlFilter swirlFilter;
+//    private SwirlFilter swirlFilter;
 
     public UnifiedSwirl() {
         super("Swirl, Pinch, Bulge", true, true);
         setParamSet(new ParamSet(
-                algorithmChooser,
+//                algorithmChooser,
                 swirlAmount,
                 pinchBulgeAmount,
                 radius.adjustRangeToImageSize(1.0),
@@ -72,18 +71,18 @@ public class UnifiedSwirl extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        int algorithm = algorithmChooser.getValue();
-        if(algorithm == AFFECT_EVERYWHERE) {
-            if(swirlFilter == null) {
-                swirlFilter = new SwirlFilter();
-            }
-            filter = swirlFilter;
-        } else if(algorithm == AFFECT_INSIDE_RADIUS) {
+//        int algorithm = algorithmChooser.getValue();
+//        if(algorithm == AFFECT_EVERYWHERE) {
+//            if(swirlFilter == null) {
+//                swirlFilter = new SwirlFilter();
+//            }
+//            filter = swirlFilter;
+//        } else if(algorithm == AFFECT_INSIDE_RADIUS) {
             if(pinchFilter == null) {
                 pinchFilter = new PinchFilter();
             }
             filter = pinchFilter;
-        }
+//        }
 
         filter.setPinchBulgeAmount(pinchBulgeAmount.getValueAsPercentage());
         filter.setSwirlAmount(swirlAmount.getValueInRadians());

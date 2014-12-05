@@ -160,7 +160,7 @@ public class PinchFilter extends TransformFilter implements SwirlMethod {
      */
     @Override
     public void setPinchBulgeAmount(float amount) {
-        this.pinchBulgeAmount = amount;
+        this.pinchBulgeAmount = -amount;
     }
 
     /**
