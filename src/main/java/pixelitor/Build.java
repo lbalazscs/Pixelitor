@@ -71,7 +71,7 @@ public enum Build {
         }
     };
 
-    public static Build CURRENT = DEVELOPMENT;
+    public static Build CURRENT = FINAL;
 
     public static final String VERSION_NUMBER = "2.2.1";
 
@@ -92,10 +92,8 @@ public enum Build {
     }
 
     public abstract boolean isRobotTest();
-
     public abstract boolean isPerformanceTest();
 
     public abstract void setRobotTest(boolean robotTest);
     public abstract void setPerformanceTest(boolean performanceTest);
-
 }

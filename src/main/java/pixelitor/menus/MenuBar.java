@@ -153,7 +153,6 @@ public class MenuBar extends JMenuBar {
         };
         MenuFactory.createMenuItem(saveAsAction, KeyStroke.getKeyStroke('S', InputEvent.CTRL_MASK + InputEvent.SHIFT_MASK), fileMenu);
 
-
         Action optimizedSaveAction = new AbstractAction("Save Optimized JPEG...") {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -210,9 +209,7 @@ public class MenuBar extends JMenuBar {
         };
         MenuFactory.createMenuItem(closeAllAction, KeyStroke.getKeyStroke('W', InputEvent.CTRL_MASK | InputEvent.ALT_MASK), fileMenu, MenuEnableCondition.THERE_IS_OPEN_IMAGE);
 
-
         initAutomateSubmenu(fileMenu);
-
 
         if (!JVM.isMac) {
             Action newFromScreenCapture = new ScreenCaptureAction();

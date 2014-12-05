@@ -20,14 +20,10 @@ import pixelitor.menus.view.ShowHideAllAction;
 import pixelitor.tools.Tools;
 
 import javax.swing.*;
-import java.awt.AWTEvent;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
-import java.awt.Toolkit;
-import java.awt.event.AWTEventListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseWheelEvent;
 
 /**
  *
@@ -120,22 +116,31 @@ public class GlobalKeyboardWatch {
         GlobalKeyboardWatch.addKeyboardShortCut('[', false, "decrement", decreaseActiveBrushSizeAction);
     }
 
-    public static void registerMouseWheelWatching() {
-        Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
-            @Override
-            public void eventDispatched(AWTEvent e) {
-                if (e instanceof MouseWheelEvent) {
-                    MouseWheelEvent wheelEvent = (MouseWheelEvent) e;
-                    if (wheelEvent.isControlDown()) {
-                        if (wheelEvent.getWheelRotation() < 0) { // up, away from the user
-                            ImageComponents.increaseZoomForActiveIC();
-                        } else {  // down, towards the user
-                            ImageComponents.decreaseZoomForActiveIC();
-                        }
-                    }
-                }
-            }
-        }, AWTEvent.MOUSE_WHEEL_EVENT_MASK);
-    }
+//    public static void registerMouseWheelWatching() {
+//        Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
+//            @Override
+//            public void eventDispatched(AWTEvent e) {
+//                if (e instanceof MouseWheelEvent) {
+//                    MouseWheelEvent wheelEvent = (MouseWheelEvent) e;
+//                    if (wheelEvent.isControlDown()) {
+//                        Point point = wheelEvent.getPoint();
+//
+//                        ImageComponent ic = ImageComponents.getActiveImageComponent();
+//                        Component component = wheelEvent.getComponent();
+//
+//                        Point mouse = wheelEvent.getLocationOnScreen();
+//
+//                        SwingUtilities.convertPointFromScreen(mouse, ic);
+//
+//                        if (wheelEvent.getWheelRotation() < 0) { // up, away from the user
+//                            ic.increaseZoom(mouse.x, mouse.y);
+//                        } else {  // down, towards the user
+//                            ic.decreaseZoom(mouse.x, mouse.y);
+//                        }
+//                    }
+//                }
+//            }
+//        }, AWTEvent.MOUSE_WHEEL_EVENT_MASK);
+//    }
 
 }

@@ -135,7 +135,7 @@ public final class PixelitorWindow extends JFrame {
 //        pack();
         AppPreferences.loadFramePosition(this);
         setVisible(true);
-        GlobalKeyboardWatch.registerMouseWheelWatching();
+//        GlobalKeyboardWatch.registerMouseWheelWatching();
     }
 
     public void activateInternalImageFrame(InternalImageFrame frame) {
