@@ -17,6 +17,7 @@
 package pixelitor.menus.file;
 
 import org.jdesktop.swingx.VerticalLayout;
+import pixelitor.AppLogic;
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
 import pixelitor.io.AnimationFrames;
@@ -69,6 +70,7 @@ public class AnimGifExportPanel extends JPanel {
                 if(file != null) {
                     AnimationFrames animation = new AnimationFrames(activeComp, p.getDelayMillis());
                     animation.saveToFile(file);
+                    AppLogic.showFileSavedMessage(file);
                 }
             }
 
