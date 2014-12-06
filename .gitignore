@@ -9,6 +9,7 @@ build.num
 *.nsi
 *.ora
 *.exe
+*.sh
 *.ico
 *.gif
 *.zip
