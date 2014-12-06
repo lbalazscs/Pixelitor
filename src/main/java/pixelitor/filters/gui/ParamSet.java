@@ -125,7 +125,7 @@ public class ParamSet implements Iterable<GUIParam> {
         }
     }
 
-    public ParamSetState getState() {
+    public ParamSetState copyState() {
         return new ParamSetState(this);
     }
 

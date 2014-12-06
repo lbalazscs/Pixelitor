@@ -40,4 +40,9 @@ public class AnimGIFWriter implements AnimationWriter {
     public void finish() {
         encoder.finish();
     }
+
+    @Override
+    public void cancel() {
+        encoder.cancel();
+    }
 }

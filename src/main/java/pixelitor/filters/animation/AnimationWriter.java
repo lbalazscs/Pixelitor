@@ -21,4 +21,9 @@ import java.awt.image.BufferedImage;
 public interface AnimationWriter {
     void addFrame(BufferedImage image);
     void finish();
+
+    /**
+     * Called if the animation rendering was cancelled
+     */
+    void cancel();
 }

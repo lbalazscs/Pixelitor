@@ -131,6 +131,7 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
             if (constrainProportions()) {
                 // it just got selected, adjust the height to the width
                 newHeight = (int) (newWidth / originalProportion);
+                //noinspection SuspiciousNameCombination
                 newHeightInPercent = newWidthInPercent;
                 if (pixelsSelected()) {
                     heightTextField.setText(String.valueOf(newHeight));
@@ -222,6 +223,7 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
                 newHeight = (int) (oldHeight * newHeightInPercent / 100);
                 if (constrainProportions()) {
                     newWidth = (int) (newHeight * originalProportion);
+                    //noinspection SuspiciousNameCombination
                     newWidthInPercent = newHeightInPercent;
                     widthTextField.setText(doubleFormatter.format(newWidthInPercent));
                 }

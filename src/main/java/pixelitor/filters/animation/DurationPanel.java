@@ -16,6 +16,7 @@
  */
 package pixelitor.filters.animation;
 
+import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.utils.GridBagHelper;
 
 import javax.swing.*;
@@ -24,12 +25,14 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 public class DurationPanel extends JPanel {
-    JTextField nrSecondsTF = new JTextField("2", 3);
-    JTextField fpsTF = new JTextField("24", 3);
-    int nrFrames;
+    private JTextField nrSecondsTF = new JTextField("2", 3);
+    private JTextField fpsTF = new JTextField("24", 3);
+    private int nrFrames;
     private final JLabel nrFramesLabel;
-    private int fps;
+    private double fps;
     private TweenWizard wizard;
+    private Interpolation interpolation;
+    private final JComboBox<Interpolation> ipCB;
 
     public DurationPanel(TweenWizard wizard) {
         super(new GridBagLayout());
@@ -55,12 +58,19 @@ public class DurationPanel extends JPanel {
         updateCalculations();
         GridBagHelper.addLabel(this, "Number of Frames:", 0, 2);
         GridBagHelper.addControl(this, nrFramesLabel);
+
+        EnumComboBoxModel<Interpolation> ipCBM = new EnumComboBoxModel<>(Interpolation.class);
+        ipCB = new JComboBox<>(ipCBM);
+
+        GridBagHelper.addLabel(this, "Interpolation:", 0, 3);
+        GridBagHelper.addControl(this, ipCB);
+
     }
 
     private void updateCalculations() {
         try {
             double nrSeconds = Double.parseDouble(nrSecondsTF.getText().trim());
-            fps = Integer.parseInt(fpsTF.getText().trim());
+            fps = Double.parseDouble(fpsTF.getText().trim());
             nrFrames = (int) (nrSeconds * fps);
             nrFramesLabel.setText(String.valueOf(nrFrames));
             wizard.setNextButtonEnabled(true);
@@ -77,5 +87,9 @@ public class DurationPanel extends JPanel {
 
     public int getMillisBetweenFrames() {
         return (int) (1000.0 / fps);
+    }
+
+    public Interpolation getInterpolation() {
+        return (Interpolation) ipCB.getSelectedItem();
     }
 }

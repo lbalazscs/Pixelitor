@@ -275,6 +275,7 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
         }
     }
 
+    @Override
     public RangeParam adjustRangeToImageSize(double ratio) {
         maxToImageSizeRatio = ratio;
         this.adjustMaxAccordingToImage = true;

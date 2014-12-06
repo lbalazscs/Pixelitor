@@ -16,24 +16,16 @@
  */
 package pixelitor.filters.animation;
 
-import pixelitor.ChangeReason;
-import pixelitor.ImageComponent;
-import pixelitor.ImageComponents;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.ParamSetState;
 import pixelitor.filters.gui.ParametrizedAdjustPanel;
 import pixelitor.utils.GUIUtils;
-import pixelitor.utils.ImageUtils;
 import pixelitor.utils.OKCancelDialog;
-import pixelitor.utils.Utils;
 
 import javax.swing.*;
-import java.awt.Toolkit;
-import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
 
 /**
  * Wizard for keyframe-based animations
@@ -46,6 +38,7 @@ public class TweenWizard {
     private ParamSetState finalState;
     private int numFrames;
     private int millisBetweenFrames;
+    private Interpolation interpolation;
 
     /**
      * Show the wizard in a dialog
@@ -109,36 +102,30 @@ public class TweenWizard {
     }
 
     private void calculateAnimation() {
-        System.out.println("Wizard::calculateAnimation: CALLED, thread = " + Thread.currentThread().getName());
-
         final ProgressMonitor progressMonitor = new ProgressMonitor(PixelitorWindow.getInstance(),
-                "Progress", "Note", 1, 100);
+                "Rendering Frames", "", 1, 100);
         progressMonitor.setProgress(0);
 
 
-        final RenderFramesTask task = new RenderFramesTask(filter, initialState, finalState, numFrames, millisBetweenFrames);
+        final RenderFramesTask task = new RenderFramesTask(filter, initialState, finalState, numFrames, millisBetweenFrames, interpolation);
         task.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
-                if ("progress" == evt.getPropertyName()) {
+                if ("progress".equals(evt.getPropertyName())) {
                     int progress = (Integer) evt.getNewValue();
-
-                    System.out.println("TweenWizard::propertyChange: progress = " + progress);
 
                     progressMonitor.setProgress(progress);
                     String message =
                             String.format("Completed %d%%.\n", progress);
                     progressMonitor.setNote(message);
-                    if (progressMonitor.isCanceled() || task.isDone()) {
-                        Toolkit.getDefaultToolkit().beep();
-                        if (progressMonitor.isCanceled()) {
-                            task.cancel(true);
-                            System.out.println("TweenWizard::propertyChange: Task canceled");
-                        } else {
-                            System.out.println("TweenWizard::propertyChange: Task completed");
-                        }
+                    if (progressMonitor.isCanceled()) {
+                        // Probably nothing bad happens if the current frame rendering is
+                        // interrupted, but to be on the safe side, let the current frame
+                        // finish by passing false to cancel
+                        task.cancel(false);
                     }
-
+//                    if( task.isDone()) {
+//                    }
                 }
             }
         });
@@ -156,69 +143,9 @@ public class TweenWizard {
     public void setNextButtonEnabled(boolean b) {
         dialog.setOKButtonEnabled(b);
     }
-}
 
-class RenderFramesTask extends SwingWorker<Void, Void> {
-    private FilterWithParametrizedGUI filter;
-    private ParamSetState initialState;
-    private ParamSetState finalState;
-    private int numFrames;
-    private int millisBetweenFrames;
-
-    public RenderFramesTask(FilterWithParametrizedGUI filter, ParamSetState initialState, ParamSetState finalState, int numFrames, int millisBetweenFrames) {
-        this.filter = filter;
-        this.initialState = initialState;
-        this.finalState = finalState;
-        this.numFrames = numFrames;
-        this.millisBetweenFrames = millisBetweenFrames;
-    }
-
-    @Override
-    protected Void doInBackground() throws Exception {
-        System.out.println(String.format("RenderFramesTask::doInBackground: called on '%s'", Thread.currentThread().getName()));
-
-        double[] time = new double[numFrames];
-        double[] progress = new double[numFrames];
-
-        File file = new File("output.gif");
-        AnimationWriter animationWriter = new AnimGIFWriter(file, millisBetweenFrames);
-
-        for (int i = 0; i < numFrames; i++) {
-            int percentProgress = (int) ((100.0 * i) / numFrames);
-            setProgress(percentProgress);
-
-            time[i] = ((double) i) / numFrames;
-            progress[i] = time[i]; // linear
-            System.out.println(String.format("RenderFramesTask::doInBackground: " +
-                    "time[%d] = %.2f, progress[%d] = %.2f, thread = '%s'", i, time[i], i, progress[i], Thread.currentThread().getName()));
-            ParamSetState intermediateState = initialState.interpolate(finalState, time[i]);
-            filter.getParamSet().setState(intermediateState);
-            //filter.execute(ChangeReason.OP_PREVIEW);
-
-            System.out.println("RenderFramesTask::doInBackground: before");
-            Utils.executeFilterWithBusyCursor(filter, ChangeReason.OP_PREVIEW, PixelitorWindow.getInstance());
-            System.out.println("RenderFramesTask::doInBackground: after");
-
-            ImageComponent ic = ImageComponents.getActiveImageComponent();
-//            ic.paintImmediately(ic.getBounds());
-            ic.repaint();
-
-            BufferedImage image = ImageComponents.getActiveCompositeImage();
-            image = ImageUtils.copyImage(image); // TODO is this necessary?
-            animationWriter.addFrame(image);
-//            Utils.debugImage(image, "Step " + i);
-        }
-        setProgress(100);
-        ImageComponents.getActiveComp().getActiveImageLayer().cancelPreviewing();
-
-        animationWriter.finish();
-        System.out.println("RenderFramesTask::doInBackground: file = " + file.getAbsolutePath() + (file.exists() ? " - exists" : " - does not exist!"));
-
-        return null;
-    }
-
-    @Override
-    protected void done() {
-        System.out.println("RenderFramesTask::done: CALLED");
+    public void setInterpolation(Interpolation interpolation) {
+        this.interpolation = interpolation;
     }
 }
+

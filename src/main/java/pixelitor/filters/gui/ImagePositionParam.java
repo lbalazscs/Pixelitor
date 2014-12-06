@@ -146,7 +146,7 @@ public class ImagePositionParam extends AbstractGUIParam {
         public ParamState interpolate(ParamState endState, double progress) {
             IPPState ippEndState = (IPPState) endState;
             double interpolatedX = ImageMath.lerp(progress, relativeX, ippEndState.relativeX);
-            double interpolatedY = ImageMath.lerp(progress, relativeY, ippEndState.relativeX);
+            double interpolatedY = ImageMath.lerp(progress, relativeY, ippEndState.relativeY);
             return new IPPState(interpolatedX, interpolatedY);
         }
     }

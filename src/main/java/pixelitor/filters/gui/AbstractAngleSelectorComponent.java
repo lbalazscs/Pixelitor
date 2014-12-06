@@ -34,9 +34,8 @@ import java.awt.geom.Line2D;
 public abstract class AbstractAngleSelectorComponent extends JComponent implements MouseListener, MouseMotionListener {
     AngleParam model;
     static final int SIZE = 50;
-    static final Stroke ARROW_STROKE = new BasicStroke(1.7f);
-//    static final Color ARROW_COLOR = new Color(48, 76, 111);
-    static final Color ARROW_COLOR = new Color(45, 66, 85);
+    private static final Stroke ARROW_STROKE = new BasicStroke(1.7f);
+    private static final Color ARROW_COLOR = new Color(45, 66, 85);
 
     int cx;
     int cy;

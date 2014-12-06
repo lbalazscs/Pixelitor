@@ -21,6 +21,7 @@ import pixelitor.filters.FilterUtils;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.ParamSet;
+import pixelitor.filters.gui.ParamSetState;
 
 import javax.swing.*;
 import java.awt.FlowLayout;
@@ -91,7 +92,8 @@ public enum TweenWizardState {
         @Override
         void onMovingToTheNext(TweenWizard wizard) {
             ParamSet paramSet = wizard.getFilter().getParamSet();
-            wizard.setInitialState(paramSet.getState());
+            ParamSetState initialState = paramSet.copyState();
+            wizard.setInitialState(initialState);
         }
     }, FINAL_FILTER_SETTINGS {
         @Override
@@ -125,7 +127,7 @@ public enum TweenWizardState {
 
             // save final state
             ParamSet paramSet = wizard.getFilter().getParamSet();
-            wizard.setFinalState(paramSet.getState());
+            wizard.setFinalState(paramSet.copyState());
         }
     }, SELECT_DURATION {
         DurationPanel durationPanel;
@@ -154,6 +156,7 @@ public enum TweenWizardState {
         void onMovingToTheNext(TweenWizard wizard) {
             wizard.setNumFrames(durationPanel.getNumFrames());
             wizard.setMillisBetweenFrames(durationPanel.getMillisBetweenFrames());
+            wizard.setInterpolation(durationPanel.getInterpolation());
         }
     };
 

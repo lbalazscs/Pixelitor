@@ -246,9 +246,9 @@ public class GroupedRangeParam extends AbstractGUIParam implements RangeBasedOnI
         public ParamState interpolate(ParamState endState, double progress) {
             GRState apEndState = (GRState) endState;
 
-            double interpolatedValues[] = new double[values.length];
+            double[] interpolatedValues = new double[values.length];
             for (int i = 0; i < values.length; i++) {
-                interpolatedValues[i] = ImageMath.lerp(progress, values[i], apEndState.values[i]);;
+                interpolatedValues[i] = ImageMath.lerp(progress, values[i], apEndState.values[i]);
             }
 
             return new GRState(interpolatedValues);

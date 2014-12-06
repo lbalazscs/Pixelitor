@@ -69,6 +69,7 @@ public class AnimatedGifEncoder {
     protected boolean sizeSet = false; // if false, get size from first frame
 
     protected int sample = 10; // default sample interval for quantizer
+    private File file;
 
     /**
      * Sets the delay time between each frame, or changes it for subsequent frames
@@ -202,6 +203,12 @@ public class AnimatedGifEncoder {
         return ok;
     }
 
+    public void cancel() {
+        if (finish()) {
+            file.delete();
+        }
+    }
+
     /**
      * Sets frame rate in frames per second. Equivalent to
      * <code>setDelay(1000/fps)</code>.
@@ -283,6 +290,7 @@ public class AnimatedGifEncoder {
      * @return false if open or initial write failed.
      */
     public boolean start(File file) {
+        this.file = file;
         boolean ok = true;
         try {
             out = new BufferedOutputStream(new FileOutputStream(file));
