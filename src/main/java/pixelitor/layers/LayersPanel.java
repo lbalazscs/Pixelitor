@@ -21,19 +21,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The container for LayerButton objects
+ * The GUI container for LayerButton objects.
+ * Each ImageComponent has its own LayersPanel instance.
  */
 public class LayersPanel extends JLayeredPane {
     private List<LayerButton> layerButtons = new ArrayList<>();
     private final ButtonGroup buttonGroup = new ButtonGroup();
+    private final LayersMouseHandler mouseHandler;
+    private LayerButton draggedButton = null;
 
     public LayersPanel() {
-//        LayersLayout layersLayout = new LayersLayout(1, 1);
-//        setLayout(layersLayout);
-
-//        addMouseListener(layersLayout);
-//        addMouseMotionListener(layersLayout);
-//        setBorder(BorderFactory.createLineBorder(Color.BLUE));
+        mouseHandler = new LayersMouseHandler(this);
     }
 
     public void addLayerButton(LayerButton button, int newLayerIndex) {
@@ -42,7 +40,9 @@ public class LayersPanel extends JLayeredPane {
         }
 
         buttonGroup.add(button);
-        addButton(button, newLayerIndex);
+        layerButtons.add(newLayerIndex, button);
+
+        add(button, JLayeredPane.DEFAULT_LAYER);
 
         button.setUserInteraction(false);
         button.setSelected(true);
@@ -50,11 +50,8 @@ public class LayersPanel extends JLayeredPane {
 
         revalidate();
         repaint();
-    }
 
-    public void addButton(LayerButton button, int index) {
-        layerButtons.add(index, button);
-        add(button, JLayeredPane.DEFAULT_LAYER);
+        button.addMouseHandler(mouseHandler);
     }
 
     /**
@@ -66,9 +63,11 @@ public class LayersPanel extends JLayeredPane {
         int parentHeight = getHeight();
         for (int i = 0; i < layerButtons.size(); i++) {
             LayerButton button = layerButtons.get(i);
-            int buttonHeight = button.getPreferredSize().height;
-            button.setSize(getWidth(), buttonHeight);
-            button.setLocation(0, parentHeight - (i + 1) * buttonHeight);
+            if (button != draggedButton) {
+                int buttonHeight = button.getPreferredSize().height;
+                button.setSize(getWidth(), buttonHeight);
+                button.setLocation(0, parentHeight - (i + 1) * buttonHeight);
+            }
         }
     }
 
@@ -78,12 +77,31 @@ public class LayersPanel extends JLayeredPane {
         remove(button);
         revalidate();
         repaint();
+
+        button.removeMouseHandler(mouseHandler);
     }
+
 
     public void changeLayerOrder(int oldIndex, int newIndex) {
         LayerButton button = layerButtons.remove(oldIndex);
         layerButtons.add(newIndex, button);
 
         revalidate();
+    }
+
+    public void setDraggedButton(LayerButton newDraggedButton) {
+        if (newDraggedButton != null) {
+            // put it into the drag layer so that it is always visible
+            remove(newDraggedButton);
+            add(newDraggedButton, JLayeredPane.DRAG_LAYER);
+        } else {
+            // drag finished, put the last dragged back to the default JLayeredPane layer
+            if (draggedButton != null) {
+                remove(draggedButton);
+                add(draggedButton, JLayeredPane.DEFAULT_LAYER);
+            }
+        }
+        this.draggedButton = newDraggedButton;
+
     }
 }

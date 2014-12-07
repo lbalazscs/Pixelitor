@@ -37,6 +37,7 @@ public class LayerButton extends JToggleButton {
     private final JToggleButton visibilityButton;
 
     private boolean userInteraction = true;
+    private final JTextField nameEditor;
 
     @Override
     public String getUIClassID() {
@@ -63,7 +64,7 @@ public class LayerButton extends JToggleButton {
         visibilityButton.setSelectedIcon(eyeIcon);
         add(visibilityButton, LayerButtonLayout.VISIBILITY_BUTTON);
 
-        final JTextField nameEditor = new LayerNameEditor(layer);
+        nameEditor = new LayerNameEditor(this, layer);
         add(nameEditor, LayerButtonLayout.NAME_EDITOR);
 
         addPropertyChangeListener("name", new PropertyChangeListener() {
@@ -90,7 +91,6 @@ public class LayerButton extends JToggleButton {
         });
     }
 
-
     @Override
     public String toString() {
         return "LayerButton{" +
@@ -105,4 +105,19 @@ public class LayerButton extends JToggleButton {
     public void setUserInteraction(boolean userInteraction) {
         this.userInteraction = userInteraction;
     }
+
+    public void addMouseHandler(LayersMouseHandler mouseHandler) {
+        addMouseListener(mouseHandler);
+        addMouseMotionListener(mouseHandler);
+        nameEditor.addMouseListener(mouseHandler);
+        nameEditor.addMouseMotionListener(mouseHandler);
+    }
+
+    public void removeMouseHandler(LayersMouseHandler mouseHandler) {
+        removeMouseListener(mouseHandler);
+        removeMouseMotionListener(mouseHandler);
+        nameEditor.removeMouseListener(mouseHandler);
+        nameEditor.removeMouseMotionListener(mouseHandler);
+    }
+
 }
