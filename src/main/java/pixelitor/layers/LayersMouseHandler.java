@@ -18,12 +18,16 @@ package pixelitor.layers;
 
 import javax.swing.event.MouseInputAdapter;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.event.MouseEvent;
 
 /**
  * The MouseListener and MouseMotionListener for the layer buttons for the drag-reordering
  */
 public class LayersMouseHandler extends MouseInputAdapter {
+    private static final Cursor MOVE_CURSOR = Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR);
+    private static final Cursor DEFAULT_CURSOR = Cursor.getDefaultCursor();
+
     private LayersPanel layersPanel;
     private int dragStartY;
 
@@ -43,13 +47,21 @@ public class LayersMouseHandler extends MouseInputAdapter {
         int mouseYInParent = e.getY() + layerButton.getY();
         layerButton.setLocation(0, mouseYInParent);
         layersPanel.setDraggedButton(layerButton);
+        layerButton.setCursor(MOVE_CURSOR);
+        layersPanel.doLayout();
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
+        LayerButton layerButton = getLayerButtonFromEvent(e);
+        layerButton.setCursor(DEFAULT_CURSOR);
         layersPanel.setDraggedButton(null);
     }
 
+    /**
+     * Returns the layer button for the mouse event and also translate
+     * the coordinates of the argument into the layer button space
+     */
     public LayerButton getLayerButtonFromEvent(MouseEvent e) {
         LayerButton layerButton = null;
         Component c = e.getComponent();
