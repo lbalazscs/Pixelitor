@@ -33,7 +33,7 @@ import java.awt.AlphaComposite;
 import java.awt.Composite;
 
 /**
- *
+ * The blending modes
  */
 public enum BlendingMode {
     NORMAL {
@@ -51,22 +51,6 @@ public enum BlendingMode {
         public String toSVGName() {
             return "svg:src-over";
         }
-
-        //    }, TEST {
-//        @Override
-//        public Composite getComposite(float opacity) {
-//            FastMultiplyComposite composite = new FastMultiplyComposite();
-//            if (opacity == 1.0f) {
-//                return composite;
-//            }
-//            return new FadingComposite(composite, opacity);
-//        }
-//        @Override
-//        public String toString() {
-//            return "Test";
-//        }
-
-
     }, DARKEN {
         @Override
         public Composite getComposite(float opacity) {
@@ -175,7 +159,6 @@ public enum BlendingMode {
             return "Linear Dodge (Add)";
         }
 
-
         @Override
         public String toSVGName() {
             return "svg:plus";
@@ -191,7 +174,6 @@ public enum BlendingMode {
         public String toString() {
             return "Overlay";
         }
-
 
         @Override
         public String toSVGName() {
@@ -209,7 +191,6 @@ public enum BlendingMode {
             return "Soft Light";
         }
 
-
         @Override
         public String toSVGName() {
             return "svg:soft-light";
@@ -226,7 +207,6 @@ public enum BlendingMode {
             return "Hard Light";
         }
 
-
         @Override
         public String toSVGName() {
             return "svg:hard-light";
@@ -241,7 +221,6 @@ public enum BlendingMode {
         public String toString() {
             return "Difference";
         }
-
 
         @Override
         public String toSVGName() {
@@ -258,7 +237,6 @@ public enum BlendingMode {
             return "Exclusion";
         }
 
-
         @Override
         public String toSVGName() {
             return "svg:exclusion";
@@ -274,7 +252,6 @@ public enum BlendingMode {
         public String toString() {
             return "Hue";
         }
-
 
         @Override
         public String toSVGName() {
@@ -345,20 +322,3 @@ public enum BlendingMode {
         return NORMAL;
     }
 }
-
-
-//        blendingModes.put("Average", BlendComposite.Average);
-//        blendingModes.put("Red", BlendComposite.Red);
-//        blendingModes.put("Green", BlendComposite.Green);
-//        blendingModes.put("Blue", BlendComposite.Blue);
-//        blendingModes.put("Hard Light", BlendComposite.HardLight);
-//        blendingModes.put("Heat", BlendComposite.Heat);
-//        blendingModes.put("Freeze", BlendComposite.Freeze);
-//        blendingModes.put("Glow", BlendComposite.Glow);
-//        blendingModes.put("Inverse Color Burn", BlendComposite.InverseColorBurn);
-//        blendingModes.put("Inverse Color Dodge", BlendComposite.InverseColorDodge);
-//        blendingModes.put("Negation", BlendComposite.Negation);
-//        blendingModes.put("Reflect", BlendComposite.Reflect);
-//        blendingModes.put("Soft Burn", BlendComposite.SoftBurn);
-//        blendingModes.put("Soft Dodge", BlendComposite.SoftDodge);
-//        blendingModes.put("Stamp", BlendComposite.Stamp);

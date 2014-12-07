@@ -44,11 +44,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 /**
- * Represents an image layer.
+ * An image layer.
  */
 public class ImageLayer extends ContentLayer {
     enum State {NORMAL, EDITING_PREVIEW, EDITING_SHOW_ORIGINAL}
-
 
     private static final long serialVersionUID = 2L;
 
@@ -56,14 +55,9 @@ public class ImageLayer extends ContentLayer {
     private static final int STATE_PREVIEWING_NOT_CHANGED = 1;
     private static final int STATE_PREVIEWING_CHANGED = 2;
 
-
-
     // transient variables from here!
-
     private transient int state = STATE_NORMAL;
-
     private transient BufferedImage bufferedImage = null;
-
     private transient TmpDrawingLayer tmpDrawingLayer;
 
     // for dialog previews
@@ -80,10 +74,8 @@ public class ImageLayer extends ContentLayer {
         }
 
         setBufferedImage(bufferedImage, true);
-
         checkConstructorPostConditions();
     }
-
 
     /**
      * Creates a new layer with the given image and size. Used when an image is pasted into a layer
@@ -211,8 +203,6 @@ public class ImageLayer extends ContentLayer {
      * This method is called when cancel was pressed in the preview dialog
      */
     public void cancelPreviewing() {
-//        System.out.println("ImageLayer.cancelPreviewing CALLED");
-
         restoreOriginalFromPreviewBackup();
         state = STATE_NORMAL;
 
@@ -516,7 +506,6 @@ public class ImageLayer extends ContentLayer {
 
     @Override
     public void mergeDownOn(ImageLayer bellowImageLayer) {
-
         int aX = getTranslationX();
         int aY = getTranslationY();
         BufferedImage bellowImage = bellowImageLayer.getBufferedImage();

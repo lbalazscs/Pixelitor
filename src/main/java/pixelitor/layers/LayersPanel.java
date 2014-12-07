@@ -18,17 +18,20 @@ package pixelitor.layers;
 
 import javax.swing.*;
 import java.awt.Component;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The container for LayerButton objects
  */
-public class LayersPanel extends JPanel {
-    //    private List<LayerButton> layerButtons = new LinkedList<LayerButton>();
+public class LayersPanel extends JLayeredPane {
+    private List<LayerButton> layerButtons = new ArrayList<>();
     private final ButtonGroup buttonGroup = new ButtonGroup();
 
     public LayersPanel() {
-        LayersLayout layersLayout = new LayersLayout(1, 1);
-        setLayout(layersLayout);
+//        LayersLayout layersLayout = new LayersLayout(1, 1);
+//        setLayout(layersLayout);
+
 //        addMouseListener(layersLayout);
 //        addMouseMotionListener(layersLayout);
 //        setBorder(BorderFactory.createLineBorder(Color.BLUE));
@@ -40,7 +43,7 @@ public class LayersPanel extends JPanel {
         }
 
         buttonGroup.add(button);
-        add(button, newLayerIndex);
+        addButton(button, newLayerIndex);
 
         button.setUserInteraction(false);
         button.setSelected(true);
@@ -48,6 +51,28 @@ public class LayersPanel extends JPanel {
 
         revalidate();
         repaint();
+    }
+
+
+    public void addButton(LayerButton button, int index) {
+        layerButtons.add(index, button);
+        button.setSize(button.getPreferredSize());
+//        button.setSize(getWidth(), button.getPreferredSize().height);
+        add(button, JLayeredPane.DEFAULT_LAYER);
+    }
+
+    /**
+     * Override doLayout() so that when the whole window is resized, the
+     * layer buttons are still laid out correctly
+     */
+    @Override
+    public void doLayout() {
+        int parentHeight = getHeight();
+        for (int i = 0; i < layerButtons.size(); i++) {
+            LayerButton button = layerButtons.get(i);
+            int buttonHeight = button.getPreferredSize().height;
+            button.setLocation(0, parentHeight - (i + 1) * buttonHeight);
+        }
     }
 
     public void deleteLayerButton(LayerButton button) {
