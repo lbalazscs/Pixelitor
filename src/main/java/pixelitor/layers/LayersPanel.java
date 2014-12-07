@@ -17,7 +17,6 @@
 package pixelitor.layers;
 
 import javax.swing.*;
-import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,11 +52,8 @@ public class LayersPanel extends JLayeredPane {
         repaint();
     }
 
-
     public void addButton(LayerButton button, int index) {
         layerButtons.add(index, button);
-        button.setSize(button.getPreferredSize());
-//        button.setSize(getWidth(), button.getPreferredSize().height);
         add(button, JLayeredPane.DEFAULT_LAYER);
     }
 
@@ -71,20 +67,23 @@ public class LayersPanel extends JLayeredPane {
         for (int i = 0; i < layerButtons.size(); i++) {
             LayerButton button = layerButtons.get(i);
             int buttonHeight = button.getPreferredSize().height;
+            button.setSize(getWidth(), buttonHeight);
             button.setLocation(0, parentHeight - (i + 1) * buttonHeight);
         }
     }
 
     public void deleteLayerButton(LayerButton button) {
         buttonGroup.remove(button);
+        layerButtons.remove(button);
         remove(button);
         revalidate();
         repaint();
     }
 
     public void changeLayerOrder(int oldIndex, int newIndex) {
-        Component c = getComponent(oldIndex);
-        add(c, newIndex);
+        LayerButton button = layerButtons.remove(oldIndex);
+        layerButtons.add(newIndex, button);
+
         revalidate();
     }
 }
