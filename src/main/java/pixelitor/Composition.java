@@ -506,7 +506,6 @@ public class Composition implements Serializable {
         }
 
         imageChanged(true, true);
-
     }
 
     public void dispose() {
@@ -684,5 +683,14 @@ public class Composition implements Serializable {
 
     public int getCanvasHeight() {
         return canvas.getHeight();
+    }
+
+    /**
+     * The user reordered the layers by dragging
+     */
+    public void dragFinished(Layer layer, int newIndex) {
+        layerList.remove(layer);
+        layerList.add(newIndex, layer);
+        imageChanged(true, true);
     }
 }

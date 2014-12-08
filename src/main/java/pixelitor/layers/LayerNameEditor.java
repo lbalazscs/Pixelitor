@@ -29,8 +29,11 @@ import java.awt.event.MouseEvent;
  * A JTextField for layer names that becomes editable if double-clicked
  */
 public class LayerNameEditor extends JTextField {
-    public LayerNameEditor(final Layer layer) {
+    private LayerButton layerButton;
+
+    public LayerNameEditor(LayerButton layerButton, final Layer layer) {
         super(layer.getName());
+        this.layerButton = layerButton;
         disableEditing();
 
         addMouseListener(new MouseAdapter() {
@@ -79,5 +82,9 @@ public class LayerNameEditor extends JTextField {
     private void disableEditing() {
         setEnabled(false);
         setEditable(false);
+    }
+
+    public LayerButton getLayerButton() {
+        return layerButton;
     }
 }
