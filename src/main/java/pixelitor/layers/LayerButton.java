@@ -39,6 +39,11 @@ public class LayerButton extends JToggleButton {
     private boolean userInteraction = true;
     private final JTextField nameEditor;
 
+    /**
+     * The Y coordinate in the parent when it is not dragging
+     */
+    private int staticY;
+
     @Override
     public String getUIClassID() {
         return uiClassID;
@@ -120,4 +125,11 @@ public class LayerButton extends JToggleButton {
         nameEditor.removeMouseMotionListener(mouseHandler);
     }
 
+    public int getStaticY() {
+        return staticY;
+    }
+
+    public void setStaticY(int staticY) {
+        this.staticY = staticY;
+    }
 }

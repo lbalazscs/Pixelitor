@@ -27,9 +27,10 @@ import java.awt.event.MouseEvent;
 public class LayersMouseHandler extends MouseInputAdapter {
     private static final Cursor MOVE_CURSOR = Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR);
     private static final Cursor DEFAULT_CURSOR = Cursor.getDefaultCursor();
-
+    public static final int DRAG_X_INDENT = 10;
     private LayersPanel layersPanel;
-    private int dragStartY;
+    private int dragStartYInButton;
+    private boolean dragging = false;
 
     public LayersMouseHandler(LayersPanel layersPanel) {
         this.layersPanel = layersPanel;
@@ -37,25 +38,34 @@ public class LayersMouseHandler extends MouseInputAdapter {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        LayerButton layerButton = getLayerButtonFromEvent(e);
-        dragStartY = e.getY() + layerButton.getY();
+        getLayerButtonFromEvent(e); // call is necessary for translating the mouse event
+        dragStartYInButton = e.getY();
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
         LayerButton layerButton = getLayerButtonFromEvent(e);
-        int mouseYInParent = e.getY() + layerButton.getY();
-        layerButton.setLocation(0, mouseYInParent);
-        layersPanel.setDraggedButton(layerButton);
+
+        // since the LayerButton is continuously relocated, e.getY() returns
+        // the mouse relative to the last LayerButton position
+        int newY = layerButton.getY() + e.getY() - dragStartYInButton;
+        layerButton.setLocation(DRAG_X_INDENT, newY);
+
+        layersPanel.updateDrag(layerButton, newY, !dragging);
+        dragging = true;
+
         layerButton.setCursor(MOVE_CURSOR);
         layersPanel.doLayout();
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        LayerButton layerButton = getLayerButtonFromEvent(e);
-        layerButton.setCursor(DEFAULT_CURSOR);
-        layersPanel.setDraggedButton(null);
+        if (dragging) {
+            LayerButton layerButton = getLayerButtonFromEvent(e);
+            layerButton.setCursor(DEFAULT_CURSOR);
+            layersPanel.dragFinished();
+        }
+        dragging = false;
     }
 
     /**
