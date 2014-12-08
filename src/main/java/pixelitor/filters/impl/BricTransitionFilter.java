@@ -29,10 +29,9 @@ import java.awt.image.BufferedImage;
  */
 public class BricTransitionFilter extends AbstractBufferedImageOp {
     public static final int BARS_HORIZONTAL = 1;
-    public static final int BARS_HORIZONTAL_RANDOM = 2;
-    public static final int BARS_VERTICAL = 3;
-    public static final int BARS_VERTICAL_RANDOM = 4;
-    public static final int KALEIDOSCOPE = 5;
+    public static final int BARS_VERTICAL = 2;
+
+    public static final int KALEIDOSCOPE = 5000;
 
     private int type;
     private float progress;
@@ -49,14 +48,8 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
             case BARS_HORIZONTAL:
                 transition = new BarsTransition2D(BarsTransition2D.HORIZONTAL, false);
                 break;
-            case BARS_HORIZONTAL_RANDOM:
-                transition = new BarsTransition2D(BarsTransition2D.HORIZONTAL, true);
-                break;
             case BARS_VERTICAL:
                 transition = new BarsTransition2D(BarsTransition2D.VERTICAL, false);
-                break;
-            case BARS_VERTICAL_RANDOM:
-                transition = new BarsTransition2D(BarsTransition2D.VERTICAL, true);
                 break;
             case KALEIDOSCOPE:
                 transition = new KaleidoscopeTransition2D();

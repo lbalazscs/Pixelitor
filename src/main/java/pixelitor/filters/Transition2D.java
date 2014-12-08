@@ -31,9 +31,7 @@ public class Transition2D extends FilterWithParametrizedGUI {
     private RangeParam progressParam = new RangeParam("Progress", 0, 100, 0);
     private IntChoiceParam type = new IntChoiceParam("Type", new IntChoiceParam.Value[]{
             new IntChoiceParam.Value("Bars (Horizontal)", BricTransitionFilter.BARS_HORIZONTAL),
-            new IntChoiceParam.Value("Bars (Horizontal, Random)", BricTransitionFilter.BARS_HORIZONTAL_RANDOM),
             new IntChoiceParam.Value("Bars (Vertical)", BricTransitionFilter.BARS_VERTICAL),
-            new IntChoiceParam.Value("Bars (Vertical, Random)", BricTransitionFilter.BARS_VERTICAL_RANDOM),
             new IntChoiceParam.Value("Kaleidoscope", BricTransitionFilter.KALEIDOSCOPE),
     });
 
