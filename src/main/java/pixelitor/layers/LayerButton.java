@@ -132,4 +132,8 @@ public class LayerButton extends JToggleButton {
     public void setStaticY(int staticY) {
         this.staticY = staticY;
     }
+
+    public void dragFinished(int newIndex) {
+        layer.dragFinished(newIndex);
+    }
 }

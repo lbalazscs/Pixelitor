@@ -259,4 +259,8 @@ public abstract class Layer implements Serializable {
     public Object getVisibilityAsORAString() {
         return isVisible() ? "visible" : "hidden";
     }
+
+    public void dragFinished(int newIndex) {
+        comp.dragFinished(this, newIndex);
+    }
 }

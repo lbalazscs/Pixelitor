@@ -30,6 +30,7 @@ public class LayersPanel extends JLayeredPane {
     private final ButtonGroup buttonGroup = new ButtonGroup();
     private final LayersMouseHandler mouseHandler;
     private LayerButton draggedButton = null;
+
     public LayersPanel() {
         mouseHandler = new LayersMouseHandler(this);
     }
@@ -144,6 +145,7 @@ public class LayersPanel extends JLayeredPane {
         if (draggedButton != null) {
             remove(draggedButton);
             add(draggedButton, JLayeredPane.DEFAULT_LAYER);
+            draggedButton.dragFinished(layerButtons.indexOf(draggedButton)); // notify the composition
         } else {
             throw new IllegalStateException();
         }
