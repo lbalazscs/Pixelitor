@@ -16,7 +16,9 @@
  */
 package pixelitor.filters.impl;
 
+import com.bric.image.transition.BarsTransition2D;
 import com.bric.image.transition.KaleidoscopeTransition2D;
+import com.bric.image.transition.Transition;
 import com.jhlabs.image.AbstractBufferedImageOp;
 
 import java.awt.Graphics2D;
@@ -26,6 +28,13 @@ import java.awt.image.BufferedImage;
  * A transition filter based on the com.bric.image.transition classes
  */
 public class BricTransitionFilter extends AbstractBufferedImageOp {
+    public static final int BARS_HORIZONTAL = 1;
+    public static final int BARS_HORIZONTAL_RANDOM = 2;
+    public static final int BARS_VERTICAL = 3;
+    public static final int BARS_VERTICAL_RANDOM = 4;
+    public static final int KALEIDOSCOPE = 5;
+
+    private int type;
     private float progress;
 
     @Override
@@ -35,7 +44,26 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
 
         Graphics2D g = dest.createGraphics();
 
-        KaleidoscopeTransition2D transition = new KaleidoscopeTransition2D();
+        Transition transition = null;
+        switch (type) {
+            case BARS_HORIZONTAL:
+                transition = new BarsTransition2D(BarsTransition2D.HORIZONTAL, false);
+                break;
+            case BARS_HORIZONTAL_RANDOM:
+                transition = new BarsTransition2D(BarsTransition2D.HORIZONTAL, true);
+                break;
+            case BARS_VERTICAL:
+                transition = new BarsTransition2D(BarsTransition2D.VERTICAL, false);
+                break;
+            case BARS_VERTICAL_RANDOM:
+                transition = new BarsTransition2D(BarsTransition2D.VERTICAL, true);
+                break;
+            case KALEIDOSCOPE:
+                transition = new KaleidoscopeTransition2D();
+                break;
+            default:
+                throw new IllegalStateException("Unexpected type = " + type);
+        }
 
         transition.paint(g, frameA, frameB, progress);
         g.dispose();
@@ -45,5 +73,9 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
 
     public void setProgress(float progress) {
         this.progress = progress;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 }
