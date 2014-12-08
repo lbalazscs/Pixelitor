@@ -138,4 +138,16 @@ public class ParamSet implements Iterable<GUIParam> {
             }
         }
     }
+
+    /**
+     * A ParamSet can be animated if at least on GUIParam in it can be
+     */
+    public boolean canBeAnimated() {
+        for (GUIParam param : paramList) {
+            if (param.canBeAnimated()) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

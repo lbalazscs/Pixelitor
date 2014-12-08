@@ -44,10 +44,13 @@ public class FilterUtils {
     }
 
     public static FilterWithParametrizedGUI[] getAnimationFiltersSorted() {
-        List<FilterWithParametrizedGUI> animFilters = new ArrayList<>();
+        List<FilterWithParametrizedGUI> animFilters = new ArrayList<>(100);
         for (Filter filter : allFilters) {
             if(filter instanceof FilterWithParametrizedGUI) {
-                animFilters.add((FilterWithParametrizedGUI) filter);
+                FilterWithParametrizedGUI parametrizedFilter = (FilterWithParametrizedGUI) filter;
+                if (parametrizedFilter.getParamSet().canBeAnimated()) {
+                    animFilters.add(parametrizedFilter);
+                }
             }
         }
         FilterWithParametrizedGUI[] filters = animFilters.toArray(new FilterWithParametrizedGUI[animFilters.size()]);
