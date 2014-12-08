@@ -32,6 +32,7 @@ public class Transition2D extends FilterWithParametrizedGUI {
     private IntChoiceParam type = new IntChoiceParam("Type", new IntChoiceParam.Value[]{
             new IntChoiceParam.Value("Bars (Horizontal)", BricTransitionFilter.BARS_HORIZONTAL),
             new IntChoiceParam.Value("Bars (Vertical)", BricTransitionFilter.BARS_VERTICAL),
+            new IntChoiceParam.Value("Fade", BricTransitionFilter.FADE),
             new IntChoiceParam.Value("Kaleidoscope", BricTransitionFilter.KALEIDOSCOPE),
     });
 
