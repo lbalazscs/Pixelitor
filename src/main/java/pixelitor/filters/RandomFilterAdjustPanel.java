@@ -56,7 +56,7 @@ public class RandomFilterAdjustPanel extends AdjustPanel {
         Filter newFilter = null;
         do {
             newFilter = FilterUtils.getRandomFilter();
-        } while (newFilter == op || (newFilter instanceof Fade));
+        } while (newFilter == op || (newFilter instanceof Fade) || (newFilter instanceof RandomFilter));
 
         op = newFilter;
         String filterName = newFilter.getName();
