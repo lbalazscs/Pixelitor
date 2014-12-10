@@ -455,6 +455,7 @@ public class MenuBar extends JMenuBar {
         MenuFactory.createMenuItem(new JHDropShadow(), null, otherFiltersSubmenu);
         MenuFactory.createMenuItem(new Transition2D(), null, otherFiltersSubmenu);
 
+        MenuFactory.createMenuItem(new RandomFilter(), null, otherFiltersSubmenu);
 
         filterMenu.add(otherFiltersSubmenu);
     }
