@@ -57,6 +57,10 @@ public class ColorSwatch extends JPanel {
 //	MouseListener mouseListener = new MouseAdapter() {
 //		@Override
 //		public void mousePressed(MouseEvent e) {
+//			checkPopup(e);
+//		}
+//
+//		public void checkPopup(MouseEvent e) {
 //			if(e.isPopupTrigger()) {
 //				if(menu==null) {
 //					menu = new JPopupMenu();
@@ -67,7 +71,13 @@ public class ColorSwatch extends JPanel {
 //				menu.show(ColorSwatch.this,e.getX(),e.getY());
 //			}
 //		}
+//
+//		@Override
+//	 	public void mouseReleased(MouseEvent e) {
+//			checkPopup(e);
+//		}
 //	};
+
 //	ActionListener actionListener = new ActionListener() {
 //		public void actionPerformed(ActionEvent e) {
 //			Object src = e.getSource();
@@ -82,7 +92,7 @@ public class ColorSwatch extends JPanel {
 //			}
 //		}
 //	};
-//
+
 
 	int w;
 	

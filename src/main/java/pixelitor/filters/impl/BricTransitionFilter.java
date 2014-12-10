@@ -18,6 +18,7 @@ package pixelitor.filters.impl;
 
 import com.bric.image.transition.BarsTransition2D;
 import com.bric.image.transition.BlendTransition2D;
+import com.bric.image.transition.BlindsTransition2D;
 import com.bric.image.transition.KaleidoscopeTransition2D;
 import com.bric.image.transition.Transition;
 import com.jhlabs.image.AbstractBufferedImageOp;
@@ -32,6 +33,8 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
     public static final int BARS_HORIZONTAL = 1;
     public static final int BARS_VERTICAL = 2;
     public static final int FADE = 3;
+    public static final int BLINDS = 4;
+    public static final int BOX = 5;
 
     public static final int KALEIDOSCOPE = 5000;
 
@@ -55,6 +58,12 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
                 break;
             case FADE:
                 transition = new BlendTransition2D();
+                break;
+            case BLINDS:
+                transition = new BlindsTransition2D();
+                break;
+            case BOX:
+                transition = new BlindsTransition2D();
                 break;
             case KALEIDOSCOPE:
                 transition = new KaleidoscopeTransition2D();
