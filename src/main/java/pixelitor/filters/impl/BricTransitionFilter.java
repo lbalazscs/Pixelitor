@@ -16,11 +16,7 @@
  */
 package pixelitor.filters.impl;
 
-import com.bric.image.transition.BarsTransition2D;
-import com.bric.image.transition.BlendTransition2D;
-import com.bric.image.transition.BlindsTransition2D;
-import com.bric.image.transition.KaleidoscopeTransition2D;
-import com.bric.image.transition.Transition;
+import com.bric.image.transition.*;
 import com.jhlabs.image.AbstractBufferedImageOp;
 
 import java.awt.Graphics2D;
@@ -34,12 +30,44 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
     public static final int BARS_VERTICAL = 2;
     public static final int FADE = 3;
     public static final int BLINDS = 4;
-    public static final int BOX = 5;
+    public static final int BOX_IN = 5;
+    public static final int BOX_OUT = 6;
+    public static final int CHECKERBOARD = 7;
+    public static final int CIRCLE_IN = 8;
+    public static final int CIRCLE_OUT = 9;
+    public static final int COLLAPSE = 10;
+    public static final int CURTAIN = 11;
+    public static final int DIAMONDS = 12;
+//    public static final int DOCUMENTARY = 13;
+    public static final int DOTS = 14;
+    public static final int FLURRY = 15;
+    public static final int FUNKY_WIPE = 16;
+    public static final int GOO = 17;
+    public static final int HALFTONE = 18;
+    public static final int KALEIDOSCOPE = 19;
+    public static final int LEVITATE = 20;
+    public static final int MICROSCOPE = 21;
+    public static final int PIVOT = 22;
+    public static final int RADIAL_WIPE = 23;
+    public static final int REVEAL = 24;
+    public static final int ROTATE = 25;
+    public static final int SCALE = 26;
+    public static final int SCRIBBLE = 27;
+    public static final int SCRIBBLE_TWICE = 28;
+    public static final int SPIRAL = 29;
+    public static final int SPIRAL_SPRAWL = 30;
+    public static final int SQUARE_RAIN = 31;
+    public static final int SQUARES = 32;
+    public static final int STARS = 33;
+    public static final int TOSS_IN = 34;
+    public static final int WAVE = 35;
 
-    public static final int KALEIDOSCOPE = 5000;
 
     private int type;
     private float progress;
+
+    GooTransition2D gooTransition2D;
+    SquaresTransition2D squaresTransition2D;
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dest) {
@@ -62,12 +90,112 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
             case BLINDS:
                 transition = new BlindsTransition2D();
                 break;
-            case BOX:
-                transition = new BlindsTransition2D();
+            case BOX_IN:
+                transition = new BoxTransition2D(Transition.IN);
+                break;
+            case BOX_OUT:
+                transition = new BoxTransition2D(Transition.OUT);
                 break;
             case KALEIDOSCOPE:
                 transition = new KaleidoscopeTransition2D();
                 break;
+            case CHECKERBOARD:
+                transition = new CheckerboardTransition2D();
+                break;
+            case CIRCLE_IN:
+                transition = new CircleTransition2D(Transition.IN);
+                break;
+            case CIRCLE_OUT:
+                transition = new CircleTransition2D(Transition.OUT);
+                break;
+            case COLLAPSE:
+                transition = new CollapseTransition2D();
+                break;
+            case CURTAIN:
+                transition = new CurtainTransition2D();
+                break;
+            case DIAMONDS:
+                transition = new DiamondsTransition2D(100);
+                break;
+//            case DOCUMENTARY:
+//                transition = new DocumentaryTransition2D();
+//                break;
+            case DOTS:
+                transition = new DotsTransition2D();
+                break;
+            case FLURRY:
+                transition = new FlurryTransition2D(Transition.OUT);
+                break;
+            case FUNKY_WIPE:
+                transition = new FunkyWipeTransition2D(true);
+                break;
+            case GOO:
+                // must be cached, otherwise randomness is different in each frame
+                if(gooTransition2D == null) {
+                    gooTransition2D = new GooTransition2D();
+                }
+                transition = gooTransition2D;
+                break;
+            case HALFTONE:
+                transition = new HalftoneTransition2D();
+                break;
+            case LEVITATE:
+                transition = new LevitateTransition2D();
+                break;
+            case MICROSCOPE:
+                transition = new MicroscopeTransition2D();
+                break;
+            case PIVOT:
+                transition = new PivotTransition2D(Transition.BOTTOM_LEFT, false);
+                break;
+            case RADIAL_WIPE:
+                transition = new RadialWipeTransition2D();
+                break;
+            case REVEAL:
+                transition = new RevealTransition2D();
+                break;
+            case ROTATE:
+                transition = new RotateTransition2D(Transition.OUT);
+                break;
+            case SCALE:
+                transition = new ScaleTransition2D(Transition.OUT);
+                break;
+            case SCRIBBLE:
+                transition = new ScribbleTransition2D(false);
+                break;
+            case SCRIBBLE_TWICE:
+                transition = new ScribbleTransition2D(true);
+                break;
+            case SPIRAL:
+                transition = new SpiralTransition2D(false);
+                break;
+            case SPIRAL_SPRAWL:
+                transition = new SpiralTransition2D(true);
+                break;
+            case SQUARE_RAIN:
+                // must be cached, otherwise randomness is different in each frame
+                transition = new SquareRainTransition2D();
+                break;
+            case SQUARES:
+                // must be cached, otherwise randomness is different in each frame
+                if(squaresTransition2D == null) {
+                    squaresTransition2D = new SquaresTransition2D();
+                }
+                transition = squaresTransition2D;
+                break;
+            case STARS:
+                transition = new StarsTransition2D();
+                break;
+            case TOSS_IN:
+                transition = new ReversedTransition(new TossTransition2D());
+                progress = 1.0f - progress;
+                break;
+            case WAVE:
+//                transition = new WaveTransition2D();
+                transition = new ReversedTransition(new WaveTransition2D(Transition.LEFT));
+//                progress = 1.0f - progress;
+                break;
+
             default:
                 throw new IllegalStateException("Unexpected type = " + type);
         }

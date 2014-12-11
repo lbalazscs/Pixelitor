@@ -19,6 +19,11 @@
  */
 package com.bric.image.transition;
 
+import com.bric.geom.Clipper;
+import com.bric.geom.RectangularTransform;
+import com.bric.geom.ShapeStringUtils;
+import org.jdesktop.swingx.graphics.BlendComposite;
+
 import java.awt.AlphaComposite;
 import java.awt.Composite;
 import java.awt.Dimension;
@@ -29,10 +34,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-
-import com.bric.geom.Clipper;
-import com.bric.geom.RectangularTransform;
-import com.bric.geom.ShapeStringUtils;
 
 /** This is an instruction to render an image.
  */
@@ -109,25 +110,41 @@ public class ImageInstruction extends Transition2DInstruction {
 
 	@Override
 	public void paint(Graphics2D g, BufferedImage frameA, BufferedImage frameB) {
+		// Laszlo: In Pixelitor frameB is always transparent, the following
+		// code will work only in that case - but the original code used to work
+		// only with opaque images, see http://javagraphics.blogspot.hu/2008/06/crossfades-what-is-and-isnt-possible.html
+
+
 		BufferedImage img = isFirstFrame ? frameA : frameB;
-		
+
 		Composite oldComposite = null;
-		if(opacity!=1) {
+//		if(opacity!=1) {
 			oldComposite = g.getComposite();
-			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,opacity));
-		}
+//			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+//			g.setComposite(new CrossFadeToTransparentComposite(opacity));
+//			g.setComposite(new AddComposite(opacity));
+//			g.setComposite(BlendComposite.Src.derive(opacity));
+
+			if(isFirstFrame) {
+				g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+			} else {
+//				g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OUT, opacity));
+				g.setComposite(BlendComposite.CrossFade.derive(opacity));
+			}
+
+		//}
 
 		Shape oldClipping = null;
 		if(clipping!=null) {
 			oldClipping = g.getClip();
-			Clipper.clip(g,clipping);
+			Clipper.clip(g, clipping);
 		}
-		
+
 		g.drawImage(img,transform,null);
-		
+
 		if(clipping!=null)
 			g.setClip(oldClipping);
-		
+
 		if(opacity!=1) {
 			g.setComposite(oldComposite);
 		}

@@ -16,6 +16,7 @@
  */
 package pixelitor;
 
+import pixelitor.filters.Transition2D;
 import pixelitor.io.OpenSaveManager;
 import pixelitor.layers.Layers;
 import pixelitor.tools.FgBgColorSelector;
@@ -113,8 +114,8 @@ public class Pixelitor {
             return;
         }
 
-//        BrokenGlass op = new BrokenGlass();
-//        op.actionPerformed(null);
+        Transition2D op = new Transition2D();
+        op.actionPerformed(null);
 
 //        Composition comp = AppLogic.getActiveComp();
 //        if(comp != null) {

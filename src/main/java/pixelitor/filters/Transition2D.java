@@ -28,14 +28,43 @@ import java.awt.image.BufferedImage;
  *
  */
 public class Transition2D extends FilterWithParametrizedGUI {
-    private RangeParam progressParam = new RangeParam("Progress", 0, 100, 0);
+    private RangeParam progressParam = new RangeParam("Progress (%)", 0, 100, 0);
     private IntChoiceParam type = new IntChoiceParam("Type", new IntChoiceParam.Value[]{
+            new IntChoiceParam.Value("Box IN", BricTransitionFilter.BOX_IN),
+            new IntChoiceParam.Value("Box OUT", BricTransitionFilter.BOX_OUT),
             new IntChoiceParam.Value("Bars (Horizontal)", BricTransitionFilter.BARS_HORIZONTAL),
             new IntChoiceParam.Value("Bars (Vertical)", BricTransitionFilter.BARS_VERTICAL),
-            new IntChoiceParam.Value("Box", BricTransitionFilter.BOX),
-//            new IntChoiceParam.Value("Fade", BricTransitionFilter.FADE),
+            new IntChoiceParam.Value("Checkerboard", BricTransitionFilter.CHECKERBOARD),
+            new IntChoiceParam.Value("Circle IN", BricTransitionFilter.CIRCLE_IN),
+            new IntChoiceParam.Value("Circle OUT", BricTransitionFilter.CIRCLE_OUT),
+            new IntChoiceParam.Value("Collapse", BricTransitionFilter.COLLAPSE),
+            new IntChoiceParam.Value("Curtain", BricTransitionFilter.CURTAIN),
+            new IntChoiceParam.Value("Diamonds", BricTransitionFilter.DIAMONDS),
+//            new IntChoiceParam.Value("Documentary", BricTransitionFilter.DOCUMENTARY),
+            new IntChoiceParam.Value("Dots", BricTransitionFilter.DOTS),
+            new IntChoiceParam.Value("Exploding Squares", BricTransitionFilter.SQUARES),
+            new IntChoiceParam.Value("Fade", BricTransitionFilter.FADE),
+            new IntChoiceParam.Value("Flurry", BricTransitionFilter.FLURRY),
+            new IntChoiceParam.Value("Funky Wipe", BricTransitionFilter.FUNKY_WIPE),
+            new IntChoiceParam.Value("Goo", BricTransitionFilter.GOO),
+            new IntChoiceParam.Value("Halftone", BricTransitionFilter.HALFTONE),
             new IntChoiceParam.Value("Kaleidoscope", BricTransitionFilter.KALEIDOSCOPE),
+            new IntChoiceParam.Value("Levitate", BricTransitionFilter.LEVITATE),
+            new IntChoiceParam.Value("Microscope", BricTransitionFilter.MICROSCOPE),
+            new IntChoiceParam.Value("Pivot", BricTransitionFilter.PIVOT),
+            new IntChoiceParam.Value("Radial Wipe", BricTransitionFilter.RADIAL_WIPE),
+            new IntChoiceParam.Value("Reveal", BricTransitionFilter.REVEAL),
+            new IntChoiceParam.Value("Rotate", BricTransitionFilter.ROTATE),
+            new IntChoiceParam.Value("Scale", BricTransitionFilter.SCALE),
+            new IntChoiceParam.Value("Scribble", BricTransitionFilter.SCRIBBLE),
+            new IntChoiceParam.Value("Scribble Twice", BricTransitionFilter.SCRIBBLE_TWICE),
+            new IntChoiceParam.Value("Spiral", BricTransitionFilter.SPIRAL),
+            new IntChoiceParam.Value("Spiral Sprawl", BricTransitionFilter.SPIRAL_SPRAWL),
+            new IntChoiceParam.Value("Square Rain", BricTransitionFilter.SQUARE_RAIN),
+            new IntChoiceParam.Value("Stars", BricTransitionFilter.STARS),
+            new IntChoiceParam.Value("Toss In", BricTransitionFilter.TOSS_IN),
             new IntChoiceParam.Value("Venetian Blinds", BricTransitionFilter.BLINDS),
+            new IntChoiceParam.Value("Wave", BricTransitionFilter.WAVE),
     });
 
     private BricTransitionFilter filter;

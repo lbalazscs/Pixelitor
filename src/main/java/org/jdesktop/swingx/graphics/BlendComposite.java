@@ -99,6 +99,7 @@ public final class BlendComposite implements Composite {
      * @author Romain Guy <romain.guy@mac.com>
      */
     public enum BlendingMode {
+        CrossFade,
         AVERAGE,
         MULTIPLY,
         SCREEN,
@@ -132,6 +133,7 @@ public final class BlendComposite implements Composite {
         LUMINOSITY
     }
 
+    public static final BlendComposite CrossFade = new BlendComposite(BlendingMode.CrossFade);
     public static final BlendComposite Average = new BlendComposite(BlendingMode.AVERAGE);
     public static final BlendComposite Multiply = new BlendComposite(BlendingMode.MULTIPLY);
     public static final BlendComposite Screen = new BlendComposite(BlendingMode.SCREEN);
@@ -437,6 +439,16 @@ public final class BlendComposite implements Composite {
 
         public static Blender getBlenderFor(BlendComposite composite) {
             switch (composite.getMode()) {
+                case CrossFade:
+                    return new Blender() {
+                        @Override
+                        public void blend(int[] src, int[] dst, int[] result) {
+                            result[0] = src[0];
+                            result[1] = src[1];
+                            result[2] = src[2];
+                            result[3] = src[3];
+                        }
+                    };
                 case ADD:
                     return new Blender() {
                         @Override
