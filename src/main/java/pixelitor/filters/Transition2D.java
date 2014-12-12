@@ -30,13 +30,13 @@ import java.awt.image.BufferedImage;
 public class Transition2D extends FilterWithParametrizedGUI {
     private RangeParam progressParam = new RangeParam("Progress (%)", 0, 100, 0);
     private IntChoiceParam type = new IntChoiceParam("Type", new IntChoiceParam.Value[]{
-            new IntChoiceParam.Value("Box IN", BricTransitionFilter.BOX_IN),
-            new IntChoiceParam.Value("Box OUT", BricTransitionFilter.BOX_OUT),
+            new IntChoiceParam.Value("Box In", BricTransitionFilter.BOX_IN),
+            new IntChoiceParam.Value("Box Out", BricTransitionFilter.BOX_OUT),
             new IntChoiceParam.Value("Bars (Horizontal)", BricTransitionFilter.BARS_HORIZONTAL),
             new IntChoiceParam.Value("Bars (Vertical)", BricTransitionFilter.BARS_VERTICAL),
             new IntChoiceParam.Value("Checkerboard", BricTransitionFilter.CHECKERBOARD),
-            new IntChoiceParam.Value("Circle IN", BricTransitionFilter.CIRCLE_IN),
-            new IntChoiceParam.Value("Circle OUT", BricTransitionFilter.CIRCLE_OUT),
+            new IntChoiceParam.Value("Circle In", BricTransitionFilter.CIRCLE_IN),
+            new IntChoiceParam.Value("Circle Out", BricTransitionFilter.CIRCLE_OUT),
             new IntChoiceParam.Value("Collapse", BricTransitionFilter.COLLAPSE),
             new IntChoiceParam.Value("Curtain", BricTransitionFilter.CURTAIN),
             new IntChoiceParam.Value("Diamonds", BricTransitionFilter.DIAMONDS),

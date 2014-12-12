@@ -63,7 +63,9 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
     private final RangeParam shadowSoftnessParam = new RangeParam("Shadow Softness", 0, 10, 3);
 
     private final Random rand;
-    private long seed;
+
+
+    private static long seed = System.nanoTime();
 
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionParam reseedAction = new ReseedNoiseActionParam(new ActionListener() {
@@ -89,7 +91,6 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
                 reseedAction
         ));
 
-        seed = System.nanoTime();
         rand = new Random(seed);
     }
 

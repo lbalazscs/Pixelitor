@@ -19,11 +19,12 @@
  */
 package com.bric.image.transition;
 
+import com.bric.geom.TransformUtils;
+import net.jafama.FastMath;
+
 import java.awt.Dimension;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
-
-import com.bric.geom.TransformUtils;
 
 /** This slides the incoming frame in a wavy motion, similar to a flag
  * whipping in the wind. Here are playback samples:
@@ -98,8 +99,8 @@ public class WaveTransition2D extends Transition2D {
 		for(int a = 0; a<i.length; a++) {
 			float z1 = ((float)(a-1))/((float)(i.length-1));
 			float z2 = ((float)(a))/((float)(i.length-1));
-			AffineTransform transform = new AffineTransform();
-			float wave = (float)(.3*Math.sin(1+3*z1+8*progress));
+			AffineTransform transform;
+			float wave = (float)(.3* FastMath.sin(1 + 3 * z1 + 8 * progress));
 			float dip = 1-.5f*(2*progress-1)*(2*progress-1)*(2*progress-1)-.5f;
 			
 			
