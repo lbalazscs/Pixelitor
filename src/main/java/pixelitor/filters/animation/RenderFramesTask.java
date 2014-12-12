@@ -22,12 +22,14 @@ import pixelitor.ImageComponents;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.ParamSetState;
+import pixelitor.utils.Dialogs;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 
 class RenderFramesTask extends SwingWorker<Void, Void> {
     private FilterWithParametrizedGUI filter;
@@ -36,25 +38,40 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
     private int numFrames;
     private int millisBetweenFrames;
     private Interpolation interpolation;
+    private TweenOutputType outputType;
+    private File output;
 
-    public RenderFramesTask(FilterWithParametrizedGUI filter, ParamSetState initialState, ParamSetState finalState, int numFrames, int millisBetweenFrames, Interpolation interpolation) {
+    public RenderFramesTask(FilterWithParametrizedGUI filter, ParamSetState initialState, ParamSetState finalState, int numFrames, int millisBetweenFrames, Interpolation interpolation, TweenOutputType outputType, File output) {
         this.filter = filter;
         this.initialState = initialState;
         this.finalState = finalState;
         this.numFrames = numFrames;
         this.millisBetweenFrames = millisBetweenFrames;
         this.interpolation = interpolation;
-
-        System.out.println("RenderFramesTask::RenderFramesTask: interpolation = " + interpolation);
+        this.outputType = outputType;
+        this.output = output;
     }
 
     @Override
     protected Void doInBackground() throws Exception {
+        try {
+            renderFrames();
+        } catch (final Exception e) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    Dialogs.showExceptionDialog(e);
+                }
+            });
+        }
+
+        return null;
+    }
+
+    private void renderFrames() {
         double[] time = new double[numFrames];
         double[] progress = new double[numFrames];
 
-        File file = new File("output.gif");
-        AnimationWriter animationWriter = new AnimGIFWriter(file, millisBetweenFrames);
+        AnimationWriter animationWriter = outputType.getAnimationWriter(output, millisBetweenFrames);
         boolean canceled = false;
 
         for (int i = 0; i < numFrames; i++) {
@@ -79,7 +96,14 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
 
             BufferedImage image = ImageComponents.getActiveCompositeImage();
             image = ImageUtils.copyImage(image); // TODO is this necessary?
-            animationWriter.addFrame(image);
+
+            try {
+                animationWriter.addFrame(image);
+            } catch (IOException e) {
+                canceled = true;
+                Dialogs.showExceptionDialog(e);
+                break;
+            }
         }
         setProgress(100);
         ImageComponents.getActiveComp().getActiveImageLayer().cancelPreviewing();
@@ -89,8 +113,6 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         } else {
             animationWriter.finish();
         }
-
-        return null;
     }
 
     @Override

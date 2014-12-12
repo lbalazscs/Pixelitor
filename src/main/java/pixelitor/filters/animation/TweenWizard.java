@@ -26,6 +26,7 @@ import pixelitor.utils.OKCancelDialog;
 import javax.swing.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 
 /**
  * Wizard for keyframe-based animations
@@ -39,6 +40,8 @@ public class TweenWizard {
     private int numFrames;
     private int millisBetweenFrames;
     private Interpolation interpolation;
+    private TweenOutputType outputType;
+    private File output; // file or directory
 
     /**
      * Show the wizard in a dialog
@@ -68,8 +71,8 @@ public class TweenWizard {
                     dispose();
                     calculateAnimation();
                 } else {
-                    JPanel panel = nextState.getPanel(TweenWizard.this);
-                    dialog.changeFormPanel(panel);
+                    JComponent panel = nextState.getPanel(TweenWizard.this);
+                    dialog.changeForm(panel);
                     dialog.setHeaderMessage(nextState.getHelpMessage());
                     wizardState = nextState;
                 }
@@ -107,7 +110,7 @@ public class TweenWizard {
         progressMonitor.setProgress(0);
 
 
-        final RenderFramesTask task = new RenderFramesTask(filter, initialState, finalState, numFrames, millisBetweenFrames, interpolation);
+        final RenderFramesTask task = new RenderFramesTask(filter, initialState, finalState, numFrames, millisBetweenFrames, interpolation, outputType, output);
         task.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
@@ -146,6 +149,14 @@ public class TweenWizard {
 
     public void setInterpolation(Interpolation interpolation) {
         this.interpolation = interpolation;
+    }
+
+    public void setOutputType(TweenOutputType outputType) {
+        this.outputType = outputType;
+    }
+
+    public void setOutput(File output) {
+        this.output = output;
     }
 }
 

@@ -16,15 +16,34 @@
  */
 package pixelitor.filters.animation;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 
-public interface AnimationWriter {
-    void addFrame(BufferedImage image) throws IOException;
-    void finish();
+public class PNGFileSequenceWriter implements AnimationWriter {
+    private File outputDir;
+    int fileSequenceNumber;
 
-    /**
-     * Called if the animation rendering was cancelled
-     */
-    void cancel();
+    public PNGFileSequenceWriter(File outputDir) {
+        this.outputDir = outputDir;
+    }
+
+    @Override
+    public void addFrame(BufferedImage image) throws IOException {
+        String fileName = String.format("frame_%05d.png", fileSequenceNumber);
+        fileSequenceNumber++;
+        File outputFile = new File(outputDir, fileName);
+        ImageIO.write(image, "PNG", outputFile);
+    }
+
+    @Override
+    public void finish() {
+
+    }
+
+    @Override
+    public void cancel() {
+
+    }
 }

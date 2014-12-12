@@ -160,17 +160,18 @@ public abstract class OKCancelDialog extends JDialog {
             remove(messageLabel);
         }
         messageLabel = new JLabel(message);
+        messageLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
         add(messageLabel, BorderLayout.NORTH);
         revalidate();
     }
 
-    public void changeFormPanel(JPanel panel) {
+    public void changeForm(JComponent form) {
         if(scrollPane != null) {
             remove(scrollPane);
         } else {
             remove(formPanel);
         }
-        formPanel = panel;
+        formPanel = form;
         addForm(formPanel, true);
         revalidate();
     }

@@ -16,6 +16,7 @@
  */
 package pixelitor.filters.animation;
 
+import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.ImageComponents;
 import pixelitor.filters.FilterUtils;
 import pixelitor.filters.FilterWithParametrizedGUI;
@@ -25,6 +26,7 @@ import pixelitor.filters.gui.ParamSetState;
 
 import javax.swing.*;
 import java.awt.FlowLayout;
+import java.io.File;
 
 /**
  * The states of the keyframe animation export dialog
@@ -44,7 +46,7 @@ public enum TweenWizardState {
         }
 
         @Override
-        JPanel getPanel(final TweenWizard wizard) {
+        JComponent getPanel(final TweenWizard wizard) {
             JPanel p = new JPanel(new FlowLayout());
             p.add(new JLabel("Select Filter:"));
             filtersCB = new JComboBox<>(FilterUtils.getAnimationFiltersSorted());
@@ -64,7 +66,7 @@ public enum TweenWizardState {
     }, INITIAL_FILTER_SETTINGS {
         @Override
         String getHelpMessage() {
-            return "<html> Select the <b>initial</b> settings for the filter";
+            return "<html> Select the <b><font color=blue size=+1>initial</font></b> settings for the filter";
         }
 
         @Override
@@ -73,7 +75,7 @@ public enum TweenWizardState {
         }
 
         @Override
-        JPanel getPanel(TweenWizard wizard) {
+        JComponent getPanel(TweenWizard wizard) {
             FilterWithParametrizedGUI filter = wizard.getFilter();
             ImageComponents.getActiveComp().getActiveImageLayer().startPreviewing();
             AdjustPanel adjustPanel = filter.getAdjustPanel();
@@ -98,16 +100,16 @@ public enum TweenWizardState {
     }, FINAL_FILTER_SETTINGS {
         @Override
         String getHelpMessage() {
-            return "<html> Select the <b>final</b> settings for the filter.";
+            return "<html> Select the <b><font color=green size=+1>final</font></b> settings for the filter.";
         }
 
         @Override
         TweenWizardState getNext() {
-            return SELECT_DURATION;
+            return SELECT_OUTPUT;
         }
 
         @Override
-        JPanel getPanel(TweenWizard wizard) {
+        JComponent getPanel(TweenWizard wizard) {
             FilterWithParametrizedGUI filter = wizard.getFilter();
             AdjustPanel adjustPanel = filter.getAdjustPanel();
             return adjustPanel;
@@ -129,6 +131,49 @@ public enum TweenWizardState {
             ParamSet paramSet = wizard.getFilter().getParamSet();
             wizard.setFinalState(paramSet.copyState());
         }
+    }, SELECT_OUTPUT {
+
+        private EnumComboBoxModel<TweenOutputType> model;
+
+        @Override
+        String getHelpMessage() {
+            return "<html> Select the output type";
+        }
+
+        @Override
+        TweenWizardState getNext() {
+            return SELECT_DURATION;
+        }
+
+        @Override
+        JComponent getPanel(TweenWizard wizard) {
+            model = new EnumComboBoxModel(TweenOutputType.class);
+            JComboBox cb = new JComboBox(model);
+            JPanel p = new JPanel(new FlowLayout());
+            p.add(cb);
+
+            return p;
+        }
+
+        @Override
+        void onWizardCancelled(TweenWizard wizard) {
+
+        }
+
+        @Override
+        void onMovingToTheNext(TweenWizard wizard) {
+            TweenOutputType type = model.getSelectedItem();
+            wizard.setOutputType(type);
+            // TODO
+            File output;
+            if(type == TweenOutputType.ANIM_GIF) {
+                output = new File("output.gif");
+            } else {
+                output = new File("anim_output");
+            }
+            type.checkFile(output);
+            wizard.setOutput(output);
+        }
     }, SELECT_DURATION {
         DurationPanel durationPanel;
 
@@ -143,7 +188,7 @@ public enum TweenWizardState {
         }
 
         @Override
-        JPanel getPanel(TweenWizard wizard) {
+        JComponent getPanel(TweenWizard wizard) {
             durationPanel = new DurationPanel(wizard);
             return durationPanel;
         }
@@ -164,7 +209,7 @@ public enum TweenWizardState {
 
     abstract TweenWizardState getNext();
 
-    abstract JPanel getPanel(TweenWizard wizard);
+    abstract JComponent getPanel(TweenWizard wizard);
 
     /**
      * Called if the wizard was cancelled while in this state

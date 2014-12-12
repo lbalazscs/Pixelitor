@@ -6,11 +6,10 @@ import java.awt.image.ColorModel;
 
 /**
  * This special composite solves the problem described at http://javagraphics.blogspot.hu/2008/06/crossfades-what-is-and-isnt-possible.html
- * while assuming that the second image is all transparent
+ * TODO it is not working with all image types.
  */
-public final class CrossFadeToTransparentComposite extends RGBComposite {
-
-    public CrossFadeToTransparentComposite(float alpha) {
+public class CrossFadeComposite extends RGBComposite {
+    public CrossFadeComposite(float alpha) {
         super(alpha);
     }
 
