@@ -211,8 +211,7 @@ public class ImageTests {
 
         addTextLayer(comp, "this should at the top", -100);
         addTextLayer(comp, "this should be selected", 50);
-        comp.moveActiveLayerDown();
-
+        comp.moveActiveLayer(false);
 
 //        ic.moveActiveLayerDown();
 //        ic.flattenImage();

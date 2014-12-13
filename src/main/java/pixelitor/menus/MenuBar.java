@@ -49,8 +49,7 @@ import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.DeleteActiveLayerAction;
 import pixelitor.layers.Layer;
-import pixelitor.layers.LayerDownAction;
-import pixelitor.layers.LayerUpAction;
+import pixelitor.layers.LayerMoveAction;
 import pixelitor.layers.TextLayer;
 import pixelitor.menus.edit.CopyAction;
 import pixelitor.menus.edit.CopyType;
@@ -624,9 +623,9 @@ public class MenuBar extends JMenuBar {
     private static void initLayerStackSubmenu(JMenu layersMenu) {
         JMenu layerStackSubmenu = new JMenu("Layer Stack");
 
-        MenuFactory.createMenuItem(LayerUpAction.INSTANCE, KeyStroke.getKeyStroke(']', InputEvent.CTRL_MASK), layerStackSubmenu);
+        MenuFactory.createMenuItem(LayerMoveAction.INSTANCE_UP, KeyStroke.getKeyStroke(']', InputEvent.CTRL_MASK), layerStackSubmenu);
 
-        MenuFactory.createMenuItem(LayerDownAction.INSTANCE, KeyStroke.getKeyStroke('[', InputEvent.CTRL_MASK), layerStackSubmenu);
+        MenuFactory.createMenuItem(LayerMoveAction.INSTANCE_DOWN, KeyStroke.getKeyStroke('[', InputEvent.CTRL_MASK), layerStackSubmenu);
 
         AbstractAction moveToLast = new AbstractAction("Layer to Top") {
             @Override

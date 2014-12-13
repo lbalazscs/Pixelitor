@@ -36,9 +36,7 @@ public class LayersContainer extends JPanel implements ImageSwitchListener {
         setLayout(new BorderLayout());
 
         scrollPane = new JScrollPane();
-
         add(scrollPane, BorderLayout.CENTER);
-
         add(LayerBlendingModePanel.INSTANCE, BorderLayout.NORTH);
 
         JPanel southPanel = new JPanel();
@@ -47,14 +45,14 @@ public class LayersContainer extends JPanel implements ImageSwitchListener {
         JButton addButton = createButtonFromAction(AddNewLayerAction.INSTANCE);
         JButton deleteButton = createButtonFromAction(DeleteActiveLayerAction.INSTANCE);
 
-        JButton layerUpButton = createButtonFromAction(LayerUpAction.INSTANCE);
-        JButton layerDownButton = createButtonFromAction(LayerDownAction.INSTANCE);
+//        JButton layerUpButton = createButtonFromAction(LayerMoveAction.INSTANCE_UP);
+//        JButton layerDownButton = createButtonFromAction(LayerMoveAction.INSTANCE_DOWN);
 
         southPanel.add(addButton);
         southPanel.add(deleteButton);
-        southPanel.add(Box.createHorizontalGlue());
-        southPanel.add(layerUpButton);
-        southPanel.add(layerDownButton);
+//        southPanel.add(Box.createHorizontalGlue());
+//        southPanel.add(layerUpButton);
+//        southPanel.add(layerDownButton);
 
         add(southPanel, BorderLayout.SOUTH);
 

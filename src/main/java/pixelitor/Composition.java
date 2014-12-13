@@ -282,22 +282,16 @@ public class Composition implements Serializable {
         }
     }
 
-
-    public void moveActiveLayerUp() {
+    public void moveActiveLayer(boolean up) {
         int oldIndex = layerList.indexOf(activeLayer);
-        swapLayers(oldIndex, oldIndex + 1, false);
-    }
-
-    public void moveActiveLayerDown() {
-        int oldIndex = layerList.indexOf(activeLayer);
-        swapLayers(oldIndex, oldIndex - 1, false);
+        int newIndex = up ? oldIndex + 1 : oldIndex - 1;
+        swapLayers(oldIndex, newIndex, false);
     }
 
     public void moveActiveLayerToTop() {
         int oldIndex = layerList.indexOf(activeLayer);
         swapLayers(oldIndex, layerList.size() - 1, false);
     }
-
 
     public void moveActiveLayerToBottom() {
         int oldIndex = layerList.indexOf(activeLayer);

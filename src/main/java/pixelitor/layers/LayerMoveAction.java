@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2014 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,13 +27,16 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /**
- * An Action that moves tha active layer down in the layer stack
+ * An Action that moves the active layer up or down in the layer stack
  */
-public class LayerDownAction extends AbstractAction implements ImageSwitchListener, LayerChangeListener {
-    public static final LayerDownAction INSTANCE = new LayerDownAction();
+public class LayerMoveAction extends AbstractAction implements ImageSwitchListener, LayerChangeListener {
+    public static final LayerMoveAction INSTANCE_UP = new LayerMoveAction(true);
+    public static final LayerMoveAction INSTANCE_DOWN = new LayerMoveAction(false);
+    private boolean up;
 
-    private LayerDownAction() {
-        super("Lower Layer", IconUtils.getSouthArrowIcon());
+    private LayerMoveAction(boolean up) {
+        super(getName(up), getIcon(up));
+        this.up = up;
         setEnabled(false);
         ImageComponents.addImageSwitchListener(this);
         AppLogic.addLayerChangeListener(this);
@@ -42,7 +45,7 @@ public class LayerDownAction extends AbstractAction implements ImageSwitchListen
     @Override
     public void actionPerformed(ActionEvent e) {
         Composition comp = ImageComponents.getActiveComp();
-        comp.moveActiveLayerDown();
+        comp.moveActiveLayer(up);
     }
 
     @Override
@@ -53,38 +56,55 @@ public class LayerDownAction extends AbstractAction implements ImageSwitchListen
     @Override
     public void newImageOpened() {
         Composition comp = ImageComponents.getActiveComp();
-        checkIndex(comp);
+        enableDisable(comp);
     }
 
-    private void checkIndex(Composition comp) {
+    public void enableDisable(Composition comp) {
         if (comp != null) {
             int activeLayerIndex = comp.getActiveLayerIndex();
-            if (activeLayerIndex > 0) {
-                setEnabled(true);
+            if (up) {
+                int nrLayers = comp.getNrLayers();
+                if (activeLayerIndex < nrLayers - 1) {
+                    setEnabled(true);
+                } else {
+                    setEnabled(false);
+                }
             } else {
-                setEnabled(false);
+                if (activeLayerIndex > 0) {
+                    setEnabled(true);
+                } else {
+                    setEnabled(false);
+                }
             }
         }
     }
 
     @Override
     public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
-        checkIndex(newIC.getComp());
+        enableDisable(newIC.getComp());
     }
 
     @Override
     public void activeCompLayerCountChanged(Composition comp, int newLayerCount) {
-        checkIndex(comp);
+        enableDisable(comp);
     }
 
     @Override
     public void activeLayerChanged(Layer newActiveLayer) {
         Composition comp = newActiveLayer.getComposition();
-        checkIndex(comp);
+        enableDisable(comp);
     }
 
     @Override
     public void layerOrderChanged(Composition comp) {
-        checkIndex(comp);
+        enableDisable(comp);
+    }
+
+    private static Icon getIcon(boolean up) {
+        return up ? IconUtils.getNorthArrowIcon() : IconUtils.getSouthArrowIcon();
+    }
+
+    private static String getName(boolean up) {
+        return up ? "Raise Layer" : "Lower Layer";
     }
 }

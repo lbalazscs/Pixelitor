@@ -16,6 +16,9 @@
  */
 package pixelitor.layers;
 
+import pixelitor.Composition;
+import pixelitor.ImageComponents;
+
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -108,10 +111,6 @@ public class LayersPanel extends JLayeredPane {
         }
     }
 
-    /**
-     * Decides whether two layer buttons should be swapped in the layerButtons list
-     * and swaps them if necessary
-     */
     private void swapIfNecessary(int dragY) {
         int staticY = draggedButton.getStaticY();
         int deltaY = dragY - staticY;
@@ -146,10 +145,16 @@ public class LayersPanel extends JLayeredPane {
             remove(draggedButton);
             add(draggedButton, JLayeredPane.DEFAULT_LAYER);
             draggedButton.dragFinished(layerButtons.indexOf(draggedButton)); // notify the composition
+
         } else {
             throw new IllegalStateException();
         }
         draggedButton = null;
         doLayout();
+
+        // notify the raise/lower layer menu items
+        Composition comp = ImageComponents.getActiveComp();
+        LayerMoveAction.INSTANCE_UP.enableDisable(comp);
+        LayerMoveAction.INSTANCE_DOWN.enableDisable(comp);
     }
 }
