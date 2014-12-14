@@ -248,12 +248,15 @@ public class OpenSaveManager {
             public void run() {
                 try {
                     Composition comp;
-                    if(type.equals("pxc")) {
-                        comp = deserializeComposition(selectedFile);
-                    } else if(type.equals("ora")) {
-                        comp = OpenRaster.readOpenRaster(selectedFile);
-                    } else {
-                        throw new IllegalStateException("type = " + type);
+                    switch (type) {
+                        case "pxc":
+                            comp = deserializeComposition(selectedFile);
+                            break;
+                        case "ora":
+                            comp = OpenRaster.readOpenRaster(selectedFile);
+                            break;
+                        default:
+                            throw new IllegalStateException("type = " + type);
                     }
                     PixelitorWindow.getInstance().addLayeredComposition(comp, selectedFile);
                 } catch (NotPxcFormatException | ParserConfigurationException | IOException | SAXException e) {

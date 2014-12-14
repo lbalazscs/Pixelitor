@@ -97,7 +97,7 @@ public class TextParam extends AbstractGUIParam {
     @Override
     public void randomize() {
         dontTrigger = true;
-        setValue(new Date().toString()); // TODO
+        setValue(new Date().toString());
         dontTrigger = false;
     }
 

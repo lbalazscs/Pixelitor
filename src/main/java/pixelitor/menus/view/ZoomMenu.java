@@ -88,7 +88,7 @@ public class ZoomMenu extends JMenu {
     /**
      * Called when the active image has changed
      */
-    public void zoomChanged(ZoomLevel zoomLevel) {
+    public static void zoomChanged(ZoomLevel zoomLevel) {
         zoomLevel.getMenuItem().setSelected(true);
     }
 }

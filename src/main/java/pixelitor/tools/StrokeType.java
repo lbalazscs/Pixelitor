@@ -192,6 +192,7 @@ public enum StrokeType {
             return shapeType.getShape(new UserDrag(0, 0, size, size));
         }
 
+        @Override
         public void setShapeType(ShapeType shapeType) {
             this.shapeType = shapeType;
         }

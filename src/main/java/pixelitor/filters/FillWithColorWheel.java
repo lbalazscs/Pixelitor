@@ -78,7 +78,7 @@ public class FillWithColorWheel extends FilterWithParametrizedGUI {
         return dest;
     }
 
-    private void calculateLine(int[] destData, int width, int cx, int cy, float hueShift, float saturation, float brightness, int y) {
+    private static void calculateLine(int[] destData, int width, int cx, int cy, float hueShift, float saturation, float brightness, int y) {
         for (int x = 0; x < width; x++) {
             double yDiff = (double) (cy - y);
             double xDiff = (double) x - cx;

@@ -172,11 +172,6 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
     }
 
     @Override
-    public boolean mouseClicked(MouseEvent e, ImageComponent ic) {
-        return false;
-    }
-
-    @Override
     public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent callingIC, AffineTransform unscaledTransform) {
         if (ended) {
             return;

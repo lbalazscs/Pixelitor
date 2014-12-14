@@ -23,15 +23,13 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 /**
- * A temporary drawing layer used bu the brush and gradient tools
+ * A temporary drawing layer used by the brush and gradient tools.
+ * It allows these tools to use blending modes.
  */
 public class TmpDrawingLayer {
     private BufferedImage image;
     private final Graphics2D g;
     private final Composite composite;
-
-    private final int tmpDrawingX = 0;
-    private final int tmpDrawingY = 0;
 
     public TmpDrawingLayer(ImageLayer imageLayer, Composite composite, boolean respectSelection) {
         this.composite = composite;
@@ -71,8 +69,6 @@ public class TmpDrawingLayer {
         }
 
         g.setComposite(composite);
-        g.drawImage(image, tmpDrawingX + translationX, tmpDrawingY + translationY, null);
+        g.drawImage(image, translationX, translationY, null);
     }
-
-
 }

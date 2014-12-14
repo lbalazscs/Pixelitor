@@ -147,8 +147,9 @@ public enum TweenWizardState {
 
         @Override
         JComponent getPanel(TweenWizard wizard) {
+            //noinspection unchecked
             model = new EnumComboBoxModel(TweenOutputType.class);
-            JComboBox cb = new JComboBox(model);
+            JComboBox<TweenOutputType> cb = new JComboBox<>(model);
             JPanel p = new JPanel(new FlowLayout());
             p.add(cb);
 

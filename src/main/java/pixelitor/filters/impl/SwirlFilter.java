@@ -23,18 +23,22 @@ public class SwirlFilter extends TransformFilter implements SwirlMethod {
     private float rotateResultAngle;
     private float pinchBulgeAmount;
 
+    @Override
     public void setCenterX(float centerX) {
         this.centerX = centerX;
     }
 
+    @Override
     public void setCenterY(float centerY) {
         this.centerY = centerY;
     }
 
+    @Override
     public void setSwirlAmount(float swirlAmount) {
         this.swirlAmount = swirlAmount;
     }
 
+    @Override
     public void setRadius(float radius) {
         this.radius = radius;
         this.radius2 = radius * radius;
@@ -66,14 +70,17 @@ public class SwirlFilter extends TransformFilter implements SwirlMethod {
         out[1] = (v + cy );
     }
 
+    @Override
     public void setZoom(float zoom) {
         this.zoom = zoom;
     }
 
+    @Override
     public void setRotateResultAngle(float rotateResultAngle) {
         this.rotateResultAngle = rotateResultAngle;
     }
 
+    @Override
     public void setPinchBulgeAmount(float pinchBulgeAmount) {
         this.pinchBulgeAmount = pinchBulgeAmount;
     }

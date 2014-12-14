@@ -157,6 +157,7 @@ public class ToolTests {
 
             // So far we are on the EDT
             Runnable notEDTThreadTask = new Runnable() {
+                @Override
                 public void run() {
                     for (int i = 0; i < numStrokes; i++) {
                         int progressPercentage = (int) ((float) i * 100 / numStrokes);

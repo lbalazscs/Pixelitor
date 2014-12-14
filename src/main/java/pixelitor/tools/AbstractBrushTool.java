@@ -96,7 +96,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         toolSettingsPanel.add(new JLabel("Mirror:"));
 
         @SuppressWarnings("unchecked")
-        JComboBox<Symmetry> symmetryCombo = new JComboBox<Symmetry>(symmetryModel);
+        JComboBox<Symmetry> symmetryCombo = new JComboBox<>(symmetryModel);
 
         toolSettingsPanel.add(symmetryCombo);
     }

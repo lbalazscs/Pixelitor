@@ -71,7 +71,7 @@ public class BrickBlockFilter extends AbstractBufferedImageOp {
         return dst;
     }
 
-    private void replaceWithAverage(BufferedImage src, BufferedImage dst, int width, int height, int[] pixels, int y, int x, int hSize, int vSize) {
+    private static void replaceWithAverage(BufferedImage src, BufferedImage dst, int width, int height, int[] pixels, int y, int x, int hSize, int vSize) {
         int w = Math.min(hSize, width - x);
         int h = Math.min(vSize, height - y);
         int t = w * h;

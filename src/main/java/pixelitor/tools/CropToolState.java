@@ -23,6 +23,7 @@ enum CropToolState {
             return USERDRAG;
         }
 
+        @Override
         public void cancelPressed(CropTool cropTool) {
             throw new IllegalStateException();
         }
@@ -35,6 +36,7 @@ enum CropToolState {
             throw new IllegalStateException();
         }
 
+        @Override
         public void cancelPressed(CropTool cropTool) {
             cropTool.resetStateToInitial();
         }
@@ -47,6 +49,7 @@ enum CropToolState {
             return TRANSFORM;
         }
 
+        @Override
         public void cancelPressed(CropTool cropTool) {
             cropTool.resetStateToInitial();
         }

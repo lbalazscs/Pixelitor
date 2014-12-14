@@ -215,7 +215,7 @@ public class ImageComponents {
         AppLogic.activeLayerChanged(layer);
 
         SelectionActions.setEnabled(newActiveComp.hasSelection(), newActiveComp);
-        ZoomMenu.INSTANCE.zoomChanged(ic.getZoomLevel());
+        ZoomMenu.zoomChanged(ic.getZoomLevel());
 
         AppLogic.activeCompositionDimensionsChanged(newActiveComp);
         PixelitorWindow.getInstance().setTitle(ic.getComp().getName() + " - " + Build.getPixelitorWindowFixTitle());

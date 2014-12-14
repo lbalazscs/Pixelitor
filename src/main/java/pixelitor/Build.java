@@ -16,8 +16,6 @@
  */
 package pixelitor;
 
-import pixelitor.utils.Utils;
-
 /**
  * The type of the "build" - in development mode there are additional
  * menus and runtime checks.
@@ -81,7 +79,7 @@ public enum Build {
         if (fixTitle == null) {
             fixTitle = "Pixelitor " + Build.VERSION_NUMBER;
             if (CURRENT != FINAL) {
-                fixTitle += " DEVELOPMENT " + Utils.getCurrentGitBranch();
+                fixTitle += " DEVELOPMENT ";
             }
             if (CURRENT.isRobotTest()) {
                 fixTitle += " - ROBOT TEST";

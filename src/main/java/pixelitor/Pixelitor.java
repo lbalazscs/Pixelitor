@@ -16,7 +16,6 @@
  */
 package pixelitor;
 
-import pixelitor.filters.animation.TweenWizard;
 import pixelitor.io.OpenSaveManager;
 import pixelitor.layers.Layers;
 import pixelitor.tools.FgBgColorSelector;
@@ -114,7 +113,7 @@ public class Pixelitor {
             return;
         }
 
-        new TweenWizard().show(pw);
+//        new TweenWizard().show(pw);
 
 //        Transition2D op = new Transition2D();
 //        op.actionPerformed(null);

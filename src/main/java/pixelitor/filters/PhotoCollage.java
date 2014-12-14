@@ -206,7 +206,7 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
         return dest;
     }
 
-    private void reseed() {
+    private static void reseed() {
         seed = System.nanoTime();
     }
 }

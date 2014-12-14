@@ -72,7 +72,7 @@ public class LayersMouseHandler extends MouseInputAdapter {
      * Returns the layer button for the mouse event and also translate
      * the coordinates of the argument into the layer button space
      */
-    public LayerButton getLayerButtonFromEvent(MouseEvent e) {
+    public static LayerButton getLayerButtonFromEvent(MouseEvent e) {
         LayerButton layerButton = null;
         Component c = e.getComponent();
         // the source of the event must be either the layer button

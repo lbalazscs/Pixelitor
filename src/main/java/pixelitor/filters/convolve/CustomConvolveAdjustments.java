@@ -90,7 +90,7 @@ public class CustomConvolveAdjustments extends AdjustPanel implements ActionList
         cmLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         leftVerticalBox.add(cmLabel);
         EnumComboBoxModel<ConvolveMethod> convolveMethodModel = filter.getConvolveMethodModel();
-        JComboBox<ConvolveMethod> convolveMethodCB = new JComboBox<ConvolveMethod>(convolveMethodModel);
+        JComboBox<ConvolveMethod> convolveMethodCB = new JComboBox<>(convolveMethodModel);
 
         convolveMethodCB.setAlignmentX(Component.LEFT_ALIGNMENT);
         leftVerticalBox.add(convolveMethodCB);
