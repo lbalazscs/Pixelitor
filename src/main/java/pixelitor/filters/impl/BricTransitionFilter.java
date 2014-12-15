@@ -63,10 +63,10 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
     public static final int TOSS_IN = 34;
     public static final int WAVE = 35;
 
-
     private int type;
     private float progress;
 
+    // these have to be cached
     GooTransition2D gooTransition2D;
     SquaresTransition2D squaresTransition2D;
 
@@ -78,6 +78,7 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
         Graphics2D g2 = dest.createGraphics();
 
         // TODO are they worth it?
+        // they increase te processing time, but do not seem to have any effect
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
@@ -184,7 +185,6 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
                 transition = new SpiralTransition2D(true);
                 break;
             case SQUARE_RAIN:
-                // must be cached, otherwise randomness is different in each frame
                 transition = new SquareRainTransition2D();
                 break;
             case SQUARES:
@@ -211,12 +211,13 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
                 throw new IllegalStateException("Unexpected type = " + type);
         }
 
-        if(progress < 0) {
-            progress = 0;
+        if(progress < 0.0f) {
+            progress = 0.0f;
         }
-        if(progress > 1) {
-            progress = 1;
+        if(progress > 1.0f) {
+            progress = 1.0f;
         }
+
         transition.paint(g2, frameA, frameB, progress);
         g2.dispose();
 
