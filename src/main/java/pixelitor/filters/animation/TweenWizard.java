@@ -46,8 +46,15 @@ public class TweenWizard {
     /**
      * Show the wizard in a dialog
      */
-    public void show(JFrame dialogParent) {
-        ParametrizedAdjustPanel.setResetParams(false);
+    public void start(JFrame dialogParent) {
+        try {
+            showDialog(dialogParent);
+        } finally {
+            ParametrizedAdjustPanel.setResetParams(true);
+        }
+    }
+
+    private void showDialog(final JFrame dialogParent) {
         dialog = new OKCancelDialog(
                 wizardState.getPanel(TweenWizard.this),
                 dialogParent,
@@ -56,7 +63,6 @@ public class TweenWizard {
 
             @Override
             protected void dialogCanceled() {
-                ParametrizedAdjustPanel.setResetParams(true);
                 wizardState.onWizardCancelled(TweenWizard.this);
                 super.dialogCanceled();
                 dispose();
@@ -70,7 +76,6 @@ public class TweenWizard {
                 if (nextState == null) { // dialog finished
                     dispose();
                     calculateAnimation();
-                    ParametrizedAdjustPanel.setResetParams(true);
                 } else {
                     JComponent panel = nextState.getPanel(TweenWizard.this);
                     dialog.changeForm(panel);

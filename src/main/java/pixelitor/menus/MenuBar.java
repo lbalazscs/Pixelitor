@@ -183,7 +183,7 @@ public class MenuBar extends JMenuBar {
         AbstractAction exportTweeningAnim = new AbstractAction("Export Tweening Animation...") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new TweenWizard().show(pixelitorWindow);
+                new TweenWizard().start(pixelitorWindow);
             }
         };
         MenuFactory.createMenuItem(exportTweeningAnim, null, fileMenu);

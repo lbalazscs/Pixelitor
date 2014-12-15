@@ -22,6 +22,7 @@ import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ParamSetState;
+import pixelitor.filters.gui.ParametrizedAdjustPanel;
 
 import javax.swing.*;
 import java.awt.FlowLayout;
@@ -95,6 +96,7 @@ public enum TweenWizardState {
             ParamSet paramSet = wizard.getFilter().getParamSet();
             ParamSetState initialState = paramSet.copyState();
             wizard.setInitialState(initialState);
+            ParametrizedAdjustPanel.setResetParams(false);
         }
     }, FINAL_FILTER_SETTINGS {
         @Override

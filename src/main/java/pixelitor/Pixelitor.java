@@ -114,7 +114,7 @@ public class Pixelitor {
             return;
         }
 
-        new TweenWizard().show(pw);
+        new TweenWizard().start(pw);
 
 //        Transition2D op = new Transition2D();
 //        op.actionPerformed(null);

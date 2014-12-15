@@ -26,6 +26,10 @@ import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 
 public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustmentListener {
+    /**
+     * Controls whether the params are reset to the default values when a new
+     * ParametrizedAdjustPanel is created
+     */
     private static boolean resetParams = true;
 
     public ParametrizedAdjustPanel(FilterWithParametrizedGUI filter) {
@@ -38,10 +42,9 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
         ParamSet params = filter.getParamSet();
         if (resetParams) {
             params.reset();
+            params.considerImageSize(ImageComponents.getActiveComp().getCanvas().getBounds());
         }
         params.setAdjustmentListener(this);
-
-        params.considerImageSize(ImageComponents.getActiveComp().getCanvas().getBounds());
 
         setupGUI(params, otherInfo);
 
@@ -68,7 +71,6 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
             if (param instanceof ActionParam) { // all the buttons go in one row
                 if (buttonsPanel == null) {
                     buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-//                    buttonsPanel.setBorder(BorderFactory.createTitledBorder("Playground"));
                     GridBagHelper.addOnlyControlToRow(panel, buttonsPanel, row);
                 }
                 buttonsPanel.add(control);
