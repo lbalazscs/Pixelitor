@@ -16,7 +16,6 @@
  */
 package pixelitor.filters.animation;
 
-import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.ImageComponents;
 import pixelitor.filters.FilterUtils;
 import pixelitor.filters.FilterWithParametrizedGUI;
@@ -36,7 +35,7 @@ public enum TweenWizardState {
         JComboBox<FilterWithParametrizedGUI> filtersCB;
 
         @Override
-        String getHelpMessage() {
+        String getHeaderText() {
             return "<html> Here you can create a basic keyframe animation <br>based on the settings of a filter.";
         }
 
@@ -65,7 +64,7 @@ public enum TweenWizardState {
         }
     }, INITIAL_FILTER_SETTINGS {
         @Override
-        String getHelpMessage() {
+        String getHeaderText() {
             return "<html> Select the <b><font color=blue size=+1>initial</font></b> settings for the filter";
         }
 
@@ -99,13 +98,13 @@ public enum TweenWizardState {
         }
     }, FINAL_FILTER_SETTINGS {
         @Override
-        String getHelpMessage() {
+        String getHeaderText() {
             return "<html> Select the <b><font color=green size=+1>final</font></b> settings for the filter.";
         }
 
         @Override
         TweenWizardState getNext() {
-            return SELECT_OUTPUT;
+            return SELECT_OUTPUT_SETTINGS;
         }
 
         @Override
@@ -131,56 +130,12 @@ public enum TweenWizardState {
             ParamSet paramSet = wizard.getFilter().getParamSet();
             wizard.setFinalState(paramSet.copyState());
         }
-    }, SELECT_OUTPUT {
-
-        private EnumComboBoxModel<TweenOutputType> model;
-
-        @Override
-        String getHelpMessage() {
-            return "<html> Select the output type";
-        }
+    }, SELECT_OUTPUT_SETTINGS {
+        OutputSettingsPanel outputSettingsPanel;
 
         @Override
-        TweenWizardState getNext() {
-            return SELECT_DURATION;
-        }
-
-        @Override
-        JComponent getPanel(TweenWizard wizard) {
-            //noinspection unchecked
-            model = new EnumComboBoxModel(TweenOutputType.class);
-            JComboBox<TweenOutputType> cb = new JComboBox<>(model);
-            JPanel p = new JPanel(new FlowLayout());
-            p.add(cb);
-
-            return p;
-        }
-
-        @Override
-        void onWizardCancelled(TweenWizard wizard) {
-
-        }
-
-        @Override
-        void onMovingToTheNext(TweenWizard wizard) {
-            TweenOutputType type = model.getSelectedItem();
-            wizard.setOutputType(type);
-            // TODO
-            File output;
-            if(type == TweenOutputType.ANIM_GIF) {
-                output = new File("output.gif");
-            } else {
-                output = new File("anim_output");
-            }
-            type.checkFile(output);
-            wizard.setOutput(output);
-        }
-    }, SELECT_DURATION {
-        DurationPanel durationPanel;
-
-        @Override
-        String getHelpMessage() {
-            return "<html> Select the duration of the animation";
+        String getHeaderText() {
+            return "<html> Output settings";
         }
 
         @Override
@@ -190,23 +145,32 @@ public enum TweenWizardState {
 
         @Override
         JComponent getPanel(TweenWizard wizard) {
-            durationPanel = new DurationPanel(wizard);
-            return durationPanel;
+            outputSettingsPanel = new OutputSettingsPanel(wizard);
+            return outputSettingsPanel;
         }
 
         @Override
         void onWizardCancelled(TweenWizard wizard) {
+
         }
 
         @Override
         void onMovingToTheNext(TweenWizard wizard) {
-            wizard.setNumFrames(durationPanel.getNumFrames());
-            wizard.setMillisBetweenFrames(durationPanel.getMillisBetweenFrames());
-            wizard.setInterpolation(durationPanel.getInterpolation());
+            TweenOutputType type = outputSettingsPanel.getTweenOutputType();
+            wizard.setOutputType(type);
+
+            File output = outputSettingsPanel.getOutput();
+            type.checkFile(output);
+            wizard.setOutput(output);
+
+            wizard.setNumFrames(outputSettingsPanel.getNumFrames());
+            wizard.setMillisBetweenFrames(outputSettingsPanel.getMillisBetweenFrames());
+            wizard.setInterpolation(outputSettingsPanel.getInterpolation());
+
         }
     };
 
-    abstract String getHelpMessage();
+    abstract String getHeaderText();
 
     abstract TweenWizardState getNext();
 

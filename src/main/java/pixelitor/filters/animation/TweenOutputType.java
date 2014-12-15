@@ -39,6 +39,11 @@ public enum TweenOutputType {
                 }
             }
         }
+
+        @Override
+        public boolean needsDirectory() {
+            return false;
+        }
     }, PNG_FILE_SEQUENCE {
         @Override
         AnimationWriter getAnimationWriter(File file, int delayMillis) {
@@ -60,9 +65,16 @@ public enum TweenOutputType {
                 throw new IllegalStateException(output.getAbsolutePath() + " is not a directory.");
             }
         }
+
+        @Override
+        public boolean needsDirectory() {
+            return true;
+        }
     };
 
     abstract AnimationWriter getAnimationWriter(File file, int delayMillis);
 
     public abstract void checkFile(File output);
+
+    public abstract boolean needsDirectory();
 }

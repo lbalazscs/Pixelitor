@@ -19,6 +19,7 @@ package pixelitor.automate;
 import pixelitor.PixelitorWindow;
 import pixelitor.io.FileChooser;
 import pixelitor.io.OutputFormat;
+import pixelitor.utils.BrowseFilesSupport;
 import pixelitor.utils.GridBagHelper;
 import pixelitor.utils.ValidatedDialog;
 import pixelitor.utils.ValidatedForm;
@@ -32,14 +33,14 @@ import java.io.File;
  * A panel that can be used to select a single directory and optionally an output format
  */
 public class SingleDirChooserPanel extends ValidatedForm {
-    private final DirectoryChooser directoryChooser;
+    private final BrowseFilesSupport directoryChooser;
     private OutputFormatSelector outputFormatSelector;
 
     public SingleDirChooserPanel(String label, String dialogTitle, String initialPath, boolean addOutputChooser) {
-        directoryChooser = new DirectoryChooser(initialPath, dialogTitle);
+        directoryChooser = new BrowseFilesSupport(initialPath, dialogTitle, true);
         JLabel dirLabel = new JLabel(label);
-        JTextField dirTF = directoryChooser.getDirTF();
-        JButton browseButton = directoryChooser.getButton();
+        JTextField dirTF = directoryChooser.getNameTF();
+        JButton browseButton = directoryChooser.getBrowseButton();
 
         if (addOutputChooser) {
             setLayout(new GridBagLayout());
@@ -65,7 +66,7 @@ public class SingleDirChooserPanel extends ValidatedForm {
     }
 
     private File getSelectedDir() {
-        return directoryChooser.getSelectedDir();
+        return directoryChooser.getSelectedFile();
     }
 
     @Override

@@ -66,6 +66,10 @@ public class GlobalKeyboardWatch {
         return spaceDown;
     }
 
+    /**
+     * The idea is that when we are in a dialog, we want to use the Tab
+     * key for navigating the UI, and not for "Hide All"
+     */
     public static void setShowHideAllForTab(boolean showHideAllForTab) {
         GlobalKeyboardWatch.showHideAllForTab = showHideAllForTab;
     }
@@ -116,29 +120,11 @@ public class GlobalKeyboardWatch {
         GlobalKeyboardWatch.addKeyboardShortCut('[', false, "decrement", decreaseActiveBrushSizeAction);
     }
 
+    // TODO this kind of global listening might be better
 //    public static void registerMouseWheelWatching() {
 //        Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
 //            @Override
 //            public void eventDispatched(AWTEvent e) {
-//                if (e instanceof MouseWheelEvent) {
-//                    MouseWheelEvent wheelEvent = (MouseWheelEvent) e;
-//                    if (wheelEvent.isControlDown()) {
-//                        Point point = wheelEvent.getPoint();
-//
-//                        ImageComponent ic = ImageComponents.getActiveImageComponent();
-//                        Component component = wheelEvent.getComponent();
-//
-//                        Point mouse = wheelEvent.getLocationOnScreen();
-//
-//                        SwingUtilities.convertPointFromScreen(mouse, ic);
-//
-//                        if (wheelEvent.getWheelRotation() < 0) { // up, away from the user
-//                            ic.increaseZoom(mouse.x, mouse.y);
-//                        } else {  // down, towards the user
-//                            ic.decreaseZoom(mouse.x, mouse.y);
-//                        }
-//                    }
-//                }
 //            }
 //        }, AWTEvent.MOUSE_WHEEL_EVENT_MASK);
 //    }

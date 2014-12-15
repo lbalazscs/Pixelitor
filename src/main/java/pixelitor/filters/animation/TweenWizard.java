@@ -67,22 +67,23 @@ public class TweenWizard {
                 // "next" was pressed
                 wizardState.onMovingToTheNext(TweenWizard.this);
                 TweenWizardState nextState = wizardState.getNext();
-                if (nextState == null) {
+                if (nextState == null) { // dialog finished
                     dispose();
                     calculateAnimation();
+                    ParametrizedAdjustPanel.setResetParams(true);
                 } else {
                     JComponent panel = nextState.getPanel(TweenWizard.this);
                     dialog.changeForm(panel);
-                    dialog.setHeaderMessage(nextState.getHelpMessage());
+                    dialog.setHeaderMessage(nextState.getHeaderText());
                     wizardState = nextState;
                 }
             }
         };
-        dialog.setHeaderMessage(wizardState.getHelpMessage());
+        dialog.setHeaderMessage(wizardState.getHeaderText());
 
         // it was packed already, but this is not correct because of the header message
         // and anyway we don't know the size of the filter dialogs in advance
-        dialog.setSize(450, 300);
+        dialog.setSize(450, 380);
 
         GUIUtils.centerOnScreen(dialog);
         dialog.setVisible(true);

@@ -37,14 +37,14 @@ public class GroupedRangeSelector extends JPanel {
             RangeParam param = model.getRangeParam(i);
             SliderSpinner slider = new SliderSpinner(param, true, SliderSpinner.TextPosition.NONE);
             slider.setupTicks();
-            GridBagHelper.addLabelWithControl(this, param.getName(), i, slider);
+            GridBagHelper.addLabelWithControl(this, param.getName(), slider, i);
         }
 
         boolean linkable = model.isLinkable();
         if(linkable) {
             final JCheckBox linkedCB = new JCheckBox();
             linkedCB.setModel(model.getCheckBoxModel());
-            GridBagHelper.addLabelWithControl(this, "Linked:", numParams, linkedCB);
+            GridBagHelper.addLabelWithControl(this, "Linked:", linkedCB, numParams);
             linkedCB.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {

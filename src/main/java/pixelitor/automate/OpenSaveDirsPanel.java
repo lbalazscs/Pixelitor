@@ -18,6 +18,7 @@ package pixelitor.automate;
 
 import pixelitor.io.FileChooser;
 import pixelitor.io.OutputFormat;
+import pixelitor.utils.BrowseFilesSupport;
 import pixelitor.utils.GridBagHelper;
 import pixelitor.utils.ValidatedForm;
 
@@ -28,8 +29,8 @@ import java.io.File;
  * A panel for selecting the opening and the saving directory
  */
 class OpenSaveDirsPanel extends ValidatedForm {
-    private final DirectoryChooser inputChooser = new DirectoryChooser(FileChooser.getLastOpenDir().getAbsolutePath(), "Select Input Directory");
-    private final DirectoryChooser outputChooser = new DirectoryChooser(FileChooser.getLastSaveDir().getAbsolutePath(), "Select Output Directory");
+    private final BrowseFilesSupport inputChooser = new BrowseFilesSupport(FileChooser.getLastOpenDir().getAbsolutePath(), "Select Input Directory", true);
+    private final BrowseFilesSupport outputChooser = new BrowseFilesSupport(FileChooser.getLastSaveDir().getAbsolutePath(), "Select Output Directory", true);
     private final boolean allowToBeTheSame;
     private String errMessage;
 
@@ -40,12 +41,12 @@ class OpenSaveDirsPanel extends ValidatedForm {
         setLayout(new GridBagLayout());
 
         GridBagHelper.addLabel(this, "Input Directory:", 0, 0);
-        GridBagHelper.addControl(this, inputChooser.getDirTF());
-        GridBagHelper.addNextControl(this, inputChooser.getButton());
+        GridBagHelper.addControl(this, inputChooser.getNameTF());
+        GridBagHelper.addNextControl(this, inputChooser.getBrowseButton());
 
         GridBagHelper.addLabel(this, "Output Directory:", 0, 1);
-        GridBagHelper.addControl(this, outputChooser.getDirTF());
-        GridBagHelper.addNextControl(this, outputChooser.getButton());
+        GridBagHelper.addControl(this, outputChooser.getNameTF());
+        GridBagHelper.addNextControl(this, outputChooser.getBrowseButton());
 
         GridBagHelper.addLabel(this, "Output Format:", 0, 2);
         outputFormatSelector = new OutputFormatSelector();
@@ -67,8 +68,8 @@ class OpenSaveDirsPanel extends ValidatedForm {
      */
     @Override
     public boolean validateData() {
-        File selectedInputDir = inputChooser.getSelectedDir();
-        File selectedOutDir = outputChooser.getSelectedDir();
+        File selectedInputDir = inputChooser.getSelectedFile();
+        File selectedOutDir = outputChooser.getSelectedFile();
 
         if (!selectedInputDir.exists()) {
             errMessage = "The selected input directory " + selectedInputDir.getAbsolutePath() + " does not exist.";
@@ -90,11 +91,11 @@ class OpenSaveDirsPanel extends ValidatedForm {
     }
 
     public void saveValues() {
-        File in = inputChooser.getSelectedDir();
+        File in = inputChooser.getSelectedFile();
         if (in != null) {
             FileChooser.setLastOpenDir(in);
         }
-        File out = outputChooser.getSelectedDir();
+        File out = outputChooser.getSelectedFile();
         if (out != null) {
             FileChooser.setLastSaveDir(out);
         }
