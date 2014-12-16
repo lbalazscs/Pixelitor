@@ -28,28 +28,13 @@ import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 
 class RenderFramesTask extends SwingWorker<Void, Void> {
-    private FilterWithParametrizedGUI filter;
-    private ParamSetState initialState;
-    private ParamSetState finalState;
-    private int numFrames;
-    private int millisBetweenFrames;
-    private Interpolation interpolation;
-    private TweenOutputType outputType;
-    private File output;
+    private TweenAnimation animation;
 
-    public RenderFramesTask(FilterWithParametrizedGUI filter, ParamSetState initialState, ParamSetState finalState, int numFrames, int millisBetweenFrames, Interpolation interpolation, TweenOutputType outputType, File output) {
-        this.filter = filter;
-        this.initialState = initialState;
-        this.finalState = finalState;
-        this.numFrames = numFrames;
-        this.millisBetweenFrames = millisBetweenFrames;
-        this.interpolation = interpolation;
-        this.outputType = outputType;
-        this.output = output;
+    public RenderFramesTask(TweenAnimation tweenAnimation) {
+        this.animation = tweenAnimation;
     }
 
     @Override
@@ -69,10 +54,12 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
     }
 
     private void renderFrames() {
-        double[] time = new double[numFrames];
-        double[] progress = new double[numFrames];
+        int numFrames = animation.getNumFrames();
+        FilterWithParametrizedGUI filter = animation.getFilter();
 
-        AnimationWriter animationWriter = outputType.getAnimationWriter(output, millisBetweenFrames);
+        double[] time = new double[numFrames];
+
+        AnimationWriter animationWriter = animation.createAnimationWriter();
         boolean canceled = false;
 
         for (int i = 0; i < numFrames; i++) {
@@ -84,10 +71,8 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
             setProgress(percentProgress);
 
             time[i] = ((double) i) / numFrames;
-            progress[i] = interpolation.time2progress(time[i]);
-//            System.out.println(String.format("RenderFramesTask::doInBackground: " +
-//                    "time[%d] = %.2f, progress[%d] = %.2f, thread = '%s'", i, time[i], i, progress[i], Thread.currentThread().getName()));
-            ParamSetState intermediateState = initialState.interpolate(finalState, progress[i]);
+            ParamSetState intermediateState = animation.tween(time[i]);
+
             filter.getParamSet().setState(intermediateState);
 
             Utils.executeFilterWithBusyCursor(filter, ChangeReason.OP_PREVIEW, PixelitorWindow.getInstance());

@@ -20,8 +20,6 @@ import pixelitor.ImageComponents;
 import pixelitor.filters.FilterUtils;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.AdjustPanel;
-import pixelitor.filters.gui.ParamSet;
-import pixelitor.filters.gui.ParamSetState;
 import pixelitor.filters.gui.ParametrizedAdjustPanel;
 
 import javax.swing.*;
@@ -61,7 +59,7 @@ public enum TweenWizardState {
         @Override
         void onMovingToTheNext(TweenWizard wizard) {
             FilterWithParametrizedGUI filter = (FilterWithParametrizedGUI) filtersCB.getSelectedItem();
-            wizard.setFilter(filter);
+            wizard.getAnimation().setFilter(filter);
         }
     }, INITIAL_FILTER_SETTINGS {
         @Override
@@ -76,7 +74,7 @@ public enum TweenWizardState {
 
         @Override
         JComponent getPanel(TweenWizard wizard) {
-            FilterWithParametrizedGUI filter = wizard.getFilter();
+            FilterWithParametrizedGUI filter = wizard.getAnimation().getFilter();
             ImageComponents.getActiveComp().getActiveImageLayer().startPreviewing();
             AdjustPanel adjustPanel = filter.getAdjustPanel();
             filter.startDialogSession();
@@ -86,16 +84,18 @@ public enum TweenWizardState {
 
         @Override
         void onWizardCancelled(TweenWizard wizard) {
-            FilterWithParametrizedGUI filter = wizard.getFilter();
+            FilterWithParametrizedGUI filter = wizard.getAnimation().getFilter();
             ImageComponents.getActiveComp().getActiveImageLayer().cancelPreviewing();
             filter.endDialogSession();
         }
 
         @Override
         void onMovingToTheNext(TweenWizard wizard) {
-            ParamSet paramSet = wizard.getFilter().getParamSet();
-            ParamSetState initialState = paramSet.copyState();
-            wizard.setInitialState(initialState);
+//            ParamSet paramSet = wizard.getAnimation().getFilter().getParamSet();
+//            ParamSetState initialState = paramSet.copyState();
+//            wizard.getAnimation().setInitialState(initialState);
+            wizard.getAnimation().copyInitialStateFromCurrent();
+
             ParametrizedAdjustPanel.setResetParams(false);
         }
     }, FINAL_FILTER_SETTINGS {
@@ -111,14 +111,14 @@ public enum TweenWizardState {
 
         @Override
         JComponent getPanel(TweenWizard wizard) {
-            FilterWithParametrizedGUI filter = wizard.getFilter();
+            FilterWithParametrizedGUI filter = wizard.getAnimation().getFilter();
             AdjustPanel adjustPanel = filter.getAdjustPanel();
             return adjustPanel;
         }
 
         @Override
         void onWizardCancelled(TweenWizard wizard) {
-            FilterWithParametrizedGUI filter = wizard.getFilter();
+            FilterWithParametrizedGUI filter = wizard.getAnimation().getFilter();
             ImageComponents.getActiveComp().getActiveImageLayer().cancelPreviewing();
             filter.endDialogSession();
         }
@@ -129,15 +129,19 @@ public enum TweenWizardState {
             onWizardCancelled(wizard);
 
             // save final state
-            ParamSet paramSet = wizard.getFilter().getParamSet();
-            wizard.setFinalState(paramSet.copyState());
+            wizard.getAnimation().copyFinalStateFromCurrent();
+
+//            ParamSet paramSet = wizard.getAnimation().getFilter().getParamSet();
+//            wizard.setFinalState(paramSet.copyState());
         }
     }, SELECT_OUTPUT_SETTINGS {
         OutputSettingsPanel outputSettingsPanel;
 
         @Override
         String getHeaderText() {
-            return "<html> Output settings";
+            return "<html> <b>Output settings</b>" +
+                    "<p>For file output select a file in an existing directory. " +
+                    "<br>For file sequence output select an existing directory.";
         }
 
         @Override
@@ -159,15 +163,16 @@ public enum TweenWizardState {
         @Override
         void onMovingToTheNext(TweenWizard wizard) {
             TweenOutputType type = outputSettingsPanel.getTweenOutputType();
-            wizard.setOutputType(type);
+            TweenAnimation animation = wizard.getAnimation();
+            animation.setOutputType(type);
 
             File output = outputSettingsPanel.getOutput();
             type.checkFile(output);
-            wizard.setOutput(output);
+            animation.setOutput(output);
 
-            wizard.setNumFrames(outputSettingsPanel.getNumFrames());
-            wizard.setMillisBetweenFrames(outputSettingsPanel.getMillisBetweenFrames());
-            wizard.setInterpolation(outputSettingsPanel.getInterpolation());
+            animation.setNumFrames(outputSettingsPanel.getNumFrames());
+            animation.setMillisBetweenFrames(outputSettingsPanel.getMillisBetweenFrames());
+            animation.setInterpolation(outputSettingsPanel.getInterpolation());
 
         }
     };
