@@ -17,6 +17,7 @@
 package pixelitor.filters.animation;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
+import pixelitor.io.FileChooser;
 import pixelitor.utils.BrowseFilesSupport;
 import pixelitor.utils.GridBagHelper;
 
@@ -36,11 +37,10 @@ public class OutputSettingsPanel extends JPanel {
     private final JLabel nrFramesLabel;
     private double fps;
     private TweenWizard wizard;
-    private Interpolation interpolation;
     private final JComboBox<Interpolation> ipCB;
     private EnumComboBoxModel<TweenOutputType> model;
     private final JComboBox<TweenOutputType> outputTypeCB;
-    private BrowseFilesSupport browseFilesSupport = new BrowseFilesSupport();
+    private BrowseFilesSupport browseFilesSupport = new BrowseFilesSupport(FileChooser.getLastSaveDir().getAbsolutePath());
 
     public OutputSettingsPanel(TweenWizard wizard) {
         super(new GridBagLayout());

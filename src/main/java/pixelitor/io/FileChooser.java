@@ -138,12 +138,14 @@ public class FileChooser {
         return lastSaveDir;
     }
 
-    public static void setLastOpenDir(File lastOpenDir) {
-        FileChooser.lastOpenDir = lastOpenDir;
+    public static void setLastOpenDir(File newOpenDir) {
+        assert newOpenDir.exists() && newOpenDir.isDirectory();
+        FileChooser.lastOpenDir = newOpenDir;
     }
 
-    public static void setLastSaveDir(File lastSaveDir) {
-        FileChooser.lastSaveDir = lastSaveDir;
+    public static void setLastSaveDir(File newSaveDir) {
+        assert newSaveDir.exists() && newSaveDir.isDirectory();
+        FileChooser.lastSaveDir = newSaveDir;
     }
 
     public static FileFilter getFileFilterForExtension(String ext) {

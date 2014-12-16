@@ -21,6 +21,7 @@ import pixelitor.filters.FilterUtils;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.ParametrizedAdjustPanel;
+import pixelitor.io.FileChooser;
 
 import javax.swing.*;
 import java.awt.FlowLayout;
@@ -175,6 +176,11 @@ public enum TweenWizardState {
             animation.setMillisBetweenFrames(outputSettingsPanel.getMillisBetweenFrames());
             animation.setInterpolation(outputSettingsPanel.getInterpolation());
 
+            if(output.isDirectory()) {
+                FileChooser.setLastSaveDir(output);
+            } else {
+                FileChooser.setLastSaveDir(output.getParentFile());
+            }
         }
     };
 

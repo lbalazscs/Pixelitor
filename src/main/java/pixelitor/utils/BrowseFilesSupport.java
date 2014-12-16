@@ -34,19 +34,19 @@ public class BrowseFilesSupport {
     private String dialogTitle;
     private boolean selectDirs;
 
-    public BrowseFilesSupport() {
-        init();
+    public BrowseFilesSupport(String initialPath) {
+        init(initialPath);
     }
 
     public BrowseFilesSupport(String initialPath, final String dialogTitle, final boolean selectDirs) {
         this.dialogTitle = dialogTitle;
         this.selectDirs = selectDirs;
-        init();
-        nameTF.setText(initialPath);
+        init(initialPath);
     }
 
-    private void init() {
+    private void init(String initialPath) {
         nameTF = new JTextField(20);
+        nameTF.setText(initialPath);
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
