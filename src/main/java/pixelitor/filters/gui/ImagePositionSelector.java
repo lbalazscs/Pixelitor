@@ -32,7 +32,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 /**
- *
+ * The image selector part of an ImagePositionPanel
  */
 public class ImagePositionSelector extends JComponent implements MouseMotionListener, MouseListener {
     private final ImagePositionPanel imagePositionPanel;
@@ -54,7 +54,6 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
 
     @Override
     public void paintComponent(Graphics g) {
-
         int totalWidth = thumb.getWidth();
         int totalHeight = thumb.getHeight();
 
@@ -63,7 +62,6 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
         Graphics2D g2 = (Graphics2D) g;
         int currentX = (int) (model.getRelativeX() * totalWidth);
         int currentY = (int) (model.getRelativeY() * totalHeight);
-
 
         // lines
         g.setColor(Color.BLACK);
@@ -118,12 +116,10 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
 
     @Override
     public void mouseClicked(MouseEvent e) {
-
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-
     }
 
     @Override
@@ -137,12 +133,9 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
 
     @Override
     public void mouseEntered(MouseEvent e) {
-
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-
     }
-
 }

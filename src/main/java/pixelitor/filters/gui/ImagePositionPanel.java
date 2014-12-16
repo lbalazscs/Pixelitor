@@ -25,14 +25,14 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 
 /**
- *
+ * The GUI component for an ImagePositionParam
  */
 public class ImagePositionPanel extends JPanel implements ParamGUI {
     private final ImagePositionParam model;
     private final RangeParam xSliderModel;
     private final RangeParam ySliderModel;
     private final ImagePositionSelector imagePositionSelector;
-    private boolean slidersMovedFromTheImage = false;
+    private boolean slidersMovedByUser = true;
 
     public ImagePositionPanel(final ImagePositionParam model, int defaultX, int defaultY) {
         this.model = model;
@@ -42,9 +42,12 @@ public class ImagePositionPanel extends JPanel implements ParamGUI {
 
         setBorder(BorderFactory.createTitledBorder(model.getName()));
         setLayout(new BorderLayout(10, 0));
+
+        // add the image position selector
         imagePositionSelector = new ImagePositionSelector(this, model, 100);
         add(imagePositionSelector, BorderLayout.WEST);
 
+        // add the two sliders
         Box verticalBox = Box.createVerticalBox();
         JComponent xSlider = xSliderModel.createGUI();
         verticalBox.add(xSlider);
@@ -52,10 +55,12 @@ public class ImagePositionPanel extends JPanel implements ParamGUI {
         verticalBox.add(ySlider);
         add(verticalBox, BorderLayout.CENTER);
 
+        // if one of the sliders was moved by the users, update the
+        // image position selector and run the filter
         xSliderModel.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                if (!slidersMovedFromTheImage) { // slider was moved by the user
+                if (slidersMovedByUser) {
                     model.setRelativeX(xSliderModel.getValue() / 100.0f);
                     imagePositionSelector.repaint();
                     if (!xSliderModel.getValueIsAdjusting()) {
@@ -67,7 +72,7 @@ public class ImagePositionPanel extends JPanel implements ParamGUI {
         ySliderModel.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                if (!slidersMovedFromTheImage) { // slider was moved by the user
+                if (slidersMovedByUser) {
                     model.setRelativeY(ySliderModel.getValue() / 100.0f);
                     imagePositionSelector.repaint();
                     if (!ySliderModel.getValueIsAdjusting()) {
@@ -82,8 +87,12 @@ public class ImagePositionPanel extends JPanel implements ParamGUI {
         setPreferredSize(new Dimension(sliderPreferredSize.width, preferredSize.height));
     }
 
+    /**
+     * Updates the sliders based on the model changes.
+     * This does not trigger the execution of the filter
+     */
     public void updateSlidersFromModel() {
-        slidersMovedFromTheImage = true;
+        slidersMovedByUser = false;
         int xValue = xSliderModel.getValue();
         int modelXValue = (int) (model.getRelativeX() * 100);
         if (modelXValue != xValue) {
@@ -94,7 +103,7 @@ public class ImagePositionPanel extends JPanel implements ParamGUI {
         if (modelYValue != yValue) {
             ySliderModel.setValue(modelYValue);
         }
-        slidersMovedFromTheImage = false;
+        slidersMovedByUser = true;
     }
 
     @Override
