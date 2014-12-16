@@ -41,6 +41,7 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
     private ParamAdjustmentListener adjustmentListener;
     private boolean dontTrigger = false;
     private final boolean ignoreRandomize;
+    private boolean finalAnimationSettingMode;
 
     public IntChoiceParam(String name, Value[] choices) {
         this(name, choices, false);
@@ -69,6 +70,9 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
     @Override
     public JComponent createGUI() {
         IntChoiceSelector choiceSelector = new IntChoiceSelector(this);
+        if(finalAnimationSettingMode) {
+            choiceSelector.setEnabled(false);
+        }
         return choiceSelector;
     }
 
@@ -93,6 +97,10 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
 
     @Override
     public void randomize() {
+        if(finalAnimationSettingMode) {
+            assert !canBeAnimated();
+            return;
+        }
         if (!ignoreRandomize) {
             Random rnd = new Random();
             int randomIndex = rnd.nextInt(choicesList.size());
@@ -261,7 +269,7 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
 //    }
 
     public static IntChoiceParam getGridTypeChoices(String name, final RangeParam randomnessParam) {
-        randomnessParam.setEnabled(false);
+        randomnessParam.setEnabledLogically(false);
         final IntChoiceParam param = new IntChoiceParam(name, gridTypeChoices);
         param.addListDataListener(new ListDataListener() {
             @Override
@@ -277,7 +285,7 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
             @Override
             public void contentsChanged(ListDataEvent e) {
                 int selectedValue = param.getValue();
-                randomnessParam.setEnabled(selectedValue != CellularFilter.GR_RANDOM);
+                randomnessParam.setEnabledLogically(selectedValue != CellularFilter.GR_RANDOM);
             }
         });
         return param;
@@ -321,5 +329,15 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
     @Override
     public void setState(ParamState state) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setEnabledLogically(boolean b) {
+        // TODO
+    }
+
+    @Override
+    public void setFinalAnimationSettingMode(boolean b) {
+        finalAnimationSettingMode = b;
     }
 }

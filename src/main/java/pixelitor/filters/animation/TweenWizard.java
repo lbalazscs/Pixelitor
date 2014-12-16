@@ -17,6 +17,7 @@
 package pixelitor.filters.animation;
 
 import pixelitor.PixelitorWindow;
+import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.ParametrizedAdjustPanel;
 import pixelitor.utils.GUIUtils;
 import pixelitor.utils.OKCancelDialog;
@@ -41,6 +42,10 @@ public class TweenWizard {
             showDialog(dialogParent);
         } finally {
             ParametrizedAdjustPanel.setResetParams(true);
+            FilterWithParametrizedGUI filter = animation.getFilter();
+            if(filter != null) {
+                filter.getParamSet().setFinalAnimationSettingMode(false);
+            }
         }
     }
 

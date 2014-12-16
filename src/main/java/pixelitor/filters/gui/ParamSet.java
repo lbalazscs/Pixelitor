@@ -53,7 +53,6 @@ public class ParamSet implements Iterable<GUIParam> {
         }
     }
 
-
     private void addRandomizeAction() {
         ActionParam randomizeAction = new ActionParam("Randomize Settings", new ActionListener() {
             @Override
@@ -149,5 +148,11 @@ public class ParamSet implements Iterable<GUIParam> {
             }
         }
         return false;
+    }
+
+    public void setFinalAnimationSettingMode(boolean b) {
+        for (GUIParam param : paramList) {
+            param.setFinalAnimationSettingMode(b);
+        }
     }
 }

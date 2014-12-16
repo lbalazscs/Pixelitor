@@ -35,7 +35,6 @@ import java.beans.PropertyChangeListener;
  */
 public class GradientParam extends AbstractGUIParam {
     private GradientSlider gradientSlider;
-
     private final float[] defaultThumbPositions;
     private final Color[] defaultColors;
 
@@ -206,4 +205,13 @@ public class GradientParam extends AbstractGUIParam {
         }
     }
 
+    @Override
+    public void setEnabledLogically(boolean b) {
+        // TODO
+    }
+
+    @Override
+    public void setFinalAnimationSettingMode(boolean b) {
+        // ignored because this GUIParam can be animated
+    }
 }

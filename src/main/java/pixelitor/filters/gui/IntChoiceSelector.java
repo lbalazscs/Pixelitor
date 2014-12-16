@@ -44,7 +44,6 @@ public class IntChoiceSelector extends JPanel implements ActionListener {
 
         add(comboBox);
 
-
         defaultButton = new DefaultButton(model);
         int buttonSize = comboBox.getPreferredSize().height;
         defaultButton.setPreferredSize(new Dimension(buttonSize, buttonSize));
@@ -52,9 +51,15 @@ public class IntChoiceSelector extends JPanel implements ActionListener {
     }
 
     @Override
+    public void setEnabled(boolean enabled) {
+        comboBox.setEnabled(enabled);
+        defaultButton.setEnabled(enabled);
+        super.setEnabled(enabled);
+    }
+
+    @Override
     public void actionPerformed(ActionEvent e) {
         model.setSelectedItem(comboBox.getSelectedItem());   // TODO is this necessary?
         defaultButton.updateState();
     }
-
 }

@@ -249,7 +249,7 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
         }
     }
 
-    public void setEnabled(boolean b) {
+    public void setEnabledLogically(boolean b) {
         enabled = b;
         if (sliderSpinner != null) {
             sliderSpinner.setEnabled(b);
@@ -314,5 +314,10 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
         public double getValue() {
             return value;
         }
+    }
+
+    @Override
+    public void setFinalAnimationSettingMode(boolean b) {
+        // ignored because this GUIParam can be animated
     }
 }

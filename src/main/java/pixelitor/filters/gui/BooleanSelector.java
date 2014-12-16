@@ -45,6 +45,12 @@ public class BooleanSelector extends JPanel implements ParamGUI {
     }
 
     @Override
+    public void setEnabled(boolean enabled) {
+        checkBox.setEnabled(enabled);
+        super.setEnabled(enabled);
+    }
+
+    @Override
     public void updateGUI() {
         checkBox.setSelected(model.getValue());
     }

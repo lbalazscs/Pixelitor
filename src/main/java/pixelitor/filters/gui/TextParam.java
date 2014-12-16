@@ -29,6 +29,7 @@ import java.util.Date;
 public class TextParam extends AbstractGUIParam {
     private final String defaultValue;
     private final JTextField tf;
+    private boolean finalAnimationSettingMode;
 
     public TextParam(String name, String defaultValue) {
         super(name);
@@ -72,6 +73,9 @@ public class TextParam extends AbstractGUIParam {
             });
         }
         p.add(tf);
+        if(finalAnimationSettingMode) {
+            tf.setEnabled(false);
+        }
         return p;
     }
 
@@ -96,8 +100,12 @@ public class TextParam extends AbstractGUIParam {
 
     @Override
     public void randomize() {
+        if(finalAnimationSettingMode) {
+            assert !canBeAnimated();
+            return;
+        }
         dontTrigger = true;
-        setValue(new Date().toString());
+        setValue(new Date().toString()); // random string...
         dontTrigger = false;
     }
 
@@ -126,5 +134,15 @@ public class TextParam extends AbstractGUIParam {
     @Override
     public void setState(ParamState state) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setEnabledLogically(boolean b) {
+        // TODO
+    }
+
+    @Override
+    public void setFinalAnimationSettingMode(boolean b) {
+        finalAnimationSettingMode = b;
     }
 }

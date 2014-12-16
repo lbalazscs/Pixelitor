@@ -39,6 +39,7 @@ public class ReseedNoiseActionParam extends ActionParam {
                 Noise.reseed();
             }
         }, "<html>Reinitialize the randomness.<br>Has effect only if some randomness is enabled in the settings.");
+        setIgnoreFinalAnimationSettingMode(false);
     }
 
     // ... and the second group of constructors is called if
@@ -50,5 +51,6 @@ public class ReseedNoiseActionParam extends ActionParam {
 
     public ReseedNoiseActionParam(String name, ActionListener actionListener) {
         super(name, actionListener, "Reinitialize the randomness");
+        setIgnoreFinalAnimationSettingMode(false);
     }
 }

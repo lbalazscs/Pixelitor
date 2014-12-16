@@ -97,6 +97,7 @@ public enum TweenWizardState {
             wizard.getAnimation().copyInitialStateFromCurrent();
 
             ParametrizedAdjustPanel.setResetParams(false);
+            wizard.getAnimation().getFilter().getParamSet().setFinalAnimationSettingMode(true);
         }
     }, FINAL_FILTER_SETTINGS {
         @Override

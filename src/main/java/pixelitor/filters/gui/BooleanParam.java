@@ -27,6 +27,10 @@ public class BooleanParam extends AbstractGUIParam {
     private boolean currentValue;
     private final boolean ignoreRandomize;
     private ParamGUI paramGUI;
+    private boolean finalAnimationSettingMode;
+
+    // show original should ignore the final animation setting
+    private boolean ignoreFinalAnimationSettingMode = false;
 
     public BooleanParam(String name, boolean defaultValue) {
         this(name, defaultValue, false);
@@ -58,6 +62,10 @@ public class BooleanParam extends AbstractGUIParam {
         BooleanSelector selector = new BooleanSelector(this);
         paramGUI = selector;
 
+        if(finalAnimationSettingMode && !ignoreFinalAnimationSettingMode) {
+            selector.setEnabled(false);
+        }
+
         return selector;
     }
 
@@ -77,6 +85,10 @@ public class BooleanParam extends AbstractGUIParam {
 
     @Override
     public void randomize() {
+        if(finalAnimationSettingMode) {
+            assert !canBeAnimated();
+            return;
+        }
         if (!ignoreRandomize) {
             dontTrigger = true;
             setValue(Math.random() > 0.5, true);
@@ -117,5 +129,19 @@ public class BooleanParam extends AbstractGUIParam {
     @Override
     public void setState(ParamState state) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setEnabledLogically(boolean b) {
+        // TODO
+    }
+
+    @Override
+    public void setFinalAnimationSettingMode(boolean b) {
+        finalAnimationSettingMode = b;
+    }
+
+    public void setIgnoreFinalAnimationSettingMode(boolean ignoreFinalAnimationSettingMode) {
+        this.ignoreFinalAnimationSettingMode = ignoreFinalAnimationSettingMode;
     }
 }

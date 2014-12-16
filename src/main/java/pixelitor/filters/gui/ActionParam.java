@@ -28,6 +28,10 @@ public class ActionParam extends AbstractGUIParam {
     private final ActionListener actionListener;
     private final Icon icon;
     private String toolTipText;
+    private boolean finalAnimationSettingMode;
+
+    // most actions should be available in the final animation settings
+    private boolean ignoreFinalAnimationSettingMode = true;
 
     public ActionParam(String name, ActionListener actionListener, String toolTipText) {
         this(name, actionListener, null, toolTipText);
@@ -50,6 +54,9 @@ public class ActionParam extends AbstractGUIParam {
         OrderedExecutionButton b = new OrderedExecutionButton(getName(), actionListener, adjustmentListener, icon);
         if(toolTipText != null) {
             b.setToolTipText(toolTipText);
+        }
+        if(finalAnimationSettingMode && !ignoreFinalAnimationSettingMode) {
+            b.setEnabled(false);
         }
         return b;
     }
@@ -114,5 +121,19 @@ public class ActionParam extends AbstractGUIParam {
     @Override
     public void setState(ParamState state) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setEnabledLogically(boolean b) {
+        // TODO
+    }
+
+    @Override
+    public void setFinalAnimationSettingMode(boolean b) {
+        finalAnimationSettingMode = b;
+    }
+
+    public void setIgnoreFinalAnimationSettingMode(boolean ignoreFinalAnimationSettingMode) {
+        this.ignoreFinalAnimationSettingMode = ignoreFinalAnimationSettingMode;
     }
 }

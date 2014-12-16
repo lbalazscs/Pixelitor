@@ -37,9 +37,18 @@ public interface GUIParam extends Resettable {
 
     void considerImageSize(Rectangle bounds);
 
-    boolean canBeAnimated();
-
     ParamState copyState();
 
     void setState(ParamState state);
+
+    boolean canBeAnimated();
+
+    /**
+     * A GUI parameter can be disabled for two reasons:
+     * because of the filter logic and because non-animatable
+     * parameters should be disabled in the final animation dialogs.
+     * The following methods are for these two scenarios
+     */
+    void setEnabledLogically(boolean b);
+    void setFinalAnimationSettingMode(boolean b); // implemented for the non-animatable params
 }

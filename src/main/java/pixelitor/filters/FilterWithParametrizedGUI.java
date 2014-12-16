@@ -47,6 +47,7 @@ public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
         this.hasAffectedAreaShapeParam = hasAffectedAreaShape;
         if (addShowOriginal) {
             showOriginalParam = BooleanParam.createParamForShowOriginal();
+            showOriginalParam.setIgnoreFinalAnimationSettingMode(true);
             showOriginalHelper = new ShowOriginalHelper(getName());
         }
         if(hasAffectedAreaShapeParam) {

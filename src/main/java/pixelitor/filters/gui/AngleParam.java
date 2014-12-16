@@ -216,4 +216,14 @@ public class AngleParam extends AbstractGUIParam {
             return new APState(interpolatedAngle);
         }
     }
+
+    @Override
+    public void setEnabledLogically(boolean b) {
+        // TODO
+    }
+
+    @Override
+    public void setFinalAnimationSettingMode(boolean b) {
+        // ignored because this GUIParam can be animated
+    }
 }

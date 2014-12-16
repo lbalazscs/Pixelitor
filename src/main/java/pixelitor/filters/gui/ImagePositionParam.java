@@ -33,7 +33,6 @@ public class ImagePositionParam extends AbstractGUIParam {
 
     private ParamGUI paramGUI;
 
-
     public ImagePositionParam(String name) {
         super(name);
     }
@@ -149,5 +148,15 @@ public class ImagePositionParam extends AbstractGUIParam {
             double interpolatedY = ImageMath.lerp(progress, relativeY, ippEndState.relativeY);
             return new IPPState(interpolatedX, interpolatedY);
         }
+    }
+
+    @Override
+    public void setEnabledLogically(boolean b) {
+        // TODO
+    }
+
+    @Override
+    public void setFinalAnimationSettingMode(boolean b) {
+        // ignored because this GUIParam can be animated
     }
 }
