@@ -21,7 +21,7 @@ import java.io.File;
 public enum TweenOutputType {
     ANIM_GIF {
         @Override
-        AnimationWriter getAnimationWriter(File file, int delayMillis) {
+        AnimationWriter createAnimationWriter(File file, int delayMillis) {
             return new AnimGIFWriter(file, delayMillis);
         }
 
@@ -46,7 +46,7 @@ public enum TweenOutputType {
         }
     }, PNG_FILE_SEQUENCE {
         @Override
-        AnimationWriter getAnimationWriter(File file, int delayMillis) {
+        AnimationWriter createAnimationWriter(File file, int delayMillis) {
             return new PNGFileSequenceWriter(file);
         }
 
@@ -72,7 +72,7 @@ public enum TweenOutputType {
         }
     };
 
-    abstract AnimationWriter getAnimationWriter(File file, int delayMillis);
+    abstract AnimationWriter createAnimationWriter(File file, int delayMillis);
 
     public abstract void checkFile(File output);
 
