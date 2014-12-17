@@ -18,6 +18,7 @@ package pixelitor.automate;
 
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
+import pixelitor.InternalImageFrame;
 import pixelitor.PixelitorWindow;
 import pixelitor.io.FileChooser;
 import pixelitor.io.FileExtensionUtils;
@@ -42,13 +43,18 @@ public class Automate {
     private static final String OVERWRITE_NO = "No (Skip)";
     private static final String OVERWRITE_CANCEL = "Cancel Processing";
 
+    static volatile boolean overwriteAll = false;
+    static volatile boolean stopProcessing = false;
+
     private Automate() {
     }
 
     /**
      * Processes each file in the input directory with the given CompositionAction
      */
-    public static void processEachFile(final CompositionAction action, final boolean closeAfterDone, String progressMonitorTitle) {
+    public static void processEachFile(final CompositionAction action,
+                                       final boolean closeImagesAfterProcessing,
+                                       String progressMonitorTitle) {
         File lastOpenDir = FileChooser.getLastOpenDir();
         if (lastOpenDir == null) {
             throw new IllegalStateException("lastOpenDir is null");
@@ -75,89 +81,103 @@ public class Automate {
         SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
             @Override
             public Void doInBackground() {
+                overwriteAll = false;
 
-                boolean overwriteAll = false;
-
-                label:
                 for (int i = 0, nrOfFiles = children.length; i < nrOfFiles; i++) {
-                    File file = children[i];
+                    if (progressMonitor.isCanceled()) {
+                        break;
+                    }
+
+                    final File file = children[i];
                     progressMonitor.setProgress((int) ((float) i * 100 / nrOfFiles));
                     progressMonitor.setNote("Processing " + file.getName());
 
                     System.out.println("Processing " + file.getName());
 
-                    if (progressMonitor.isCanceled()) {
-                        break;
-                    }
-
-                    OpenSaveManager.openFile(file);
-                    final Composition comp = ImageComponents.getActiveComp();
-
-                    Runnable guiTask = new Runnable() {
+                    Runnable edtTask = new Runnable() {
                         @Override
                         public void run() {
-                            action.process(comp);
+                            processFile(file, action, lastSaveDir, closeImagesAfterProcessing);
                         }
                     };
                     try {
-                        EventQueue.invokeAndWait(guiTask);
+                        EventQueue.invokeAndWait(edtTask);
                     } catch (InterruptedException | InvocationTargetException e) {
                         Dialogs.showExceptionDialog(e);
                     }
 
-                    OutputFormat outputFormat = OutputFormat.getLastOutputFormat();
-
-                    String inputFileName = file.getName();
-                    String outFileName = FileExtensionUtils.replaceExtension(inputFileName, outputFormat.toString());
-
-                    File outputFile = new File(lastSaveDir, outFileName);
-
-                    if (outputFile.exists() && (!overwriteAll)) {
-
-                        JOptionPane pane = new JOptionPane("File " + outputFile + " already exists. Overwrite?", JOptionPane.WARNING_MESSAGE);
-                        pane.setOptions(new String[]{OVERWRITE_YES, OVERWRITE_YES_ALL, OVERWRITE_NO, OVERWRITE_CANCEL});
-                        pane.setInitialValue(OVERWRITE_NO);
-
-                        JDialog dialog = pane.createDialog(PixelitorWindow.getInstance(), "Warning");
-                        dialog.setVisible(true);
-                        String value = (String) pane.getValue();
-                        String answer;
-
-                        if (value == null) { // cancelled
-                            answer = OVERWRITE_CANCEL;
-                        } else {
-                            answer = value;
-                        }
-
-                        switch (answer) {
-                            case OVERWRITE_YES:
-                                outputFormat.saveComposition(comp, outputFile);
-                                break;
-                            case OVERWRITE_YES_ALL:
-                                outputFormat.saveComposition(comp, outputFile);
-                                overwriteAll = true;
-                                break;
-                            case OVERWRITE_NO:
-                                // do nothing
-                                break;
-                            case OVERWRITE_CANCEL:
-                                if (closeAfterDone) {
-                                    OpenSaveManager.warnAndCloseImage(comp.getIC());
-                                }
-                                break label;
-                        }
-                    } else { // the file does not exist or overwrite all was pressed previously
-                        outputFormat.saveComposition(comp, outputFile);
+                    if (stopProcessing) {
+                        break;
                     }
-                    if (closeAfterDone) {
-                        OpenSaveManager.warnAndCloseImage(comp.getIC());
-                    }
+
                 } // end of for loop
                 progressMonitor.close();
                 return null;
             } // end of doInBackground
         };
         worker.execute();
+    }
+
+    private static void processFile(File file,
+                                    final CompositionAction action,
+                                    File lastSaveDir,
+                                    boolean closeImagesAfterProcessing) {
+        OpenSaveManager.openFile(file);
+        final Composition comp = ImageComponents.getActiveComp();
+
+        InternalImageFrame frame = comp.getIC().getInternalFrame();
+        frame.paintImmediately(frame.getBounds());
+
+        action.process(comp);
+
+        OutputFormat outputFormat = OutputFormat.getLastOutputFormat();
+
+        String inputFileName = file.getName();
+        String outFileName = FileExtensionUtils.replaceExtension(inputFileName, outputFormat.toString());
+
+        File outputFile = new File(lastSaveDir, outFileName);
+
+        if (outputFile.exists() && (!overwriteAll)) {
+            JOptionPane pane = new JOptionPane("File " + outputFile + " already exists. Overwrite?", JOptionPane.WARNING_MESSAGE);
+            pane.setOptions(new String[]{OVERWRITE_YES, OVERWRITE_YES_ALL, OVERWRITE_NO, OVERWRITE_CANCEL});
+            pane.setInitialValue(OVERWRITE_NO);
+
+            JDialog dialog = pane.createDialog(PixelitorWindow.getInstance(), "Warning");
+            dialog.setVisible(true);
+            String value = (String) pane.getValue();
+            String answer;
+
+            if (value == null) { // cancelled
+                answer = OVERWRITE_CANCEL;
+            } else {
+                answer = value;
+            }
+
+            switch (answer) {
+                case OVERWRITE_YES:
+                    outputFormat.saveComposition(comp, outputFile);
+                    break;
+                case OVERWRITE_YES_ALL:
+                    outputFormat.saveComposition(comp, outputFile);
+                    overwriteAll = true;
+                    break;
+                case OVERWRITE_NO:
+                    // do nothing
+                    break;
+                case OVERWRITE_CANCEL:
+                    if (closeImagesAfterProcessing) {
+                        OpenSaveManager.warnAndCloseImage(comp.getIC());
+                    }
+                    stopProcessing = true;
+                    return;
+            }
+        } else { // the file does not exist or overwrite all was pressed previously
+            outputFormat.saveComposition(comp, outputFile);
+        }
+        if (closeImagesAfterProcessing) {
+            OpenSaveManager.warnAndCloseImage(comp.getIC());
+        }
+        stopProcessing = false;
     }
 
     /**

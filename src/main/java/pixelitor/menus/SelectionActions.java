@@ -64,9 +64,7 @@ public final class SelectionActions {
     }
 
     public static void setEnabled(boolean b, Composition comp) {
-        if(!SwingUtilities.isEventDispatchThread()) {
-            throw new IllegalStateException("SelectionActions::setEnabled: not on EDT");
-        }
+        assert SwingUtilities.isEventDispatchThread();
 
         if (Build.CURRENT.isRobotTest()) {
             if (comp != null) {

@@ -58,6 +58,8 @@ public class OpenSaveManager {
     }
 
     public static void openFile(final File selectedFile) {
+        assert SwingUtilities.isEventDispatchThread();
+
         String ext = FileExtensionUtils.getFileExtension(selectedFile.getName());
         if ("pxc".equals(ext)) {
             openLayered(selectedFile, "pxc");

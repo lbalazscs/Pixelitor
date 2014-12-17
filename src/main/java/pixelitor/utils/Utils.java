@@ -173,7 +173,6 @@ public final class Utils {
             } catch (IOException e) {
                 Dialogs.showExceptionDialog(e);
             }
-        } else {
         }
     }
 
@@ -182,14 +181,6 @@ public final class Utils {
      */
     public static String toFileName(String s) {
         return s.replaceAll("[^A-Za-z0-9_]", "_");
-    }
-
-    public static void debugThread() {
-        Thread thread = Thread.currentThread();
-        String name = thread.getName();
-        System.out.println("Utils.debugThread name = \"" + name + '\"');
-        boolean eventDispatchThread = SwingUtilities.isEventDispatchThread();
-        System.out.println("Utils.debugThread eventDispatchThread = " + eventDispatchThread);
     }
 
     public static void randomizeGUIWidgetsOn(JPanel panel) {
