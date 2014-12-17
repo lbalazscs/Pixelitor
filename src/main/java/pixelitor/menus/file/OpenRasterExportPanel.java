@@ -55,8 +55,7 @@ public class OpenRasterExportPanel extends JPanel {
         OKCancelDialog d = new OKCancelDialog(p, parent, "Export OpenRaster", "Export", "Cancel", false) {
             @Override
             protected void dialogAccepted() {
-                super.dialogAccepted();
-                dispose();
+                close();
                 File file = FileChooser.selectSaveFileForSpecificFormat(FileChooser.oraFilter);
                 if(file != null) {
                     boolean addMergedImage = p.getExportMergedImage();
@@ -67,12 +66,6 @@ public class OpenRasterExportPanel extends JPanel {
                         Dialogs.showExceptionDialog(e);
                     }
                 }
-            }
-
-            @Override
-            protected void dialogCanceled() {
-                super.dialogCanceled();
-                dispose();
             }
         };
         d.setVisible(true);

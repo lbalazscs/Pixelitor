@@ -151,15 +151,14 @@ public class ShapesTool extends Tool {
         effectsDialog = new OKCancelDialog(effectsPanel, "Effects") {
             @Override
             protected void dialogAccepted() {
-                super.dialogAccepted();
-                closeDialog(effectsDialog);
+                effectsDialog.close();
                 effectsPanel.updateEffectsFromGUI();
             }
 
             @Override
             protected void dialogCanceled() {
                 super.dialogCanceled();
-                closeDialog(effectsDialog);
+                effectsDialog.close();
             }
         };
         effectsDialog.setVisible(true);

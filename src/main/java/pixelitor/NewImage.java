@@ -68,8 +68,6 @@ public final class NewImage {
         OKCancelDialog d = new OKCancelDialog(p, "New Image") {
             @Override
             public void dialogAccepted() {
-                super.dialogAccepted();
-
                 int selectedWidth = p.getSelectedWidth();
                 int selectedHeight = p.getSelectedHeight();
                 FillType bg = p.getSelectedBackground();
@@ -81,13 +79,7 @@ public final class NewImage {
                 lastNew.width = selectedWidth;
                 lastNew.height = selectedHeight;
 
-                dispose();
-            }
-
-            @Override
-            public void dialogCanceled() {
-                super.dialogCanceled();
-                dispose();
+                close();
             }
         };
         d.setVisible(true);

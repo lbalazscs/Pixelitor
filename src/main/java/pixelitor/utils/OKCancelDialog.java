@@ -32,8 +32,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 public abstract class OKCancelDialog extends JDialog {
-    JComponent formPanel;
-    JLabel messageLabel;
+    protected JComponent formPanel;
+    private JLabel messageLabel;
     private JScrollPane scrollPane;
     private JButton okButton;
 
@@ -54,12 +54,8 @@ public abstract class OKCancelDialog extends JDialog {
         this.formPanel = form;
 
         setLayout(new BorderLayout());
-
         addForm(form, addScrollBars);
-
         JPanel southPanel = new JPanel();
-
-
         okButton = new JButton(okText);
         JButton cancelButton = new JButton(cancelText);
 
@@ -107,9 +103,7 @@ public abstract class OKCancelDialog extends JDialog {
             @Override
             public void windowClosing(WindowEvent e) {
                 // the user pressed the X button...
-
                 dialogCanceled();
-
             }
         });
 
@@ -129,30 +123,25 @@ public abstract class OKCancelDialog extends JDialog {
         okButton.setEnabled(b);
     }
 
-    /**
-     * Subclasses should always call super.dialogAccepted() and (if desired) dispose()
-     */
-    protected void dialogAccepted() {
-        // TODO this is bad design: setShowHideAllForTab is called ven if the
-        // dialog is not closed
-        // Instead the dialog should listen itself for closing events and set
-        // there
-        // However if the user clicks on X, the WindowAdapter/windowClosed WILL be called
-        // but for dispose not....
-        // TODO anyway it is an error to ALWAYS call super.dialogAccepted() because the
-        // window might not be closed
-        // The point is that setShowHideAllForTab and dispose should be called AT THE SAME TIME
-
-        // turn on again the global keyboard shortcut for Tab
-        GlobalKeyboardWatch.setShowHideAllForTab(true);
-
+    @Override
+    public void dispose() {
+        super.dispose();
     }
 
+    public void close() {
+        setVisible(false);
+        GlobalKeyboardWatch.setShowHideAllForTab(true);
+        dispose();
+    }
+
+    protected abstract void dialogAccepted();
+
     /**
-     * Subclasses should always call super.dialogCanceled() and dispose()
+     * The default implementation only calls close()
+     * If overridden, call close() manually
      */
     protected void dialogCanceled() {
-        GlobalKeyboardWatch.setShowHideAllForTab(true);
+        close();
     }
 
     public void setHeaderMessage(String message) {

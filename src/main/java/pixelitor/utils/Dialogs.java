@@ -28,10 +28,13 @@ import java.awt.Frame;
 import java.awt.Toolkit;
 import java.util.logging.Level;
 
+/**
+ * Static utility methods related to dialogs
+ */
 public class Dialogs {
     private static boolean mainWindowInitialized = false;
 
-    private Dialogs() { // only static utility methods
+    private Dialogs() { // should not me instantiated
     }
 
     public static void setMainWindowInitialized(boolean mainWindowInitialized) {
@@ -48,7 +51,6 @@ public class Dialogs {
         }
         return null;
     }
-
 
     public static void showInfoDialog(String title, String msg) {
         JOptionPane.showMessageDialog(getParentForDialogs(), msg, title, JOptionPane.INFORMATION_MESSAGE);

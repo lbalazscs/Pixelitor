@@ -108,7 +108,6 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
         return (pixelPercentChooser1.getSelectedIndex() == 0);
     }
 
-
     private boolean constrainProportions() {
         return constrainProportionsCheckBox.isSelected();
     }
@@ -153,12 +152,10 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
 
     @Override
     public void keyTyped(KeyEvent e) {
-
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
-
     }
 
     @Override
@@ -253,28 +250,17 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
         return newHeight;
     }
 
-
     public static void showInDialog(final Composition comp) {
         final ResizePanel p = new ResizePanel(comp);
         OKCancelDialog d = new OKCancelDialog(p, "Resize") {
             @Override
             protected void dialogAccepted() {
-                super.dialogAccepted();
-
                 if (!p.validData()) {
                     JOptionPane.showMessageDialog(this, p.getErrorMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 CompositionUtils.resize(comp, p.getNewWidth(), p.getNewHeight(), false);
-                dispose();
-            }
-
-            @Override
-            protected void dialogCanceled() {
-                super.dialogCanceled();
-
-                dispose();
-
+                close();
             }
         };
         d.setVisible(true);

@@ -17,6 +17,7 @@
 package pixelitor.utils;
 
 import pixelitor.GlobalKeyboardWatch;
+import pixelitor.utils.GUIUtils;
 
 import javax.swing.*;
 import java.awt.BorderLayout;

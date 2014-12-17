@@ -38,20 +38,13 @@ public class EnlargeCanvas {
         OKCancelDialog d = new OKCancelDialog(panel, "Enlarge Canvas") {
             @Override
             protected void dialogAccepted() {
-                super.dialogAccepted();
                 ImageComponents.getActiveComp().enlargeCanvas(
                         panel.getNorth(),
                         panel.getEast(),
                         panel.getSouth(),
                         panel.getWest()
                 );
-                dispose();
-            }
-
-            @Override
-            protected void dialogCanceled() {
-                super.dialogCanceled();
-                dispose();
+                close();
             }
         };
         d.setVisible(true);
@@ -95,7 +88,5 @@ public class EnlargeCanvas {
         public int getEast() {
             return eastRange.getValue();
         }
-
-
     }
 }

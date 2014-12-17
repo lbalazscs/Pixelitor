@@ -38,12 +38,10 @@ public class ValidatedDialog extends OKCancelDialog {
 
     @Override
     protected void dialogAccepted() {
-        super.dialogAccepted();
-
         ValidatedForm validatedForm = (ValidatedForm) formPanel;
         if (validatedForm.validateData()) {
             setOkPressed(true);
-            dispose();
+            close();
         } else {
             JOptionPane.showMessageDialog(this, validatedForm.getErrorMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -51,10 +49,8 @@ public class ValidatedDialog extends OKCancelDialog {
 
     @Override
     protected void dialogCanceled() {
-        super.dialogCanceled();
-
         setOkPressed(false);
-        dispose();
+        close();
     }
 
     public boolean isOkPressed() {

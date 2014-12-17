@@ -45,7 +45,7 @@ public class BrowseFilesSupport {
     }
 
     private void init(String initialPath) {
-        nameTF = new JTextField(20);
+        nameTF = new JTextField(25);
         nameTF.setText(initialPath);
         button.addActionListener(new ActionListener() {
             @Override

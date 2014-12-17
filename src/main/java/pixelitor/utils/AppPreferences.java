@@ -178,7 +178,6 @@ public final class AppPreferences {
         }
     }
 
-
     public static File loadLastOpenDir() {
         return loadDir(LAST_OPEN_DIR_KEY);
     }
@@ -206,7 +205,6 @@ public final class AppPreferences {
     private static File getDocumentsDir() {
         return FileSystemView.getFileSystemView().getDefaultDirectory();
     }
-
 
     private static void saveLastOpenDir() {
         saveDir(FileChooser.getLastOpenDir(), LAST_OPEN_DIR_KEY);
@@ -396,7 +394,6 @@ public final class AppPreferences {
 
     public static class Panel extends JPanel {
         private final JTextField undoLevelsTF;
-//        private JCheckBox showDevelopMenuCB;
 
         Panel() {
             setLayout(new GridBagLayout());
@@ -404,12 +401,6 @@ public final class AppPreferences {
             undoLevelsTF = new IntTextField(3);
             undoLevelsTF.setText(String.valueOf(History.getUndoLevels()));
             GridBagHelper.addControl(this, undoLevelsTF);
-
-//            GridBagHelper.addLabel(this, "Show Develop Menu: ", 0, 1);
-//            showDevelopMenuCB = new JCheckBox();
-//            MenuBar menuBar = (MenuBar) PixelitorWindow.getInstance().getJMenuBar();
-//            showDevelopMenuCB.setSelected(menuBar.isDevelopMenuShown());
-//            GridBagHelper.addControl(this, showDevelopMenuCB);
         }
 
         private int getUndoLevels() {
@@ -418,31 +409,14 @@ public final class AppPreferences {
             return retVal;
         }
 
-//        private boolean getShowDevelopMenuSetting() {
-//            return showDevelopMenuCB.isSelected();
-//        }
-
         public static void showInDialog() {
             final Panel p = new Panel();
             OKCancelDialog d = new OKCancelDialog(p, "Preferences") {
                 @Override
                 protected void dialogAccepted() {
-                    super.dialogAccepted();
-
                     int undoLevels = p.getUndoLevels();
                     History.setUndoLevels(undoLevels);
-
-//                    boolean b = p.getShowDevelopMenuSetting();
-//                    MenuBar menuBar = (MenuBar) PixelitorWindow.getInstance().getJMenuBar();
-//                    menuBar.setShowDevelopMenu(b);
-
-                    dispose();
-                }
-
-                @Override
-                protected void dialogCanceled() {
-                    super.dialogCanceled();
-                    dispose();
+                    close();
                 }
             };
             d.setVisible(true);
@@ -460,5 +434,4 @@ public final class AppPreferences {
         // rounds up to the nearest multiple of 5
         return ((retVal + 4) / 5) * 5;
     }
-
 }

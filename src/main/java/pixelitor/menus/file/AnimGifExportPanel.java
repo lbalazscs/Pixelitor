@@ -64,20 +64,13 @@ public class AnimGifExportPanel extends JPanel {
         OKCancelDialog d = new OKCancelDialog(p, parent, "Export Animated GIF", "Export", "Cancel", false) {
             @Override
             protected void dialogAccepted() {
-                super.dialogAccepted();
-                dispose();
+                close();
                 File file = FileChooser.selectSaveFileForSpecificFormat(FileChooser.gifFilter);
                 if(file != null) {
                     AnimationFrames animation = new AnimationFrames(activeComp, p.getDelayMillis());
                     animation.saveToFile(file);
                     AppLogic.showFileSavedMessage(file);
                 }
-            }
-
-            @Override
-            protected void dialogCanceled() {
-                super.dialogCanceled();
-                dispose();
             }
         };
         d.setVisible(true);

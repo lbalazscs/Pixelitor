@@ -125,16 +125,9 @@ public class OptimizedJpegSavePanel extends JPanel {
         OKCancelDialog d = new OKCancelDialog(p, frame, "Save Optimized JPEG", "Save", "Cancel", false) {
             @Override
             protected void dialogAccepted() {
-                super.dialogAccepted();
-                dispose();
+                close();
                 float quality = p.getSelectedQuality();
                 OpenSaveManager.saveJpegWithQuality(quality);
-            }
-
-            @Override
-            protected void dialogCanceled() {
-                super.dialogCanceled();
-                dispose();
             }
         };
         d.setVisible(true);

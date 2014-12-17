@@ -46,16 +46,8 @@ public class ScreenCaptureAction extends AbstractAction {
         OKCancelDialog d = new OKCancelDialog(getSettingsPanel(), "Screen Capture") {
             @Override
             protected void dialogAccepted() {
-                super.dialogAccepted();
                 capture();
-                dispose();
-//                setVisible(false);
-            }
-
-            @Override
-            protected void dialogCanceled() {
-                super.dialogCanceled();
-                dispose();
+                close();
             }
         };
         d.setVisible(true);
