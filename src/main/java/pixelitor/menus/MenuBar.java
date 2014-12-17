@@ -1118,7 +1118,7 @@ public class MenuBar extends JMenuBar {
         };
         MenuFactory.createMenuItem(updateHistogram, null, debugSubmenu);
 
-        AbstractAction saveAllImagesToDir = new AbstractAction("Save All Images to Directory...") {
+        AbstractAction saveAllImagesToDir = new AbstractAction("Save All Images to Folder...") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 OpenSaveManager.saveAllImagesToDir();

@@ -75,7 +75,7 @@ public class SingleDirChooserPanel extends ValidatedForm {
     }
 
     @Override
-    public boolean validateData() {
+    public boolean isDataValid() {
         return true;
     }
 
@@ -86,7 +86,7 @@ public class SingleDirChooserPanel extends ValidatedForm {
      * @return true if a selection was made, false if the operation was cancelled
      */
     public static boolean selectOutputDir(boolean addOutputChooser) {
-        SingleDirChooserPanel chooserPanel = new SingleDirChooserPanel("Output Directory:", "Select Output Directory", FileChooser.getLastSaveDir().getAbsolutePath(), addOutputChooser);
+        SingleDirChooserPanel chooserPanel = new SingleDirChooserPanel("Output Folder:", "Select Output Folder", FileChooser.getLastSaveDir().getAbsolutePath(), addOutputChooser);
         ValidatedDialog chooser = new ValidatedDialog(chooserPanel, PixelitorWindow.getInstance(), "Select Output Folder");
         chooser.setVisible(true);
 

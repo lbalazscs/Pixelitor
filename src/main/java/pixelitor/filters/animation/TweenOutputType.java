@@ -31,13 +31,8 @@ public enum TweenOutputType {
         }
 
         @Override
-        public void checkFile(File output) {
-            // we expect it to be a file
-            if(output.exists()) {
-                if (output.isDirectory()) {
-                    throw new IllegalStateException(output.getAbsolutePath() + " is a directory");
-                }
-            }
+        public String checkFile(File output) {
+            return expectFile(output, this, "GIF");
         }
 
         @Override
@@ -56,14 +51,8 @@ public enum TweenOutputType {
         }
 
         @Override
-        public void checkFile(File output) {
-            // we expect it to be an existing directory
-            if(!output.exists()) {
-                throw new IllegalStateException(output.getAbsolutePath() + " does not exist.");
-            }
-            if(!output.isDirectory()) {
-                throw new IllegalStateException(output.getAbsolutePath() + " is not a directory.");
-            }
+        public String checkFile(File output) {
+            return expectDir(output, this);
         }
 
         @Override
@@ -74,7 +63,35 @@ public enum TweenOutputType {
 
     abstract AnimationWriter createAnimationWriter(File file, int delayMillis);
 
-    public abstract void checkFile(File output);
+    /**
+     * Returns the error message or null if the argument is OK as output
+     */
+    public abstract String checkFile(File output);
 
     public abstract boolean needsDirectory();
+
+    private static String expectFile(File output, TweenOutputType type, String fileType) {
+        // we expect it to be a file
+        if (output.exists()) {
+            if (output.isDirectory()) {
+                return String.format("<html>%s is a folder." +
+                                "<br>For the \"%s\" output type, select a (new or existing) %s file in an existing folder.",
+                        output.getAbsolutePath(), type.toString(), fileType);
+            }
+        }
+        return null;
+    }
+
+    private static String expectDir(File output, TweenOutputType type) {
+        // we expect it to be an existing directory
+        if (!output.isDirectory()) {
+            return String.format("<html>%s is not a folder." +
+                            "<br>For the \"%s\" output type, select an existing folder.",
+                    output.getAbsolutePath(), type.toString());
+        }
+        if (!output.exists()) {
+            return output.getAbsolutePath() + " does not exist.";
+        }
+        return null;
+    }
 }

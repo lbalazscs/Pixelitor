@@ -88,8 +88,8 @@ public class BatchResize {
         }
 
         @Override
-        public boolean validateData() {
-            if (!openSaveDirsPanel.validateData()) {
+        public boolean isDataValid() {
+            if (!openSaveDirsPanel.isDataValid()) {
                 errorMessage = openSaveDirsPanel.getErrorMessage();
                 return false;
             }

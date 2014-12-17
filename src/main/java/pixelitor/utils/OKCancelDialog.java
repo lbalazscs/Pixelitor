@@ -123,9 +123,8 @@ public abstract class OKCancelDialog extends JDialog {
         okButton.setEnabled(b);
     }
 
-    @Override
-    public void dispose() {
-        super.dispose();
+    public void setOKButtonText(String text) {
+        okButton.setText(text);
     }
 
     public void close() {

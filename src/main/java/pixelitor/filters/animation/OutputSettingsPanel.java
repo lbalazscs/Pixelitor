@@ -20,8 +20,12 @@ import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.io.FileChooser;
 import pixelitor.utils.BrowseFilesSupport;
 import pixelitor.utils.GridBagHelper;
+import pixelitor.utils.TFValidationLayerUI;
+import pixelitor.utils.TextFieldValidator;
+import pixelitor.utils.ValidatedForm;
 
 import javax.swing.*;
+import javax.swing.plaf.LayerUI;
 import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -30,7 +34,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
 
-public class OutputSettingsPanel extends JPanel {
+public class OutputSettingsPanel extends ValidatedForm implements TextFieldValidator {
     private JTextField nrSecondsTF = new JTextField("2", 3);
     private JTextField fpsTF = new JTextField("24", 3);
     private int nrFrames;
@@ -41,10 +45,15 @@ public class OutputSettingsPanel extends JPanel {
     private EnumComboBoxModel<TweenOutputType> model;
     private final JComboBox<TweenOutputType> outputTypeCB;
     private BrowseFilesSupport browseFilesSupport = new BrowseFilesSupport(FileChooser.getLastSaveDir().getAbsolutePath());
+    private final JTextField fileNameTF;
+    private String errorMessage;
 
     public OutputSettingsPanel(TweenWizard wizard) {
         super(new GridBagLayout());
         this.wizard = wizard;
+
+        // A single TFValidationLayerUI for all the textfields.
+        LayerUI<JTextField> tfLayerUI = new TFValidationLayerUI(this);
 
         //noinspection unchecked
         model = new EnumComboBoxModel(TweenOutputType.class);
@@ -59,22 +68,24 @@ public class OutputSettingsPanel extends JPanel {
 
         GridBagHelper.addLabelWithControl(this, "Output Type:", outputTypeCB, 0);
 
-        GridBagHelper.addLabelWithControl(this, "Number of seconds:", nrSecondsTF, 1);
+        GridBagHelper.addLabelWithControl(this, "Number of Seconds:",
+                new JLayer<>(nrSecondsTF, tfLayerUI), 1);
 
         KeyAdapter keyAdapter = new KeyAdapter() {
             @Override
-            public void keyReleased(KeyEvent e) {
-                updateCalculations();
+            public void keyReleased(KeyEvent keyEvent) {
+                updateCalculations(keyEvent);
             }
         };
         nrSecondsTF.addKeyListener(keyAdapter);
 
-        GridBagHelper.addLabelWithControl(this, "Frames per Second:", fpsTF, 2);
+        GridBagHelper.addLabelWithControl(this, "Frames per Second:",
+                new JLayer<>(fpsTF, tfLayerUI), 2);
 
         fpsTF.addKeyListener(keyAdapter);
 
         nrFramesLabel = new JLabel();
-        updateCalculations();
+        updateCalculations(null);
 
         GridBagHelper.addLabelWithControl(this, "Number of Frames:", nrFramesLabel, 3);
 
@@ -84,8 +95,9 @@ public class OutputSettingsPanel extends JPanel {
         GridBagHelper.addLabelWithControl(this, "Interpolation:", ipCB, 4);
 
         JPanel p = new JPanel(new FlowLayout());
-        p.setBorder(BorderFactory.createTitledBorder("Output File/Directory"));
-        p.add(browseFilesSupport.getNameTF());
+        p.setBorder(BorderFactory.createTitledBorder("Output File/Folder"));
+        fileNameTF = browseFilesSupport.getNameTF();
+        p.add(new JLayer<>(fileNameTF, tfLayerUI));
         p.add(browseFilesSupport.getBrowseButton());
         GridBagHelper.addOnlyControlToRow(this, p, 5);
 
@@ -95,23 +107,24 @@ public class OutputSettingsPanel extends JPanel {
         TweenOutputType selected = (TweenOutputType) outputTypeCB.getSelectedItem();
         if(selected.needsDirectory()) {
             browseFilesSupport.setSelectDirs(true);
-            browseFilesSupport.setDialogTitle("Select Output Directory");
+            browseFilesSupport.setDialogTitle("Select Output Folder");
         } else {
             browseFilesSupport.setSelectDirs(false);
             browseFilesSupport.setDialogTitle("Select Output File");
         }
+        if (fileNameTF != null) { // not the initial setup
+            fileNameTF.repaint();
+        }
     }
 
-    private void updateCalculations() {
+    private void updateCalculations(KeyEvent e) {
         try {
             double nrSeconds = Double.parseDouble(nrSecondsTF.getText().trim());
             fps = Double.parseDouble(fpsTF.getText().trim());
             nrFrames = (int) (nrSeconds * fps);
             nrFramesLabel.setText(String.valueOf(nrFrames));
-            wizard.setNextButtonEnabled(true);
-        } catch (Exception e) {
-            // disable the next button in case of any formatting problem
-            wizard.setNextButtonEnabled(false);
+        } catch (Exception ex) {
+            nrFramesLabel.setText("??");
         }
     }
 
@@ -135,4 +148,32 @@ public class OutputSettingsPanel extends JPanel {
         return browseFilesSupport.getSelectedFile();
     }
 
+    @Override
+    public boolean isDataValid() {
+        return isValid(nrSecondsTF) && isValid(fpsTF) && isValid(fileNameTF);
+    }
+
+    @Override
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    @Override
+    public boolean isValid(JTextField textField) {
+        boolean valid = true;
+        if (textField == nrSecondsTF || textField == fpsTF) {
+            String text = textField.getText().trim();
+            try {
+                Double.parseDouble(text);
+            } catch (NumberFormatException ex) {
+                valid = false;
+                errorMessage = text + " is not a valid number.";
+            }
+        } else if (textField == fileNameTF) {
+            TweenOutputType outputType = (TweenOutputType) outputTypeCB.getSelectedItem();
+            errorMessage = outputType.checkFile(new File(textField.getText().trim()));
+            valid = (errorMessage == null);
+        }
+        return valid;
+    }
 }

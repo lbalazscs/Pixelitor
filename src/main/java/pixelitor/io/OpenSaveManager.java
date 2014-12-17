@@ -329,7 +329,7 @@ public class OpenSaveManager {
         final File saveDir = FileChooser.getLastSaveDir();
         final List<ImageComponent> imageComponents = ImageComponents.getImageComponents();
 
-        final ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("Saving All Images to Directory");
+        final ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("Saving All Images to Folder");
 
         SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
             @Override

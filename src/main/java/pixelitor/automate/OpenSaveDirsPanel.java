@@ -29,8 +29,8 @@ import java.io.File;
  * A panel for selecting the opening and the saving directory
  */
 class OpenSaveDirsPanel extends ValidatedForm {
-    private final BrowseFilesSupport inputChooser = new BrowseFilesSupport(FileChooser.getLastOpenDir().getAbsolutePath(), "Select Input Directory", true);
-    private final BrowseFilesSupport outputChooser = new BrowseFilesSupport(FileChooser.getLastSaveDir().getAbsolutePath(), "Select Output Directory", true);
+    private final BrowseFilesSupport inputChooser = new BrowseFilesSupport(FileChooser.getLastOpenDir().getAbsolutePath(), "Select Input Folder", true);
+    private final BrowseFilesSupport outputChooser = new BrowseFilesSupport(FileChooser.getLastSaveDir().getAbsolutePath(), "Select Output Folder", true);
     private final boolean allowToBeTheSame;
     private String errMessage;
 
@@ -40,11 +40,11 @@ class OpenSaveDirsPanel extends ValidatedForm {
         this.allowToBeTheSame = allowToBeTheSame;
         setLayout(new GridBagLayout());
 
-        GridBagHelper.addLabel(this, "Input Directory:", 0, 0);
+        GridBagHelper.addLabel(this, "Input Folder:", 0, 0);
         GridBagHelper.addControl(this, inputChooser.getNameTF());
         GridBagHelper.addNextControl(this, inputChooser.getBrowseButton());
 
-        GridBagHelper.addLabel(this, "Output Directory:", 0, 1);
+        GridBagHelper.addLabel(this, "Output Folder:", 0, 1);
         GridBagHelper.addControl(this, outputChooser.getNameTF());
         GridBagHelper.addNextControl(this, outputChooser.getBrowseButton());
 
@@ -67,16 +67,16 @@ class OpenSaveDirsPanel extends ValidatedForm {
      * @return true if the data is valid
      */
     @Override
-    public boolean validateData() {
+    public boolean isDataValid() {
         File selectedInputDir = inputChooser.getSelectedFile();
         File selectedOutDir = outputChooser.getSelectedFile();
 
         if (!selectedInputDir.exists()) {
-            errMessage = "The selected input directory " + selectedInputDir.getAbsolutePath() + " does not exist.";
+            errMessage = "The selected input folder " + selectedInputDir.getAbsolutePath() + " does not exist.";
             return false;
         }
         if (!selectedOutDir.exists()) {
-            errMessage = "The selected output directory " + selectedInputDir.getAbsolutePath() + " does not exist.";
+            errMessage = "The selected output folder " + selectedInputDir.getAbsolutePath() + " does not exist.";
             return false;
         }
 
@@ -84,7 +84,7 @@ class OpenSaveDirsPanel extends ValidatedForm {
             return true;
         }
         if (selectedInputDir.equals(selectedOutDir)) {
-            errMessage = "The input and output directories must be different";
+            errMessage = "The input and output folders must be different";
             return false;
         }
         return true;

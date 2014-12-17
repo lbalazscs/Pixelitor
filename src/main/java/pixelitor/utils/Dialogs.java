@@ -24,6 +24,7 @@ import pixelitor.history.History;
 import pixelitor.utils.test.DebugEventQueue;
 
 import javax.swing.*;
+import java.awt.Component;
 import java.awt.Frame;
 import java.awt.Toolkit;
 import java.util.logging.Level;
@@ -63,6 +64,10 @@ public class Dialogs {
 
     public static void showErrorDialog(String title, String msg) {
         JOptionPane.showMessageDialog(getParentForDialogs(), msg, title, JOptionPane.ERROR_MESSAGE);
+    }
+
+    public static void showErrorDialog(Component parent, String title, String msg) {
+        JOptionPane.showMessageDialog(parent, msg, title, JOptionPane.ERROR_MESSAGE);
     }
 
     public static void showNotImageLayerDialog() {

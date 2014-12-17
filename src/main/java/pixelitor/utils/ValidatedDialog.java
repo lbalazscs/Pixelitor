@@ -39,7 +39,7 @@ public class ValidatedDialog extends OKCancelDialog {
     @Override
     protected void dialogAccepted() {
         ValidatedForm validatedForm = (ValidatedForm) formPanel;
-        if (validatedForm.validateData()) {
+        if (validatedForm.isDataValid()) {
             setOkPressed(true);
             close();
         } else {

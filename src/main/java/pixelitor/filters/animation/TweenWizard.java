@@ -19,8 +19,10 @@ package pixelitor.filters.animation;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.ParametrizedAdjustPanel;
+import pixelitor.utils.Dialogs;
 import pixelitor.utils.GUIUtils;
 import pixelitor.utils.OKCancelDialog;
+import pixelitor.utils.ValidatedForm;
 
 import javax.swing.*;
 import java.beans.PropertyChangeEvent;
@@ -31,7 +33,7 @@ import java.beans.PropertyChangeListener;
  */
 public class TweenWizard {
     private OKCancelDialog dialog = null;
-    private TweenWizardState wizardState = TweenWizardState.SELECT_FILTER;
+    private TweenWizardPage wizardPage = TweenWizardPage.SELECT_FILTER;
     private TweenAnimation animation = new TweenAnimation();
 
     /**
@@ -51,35 +53,48 @@ public class TweenWizard {
 
     private void showDialog(final JFrame dialogParent) {
         dialog = new OKCancelDialog(
-                wizardState.getPanel(TweenWizard.this),
+                wizardPage.getPanel(TweenWizard.this),
                 dialogParent,
                 "Export Keyframe Animation",
                 "Next", "Cancel") {
 
             @Override
             protected void dialogCanceled() {
-                wizardState.onWizardCancelled(TweenWizard.this);
+                wizardPage.onWizardCancelled(TweenWizard.this);
                 super.dialogCanceled();
                 dispose();
             }
 
             @Override
-            protected void dialogAccepted() {
-                // "next" was pressed
-                wizardState.onMovingToTheNext(TweenWizard.this);
-                TweenWizardState nextState = wizardState.getNext();
-                if (nextState == null) { // dialog finished
+            protected void dialogAccepted() { // "next" was pressed
+                // first check if it may move forward
+                if (wizardPage == TweenWizardPage.OUTPUT_SETTINGS) {
+                    ValidatedForm settings = (ValidatedForm) wizardPage.getPanel(TweenWizard.this);
+                    if (!settings.isDataValid()) {
+                        Dialogs.showErrorDialog(this, "Error", settings.getErrorMessage());
+                        return;
+                    }
+                }
+
+                // move forward
+                wizardPage.onMovingToTheNext(TweenWizard.this);
+                TweenWizardPage nextPage = wizardPage.getNext();
+                if (nextPage == null) { // dialog finished
                     dispose();
                     calculateAnimation();
                 } else {
-                    JComponent panel = nextState.getPanel(TweenWizard.this);
+                    JComponent panel = nextPage.getPanel(TweenWizard.this);
                     dialog.changeForm(panel);
-                    dialog.setHeaderMessage(nextState.getHeaderText());
-                    wizardState = nextState;
+                    dialog.setHeaderMessage(nextPage.getHeaderText());
+                    wizardPage = nextPage;
+
+                    if (wizardPage.getNext() == null) { // this is the last page
+                        setOKButtonText("Render");
+                    }
                 }
             }
         };
-        dialog.setHeaderMessage(wizardState.getHeaderText());
+        dialog.setHeaderMessage(wizardPage.getHeaderText());
 
         // it was packed already, but this is not correct because of the header message
         // and anyway we don't know the size of the filter dialogs in advance
@@ -117,10 +132,6 @@ public class TweenWizard {
             }
         });
         task.execute();
-    }
-
-    public void setNextButtonEnabled(boolean b) {
-        dialog.setOKButtonEnabled(b);
     }
 
     public TweenAnimation getAnimation() {

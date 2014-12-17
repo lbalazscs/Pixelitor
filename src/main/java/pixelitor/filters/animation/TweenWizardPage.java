@@ -28,9 +28,9 @@ import java.awt.FlowLayout;
 import java.io.File;
 
 /**
- * The states of the keyframe animation export dialog
+ * The pages of the keyframe animation export dialog
  */
-public enum TweenWizardState {
+public enum TweenWizardPage {
     SELECT_FILTER {
         JComboBox<FilterWithParametrizedGUI> filtersCB;
 
@@ -40,7 +40,7 @@ public enum TweenWizardState {
         }
 
         @Override
-        TweenWizardState getNext() {
+        TweenWizardPage getNext() {
             return INITIAL_FILTER_SETTINGS;
         }
 
@@ -69,7 +69,7 @@ public enum TweenWizardState {
         }
 
         @Override
-        TweenWizardState getNext() {
+        TweenWizardPage getNext() {
             return FINAL_FILTER_SETTINGS;
         }
 
@@ -107,8 +107,8 @@ public enum TweenWizardState {
         }
 
         @Override
-        TweenWizardState getNext() {
-            return SELECT_OUTPUT_SETTINGS;
+        TweenWizardPage getNext() {
+            return OUTPUT_SETTINGS;
         }
 
         @Override
@@ -136,24 +136,26 @@ public enum TweenWizardState {
 //            ParamSet paramSet = wizard.getAnimation().getFilter().getParamSet();
 //            wizard.setFinalState(paramSet.copyState());
         }
-    }, SELECT_OUTPUT_SETTINGS {
+    }, OUTPUT_SETTINGS {
         OutputSettingsPanel outputSettingsPanel;
 
         @Override
         String getHeaderText() {
             return "<html> <b>Output settings</b>" +
-                    "<p>For file output select a file in an existing directory. " +
-                    "<br>For file sequence output select an existing directory.";
+                    "<p>For file output select a file in an existing folder. " +
+                    "<br>For file sequence output select an existing folder.";
         }
 
         @Override
-        TweenWizardState getNext() {
+        TweenWizardPage getNext() {
             return null;
         }
 
         @Override
         JComponent getPanel(TweenWizard wizard) {
-            outputSettingsPanel = new OutputSettingsPanel(wizard);
+            if (outputSettingsPanel == null) {
+                outputSettingsPanel = new OutputSettingsPanel(wizard);
+            }
             return outputSettingsPanel;
         }
 
@@ -169,7 +171,6 @@ public enum TweenWizardState {
             animation.setOutputType(type);
 
             File output = outputSettingsPanel.getOutput();
-            type.checkFile(output);
             animation.setOutput(output);
 
             animation.setNumFrames(outputSettingsPanel.getNumFrames());
@@ -186,7 +187,7 @@ public enum TweenWizardState {
 
     abstract String getHeaderText();
 
-    abstract TweenWizardState getNext();
+    abstract TweenWizardPage getNext();
 
     abstract JComponent getPanel(TweenWizard wizard);
 

@@ -55,8 +55,8 @@ public class AppNode extends DebugNode {
         }
 
         addStringChild("Pixelitor Version", Build.VERSION_NUMBER);
-        addQuotedStringChild("Opening Directory", FileChooser.getLastOpenDir().getAbsolutePath());
-        addQuotedStringChild("Saving Directory", FileChooser.getLastSaveDir().getAbsolutePath());
+        addQuotedStringChild("Opening Folder", FileChooser.getLastOpenDir().getAbsolutePath());
+        addQuotedStringChild("Saving Folder", FileChooser.getLastSaveDir().getAbsolutePath());
 
         addBooleanChild("Can Undo", History.canUndo());
         addBooleanChild("Can Redo", History.canRedo());

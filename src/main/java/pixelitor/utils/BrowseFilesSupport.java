@@ -68,7 +68,7 @@ public class BrowseFilesSupport {
         chooser.setDialogTitle(dialogTitle);
 
         if(selectDirs) {
-            chooser.setApproveButtonText("Select Directory");
+            chooser.setApproveButtonText("Select Folder");
             chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         }
 
