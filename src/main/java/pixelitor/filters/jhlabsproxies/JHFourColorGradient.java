@@ -63,7 +63,7 @@ public class JHFourColorGradient extends FilterWithParametrizedGUI {
     }
 
     @Override
-    public AdjustPanel getAdjustPanel() {
+    public AdjustPanel createAdjustPanel() {
         return new GeographicalAdjustmentPanel(this, true);
     }
 }

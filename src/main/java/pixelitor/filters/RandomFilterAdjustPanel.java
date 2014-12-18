@@ -17,8 +17,10 @@
 package pixelitor.filters;
 
 import pixelitor.ChangeReason;
+import pixelitor.ImageComponents;
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.FilterWithGUI;
+import pixelitor.layers.ImageLayer;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -27,8 +29,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class RandomFilterAdjustPanel extends AdjustPanel {
-    JPanel realSettingsPanel;
-    JPanel lastFilterPanel;
+    private JPanel realSettingsPanel;
+    private JPanel lastFilterPanel;
+    private Filter lastFilter;
 
     protected RandomFilterAdjustPanel(RandomFilter filter) {
         super(null); // the actual filter will be determined bellow
@@ -40,7 +43,7 @@ public class RandomFilterAdjustPanel extends AdjustPanel {
                 nextRandomFilter();
             }
         });
-        JPanel northPanel = new JPanel(new FlowLayout());
+        JPanel northPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         northPanel.add(nextRandomButton);
         add(northPanel, BorderLayout.NORTH);
         realSettingsPanel = new JPanel();
@@ -62,12 +65,20 @@ public class RandomFilterAdjustPanel extends AdjustPanel {
         String filterName = newFilter.getName();
         realSettingsPanel.setBorder(BorderFactory.createTitledBorder(filterName));
         if (newFilter instanceof FilterWithGUI) {
-            AdjustPanel adjustPanel = ((FilterWithGUI) newFilter).getAdjustPanel();
+            if (lastFilter != null) { // there was a filter before
+                // need to clear the preview of the previous filters
+                // so that the image position selectors show the original image
+                ImageLayer imageLayer = ImageComponents.getActiveComp().getActiveImageLayer();
+                imageLayer.cancelPreviewing(); // cancel the last one
+                imageLayer.startPreviewing(); // start the new one
+            }
+            AdjustPanel adjustPanel = ((FilterWithGUI) newFilter).createAdjustPanel();
             realSettingsPanel.add(adjustPanel);
             lastFilterPanel = adjustPanel;
         } else {
             lastFilterPanel = null;
             op.execute(ChangeReason.OP_PREVIEW);
         }
+        lastFilter = newFilter;
     }
 }

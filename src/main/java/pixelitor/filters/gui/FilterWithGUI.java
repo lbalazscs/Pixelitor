@@ -28,7 +28,6 @@ import java.awt.event.ActionEvent;
  * An operation that has a GUI for customization
  */
 public abstract class FilterWithGUI extends Filter {
-    //    protected AdjustPanel adjustPanel = null;
     private final String name;
 
     protected FilterWithGUI(String name) {
@@ -36,7 +35,13 @@ public abstract class FilterWithGUI extends Filter {
         this.name = name;
     }
 
-    public abstract AdjustPanel getAdjustPanel();
+    /**
+     * Creates a new adjustment panel for this GUI filter
+     * The panel must be created at the moment of this call (cannot be cached)
+     * Creating an adjustment panel should also automatically execute the first
+     * preview run of this filter based on the default settings
+     */
+    public abstract AdjustPanel createAdjustPanel();
 
     /**
      * Returns the menu name, but without the "..." at the end
@@ -57,7 +62,7 @@ public abstract class FilterWithGUI extends Filter {
         if (comp != null) {
             comp.getActiveImageLayer().startPreviewing();
 
-            AdjustPanel p = getAdjustPanel();
+            AdjustPanel p = createAdjustPanel();
             startDialogSession();
             AdjustDialog.showDialog(p, this);
             endDialogSession();

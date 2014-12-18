@@ -47,20 +47,30 @@ import java.io.ObjectOutputStream;
  * An image layer.
  */
 public class ImageLayer extends ContentLayer {
-    enum State {NORMAL, EDITING_PREVIEW, EDITING_SHOW_ORIGINAL}
+    enum State {NORMAL, EDITING_PREVIEW, EDITING_SHOW_ORIGINAL}  // TODO
 
     private static final long serialVersionUID = 2L;
 
+    // no filter with dialog is running
     private static final int STATE_NORMAL = 0;
+
+    // we are previewing, but a filter returned the src => no repainting
+    // or history saving at the end is necessary
     private static final int STATE_PREVIEWING_NOT_CHANGED = 1;
+
+    // the filter changed the image object, and we are previewing that change
     private static final int STATE_PREVIEWING_CHANGED = 2;
 
+    //
     // transient variables from here!
+    //
     private transient int state = STATE_NORMAL;
+
     private transient BufferedImage bufferedImage = null;
     private transient TmpDrawingLayer tmpDrawingLayer;
 
-    // for dialog previews
+    // During dialog previews the image displayed by this layer will be replaced
+    // and the original image (or a subimage if there is selection) is stored here
     private transient BufferedImage backupForPreviewBufferedImage = null;
 
     /**
@@ -138,7 +148,7 @@ public class ImageLayer extends ContentLayer {
     }
 
     @Override
-    public Layer duplicate() {
+    public ImageLayer duplicate() {
         BufferedImage imageCopy = ImageUtils.copyImage(bufferedImage);
         ImageLayer d = new ImageLayer(comp, imageCopy, getDuplicateLayerName());
         d.setOpacity(opacity, false, true, true);
@@ -169,6 +179,7 @@ public class ImageLayer extends ContentLayer {
         } else {
             Shape selectionShape = selection.getShape();
             if (selectionShape != null) {
+                // the argument image pixels will replace the old ones only where selected
                 Graphics2D g = bufferedImage.createGraphics();
                 g.translate(-getTranslationX(), -getTranslationY());
                 g.setComposite(AlphaComposite.Src);
@@ -185,7 +196,8 @@ public class ImageLayer extends ContentLayer {
     }
 
     /**
-     * This method is called when a new dialog appears
+     * This method is called when a new dialog appears,
+     * right before creating the adjustment panel
      */
     public void startPreviewing() {
         this.backupForPreviewBufferedImage = getImageOrSubImageIfSelected(true, true);
@@ -200,7 +212,7 @@ public class ImageLayer extends ContentLayer {
     }
 
     /**
-     * This method is called when cancel was pressed in the preview dialog
+     * Called when Cancel was pressed in the preview dialog
      */
     public void cancelPreviewing() {
         restoreOriginalFromPreviewBackup();
@@ -215,9 +227,12 @@ public class ImageLayer extends ContentLayer {
         }
 
         // restore the original
-        setBufferedImage(this.backupForPreviewBufferedImage, false);
+        setBufferedImage(backupForPreviewBufferedImage, false);
     }
 
+    /**
+     * Called if OK was pressed in a GUI dialog
+     */
     public void finishFilterWithPreview(String filterName) {
         assert state != STATE_NORMAL;
 
@@ -482,6 +497,7 @@ public class ImageLayer extends ContentLayer {
         BufferedImage dest = new BufferedImage(newImageWidth, newImageHeight, img.getType());
 
         Graphics2D g2 = dest.createGraphics();
+        // TODO we should not need bicubic here as long as we have only 90, 180, 270 degrees
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 
         if (angleDegree == 90) {
@@ -491,7 +507,6 @@ public class ImageLayer extends ContentLayer {
         } else if (angleDegree == 270) {
             g2.translate(0, imageWidth);
         }
-
 
         g2.rotate(Math.toRadians(angleDegree));
         g2.drawImage(img, 0, 0, imageWidth, imageHeight, null);
@@ -611,10 +626,13 @@ public class ImageLayer extends ContentLayer {
         return image;
     }
 
-    public BufferedImage getImageOrSubImageIfSelected(boolean copyIfFull, boolean copyAndTranslateIfSelected) {
+    /**
+     * If there is a selection, then the filters work on a subimage determined by the selection bounds.
+     */
+    public BufferedImage getImageOrSubImageIfSelected(boolean copyIfNoSelection, boolean copyAndTranslateIfSelected) {
         Selection selection = comp.getSelection();
         if (selection == null) {
-            if (copyIfFull) {
+            if (copyIfNoSelection) {
                 return ImageUtils.copyImage(bufferedImage);
             }
             return bufferedImage;
@@ -624,6 +642,8 @@ public class ImageLayer extends ContentLayer {
     }
 
     public BufferedImage getSelectionSizedPartFrom(BufferedImage src, Selection selection, boolean copyAndTranslateIfSelected) {
+        assert selection != null;
+
         Rectangle bounds = selection.getShapeBounds(); // relative to the composition
 
         bounds.translate(-getTranslationX(), -getTranslationY()); // relative to the image
@@ -631,7 +651,7 @@ public class ImageLayer extends ContentLayer {
         // TODO SwingUtilities.computeIntersection can do this without allocating a rectangle
         bounds = bounds.intersection(imageBounds);
 
-        if (bounds.isEmpty()) {
+        if (bounds.isEmpty()) { // TODO if the selection is outside the image?
             if (copyAndTranslateIfSelected) {
                 return ImageUtils.copyImage(src);
             } else {

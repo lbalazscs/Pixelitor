@@ -54,7 +54,7 @@ public class JHPerspective extends FilterWithParametrizedGUI {
     }
 
     @Override
-    public AdjustPanel getAdjustPanel() {
+    public AdjustPanel createAdjustPanel() {
         return new GeographicalAdjustmentPanel(this, false);
     }
 

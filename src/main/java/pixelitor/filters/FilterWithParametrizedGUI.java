@@ -61,7 +61,7 @@ public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
     }
 
     @Override
-    public AdjustPanel getAdjustPanel() {
+    public AdjustPanel createAdjustPanel() {
         return new ParametrizedAdjustPanel(this);
     }
 

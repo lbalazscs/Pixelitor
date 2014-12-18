@@ -19,6 +19,7 @@ package pixelitor.utils;
 import pixelitor.PixelitorWindow;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -33,6 +34,7 @@ public class BrowseFilesSupport {
     private final JButton button = new JButton("Browse...");
     private String dialogTitle;
     private boolean selectDirs;
+    private FileFilter fileFilter; // used for filtering when in file selection mode
 
     public BrowseFilesSupport(String initialPath) {
         init(initialPath);
@@ -64,13 +66,24 @@ public class BrowseFilesSupport {
     }
 
     private void browseButtonClicked(String dialogTitle) {
-        JFileChooser chooser = new JFileChooser(nameTF.getText());
-        chooser.setDialogTitle(dialogTitle);
+        JFileChooser chooser;
 
         if(selectDirs) {
+            chooser = new JFileChooser(nameTF.getText());
             chooser.setApproveButtonText("Select Folder");
             chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        } else {
+            chooser = new ConfirmSaveFileChooser(nameTF.getText());
+            if (fileFilter != null) {
+                // First remove the All Files option...
+                chooser.setAcceptAllFileFilterUsed(false);
+                // ... then add the extension filter corresponding to the saved file type...
+                chooser.addChoosableFileFilter(fileFilter);
+                // ... then add back the All Files option so that it is at the end
+                chooser.setAcceptAllFileFilterUsed(true);
+            }
         }
+        chooser.setDialogTitle(dialogTitle);
 
         chooser.showOpenDialog(PixelitorWindow.getInstance());
         File selectedFile = chooser.getSelectedFile();
@@ -97,5 +110,9 @@ public class BrowseFilesSupport {
 
     public void setDialogTitle(String dialogTitle) {
         this.dialogTitle = dialogTitle;
+    }
+
+    public void setFileFilter(FileFilter fileFilter) {
+        this.fileFilter = fileFilter;
     }
 }

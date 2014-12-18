@@ -103,7 +103,7 @@ public class TextFilter extends FilterWithGUI {
 
 
     @Override
-    public AdjustPanel getAdjustPanel() {
+    public AdjustPanel createAdjustPanel() {
         return new TextFilterAdjustments(this);
     }
 

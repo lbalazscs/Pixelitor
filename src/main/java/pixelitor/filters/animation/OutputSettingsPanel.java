@@ -40,23 +40,20 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
     private int nrFrames;
     private final JLabel nrFramesLabel;
     private double fps;
-    private TweenWizard wizard;
     private final JComboBox<Interpolation> ipCB;
-    private EnumComboBoxModel<TweenOutputType> model;
     private final JComboBox<TweenOutputType> outputTypeCB;
     private BrowseFilesSupport browseFilesSupport = new BrowseFilesSupport(FileChooser.getLastSaveDir().getAbsolutePath());
     private final JTextField fileNameTF;
     private String errorMessage;
 
-    public OutputSettingsPanel(TweenWizard wizard) {
+    public OutputSettingsPanel() {
         super(new GridBagLayout());
-        this.wizard = wizard;
 
         // A single TFValidationLayerUI for all the textfields.
         LayerUI<JTextField> tfLayerUI = new TFValidationLayerUI(this);
 
         //noinspection unchecked
-        model = new EnumComboBoxModel(TweenOutputType.class);
+        EnumComboBoxModel<TweenOutputType> model = new EnumComboBoxModel(TweenOutputType.class);
         outputTypeCB = new JComboBox<>(model);
         outputTypeCB.addActionListener(new ActionListener() {
             @Override
@@ -74,7 +71,7 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
         KeyAdapter keyAdapter = new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent keyEvent) {
-                updateCalculations(keyEvent);
+                updateCalculations();
             }
         };
         nrSecondsTF.addKeyListener(keyAdapter);
@@ -85,7 +82,7 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
         fpsTF.addKeyListener(keyAdapter);
 
         nrFramesLabel = new JLabel();
-        updateCalculations(null);
+        updateCalculations();
 
         GridBagHelper.addLabelWithControl(this, "Number of Frames:", nrFramesLabel, 3);
 
@@ -111,13 +108,14 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
         } else {
             browseFilesSupport.setSelectDirs(false);
             browseFilesSupport.setDialogTitle("Select Output File");
+            browseFilesSupport.setFileFilter(selected.getFileFilter());
         }
         if (fileNameTF != null) { // not the initial setup
             fileNameTF.repaint();
         }
     }
 
-    private void updateCalculations(KeyEvent e) {
+    private void updateCalculations() {
         try {
             double nrSeconds = Double.parseDouble(nrSecondsTF.getText().trim());
             fps = Double.parseDouble(fpsTF.getText().trim());
@@ -164,6 +162,7 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
         if (textField == nrSecondsTF || textField == fpsTF) {
             String text = textField.getText().trim();
             try {
+                //noinspection ResultOfMethodCallIgnored
                 Double.parseDouble(text);
             } catch (NumberFormatException ex) {
                 valid = false;

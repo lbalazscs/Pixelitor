@@ -339,7 +339,7 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
     }
 
     @Override
-    public AdjustPanel getAdjustPanel() {
+    public AdjustPanel createAdjustPanel() {
         return new ChannelMixerAdjustments(this, actions);
     }
 

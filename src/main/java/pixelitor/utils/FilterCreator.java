@@ -236,7 +236,7 @@ public class FilterCreator extends JPanel {
         String retVal = "";
         if (gui && (!parametrizedGui)) {
             retVal += "\n    @Override\n";
-            retVal += "    public AdjustPanel getAdjustPanel() {\n";
+            retVal += "    public AdjustPanel createAdjustPanel() {\n";
             retVal += "        return new " + className + "Adjustments(this);\n";
             retVal += "    }\n";
         }

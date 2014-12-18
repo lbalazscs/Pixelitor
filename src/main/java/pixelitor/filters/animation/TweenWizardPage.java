@@ -22,6 +22,7 @@ import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.ParametrizedAdjustPanel;
 import pixelitor.io.FileChooser;
+import pixelitor.layers.ImageLayer;
 
 import javax.swing.*;
 import java.awt.FlowLayout;
@@ -77,7 +78,7 @@ public enum TweenWizardPage {
         JComponent getPanel(TweenWizard wizard) {
             FilterWithParametrizedGUI filter = wizard.getAnimation().getFilter();
             ImageComponents.getActiveComp().getActiveImageLayer().startPreviewing();
-            AdjustPanel adjustPanel = filter.getAdjustPanel();
+            AdjustPanel adjustPanel = filter.createAdjustPanel();
             filter.startDialogSession();
 
             return adjustPanel;
@@ -92,9 +93,6 @@ public enum TweenWizardPage {
 
         @Override
         void onMovingToTheNext(TweenWizard wizard) {
-//            ParamSet paramSet = wizard.getAnimation().getFilter().getParamSet();
-//            ParamSetState initialState = paramSet.copyState();
-//            wizard.getAnimation().setInitialState(initialState);
             wizard.getAnimation().copyInitialStateFromCurrent();
 
             ParametrizedAdjustPanel.setResetParams(false);
@@ -113,8 +111,15 @@ public enum TweenWizardPage {
 
         @Override
         JComponent getPanel(TweenWizard wizard) {
+            // the following 3 lines are necessary because otherwise the image position
+            // selectors will show the result of the initial filter and not the original image
+            ImageLayer imageLayer = ImageComponents.getActiveComp().getActiveImageLayer();
+            imageLayer.cancelPreviewing(); // cancel the initial one
+            imageLayer.startPreviewing(); // start the final one
+
             FilterWithParametrizedGUI filter = wizard.getAnimation().getFilter();
-            AdjustPanel adjustPanel = filter.getAdjustPanel();
+            AdjustPanel adjustPanel = filter.createAdjustPanel();
+
             return adjustPanel;
         }
 
@@ -132,9 +137,6 @@ public enum TweenWizardPage {
 
             // save final state
             wizard.getAnimation().copyFinalStateFromCurrent();
-
-//            ParamSet paramSet = wizard.getAnimation().getFilter().getParamSet();
-//            wizard.setFinalState(paramSet.copyState());
         }
     }, OUTPUT_SETTINGS {
         OutputSettingsPanel outputSettingsPanel;
@@ -154,7 +156,7 @@ public enum TweenWizardPage {
         @Override
         JComponent getPanel(TweenWizard wizard) {
             if (outputSettingsPanel == null) {
-                outputSettingsPanel = new OutputSettingsPanel(wizard);
+                outputSettingsPanel = new OutputSettingsPanel();
             }
             return outputSettingsPanel;
         }

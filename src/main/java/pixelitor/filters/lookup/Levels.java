@@ -28,7 +28,7 @@ public class Levels extends DynamicLookupFilter {
     }
 
     @Override
-    public AdjustPanel getAdjustPanel() {
+    public AdjustPanel createAdjustPanel() {
         return new LevelsPanel(this);
     }
 }

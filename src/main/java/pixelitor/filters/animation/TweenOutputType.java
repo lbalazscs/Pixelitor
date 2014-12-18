@@ -16,6 +16,9 @@
  */
 package pixelitor.filters.animation;
 
+import pixelitor.io.FileChooser;
+
+import javax.swing.filechooser.FileFilter;
 import java.io.File;
 
 public enum TweenOutputType {
@@ -39,6 +42,11 @@ public enum TweenOutputType {
         public boolean needsDirectory() {
             return false;
         }
+
+        @Override
+        public FileFilter getFileFilter() {
+            return FileChooser.gifFilter;
+        }
     }, PNG_FILE_SEQUENCE {
         @Override
         AnimationWriter createAnimationWriter(File file, int delayMillis) {
@@ -58,6 +66,11 @@ public enum TweenOutputType {
         @Override
         public boolean needsDirectory() {
             return true;
+        }
+
+        @Override
+        public FileFilter getFileFilter() {
+            return null;
         }
     };
 
@@ -94,4 +107,6 @@ public enum TweenOutputType {
         }
         return null;
     }
+
+    public abstract FileFilter getFileFilter();
 }

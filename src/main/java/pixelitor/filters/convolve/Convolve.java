@@ -64,7 +64,7 @@ public class Convolve extends FilterWithGUI {
     }
 
     @Override
-    public AdjustPanel getAdjustPanel() {
+    public AdjustPanel createAdjustPanel() {
         return new CustomConvolveAdjustments(this);
     }
 
