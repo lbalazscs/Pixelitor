@@ -147,4 +147,11 @@ public class LayerButton extends JToggleButton {
     public boolean isNameEditing() {
         return nameEditor.isEditable();
     }
+
+    /**
+     * Can be used for debugging
+     */
+    public String getLayerName() {
+        return layer.getName();
+    }
 }
