@@ -54,7 +54,7 @@ public class AboutDialog extends OKDialog {
         p.add(new JLabel("<html>Pixelitor was written by <b>László Balázs-Csíki</b>." +
                 "<br><br>The Sepia filter was contributed by <b>Daniel Wreczycki</b>." +
                 "<br><br>Pixelitor uses <ul><li>the image filter library by <b>Jerry Huxtable</b> " +
-                "<li>some components by <b>Jeremy Wood</b>" +
+                "<li>many components by <b>Jeremy Wood</b>" +
                 "<li>the fast math library by <b>Jeff Hain</b>" +
                 "<li>the animated GIF encoder by <b>Kevin Weiner</b>" +
                 "<li>the Canny Edge Detector by <b>Tom Gibara</b>" +

@@ -48,7 +48,8 @@ public class LayersPanel extends JLayeredPane {
 
         add(button, JLayeredPane.DEFAULT_LAYER);
 
-        button.setUserInteraction(false);
+        // the new layer always becomes the selected layer
+        button.setUserInteraction(false); // this selection should not go into history
         button.setSelected(true);
         button.setUserInteraction(true);
 
@@ -85,8 +86,8 @@ public class LayersPanel extends JLayeredPane {
 
         if (firstDragUpdate) {
             // put it into the drag layer so that it is always visible
-            remove(newDraggedButton);
-            add(newDraggedButton, JLayeredPane.DRAG_LAYER);
+            // (removing and adding works on Java 7, but not on Java 8, setLayer is fine on both)
+            setLayer(newDraggedButton, JLayeredPane.DRAG_LAYER);
             this.draggedButton = newDraggedButton;
         }
         swapIfNecessary(dragY);
@@ -111,6 +112,9 @@ public class LayersPanel extends JLayeredPane {
         }
     }
 
+    /**
+     * Change the order of buttons while dragging
+     */
     private void swapIfNecessary(int dragY) {
         int staticY = draggedButton.getStaticY();
         int deltaY = dragY - staticY;
@@ -142,10 +146,8 @@ public class LayersPanel extends JLayeredPane {
     // drag finished, put the last dragged back to the default JLayeredPane layer
     public void dragFinished() {
         if (draggedButton != null) {
-            remove(draggedButton);
-            add(draggedButton, JLayeredPane.DEFAULT_LAYER);
+            setLayer(draggedButton, JLayeredPane.DEFAULT_LAYER);
             draggedButton.dragFinished(layerButtons.indexOf(draggedButton)); // notify the composition
-
         } else {
             throw new IllegalStateException();
         }

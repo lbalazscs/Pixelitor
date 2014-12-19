@@ -28,7 +28,7 @@ public class RandomFilter extends FilterWithGUI {
 
     @Override
     public AdjustPanel createAdjustPanel() {
-        return new RandomFilterAdjustPanel(this);
+        return new RandomFilterAdjustPanel();
     }
 
     @Override

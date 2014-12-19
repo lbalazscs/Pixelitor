@@ -33,7 +33,7 @@ public class RandomFilterAdjustPanel extends AdjustPanel {
     private JPanel lastFilterPanel;
     private Filter lastFilter;
 
-    protected RandomFilterAdjustPanel(RandomFilter filter) {
+    protected RandomFilterAdjustPanel() {
         super(null); // the actual filter will be determined bellow
         setLayout(new BorderLayout());
         JButton nextRandomButton = new JButton("Next Random Filter");
@@ -59,7 +59,11 @@ public class RandomFilterAdjustPanel extends AdjustPanel {
         Filter newFilter = null;
         do {
             newFilter = FilterUtils.getRandomFilter();
-        } while (newFilter == op || (newFilter instanceof Fade) || (newFilter instanceof RandomFilter));
+        } while (newFilter == op ||
+                (newFilter instanceof Fade) ||
+                (newFilter instanceof RandomFilter) ||
+                (newFilter instanceof RepeatLastOp)
+                );
 
         op = newFilter;
         String filterName = newFilter.getName();

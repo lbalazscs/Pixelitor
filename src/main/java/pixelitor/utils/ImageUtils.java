@@ -21,7 +21,6 @@ import com.jhlabs.composite.ScreenComposite;
 import com.jhlabs.image.BoxBlurFilter;
 import com.jhlabs.image.EmbossFilter;
 import org.jdesktop.swingx.graphics.BlendComposite;
-import pixelitor.ExceptionHandler;
 import pixelitor.ImageComponents;
 import pixelitor.filters.Invert;
 import pixelitor.menus.view.ZoomLevel;
@@ -568,7 +567,7 @@ public class ImageUtils {
         try {
             raster = src.copyData(null);
         } catch (OutOfMemoryError e) {
-            ExceptionHandler.showOutOfMemoryDialog();
+            Dialogs.showOutOfMemoryDialog();
         }
         return new BufferedImage(src.getColorModel(), raster, src.isAlphaPremultiplied(), null);
     }

@@ -67,7 +67,7 @@ public class TweenWizard {
 
             @Override
             protected void dialogAccepted() { // "next" was pressed
-                // first check if it may move forward
+                // check if it may move forward
                 if (wizardPage == TweenWizardPage.OUTPUT_SETTINGS) {
                     ValidatedForm settings = (ValidatedForm) wizardPage.getPanel(TweenWizard.this);
                     if (!settings.isDataValid()) {
@@ -78,6 +78,14 @@ public class TweenWizard {
 
                 // move forward
                 wizardPage.onMovingToTheNext(TweenWizard.this);
+
+                // final overwrite check - must be called after onMovingToTheNext
+                if (wizardPage == TweenWizardPage.OUTPUT_SETTINGS) {
+                    if (!animation.checkOverwrite(this)) {
+                        return;
+                    }
+                }
+
                 TweenWizardPage nextPage = wizardPage.getNext();
                 if (nextPage == null) { // dialog finished
                     dispose();

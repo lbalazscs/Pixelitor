@@ -23,6 +23,10 @@ import pixelitor.PixelitorWindow;
 import pixelitor.history.History;
 import pixelitor.utils.test.DebugEventQueue;
 
+import javax.sound.midi.MidiChannel;
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.Synthesizer;
 import javax.swing.*;
 import java.awt.Component;
 import java.awt.Frame;
@@ -58,12 +62,25 @@ public class Dialogs {
     }
 
     public static boolean showYesNoQuestionDialog(String title, String msg) {
-        int reply = JOptionPane.showConfirmDialog(getParentForDialogs(), msg, title, JOptionPane.YES_NO_OPTION);
+        return showYesNoQuestionDialog(getParentForDialogs(), title, msg);
+    }
+
+    public static boolean showYesNoQuestionDialog(Component parent, String title, String msg) {
+        int reply = JOptionPane.showConfirmDialog(parent, msg, title, JOptionPane.YES_NO_OPTION);
+        return (reply == JOptionPane.YES_OPTION);
+    }
+
+    public static boolean showYesNoWarningDialog(String title, String msg) {
+        return showYesNoWarningDialog(getParentForDialogs(), title, msg);
+    }
+
+    public static boolean showYesNoWarningDialog(Component parent, String title, String msg) {
+        int reply = JOptionPane.showConfirmDialog(parent, msg, title, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
         return (reply == JOptionPane.YES_OPTION);
     }
 
     public static void showErrorDialog(String title, String msg) {
-        JOptionPane.showMessageDialog(getParentForDialogs(), msg, title, JOptionPane.ERROR_MESSAGE);
+        showErrorDialog(getParentForDialogs(), title, msg);
     }
 
     public static void showErrorDialog(Component parent, String title, String msg) {
@@ -84,12 +101,39 @@ public class Dialogs {
             History.showHistory();
             Toolkit.getDefaultToolkit().beep();
 
-//            playWarningSound();
+            playWarningSound();
         }
 
         Frame parent = getParentForDialogs();
         String basicErrorMessage = "An exception occurred: " + e.getMessage();
         ErrorInfo ii = new ErrorInfo("Program error", basicErrorMessage, null, null, e, Level.SEVERE, null);
         JXErrorPane.showDialog(parent, ii);
+    }
+
+    private static void playWarningSound() {
+        try {
+            int velocity = 127;    // max volume
+            int sound = 65;
+            Synthesizer synthesizer = MidiSystem.getSynthesizer();
+            synthesizer.open();
+            MidiChannel channel = synthesizer.getChannels()[9];  // drums channel.
+            for (int i = 0; i < 10; i++) {
+                Thread.sleep(100);
+                channel.noteOn(sound + i, velocity);
+                Thread.sleep(100);
+                channel.noteOff(sound + i);
+            }
+        } catch (MidiUnavailableException | InterruptedException e1) {
+            e1.printStackTrace();
+        }
+    }
+
+    public static void showOutOfMemoryDialog() {
+        String message = "<html><b>Out of memory error.</b> You can try <ul>" +
+                "<li>decreasing the undo levels" +
+                "<li>decreasing the number of layers" +
+                "<li>working with smaller images";
+        String title = "Out of memory error.";
+        Dialogs.showErrorDialog(title, message);
     }
 }

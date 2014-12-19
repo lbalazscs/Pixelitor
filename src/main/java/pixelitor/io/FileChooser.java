@@ -37,7 +37,7 @@ public class FileChooser {
     public static final FileFilter jpegFilter = new FileNameExtensionFilter("JPEG files", "jpg", "jpeg");
     private static final FileFilter pngFilter = new FileNameExtensionFilter("PNG files", "png");
     private static final FileFilter bmpFilter = new FileNameExtensionFilter("BMP files", "bmp");
-    public static final FileFilter gifFilter = new FileNameExtensionFilter("GIF files", "gif");
+    public static final FileNameExtensionFilter gifFilter = new FileNameExtensionFilter("GIF files", "gif");
     private static final FileFilter pxcFilter = new FileNameExtensionFilter("PXC files", "pxc");
     public static final FileFilter oraFilter = new FileNameExtensionFilter("OpenRaster files", "ora");
 

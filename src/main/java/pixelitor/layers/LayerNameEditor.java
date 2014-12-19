@@ -17,13 +17,10 @@
 package pixelitor.layers;
 
 import javax.swing.*;
-import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 /**
  * A JTextField for layer names that becomes editable if double-clicked
@@ -36,21 +33,21 @@ public class LayerNameEditor extends JTextField {
         this.layerButton = layerButton;
         disableEditing();
 
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) {   // enable if double-clicked
-                    enableEditing();
-                } else {                        // a simple click selects the layer
-                    requestFocus();
-                    Container container = getParent();
-                    if (container != null) {
-                        LayerButton b = (LayerButton) container;
-                        b.setSelected(true);
-                    }
-                }
-            }
-        });
+//        addMouseListener(new MouseAdapter() {
+//            @Override
+//            public void mouseClicked(MouseEvent e) {
+//                if (e.getClickCount() == 2) {   // enable if double-clicked
+//                    enableEditing();
+//                } else {                        // a simple click selects the layer
+//                    requestFocus();
+//                    Container container = getParent();
+//                    if (container != null) {
+//                        LayerButton b = (LayerButton) container;
+//                        b.setSelected(true);
+//                    }
+//                }
+//            }
+//        });
 
         addFocusListener(new FocusAdapter() {
             @Override
@@ -71,7 +68,7 @@ public class LayerNameEditor extends JTextField {
 
     }
 
-    private void enableEditing() {
+    public void enableEditing() {
         setEnabled(true);
         setEditable(true);
         requestFocus();

@@ -262,7 +262,6 @@ public class Composition implements Serializable {
         History.addEdit(new NotUndoableEdit(this, "Flatten Image"));
     }
 
-
     public void mergeDown() {
         int activeIndex = layerList.indexOf(activeLayer);
         if (activeIndex > 0) {
@@ -277,7 +276,6 @@ public class Composition implements Serializable {
                         History.addEdit(new NotUndoableEdit(this, "Merge Down"));
                     }
                 }
-
             }
         }
     }
@@ -322,7 +320,6 @@ public class Composition implements Serializable {
             LayerOrderChangeEdit edit = new LayerOrderChangeEdit(this, oldIndex, newIndex);
             History.addEdit(edit);
         }
-
     }
 
     public void moveLayerSelectionUp() {

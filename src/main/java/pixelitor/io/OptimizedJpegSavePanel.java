@@ -16,10 +16,10 @@
  */
 package pixelitor.io;
 
-import pixelitor.ExceptionHandler;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.tools.HandToolSupport;
+import pixelitor.utils.Dialogs;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.OKCancelDialog;
 import pixelitor.utils.SliderSpinner;
@@ -165,7 +165,7 @@ class ImagePanel extends JPanel {
         try {
             g.drawImage(image, 0, 0, null);
         } catch (OutOfMemoryError e) {
-            ExceptionHandler.showOutOfMemoryDialog();
+            Dialogs.showOutOfMemoryDialog();
         }
     }
 

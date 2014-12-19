@@ -21,7 +21,6 @@ import pixelitor.AppLogic;
 import pixelitor.Build;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
-import pixelitor.ExceptionHandler;
 import pixelitor.ImageComponents;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.Canny;
@@ -158,7 +157,7 @@ public final class Utils {
             }
             AppLogic.setStatusMessage(performanceMessage);
         } catch (OutOfMemoryError e) {
-            ExceptionHandler.showOutOfMemoryDialog();
+            Dialogs.showOutOfMemoryDialog();
         } catch (Exception e) {
             Dialogs.showExceptionDialog(e);
         }

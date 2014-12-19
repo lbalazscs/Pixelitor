@@ -54,7 +54,7 @@ public class Fade extends FilterWithParametrizedGUI {
         FadeableEdit edit = History.getPreviousEditForFade(ImageComponents.getActiveComp());
 
         if (edit == null) { // the fade menu item is active only if History.canFade()
-            throw new IllegalStateException();
+            throw new IllegalStateException("no FadeableEdit");
         }
 
         BufferedImage previous = edit.getBackupImage();

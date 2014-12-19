@@ -18,7 +18,9 @@ package pixelitor.filters.animation;
 
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.ParamSetState;
+import pixelitor.utils.Dialogs;
 
+import java.awt.Component;
 import java.io.File;
 
 public class TweenAnimation {
@@ -67,10 +69,6 @@ public class TweenAnimation {
         this.numFrames = numFrames;
     }
 
-    public File getOutput() {
-        return output;
-    }
-
     public void setOutput(File output) {
         this.output = output;
     }
@@ -87,5 +85,30 @@ public class TweenAnimation {
     public ParamSetState tween(double time) {
         double progress = interpolation.time2progress(time);
         return initialState.interpolate(finalState, progress);
+    }
+
+    /**
+     * A final warning if something might get overwritten because
+     * the selected file exists or the selected directory is not empty
+     *
+     * @return true if the rendering can proceed
+     */
+    public boolean checkOverwrite(Component dialogParent) {
+        if (outputType.needsDirectory()) {
+            if (output.list().length == 0) {
+                return true;
+            } else {
+                return Dialogs.showYesNoWarningDialog(dialogParent, "Folder not empty",
+                        "<html>The folder " + output.getAbsolutePath() + " is not empty. " +
+                                "<br>Some files might get overridden. Are sure you want to continue?");
+            }
+        } else { // file
+            if (output.exists()) {
+                return Dialogs.showYesNoWarningDialog(dialogParent, "File exists",
+                        output.getAbsolutePath() + " exists already. Overwrite?");
+            } else {
+                return true;
+            }
+        }
     }
 }

@@ -19,13 +19,13 @@ package pixelitor.layers;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
-import pixelitor.ExceptionHandler;
 import pixelitor.filters.comp.Flip;
 import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.history.TranslateEdit;
 import pixelitor.selection.Selection;
 import pixelitor.tools.Tools;
+import pixelitor.utils.Dialogs;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.ImageLayerNode;
@@ -336,7 +336,7 @@ public class ImageLayer extends ContentLayer {
                 }
             }
         } catch (OutOfMemoryError e) {
-            ExceptionHandler.showOutOfMemoryDialog();
+            Dialogs.showOutOfMemoryDialog();
         }
     }
 

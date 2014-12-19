@@ -65,7 +65,7 @@ public class Selection {
         NO_SHAPE_YET { // we had a mouse press, but no drag or mouse up
             @Override
             Rectangle getShapeBounds(Shape currentSelectionShape) {
-                throw new IllegalStateException();
+                throw new IllegalStateException("no shape yet");
             }
 
             @Override
@@ -89,7 +89,7 @@ public class Selection {
         }, DIED { // the selection is no longer there
             @Override
             Rectangle getShapeBounds(Shape currentSelectionShape) {
-                throw new IllegalStateException();
+                throw new IllegalStateException("died");
             }
 
             @Override

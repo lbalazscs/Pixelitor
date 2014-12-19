@@ -21,12 +21,10 @@ import pixelitor.filters.FilterUtils;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.ParametrizedAdjustPanel;
-import pixelitor.io.FileChooser;
 import pixelitor.layers.ImageLayer;
 
 import javax.swing.*;
 import java.awt.FlowLayout;
-import java.io.File;
 
 /**
  * The pages of the keyframe animation export dialog
@@ -166,25 +164,13 @@ public enum TweenWizardPage {
 
         }
 
+
         @Override
         void onMovingToTheNext(TweenWizard wizard) {
-            TweenOutputType type = outputSettingsPanel.getTweenOutputType();
             TweenAnimation animation = wizard.getAnimation();
-            animation.setOutputType(type);
-
-            File output = outputSettingsPanel.getOutput();
-            animation.setOutput(output);
-
-            animation.setNumFrames(outputSettingsPanel.getNumFrames());
-            animation.setMillisBetweenFrames(outputSettingsPanel.getMillisBetweenFrames());
-            animation.setInterpolation(outputSettingsPanel.getInterpolation());
-
-            if(output.isDirectory()) {
-                FileChooser.setLastSaveDir(output);
-            } else {
-                FileChooser.setLastSaveDir(output.getParentFile());
-            }
+            outputSettingsPanel.copySettingsInto(animation);
         }
+
     };
 
     abstract String getHeaderText();

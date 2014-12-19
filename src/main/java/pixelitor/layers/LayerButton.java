@@ -30,8 +30,8 @@ import java.beans.PropertyChangeListener;
 public class LayerButton extends JToggleButton {
     private final Layer layer;
 
-    private static final Icon eyeIcon = IconUtils.loadIcon("eye_open.png");
-    private static final Icon noEyeIcon = IconUtils.loadIcon("eye_closed.png");
+    private static final Icon OPEN_EYE_ICON = IconUtils.loadIcon("eye_open.png");
+    private static final Icon CLOSED_EYE_ICON = IconUtils.loadIcon("eye_closed.png");
 
     private static final String uiClassID = "LayerButtonUI";
     private final JToggleButton visibilityButton;
@@ -54,19 +54,19 @@ public class LayerButton extends JToggleButton {
         setUI(new LayerButtonUI());
     }
 
-    public void setUI(LayerButtonUI ui) {
-        super.setUI(ui);
-    }
+//    public void setUI(LayerButtonUI ui) {
+//        super.setUI(ui);
+//    }
 
     public LayerButton(final Layer layer) {
         this.layer = layer;
         setLayout(new LayerButtonLayout(5, 5));
-        visibilityButton = new JCheckBox(noEyeIcon);
-        visibilityButton.setRolloverIcon(noEyeIcon);
+        visibilityButton = new JCheckBox(CLOSED_EYE_ICON);
+        visibilityButton.setRolloverIcon(CLOSED_EYE_ICON);
 
         visibilityButton.setSelected(true);
         visibilityButton.setToolTipText("Layer visibility");
-        visibilityButton.setSelectedIcon(eyeIcon);
+        visibilityButton.setSelectedIcon(OPEN_EYE_ICON);
         add(visibilityButton, LayerButtonLayout.VISIBILITY_BUTTON);
 
         nameEditor = new LayerNameEditor(this, layer);
@@ -133,7 +133,18 @@ public class LayerButton extends JToggleButton {
         this.staticY = staticY;
     }
 
-    public void dragFinished(int newIndex) {
-        layer.dragFinished(newIndex);
+    public void dragFinished(int newLayerIndex) {
+        layer.dragFinished(newLayerIndex);
+    }
+
+    /**
+     * Can be used for debugging
+     */
+    public String getLayerName() {
+        return layer.getName();
+    }
+
+    public boolean isNameEditing() {
+        return nameEditor.isEditable();
     }
 }

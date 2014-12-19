@@ -25,12 +25,13 @@ import java.awt.event.MouseEvent;
  * The MouseListener and MouseMotionListener for the layer buttons for the drag-reordering
  */
 public class LayersMouseHandler extends MouseInputAdapter {
-    private static final Cursor MOVE_CURSOR = Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR);
+    private static final Cursor MOVE_CURSOR = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
     private static final Cursor DEFAULT_CURSOR = Cursor.getDefaultCursor();
     public static final int DRAG_X_INDENT = 10;
     private LayersPanel layersPanel;
     private int dragStartYInButton;
     private boolean dragging = false;
+    private long lastNameEditorPressesMillis;
 
     public LayersMouseHandler(LayersPanel layersPanel) {
         this.layersPanel = layersPanel;
@@ -38,13 +39,32 @@ public class LayersMouseHandler extends MouseInputAdapter {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        getLayerButtonFromEvent(e); // call is necessary for translating the mouse event
+        // a manual double-click watch - necessary on Mac?
+        Component c = e.getComponent();
+        if (c instanceof LayerNameEditor) {
+            long when = e.getWhen();
+            long diffMillis = when - lastNameEditorPressesMillis;
+            if (diffMillis < 250) {
+                LayerNameEditor editor = (LayerNameEditor) c;
+                editor.enableEditing();
+            }
+            lastNameEditorPressesMillis = when;
+        }
+
+        getLayerButtonFromEvent(e); // the call is necessary for translating the mouse event
         dragStartYInButton = e.getY();
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
         LayerButton layerButton = getLayerButtonFromEvent(e);
+        if (!dragging && Math.abs(dragStartYInButton - e.getY()) < 5) {
+            // it seems that on Mac we get mouseDragged events even when the mouse is not moved
+            return;
+        }
+        if (layerButton.isNameEditing()) {
+            return;
+        }
 
         // since the LayerButton is continuously relocated, e.getY() returns
         // the mouse relative to the last LayerButton position
@@ -60,10 +80,14 @@ public class LayersMouseHandler extends MouseInputAdapter {
 
     @Override
     public void mouseReleased(MouseEvent e) {
+        LayerButton layerButton = getLayerButtonFromEvent(e);
         if (dragging) {
-            LayerButton layerButton = getLayerButtonFromEvent(e);
             layerButton.setCursor(DEFAULT_CURSOR);
             layersPanel.dragFinished();
+        } else {
+            // necessary on Mac so that the layer gets selected
+            // even if the user clicks on the name field
+            layerButton.setSelected(true);
         }
         dragging = false;
     }

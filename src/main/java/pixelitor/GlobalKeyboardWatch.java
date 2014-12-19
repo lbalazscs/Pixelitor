@@ -20,10 +20,14 @@ import pixelitor.menus.view.ShowHideAllAction;
 import pixelitor.tools.Tools;
 
 import javax.swing.*;
+import java.awt.AWTEvent;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
+import java.awt.Toolkit;
+import java.awt.event.AWTEventListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 
 /**
  *
@@ -118,6 +122,25 @@ public class GlobalKeyboardWatch {
 
         GlobalKeyboardWatch.addKeyboardShortCut(']', false, "increment", increaseActiveBrushSizeAction);
         GlobalKeyboardWatch.addKeyboardShortCut('[', false, "decrement", decreaseActiveBrushSizeAction);
+    }
+
+    public static void registerDebugMouseWatching() {
+        Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
+            @Override
+            public void eventDispatched(AWTEvent event) {
+                MouseEvent m = (MouseEvent) event;
+                String compClass = m.getComponent().getClass().getName();
+                if (m.getID() == MouseEvent.MOUSE_CLICKED) {
+                    System.out.println("GlobalKeyboardWatch:MOUSE_CLICKED x = " + m.getX() + ", y = " + m.getY() + ", click count = " + m.getClickCount() + ", comp class = " + compClass);
+                } else if (m.getID() == MouseEvent.MOUSE_DRAGGED) {
+                    System.out.println("GlobalKeyboardWatch:MOUSE_DRAGGED x = " + m.getX() + ", y = " + m.getY() + ", comp class = " + compClass);
+                } else if (m.getID() == MouseEvent.MOUSE_PRESSED) {
+                    System.out.println("GlobalKeyboardWatch:MOUSE_PRESSED x = " + m.getX() + ", y = " + m.getY() + ", comp class = " + compClass);
+                } else if (m.getID() == MouseEvent.MOUSE_RELEASED) {
+                    System.out.println("GlobalKeyboardWatch:MOUSE_RELEASED x = " + m.getX() + ", y = " + m.getY() + ", comp class = " + compClass);
+                }
+            }
+        }, AWTEvent.MOUSE_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK);
     }
 
     // TODO this kind of global listening might be better

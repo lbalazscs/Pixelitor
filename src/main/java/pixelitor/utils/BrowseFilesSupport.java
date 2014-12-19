@@ -17,9 +17,10 @@
 package pixelitor.utils;
 
 import pixelitor.PixelitorWindow;
+import pixelitor.io.FileExtensionUtils;
 
 import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -34,7 +35,7 @@ public class BrowseFilesSupport {
     private final JButton button = new JButton("Browse...");
     private String dialogTitle;
     private boolean selectDirs;
-    private FileFilter fileFilter; // used for filtering when in file selection mode
+    private FileNameExtensionFilter fileFilter; // used for filtering when in file selection mode
 
     public BrowseFilesSupport(String initialPath) {
         init(initialPath);
@@ -73,7 +74,17 @@ public class BrowseFilesSupport {
             chooser.setApproveButtonText("Select Folder");
             chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         } else {
-            chooser = new ConfirmSaveFileChooser(nameTF.getText());
+            // get the parent dir of the file
+            File selectorCurrentDir;
+            File f = new File(nameTF.getText());
+            if (f.isDirectory()) {
+                selectorCurrentDir = f;
+            } else {
+                selectorCurrentDir = f.getParentFile();
+            }
+
+            chooser = new JFileChooser(selectorCurrentDir);
+            chooser.setApproveButtonText("Select File");
             if (fileFilter != null) {
                 // First remove the All Files option...
                 chooser.setAcceptAllFileFilterUsed(false);
@@ -89,6 +100,16 @@ public class BrowseFilesSupport {
         File selectedFile = chooser.getSelectedFile();
         if (selectedFile != null) {
             String fileName = selectedFile.toString();
+
+            if (!selectDirs) {
+                String extension = FileExtensionUtils.getFileExtension(selectedFile.getName());
+                if (extension == null) { // the user entered no extension
+                    if (fileFilter != null) {
+                        fileName = fileName + "." + fileFilter.getExtensions()[0];
+                    }
+                }
+            }
+
             nameTF.setText(fileName);
         }
     }
@@ -112,7 +133,7 @@ public class BrowseFilesSupport {
         this.dialogTitle = dialogTitle;
     }
 
-    public void setFileFilter(FileFilter fileFilter) {
+    public void setFileFilter(FileNameExtensionFilter fileFilter) {
         this.fileFilter = fileFilter;
     }
 }
