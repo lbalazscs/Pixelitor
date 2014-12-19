@@ -18,11 +18,6 @@ package pixelitor;
 
 import pixelitor.utils.Dialogs;
 
-import javax.sound.midi.MidiChannel;
-import javax.sound.midi.MidiSystem;
-import javax.sound.midi.MidiUnavailableException;
-import javax.sound.midi.Synthesizer;
-
 /**
  * Handles uncaught exceptions and other errors
  */
@@ -40,33 +35,4 @@ public class ExceptionHandler implements Thread.UncaughtExceptionHandler {
     public void uncaughtException(Thread t, Throwable e) {
         Dialogs.showExceptionDialog(e);
     }
-
-    public static void playWarningSound() {
-        try {
-            int velocity = 127;    // max volume
-            int sound = 65;
-            Synthesizer synthesizer = MidiSystem.getSynthesizer();
-            synthesizer.open();
-            MidiChannel channel = synthesizer.getChannels()[9];  // drums channel.
-            for (int i = 0; i < 10; i++) {
-                Thread.sleep(100);
-                channel.noteOn(sound + i, velocity);
-                Thread.sleep(100);
-                channel.noteOff(sound + i);
-            }
-        } catch (MidiUnavailableException | InterruptedException e1) {
-            e1.printStackTrace();
-        }
-    }
-
-    public static void showOutOfMemoryDialog() {
-        String message = "<html><b>Out of memory error.</b> You can try <ul>" +
-                "<li>decreasing the undo levels" +
-                "<li>decreasing the number of layers" +
-                "<li>working with smaller images";
-        String title = "Out of memory error.";
-        Dialogs.showErrorDialog(title, message);
-    }
-
-
 }

@@ -69,7 +69,7 @@ public enum Build {
         }
     };
 
-    public static Build CURRENT = DEVELOPMENT;
+    public static Build CURRENT = FINAL;
 
     public static final String VERSION_NUMBER = "2.3.0";
 
@@ -79,7 +79,7 @@ public enum Build {
         if (fixTitle == null) {
             fixTitle = "Pixelitor " + Build.VERSION_NUMBER;
             if (CURRENT != FINAL) {
-                fixTitle += " DEVELOPMENT ";
+                fixTitle += " DEVELOPMENT " + System.getProperty("java.version");
             }
             if (CURRENT.isRobotTest()) {
                 fixTitle += " - ROBOT TEST";

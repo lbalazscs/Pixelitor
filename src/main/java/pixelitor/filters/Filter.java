@@ -17,6 +17,7 @@
 
 package pixelitor.filters;
 
+import pixelitor.Build;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
 import pixelitor.PixelitorWindow;
@@ -135,6 +136,11 @@ public abstract class Filter extends AbstractAction implements Comparable<Filter
 
         dest = transform(src, dest);
 
+        if (dest == null) {
+            if (Build.CURRENT == Build.DEVELOPMENT) {
+                System.out.println(String.format("Filter::executeForOneLayer: '%s' returned null dest", getName()));
+            }
+        }
         assert dest != null;
 
         return dest;

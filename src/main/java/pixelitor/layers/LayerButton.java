@@ -136,4 +136,11 @@ public class LayerButton extends JToggleButton {
     public void dragFinished(int newIndex) {
         layer.dragFinished(newIndex);
     }
+
+    /**
+     * Can be used for debugging
+     */
+    public String getLayerName() {
+        return layer.getName();
+    }
 }

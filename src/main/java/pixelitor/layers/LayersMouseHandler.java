@@ -25,7 +25,7 @@ import java.awt.event.MouseEvent;
  * The MouseListener and MouseMotionListener for the layer buttons for the drag-reordering
  */
 public class LayersMouseHandler extends MouseInputAdapter {
-    private static final Cursor MOVE_CURSOR = Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR);
+    private static final Cursor MOVE_CURSOR = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
     private static final Cursor DEFAULT_CURSOR = Cursor.getDefaultCursor();
     public static final int DRAG_X_INDENT = 10;
     private LayersPanel layersPanel;
@@ -38,13 +38,17 @@ public class LayersMouseHandler extends MouseInputAdapter {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        getLayerButtonFromEvent(e); // call is necessary for translating the mouse event
+        getLayerButtonFromEvent(e); // the call is necessary for translating the mouse event
         dragStartYInButton = e.getY();
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
         LayerButton layerButton = getLayerButtonFromEvent(e);
+        if (Math.abs(dragStartYInButton - e.getY()) < 5) {
+            // it seems that on Mac we get mouseDragged events even when the mouse is not moved
+            return;
+        }
 
         // since the LayerButton is continuously relocated, e.getY() returns
         // the mouse relative to the last LayerButton position

@@ -29,6 +29,7 @@ import pixelitor.filters.Fade;
 import pixelitor.filters.Filter;
 import pixelitor.filters.FilterUtils;
 import pixelitor.filters.Invert;
+import pixelitor.filters.RandomFilter;
 import pixelitor.filters.comp.Flip;
 import pixelitor.filters.comp.Rotate;
 import pixelitor.filters.gui.FilterWithGUI;
@@ -92,14 +93,13 @@ public class RobotTest {
     private static boolean continueRunning = true;
 
     private static WeightedCaller weightedCaller = new WeightedCaller();
-    public static final boolean PRINT_MEMORY = true;
+    public static final boolean PRINT_MEMORY = false;
 
     /**
      * Utility class with static methods
      */
     private RobotTest() {
     }
-
 
     public static void runRobot() throws AWTException {
         if (Build.CURRENT != Build.DEVELOPMENT) {
@@ -175,7 +175,6 @@ public class RobotTest {
                         break;
                     }
 
-
                     r.delay(100 + rand.nextInt(400));
 
                     Runnable runnable = new Runnable() {
@@ -195,7 +194,7 @@ public class RobotTest {
                     try {
                         EventQueue.invokeAndWait(runnable);
                     } catch (InterruptedException | InvocationTargetException e) {
-                        e.printStackTrace();
+                        Dialogs.showExceptionDialog(e);
                     }
                 }
                 System.out.println("\nRobotTest.runRobot FINISHED at " + new Date());
@@ -237,7 +236,6 @@ public class RobotTest {
 
     private static void logRobotEvent(String msg) {
         DebugEventQueue.post(new RobotEvent(msg));
-//        System.out.println(String.format("RobotTest::logRobotEvent: msg = '%s'", msg));
     }
 
     private static void randomMove(Robot r, int x, int y) {
@@ -287,35 +285,15 @@ public class RobotTest {
         if (op instanceof Brick) {
             return;
         }
+        if (op instanceof RandomFilter) {
+            return;
+        }
 
         logRobotEvent("random operation: " + op.getName());
 
         op.randomizeSettings();
 
-
-//        if (op instanceof FilterWithGUI) {
-//            // execute everything without showing a modal dialog
-//            FilterWithGUI guiFilter = (FilterWithGUI) op;
-//
-//
-//            Composition comp = ImageComponents.getActiveComp();
-//            if (comp != null) {
-//                comp.getActiveImageLayer().startPreviewing();
-//                guiFilter.startDialogSession();
-//
-//                String guiFilterName = guiFilter.getName();
-//
-//                System.out.println(String.format("RobotTest::randomOperation: guiFilterName = '%s'", guiFilterName));
-//
-//                comp.finishFilterWithPreview(guiFilterName);
-//                FilterUtils.setLastExecutedFilter(guiFilter);
-//
-//                guiFilter.endDialogSession();
-//            }
-//        } else {
-//            op.actionPerformed(null);
-//        }
-
+        // execute everything without showing a modal dialog
         op.execute(ChangeReason.OP_WITHOUT_DIALOG);
         if(op instanceof FilterWithGUI) {
             ((FilterWithGUI)op).endDialogSession();

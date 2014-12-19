@@ -16,6 +16,7 @@
  */
 package pixelitor.filters.animation;
 
+import org.jdesktop.swingx.VerticalLayout;
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.io.FileChooser;
 import pixelitor.utils.BrowseFilesSupport;
@@ -47,7 +48,8 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
     private String errorMessage;
 
     public OutputSettingsPanel() {
-        super(new GridBagLayout());
+        super(new VerticalLayout());
+        JPanel contentPanel = new JPanel(new GridBagLayout());
 
         // A single TFValidationLayerUI for all the textfields.
         LayerUI<JTextField> tfLayerUI = new TFValidationLayerUI(this);
@@ -63,9 +65,9 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
         });
         outputTypeChanged(); // initial setup
 
-        GridBagHelper.addLabelWithControl(this, "Output Type:", outputTypeCB, 0);
+        GridBagHelper.addLabelWithControl(contentPanel, "Output Type:", outputTypeCB, 0);
 
-        GridBagHelper.addLabelWithControl(this, "Number of Seconds:",
+        GridBagHelper.addLabelWithControl(contentPanel, "Number of Seconds:",
                 new JLayer<>(nrSecondsTF, tfLayerUI), 1);
 
         KeyAdapter keyAdapter = new KeyAdapter() {
@@ -76,7 +78,7 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
         };
         nrSecondsTF.addKeyListener(keyAdapter);
 
-        GridBagHelper.addLabelWithControl(this, "Frames per Second:",
+        GridBagHelper.addLabelWithControl(contentPanel, "Frames per Second:",
                 new JLayer<>(fpsTF, tfLayerUI), 2);
 
         fpsTF.addKeyListener(keyAdapter);
@@ -84,20 +86,21 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
         nrFramesLabel = new JLabel();
         updateCalculations();
 
-        GridBagHelper.addLabelWithControl(this, "Number of Frames:", nrFramesLabel, 3);
+        GridBagHelper.addLabelWithControl(contentPanel, "Number of Frames:", nrFramesLabel, 3);
 
         EnumComboBoxModel<Interpolation> ipCBM = new EnumComboBoxModel<>(Interpolation.class);
         ipCB = new JComboBox<>(ipCBM);
 
-        GridBagHelper.addLabelWithControl(this, "Interpolation:", ipCB, 4);
+        GridBagHelper.addLabelWithControl(contentPanel, "Interpolation:", ipCB, 4);
 
-        JPanel p = new JPanel(new FlowLayout());
-        p.setBorder(BorderFactory.createTitledBorder("Output File/Folder"));
+        JPanel filePanel = new JPanel(new FlowLayout());
+        filePanel.setBorder(BorderFactory.createTitledBorder("Output File/Folder"));
         fileNameTF = browseFilesSupport.getNameTF();
-        p.add(new JLayer<>(fileNameTF, tfLayerUI));
-        p.add(browseFilesSupport.getBrowseButton());
-        GridBagHelper.addOnlyControlToRow(this, p, 5);
+        filePanel.add(new JLayer<>(fileNameTF, tfLayerUI));
+        filePanel.add(browseFilesSupport.getBrowseButton());
+        GridBagHelper.addOnlyControlToRow(contentPanel, filePanel, 5);
 
+        add(contentPanel);
     }
 
     private void outputTypeChanged() {
@@ -124,26 +127,6 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
         } catch (Exception ex) {
             nrFramesLabel.setText("??");
         }
-    }
-
-    public int getNumFrames() {
-        return nrFrames;
-    }
-
-    public int getMillisBetweenFrames() {
-        return (int) (1000.0 / fps);
-    }
-
-    public Interpolation getInterpolation() {
-        return (Interpolation) ipCB.getSelectedItem();
-    }
-
-    public TweenOutputType getTweenOutputType() {
-        return (TweenOutputType) outputTypeCB.getSelectedItem();
-    }
-
-    public File getOutput() {
-        return browseFilesSupport.getSelectedFile();
     }
 
     @Override
@@ -174,5 +157,23 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
             valid = (errorMessage == null);
         }
         return valid;
+    }
+
+    public void copySettingsInto(TweenAnimation animation) {
+        TweenOutputType type = (TweenOutputType) outputTypeCB.getSelectedItem();
+        animation.setOutputType(type);
+
+        File output = browseFilesSupport.getSelectedFile();
+        animation.setOutput(output);
+
+        animation.setNumFrames(nrFrames);
+        animation.setMillisBetweenFrames((int) (1000.0 / fps));
+        animation.setInterpolation((Interpolation) ipCB.getSelectedItem());
+
+        if (output.isDirectory()) {
+            FileChooser.setLastSaveDir(output);
+        } else {
+            FileChooser.setLastSaveDir(output.getParentFile());
+        }
     }
 }

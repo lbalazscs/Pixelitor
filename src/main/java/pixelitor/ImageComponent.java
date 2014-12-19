@@ -278,7 +278,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 //            double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
 //            System.out.println(String.format("ImageComponent::paint: estimatedSeconds = '%.2f'", estimatedSeconds));
         } catch (OutOfMemoryError e) {
-            ExceptionHandler.showOutOfMemoryDialog();
+            Dialogs.showOutOfMemoryDialog();
         }
     }
 

@@ -85,8 +85,8 @@ public class LayersPanel extends JLayeredPane {
 
         if (firstDragUpdate) {
             // put it into the drag layer so that it is always visible
-            remove(newDraggedButton);
-            add(newDraggedButton, JLayeredPane.DRAG_LAYER);
+            // (removing and adding works on Java 7, but not on Java 8, setLayer is fine on both)
+            setLayer(newDraggedButton, JLayeredPane.DRAG_LAYER);
             this.draggedButton = newDraggedButton;
         }
         swapIfNecessary(dragY);
@@ -142,8 +142,9 @@ public class LayersPanel extends JLayeredPane {
     // drag finished, put the last dragged back to the default JLayeredPane layer
     public void dragFinished() {
         if (draggedButton != null) {
-            remove(draggedButton);
-            add(draggedButton, JLayeredPane.DEFAULT_LAYER);
+//            remove(draggedButton);
+//            add(draggedButton, JLayeredPane.DEFAULT_LAYER);
+            setLayer(draggedButton, JLayeredPane.DEFAULT_LAYER);
             draggedButton.dragFinished(layerButtons.indexOf(draggedButton)); // notify the composition
 
         } else {

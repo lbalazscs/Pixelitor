@@ -37,6 +37,12 @@ public class Pixelitor {
     }
 
     public static void main(final String[] args) {
+        // allows to put the app into development mode by
+        // adding -Dpixelitor.development=true to the command line
+        if ("true".equals(System.getProperty("pixelitor.development"))) {
+            Build.CURRENT = Build.DEVELOPMENT;
+        }
+
         setupForMacintosh();
 
         ExceptionHandler.INSTANCE.register();

@@ -152,7 +152,7 @@ public class MenuBar extends JMenuBar {
         };
         MenuFactory.createMenuItem(saveAsAction, KeyStroke.getKeyStroke('S', InputEvent.CTRL_MASK + InputEvent.SHIFT_MASK), fileMenu);
 
-        Action optimizedSaveAction = new AbstractAction("Save Optimized JPEG...") {
+        Action optimizedSaveAction = new AbstractAction("Export Optimized JPEG...") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Composition comp = ImageComponents.getActiveComp();

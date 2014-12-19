@@ -18,36 +18,11 @@ package pixelitor.filters.animation;
 
 import pixelitor.io.FileChooser;
 
-import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 
 public enum TweenOutputType {
-    ANIM_GIF {
-        @Override
-        AnimationWriter createAnimationWriter(File file, int delayMillis) {
-            return new AnimGIFWriter(file, delayMillis);
-        }
-
-        @Override
-        public String toString() {
-            return "Animated GIF";
-        }
-
-        @Override
-        public String checkFile(File output) {
-            return expectFile(output, this, "GIF");
-        }
-
-        @Override
-        public boolean needsDirectory() {
-            return false;
-        }
-
-        @Override
-        public FileFilter getFileFilter() {
-            return FileChooser.gifFilter;
-        }
-    }, PNG_FILE_SEQUENCE {
+    PNG_FILE_SEQUENCE {
         @Override
         AnimationWriter createAnimationWriter(File file, int delayMillis) {
             return new PNGFileSequenceWriter(file);
@@ -69,8 +44,33 @@ public enum TweenOutputType {
         }
 
         @Override
-        public FileFilter getFileFilter() {
+        public FileNameExtensionFilter getFileFilter() {
             return null;
+        }
+    }, ANIM_GIF {
+        @Override
+        AnimationWriter createAnimationWriter(File file, int delayMillis) {
+            return new AnimGIFWriter(file, delayMillis);
+        }
+
+        @Override
+        public String toString() {
+            return "Animated GIF";
+        }
+
+        @Override
+        public String checkFile(File output) {
+            return expectFileInExistingDir(output, this, "GIF");
+        }
+
+        @Override
+        public boolean needsDirectory() {
+            return false;
+        }
+
+        @Override
+        public FileNameExtensionFilter getFileFilter() {
+            return FileChooser.gifFilter;
         }
     };
 
@@ -83,13 +83,19 @@ public enum TweenOutputType {
 
     public abstract boolean needsDirectory();
 
-    private static String expectFile(File output, TweenOutputType type, String fileType) {
-        // we expect it to be a file
+    private static String expectFileInExistingDir(File output, TweenOutputType type, String fileType) {
         if (output.exists()) {
             if (output.isDirectory()) {
                 return String.format("<html>%s is a folder." +
                                 "<br>For the \"%s\" output type, select a (new or existing) %s file in an existing folder.",
                         output.getAbsolutePath(), type.toString(), fileType);
+            }
+        } else { // if it does not exist, we still expect the parent directory to exist
+            File parentDir = output.getParentFile();
+            if (!parentDir.exists()) {
+                return String.format("<html>The folder %s of the %s file does not exist." +
+                                "<br>For the \"%s\" output type, select a (new or existing) %s file in an existing folder.",
+                        parentDir.getName(), output.getAbsolutePath(), type.toString(), fileType);
             }
         }
         return null;
@@ -108,5 +114,5 @@ public enum TweenOutputType {
         return null;
     }
 
-    public abstract FileFilter getFileFilter();
+    public abstract FileNameExtensionFilter getFileFilter();
 }
