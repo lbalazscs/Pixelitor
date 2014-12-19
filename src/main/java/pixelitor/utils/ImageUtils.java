@@ -410,6 +410,10 @@ public class ImageUtils {
 
     public static Color getRandomColor(boolean randomAlpha) {
         Random rnd = new Random();
+        return getRandomColor(rnd, randomAlpha);
+    }
+
+    public static Color getRandomColor(Random rnd, boolean randomAlpha) {
         int r = rnd.nextInt(256);
         int g = rnd.nextInt(256);
         int b = rnd.nextInt(256);

@@ -16,192 +16,119 @@
  */
 package pixelitor.filters;
 
+import pixelitor.filters.gui.ActionParam;
+import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ReseedNoiseActionParam;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.GeneralPath;
-import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.util.Random;
 
 /**
  * Starburst
  */
 public class Starburst extends FilterWithParametrizedGUI {
     private final RangeParam numberOfRaysParam = new RangeParam("Number of Rays", 2, 100, 10);
-    private final ImagePositionParam centerParam = new ImagePositionParam("Center");
-    private final ColorParam bgColorParam = new ColorParam("Backround Color:", Color.WHITE, false, false);
-    private final ColorParam fgColorParam = new ColorParam("Rays Color:", Color.BLACK, false, false);
+    private final ImagePositionParam center = new ImagePositionParam("Center");
+    private final ColorParam bgColor = new ColorParam("Background Color:", Color.WHITE, false, false);
+    private final ColorParam fgColor = new ColorParam("Rays Color:", Color.BLACK, false, false);
     private final BooleanParam randomColorsParam = new BooleanParam("Use Random Colors for Rays", false, true);
+    private final AngleParam rotate = new AngleParam("Rotate", 0);
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private final ActionParam reseedAction = new ReseedNoiseActionParam(
+            "Reseed Colors", "Recalculates the random colors",
+            new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    reseed();
+                }
+            });
+
+    private final Random rand;
+    private static long seed = System.nanoTime();
 
     public Starburst() {
         super("Starburst ", true, false);
         setParamSet(new ParamSet(
                 numberOfRaysParam,
-                bgColorParam,
-                fgColorParam,
+                bgColor,
+                fgColor,
                 randomColorsParam,
-                centerParam
+                center,
+                rotate,
+                reseedAction
         ));
+        rand = new Random(seed);
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-
+        rand.setSeed(seed);
         int width = dest.getWidth();
         int height = dest.getHeight();
 
         Graphics2D g = dest.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setColor(bgColorParam.getColor());
+        g.setColor(bgColor.getColor());
         g.fillRect(0, 0, width, height);
 
-        float cx = width * centerParam.getRelativeX();
-        float cy = height * centerParam.getRelativeY();
+        float cx = width * center.getRelativeX();
+        float cy = height * center.getRelativeY();
 
-        g.setColor(fgColorParam.getColor());
+        g.setColor(fgColor.getColor());
 
         int numberOfRays = numberOfRaysParam.getValue();
         boolean useRandomColors = randomColorsParam.getValue();
 
-        double averageRayAngle = 180.0 / numberOfRays;
-        double angleBetweenRays = 360.0 / numberOfRays;
+        double averageRayAngle = Math.PI / numberOfRays;
+        double startAngle = rotate.getValueInRadians();
+        double angle = startAngle;
 
-//        System.out.println("Starburst.transform numberOfRays = " + numberOfRays);
-//        System.out.println("Starburst.transform averageRayAngle = " + averageRayAngle);
-//        System.out.println("Starburst.transform angleBetweenRays = " + angleBetweenRays);
-
-        double startAngle = 0;
-
+        double radius = Math.sqrt(width * width + height * height);
 
         for (int i = 0; i < numberOfRays; i++) {
-//            System.out.println("Starburst.transform startAngle = " + startAngle);
+            GeneralPath triangle = new GeneralPath();
+            triangle.moveTo(cx, cy);
 
-            Point2D.Float p1 = intersectRectangleWithRay(cx, cy, width, height, startAngle);
-            Point2D.Float p2 = intersectRectangleWithRay(cx, cy, width, height, startAngle + averageRayAngle);
+            double p1x = cx + radius * Math.cos(angle);
+            double p1y = cy + radius * Math.sin(angle);
 
-            if (p1 != null && p2 != null) {
-//                System.out.println("    Starburst.transform p1.x = " + p1.getX() + ", p1.y = " + p1.getY());
-//                System.out.println("    Starburst.transform p2.x = " + p2.getX() + ", p2.y = " + p2.getY());
+            triangle.lineTo(p1x, p1y);
 
-                GeneralPath shape = new GeneralPath();
-                shape.moveTo(cx, cy);
+            angle += averageRayAngle;
 
-                double p1x = p1.getX();
-                double p1y = p1.getY();
-                double p2x = p2.getX();
-                double p2y = p2.getY();
+            double p2x = cx + radius * Math.cos(angle);
+            double p2y = cy + radius * Math.sin(angle);
 
-                shape.lineTo(p1x, p1y);
+            angle += averageRayAngle; // increment again to leave out
 
-                if ((p1x != p2x) && (p1y != p2y)) {   // corner case: not a triangle
-                    int cornerX, cornerY;
-                    if (p1x == width || p2x == width) {
-                        cornerX = width;
-                    } else if (p1x == 0 || p2x == 0) {
-                        cornerX = 0;
-                    } else {
-                        throw new IllegalStateException();
-                    }
+            triangle.lineTo(p2x, p2y);
+            triangle.closePath();
 
-                    if (p1y == height || p2y == height) {
-                        cornerY = height;
-                    } else if (p1y == 0 || p2y == 0) {
-                        cornerY = 0;
-                    } else {
-                        throw new IllegalStateException();
-                    }
-
-                    shape.lineTo(cornerX, cornerY);
-                }
-
-                shape.lineTo(p2x, p2y);
-                shape.closePath();
-
-                if (useRandomColors) {
-                    g.setColor(ImageUtils.getRandomColor(false));
-                }
-
-                g.fill(shape);
-            } else {
-//                    System.out.println("    Starburst.transform NO TRIANGLE");
+            if (useRandomColors) {
+                g.setColor(ImageUtils.getRandomColor(rand, false));
             }
 
-            startAngle += angleBetweenRays;
+            g.fill(triangle);
         }
 
         g.dispose();
-
         return dest;
     }
 
-    private static Point2D.Float intersectRectangleWithRay(float cx, float cy, int width, int height, double thetaDegrees) {
-        double thetaRadians = Math.toRadians(thetaDegrees);
-//        System.out.println("Starburst.intersectRectangleWithRay thetaDegrees = " + thetaDegrees + ", thetaRadians = " + thetaRadians);
-
-        if (thetaDegrees == 0) {
-            if (cy >= 0 && cy <= height) {
-//                System.out.println("Starburst.intersectRectangleWithRay EAST SIMPLE FOUND");
-                return new Point2D.Float(width, cy);
-            } else {
-                return null;
-            }
-        } else if (thetaDegrees == 180) {
-            if (cy >= 0 && cy <= height) {
-//                System.out.println("Starburst.intersectRectangleWithRay WEST SIMPLE FOUND");
-                return new Point2D.Float(0, cy);
-            } else {
-                return null;
-            }
-        }
-
-
-        if (thetaDegrees > 0 && thetaDegrees < 180) {
-            // check north
-            int ix = (int) (cx + (cy / Math.tan(thetaRadians)));
-            if (ix >= 0 && ix <= width) {
-//                System.out.println("Starburst.intersectRectangleWithRay NORTH FOUND ix = " + ix);
-                return new Point2D.Float(ix, 0);
-            } else {
-//                System.out.println("Failed NORTH CHECK ix = " + ix);
-            }
-        } else {
-            // check south
-//            int ix = (int) (cx + ((height - cy) / Math.tan(thetaRadians + Math.PI)));
-            int ix = (int) (cx - ((height - cy) / Math.tan(thetaRadians)));
-            if (ix >= 0 && ix <= width) {
-//                System.out.println("Starburst.intersectRectangleWithRay SOUTH FOUND ix = " + ix);
-                return new Point2D.Float(ix, height);
-            }
-        }
-
-        if ((thetaDegrees >= 0 && thetaDegrees < 90) || (thetaDegrees > 270 && thetaDegrees <= 360)) {
-            // check east
-            int iy = (int) (cy - Math.tan(thetaRadians) * (width - cx));
-            if (iy >= 0 && iy <= height) {
-//                System.out.println("Starburst.intersectRectangleWithRay EAST FOUND iy = " + iy);
-                return new Point2D.Float(width, iy);
-            }
-        }
-
-        if (thetaDegrees > 90 && thetaDegrees < 270) {
-            // check west
-            int iy = (int) (cy + Math.tan(thetaRadians + +Math.PI) * cx);
-            if (iy >= 0 && iy <= height) {
-//                System.out.println("Starburst.intersectRectangleWithRay WEST FOUND iy = " + iy);
-                return new Point2D.Float(0, iy);
-            }
-        }
-
-
-//        System.out.println("  Starburst.intersectRectangleWithRay NO INTERSECTION FOUND");
-        // no intersection found
-        return null;
+    private static void reseed() {
+        seed = System.nanoTime();
     }
 }

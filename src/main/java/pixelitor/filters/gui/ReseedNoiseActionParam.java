@@ -50,7 +50,11 @@ public class ReseedNoiseActionParam extends ActionParam {
     }
 
     public ReseedNoiseActionParam(String name, ActionListener actionListener) {
-        super(name, actionListener, "Reinitialize the randomness");
+        this(name, "Reinitialize the randomness", actionListener);
+    }
+
+    public ReseedNoiseActionParam(String name, String toolTipText, ActionListener actionListener) {
+        super(name, actionListener, toolTipText);
         setIgnoreFinalAnimationSettingMode(false);
     }
 }
