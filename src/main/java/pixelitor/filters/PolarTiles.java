@@ -27,40 +27,40 @@ import pixelitor.filters.impl.PolarTilesFilter;
 import java.awt.image.BufferedImage;
 
 /**
- *
+ * Polar Glass Tiles filter
  */
 public class PolarTiles extends FilterWithParametrizedGUI {
 
-    private ImagePositionParam centerParam = new ImagePositionParam("Center");
+    private ImagePositionParam center = new ImagePositionParam("Center");
 
-    private RangeParam numADivisionsParam = new RangeParam("Number of Angular Divisions", 0, 100, 7);
-    private RangeParam numRDivisionsParam = new RangeParam("Number of Radial Divisions", 0, 50, 7);
-    private RangeParam rotateParam = new RangeParam("Rotate Effect", 0, 100, 0);
+    private RangeParam numAngDivisions = new RangeParam("Number of Angular Divisions", 0, 100, 7);
+    private RangeParam numRadDivisions = new RangeParam("Number of Radial Divisions", 0, 50, 7);
+    private RangeParam rotateEffect = new RangeParam("Rotate Effect", 0, 100, 0);
 
-    private RangeParam randomnessParam = new RangeParam("Randomness", 0, 100, 0);
-    private RangeParam curvatureParam = new RangeParam("Curvature", 0, 20, 4);
+    private RangeParam randomness = new RangeParam("Randomness", 0, 100, 0);
+    private RangeParam curvature = new RangeParam("Curvature", 0, 20, 4);
 
-    private RangeParam zoomParam = new RangeParam("Zoom (%)", 1, 500, 100);
-    private AngleParam rotateResultParam = new AngleParam("Rotate Result", 0);
+    private RangeParam zoom = new RangeParam("Zoom (%)", 1, 500, 100);
+    private AngleParam rotateImage = new AngleParam("Rotate Image", 0);
 
-    private IntChoiceParam edgeActionParam = IntChoiceParam.getEdgeActionChoices(true);
-    private IntChoiceParam interpolationParam = IntChoiceParam.getInterpolationChoices();
+    private IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices(true);
+    private IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
 
     private PolarTilesFilter filter;
 
     public PolarTiles() {
         super("Polar Glass Tiles", true, false);
         setParamSet(new ParamSet(
-                centerParam,
-                numADivisionsParam,
-                numRDivisionsParam,
-                curvatureParam.adjustRangeToImageSize(0.02),
-                rotateParam,
-                zoomParam,
-                randomnessParam,
-                rotateResultParam,
-                edgeActionParam,
-                interpolationParam,
+                center,
+                numAngDivisions,
+                numRadDivisions,
+                curvature.adjustRangeToImageSize(0.02),
+                rotateEffect,
+                zoom,
+                randomness,
+                rotateImage,
+                edgeAction,
+                interpolation,
                 new ReseedNoiseActionParam("Reseed Randomness")
         ));
     }
@@ -71,17 +71,17 @@ public class PolarTiles extends FilterWithParametrizedGUI {
             filter = new PolarTilesFilter();
         }
 
-        filter.setCenterX(centerParam.getRelativeX());
-        filter.setCenterY(centerParam.getRelativeY());
-        filter.setEdgeAction(edgeActionParam.getValue());
-        filter.setInterpolation(interpolationParam.getValue());
-        filter.setRotateResult((float) rotateResultParam.getValueInIntuitiveRadians());
-        filter.setZoom(zoomParam.getValueAsPercentage());
-        filter.setT(rotateParam.getValueAsPercentage());
-        filter.setNumADivisions(numADivisionsParam.getValue());
-        filter.setNumRDivisions(numRDivisionsParam.getValue());
-        filter.setCurvature(curvatureParam.getValue());
-        filter.setRandomness(randomnessParam.getValueAsPercentage());
+        filter.setCenterX(center.getRelativeX());
+        filter.setCenterY(center.getRelativeY());
+        filter.setEdgeAction(edgeAction.getValue());
+        filter.setInterpolation(interpolation.getValue());
+        filter.setRotateResult((float) rotateImage.getValueInIntuitiveRadians());
+        filter.setZoom(zoom.getValueAsPercentage());
+        filter.setT(rotateEffect.getValueAsPercentage());
+        filter.setNumADivisions(numAngDivisions.getValue());
+        filter.setNumRDivisions(numRadDivisions.getValue());
+        filter.setCurvature(curvature.getValueAsDouble());
+        filter.setRandomness(randomness.getValueAsPercentage());
 
         dest = filter.filter(src, dest);
         return dest;

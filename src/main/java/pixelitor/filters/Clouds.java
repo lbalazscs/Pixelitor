@@ -42,11 +42,11 @@ public class Clouds extends FilterWithParametrizedGUI {
         reseed();
     }
 
-    private final RangeParam scaleParam = new RangeParam("Zoom", 3, 300, 100);
-    private final RangeParam roughnessParam = new RangeParam("Roughness (%)", 1, 100, 50);
+    private final RangeParam scale = new RangeParam("Zoom", 3, 300, 100);
+    private final RangeParam roughness = new RangeParam("Roughness (%)", 1, 100, 50);
 
-    private final ColorParam color1Param = new ColorParam("Color 1", Color.BLACK, true, false);
-    private final ColorParam color2Param = new ColorParam("Color 2", Color.WHITE, true, false);
+    private final ColorParam color1 = new ColorParam("Color 1", Color.BLACK, true, false);
+    private final ColorParam color2 = new ColorParam("Color 2", Color.WHITE, true, false);
 
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionParam reseedAction = new ReseedNoiseActionParam(new ActionListener() {
@@ -59,28 +59,27 @@ public class Clouds extends FilterWithParametrizedGUI {
     public Clouds() {
         super("Clouds", false, false);
         setParamSet(new ParamSet(
-                scaleParam.adjustRangeToImageSize(0.3),
-                roughnessParam,
-                color1Param,
-                color2Param,
+                scale.adjustRangeToImageSize(0.3),
+                roughness,
+                color1,
+                color2,
                 reseedAction
         ));
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        int scaleValue = scaleParam.getValue();
-        float roughnessValue = roughnessParam.getValueAsPercentage();
 
-        Color c1 = color1Param.getColor();
-        Color c2 = color2Param.getColor();
-
-        renderClouds(dest, scaleValue, roughnessValue, c1, c2);
+        renderClouds(dest,
+                scale.getValueAsFloat(),
+                roughness.getValueAsPercentage(),
+                color1.getColor(),
+                color2.getColor());
 
         return dest;
     }
 
-    public static void renderClouds(BufferedImage dest, final int scaleValue, final float roughnessValue, Color c1, Color c2) {
+    public static void renderClouds(BufferedImage dest, final float scaleValue, final float roughnessValue, Color c1, Color c2) {
         final int width = dest.getWidth();
         int height = dest.getHeight();
         final int[] destData = ImageUtils.getPixelsAsArray(dest);
@@ -109,15 +108,15 @@ public class Clouds extends FilterWithParametrizedGUI {
         }
     }
 
-    private static void calculateLine(int scaleValue, float roughnessValue, int width, int[] destData, int[] color1, int[] color2, int y) {
+    private static void calculateLine(float scaleValue, float roughnessValue, int width, int[] destData, int[] color1, int[] color2, int y) {
         for (int x = 0; x < width; x++) {
-            int scale = scaleValue;
+            float scale = scaleValue;
             float noiseValue = 0.0f;
             float contribution = 1.0f;
 
             for (int i = 0; (i < 8) && (contribution > 0.03f) && (scale > 0); i++) {
-                float scaledX = x / (float) scale;
-                float scaledY = y / (float) scale;
+                float scaledX = x / scale;
+                float scaledY = y / scale;
                 float n = perlinNoise2D(scaledX, scaledY);
                 noiseValue += contribution * n;
                 scale /= 2;

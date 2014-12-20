@@ -40,32 +40,32 @@ public class HueSat extends FilterWithParametrizedGUI {
     private static final int MAX_BRI = 100;
     private static final int DEFAULT_BRI = 0;
 
-    private final RangeParam hueParam = new RangeParam("Hue", MIN_HUE, MAX_HUE, DEFAULT_HUE);
-    private final RangeParam saturationParam = new RangeParam("Saturation", MIN_SAT, MAX_SAT, DEFAULT_SAT);
-    private final RangeParam brightnessParam = new RangeParam("Brightness", MIN_BRI, MAX_BRI, DEFAULT_BRI);
+    private final RangeParam hue = new RangeParam("Hue", MIN_HUE, MAX_HUE, DEFAULT_HUE);
+    private final RangeParam saturation = new RangeParam("Saturation", MIN_SAT, MAX_SAT, DEFAULT_SAT);
+    private final RangeParam brightness = new RangeParam("Brightness", MIN_BRI, MAX_BRI, DEFAULT_BRI);
 
     public HueSat() {
         super("Hue/Saturation", true, false);
         setParamSet(new ParamSet(
-                hueParam,
-                saturationParam,
-                brightnessParam
+                hue,
+                saturation,
+                brightness
         ));
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        int hueP = hueParam.getValue();
-        int satP = saturationParam.getValue();
-        int briP = brightnessParam.getValue();
+        int hueP = hue.getValue();
+        int satP = saturation.getValue();
+        int briP = brightness.getValue();
 
         if ((hueP == 0) && (satP == 0) && (briP == 0)) {
             return src;
         }
 
-        float satShift = satP / 100.0f;
-        float briShift = briP / 100.0f;
-        float hueShift = hueP / 360.0f;
+        float satShift = saturation.getValueAsPercentage();
+        float briShift = brightness.getValueAsPercentage();
+        float hueShift = hue.getValueAsFloat() / 360.0f;
 
         int[] srcData = ImageUtils.getPixelsAsArray(src);
         int[] destData = ImageUtils.getPixelsAsArray(dest);

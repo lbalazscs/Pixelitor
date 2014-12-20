@@ -45,13 +45,10 @@ import java.awt.image.ShortLookupTable;
  * Lightning
  */
 public class Lightning extends FilterWithParametrizedGUI {
-    private final RangeParam numberOfBoltsParam = new RangeParam("Number of Bolts", 1, 20, 8);
-    private final ImagePositionParam centerParam = new ImagePositionParam("Center");
+    private final RangeParam numberOfBolts = new RangeParam("Number of Bolts", 1, 20, 8);
+    private final ImagePositionParam center = new ImagePositionParam("Center");
     private final ColorParam colorParam = new ColorParam("Color:", Color.WHITE, false, false);
-    private final RangeParam boltExpansionParam = new RangeParam("Bolt Expansion", 1, 255, 70);
-
-    public static final int MATH_ATAN = 0;
-    public static final int FAST_ATAN = 1;
+    private final RangeParam boltExpansion = new RangeParam("Bolt Expansion", 1, 255, 70);
 
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionParam reseedAction = new ReseedNoiseActionParam(new ActionListener() {
@@ -64,9 +61,9 @@ public class Lightning extends FilterWithParametrizedGUI {
     public Lightning() {
         super("Lightning", true, false);
         setParamSet(new ParamSet(
-                centerParam,
-                numberOfBoltsParam,
-                boltExpansionParam,
+                center,
+                numberOfBolts,
+                boltExpansion,
 //                colorParam,        TODO does not work right
                 reseedAction
         ));
@@ -76,7 +73,7 @@ public class Lightning extends FilterWithParametrizedGUI {
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         boolean debug = false;
 
-        int numberOfBolts = numberOfBoltsParam.getValue();
+        int numberOfBolts = this.numberOfBolts.getValue();
         int srcWidth = src.getWidth();
         int srcHeight = src.getHeight();
 
@@ -111,8 +108,8 @@ public class Lightning extends FilterWithParametrizedGUI {
         // crop the image to the target size
         int xSizeDiff = lightningImage.getWidth() - srcWidth;
         int ySizeDiff = lightningImage.getHeight() - srcHeight;
-        int xTrans = -xSizeDiff / 2 + (int) (srcWidth * (centerParam.getRelativeX() - 0.5));
-        int yTrans = -ySizeDiff / 2 + (int) (srcHeight * (centerParam.getRelativeY() - 0.5));
+        int xTrans = -xSizeDiff / 2 + (int) (srcWidth * (center.getRelativeX() - 0.5));
+        int yTrans = -ySizeDiff / 2 + (int) (srcHeight * (center.getRelativeY() - 0.5));
 
         BufferedImage croppedLightningImage = new BufferedImage(srcWidth, srcHeight, BufferedImage.TYPE_INT_ARGB);
         Graphics2D gCroppedLightning = croppedLightningImage.createGraphics();
@@ -120,7 +117,7 @@ public class Lightning extends FilterWithParametrizedGUI {
 
         // apply difference clouds
         BufferedImage cloudsImage = new BufferedImage(srcWidth, srcHeight, BufferedImage.TYPE_INT_ARGB);
-        Clouds.renderClouds(cloudsImage, 100, 0.5f, Color.BLACK, Color.WHITE);
+        Clouds.renderClouds(cloudsImage, 100.0f, 0.5f, Color.BLACK, Color.WHITE);
         gCroppedLightning.setComposite(new DifferenceComposite(1.0f));
         gCroppedLightning.drawImage(cloudsImage, 0, 0, null);
 
@@ -134,7 +131,7 @@ public class Lightning extends FilterWithParametrizedGUI {
 //            AppLogic.debugImage(croppedLightningImage, "croppedLightningImage after crop");
         }
 
-        int levelsThreshold = boltExpansionParam.getValue();
+        double levelsThreshold = boltExpansion.getValueAsDouble();
         short[] invertAndDarkenLUT = new short[256];
         for (short i = 0; i < invertAndDarkenLUT.length; i++) {
             if (i >= levelsThreshold) {

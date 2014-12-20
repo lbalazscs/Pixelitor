@@ -13,27 +13,27 @@ import java.awt.image.BufferedImage;
  * Swirl filter
  */
 public class Swirl extends FilterWithParametrizedGUI {
-    private RangeParam amountParam = new RangeParam("Amount", -400, 400, 100);
-    private RangeParam radiusParam = new RangeParam("Radius", 0, 1000, 300);
-    private RangeParam zoomParam = new RangeParam("Zoom (%)", 1, 500, 100);
-    private AngleParam rotateResultParam = new AngleParam("Rotate Result", 0);
+    private RangeParam amount = new RangeParam("Amount", -400, 400, 100);
+    private RangeParam radius = new RangeParam("Radius", 0, 1000, 300);
+    private RangeParam zoom = new RangeParam("Zoom (%)", 1, 500, 100);
+    private AngleParam rotateResult = new AngleParam("Rotate Result", 0);
 
-    private ImagePositionParam centerParam = new ImagePositionParam("Center");
-    private IntChoiceParam edgeActionParam =  IntChoiceParam.getEdgeActionChoices();
-    private IntChoiceParam interpolationParam = IntChoiceParam.getInterpolationChoices();
+    private ImagePositionParam center = new ImagePositionParam("Center");
+    private IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
+    private IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
 
     private SwirlFilter filter;
 
     public Swirl() {
         super("Swirl", true, false);
         setParamSet(new ParamSet(
-                amountParam,
-                radiusParam.adjustRangeToImageSize(1.0),
-                centerParam,
-                zoomParam,
-                rotateResultParam,
-                edgeActionParam,
-                interpolationParam
+                amount,
+                radius.adjustRangeToImageSize(1.0),
+                center,
+                zoom,
+                rotateResult,
+                edgeAction,
+                interpolation
         ));
     }
 
@@ -43,15 +43,15 @@ public class Swirl extends FilterWithParametrizedGUI {
             filter = new SwirlFilter();
         }
 
-        filter.setSwirlAmount(amountParam.getValueAsPercentage());
-        filter.setRadius(radiusParam.getValue());
-        filter.setZoom(zoomParam.getValueAsPercentage());
-        filter.setRotateResultAngle((float) rotateResultParam.getValueInIntuitiveRadians());
+        filter.setSwirlAmount(amount.getValueAsPercentage());
+        filter.setRadius(radius.getValueAsFloat());
+        filter.setZoom(zoom.getValueAsPercentage());
+        filter.setRotateResultAngle((float) rotateResult.getValueInIntuitiveRadians());
 
-        filter.setCenterX(centerParam.getRelativeX());
-        filter.setCenterY(centerParam.getRelativeY());
-        filter.setEdgeAction(edgeActionParam.getValue());
-        filter.setInterpolation(interpolationParam.getValue());
+        filter.setCenterX(center.getRelativeX());
+        filter.setCenterY(center.getRelativeY());
+        filter.setEdgeAction(edgeAction.getValue());
+        filter.setInterpolation(interpolation.getValue());
 
         dest = filter.filter(src, dest);
         return dest;

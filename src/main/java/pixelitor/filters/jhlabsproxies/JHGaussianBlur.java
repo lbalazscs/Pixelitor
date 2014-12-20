@@ -30,7 +30,7 @@ import java.awt.image.BufferedImage;
  * Gaussian Blur based on JHLabs GaussianFilter
  */
 public class JHGaussianBlur extends FilterWithParametrizedGUI {
-    private final RangeParam radiusParam = new RangeParam("Radius", 0, 100, 0);
+    private final RangeParam radius = new RangeParam("Radius", 0, 100, 0);
     private final BooleanParam hpSharpening = BooleanParam.createParamForHPSharpening();
 
     private GaussianFilter filter;
@@ -38,15 +38,14 @@ public class JHGaussianBlur extends FilterWithParametrizedGUI {
     public JHGaussianBlur() {
         super("Gaussian Blur", true, false);
         setParamSet(new ParamSet(
-                radiusParam,
+                radius,
                 hpSharpening
         ));
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        int radius = radiusParam.getValue();
-        if (radius == 0) {
+        if (radius.getValue() == 0) {
             return src;
         }
 
@@ -54,7 +53,7 @@ public class JHGaussianBlur extends FilterWithParametrizedGUI {
             filter = new GaussianFilter();
         }
 
-        filter.setRadius(radius);
+        filter.setRadius(radius.getValueAsFloat());
         filter.setPremultiplyAlpha(false);
 
         dest = filter.filter(src, dest);
@@ -72,6 +71,6 @@ public class JHGaussianBlur extends FilterWithParametrizedGUI {
     }
 
     public void setRadius(int newRadius) {
-        radiusParam.setValue(newRadius);
+        radius.setValue(newRadius);
     }
 }

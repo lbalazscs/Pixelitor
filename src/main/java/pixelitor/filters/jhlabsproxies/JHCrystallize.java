@@ -76,12 +76,11 @@ public class JHCrystallize extends FilterWithParametrizedGUI {
         }
 
         filter.setEdgeThickness(edgeThickness.getValueAsPercentage());
-        filter.setScale(size.getValue());
+        filter.setScale(size.getValueAsFloat());
         filter.setRandomness(randomness.getValueAsPercentage());
         filter.setEdgeColor(edgeColor.getColor().getRGB());
         filter.setGridType(gridType.getValue());
         filter.setFadeEdges(fadeEdges.getValue());
-//        filter.setRndGenerator(rndGen.getValue());
 
         dest = filter.filter(src, dest);
         return dest;

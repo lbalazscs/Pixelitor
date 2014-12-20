@@ -48,7 +48,7 @@ public class JHFrostedGlass extends FilterWithParametrizedGUI {
             filter = new DiffuseFilter();
         }
 
-        filter.setScale(amount.getValue());
+        filter.setScale(amount.getValueAsFloat());
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 

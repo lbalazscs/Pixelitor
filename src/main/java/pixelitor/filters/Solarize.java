@@ -30,9 +30,9 @@ public class Solarize extends FilterWithParametrizedGUI {
     private static final int TYPE_CLASSIC = 1; // pixels above the threshold level are inverted + contrast is maximized
     private static final int TYPE_INVERTED = 2; // upside down: corresponds to a V-shaped curves adjustment
 
-    private final RangeParam redThresholdParam = new RangeParam("Red Threshold", 0, 255, 128);
-    private final RangeParam greenThresholdParam = new RangeParam("Green Threshold", 0, 255, 128);
-    private final RangeParam blueThresholdParam = new RangeParam("Blue Threshold", 0, 255, 128);
+    private final RangeParam redThreshold = new RangeParam("Red Threshold", 0, 255, 128);
+    private final RangeParam greenThreshold = new RangeParam("Green Threshold", 0, 255, 128);
+    private final RangeParam blueThreshold = new RangeParam("Blue Threshold", 0, 255, 128);
 
     private final IntChoiceParam type = new IntChoiceParam("Type", new IntChoiceParam.Value[]{
             new IntChoiceParam.Value("Classic", TYPE_CLASSIC),
@@ -43,9 +43,9 @@ public class Solarize extends FilterWithParametrizedGUI {
         super("Solarize", true, false);
         setParamSet(new ParamSet(
                 type,
-                redThresholdParam,
-                greenThresholdParam,
-                blueThresholdParam
+                redThreshold,
+                greenThreshold,
+                blueThreshold
         ));
     }
 
@@ -54,9 +54,9 @@ public class Solarize extends FilterWithParametrizedGUI {
         int[] srcData = ImageUtils.getPixelsAsArray(src);
         int[] destData = ImageUtils.getPixelsAsArray(dest);
 
-        int redThreshold = redThresholdParam.getValue();
-        int greenThreshold = greenThresholdParam.getValue();
-        int blueThreshold = blueThresholdParam.getValue();
+        float redThreshold = this.redThreshold.getValueAsFloat();
+        float greenThreshold = this.greenThreshold.getValueAsFloat();
+        float blueThreshold = this.blueThreshold.getValueAsFloat();
 
         float m1Red = 255.0f / redThreshold;
         float m2Red = 255.0f / (255.0f - redThreshold);

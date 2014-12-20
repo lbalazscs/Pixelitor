@@ -31,29 +31,29 @@ import java.awt.image.BufferedImage;
  * Wood based on the JHLabs WoodFilter
  */
 public class JHWood extends FilterWithParametrizedGUI {
-    private final RangeParam ringsParam = new RangeParam("Rings", 1, 100, 50);
-    private final RangeParam scaleParam = new RangeParam("Zoom", 1, 500, 100);
-    private final RangeParam stretchParam = new RangeParam("Stretch", 1, 50, 10);
-    private final AngleParam angleParam = new AngleParam("Angle", 0);
-    private final RangeParam turbulenceParam = new RangeParam("Turbulence", 0, 100, 0);
-    private final RangeParam fibresParam = new RangeParam("Fibres", 0, 100, 10);
-    private final RangeParam gainParam = new RangeParam("Gain", 0, 100, 80);
+    private final RangeParam rings = new RangeParam("Rings", 1, 100, 50);
+    private final RangeParam scale = new RangeParam("Zoom", 1, 500, 100);
+    private final RangeParam stretch = new RangeParam("Stretch", 1, 50, 10);
+    private final AngleParam angle = new AngleParam("Angle", 0);
+    private final RangeParam turbulence = new RangeParam("Turbulence", 0, 100, 0);
+    private final RangeParam fibres = new RangeParam("Fibres", 0, 100, 10);
+    private final RangeParam gain = new RangeParam("Gain", 0, 100, 80);
 
-    private final GradientParam gradientParam = new GradientParam("Colors", new Color(229, 196, 148), new Color(152, 123, 81));
+    private final GradientParam gradient = new GradientParam("Colors", new Color(229, 196, 148), new Color(152, 123, 81));
 
     private WoodFilter filter;
 
     public JHWood() {
         super("Wood", false, false);
         setParamSet(new ParamSet(
-                angleParam,
-                scaleParam.adjustRangeToImageSize(0.5),
-                stretchParam,
-                gradientParam,
-                ringsParam,
-                turbulenceParam,
-                fibresParam,
-                gainParam,
+                angle,
+                scale.adjustRangeToImageSize(0.5),
+                stretch,
+                gradient,
+                rings,
+                turbulence,
+                fibres,
+                gain,
                 new ReseedNoiseActionParam()
         ));
     }
@@ -64,16 +64,14 @@ public class JHWood extends FilterWithParametrizedGUI {
             filter = new WoodFilter();
         }
 
-        double angle = angleParam.getValueInRadians() + Math.PI / 2;
-
-        filter.setAngle((float) angle);
-        filter.setScale(scaleParam.getValue());
-        filter.setStretch(stretchParam.getValue());
-        filter.setRings(ringsParam.getValueAsPercentage());
-        filter.setTurbulence(turbulenceParam.getValueAsPercentage());
-        filter.setFibres(fibresParam.getValueAsPercentage());
-        filter.setGain(gainParam.getValueAsPercentage());
-        filter.setColormap(gradientParam.getValue());
+        filter.setAngle((float) (angle.getValueInRadians() + Math.PI / 2));
+        filter.setScale(scale.getValueAsFloat());
+        filter.setStretch(stretch.getValueAsFloat());
+        filter.setRings(rings.getValueAsPercentage());
+        filter.setTurbulence(turbulence.getValueAsPercentage());
+        filter.setFibres(fibres.getValueAsPercentage());
+        filter.setGain(gain.getValueAsPercentage());
+        filter.setColormap(gradient.getValue());
 
         dest = filter.filter(src, dest);
         return dest;

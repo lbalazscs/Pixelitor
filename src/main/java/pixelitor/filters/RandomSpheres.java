@@ -56,10 +56,10 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
     private final Random rand;
     private long seed;
 
-    private final RangeParam radiusParam = new RangeParam("Radius", 2, 100, 10);
-    private final RangeParam densityParam = new RangeParam("Density (%)", 1, 200, 50);
+    private final RangeParam radius = new RangeParam("Radius", 2, 100, 10);
+    private final RangeParam density = new RangeParam("Density (%)", 1, 200, 50);
 
-    private final IntChoiceParam colorSourceParam = new IntChoiceParam("Colors Source", new IntChoiceParam.Value[]{
+    private final IntChoiceParam colorSource = new IntChoiceParam("Colors Source", new IntChoiceParam.Value[]{
             new IntChoiceParam.Value("Sample Image", COLORS_SAMPLE_IMAGE),
             new IntChoiceParam.Value("Use FG, BG Colors", COLORS_FG_BG),
     });
@@ -72,7 +72,7 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
 
     private final ElevationAngleParam highlightElevationSelector = new ElevationAngleParam("Highlight Elevation (Degrees)", INTUITIVE_RADIANS_45);
 
-    private final RangeParam opacityParam = new RangeParam("Opacity (%)", 0, 100, 100);
+    private final RangeParam opacity = new RangeParam("Opacity (%)", 0, 100, 100);
 
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionParam reseedAction = new ReseedNoiseActionParam(new ActionListener() {
@@ -85,11 +85,11 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
     public RandomSpheres() {
         super("Random Spheres", true, false);
         setParamSet(new ParamSet(
-                radiusParam.adjustRangeToImageSize(0.1),
-                densityParam,
+                radius.adjustRangeToImageSize(0.1),
+                density,
 //                typeParam,
-                opacityParam,
-                colorSourceParam,
+                opacity,
+                colorSource,
                 addHighLightsCB,
                 highlightAngleSelector,
                 highlightElevationSelector,
@@ -108,7 +108,7 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
         int width = dest.getWidth();
         int height = dest.getHeight();
 
-        int radius = radiusParam.getValue();
+        float radius = this.radius.getValueAsFloat();
         double angle = highlightAngleSelector.getValueInRadians();
         angle += Math.PI;
 
@@ -118,12 +118,12 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
         int centerShiftY = (int) (radius * Math.sin(angle) * Math.cos(elevation));
 
         boolean addHighlights = addHighLightsCB.getValue();
-        float density = densityParam.getValueAsPercentage();
-        float opacity = opacityParam.getValueAsPercentage();
+        float density = this.density.getValueAsPercentage();
+        float opacity = this.opacity.getValueAsPercentage();
 
         g.setComposite(AlphaComposite.SrcOver.derive(opacity));
 
-        int colorSource = colorSourceParam.getValue();
+        int colorSource = this.colorSource.getValue();
 
         int numCircles = (int) ((width * height * density) / (radius * radius));
 
@@ -168,18 +168,19 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
 
-            int drawX = x - radius;
-            int drawY = y - radius;
-            int diameter = 2 * radius;
+            float drawX = x - radius;
+            float drawY = y - radius;
+            float diameter = 2 * radius;
             if (type == TYPE_SPHERES) {
-                g.fillOval(drawX, drawY, diameter, diameter);
+                Ellipse2D.Float circle = new Ellipse2D.Float(drawX, drawY, diameter, diameter);
+                g.fill(circle);
             } else if (type == TYPE_BUBBLES) {
                 Ellipse2D.Float circle = new Ellipse2D.Float(drawX, drawY, diameter, diameter);
                 g.draw(circle);
 
                 InnerGlowPathEffect innerGlow = new InnerGlowPathEffect(1.0f);
                 innerGlow.setBrushColor(c);
-                int effectWidth = diameter / 7;
+                int effectWidth = (int) diameter / 7;
                 innerGlow.setEffectWidth(effectWidth);
                 innerGlow.setBrushSteps(EffectConfiguratorPanel.calculateBrushSteps(effectWidth));
                 innerGlow.apply(g, circle, 0, 0);

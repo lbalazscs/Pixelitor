@@ -33,6 +33,7 @@ public class SepiaFilter extends PointFilter {
     public SepiaFilter(int sepiaIntensity) {
         this.sepiaIntensity = sepiaIntensity;
     }
+
     public void setSepiaIntensity(int sepiaIntensity) {
         this.sepiaIntensity = sepiaIntensity;
     }

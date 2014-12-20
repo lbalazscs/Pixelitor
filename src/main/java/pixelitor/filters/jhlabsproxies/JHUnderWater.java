@@ -30,28 +30,28 @@ import java.awt.image.BufferedImage;
  * UnderWater filter based on JHLabs SwimFilter
  */
 public class JHUnderWater extends FilterWithParametrizedGUI {
-    private RangeParam amountParam = new RangeParam("Amount", 0, 100, 50);
-    private RangeParam scaleParam = new RangeParam("Scale", 1, 300, 150);
-    private RangeParam stretchParam = new RangeParam("Stretch", 1, 50, 1);
+    private RangeParam amount = new RangeParam("Amount", 0, 100, 50);
+    private RangeParam scale = new RangeParam("Scale", 1, 300, 150);
+    private RangeParam stretch = new RangeParam("Stretch", 1, 50, 1);
 //    private RangeParam turbulenceParam = new RangeParam("Turbulence", 0, 100, 0);
-    private RangeParam timeParam = new RangeParam("Time", 100, 1000, 100);
-    private AngleParam angleParam = new AngleParam("Angle", 0);
-    private IntChoiceParam edgeActionParam =  IntChoiceParam.getEdgeActionChoices(true);
-    private IntChoiceParam interpolationParam = IntChoiceParam.getInterpolationChoices();
+private RangeParam time = new RangeParam("Time", 100, 1000, 100);
+    private AngleParam angle = new AngleParam("Angle", 0);
+    private IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices(true);
+    private IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
 
     private SwimFilter filter;
 
     public JHUnderWater() {
         super("Underwater", true, false);
         setParamSet(new ParamSet(
-                amountParam.adjustRangeToImageSize(0.1),
-                scaleParam.adjustRangeToImageSize(0.3),
-                stretchParam,
-                angleParam,
+                amount.adjustRangeToImageSize(0.1),
+                scale.adjustRangeToImageSize(0.3),
+                stretch,
+                angle,
 //                turbulenceParam,
-                timeParam,
-                edgeActionParam,
-                interpolationParam,
+                time,
+                edgeAction,
+                interpolation,
                 new ReseedNoiseActionParam()
         ));
     }
@@ -62,14 +62,14 @@ public class JHUnderWater extends FilterWithParametrizedGUI {
             filter = new SwimFilter();
         }
 
-        filter.setAmount(amountParam.getValue());
-        filter.setScale(scaleParam.getValue());
-        filter.setStretch(stretchParam.getValue());
+        filter.setAmount(amount.getValueAsFloat());
+        filter.setScale(scale.getValueAsFloat());
+        filter.setStretch(stretch.getValueAsFloat());
 //        filter.setTurbulence(turbulenceParam.getValueAsPercentage());
-        filter.setTime(timeParam.getValueAsPercentage());
-        filter.setAngle((float) angleParam.getValueInRadians());
-        filter.setEdgeAction(edgeActionParam.getValue());
-        filter.setInterpolation(interpolationParam.getValue());
+        filter.setTime(time.getValueAsPercentage());
+        filter.setAngle((float) angle.getValueInRadians());
+        filter.setEdgeAction(edgeAction.getValue());
+        filter.setInterpolation(interpolation.getValue());
 
         dest = filter.filter(src, dest);
         return dest;

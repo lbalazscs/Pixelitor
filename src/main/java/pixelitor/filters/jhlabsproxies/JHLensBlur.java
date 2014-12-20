@@ -60,10 +60,10 @@ public class JHLensBlur extends FilterWithParametrizedGUI {
             filter = new LensBlurFilter();
         }
 
-        filter.setRadius(radius);
+        filter.setRadius(amount.getValueAsFloat());
         filter.setSides(numberOfSides.getValue());
-        filter.setBloom(bloomFactor.getValue());
-        filter.setBloomThreshold(bloomThreshold.getValue());
+        filter.setBloom(bloomFactor.getValueAsFloat());
+        filter.setBloomThreshold(bloomThreshold.getValueAsFloat());
 
         dest = filter.filter(src, dest);
 

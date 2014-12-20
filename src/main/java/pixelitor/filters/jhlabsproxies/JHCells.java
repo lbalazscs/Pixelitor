@@ -41,10 +41,10 @@ public class JHCells extends FilterWithParametrizedGUI {
     private static final int TYPE_GRID = 2;
     private static final int TYPE_STRANGE = 3;
 
-    private GradientParam gradientParam = new GradientParam("Colors", Color.BLACK, Color.WHITE);
+    private GradientParam gradient = new GradientParam("Colors", Color.BLACK, Color.WHITE);
 
-    private RangeParam scaleParam = new RangeParam("Zoom", 1, 500, 100);
-    private RangeParam stretchParam = new RangeParam("Stretch (%)", 100, 999, 100);
+    private RangeParam scale = new RangeParam("Zoom", 1, 500, 100);
+    private RangeParam stretch = new RangeParam("Stretch (%)", 100, 999, 100);
 //    private RangeParam f1Param = new RangeParam("F1", -100, 100, -100);
 //    private RangeParam f2Param = new RangeParam("F2", -100, 100, -100);
 //    private RangeParam f3Param = new RangeParam("F3", -100, 100, 0);
@@ -52,7 +52,7 @@ public class JHCells extends FilterWithParametrizedGUI {
     private RangeParam randomness = new RangeParam("Grid Randomness", 1, 100, 1);
     private IntChoiceParam gridType = IntChoiceParam.getGridTypeChoices("Grid Type", randomness);
 
-    private IntChoiceParam typeParam = new IntChoiceParam("Type", new IntChoiceParam.Value[]{
+    private IntChoiceParam type = new IntChoiceParam("Type", new IntChoiceParam.Value[]{
 //            new IntChoiceParam.Value("Free", 0),
             new IntChoiceParam.Value("Cells", TYPE_CELLS),
             new IntChoiceParam.Value("Grid", TYPE_GRID),
@@ -61,7 +61,7 @@ public class JHCells extends FilterWithParametrizedGUI {
     private RangeParam tuneParam = new RangeParam("Type", 0, 100, 0);
     private RangeParam bwParam = new RangeParam("Dark/Light Balance", -20, 20, 0);
 
-    private AngleParam angleParam = new AngleParam("Angle", 0);
+    private AngleParam angle = new AngleParam("Angle", 0);
 
     private final ActionParam reseedAction = new ReseedNoiseActionParam(new ActionListener() {
         @Override
@@ -76,15 +76,15 @@ public class JHCells extends FilterWithParametrizedGUI {
     public JHCells() {
         super("Cells", false, false);
         setParamSet(new ParamSet(
-                typeParam,
+                type,
                 tuneParam,
                 gridType,
                 randomness,
-                gradientParam,
+                gradient,
                 bwParam,
-                scaleParam.adjustRangeToImageSize(0.5),
-                stretchParam,
-                angleParam,
+                scale.adjustRangeToImageSize(0.5),
+                stretch,
+                angle,
                 reseedAction
 //                rndGen
 //                f1Param,
@@ -99,20 +99,11 @@ public class JHCells extends FilterWithParametrizedGUI {
             filter = new CellularFilter();
         }
 
-        int scale = scaleParam.getValue();
-        float stretch = stretchParam.getValueAsPercentage();
-        float angle = (float) (angleParam.getValueInRadians() + (Math.PI / 2));
-
-        int type = typeParam.getValue();
         float tune = tuneParam.getValueAsPercentage();
 
         float f1, f2, f3;
 
-        switch (type) {
-//            case 0:
-//                f1 = f1Param.getValueAsPercentage();
-//                f2 = f2Param.getValueAsPercentage();
-//                f3 = f3Param.getValueAsPercentage();
+        switch (type.getValue()) {
             case TYPE_CELLS:
                 f1 = 1.0f - tune;
                 f2 = tune;
@@ -137,20 +128,15 @@ public class JHCells extends FilterWithParametrizedGUI {
         f2 += bw;
         f3 += bw;
 
-        filter.setScale(scale);
-        filter.setStretch(stretch);
-        filter.setAngle(angle);
-
+        filter.setScale(scale.getValueAsFloat());
+        filter.setStretch(stretch.getValueAsPercentage());
+        filter.setAngle((float) (angle.getValueInRadians() + (Math.PI / 2)));
         filter.setF1(f1);
         filter.setF2(f2);
         filter.setF3(f3);
         filter.setGridType(gridType.getValue());
         filter.setRandomness(randomness.getValueAsPercentage());
-
-        filter.setColormap(gradientParam.getValue());
-
-//        filter.setRndGenerator(rndGen.getValue());
-//        filter.setRndGenerator(CellularFilter.RND_GENERATOR_MSX_INT);
+        filter.setColormap(gradient.getValue());
 
         dest = filter.filter(src, dest);
         return dest;

@@ -85,8 +85,8 @@ public class PolarTilesFilter extends CenteredTransformFilter {
         this.numRDivisions = numRDivisions;
     }
 
-    public void setCurvature(int curvature) {
-        this.curvature = curvature * curvature / 10.0f;
+    public void setCurvature(double curvature) {
+        this.curvature = (float) (curvature * curvature / 10.0f);
     }
 
     public void setRandomness(float randomness) {

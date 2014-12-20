@@ -36,7 +36,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Desktop;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.color.ColorSpace;
@@ -307,11 +306,16 @@ public final class Utils {
         return angle;
     }
 
-    public static Point2D calculateOffset(int distance, double angle) {
-        int offsetX = (int) (distance * Math.cos(angle));
-        int offsetY = (int) (distance * Math.sin(angle));
+    public static Point2D calculateOffset(double distance, double angle) {
+//        int offsetX = (int) (distance * Math.cos(angle));
+//        int offsetY = (int) (distance * Math.sin(angle));
+//
+//        return new Point(offsetX, offsetY);
 
-        return new Point(offsetX, offsetY);
+        double offsetX = distance * Math.cos(angle);
+        double offsetY = distance * Math.sin(angle);
+
+        return new Point2D.Double(offsetX, offsetY);
     }
 
     // makes sure that the returned rectangle has positive width, height

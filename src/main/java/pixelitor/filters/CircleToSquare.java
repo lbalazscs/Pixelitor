@@ -64,8 +64,8 @@ public class CircleToSquare extends FilterWithParametrizedGUI {
 //        filter.setRadiusX(radius.getValue(0));
 //        filter.setRadiusY(radius.getValue(1));
 
-        filter.setRadiusX(radius.getValue());
-        filter.setRadiusY(radius.getValue());
+        filter.setRadiusX(radius.getValueAsFloat());
+        filter.setRadiusY(radius.getValueAsFloat());
 
 
         filter.setAmount(amount.getValueAsPercentage());

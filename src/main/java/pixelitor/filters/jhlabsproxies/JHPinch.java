@@ -35,7 +35,7 @@ public class JHPinch extends FilterWithParametrizedGUI {
     private final RangeParam twirlAngle = new RangeParam("Twirl Angle", -360, 360, 90);
     private final RangeParam pinchBulgeAmount = new RangeParam("Pinch-Bulge Amount", -100, 100, 50);
     private RangeParam zoomParam = new RangeParam("Zoom (%)", 1, 500, 100);
-    private AngleParam rotateResultParam = new AngleParam("Rotate Result", 0);
+    private AngleParam rotateResult = new AngleParam("Rotate Result", 0);
 
 
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
@@ -51,7 +51,7 @@ public class JHPinch extends FilterWithParametrizedGUI {
                 radius.adjustRangeToImageSize(1.0),
                 center,
                 zoomParam,
-                rotateResultParam,
+                rotateResult,
                 edgeAction,
                 interpolation
         ));
@@ -63,7 +63,7 @@ public class JHPinch extends FilterWithParametrizedGUI {
             filter = new PinchFilter();
         }
 
-        filter.setRadius(radius.getValue());
+        filter.setRadius(radius.getValueAsFloat());
 
         filter.setPinchBulgeAmount((-1) * pinchBulgeAmount.getValueAsPercentage());
         filter.setSwirlAmount(2 * twirlAngle.getValueInRadians());
@@ -72,7 +72,7 @@ public class JHPinch extends FilterWithParametrizedGUI {
         filter.setCenterY(center.getRelativeY());
 
         filter.setZoom(zoomParam.getValueAsPercentage());
-        filter.setRotateResultAngle((float) rotateResultParam.getValueInIntuitiveRadians());
+        filter.setRotateResultAngle((float) rotateResult.getValueInIntuitiveRadians());
         filter.setEdgeAction(edgeAction.getValue());
 
         filter.setInterpolation(interpolation.getValue());

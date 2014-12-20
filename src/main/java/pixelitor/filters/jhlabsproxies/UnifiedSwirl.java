@@ -44,8 +44,8 @@ public class UnifiedSwirl extends FilterWithParametrizedGUI {
     private final RangeParam radius = new RangeParam("Radius", 1, 999, 500);
     private final RangeParam swirlAmount = new RangeParam("Swirl Amount", -360, 360, 90);
     private final RangeParam pinchBulgeAmount = new RangeParam("Pinch-Bulge Amount", -100, 100, 0);
-    private RangeParam zoomParam = new RangeParam("Zoom (%)", 1, 500, 100);
-    private AngleParam rotateResultParam = new AngleParam("Rotate Result", 0);
+    private RangeParam zoom = new RangeParam("Zoom (%)", 1, 500, 100);
+    private AngleParam rotateResult = new AngleParam("Rotate Result", 0);
 
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
     private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
@@ -62,8 +62,8 @@ public class UnifiedSwirl extends FilterWithParametrizedGUI {
                 pinchBulgeAmount,
                 radius.adjustRangeToImageSize(1.0),
                 center,
-                zoomParam,
-                rotateResultParam,
+                zoom,
+                rotateResult,
                 edgeAction,
                 interpolation
         ));
@@ -86,12 +86,12 @@ public class UnifiedSwirl extends FilterWithParametrizedGUI {
 
         filter.setPinchBulgeAmount(pinchBulgeAmount.getValueAsPercentage());
         filter.setSwirlAmount(swirlAmount.getValueInRadians());
-        filter.setRadius(radius.getValue());
+        filter.setRadius(radius.getValueAsFloat());
         filter.setCenterX(center.getRelativeX());
         filter.setCenterY(center.getRelativeY());
 
-        filter.setZoom(zoomParam.getValueAsPercentage());
-        filter.setRotateResultAngle((float) rotateResultParam.getValueInIntuitiveRadians());
+        filter.setZoom(zoom.getValueAsPercentage());
+        filter.setRotateResultAngle((float) rotateResult.getValueInIntuitiveRadians());
 
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());

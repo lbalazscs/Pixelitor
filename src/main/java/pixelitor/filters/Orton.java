@@ -29,21 +29,21 @@ import java.awt.image.BufferedImage;
  * Orton effect - based on http://pcin.net/update/2006/11/01/the-orton-effect-digital-photography-tip-of-the-week/
  */
 public class Orton extends FilterWithParametrizedGUI {
-    private final RangeParam blurRadiusParam = new RangeParam("Blur Radius", 0, 10, 3);
-    private final RangeParam amountParam = new RangeParam("Amount (%)", 0, 100, 100);
+    private final RangeParam blurRadius = new RangeParam("Blur Radius", 0, 10, 3);
+    private final RangeParam amount = new RangeParam("Amount (%)", 0, 100, 100);
 
     public Orton() {
         super("Orton Effect", true, false);
         setParamSet(new ParamSet(
-                blurRadiusParam.adjustRangeToImageSize(0.01),
-                amountParam
+                blurRadius.adjustRangeToImageSize(0.01),
+                amount
         ));
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        int blurRadius = blurRadiusParam.getValue();
-        float opacity = amountParam.getValueAsPercentage();
+        float blurRadius = this.blurRadius.getValueAsFloat();
+        float opacity = amount.getValueAsPercentage();
 
         dest = ImageUtils.copyImage(src);
         ImageUtils.screenWithItself(dest, opacity);

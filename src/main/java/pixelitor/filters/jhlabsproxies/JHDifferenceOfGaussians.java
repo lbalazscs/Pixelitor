@@ -29,8 +29,8 @@ import java.awt.image.BufferedImage;
  * Difference of Gaussians based on the JHLabs DoGFilter
  */
 public class JHDifferenceOfGaussians extends FilterWithParametrizedGUI {
-    private final RangeParam radius1Param = new RangeParam("Radius 1", 0, 10, 0);
-    private final RangeParam radius2Param = new RangeParam("Radius 2", 0, 10, 4);
+    private final RangeParam radius1 = new RangeParam("Radius 1", 0, 10, 0);
+    private final RangeParam radius2 = new RangeParam("Radius 2", 0, 10, 4);
     private final BooleanParam normalize = new BooleanParam("Maximize Contrast", true);
     private final BooleanParam invert = new BooleanParam("Invert", false);
 
@@ -39,8 +39,8 @@ public class JHDifferenceOfGaussians extends FilterWithParametrizedGUI {
     public JHDifferenceOfGaussians() {
         super("Difference of Gaussians", true, false);
         setParamSet(new ParamSet(
-                radius1Param.adjustRangeToImageSize(0.01),
-                radius2Param.adjustRangeToImageSize(0.01),
+                radius1.adjustRangeToImageSize(0.01),
+                radius2.adjustRangeToImageSize(0.01),
                 normalize,
                 invert
         ));
@@ -52,10 +52,8 @@ public class JHDifferenceOfGaussians extends FilterWithParametrizedGUI {
             filter = new DoGFilter();
         }
 
-        int radius1 = radius1Param.getValue();
-        int radius2 = radius2Param.getValue();
-        filter.setRadius1(radius1);
-        filter.setRadius2(radius2);
+        filter.setRadius1(radius1.getValueAsFloat());
+        filter.setRadius2(radius2.getValueAsFloat());
         filter.setNormalize(normalize.getValue());
 
         dest = filter.filter(src, dest);

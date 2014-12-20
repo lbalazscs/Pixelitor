@@ -63,7 +63,7 @@ public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
     }
 
     public Point2D getOffset() {
-        int distance = distanceParam.getValue();
+        double distance = distanceParam.getValueAsDouble();
         double angle = angleParam.getValueInRadians();
 
         return Utils.calculateOffset(distance, angle);

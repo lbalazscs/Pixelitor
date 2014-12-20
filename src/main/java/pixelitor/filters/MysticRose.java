@@ -34,39 +34,39 @@ import java.awt.image.BufferedImage;
  * Mystic Rose
  */
 public class MysticRose extends FilterWithParametrizedGUI {
-    private RangeParam pointsParam = new RangeParam("Number of Points", 3, 42, 10);
-    private RangeParam widthParam = new RangeParam("Line Width", 1, 10, 1);
-    private RangeParam rotateParam = new RangeParam("Rotate", 0, 100, 0);
+    private RangeParam nrPoints = new RangeParam("Number of Points", 3, 42, 10);
+    private RangeParam lineWidth = new RangeParam("Line Width", 1, 10, 1);
+    private RangeParam rotate = new RangeParam("Rotate", 0, 100, 0);
     private BooleanParam glow = new BooleanParam("Glow", false);
 
     public MysticRose() {
         super("Mystic Rose", false, false);
         setParamSet(new ParamSet(
-                pointsParam,
-                widthParam,
-                rotateParam,
+                nrPoints,
+                lineWidth,
+                rotate,
                 glow
         ));
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        int width = src.getWidth();
-        int height = src.getHeight();
-        dest = new BufferedImage(width, height, src.getType());
+        int srcWidth = src.getWidth();
+        int srcHeight = src.getHeight();
+        dest = new BufferedImage(srcWidth, srcHeight, src.getType());
         Graphics2D g2 = dest.createGraphics();
         g2.setColor(Color.BLACK);
-        g2.fillRect(0, 0, width, height);
+        g2.fillRect(0, 0, srcWidth, srcHeight);
         g2.setColor(Color.WHITE);
-        g2.setStroke(new BasicStroke(widthParam.getValue()));
+        g2.setStroke(new BasicStroke(lineWidth.getValueAsFloat()));
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        int numPoints = pointsParam.getValue();
+        int numPoints = nrPoints.getValue();
         Point[] points = new Point[numPoints];
-        double radius = 0.45 * Math.min(width, height);
-        double halfWidth = width / 2.0;
-        double halfHeight = height / 2.0;
-        double startAngle = 2 * Math.PI / numPoints * rotateParam.getValueAsPercentage();
+        double radius = 0.45 * Math.min(srcWidth, srcHeight);
+        double halfWidth = srcWidth / 2.0;
+        double halfHeight = srcHeight / 2.0;
+        double startAngle = 2 * Math.PI / numPoints * rotate.getValueAsPercentage();
         for (int i = 0; i < points.length; i++) {
             double theta = startAngle + 2 * Math.PI * i / numPoints;
             points[i] = new Point((int)(halfWidth + radius * Math.cos(theta)), (int)(halfHeight + radius * Math.sin(theta)));
@@ -81,13 +81,15 @@ public class MysticRose extends FilterWithParametrizedGUI {
 
         if(glow.getValue()) {
             BufferedImage copy = ImageUtils.copyImage(dest);
-            FastBlurFilter fastBlur = new FastBlurFilter(widthParam.getValue());
+            // TODO FastBlurFilter takes an int as constructor argument - not good for animation
+            // BoxBlurFilter on the other hand might be OK
+            FastBlurFilter fastBlur = new FastBlurFilter(lineWidth.getValue());
             fastBlur.filter(copy, copy);
             g2.setComposite(new AddComposite(1.0f));
             g2.drawImage(copy, 0, 0, null);
 
 //            GlowFilter glowFilter = new GlowFilter();
-//            glowFilter.setRadius(widthParam.getValue());
+//            glowFilter.setRadius(lineWidth.getValue());
 //            glowFilter.filter(dest, dest);
         }
         g2.dispose();

@@ -59,8 +59,8 @@ public class JHTurbulentDistortion extends FilterWithParametrizedGUI {
         }
 
         filter.setTurbulence(turbulence.getValueAsPercentage());
-        filter.setScale(scale.getValue());
-        filter.setAmount(amount.getValue());
+        filter.setScale(scale.getValueAsFloat());
+        filter.setAmount(amount.getValueAsFloat());
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 

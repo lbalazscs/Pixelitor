@@ -37,7 +37,7 @@ import java.awt.image.BufferedImage;
  * Pointillize based on the JHLabs PointillizeFilter
  */
 public class JHPointillize extends FilterWithParametrizedGUI {
-    private final RangeParam size = new RangeParam("Grid Size", 1, 200, 15);
+    private final RangeParam gridSize = new RangeParam("Grid Size", 1, 200, 15);
     private final RangeParam dotSize = new RangeParam("Dot Relative Size (%)", 0, 100, 45);
     private final RangeParam fuzziness = new RangeParam("Fuzziness (%)", 0, 100, 0);
     private final ColorParam edgeColor = new ColorParam("Fill Color", Color.BLACK, true, true);
@@ -60,7 +60,7 @@ public class JHPointillize extends FilterWithParametrizedGUI {
     public JHPointillize() {
         super("Pointillize", true, false);
         setParamSet(new ParamSet(
-                size.adjustRangeToImageSize(0.2),
+                gridSize.adjustRangeToImageSize(0.2),
                 dotSize,
                 fuzziness,
                 gridType,
@@ -79,7 +79,7 @@ public class JHPointillize extends FilterWithParametrizedGUI {
         }
 
         // there is an angle property but it does not work as expected
-        filter.setScale(size.getValue());
+        filter.setScale(gridSize.getValueAsFloat());
         filter.setRandomness(randomness.getValueAsPercentage());
         filter.setEdgeThickness(dotSize.getValueAsPercentage());
         filter.setFuzziness(fuzziness.getValueAsPercentage());

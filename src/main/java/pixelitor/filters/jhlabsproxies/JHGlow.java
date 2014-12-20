@@ -52,7 +52,7 @@ public class JHGlow extends FilterWithParametrizedGUI {
         }
 
         filter.setAmount(amountValue);
-        filter.setRadius(softness.getValue());
+        filter.setRadius(softness.getValueAsFloat());
 
         dest = filter.filter(src, dest);
         return dest;

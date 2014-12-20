@@ -28,7 +28,7 @@ import java.awt.image.BufferedImage;
  */
 public class RadialWavesFilter extends CenteredTransformFilter {
     private int angularDivision;
-    private int radialAmplitude;
+    private double radialAmplitude;
 
     private float phase;
     private float zoom;
@@ -95,7 +95,7 @@ public class RadialWavesFilter extends CenteredTransformFilter {
         this.angularDivision = angularDivision;
     }
 
-    public void setRadialAmplitude(int radialAmplitude) {
+    public void setRadialAmplitude(double radialAmplitude) {
         this.radialAmplitude = radialAmplitude;
     }
 }

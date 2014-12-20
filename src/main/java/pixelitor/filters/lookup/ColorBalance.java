@@ -48,27 +48,27 @@ public class ColorBalance extends FilterWithParametrizedGUI {
             new IntChoiceParam.Value("Highlights", HIGHLIGHTS),
     });
 
-    private RangeParam cyanRedParam = new RangeWithColorsParam(Color.CYAN, Color.RED, "Cyan-Red", -100, 100, 0);
-    private RangeParam magentaGreenParam = new RangeWithColorsParam(Color.MAGENTA, Color.GREEN, "Magenta-Green", -100, 100,
+    private RangeParam cyanRed = new RangeWithColorsParam(Color.CYAN, Color.RED, "Cyan-Red", -100, 100, 0);
+    private RangeParam magentaGreen = new RangeWithColorsParam(Color.MAGENTA, Color.GREEN, "Magenta-Green", -100, 100,
             0);
-    private RangeParam yellowBlueParam = new RangeWithColorsParam(Color.YELLOW, Color.BLUE, "Yellow-Blue", -100, 100,
+    private RangeParam yellowBlue = new RangeWithColorsParam(Color.YELLOW, Color.BLUE, "Yellow-Blue", -100, 100,
             0);
 
     public ColorBalance() {
         super("Color Balance", true, false);
         setParamSet(new ParamSet(
                 affectParam,
-                cyanRedParam,
-                magentaGreenParam,
-                yellowBlueParam
+                cyanRed,
+                magentaGreen,
+                yellowBlue
         ));
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        short cr = (short) cyanRedParam.getValue();
-        short mg = (short) magentaGreenParam.getValue();
-        short yb = (short) yellowBlueParam.getValue();
+        float cr = cyanRed.getValueAsFloat();
+        float mg = magentaGreen.getValueAsFloat();
+        float yb = yellowBlue.getValueAsFloat();
 
         if ((cr == 0) && (mg == 0) && (yb == 0)) {
             return src;

@@ -63,8 +63,8 @@ public class JHWaterRipple extends FilterWithParametrizedGUI {
 
         filter.setCentreX(center.getRelativeX());
         filter.setCentreY(center.getRelativeY());
-        filter.setRadius(radius.getValue());
-        filter.setWavelength(wavelength.getValue());
+        filter.setRadius(radius.getValueAsFloat());
+        filter.setWavelength(wavelength.getValueAsFloat());
         filter.setAmplitude(amplitude.getValueAsPercentage());
         filter.setPhase(phase.getValueInRadians());
         filter.setEdgeAction(edgeAction.getValue());

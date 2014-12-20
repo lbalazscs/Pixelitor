@@ -62,11 +62,11 @@ public class JHWrapAroundArc extends FilterWithParametrizedGUI {
 
         filter.setCentreX(center.getRelativeX());
         filter.setCentreY(center.getRelativeY());
-        filter.setRadius(radius.getValue());
-        filter.setHeight(thickness.getValue());
+        filter.setRadius(radius.getValueAsFloat());
+        filter.setHeight(thickness.getValueAsFloat());
         filter.setAngle((float) rotateResult.getValueInIntuitiveRadians());
 
-        int spreadValue = spread.getValue();
+        double spreadValue = spread.getValueAsDouble();
         float spreadRadians = (float) (2 * Math.PI / spreadValue);
         filter.setSpreadAngle(spreadRadians);
 

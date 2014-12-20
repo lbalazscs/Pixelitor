@@ -29,31 +29,31 @@ import java.awt.image.BufferedImage;
  * Radial waves in a polar coordinate system
  */
 public class RadialWaves extends FilterWithParametrizedGUI {
-    private RangeParam angularDivisionParam = new RangeParam("Angular Division", 1, 100, 10);
-    private RangeParam radialAmplitudeParam = new RangeParam("Radial Amplitude", 0, 100, 20);
+    private RangeParam angularDivision = new RangeParam("Angular Division", 1, 100, 10);
+    private RangeParam radialAmplitude = new RangeParam("Radial Amplitude", 0, 100, 20);
 
-    private RangeParam phaseParam = new RangeParam("Phase (time)", 0, 360, 0);
+    private RangeParam phase = new RangeParam("Phase (time)", 0, 360, 0);
 
-    private ImagePositionParam centerParam = new ImagePositionParam("Center");
-    private RangeParam zoomParam = new RangeParam("Zoom (%)", 1, 500, 100);
+    private ImagePositionParam center = new ImagePositionParam("Center");
+    private RangeParam zoom = new RangeParam("Zoom (%)", 1, 500, 100);
     private final IntChoiceParam waveType = IntChoiceParam.getWaveTypeChoices();
 
-    private IntChoiceParam edgeActionParam = IntChoiceParam.getEdgeActionChoices();
-    private IntChoiceParam interpolationParam = IntChoiceParam.getInterpolationChoices();
+    private IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
+    private IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
 
     private RadialWavesFilter filter;
 
     public RadialWaves() {
         super("Radial Waves", true, false);
         setParamSet(new ParamSet(
-                centerParam,
-                angularDivisionParam,
-                radialAmplitudeParam.adjustRangeToImageSize(1.0),
+                center,
+                angularDivision,
+                radialAmplitude.adjustRangeToImageSize(1.0),
                 waveType,
-                phaseParam,
-                zoomParam,
-                edgeActionParam,
-                interpolationParam,
+                phase,
+                zoom,
+                edgeAction,
+                interpolation,
                 new ReseedNoiseActionParam("Reseed Noise")
         ));
     }
@@ -64,17 +64,17 @@ public class RadialWaves extends FilterWithParametrizedGUI {
             filter = new RadialWavesFilter();
         }
 
-        filter.setCenterX(centerParam.getRelativeX());
-        filter.setCenterY(centerParam.getRelativeY());
-        filter.setEdgeAction(edgeActionParam.getValue());
-        filter.setInterpolation(interpolationParam.getValue());
+        filter.setCenterX(center.getRelativeX());
+        filter.setCenterY(center.getRelativeY());
+        filter.setEdgeAction(edgeAction.getValue());
+        filter.setInterpolation(interpolation.getValue());
 
-        filter.setPhase(phaseParam.getValueAsPercentage());
+        filter.setPhase(phase.getValueAsPercentage());
 
-        filter.setAngularDivision(angularDivisionParam.getValue());
-        filter.setRadialAmplitude(radialAmplitudeParam.getValue());
+        filter.setAngularDivision(angularDivision.getValue());
+        filter.setRadialAmplitude(radialAmplitude.getValueAsDouble());
 
-        filter.setZoom(zoomParam.getValueAsPercentage());
+        filter.setZoom(zoom.getValueAsPercentage());
         filter.setWaveType(waveType.getValue());
 
         dest = filter.filter(src, dest);

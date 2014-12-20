@@ -133,7 +133,7 @@ public class JHMotionBlur extends FilterWithParametrizedGUI {
         filter.setCentreX(center.getRelativeX());
         filter.setCentreY(center.getRelativeY());
         filter.setAngle((float) angle.getValueInIntuitiveRadians());
-        filter.setDistance(distanceValue);
+        filter.setDistance(distance.getValueAsFloat());
         filter.setRotation(rotationValue);
         filter.setZoom(zoomValue);
 

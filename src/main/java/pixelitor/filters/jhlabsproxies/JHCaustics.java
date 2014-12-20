@@ -68,9 +68,9 @@ public class JHCaustics extends FilterWithParametrizedGUI {
         filter.setBrightness(brightness.getValue());
         filter.setDispersion(dispersion.getValueAsPercentage());
         filter.setSamples(samples.getValue());
-        filter.setScale(scale.getValue());
+        filter.setScale(scale.getValueAsFloat());
         filter.setTime(time.getValueAsPercentage());
-        filter.setTurbulence(turbulence.getValue());
+        filter.setTurbulence(turbulence.getValueAsFloat());
 
         dest = filter.filter(src, dest);
         return dest;

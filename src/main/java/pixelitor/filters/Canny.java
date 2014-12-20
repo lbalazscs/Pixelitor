@@ -36,14 +36,6 @@ public class Canny extends FilterWithParametrizedGUI {
     private final RangeParam gaussianKernelRadius = new RangeParam("Gaussian Kernel Radius", 1, 10, 2);
     private final BooleanParam contrastNormalized = new BooleanParam("Contrast Normalized", false);
 
-//    private final IntChoiceParam hypot = new IntChoiceParam("Math", new IntChoiceParam.Value[] {
-//            new IntChoiceParam.Value("Approximate", CannyEdgeDetector.HYPOT_APPROX),
-//            new IntChoiceParam.Value("FastMath", CannyEdgeDetector.HYPOT_FASTMATH),
-//            new IntChoiceParam.Value("Math", CannyEdgeDetector.HYPOT_MATH),
-//    });
-
-//    private CannyEdgeDetector detector;
-
     public Canny() {
         super("Canny Edge Detector", true, false);
         setParamSet(new ParamSet(
@@ -84,7 +76,7 @@ public class Canny extends FilterWithParametrizedGUI {
         detector.setLowThreshold(lowThreshold.getValueAsPercentage());
         detector.setHighThreshold(highThreshold.getValueAsPercentage());
         detector.setContrastNormalized(contrastNormalized.getValue());
-        detector.setGaussianKernelRadius(gaussianKernelRadius.getValue());
+        detector.setGaussianKernelRadius(gaussianKernelRadius.getValueAsFloat());
         detector.setGaussianKernelWidth(gaussianKernelWidth.getValue());
 
         detector.setSourceImage(src);

@@ -38,7 +38,7 @@ public class JHGlint extends FilterWithParametrizedGUI {
 //    private ColorParam color2 = new ColorParam("Outer Color", Color.WHITE, true, true);
 //    private BooleanParam glintOnly = new BooleanParam("Glint Only", false);
 
-    private final GradientParam colorsParam = new GradientParam("Colors", Color.WHITE, Color.WHITE);
+    private final GradientParam colors = new GradientParam("Colors", Color.WHITE, Color.WHITE);
 
 
     private GlintFilter filter;
@@ -51,7 +51,7 @@ public class JHGlint extends FilterWithParametrizedGUI {
                 intensity,
                 length, // if we adjust to the max of image, render times become unbearable for large images
                 blur,
-                colorsParam
+                colors
 //                glintOnly
         ));
     }
@@ -68,8 +68,8 @@ public class JHGlint extends FilterWithParametrizedGUI {
         filter.setCoverage(coverage.getValueAsPercentage());
         filter.setAmount(intensity.getValueAsPercentage());
         filter.setLength(length.getValue());
-        filter.setBlur(blur.getValue());
-        filter.setColormap(colorsParam.getValue());
+        filter.setBlur(blur.getValueAsFloat());
+        filter.setColormap(colors.getValue());
 
         dest = filter.filter(src, dest);
         return dest;

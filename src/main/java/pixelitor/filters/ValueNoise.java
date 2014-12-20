@@ -55,16 +55,16 @@ public class ValueNoise extends FilterWithParametrizedGUI {
         }
     });
 
-    private final ColorParam color1Param = new ColorParam("Color 1", Color.BLACK, true, false);
-    private final ColorParam color2Param = new ColorParam("Color 2", Color.WHITE, true, false);
+    private final ColorParam color1 = new ColorParam("Color 1", Color.BLACK, true, false);
+    private final ColorParam color2 = new ColorParam("Color 2", Color.WHITE, true, false);
 
     public ValueNoise() {
         super("Value Noise", false, false);
         setParamSet(new ParamSet(
                 scale.adjustRangeToImageSize(0.3),
                 details,
-                color1Param,
-                color2Param,
+                color1,
+                color2,
                 reseedAction
         ));
     }
@@ -74,8 +74,8 @@ public class ValueNoise extends FilterWithParametrizedGUI {
 //        int[] srcData = ImageUtils.getPixelsAsArray(src);
 
         final int[] lookupTable = new int[256];
-        Color c1 = color1Param.getColor();
-        Color c2 = color2Param.getColor();
+        Color c1 = color1.getColor();
+        Color c2 = color2.getColor();
         int[] color1 = {c1.getAlpha(), c1.getRed(), c1.getGreen(), c1.getBlue()};
         int[] color2 = {c2.getAlpha(), c2.getRed(), c2.getGreen(), c2.getBlue()};
 
@@ -86,7 +86,7 @@ public class ValueNoise extends FilterWithParametrizedGUI {
         final int[] destData = ImageUtils.getPixelsAsArray(dest);
         final int width = dest.getWidth();
         int height = dest.getHeight();
-        final float frequency = 1.0f / scale.getValue();
+        final float frequency = 1.0f / scale.getValueAsFloat();
 
         final float persistence = 0.6f;
         final float amplitude = 1.0f;

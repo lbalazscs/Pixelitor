@@ -25,7 +25,8 @@ import java.awt.image.BufferedImage;
  */
 public class StampFilter extends PointFilter {
     public static final int FAST_BLUR = 1;
-    public static final int GAUSSIAN_BLUR = 2;
+    public static final int BOX3_BLUR = 2;
+    public static final int GAUSSIAN_BLUR = 3;
     private int blurMethod = FAST_BLUR;
 
     private float threshold;
@@ -159,8 +160,10 @@ public class StampFilter extends PointFilter {
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
         if(blurMethod == FAST_BLUR) {
             dst = new FastBlurFilter((int) radius).filter(src, null);
+        } else if (blurMethod == BOX3_BLUR) {
+            dst = new BoxBlurFilter(radius, radius, 3).filter(src, null);
         } else if(blurMethod == GAUSSIAN_BLUR) {
-            dst = new GaussianFilter((int) radius).filter(src, null);
+            dst = new GaussianFilter(radius).filter(src, null);
         } else {
             throw new IllegalStateException("blurMethod = " + blurMethod);
         }

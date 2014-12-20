@@ -38,7 +38,8 @@ public class JHStamp extends FilterWithParametrizedGUI {
 
     private final IntChoiceParam blurMethod = new IntChoiceParam("Blur Method",
             new IntChoiceParam.Value[] {
-                    new IntChoiceParam.Value("Fast", StampFilter.FAST_BLUR),
+                    new IntChoiceParam.Value("Fast (Smoothness does not animate well)", StampFilter.FAST_BLUR),
+                    new IntChoiceParam.Value("Box Blur, 3 iterations", StampFilter.BOX3_BLUR),
                     new IntChoiceParam.Value("Gaussian (slow for large images!)", StampFilter.GAUSSIAN_BLUR)
             }, true);
 
@@ -64,7 +65,7 @@ public class JHStamp extends FilterWithParametrizedGUI {
 
         filter.setBlack(darkColor.getColor().getRGB());
         filter.setWhite(brightColor.getColor().getRGB());
-        filter.setRadius(smoothness.getValue());
+        filter.setRadius(smoothness.getValueAsFloat());
         filter.setSoftness(soften.getValueAsPercentage());
         filter.setThreshold(lightDarkBalance.getValueAsPercentage());
         filter.setBlurMethod(blurMethod.getValue());

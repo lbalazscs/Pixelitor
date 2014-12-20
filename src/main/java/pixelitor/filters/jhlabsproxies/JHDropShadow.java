@@ -62,8 +62,8 @@ public class JHDropShadow extends FilterWithParametrizedGUI {
 
         filter.setAddMargins(false);
         filter.setAngle((float) angle.getValueInIntuitiveRadians());
-        filter.setDistance(distance.getValue());
-        filter.setRadius(softness.getValue());
+        filter.setDistance(distance.getValueAsFloat());
+        filter.setRadius(softness.getValueAsFloat());
         filter.setOpacity(opacity.getValueAsPercentage());
         filter.setShadowColor(color.getColor().getRGB());
         filter.setShadowOnly(shadowOnly.getValue());

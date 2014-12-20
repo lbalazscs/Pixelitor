@@ -52,7 +52,7 @@ public class JHUnsharpMask extends FilterWithParametrizedGUI {
 
         filter.setAmount(amount.getValueAsPercentage());
         filter.setThreshold(threshold.getValue());
-        filter.setRadius(radius.getValue());
+        filter.setRadius(radius.getValueAsFloat());
 
         dest = filter.filter(src, dest);
 
