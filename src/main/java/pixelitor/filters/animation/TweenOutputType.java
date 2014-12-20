@@ -55,7 +55,7 @@ public enum TweenOutputType {
 
         @Override
         public String toString() {
-            return "Animated GIF";
+            return "Animated GIF File";
         }
 
         @Override

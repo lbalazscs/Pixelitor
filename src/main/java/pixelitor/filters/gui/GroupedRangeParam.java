@@ -109,6 +109,14 @@ public class GroupedRangeParam extends AbstractGUIParam implements RangeBasedOnI
         return rangeParams[index].getValue();
     }
 
+    public float getValueAsFloat(int index) {
+        return rangeParams[index].getValueAsFloat();
+    }
+
+    public double getValueAsDouble(int index) {
+        return rangeParams[index].getValueAsDouble();
+    }
+
     public void setValue(int index, int newValue) {
         rangeParams[index].setValue(newValue);
         // if linked, the others will be set automatically
@@ -231,7 +239,7 @@ public class GroupedRangeParam extends AbstractGUIParam implements RangeBasedOnI
         double[] values = grState.values;
         for (int i = 0; i < values.length; i++) {
             double value = values[i];
-            rangeParams[i].setValue((int) value);
+            rangeParams[i].setValueAsDouble(value);
         }
     }
 

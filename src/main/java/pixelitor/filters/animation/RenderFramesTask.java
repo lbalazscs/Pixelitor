@@ -22,6 +22,7 @@ import pixelitor.ImageComponents;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.ParamSetState;
+import pixelitor.layers.ImageLayer;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
@@ -62,8 +63,13 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         AnimationWriter animationWriter = animation.createAnimationWriter();
         boolean canceled = false;
 
+        ImageLayer activeImageLayer = ImageComponents.getActiveComp().getActiveImageLayer();
+        activeImageLayer.tweenCalculatingStarted();
+
         for (int i = 0; i < numFrames; i++) {
+            System.out.println("RenderFramesTask::renderFrames: rendering frame " + i + " on the thread " + Thread.currentThread().getName());
             if (isCancelled()) {
+                System.out.println("RenderFramesTask::renderFrames: isCancelled() returned true");
                 canceled = true;
                 break;
             }
@@ -72,7 +78,6 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
 
             time[i] = ((double) i) / numFrames;
             ParamSetState intermediateState = animation.tween(time[i]);
-
             filter.getParamSet().setState(intermediateState);
 
             Utils.executeFilterWithBusyCursor(filter, ChangeReason.OP_PREVIEW, PixelitorWindow.getInstance());
@@ -92,7 +97,8 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
             }
         }
         setProgress(100);
-        ImageComponents.getActiveComp().getActiveImageLayer().cancelPreviewing();
+//        activeImageLayer.cancelPreviewing();
+        activeImageLayer.tweenCalculatingEnded();
 
         if (canceled) {
             animationWriter.cancel();

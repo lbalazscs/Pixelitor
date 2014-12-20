@@ -100,7 +100,7 @@ public class TweenAnimation {
             } else {
                 return Dialogs.showYesNoWarningDialog(dialogParent, "Folder not empty",
                         "<html>The folder " + output.getAbsolutePath() + " is not empty. " +
-                                "<br>Some files might get overridden. Are sure you want to continue?");
+                                "<br>Some files might get replaced. Are sure you want to continue?");
             }
         } else { // file
             if (output.exists()) {

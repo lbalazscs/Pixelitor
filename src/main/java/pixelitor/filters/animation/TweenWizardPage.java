@@ -142,8 +142,8 @@ public enum TweenWizardPage {
         @Override
         String getHeaderText() {
             return "<html> <b>Output settings</b>" +
-                    "<p>For file output select a new or existing file in an existing folder." +
-                    "<br>For file sequence output select an existing folder.";
+                    "<p>For file sequence output select an existing folder." +
+                    "<br>For file output select a new or existing file in an existing folder.";
         }
 
         @Override

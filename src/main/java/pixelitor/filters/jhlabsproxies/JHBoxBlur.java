@@ -50,8 +50,8 @@ public class JHBoxBlur extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        int hRadius = radius.getValue(0);
-        int vRadius = radius.getValue(1);
+        float hRadius = radius.getValueAsFloat(0);
+        float vRadius = radius.getValueAsFloat(1);
         if ((hRadius == 0) && (vRadius == 0)) {
             return src;
         }

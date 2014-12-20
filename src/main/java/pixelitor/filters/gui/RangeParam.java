@@ -34,12 +34,20 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
     private int minValue;
     private int maxValue;
     private int defaultValue;
-    private int value;
+
+    /**
+     * This is not stored as an int in order to enable animation interpolations
+     * However setValue accepts only int as the argument
+     * because it implements BoundedRangeModel
+     * There is also a setValueAsDouble method, but this is only used programmatically
+     */
+    private double value;
+
     private boolean adjusting;
     private final boolean addDefaultButtons;
     private final SliderSpinner.TextPosition textPosition;
 
-    private transient ChangeEvent changeEvent = null;
+    private ChangeEvent changeEvent = null;
     private final EventListenerList listenerList = new EventListenerList();
     private boolean enabled = true;
     private SliderSpinner sliderSpinner;
@@ -102,14 +110,14 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
      * This class can be used to manage non-integer values by multiplying them with 100
      */
     public float getValueAsPercentage() {
-        return ((float) getValue()) / 100.0f;
+        return (getValueAsFloat()) / 100.0f;
     }
 
     /**
      * Int values measured in grades are transformed to radians
      */
     public float getValueInRadians() {
-        return (float) Math.toRadians(getValue());
+        return (float) Math.toRadians(getValueAsDouble());
     }
 
     @Override
@@ -141,13 +149,13 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
 
     public void increaseValue() {
         if (value < maxValue) {
-            setValue(value + 1);
+            setValue((int) value + 1);
         }
     }
 
     public void decreaseValue() {
         if (value > minValue) {
-            setValue(value - 1);
+            setValue((int) value - 1);
         }
     }
 
@@ -173,6 +181,14 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
 
     @Override
     public int getValue() {
+        return (int) value;
+    }
+
+    public float getValueAsFloat() {
+        return (float) value;
+    }
+
+    public double getValueAsDouble() {
         return value;
     }
 
@@ -189,6 +205,14 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
                 }
             }
         }
+    }
+
+    /**
+     * This is only used programmatically, therefore
+     * it never triggers the filter or anything else
+     */
+    public void setValueAsDouble(double d) {
+        value = d;
     }
 
     @Override
@@ -249,6 +273,7 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
         }
     }
 
+    @Override
     public void setEnabledLogically(boolean b) {
         enabled = b;
         if (sliderSpinner != null) {
@@ -294,7 +319,13 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
 
     @Override
     public void setState(ParamState state) {
-        value = (int) ((RPState)state).getValue();
+        double doubleValue = ((RPState) state).getValue();
+
+//        int intValue = (int) doubleValue;
+//        if(getName().equals("Radial Wavelength")) {
+//            System.out.println(String.format("RangeParam::setState: doubleValue = %.2f intValue = %d", doubleValue, intValue));
+//        }
+        value = doubleValue;
     }
 
     private static class RPState implements ParamState {

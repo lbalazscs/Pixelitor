@@ -70,7 +70,7 @@ public class AngularWaves extends FilterWithParametrizedGUI {
         filter.setInterpolation(interpolationParam.getValue());
 
         filter.setPhase(phaseParam.getValueAsPercentage());
-        filter.setRadialWL(radialWLParam.getValue());
+        filter.setRadialWL(radialWLParam.getValueAsDouble());
 
         filter.setZoom(zoomParam.getValueAsPercentage());
         filter.setAmount(amountParam.getValueAsPercentage());

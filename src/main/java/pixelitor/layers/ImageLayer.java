@@ -47,7 +47,7 @@ import java.io.ObjectOutputStream;
  * An image layer.
  */
 public class ImageLayer extends ContentLayer {
-    enum State {NORMAL, EDITING_PREVIEW, EDITING_SHOW_ORIGINAL}  // TODO
+//    enum State {NORMAL, EDITING_PREVIEW, EDITING_SHOW_ORIGINAL}  // TODO
 
     private static final long serialVersionUID = 2L;
 
@@ -60,6 +60,9 @@ public class ImageLayer extends ContentLayer {
 
     // the filter changed the image object, and we are previewing that change
     private static final int STATE_PREVIEWING_CHANGED = 2;
+
+    //
+    private static final int STATE_CALCULATE_TWEENING = 3;
 
     //
     // transient variables from here!
@@ -164,9 +167,6 @@ public class ImageLayer extends ContentLayer {
     }
 
     public void setBufferedImage(BufferedImage newImage, boolean ignoreSelection) {
-//        System.out.println("ImageLayer.setBufferedImage CALLED");
-//        Thread.dumpStack();
-
         if (newImage == null) {
             throw new IllegalArgumentException("newImage is null");
         }
@@ -245,7 +245,7 @@ public class ImageLayer extends ContentLayer {
     }
 
     /**
-     * @return true if the image has has to be repainted
+     * @return true if the image has to be repainted
      */
     public boolean changePreviewImage(BufferedImage img) {
         if (img == null) {
@@ -254,6 +254,7 @@ public class ImageLayer extends ContentLayer {
         if (img == bufferedImage) {
             // this can happen if a filter with preview decides that no change is necessary and returns the src
             assert state != STATE_NORMAL;
+
             boolean previouslyLookedTheSame = (state == STATE_PREVIEWING_NOT_CHANGED);
             state = STATE_PREVIEWING_NOT_CHANGED;
             return !previouslyLookedTheSame;
@@ -786,4 +787,17 @@ public class ImageLayer extends ContentLayer {
         assert bufferedImage != null;
     }
 
+    // TODO why is this working without the startPreviewing-like
+    // saving of backupForPreviewBufferedImage
+    public void tweenCalculatingStarted() {
+        state = STATE_CALCULATE_TWEENING;
+    }
+
+    // currently the same as cancelPreviewing
+    public void tweenCalculatingEnded() {
+        restoreOriginalFromPreviewBackup();
+        state = STATE_NORMAL;
+
+        getComposition().getIC().repaint(); // TODO necessary?
+    }
 }

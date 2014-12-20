@@ -25,7 +25,7 @@ import net.jafama.FastMath;
  * Angular waves in a polar coordinate system
  */
 public class AngularWavesFilter extends CenteredTransformFilter {
-    private int radialWL;
+    private double radialWL;
 
     private float phase;
     private float zoom;
@@ -68,7 +68,7 @@ public class AngularWavesFilter extends CenteredTransformFilter {
         out[1] = (v + cy);
     }
 
-    public void setRadialWL(int radialWL) {
+    public void setRadialWL(double radialWL) {
         this.radialWL = radialWL;
     }
 
