@@ -34,6 +34,7 @@ import java.beans.PropertyChangeListener;
  * the actual value is stored only inside the GradientSlider)
  */
 public class GradientParam extends AbstractGUIParam {
+    public static final String GRADIENT_SLIDER_USE_BEVEL = "GradientSlider.useBevel";
     private GradientSlider gradientSlider;
     private final float[] defaultThumbPositions;
     private final Color[] defaultColors;
@@ -62,6 +63,9 @@ public class GradientParam extends AbstractGUIParam {
         gradientSlider.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
+                if (evt.getPropertyName().equals(GRADIENT_SLIDER_USE_BEVEL)) {
+                    return;
+                }
                 if (!dontTrigger) {
                     if (!gradientSlider.isValueAdjusting()) {
                         if (adjustmentListener != null) {
@@ -76,7 +80,7 @@ public class GradientParam extends AbstractGUIParam {
                 }
             }
         });
-        gradientSlider.putClientProperty("GradientSlider.useBevel", "true");
+        gradientSlider.putClientProperty(GRADIENT_SLIDER_USE_BEVEL, "true");
 
         // if there other controls in the dialog, they will determine the horizontal size
         gradientSlider.setPreferredSize(new Dimension(250, 30));
@@ -92,6 +96,9 @@ public class GradientParam extends AbstractGUIParam {
             @Override
             public int getColor(float v) {
                 Color c = (Color) gradientSlider.getValue(v);
+                if (c == null) {
+                    throw new IllegalStateException("null color for v = " + v);
+                }
                 return c.getRGB();
             }
         };
@@ -167,7 +174,9 @@ public class GradientParam extends AbstractGUIParam {
     @Override
     public void setState(ParamState state) {
         GState gr = (GState) state;
+        dontTrigger = true;
         createGradientSlider(gr.thumbPositions, gr.colors);
+        dontTrigger = false;
     }
 
     private static class GState implements ParamState {

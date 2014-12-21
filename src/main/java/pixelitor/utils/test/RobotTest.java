@@ -28,11 +28,16 @@ import pixelitor.filters.Brick;
 import pixelitor.filters.Fade;
 import pixelitor.filters.Filter;
 import pixelitor.filters.FilterUtils;
+import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.Invert;
 import pixelitor.filters.RandomFilter;
+import pixelitor.filters.animation.Interpolation;
+import pixelitor.filters.animation.TweenAnimation;
 import pixelitor.filters.comp.Flip;
 import pixelitor.filters.comp.Rotate;
 import pixelitor.filters.gui.FilterWithGUI;
+import pixelitor.filters.gui.ParamSet;
+import pixelitor.filters.gui.ParamSetState;
 import pixelitor.history.History;
 import pixelitor.layers.AddNewLayerAction;
 import pixelitor.layers.AdjustmentLayer;
@@ -153,7 +158,7 @@ public class RobotTest {
                     if ((i % onePercent) == 0) {
                         int percent = 100 * i / maxTests;
                         System.out.print(percent + "% ");
-                        if(PRINT_MEMORY) {
+                        if (PRINT_MEMORY) {
                             String memoryString = new MemoryInfo().toString();
                             System.out.println(memoryString);
                         } else {
@@ -277,7 +282,6 @@ public class RobotTest {
             return;
         }
 
-
         Filter op = FilterUtils.getRandomFilter();
         if (op instanceof Fade) {
             return;
@@ -295,10 +299,45 @@ public class RobotTest {
 
         // execute everything without showing a modal dialog
         op.execute(ChangeReason.OP_WITHOUT_DIALOG);
-        if(op instanceof FilterWithGUI) {
-            ((FilterWithGUI)op).endDialogSession();
+        if (op instanceof FilterWithGUI) {
+            ((FilterWithGUI) op).endDialogSession();
         }
     }
+
+    private static void randomTweenOperation(Robot r) {
+        FilterWithParametrizedGUI[] filters = FilterUtils.getAnimationFiltersSorted();
+        FilterWithParametrizedGUI filter = filters[(int) (Math.random() * filters.length)];
+
+        TweenAnimation animation = new TweenAnimation();
+        animation.setFilter(filter);
+
+        Interpolation[] interpolations = Interpolation.values();
+        Interpolation randomInterpolation = interpolations[(int) (Math.random() * interpolations.length)];
+        animation.setInterpolation(randomInterpolation);
+
+        ParamSet paramSet = filter.getParamSet();
+        paramSet.randomize();
+        animation.copyInitialStateFromCurrent();
+
+        paramSet.randomize();
+        animation.copyFinalStateFromCurrent();
+
+        double randomTime = Math.random();
+        ParamSetState intermediateState = animation.tween(randomTime);
+        paramSet.setState(intermediateState);
+
+        String filterName = filter.getName();
+        logRobotEvent("random operation: " + filterName);
+
+//        System.out.println(String.format("RobotTest::randomTweenOperation: " +
+//                "filterName = '%s' time=%.2f, interpolation = %s",
+//                filterName, randomTime, randomInterpolation.toString()));
+
+        // execute everything without showing a modal dialog
+        filter.execute(ChangeReason.OP_WITHOUT_DIALOG);
+        filter.endDialogSession();
+    }
+
 
     private static final int[] keyEvents = {KeyEvent.VK_1, KeyEvent.VK_A,
             KeyEvent.VK_ENTER, KeyEvent.VK_ESCAPE, KeyEvent.VK_BACK_SPACE,
@@ -331,7 +370,7 @@ public class RobotTest {
         if (ic != null) {
             ZoomLevel randomZoomLevel = null;
             double percentValue = 0;
-            while(percentValue < 49) {
+            while (percentValue < 49) {
                 randomZoomLevel = ZoomLevel.getRandomZoomLevel(rand);
                 percentValue = randomZoomLevel.getPercentValue();
             }
@@ -349,7 +388,7 @@ public class RobotTest {
         }
     }
 
-        private static void repeat() {
+    private static void repeat() {
         logRobotEvent("repeat");
         PixelitorWindow pw = PixelitorWindow.getInstance();
         pw.dispatchEvent(new KeyEvent(pw, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), KeyEvent.CTRL_MASK, KeyEvent.VK_F, 'F'));
@@ -401,10 +440,10 @@ public class RobotTest {
 
     private static void arrangeWindows() {
         double r = Math.random();
-        if (r > 0.8) {
+        if (r < 0.8) {
             logRobotEvent("arrange windows - tile");
             PixelitorWindow.getInstance().tileWindows();
-        } else if (r > 0.7) {
+        } else {
             logRobotEvent("arrange windows - cascade");
             PixelitorWindow.getInstance().cascadeWindows();
         }
@@ -630,7 +669,7 @@ public class RobotTest {
             tool = Tools.getRandomTool(rand);
 
             // The move tool can cause out of memory errors, so don't test it
-            if(tool == Tools.MOVE) {
+            if (tool == Tools.MOVE) {
                 return;
             }
         }
@@ -774,7 +813,7 @@ public class RobotTest {
             }
         });
 
-        weightedCaller.registerCallback(1, new Runnable() {
+        weightedCaller.registerCallback(2, new Runnable() {
             @Override
             public void run() {
                 randomizeToolSettings();
@@ -795,10 +834,17 @@ public class RobotTest {
             }
         });
 
-        weightedCaller.registerCallback(3, new Runnable() {
+        weightedCaller.registerCallback(5, new Runnable() {
             @Override
             public void run() {
                 randomOperation(r);
+            }
+        });
+
+        weightedCaller.registerCallback(25, new Runnable() {
+            @Override
+            public void run() {
+                randomTweenOperation(r);
             }
         });
 
@@ -816,14 +862,14 @@ public class RobotTest {
             }
         });
 
-        weightedCaller.registerCallback(5, new Runnable() {
+        weightedCaller.registerCallback(1, new Runnable() {
             @Override
             public void run() {
                 randomZoomOut(rand);
             }
         });
 
-        weightedCaller.registerCallback(1, new Runnable() {
+        weightedCaller.registerCallback(5, new Runnable() {
             @Override
             public void run() {
                 randomDeselect();
@@ -872,14 +918,14 @@ public class RobotTest {
             }
         });
 
-        weightedCaller.registerCallback(10, new Runnable() {
+        weightedCaller.registerCallback(3, new Runnable() {
             @Override
             public void run() {
                 layerMerge();
             }
         });
 
-        weightedCaller.registerCallback(30, new Runnable() {
+        weightedCaller.registerCallback(10, new Runnable() {
             @Override
             public void run() {
                 layerAddDelete();

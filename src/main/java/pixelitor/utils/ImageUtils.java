@@ -24,6 +24,7 @@ import org.jdesktop.swingx.graphics.BlendComposite;
 import pixelitor.ImageComponents;
 import pixelitor.filters.Invert;
 import pixelitor.menus.view.ZoomLevel;
+import pixelitor.utils.debug.BufferedImageNode;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -977,5 +978,11 @@ public class ImageUtils {
             sat = 0;
         }
         return sat;
+    }
+
+    public static void debugImage(BufferedImage img) {
+        BufferedImageNode imgNode = new BufferedImageNode("debug", img);
+        String s = imgNode.toDetailedString();
+        System.out.println(String.format("ImageUtils::debugImage: s = '%s'", s));
     }
 }

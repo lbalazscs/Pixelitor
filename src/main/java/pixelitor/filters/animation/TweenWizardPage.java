@@ -27,15 +27,15 @@ import javax.swing.*;
 import java.awt.FlowLayout;
 
 /**
- * The pages of the keyframe animation export dialog
+ * The pages of the tweening animation export dialog
  */
 public enum TweenWizardPage {
     SELECT_FILTER {
         JComboBox<FilterWithParametrizedGUI> filtersCB;
 
         @Override
-        String getHeaderText() {
-            return "<html> Here you can create a basic keyframe animation <br>based on the settings of a filter.";
+        String getHeaderText(TweenWizard wizard) {
+            return "<html> Here you can create a tweening animation <br>based on the settings of a filter.";
         }
 
         @Override
@@ -63,7 +63,7 @@ public enum TweenWizardPage {
         }
     }, INITIAL_FILTER_SETTINGS {
         @Override
-        String getHeaderText() {
+        String getHeaderText(TweenWizard wizard) {
             return "<html> Select the <b><font color=blue size=+1>initial</font></b> settings for the filter";
         }
 
@@ -98,8 +98,13 @@ public enum TweenWizardPage {
         }
     }, FINAL_FILTER_SETTINGS {
         @Override
-        String getHeaderText() {
-            return "<html> Select the <b><font color=green size=+1>final</font></b> settings for the filter.";
+        String getHeaderText(TweenWizard wizard) {
+            String text = "<html> Select the <b><font color=green size=+1>final</font></b> settings for the filter.";
+            boolean hasGradient = wizard.getAnimation().getFilter().getParamSet().hasGradient();
+            if (hasGradient) {
+                text += "<br>Do not change the number of thumbs for the gradient, only their color or position.";
+            }
+            return text;
         }
 
         @Override
@@ -140,7 +145,7 @@ public enum TweenWizardPage {
         OutputSettingsPanel outputSettingsPanel;
 
         @Override
-        String getHeaderText() {
+        String getHeaderText(TweenWizard wizard) {
             return "<html> <b>Output settings</b>" +
                     "<p>For file sequence output select an existing folder." +
                     "<br>For file output select a new or existing file in an existing folder.";
@@ -173,7 +178,7 @@ public enum TweenWizardPage {
 
     };
 
-    abstract String getHeaderText();
+    abstract String getHeaderText(TweenWizard wizard);
 
     abstract TweenWizardPage getNext();
 

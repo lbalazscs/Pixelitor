@@ -38,8 +38,10 @@ public class JHStamp extends FilterWithParametrizedGUI {
 
     private final IntChoiceParam blurMethod = new IntChoiceParam("Blur Method",
             new IntChoiceParam.Value[] {
-                    new IntChoiceParam.Value("Fast (Smoothness does not animate well)", StampFilter.FAST_BLUR),
-                    new IntChoiceParam.Value("Box Blur, 3 iterations", StampFilter.BOX3_BLUR),
+                    // for fast smoothness is calculated with int values
+                    new IntChoiceParam.Value("Fast", StampFilter.FAST_BLUR),
+                    // this is calculated with floats, but the animation is still not smooth
+//                    new IntChoiceParam.Value("Box Blur, 3 iterations", StampFilter.BOX3_BLUR),
                     new IntChoiceParam.Value("Gaussian (slow for large images!)", StampFilter.GAUSSIAN_BLUR)
             }, true);
 

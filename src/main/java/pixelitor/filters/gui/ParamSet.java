@@ -155,4 +155,13 @@ public class ParamSet implements Iterable<GUIParam> {
             param.setFinalAnimationSettingMode(b);
         }
     }
+
+    public boolean hasGradient() {
+        for (GUIParam param : paramList) {
+            if (param instanceof GradientParam) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

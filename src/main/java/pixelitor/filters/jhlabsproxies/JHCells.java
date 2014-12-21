@@ -49,8 +49,8 @@ public class JHCells extends FilterWithParametrizedGUI {
 //    private RangeParam f2Param = new RangeParam("F2", -100, 100, -100);
 //    private RangeParam f3Param = new RangeParam("F3", -100, 100, 0);
 
-    private RangeParam randomness = new RangeParam("Grid Randomness", 1, 100, 1);
-    private IntChoiceParam gridType = IntChoiceParam.getGridTypeChoices("Grid Type", randomness);
+    private RangeParam gridRandomness = new RangeParam("Grid Randomness", 1, 100, 1);
+    private IntChoiceParam gridType = IntChoiceParam.getGridTypeChoices("Grid Type", gridRandomness);
 
     private IntChoiceParam type = new IntChoiceParam("Type", new IntChoiceParam.Value[]{
 //            new IntChoiceParam.Value("Free", 0),
@@ -58,8 +58,8 @@ public class JHCells extends FilterWithParametrizedGUI {
             new IntChoiceParam.Value("Grid", TYPE_GRID),
             new IntChoiceParam.Value("Grid 2", TYPE_STRANGE),
     });
-    private RangeParam tuneParam = new RangeParam("Type", 0, 100, 0);
-    private RangeParam bwParam = new RangeParam("Dark/Light Balance", -20, 20, 0);
+    private RangeParam refineType = new RangeParam("Refine Type", 0, 100, 0);
+    private RangeParam darkLightBalance = new RangeParam("Dark/Light Balance", -20, 20, 0);
 
     private AngleParam angle = new AngleParam("Angle", 0);
 
@@ -77,11 +77,11 @@ public class JHCells extends FilterWithParametrizedGUI {
         super("Cells", false, false);
         setParamSet(new ParamSet(
                 type,
-                tuneParam,
+                refineType,
                 gridType,
-                randomness,
+                gridRandomness,
                 gradient,
-                bwParam,
+                darkLightBalance,
                 scale.adjustRangeToImageSize(0.5),
                 stretch,
                 angle,
@@ -99,7 +99,7 @@ public class JHCells extends FilterWithParametrizedGUI {
             filter = new CellularFilter();
         }
 
-        float tune = tuneParam.getValueAsPercentage();
+        float tune = refineType.getValueAsPercentage();
 
         float f1, f2, f3;
 
@@ -123,7 +123,7 @@ public class JHCells extends FilterWithParametrizedGUI {
                 throw new IllegalStateException();
         }
 
-        float bw = bwParam.getValueAsPercentage();
+        float bw = darkLightBalance.getValueAsPercentage();
         f1 += bw;
         f2 += bw;
         f3 += bw;
@@ -135,7 +135,7 @@ public class JHCells extends FilterWithParametrizedGUI {
         filter.setF2(f2);
         filter.setF3(f3);
         filter.setGridType(gridType.getValue());
-        filter.setRandomness(randomness.getValueAsPercentage());
+        filter.setRandomness(gridRandomness.getValueAsPercentage());
         filter.setColormap(gradient.getValue());
 
         dest = filter.filter(src, dest);

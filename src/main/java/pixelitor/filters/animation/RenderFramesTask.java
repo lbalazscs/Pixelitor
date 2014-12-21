@@ -67,9 +67,7 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         activeImageLayer.tweenCalculatingStarted();
 
         for (int i = 0; i < numFrames; i++) {
-            System.out.println("RenderFramesTask::renderFrames: rendering frame " + i + " on the thread " + Thread.currentThread().getName());
             if (isCancelled()) {
-                System.out.println("RenderFramesTask::renderFrames: isCancelled() returned true");
                 canceled = true;
                 break;
             }
@@ -79,6 +77,8 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
             time[i] = ((double) i) / numFrames;
             ParamSetState intermediateState = animation.tween(time[i]);
             filter.getParamSet().setState(intermediateState);
+
+//            System.out.println("RenderFramesTask::renderFrames: CALLED, rendering frame " + i);
 
             Utils.executeFilterWithBusyCursor(filter, ChangeReason.OP_PREVIEW, PixelitorWindow.getInstance());
 

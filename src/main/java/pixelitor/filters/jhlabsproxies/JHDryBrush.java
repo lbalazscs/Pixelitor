@@ -57,4 +57,9 @@ public class JHDryBrush extends FilterWithParametrizedGUI {
         dest = filter.filter(src, dest);
         return dest;
     }
+
+    @Override
+    public boolean excludeFromAnimation() {
+        return true;
+    }
 }

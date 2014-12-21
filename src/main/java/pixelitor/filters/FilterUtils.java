@@ -16,6 +16,7 @@
  */
 package pixelitor.filters;
 
+import pixelitor.history.History;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -48,14 +49,21 @@ public class FilterUtils {
         for (Filter filter : allFilters) {
             if(filter instanceof FilterWithParametrizedGUI) {
                 FilterWithParametrizedGUI parametrizedFilter = (FilterWithParametrizedGUI) filter;
-                if (parametrizedFilter.getParamSet().canBeAnimated()) {
+                if (parametrizedFilter.getParamSet().canBeAnimated() && !parametrizedFilter.excludeFromAnimation()) {
+                    // include Fade only if there is something to fade
+                    if (parametrizedFilter instanceof Fade) {
+                        if (!History.canFade()) {
+                            continue;
+                        }
+                    }
+
                     animFilters.add(parametrizedFilter);
                 }
             }
         }
-        FilterWithParametrizedGUI[] filters = animFilters.toArray(new FilterWithParametrizedGUI[animFilters.size()]);
-        Arrays.sort(filters);
-        return filters;
+        FilterWithParametrizedGUI[] animFiltersSorted = animFilters.toArray(new FilterWithParametrizedGUI[animFilters.size()]);
+        Arrays.sort(animFiltersSorted);
+        return animFiltersSorted;
     }
 
     public static Filter getRandomFilter() {

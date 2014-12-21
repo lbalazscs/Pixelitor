@@ -537,9 +537,7 @@ public class Composition implements Serializable {
             if (isActiveComp()) {
                 SelectionActions.setEnabled(false, this);
             } else {
-                if(Build.CURRENT == Build.DEVELOPMENT) {
-                    throw new IllegalStateException("can we get here?");
-                }
+                // we can get here from a DeselectEdit.redo on a non-active composition
             }
         }
     }

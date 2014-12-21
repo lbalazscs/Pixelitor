@@ -61,12 +61,12 @@ public class JHPointillize extends FilterWithParametrizedGUI {
         super("Pointillize", true, false);
         setParamSet(new ParamSet(
                 gridSize.adjustRangeToImageSize(0.2),
-                dotSize,
-                fuzziness,
                 gridType,
                 randomness,
-                edgeColor,
                 fadeEdges,
+                edgeColor,
+                dotSize,
+                fuzziness,
                 reseedAction
 //                rndGen
         ));

@@ -127,4 +127,12 @@ public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
     public void setAffectedAreaShapes(Shape[] affectedAreaShapes) {
         this.affectedAreaShapes = affectedAreaShapes;
     }
+
+    /**
+     * Some filters cannot be animated well, they can return true
+     * here in order to be excluded from the animation filters
+     */
+    public boolean excludeFromAnimation() {
+        return false;
+    }
 }

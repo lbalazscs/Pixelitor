@@ -52,18 +52,18 @@ public class Threshold extends FilterWithParametrizedGUI {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         int basedOn = criterion.getValue();
-        RGBPixelOp pixelOp = getRGBPixelOp(threshold.getValue(), basedOn);
+        RGBPixelOp pixelOp = getRGBPixelOp(threshold.getValueAsDouble(), basedOn);
         return FilterUtils.runRGBPixelOp(pixelOp, src, dest);
     }
 
-    RGBPixelOp getRGBPixelOp(final int threshold, int basedOn) {
+    RGBPixelOp getRGBPixelOp(final double threshold, int basedOn) {
         switch (basedOn) {
             case CRIT_LUMINOSITY:
                 return new RGBPixelOp() {
                     @Override
                     public int changeRGB(int a, int r, int g, int b) {
                         // TODO can be faster with the luminosity lookup?
-                        int luminosity = (int) (0.299 * r + 0.587 * g + 0.114 * b);
+                        double luminosity = 0.299 * r + 0.587 * g + 0.114 * b;
                         if (luminosity > threshold) {
                             r = 255;
                             g = 255;
@@ -130,7 +130,7 @@ public class Threshold extends FilterWithParametrizedGUI {
                 };
             case CRIT_SATURATION:
                 return new RGBPixelOp() {
-                    float satThreshold = threshold / 255.0f;
+                    float satThreshold = (float) (threshold / 255.0f);
                     @Override
                     public int changeRGB(int a, int r, int g, int b) {
                         float sat = ImageUtils.calcSaturation(r, g, b);

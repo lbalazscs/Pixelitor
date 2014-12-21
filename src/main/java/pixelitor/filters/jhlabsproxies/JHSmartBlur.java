@@ -66,4 +66,9 @@ public class JHSmartBlur extends FilterWithParametrizedGUI {
 
         return dest;
     }
+
+    @Override
+    public boolean excludeFromAnimation() {
+        return true;
+    }
 }

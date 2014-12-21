@@ -47,4 +47,9 @@ public class Posterize extends FilterWithParametrizedGUI {
 
         return dest;
     }
+
+    @Override
+    public boolean excludeFromAnimation() {
+        return true;
+    }
 }

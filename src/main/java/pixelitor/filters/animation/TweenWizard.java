@@ -29,7 +29,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 /**
- * Wizard for keyframe-based animations
+ * Wizard for tweening animations
  */
 public class TweenWizard {
     private OKCancelDialog dialog = null;
@@ -55,7 +55,7 @@ public class TweenWizard {
         dialog = new OKCancelDialog(
                 wizardPage.getPanel(TweenWizard.this),
                 dialogParent,
-                "Export Keyframe Animation",
+                "Export Tweening Animation",
                 "Next", "Cancel") {
 
             @Override
@@ -93,7 +93,7 @@ public class TweenWizard {
                 } else {
                     JComponent panel = nextPage.getPanel(TweenWizard.this);
                     dialog.changeForm(panel);
-                    dialog.setHeaderMessage(nextPage.getHeaderText());
+                    dialog.setHeaderMessage(nextPage.getHeaderText(TweenWizard.this));
                     wizardPage = nextPage;
 
                     if (wizardPage.getNext() == null) { // this is the last page
@@ -102,7 +102,7 @@ public class TweenWizard {
                 }
             }
         };
-        dialog.setHeaderMessage(wizardPage.getHeaderText());
+        dialog.setHeaderMessage(wizardPage.getHeaderText(TweenWizard.this));
 
         // it was packed already, but this is not correct because of the header message
         // and anyway we don't know the size of the filter dialogs in advance

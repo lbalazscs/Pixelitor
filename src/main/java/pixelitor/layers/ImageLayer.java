@@ -167,6 +167,9 @@ public class ImageLayer extends ContentLayer {
     }
 
     public void setBufferedImage(BufferedImage newImage, boolean ignoreSelection) {
+//        System.out.println("ImageLayer::setBufferedImage: ignoreSelection = " + ignoreSelection);
+//        Thread.dumpStack();
+
         if (newImage == null) {
             throw new IllegalArgumentException("newImage is null");
         }

@@ -67,6 +67,10 @@ public class Brushes {
     public void drawLine(int brushNo, int startX, int startY, int endX, int endY) {
         updateAffectedCoordinates(endX, endY);
 
+        if (radius <= 0) {
+            throw new IllegalStateException("radius is " + radius);
+        }
+
         brushes[brushNo].drawLine(g, startX, startY, endX, endY, radius);
         comp.updateRegion(startX, startY, endX, endY, 2 * radius);
     }
