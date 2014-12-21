@@ -83,7 +83,7 @@ public class OneLayerUndoableEdit extends PixelitorEdit {
                 if (saveSubImageOnly) {
                     backup = imageLayer.getImageOrSubImageIfSelected(false, true);
                 } else {
-                    backup = imageLayer.getBufferedImage(); // for crop/resize  we save the whole image
+                    backup = imageLayer.getImage(); // for crop/resize  we save the whole image
                 }
             }
 

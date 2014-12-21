@@ -152,7 +152,7 @@ public abstract class ContentLayer extends Layer {
 
         int aX = getTranslationX();
         int aY = getTranslationY();
-        BufferedImage bellowImage = bellowImageLayer.getBufferedImage();
+        BufferedImage bellowImage = bellowImageLayer.getImage();
         int bX = bellowImageLayer.getTranslationX();
         int bY = bellowImageLayer.getTranslationY();
 

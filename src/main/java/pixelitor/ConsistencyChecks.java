@@ -46,6 +46,9 @@ public final class ConsistencyChecks {
         }
     }
 
+    /**
+     * Checks whether Fade would work now
+     */
     public static boolean fadeCheck(Composition comp) {
         FadeableEdit edit = History.getPreviousEditForFade(comp);
         if (edit != null) {  // can fade
@@ -64,10 +67,9 @@ public final class ConsistencyChecks {
                 if (differentWidth || differentHeight) {
 
                     String lastFadeableOp = History.getLastPresentationName();
-                    throw new IllegalStateException("'Fade " + lastFadeableOp + "' would not work now: FadeableEdit class = " + edit.getClass().getName() + " width = " + current.getWidth() +
-                            ", previous width = " + previous.getWidth() +
-                            ", height = " + current.getHeight() +
-                            ", previous height = " + previous.getHeight()
+                    throw new IllegalStateException("'Fade " + lastFadeableOp + "' would not work now:\nFadeableEdit class = " + edit.getClass().getName() + "\n" +
+                            " current selected dimensions: width = " + current.getWidth() + ", height = " + current.getHeight() +
+                            " history dimensions: width = " + previous.getWidth() + ", height = " + previous.getHeight()
                     );
                 }
             }
@@ -94,7 +96,7 @@ public final class ConsistencyChecks {
     public static boolean translationCheck(Composition comp) {
         ImageLayer layer = comp.getActiveImageLayer();
         if (layer != null) {
-            BufferedImage bufferedImage = layer.getBufferedImage();
+            BufferedImage bufferedImage = layer.getImage();
 
             int x = -layer.getTranslationX();
             int canvasWidth = comp.getCanvasWidth();

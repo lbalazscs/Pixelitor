@@ -63,7 +63,7 @@ public class EraseTool extends AbstractBrushTool {
         // the color does not matter as long as AlphaComposite.CLEAR is used
         g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OUT, 1.0f));
 
-        BufferedImage image = ImageComponents.getActiveComp().getActiveImageLayer().getBufferedImage();
+        BufferedImage image = ImageComponents.getActiveComp().getActiveImageLayer().getImage();
 
         Utils.checkRasterMinimum(image); // TODO remove if raster bug is corrected
 

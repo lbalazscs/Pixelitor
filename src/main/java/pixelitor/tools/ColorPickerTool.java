@@ -71,7 +71,7 @@ public class ColorPickerTool extends Tool {
                 return;
             }
 
-            img = ic.getComp().getActiveImageLayer().getBufferedImage();
+            img = ic.getComp().getActiveImageLayer().getImage();
             ImageLayer layer = ic.getComp().getActiveImageLayer();
             x -= layer.getTranslationX();
             y -= layer.getTranslationY();

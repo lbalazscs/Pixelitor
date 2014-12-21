@@ -290,7 +290,7 @@ public class OpenSaveManager {
             Layer layer = comp.getLayer(i);
             if (layer instanceof ImageLayer) {
                 ImageLayer imageLayer = (ImageLayer) layer;
-                BufferedImage image = imageLayer.getBufferedImage();
+                BufferedImage image = imageLayer.getImage();
 
                 File outputDir = FileChooser.getLastSaveDir();
 

@@ -99,7 +99,7 @@ public class PaintBucketTool extends Tool {
 //            x -= shapeBounds.y;
 //        }
 
-        BufferedImage image = layer.getBufferedImage();
+        BufferedImage image = layer.getImage();
         BufferedImage original = ImageUtils.copyImage(image);
         BufferedImage workingCopy = ImageUtils.copyImage(image);
 
@@ -120,7 +120,7 @@ public class PaintBucketTool extends Tool {
             g.drawImage(workingCopy, 0, 0, null);
             g.dispose();
 
-//            layer.setBufferedImage(workingCopy, false);
+//            layer.setImage(workingCopy, false);
 
             comp.imageChanged(true, true);
         }

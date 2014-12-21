@@ -44,7 +44,7 @@ public class AnimationFrames {
             Layer layer = comp.getLayer(i);
             if (layer instanceof ImageLayer) {
                 ImageLayer imageLayer = (ImageLayer) layer;
-                BufferedImage image = imageLayer.getBufferedImage();
+                BufferedImage image = imageLayer.getImage();
                 images.add(image);
             }
         }

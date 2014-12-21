@@ -64,7 +64,7 @@ public class PartialImageEdit extends FadeableEdit {
     }
 
     private void swapRasters() {
-        BufferedImage image = layer.getBufferedImage();
+        BufferedImage image = layer.getImage();
 
         Raster tmpRaster;
         try {
@@ -103,7 +103,7 @@ public class PartialImageEdit extends FadeableEdit {
         // recreate the full image as if it was backed up entirely
         // because Fade expects to fade images of equal size
         // TODO this is not the optimal solution  - Fade should fade only the changed area
-        BufferedImage fullImage = layer.getBufferedImage();
+        BufferedImage fullImage = layer.getImage();
         BufferedImage previousImage = ImageUtils.copyImage(fullImage);
         previousImage.setData(backupRaster);
 

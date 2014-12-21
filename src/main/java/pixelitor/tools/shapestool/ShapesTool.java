@@ -224,7 +224,7 @@ public class ShapesTool extends Tool {
             shapeBounds.grow(thickness, thickness);
 
             ToolAffectedArea affectedArea = new ToolAffectedArea(comp, shapeBounds, false);
-            saveSubImageForUndo(comp.getActiveImageLayer().getBufferedImage(), affectedArea);
+            saveSubImageForUndo(comp.getActiveImageLayer().getImage(), affectedArea);
         }
 
         paintShapeOnIC(comp, userDrag);
@@ -297,7 +297,7 @@ public class ShapesTool extends Tool {
         int translationX = -layer.getTranslationX();
         int translationY = -layer.getTranslationY();
 
-        BufferedImage bi = layer.getBufferedImage();
+        BufferedImage bi = layer.getImage();
         Graphics2D g2 = bi.createGraphics();
         g2.translate(translationX, translationY);
         comp.setSelectionClipping(g2, null);

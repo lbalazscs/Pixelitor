@@ -69,8 +69,8 @@ public class TranslateEdit extends PixelitorEdit {
         BufferedImage tmpBI = null;
         if (backupImage != null) {
             ImageLayer imageLayer = (ImageLayer) layer;
-            tmpBI = imageLayer.getBufferedImage();
-            imageLayer.setBufferedImage(backupImage, true);
+            tmpBI = imageLayer.getImage();
+            imageLayer.setImage(backupImage);
         }
         layer.setTranslationX(backupTranslationX);
         layer.setTranslationY(backupTranslationY);

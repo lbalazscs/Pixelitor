@@ -47,46 +47,38 @@ import java.io.ObjectOutputStream;
  * An image layer.
  */
 public class ImageLayer extends ContentLayer {
-//    enum State {NORMAL, EDITING_PREVIEW, EDITING_SHOW_ORIGINAL}  // TODO
+    //    enum State {NORMAL, EDITING_PREVIEW, EDITING_SHOW_ORIGINAL}  // TODO
+    enum State {
+        NORMAL, PREVIEWING_NOT_CHANGED, PREVIEWING_CHANGED, CALCULATE_TWEENING
+    }
 
     private static final long serialVersionUID = 2L;
-
-    // no filter with dialog is running
-    private static final int STATE_NORMAL = 0;
-
-    // we are previewing, but a filter returned the src => no repainting
-    // or history saving at the end is necessary
-    private static final int STATE_PREVIEWING_NOT_CHANGED = 1;
-
-    // the filter changed the image object, and we are previewing that change
-    private static final int STATE_PREVIEWING_CHANGED = 2;
-
-    //
-    private static final int STATE_CALCULATE_TWEENING = 3;
 
     //
     // transient variables from here!
     //
-    private transient int state = STATE_NORMAL;
+    private transient State state = State.NORMAL;
 
-    private transient BufferedImage bufferedImage = null;
+    private transient BufferedImage image = null;
     private transient TmpDrawingLayer tmpDrawingLayer;
 
     // During dialog previews the image displayed by this layer will be replaced
     // and the original image (or a subimage if there is selection) is stored here
-    private transient BufferedImage backupForPreviewBufferedImage = null;
+//    private transient BufferedImage backupForPreviewBufferedImage = null;
+
+    private transient BufferedImage previewImage;
 
     /**
      * Creates a new layer with the given image
      */
-    public ImageLayer(Composition comp, BufferedImage bufferedImage, String name) {
+    public ImageLayer(Composition comp, BufferedImage image, String name) {
         super(comp, name == null ? comp.generateNewLayerName() : name);
         canvas = comp.getCanvas();
-        if (bufferedImage == null) {
-            throw new IllegalArgumentException("bufferedImage is null");
+        if (image == null) {
+            throw new IllegalArgumentException("image is null");
         }
 
-        setBufferedImage(bufferedImage, true);
+        setImage(image);
         checkConstructorPostConditions();
     }
 
@@ -98,7 +90,7 @@ public class ImageLayer extends ContentLayer {
         canvas = comp.getCanvas();
 
         if (pastedImage == null) {
-            throw new IllegalArgumentException("bufferedImage is null");
+            throw new IllegalArgumentException("image is null");
         }
 
         int pastedWidth = pastedImage.getWidth();
@@ -122,10 +114,10 @@ public class ImageLayer extends ContentLayer {
             g.dispose();
         }
 
-        // TODO called with the ignoreSelection=true, because otherwise setBufferedImage assumes that there is already
+        // TODO called with the ignoreSelection=true, because otherwise setImage assumes that there is already
         // a bufferedImage for this layer
         // the right thing to do would be respecting the selection
-        setBufferedImage(newImage, true);
+        setImage(newImage);
 
         if (addXTranslation) {
             int newXTrans = -(pastedWidth - width) / 2;
@@ -146,13 +138,13 @@ public class ImageLayer extends ContentLayer {
         super(comp, name == null ? comp.generateNewLayerName() : name);
         canvas = comp.getCanvas();
 
-        setBufferedImage(new BufferedImage(canvas.getWidth(), canvas.getHeight(), BufferedImage.TYPE_INT_ARGB_PRE), true);
+        setImage(new BufferedImage(canvas.getWidth(), canvas.getHeight(), BufferedImage.TYPE_INT_ARGB_PRE));
         checkConstructorPostConditions();
     }
 
     @Override
     public ImageLayer duplicate() {
-        BufferedImage imageCopy = ImageUtils.copyImage(bufferedImage);
+        BufferedImage imageCopy = ImageUtils.copyImage(image);
         ImageLayer d = new ImageLayer(comp, imageCopy, getDuplicateLayerName());
         d.setOpacity(opacity, false, true, true);
         d.setTranslationX(translationX);
@@ -162,38 +154,59 @@ public class ImageLayer extends ContentLayer {
         return d;
     }
 
-    public BufferedImage getBufferedImage() {
-        return bufferedImage;
+    public BufferedImage getImage() {
+        return image;
     }
 
-    public void setBufferedImage(BufferedImage newImage, boolean ignoreSelection) {
-//        System.out.println("ImageLayer::setBufferedImage: ignoreSelection = " + ignoreSelection);
-//        Thread.dumpStack();
-
+    /**
+     * If there is no selection, returns the newImage
+     * If there is a selection, copies newImage into src according to the selection, and returns src
+     */
+    private BufferedImage replaceImageWithSelection(BufferedImage src, BufferedImage newImage) {
         if (newImage == null) {
             throw new IllegalArgumentException("newImage is null");
         }
-
         assert Utils.checkRasterMinimum(newImage);
 
         Selection selection = comp.getSelection();
-        if ((selection == null) || ignoreSelection) {
-            bufferedImage = newImage;
+        if (selection == null) {
+            return newImage;
         } else {
             Shape selectionShape = selection.getShape();
             if (selectionShape != null) {
                 // the argument image pixels will replace the old ones only where selected
-                Graphics2D g = bufferedImage.createGraphics();
+                Graphics2D g = src.createGraphics();
                 g.translate(-getTranslationX(), -getTranslationY());
                 g.setComposite(AlphaComposite.Src);
                 g.setClip(selectionShape);
                 Rectangle bounds = selectionShape.getBounds();
                 g.drawImage(newImage, bounds.x, bounds.y, null);
                 g.dispose();
+                return src;
             } else {
-                bufferedImage = newImage;
+                return newImage;
             }
         }
+    }
+
+    private void setPreviewWithSelection(BufferedImage newImage) {
+        previewImage = replaceImageWithSelection(previewImage, newImage);
+    }
+
+    private void setImageWithSelection(BufferedImage newImage) {
+        image = replaceImageWithSelection(image, newImage);
+        comp.imageChanged(false, false);
+    }
+
+    // sets the image ignoring the selection
+    public void setImage(BufferedImage newImage) {
+        if (newImage == null) {
+            throw new IllegalArgumentException("newImage is null");
+        }
+
+        assert Utils.checkRasterMinimum(newImage);
+
+        image = newImage;
 
         comp.imageChanged(false, false);
     }
@@ -203,48 +216,66 @@ public class ImageLayer extends ContentLayer {
      * right before creating the adjustment panel
      */
     public void startPreviewing() {
-        this.backupForPreviewBufferedImage = getImageOrSubImageIfSelected(true, true);
-        state = STATE_PREVIEWING_NOT_CHANGED;
+//        this.backupForPreviewBufferedImage = getImageOrSubImageIfSelected(true, true);
+        setState(State.PREVIEWING_NOT_CHANGED);
+        if (comp.hasSelection()) {
+            // if we have a selection, then the preview image reference cannot be simply
+            // the image reference, because when we draw on the preview image, we would
+            // also draw on the image
+            previewImage = ImageUtils.copyImage(image);
+        } else {
+            // if there is no selection, then there is no problem, because
+            // the reference will be overwritten
+            previewImage = image;
+        }
     }
 
     /**
      * This method is called when a new adjustment is made in the dialog, before running the filter
      */
     public void startNewPreviewFromDialog() {
-        restoreOriginalFromPreviewBackup();
+//        restoreOriginalFromPreviewBackup();
     }
 
     /**
      * Called when Cancel was pressed in the preview dialog
      */
     public void cancelPreviewing() {
-        restoreOriginalFromPreviewBackup();
-        state = STATE_NORMAL;
+//        restoreOriginalFromPreviewBackup();
+        setState(State.NORMAL);
+
+//        Utils.debugImage(image, "image");
+//        Utils.debugImage(previewImage, "previewImage");
+
+        previewImage = null;
 
         getComposition().getIC().repaint(); // TODO necessary?
     }
 
-    private void restoreOriginalFromPreviewBackup() {
-        if (backupForPreviewBufferedImage == null) {
-            throw new IllegalStateException("backupForPreviewBufferedImage is null");
-        }
-
-        // restore the original
-        setBufferedImage(backupForPreviewBufferedImage, false);
-    }
+//    private void restoreOriginalFromPreviewBackup() {
+//        if (backupForPreviewBufferedImage == null) {
+//            throw new IllegalStateException("backupForPreviewBufferedImage is null");
+//        }
+//
+//        // restore the original
+//        setImage(backupForPreviewBufferedImage, false);
+//    }
 
     /**
      * Called if OK was pressed in a GUI dialog
      */
     public void finishFilterWithPreview(String filterName) {
-        assert state != STATE_NORMAL;
+        assert state != State.NORMAL;
 
-        if (state == STATE_PREVIEWING_CHANGED) {
-            ImageEdit edit = new ImageEdit(filterName, comp, backupForPreviewBufferedImage, true);
+        if (state == State.PREVIEWING_CHANGED) {
+            ImageEdit edit = new ImageEdit(filterName, comp, getImageOrSubImageIfSelected(true, true), true);
             History.addEdit(edit);
         }
 
-        state = STATE_NORMAL;
+        image = previewImage;
+        previewImage = null;
+
+        setState(State.NORMAL);
     }
 
     /**
@@ -254,19 +285,21 @@ public class ImageLayer extends ContentLayer {
         if (img == null) {
             throw new IllegalArgumentException("img == null");
         }
-        if (img == bufferedImage) {
+        if (img == image) {
             // this can happen if a filter with preview decides that no change is necessary and returns the src
-            assert state != STATE_NORMAL;
+            assert state != State.NORMAL;
 
-            boolean previouslyLookedTheSame = (state == STATE_PREVIEWING_NOT_CHANGED);
-            state = STATE_PREVIEWING_NOT_CHANGED;
+            boolean previouslyLookedTheSame = (state == State.PREVIEWING_NOT_CHANGED);
+            setState(State.PREVIEWING_NOT_CHANGED);
             return !previouslyLookedTheSame;
         }
 
 //        AppLogic.debugImage(img, "ImageLayer.changePreviewImage");
 
-        setBufferedImage(img, false);
-        state = STATE_PREVIEWING_CHANGED;
+        setPreviewWithSelection(img);
+
+//        setImage(img, false);
+        setState(State.PREVIEWING_CHANGED);
         return true;
     }
 
@@ -274,24 +307,24 @@ public class ImageLayer extends ContentLayer {
         if (img == null) {
             throw new IllegalArgumentException("img == null");
         }
-        if (img == bufferedImage) { // the filter returned the original
+        if (img == image) { // the filter returned the original
             return;
         }
 
-        assert state == STATE_NORMAL;
+        assert state == State.NORMAL;
 
         // if there is a selection, it is important to make a copy because in this case
-        // setBufferedImage does not change the bufferedImage reference, and the new image
+        // setImage does not change the image reference, and the new image
         // would be saved for undo
         BufferedImage imageForUndo = getImageOrSubImageIfSelected(false, true);
-        setBufferedImage(img, false);
+        setImageWithSelection(img);
 
-        if(Build.CURRENT.isPerformanceTest()) {
+        if (Build.CURRENT.isPerformanceTest()) {
             return;
         }
 
-        if (imageForUndo == bufferedImage) {
-            throw new IllegalStateException("imageForUndo == bufferedImage");
+        if (imageForUndo == image) {
+            throw new IllegalStateException("imageForUndo == image");
         }
         assert imageForUndo != null;
         ImageEdit edit = new ImageEdit(opName, comp, imageForUndo, true);
@@ -302,9 +335,9 @@ public class ImageLayer extends ContentLayer {
         if (img == null) {
             throw new IllegalArgumentException("img == null");
         }
-        assert img != bufferedImage; // simple filters always change something
-        assert state == STATE_NORMAL;
-        setBufferedImage(img, false);
+        assert img != image; // simple filters always change something
+        assert state == State.NORMAL;
+        setImageWithSelection(img);
     }
 
     @Override
@@ -314,7 +347,7 @@ public class ImageLayer extends ContentLayer {
     }
 
     public Rectangle getBounds() {
-        return new Rectangle(translationX, translationY, bufferedImage.getWidth(), bufferedImage.getHeight());
+        return new Rectangle(translationX, translationY, image.getWidth(), image.getHeight());
     }
 
     public boolean checkForLayerEnlargement() {
@@ -346,61 +379,61 @@ public class ImageLayer extends ContentLayer {
 
     private void enlargeSE() {
         BufferedImage bi = new BufferedImage(
-                bufferedImage.getWidth() - translationX,
-                bufferedImage.getHeight() - translationY,
-                bufferedImage.getType());
+                image.getWidth() - translationX,
+                image.getHeight() - translationY,
+                image.getType());
         Graphics2D g = bi.createGraphics();
-        g.drawImage(bufferedImage, 0, 0, null);
+        g.drawImage(image, 0, 0, null);
         g.dispose();
 
-        setBufferedImage(bi, true);
+        setImage(bi);
     }
 
     private void enlargeNE() {
         BufferedImage bi = new BufferedImage(
-                bufferedImage.getWidth() - translationX,
-                bufferedImage.getHeight() + translationY,
-                bufferedImage.getType());
+                image.getWidth() - translationX,
+                image.getHeight() + translationY,
+                image.getType());
         Graphics2D g = bi.createGraphics();
-        g.drawImage(bufferedImage, 0, translationY, null);
+        g.drawImage(image, 0, translationY, null);
         g.dispose();
-        setBufferedImage(bi, true);
+        setImage(bi);
         translationY = 0;
     }
 
     private void enlargeSW() {
         BufferedImage bi = new BufferedImage(
-                bufferedImage.getWidth() + translationX,
-                bufferedImage.getHeight() - translationY,
-                bufferedImage.getType());
+                image.getWidth() + translationX,
+                image.getHeight() - translationY,
+                image.getType());
         Graphics2D g = bi.createGraphics();
-        g.drawImage(bufferedImage, translationX, 0, null);
+        g.drawImage(image, translationX, 0, null);
         g.dispose();
-        setBufferedImage(bi, true);
+        setImage(bi);
         translationX = 0;
     }
 
     private void enlargeNW() {
         BufferedImage bi = new BufferedImage(
-                bufferedImage.getWidth() + translationX,
-                bufferedImage.getHeight() + translationY,
-                bufferedImage.getType());
+                image.getWidth() + translationX,
+                image.getHeight() + translationY,
+                image.getType());
         Graphics2D g = bi.createGraphics();
-        g.drawImage(bufferedImage, translationX, translationY, null);
+        g.drawImage(image, translationX, translationY, null);
         g.dispose();
-        setBufferedImage(bi, true);
+        setImage(bi);
         translationX = 0;
         translationY = 0;
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
-        ImageUtils.serializeImage(out, bufferedImage);
+        ImageUtils.serializeImage(out, image);
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        setBufferedImage(ImageUtils.deserializeImage(in), true);
+        setImage(ImageUtils.deserializeImage(in));
     }
 
     /**
@@ -409,11 +442,11 @@ public class ImageLayer extends ContentLayer {
     public BufferedImage getImageForFilterDialogs() {
         Selection selection = comp.getSelection();
         if (selection == null) {
-            return bufferedImage;
+            return image;
         }
 
         Rectangle selectionBounds = selection.getShapeBounds();
-        return bufferedImage.getSubimage(selectionBounds.x, selectionBounds.y, selectionBounds.width, selectionBounds.height);
+        return image.getSubimage(selectionBounds.x, selectionBounds.y, selectionBounds.width, selectionBounds.height);
     }
 
     @Override
@@ -455,7 +488,7 @@ public class ImageLayer extends ContentLayer {
             setTranslationY(-newTranslationYAbs);
         }
 
-        setBufferedImage(dest, false);
+        setImageWithSelection(dest);
     }
 
     @Override
@@ -520,17 +553,17 @@ public class ImageLayer extends ContentLayer {
             setTranslationX(-newTranslationXAbs);
             setTranslationY(-newTranslationYAbs);
         }
-        setBufferedImage(dest, false);
+        setImageWithSelection(dest);
     }
 
     @Override
     public void mergeDownOn(ImageLayer bellowImageLayer) {
         int aX = getTranslationX();
         int aY = getTranslationY();
-        BufferedImage bellowImage = bellowImageLayer.getBufferedImage();
+        BufferedImage bellowImage = bellowImageLayer.getImage();
         int bX = bellowImageLayer.getTranslationX();
         int bY = bellowImageLayer.getTranslationY();
-        BufferedImage activeImage = getBufferedImage();
+        BufferedImage activeImage = getImage();
         Graphics2D g = bellowImage.createGraphics();
         int x = aX - bX;
         int y = aY - bY;
@@ -538,46 +571,6 @@ public class ImageLayer extends ContentLayer {
         g.setComposite(composite);
         g.drawImage(activeImage, x, y, null);
         g.dispose();
-    }
-
-    @Override
-    public void paintLayerOnGraphics(Graphics2D g, boolean isFirstVisibleLayer) {
-        setupDrawingComposite(g, isFirstVisibleLayer);
-
-        if (tmpDrawingLayer == null) {
-            if (Tools.isShapesDrawing() && isActiveLayer()) {
-                // we need to draw inside the layer, but only temporarily
-                BufferedImage tmp = createCompositionSizedTmpImage();
-                Graphics2D tmpG = tmp.createGraphics();
-                tmpG.drawImage(bufferedImage, getTranslationX(), getTranslationY(), null);
-
-                // brush and shapes cannot be active together, therefore if is enough to call this only here!
-                comp.setSelectionClipping(tmpG, null);
-                Tools.SHAPES.paintOverLayer(tmpG);
-                tmpG.dispose();
-
-                g.drawImage(tmp, 0, 0, null);
-                tmp.flush();
-            } else { // the simple case
-                g.drawImage(bufferedImage, getTranslationX(), getTranslationY(), null);
-            }
-        } else { // we are in the middle of a brush draw
-
-            if (blendingMode == BlendingMode.NORMAL && opacity > 0.999f) {  // layer in normal mode, opacity  = 100%
-                g.drawImage(bufferedImage, getTranslationX(), getTranslationY(), null);
-                tmpDrawingLayer.paintLayer(g, 0, 0);
-            } else { // layer is not in normal mode
-                // first create a merged layer-brush image
-                BufferedImage mergedLayerBrushImg = ImageUtils.copyImage(bufferedImage); // TODO a canvas-sized image is enough and then less translating is necessary
-                Graphics2D mergedLayerBrushG = mergedLayerBrushImg.createGraphics();
-
-                tmpDrawingLayer.paintLayer(mergedLayerBrushG, -getTranslationX(), -getTranslationY()); // draw the brush on the layer
-                mergedLayerBrushG.dispose();
-
-                // now draw the merged layer-brush on the target Graphics with the layer composite
-                g.drawImage(mergedLayerBrushImg, getTranslationX(), getTranslationY(), null);
-            }
-        }
     }
 
     public TmpDrawingLayer createTmpDrawingLayer(Composite c, boolean respectSelection) {
@@ -589,7 +582,7 @@ public class ImageLayer extends ContentLayer {
         if (tmpDrawingLayer == null) {
             return;
         }
-        Graphics2D g = bufferedImage.createGraphics();
+        Graphics2D g = image.createGraphics();
 
         tmpDrawingLayer.paintLayer(g, -getTranslationX(), -getTranslationY());
         g.dispose();
@@ -601,7 +594,7 @@ public class ImageLayer extends ContentLayer {
     public BufferedImage createCompositionSizedTmpImage() {
         int width = canvas.getWidth();
         int height = canvas.getHeight();
-        int type = bufferedImage.getType();
+        int type = image.getType();
         return new BufferedImage(width, height, type);
     }
 
@@ -616,10 +609,10 @@ public class ImageLayer extends ContentLayer {
 
         BufferedImage image;
         try {
-            image = bufferedImage.getSubimage(x, y, canvasWidth, canvasHeight);
+            image = this.image.getSubimage(x, y, canvasWidth, canvasHeight);
         } catch (RasterFormatException e) {
             System.out.println("ImageLayer.createCompositionSizedSubImage x = " + x + ", y = " + y + ", canvasWidth = " + canvasWidth + ", canvasHeight = " + canvasHeight);
-            WritableRaster raster = bufferedImage.getRaster();
+            WritableRaster raster = this.image.getRaster();
             int minX = raster.getMinX();
             int minY = raster.getMinY();
             System.out.println("ImageLayer.createCompositionSizedSubImage minX = " + minX + ", minY = " + minY);
@@ -637,12 +630,12 @@ public class ImageLayer extends ContentLayer {
         Selection selection = comp.getSelection();
         if (selection == null) {
             if (copyIfNoSelection) {
-                return ImageUtils.copyImage(bufferedImage);
+                return ImageUtils.copyImage(image);
             }
-            return bufferedImage;
+            return image;
         }
 
-        return getSelectionSizedPartFrom(bufferedImage, selection, copyAndTranslateIfSelected);
+        return getSelectionSizedPartFrom(image, selection, copyAndTranslateIfSelected);
     }
 
     public BufferedImage getSelectionSizedPartFrom(BufferedImage src, Selection selection, boolean copyAndTranslateIfSelected) {
@@ -672,16 +665,16 @@ public class ImageLayer extends ContentLayer {
     }
 
     public void cropToCanvasSize() {
-        int imageWidth = bufferedImage.getWidth();
-        int imageHeight = bufferedImage.getHeight();
+        int imageWidth = image.getWidth();
+        int imageHeight = image.getHeight();
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
 
         if ((imageWidth > canvasWidth) || (imageHeight > canvasHeight)) {
-            BufferedImage newImage = ImageUtils.crop(bufferedImage, -getTranslationX(), -getTranslationY(), canvasWidth, canvasHeight);
+            BufferedImage newImage = ImageUtils.crop(image, -getTranslationX(), -getTranslationY(), canvasWidth, canvasHeight);
 
-            BufferedImage tmp = bufferedImage;
-            setBufferedImage(newImage, true);
+            BufferedImage tmp = image;
+            setImage(newImage);
             tmp.flush();
 
             setTranslationX(0);
@@ -691,8 +684,8 @@ public class ImageLayer extends ContentLayer {
 
     @Override
     public void enlargeCanvas(int north, int east, int south, int west) {
-        int width = bufferedImage.getWidth();
-        int height = bufferedImage.getHeight();
+        int width = image.getWidth();
+        int height = image.getHeight();
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
 
@@ -705,13 +698,13 @@ public class ImageLayer extends ContentLayer {
         int newTranslationX = getTranslationX();
         int newTranslationY = getTranslationY();
 
-        BufferedImage newImage = new BufferedImage(newImageWidth, newImageHeight, bufferedImage.getType());
+        BufferedImage newImage = new BufferedImage(newImageWidth, newImageHeight, image.getType());
         Graphics2D g = newImage.createGraphics();
-        g.drawImage(bufferedImage, newImagePaintX, newImagePaintY, null);
+        g.drawImage(image, newImagePaintX, newImagePaintY, null);
         g.dispose();
 
-        bufferedImage.flush();
-        bufferedImage = newImage;
+        image.flush();
+        image = newImage;
 
         setTranslationX(newTranslationX);
         setTranslationY(newTranslationY);
@@ -722,7 +715,7 @@ public class ImageLayer extends ContentLayer {
         TranslateEdit edit = null;
         boolean needsEnlarging = checkForLayerEnlargement();
         if (needsEnlarging) {
-            edit = new TranslateEdit(this, getBufferedImage(), oldTranslationX, oldTranslationY);
+            edit = new TranslateEdit(this, getImage(), oldTranslationX, oldTranslationY);
         } else {
             edit = new TranslateEdit(this, null, oldTranslationX, oldTranslationY);
         }
@@ -738,7 +731,7 @@ public class ImageLayer extends ContentLayer {
     public void resize(int targetWidth, int targetHeight, boolean progressiveBilinear) {
         Rectangle canvasBounds = comp.getCanvasBounds();
 
-        BufferedImage img = getBufferedImage();
+        BufferedImage img = getImage();
 
         Rectangle layerBounds = getBounds();
         // the layer size can be bigger than the canvas size, and it can have a negative
@@ -757,7 +750,7 @@ public class ImageLayer extends ContentLayer {
         }
 
         BufferedImage resizedImg = ImageUtils.getFasterScaledInstance(img, resizeWidth, resizeHeight, RenderingHints.VALUE_INTERPOLATION_BICUBIC, progressiveBilinear);
-        setBufferedImage(resizedImg, true);
+        setImage(resizedImg);
 
         if (bigLayer) {
             setTranslationX((int) (getTranslationX() * horizontalResizeRatio));
@@ -770,7 +763,7 @@ public class ImageLayer extends ContentLayer {
         int cropWidth = selectionBounds.width;
         int cropHeight = selectionBounds.height;
 
-        BufferedImage img = getBufferedImage();
+        BufferedImage img = getImage();
 
         // the selectionBounds is in image space except for the translation
         int transX = getTranslationX();
@@ -780,27 +773,90 @@ public class ImageLayer extends ContentLayer {
         int cropY = selectionBounds.y - transY;
 
         BufferedImage dest = ImageUtils.crop(img, cropX, cropY, cropWidth, cropHeight);
-        setBufferedImage(dest, true);
+        setImage(dest);
         setTranslationX(0);
         setTranslationY(0);
     }
 
     private void checkConstructorPostConditions() {
         assert canvas != null;
-        assert bufferedImage != null;
+        assert image != null;
     }
 
     // TODO why is this working without the startPreviewing-like
     // saving of backupForPreviewBufferedImage
     public void tweenCalculatingStarted() {
-        state = STATE_CALCULATE_TWEENING;
+        setState(State.CALCULATE_TWEENING);
     }
 
     // currently the same as cancelPreviewing
     public void tweenCalculatingEnded() {
-        restoreOriginalFromPreviewBackup();
-        state = STATE_NORMAL;
+//        restoreOriginalFromPreviewBackup();
+        setState(State.NORMAL);
 
         getComposition().getIC().repaint(); // TODO necessary?
+    }
+
+    @Override
+    public void paintLayerOnGraphics(Graphics2D g, boolean isFirstVisibleLayer) {
+        setupDrawingComposite(g, isFirstVisibleLayer);
+
+        BufferedImage visibleImage = null;
+        if (state == State.NORMAL) {
+            visibleImage = image;
+        } else {
+            assert previewImage != null;
+            visibleImage = previewImage;
+        }
+
+        if (tmpDrawingLayer == null) {
+            if (Tools.isShapesDrawing() && isActiveLayer()) {
+                // we need to draw inside the layer, but only temporarily
+                BufferedImage tmp = createCompositionSizedTmpImage();
+                Graphics2D tmpG = tmp.createGraphics();
+                tmpG.drawImage(visibleImage, getTranslationX(), getTranslationY(), null);
+
+                // brush and shapes cannot be active together, therefore if is enough to call this only here!
+                comp.setSelectionClipping(tmpG, null);
+                Tools.SHAPES.paintOverLayer(tmpG);
+                tmpG.dispose();
+
+                g.drawImage(tmp, 0, 0, null);
+                tmp.flush();
+            } else { // the simple case
+                g.drawImage(visibleImage, getTranslationX(), getTranslationY(), null);
+            }
+        } else { // we are in the middle of a brush draw
+
+            if (blendingMode == BlendingMode.NORMAL && opacity > 0.999f) {  // layer in normal mode, opacity  = 100%
+                g.drawImage(visibleImage, getTranslationX(), getTranslationY(), null);
+                tmpDrawingLayer.paintLayer(g, 0, 0);
+            } else { // layer is not in normal mode
+                // first create a merged layer-brush image
+                BufferedImage mergedLayerBrushImg = ImageUtils.copyImage(visibleImage); // TODO a canvas-sized image is enough and then less translating is necessary
+                Graphics2D mergedLayerBrushG = mergedLayerBrushImg.createGraphics();
+
+                tmpDrawingLayer.paintLayer(mergedLayerBrushG, -getTranslationX(), -getTranslationY()); // draw the brush on the layer
+                mergedLayerBrushG.dispose();
+
+                // now draw the merged layer-brush on the target Graphics with the layer composite
+                g.drawImage(mergedLayerBrushImg, getTranslationX(), getTranslationY(), null);
+            }
+        }
+    }
+
+    private void setState(State newState) {
+//        System.out.println("ImageLayer::setState: " + state + " => " + newState);
+        state = newState;
+        comp.imageChanged(false, false);
+    }
+
+    public void debugImages() {
+        Utils.debugImage(image, "image");
+        if (previewImage != null) {
+            Utils.debugImage(previewImage, "previewImage");
+        } else {
+            Dialogs.showInfoDialog("null", "previewImage is null");
+        }
     }
 }

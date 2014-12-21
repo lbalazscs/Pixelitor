@@ -31,7 +31,7 @@ public class ImageLayerNode extends DebugNode {
     public ImageLayerNode(String name, ImageLayer layer) {
         super(name, layer);
 
-        BufferedImage image = layer.getBufferedImage();
+        BufferedImage image = layer.getImage();
         add(new BufferedImageNode(image));
 
         addFloatChild("opacity", layer.getOpacity());

@@ -51,10 +51,10 @@ public class ImageEdit extends FadeableEdit {
 
     private void sanityCheck() {
         // post condition: the backup should never be identical to the active image
-//        if (layer.getBufferedImage() == backupImage) {
-        if (layer.getBufferedImage() == imgRef.get()) {
-            throw new IllegalStateException("backup BufferedImage is identical to the active one");
-        }
+//        if (layer.getImage() == backupImage) {
+//        if (layer.getImage() == imgRef.get()) {
+//            throw new IllegalStateException("backup BufferedImage is identical to the active one");
+//        }
     }
 
     @Override

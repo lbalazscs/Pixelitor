@@ -80,7 +80,7 @@ public class BrushTool extends AbstractBrushTool {
 
     @Override
     BufferedImage getFullUntouchedImage(Composition comp) {
-        BufferedImage retVal = comp.getActiveImageLayer().getBufferedImage();
+        BufferedImage retVal = comp.getActiveImageLayer().getImage();
         if (retVal == null) {
             throw new IllegalStateException();
         }

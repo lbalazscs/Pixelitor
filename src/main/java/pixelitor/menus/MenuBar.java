@@ -48,6 +48,7 @@ import pixelitor.layers.AddNewLayerAction;
 import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.DeleteActiveLayerAction;
+import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMoveAction;
 import pixelitor.layers.TextLayer;
@@ -1126,6 +1127,14 @@ public class MenuBar extends JMenuBar {
         };
         MenuFactory.createMenuItem(saveAllImagesToDir, null, debugSubmenu);
 
+        AbstractAction debugImageLayerImages = new AbstractAction("Debug ImageLayer Images") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ImageLayer layer = (ImageLayer) ImageComponents.getActiveLayer();
+                layer.debugImages();
+            }
+        };
+        MenuFactory.createMenuItem(debugImageLayerImages, null, debugSubmenu);
 
         develMenu.add(debugSubmenu);
     }

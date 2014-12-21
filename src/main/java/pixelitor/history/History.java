@@ -158,6 +158,10 @@ public final class History {
         return "";
     }
 
+    /**
+     * If the last edit in the history is a FadeableEdit for the given composition,
+     * return it
+     */
     public static FadeableEdit getPreviousEditForFade(Composition comp) {
         if (undoDepth > 0) {
             return null;

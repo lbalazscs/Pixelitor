@@ -76,7 +76,7 @@ public class OpenRaster {
                         imageLayer.getTranslationX());
                 ZipEntry entry = new ZipEntry(String.format("data/%d.png", i));
                 zos.putNextEntry(entry);
-                BufferedImage image = imageLayer.getBufferedImage();
+                BufferedImage image = imageLayer.getImage();
                 ImageIO.write(image, "PNG", zos);
                 zos.closeEntry();
             }
