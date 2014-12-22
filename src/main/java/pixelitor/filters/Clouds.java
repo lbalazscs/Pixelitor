@@ -65,6 +65,7 @@ public class Clouds extends FilterWithParametrizedGUI {
                 color2,
                 reseedAction
         ));
+        listNamePrefix = "Render ";
     }
 
     @Override
@@ -233,5 +234,4 @@ public class Clouds extends FilterWithParametrizedGUI {
             p[i + 256] = p[i];
         }
     }
-
 }

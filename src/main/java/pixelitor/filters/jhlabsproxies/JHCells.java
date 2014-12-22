@@ -91,6 +91,7 @@ public class JHCells extends FilterWithParametrizedGUI {
 //                f2Param,
 //                f3Param
         ));
+        listNamePrefix = "Render ";
     }
 
     @Override
@@ -100,7 +101,6 @@ public class JHCells extends FilterWithParametrizedGUI {
         }
 
         float tune = refineType.getValueAsPercentage();
-
         float f1, f2, f3;
 
         switch (type.getValue()) {

@@ -22,12 +22,13 @@ import pixelitor.utils.ImageUtils;
 import java.awt.image.BufferedImage;
 
 /**
- *
+ * Extracts the luminosity channel
  */
 public class Luminosity extends Filter {
 
     public Luminosity() {
         super("Luminosity");
+        listNamePrefix = "Extract Channel: ";
     }
 
     @Override

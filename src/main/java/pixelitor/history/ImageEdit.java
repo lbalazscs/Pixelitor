@@ -28,17 +28,15 @@ import java.lang.ref.SoftReference;
  * A PixelitorEdit that represents the changes made to an image.
  */
 public class ImageEdit extends FadeableEdit {
-//    private BufferedImage backupImage;
     private SoftReference<BufferedImage> imgRef;
     private ImageLayer layer;
 
     private final boolean canRepeat;
 
-
     public ImageEdit(String name, Composition comp, BufferedImage backupImage, boolean canRepeat) {
         super(comp, name);
 
-        // this.backupImage = backupImage;
+        // the backup image is stored in an SoftReference
         this.imgRef = new SoftReference<>(backupImage);
 
         this.canRepeat = canRepeat;
@@ -51,10 +49,10 @@ public class ImageEdit extends FadeableEdit {
 
     private void sanityCheck() {
         // post condition: the backup should never be identical to the active image
-//        if (layer.getImage() == backupImage) {
-//        if (layer.getImage() == imgRef.get()) {
-//            throw new IllegalStateException("backup BufferedImage is identical to the active one");
-//        }
+        // otherwise the backup might be also edited
+        if (layer.getImage() == imgRef.get()) {
+            throw new IllegalStateException("backup BufferedImage is identical to the active one");
+        }
     }
 
     @Override
@@ -81,12 +79,10 @@ public class ImageEdit extends FadeableEdit {
         }
 
         BufferedImage tmp = layer.getImageOrSubImageIfSelected(false, true);
-
         layer.changeImageUndoRedo(backupImage);
-
         comp.imageChanged(true, true);
 
-        // backupImage = tmp;
+        // create new backup image from tmp
         imgRef = new SoftReference<>(tmp);
         History.postEdit(this);
 
@@ -102,9 +98,8 @@ public class ImageEdit extends FadeableEdit {
         if(backupImage != null) {
             backupImage.flush();
         }
-//        backupImage = null;
-        imgRef = null;
 
+        imgRef = null;
         layer = null;
     }
 

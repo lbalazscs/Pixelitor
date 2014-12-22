@@ -33,11 +33,14 @@ public class RandomFilter extends FilterWithGUI {
 
     @Override
     protected BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        return null;
+        /**
+         * The real work is done by other filters
+         */
+        throw new UnsupportedOperationException("this should not be called");
     }
 
     @Override
     public void randomizeSettings() {
-
+        throw new UnsupportedOperationException("this should not be called");
     }
 }

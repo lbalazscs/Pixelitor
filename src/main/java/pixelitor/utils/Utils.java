@@ -30,6 +30,7 @@ import pixelitor.filters.FilterUtils;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.Lightning;
 import pixelitor.filters.RepeatLastOp;
+import pixelitor.layers.ImageLayer;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -92,7 +93,7 @@ public final class Utils {
      */
     public static void executeWithBusyCursor(final Component parent, Runnable task, boolean newThread) {
         Timer timer = new Timer();
-        TimerTask timerTask = new TimerTask() {
+        TimerTask startBusyCursorTask = new TimerTask() {
             @Override
             public void run() {
                 parent.setCursor(BUSY_CURSOR);
@@ -102,14 +103,18 @@ public final class Utils {
         try {
             // if after WAIT_CURSOR_DELAY the original task is still running,
             // set the cursor to the delay cursor
-            timer.schedule(timerTask, WAIT_CURSOR_DELAY);
+            timer.schedule(startBusyCursorTask, WAIT_CURSOR_DELAY);
             if (newThread) {
+                new Exception("is this ever true?").printStackTrace();
+
                 Thread t = new Thread(task);
                 t.setPriority(Thread.NORM_PRIORITY); // lower priority than the event thread
                 t.start();
             } else {
                 task.run(); // on the current thread
             }
+        } catch (Throwable t) { // otherwise AssertionErrors disappear
+            Dialogs.showExceptionDialog(t);
         } finally {
             // when the original task has stopped running, the cursor is reset
             timer.cancel();
@@ -121,7 +126,7 @@ public final class Utils {
      * Executes the given filter with busy cursor
      */
     public static void executeFilterWithBusyCursor(final Filter filter, final ChangeReason changeReason, Component busyCursorParent) {
-        String fileterMenuName = filter.getMenuName();
+        String filterMenuName = filter.getMenuName();
         try {
             final Composition comp = ImageComponents.getActiveComp();
             if (comp == null) {
@@ -131,8 +136,10 @@ public final class Utils {
             }
 
             if (changeReason == ChangeReason.OP_PREVIEW) {
-                comp.getActiveImageLayer().startNewPreviewFromDialog();
+                ImageLayer layer = comp.getActiveImageLayer();
+                layer.startNewPreviewFromDialog();
             } else {
+                // e.g. OP WITHOUT DIALOG
                 FilterUtils.setLastExecutedFilter(filter);
             }
 
@@ -149,10 +156,10 @@ public final class Utils {
             long totalTime = (System.nanoTime() - startTime) / 1_000_000;
             String performanceMessage;
             if (totalTime < 1000) {
-                performanceMessage = fileterMenuName + " took " + totalTime + " ms";
+                performanceMessage = filterMenuName + " took " + totalTime + " ms";
             } else {
                 float seconds = totalTime / 1000.0f;
-                performanceMessage = String.format("%s took %.1f s", fileterMenuName, seconds);
+                performanceMessage = String.format("%s took %.1f s", filterMenuName, seconds);
             }
             AppLogic.setStatusMessage(performanceMessage);
         } catch (OutOfMemoryError e) {
@@ -160,7 +167,7 @@ public final class Utils {
         } catch (Exception e) {
             Dialogs.showExceptionDialog(e);
         }
-        RepeatLastOp.INSTANCE.setMenuName("Repeat " + fileterMenuName);
+        RepeatLastOp.INSTANCE.setMenuName("Repeat " + filterMenuName);
     }
 
     public static void openURI(URI uri) {

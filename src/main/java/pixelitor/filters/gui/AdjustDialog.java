@@ -43,7 +43,7 @@ public final class AdjustDialog extends OKCancelDialog {
     public void dialogAccepted() {
         Composition comp = ImageComponents.getActiveComp();
 //        comp.changeActiveLayerImage(null, ChangeReason.OP_WITH_PREVIEW_FINISHED, activeFilter.getName());
-        comp.finishFilterWithPreview(activeFilter.getName());
+        comp.okPressedInDialog(activeFilter.getName());
         FilterUtils.setLastExecutedFilter(activeFilter);
 
         close();
@@ -52,7 +52,7 @@ public final class AdjustDialog extends OKCancelDialog {
     @Override
     public void dialogCanceled() {
         Composition comp = ImageComponents.getActiveComp();
-        comp.getActiveImageLayer().cancelPreviewing();
+        comp.getActiveImageLayer().cancelPressedInDialog();
 
         close();
     }

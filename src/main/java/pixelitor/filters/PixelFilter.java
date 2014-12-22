@@ -19,7 +19,7 @@ package pixelitor.filters;
 import java.awt.image.BufferedImage;
 
 /**
- *
+ * Extracts a channel from the image
  */
 public class PixelFilter extends Filter {
     private final RGBPixelOp rgbOp;
@@ -27,6 +27,7 @@ public class PixelFilter extends Filter {
     public PixelFilter(String name, RGBPixelOp rgbOp) {
         super(name);
         this.rgbOp = rgbOp;
+        listNamePrefix = "Extract Channel: ";
     }
 
     @Override

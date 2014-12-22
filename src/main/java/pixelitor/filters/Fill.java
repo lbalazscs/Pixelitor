@@ -31,6 +31,7 @@ public class Fill extends Filter {
     public Fill(FillType fillType) {
         super(fillType.toString());
         this.fillType = fillType;
+        listNamePrefix = "Fill with ";
     }
 
     @Override

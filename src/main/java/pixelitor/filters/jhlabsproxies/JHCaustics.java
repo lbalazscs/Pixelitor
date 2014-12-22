@@ -28,7 +28,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 /**
- * Caustics based on the JHLabs CausticsFilter
+ * Renders caustics based on the JHLabs CausticsFilter
  */
 public class JHCaustics extends FilterWithParametrizedGUI {
     private final ColorParam bgColor = new ColorParam("Background Color", new Color(0, 200, 175), false, false);
@@ -55,6 +55,7 @@ public class JHCaustics extends FilterWithParametrizedGUI {
                 samples,
                 new ReseedNoiseActionParam()
         ));
+        listNamePrefix = "Render ";
     }
 
     @Override

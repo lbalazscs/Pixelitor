@@ -28,7 +28,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 /**
- * Wood based on the JHLabs WoodFilter
+ * Renders wood texture based on the JHLabs WoodFilter
  */
 public class JHWood extends FilterWithParametrizedGUI {
     private final RangeParam rings = new RangeParam("Rings", 1, 100, 50);
@@ -56,6 +56,7 @@ public class JHWood extends FilterWithParametrizedGUI {
                 gain,
                 new ReseedNoiseActionParam()
         ));
+        listNamePrefix = "Render ";
     }
 
     @Override

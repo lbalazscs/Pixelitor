@@ -24,7 +24,6 @@ import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.ParamSetState;
 import pixelitor.layers.ImageLayer;
 import pixelitor.utils.Dialogs;
-import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -64,6 +63,8 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         boolean canceled = false;
 
         ImageLayer activeImageLayer = ImageComponents.getActiveComp().getActiveImageLayer();
+        PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
+
         activeImageLayer.tweenCalculatingStarted();
 
         for (int i = 0; i < numFrames; i++) {
@@ -78,15 +79,13 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
             ParamSetState intermediateState = animation.tween(time[i]);
             filter.getParamSet().setState(intermediateState);
 
-//            System.out.println("RenderFramesTask::renderFrames: CALLED, rendering frame " + i);
-
-            Utils.executeFilterWithBusyCursor(filter, ChangeReason.OP_PREVIEW, PixelitorWindow.getInstance());
+            Utils.executeFilterWithBusyCursor(filter, ChangeReason.OP_PREVIEW, busyCursorParent);
 
             ImageComponent ic = ImageComponents.getActiveImageComponent();
             ic.repaint();
 
             BufferedImage image = ImageComponents.getActiveCompositeImage();
-            image = ImageUtils.copyImage(image); // TODO is this necessary?
+//            image = ImageUtils.copyImage(image); // TODO is this necessary?
 
             try {
                 animationWriter.addFrame(image);
@@ -97,7 +96,6 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
             }
         }
         setProgress(100);
-//        activeImageLayer.cancelPreviewing();
         activeImageLayer.tweenCalculatingEnded();
 
         if (canceled) {

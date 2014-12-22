@@ -169,21 +169,21 @@ public class Composition implements Serializable {
         return layerList.indexOf(activeLayer);
     }
 
-    public void finishFilterWithPreview(String filterName) {
-        ((ImageLayer) activeLayer).finishFilterWithPreview(filterName);
+    public void okPressedInDialog(String filterName) {
+        ((ImageLayer) activeLayer).okPressedInDialog(filterName);
     }
 
-    public void changeImageSimpleFilterFinished(BufferedImage img, ChangeReason changeReason, String opName) {
+    public void filterWithoutDialogFinished(BufferedImage img, ChangeReason changeReason, String opName) {
         setDirty(true);
 
-        ((ImageLayer) activeLayer).changeImageSimpleFilterFinished(img, opName);
+        ((ImageLayer) activeLayer).filterWithoutDialogFinished(img, changeReason, opName);
 
         imageChanged(true, true);
     }
 
-    public void changePreviewImage(BufferedImage img) {
+    public void changePreviewImage(BufferedImage img, String filterName) {
         ImageLayer layer = (ImageLayer) activeLayer;
-        if (layer.changePreviewImage(img)) {
+        if (layer.changePreviewImage(img, filterName)) {
             imageChanged(true, true);
         }
     }
@@ -200,6 +200,15 @@ public class Composition implements Serializable {
         ImageLayer imageLayer = getActiveImageLayer();
         if (imageLayer != null) {
             return imageLayer.getImageOrSubImageIfSelected(copyIfFull, copyAndTranslateIfSelected);
+        }
+
+        return null;
+    }
+
+    public BufferedImage getFilterSource() {
+        ImageLayer imageLayer = getActiveImageLayer();
+        if (imageLayer != null) {
+            return imageLayer.getFilterSourceImage();
         }
 
         return null;

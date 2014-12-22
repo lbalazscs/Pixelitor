@@ -16,7 +16,7 @@
  */
 package pixelitor.layers;
 
-import pixelitor.Build;
+import pixelitor.ChangeReason;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.filters.comp.Flip;
@@ -45,12 +45,44 @@ import java.io.ObjectOutputStream;
 
 /**
  * An image layer.
+ *
+ * Filter without a dialog are executed as ChangeReason.OP_WITHOUT_DIALOG on the EDT.
+ * The filter asks getFilterSource() in the NORMAL state, and
+ * (if there is no selection) the image (not a copy!) is returned as the filter source.
+ * The filter transforms the image, and calls filterWithoutDialogFinished
+ * with the transformed image.
+ *
+ * Filters with dialog are executed as ChangeReason.OP_PREVIEW on the EDT.
+ * startPreviewing() is called when a new dialog appears,
+ * right before creating the adjustment panel.
+ * Before executing a filter with dialog, startNewPreviewFromDialog() is called
+ * (does nothing in the current implementation), then the filter is executed,
+ * and each execution is followed by changePreviewImage().
+ * At the end, depending on the user action, okPressedInDialog()
+ * or cancelPressedInDialog() is called.
  */
 public class ImageLayer extends ContentLayer {
     //    enum State {NORMAL, EDITING_PREVIEW, EDITING_SHOW_ORIGINAL}  // TODO
     enum State {
-        NORMAL, PREVIEWING_NOT_CHANGED, PREVIEWING_CHANGED, CALCULATE_TWEENING
+        /**
+         * The layer is in normal state when no filter is running on it
+         */
+        NORMAL {
+        },
+        /**
+         * The layer is in previewing mode when a filter with dialog is opened
+         * Filters that work normally without a dialog can still work with a
+         * dialog when invoked from places like the the "Random Filter"
+         */
+        PREVIEW {
+        };
     }
+
+    /**
+     * Whether the preview image is different from the normal image
+     * It makes sense only in PREVIEW mode
+     */
+    private transient boolean imageContentChanged = false;
 
     private static final long serialVersionUID = 2L;
 
@@ -59,14 +91,27 @@ public class ImageLayer extends ContentLayer {
     //
     private transient State state = State.NORMAL;
 
-    private transient BufferedImage image = null;
     private transient TmpDrawingLayer tmpDrawingLayer;
 
     // During dialog previews the image displayed by this layer will be replaced
     // and the original image (or a subimage if there is selection) is stored here
 //    private transient BufferedImage backupForPreviewBufferedImage = null;
 
+    /**
+     * The image content of this image layer
+     */
+    private transient BufferedImage image = null;
+
+    /**
+     * The image shown during previews
+     */
     private transient BufferedImage previewImage;
+
+    /**
+     * The source image passed to the filters.
+     * This is different than image if there is a selection.
+     */
+    private transient BufferedImage filterSourceImage;
 
     /**
      * Creates a new layer with the given image
@@ -163,9 +208,8 @@ public class ImageLayer extends ContentLayer {
      * If there is a selection, copies newImage into src according to the selection, and returns src
      */
     private BufferedImage replaceImageWithSelection(BufferedImage src, BufferedImage newImage) {
-        if (newImage == null) {
-            throw new IllegalArgumentException("newImage is null");
-        }
+        assert src != null;
+        assert newImage != null;
         assert Utils.checkRasterMinimum(newImage);
 
         Selection selection = comp.getSelection();
@@ -198,7 +242,7 @@ public class ImageLayer extends ContentLayer {
         comp.imageChanged(false, false);
     }
 
-    // sets the image ignoring the selection
+    // sets the image object ignoring the selection
     public void setImage(BufferedImage newImage) {
         if (newImage == null) {
             throw new IllegalArgumentException("newImage is null");
@@ -216,18 +260,17 @@ public class ImageLayer extends ContentLayer {
      * right before creating the adjustment panel
      */
     public void startPreviewing() {
-//        this.backupForPreviewBufferedImage = getImageOrSubImageIfSelected(true, true);
-        setState(State.PREVIEWING_NOT_CHANGED);
         if (comp.hasSelection()) {
             // if we have a selection, then the preview image reference cannot be simply
-            // the image reference, because when we draw on the preview image, we would
-            // also draw on the image
+            // the image reference, because when we draw into the preview image, we would
+            // also draw on the real image, and after cancel we would still have the changed version.
             previewImage = ImageUtils.copyImage(image);
         } else {
             // if there is no selection, then there is no problem, because
-            // the reference will be overwritten
+            // the previewImage reference will be overwritten
             previewImage = image;
         }
+        setState(State.PREVIEW);
     }
 
     /**
@@ -237,37 +280,11 @@ public class ImageLayer extends ContentLayer {
 //        restoreOriginalFromPreviewBackup();
     }
 
-    /**
-     * Called when Cancel was pressed in the preview dialog
-     */
-    public void cancelPreviewing() {
-//        restoreOriginalFromPreviewBackup();
-        setState(State.NORMAL);
+    public void okPressedInDialog(String filterName) {
+        assert state == State.PREVIEW;
+        assert previewImage != null;
 
-//        Utils.debugImage(image, "image");
-//        Utils.debugImage(previewImage, "previewImage");
-
-        previewImage = null;
-
-        getComposition().getIC().repaint(); // TODO necessary?
-    }
-
-//    private void restoreOriginalFromPreviewBackup() {
-//        if (backupForPreviewBufferedImage == null) {
-//            throw new IllegalStateException("backupForPreviewBufferedImage is null");
-//        }
-//
-//        // restore the original
-//        setImage(backupForPreviewBufferedImage, false);
-//    }
-
-    /**
-     * Called if OK was pressed in a GUI dialog
-     */
-    public void finishFilterWithPreview(String filterName) {
-        assert state != State.NORMAL;
-
-        if (state == State.PREVIEWING_CHANGED) {
+        if (isImageContentChanged()) {
             ImageEdit edit = new ImageEdit(filterName, comp, getImageOrSubImageIfSelected(true, true), true);
             History.addEdit(edit);
         }
@@ -278,57 +295,94 @@ public class ImageLayer extends ContentLayer {
         setState(State.NORMAL);
     }
 
+    public void cancelPressedInDialog() {
+        assert state == State.PREVIEW;
+        assert previewImage != null;
+
+        setState(State.NORMAL);
+        previewImage = null;
+        comp.imageChanged(true, true);
+    }
+
+    public void tweenCalculatingStarted() {
+        assert state == State.NORMAL;
+//        setState(State.PREVIEW);
+        startPreviewing();
+    }
+
+    // currently the same as cancelPressedInDialog
+    public void tweenCalculatingEnded() {
+        assert state == State.PREVIEW;
+        setState(State.NORMAL);
+
+        getComposition().getIC().repaint(); // TODO necessary?
+    }
+
     /**
      * @return true if the image has to be repainted
      */
-    public boolean changePreviewImage(BufferedImage img) {
+    public boolean changePreviewImage(BufferedImage img, String filterName) {
+//        System.out.println(String.format("ImageLayer::changePreviewImage: filterName = '%s'", filterName));
+
+        assert state == State.PREVIEW : "state was " + state + ", with the filter " + filterName;
+        assert previewImage != null : "previewImage was null with " + filterName;
+
         if (img == null) {
             throw new IllegalArgumentException("img == null");
         }
         if (img == image) {
-            // this can happen if a filter with preview decides that no change is necessary and returns the src
-            assert state != State.NORMAL;
+            // this can happen if a filter with preview decides that no
+            // change is necessary and returns the src
 
-            boolean previouslyLookedTheSame = (state == State.PREVIEWING_NOT_CHANGED);
-            setState(State.PREVIEWING_NOT_CHANGED);
-            return !previouslyLookedTheSame;
+            imageContentChanged = false; // no history will be necessary
+
+            // it still can happen that the image needs to be repainted
+            // because the preview image can be different from the image
+            // (the user does something, but then resets the params to a do-nothing state)
+            boolean shouldRefresh = image != previewImage;
+            previewImage = image;
+
+            return shouldRefresh;
         }
-
-//        AppLogic.debugImage(img, "ImageLayer.changePreviewImage");
+        imageContentChanged = true; // history will be necessary
 
         setPreviewWithSelection(img);
-
-//        setImage(img, false);
-        setState(State.PREVIEWING_CHANGED);
+        setState(State.PREVIEW);
         return true;
     }
 
-    public void changeImageSimpleFilterFinished(BufferedImage img, String opName) {
-        if (img == null) {
-            throw new IllegalArgumentException("img == null");
+    public void filterWithoutDialogFinished(BufferedImage transformedImage, ChangeReason changeReason, String opName) {
+        if (transformedImage == null) {
+            throw new IllegalArgumentException("transformedImage == null");
         }
-        if (img == image) { // the filter returned the original
-            return;
+        // A filter without dialog should never return the original image
+        if (transformedImage == image) { // the filter returned the original
+            throw new IllegalStateException(opName + " returned the original image");
         }
 
+        // filters without dialog run in the normal state
         assert state == State.NORMAL;
 
-        // if there is a selection, it is important to make a copy because in this case
-        // setImage does not change the image reference, and the new image
-        // would be saved for undo
-        BufferedImage imageForUndo = getImageOrSubImageIfSelected(false, true);
-        setImageWithSelection(img);
+        BufferedImage imageForUndo = getFilterSourceImage();
+        setImageWithSelection(transformedImage);
 
-        if (Build.CURRENT.isPerformanceTest()) {
+        if (changeReason == ChangeReason.PERFORMANCE_TEST) {
+            // no undo is necessary for performance tests
             return;
         }
 
+        // at this point we are sure that the image changed,
+        // considering that a filter without dialog was running
         if (imageForUndo == image) {
             throw new IllegalStateException("imageForUndo == image");
         }
         assert imageForUndo != null;
         ImageEdit edit = new ImageEdit(opName, comp, imageForUndo, true);
         History.addEdit(edit);
+
+        // otherwise the next filter run will take the old image source,
+        // not the actual one
+        filterSourceImage = null;
     }
 
     public void changeImageUndoRedo(BufferedImage img) {
@@ -434,6 +488,8 @@ public class ImageLayer extends ContentLayer {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         setImage(ImageUtils.deserializeImage(in));
+        state = State.NORMAL;
+        imageContentChanged = false;
     }
 
     /**
@@ -623,10 +679,20 @@ public class ImageLayer extends ContentLayer {
         return image;
     }
 
+    public BufferedImage getFilterSourceImage() {
+        if (filterSourceImage == null) {
+            filterSourceImage = getImageOrSubImageIfSelected(false, true);
+        }
+        return filterSourceImage;
+    }
+
     /**
      * If there is a selection, then the filters work on a subimage determined by the selection bounds.
      */
     public BufferedImage getImageOrSubImageIfSelected(boolean copyIfNoSelection, boolean copyAndTranslateIfSelected) {
+//        new Exception("copyIfNoSelection = " + copyIfNoSelection +
+//                ", copyAndTranslateIfSelected = " + copyAndTranslateIfSelected)
+//                .printStackTrace();
         Selection selection = comp.getSelection();
         if (selection == null) {
             if (copyIfNoSelection) {
@@ -783,20 +849,6 @@ public class ImageLayer extends ContentLayer {
         assert image != null;
     }
 
-    // TODO why is this working without the startPreviewing-like
-    // saving of backupForPreviewBufferedImage
-    public void tweenCalculatingStarted() {
-        setState(State.CALCULATE_TWEENING);
-    }
-
-    // currently the same as cancelPreviewing
-    public void tweenCalculatingEnded() {
-//        restoreOriginalFromPreviewBackup();
-        setState(State.NORMAL);
-
-        getComposition().getIC().repaint(); // TODO necessary?
-    }
-
     @Override
     public void paintLayerOnGraphics(Graphics2D g, boolean isFirstVisibleLayer) {
         setupDrawingComposite(g, isFirstVisibleLayer);
@@ -805,7 +857,7 @@ public class ImageLayer extends ContentLayer {
         if (state == State.NORMAL) {
             visibleImage = image;
         } else {
-            assert previewImage != null;
+            assert previewImage != null : "no preview image in state " + state;
             visibleImage = previewImage;
         }
 
@@ -846,8 +898,11 @@ public class ImageLayer extends ContentLayer {
     }
 
     private void setState(State newState) {
-//        System.out.println("ImageLayer::setState: " + state + " => " + newState);
         state = newState;
+        if (newState == State.NORMAL) {
+            previewImage = null;
+            filterSourceImage = null;
+        }
         comp.imageChanged(false, false);
     }
 
@@ -858,5 +913,10 @@ public class ImageLayer extends ContentLayer {
         } else {
             Dialogs.showInfoDialog("null", "previewImage is null");
         }
+    }
+
+    private boolean isImageContentChanged() {
+        assert state == State.PREVIEW;
+        return imageContentChanged;
     }
 }

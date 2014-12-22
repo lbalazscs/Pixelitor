@@ -111,8 +111,13 @@ public class Dialogs {
     }
 
     private static void playWarningSound() {
+//        if (2 > 1) {
+//            return;
+//        }
+
         try {
-            int velocity = 127;    // max volume
+//            int velocity = 127;    // max volume
+            int velocity = 90;    // max volume
             int sound = 65;
             Synthesizer synthesizer = MidiSystem.getSynthesizer();
             synthesizer.open();

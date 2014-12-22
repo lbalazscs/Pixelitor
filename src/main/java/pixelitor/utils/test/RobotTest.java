@@ -43,6 +43,7 @@ import pixelitor.layers.AddNewLayerAction;
 import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.DeleteActiveLayerAction;
+import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.Layers;
 import pixelitor.layers.ShapeLayer;
@@ -65,6 +66,7 @@ import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.GUIUtils;
 import pixelitor.utils.MemoryInfo;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.AWTException;
@@ -297,10 +299,27 @@ public class RobotTest {
 
         op.randomizeSettings();
 
-        // execute everything without showing a modal dialog
-        op.execute(ChangeReason.OP_WITHOUT_DIALOG);
         if (op instanceof FilterWithGUI) {
-            ((FilterWithGUI) op).endDialogSession();
+            FilterWithGUI fg = (FilterWithGUI) op;
+
+            ImageLayer layer = ImageComponents.getActiveComp().getActiveImageLayer();
+            layer.startPreviewing();
+
+            op.randomizeSettings();
+            op.execute(ChangeReason.OP_PREVIEW);
+
+            op.randomizeSettings();
+            op.execute(ChangeReason.OP_PREVIEW);
+
+            if (Math.random() > 0.3) {
+                layer.okPressedInDialog(op.getName());
+            } else {
+                layer.cancelPressedInDialog();
+            }
+
+            fg.endDialogSession();
+        } else {
+            op.execute(ChangeReason.OP_WITHOUT_DIALOG);
         }
     }
 
@@ -334,8 +353,14 @@ public class RobotTest {
 //                filterName, randomTime, randomInterpolation.toString()));
 
         // execute everything without showing a modal dialog
-        filter.execute(ChangeReason.OP_WITHOUT_DIALOG);
+        ImageLayer layer = ImageComponents.getActiveComp().getActiveImageLayer();
+        layer.tweenCalculatingStarted();
+
+        PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
+        Utils.executeFilterWithBusyCursor(filter, ChangeReason.OP_PREVIEW, busyCursorParent);
+
         filter.endDialogSession();
+        layer.tweenCalculatingEnded();
     }
 
 

@@ -43,7 +43,7 @@ public class RandomFilterAdjustPanel extends AdjustPanel {
                 nextRandomFilter();
             }
         });
-        JPanel northPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JPanel northPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         northPanel.add(nextRandomButton);
         add(northPanel, BorderLayout.NORTH);
         realSettingsPanel = new JPanel();
@@ -66,18 +66,19 @@ public class RandomFilterAdjustPanel extends AdjustPanel {
                 );
 
         op = newFilter;
-        String filterName = newFilter.getName();
+        String filterName = newFilter.getListName();
         realSettingsPanel.setBorder(BorderFactory.createTitledBorder(filterName));
         if (newFilter instanceof FilterWithGUI) {
             if (lastFilter != null) { // there was a filter before
                 // need to clear the preview of the previous filters
                 // so that the image position selectors show the original image
                 ImageLayer imageLayer = ImageComponents.getActiveComp().getActiveImageLayer();
-                imageLayer.cancelPreviewing(); // cancel the last one
+                imageLayer.cancelPressedInDialog(); // cancel the last one
                 imageLayer.startPreviewing(); // start the new one
             }
             AdjustPanel adjustPanel = ((FilterWithGUI) newFilter).createAdjustPanel();
             realSettingsPanel.add(adjustPanel);
+            adjustPanel.revalidate();
             lastFilterPanel = adjustPanel;
         } else {
             lastFilterPanel = null;

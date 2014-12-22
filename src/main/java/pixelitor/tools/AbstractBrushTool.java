@@ -45,6 +45,7 @@ import java.awt.image.BufferedImage;
  * Abstract superclass for tools like brush or erase.
  */
 public abstract class AbstractBrushTool extends Tool implements ImageSwitchListener {
+    private static final int MIN_BRUSH_RADIUS = 1;
     public static final int MAX_BRUSH_RADIUS = 100;
     public static final int DEFAULT_BRUSH_RADIUS = 10;
 
@@ -53,7 +54,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     private JComboBox<BrushType> typeSelector;
 
     Graphics2D g;
-    private final RangeParam brushRadiusParam = new RangeParam("Radius", 1, MAX_BRUSH_RADIUS, DEFAULT_BRUSH_RADIUS);
+    private final RangeParam brushRadiusParam = new RangeParam("Radius", MIN_BRUSH_RADIUS, MAX_BRUSH_RADIUS, DEFAULT_BRUSH_RADIUS);
 
 //    private Composition comp;
 
@@ -218,7 +219,15 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     }
 
     private void setupDrawingRadius() {
-        brushes.setRadius(brushRadiusParam.getValue());
+        int value = brushRadiusParam.getValue();
+
+        // because of a JDK bug, sometimes it is possible to drag the slider to negative values
+        if (value < MIN_BRUSH_RADIUS) {
+            value = MIN_BRUSH_RADIUS;
+            brushRadiusParam.setValue(MIN_BRUSH_RADIUS);
+        }
+
+        brushes.setRadius(value);
     }
 
     protected abstract void setupGraphics(Graphics2D g, Paint p);

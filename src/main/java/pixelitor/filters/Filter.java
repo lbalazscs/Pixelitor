@@ -30,8 +30,12 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 
+/**
+ * The superclass of all Pixelitor filters and color adjustments
+ */
 public abstract class Filter extends AbstractAction implements Comparable<Filter> {
     protected boolean copySrcToDstBeforeRunning = false;
+    protected String listNamePrefix = null;
 
     protected Filter(String name) {
         this(name, null);
@@ -59,6 +63,18 @@ public abstract class Filter extends AbstractAction implements Comparable<Filter
 
     public String getName() {
         return getMenuName();
+    }
+
+    /**
+     * This name appears when all filters are listed in a combo box
+     * For example "Fill with Transparent" is better than "Transparent" in this case
+     */
+    public String getListName() {
+        if (listNamePrefix == null) {
+            return getName();
+        } else {
+            return listNamePrefix + getName();
+        }
     }
 
     @Override
@@ -98,17 +114,19 @@ public abstract class Filter extends AbstractAction implements Comparable<Filter
      * This code is executed with busy cursor
      */
     public void runit(Composition comp, ChangeReason changeReason) {
-        BufferedImage src = comp.getImageOrSubImageIfSelectedForActiveLayer(false, true);
+        BufferedImage src = comp.getFilterSource();
+
+//        Utils.debugImage(src, "src");
+
         BufferedImage dest = executeForOneLayer(src);
-//                    AppLogic.debugImage(dest);
         assert dest != null;
 
         if (changeReason == ChangeReason.OP_PREVIEW) {
-            comp.changePreviewImage(dest);
+            comp.changePreviewImage(dest, getName());
         } else if (changeReason == ChangeReason.OP_WITHOUT_DIALOG) {
-            comp.changeImageSimpleFilterFinished(dest, changeReason, getName());
+            comp.filterWithoutDialogFinished(dest, changeReason, getName());
         } else if (changeReason == ChangeReason.PERFORMANCE_TEST) {
-            comp.changeImageSimpleFilterFinished(dest, changeReason, getName());
+            comp.filterWithoutDialogFinished(dest, changeReason, getName());
         } else {
             throw new IllegalStateException(changeReason.toString());
         }

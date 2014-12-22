@@ -32,7 +32,7 @@ import java.util.Random;
 import java.util.concurrent.Future;
 
 /**
- * Value Noise
+ * Renders value noise
  */
 public class ValueNoise extends FilterWithParametrizedGUI {
     private static final Random rand = new Random();
@@ -67,20 +67,19 @@ public class ValueNoise extends FilterWithParametrizedGUI {
                 color2,
                 reseedAction
         ));
+        listNamePrefix = "Render ";
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-//        int[] srcData = ImageUtils.getPixelsAsArray(src);
-
         final int[] lookupTable = new int[256];
         Color c1 = color1.getColor();
         Color c2 = color2.getColor();
-        int[] color1 = {c1.getAlpha(), c1.getRed(), c1.getGreen(), c1.getBlue()};
-        int[] color2 = {c2.getAlpha(), c2.getRed(), c2.getGreen(), c2.getBlue()};
+        int[] colorArray1 = {c1.getAlpha(), c1.getRed(), c1.getGreen(), c1.getBlue()};
+        int[] colorArray2 = {c2.getAlpha(), c2.getRed(), c2.getGreen(), c2.getBlue()};
 
         for (int i = 0, lookupTableLength = lookupTable.length; i < lookupTableLength; i++) {
-            lookupTable[i] = ImageUtils.lerpAndPremultiplyColorWithAlpha(i / 255.0f, color1, color2);
+            lookupTable[i] = ImageUtils.lerpAndPremultiplyColorWithAlpha(i / 255.0f, colorArray1, colorArray2);
         }
 
         final int[] destData = ImageUtils.getPixelsAsArray(dest);
@@ -123,8 +122,6 @@ public class ValueNoise extends FilterWithParametrizedGUI {
             int noise = (int) (255 * generateValueNoise(x, y, octaves, frequency, persistence, amplitude));
 
             int value = lookupTable[noise];
-//                int noise = 100;
-            //destData[x + y * width] = (0xFF000000 | (noise << 16) | (noise << 8) | noise);
             destData[x + y * width] = value;
         }
     }

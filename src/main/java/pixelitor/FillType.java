@@ -25,57 +25,43 @@ import java.awt.Color;
  * A fill color with a string description
  */
 public enum FillType {
-    WHITE {
-        @Override
-        public String toString() {
-            return "White";
-        }
-
+    WHITE("White") {
         @Override
         public Color getColor() {
             return Color.WHITE;
         }
-    }, BLACK {
-        @Override
-        public String toString() {
-            return "Black";
-        }
-
+    }, BLACK("Black") {
         @Override
         public Color getColor() {
             return Color.BLACK;
         }
-    }, TRANSPARENT {
-        @Override
-        public String toString() {
-            return "Transparent";
-        }
-
+    }, TRANSPARENT("Transparent") {
         @Override
         public Color getColor() {
             return Utils.TRANSPARENT_COLOR;
         }
-    }, FOREGROUND {
-        @Override
-        public String toString() {
-            return "Foreground Color";
-        }
-
+    }, FOREGROUND("Foreground Color") {
         @Override
         public Color getColor() {
             return FgBgColorSelector.getFG();
         }
-    }, BACKGROUND {
-        @Override
-        public String toString() {
-            return "Background Color";
-        }
-
+    }, BACKGROUND("Background Color") {
         @Override
         public Color getColor() {
             return FgBgColorSelector.getBG();
         }
     };
 
+    private final String guiName;
+
+    FillType(String guiName) {
+        this.guiName = guiName;
+    }
+
     public abstract Color getColor();
+
+    @Override
+    public String toString() {
+        return guiName;
+    }
 }

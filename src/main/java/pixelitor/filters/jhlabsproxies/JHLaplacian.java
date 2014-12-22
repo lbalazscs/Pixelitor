@@ -22,7 +22,7 @@ import pixelitor.filters.Filter;
 import java.awt.image.BufferedImage;
 
 /**
- * Laplacian based on the JHLabs LaplaceFilter
+ * Laplacian edge detection based on the JHLabs LaplaceFilter
  */
 public class JHLaplacian extends Filter {
 
@@ -45,5 +45,10 @@ public class JHLaplacian extends Filter {
     @Override
     public void randomizeSettings() {
         // nothing to randomize
+    }
+
+    @Override
+    public String getListName() {
+        return "Laplacian Edge Detection";
     }
 }

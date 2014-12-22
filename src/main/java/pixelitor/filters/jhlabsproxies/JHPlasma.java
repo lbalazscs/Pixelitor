@@ -34,13 +34,13 @@ import java.awt.image.BufferedImage;
  * Plasma based on the JHLabs PlasmaFilter
  */
 public class JHPlasma extends FilterWithParametrizedGUI {
-    private final RangeParam turbulenceParam = new RangeParam("Turbulence", 0, 600, 100);
+    private final RangeParam turbulence = new RangeParam("Turbulence", 0, 600, 100);
 
     private static final int LESS_COLORS = 0;
     private static final int MORE_COLORS = 1;
     private static final int GRADIENT_COLORS = 2;
 
-    private final IntChoiceParam typeParam = new IntChoiceParam("Colors", new IntChoiceParam.Value[]{
+    private final IntChoiceParam type = new IntChoiceParam("Colors", new IntChoiceParam.Value[]{
             new IntChoiceParam.Value("Less", LESS_COLORS),
             new IntChoiceParam.Value("More", MORE_COLORS),
             new IntChoiceParam.Value("Use Gradient", GRADIENT_COLORS),
@@ -60,32 +60,31 @@ public class JHPlasma extends FilterWithParametrizedGUI {
 
     private final float[] defaultThumbPositions = {0.0f, 0.3f, 0.7f, 1.0f};
     private final Color[] defaultValues = {Color.BLACK, Color.RED, Color.ORANGE, Color.YELLOW};
-    private final GradientParam gradientParam = new GradientParam("Gradient", defaultThumbPositions, defaultValues);
+    private final GradientParam gradient = new GradientParam("Gradient", defaultThumbPositions, defaultValues);
 
 
     public JHPlasma() {
         super("Plasma", false, false);
         setParamSet(new ParamSet(
-                turbulenceParam,
-                typeParam,
-                gradientParam,
+                turbulence,
+                type,
+                gradient,
                 reseedAction
         ));
+        listNamePrefix = "Render ";
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        float turbulence = turbulenceParam.getValueAsPercentage();
 
         if (filter == null) {
             filter = new PlasmaFilter();
         }
 
-        filter.setLessColors(typeParam.getValue() != MORE_COLORS);
-        filter.setTurbulence(turbulence);
-
-        filter.setUseColormap(typeParam.getValue() == GRADIENT_COLORS);
-        filter.setColormap(gradientParam.getValue());
+        filter.setLessColors(type.getValue() != MORE_COLORS);
+        filter.setTurbulence(turbulence.getValueAsPercentage());
+        filter.setUseColormap(type.getValue() == GRADIENT_COLORS);
+        filter.setColormap(gradient.getValue());
 
         dest = filter.filter(src, dest);
         return dest;
