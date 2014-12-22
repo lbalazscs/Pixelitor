@@ -340,4 +340,10 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
     public void setFinalAnimationSettingMode(boolean b) {
         finalAnimationSettingMode = b;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s[name = '%s', selected = '%s']",
+                getClass().getSimpleName(), name, currentChoice.toString());
+    }
 }

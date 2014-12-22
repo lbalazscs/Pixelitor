@@ -113,8 +113,6 @@ public final class Utils {
             } else {
                 task.run(); // on the current thread
             }
-        } catch (Throwable t) { // otherwise AssertionErrors disappear
-            Dialogs.showExceptionDialog(t);
         } finally {
             // when the original task has stopped running, the cursor is reset
             timer.cancel();
@@ -164,7 +162,10 @@ public final class Utils {
             AppLogic.setStatusMessage(performanceMessage);
         } catch (OutOfMemoryError e) {
             Dialogs.showOutOfMemoryDialog();
-        } catch (Exception e) {
+        } catch (Throwable e) { // make sure AssertionErrors are caught
+            if (Build.CURRENT.isRobotTest()) {
+                throw e; // we can debug the exact filter parameters only in RobotTest
+            }
             Dialogs.showExceptionDialog(e);
         }
         RepeatLastOp.INSTANCE.setMenuName("Repeat " + filterMenuName);

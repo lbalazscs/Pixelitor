@@ -164,4 +164,14 @@ public class ParamSet implements Iterable<GUIParam> {
         }
         return false;
     }
+
+    @Override
+    public String toString() {
+        String s = "ParamSet[";
+        for (GUIParam param : paramList) {
+            s += ("\n    " + param.toString());
+        }
+        s += "\n]";
+        return s;
+    }
 }

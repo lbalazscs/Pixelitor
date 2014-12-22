@@ -351,4 +351,10 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
     public void setFinalAnimationSettingMode(boolean b) {
         // ignored because this GUIParam can be animated
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s[name = '%s', value = %.2f]",
+                getClass().getSimpleName(), getName(), value);
+    }
 }

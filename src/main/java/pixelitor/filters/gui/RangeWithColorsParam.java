@@ -39,5 +39,4 @@ public class RangeWithColorsParam extends RangeParam {
         SliderSpinner sliderSpinner = new SliderSpinner(leftColor, rightColor, this);
         return sliderSpinner;
     }
-
 }

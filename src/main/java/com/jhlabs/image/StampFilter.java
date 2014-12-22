@@ -161,6 +161,10 @@ public class StampFilter extends PointFilter {
         if(blurMethod == FAST_BLUR) {
             dst = new FastBlurFilter((int) radius).filter(src, null);
         } else if (blurMethod == BOX3_BLUR) {
+            if ((src.getWidth() == 1) || (src.getHeight() == 1)) {
+                // otherwise we get ArrayIndexOutOfBoundsException in BoxBlurFilter
+                return src;
+            }
             dst = new BoxBlurFilter(radius, radius, 3).filter(src, null);
         } else if(blurMethod == GAUSSIAN_BLUR) {
             dst = new GaussianFilter(radius).filter(src, null);

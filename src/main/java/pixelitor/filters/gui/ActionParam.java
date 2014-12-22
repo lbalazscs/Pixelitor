@@ -136,4 +136,10 @@ public class ActionParam extends AbstractGUIParam {
     public void setIgnoreFinalAnimationSettingMode(boolean ignoreFinalAnimationSettingMode) {
         this.ignoreFinalAnimationSettingMode = ignoreFinalAnimationSettingMode;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s[name = '%s']",
+                getClass().getSimpleName(), getName());
+    }
 }

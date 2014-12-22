@@ -145,4 +145,11 @@ public class TextParam extends AbstractGUIParam {
     public void setFinalAnimationSettingMode(boolean b) {
         finalAnimationSettingMode = b;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s[name = '%s', text = '%s']",
+                getClass().getSimpleName(), getName(), tf == null ? "null" : tf.getText());
+    }
+
 }

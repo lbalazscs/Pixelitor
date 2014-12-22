@@ -51,6 +51,11 @@ public class Orton extends FilterWithParametrizedGUI {
         BufferedImage blurredMultiplied = ImageUtils.copyImage(dest);
 
         if (blurRadius > 0) {
+            if ((src.getWidth() == 1) || (src.getHeight() == 1)) {
+                // otherwise we get ArrayIndexOutOfBoundsException in BoxBlurFilter
+                return src;
+            }
+
             BoxBlurFilter boxBlur = new BoxBlurFilter(blurRadius, blurRadius, 3);
             blurredMultiplied = boxBlur.filter(blurredMultiplied, blurredMultiplied);
         }

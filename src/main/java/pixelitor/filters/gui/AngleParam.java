@@ -226,4 +226,10 @@ public class AngleParam extends AbstractGUIParam {
     public void setFinalAnimationSettingMode(boolean b) {
         // ignored because this GUIParam can be animated
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s[name = '%s', angleInRadians = %.2f]",
+                getClass().getSimpleName(), getName(), angleInRadians);
+    }
 }

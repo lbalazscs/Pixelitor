@@ -81,6 +81,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.geom.RoundRectangle2D;
+import java.awt.image.BufferedImage;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 import java.util.Random;
@@ -299,17 +300,32 @@ public class RobotTest {
 
         op.randomizeSettings();
 
+        ImageLayer layer = ImageComponents.getActiveComp().getActiveImageLayer();
         if (op instanceof FilterWithGUI) {
             FilterWithGUI fg = (FilterWithGUI) op;
 
-            ImageLayer layer = ImageComponents.getActiveComp().getActiveImageLayer();
             layer.startPreviewing();
 
-            op.randomizeSettings();
-            op.execute(ChangeReason.OP_PREVIEW);
+            try {
+                op.randomizeSettings();
+                op.execute(ChangeReason.OP_PREVIEW);
 
-            op.randomizeSettings();
-            op.execute(ChangeReason.OP_PREVIEW);
+                op.randomizeSettings();
+                op.execute(ChangeReason.OP_PREVIEW);
+            } catch (Exception e) {
+                BufferedImage src = layer.getFilterSourceImage();
+                if (op instanceof FilterWithParametrizedGUI) {
+                    ParamSet paramSet = ((FilterWithParametrizedGUI) op).getParamSet();
+                    System.out.println(String.format(
+                            "RobotTest::randomOperation: name = %s, width = %d, height = %d, params = %s",
+                            op.getName(), src.getWidth(), src.getHeight(), paramSet.toString()));
+                } else {
+                    System.out.println(String.format(
+                            "RobotTest::randomOperation: name = %s, width = %d, height = %d",
+                            op.getName(), src.getWidth(), src.getHeight()));
+                }
+                throw e;
+            }
 
             if (Math.random() > 0.3) {
                 layer.okPressedInDialog(op.getName());
@@ -319,7 +335,15 @@ public class RobotTest {
 
             fg.endDialogSession();
         } else {
-            op.execute(ChangeReason.OP_WITHOUT_DIALOG);
+            BufferedImage src = layer.getFilterSourceImage();
+            try {
+                op.execute(ChangeReason.OP_WITHOUT_DIALOG);
+            } catch (Exception e) {
+                System.out.println(String.format(
+                        "RobotTest::randomOperation: name = %s, width = %d, height = %d",
+                        op.getName(), src.getWidth(), src.getHeight()));
+                throw e;
+            }
         }
     }
 
@@ -357,7 +381,16 @@ public class RobotTest {
         layer.tweenCalculatingStarted();
 
         PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
-        Utils.executeFilterWithBusyCursor(filter, ChangeReason.OP_PREVIEW, busyCursorParent);
+
+        try {
+            Utils.executeFilterWithBusyCursor(filter, ChangeReason.OP_PREVIEW, busyCursorParent);
+        } catch (Exception e) {
+            BufferedImage src = layer.getFilterSourceImage();
+            System.out.println(String.format(
+                    "RobotTest::randomTweenOperation: name = %s, width = %d, height = %d, params = %s",
+                    filter.getName(), src.getWidth(), src.getHeight(), paramSet.toString()));
+            throw e;
+        }
 
         filter.endDialogSession();
         layer.tweenCalculatingEnded();

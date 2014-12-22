@@ -52,6 +52,12 @@ public class JHDifferenceOfGaussians extends FilterWithParametrizedGUI {
             filter = new DoGFilter();
         }
 
+        if ((src.getWidth() == 1) || (src.getHeight() == 1)) {
+            // otherwise we get ArrayIndexOutOfBoundsException in BoxBlurFilter
+            // TODO return black image?
+            return src;
+        }
+
         filter.setRadius1(radius1.getValueAsFloat());
         filter.setRadius2(radius2.getValueAsFloat());
         filter.setNormalize(normalize.getValue());
