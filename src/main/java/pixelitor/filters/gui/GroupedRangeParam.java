@@ -78,9 +78,10 @@ public class GroupedRangeParam extends AbstractGUIParam implements RangeBasedOnI
                         // set the value of every other param to the value of the current param
                         for (RangeParam otherParam : rangeParams) {
                             if (otherParam != param) {
-                                otherParam.setDontTrigger(true);
-                                otherParam.setValue(param.getValue());
-                                otherParam.setDontTrigger(false);
+//                                otherParam.setDontTrigger(true);
+                                int newValue = param.getValue();
+                                otherParam.setValueWithoutTrigger(newValue);
+//                                otherParam.setDontTrigger(false);
                             }
                         }
                     }

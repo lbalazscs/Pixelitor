@@ -27,6 +27,7 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 
@@ -36,6 +37,9 @@ import java.awt.image.BufferedImage;
 public abstract class Filter extends AbstractAction implements Comparable<Filter> {
     protected boolean copySrcToDstBeforeRunning = false;
     protected String listNamePrefix = null;
+
+    // used for making sure that there are no unnecessary filters triggered
+    public static long runCount = 0;
 
     protected Filter(String name) {
         this(name, null);
@@ -141,7 +145,7 @@ public abstract class Filter extends AbstractAction implements Comparable<Filter
     }
 
     public BufferedImage executeForOneLayer(BufferedImage src) {
-//        assert !EventQueue.isDispatchThread();
+        assert EventQueue.isDispatchThread();
 
         BufferedImage dest = null;
         if (createDefaultDestBuffer()) {
@@ -153,6 +157,8 @@ public abstract class Filter extends AbstractAction implements Comparable<Filter
         }
 
         dest = transform(src, dest);
+        runCount++;
+//        System.out.println(String.format("Filter::executeForOneLayer: transformed '%s'", getName()));
 
         if (dest == null) {
             if (Build.CURRENT == Build.DEVELOPMENT) {

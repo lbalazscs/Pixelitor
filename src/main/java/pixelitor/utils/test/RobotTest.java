@@ -246,19 +246,19 @@ public class RobotTest {
         DebugEventQueue.post(new RobotEvent(msg));
     }
 
-    private static void randomMove(Robot r, int x, int y) {
+    private static void move(Robot r, int x, int y) {
         logRobotEvent("random move to (" + x + ", " + y + ')');
         r.mouseMove(x, y);
     }
 
-    private static void randomDrag(Robot r, int x, int y) {
+    private static void drag(Robot r, int x, int y) {
         logRobotEvent("random \"" + Tools.getCurrentTool().getName() + " Tool\" drag to (" + x + ", " + y + ')');
         r.mousePress(InputEvent.BUTTON1_MASK);
         r.mouseMove(x, y);
         r.mouseRelease(InputEvent.BUTTON1_MASK);
     }
 
-    private static void randomClick(Robot r) {
+    private static void click(Robot r) {
         logRobotEvent("random click");
 
         r.mousePress(InputEvent.BUTTON1_MASK);
@@ -274,18 +274,19 @@ public class RobotTest {
         r.mouseRelease(InputEvent.BUTTON3_MASK);
     }
 
-
     private static void randomColors() {
         logRobotEvent("random colors");
         FgBgColorSelector.setRandomColors();
     }
 
     private static void randomOperation(Robot r) {
+        long runCountBefore = Filter.runCount;
+
         if (!Layers.activeIsImageLayer()) {
             return;
         }
 
-        Filter op = FilterUtils.getRandomFilter();
+        Filter op = getRandomFilter();
         if (op instanceof Fade) {
             return;
         }
@@ -296,7 +297,10 @@ public class RobotTest {
             return;
         }
 
-        logRobotEvent("random operation: " + op.getName());
+        String opName = op.getName();
+//        System.out.println(String.format("RobotTest::randomOperation: opName = '%s'", opName));
+
+        logRobotEvent("random operation: " + opName);
 
         op.randomizeSettings();
 
@@ -309,26 +313,23 @@ public class RobotTest {
             try {
                 op.randomizeSettings();
                 op.execute(ChangeReason.OP_PREVIEW);
-
-                op.randomizeSettings();
-                op.execute(ChangeReason.OP_PREVIEW);
             } catch (Exception e) {
                 BufferedImage src = layer.getFilterSourceImage();
                 if (op instanceof FilterWithParametrizedGUI) {
                     ParamSet paramSet = ((FilterWithParametrizedGUI) op).getParamSet();
                     System.out.println(String.format(
                             "RobotTest::randomOperation: name = %s, width = %d, height = %d, params = %s",
-                            op.getName(), src.getWidth(), src.getHeight(), paramSet.toString()));
+                            opName, src.getWidth(), src.getHeight(), paramSet.toString()));
                 } else {
                     System.out.println(String.format(
                             "RobotTest::randomOperation: name = %s, width = %d, height = %d",
-                            op.getName(), src.getWidth(), src.getHeight()));
+                            opName, src.getWidth(), src.getHeight()));
                 }
                 throw e;
             }
 
             if (Math.random() > 0.3) {
-                layer.okPressedInDialog(op.getName());
+                layer.okPressedInDialog(opName);
             } else {
                 layer.cancelPressedInDialog();
             }
@@ -341,15 +342,22 @@ public class RobotTest {
             } catch (Exception e) {
                 System.out.println(String.format(
                         "RobotTest::randomOperation: name = %s, width = %d, height = %d",
-                        op.getName(), src.getWidth(), src.getHeight()));
+                        opName, src.getWidth(), src.getHeight()));
                 throw e;
             }
+        }
+        long runCountAfter = Filter.runCount;
+        if (runCountAfter != (runCountBefore + 1)) {
+            throw new IllegalStateException("runCountBefore = " + runCountBefore + ", runCountAfter = " + runCountAfter);
         }
     }
 
     private static void randomTweenOperation(Robot r) {
-        FilterWithParametrizedGUI[] filters = FilterUtils.getAnimationFiltersSorted();
-        FilterWithParametrizedGUI filter = filters[(int) (Math.random() * filters.length)];
+        long runCountBefore = Filter.runCount;
+
+        FilterWithParametrizedGUI filter = getRandomTweenFilter();
+        String filterName = filter.getName();
+//        System.out.println(String.format("RobotTest::randomTweenOperation: filterName = '%s'", filterName));
 
         TweenAnimation animation = new TweenAnimation();
         animation.setFilter(filter);
@@ -369,7 +377,6 @@ public class RobotTest {
         ParamSetState intermediateState = animation.tween(randomTime);
         paramSet.setState(intermediateState);
 
-        String filterName = filter.getName();
         logRobotEvent("random operation: " + filterName);
 
 //        System.out.println(String.format("RobotTest::randomTweenOperation: " +
@@ -388,14 +395,26 @@ public class RobotTest {
             BufferedImage src = layer.getFilterSourceImage();
             System.out.println(String.format(
                     "RobotTest::randomTweenOperation: name = %s, width = %d, height = %d, params = %s",
-                    filter.getName(), src.getWidth(), src.getHeight(), paramSet.toString()));
+                    filterName, src.getWidth(), src.getHeight(), paramSet.toString()));
             throw e;
         }
 
         filter.endDialogSession();
         layer.tweenCalculatingEnded();
+
+        long runCountAfter = Filter.runCount;
+        if (runCountAfter != (runCountBefore + 1)) {
+            throw new IllegalStateException("runCountBefore = " + runCountBefore + ", runCountAfter = " + runCountAfter);
+        }
     }
 
+    private static void randomFitToScreen(Robot r) {
+        if (Math.random() > 0.1) {
+            ImageComponents.fitActiveToScreen();
+        } else {
+            ImageComponents.fitActiveToActualPixels();
+        }
+    }
 
     private static final int[] keyEvents = {KeyEvent.VK_1, KeyEvent.VK_A,
             KeyEvent.VK_ENTER, KeyEvent.VK_ESCAPE, KeyEvent.VK_BACK_SPACE,
@@ -452,38 +471,31 @@ public class RobotTest {
         pw.dispatchEvent(new KeyEvent(pw, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), KeyEvent.CTRL_MASK, KeyEvent.VK_F, 'F'));
     }
 
-    private static void undo() {
+    private static void randomUndoRedo() {
         if (History.canUndo()) {
-            logRobotEvent("undo");
+            logRobotEvent("randomUndoRedo");
             History.undo();
-        }
-        if (rand.nextInt(10) > 5) {
-            redo();
-        }
-    }
-
-    private static void redo() {
-        if (History.canRedo()) {
-            logRobotEvent("redo");
-            History.redo();
+            if (rand.nextInt(10) > 3) {
+                History.redo();
+            }
         }
     }
 
-    private static void crop() {
+    private static void randomCrop() {
         boolean enabled = SelectionActions.areEnabled();
         if (enabled) {
-            logRobotEvent("crop");
+            logRobotEvent("randomCrop");
             SelectionActions.getCropAction().actionPerformed(new ActionEvent("", 0, ""));
         }
     }
 
-    private static void fade() {
+    private static void randomFade() {
         boolean b = History.canFade();
         if (!b) {
             return;
         }
 
-        logRobotEvent("fade");
+        logRobotEvent("randomFade");
 
         Fade fade = new Fade();
         fade.setOpacity(rand.nextInt(100));
@@ -507,7 +519,7 @@ public class RobotTest {
         }
     }
 
-    private static void randomDeselect() {
+    private static void deselect() {
         if (SelectionActions.areEnabled()) {
             logRobotEvent("deselect");
             SelectionActions.getDeselectAction().actionPerformed(new ActionEvent("", 0, ""));
@@ -515,10 +527,8 @@ public class RobotTest {
     }
 
     private static void layerToCanvasSize() {
-        if (rand.nextInt(4) == 2) {
-            logRobotEvent("layer to canvas size");
-            ImageComponents.getActiveComp().layerToCanvasSize();
-        }
+        logRobotEvent("layer to canvas size");
+        ImageComponents.getActiveComp().layerToCanvasSize();
     }
 
     private static void invertSelection() {
@@ -678,7 +688,6 @@ public class RobotTest {
         }
     }
 
-
     private static void randomChangeLayerOpacityOrBlending() {
         Layer layer = ImageComponents.getActiveLayer();
         if (rand.nextBoolean()) {
@@ -794,13 +803,13 @@ public class RobotTest {
 
     private static void setupWeightedCaller(final Robot r) {
         // random move
-        weightedCaller.registerCallback(30, new Runnable() {
+        weightedCaller.registerCallback(10, new Runnable() {
             @Override
             public void run() {
                 Point randomPoint = generateRandomPoint();
                 final int randomX = randomPoint.x;
                 final int randomY = randomPoint.y;
-                randomMove(r, randomX, randomY);
+                move(r, randomX, randomY);
             }
         });
 
@@ -811,14 +820,14 @@ public class RobotTest {
                 Point randomPoint = generateRandomPoint();
                 final int randomX = randomPoint.x;
                 final int randomY = randomPoint.y;
-                randomDrag(r, randomX, randomY);
+                drag(r, randomX, randomY);
             }
         });
 
         weightedCaller.registerCallback(5, new Runnable() {
             @Override
             public void run() {
-                randomClick(r);
+                click(r);
             }
         });
 
@@ -846,28 +855,21 @@ public class RobotTest {
         weightedCaller.registerCallback(1, new Runnable() {
             @Override
             public void run() {
-                undo();
+                randomUndoRedo();
             }
         });
 
         weightedCaller.registerCallback(1, new Runnable() {
             @Override
             public void run() {
-                redo();
+                randomCrop();
             }
         });
 
         weightedCaller.registerCallback(1, new Runnable() {
             @Override
             public void run() {
-                crop();
-            }
-        });
-
-        weightedCaller.registerCallback(1, new Runnable() {
-            @Override
-            public void run() {
-                fade();
+                randomFade();
             }
         });
 
@@ -906,6 +908,13 @@ public class RobotTest {
             }
         });
 
+        weightedCaller.registerCallback(10, new Runnable() {
+            @Override
+            public void run() {
+                randomFitToScreen(r);
+            }
+        });
+
         weightedCaller.registerCallback(3, new Runnable() {
             @Override
             public void run() {
@@ -930,7 +939,7 @@ public class RobotTest {
         weightedCaller.registerCallback(5, new Runnable() {
             @Override
             public void run() {
-                randomDeselect();
+                deselect();
             }
         });
 
@@ -983,7 +992,7 @@ public class RobotTest {
             }
         });
 
-        weightedCaller.registerCallback(10, new Runnable() {
+        weightedCaller.registerCallback(3, new Runnable() {
             @Override
             public void run() {
                 layerAddDelete();
@@ -1025,7 +1034,7 @@ public class RobotTest {
             }
         });
 
-        weightedCaller.registerCallback(1, new Runnable() {
+        weightedCaller.registerCallback(3, new Runnable() {
             @Override
             public void run() {
                 randomTool();
@@ -1040,6 +1049,18 @@ public class RobotTest {
 //        randomSpecialLayer();
 //        randomLayerMask();
     }
+
+    private static FilterWithParametrizedGUI getRandomTweenFilter() {
+//        return canny;
+        FilterWithParametrizedGUI[] filters = FilterUtils.getAnimationFiltersSorted();
+        return filters[(int) (Math.random() * filters.length)];
+    }
+
+    private static Filter getRandomFilter() {
+        return FilterUtils.getRandomFilter();
+    }
+
+//    private static Canny canny = new Canny();
 }
 
 

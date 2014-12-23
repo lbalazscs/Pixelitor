@@ -16,8 +16,10 @@
  */
 package pixelitor.filters.gui;
 
+import pixelitor.filters.Filter;
 import pixelitor.utils.IconUtils;
 
+import java.awt.EventQueue;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -88,9 +90,17 @@ public class ParamSet implements Iterable<GUIParam> {
     }
 
     public void randomize() {
+        assert EventQueue.isDispatchThread();
+
+        long before = Filter.runCount;
+
         for (GUIParam param : paramList) {
             param.randomize();
         }
+
+        // this call is not supposed to trigger the filter
+        long after = Filter.runCount;
+        assert before == after : "before = " + before + ", after = " + after;
     }
 
     public void startPresetAdjusting() {

@@ -324,7 +324,9 @@ public class ImageLayer extends ContentLayer {
     public boolean changePreviewImage(BufferedImage img, String filterName) {
 //        System.out.println(String.format("ImageLayer::changePreviewImage: filterName = '%s'", filterName));
 
-        assert state == State.PREVIEW : "state was " + state + ", with the filter " + filterName;
+        assert state == State.PREVIEW : "state was " + state +
+                ", with the filter " + filterName +
+                ", in the composition " + comp.getName();
         assert previewImage != null : "previewImage was null with " + filterName;
 
         if (img == null) {

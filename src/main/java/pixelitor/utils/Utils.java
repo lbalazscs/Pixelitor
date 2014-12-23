@@ -397,7 +397,6 @@ public final class Utils {
             ((FilterWithParametrizedGUI)filter).endDialogSession();
 
             double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
-//            System.out.println(String.format("Utils::findSlowestFilter: %s took '%.2f'", filter.getName(), estimatedSeconds));
             results.put(filter.getName(), estimatedSeconds);
         }
         Collections.sort(filtersToTest, new Comparator<Filter>() {

@@ -199,6 +199,10 @@ public class BoxBlurFilter extends AbstractBufferedImageOp {
                 out[outIndex] = (a1 << 24) | (r1 << 16) | (g1 << 8) | b1;
                 outIndex += height;
             }
+
+            // Laszlo: we get an array index out of bounds exception here
+            // if either the width or the height of the image is 1 pixel.
+            // In Pixelitor these cases are already filtered before we get here
             out[outIndex] = in[width - 1];
             inIndex += width;
         }

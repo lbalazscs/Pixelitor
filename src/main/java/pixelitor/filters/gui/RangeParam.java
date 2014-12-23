@@ -99,11 +99,17 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
      */
     @Override
     public void reset(boolean triggerAction) {
-        if (!triggerAction) {
-            dontTrigger = true;
+        if (triggerAction) {
+            setValue(defaultValue);
+        } else {
+            setValueWithoutTrigger(defaultValue);
         }
-        setValue(defaultValue);
-        dontTrigger = false;
+
+//        if (!triggerAction) {
+//            dontTrigger = true;
+//        }
+//        setValue(defaultValue);
+//        dontTrigger = false;
     }
 
     /**
@@ -208,8 +214,20 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
     }
 
     /**
-     * This is only used programmatically, therefore
-     * it never triggers the filter or anything else
+     * This is like setValue, but it guarantees that the filter will not be triggered.
+     * (When grouped RangeParams are updating each other, it cannot be done with the
+     * dontTrigger global variable, because dontTrigger will be set to false too early)
+     */
+    public void setValueWithoutTrigger(int n) {
+        if (value != n) {
+            value = n;
+            fireStateChanged();
+        }
+    }
+
+    /**
+     * This is only used programmatically while tweening, therefore
+     * it never triggers the filter or the GUI
      */
     public void setValueAsDouble(double d) {
         value = d;
@@ -268,7 +286,8 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
                 if (changeEvent == null) {
                     changeEvent = new ChangeEvent(this);
                 }
-                ((ChangeListener) listeners[i + 1]).stateChanged(changeEvent);
+                ChangeListener listener = (ChangeListener) listeners[i + 1];
+                listener.stateChanged(changeEvent);
             }
         }
     }

@@ -27,15 +27,15 @@ import pixelitor.filters.gui.RangeParam;
 import java.awt.image.BufferedImage;
 
 /**
- * Fisheye based on the JHLabs SphereFilter
+ * "Lens over image" effect based on the JHLabs SphereFilter
  */
 public class JHLensOverImage extends FilterWithParametrizedGUI {
+    private final ImagePositionParam center = new ImagePositionParam("Center");
     private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 0, 999, 200);
 
     // less than 100% doesn't create anything usable
     private final RangeParam refractionIndex = new RangeParam("Refraction Index (%)", 100, 300, 150);
 
-    private final ImagePositionParam center = new ImagePositionParam("Center");
     //    private IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
     private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
 
@@ -44,9 +44,9 @@ public class JHLensOverImage extends FilterWithParametrizedGUI {
     public JHLensOverImage() {
         super("Lens Over Image", true, true);
         setParamSet(new ParamSet(
+                center,
                 radius.adjustRangeToImageSize(1.0),
                 refractionIndex,
-                center,
 //                edgeAction,  // edge action doesn't create anything usable in this case
                 interpolation
         ));
@@ -68,8 +68,6 @@ public class JHLensOverImage extends FilterWithParametrizedGUI {
 
         filter.setCentreX(center.getRelativeX());
         filter.setCentreY(center.getRelativeY());
-
-//        filter.setRadius(radius.getValue());
 
         filter.setA(hRadius);
         filter.setB(vRadius);
