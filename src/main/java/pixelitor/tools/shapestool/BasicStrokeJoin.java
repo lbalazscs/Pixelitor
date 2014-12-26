@@ -22,29 +22,24 @@ import java.awt.BasicStroke;
  * An enum wrapper around the join argument of a BasicStroke constructor
  */
 enum BasicStrokeJoin {
-    ROUND(BasicStroke.JOIN_ROUND) {
-        @Override
-        public String toString() {
-            return "Round";
-        }
-    }, BEVEL(BasicStroke.JOIN_BEVEL) {
-        @Override
-        public String toString() {
-            return "Bevel";
-        }
-    }, MITER(BasicStroke.JOIN_MITER) {
-        @Override
-        public String toString() {
-            return "Miter";
-        }
-    };
-    private final int value;
+    ROUND("Round", BasicStroke.JOIN_ROUND),
+    BEVEL("Bevel", BasicStroke.JOIN_BEVEL),
+    MITER("Miter", BasicStroke.JOIN_MITER);
 
-    BasicStrokeJoin(int value) {
+    private final int value;
+    private final String guiName;
+
+    BasicStrokeJoin(String guiName, int value) {
+        this.guiName = guiName;
         this.value = value;
     }
 
     public int getValue() {
         return value;
+    }
+
+    @Override
+    public String toString() {
+        return guiName;
     }
 }

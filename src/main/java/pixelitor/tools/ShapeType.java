@@ -33,32 +33,22 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
 
 /**
- *
+ * The shapes types in the shapes tool
  */
 public enum ShapeType {
-    RECTANGLE(true) {
+    RECTANGLE("Rectangle", true) {
         @Override
         public Shape getShape(UserDrag userDrag) {
             updateCoordinatesPositive(userDrag);
             return new Rectangle(x, y, width, height);
         }
-
-        @Override
-        public String toString() {
-            return "Rectangle";
-        }
-    }, ELLIPSE(true) {
+    }, ELLIPSE("Ellipse", true) {
         @Override
         public Shape getShape(UserDrag userDrag) {
             updateCoordinatesPositive(userDrag);
             return new Ellipse2D.Float(x, y, width, height);
         }
-
-        @Override
-        public String toString() {
-            return "Ellipse";
-        }
-    }, DIAMOND(true) {
+    }, DIAMOND("Diamond", true) {
         @Override
         public Shape getShape(UserDrag userDrag) {
             updateCoordinates(userDrag);
@@ -75,34 +65,19 @@ public enum ShapeType {
 
             return path;
         }
-
-        @Override
-        public String toString() {
-            return "Diamond";
-        }
-    }, LINE(false) {
+    }, LINE("Line", false) {
         @Override
         public Shape getShape(UserDrag userDrag) {
 //            updateCoordinatesPositive(start, end);
             return userDrag.asLine();
         }
-
-        @Override
-        public String toString() {
-            return "Line";
-        }
-    }, HEART(true) {
+    }, HEART("Heart", true) {
         @Override
         public Shape getShape(UserDrag userDrag) {
             updateCoordinates(userDrag);
             return new Heart(x, y, width, height);
         }
-
-        @Override
-        public String toString() {
-            return "Heart";
-        }
-    }, STAR(true) {
+    }, STAR("Star", true) {
         @Override
         public Shape getShape(UserDrag userDrag) {
             updateCoordinates(userDrag);
@@ -125,12 +100,7 @@ public enum ShapeType {
 
             return new Star2D(cx, cy, innerRadius, outerRadius, 7);
         }
-
-        @Override
-        public String toString() {
-            return "Star";
-        }
-    }, RANDOM_STAR(true) {
+    }, RANDOM_STAR("Random Star", true) {
         private UserDrag lastUserDrag;
         private RandomStar lastStar;
 
@@ -146,13 +116,7 @@ public enum ShapeType {
             updateCoordinates(userDrag);
             return new RandomStar(x, y, width, height);
         }
-
-        @Override
-        public String toString() {
-            return "Random Star";
-        }
-
-    }, ARROW(true) {
+    }, ARROW("Arrow", true) {
         GeneralPath unitArrow = null;
 
         @Override
@@ -176,67 +140,36 @@ public enum ShapeType {
             transform.rotate(angle);
             return transform.createTransformedShape(unitArrow);
         }
-
-
-        @Override
-        public String toString() {
-            return "Arrow";
-        }
-    }, CAT(true) {
+    }, CAT("Cat", true) {
         @Override
         public Shape getShape(UserDrag userDrag) {
             updateCoordinates(userDrag);
             return new Cat(x, y, width, height);
         }
-
-        @Override
-        public String toString() {
-            return "Cat";
-        }
-    }, KIWI(true) {
+    }, KIWI("Kiwi", true) {
         @Override
         public Shape getShape(UserDrag userDrag) {
             updateCoordinates(userDrag);
             return new Kiwi(x, y, width, height);
         }
-
-        @Override
-        public String toString() {
-            return "Kiwi";
-        }
-    }, BAT(true) {
+    }, BAT("Bat", true) {
         @Override
         public Shape getShape(UserDrag userDrag) {
             updateCoordinates(userDrag);
             return new Bat(x, y, width, height);
         }
-
-        @Override
-        public String toString() {
-            return "Bat";
-        }
-    }, RABBIT(true) {
+    }, RABBIT("Rabbit", true) {
         @Override
         public Shape getShape(UserDrag userDrag) {
             updateCoordinates(userDrag);
             return new Rabbit(x, y, width, height);
         }
-
-        @Override
-        public String toString() {
-            return "Rabbit";
-        }
-//    }, SKULL(true) {
+//    }, SKULL("Skull", true) {
 //        @Override
 //        public Shape getShape(UserDrag userDrag) {
 //            updateCoordinates(userDrag);
 //            return new Skull(x, y, width, height);
 //        }
-//        @Override
-//        public String toString() {
-//            return "Skull";
-//        }
-
     };
 
     /**
@@ -262,9 +195,11 @@ public enum ShapeType {
         height = r.height;
     }
 
+    private final String guiName;
     private final boolean closed;
 
-    ShapeType(boolean closed) {
+    ShapeType(String guiName, boolean closed) {
+        this.guiName = guiName;
         this.closed = closed;
     }
 
@@ -274,5 +209,10 @@ public enum ShapeType {
 
     public boolean isClosed() {
         return closed;
+    }
+
+    @Override
+    public String toString() {
+        return guiName;
     }
 }

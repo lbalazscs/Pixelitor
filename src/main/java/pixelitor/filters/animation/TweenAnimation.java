@@ -21,6 +21,7 @@ import pixelitor.filters.gui.ParamSetState;
 import pixelitor.utils.Dialogs;
 
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.io.File;
 
 public class TweenAnimation {
@@ -94,6 +95,7 @@ public class TweenAnimation {
      * @return true if the rendering can proceed
      */
     public boolean checkOverwrite(Component dialogParent) {
+        assert EventQueue.isDispatchThread();
         if (outputType.needsDirectory()) {
             if (output.list().length == 0) {
                 return true;

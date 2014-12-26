@@ -31,7 +31,7 @@ import java.awt.Stroke;
  * Some members are also used in some brushes.
  */
 public enum StrokeType {
-    BASIC {
+    BASIC("Basic") {
         @Override
         public Stroke getStroke(float width, int cap, int join, float[] dashFloats) {
             Stroke stroke = new BasicStroke(width, cap, join, 1.5f,
@@ -41,15 +41,10 @@ public enum StrokeType {
         }
 
         @Override
-        public String toString() {
-            return "Basic";
-        }
-
-        @Override
         public int getExtraWidth(int specifiedWidth) {
             return 0;
         }
-    }, WOBBLE {
+    }, WOBBLE("Wobble") {
         private float lastWidth = 0.0f;
         private WobbleStroke wobbleStroke;
 
@@ -78,15 +73,10 @@ public enum StrokeType {
         }
 
         @Override
-        public String toString() {
-            return "Wobble";
-        }
-
-        @Override
         public int getExtraWidth(int specifiedWidth) {
             return (int) (specifiedWidth * 1.5);
         }
-    }, ZIGZAG {
+    }, ZIGZAG("Zigzag") {
         private Stroke tmp;
 
         @Override
@@ -102,15 +92,10 @@ public enum StrokeType {
         }
 
         @Override
-        public String toString() {
-            return "Zigzag";
-        }
-
-        @Override
         public int getExtraWidth(int specifiedWidth) {
             return specifiedWidth / 2;
         }
-    }, OUTLINE_CIRCLE {
+    }, OUTLINE_CIRCLE("Outline Circle") {
         @Override
         public Stroke getStroke(float width, int cap, int join, float[] dashFloats) {
             Stroke stroke = new CompositeStroke(
@@ -125,15 +110,10 @@ public enum StrokeType {
         }
 
         @Override
-        public String toString() {
-            return "Outline Circle";
-        }
-
-        @Override
         public int getExtraWidth(int specifiedWidth) {
             return 0;
         }
-    }, OUTLINE_SQUARE {
+    }, OUTLINE_SQUARE("Outline Square") {
         @Override
         public Stroke getStroke(float width, int cap, int join, float[] dashFloats) {
             Stroke stroke = new CompositeStroke(
@@ -148,30 +128,20 @@ public enum StrokeType {
         }
 
         @Override
-        public String toString() {
-            return "Outline Square";
-        }
-
-        @Override
         public int getExtraWidth(int specifiedWidth) {
             return 0;
         }
-    }, CALLIGRAPHY {
+    }, CALLIGRAPHY("Calligraphy") {
         @Override
         public Stroke getStroke(float width, int cap, int join, float[] dashFloats) {
             return new CalligraphyStroke(width);
         }
 
         @Override
-        public String toString() {
-            return "Calligraphy";
-        }
-
-        @Override
         public int getExtraWidth(int specifiedWidth) {
             return 0;
         }
-    }, SHAPE {
+    }, SHAPE("Shape") {
         private ShapeType shapeType;
 
         @Override
@@ -198,11 +168,6 @@ public enum StrokeType {
         }
 
         @Override
-        public String toString() {
-            return "Shape";
-        }
-
-        @Override
         public int getExtraWidth(int specifiedWidth) {
             return 0;
         }
@@ -210,6 +175,12 @@ public enum StrokeType {
 
     private static final float OUTLINE_WIDTH = 1.0f;
     public BasicStroke innerOutlineStroke = new BasicStroke(OUTLINE_WIDTH);
+
+    private final String guiName;
+
+    StrokeType(String guiName) {
+        this.guiName = guiName;
+    }
 
     /**
      * Some strokes have an inner stoke. They can return here a non-null value
@@ -237,6 +208,11 @@ public enum StrokeType {
      */
     public Stroke getStroke(float width) {
         return getStroke(width, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, null);
+    }
+
+    @Override
+    public String toString() {
+        return guiName;
     }
 }
 

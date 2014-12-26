@@ -205,5 +205,10 @@ public final class History {
 
         undoManager.dumpHistory();
     }
+
+    // for debugging only
+    public static PixelitorEdit getLastEdit() {
+        return undoManager.getLastEdit();
+    }
 }
 

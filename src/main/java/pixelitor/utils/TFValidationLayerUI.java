@@ -34,8 +34,8 @@ public class TFValidationLayerUI extends LayerUI<JTextField> {
     public void paint(Graphics g, JComponent c) {
         super.paint(g, c);
 
-        JLayer jlayer = (JLayer) c;
-        JTextField textField = (JTextField) jlayer.getView();
+        JLayer<JTextField> jLayer = (JLayer<JTextField>) c;
+        JTextField textField = jLayer.getView();
         if (!validator.isValid(textField)) {
             Graphics2D g2 = (Graphics2D) g.create();
 

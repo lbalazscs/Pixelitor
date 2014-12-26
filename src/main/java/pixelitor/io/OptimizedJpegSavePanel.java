@@ -105,7 +105,7 @@ public class OptimizedJpegSavePanel extends JPanel {
                 imageWithSize[0] = JpegOutput.writeJPGtoPreviewImage(OptimizedJpegSavePanel.this.image, quality);
             }
         };
-        Utils.executeWithBusyCursor(this, task, false);
+        Utils.executeWithBusyCursor(this, task);
 
         BufferedImage newPreview = imageWithSize[0].getImage();
         optimized.updateImage(newPreview);

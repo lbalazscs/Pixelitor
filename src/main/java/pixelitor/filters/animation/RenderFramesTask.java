@@ -20,6 +20,7 @@ import pixelitor.ChangeReason;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
 import pixelitor.PixelitorWindow;
+import pixelitor.filters.Filter;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.ParamSetState;
 import pixelitor.layers.ImageLayer;
@@ -57,8 +58,6 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         int numFrames = animation.getNumFrames();
         FilterWithParametrizedGUI filter = animation.getFilter();
 
-        double[] time = new double[numFrames];
-
         AnimationWriter animationWriter = animation.createAnimationWriter();
         boolean canceled = false;
 
@@ -67,25 +66,17 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
 
         activeImageLayer.tweenCalculatingStarted();
 
-        for (int i = 0; i < numFrames; i++) {
+        for (int frameNr = 0; frameNr < numFrames; frameNr++) {
             if (isCancelled()) {
                 canceled = true;
                 break;
             }
-            int percentProgress = (int) ((100.0 * i) / numFrames);
+            int percentProgress = (int) ((100.0 * frameNr) / numFrames);
             setProgress(percentProgress);
 
-            time[i] = ((double) i) / numFrames;
-            ParamSetState intermediateState = animation.tween(time[i]);
-            filter.getParamSet().setState(intermediateState);
+            double time = ((double) frameNr) / numFrames;
 
-            Utils.executeFilterWithBusyCursor(filter, ChangeReason.OP_PREVIEW, busyCursorParent);
-
-            ImageComponent ic = ImageComponents.getActiveImageComponent();
-            ic.repaint();
-
-            BufferedImage image = ImageComponents.getActiveCompositeImage();
-//            image = ImageUtils.copyImage(image); // TODO is this necessary?
+            BufferedImage image = renderFrame(filter, time, busyCursorParent);
 
             try {
                 animationWriter.addFrame(image);
@@ -103,6 +94,23 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         } else {
             animationWriter.finish();
         }
+    }
+
+    private BufferedImage renderFrame(FilterWithParametrizedGUI filter, double time, PixelitorWindow busyCursorParent) {
+        long runCountBefore = Filter.runCount;
+
+        ParamSetState intermediateState = animation.tween(time);
+        filter.getParamSet().setState(intermediateState);
+
+        Utils.executeFilterWithBusyCursor(filter, ChangeReason.OP_PREVIEW, busyCursorParent);
+
+        long runCountAfter = Filter.runCount;
+        assert runCountAfter == runCountBefore + 1;
+
+        ImageComponent ic = ImageComponents.getActiveImageComponent();
+        ic.repaint();
+
+        return ImageComponents.getActiveCompositeImage();
     }
 
     @Override

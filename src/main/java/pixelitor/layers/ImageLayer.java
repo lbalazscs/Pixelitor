@@ -664,13 +664,12 @@ public class ImageLayer extends ContentLayer {
 
         assert ConsistencyChecks.translationCheck(comp);
 
-
-        BufferedImage image;
+        BufferedImage subImage;
         try {
-            image = this.image.getSubimage(x, y, canvasWidth, canvasHeight);
+            subImage = image.getSubimage(x, y, canvasWidth, canvasHeight);
         } catch (RasterFormatException e) {
             System.out.println("ImageLayer.createCompositionSizedSubImage x = " + x + ", y = " + y + ", canvasWidth = " + canvasWidth + ", canvasHeight = " + canvasHeight);
-            WritableRaster raster = this.image.getRaster();
+            WritableRaster raster = image.getRaster();
             int minX = raster.getMinX();
             int minY = raster.getMinY();
             System.out.println("ImageLayer.createCompositionSizedSubImage minX = " + minX + ", minY = " + minY);
@@ -678,7 +677,7 @@ public class ImageLayer extends ContentLayer {
             throw e;
         }
 
-        return image;
+        return subImage;
     }
 
     public BufferedImage getFilterSourceImage() {

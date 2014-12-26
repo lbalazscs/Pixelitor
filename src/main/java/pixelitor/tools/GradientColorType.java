@@ -19,90 +19,69 @@ package pixelitor.tools;
 import java.awt.Color;
 
 /**
- *
+ * The color option in the gradient tool
  */
 public enum GradientColorType {
-    FG_TO_BG {
+    FG_TO_BG("Foreground to Background") {
         @Override
-        public String toString() {
-            return "Foreground to Background";
-        }
-
-        @Override
-        public Color getStartColor() {
-            if (isInverted()) {
-                return FgBgColorSelector.getBG();
-            }
+        protected Color getA() {
             return FgBgColorSelector.getFG();
         }
 
         @Override
-        public Color getEndColor() {
-            if (isInverted()) {
-                return FgBgColorSelector.getFG();
-            }
+        protected Color getB() {
             return FgBgColorSelector.getBG();
         }
-    },
-    FG_TO_TRANSPARENT {
+    }, FG_TO_TRANSPARENT("Foreground to Transparent") {
         private final Color transparentColor = new Color(0, 0, 0, 0);
 
         @Override
-        public String toString() {
-            return "Foreground to Transparent";
-        }
-
-        @Override
-        public Color getStartColor() {
-            if (isInverted()) {
-                return transparentColor;
-            }
+        protected Color getA() {
             return FgBgColorSelector.getFG();
         }
 
         @Override
-        public Color getEndColor() {
-            if (isInverted()) {
-                return FgBgColorSelector.getFG();
-            }
+        protected Color getB() {
             return transparentColor;
         }
-    },
-    BLACK_TO_WHITE {
+    }, BLACK_TO_WHITE("Black to White") {
         @Override
-        public String toString() {
-            return "Black to White";
-        }
-
-        @Override
-        public Color getStartColor() {
-            if (isInverted()) {
-                return Color.WHITE;
-            }
+        protected Color getA() {
             return Color.BLACK;
         }
 
         @Override
-        public Color getEndColor() {
-            if (isInverted()) {
-                return Color.BLACK;
-            }
+        protected Color getB() {
             return Color.WHITE;
         }
     };
 
-    public abstract Color getStartColor();
+    private final String guiName;
 
-    public abstract Color getEndColor();
-
-
-    public boolean isInverted() {
-        return invert;
+    GradientColorType(String guiName) {
+        this.guiName = guiName;
     }
 
-    public void setInvert(boolean invert) {
-        this.invert = invert;
+    protected abstract Color getA();
+
+    protected abstract Color getB();
+
+    public Color getStartColor(boolean invert) {
+        if (invert) {
+            return getB();
+        }
+        return getA();
     }
 
-    private boolean invert;
+    public Color getEndColor(boolean invert) {
+        if (invert) {
+            return getA();
+        }
+        return getB();
+    }
+
+    @Override
+    public String toString() {
+        return guiName;
+    }
 }

@@ -50,8 +50,10 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 public class OpenRaster {
+    private OpenRaster() {
+    }
+
     public static void writeOpenRaster(Composition comp, File outFile, boolean addMergedImage) throws IOException {
-        // TODO use try with resources
         FileOutputStream fos = new FileOutputStream(outFile);
         ZipOutputStream zos = new ZipOutputStream(fos);
 
@@ -104,27 +106,26 @@ public class OpenRaster {
     public static Composition readOpenRaster(File file) throws IOException, ParserConfigurationException, SAXException {
         boolean DEBUG = System.getProperty("openraster.debug", "false").equals("true");
 
-        ZipFile zipFile = new ZipFile(file);
-
-        Map<String, BufferedImage> images = new HashMap<>();
         String stackXML = null;
+        Map<String, BufferedImage> images = new HashMap<>();
+        try (ZipFile zipFile = new ZipFile(file)) {
+            Enumeration<? extends ZipEntry> fileEntries = zipFile.entries();
+            while (fileEntries.hasMoreElements()) {
+                ZipEntry entry = fileEntries.nextElement();
+                String name = entry.getName();
 
-        Enumeration<? extends ZipEntry> fileEntries = zipFile.entries();
-        while(fileEntries.hasMoreElements()){
-            ZipEntry entry = fileEntries.nextElement();
-            String name = entry.getName();
-
-            if(name.equalsIgnoreCase("stack.xml")) {
-                stackXML = extractString(zipFile.getInputStream(entry));
-            } else if(name.equalsIgnoreCase("mergedimage.png")) {
-                // no need for that
-            } else {
-                String extension = FileExtensionUtils.getFileExtension(name);
-                if("png".equalsIgnoreCase(extension)) {
-                    BufferedImage image = ImageIO.read(zipFile.getInputStream(entry));
-                    images.put(name, image);
-                    if(DEBUG) {
-                        System.out.println(String.format("OpenRaster::readOpenRaster: found png image in zip file at the path '%s'", name));
+                if (name.equalsIgnoreCase("stack.xml")) {
+                    stackXML = extractString(zipFile.getInputStream(entry));
+                } else if (name.equalsIgnoreCase("mergedimage.png")) {
+                    // no need for that
+                } else {
+                    String extension = FileExtensionUtils.getFileExtension(name);
+                    if ("png".equalsIgnoreCase(extension)) {
+                        BufferedImage image = ImageIO.read(zipFile.getInputStream(entry));
+                        images.put(name, image);
+                        if (DEBUG) {
+                            System.out.println(String.format("OpenRaster::readOpenRaster: found png image in zip file at the path '%s'", name));
+                        }
                     }
                 }
             }

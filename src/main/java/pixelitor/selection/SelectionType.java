@@ -27,29 +27,19 @@ import java.awt.geom.GeneralPath;
  * The type of a new selection created interactively by the user
  */
 public enum SelectionType {
-    RECTANGLE {
+    RECTANGLE("Rectangle") {
         @Override
         public Shape updateShape(UserDrag userDrag, Shape currentSelectionShape) {
             Rectangle dragRectangle = userDrag.createPositiveRectangle();
             return dragRectangle;
         }
-
-        @Override
-        public String toString() {
-            return "Rectangle";
-        }
-    }, ELLIPSE {
+    }, ELLIPSE("Ellipse") {
         @Override
         public Shape updateShape(UserDrag userDrag, Shape currentSelectionShape) {
             Rectangle dr = userDrag.createPositiveRectangle();
             return new Ellipse2D.Float(dr.x, dr.y, dr.width, dr.height);
         }
-
-        @Override
-        public String toString() {
-            return "Ellipse";
-        }
-    }, LASSO {
+    }, LASSO("Freehand") {
         @Override
         public Shape updateShape(UserDrag userDrag, Shape currentSelectionShape) {
             boolean createNew;
@@ -73,12 +63,7 @@ public enum SelectionType {
                 return gp;
             }
         }
-
-        @Override
-        public String toString() {
-            return "Freehand";
-        }
-//    }, POLYGONAL_LASSO {
+//    }, POLYGONAL_LASSO("Polygonal") {
 //        @Override
 //        public Shape updateShape(UserDrag userDrag, Shape currentSelectionShape) {
 //            boolean createNew = false;
@@ -105,13 +90,18 @@ public enum SelectionType {
 //                return polygon;
 //            }
 //        }
-//
-//
-//        @Override
-//        public String toString() {
-//            return "Polygonal";
-//        }
     };
 
+    private final String guiName;
+
+    SelectionType(String guiName) {
+        this.guiName = guiName;
+    }
+
     public abstract Shape updateShape(UserDrag userDrag, Shape currentSelectionShape);
+
+    @Override
+    public String toString() {
+        return guiName;
+    }
 }

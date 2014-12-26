@@ -27,7 +27,6 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 
@@ -145,8 +144,6 @@ public abstract class Filter extends AbstractAction implements Comparable<Filter
     }
 
     public BufferedImage executeForOneLayer(BufferedImage src) {
-        assert EventQueue.isDispatchThread();
-
         BufferedImage dest = null;
         if (createDefaultDestBuffer()) {
             if (copyContents()) {

@@ -23,7 +23,7 @@ import java.util.Random;
  * The available zoom levels
  */
 public enum ZoomLevel {
-    Z12 {
+    Z12("12.5 %") {
         @Override
         public double getPercentValue() {
             return 12.5;
@@ -38,13 +38,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z12;
         }
-
-        @Override
-        public String toString() {
-            return "12.5 %";
-        }
-    }, Z12plus { // 12.5 * sqrt(2)
-
+    }, Z12plus("17.7 %") { // 12.5 * sqrt(2)
         @Override
         public double getPercentValue() {
             return 17.677669529663688110021109052621;
@@ -59,13 +53,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z12;
         }
-
-        @Override
-        public String toString() {
-            return "17.7 %";
-        }
-
-    }, Z25 {
+    }, Z25("25 %") {
         @Override
         public double getPercentValue() {
             return 25;
@@ -80,12 +68,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z12plus;
         }
-
-        @Override
-        public String toString() {
-            return "25 %";
-        }
-    }, Z25plus {
+    }, Z25plus("35.3 %") {
         @Override
         public double getPercentValue() {
             return 35.355339059327376220042218105242;
@@ -100,12 +83,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z25;
         }
-
-        @Override
-        public String toString() {
-            return "35.3 %";
-        }
-    }, Z50 {
+    }, Z50("50 %") {
         @Override
         public double getPercentValue() {
             return 50;
@@ -120,12 +98,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z25plus;
         }
-
-        @Override
-        public String toString() {
-            return "50 %";
-        }
-    }, Z50plus {
+    }, Z50plus("70.7 %") {
         @Override
         public double getPercentValue() {
             return 70.710678118654752440084436210485;
@@ -140,12 +113,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z50;
         }
-
-        @Override
-        public String toString() {
-            return "70.7 %";
-        }
-    }, Z100 {
+    }, Z100("100 %") {
         @Override
         public double getPercentValue() {
             return 100;
@@ -160,12 +128,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z50plus;
         }
-
-        @Override
-        public String toString() {
-            return "100 %";
-        }
-    }, Z100plus {
+    }, Z100plus("141.4 %") {
         @Override
         public double getPercentValue() {
             return 141.42135623730950488016887242097;
@@ -180,12 +143,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z100;
         }
-
-        @Override
-        public String toString() {
-            return "141.4 %";
-        }
-    }, Z200 {
+    }, Z200("200 %") {
         @Override
         public double getPercentValue() {
             return 200;
@@ -200,12 +158,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z100plus;
         }
-
-        @Override
-        public String toString() {
-            return "200 %";
-        }
-    }, Z200plus {
+    }, Z200plus("282.8 %") {
         @Override
         public double getPercentValue() {
             return 282.84271247461900976033774484194;
@@ -220,12 +173,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z200;
         }
-
-        @Override
-        public String toString() {
-            return "282.8 %";
-        }
-    }, Z400 {
+    }, Z400("400 %") {
         @Override
         public double getPercentValue() {
             return 400;
@@ -240,12 +188,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z200plus;
         }
-
-        @Override
-        public String toString() {
-            return "400 %";
-        }
-    }, Z400plus {
+    }, Z400plus("565.7 %") {
         @Override
         public double getPercentValue() {
             return 565.68542494923801952067548968388;
@@ -260,12 +203,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z400;
         }
-
-        @Override
-        public String toString() {
-            return "565.7 %";
-        }
-    }, Z800 {
+    }, Z800("800 %") {
         @Override
         public double getPercentValue() {
             return 800;
@@ -280,12 +218,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z400plus;
         }
-
-        @Override
-        public String toString() {
-            return "800 %";
-        }
-    }, Z800plus {
+    }, Z800plus("1131.4 %") {
         @Override
         public double getPercentValue() {
             return 1131.3708498984760390413509793678;
@@ -300,12 +233,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z800;
         }
-
-        @Override
-        public String toString() {
-            return "1131.4 %";
-        }
-    }, Z1600 {
+    }, Z1600("1600 %") {
         @Override
         public double getPercentValue() {
             return 1600;
@@ -320,12 +248,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z800plus;
         }
-
-        @Override
-        public String toString() {
-            return "1600 %";
-        }
-    }, Z1600plus {
+    }, Z1600plus("2262.7 %") {
         @Override
         public double getPercentValue() {
             return 2262.7416997969520780827019587355;
@@ -340,12 +263,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z1600;
         }
-
-        @Override
-        public String toString() {
-            return "2262.7 %";
-        }
-    }, Z3200 {
+    }, Z3200("3200 %") {
         @Override
         public double getPercentValue() {
             return 3200;
@@ -360,12 +278,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z1600plus;
         }
-
-        @Override
-        public String toString() {
-            return "3200 %";
-        }
-    }, Z3200plus {
+    }, Z3200plus("4525.5 %") {
         @Override
         public double getPercentValue() {
             return 4525.483399593904156165403917471;
@@ -380,12 +293,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z3200;
         }
-
-        @Override
-        public String toString() {
-            return "4525.5 %";
-        }
-    }, Z6400 {
+    }, Z6400("6400 %") {
         @Override
         public double getPercentValue() {
             return 6400;
@@ -400,15 +308,31 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z3200plus;
         }
-
-        @Override
-        public String toString() {
-            return "6400 %";
-        }
     };
 
     private BasicStroke outerGeometryStroke;
     private BasicStroke innerGeometryStroke;
+    private final String guiName;
+
+    ZoomLevel(String guiName) {
+        this.guiName = guiName;
+    }
+
+    private ZoomMenuItem menuItem;
+
+    @Override
+    public String toString() {
+        return guiName;
+    }
+
+    public ZoomMenuItem getMenuItem() {
+        // The menuItem must be initialized here in order to make sure that
+        // it runs after the enum constructor, therefore it has a name
+        if (menuItem == null) {
+            menuItem = new ZoomMenuItem(this);
+        }
+        return menuItem;
+    }
 
     public BasicStroke getOuterGeometryStroke() {
         if (outerGeometryStroke == null) {
@@ -429,32 +353,6 @@ public enum ZoomLevel {
     public abstract ZoomLevel zoomIn();
 
     public abstract ZoomLevel zoomOut();
-
-//    public Point fromComponentSpaceToImage(Point input) {
-//        double zoom = 100.0 / getPercentValue();
-//        return new Point((int)(input.x*zoom), (int)(input.y*zoom));
-//    }
-//
-//    public Rectangle fromComponentSpaceToImage(Rectangle input) {
-//        double zoom = 100.0 / getPercentValue();
-//        return new Rectangle((int)(input.x*zoom), (int)(input.y*zoom), (int)(input.width*zoom), (int)(input.height*zoom));
-//    }
-//
-//    public Point fromImageSpaceToComponent(Point input) {
-//        double zoom = getPercentValue() / 100.0;
-//        return new Point((int)(input.x*zoom), (int)(input.y*zoom));
-//    }
-
-//    public Rectangle fromImageSpaceToComponent(Rectangle input) {
-//        double zoom = getPercentValue() / 100.0;
-//        return new Rectangle((int)(input.x*zoom), (int)(input.y*zoom), (int)(input.width*zoom), (int)(input.height*zoom));
-//    }
-
-    private final ZoomMenuItem menuItem = new ZoomMenuItem(this);
-
-    public ZoomMenuItem getMenuItem() {
-        return menuItem;
-    }
 
     public static ZoomLevel getRandomZoomLevel(Random rand) {
         int index = rand.nextInt(values().length);

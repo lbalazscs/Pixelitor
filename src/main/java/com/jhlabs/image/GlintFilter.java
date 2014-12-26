@@ -177,7 +177,11 @@ public class GlintFilter extends AbstractBufferedImageOp {
         final int width = src.getWidth();
         final int height = src.getHeight();
         final int[] pixels = new int[width];
-        final int length2 = (int) (length / 1.414f);
+
+        // Laszlo: added this in order to prevent division by 0
+        int calculatedLength2 = (int) (length / 1.414f);
+        final int length2 = calculatedLength2 > 0 ? calculatedLength2 : 1;
+
         final int[] colors = new int[length + 1];
         final int[] colors2 = new int[length2 + 1];
 

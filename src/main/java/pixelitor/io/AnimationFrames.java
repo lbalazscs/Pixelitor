@@ -75,7 +75,7 @@ public class AnimationFrames {
                 }
             }
         };
-        Utils.executeWithBusyCursor(r, false);
+        Utils.executeWithBusyCursor(r);
     }
 
 }

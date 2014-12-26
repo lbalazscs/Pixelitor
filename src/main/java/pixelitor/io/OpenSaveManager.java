@@ -89,7 +89,7 @@ public class OpenSaveManager {
                 PixelitorWindow.getInstance().addNewImage(img, selectedFile, null);
             }
         };
-        Utils.executeWithBusyCursor(r, false);
+        Utils.executeWithBusyCursor(r);
     }
 
 
@@ -141,7 +141,7 @@ public class OpenSaveManager {
                 }
             }
         };
-        Utils.executeWithBusyCursor(r, false);
+        Utils.executeWithBusyCursor(r);
     }
 
     public static void warnAndCloseImage(ImageComponent imageComponent) {
@@ -266,7 +266,7 @@ public class OpenSaveManager {
                 }
             }
         };
-        Utils.executeWithBusyCursor(r, false);
+        Utils.executeWithBusyCursor(r);
     }
 
     public static void openAllImagesInDir(File dir) {

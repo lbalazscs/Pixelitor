@@ -95,9 +95,6 @@ public class GradientParam extends AbstractGUIParam {
         return new Colormap() {
             @Override
             public int getColor(float v) {
-//                if(v == Float.NaN) { // a division by 0 can happen in Glint
-//                    return 0;
-//                }
                 Color c = (Color) gradientSlider.getValue(v);
                 if (c == null) {
                     throw new IllegalStateException("null color for v = " + v);

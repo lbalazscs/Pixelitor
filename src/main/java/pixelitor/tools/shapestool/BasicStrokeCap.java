@@ -22,29 +22,24 @@ import java.awt.BasicStroke;
  * An enum wrapper around the cap argument of a BasicStroke constructor
  */
 enum BasicStrokeCap {
-    ROUND(BasicStroke.CAP_ROUND) {
-        @Override
-        public String toString() {
-            return "Round";
-        }
-    }, BUTT(BasicStroke.CAP_BUTT) {
-        @Override
-        public String toString() {
-            return "Butt";
-        }
-    }, SQUARE(BasicStroke.CAP_SQUARE) {
-        @Override
-        public String toString() {
-            return "Square";
-        }
-    };
-    private final int value;
+    ROUND("Round", BasicStroke.CAP_ROUND),
+    BUTT("Butt", BasicStroke.CAP_BUTT),
+    SQUARE("Square", BasicStroke.CAP_SQUARE);
 
-    BasicStrokeCap(int value) {
+    private final int value;
+    private final String guiName;
+
+    BasicStrokeCap(String guiName, int value) {
+        this.guiName = guiName;
         this.value = value;
     }
 
     public int getValue() {
         return value;
+    }
+
+    @Override
+    public String toString() {
+        return guiName;
     }
 }

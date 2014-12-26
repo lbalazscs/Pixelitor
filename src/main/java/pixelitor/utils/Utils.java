@@ -82,16 +82,14 @@ public final class Utils {
     private Utils() {
     }
 
-
-    public static void executeWithBusyCursor(Runnable task, boolean newThread) {
-        executeWithBusyCursor(PixelitorWindow.getInstance(), task, newThread);
+    public static void executeWithBusyCursor(Runnable task) {
+        executeWithBusyCursor(PixelitorWindow.getInstance(), task);
     }
-
 
     /**
      * Executes a task with busy cursor
      */
-    public static void executeWithBusyCursor(final Component parent, Runnable task, boolean newThread) {
+    public static void executeWithBusyCursor(final Component parent, Runnable task) {
         Timer timer = new Timer();
         TimerTask startBusyCursorTask = new TimerTask() {
             @Override
@@ -104,15 +102,7 @@ public final class Utils {
             // if after WAIT_CURSOR_DELAY the original task is still running,
             // set the cursor to the delay cursor
             timer.schedule(startBusyCursorTask, WAIT_CURSOR_DELAY);
-            if (newThread) {
-                new Exception("is this ever true?").printStackTrace();
-
-                Thread t = new Thread(task);
-                t.setPriority(Thread.NORM_PRIORITY); // lower priority than the event thread
-                t.start();
-            } else {
-                task.run(); // on the current thread
-            }
+            task.run(); // on the current thread!
         } finally {
             // when the original task has stopped running, the cursor is reset
             timer.cancel();
@@ -149,7 +139,7 @@ public final class Utils {
                     filter.runit(comp, changeReason);
                 }
             };
-            executeWithBusyCursor(busyCursorParent, task, false);
+            executeWithBusyCursor(busyCursorParent, task);
 
             long totalTime = (System.nanoTime() - startTime) / 1_000_000;
             String performanceMessage;

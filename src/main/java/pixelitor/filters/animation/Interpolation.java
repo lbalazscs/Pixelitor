@@ -4,47 +4,33 @@ package pixelitor.filters.animation;
  * http://www.wolframalpha.com/input/?i=Plot[{x%2C+x*x%2C+-x*%28x+-+2%29%2C++x*x*%283+-+2*x%29}%2C+{x%2C+0%2C+1}]
  */
 public enum Interpolation {
-    LINEAR {
+    LINEAR("Linear (uniform)") {
         @Override
         double time2progress(double time) {
             return time;
         }
-
-        @Override
-        public String toString() {
-            return "Linear (uniform)";
-        }
-    }, QUAD_EASE_IN {
+    }, QUAD_EASE_IN("Ease In (slow start)") {
         @Override
         double time2progress(double time) {
             return time * time;
         }
-
-        @Override
-        public String toString() {
-            return "Ease In (slow start)";
-        }
-    }, QUAD_EASE_OUT {
+    }, QUAD_EASE_OUT("Ease Out (slow stop)") {
         @Override
         double time2progress(double time) {
             return -time * (time - 2);
         }
-
-        @Override
-        public String toString() {
-            return "Ease Out (slow stop)";
-        }
-    }, EASE_IN_OUT {
+    }, EASE_IN_OUT("Ease In and Out") {
         @Override
         double time2progress(double time) {
             return time * time * (3 - 2 * time);
         }
-
-        @Override
-        public String toString() {
-            return "Ease In and Out";
-        }
     };
+
+    private final String guiName;
+
+    Interpolation(String guiName) {
+        this.guiName = guiName;
+    }
 
     /**
      * Transforms the normalized time into the normalized animation progress
@@ -53,4 +39,9 @@ public enum Interpolation {
      * @return a value between 0 and 1
      */
     abstract double time2progress(double time);
+
+    @Override
+    public String toString() {
+        return guiName;
+    }
 }

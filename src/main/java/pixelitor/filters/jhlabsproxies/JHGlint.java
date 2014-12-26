@@ -32,7 +32,8 @@ public class JHGlint extends FilterWithParametrizedGUI {
     private final RangeParam threshold = new RangeParam("Threshold (%)", 0, 100, 70);
     private final RangeParam coverage = new RangeParam("Coverage (%)", 0, 100, 50);
     private final RangeParam intensity = new RangeParam("Intensity (%)", 0, 100, 15);
-    private final RangeParam length = new RangeParam("Length", 0, 100, 20);
+
+    private final RangeParam lengthParam = new RangeParam("Length", 0, 100, 20);
     private final RangeParam blur = new RangeParam("Blur", 0, 20, 1);
 //    private ColorParam color1 = new ColorParam("Inner Color", Color.WHITE, true, true);
 //    private ColorParam color2 = new ColorParam("Outer Color", Color.WHITE, true, true);
@@ -49,7 +50,7 @@ public class JHGlint extends FilterWithParametrizedGUI {
                 threshold,
                 coverage,
                 intensity,
-                length, // if we adjust to the max of image, render times become unbearable for large images
+                lengthParam, // if we adjust to the max of image, render times become unbearable for large images
                 blur,
                 colors
 //                glintOnly
@@ -58,7 +59,11 @@ public class JHGlint extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-//        System.out.println("JHGlint.transform CALLED");
+        int length = lengthParam.getValue();
+        if (length == 0) {
+            // mot just for performance, a 0 length would cause division by 0
+            return src;
+        }
 
         if (filter == null) {
             filter = new GlintFilter();
@@ -67,7 +72,7 @@ public class JHGlint extends FilterWithParametrizedGUI {
         filter.setThreshold(threshold.getValueAsPercentage());
         filter.setCoverage(coverage.getValueAsPercentage());
         filter.setAmount(intensity.getValueAsPercentage());
-        filter.setLength(length.getValue());
+        filter.setLength(length);
         filter.setBlur(blur.getValueAsFloat());
         filter.setColormap(colors.getValue());
 

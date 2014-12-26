@@ -36,280 +36,123 @@ import java.awt.Composite;
  * The blending modes
  */
 public enum BlendingMode {
-    NORMAL {
+    NORMAL("Normal", "svg:src-over") {
         @Override
         public Composite getComposite(float opacity) {
             return AlphaComposite.SrcOver.derive(opacity);
         }
-
-        @Override
-        public String toString() {
-            return "Normal";
-        }
-
-        @Override
-        public String toSVGName() {
-            return "svg:src-over";
-        }
-    }, DARKEN {
+    }, DARKEN("Darken", "svg:darken") {
         @Override
         public Composite getComposite(float opacity) {
 //            return BlendComposite.Darken;
             return new DarkenComposite(opacity);
         }
-
-        @Override
-        public String toString() {
-            return "Darken";
-        }
-
-        @Override
-        public String toSVGName() {
-            return "svg:darken";
-        }
     },
-    MULTIPLY {
+    MULTIPLY("Multiply", "svg:multiply") {
         @Override
         public Composite getComposite(float opacity) {
 //            return BlendComposite.Multiply;
             return new MultiplyComposite(opacity);
         }
-
-        @Override
-        public String toString() {
-            return "Multiply";
-        }
-
-        @Override
-        public String toSVGName() {
-            return "svg:multiply";
-        }
-    }, COLOR_BURN {
+    }, COLOR_BURN("Color Burn", "svg:color-burn") {
         @Override
         public Composite getComposite(float opacity) {
 //            return BlendComposite.ColorBurn;
             return new ColorBurnComposite(opacity);
         }
-
-        @Override
-        public String toString() {
-            return "Color Burn";
-        }
-
-        @Override
-        public String toSVGName() {
-            return "svg:color-burn";
-        }
-    }, LIGHTEN {
+    }, LIGHTEN("Lighten", "svg:lighten") {
         @Override
         public Composite getComposite(float opacity) {
             return BlendComposite.Lighten;
         }
-
-        @Override
-        public String toString() {
-            return "Lighten";
-        }
-
-        @Override
-        public String toSVGName() {
-            return "svg:lighten";
-        }
-    }, SCREEN {
+    }, SCREEN("Screen", "svg:screen") {
         @Override
         public Composite getComposite(float opacity) {
 //            return BlendComposite.Screen;
             return new ScreenComposite(opacity);
         }
-
-        @Override
-        public String toString() {
-            return "Screen";
-        }
-
-
-        @Override
-        public String toSVGName() {
-            return "svg:screen";
-        }
-    }, COLOR_DODGE {
+    }, COLOR_DODGE("Color Dodge", "svg:color-dodge") {
         @Override
         public Composite getComposite(float opacity) {
             return BlendComposite.ColorDodge;
         }
-
-        @Override
-        public String toString() {
-            return "Color Dodge";
-        }
-
-
-        @Override
-        public String toSVGName() {
-            return "svg:color-dodge";
-        }
-    }, LINEAR_DODGE {
+    }, LINEAR_DODGE("Linear Dodge (Add)", "svg:plus") {
         @Override
         public Composite getComposite(float opacity) {
             return BlendComposite.Add;
         }
-
-        @Override
-        public String toString() {
-            return "Linear Dodge (Add)";
-        }
-
-        @Override
-        public String toSVGName() {
-            return "svg:plus";
-        }
-    }, OVERLAY {
+    }, OVERLAY("Overlay", "svg:overlay") {
         @Override
         public Composite getComposite(float opacity) {
 //            return BlendComposite.Overlay;
             return new OverlayComposite(opacity);
         }
-
-        @Override
-        public String toString() {
-            return "Overlay";
-        }
-
-        @Override
-        public String toSVGName() {
-            return "svg:overlay";
-        }
-    }, SOFT_LIGHT {
+    }, SOFT_LIGHT("Soft Light", "svg:soft-light") {
         @Override
         public Composite getComposite(float opacity) {
 //            return BlendComposite.SoftLight;
             return new SoftLightComposite(opacity);
         }
-
-        @Override
-        public String toString() {
-            return "Soft Light";
-        }
-
-        @Override
-        public String toSVGName() {
-            return "svg:soft-light";
-        }
-    }, HARD_LIGHT {
+    }, HARD_LIGHT("Hard Light", "svg:hard-light") {
         @Override
         public Composite getComposite(float opacity) {
 //            return BlendComposite.HardLight;
             return new HardLightComposite(opacity);
         }
-
-        @Override
-        public String toString() {
-            return "Hard Light";
-        }
-
-        @Override
-        public String toSVGName() {
-            return "svg:hard-light";
-        }
-    }, DIFFERENCE {
+    }, DIFFERENCE("Difference", "svg:difference") {
         @Override
         public Composite getComposite(float opacity) {
             return BlendComposite.Difference;
         }
-
-        @Override
-        public String toString() {
-            return "Difference";
-        }
-
-        @Override
-        public String toSVGName() {
-            return "svg:difference";
-        }
-    }, EXCLUSION {
+    }, EXCLUSION("Exclusion", "svg:exclusion") {
         @Override
         public Composite getComposite(float opacity) {
             return BlendComposite.Exclusion;
         }
-
-        @Override
-        public String toString() {
-            return "Exclusion";
-        }
-
-        @Override
-        public String toSVGName() {
-            return "svg:exclusion";
-        }
-    }, HUE {
+    }, HUE("Hue", "svg:hue") {
         @Override
         public Composite getComposite(float opacity) {
 //            return BlendComposite.Hue;
             return new HueComposite(opacity);
         }
-
-        @Override
-        public String toString() {
-            return "Hue";
-        }
-
-        @Override
-        public String toSVGName() {
-            return "svg:hue";
-        }
-    }, SATURATION {
+    }, SATURATION("Saturation", "svg:saturation") {
         @Override
         public Composite getComposite(float opacity) {
 //            return BlendComposite.Saturation;
             return new SaturationComposite(opacity);
         }
-
-        @Override
-        public String toString() {
-            return "Saturation";
-        }
-
-        @Override
-        public String toSVGName() {
-            return "svg:saturation";
-        }
-    }, COLOR {
+    }, COLOR("Color", "svg:color") {
         @Override
         public Composite getComposite(float opacity) {
 //            return BlendComposite.Color;
             return new ColorComposite(opacity);
         }
-
-        @Override
-        public String toString() {
-            return "Color";
-        }
-
-        @Override
-        public String toSVGName() {
-            return "svg:color";
-        }
-    }, LUMINOSITY {
+    }, LUMINOSITY("Value", "svg:luminosity") {
         @Override
         public Composite getComposite(float opacity) {
 //            return BlendComposite.Luminosity;
             return new ValueComposite(opacity);
         }
-
-        @Override
-        public String toString() {
-//            return "Luminosity";
-            return "Value";
-        }
-
-        @Override
-        public String toSVGName() {
-            return "svg:luminosity";
-        }
     };
 
+    private final String guiName;
+    private final String svgName;
+
+    BlendingMode(String guiName, String svgName) {
+        this.guiName = guiName;
+        this.svgName = svgName;
+    }
+
     public abstract Composite getComposite(float opacity);
-    public abstract String toSVGName();
+
+    public String toSVGName() {
+        return svgName;
+    }
+
+    @Override
+    public String toString() {
+        return guiName;
+    }
 
     public static BlendingMode fromSVGName(String svgName) {
         BlendingMode[] values = values();

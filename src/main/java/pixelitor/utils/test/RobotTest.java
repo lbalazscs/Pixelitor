@@ -39,6 +39,7 @@ import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ParamSetState;
 import pixelitor.history.History;
+import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.AddNewLayerAction;
 import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.BlendingMode;
@@ -154,7 +155,8 @@ public class RobotTest {
         SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
             @Override
             public Void doInBackground() {
-                int maxTests = 8000;
+//                int maxTests = 8000;
+                int maxTests = 10000;
                 int onePercent = maxTests / 100;
 
                 for (int i = 0; i < maxTests; i++) {
@@ -280,8 +282,6 @@ public class RobotTest {
     }
 
     private static void randomOperation(Robot r) {
-        long runCountBefore = Filter.runCount;
-
         if (!Layers.activeIsImageLayer()) {
             return;
         }
@@ -296,6 +296,8 @@ public class RobotTest {
         if (op instanceof RandomFilter) {
             return;
         }
+
+        long runCountBefore = Filter.runCount;
 
         String opName = op.getName();
 //        System.out.println(String.format("RobotTest::randomOperation: opName = '%s'", opName));
@@ -475,6 +477,13 @@ public class RobotTest {
         if (History.canUndo()) {
             logRobotEvent("randomUndoRedo");
             History.undo();
+
+            if (!History.canRedo()) {
+                PixelitorEdit lastEdit = History.getLastEdit();
+                System.out.println("RobotTest::randomUndoRedo: lastEdit = " + (lastEdit == null ? "null" : (lastEdit.toString() + ", class = " + lastEdit.getClass().getName())));
+            }
+
+            assert History.canRedo();
             if (rand.nextInt(10) > 3) {
                 History.redo();
             }

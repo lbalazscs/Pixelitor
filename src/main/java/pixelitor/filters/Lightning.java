@@ -73,13 +73,11 @@ public class Lightning extends FilterWithParametrizedGUI {
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         boolean debug = false;
 
-        int numberOfBolts = this.numberOfBolts.getValue();
         int srcWidth = src.getWidth();
         int srcHeight = src.getHeight();
 
-
         int lightningImageSize = 2 * Math.max(srcWidth, srcHeight);
-        int gradientDistance = (lightningImageSize / (numberOfBolts ));
+        float gradientDistance = ((float) lightningImageSize) / (numberOfBolts.getValue());
 
         // create image with vertical bars
         BufferedImage lightningImage = new BufferedImage(lightningImageSize, lightningImageSize, BufferedImage.TYPE_INT_ARGB);

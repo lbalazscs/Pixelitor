@@ -31,127 +31,73 @@ import pixelitor.tools.brushes.WobbleBrush;
  * The brush types the user can use
  */
 enum BrushType {
-    IDEAL {
-        @Override
-        public String toString() {
-            return "Hard";
-        }
-
+    IDEAL("Hard") {
         @Override
         public Brush createBrush() {
             return new IdealBrush();
         }
-
-    }, SOFT {
-        @Override
-        public String toString() {
-            return "Soft";
-        }
-
+    }, SOFT("Soft") {
         @Override
         public Brush createBrush() {
             return new UniformImageBrush(ImageBrushType.SOFT, 0.25, false);
         }
-    }, WOBBLE {
-        @Override
-        public String toString() {
-            return "Wobble";
-        }
-
+    }, WOBBLE("Wobble") {
         @Override
         public Brush createBrush() {
             return new WobbleBrush();
         }
-    }, CALLIGRAPHY {
-        @Override
-        public String toString() {
-            return "Calligraphy";
-        }
-
+    }, CALLIGRAPHY("Calligraphy") {
         @Override
         public Brush createBrush() {
             return new CalligraphyBrush();
         }
-    }, REALISTIC {
-        @Override
-        public String toString() {
-            return "Realistic";
-        }
-
+    }, REALISTIC("Realistic") {
         @Override
         public Brush createBrush() {
             return new UniformImageBrush(ImageBrushType.REAL, 0.05, false);
         }
-    }, HAIR {
-        @Override
-        public String toString() {
-            return "Hair";
-        }
-
+    }, HAIR("Hair") {
         @Override
         public Brush createBrush() {
             return new UniformImageBrush(ImageBrushType.HAIR, 0.02, false);
         }
-    }, HEART {
-        @Override
-        public String toString() {
-            return "Heart";
-        }
-
+    }, HEART("Heart") {
         @Override
         public Brush createBrush() {
             return new AngledShapeBrush(BrushShapeProvider.HEART, 2.3);
         }
-
-
-//    }, ARROW {
-//        @Override
-//        public String toString() {
-//            return "Image-Based Arrow";
-//        }
-//
+//    }, ARROW("Image-Based Arrow") {
 //        @Override
 //        public Brush getBrush() {
 //            return new UniformImageBrush(ImageBrushType.ARROW, 2.5, true);
 //        }
-//
-//    }, GREEK {
-//        @Override
-//        public String toString() {
-//            return "Image-Based Greek";
-//        }
-//
+//    }, GREEK("Image-Based Greek") {
 //        @Override
 //        public Brush getBrush() {
 //            return new UniformImageBrush(ImageBrushType.GREEK, 2.0, true);
 //        }
-
-
-    }, OUTLINE_CIRCLE {
-        private OutlineCircleBrush outlineCircleBrush;
-
-        @Override
-        public String toString() {
-            return "Circles";
-        }
-
+    }, OUTLINE_CIRCLE("Circles") {
         @Override
         public Brush createBrush() {
             return new OutlineCircleBrush();
         }
-    }, OUTLINE_SQUARE {
-        private OutlineSquareBrush outlineSquareBrush;
-
-        @Override
-        public String toString() {
-            return "Squares";
-        }
-
+    }, OUTLINE_SQUARE("Squares") {
         @Override
         public Brush createBrush() {
             return new OutlineSquareBrush();
         }
     };
 
+    private final String guiName;
+
+    BrushType(String guiName) {
+        this.guiName = guiName;
+    }
+
     public abstract Brush createBrush();
+
+    @Override
+    public String toString() {
+        return guiName;
+    }
 }

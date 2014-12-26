@@ -54,10 +54,6 @@ public class LayerButton extends JToggleButton {
         setUI(new LayerButtonUI());
     }
 
-//    public void setUI(LayerButtonUI ui) {
-//        super.setUI(ui);
-//    }
-
     public LayerButton(final Layer layer) {
         this.layer = layer;
         setLayout(new LayerButtonLayout(5, 5));
@@ -65,7 +61,7 @@ public class LayerButton extends JToggleButton {
         visibilityButton.setRolloverIcon(CLOSED_EYE_ICON);
 
         visibilityButton.setSelected(true);
-        visibilityButton.setToolTipText("Layer visibility");
+        visibilityButton.setToolTipText("Layer Visibility");
         visibilityButton.setSelectedIcon(OPEN_EYE_ICON);
         add(visibilityButton, LayerButtonLayout.VISIBILITY_BUTTON);
 

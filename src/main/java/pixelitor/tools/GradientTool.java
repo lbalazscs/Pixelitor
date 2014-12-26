@@ -35,7 +35,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 
 /**
- *
+ * The gradient tool
  */
 public class GradientTool extends Tool {
     private boolean thereWasDragging = false;
@@ -138,8 +138,7 @@ public class GradientTool extends Tool {
         // repeated gradients are still jaggy
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        colorType.setInvert(invert);
-        Color[] colors = {colorType.getStartColor(), colorType.getEndColor()};
+        Color[] colors = {colorType.getStartColor(invert), colorType.getEndColor(invert)};
 
         Paint gradient = type.getGradient(userDrag, colors, cycleMethod);
 

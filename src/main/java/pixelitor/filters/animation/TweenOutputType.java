@@ -21,16 +21,14 @@ import pixelitor.io.FileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 
+/**
+ * The output type of the tweening animation
+ */
 public enum TweenOutputType {
-    PNG_FILE_SEQUENCE {
+    PNG_FILE_SEQUENCE("PNG File Sequence") {
         @Override
         AnimationWriter createAnimationWriter(File file, int delayMillis) {
             return new PNGFileSequenceWriter(file);
-        }
-
-        @Override
-        public String toString() {
-            return "PNG File Sequence";
         }
 
         @Override
@@ -47,15 +45,10 @@ public enum TweenOutputType {
         public FileNameExtensionFilter getFileFilter() {
             return null;
         }
-    }, ANIM_GIF {
+    }, ANIM_GIF("Animated GIF File") {
         @Override
         AnimationWriter createAnimationWriter(File file, int delayMillis) {
             return new AnimGIFWriter(file, delayMillis);
-        }
-
-        @Override
-        public String toString() {
-            return "Animated GIF File";
         }
 
         @Override
@@ -114,5 +107,16 @@ public enum TweenOutputType {
         return null;
     }
 
+    private final String guiName;
+
+    TweenOutputType(String guiName) {
+        this.guiName = guiName;
+    }
+
     public abstract FileNameExtensionFilter getFileFilter();
+
+    @Override
+    public String toString() {
+        return guiName;
+    }
 }

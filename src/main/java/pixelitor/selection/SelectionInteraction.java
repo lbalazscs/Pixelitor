@@ -23,17 +23,12 @@ import java.awt.geom.Area;
  * Describes how the new selection is combined with the existing selection
  */
 public enum SelectionInteraction {
-    REPLACE {
+    REPLACE("Replace") {
         @Override
         public Shape combine(Shape oldShape, Shape newShape) {
             return newShape;
         }
-
-        @Override
-        public String toString() {
-            return "Replace";
-        }
-    }, ADD {
+    }, ADD("Add") {
         @Override
         public Shape combine(Shape oldShape, Shape newShape) {
             Area oldArea = new Area(oldShape);
@@ -41,12 +36,7 @@ public enum SelectionInteraction {
             oldArea.add(newArea);
             return oldArea;
         }
-
-        @Override
-        public String toString() {
-            return "Add";
-        }
-    }, SUBTRACT {
+    }, SUBTRACT("Subtract") {
         @Override
         public Shape combine(Shape oldShape, Shape newShape) {
             Area oldArea = new Area(oldShape);
@@ -54,12 +44,7 @@ public enum SelectionInteraction {
             oldArea.subtract(newArea);
             return oldArea;
         }
-
-        @Override
-        public String toString() {
-            return "Subtract";
-        }
-    }, INTERSECT {
+    }, INTERSECT("Intersect") {
         @Override
         public Shape combine(Shape oldShape, Shape newShape) {
             Area oldArea = new Area(oldShape);
@@ -67,14 +52,20 @@ public enum SelectionInteraction {
             oldArea.intersect(newArea);
             return oldArea;
         }
-
-        @Override
-        public String toString() {
-            return "Intersect";
-        }
     };
 
+    private final String guiName;
+
+    SelectionInteraction(String guiName) {
+        this.guiName = guiName;
+    }
+
     public abstract Shape combine(Shape oldShape, Shape newShape);
+
+    @Override
+    public String toString() {
+        return guiName;
+    }
 
     public String getNameForUndo() {
         return toString() + " Selection";

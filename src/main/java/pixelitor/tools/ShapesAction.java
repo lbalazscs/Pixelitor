@@ -17,39 +17,15 @@
 package pixelitor.tools;
 
 /**
- *
+ * The "Action" in the shapes tool
  */
 public enum ShapesAction {
-    FILL(true, false, false, false, true, true, false) {
-        @Override
-        public String toString() {
-            return "Fill";
-        }
-    }, STROKE(false, true, true, true, false, true, false) {
-        @Override
-        public String toString() {
-            return "Stroke";
-        }
-    }, FILL_AND_STROKE(true, true, true, true, true, true, false) {
-        @Override
-        public String toString() {
-            return "Fill and Stroke";
-        }
-    }, EFFECTS_ONLY(false, false, false, false, false, true, false) {
-        @Override
-        public String toString() {
-            return "Effects Only";
-        }
-    }, SELECTION(false, false, false, false, false, false, true) {
-        @Override
-        public String toString() {
-            return "Selection";
-        }
-    }, SELECTION_FROM_STROKE(false, false, true, false, false, false, true) {
-        @Override
-        public String toString() {
-            return "Stroked Selection";
-        }
+    FILL(true, false, false, false, true, true, false, "Fill") {
+    }, STROKE(false, true, true, true, false, true, false, "Stroke") {
+    }, FILL_AND_STROKE(true, true, true, true, true, true, false, "Fill and Stroke") {
+    }, EFFECTS_ONLY(false, false, false, false, false, true, false, "Effects Only") {
+    }, SELECTION(false, false, false, false, false, false, true, "Selection") {
+    }, SELECTION_FROM_STROKE(false, false, true, false, false, false, true, "Stroked Selection") {
     };
 
     private final boolean enableStrokeSettings;
@@ -61,7 +37,9 @@ public enum ShapesAction {
     private final boolean drawEffects;
     private final boolean createSelection;
 
-    ShapesAction(boolean enableFillPaintSelection, boolean enableStrokePaintSelection, boolean enableStrokeSettings, boolean stroke, boolean fill, boolean drawEffects, boolean createSelection) {
+    private final String guiName;
+
+    ShapesAction(boolean enableFillPaintSelection, boolean enableStrokePaintSelection, boolean enableStrokeSettings, boolean stroke, boolean fill, boolean drawEffects, boolean createSelection, String guiName) {
         this.enableFillPaintSelection = enableFillPaintSelection;
         this.enableStrokePaintSelection = enableStrokePaintSelection;
         this.enableStrokeSettings = enableStrokeSettings;
@@ -69,6 +47,7 @@ public enum ShapesAction {
         this.fill = fill;
         this.drawEffects = drawEffects;
         this.createSelection = createSelection;
+        this.guiName = guiName;
 
         if (createSelection) {
             if (stroke || fill || drawEffects) {
@@ -94,7 +73,6 @@ public enum ShapesAction {
         return enableStrokePaintSelection;
     }
 
-
     public boolean hasStroke() {
         return stroke;
     }
@@ -111,4 +89,8 @@ public enum ShapesAction {
         return createSelection;
     }
 
+    @Override
+    public String toString() {
+        return guiName;
+    }
 }

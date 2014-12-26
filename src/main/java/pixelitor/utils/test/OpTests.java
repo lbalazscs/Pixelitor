@@ -155,7 +155,7 @@ public class OpTests {
                 JOptionPane.showMessageDialog(PixelitorWindow.getInstance(), msg, "Test Result", JOptionPane.INFORMATION_MESSAGE);
             }
         };
-        Utils.executeWithBusyCursor(task, false);
+        Utils.executeWithBusyCursor(task);
     }
 
     public static void randomResize() {
