@@ -28,7 +28,7 @@ import pixelitor.NewImage;
 import pixelitor.PixelitorWindow;
 import pixelitor.automate.Automate;
 import pixelitor.automate.SingleDirChooserPanel;
-import pixelitor.filters.FillWithColorWheel;
+import pixelitor.filters.ColorWheel;
 import pixelitor.filters.ValueNoise;
 import pixelitor.filters.jhlabsproxies.JHDropShadow;
 import pixelitor.filters.jhlabsproxies.JHGaussianBlur;
@@ -128,7 +128,7 @@ public class ImageTests {
 
         Composition ic = ImageComponents.getActiveComp();
         ic.getActiveLayer().setName("Color Wheel", true);
-        new FillWithColorWheel().execute(ChangeReason.OP_WITHOUT_DIALOG);
+        new ColorWheel().execute(ChangeReason.OP_WITHOUT_DIALOG);
 
         addNewLayer("Value Noise");
         ValueNoise valueNoise = new ValueNoise();

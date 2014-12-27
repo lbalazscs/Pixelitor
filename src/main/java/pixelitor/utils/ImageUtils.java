@@ -572,7 +572,7 @@ public class ImageUtils {
         try {
             raster = src.copyData(null);
         } catch (OutOfMemoryError e) {
-            Dialogs.showOutOfMemoryDialog();
+            Dialogs.showOutOfMemoryDialog(e);
         }
         return new BufferedImage(src.getColorModel(), raster, src.isAlphaPremultiplied(), null);
     }

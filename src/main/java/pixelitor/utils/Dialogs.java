@@ -133,7 +133,10 @@ public class Dialogs {
         }
     }
 
-    public static void showOutOfMemoryDialog() {
+    public static void showOutOfMemoryDialog(OutOfMemoryError e) {
+        if (Build.CURRENT == Build.DEVELOPMENT) {
+            e.printStackTrace();
+        }
         String message = "<html><b>Out of memory error.</b> You can try <ul>" +
                 "<li>decreasing the undo levels" +
                 "<li>decreasing the number of layers" +

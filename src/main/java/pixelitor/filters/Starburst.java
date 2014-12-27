@@ -71,6 +71,7 @@ public class Starburst extends FilterWithParametrizedGUI {
                 reseedAction
         ));
         rand = new Random(seed);
+        listNamePrefix = "Fill with ";
     }
 
     @Override
@@ -96,7 +97,7 @@ public class Starburst extends FilterWithParametrizedGUI {
         double startAngle = rotate.getValueInRadians();
         double angle = startAngle;
 
-        double radius = Math.sqrt(width * width + height * height);
+        double radius = width + height; // should be enough even if the center is outside the image
 
         for (int i = 0; i < numberOfRays; i++) {
             GeneralPath triangle = new GeneralPath();

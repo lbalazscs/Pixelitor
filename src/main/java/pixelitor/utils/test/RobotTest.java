@@ -39,7 +39,6 @@ import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ParamSetState;
 import pixelitor.history.History;
-import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.AddNewLayerAction;
 import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.BlendingMode;
@@ -103,6 +102,9 @@ public class RobotTest {
 
     private static WeightedCaller weightedCaller = new WeightedCaller();
     public static final boolean PRINT_MEMORY = false;
+    private static KeyStroke stopKeyStroke;
+
+    private static int numPastedImages = 0;
 
     /**
      * Utility class with static methods
@@ -117,8 +119,10 @@ public class RobotTest {
         }
         Build.CURRENT.setRobotTest(true);
 
+        numPastedImages = 0;
+
         // make sure it can be stopped by pressing the u key
-        final KeyStroke stopKeyStroke = KeyStroke.getKeyStroke('u');
+        stopKeyStroke = KeyStroke.getKeyStroke('u');
         GlobalKeyboardWatch.addKeyboardShortCut(stopKeyStroke, "stoprobot", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -146,22 +150,28 @@ public class RobotTest {
         Point p = generateRandomPoint();
         r.mouseMove(p.x, p.y);
 
-        if (ImageComponents.getActiveComp() == null) {
+//        if (ImageComponents.getActiveComp() == null) {
             logRobotEvent("initial splash");
             ImageTests.createSplashImage();
-        }
+        //}
         randomCopy(); // ensure an image is on the clipboard
 
-        SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+        SwingWorker<Void, Void> worker = createOneRoundSwingWorker(r, true);
+        worker.execute();
+    }
+
+    private static SwingWorker<Void, Void> createOneRoundSwingWorker(final Robot r, final boolean forever) {
+        return new SwingWorker<Void, Void>() {
             @Override
             public Void doInBackground() {
-//                int maxTests = 8000;
-                int maxTests = 10000;
-                int onePercent = maxTests / 100;
+                int numTests = 8000;
+                int onePercent = numTests / 100;
 
-                for (int i = 0; i < maxTests; i++) {
+                int max = forever ? Integer.MAX_VALUE : numTests;
+
+                for (int i = 0; i < max; i++) {
                     if ((i % onePercent) == 0) {
-                        int percent = 100 * i / maxTests;
+                        int percent = 100 * i / numTests;
                         System.out.print(percent + "% ");
                         if (PRINT_MEMORY) {
                             String memoryString = new MemoryInfo().toString();
@@ -214,7 +224,6 @@ public class RobotTest {
                 return null;
             } // end of doInBackground()
         };
-        worker.execute();
     }
 
     private static Point generateRandomPoint() {
@@ -479,8 +488,7 @@ public class RobotTest {
             History.undo();
 
             if (!History.canRedo()) {
-                PixelitorEdit lastEdit = History.getLastEdit();
-                System.out.println("RobotTest::randomUndoRedo: lastEdit = " + (lastEdit == null ? "null" : (lastEdit.toString() + ", class = " + lastEdit.getClass().getName())));
+                History.canRedo(); // check again, with breakpoint
             }
 
             assert History.canRedo();
@@ -684,6 +692,9 @@ public class RobotTest {
     }
 
     private static void randomPaste() {
+        if (numPastedImages > 3) {
+            return;
+        }
         int r = rand.nextInt(10);
         if (r == 0) {
             if (singleImageTest) {
@@ -691,9 +702,11 @@ public class RobotTest {
             }
             logRobotEvent("random paste as new image");
             new PasteAction(false).actionPerformed(new ActionEvent("", 0, ""));
+            numPastedImages++;
         } else if (r == 1) {
             logRobotEvent("random paste as new layer");
             new PasteAction(true).actionPerformed(new ActionEvent("", 0, ""));
+            numPastedImages++;
         }
     }
 

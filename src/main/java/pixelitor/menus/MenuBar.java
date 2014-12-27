@@ -366,7 +366,7 @@ public class MenuBar extends JMenuBar {
         MenuFactory.createMenuItem(new Fill(FillType.FOREGROUND), KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, InputEvent.ALT_MASK), fillSubmenu);
         MenuFactory.createMenuItem(new Fill(FillType.BACKGROUND), KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, InputEvent.CTRL_MASK), fillSubmenu);
         MenuFactory.createMenuItem(new Fill(FillType.TRANSPARENT), null, fillSubmenu);
-        MenuFactory.createMenuItem(new FillWithColorWheel(), null, fillSubmenu);
+        MenuFactory.createMenuItem(new ColorWheel(), null, fillSubmenu);
         MenuFactory.createMenuItem(new JHFourColorGradient(), null, fillSubmenu);
         MenuFactory.createMenuItem(new Starburst(), null, fillSubmenu);
 

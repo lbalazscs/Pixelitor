@@ -45,6 +45,7 @@ public class JHFourColorGradient extends FilterWithParametrizedGUI {
                 southWestParam,
                 southEastParam
         ));
+        listNamePrefix = "Fill with ";
     }
 
     @Override

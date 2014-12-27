@@ -429,7 +429,7 @@ public class ImageLayer extends ContentLayer {
                 }
             }
         } catch (OutOfMemoryError e) {
-            Dialogs.showOutOfMemoryDialog();
+            Dialogs.showOutOfMemoryDialog(e);
         }
     }
 

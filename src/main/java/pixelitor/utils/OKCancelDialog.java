@@ -23,6 +23,7 @@ import pixelitor.PixelitorWindow;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
+import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
@@ -51,6 +52,8 @@ public abstract class OKCancelDialog extends JDialog {
 
     protected OKCancelDialog(JComponent form, Frame owner, String title, String okText, String cancelText, boolean addScrollBars) {
         super(owner, title, true);
+        assert EventQueue.isDispatchThread();
+
         this.formPanel = form;
 
         setLayout(new BorderLayout());

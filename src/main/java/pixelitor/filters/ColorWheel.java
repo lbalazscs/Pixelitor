@@ -29,16 +29,17 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.Future;
 
-public class FillWithColorWheel extends FilterWithParametrizedGUI {
+public class ColorWheel extends FilterWithParametrizedGUI {
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final AngleParam hueShiftParam = new AngleParam("Rotate (Degrees)", 0);
     private final RangeParam brightnessParam = new RangeParam("Brightness (%)", 0, 100, 75);
     private final RangeParam satParam = new RangeParam("Saturation (%)", 0, 100, 90);
 
 
-    public FillWithColorWheel() {
+    public ColorWheel() {
         super("Color Wheel", false, false);
         setParamSet(new ParamSet(center, hueShiftParam, brightnessParam, satParam));
+        listNamePrefix = "Fill with ";
     }
 
     @Override

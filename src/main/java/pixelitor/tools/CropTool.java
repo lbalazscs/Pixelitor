@@ -70,7 +70,16 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
         maskOpacityParam.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                hideComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, maskOpacityParam.getValueAsPercentage());
+                float alpha = maskOpacityParam.getValueAsPercentage();
+                // because of a swing bug, the slider can get out of range
+                if (alpha < 0.0f) {
+                    alpha = 0.0f;
+                    maskOpacityParam.setValue(0);
+                } else if (alpha > 1.0f) {
+                    alpha = 1.0f;
+                    maskOpacityParam.setValue(100);
+                }
+                hideComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
                 ImageComponents.repaintActive();
             }
         });

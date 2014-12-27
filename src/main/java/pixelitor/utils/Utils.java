@@ -151,7 +151,7 @@ public final class Utils {
             }
             AppLogic.setStatusMessage(performanceMessage);
         } catch (OutOfMemoryError e) {
-            Dialogs.showOutOfMemoryDialog();
+            Dialogs.showOutOfMemoryDialog(e);
         } catch (Throwable e) { // make sure AssertionErrors are caught
             if (Build.CURRENT.isRobotTest()) {
                 throw e; // we can debug the exact filter parameters only in RobotTest

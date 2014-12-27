@@ -92,7 +92,7 @@ public abstract class Filter extends AbstractAction implements Comparable<Filter
 
     @Override
     public String toString() {
-        return getMenuName();
+        return getListName();
     }
 
     /**
@@ -171,8 +171,8 @@ public abstract class Filter extends AbstractAction implements Comparable<Filter
 
     @Override
     public int compareTo(Filter o) {
-        String name = getMenuName();
-        String otherName = o.getMenuName();
+        String name = getListName();
+        String otherName = o.getListName();
         return name.compareTo(otherName);
     }
 
@@ -183,14 +183,16 @@ public abstract class Filter extends AbstractAction implements Comparable<Filter
 
         Filter filter = (Filter) o;
 
-        if (!getMenuName().equals(filter.getMenuName())) return false;
+        if (!getListName().equals(filter.getListName())) {
+            return false;
+        }
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        return getMenuName().hashCode();
+        return getListName().hashCode();
     }
 
     public abstract void randomizeSettings();
