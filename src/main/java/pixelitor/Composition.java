@@ -16,6 +16,7 @@
  */
 package pixelitor;
 
+import com.bric.util.JVM;
 import pixelitor.history.DeleteLayerEdit;
 import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;
@@ -630,11 +631,13 @@ public class Composition implements Serializable {
         if (isActiveComp()) {
             SelectionActions.setEnabled(true, this);
         } else {
-            if(Build.CURRENT == Build.DEVELOPMENT) {
-                throw new IllegalStateException("can we get here?");
+            // TODO it seems that during Mac robot tests we can get here
+            if (Build.CURRENT == Build.FINAL) {
+                if (!JVM.isMac) {
+                    throw new IllegalStateException("can we still get here?");
+                }
             }
         }
-
     }
 
     public void createSelectionFromShape(Shape selectionShape) {
