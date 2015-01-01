@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.utils.test;
 
@@ -29,6 +29,7 @@ import pixelitor.filters.gui.ParametrizedAdjustPanel;
 import pixelitor.history.History;
 import pixelitor.io.FileChooser;
 import pixelitor.io.OutputFormat;
+import pixelitor.utils.Optional;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -84,7 +85,7 @@ public class OpTests {
 
                             op.randomizeSettings();
                             op.execute(ChangeReason.OP_WITHOUT_DIALOG); // a  reason that makes backup
-                            Composition comp = ImageComponents.getActiveComp();
+                            Composition comp = ImageComponents.getActiveComp().get();
                             String fileName = "test_" + Utils.toFileName(op.getMenuName()) + '.' + outputFormat.toString();
                             File f = new File(selectedDir, fileName);
                             outputFormat.saveComposition(comp, f);
@@ -139,7 +140,7 @@ public class OpTests {
     }
 
     public static void getCompositeImagePerformanceTest() {
-        final Composition comp = ImageComponents.getActiveComp();
+        final Composition comp = ImageComponents.getActiveComp().get();
 
         Runnable task = new Runnable() {
             @Override
@@ -159,12 +160,11 @@ public class OpTests {
     }
 
     public static void randomResize() {
-        Composition comp = ImageComponents.getActiveComp();
-        if (comp != null) {
+        Optional<Composition> comp = ImageComponents.getActiveComp();
+        if (comp.isPresent()) {
             int targetWidth = 10 + RobotTest.rand.nextInt(1200);
             int targetHeight = 10 + RobotTest.rand.nextInt(800);
-            CompositionUtils.resize(comp, targetWidth, targetHeight, false);
+            CompositionUtils.resize(comp.get(), targetWidth, targetHeight, false);
         }
-
     }
 }

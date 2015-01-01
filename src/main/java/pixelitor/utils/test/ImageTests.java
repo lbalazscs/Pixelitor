@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.utils.test;
 
@@ -98,7 +98,7 @@ public class ImageTests {
                             File lastSaveDir = FileChooser.getLastSaveDir();
                             File f = new File(lastSaveDir, fileName);
 
-                            Composition comp = ImageComponents.getActiveComp();
+                            Composition comp = ImageComponents.getActiveComp().get();
 
                             outputFormat.saveComposition(comp, f);
 
@@ -126,7 +126,7 @@ public class ImageTests {
 
         NewImage.addNewImage(FillType.WHITE, 400, 247, "Splash");
 
-        Composition ic = ImageComponents.getActiveComp();
+        Composition ic = ImageComponents.getActiveComp().get();
         ic.getActiveLayer().setName("Color Wheel", true);
         new ColorWheel().execute(ChangeReason.OP_WITHOUT_DIALOG);
 
@@ -191,14 +191,14 @@ public class ImageTests {
 
     private static void addNewLayer(String name) {
         AddNewLayerAction.INSTANCE.actionPerformed(new ActionEvent(PixelitorWindow.getInstance(), 0, name));
-        ImageComponents.getActiveLayer().setName(name, true);
+        ImageComponents.getActiveLayer().get().setName(name, true);
     }
 
     public static void testLayers() {
         FgBgColorSelector.setBG(Color.WHITE);
         FgBgColorSelector.setFG(Color.BLACK);
         NewImage.addNewImage(FillType.TRANSPARENT, 400, 400, "Layer Test");
-        Composition comp = ImageComponents.getActiveComp();
+        Composition comp = ImageComponents.getActiveComp().get();
 
         addTextLayer(comp, "this should be deleted", 0);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.layers;
 
@@ -22,6 +22,7 @@ import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
 import pixelitor.utils.BlendingModePanel;
 import pixelitor.utils.ImageSwitchListener;
+import pixelitor.utils.Optional;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -63,28 +64,20 @@ public class LayerBlendingModePanel extends BlendingModePanel implements ImageSw
 
 
     private void opacityChanged() {
-        Composition comp = ImageComponents.getActiveComp();
+        Optional<Layer> activeLayer = ImageComponents.getActiveLayer();
 
-        if (comp != null) {
-            Layer activeLayer = comp.getActiveLayer();
-
-            if (activeLayer != null) {
-                float floatValue = getOpacity();
-                activeLayer.setOpacity(floatValue, false, true, true);
-            }
+        if (activeLayer.isPresent()) {
+            float floatValue = getOpacity();
+            activeLayer.get().setOpacity(floatValue, false, true, true);
         }
     }
 
     private void blendingModeChanged() {
-        Composition comp = ImageComponents.getActiveComp();
+        Optional<Layer> activeLayer = ImageComponents.getActiveLayer();
 
-        if (comp != null) {
-            Layer activeLayer = comp.getActiveLayer();
-
-            if (activeLayer != null) {
-                BlendingMode blendingMode = getBlendingMode();
-                activeLayer.setBlendingMode(blendingMode, false, true, true);
-            }
+        if (activeLayer.isPresent()) {
+            BlendingMode blendingMode = getBlendingMode();
+            activeLayer.get().setBlendingMode(blendingMode, false, true, true);
         }
     }
 

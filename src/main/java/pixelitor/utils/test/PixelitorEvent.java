@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,17 +8,18 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.utils.test;
 
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
 import pixelitor.layers.Layer;
+import pixelitor.utils.Optional;
 
 import java.text.Format;
 import java.text.SimpleDateFormat;
@@ -31,7 +32,7 @@ public class PixelitorEvent implements Comparable<PixelitorEvent> {
     private final String description;
     private final Date date;
     private final Composition comp;
-    private Layer layer;
+    private final Layer layer;
     private static final Format dateFormatter = new SimpleDateFormat("HH:mm:ss:SSS");
 
     public PixelitorEvent(String description) {
@@ -40,9 +41,14 @@ public class PixelitorEvent implements Comparable<PixelitorEvent> {
         this.description = description;
 
         date = new Date();
-        comp = ImageComponents.getActiveComp();
-        if (comp != null) {
+
+        Optional<Composition> opt = ImageComponents.getActiveComp();
+        if (opt.isPresent()) {
+            comp = opt.get();
             layer = comp.getActiveLayer();
+        } else {
+            comp = null;
+            layer = null;
         }
     }
 

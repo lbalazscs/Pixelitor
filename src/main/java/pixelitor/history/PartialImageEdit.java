@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.history;
 
@@ -20,6 +20,7 @@ import pixelitor.Composition;
 import pixelitor.layers.ImageLayer;
 import pixelitor.selection.Selection;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Optional;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -107,11 +108,11 @@ public class PartialImageEdit extends FadeableEdit {
         BufferedImage previousImage = ImageUtils.copyImage(fullImage);
         previousImage.setData(backupRaster);
 
-        Selection selection = layer.getComposition().getSelection();
-        if (selection != null) {
+        Optional<Selection> selection = layer.getComposition().getSelection();
+        if (selection.isPresent()) {
             // backupRaster is relative to the full image, but we need to return a selection-sized image
             // TODO this is another ugly hack
-            previousImage = layer.getSelectionSizedPartFrom(previousImage, selection, true);
+            previousImage = layer.getSelectionSizedPartFrom(previousImage, selection.get(), true);
         }
 
         return previousImage;

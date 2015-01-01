@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor.menus;
@@ -25,6 +25,7 @@ import pixelitor.selection.Selection;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Dialogs;
+import pixelitor.utils.Optional;
 
 import javax.swing.*;
 import java.awt.Shape;
@@ -42,14 +43,14 @@ public final class SelectionActions {
     private static final AbstractAction deselectAction = new AbstractAction("Deselect") {
         @Override
         public void actionPerformed(ActionEvent e) {
-            ImageComponents.getActiveComp().deselect(true);
+            ImageComponents.getActiveComp().get().deselect(true);
         }
     };
 
     private static final AbstractAction invertSelectionAction = new AbstractAction("Invert Selection") {
         @Override
         public void actionPerformed(ActionEvent e) {
-            ImageComponents.getActiveComp().invertSelection();
+            ImageComponents.getActiveComp().get().invertSelection();
         }
     };
 
@@ -123,15 +124,14 @@ public final class SelectionActions {
                 return;
             }
 
-            Composition comp = ImageComponents.getActiveComp();
-            Selection selection = comp.getSelection();
-            if (selection != null) {
-                Shape shape = selection.getShape();
+            Composition comp = ImageComponents.getActiveComp().get();
+            Optional<Selection> selection = comp.getSelection();
+            if (selection.isPresent()) {
+                Shape shape = selection.get().getShape();
                 if (shape != null) {
                     brushTool.trace(comp, shape);
                 }
             }
         }
     }
-
 }

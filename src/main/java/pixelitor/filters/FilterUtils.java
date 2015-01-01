@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,16 +8,17 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters;
 
 import pixelitor.history.History;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Optional;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -83,8 +84,8 @@ public class FilterUtils {
         FilterUtils.lastExecutedFilter = lastExecutedFilter;
     }
 
-    public static Filter getLastExecutedFilter() {
-        return lastExecutedFilter;
+    public static Optional<Filter> getLastExecutedFilter() {
+        return Optional.ofNullable(lastExecutedFilter);
     }
 
     public static BufferedImage runRGBPixelOp(RGBPixelOp pixelOp, BufferedImage src, BufferedImage dest) {

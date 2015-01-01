@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.layers;
 
@@ -42,7 +42,7 @@ public class DeleteActiveLayerAction extends AbstractAction implements ImageSwit
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Composition comp = ImageComponents.getActiveComp();
+        Composition comp = ImageComponents.getActiveComp().get();
         comp.removeActiveLayer();
     }
 
@@ -53,7 +53,7 @@ public class DeleteActiveLayerAction extends AbstractAction implements ImageSwit
 
     @Override
     public void newImageOpened() {
-        int nrLayers = ImageComponents.getActiveComp().getNrLayers();
+        int nrLayers = ImageComponents.getActiveComp().get().getNrLayers();
         if (nrLayers <= 1) {
             setEnabled(false);
         } else {

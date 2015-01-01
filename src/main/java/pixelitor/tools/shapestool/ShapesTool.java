@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.tools.shapestool;
 
@@ -38,6 +38,7 @@ import pixelitor.tools.ToolAffectedArea;
 import pixelitor.tools.UserDrag;
 import pixelitor.utils.GUIUtils;
 import pixelitor.utils.OKCancelDialog;
+import pixelitor.utils.Optional;
 
 import javax.swing.*;
 import java.awt.BasicStroke;
@@ -167,9 +168,9 @@ public class ShapesTool extends Tool {
     @Override
     public void toolMousePressed(MouseEvent e, ImageComponent ic) {
         Composition comp = ic.getComp();
-        Selection selection = comp.getSelection();
-        if (selection != null) {
-            backupSelectionShape = selection.getShape();
+        Optional<Selection> selection = comp.getSelection();
+        if (selection.isPresent()) {
+            backupSelectionShape = selection.get().getShape();
         } else {
             backupSelectionShape = null;
         }
@@ -230,15 +231,15 @@ public class ShapesTool extends Tool {
         paintShapeOnIC(comp, userDrag);
 
         if (selectionMode) {
-            Selection selection = comp.getSelection();
-            if (selection != null) {
-                selection.clipToCompSize(comp); // the selection can be too big
+            Optional<Selection> selection = comp.getSelection();
+            if (selection.isPresent()) {
+                selection.get().clipToCompSize(comp); // the selection can be too big
 
                 PixelitorEdit edit;
                 if (backupSelectionShape != null) {
                     edit = new SelectionChangeEdit(comp, backupSelectionShape, "Selection Change");
                 } else {
-                    edit = new NewSelectionEdit(comp, selection.getShape());
+                    edit = new NewSelectionEdit(comp, selection.get().getShape());
                 }
                 History.addEdit(edit);
             }
@@ -392,12 +393,12 @@ public class ShapesTool extends Tool {
                 selectionShape = currentShape;
             }
 
-            Composition comp = ImageComponents.getActiveComp(); // TODO there should be a more direct way to get the reference
-            Selection selection = comp.getSelection();
-            if (selection == null) {
+            Composition comp = ImageComponents.getActiveComp().get(); // TODO there should be a more direct way to get the reference
+            Optional<Selection> selection = comp.getSelection();
+            if (!selection.isPresent()) {
                 comp.createSelectionFromShape(selectionShape);
             } else {
-                selection.setShape(selectionShape);
+                selection.get().setShape(selectionShape);
             }
         }
     }

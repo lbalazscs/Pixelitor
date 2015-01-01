@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.tools;
 
@@ -27,6 +27,7 @@ import pixelitor.menus.SelectionActions;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionInteraction;
 import pixelitor.selection.SelectionType;
+import pixelitor.utils.Optional;
 
 import javax.swing.*;
 import java.awt.Cursor;
@@ -101,20 +102,20 @@ public class SelectionTool extends Tool {
         SelectionInteraction selectionInteraction = (SelectionInteraction) interactionCombo.getSelectedItem();
 
         Composition comp = ic.getComp();
-        Selection selection = comp.getSelection();
-        if (selection == null) {
+        Optional<Selection> selection = comp.getSelection();
+        if (!selection.isPresent()) {
             backupShape = null;
             comp.startSelection(selectionType, selectionInteraction);
         } else {
-            backupShape = selection.getShape();
-            selection.startNewShape(selectionType, selectionInteraction);
+            backupShape = selection.get().getShape();
+            selection.get().startNewShape(selectionType, selectionInteraction);
         }
     }
 
     @Override
     public void toolMouseDragged(MouseEvent e, ImageComponent ic) {
         Composition comp = ic.getComp();
-        Selection selection = comp.getSelection();
+        Optional<Selection> selection = comp.getSelection();
 
         boolean altDown = e.isAltDown();
         boolean startFromCenter = (!altMeansSubtract) && altDown;
@@ -123,7 +124,7 @@ public class SelectionTool extends Tool {
         }
 
         userDrag.setStartFromCenter(startFromCenter);
-        selection.updateSelection(userDrag);
+        selection.get().updateSelection(userDrag);
     }
 
     @Override
@@ -140,7 +141,8 @@ public class SelectionTool extends Tool {
         }
 
         Composition comp = ic.getComp();
-        Selection selection = comp.getSelection();
+        Optional<Selection> opt = comp.getSelection();
+        Selection selection = opt.get();
 
         if (originalSelectionInteraction != null) {
             interactionCombo.setSelectedItem(originalSelectionInteraction);
@@ -210,9 +212,9 @@ public class SelectionTool extends Tool {
 
     private void addPolygonalLassoPoint(ImageComponent ic) {
         Composition comp = ic.getComp();
-        Selection selection = comp.getSelection();
-        if (selection != null) {
-            selection.addNewPolygonalLassoPoint(userDrag);
+        Optional<Selection> selection = comp.getSelection();
+        if (selection.isPresent()) {
+            selection.get().addNewPolygonalLassoPoint(userDrag);
         }
     }
 

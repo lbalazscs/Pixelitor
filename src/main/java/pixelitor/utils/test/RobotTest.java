@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.utils.test;
 
@@ -315,7 +315,7 @@ public class RobotTest {
 
         op.randomizeSettings();
 
-        ImageLayer layer = ImageComponents.getActiveComp().getActiveImageLayer();
+        ImageLayer layer = ImageComponents.getActiveImageLayer().get();
         if (op instanceof FilterWithGUI) {
             FilterWithGUI fg = (FilterWithGUI) op;
 
@@ -395,7 +395,7 @@ public class RobotTest {
 //                filterName, randomTime, randomInterpolation.toString()));
 
         // execute everything without showing a modal dialog
-        ImageLayer layer = ImageComponents.getActiveComp().getActiveImageLayer();
+        ImageLayer layer = ImageComponents.getActiveImageLayer().get();
         layer.tweenCalculatingStarted();
 
         PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
@@ -487,11 +487,15 @@ public class RobotTest {
             logRobotEvent("randomUndoRedo");
             History.undo();
 
+            // for some reason, redo might not be available even if we are right
+            // after an undo which didn't throw a CannotUndoException
+            // This is not a problem in Pixelitor, because the RedoMenuItem
+            // also checks History.canRedo() after an undo
             if (!History.canRedo()) {
-                History.canRedo(); // check again, with breakpoint
+                return;
             }
 
-            assert History.canRedo();
+//            assert History.canRedo();
             if (rand.nextInt(10) > 3) {
                 History.redo();
             }
@@ -545,7 +549,7 @@ public class RobotTest {
 
     private static void layerToCanvasSize() {
         logRobotEvent("layer to canvas size");
-        ImageComponents.getActiveComp().layerToCanvasSize();
+        ImageComponents.getActiveComp().get().layerToCanvasSize();
     }
 
     private static void invertSelection() {
@@ -601,7 +605,7 @@ public class RobotTest {
     }
 
     private static void layerOrderChange() {
-        Composition comp = ImageComponents.getActiveComp();
+        Composition comp = ImageComponents.getActiveComp().get();
         int r = rand.nextInt(6);
         switch (r) {
             case 0:
@@ -632,7 +636,7 @@ public class RobotTest {
     }
 
     private static void layerMerge() {
-        Composition comp = ImageComponents.getActiveComp();
+        Composition comp = ImageComponents.getActiveComp().get();
 
         if (rand.nextBoolean()) {
             logRobotEvent("layer merge down");
@@ -711,7 +715,7 @@ public class RobotTest {
     }
 
     private static void randomChangeLayerOpacityOrBlending() {
-        Layer layer = ImageComponents.getActiveLayer();
+        Layer layer = ImageComponents.getActiveLayer().get();
         if (rand.nextBoolean()) {
             float opacity = layer.getOpacity();
             float f = rand.nextFloat();
@@ -733,7 +737,7 @@ public class RobotTest {
     }
 
     private static void randomChangeLayerVisibility() {
-        Layer layer = ImageComponents.getActiveLayer();
+        Layer layer = ImageComponents.getActiveLayer().get();
         boolean visible = layer.isVisible();
         if (rand.nextBoolean()) {
             if (!visible) {
@@ -796,7 +800,7 @@ public class RobotTest {
 
     private static void randomSpecialLayer() {
         int r = rand.nextInt(3);
-        Composition comp = ImageComponents.getActiveComp();
+        Composition comp = ImageComponents.getActiveComp().get();
         Layer newLayer = null;
 
         if (r == 0) {
@@ -820,7 +824,7 @@ public class RobotTest {
     private static void randomLayerMask() {
         logRobotEvent("random layer mask");
 
-        ImageComponents.getActiveComp().getActiveLayer().addTestLayerMask();
+        ImageComponents.getActiveLayer().get().addTestLayerMask();
     }
 
     private static void setupWeightedCaller(final Robot r) {

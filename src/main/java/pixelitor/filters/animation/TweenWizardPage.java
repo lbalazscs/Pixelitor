@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters.animation;
 
@@ -75,7 +75,7 @@ public enum TweenWizardPage {
         @Override
         JComponent getPanel(TweenWizard wizard) {
             FilterWithParametrizedGUI filter = wizard.getAnimation().getFilter();
-            ImageComponents.getActiveComp().getActiveImageLayer().startPreviewing();
+            ImageComponents.getActiveImageLayer().get().startPreviewing();
             AdjustPanel adjustPanel = filter.createAdjustPanel();
             filter.startDialogSession();
 
@@ -85,7 +85,7 @@ public enum TweenWizardPage {
         @Override
         void onWizardCancelled(TweenWizard wizard) {
             FilterWithParametrizedGUI filter = wizard.getAnimation().getFilter();
-            ImageComponents.getActiveComp().getActiveImageLayer().cancelPressedInDialog();
+            ImageComponents.getActiveImageLayer().get().cancelPressedInDialog();
             filter.endDialogSession();
         }
 
@@ -116,7 +116,7 @@ public enum TweenWizardPage {
         JComponent getPanel(TweenWizard wizard) {
             // the following 3 lines are necessary because otherwise the image position
             // selectors will show the result of the initial filter and not the original image
-            ImageLayer imageLayer = ImageComponents.getActiveComp().getActiveImageLayer();
+            ImageLayer imageLayer = ImageComponents.getActiveImageLayer().get();
             imageLayer.cancelPressedInDialog(); // cancel the initial one
             imageLayer.startPreviewing(); // start the final one
 
@@ -129,7 +129,7 @@ public enum TweenWizardPage {
         @Override
         void onWizardCancelled(TweenWizard wizard) {
             FilterWithParametrizedGUI filter = wizard.getAnimation().getFilter();
-            ImageComponents.getActiveComp().getActiveImageLayer().cancelPressedInDialog();
+            ImageComponents.getActiveImageLayer().get().cancelPressedInDialog();
             filter.endDialogSession();
         }
 

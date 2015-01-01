@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor;
 
@@ -34,11 +34,13 @@ import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionInteraction;
 import pixelitor.selection.SelectionType;
 import pixelitor.utils.HistogramsPanel;
+import pixelitor.utils.Optional;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -552,8 +554,8 @@ public class Composition implements Serializable {
         }
     }
 
-    public Selection getSelection() {
-        return selection;
+    public Optional<Selection> getSelection() {
+        return Optional.ofNullable(selection);
     }
 
     public boolean hasSelection() {
@@ -608,7 +610,9 @@ public class Composition implements Serializable {
         if (selection != null) {
             Shape shape;
             if (at != null) {
-                shape = selection.getTransformedShape(at);
+                Path2D.Float pathShape = new Path2D.Float(selection.getShape());
+                pathShape.transform(at);
+                shape = pathShape;
             } else { // relative to the composition
                 shape = selection.getShape();
             }
@@ -653,7 +657,7 @@ public class Composition implements Serializable {
     }
 
     public boolean isActiveComp() {
-        return (ImageComponents.getActiveComp() == this);
+        return (ImageComponents.getActiveComp().get() == this);
     }
 
     public void layerToCanvasSize() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor.filters;
@@ -24,6 +24,7 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.history.FadeableEdit;
 import pixelitor.history.History;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Optional;
 
 import java.awt.image.BufferedImage;
 
@@ -47,17 +48,20 @@ public class Fade extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+        assert History.canFade();
+
         if (opacityParam.getValue() == 100) {
             return src;
         }
 
-        FadeableEdit edit = History.getPreviousEditForFade(ImageComponents.getActiveComp());
+        Composition activeComp = ImageComponents.getActiveComp().get();
+        Optional<FadeableEdit> edit = History.getPreviousEditForFade(activeComp);
 
-        if (edit == null) { // the fade menu item is active only if History.canFade()
+        if (!edit.isPresent()) { // the fade menu item must be active only if History.canFade()
             throw new IllegalStateException("no FadeableEdit");
         }
 
-        BufferedImage previous = edit.getBackupImage();
+        BufferedImage previous = edit.get().getBackupImage();
         if(previous == null) {
             // soft reference expired
             return src;
@@ -70,8 +74,7 @@ public class Fade extends FilterWithParametrizedGUI {
         int length = srcData.length;
 
         if (length != prevData.length) {
-            Composition activeComp = ImageComponents.getActiveComp();
-            Composition previousComp = edit.getComp();
+            Composition previousComp = edit.get().getComp();
             if (activeComp != previousComp) {
                 throw new IllegalArgumentException("activeComp != previousComp");
             }

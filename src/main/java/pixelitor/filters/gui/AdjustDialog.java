@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor.filters.gui;
@@ -41,7 +41,7 @@ public final class AdjustDialog extends OKCancelDialog {
 
     @Override
     public void dialogAccepted() {
-        Composition comp = ImageComponents.getActiveComp();
+        Composition comp = ImageComponents.getActiveComp().get();
 //        comp.changeActiveLayerImage(null, ChangeReason.OP_WITH_PREVIEW_FINISHED, activeFilter.getName());
         comp.okPressedInDialog(activeFilter.getName());
         FilterUtils.setLastExecutedFilter(activeFilter);
@@ -51,7 +51,7 @@ public final class AdjustDialog extends OKCancelDialog {
 
     @Override
     public void dialogCanceled() {
-        Composition comp = ImageComponents.getActiveComp();
+        Composition comp = ImageComponents.getActiveComp().get();
         comp.getActiveImageLayer().cancelPressedInDialog();
 
         close();

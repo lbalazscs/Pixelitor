@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor;
 
@@ -21,6 +21,7 @@ import pixelitor.history.History;
 import pixelitor.layers.DeleteActiveLayerAction;
 import pixelitor.layers.ImageLayer;
 import pixelitor.menus.SelectionActions;
+import pixelitor.utils.Optional;
 
 import javax.swing.*;
 import java.awt.image.BufferedImage;
@@ -37,8 +38,9 @@ public final class ConsistencyChecks {
     }
 
     public static void checkAll() {
-        Composition comp = ImageComponents.getActiveComp();
-        if (comp != null) {
+        Optional<Composition> opt = ImageComponents.getActiveComp();
+        if (opt.isPresent()) {
+            Composition comp = opt.get();
             selectionCheck(comp);
             fadeCheck(comp);
             translationCheck(comp);
@@ -50,13 +52,13 @@ public final class ConsistencyChecks {
      * Checks whether Fade would work now
      */
     public static boolean fadeCheck(Composition comp) {
-        FadeableEdit edit = History.getPreviousEditForFade(comp);
-        if (edit != null) {  // can fade
+        Optional<FadeableEdit> edit = History.getPreviousEditForFade(comp);
+        if (edit.isPresent()) {  // can fade
             ImageLayer layer = comp.getActiveImageLayer();
             if (layer != null) {
                 BufferedImage current = layer.getImageOrSubImageIfSelected(false, true);
 
-                BufferedImage previous = edit.getBackupImage();
+                BufferedImage previous = edit.get().getBackupImage();
                 if(previous == null) {
                     // soft reference expired
                     return true;
@@ -121,7 +123,7 @@ public final class ConsistencyChecks {
         if (action == null) {
             return true;
         }
-        Composition comp = ImageComponents.getActiveComp();
+        Composition comp = ImageComponents.getActiveComp().get();
         if (comp == null) {
             return true;
         }

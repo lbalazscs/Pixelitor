@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor.history;
@@ -21,9 +21,9 @@ import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.ImageComponents;
-import pixelitor.selection.Selection;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Dialogs;
+import pixelitor.utils.Optional;
 import pixelitor.utils.test.DebugEventQueue;
 import pixelitor.utils.test.HistoryEvent;
 
@@ -140,9 +140,9 @@ public final class History {
             return false;
         }
 
-        PixelitorEdit lastEdit = undoManager.getLastEdit();
-        if (lastEdit != null) {
-            return lastEdit.canRepeat();
+        Optional<PixelitorEdit> lastEdit = undoManager.getLastEdit();
+        if (lastEdit.isPresent()) {
+            return lastEdit.get().canRepeat();
         }
         return false;
     }
@@ -151,35 +151,40 @@ public final class History {
      * Used for the name of the fade/repeat menu items
      */
     public static String getLastPresentationName() {
-        PixelitorEdit lastEdit = undoManager.getLastEdit();
-        if (lastEdit != null) {
-            return lastEdit.getPresentationName();
+        Optional<PixelitorEdit> lastEdit = undoManager.getLastEdit();
+        if (lastEdit.isPresent()) {
+            return lastEdit.get().getPresentationName();
         }
         return "";
     }
 
     /**
      * If the last edit in the history is a FadeableEdit for the given composition,
-     * return it
+     * return it, otherwise return empty Optional
      */
-    public static FadeableEdit getPreviousEditForFade(Composition comp) {
+    public static Optional<FadeableEdit> getPreviousEditForFade(Composition comp) {
         if (undoDepth > 0) {
-            return null;
+            return Optional.empty();
         }
-        PixelitorEdit lastEdit = undoManager.getLastEdit();
-        if (lastEdit instanceof FadeableEdit) {
-            Composition lastComp = lastEdit.getComp();
-            if (comp != lastComp) {
-                return null;
+        Optional<PixelitorEdit> lastEditOpt = undoManager.getLastEdit();
+        if (lastEditOpt.isPresent()) {
+            PixelitorEdit lastEdit = lastEditOpt.get();
+            if (lastEdit instanceof FadeableEdit) {
+                Composition lastComp = lastEdit.getComp();
+                if (comp != lastComp) {
+                    // this happens if the active image has changed
+                    // since the last edit
+                    return Optional.empty();
+                }
+                return Optional.of((FadeableEdit) lastEdit);
             }
-            return (FadeableEdit) lastEdit;
         }
-        return null;
+        return Optional.empty();
     }
 
     public static boolean canFade() {
-        Composition comp = ImageComponents.getActiveComp();
-        return (getPreviousEditForFade(comp) != null);
+        Composition comp = ImageComponents.getActiveComp().get();
+        return (getPreviousEditForFade(comp).isPresent());
     }
 
     public static void allImagesAreClosed() {
@@ -194,20 +199,8 @@ public final class History {
         undoManager.showHistory();
     }
 
-    public static void dumpHistory() {
-        showHistory();
-        System.out.println("HISTORY DUMP undoDepth = " + undoDepth);
-        Composition comp = ImageComponents.getActiveComp();
-        if (comp != null) {
-            Selection selection = comp.getSelection();
-            System.out.println("History.dumpHistory selection = " + selection);
-        }
-
-        undoManager.dumpHistory();
-    }
-
     // for debugging only
-    public static PixelitorEdit getLastEdit() {
+    public static Optional<PixelitorEdit> getLastEdit() {
         return undoManager.getLastEdit();
     }
 }

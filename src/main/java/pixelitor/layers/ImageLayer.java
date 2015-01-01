@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.layers;
 
@@ -27,6 +27,7 @@ import pixelitor.selection.Selection;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Optional;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.ImageLayerNode;
 
@@ -212,11 +213,11 @@ public class ImageLayer extends ContentLayer {
         assert newImage != null;
         assert Utils.checkRasterMinimum(newImage);
 
-        Selection selection = comp.getSelection();
-        if (selection == null) {
+        Optional<Selection> selection = comp.getSelection();
+        if (!selection.isPresent()) {
             return newImage;
         } else {
-            Shape selectionShape = selection.getShape();
+            Shape selectionShape = selection.get().getShape();
             if (selectionShape != null) {
                 // the argument image pixels will replace the old ones only where selected
                 Graphics2D g = src.createGraphics();
@@ -498,12 +499,12 @@ public class ImageLayer extends ContentLayer {
      * Returns the image shown in the image selector in filter dialogs
      */
     public BufferedImage getImageForFilterDialogs() {
-        Selection selection = comp.getSelection();
-        if (selection == null) {
+        Optional<Selection> selection = comp.getSelection();
+        if (!selection.isPresent()) {
             return image;
         }
 
-        Rectangle selectionBounds = selection.getShapeBounds();
+        Rectangle selectionBounds = selection.get().getShapeBounds();
         return image.getSubimage(selectionBounds.x, selectionBounds.y, selectionBounds.width, selectionBounds.height);
     }
 
@@ -694,15 +695,15 @@ public class ImageLayer extends ContentLayer {
 //        new Exception("copyIfNoSelection = " + copyIfNoSelection +
 //                ", copyAndTranslateIfSelected = " + copyAndTranslateIfSelected)
 //                .printStackTrace();
-        Selection selection = comp.getSelection();
-        if (selection == null) {
+        Optional<Selection> selection = comp.getSelection();
+        if (!selection.isPresent()) {
             if (copyIfNoSelection) {
                 return ImageUtils.copyImage(image);
             }
             return image;
         }
 
-        return getSelectionSizedPartFrom(image, selection, copyAndTranslateIfSelected);
+        return getSelectionSizedPartFrom(image, selection.get(), copyAndTranslateIfSelected);
     }
 
     public BufferedImage getSelectionSizedPartFrom(BufferedImage src, Selection selection, boolean copyAndTranslateIfSelected) {

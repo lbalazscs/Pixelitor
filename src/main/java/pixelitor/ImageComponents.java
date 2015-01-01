@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2013 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor;
@@ -20,6 +20,7 @@ package pixelitor;
 import pixelitor.filters.comp.CompositionUtils;
 import pixelitor.filters.gui.ResizePanel;
 import pixelitor.history.History;
+import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.menus.SelectionActions;
 import pixelitor.menus.view.ZoomLevel;
@@ -28,6 +29,7 @@ import pixelitor.selection.Selection;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.ImageSwitchListener;
+import pixelitor.utils.Optional;
 
 import java.awt.Cursor;
 import java.awt.Rectangle;
@@ -84,29 +86,41 @@ public class ImageComponents {
         return activeImageComponent;
     }
 
-    public static Composition getActiveComp() {
+    public static Optional<Composition> getActiveComp() {
         if (activeImageComponent != null) {
-            return activeImageComponent.getComp();
+            return Optional.of(activeImageComponent.getComp());
         }
 
-        return null;
+        return Optional.empty();
     }
 
-    public static Layer getActiveLayer() {
-        return getActiveComp().getActiveLayer();
+    public static Optional<Layer> getActiveLayer() {
+        Optional<Composition> activeComp = getActiveComp();
+        if (activeComp.isPresent()) {
+            return Optional.of(activeComp.get().getActiveLayer());
+        }
+        return Optional.empty();
+    }
+
+    public static Optional<ImageLayer> getActiveImageLayer() {
+        Optional<Composition> activeComp = getActiveComp();
+        if (activeComp.isPresent()) {
+            return Optional.of(activeComp.get().getActiveImageLayer());
+        }
+        return Optional.empty();
     }
 
     public static int getNrOfOpenImages() {
         return imageComponents.size();
     }
 
-    public static BufferedImage getActiveCompositeImage() {
-        Composition comp = getActiveComp();
-        if (comp != null) {
-            return comp.getCompositeImage();
+    public static Optional<BufferedImage> getActiveCompositeImage() {
+        Optional<Composition> comp = getActiveComp();
+        if (comp.isPresent()) {
+            return Optional.of(comp.get().getCompositeImage());
         }
 
-        return null;
+        return Optional.empty();
     }
 
     /**
@@ -115,12 +129,12 @@ public class ImageComponents {
      */
     public static void toolCropActiveImage(boolean allowGrowing) {
         try {
-            Composition comp = getActiveComp();
-            if (comp == null) {
-                return;
+            Optional<Composition> opt = getActiveComp();
+            if (opt.isPresent()) {
+                Composition comp = opt.get();
+                Rectangle cropRectangle = Tools.CROP.getCropRectangle(comp.getIC());
+                CompositionUtils.cropImage(comp, cropRectangle, false, allowGrowing);
             }
-            Rectangle cropRectangle = Tools.CROP.getCropRectangle(comp.getIC());
-            CompositionUtils.cropImage(comp, cropRectangle, false, allowGrowing);
         } catch (Exception ex) {
             Dialogs.showExceptionDialog(ex);
         }
@@ -131,25 +145,24 @@ public class ImageComponents {
      */
     public static void selectionCropActiveImage() {
         try {
-            Composition comp = getActiveComp();
-            if (comp == null) {
-                return;
-            }
-            Selection selection = comp.getSelection();
-            if (selection != null) {
-                Rectangle selectionBounds = selection.getShapeBounds();
-                CompositionUtils.cropImage(comp, selectionBounds, true, true);
+            Optional<Composition> opt = getActiveComp();
+            if (opt.isPresent()) {
+                Composition comp = opt.get();
+                Optional<Selection> selection = comp.getSelection();
+                if (selection.isPresent()) {
+                    Rectangle selectionBounds = selection.get().getShapeBounds();
+                    CompositionUtils.cropImage(comp, selectionBounds, true, true);
+                }
             }
         } catch (Exception ex) {
             Dialogs.showExceptionDialog(ex);
         }
     }
 
-
     public static void resizeActiveImage() {
         try {
-            Composition comp = getActiveComp();
-            ResizePanel.showInDialog(comp);
+            Optional<Composition> opt = getActiveComp();
+            ResizePanel.showInDialog(opt.get());
         } catch (Exception ex) {
             Dialogs.showExceptionDialog(ex);
         }

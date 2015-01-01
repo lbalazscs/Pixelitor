@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.history;
 
@@ -20,6 +20,7 @@ import pixelitor.Composition;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.selection.Selection;
+import pixelitor.utils.Optional;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -27,10 +28,11 @@ import java.awt.Shape;
 import java.awt.image.BufferedImage;
 
 /**
- * A PixelitorEdit that represents an operation that can affect multiple layers,
+ * A PixelitorEdit representing an operation that can affect multiple layers,
  * such as resize, a crop, flip, or image rotation.
- * These are undoable only if the image consists of a single layer
+ * These are undoable only if the composition consists of a single layer
  */
+// TODO find better name for the class - perhaps MultiLayerEdit
 public class OneLayerUndoableEdit extends PixelitorEdit {
     private BufferedImage backupImage;
     private final boolean saveSelection;
@@ -51,9 +53,9 @@ public class OneLayerUndoableEdit extends PixelitorEdit {
         this.saveSelection = saveSelection;
 
         if (saveSelection) {
-            Selection selection = comp.getSelection();
-            if (selection != null) {
-                backupShape = selection.getShape();
+            Optional<Selection> selection = comp.getSelection();
+            if (selection.isPresent()) {
+                backupShape = selection.get().getShape();
             }
         }
 
@@ -124,7 +126,6 @@ public class OneLayerUndoableEdit extends PixelitorEdit {
         if (saveSelection && (backupShape != null)) {
             comp.createSelectionFromShape(backupShape);
         }
-
     }
 
     @Override

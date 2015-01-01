@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor.utils;
@@ -116,7 +116,7 @@ public final class Utils {
     public static void executeFilterWithBusyCursor(final Filter filter, final ChangeReason changeReason, Component busyCursorParent) {
         String filterMenuName = filter.getMenuName();
         try {
-            final Composition comp = ImageComponents.getActiveComp();
+            final Composition comp = ImageComponents.getActiveComp().get();
             if (comp == null) {
                 Dialogs.showErrorDialog("Error",
                         "No active composition found while executing " + filter.getName());
@@ -427,7 +427,7 @@ public final class Utils {
 
     @SuppressWarnings("WeakerAccess")
     public static void debugImage(BufferedImage img, String description) {
-        Composition save = ImageComponents.getActiveComp();
+        Composition save = ImageComponents.getActiveComp().get();
 
         BufferedImage copy = ImageUtils.copyImage(img);
         PixelitorWindow.getInstance().addNewImage(copy, null, description);

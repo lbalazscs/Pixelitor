@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,16 +8,17 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.history;
 
 import pixelitor.Composition;
 import pixelitor.selection.Selection;
+import pixelitor.utils.Optional;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -54,13 +55,13 @@ public class SelectionChangeEdit extends PixelitorEdit {
     }
 
     private void swapShapes() {
-        Selection selection = comp.getSelection();
+        Optional<Selection> selection = comp.getSelection();
         Shape tmp;
-        if (selection != null) {
-            tmp = selection.getShape();
-            selection.setShape(backupShape);
+        if (selection.isPresent()) {
+            tmp = selection.get().getShape(); // TODO create swapShapes in Selection?
+            selection.get().setShape(backupShape);
         } else {
-            throw new IllegalStateException();
+            throw new IllegalStateException("no selection in " + comp.getName());
         }
 
         backupShape = tmp;

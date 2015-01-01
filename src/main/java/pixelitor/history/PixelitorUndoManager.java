@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,16 +8,17 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.history;
 
 import pixelitor.PixelitorWindow;
 import pixelitor.utils.GUIUtils;
+import pixelitor.utils.Optional;
 
 import javax.swing.*;
 import javax.swing.event.EventListenerList;
@@ -44,13 +45,13 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Undoa
     /**
      * This method is necessary mostly because lastEdit() in CompoundEdit is protected
      */
-    public PixelitorEdit getLastEdit() {
+    public Optional<PixelitorEdit> getLastEdit() {
         UndoableEdit edit = super.lastEdit();
         if (edit != null) {
-            return (PixelitorEdit) edit;
+            return Optional.of((PixelitorEdit) edit);
         }
 
-        return null;
+        return Optional.empty();
     }
 
     @Override

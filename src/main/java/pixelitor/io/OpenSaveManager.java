@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor.io;
@@ -95,7 +95,7 @@ public class OpenSaveManager {
 
     public static void save(boolean saveAs) {
         try {
-            Composition comp = ImageComponents.getActiveComp();
+            Composition comp = ImageComponents.getActiveComp().get();
             save(comp, saveAs);
         } catch (Exception e) {
             Dialogs.showExceptionDialog(e);
@@ -284,7 +284,7 @@ public class OpenSaveManager {
             return;
         }
 
-        Composition comp = ImageComponents.getActiveComp();
+        Composition comp = ImageComponents.getActiveComp().get();
         int nrLayers = comp.getNrLayers();
         for (int i = 0; i < nrLayers; i++) {
             Layer layer = comp.getLayer(i);
@@ -303,7 +303,7 @@ public class OpenSaveManager {
     }
 
     public static void saveCurrentImageInAllFormats() {
-        Composition comp = ImageComponents.getActiveComp();
+        Composition comp = ImageComponents.getActiveComp().get();
 
         boolean cancelled = !SingleDirChooserPanel.selectOutputDir(false);
         if (cancelled) {
@@ -360,7 +360,7 @@ public class OpenSaveManager {
             FileChooser.setOnlyOneSaveExtension(FileChooser.jpegFilter);
 
             jpegQuality = quality;
-            FileChooser.showSaveFileChooserAndSaveComp(ImageComponents.getActiveComp());
+            FileChooser.showSaveFileChooserAndSaveComp(ImageComponents.getActiveComp().get());
         } finally {
             FileChooser.setDefaultSaveExtensions();
             jpegQuality = DEFAULT_JPEG_QUALITY;
