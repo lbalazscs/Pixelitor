@@ -53,8 +53,9 @@ import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMoveAction;
 import pixelitor.layers.TextLayer;
 import pixelitor.menus.edit.CopyAction;
-import pixelitor.menus.edit.CopyType;
+import pixelitor.menus.edit.CopySource;
 import pixelitor.menus.edit.PasteAction;
+import pixelitor.menus.edit.PasteDestination;
 import pixelitor.menus.file.AnimGifExportPanel;
 import pixelitor.menus.file.OpenRasterExportPanel;
 import pixelitor.menus.file.RecentFilesMenu;
@@ -92,9 +93,45 @@ import java.awt.image.BufferedImage;
  * The menu bar of the app
  */
 public class MenuBar extends JMenuBar {
+    private static final KeyStroke CTRL_N = KeyStroke.getKeyStroke('N', InputEvent.CTRL_MASK);
+    private static final KeyStroke CTRL_O = KeyStroke.getKeyStroke('O', InputEvent.CTRL_MASK);
+    private static final KeyStroke CTRL_S = KeyStroke.getKeyStroke('S', InputEvent.CTRL_MASK);
+    private static final KeyStroke CTRL_SHIFT_S = KeyStroke.getKeyStroke('S', InputEvent.CTRL_MASK + InputEvent.SHIFT_MASK);
+    private static final KeyStroke CTRL_W = KeyStroke.getKeyStroke('W', InputEvent.CTRL_MASK);
+    private static final KeyStroke CTRL_ALT_W = KeyStroke.getKeyStroke('W', InputEvent.CTRL_MASK | InputEvent.ALT_MASK);
+    private static final KeyStroke CTRL_F = KeyStroke.getKeyStroke('F', InputEvent.CTRL_MASK);
+    private static final KeyStroke CTRL_Z = KeyStroke.getKeyStroke('Z', InputEvent.CTRL_MASK);
+    private static final KeyStroke CTRL_SHIFT_Z = KeyStroke.getKeyStroke('Z', InputEvent.SHIFT_MASK + InputEvent.CTRL_MASK);
+    private static final KeyStroke CTRL_SHIFT_F = KeyStroke.getKeyStroke('F', InputEvent.CTRL_MASK + InputEvent.SHIFT_MASK);
+    private static final KeyStroke CTRL_C = KeyStroke.getKeyStroke('C', InputEvent.CTRL_MASK);
+    private static final KeyStroke CTRL_SHIFT_C = KeyStroke.getKeyStroke('C', InputEvent.CTRL_MASK + InputEvent.SHIFT_MASK);
+    private static final KeyStroke CTRL_V = KeyStroke.getKeyStroke('V', InputEvent.CTRL_MASK);
+    private static final KeyStroke CTRL_SHIFT_V = KeyStroke.getKeyStroke('V', InputEvent.CTRL_MASK + InputEvent.SHIFT_MASK);
+    private static final KeyStroke CTRL_ALT_I = KeyStroke.getKeyStroke('I', InputEvent.CTRL_MASK | InputEvent.ALT_MASK);
+    private static final KeyStroke CTRL_B = KeyStroke.getKeyStroke('B', InputEvent.CTRL_MASK);
+    private static final KeyStroke CTRL_U = KeyStroke.getKeyStroke('U', InputEvent.CTRL_MASK);
+    private static final KeyStroke CTRL_L = KeyStroke.getKeyStroke('L', InputEvent.CTRL_MASK);
+    private static final KeyStroke CTRL_I = KeyStroke.getKeyStroke('I', InputEvent.CTRL_MASK);
+    private static final KeyStroke ALT_BACKSPACE = KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, InputEvent.ALT_MASK);
+    private static final KeyStroke CTRL_BACKSPACE = KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, InputEvent.CTRL_MASK);
+    private static final KeyStroke CTRL_D = KeyStroke.getKeyStroke('D', InputEvent.CTRL_MASK);
+    private static final KeyStroke CTRL_SHIFT_I = KeyStroke.getKeyStroke('I', InputEvent.CTRL_MASK + InputEvent.SHIFT_MASK);
+    private static final KeyStroke T = KeyStroke.getKeyStroke('T');
+    private static final KeyStroke CTRL_E = KeyStroke.getKeyStroke('E', InputEvent.CTRL_MASK);
+    private static final KeyStroke CTRL_J = KeyStroke.getKeyStroke('J', InputEvent.CTRL_MASK);
+    private static final KeyStroke CTRL_SHIFT_ALT_E = KeyStroke.getKeyStroke('E', InputEvent.CTRL_MASK + InputEvent.ALT_MASK + InputEvent.SHIFT_MASK);
+    private static final KeyStroke CTRL_CLOSE_BRACKET = KeyStroke.getKeyStroke(']', InputEvent.CTRL_MASK);
+    private static final KeyStroke CTRL_OPEN_BRACKET = KeyStroke.getKeyStroke('[', InputEvent.CTRL_MASK);
+    private static final KeyStroke CTRL_SHIFT_CLOSE_BRACKET = KeyStroke.getKeyStroke(']', InputEvent.CTRL_MASK + InputEvent.SHIFT_MASK);
+    private static final KeyStroke CTRL_SHIFT_OPEN_BRACKET = KeyStroke.getKeyStroke('[', InputEvent.CTRL_MASK + InputEvent.SHIFT_MASK);
+    private static final KeyStroke ALT_CLOSE_BRACKET = KeyStroke.getKeyStroke(']', InputEvent.ALT_MASK);
+    private static final KeyStroke ALT_OPEN_BRACKET = KeyStroke.getKeyStroke('[', InputEvent.ALT_MASK);
+    private static final KeyStroke F6 = KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0);
+    private static final KeyStroke F7 = KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0);
+    private static final KeyStroke TAB = KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0);
+    private static final KeyStroke CTRL_R = KeyStroke.getKeyStroke('R', InputEvent.CTRL_MASK);
 
     public MenuBar(PixelitorWindow pixelitorWindow) {
-
         initFileMenu(pixelitorWindow);
         initEditMenu();
         initLayerMenu();
@@ -110,12 +147,11 @@ public class MenuBar extends JMenuBar {
         initHelpMenu(pixelitorWindow);
     }
 
-
     private void initFileMenu(final PixelitorWindow pixelitorWindow) {
         JMenu fileMenu = createMenu("File", 'F');
 
         // new image
-        MenuFactory.createMenuItem(NewImage.getAction(), KeyStroke.getKeyStroke('N', InputEvent.CTRL_MASK), fileMenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
+        createMenuItem(NewImage.getAction(), fileMenu, EnabledIf.ACTION_ENABLED, CTRL_N);
 
         // open
         Action openAction = new AbstractAction("Open...") {
@@ -128,7 +164,7 @@ public class MenuBar extends JMenuBar {
                 }
             }
         };
-        MenuFactory.createMenuItem(openAction, KeyStroke.getKeyStroke('O', InputEvent.CTRL_MASK), fileMenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
+        createMenuItem(openAction, fileMenu, EnabledIf.ACTION_ENABLED, CTRL_O);
 
         // recent files
         JMenu recentFiles = RecentFilesMenu.getInstance();
@@ -143,7 +179,7 @@ public class MenuBar extends JMenuBar {
                 OpenSaveManager.save(false);
             }
         };
-        MenuFactory.createMenuItem(saveAction, KeyStroke.getKeyStroke('S', InputEvent.CTRL_MASK), fileMenu);
+        createMenuItem(saveAction, fileMenu, CTRL_S);
 
         // save as
         Action saveAsAction = new AbstractAction("Save As...") {
@@ -152,7 +188,7 @@ public class MenuBar extends JMenuBar {
                 OpenSaveManager.save(true);
             }
         };
-        MenuFactory.createMenuItem(saveAsAction, KeyStroke.getKeyStroke('S', InputEvent.CTRL_MASK + InputEvent.SHIFT_MASK), fileMenu);
+        createMenuItem(saveAsAction, fileMenu, CTRL_SHIFT_S);
 
         Action optimizedSaveAction = new AbstractAction("Export Optimized JPEG...") {
             @Override
@@ -162,7 +198,7 @@ public class MenuBar extends JMenuBar {
                 OptimizedJpegSavePanel.showInDialog(image, pixelitorWindow);
             }
         };
-        MenuFactory.createMenuItem(optimizedSaveAction, null, fileMenu);
+        createMenuItem(optimizedSaveAction, fileMenu);
 
         AbstractAction exportORA = new AbstractAction("Export OpenRaster...") {
             @Override
@@ -170,7 +206,7 @@ public class MenuBar extends JMenuBar {
                 OpenRasterExportPanel.showInDialog(pixelitorWindow);
             }
         };
-        MenuFactory.createMenuItem(exportORA, null, fileMenu);
+        createMenuItem(exportORA, fileMenu);
 
         fileMenu.addSeparator();
 
@@ -180,7 +216,7 @@ public class MenuBar extends JMenuBar {
                 AnimGifExportPanel.showInDialog(pixelitorWindow);
             }
         };
-        MenuFactory.createMenuItem(exportLayerAnim, null, fileMenu);
+        createMenuItem(exportLayerAnim, fileMenu);
 
         AbstractAction exportTweeningAnim = new AbstractAction("Export Tweening Animation...") {
             @Override
@@ -188,7 +224,7 @@ public class MenuBar extends JMenuBar {
                 new TweenWizard().start(pixelitorWindow);
             }
         };
-        MenuFactory.createMenuItem(exportTweeningAnim, null, fileMenu);
+        createMenuItem(exportTweeningAnim, fileMenu);
 
         fileMenu.addSeparator();
 
@@ -199,7 +235,7 @@ public class MenuBar extends JMenuBar {
                 OpenSaveManager.warnAndCloseImage(ImageComponents.getActiveImageComponent());
             }
         };
-        MenuFactory.createMenuItem(closeAction, KeyStroke.getKeyStroke('W', InputEvent.CTRL_MASK), fileMenu, MenuEnableCondition.THERE_IS_OPEN_IMAGE);
+        createMenuItem(closeAction, fileMenu, CTRL_W);
 
         // close all
         Action closeAllAction = new AbstractAction("Close All") {
@@ -208,13 +244,13 @@ public class MenuBar extends JMenuBar {
                 OpenSaveManager.warnAndCloseAllImages();
             }
         };
-        MenuFactory.createMenuItem(closeAllAction, KeyStroke.getKeyStroke('W', InputEvent.CTRL_MASK | InputEvent.ALT_MASK), fileMenu, MenuEnableCondition.THERE_IS_OPEN_IMAGE);
+        createMenuItem(closeAllAction, fileMenu, CTRL_ALT_W);
 
         initAutomateSubmenu(fileMenu);
 
         if (!JVM.isMac) {
             Action newFromScreenCapture = new ScreenCaptureAction();
-            MenuFactory.createMenuItem(newFromScreenCapture, null, fileMenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
+            createMenuItem(newFromScreenCapture, fileMenu, EnabledIf.ACTION_ENABLED);
         }
 
         fileMenu.addSeparator();
@@ -227,7 +263,7 @@ public class MenuBar extends JMenuBar {
                 AppPreferences.exitApp();
             }
         };
-        MenuFactory.createMenuItem(exitAction, null, fileMenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
+        createMenuItem(exitAction, fileMenu, EnabledIf.ACTION_ENABLED);
 
         this.add(fileMenu);
     }
@@ -246,7 +282,7 @@ public class MenuBar extends JMenuBar {
                 }
             }
         };
-        MenuFactory.createMenuItem(batchResizeAction, null, batchSubmenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
+        createMenuItem(batchResizeAction, batchSubmenu, EnabledIf.ACTION_ENABLED);
 
         Action exportLayersAction = new AbstractAction("Export Layers to PNG...") {
             @Override
@@ -258,14 +294,14 @@ public class MenuBar extends JMenuBar {
                 }
             }
         };
-        MenuFactory.createMenuItem(exportLayersAction, null, batchSubmenu, MenuEnableCondition.THERE_IS_OPEN_IMAGE);
+        createMenuItem(exportLayersAction, batchSubmenu, EnabledIf.THERE_IS_OPEN_IMAGE);
     }
 
     private void initEditMenu() {
         JMenu editMenu = createMenu("Edit", 'E');
 
         // last op
-        MenuFactory.createMenuItem(RepeatLastOp.INSTANCE, KeyStroke.getKeyStroke('F', InputEvent.CTRL_MASK), editMenu, MenuEnableCondition.CAN_REPEAT_OPERATION);
+        createMenuItem(RepeatLastOp.INSTANCE, editMenu, EnabledIf.CAN_REPEAT_OPERATION, CTRL_F);
         editMenu.addSeparator();
 
         // undo
@@ -275,7 +311,7 @@ public class MenuBar extends JMenuBar {
                 History.undo();
             }
         };
-        MenuFactory.createMenuItem(undoAction, KeyStroke.getKeyStroke('Z', InputEvent.CTRL_MASK), editMenu, MenuEnableCondition.UNDO_POSSIBLE);
+        createMenuItem(undoAction, editMenu, EnabledIf.UNDO_POSSIBLE, CTRL_Z);
 
         // undo
         Action redoAction = new AbstractAction("Redo") {
@@ -284,23 +320,22 @@ public class MenuBar extends JMenuBar {
                 History.redo();
             }
         };
-        MenuFactory.createMenuItem(redoAction, KeyStroke.getKeyStroke('Z', InputEvent.SHIFT_MASK + InputEvent.CTRL_MASK), editMenu, MenuEnableCondition.REDO_POSSIBLE);
+        createMenuItem(redoAction, editMenu, EnabledIf.REDO_POSSIBLE, CTRL_SHIFT_Z);
 
         // fade
-        MenuFactory.createMenuItem(new Fade(), KeyStroke.getKeyStroke('F', InputEvent.CTRL_MASK + InputEvent.SHIFT_MASK), editMenu, MenuEnableCondition.FADING_POSSIBLE);
+        createMenuItem(new Fade(), editMenu, EnabledIf.FADING_POSSIBLE, CTRL_SHIFT_F);
 
         // crop
-        MenuFactory.createMenuItem(SelectionActions.getCropAction(), null, editMenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
+        createMenuItem(SelectionActions.getCropAction(), editMenu, EnabledIf.ACTION_ENABLED);
 
         editMenu.addSeparator();
 
         // copy
-        MenuFactory.createMenuItem(new CopyAction(CopyType.COPY_LAYER), KeyStroke.getKeyStroke('C', InputEvent.CTRL_MASK), editMenu, MenuEnableCondition.THERE_IS_OPEN_IMAGE);
-        MenuFactory.createMenuItem(new CopyAction(CopyType.COPY_COMPOSITE), KeyStroke.getKeyStroke('C', InputEvent.CTRL_MASK + InputEvent.SHIFT_MASK), editMenu, MenuEnableCondition.THERE_IS_OPEN_IMAGE);
+        createMenuItem(new CopyAction(CopySource.LAYER), editMenu, CTRL_C);
+        createMenuItem(new CopyAction(CopySource.COMPOSITE), editMenu, CTRL_SHIFT_C);
         // paste
-        MenuFactory.createMenuItem(new PasteAction(false), KeyStroke.getKeyStroke('V', InputEvent.CTRL_MASK), editMenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
-        MenuFactory.createMenuItem(new PasteAction(true), KeyStroke.getKeyStroke('V', InputEvent.CTRL_MASK + InputEvent.SHIFT_MASK), editMenu);
-
+        createMenuItem(new PasteAction(PasteDestination.NEW_IMAGE), editMenu, EnabledIf.ACTION_ENABLED, CTRL_V);
+        createMenuItem(new PasteAction(PasteDestination.NEW_LAYER), editMenu, CTRL_SHIFT_V);
 
         editMenu.addSeparator();
 
@@ -311,20 +346,20 @@ public class MenuBar extends JMenuBar {
                 ImageComponents.resizeActiveImage();
             }
         };
-        MenuFactory.createMenuItem(resizeAction, KeyStroke.getKeyStroke('I', InputEvent.CTRL_MASK | InputEvent.ALT_MASK), editMenu, MenuEnableCondition.THERE_IS_OPEN_IMAGE);
+        createMenuItem(resizeAction, editMenu, CTRL_ALT_I);
 
         JMenu rotateSubmenu = new JMenu("Rotate/Flip");
         editMenu.add(rotateSubmenu);
         // rotate
-        MenuFactory.createMenuItem(new Rotate(90, "Rotate 90\u00B0 CW"), null, rotateSubmenu, MenuEnableCondition.THERE_IS_OPEN_IMAGE);
-        MenuFactory.createMenuItem(new Rotate(180, "Rotate 180\u00B0"), null, rotateSubmenu, MenuEnableCondition.THERE_IS_OPEN_IMAGE);
-        MenuFactory.createMenuItem(new Rotate(270, "Rotate 90\u00B0 CCW"), null, rotateSubmenu, MenuEnableCondition.THERE_IS_OPEN_IMAGE);
+        createMenuItem(new Rotate(90, "Rotate 90\u00B0 CW"), rotateSubmenu);
+        createMenuItem(new Rotate(180, "Rotate 180\u00B0"), rotateSubmenu);
+        createMenuItem(new Rotate(270, "Rotate 90\u00B0 CCW"), rotateSubmenu);
         rotateSubmenu.addSeparator();
         // flip
-        MenuFactory.createMenuItem(Flip.createFlipOp(Flip.Direction.HORIZONTAL), null, rotateSubmenu, MenuEnableCondition.THERE_IS_OPEN_IMAGE);
-        MenuFactory.createMenuItem(Flip.createFlipOp(Flip.Direction.VERTICAL), null, rotateSubmenu, MenuEnableCondition.THERE_IS_OPEN_IMAGE);
+        createMenuItem(Flip.createFlipOp(Flip.Direction.HORIZONTAL), rotateSubmenu);
+        createMenuItem(Flip.createFlipOp(Flip.Direction.VERTICAL), rotateSubmenu);
 
-        MenuFactory.createMenuItem(new TransformLayer(), null, editMenu, MenuEnableCondition.THERE_IS_OPEN_IMAGE);
+        createMenuItem(new TransformLayer(), editMenu);
 
         editMenu.addSeparator();
         // preferences
@@ -342,16 +377,16 @@ public class MenuBar extends JMenuBar {
     private void initColorsMenu() {
         JMenu colorsMenu = createMenu("Colors", 'C');
 
-        MenuFactory.createMenuItem(new ColorBalance(), KeyStroke.getKeyStroke('B', InputEvent.CTRL_MASK), colorsMenu);
-        MenuFactory.createMenuItem(new HueSat(), KeyStroke.getKeyStroke('U', InputEvent.CTRL_MASK), colorsMenu);
-        MenuFactory.createMenuItem(new Colorize(), null, colorsMenu);
-        MenuFactory.createMenuItem(new Levels(), KeyStroke.getKeyStroke('L', InputEvent.CTRL_MASK), colorsMenu);
-        MenuFactory.createMenuItem(new Brightness(), null, colorsMenu);
-        MenuFactory.createMenuItem(new Solarize(), null, colorsMenu);
-        MenuFactory.createMenuItem(new Sepia(), null, colorsMenu);
-        MenuFactory.createMenuItem(new Invert(), KeyStroke.getKeyStroke('I', InputEvent.CTRL_MASK), colorsMenu);
-        MenuFactory.createMenuItem(new ChannelInvert(), null, colorsMenu);
-        MenuFactory.createMenuItem(new ChannelMixer(), null, colorsMenu);
+        createMenuItem(new ColorBalance(), colorsMenu, CTRL_B);
+        createMenuItem(new HueSat(), colorsMenu, CTRL_U);
+        createMenuItem(new Colorize(), colorsMenu);
+        createMenuItem(new Levels(), colorsMenu, CTRL_L);
+        createMenuItem(new Brightness(), colorsMenu);
+        createMenuItem(new Solarize(), colorsMenu);
+        createMenuItem(new Sepia(), colorsMenu);
+        createMenuItem(new Invert(), colorsMenu, CTRL_I);
+        createMenuItem(new ChannelInvert(), colorsMenu);
+        createMenuItem(new ChannelMixer(), colorsMenu);
 
         initExtractChannelsSubmenu(colorsMenu);
 
@@ -364,12 +399,12 @@ public class MenuBar extends JMenuBar {
 
     private static void initFillSubmenu(JMenu colorsMenu) {
         JMenu fillSubmenu = new JMenu("Fill with");
-        MenuFactory.createMenuItem(new Fill(FillType.FOREGROUND), KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, InputEvent.ALT_MASK), fillSubmenu);
-        MenuFactory.createMenuItem(new Fill(FillType.BACKGROUND), KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, InputEvent.CTRL_MASK), fillSubmenu);
-        MenuFactory.createMenuItem(new Fill(FillType.TRANSPARENT), null, fillSubmenu);
-        MenuFactory.createMenuItem(new ColorWheel(), null, fillSubmenu);
-        MenuFactory.createMenuItem(new JHFourColorGradient(), null, fillSubmenu);
-        MenuFactory.createMenuItem(new Starburst(), null, fillSubmenu);
+        createMenuItem(new Fill(FillType.FOREGROUND), fillSubmenu, ALT_BACKSPACE);
+        createMenuItem(new Fill(FillType.BACKGROUND), fillSubmenu, CTRL_BACKSPACE);
+        createMenuItem(new Fill(FillType.TRANSPARENT), fillSubmenu);
+        createMenuItem(new ColorWheel(), fillSubmenu);
+        createMenuItem(new JHFourColorGradient(), fillSubmenu);
+        createMenuItem(new Starburst(), fillSubmenu);
 
         colorsMenu.add(fillSubmenu);
     }
@@ -378,43 +413,43 @@ public class MenuBar extends JMenuBar {
         JMenu channelsSubmenu = new JMenu("Extract Channels");
         colorsMenu.add(channelsSubmenu);
 
-        MenuFactory.createMenuItem(new ExtractChannel(), null, channelsSubmenu);
+        createMenuItem(new ExtractChannel(), channelsSubmenu);
 
         channelsSubmenu.addSeparator();
-        MenuFactory.createMenuItem(new Luminosity(), null, channelsSubmenu);
-        MenuFactory.createMenuItem(NoDialogPixelOpFactory.getValueChannelOp(), null, channelsSubmenu);
-        MenuFactory.createMenuItem(NoDialogPixelOpFactory.getDesaturateChannelOp(), null, channelsSubmenu);
+        createMenuItem(new Luminosity(), channelsSubmenu);
+        createMenuItem(NoDialogPixelOpFactory.getValueChannelOp(), channelsSubmenu);
+        createMenuItem(NoDialogPixelOpFactory.getDesaturateChannelOp(), channelsSubmenu);
         channelsSubmenu.addSeparator();
-        MenuFactory.createMenuItem(NoDialogPixelOpFactory.getHueChannelOp(), null, channelsSubmenu);
-        MenuFactory.createMenuItem(NoDialogPixelOpFactory.getHueInColorsChannelOp(), null, channelsSubmenu);
-        MenuFactory.createMenuItem(NoDialogPixelOpFactory.getSaturationChannelOp(), null, channelsSubmenu);
+        createMenuItem(NoDialogPixelOpFactory.getHueChannelOp(), channelsSubmenu);
+        createMenuItem(NoDialogPixelOpFactory.getHueInColorsChannelOp(), channelsSubmenu);
+        createMenuItem(NoDialogPixelOpFactory.getSaturationChannelOp(), channelsSubmenu);
     }
 
     private static void initReduceColorsSubmenu(JMenu colorsMenu) {
         JMenu reduceColorsSubmenu = new JMenu("Reduce Colors");
         colorsMenu.add(reduceColorsSubmenu);
 
-        MenuFactory.createMenuItem(new JHQuantize(), null, reduceColorsSubmenu);
-        MenuFactory.createMenuItem(new Posterize(), null, reduceColorsSubmenu);
-        MenuFactory.createMenuItem(new Threshold(), null, reduceColorsSubmenu);
+        createMenuItem(new JHQuantize(), reduceColorsSubmenu);
+        createMenuItem(new Posterize(), reduceColorsSubmenu);
+        createMenuItem(new Threshold(), reduceColorsSubmenu);
         reduceColorsSubmenu.addSeparator();
-        MenuFactory.createMenuItem(new JHTriTone(), null, reduceColorsSubmenu);
-        MenuFactory.createMenuItem(new GradientMap(), null, reduceColorsSubmenu);
+        createMenuItem(new JHTriTone(), reduceColorsSubmenu);
+        createMenuItem(new GradientMap(), reduceColorsSubmenu);
         reduceColorsSubmenu.addSeparator();
-        MenuFactory.createMenuItem(new JHColorHalftone(), null, reduceColorsSubmenu);
-        MenuFactory.createMenuItem(new JHDither(), null, reduceColorsSubmenu);
+        createMenuItem(new JHColorHalftone(), reduceColorsSubmenu);
+        createMenuItem(new JHDither(), reduceColorsSubmenu);
     }
 
     private void initSelectMenu() {
         JMenu selectMenu = createMenu("Selection", 'S');
 
-        MenuFactory.createMenuItem(SelectionActions.getDeselectAction(), KeyStroke.getKeyStroke('D', InputEvent.CTRL_MASK), selectMenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
+        createMenuItem(SelectionActions.getDeselectAction(), selectMenu, EnabledIf.ACTION_ENABLED, CTRL_D);
 
-        MenuFactory.createMenuItem(SelectionActions.getInvertSelectionAction(), KeyStroke.getKeyStroke('I', InputEvent.CTRL_MASK + InputEvent.SHIFT_MASK), selectMenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
+        createMenuItem(SelectionActions.getInvertSelectionAction(), selectMenu, EnabledIf.ACTION_ENABLED, CTRL_SHIFT_I);
 
         selectMenu.addSeparator();
-        MenuFactory.createMenuItem(SelectionActions.getTraceWithBrush(), null, selectMenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
-        MenuFactory.createMenuItem(SelectionActions.getTraceWithEraser(), null, selectMenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
+        createMenuItem(SelectionActions.getTraceWithBrush(), selectMenu, EnabledIf.ACTION_ENABLED);
+        createMenuItem(SelectionActions.getTraceWithEraser(), selectMenu, EnabledIf.ACTION_ENABLED);
 
         this.add(selectMenu);
     }
@@ -432,85 +467,85 @@ public class MenuBar extends JMenuBar {
         initFindEdgesSubmenu(filterMenu);
         initOtherSubmenu(filterMenu);
 
-        MenuFactory.createMenuItem(TextFilter.INSTANCE, KeyStroke.getKeyStroke('T'), filterMenu);
+        createMenuItem(TextFilter.INSTANCE, filterMenu, T);
 
         this.add(filterMenu);
     }
 
     private static void initRenderSubmenu(JMenu filterMenu) {
         JMenu renderSubmenu = new JMenu("Render");
-        MenuFactory.createMenuItem(new Clouds(), null, renderSubmenu);
-        MenuFactory.createMenuItem(new ValueNoise(), null, renderSubmenu);
-        MenuFactory.createMenuItem(new JHCaustics(), null, renderSubmenu);
-        MenuFactory.createMenuItem(new JHPlasma(), null, renderSubmenu);
-        MenuFactory.createMenuItem(new JHWood(), null, renderSubmenu);
-        MenuFactory.createMenuItem(new JHCells(), null, renderSubmenu);
-        MenuFactory.createMenuItem(new JHBrushedMetal(), null, renderSubmenu);
+        createMenuItem(new Clouds(), renderSubmenu);
+        createMenuItem(new ValueNoise(), renderSubmenu);
+        createMenuItem(new JHCaustics(), renderSubmenu);
+        createMenuItem(new JHPlasma(), renderSubmenu);
+        createMenuItem(new JHWood(), renderSubmenu);
+        createMenuItem(new JHCells(), renderSubmenu);
+        createMenuItem(new JHBrushedMetal(), renderSubmenu);
 
         filterMenu.add(renderSubmenu);
     }
 
     private static void initFindEdgesSubmenu(JMenu filterMenu) {
         JMenu findEdgesSubmenu = new JMenu("Find Edges");
-        MenuFactory.createMenuItem(new JHConvolutionEdge(), null, findEdgesSubmenu);
-        MenuFactory.createMenuItem(new JHLaplacian(), null, findEdgesSubmenu);
-        MenuFactory.createMenuItem(new JHDifferenceOfGaussians(), null, findEdgesSubmenu);
-        MenuFactory.createMenuItem(new Canny(), null, findEdgesSubmenu);
+        createMenuItem(new JHConvolutionEdge(), findEdgesSubmenu);
+        createMenuItem(new JHLaplacian(), findEdgesSubmenu);
+        createMenuItem(new JHDifferenceOfGaussians(), findEdgesSubmenu);
+        createMenuItem(new Canny(), findEdgesSubmenu);
         filterMenu.add(findEdgesSubmenu);
     }
 
     private static void initOtherSubmenu(JMenu filterMenu) {
         JMenu otherFiltersSubmenu = new JMenu("Other");
-        MenuFactory.createMenuItem(new Convolve(3), null, otherFiltersSubmenu);
-        MenuFactory.createMenuItem(new Convolve(5), null, otherFiltersSubmenu);
+        createMenuItem(new Convolve(3), otherFiltersSubmenu);
+        createMenuItem(new Convolve(5), otherFiltersSubmenu);
 
-        MenuFactory.createMenuItem(new JHDropShadow(), null, otherFiltersSubmenu);
-        MenuFactory.createMenuItem(new Transition2D(), null, otherFiltersSubmenu);
+        createMenuItem(new JHDropShadow(), otherFiltersSubmenu);
+        createMenuItem(new Transition2D(), otherFiltersSubmenu);
 
-        MenuFactory.createMenuItem(new RandomFilter(), null, otherFiltersSubmenu);
+        createMenuItem(new RandomFilter(), otherFiltersSubmenu);
 
         filterMenu.add(otherFiltersSubmenu);
     }
 
     private static void initArtisticSubmenu(JMenu filterMenu) {
         JMenu artisticFiltersSubmenu = new JMenu("Artistic");
-        MenuFactory.createMenuItem(new JHCrystallize(), null, artisticFiltersSubmenu);
-        MenuFactory.createMenuItem(new JHPointillize(), null, artisticFiltersSubmenu);
-        MenuFactory.createMenuItem(new JHStamp(), null, artisticFiltersSubmenu);
-        MenuFactory.createMenuItem(new JHDryBrush(), null, artisticFiltersSubmenu);
+        createMenuItem(new JHCrystallize(), artisticFiltersSubmenu);
+        createMenuItem(new JHPointillize(), artisticFiltersSubmenu);
+        createMenuItem(new JHStamp(), artisticFiltersSubmenu);
+        createMenuItem(new JHDryBrush(), artisticFiltersSubmenu);
 
-        MenuFactory.createMenuItem(new RandomSpheres(), null, artisticFiltersSubmenu);
-        MenuFactory.createMenuItem(new JHSmear(), null, artisticFiltersSubmenu);
-        MenuFactory.createMenuItem(new JHEmboss(), null, artisticFiltersSubmenu);
+        createMenuItem(new RandomSpheres(), artisticFiltersSubmenu);
+        createMenuItem(new JHSmear(), artisticFiltersSubmenu);
+        createMenuItem(new JHEmboss(), artisticFiltersSubmenu);
 
-        MenuFactory.createMenuItem(new Orton(), null, artisticFiltersSubmenu);
-        MenuFactory.createMenuItem(new PhotoCollage(), null, artisticFiltersSubmenu);
+        createMenuItem(new Orton(), artisticFiltersSubmenu);
+        createMenuItem(new PhotoCollage(), artisticFiltersSubmenu);
 
         filterMenu.add(artisticFiltersSubmenu);
     }
 
     private static void initBlurSharpenSubmenu(JMenu filterMenu) {
         JMenu bsSubmenu = new JMenu("Blur/Sharpen");
-        MenuFactory.createMenuItem(new JHGaussianBlur(), null, bsSubmenu);
-        MenuFactory.createMenuItem(new JHSmartBlur(), null, bsSubmenu);
-        MenuFactory.createMenuItem(new JHBoxBlur(), null, bsSubmenu);
-        MenuFactory.createMenuItem(new FastBlur(), null, bsSubmenu);
-        MenuFactory.createMenuItem(new JHLensBlur(), null, bsSubmenu);
-        MenuFactory.createMenuItem(new JHMotionBlur(JHMotionBlur.Mode.MOTION_BLUR), null, bsSubmenu);
-        MenuFactory.createMenuItem(new JHMotionBlur(JHMotionBlur.Mode.SPIN_ZOOM_BLUR), null, bsSubmenu);
+        createMenuItem(new JHGaussianBlur(), bsSubmenu);
+        createMenuItem(new JHSmartBlur(), bsSubmenu);
+        createMenuItem(new JHBoxBlur(), bsSubmenu);
+        createMenuItem(new FastBlur(), bsSubmenu);
+        createMenuItem(new JHLensBlur(), bsSubmenu);
+        createMenuItem(new JHMotionBlur(JHMotionBlur.Mode.MOTION_BLUR), bsSubmenu);
+        createMenuItem(new JHMotionBlur(JHMotionBlur.Mode.SPIN_ZOOM_BLUR), bsSubmenu);
         bsSubmenu.addSeparator();
-        MenuFactory.createMenuItem(new JHUnsharpMask(), null, bsSubmenu);
+        createMenuItem(new JHUnsharpMask(), bsSubmenu);
         filterMenu.add(bsSubmenu);
     }
 
     private static void initNoiseSubmenu(JMenu filterMenu) {
         JMenu noiseSubmenu = new JMenu("Noise");
-        MenuFactory.createMenuItem(new JHReduceNoise(), null, noiseSubmenu);
-        MenuFactory.createMenuItem(new JHMedian(), null, noiseSubmenu);
+        createMenuItem(new JHReduceNoise(), noiseSubmenu);
+        createMenuItem(new JHMedian(), noiseSubmenu);
 
         noiseSubmenu.addSeparator();
-        MenuFactory.createMenuItem(new AddNoise(), null, noiseSubmenu);
-        MenuFactory.createMenuItem(new JHPixelate(), null, noiseSubmenu);
+        createMenuItem(new AddNoise(), noiseSubmenu);
+        createMenuItem(new JHPixelate(), noiseSubmenu);
 
         filterMenu.add(noiseSubmenu);
     }
@@ -518,10 +553,10 @@ public class MenuBar extends JMenuBar {
     private static void initLightSubmenu(JMenu filterMenu) {
         JMenu lightSubmenu = new JMenu("Light");
         filterMenu.add(lightSubmenu);
-        MenuFactory.createMenuItem(new JHGlow(), null, lightSubmenu);
-        MenuFactory.createMenuItem(new JHSparkle(), null, lightSubmenu);
-        MenuFactory.createMenuItem(new JHRays(), null, lightSubmenu);
-        MenuFactory.createMenuItem(new JHGlint(), null, lightSubmenu);
+        createMenuItem(new JHGlow(), lightSubmenu);
+        createMenuItem(new JHSparkle(), lightSubmenu);
+        createMenuItem(new JHRays(), lightSubmenu);
+        createMenuItem(new JHGlint(), lightSubmenu);
     }
 
     private static void initDistortSubmenu(JMenu filterMenu) {
@@ -529,39 +564,39 @@ public class MenuBar extends JMenuBar {
         filterMenu.add(distortMenu);
 //        MenuFactory.createMenuItem(new JHPinch(), null, distortMenu);
 //        MenuFactory.createMenuItem(new Swirl(), null, distortMenu);
-        MenuFactory.createMenuItem(new UnifiedSwirl(), null, distortMenu);
+        createMenuItem(new UnifiedSwirl(), distortMenu);
 
-        MenuFactory.createMenuItem(new CircleToSquare(), null, distortMenu);
-        MenuFactory.createMenuItem(new JHPerspective(), null, distortMenu);
+        createMenuItem(new CircleToSquare(), distortMenu);
+        createMenuItem(new JHPerspective(), distortMenu);
         distortMenu.addSeparator();
-        MenuFactory.createMenuItem(new JHLensOverImage(), null, distortMenu);
-        MenuFactory.createMenuItem(new Magnify(), null, distortMenu);
+        createMenuItem(new JHLensOverImage(), distortMenu);
+        createMenuItem(new Magnify(), distortMenu);
         distortMenu.addSeparator();
-        MenuFactory.createMenuItem(new JHTurbulentDistortion(), null, distortMenu);
-        MenuFactory.createMenuItem(new JHUnderWater(), null, distortMenu);
-        MenuFactory.createMenuItem(new JHWaterRipple(), null, distortMenu);
-        MenuFactory.createMenuItem(new JHWaves(), null, distortMenu);
-        MenuFactory.createMenuItem(new AngularWaves(), null, distortMenu);
-        MenuFactory.createMenuItem(new RadialWaves(), null, distortMenu);
+        createMenuItem(new JHTurbulentDistortion(), distortMenu);
+        createMenuItem(new JHUnderWater(), distortMenu);
+        createMenuItem(new JHWaterRipple(), distortMenu);
+        createMenuItem(new JHWaves(), distortMenu);
+        createMenuItem(new AngularWaves(), distortMenu);
+        createMenuItem(new RadialWaves(), distortMenu);
         distortMenu.addSeparator();
-        MenuFactory.createMenuItem(new GlassTiles(), null, distortMenu);
-        MenuFactory.createMenuItem(new PolarTiles(), null, distortMenu);
-        MenuFactory.createMenuItem(new JHFrostedGlass(), null, distortMenu);
+        createMenuItem(new GlassTiles(), distortMenu);
+        createMenuItem(new PolarTiles(), distortMenu);
+        createMenuItem(new JHFrostedGlass(), distortMenu);
         distortMenu.addSeparator();
-        MenuFactory.createMenuItem(new LittlePlanet(), null, distortMenu);
-        MenuFactory.createMenuItem(new JHPolarCoordinates(), null, distortMenu);
-        MenuFactory.createMenuItem(new JHWrapAroundArc(), null, distortMenu);
+        createMenuItem(new LittlePlanet(), distortMenu);
+        createMenuItem(new JHPolarCoordinates(), distortMenu);
+        createMenuItem(new JHWrapAroundArc(), distortMenu);
     }
 
     private static void initDislocateSubmenu(JMenu filterMenu) {
         JMenu dislocateSubmenu = new JMenu("Dislocate");
         filterMenu.add(dislocateSubmenu);
 
-        MenuFactory.createMenuItem(new JHKaleidoscope(), null, dislocateSubmenu);
-        MenuFactory.createMenuItem(new JHVideoFeedback(), null, dislocateSubmenu);
-        MenuFactory.createMenuItem(new JHOffset(), null, dislocateSubmenu);
-        MenuFactory.createMenuItem(new Slice(), null, dislocateSubmenu);
-        MenuFactory.createMenuItem(new Mirror(), null, dislocateSubmenu);
+        createMenuItem(new JHKaleidoscope(), dislocateSubmenu);
+        createMenuItem(new JHVideoFeedback(), dislocateSubmenu);
+        createMenuItem(new JHOffset(), dislocateSubmenu);
+        createMenuItem(new Slice(), dislocateSubmenu);
+        createMenuItem(new Mirror(), dislocateSubmenu);
     }
 
 
@@ -578,7 +613,7 @@ public class MenuBar extends JMenuBar {
                 comp.flattenImage();
             }
         };
-        MenuFactory.createMenuItem(flattenImageAction, null, layersMenu);
+        createMenuItem(flattenImageAction, layersMenu);
 
         AbstractAction mergeDownAction = new AbstractAction("Merge Down") {
             @Override
@@ -587,8 +622,7 @@ public class MenuBar extends JMenuBar {
                 comp.mergeDown();
             }
         };
-        MenuFactory.createMenuItem(mergeDownAction, KeyStroke.getKeyStroke('E', InputEvent.CTRL_MASK), layersMenu);
-
+        createMenuItem(mergeDownAction, layersMenu, CTRL_E);
 
         AbstractAction duplicateLayerAction = new AbstractAction("Duplicate Layer") {
             @Override
@@ -597,7 +631,7 @@ public class MenuBar extends JMenuBar {
                 comp.duplicateLayer();
             }
         };
-        MenuFactory.createMenuItem(duplicateLayerAction, KeyStroke.getKeyStroke('J', InputEvent.CTRL_MASK), layersMenu);
+        createMenuItem(duplicateLayerAction, layersMenu, CTRL_J);
 
         AbstractAction newLayerFromCompositeAction = new AbstractAction("New Layer from Composite") {
             @Override
@@ -606,7 +640,7 @@ public class MenuBar extends JMenuBar {
                 comp.addNewLayerFromComposite("Composite");
             }
         };
-        MenuFactory.createMenuItem(newLayerFromCompositeAction, KeyStroke.getKeyStroke('E', InputEvent.CTRL_MASK + InputEvent.ALT_MASK + InputEvent.SHIFT_MASK), layersMenu);
+        createMenuItem(newLayerFromCompositeAction, layersMenu, CTRL_SHIFT_ALT_E);
 
         AbstractAction layerToCanvasSizeAction = new AbstractAction("Layer to Canvas Size") {
             @Override
@@ -615,8 +649,7 @@ public class MenuBar extends JMenuBar {
                 comp.layerToCanvasSize();
             }
         };
-        MenuFactory.createMenuItem(layerToCanvasSizeAction, null, layersMenu);
-
+        createMenuItem(layerToCanvasSizeAction, layersMenu);
 
         initLayerStackSubmenu(layersMenu);
         this.add(layersMenu);
@@ -625,9 +658,9 @@ public class MenuBar extends JMenuBar {
     private static void initLayerStackSubmenu(JMenu layersMenu) {
         JMenu layerStackSubmenu = new JMenu("Layer Stack");
 
-        MenuFactory.createMenuItem(LayerMoveAction.INSTANCE_UP, KeyStroke.getKeyStroke(']', InputEvent.CTRL_MASK), layerStackSubmenu);
+        createMenuItem(LayerMoveAction.INSTANCE_UP, layerStackSubmenu, CTRL_CLOSE_BRACKET);
 
-        MenuFactory.createMenuItem(LayerMoveAction.INSTANCE_DOWN, KeyStroke.getKeyStroke('[', InputEvent.CTRL_MASK), layerStackSubmenu);
+        createMenuItem(LayerMoveAction.INSTANCE_DOWN, layerStackSubmenu, CTRL_OPEN_BRACKET);
 
         AbstractAction moveToLast = new AbstractAction("Layer to Top") {
             @Override
@@ -636,7 +669,7 @@ public class MenuBar extends JMenuBar {
                 comp.moveActiveLayerToTop();
             }
         };
-        MenuFactory.createMenuItem(moveToLast, KeyStroke.getKeyStroke(']', InputEvent.CTRL_MASK + InputEvent.SHIFT_MASK), layerStackSubmenu);
+        createMenuItem(moveToLast, layerStackSubmenu, CTRL_SHIFT_CLOSE_BRACKET);
 
         AbstractAction moveToFirstAction = new AbstractAction("Layer to Bottom") {
             @Override
@@ -645,7 +678,7 @@ public class MenuBar extends JMenuBar {
                 comp.moveActiveLayerToBottom();
             }
         };
-        MenuFactory.createMenuItem(moveToFirstAction, KeyStroke.getKeyStroke('[', InputEvent.CTRL_MASK + InputEvent.SHIFT_MASK), layerStackSubmenu);
+        createMenuItem(moveToFirstAction, layerStackSubmenu, CTRL_SHIFT_OPEN_BRACKET);
 
         layerStackSubmenu.addSeparator();
 
@@ -656,7 +689,7 @@ public class MenuBar extends JMenuBar {
                 comp.moveLayerSelectionUp();
             }
         };
-        MenuFactory.createMenuItem(moveSelectionUpAction, KeyStroke.getKeyStroke(']', InputEvent.ALT_MASK), layerStackSubmenu);
+        createMenuItem(moveSelectionUpAction, layerStackSubmenu, ALT_CLOSE_BRACKET);
 
         AbstractAction moveDownSelectionAction = new AbstractAction("Lower Layer Selection") {
             @Override
@@ -665,27 +698,23 @@ public class MenuBar extends JMenuBar {
                 comp.moveLayerSelectionDown();
             }
         };
-        MenuFactory.createMenuItem(moveDownSelectionAction, KeyStroke.getKeyStroke('[', InputEvent.ALT_MASK), layerStackSubmenu);
-
+        createMenuItem(moveDownSelectionAction, layerStackSubmenu, ALT_OPEN_BRACKET);
 
         layersMenu.add(layerStackSubmenu);
     }
 
-
     private void initViewMenu(PixelitorWindow pixelitorWindow) {
         JMenu viewMenu = createMenu("View", 'V');
-//        JMenu lfSubmenu = new LookAndFeelMenu("Skin", parent);
-//        viewMenu.add(lfSubmenu);
 
         viewMenu.add(ZoomMenu.INSTANCE);
 
         viewMenu.addSeparator();
 
         viewMenu.add(new ShowHideStatusBarAction());
-        MenuFactory.createMenuItem(new ShowHideHistogramsAction(), KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0), viewMenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
-        MenuFactory.createMenuItem(new ShowHideLayersAction(), KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0), viewMenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
+        createMenuItem(new ShowHideHistogramsAction(), viewMenu, EnabledIf.ACTION_ENABLED, F6);
+        createMenuItem(new ShowHideLayersAction(), viewMenu, EnabledIf.ACTION_ENABLED, F7);
         viewMenu.add(new ShowHideToolsAction());
-        MenuFactory.createMenuItem(ShowHideAllAction.INSTANCE, KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), viewMenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
+        createMenuItem(ShowHideAllAction.INSTANCE, viewMenu, EnabledIf.ACTION_ENABLED, TAB);
 
         AbstractAction defaultWorkspaceAction = new AbstractAction("Set Default Workspace") {
             @Override
@@ -693,12 +722,7 @@ public class MenuBar extends JMenuBar {
                 AppPreferences.WorkSpace.setDefault();
             }
         };
-        MenuFactory.createMenuItem(defaultWorkspaceAction, null, viewMenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
-
-//        viewMenu.addSeparator();
-//
-//        NewWindowForAction newWindowForAction = new NewWindowForAction();
-//        MenuFactory.createMenuItem(newWindowForAction, null, viewMenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
+        createMenuItem(defaultWorkspaceAction, viewMenu, EnabledIf.ACTION_ENABLED);
 
         viewMenu.addSeparator();
 
@@ -720,7 +744,7 @@ public class MenuBar extends JMenuBar {
                 }
             }
         };
-        MenuFactory.createMenuItem(cascadeWindowsAction, null, arrangeWindowsSubmenu);
+        createMenuItem(cascadeWindowsAction, arrangeWindowsSubmenu);
 
         AbstractAction tileWindowsAction = new AbstractAction("Tile") {
             @Override
@@ -732,7 +756,7 @@ public class MenuBar extends JMenuBar {
                 }
             }
         };
-        MenuFactory.createMenuItem(tileWindowsAction, null, arrangeWindowsSubmenu);
+        createMenuItem(tileWindowsAction, arrangeWindowsSubmenu);
 
         viewMenu.add(arrangeWindowsSubmenu);
     }
@@ -755,7 +779,7 @@ public class MenuBar extends JMenuBar {
                 comp.addLayer(textLayer, true, true, false);
             }
         };
-        MenuFactory.createMenuItem(newTextLayer, null, developMenu);
+        createMenuItem(newTextLayer, developMenu);
 
         AbstractAction newAdjustmentLayer = new AbstractAction("New Global Adjustment Layer...") {
             @Override
@@ -766,7 +790,7 @@ public class MenuBar extends JMenuBar {
                 comp.addLayer(adjustmentLayer, true, true, false);
             }
         };
-        MenuFactory.createMenuItem(newAdjustmentLayer, null, developMenu);
+        createMenuItem(newAdjustmentLayer, developMenu);
 
 
         AbstractAction filterCreatorAction = new AbstractAction("Filter Creator...") {
@@ -775,7 +799,7 @@ public class MenuBar extends JMenuBar {
                 FilterCreator.showInDialog(pixelitorWindow);
             }
         };
-        MenuFactory.createMenuItem(filterCreatorAction, null, developMenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
+        createMenuItem(filterCreatorAction, developMenu, EnabledIf.ACTION_ENABLED);
 
         AbstractAction debugSpecialAction = new AbstractAction("Debug Special") {
             @Override
@@ -802,7 +826,7 @@ public class MenuBar extends JMenuBar {
 
             }
         };
-        MenuFactory.createMenuItem(debugSpecialAction, null, developMenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
+        createMenuItem(debugSpecialAction, developMenu, EnabledIf.ACTION_ENABLED);
 
         AbstractAction addLayerMask = new AbstractAction("Add Layer Mask") {
             @Override
@@ -811,7 +835,7 @@ public class MenuBar extends JMenuBar {
                 layer.addTestLayerMask();
             }
         };
-        MenuFactory.createMenuItem(addLayerMask, null, developMenu);
+        createMenuItem(addLayerMask, developMenu);
 
         AbstractAction dumpEvents = new AbstractAction("Dump Event Queue") {
             @Override
@@ -819,7 +843,7 @@ public class MenuBar extends JMenuBar {
                 DebugEventQueue.dump();
             }
         };
-        MenuFactory.createMenuItem(dumpEvents, null, developMenu);
+        createMenuItem(dumpEvents, developMenu);
 
         initLayerMaskSubmenu(developMenu);
 
@@ -835,7 +859,7 @@ public class MenuBar extends JMenuBar {
                 ImageTests.createSplashImage();
             }
         };
-        MenuFactory.createMenuItem(splashScreenAction, null, splashMenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
+        createMenuItem(splashScreenAction, splashMenu, EnabledIf.ACTION_ENABLED);
 
         AbstractAction manySplashScreensAction = new AbstractAction("Save Many Splash Images...") {
             @Override
@@ -843,7 +867,7 @@ public class MenuBar extends JMenuBar {
                 ImageTests.saveManySplashImages();
             }
         };
-        MenuFactory.createMenuItem(manySplashScreensAction, null, splashMenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
+        createMenuItem(manySplashScreensAction, splashMenu, EnabledIf.ACTION_ENABLED);
         developMenu.add(splashMenu);
     }
 
@@ -861,7 +885,7 @@ public class MenuBar extends JMenuBar {
                 }
             }
         };
-        MenuFactory.createMenuItem(editLayerMask, null, layerMaskSubMenu);
+        createMenuItem(editLayerMask, layerMaskSubMenu);
 
         AbstractAction editComposition = new AbstractAction("Edit Composition") {
             @Override
@@ -873,7 +897,7 @@ public class MenuBar extends JMenuBar {
             }
         };
 
-        MenuFactory.createMenuItem(editComposition, null, layerMaskSubMenu);
+        createMenuItem(editComposition, layerMaskSubMenu);
 
         developMenu.add(layerMaskSubMenu);
     }
@@ -882,27 +906,27 @@ public class MenuBar extends JMenuBar {
         JMenu experimentalSubmenu = new JMenu("Experimental");
         developMenu.add(experimentalSubmenu);
 
-        MenuFactory.createMenuItem(new MysticRose(), null, experimentalSubmenu);
+        createMenuItem(new MysticRose(), experimentalSubmenu);
 
 
-        MenuFactory.createMenuItem(new Sphere3D(), null, experimentalSubmenu);
+        createMenuItem(new Sphere3D(), experimentalSubmenu);
 
-        MenuFactory.createMenuItem(EnlargeCanvas.getAction(), null, experimentalSubmenu);
+        createMenuItem(EnlargeCanvas.getAction(), experimentalSubmenu);
 
 
-        MenuFactory.createMenuItem(new Brick(), null, experimentalSubmenu);
+        createMenuItem(new Brick(), experimentalSubmenu);
 
-        MenuFactory.createMenuItem(new RenderGrid(), null, experimentalSubmenu);
-        MenuFactory.createMenuItem(new Lightning(), null, experimentalSubmenu);
+        createMenuItem(new RenderGrid(), experimentalSubmenu);
+        createMenuItem(new Lightning(), experimentalSubmenu);
 
-        MenuFactory.createMenuItem(new EmptyPolar(), null, experimentalSubmenu);
+        createMenuItem(new EmptyPolar(), experimentalSubmenu);
 
     }
 
     private static void initTestSubmenu(JMenu developMenu, final PixelitorWindow pixelitorWindow) {
         JMenu testSubmenu = new JMenu("Test");
 
-        MenuFactory.createMenuItem(new ParamTest(), KeyStroke.getKeyStroke('P', InputEvent.CTRL_MASK), testSubmenu);
+        createMenuItem(new ParamTest(), testSubmenu);
 
         AbstractAction randomResizeAction = new AbstractAction("Random Resize") {
             @Override
@@ -914,7 +938,7 @@ public class MenuBar extends JMenuBar {
                 }
             }
         };
-        MenuFactory.createMenuItem(randomResizeAction, KeyStroke.getKeyStroke('M', InputEvent.CTRL_MASK), testSubmenu);
+        createMenuItem(randomResizeAction, testSubmenu);
 
         AbstractAction randomToolAction = new AbstractAction("1001 Brush & Shape Actions") {
             @Override
@@ -926,7 +950,7 @@ public class MenuBar extends JMenuBar {
                 }
             }
         };
-        MenuFactory.createMenuItem(randomToolAction, null, testSubmenu);
+        createMenuItem(randomToolAction, testSubmenu);
 
         AbstractAction randomBrushAction = new AbstractAction("1001 Brush Only Actions") {
             @Override
@@ -938,7 +962,7 @@ public class MenuBar extends JMenuBar {
                 }
             }
         };
-        MenuFactory.createMenuItem(randomBrushAction, null, testSubmenu);
+        createMenuItem(randomBrushAction, testSubmenu);
 
 
         AbstractAction robotTestAction = new AbstractAction("Robot Test") {
@@ -951,8 +975,7 @@ public class MenuBar extends JMenuBar {
                 }
             }
         };
-//        MenuFactory.createMenuItem(robotTestAction, KeyStroke.getKeyStroke('R', InputEvent.CTRL_MASK), testSubmenu, MenuEnableCondition.ALWAYS);
-        MenuFactory.createMenuItem(robotTestAction, KeyStroke.getKeyStroke('R', InputEvent.CTRL_MASK), testSubmenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
+        createMenuItem(robotTestAction, testSubmenu, EnabledIf.ACTION_ENABLED, CTRL_R);
 
         AbstractAction opPerformanceTestAction = new AbstractAction("Operation Performance Test...") {
             @Override
@@ -960,8 +983,7 @@ public class MenuBar extends JMenuBar {
                 new PerformanceTestingDialog(pixelitorWindow);
             }
         };
-        MenuFactory.createMenuItem(opPerformanceTestAction, null, testSubmenu);
-
+        createMenuItem(opPerformanceTestAction, testSubmenu);
 
         AbstractAction findSlowestFilter = new AbstractAction("Find Slowest Filter") {
             @Override
@@ -970,7 +992,7 @@ public class MenuBar extends JMenuBar {
                 Utils.findSlowestFilter();
             }
         };
-        MenuFactory.createMenuItem(findSlowestFilter, KeyStroke.getKeyStroke('K', InputEvent.CTRL_MASK), testSubmenu);
+        createMenuItem(findSlowestFilter, testSubmenu);
 
         AbstractAction ciPerformanceTestAction = new AbstractAction("getCompositeImage() Performance Test...") {
             @Override
@@ -978,7 +1000,7 @@ public class MenuBar extends JMenuBar {
                 OpTests.getCompositeImagePerformanceTest();
             }
         };
-        MenuFactory.createMenuItem(ciPerformanceTestAction, null, testSubmenu);
+        createMenuItem(ciPerformanceTestAction, testSubmenu);
 
         testSubmenu.addSeparator();
 
@@ -988,7 +1010,7 @@ public class MenuBar extends JMenuBar {
                 OpTests.runAllOpsOnCurrentLayer();
             }
         };
-        MenuFactory.createMenuItem(runAllOps, null, testSubmenu);
+        createMenuItem(runAllOps, testSubmenu);
 
         AbstractAction saveAllOps = new AbstractAction("Save the Result of Each Operation...") {
             @Override
@@ -996,7 +1018,7 @@ public class MenuBar extends JMenuBar {
                 OpTests.saveTheResultOfEachOp();
             }
         };
-        MenuFactory.createMenuItem(saveAllOps, null, testSubmenu);
+        createMenuItem(saveAllOps, testSubmenu);
 
         AbstractAction saveInAllFormats = new AbstractAction("Save Current Image in All Formats...") {
             @Override
@@ -1004,7 +1026,7 @@ public class MenuBar extends JMenuBar {
                 OpenSaveManager.saveCurrentImageInAllFormats();
             }
         };
-        MenuFactory.createMenuItem(saveInAllFormats, null, testSubmenu);
+        createMenuItem(saveInAllFormats, testSubmenu);
 
         testSubmenu.addSeparator();
 
@@ -1014,7 +1036,7 @@ public class MenuBar extends JMenuBar {
                 ImageTests.testLayers();
             }
         };
-        MenuFactory.createMenuItem(testAllOnNewImg, null, testSubmenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
+        createMenuItem(testAllOnNewImg, testSubmenu, EnabledIf.ACTION_ENABLED);
 
         AbstractAction testTools = new AbstractAction("Test Tools") {
             @Override
@@ -1022,7 +1044,7 @@ public class MenuBar extends JMenuBar {
                 ToolTests.testTools();
             }
         };
-        MenuFactory.createMenuItem(testTools, null, testSubmenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
+        createMenuItem(testTools, testSubmenu, EnabledIf.ACTION_ENABLED);
 
         AbstractAction testIOOverlayBlur = new AbstractAction("IO Overlay Blur...") {
             @Override
@@ -1030,8 +1052,7 @@ public class MenuBar extends JMenuBar {
                 ImageTests.ioOverlayBlur();
             }
         };
-        MenuFactory.createMenuItem(testIOOverlayBlur, null, testSubmenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
-
+        createMenuItem(testIOOverlayBlur, testSubmenu, EnabledIf.ACTION_ENABLED);
 
         developMenu.add(testSubmenu);
     }
@@ -1045,7 +1066,7 @@ public class MenuBar extends JMenuBar {
                 AppLogic.showDebugAppDialog();
             }
         };
-        MenuFactory.createMenuItem(debugAppAction, null, debugSubmenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
+        createMenuItem(debugAppAction, debugSubmenu, EnabledIf.ACTION_ENABLED);
 
         AbstractAction debugHistoryAction = new AbstractAction("Debug History...") {
             @Override
@@ -1053,7 +1074,7 @@ public class MenuBar extends JMenuBar {
                 History.showHistory();
             }
         };
-        MenuFactory.createMenuItem(debugHistoryAction, KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0), debugSubmenu);
+        createMenuItem(debugHistoryAction, debugSubmenu);
 
         AbstractAction imageInfo = new AbstractAction("Image Info...") {
             @Override
@@ -1068,7 +1089,7 @@ public class MenuBar extends JMenuBar {
                 Dialogs.showInfoDialog("Image Info - " + comp.getName(), msg);
             }
         };
-        MenuFactory.createMenuItem(imageInfo, null, debugSubmenu);
+        createMenuItem(imageInfo, debugSubmenu);
 
         AbstractAction repaintActive = new AbstractAction("repaint() on the active image") {
             @Override
@@ -1076,7 +1097,7 @@ public class MenuBar extends JMenuBar {
                 ImageComponents.repaintActive();
             }
         };
-        MenuFactory.createMenuItem(repaintActive, null, debugSubmenu);
+        createMenuItem(repaintActive, debugSubmenu);
 
         AbstractAction imageChangedActive = new AbstractAction("imageChanged(true, true) on the active image") {
             @Override
@@ -1084,8 +1105,7 @@ public class MenuBar extends JMenuBar {
                 ImageComponents.getActiveComp().get().imageChanged(true, true);
             }
         };
-        MenuFactory.createMenuItem(imageChangedActive, null, debugSubmenu);
-
+        createMenuItem(imageChangedActive, debugSubmenu);
 
         AbstractAction revalidateActive = new AbstractAction("revalidate() the main window") {
             @Override
@@ -1093,7 +1113,7 @@ public class MenuBar extends JMenuBar {
                 pixelitorWindow.getContentPane().revalidate();
             }
         };
-        MenuFactory.createMenuItem(revalidateActive, null, debugSubmenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
+        createMenuItem(revalidateActive, debugSubmenu, EnabledIf.ACTION_ENABLED);
 
         AbstractAction resetLayerTranslation = new AbstractAction("reset the translation of current layer") {
             @Override
@@ -1108,8 +1128,7 @@ public class MenuBar extends JMenuBar {
                 }
             }
         };
-        MenuFactory.createMenuItem(resetLayerTranslation, null, debugSubmenu);
-
+        createMenuItem(resetLayerTranslation, debugSubmenu);
 
         AbstractAction updateHistogram = new AbstractAction("Update Histograms") {
             @Override
@@ -1118,7 +1137,7 @@ public class MenuBar extends JMenuBar {
                 HistogramsPanel.INSTANCE.updateFromCompIfShown(comp);
             }
         };
-        MenuFactory.createMenuItem(updateHistogram, null, debugSubmenu);
+        createMenuItem(updateHistogram, debugSubmenu);
 
         AbstractAction saveAllImagesToDir = new AbstractAction("Save All Images to Folder...") {
             @Override
@@ -1126,7 +1145,7 @@ public class MenuBar extends JMenuBar {
                 OpenSaveManager.saveAllImagesToDir();
             }
         };
-        MenuFactory.createMenuItem(saveAllImagesToDir, null, debugSubmenu);
+        createMenuItem(saveAllImagesToDir, debugSubmenu);
 
         AbstractAction debugImageLayerImages = new AbstractAction("Debug ImageLayer Images") {
             @Override
@@ -1135,7 +1154,7 @@ public class MenuBar extends JMenuBar {
                 layer.get().debugImages();
             }
         };
-        MenuFactory.createMenuItem(debugImageLayerImages, null, debugSubmenu);
+        createMenuItem(debugImageLayerImages, debugSubmenu);
 
         develMenu.add(debugSubmenu);
     }
@@ -1149,12 +1168,12 @@ public class MenuBar extends JMenuBar {
                 TipsOfTheDay.showTips(pixelitorWindow, true);
             }
         };
-        MenuFactory.createMenuItem(tipOfTheDayAction, null, helpMenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
+        createMenuItem(tipOfTheDayAction, helpMenu, EnabledIf.ACTION_ENABLED);
 
 //        JMenu webSubMenu = new JMenu("Web");
-//        MenuFactory.createMenuItem(new OpenInBrowserAction("Ask for Help", "https://sourceforge.net/projects/pixelitor/forums/forum/1034234"), null, webSubMenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
-//        MenuFactory.createMenuItem(new OpenInBrowserAction("Discuss Pixelitor", "https://sourceforge.net/projects/pixelitor/forums/forum/1034233"), null, webSubMenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
-//        MenuFactory.createMenuItem(new OpenInBrowserAction("Report a Bug", "https://sourceforge.net/tracker/?group_id=285935&atid=1211793"), null, webSubMenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
+//        MenuFactory.createMenuItem(new OpenInBrowserAction("Ask for Help", "https://sourceforge.net/projects/pixelitor/forums/forum/1034234"), null, webSubMenu, MenuEnableCondition.ACTION_ENABLED);
+//        MenuFactory.createMenuItem(new OpenInBrowserAction("Discuss Pixelitor", "https://sourceforge.net/projects/pixelitor/forums/forum/1034233"), null, webSubMenu, MenuEnableCondition.ACTION_ENABLED);
+//        MenuFactory.createMenuItem(new OpenInBrowserAction("Report a Bug", "https://sourceforge.net/tracker/?group_id=285935&atid=1211793"), null, webSubMenu, MenuEnableCondition.ACTION_ENABLED);
 //        helpMenu.add(webSubMenu);
 
         helpMenu.addSeparator();
@@ -1173,7 +1192,7 @@ public class MenuBar extends JMenuBar {
                 AboutDialog.showDialog(pixelitorWindow);
             }
         };
-        MenuFactory.createMenuItem(aboutAction, null, helpMenu, MenuEnableCondition.ALWAYS_UNLESS_ACTION_DISABLED);
+        createMenuItem(aboutAction, helpMenu, EnabledIf.ACTION_ENABLED);
 
         this.add(helpMenu);
     }
@@ -1184,4 +1203,23 @@ public class MenuBar extends JMenuBar {
         return menu;
     }
 
+    private static void createMenuItem(Action a, JMenu parent, EnabledIf whenToEnable, KeyStroke keyStroke) {
+        JMenuItem menuItem = whenToEnable.getMenuItem(a);
+        parent.add(menuItem);
+        if (keyStroke != null) {
+            menuItem.setAccelerator(keyStroke);
+        }
+    }
+
+    private static void createMenuItem(Action action, JMenu parent, EnabledIf whenToEnable) {
+        createMenuItem(action, parent, whenToEnable, null);
+    }
+
+    public static void createMenuItem(Action action, JMenu parent, KeyStroke keyStroke) {
+        createMenuItem(action, parent, EnabledIf.THERE_IS_OPEN_IMAGE, keyStroke);
+    }
+
+    public static void createMenuItem(Action action, JMenu parent) {
+        createMenuItem(action, parent, EnabledIf.THERE_IS_OPEN_IMAGE, null);
+    }
 }

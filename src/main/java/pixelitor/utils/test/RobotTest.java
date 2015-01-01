@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.utils.test;
 
 import pixelitor.Build;
@@ -50,8 +51,9 @@ import pixelitor.layers.ShapeLayer;
 import pixelitor.layers.TextLayer;
 import pixelitor.menus.SelectionActions;
 import pixelitor.menus.edit.CopyAction;
-import pixelitor.menus.edit.CopyType;
+import pixelitor.menus.edit.CopySource;
 import pixelitor.menus.edit.PasteAction;
+import pixelitor.menus.edit.PasteDestination;
 import pixelitor.menus.view.ShowHideAllAction;
 import pixelitor.menus.view.ShowHideHistogramsAction;
 import pixelitor.menus.view.ShowHideLayersAction;
@@ -688,10 +690,10 @@ public class RobotTest {
     private static void randomCopy() {
         if (rand.nextBoolean()) {
             logRobotEvent("random copy layer");
-            new CopyAction(CopyType.COPY_LAYER).actionPerformed(new ActionEvent("", 0, ""));
+            new CopyAction(CopySource.LAYER).actionPerformed(new ActionEvent("", 0, ""));
         } else {
             logRobotEvent("random copy composite");
-            new CopyAction(CopyType.COPY_COMPOSITE).actionPerformed(new ActionEvent("", 0, ""));
+            new CopyAction(CopySource.COMPOSITE).actionPerformed(new ActionEvent("", 0, ""));
         }
     }
 
@@ -705,11 +707,11 @@ public class RobotTest {
                 return;
             }
             logRobotEvent("random paste as new image");
-            new PasteAction(false).actionPerformed(new ActionEvent("", 0, ""));
+            new PasteAction(PasteDestination.NEW_IMAGE).actionPerformed(new ActionEvent("", 0, ""));
             numPastedImages++;
         } else if (r == 1) {
             logRobotEvent("random paste as new layer");
-            new PasteAction(true).actionPerformed(new ActionEvent("", 0, ""));
+            new PasteAction(PasteDestination.NEW_LAYER).actionPerformed(new ActionEvent("", 0, ""));
             numPastedImages++;
         }
     }

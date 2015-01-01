@@ -14,13 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.menus.edit;
 
-import pixelitor.Composition;
-import pixelitor.ImageComponents;
-import pixelitor.PixelitorWindow;
-import pixelitor.layers.ImageLayer;
-import pixelitor.layers.Layer;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.ImageUtils;
 
@@ -35,16 +31,15 @@ import java.awt.image.WritableRaster;
 import java.io.IOException;
 
 /**
- * Pastes an image from the system clipboard to a new image
+ * Pastes an image from the system clipboard
  */
 public class PasteAction extends AbstractAction {
-    private static int pastedCount = 1;
+    private PasteDestination destination;
 
-    private boolean pasteAsNewLayer = false;
+    public PasteAction(PasteDestination destination) {
+        super(destination.toString());
 
-    public PasteAction(boolean pasteAsNewLayer) {
-        super(pasteAsNewLayer ? "Paste as New Layer" : "Paste as New Image");
-        this.pasteAsNewLayer = pasteAsNewLayer;
+        this.destination = destination;
     }
 
     @Override
@@ -74,16 +69,7 @@ public class PasteAction extends AbstractAction {
                     }
                 }
 
-                if (pasteAsNewLayer) {
-                    Composition comp = ImageComponents.getActiveComp().get();
-                    Layer newLayer = new ImageLayer(comp, pastedImage, "Pasted Layer", comp.getCanvasWidth(), comp.getCanvasHeight());
-
-                    comp.addLayer(newLayer, true, true, false);
-                } else { // paste as new image
-                    String title = "Pasted Image " + pastedCount;
-                    PixelitorWindow.getInstance().addNewImage(pastedImage, null, title);
-                    pastedCount++;
-                }
+                destination.addImage(pastedImage);
             }
         } catch (Exception ex) {
             Dialogs.showExceptionDialog(ex);

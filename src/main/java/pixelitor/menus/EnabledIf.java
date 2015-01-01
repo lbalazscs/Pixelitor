@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.menus;
 
@@ -25,7 +25,7 @@ import javax.swing.*;
 /**
  * When to enable a menu or a menu item
  */
-enum MenuEnableCondition {
+enum EnabledIf {
     THERE_IS_OPEN_IMAGE {
         @Override
         public JMenuItem getMenuItem(Action a) {
@@ -51,7 +51,7 @@ enum MenuEnableCondition {
         public JMenuItem getMenuItem(Action a) {
             return new RedoMenuItem(a);
         }
-    }, ALWAYS_UNLESS_ACTION_DISABLED {
+    }, ACTION_ENABLED { // in most cases this means "always"
         @Override
         public JMenuItem getMenuItem(Action a) {
             return new JMenuItem(a);

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.menus.edit;
 
 import pixelitor.ImageComponents;
@@ -21,16 +22,16 @@ import pixelitor.ImageComponents;
 import java.awt.image.BufferedImage;
 
 /**
- *
+ * Represents the source of the image that will be copied to the clipboard
  */
-public enum CopyType {
-    COPY_LAYER {
+public enum CopySource {
+    LAYER {
         @Override
-        BufferedImage getCopySource() {
+        BufferedImage getImage() {
 //            return AppLogic.getActiveComp().getImageOrSubImageIfSelectedForActiveLayer(false, false);
 
             // TODO this avoids the raster "has minX or minY not equal to zero" exception,
-            // but bow it is copied twice 
+            // but now it is copied twice
             return ImageComponents.getActiveComp().get().getImageOrSubImageIfSelectedForActiveLayer(false, true);
         }
 
@@ -38,10 +39,9 @@ public enum CopyType {
         public String toString() {
             return "Copy Layer";
         }
-    },
-    COPY_COMPOSITE {
+    }, COMPOSITE {
         @Override
-        BufferedImage getCopySource() {
+        BufferedImage getImage() {
             return ImageComponents.getActiveCompositeImage().get();
         }
 
@@ -51,5 +51,5 @@ public enum CopyType {
         }
     };
 
-    abstract BufferedImage getCopySource();
+    abstract BufferedImage getImage();
 }
