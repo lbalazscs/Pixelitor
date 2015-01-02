@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.tools.toolhandlers;
 
@@ -22,9 +22,10 @@ import pixelitor.tools.Tools;
 import java.awt.event.MouseEvent;
 
 /**
- *
+ * If Alt is pressed, the color picker will handle the events
+ * instead of the current tool
  */
-public class ColorPickerToolEventHandler extends ToolEventHandler {
+public class ColorPickerToolHandler extends ToolHandler {
     @Override
     boolean mousePressed(MouseEvent e, ImageComponent ic) {
         if (e.isAltDown()) {
@@ -32,6 +33,7 @@ public class ColorPickerToolEventHandler extends ToolEventHandler {
             return true;
         }
 
+        // forwards the mouse event to the next handler
         return false;
     }
 

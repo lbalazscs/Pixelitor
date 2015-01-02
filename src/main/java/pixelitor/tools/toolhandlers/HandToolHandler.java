@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.tools.toolhandlers;
 
@@ -25,17 +25,17 @@ import java.awt.Cursor;
 import java.awt.event.MouseEvent;
 
 /**
- * Checks whether the current tool should behave as a hand tool (space is down at the start of a mouse drag),
- * and forwards the request to the next ToolEventHandler if not.
+ * Checks whether the current tool should behave as a hand tool
+ * (space is down at the start of a mouse drag).
  */
-public class HandToolEventHandler extends ToolEventHandler {
+public class HandToolHandler extends ToolHandler {
     private boolean handToolForwarding = false;
     private boolean normalToolUsage = false;
     private boolean spaceDown = false;
 
     private final Cursor cursor;
 
-    public HandToolEventHandler(Cursor cursor) {
+    public HandToolHandler(Cursor cursor) {
         this.cursor = cursor;
     }
 
@@ -49,6 +49,7 @@ public class HandToolEventHandler extends ToolEventHandler {
         normalToolUsage = true;
         handToolForwarding = false;
 
+        // forwards the mouse event to the next handler
         return false;
     }
 
@@ -94,5 +95,4 @@ public class HandToolEventHandler extends ToolEventHandler {
             ImageComponents.setToolCursor(cursor);
         }
     }
-
 }

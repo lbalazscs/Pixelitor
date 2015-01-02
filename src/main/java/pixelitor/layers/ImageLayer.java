@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.layers;
 
 import pixelitor.ChangeReason;
@@ -872,7 +873,7 @@ public class ImageLayer extends ContentLayer {
 
                 // brush and shapes cannot be active together, therefore if is enough to call this only here!
                 comp.setSelectionClipping(tmpG, null);
-                Tools.SHAPES.paintOverLayer(tmpG);
+                Tools.SHAPES.paintOverLayer(tmpG, comp);
                 tmpG.dispose();
 
                 g.drawImage(tmp, 0, 0, null);

@@ -17,33 +17,37 @@
 package pixelitor.tools.toolhandlers;
 
 import pixelitor.ImageComponent;
-import pixelitor.layers.Layers;
-import pixelitor.utils.Dialogs;
+import pixelitor.tools.Tool;
 
 import java.awt.event.MouseEvent;
 
 /**
- * Checks whether the active layer is an image layer.
+ * At the end of a AbstractToolHandler chain there is always a CurrentToolHandler,
+ * which forwards the events to the current tool in order to do the real job of the tool
  */
-public class ImageLayerCheckHandler extends ToolHandler {
+public class CurrentToolHandler extends ToolHandler {
+    Tool tool;
+
+    public CurrentToolHandler(Tool tool) {
+        this.tool = tool;
+    }
+
     @Override
     boolean mousePressed(MouseEvent e, ImageComponent ic) {
-        if (!Layers.activeIsImageLayer()) {
-            Dialogs.showNotImageLayerDialog();
-            return true;
-        }
-
-        // forwards the mouse event to the next handler
-        return false;
+        tool.toolMousePressed(e, ic);
+        // this is the last handler in the chain, therefore it always returns true
+        return true;
     }
 
     @Override
     boolean mouseDragged(MouseEvent e, ImageComponent ic) {
-        return !Layers.activeIsImageLayer();
+        tool.toolMouseDragged(e, ic);
+        return true;
     }
 
     @Override
     boolean mouseReleased(MouseEvent e, ImageComponent ic) {
-        return !Layers.activeIsImageLayer();
+        tool.toolMouseReleased(e, ic);
+        return true;
     }
 }

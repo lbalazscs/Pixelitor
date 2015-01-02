@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,45 +8,61 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.tools.toolhandlers;
 
 import pixelitor.ImageComponent;
-import pixelitor.tools.Tool;
 
 import java.awt.event.MouseEvent;
 
 /**
- * At the end of a ToolEventHandler chain there is always a ToolHandler, which does
- * the real job of the tool
+ * Can be used to handle the mouse events instead of the current tool.
+ *
+ * The tool event handler objects follow the "Chain of responsibility" design pattern.
+ * The last event handler is always the current tool.
+ * This is the abstract superclass of all the chained handlers.
  */
-public class ToolHandler extends ToolEventHandler {
-    Tool tool;
+public abstract class ToolHandler {
+    private ToolHandler successor;
 
-    public ToolHandler(Tool tool) {
-        this.tool = tool;
+    public void setSuccessor(ToolHandler handler) {
+        successor = handler;
     }
 
-    @Override
-    boolean mousePressed(MouseEvent e, ImageComponent ic) {
-        tool.toolMousePressed(e, ic);
-        return true;
+    public void handleMousePressed(MouseEvent e, ImageComponent ic) {
+        if (mousePressed(e, ic)) {
+            return;
+        }
+        // forwards the mouse event to the next handler
+        successor.handleMousePressed(e, ic);
     }
 
-    @Override
-    boolean mouseDragged(MouseEvent e, ImageComponent ic) {
-        tool.toolMouseDragged(e, ic);
-        return true;
+    /**
+     * @return true if the event was handled and it should no be forwarded to the next handler
+     */
+    abstract boolean mousePressed(MouseEvent e, ImageComponent ic);
+
+    public void handleMouseDragged(MouseEvent e, ImageComponent ic) {
+        if (mouseDragged(e, ic)) {
+            return;
+        }
+        successor.handleMouseDragged(e, ic);
     }
 
-    @Override
-    boolean mouseReleased(MouseEvent e, ImageComponent ic) {
-        tool.toolMouseReleased(e, ic);
-        return true;
+    abstract boolean mouseDragged(MouseEvent e, ImageComponent ic);
+
+    public void handleMouseReleased(MouseEvent e, ImageComponent ic) {
+        if (mouseReleased(e, ic)) {
+            return;
+        }
+        successor.handleMouseReleased(e, ic);
     }
+
+    abstract boolean mouseReleased(MouseEvent e, ImageComponent ic);
+
 }

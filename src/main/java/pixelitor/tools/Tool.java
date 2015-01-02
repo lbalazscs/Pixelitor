@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.tools;
 
@@ -24,10 +24,10 @@ import pixelitor.ImageComponents;
 import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.history.PartialImageEdit;
-import pixelitor.tools.toolhandlers.ColorPickerToolEventHandler;
-import pixelitor.tools.toolhandlers.HandToolEventHandler;
+import pixelitor.tools.toolhandlers.ColorPickerToolHandler;
+import pixelitor.tools.toolhandlers.CurrentToolHandler;
+import pixelitor.tools.toolhandlers.HandToolHandler;
 import pixelitor.tools.toolhandlers.ImageLayerCheckHandler;
-import pixelitor.tools.toolhandlers.ToolEventHandler;
 import pixelitor.tools.toolhandlers.ToolHandler;
 import pixelitor.utils.Utils;
 
@@ -40,13 +40,11 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
 /**
- * A tool
+ * An abstract superclass for all tools
  */
 public abstract class Tool {
-
     private boolean mouseDown = false;
     private ToolButton toolButton;
-
 
     private final String name;
     private final String iconFileName;
@@ -61,8 +59,8 @@ public abstract class Tool {
     protected UserDrag userDrag;
 
     private final char activationKeyChar;
-    private ToolEventHandler handlerChainStart;
-    private HandToolEventHandler handToolEventHandler;
+    private ToolHandler handlerChainStart;
+    private HandToolHandler handToolHandler;
 
     protected ToolSettingsPanel toolSettingsPanel;
     protected boolean ended = false;
@@ -80,25 +78,28 @@ public abstract class Tool {
     }
 
     private void initHandlerChain(Cursor cursor, boolean allowOnlyImageLayers, boolean handToolForwarding) {
-        ToolEventHandler lastHandler = null;
+        ToolHandler lastHandler = null;
         if (allowOnlyImageLayers) {
             lastHandler = addHandlerToChain(new ImageLayerCheckHandler(), lastHandler);
         }
         if (handToolForwarding) {
-            handToolEventHandler = new HandToolEventHandler(cursor);
-            lastHandler = addHandlerToChain(handToolEventHandler, lastHandler);
+            // most tools behave like the hand tool if the space is pressed
+            handToolHandler = new HandToolHandler(cursor);
+            lastHandler = addHandlerToChain(handToolHandler, lastHandler);
         }
-        if (this instanceof AbstractBrushTool) { // TODO
-            ColorPickerToolEventHandler colorPickerEventHandler = new ColorPickerToolEventHandler();
-            lastHandler = addHandlerToChain(colorPickerEventHandler, lastHandler);
+        if (this instanceof AbstractBrushTool) {
+            // brush tools behave like the color picker if Alt is pressed
+            ColorPickerToolHandler colorPickerHandler = new ColorPickerToolHandler();
+            lastHandler = addHandlerToChain(colorPickerHandler, lastHandler);
         }
-        lastHandler = addHandlerToChain(new ToolHandler(this), lastHandler);
+        // if there was no special case, the current tool should handle the events
+        addHandlerToChain(new CurrentToolHandler(this), lastHandler);
     }
 
     /**
      * Adds the new handler to the end of the chain and returns the new end of the chain
      */
-    private ToolEventHandler addHandlerToChain(ToolEventHandler newHandler, ToolEventHandler lastOne) {
+    private ToolHandler addHandlerToChain(ToolHandler newHandler, ToolHandler lastOne) {
         if (lastOne == null) {
             handlerChainStart = newHandler;
             return handlerChainStart;
@@ -119,8 +120,6 @@ public abstract class Tool {
 
     public void mousePressed(MouseEvent e, ImageComponent ic) {
         if (mouseDown) {
-            // TODO test again
-
             // can happen if the tool is changed while drawing, and then changed back
             MouseEvent fake = new MouseEvent((Component) e.getSource(), e.getID(), e.getWhen(), e.getModifiers(),
                     userDrag.getEndX(), userDrag.getEndY(), 1, false);
@@ -149,7 +148,6 @@ public abstract class Tool {
         endPointInitialized = false;
     }
 
-
     public void mouseDragged(MouseEvent e, ImageComponent ic) {
         if (!mouseDown) { // can happen if the tool is changed while drawing
             mousePressed(e, ic); // try to initialize
@@ -175,7 +173,6 @@ public abstract class Tool {
 
         handlerChainStart.handleMouseDragged(e, ic);
     }
-
 
     void setButton(ToolButton toolButton) {
         this.toolButton = toolButton;
@@ -239,14 +236,14 @@ public abstract class Tool {
     }
 
     public void spacePressed() {
-        if (handToolEventHandler != null) { // there is hand tool forwarding
-            handToolEventHandler.spacePressed();
+        if (handToolHandler != null) { // there is hand tool forwarding
+            handToolHandler.spacePressed();
         }
     }
 
     public void spaceReleased() {
-        if (handToolEventHandler != null) { // there is hand tool forwarding
-            handToolEventHandler.spaceReleased();
+        if (handToolHandler != null) { // there is hand tool forwarding
+            handToolHandler.spaceReleased();
         }
     }
 
@@ -263,10 +260,9 @@ public abstract class Tool {
         return cursor;
     }
 
-    public void paintOverLayer(Graphics2D g) {
+    public void paintOverLayer(Graphics2D g, Composition comp) {
         // empty for the convenience of subclasses
     }
-
 
     /**
      * A possibility to paint temporarily something (like marching ants) on the ImageComponent
@@ -279,7 +275,6 @@ public abstract class Tool {
     public void mouseMoved(MouseEvent e, ImageComponent ic) {
         // empty for the convenience of subclasses
     }
-
 
     public abstract void toolMousePressed(MouseEvent e, ImageComponent ic);
 

@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools.shapestool;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import org.jdesktop.swingx.painter.effects.AreaEffect;
 import pixelitor.Composition;
 import pixelitor.ImageComponent;
-import pixelitor.ImageComponents;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.history.History;
@@ -74,7 +74,7 @@ public class ShapesTool extends Tool {
     private JButton strokeSettingsButton;
     private BasicStroke basicStrokeForOpenShapes;
     private final JComboBox<TwoPointBasedPaint> strokeFillCombo;
-    private final JComboBox<TwoPointBasedPaint> fillCombo = new JComboBox(fillModel);
+    private final JComboBox<TwoPointBasedPaint> fillCombo = new JComboBox<>(fillModel);
     private JButton effectsButton;
     private OKCancelDialog effectsDialog;
     private EffectsPanel effectsPanel;
@@ -84,14 +84,13 @@ public class ShapesTool extends Tool {
 
     private Stroke stroke;
 
-
     public ShapesTool() {
         super('s', "Shapes", "shapes_tool_icon.gif",
                 "Click and drag to draw a shape. Hold SPACE down while drawing to move the shape. ",
                 Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR), true, true, false, ClipStrategy.IMAGE_ONLY);
 
         strokeFillModel.setSelectedItem(TwoPointBasedPaint.BACKGROUND);
-        strokeFillCombo = new JComboBox(strokeFillModel);
+        strokeFillCombo = new JComboBox<>(strokeFillModel);
 
         spaceDragBehavior = true;
     }
@@ -99,15 +98,14 @@ public class ShapesTool extends Tool {
     @Override
     public void initSettingsPanel() {
         toolSettingsPanel.add(new JLabel("Shape:"));
-        final JComboBox<ShapeType> shapeTypeCB = new JComboBox(typeModel);
+        final JComboBox<ShapeType> shapeTypeCB = new JComboBox<>(typeModel);
         toolSettingsPanel.add(shapeTypeCB);
 
         // make sure all values are visible without a scrollbar
         shapeTypeCB.setMaximumRowCount(ShapeType.values().length);
 
-
         toolSettingsPanel.add(new JLabel("Action:"));
-        JComboBox<ShapesAction> actionCB = new JComboBox(actionModel);
+        JComboBox<ShapesAction> actionCB = new JComboBox<>(actionModel);
         toolSettingsPanel.add(actionCB);
 
         actionCB.addActionListener(new ActionListener() {
@@ -183,13 +181,13 @@ public class ShapesTool extends Tool {
 
         Composition comp = ic.getComp();
 
+        // this will trigger paintOverLayer, therefore the continuous drawing of the shape
         comp.imageChanged(true, false); // TODO optimize, the whole image should not be repainted
     }
 
     @Override
     public void toolMouseReleased(MouseEvent e, ImageComponent ic) {
         userDrag.setStartFromCenter(e.isAltDown());
-
 
         Composition comp = ic.getComp();
 
@@ -283,9 +281,10 @@ public class ShapesTool extends Tool {
     }
 
     @Override
-    public void paintOverLayer(Graphics2D g) {
+    public void paintOverLayer(Graphics2D g, Composition comp) {
         if (drawing) {
-            paintShape(g, userDrag);
+            // updates continuously the shape while drawing
+            paintShape(g, userDrag, comp);
         }
     }
 
@@ -303,7 +302,7 @@ public class ShapesTool extends Tool {
         g2.translate(translationX, translationY);
         comp.setSelectionClipping(g2, null);
 
-        paintShape(g2, userDrag);
+        paintShape(g2, userDrag, comp);
         g2.dispose();
     }
 
@@ -311,7 +310,7 @@ public class ShapesTool extends Tool {
      * Paints the selected shape on the given Graphics2D within the bounds of the given UserDrag
      * Called by paintOnImage while dragging, and by paintShapeOnIC on mouse release
      */
-    private void paintShape(Graphics2D g, UserDrag userDrag) {
+    private void paintShape(Graphics2D g, UserDrag userDrag, Composition comp) {
         if (userDrag.isClick()) {
             return;
         }
@@ -327,7 +326,6 @@ public class ShapesTool extends Tool {
 
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-
         if (action.hasFill()) {
             TwoPointBasedPaint fillType = fillModel.getSelectedItem();
             if (shapeType.isClosed()) {
@@ -340,8 +338,6 @@ public class ShapesTool extends Tool {
                 g.setPaint(fillType.getPaint(userDrag));
                 g.draw(currentShape);
             }
-        } else {
-            // no fill
         }
 
         if (action.hasStroke()) {
@@ -354,8 +350,6 @@ public class ShapesTool extends Tool {
             g.setStroke(stroke);
             g.setPaint(strokeFill.getPaint(userDrag));
             g.draw(currentShape);
-        } else {
-            // no stroke
         }
 
         if (action.drawEffects()) {
@@ -376,9 +370,8 @@ public class ShapesTool extends Tool {
             }
         }
 
-
         if (action.createSelection()) {
-            Shape selectionShape = null;
+            Shape selectionShape;
             if (action.enableStrokeSettings()) {
                 if (stroke == null) {
                     stroke = createStroke();
@@ -393,7 +386,6 @@ public class ShapesTool extends Tool {
                 selectionShape = currentShape;
             }
 
-            Composition comp = ImageComponents.getActiveComp().get(); // TODO there should be a more direct way to get the reference
             Optional<Selection> selection = comp.getSelection();
             if (!selection.isPresent()) {
                 comp.createSelectionFromShape(selectionShape);
@@ -411,21 +403,14 @@ public class ShapesTool extends Tool {
             dashFloats = new float[]{2 * strokeWidth, 2 * strokeWidth};
         }
 
-        Stroke stroke = strokeTypeModel.getSelectedItem().getStroke(
+        Stroke s = strokeTypeModel.getSelectedItem().getStroke(
                 strokeWidth,
                 strokeCapModel.getSelectedItem().getValue(),
                 strokeJoinModel.getSelectedItem().getValue(),
                 dashFloats
         );
 
-        return stroke;
-    }
-
-    /**
-     * Used for testing
-     */
-    public void setShapeType(ShapeType newType) {
-        typeModel.setSelectedItem(newType);
+        return s;
     }
 
     public boolean isDrawing() {
@@ -454,6 +439,13 @@ public class ShapesTool extends Tool {
 
     private void enableFillPaintSelection(boolean b) {
         fillCombo.setEnabled(b);
+    }
+
+    /**
+     * Used for testing
+     */
+    public void setShapeType(ShapeType newType) {
+        typeModel.setSelectedItem(newType);
     }
 
     /**
