@@ -80,7 +80,7 @@ public class Composition implements Serializable {
      * If the file argument is not null, then the name argument is ignored
      * (the name of the composition will be the file name)
      */
-    public Composition(ImageComponent ic, File file, String name, Canvas canvas) {
+    public Composition(ImageDisplay ic, File file, String name, Canvas canvas) {
         this.ic = ic; // can be null
         this.canvas = canvas;
         if (file != null) {
@@ -124,8 +124,8 @@ public class Composition implements Serializable {
         int activeLayerIndex = layerList.indexOf(activeLayer);
         int newLayerIndex;
 
-        if (activeLayerIndex == -1) { // happens only while unit testing
-            newLayerIndex = 0;
+        if (activeLayerIndex == -1) { // TODO happens only while unit testing
+            newLayerIndex = layerList.size();
         } else {
             if (bellowActive) {
                 newLayerIndex = activeLayerIndex;
@@ -650,7 +650,7 @@ public class Composition implements Serializable {
     }
 
     public boolean isActiveComp() {
-        // TODO this was hack in order to isolate the unit tests from ImageComponents
+        // TODO this was a hack in order to isolate the unit tests from ImageComponents
         if (!(ic instanceof ImageComponent)) {
             return false;
         }
@@ -694,5 +694,9 @@ public class Composition implements Serializable {
         layerList.remove(layer);
         layerList.add(newIndex, layer);
         imageChanged(true, true);
+    }
+
+    public void repaint() {
+        ic.repaint();
     }
 }

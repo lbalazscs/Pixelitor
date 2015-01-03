@@ -208,18 +208,14 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         return node.toDetailedString();
     }
 
-    @Override
     public void setInternalFrame(InternalImageFrame internalFrame) {
         this.internalFrame = internalFrame;
     }
 
-    @Override
     public InternalImageFrame getInternalFrame() {
         return internalFrame;
     }
 
-
-    @Override
     public void close() {
         if (internalFrame != null) {
             // this will also cause the calling of AppLogic.imageClosed via
@@ -255,13 +251,10 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         return comp.getName() + " - " + zoomLevel.toString();
     }
 
-
-    @Override
     public ZoomLevel getZoomLevel() {
         return zoomLevel;
     }
 
-    @Override
     public void addLayerButton(LayerButton layerButton, int newLayerIndex) {
         layersPanel.addLayerButton(layerButton, newLayerIndex);
     }
@@ -396,7 +389,6 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         }
     }
 
-    @Override
     public void setLayerMaskEditing(boolean layerMaskEditing) {
         this.layerMaskEditing = layerMaskEditing;
         repaint();
@@ -465,7 +457,6 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     /**
      * @return true if there was a change in zoom
      */
-    @Override
     public boolean setZoom(ZoomLevel newZoomLevel, boolean settingTheInitialSize) {
         if (this.zoomLevel == newZoomLevel && !settingTheInitialSize) {
             return false;
@@ -505,7 +496,6 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         return true;
     }
 
-    @Override
     public void increaseZoom(int mouseX, int mouseY) {
         ZoomLevel oldZoom = zoomLevel;
         ZoomLevel newZoom = zoomLevel.zoomIn();
@@ -514,7 +504,6 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         }
     }
 
-    @Override
     public void decreaseZoom(int mouseX, int mouseY) {
         ZoomLevel oldZoom = zoomLevel;
         ZoomLevel newZoom = zoomLevel.zoomOut();

@@ -287,7 +287,7 @@ public class ImageLayer extends ContentLayer {
         assert previewImage != null;
 
         if (isImageContentChanged()) {
-            ImageEdit edit = new ImageEdit(filterName, comp, getImageOrSubImageIfSelected(true, true), true);
+            ImageEdit edit = new ImageEdit(filterName, comp, this, getImageOrSubImageIfSelected(true, true), true);
             History.addEdit(edit);
         }
 
@@ -317,7 +317,7 @@ public class ImageLayer extends ContentLayer {
         assert state == State.PREVIEW;
         setState(State.NORMAL);
 
-        getComposition().getIC().repaint(); // TODO necessary?
+        getComposition().repaint(); // TODO necessary?
     }
 
     /**
@@ -381,7 +381,7 @@ public class ImageLayer extends ContentLayer {
             throw new IllegalStateException("imageForUndo == image");
         }
         assert imageForUndo != null;
-        ImageEdit edit = new ImageEdit(opName, comp, imageForUndo, true);
+        ImageEdit edit = new ImageEdit(opName, comp, this, imageForUndo, true);
         History.addEdit(edit);
 
         // otherwise the next filter run will take the old image source,

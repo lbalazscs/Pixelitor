@@ -19,24 +19,17 @@ package pixelitor;
 
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
-import pixelitor.menus.view.ZoomLevel;
 
 import java.awt.image.BufferedImage;
 
+/**
+ * Separates the GUI code from the non-GUI code.
+ * Contains the methods of ImageComponent that are visible from non-GUI code
+ */
 public interface ImageDisplay {
     void addBaseLayer(BufferedImage baseLayerImage);
 
-    void setInternalFrame(InternalImageFrame internalFrame);
-
-    InternalImageFrame getInternalFrame();
-
-    void close();
-
     double getViewScale();
-
-    ZoomLevel getZoomLevel();
-
-    void addLayerButton(LayerButton layerButton, int newLayerIndex);
 
     void deleteLayerButton(LayerButton button);
 
@@ -46,15 +39,7 @@ public interface ImageDisplay {
 
     void updateRegion(int startX, int startY, int endX, int endY, int thickness);
 
-    void setLayerMaskEditing(boolean layerMaskEditing);
-
     void canvasSizeChanged();
-
-    boolean setZoom(ZoomLevel newZoomLevel, boolean settingTheInitialSize);
-
-    void increaseZoom(int mouseX, int mouseY);
-
-    void decreaseZoom(int mouseX, int mouseY);
 
     void repaint();
 

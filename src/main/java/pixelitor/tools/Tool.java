@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools;
 
 import pixelitor.Canvas;
@@ -203,19 +204,15 @@ public abstract class Tool {
     void saveImageForUndo(Composition comp) {
         BufferedImage copy = comp.getImageOrSubImageIfSelectedForActiveLayer(true, true);
 
-        ImageEdit edit = new ImageEdit(getName(), comp, copy, false);
+        ImageEdit edit = new ImageEdit(getName(), comp, comp.getActiveImageLayer(), copy, false);
         History.addEdit(edit);
     }
 
     /**
      * This saving method is used by the brush tools, by the shapes and by the paint bucket.
      * It saves the intersection of the selection (if there is one) with the maximal affected area.
-     * TODO currently it does not take the selection into account
-     *
-     * @param comp
-     * @param fullUntouchedImage
-     * @param rectangleAffectedByTool - given relative to the canvas
      */
+    // TODO currently it does not take the selection into account
     public void saveSubImageForUndo(BufferedImage fullUntouchedImage, ToolAffectedArea affectedArea) {
         assert (fullUntouchedImage != null);
         Rectangle rectangleAffectedByTool = affectedArea.getRectangle();

@@ -132,6 +132,8 @@ public class Selection {
      * - selections from the Shapes Tool
      */
     public Selection(Shape shape, ImageDisplay c) {
+        assert c != null;
+
         this.currentSelectionShape = shape;
         this.ic = c;
 
@@ -202,6 +204,8 @@ public class Selection {
     }
 
     private void startMarching() {
+        assert ic != null;
+
         marchingAntsTimer = new Timer(100, null);
         marchingAntsTimer.addActionListener(new ActionListener() {
             @Override
