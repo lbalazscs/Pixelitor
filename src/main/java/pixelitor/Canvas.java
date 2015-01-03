@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor;
 
 import java.awt.Dimension;
@@ -15,7 +32,7 @@ public class Canvas implements Serializable {
     private int zoomedWidth;
     private int zoomedHeight;
 
-    private transient ImageComponent ic;
+    private transient ImageDisplay ic;
 
     // for consistency with Pixelitor 2.1.0
     private static final long serialVersionUID = -1459254568616232274L;
@@ -26,7 +43,7 @@ public class Canvas implements Serializable {
      * and later associated with the (transient!) ImageComponent
      * In the case of a new image, this object is first created in ImageComponent
      */
-    public Canvas(ImageComponent ic, int width, int height) {
+    public Canvas(ImageDisplay ic, int width, int height) {
         this.width = width;
         this.height = height;
         this.ic = ic;

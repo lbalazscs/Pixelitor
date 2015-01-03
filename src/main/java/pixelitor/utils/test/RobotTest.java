@@ -645,7 +645,7 @@ public class RobotTest {
             comp.mergeDown();
         } else {
             logRobotEvent("layer flatten image");
-            comp.flattenImage();
+            comp.flattenImage(true);
         }
     }
 

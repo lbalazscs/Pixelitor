@@ -20,7 +20,7 @@ package pixelitor.selection;
 import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
+import pixelitor.ImageDisplay;
 import pixelitor.tools.UserDrag;
 import pixelitor.utils.Dialogs;
 
@@ -41,7 +41,7 @@ import java.awt.geom.Area;
  */
 public class Selection {
     private float dashPhase;
-    private ImageComponent ic;
+    private ImageDisplay ic;
     private Timer marchingAntsTimer;
 
     // the shape that is currently drawn
@@ -106,7 +106,7 @@ public class Selection {
     /**
      * Called when a new selection is created with the marquee selection tool
      */
-    public Selection(ImageComponent c, SelectionType selectionType, SelectionInteraction selectionInteraction) {
+    public Selection(ImageDisplay c, SelectionType selectionType, SelectionInteraction selectionInteraction) {
         this.ic = c;
         this.selectionType = selectionType;
         this.selectionInteraction = selectionInteraction;
@@ -131,7 +131,7 @@ public class Selection {
      * - when a deselect is undone (and when a  new selection is undone and then redone)
      * - selections from the Shapes Tool
      */
-    public Selection(Shape shape, ImageComponent c) {
+    public Selection(Shape shape, ImageDisplay c) {
         this.currentSelectionShape = shape;
         this.ic = c;
 

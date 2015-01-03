@@ -276,4 +276,8 @@ public class ImageComponents {
         ZoomLevel newZoomLevel = currentZoom.zoomOut();
         activeImageComponent.setZoom(newZoomLevel, false);
     }
+
+    public static boolean isActive(ImageComponent imageComponent) {
+        return imageComponent == activeImageComponent;
+    }
 }

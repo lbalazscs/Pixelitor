@@ -610,7 +610,7 @@ public class MenuBar extends JMenuBar {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Composition comp = ImageComponents.getActiveComp().get();
-                comp.flattenImage();
+                comp.flattenImage(true);
             }
         };
         createMenuItem(flattenImageAction, layersMenu);

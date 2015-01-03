@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor;
 
-import com.bric.util.JVM;
 import pixelitor.history.DeleteLayerEdit;
 import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;
@@ -72,7 +72,7 @@ public class Composition implements Serializable {
     private transient boolean dirty = false;
     private transient boolean compositeImageUpToDate = false;
     private transient BufferedImage cachedCompositeImage = null;
-    private transient ImageComponent ic;
+    private transient ImageDisplay ic;
 
     private transient Selection selection;
 
@@ -81,7 +81,7 @@ public class Composition implements Serializable {
      * (the name of the composition will be the file name)
      */
     public Composition(ImageComponent ic, File file, String name, Canvas canvas) {
-        this.ic = ic;
+        this.ic = ic; // can be null
         this.canvas = canvas;
         if (file != null) {
             setFile(file);
@@ -124,10 +124,14 @@ public class Composition implements Serializable {
         int activeLayerIndex = layerList.indexOf(activeLayer);
         int newLayerIndex;
 
-        if (bellowActive) {
-            newLayerIndex = activeLayerIndex;
+        if (activeLayerIndex == -1) { // happens only while unit testing
+            newLayerIndex = 0;
         } else {
-            newLayerIndex = activeLayerIndex + 1;
+            if (bellowActive) {
+                newLayerIndex = activeLayerIndex;
+            } else {
+                newLayerIndex = activeLayerIndex + 1;
+            }
         }
 
         addLayer(newLayer, addToHistory, updateHistogram, newLayerIndex);
@@ -138,7 +142,7 @@ public class Composition implements Serializable {
      */
     public void addLayer(Layer newLayer, boolean addToHistory, boolean updateHistogram, int newLayerIndex) {
         layerList.add(newLayerIndex, newLayer);
-        addLayerToGUI(newLayer, newLayerIndex);
+        ic.addLayerToGUI(newLayer, newLayerIndex);
 
         if (addToHistory) {
             NewLayerEdit newLayerEdit = new NewLayerEdit(this, newLayer);
@@ -147,17 +151,6 @@ public class Composition implements Serializable {
 
         imageChanged(updateHistogram, updateHistogram); // if the histogram is updated,a  repaint is also necessary
     }
-
-    private void addLayerToGUI(Layer newLayer, int newLayerIndex) {
-        LayerButton layerButton = newLayer.getLayerButton();
-        ic.addLayerButton(layerButton, newLayerIndex);
-        setActiveLayer(newLayer, false);
-
-        if (isActiveComp()) {
-            AppLogic.activeCompLayerCountChanged(this, layerList.size());
-        }
-    }
-
 
     public void duplicateLayer() {
         Layer duplicate = activeLayer.duplicate();
@@ -254,8 +247,10 @@ public class Composition implements Serializable {
         return layerList.get(i);
     }
 
-    public void flattenImage() {
-        assert isActiveComp();
+    public void flattenImage(boolean updateGUI) {
+        if (updateGUI) {
+            assert isActiveComp();
+        }
 
         if (layerList.size() < 2) {
             return;
@@ -270,8 +265,10 @@ public class Composition implements Serializable {
         for (int i = nrLayers - 1; i >= 0; i--) { // remove the rest
             removeLayer(i);
         }
-        AppLogic.activeCompLayerCountChanged(this, 1);
-        History.addEdit(new NotUndoableEdit(this, "Flatten Image"));
+        if (updateGUI) {
+            AppLogic.activeCompLayerCountChanged(this, 1);
+            History.addEdit(new NotUndoableEdit(this, "Flatten Image"));
+        }
     }
 
     public void mergeDown() {
@@ -309,6 +306,9 @@ public class Composition implements Serializable {
     }
 
     public void swapLayers(int oldIndex, int newIndex, boolean isUndoRedo) {
+        assert oldIndex >= 0 : "oldIndex = " + oldIndex;
+        assert newIndex >= 0;
+
         if (newIndex < 0) {
             return;
         }
@@ -415,7 +415,7 @@ public class Composition implements Serializable {
     /**
      * Called when deserialized
      */
-    public void setImageComponent(ImageComponent ic) {
+    public void setImageComponent(ImageDisplay ic) {
         this.ic = ic;
     }
 
@@ -444,7 +444,7 @@ public class Composition implements Serializable {
             throw new IllegalStateException("layerList is null");
         }
         int layerIndex = layerList.indexOf(layer);
-        addLayerToGUI(layer, layerIndex);
+        ic.addLayerToGUI(layer, layerIndex);
     }
 
 
@@ -464,7 +464,7 @@ public class Composition implements Serializable {
     private void setName(String name) {
         this.name = name;
         if (ic != null) {
-            ic.setInternalFrameTitle();
+            ic.updateTitle();
         }
     }
 
@@ -524,7 +524,7 @@ public class Composition implements Serializable {
     }
 
     public ImageComponent getIC() {
-        return ic;
+        return (ImageComponent) ic;
     }
 
     public void paintSelection(Graphics2D g) {
@@ -634,13 +634,6 @@ public class Composition implements Serializable {
         selection = new Selection(ic, selectionType, selectionInteraction);
         if (isActiveComp()) {
             SelectionActions.setEnabled(true, this);
-        } else {
-            // TODO it seems that during Mac robot tests we can get here
-            if (Build.CURRENT == Build.FINAL) {
-                if (!JVM.isMac) {
-                    throw new IllegalStateException("can we still get here?");
-                }
-            }
         }
     }
 
@@ -657,6 +650,10 @@ public class Composition implements Serializable {
     }
 
     public boolean isActiveComp() {
+        // TODO this was hack in order to isolate the unit tests from ImageComponents
+        if (!(ic instanceof ImageComponent)) {
+            return false;
+        }
         return (ImageComponents.getActiveComp().get() == this);
     }
 
