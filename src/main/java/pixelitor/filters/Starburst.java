@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,29 +8,27 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
-import pixelitor.filters.gui.ActionParam;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseActionParam;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.ReseedSupport;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.util.Random;
@@ -46,19 +44,6 @@ public class Starburst extends FilterWithParametrizedGUI {
     private final BooleanParam randomColorsParam = new BooleanParam("Use Random Colors for Rays", false, true);
     private final AngleParam rotate = new AngleParam("Rotate", 0);
 
-    @SuppressWarnings("FieldCanBeLocal")
-    private final ActionParam reseedAction = new ReseedNoiseActionParam(
-            "Reseed Colors", "Recalculates the random colors",
-            new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    reseed();
-                }
-            });
-
-    private final Random rand;
-    private static long seed = System.nanoTime();
-
     public Starburst() {
         super("Starburst ", true, false);
         setParamSet(new ParamSet(
@@ -68,15 +53,16 @@ public class Starburst extends FilterWithParametrizedGUI {
                 randomColorsParam,
                 center,
                 rotate,
-                reseedAction
+                ReseedSupport.createParam("Reseed Colors", "Recalculates the random colors")
         ));
-        rand = new Random(seed);
         listNamePrefix = "Fill with ";
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        rand.setSeed(seed);
+        ReseedSupport.reInitialize();
+        Random rand = ReseedSupport.getRand();
+
         int width = dest.getWidth();
         int height = dest.getHeight();
 
@@ -127,9 +113,5 @@ public class Starburst extends FilterWithParametrizedGUI {
 
         g.dispose();
         return dest;
-    }
-
-    private static void reseed() {
-        seed = System.nanoTime();
     }
 }

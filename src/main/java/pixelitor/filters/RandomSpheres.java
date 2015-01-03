@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,26 +8,25 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor.filters;
 
 import org.jdesktop.swingx.painter.effects.InnerGlowPathEffect;
-import pixelitor.filters.gui.ActionParam;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ElevationAngleParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseActionParam;
 import pixelitor.filters.painters.EffectConfiguratorPanel;
 import pixelitor.tools.FgBgColorSelector;
+import pixelitor.utils.ReseedSupport;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -35,8 +34,6 @@ import java.awt.Graphics2D;
 import java.awt.MultipleGradientPaint;
 import java.awt.RadialGradientPaint;
 import java.awt.RenderingHints;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
@@ -52,9 +49,6 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
 
     private static final int TYPE_SPHERES = 1;
     private static final int TYPE_BUBBLES = 2;
-
-    private final Random rand;
-    private long seed;
 
     private final RangeParam radius = new RangeParam("Radius", 2, 100, 10);
     private final RangeParam density = new RangeParam("Density (%)", 1, 200, 50);
@@ -74,14 +68,6 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
 
     private final RangeParam opacity = new RangeParam("Opacity (%)", 0, 100, 100);
 
-    @SuppressWarnings("FieldCanBeLocal")
-    private final ActionParam reseedAction = new ReseedNoiseActionParam(new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            reseed();
-        }
-    });
-
     public RandomSpheres() {
         super("Random Spheres", true, false);
         setParamSet(new ParamSet(
@@ -93,17 +79,16 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
                 addHighLightsCB,
                 highlightAngleSelector,
                 highlightElevationSelector,
-                reseedAction
+                ReseedSupport.createParam()
         ));
-
-        seed = System.nanoTime();
-        rand = new Random(seed);
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+        ReseedSupport.reInitialize();
+        Random rand = ReseedSupport.getRand();
+
         Graphics2D g = dest.createGraphics();
-        rand.setSeed(seed);
 
         int width = dest.getWidth();
         int height = dest.getHeight();
@@ -189,9 +174,5 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
 
         g.dispose();
         return dest;
-    }
-
-    private void reseed() {
-        seed = System.nanoTime();
     }
 }

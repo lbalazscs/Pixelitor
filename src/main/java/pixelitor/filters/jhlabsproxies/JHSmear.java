@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,12 +8,13 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.SmearFilter;
@@ -22,14 +23,16 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.utils.ReseedSupport;
 
 import java.awt.image.BufferedImage;
+import java.util.Random;
 
 /**
  * Smear based on the JHLabs SmearFilter
  */
 public class JHSmear extends FilterWithParametrizedGUI {
-    private final RangeParam distance = new RangeParam("Distance", 0, 100, 0);
+    private final RangeParam distance = new RangeParam("Distance", 0, 100, 15);
     private final RangeParam density = new RangeParam("Density (%)", 0, 100, 50);
     private final AngleParam angle = new AngleParam("Angle (only for lines)", 0);
     private final RangeParam mix = new RangeParam("Opacity (%)", 0, 100, 50);
@@ -51,7 +54,8 @@ public class JHSmear extends FilterWithParametrizedGUI {
                 shape,
                 density,
                 angle,
-                mix
+                mix,
+                ReseedSupport.createParam()
         ));
     }
 
@@ -62,6 +66,9 @@ public class JHSmear extends FilterWithParametrizedGUI {
             return src;
         }
 
+        ReseedSupport.reInitialize();
+        Random rand = ReseedSupport.getRand();
+
         if (filter == null) {
             filter = new SmearFilter();
         }
@@ -71,6 +78,7 @@ public class JHSmear extends FilterWithParametrizedGUI {
         filter.setAngle((float) angle.getValueInRadians());
         filter.setMix(mix.getValueAsPercentage());
         filter.setShape(shape.getValue());
+        filter.setRandomGenerator(rand);
 
         dest = filter.filter(src, dest);
         return dest;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,19 +8,21 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor.filters;
 
 import com.jhlabs.image.ImageMath;
+import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.ReseedSupport;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -30,9 +32,16 @@ import java.util.Random;
  * Add Noise filter
  */
 public class AddNoise extends FilterWithParametrizedGUI {
+    private static final int METHOD_FASTER = 1;
+    private static final int METHOD_COVERAGE_ANIM = 2;
+
     private final RangeParam opacity = new RangeParam("Opacity (%)", 0, 100, 100);
     private final RangeParam coverage = new RangeParam("Coverage (%)", 0, 100, 50);
     private final RangeParam saturation = new RangeParam("Saturation (%)", 0, 100, 100);
+    private final IntChoiceParam method = new IntChoiceParam("Method", new IntChoiceParam.Value[]{
+            new IntChoiceParam.Value("Faster", METHOD_FASTER),
+            new IntChoiceParam.Value("Smooth Coverage Animation", METHOD_COVERAGE_ANIM),
+    });
 
     private float[] tmpHSV = new float[3];
 
@@ -41,12 +50,17 @@ public class AddNoise extends FilterWithParametrizedGUI {
         setParamSet(new ParamSet(
                 coverage,
                 saturation,
-                opacity
+                opacity,
+                method,
+                ReseedSupport.createParam()
         ));
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+        ReseedSupport.reInitialize();
+        Random rand = ReseedSupport.getRand();
+
         int[] srcData = ImageUtils.getPixelsAsArray(src);
         int[] destData = ImageUtils.getPixelsAsArray(dest);
 
@@ -58,11 +72,18 @@ public class AddNoise extends FilterWithParametrizedGUI {
 
         float coverageValue = coverage.getValueAsPercentage();
 
-        Random random = new Random();
+        boolean coverageAnim = method.getValue() == METHOD_COVERAGE_ANIM;
+
         for (int i = 0; i < destData.length; i++) {
             int srcRGB = srcData[i];
 
-            float rn = random.nextFloat();
+            int randomInt = 0;
+            if (coverageAnim) {
+                // generate random numbers for the discarded pixels as well
+                randomInt = rand.nextInt();
+            }
+
+            float rn = rand.nextFloat();
             if (rn > coverageValue) {
                 destData[i] = srcRGB;
                 continue;
@@ -74,8 +95,11 @@ public class AddNoise extends FilterWithParametrizedGUI {
                 continue;
             }
 
-            int randomInt = random.nextInt();
-
+            if (!coverageAnim) {
+                // if coverage animation is not a requirement, then it is faster
+                // to generate the random values only here, for the covered pixels
+                randomInt = rand.nextInt();
+            }
 
             if(saturationValue == 100) {
                 // make the alpha channel the same as for the source

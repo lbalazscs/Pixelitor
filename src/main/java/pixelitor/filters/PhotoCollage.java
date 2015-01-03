@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,23 +8,23 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import org.jdesktop.swingx.image.StackBlurFilter;
-import pixelitor.filters.gui.ActionParam;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseActionParam;
+import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.Utils;
 
 import java.awt.AlphaComposite;
@@ -36,8 +36,6 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.TexturePaint;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -62,19 +60,6 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
     private final RangeParam shadowDistanceParam = new RangeParam("Shadow Distance", 0, 20, 5);
     private final RangeParam shadowSoftnessParam = new RangeParam("Shadow Softness", 0, 10, 3);
 
-    private final Random rand;
-
-
-    private static long seed = System.nanoTime();
-
-    @SuppressWarnings("FieldCanBeLocal")
-    private final ActionParam reseedAction = new ReseedNoiseActionParam(new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            reseed();
-        }
-    });
-
     public PhotoCollage() {
         super("Photo Collage", true, false);
         setParamSet(new ParamSet(
@@ -88,15 +73,15 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
                 shadowAngleParam,
                 shadowDistanceParam.adjustRangeToImageSize(0.02),
                 shadowSoftnessParam.adjustRangeToImageSize(0.01),
-                reseedAction
+                ReseedSupport.createParam()
         ));
-
-        rand = new Random(seed);
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        rand.setSeed(seed);
+        ReseedSupport.reInitialize();
+        Random rand = ReseedSupport.getRand();
+
         int xSize = sizeParam.getValue(0);
         int ySize = sizeParam.getValue(1);
 
@@ -204,9 +189,5 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
 
         g.dispose();
         return dest;
-    }
-
-    private static void reseed() {
-        seed = System.nanoTime();
     }
 }
