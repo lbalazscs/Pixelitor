@@ -17,7 +17,6 @@ limitations under the License.
 package com.jhlabs.image;
 
 import java.awt.Rectangle;
-import java.util.Date;
 import java.util.Random;
 
 public class SmearFilter extends WholeImageFilter {
@@ -33,14 +32,14 @@ public class SmearFilter extends WholeImageFilter {
     private float scatter = 0.0f;
     private int distance = 8;
     private Random randomGenerator;
-    private long seed = 567;
+    //    private long seed = 567;
     private int shape = LINES;
     private float mix = 0.5f;
     private int fadeout = 0;
     private boolean background = false;
 
     public SmearFilter() {
-        randomGenerator = new Random();
+//        randomGenerator = new Random();
     }
 
     public void setShape(int shape) {
@@ -120,21 +119,19 @@ public class SmearFilter extends WholeImageFilter {
         return background;
     }
 
-    public void randomize() {
-        seed = new Date().getTime();
-    }
+//    public void randomize() {
+//        seed = new Date().getTime();
+//    }
 
-    private float random(float low, float high) {
-        return low + (high - low) * randomGenerator.nextFloat();
-    }
+//    private float random(float low, float high) {
+//        return low + (high - low) * randomGenerator.nextFloat();
+//    }
 
     @Override
     protected int[] filterPixels(int width, int height, int[] inPixels, Rectangle transformedSpace) {
         int[] outPixels = new int[width * height];
 
-        randomGenerator.setSeed(seed);
-        float sinAngle = (float) Math.sin(angle);
-        float cosAngle = (float) Math.cos(angle);
+//        randomGenerator.setSeed(seed);
 
         int i = 0;
         int numShapes;
@@ -170,6 +167,9 @@ public class SmearFilter extends WholeImageFilter {
                 }
                 break;
             case LINES:
+                float sinAngle = (float) Math.sin(angle);
+                float cosAngle = (float) Math.cos(angle);
+
                 numShapes = (int) (2 * density * width * height / 2);
 
                 for (i = 0; i < numShapes; i++) {
@@ -279,4 +279,7 @@ public class SmearFilter extends WholeImageFilter {
         return "Effects/Smear...";
 	}
 
+    public void setRandomGenerator(Random randomGenerator) {
+        this.randomGenerator = randomGenerator;
+    }
 }

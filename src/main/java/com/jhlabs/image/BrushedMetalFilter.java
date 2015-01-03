@@ -37,7 +37,7 @@ public class BrushedMetalFilter implements BufferedImageOp {
 	private int color = 0xff888888;
 	private float shine = 0.1f;
     private boolean monochrome = true;
-	private Random random = new Random();
+    private Random random;
 
     /**
      * Constructs a BrushedMetalFilter object.
@@ -301,4 +301,8 @@ public class BrushedMetalFilter implements BufferedImageOp {
 	public String toString() {
 		return "Texture/Brushed Metal...";
 	}
+
+    public void setRandom(Random random) {
+        this.random = random;
+    }
 }
