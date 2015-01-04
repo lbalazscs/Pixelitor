@@ -178,7 +178,7 @@ public final class PixelitorWindow extends JFrame {
     public void addNewImage(BufferedImage img, File file, String name) {
         ImageComponent ic = new ImageComponent(file, name, img);
         ImageComponents.setActiveImageComponent(ic, false);
-        ic.addBaseLayer(img);
+//        ic.addBaseLayer(img);
         ic.setCursor(Tools.getCurrentTool().getCursor());
 
         try {

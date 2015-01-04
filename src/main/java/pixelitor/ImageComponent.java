@@ -18,7 +18,6 @@
 package pixelitor;
 
 import org.jdesktop.swingx.painter.CheckerboardPainter;
-import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
 import pixelitor.layers.LayersContainer;
@@ -90,6 +89,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         comp = new Composition(this, file, name, canvas);
 
         init(width, height);
+
+        comp.addBaseLayer(baseLayerImage);
     }
 
     /**
@@ -109,17 +110,6 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         canvas.setIc(this);
 
         init(canvas.getWidth(), canvas.getHeight());
-    }
-
-    /**
-     * This method is not called from the constructor so that the active ImageComponent can be set before calling this
-     */
-    @Override
-    public void addBaseLayer(BufferedImage baseLayerImage) {
-        canvas.updateSize(baseLayerImage.getWidth(), baseLayerImage.getHeight());
-        ImageLayer newLayer = new ImageLayer(comp, baseLayerImage, null);
-
-        comp.addLayer(newLayer, false, true, false);
     }
 
     private void init(int width, int height) {
@@ -629,7 +619,6 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     public void addLayerToGUI(Layer newLayer, int newLayerIndex) {
         LayerButton layerButton = newLayer.getLayerButton();
         addLayerButton(layerButton, newLayerIndex);
-        comp.setActiveLayer(newLayer, false);
 
         if (ImageComponents.isActive(this)) {
             AppLogic.activeCompLayerCountChanged(comp, comp.getNrLayers());

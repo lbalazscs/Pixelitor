@@ -20,15 +20,11 @@ package pixelitor;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
 
-import java.awt.image.BufferedImage;
-
 /**
  * Separates the GUI code from the non-GUI code.
- * Contains the methods of ImageComponent that are visible from non-GUI code
+ * Contains the ImageComponent methods that are visible from non-GUI code.
  */
 public interface ImageDisplay {
-    void addBaseLayer(BufferedImage baseLayerImage);
-
     double getViewScale();
 
     void deleteLayerButton(LayerButton button);

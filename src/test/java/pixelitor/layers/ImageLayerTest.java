@@ -36,21 +36,22 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class ImageLayerTest {
+    private Composition comp;
     private ImageLayer layer;
 
     public static BufferedImage createTestImage() {
         return new BufferedImage(CompositionTest.sizeX, CompositionTest.sizeY, BufferedImage.TYPE_INT_ARGB);
     }
 
-    public static ImageLayer createTestImageLayer(String layerName) {
-        Composition comp = CompositionTest.createEmptyTestComposition();
+    public static ImageLayer createTestImageLayer(String layerName, Composition comp) {
         BufferedImage image = createTestImage();
         return new ImageLayer(comp, image, layerName);
     }
 
     @Before
     public void setUp() {
-        layer = createTestImageLayer("layer 1");
+        comp = CompositionTest.createEmptyTestComposition();
+        layer = createTestImageLayer("layer 1", comp);
     }
 
     @After
@@ -176,7 +177,7 @@ public class ImageLayerTest {
 
     @Test
     public void testMergeDownOn() {
-        layer.mergeDownOn(createTestImageLayer("layer 2"));
+        layer.mergeDownOn(createTestImageLayer("layer 2", comp));
     }
 
     @Test

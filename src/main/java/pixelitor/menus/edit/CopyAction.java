@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.menus.edit;
 
 import pixelitor.utils.Dialogs;
@@ -42,6 +43,12 @@ public class CopyAction extends AbstractAction {
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             BufferedImage activeImage = source.getImage();
             Transferable imageTransferable = new ImageTransferable(activeImage);
+
+            // Sun Jan 04 08:00:30 CET 2015, robot test:
+            // java.awt.image.RasterFormatException: Incorrect scanline stride: 12
+            // at sun.awt.image.ByteComponentRaster.verify(ByteComponentRaster.java:894)
+            // at sun.awt.image.ByteComponentRaster.<init>(ByteComponentRaster.java:201)
+            // https://bugs.openjdk.java.net/browse/JDK-8041558
             clipboard.setContents(imageTransferable, null);
         } catch (Exception ex) {
             Dialogs.showExceptionDialog(ex);

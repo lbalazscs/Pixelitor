@@ -130,6 +130,7 @@ public class MenuBar extends JMenuBar {
     private static final KeyStroke F7 = KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0);
     private static final KeyStroke TAB = KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0);
     private static final KeyStroke CTRL_R = KeyStroke.getKeyStroke('R', InputEvent.CTRL_MASK);
+    private static final KeyStroke CTRL_ALT_R = KeyStroke.getKeyStroke('R', InputEvent.CTRL_MASK + InputEvent.ALT_MASK);
 
     public MenuBar(PixelitorWindow pixelitorWindow) {
         initFileMenu(pixelitorWindow);
@@ -599,7 +600,6 @@ public class MenuBar extends JMenuBar {
         createMenuItem(new Mirror(), dislocateSubmenu);
     }
 
-
     private void initLayerMenu() {
         JMenu layersMenu = createMenu("Layer", 'L');
 
@@ -938,7 +938,7 @@ public class MenuBar extends JMenuBar {
                 }
             }
         };
-        createMenuItem(randomResizeAction, testSubmenu);
+        createMenuItem(randomResizeAction, testSubmenu, CTRL_ALT_R);
 
         AbstractAction randomToolAction = new AbstractAction("1001 Brush & Shape Actions") {
             @Override

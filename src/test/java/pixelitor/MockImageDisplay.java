@@ -20,14 +20,7 @@ package pixelitor;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
 
-import java.awt.image.BufferedImage;
-
 public class MockImageDisplay implements ImageDisplay {
-    @Override
-    public void addBaseLayer(BufferedImage baseLayerImage) {
-
-    }
-
     @Override
     public double getViewScale() {
         return 1.0;
@@ -35,7 +28,6 @@ public class MockImageDisplay implements ImageDisplay {
 
     @Override
     public void deleteLayerButton(LayerButton button) {
-
     }
 
     @Override
@@ -45,31 +37,25 @@ public class MockImageDisplay implements ImageDisplay {
 
     @Override
     public void changeLayerOrderInTheGUI(int oldIndex, int newIndex) {
-
     }
 
     @Override
     public void updateRegion(int startX, int startY, int endX, int endY, int thickness) {
-
     }
 
     @Override
     public void canvasSizeChanged() {
-
     }
 
     @Override
     public void repaint() {
-
     }
 
     @Override
     public void updateTitle() {
-
     }
 
     @Override
     public void addLayerToGUI(Layer newLayer, int newLayerIndex) {
-
     }
 }
