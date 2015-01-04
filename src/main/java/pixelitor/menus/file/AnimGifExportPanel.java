@@ -14,14 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.menus.file;
 
 import org.jdesktop.swingx.VerticalLayout;
 import pixelitor.AppLogic;
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
-import pixelitor.io.AnimationFrames;
-import pixelitor.io.FileChooser;
+import pixelitor.io.FileChoosers;
+import pixelitor.io.LayerAnimationFrames;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.OKCancelDialog;
 
@@ -65,9 +66,9 @@ public class AnimGifExportPanel extends JPanel {
             @Override
             protected void dialogAccepted() {
                 close();
-                File file = FileChooser.selectSaveFileForSpecificFormat(FileChooser.gifFilter);
+                File file = FileChoosers.selectSaveFileForSpecificFormat(FileChoosers.gifFilter);
                 if(file != null) {
-                    AnimationFrames animation = new AnimationFrames(activeComp, p.getDelayMillis());
+                    LayerAnimationFrames animation = new LayerAnimationFrames(activeComp, p.getDelayMillis());
                     animation.saveToFile(file);
                     AppLogic.showFileSavedMessage(file);
                 }

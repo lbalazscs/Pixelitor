@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,17 +8,18 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
+import pixelitor.ImageDisplay;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.TmpDrawingLayer;
 import pixelitor.utils.BlendingModePanel;
@@ -87,18 +88,18 @@ public class GradientTool extends Tool {
     }
 
     @Override
-    public void toolMousePressed(MouseEvent e, ImageComponent ic) {
+    public void toolMousePressed(MouseEvent e, ImageDisplay ic) {
 
     }
 
     @Override
-    public void toolMouseDragged(MouseEvent e, ImageComponent ic) {
+    public void toolMouseDragged(MouseEvent e, ImageDisplay ic) {
         thereWasDragging = true;  // the gradient will be drawn only when the mouse is released
         ic.repaint();
     }
 
     @Override
-    public void toolMouseReleased(MouseEvent e, ImageComponent ic) {
+    public void toolMouseReleased(MouseEvent e, ImageDisplay ic) {
         if (thereWasDragging) {
             Composition comp = ic.getComp();
 
@@ -118,7 +119,7 @@ public class GradientTool extends Tool {
     }
 
     @Override
-    public boolean mouseClicked(MouseEvent e, ImageComponent ic) {
+    public boolean mouseClicked(MouseEvent e, ImageDisplay ic) {
         if (super.mouseClicked(e, ic)) {
             return true;
         }
@@ -152,7 +153,7 @@ public class GradientTool extends Tool {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent callingIC, AffineTransform unscaledTransform) {
+    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageDisplay callingIC, AffineTransform unscaledTransform) {
         if (thereWasDragging) {
             g2.setXORMode(Color.BLACK);
             userDrag.drawLine(g2);

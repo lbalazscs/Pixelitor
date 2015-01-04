@@ -30,6 +30,7 @@ import pixelitor.filters.FilterUtils;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.Lightning;
 import pixelitor.filters.RepeatLastOp;
+import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.layers.ImageLayer;
 
 import javax.swing.*;
@@ -265,6 +266,7 @@ public final class Utils {
         return sizeInMegaBytes;
     }
 
+    @SuppressWarnings("SameReturnValue")  // used in asserts
     public static boolean checkRasterMinimum(BufferedImage newImage) {
         if (Build.CURRENT.isRobotTest()) {
             WritableRaster raster = newImage.getRaster();
@@ -375,7 +377,7 @@ public final class Utils {
                 System.out.println("Warmup for " + op.getName());
 
                 op.execute(ChangeReason.OP_WITHOUT_DIALOG); // a  reason that makes backup
-                ((FilterWithParametrizedGUI) op).endDialogSession();
+                ((FilterWithGUI) op).endDialogSession();
                 filtersToTest.add(op);
             }
         }
@@ -384,7 +386,7 @@ public final class Utils {
             System.out.println("Testing " + filter.getName());
 
             filter.execute(ChangeReason.OP_WITHOUT_DIALOG);
-            ((FilterWithParametrizedGUI)filter).endDialogSession();
+            ((FilterWithGUI) filter).endDialogSession();
 
             double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
             results.put(filter.getName(), estimatedSeconds);

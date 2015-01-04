@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import pixelitor.ChangeReason;
@@ -53,10 +54,11 @@ public class RandomFilterAdjustPanel extends AdjustPanel {
     }
 
     private void nextRandomFilter() {
+        //noinspection InstanceVariableUsedBeforeInitialized
         if (lastFilterPanel != null) {
             realSettingsPanel.remove(lastFilterPanel);
         }
-        Filter newFilter = null;
+        Filter newFilter;
         do {
             newFilter = FilterUtils.getRandomFilter();
         } while (newFilter == op ||
@@ -69,6 +71,7 @@ public class RandomFilterAdjustPanel extends AdjustPanel {
         String filterName = newFilter.getListName();
         realSettingsPanel.setBorder(BorderFactory.createTitledBorder(filterName));
         if (newFilter instanceof FilterWithGUI) {
+            //noinspection InstanceVariableUsedBeforeInitialized
             if (lastFilter != null) { // there was a filter before
                 // need to clear the preview of the previous filters
                 // so that the image position selectors show the original image

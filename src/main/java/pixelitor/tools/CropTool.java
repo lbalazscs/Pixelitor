@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,18 +8,20 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
+import pixelitor.ImageDisplay;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.transform.TransformSupport;
 import pixelitor.transform.TransformToolChangeListener;
@@ -117,7 +119,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
     }
 
     @Override
-    public void toolMousePressed(MouseEvent e, ImageComponent ic) {
+    public void toolMousePressed(MouseEvent e, ImageDisplay ic) {
         // in case of crop/image change the ended is set to true even if the tool is not ended
         // if a new drag is started, then reset it
         ended = false;
@@ -126,7 +128,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
 
         if(state == CropToolState.TRANSFORM) {
             assert transformSupport != null;
-            transformSupport.mousePressed(e, ic);
+            transformSupport.mousePressed(e);
             cropButton.setEnabled(true);
             cancelButton.setEnabled(true);
         } else if(state == CropToolState.USERDRAG) {
@@ -136,7 +138,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
     }
 
     @Override
-    public void toolMouseDragged(MouseEvent e, ImageComponent ic) {
+    public void toolMouseDragged(MouseEvent e, ImageDisplay ic) {
         ic.repaint();
         if(state == CropToolState.TRANSFORM) {
             transformSupport.mouseDragged(e, ic);
@@ -145,7 +147,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
 
     // TODO: this is not done with the "toolMouse" mechanism
     @Override
-    public void mouseMoved(MouseEvent e, ImageComponent ic) {
+    public void mouseMoved(MouseEvent e, ImageDisplay ic) {
         super.mouseMoved(e, ic);
         if(state == CropToolState.TRANSFORM) {
             transformSupport.mouseMoved(e, ic);
@@ -153,7 +155,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
     }
 
     @Override
-    public void toolMouseReleased(MouseEvent e, ImageComponent ic) {
+    public void toolMouseReleased(MouseEvent e, ImageDisplay ic) {
         Composition comp = ic.getComp();
         comp.imageChanged(true, true);
 
@@ -181,7 +183,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent callingIC, AffineTransform unscaledTransform) {
+    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageDisplay callingIC, AffineTransform unscaledTransform) {
         if (ended) {
             return;
         }
@@ -242,7 +244,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
      * Returns the crop rectangle in image space
      * @param zoomLevel
      */
-    public Rectangle getCropRectangle(ImageComponent ic) {
+    public Rectangle getCropRectangle(ImageDisplay ic) {
         switch (state) {
             case INITIAL:
                 lastCropRectangle = null;

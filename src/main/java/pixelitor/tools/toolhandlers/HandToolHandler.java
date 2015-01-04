@@ -14,11 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools.toolhandlers;
 
 import pixelitor.GlobalKeyboardWatch;
-import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
+import pixelitor.ImageDisplay;
 import pixelitor.tools.Tools;
 
 import java.awt.Cursor;
@@ -40,7 +41,7 @@ public class HandToolHandler extends ToolHandler {
     }
 
     @Override
-    boolean mousePressed(MouseEvent e, ImageComponent ic) {
+    boolean mousePressed(MouseEvent e, ImageDisplay ic) {
         if (GlobalKeyboardWatch.isSpaceDown()) {
             Tools.HAND.mousePressed(e, ic);
             handToolForwarding = true;
@@ -54,7 +55,7 @@ public class HandToolHandler extends ToolHandler {
     }
 
     @Override
-    boolean mouseDragged(MouseEvent e, ImageComponent ic) {
+    boolean mouseDragged(MouseEvent e, ImageDisplay ic) {
         if (handToolForwarding) {
             Tools.HAND.mouseDragged(e, ic);
             return true;
@@ -66,7 +67,7 @@ public class HandToolHandler extends ToolHandler {
     }
 
     @Override
-    boolean mouseReleased(MouseEvent e, ImageComponent ic) {
+    boolean mouseReleased(MouseEvent e, ImageDisplay ic) {
         normalToolUsage = false;
 
         if (handToolForwarding) {

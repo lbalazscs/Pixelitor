@@ -59,7 +59,7 @@ public class Composition implements Serializable {
     // a counter for the names of new layers
     private int newLayerCount = 1;
 
-    private final List<Layer> layers = new ArrayList<>();
+    private final List<Layer> layerList = new ArrayList<>();
     private Layer activeLayer;
     private String name; // the file name or something like "Untitled 1"
 
@@ -121,22 +121,22 @@ public class Composition implements Serializable {
     }
 
     public int getNrLayers() {
-        return layers.size();
+        return layerList.size();
     }
 
     /**
      * Adds a layer to the bottom without updating any GUI
      */
     public void addLayerNoGUI(Layer newLayer) {
-        layers.add(newLayer);
+        layerList.add(newLayer);
     }
 
     public void addLayer(Layer newLayer, boolean addToHistory, boolean updateHistogram, boolean bellowActive) {
-        int activeLayerIndex = layers.indexOf(activeLayer);
+        int activeLayerIndex = layerList.indexOf(activeLayer);
         int newLayerIndex;
 
         if (activeLayerIndex == -1) { // no active layer yet
-            assert layers.isEmpty();
+            assert layerList.isEmpty();
             newLayerIndex = 0;
         } else {
             if (bellowActive) {
@@ -153,7 +153,7 @@ public class Composition implements Serializable {
      * Adds the specified layer at the specified layer position
      */
     public void addLayer(Layer newLayer, boolean addToHistory, boolean updateHistogram, int newLayerIndex) {
-        layers.add(newLayerIndex, newLayer);
+        layerList.add(newLayerIndex, newLayer);
         setActiveLayer(newLayer, false);
         ic.addLayerToGUI(newLayer, newLayerIndex);
 
@@ -177,7 +177,7 @@ public class Composition implements Serializable {
     }
 
     public int getActiveLayerIndex() {
-        return layers.indexOf(activeLayer);
+        return layerList.indexOf(activeLayer);
     }
 
     public void okPressedInDialog(String filterName) {
@@ -230,7 +230,7 @@ public class Composition implements Serializable {
     }
 
     public boolean isEmpty() {
-        return layers.isEmpty();
+        return layerList.isEmpty();
     }
 
     public String getName() {
@@ -259,7 +259,7 @@ public class Composition implements Serializable {
     }
 
     public Layer getLayer(int i) {
-        return layers.get(i);
+        return layerList.get(i);
     }
 
     public void flattenImage(boolean updateGUI) {
@@ -267,7 +267,7 @@ public class Composition implements Serializable {
             assert isActiveComp();
         }
 
-        if (layers.size() < 2) {
+        if (layerList.size() < 2) {
             return;
         }
 
@@ -289,10 +289,10 @@ public class Composition implements Serializable {
     public void mergeDown() {
         assert checkConsistency();
 
-        int activeIndex = layers.indexOf(activeLayer);
+        int activeIndex = layerList.indexOf(activeLayer);
         if (activeIndex > 0) {
             if (activeLayer.isVisible()) {
-                Layer bellow = layers.get(activeIndex - 1);
+                Layer bellow = layerList.get(activeIndex - 1);
                 if (bellow instanceof ImageLayer) {
                     ImageLayer imageLayerBellow = (ImageLayer) bellow;
                     if (imageLayerBellow.isVisible()) {
@@ -309,7 +309,7 @@ public class Composition implements Serializable {
     public void moveActiveLayer(boolean up) {
         assert checkConsistency();
 
-        int oldIndex = layers.indexOf(activeLayer);
+        int oldIndex = layerList.indexOf(activeLayer);
         int newIndex = up ? oldIndex + 1 : oldIndex - 1;
         swapLayers(oldIndex, newIndex, false);
     }
@@ -317,14 +317,14 @@ public class Composition implements Serializable {
     public void moveActiveLayerToTop() {
         assert checkConsistency();
 
-        int oldIndex = layers.indexOf(activeLayer);
-        swapLayers(oldIndex, layers.size() - 1, false);
+        int oldIndex = layerList.indexOf(activeLayer);
+        swapLayers(oldIndex, layerList.size() - 1, false);
     }
 
     public void moveActiveLayerToBottom() {
         assert checkConsistency();
 
-        int oldIndex = layers.indexOf(activeLayer);
+        int oldIndex = layerList.indexOf(activeLayer);
         swapLayers(oldIndex, 0, false);
     }
 
@@ -332,16 +332,16 @@ public class Composition implements Serializable {
         if (newIndex < 0) {
             return;
         }
-        if (newIndex >= layers.size()) {
+        if (newIndex >= layerList.size()) {
             return;
         }
         if (oldIndex == newIndex) {
             return;
         }
 
-        Layer layer = layers.get(oldIndex);
-        layers.remove(layer);
-        layers.add(newIndex, layer);
+        Layer layer = layerList.get(oldIndex);
+        layerList.remove(layer);
+        layerList.add(newIndex, layer);
         ic.changeLayerOrderInTheGUI(oldIndex, newIndex);
 
         imageChanged(true, true);
@@ -355,26 +355,26 @@ public class Composition implements Serializable {
     }
 
     public void moveLayerSelectionUp() {
-        int oldIndex = layers.indexOf(activeLayer);
+        int oldIndex = layerList.indexOf(activeLayer);
 
         int newIndex = oldIndex + 1;
-        if (newIndex >= layers.size()) {
+        if (newIndex >= layerList.size()) {
             return;
         }
-        setActiveLayer(layers.get(newIndex), true);
+        setActiveLayer(layerList.get(newIndex), true);
 
         assert ConsistencyChecks.fadeCheck(this);
     }
 
 
     public void moveLayerSelectionDown() {
-        int oldIndex = layers.indexOf(activeLayer);
+        int oldIndex = layerList.indexOf(activeLayer);
         int newIndex = oldIndex - 1;
         if (newIndex < 0) {
             return;
         }
 
-        setActiveLayer(layers.get(newIndex), true);
+        setActiveLayer(layerList.get(newIndex), true);
 
         assert ConsistencyChecks.fadeCheck(this);
     }
@@ -394,7 +394,7 @@ public class Composition implements Serializable {
         Graphics2D g = imageSoFar.createGraphics();
 
         boolean firstVisibleLayer = true;
-        for (Layer layer : layers) {
+        for (Layer layer : layerList) {
             if (layer.isVisible()) {
                 BufferedImage result = layer.paintLayer(g, firstVisibleLayer, imageSoFar);
                 if (result != null) { // this was an adjustment layer
@@ -447,12 +447,11 @@ public class Composition implements Serializable {
     /**
      * This is called then the deserialization is complete in order to provide additional
      * initialization
-     * @param ic
      */
-     public void restoreAfterDeserialization(ImageComponent ic) {
+    public void restoreAfterDeserialization() {
         Layer activeLayerRef = activeLayer;
 
-         for (Layer layer : layers) {
+        for (Layer layer : layerList) {
             restoreLayerAfterDeserialization(layer);
         }
 
@@ -460,14 +459,13 @@ public class Composition implements Serializable {
     }
 
     private void restoreLayerAfterDeserialization(Layer layer) {
-        if (layers == null) {
-            throw new IllegalStateException("layers is null");
+        if (layerList == null) {
+            throw new IllegalStateException("layerList is null");
         }
-        int layerIndex = layers.indexOf(layer);
+        int layerIndex = layerList.indexOf(layer);
         setActiveLayer(layer, false);
         ic.addLayerToGUI(layer, layerIndex);
     }
-
 
     public Rectangle getCanvasBounds() {
         return canvas.getBounds();
@@ -490,7 +488,7 @@ public class Composition implements Serializable {
     }
 
     private void removeLayer(int layerIndex) {
-        Layer layer = layers.get(layerIndex);
+        Layer layer = layerList.get(layerIndex);
         removeLayer(layer, false);
     }
 
@@ -498,13 +496,12 @@ public class Composition implements Serializable {
         removeLayer(activeLayer, false);
     }
 
-
     public void removeLayer(Layer layerToBeRemoved, boolean isUndoRedo) {
-        if (layers.size() < 2) {
-            throw new IllegalStateException("there are " + layers.size() + " layers");
+        if (layerList.size() < 2) {
+            throw new IllegalStateException("there are " + layerList.size() + " layers");
         }
 
-        int layerIndex = layers.indexOf(layerToBeRemoved);
+        int layerIndex = layerList.indexOf(layerToBeRemoved);
 
         if (!isUndoRedo) {
             DeleteLayerEdit newLayerEdit = new DeleteLayerEdit(this, layerToBeRemoved, layerIndex);
@@ -513,20 +510,20 @@ public class Composition implements Serializable {
 
         LayerButton button = layerToBeRemoved.getLayerButton();
 
-        layers.remove(layerToBeRemoved);
+        layerList.remove(layerToBeRemoved);
 
         if (layerToBeRemoved == activeLayer) {
             if (layerIndex > 0) {
-                setActiveLayer(layers.get(layerIndex - 1), false);
+                setActiveLayer(layerList.get(layerIndex - 1), false);
             } else {  // removed the fist layer, set the new first layer as active
-                setActiveLayer(layers.get(0), false);
+                setActiveLayer(layerList.get(0), false);
             }
         }
 
         ic.deleteLayerButton(button);
 
         if (isActiveComp()) {
-            AppLogic.activeCompLayerCountChanged(this, layers.size());
+            AppLogic.activeCompLayerCountChanged(this, layerList.size());
         }
 
         imageChanged(true, true);
@@ -687,7 +684,7 @@ public class Composition implements Serializable {
     }
 
     public void enlargeCanvas(int north, int east, int south, int west) {
-        for (Layer layer : layers) {
+        for (Layer layer : layerList) {
             if (layer instanceof ContentLayer) {
                 ContentLayer contentLayer = (ContentLayer) layer;
                 contentLayer.enlargeCanvas(north, east, south, west);
@@ -712,8 +709,8 @@ public class Composition implements Serializable {
      * The user reordered the layers by dragging
      */
     public void dragFinished(Layer layer, int newIndex) {
-        layers.remove(layer);
-        layers.add(newIndex, layer);
+        layerList.remove(layer);
+        layerList.add(newIndex, layer);
         imageChanged(true, true);
     }
 
@@ -722,15 +719,16 @@ public class Composition implements Serializable {
     }
 
     // called from assertions and unit tests
+    @SuppressWarnings("SameReturnValue")
     public boolean checkConsistency() {
-        if (layers.isEmpty()) {
+        if (layerList.isEmpty()) {
             throw new IllegalStateException("no layer in " + getName());
         }
         if (activeLayer == null) {
             throw new IllegalStateException("no active layer in " + getName());
         }
-        if (!layers.contains(activeLayer)) {
-            throw new IllegalStateException("active layer (" + activeLayer.getName() + ") not in list (" + layers.toString() + ")");
+        if (!layerList.contains(activeLayer)) {
+            throw new IllegalStateException("active layer (" + activeLayer.getName() + ") not in list (" + layerList.toString() + ")");
         }
         return true;
     }

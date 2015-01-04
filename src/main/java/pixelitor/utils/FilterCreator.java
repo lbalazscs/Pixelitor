@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,12 +8,13 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.utils;
 
 import javax.swing.*;
@@ -215,7 +216,7 @@ public class FilterCreator extends JPanel {
         String retVal = addImports(name, pixelLoop, parametrizedGui, proxy, proxyName);
         String className = name.replaceAll(" ", "");
 
-        retVal += addSuperClass(gui, parametrizedGui, className, proxy);
+        retVal += addSuperClass(gui, parametrizedGui, className);
 
         if (gui && parametrizedGui) {
             retVal += addParamsDeclaration(center, angleParam, edge, color, gradient, interpolation, params);
@@ -225,7 +226,7 @@ public class FilterCreator extends JPanel {
             retVal += "\n    private " + proxyName + " filter;\n";
         }
 
-        retVal += addConstructor(name, gui, parametrizedGui, className, copySrc, proxy, edge, interpolation, params);
+        retVal += addConstructor(name, gui, parametrizedGui, className, copySrc, edge, interpolation, params);
         retVal += addTransform(pixelLoop, proxy, proxyName, center, angleParam, edge, interpolation, params);
         retVal += addGetAdjustPanel(gui, parametrizedGui, className);
 
@@ -294,7 +295,7 @@ public class FilterCreator extends JPanel {
         return retVal;
     }
 
-    private static String addSuperClass(boolean gui, boolean parametrizedGui, String className, boolean proxy) {
+    private static String addSuperClass(boolean gui, boolean parametrizedGui, String className) {
         String retVal = "";
         String superClassName1;
         if (gui) {
@@ -308,9 +309,6 @@ public class FilterCreator extends JPanel {
         }
         String superClassName = superClassName1;
 
-//        if (proxy) {
-//            className = "JH" + className;
-//        }
         retVal += "public class " + className;
         retVal += " extends " + superClassName;
         retVal += " {\n";
@@ -341,11 +339,8 @@ public class FilterCreator extends JPanel {
         return retVal;
     }
 
-    private static String addConstructor(String name, boolean gui, boolean parametrizedGui, String className, boolean copySrc, boolean proxy, boolean edge, boolean interpolation, ParameterInfo... params) {
+    private static String addConstructor(String name, boolean gui, boolean parametrizedGui, String className, boolean copySrc, boolean edge, boolean interpolation, ParameterInfo... params) {
         String retVal = "";
-//        if (proxy) {
-//            className = "JH" + className;
-//        }
         retVal += "\n    public " + className + "() {\n";
 
         retVal += "        super(\"" + name + "\", true, false);\n";

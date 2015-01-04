@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,12 +8,13 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.io;
 
 import pixelitor.Composition;
@@ -27,7 +28,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 
-public class FileChooser {
+public class FileChoosers {
     private static JFileChooser openFileChooser;
     private static CustomFileChooser saveFileChooser;
 
@@ -44,6 +45,8 @@ public class FileChooser {
     private static final FileFilter[] DFAULT_OPEN_SAVE_FILTERS = {bmpFilter, gifFilter, jpegFilter, oraFilter, pngFilter, pxcFilter};
     private static final FileFilter[] NON_DEFAULT_OPEN_SAVE_FILTERS = {};
 
+    private FileChoosers() {
+    }
 
     public static synchronized void initOpenFileChooser() {
         if (openFileChooser == null) {
@@ -140,12 +143,12 @@ public class FileChooser {
 
     public static void setLastOpenDir(File newOpenDir) {
         assert newOpenDir.exists() && newOpenDir.isDirectory();
-        FileChooser.lastOpenDir = newOpenDir;
+        FileChoosers.lastOpenDir = newOpenDir;
     }
 
     public static void setLastSaveDir(File newSaveDir) {
         assert newSaveDir.exists() && newSaveDir.isDirectory();
-        FileChooser.lastSaveDir = newSaveDir;
+        FileChoosers.lastSaveDir = newSaveDir;
     }
 
     public static FileFilter getFileFilterForExtension(String ext) {

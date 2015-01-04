@@ -14,9 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools.toolhandlers;
 
-import pixelitor.ImageComponent;
+import pixelitor.ImageDisplay;
 import pixelitor.tools.Tool;
 
 import java.awt.event.MouseEvent;
@@ -33,20 +34,20 @@ public class CurrentToolHandler extends ToolHandler {
     }
 
     @Override
-    boolean mousePressed(MouseEvent e, ImageComponent ic) {
+    boolean mousePressed(MouseEvent e, ImageDisplay ic) {
         tool.toolMousePressed(e, ic);
         // this is the last handler in the chain, therefore it always returns true
         return true;
     }
 
     @Override
-    boolean mouseDragged(MouseEvent e, ImageComponent ic) {
+    boolean mouseDragged(MouseEvent e, ImageDisplay ic) {
         tool.toolMouseDragged(e, ic);
         return true;
     }
 
     @Override
-    boolean mouseReleased(MouseEvent e, ImageComponent ic) {
+    boolean mouseReleased(MouseEvent e, ImageDisplay ic) {
         tool.toolMouseReleased(e, ic);
         return true;
     }

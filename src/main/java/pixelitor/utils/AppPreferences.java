@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor.utils;
@@ -22,7 +22,7 @@ import pixelitor.NewImage;
 import pixelitor.PixelitorWindow;
 import pixelitor.TipsOfTheDay;
 import pixelitor.history.History;
-import pixelitor.io.FileChooser;
+import pixelitor.io.FileChoosers;
 import pixelitor.menus.file.RecentFileInfo;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.tools.FgBgColorSelector;
@@ -207,11 +207,11 @@ public final class AppPreferences {
     }
 
     private static void saveLastOpenDir() {
-        saveDir(FileChooser.getLastOpenDir(), LAST_OPEN_DIR_KEY);
+        saveDir(FileChoosers.getLastOpenDir(), LAST_OPEN_DIR_KEY);
     }
 
     private static void saveLastSaveDir() {
-        saveDir(FileChooser.getLastSaveDir(), LAST_SAVE_DIR_KEY);
+        saveDir(FileChoosers.getLastSaveDir(), LAST_SAVE_DIR_KEY);
     }
 
     private static void saveDir(File f, String key) {

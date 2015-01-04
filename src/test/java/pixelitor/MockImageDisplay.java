@@ -20,7 +20,16 @@ package pixelitor;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
 
+import javax.swing.*;
+import java.awt.Container;
+import java.awt.Cursor;
+import java.awt.Rectangle;
+
 public class MockImageDisplay implements ImageDisplay {
+    private Cursor cursor = Cursor.getDefaultCursor();
+    private final JViewport parent = new JViewport();
+    private Composition comp;
+
     @Override
     public double getViewScale() {
         return 1.0;
@@ -32,7 +41,7 @@ public class MockImageDisplay implements ImageDisplay {
 
     @Override
     public Composition getComp() {
-        return null;
+        return comp;
     }
 
     @Override
@@ -57,5 +66,57 @@ public class MockImageDisplay implements ImageDisplay {
 
     @Override
     public void addLayerToGUI(Layer newLayer, int newLayerIndex) {
+    }
+
+    @Override
+    public int componentXToImageSpace(int mouseX) {
+        return mouseX;
+    }
+
+    @Override
+    public int componentYToImageSpace(int mouseY) {
+        return mouseY;
+    }
+
+    @Override
+    public Rectangle fromImageToComponentSpace(Rectangle input) {
+        return input;
+    }
+
+    @Override
+    public Rectangle fromComponentToImageSpace(Rectangle input) {
+        return input;
+    }
+
+    @Override
+    public Cursor getCursor() {
+        return cursor;
+    }
+
+    @Override
+    public void setCursor(Cursor cursor) {
+        this.cursor = cursor;
+    }
+
+    @Override
+    public Container getParent() {
+        return parent;
+    }
+
+    @Override
+    public Rectangle getViewRectangle() {
+        return comp.getCanvasBounds();
+    }
+
+    @Override
+    public void increaseZoom(int mouseX, int mouseY) {
+    }
+
+    @Override
+    public void decreaseZoom(int mouseX, int mouseY) {
+    }
+
+    public void setComp(Composition comp) {
+        this.comp = comp;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,15 +8,16 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.automate;
 
-import pixelitor.io.FileChooser;
+import pixelitor.io.FileChoosers;
 import pixelitor.io.OutputFormat;
 import pixelitor.utils.BrowseFilesSupport;
 import pixelitor.utils.GridBagHelper;
@@ -29,8 +30,8 @@ import java.io.File;
  * A panel for selecting the opening and the saving directory
  */
 class OpenSaveDirsPanel extends ValidatedForm {
-    private final BrowseFilesSupport inputChooser = new BrowseFilesSupport(FileChooser.getLastOpenDir().getAbsolutePath(), "Select Input Folder", true);
-    private final BrowseFilesSupport outputChooser = new BrowseFilesSupport(FileChooser.getLastSaveDir().getAbsolutePath(), "Select Output Folder", true);
+    private final BrowseFilesSupport inputChooser = new BrowseFilesSupport(FileChoosers.getLastOpenDir().getAbsolutePath(), "Select Input Folder", true);
+    private final BrowseFilesSupport outputChooser = new BrowseFilesSupport(FileChoosers.getLastSaveDir().getAbsolutePath(), "Select Output Folder", true);
     private final boolean allowToBeTheSame;
     private String errMessage;
 
@@ -93,11 +94,11 @@ class OpenSaveDirsPanel extends ValidatedForm {
     public void saveValues() {
         File in = inputChooser.getSelectedFile();
         if (in != null) {
-            FileChooser.setLastOpenDir(in);
+            FileChoosers.setLastOpenDir(in);
         }
         File out = outputChooser.getSelectedFile();
         if (out != null) {
-            FileChooser.setLastSaveDir(out);
+            FileChoosers.setLastSaveDir(out);
         }
 
         OutputFormat.setLastOutputFormat(getSelectedFormat());

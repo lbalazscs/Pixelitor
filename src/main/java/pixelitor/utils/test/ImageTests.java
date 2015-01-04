@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.utils.test;
 
 import org.jdesktop.swingx.painter.AbstractLayoutPainter;
@@ -33,7 +34,7 @@ import pixelitor.filters.ValueNoise;
 import pixelitor.filters.jhlabsproxies.JHDropShadow;
 import pixelitor.filters.jhlabsproxies.JHGaussianBlur;
 import pixelitor.filters.painters.TextFilter;
-import pixelitor.io.FileChooser;
+import pixelitor.io.FileChoosers;
 import pixelitor.io.OutputFormat;
 import pixelitor.layers.AddNewLayerAction;
 import pixelitor.layers.BlendingMode;
@@ -95,7 +96,7 @@ public class ImageTests {
                         public void run() {
                             createSplashImage();
 
-                            File lastSaveDir = FileChooser.getLastSaveDir();
+                            File lastSaveDir = FileChoosers.getLastSaveDir();
                             File f = new File(lastSaveDir, fileName);
 
                             Composition comp = ImageComponents.getActiveComp().get();

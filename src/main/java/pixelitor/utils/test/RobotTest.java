@@ -292,7 +292,7 @@ public class RobotTest {
         FgBgColorSelector.setRandomColors();
     }
 
-    private static void randomOperation(Robot r) {
+    private static void randomOperation() {
         if (!Layers.activeIsImageLayer()) {
             return;
         }
@@ -365,7 +365,7 @@ public class RobotTest {
         }
     }
 
-    private static void randomTweenOperation(Robot r) {
+    private static void randomTweenOperation() {
         long runCountBefore = Filter.runCount;
 
         FilterWithParametrizedGUI filter = getRandomTweenFilter();
@@ -421,7 +421,7 @@ public class RobotTest {
         }
     }
 
-    private static void randomFitToScreen(Robot r) {
+    private static void randomFitToScreen() {
         if (Math.random() > 0.1) {
             ImageComponents.fitActiveToScreen();
         } else {
@@ -470,7 +470,7 @@ public class RobotTest {
         }
     }
 
-    private static void randomZoomOut(Random rand) {
+    private static void randomZoomOut() {
         ImageComponent ic = ImageComponents.getActiveImageComponent();
         if (ic != null) {
             ZoomLevel previous = ic.getZoomLevel().zoomOut();
@@ -925,21 +925,21 @@ public class RobotTest {
         weightedCaller.registerCallback(5, new Runnable() {
             @Override
             public void run() {
-                randomOperation(r);
+                randomOperation();
             }
         });
 
         weightedCaller.registerCallback(25, new Runnable() {
             @Override
             public void run() {
-                randomTweenOperation(r);
+                randomTweenOperation();
             }
         });
 
         weightedCaller.registerCallback(10, new Runnable() {
             @Override
             public void run() {
-                randomFitToScreen(r);
+                randomFitToScreen();
             }
         });
 
@@ -960,7 +960,7 @@ public class RobotTest {
         weightedCaller.registerCallback(1, new Runnable() {
             @Override
             public void run() {
-                randomZoomOut(rand);
+                randomZoomOut();
             }
         });
 

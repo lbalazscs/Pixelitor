@@ -18,6 +18,7 @@
 package pixelitor.menus.edit;
 
 import pixelitor.utils.Dialogs;
+import pixelitor.utils.debug.BufferedImageNode;
 
 import javax.swing.*;
 import java.awt.Toolkit;
@@ -25,6 +26,7 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
+import java.awt.image.RasterFormatException;
 
 /**
  * Copies an image to the system clipboard
@@ -44,12 +46,19 @@ public class CopyAction extends AbstractAction {
             BufferedImage activeImage = source.getImage();
             Transferable imageTransferable = new ImageTransferable(activeImage);
 
-            // Sun Jan 04 08:00:30 CET 2015, robot test:
-            // java.awt.image.RasterFormatException: Incorrect scanline stride: 12
-            // at sun.awt.image.ByteComponentRaster.verify(ByteComponentRaster.java:894)
-            // at sun.awt.image.ByteComponentRaster.<init>(ByteComponentRaster.java:201)
-            // https://bugs.openjdk.java.net/browse/JDK-8041558
-            clipboard.setContents(imageTransferable, null);
+            try {
+                // Sun Jan 04 08:00:30 CET 2015, robot test:
+                // java.awt.image.RasterFormatException: Incorrect scanline stride: 12
+                // at sun.awt.image.ByteComponentRaster.verify(ByteComponentRaster.java:894)
+                // at sun.awt.image.ByteComponentRaster.<init>(ByteComponentRaster.java:201)
+                // https://bugs.openjdk.java.net/browse/JDK-8041558
+                clipboard.setContents(imageTransferable, null);
+            } catch (RasterFormatException rfe) {
+                rfe.printStackTrace();
+                BufferedImageNode node = new BufferedImageNode(activeImage);
+                String s = node.toString();
+                System.out.println(String.format("CopyAction::RasterFormatException in actionPerformed: s = '%s'", s));
+            }
         } catch (Exception ex) {
             Dialogs.showExceptionDialog(ex);
         }

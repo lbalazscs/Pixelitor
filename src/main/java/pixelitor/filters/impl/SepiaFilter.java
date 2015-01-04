@@ -52,19 +52,27 @@ public class SepiaFilter extends PointFilter {
 
         int gry = (r + g + b) / 3;
         r = g = b = gry;
-        r = r + (sepiaDepth * 2);
-        g = g + sepiaDepth;
+        r += (sepiaDepth * 2);
+        g += sepiaDepth;
 
-        if (r>255) r=255;
-        if (g>255) g=255;
+        if (r > 255) {
+            r = 255;
+        }
+        if (g > 255) {
+            g = 255;
+        }
 //        if (b>255) b=255;
 
         // Darken blue color to increase sepia effect
         b -= sepiaIntensity;
 
         // normalize if out of bounds
-        if (b<0) b=0;
-        if (b>255) b=255;
+        if (b < 0) {
+            b = 0;
+        }
+        if (b > 255) {
+            b = 255;
+        }
 
         return (a << 24) | (r << 16) | (g << 8) | b;
     }

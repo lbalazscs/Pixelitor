@@ -14,11 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.menus.file;
 
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
-import pixelitor.io.FileChooser;
+import pixelitor.io.FileChoosers;
 import pixelitor.io.OpenRaster;
 import pixelitor.io.OpenSaveManager;
 import pixelitor.utils.Dialogs;
@@ -56,7 +57,7 @@ public class OpenRasterExportPanel extends JPanel {
             @Override
             protected void dialogAccepted() {
                 close();
-                File file = FileChooser.selectSaveFileForSpecificFormat(FileChooser.oraFilter);
+                File file = FileChoosers.selectSaveFileForSpecificFormat(FileChoosers.oraFilter);
                 if(file != null) {
                     boolean addMergedImage = p.getExportMergedImage();
                     try {

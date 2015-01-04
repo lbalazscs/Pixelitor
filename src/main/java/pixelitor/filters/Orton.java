@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,12 +8,13 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import com.jhlabs.composite.MultiplyComposite;
@@ -42,7 +43,7 @@ public class Orton extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        float blurRadius = this.blurRadius.getValueAsFloat();
+        float radius = blurRadius.getValueAsFloat();
         float opacity = amount.getValueAsPercentage();
 
         dest = ImageUtils.copyImage(src);
@@ -50,13 +51,13 @@ public class Orton extends FilterWithParametrizedGUI {
 
         BufferedImage blurredMultiplied = ImageUtils.copyImage(dest);
 
-        if (blurRadius > 0) {
+        if (radius > 0) {
             if ((src.getWidth() == 1) || (src.getHeight() == 1)) {
                 // otherwise we get ArrayIndexOutOfBoundsException in BoxBlurFilter
                 return src;
             }
 
-            BoxBlurFilter boxBlur = new BoxBlurFilter(blurRadius, blurRadius, 3);
+            BoxBlurFilter boxBlur = new BoxBlurFilter(radius, radius, 3);
             blurredMultiplied = boxBlur.filter(blurredMultiplied, blurredMultiplied);
         }
 

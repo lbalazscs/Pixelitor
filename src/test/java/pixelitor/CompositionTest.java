@@ -49,6 +49,7 @@ public class CompositionTest {
         MockImageDisplay mockImageDisplay = new MockImageDisplay();
         Canvas canvas = new Canvas(mockImageDisplay, sizeX, sizeY);
         Composition c = new Composition(mockImageDisplay, new File("unit_test.jpg"), "Composition", canvas);
+        mockImageDisplay.setComp(c);
 
         return c;
     }

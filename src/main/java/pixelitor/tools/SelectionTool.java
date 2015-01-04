@@ -14,10 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools;
 
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
+import pixelitor.ImageDisplay;
 import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;
 import pixelitor.history.NewSelectionEdit;
@@ -78,7 +79,7 @@ public class SelectionTool extends Tool {
     }
 
     @Override
-    public void toolMousePressed(MouseEvent e, ImageComponent ic) {
+    public void toolMousePressed(MouseEvent e, ImageDisplay ic) {
         boolean shiftDown = e.isShiftDown();
         boolean altDown = e.isAltDown();
 
@@ -113,7 +114,7 @@ public class SelectionTool extends Tool {
     }
 
     @Override
-    public void toolMouseDragged(MouseEvent e, ImageComponent ic) {
+    public void toolMouseDragged(MouseEvent e, ImageDisplay ic) {
         Composition comp = ic.getComp();
         Optional<Selection> selection = comp.getSelection();
 
@@ -128,14 +129,14 @@ public class SelectionTool extends Tool {
     }
 
     @Override
-    public void mouseMoved(MouseEvent e, ImageComponent ic) {
+    public void mouseMoved(MouseEvent e, ImageDisplay ic) {
 //        if(typeCombo.getSelectedItem() == SelectionType.POLYGONAL_LASSO) {
 //            mouseDragged(e, ic);
 //        }
     }
 
     @Override
-    public void toolMouseReleased(MouseEvent e, ImageComponent ic) {
+    public void toolMouseReleased(MouseEvent e, ImageDisplay ic) {
         if (userDrag.isClick()) { // will be handled by mouseClicked
             return;
         }
@@ -194,7 +195,7 @@ public class SelectionTool extends Tool {
     }
 
     @Override
-    public boolean mouseClicked(MouseEvent e, ImageComponent ic) {
+    public boolean mouseClicked(MouseEvent e, ImageDisplay ic) {
         super.mouseClicked(e, ic);
 
 //        if(typeCombo.getSelectedItem() == SelectionType.POLYGONAL_LASSO) {
@@ -210,7 +211,7 @@ public class SelectionTool extends Tool {
         return false;
     }
 
-    private void addPolygonalLassoPoint(ImageComponent ic) {
+    private void addPolygonalLassoPoint(ImageDisplay ic) {
         Composition comp = ic.getComp();
         Optional<Selection> selection = comp.getSelection();
         if (selection.isPresent()) {
@@ -218,7 +219,7 @@ public class SelectionTool extends Tool {
         }
     }
 
-    private static void deselect(ImageComponent ic, boolean sendDeselectEdit) {
+    private static void deselect(ImageDisplay ic, boolean sendDeselectEdit) {
         Composition comp = ic.getComp();
 
         if (comp.hasSelection()) {

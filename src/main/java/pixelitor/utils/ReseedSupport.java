@@ -28,6 +28,9 @@ public class ReseedSupport {
     private static long seed = System.nanoTime();
     private static final Random rand = new Random();
 
+    private ReseedSupport() {
+    }
+
     /**
      * Reinitializes the random number generator in order to
      * make sure that the filter runs with the same random numbers

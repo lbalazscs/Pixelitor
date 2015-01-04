@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,16 +8,17 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools;
 
 import pixelitor.AppLogic;
-import pixelitor.ImageComponent;
+import pixelitor.ImageDisplay;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layers;
 
@@ -46,22 +47,22 @@ public class ColorPickerTool extends Tool {
 
 
     @Override
-    public void toolMousePressed(MouseEvent e, ImageComponent ic) {
+    public void toolMousePressed(MouseEvent e, ImageDisplay ic) {
         sampleColor(e, ic, e.isAltDown());
     }
 
 
     @Override
-    public void toolMouseDragged(MouseEvent e, ImageComponent ic) {
+    public void toolMouseDragged(MouseEvent e, ImageDisplay ic) {
         sampleColor(e, ic, e.isAltDown());
     }
 
     @Override
-    public void toolMouseReleased(MouseEvent e, ImageComponent ic) {
+    public void toolMouseReleased(MouseEvent e, ImageDisplay ic) {
 
     }
 
-    public void sampleColor(MouseEvent e, ImageComponent ic, boolean selectBackground) {
+    public void sampleColor(MouseEvent e, ImageDisplay ic, boolean selectBackground) {
         int x = ic.componentXToImageSpace(e.getX());
         int y = ic.componentYToImageSpace(e.getY());
 
@@ -71,8 +72,9 @@ public class ColorPickerTool extends Tool {
                 return;
             }
 
-            img = ic.getComp().getActiveImageLayer().getImage();
             ImageLayer layer = ic.getComp().getActiveImageLayer();
+            img = layer.getImage();
+
             x -= layer.getTranslationX();
             y -= layer.getTranslationY();
         } else {

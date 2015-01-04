@@ -14,13 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.automate;
 
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
 import pixelitor.InternalImageFrame;
 import pixelitor.PixelitorWindow;
-import pixelitor.io.FileChooser;
+import pixelitor.io.FileChoosers;
 import pixelitor.io.FileExtensionUtils;
 import pixelitor.io.OpenSaveManager;
 import pixelitor.io.OutputFormat;
@@ -55,7 +56,7 @@ public class Automate {
     public static void processEachFile(final CompositionAction action,
                                        final boolean closeImagesAfterProcessing,
                                        String progressMonitorTitle) {
-        File lastOpenDir = FileChooser.getLastOpenDir();
+        File lastOpenDir = FileChoosers.getLastOpenDir();
         if (lastOpenDir == null) {
             throw new IllegalStateException("lastOpenDir is null");
         }
@@ -63,7 +64,7 @@ public class Automate {
             throw new IllegalStateException("Last open dir " + lastOpenDir.getAbsolutePath() + " does not exist");
         }
 
-        final File lastSaveDir = FileChooser.getLastSaveDir();
+        final File lastSaveDir = FileChoosers.getLastSaveDir();
         if (lastSaveDir == null) {
             throw new IllegalStateException("lastSaveDir is null");
         }

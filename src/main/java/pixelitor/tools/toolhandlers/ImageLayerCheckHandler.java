@@ -14,9 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools.toolhandlers;
 
-import pixelitor.ImageComponent;
+import pixelitor.ImageDisplay;
 import pixelitor.layers.Layers;
 import pixelitor.utils.Dialogs;
 
@@ -27,7 +28,7 @@ import java.awt.event.MouseEvent;
  */
 public class ImageLayerCheckHandler extends ToolHandler {
     @Override
-    boolean mousePressed(MouseEvent e, ImageComponent ic) {
+    boolean mousePressed(MouseEvent e, ImageDisplay ic) {
         if (!Layers.activeIsImageLayer()) {
             Dialogs.showNotImageLayerDialog();
             return true;
@@ -38,12 +39,12 @@ public class ImageLayerCheckHandler extends ToolHandler {
     }
 
     @Override
-    boolean mouseDragged(MouseEvent e, ImageComponent ic) {
+    boolean mouseDragged(MouseEvent e, ImageDisplay ic) {
         return !Layers.activeIsImageLayer();
     }
 
     @Override
-    boolean mouseReleased(MouseEvent e, ImageComponent ic) {
+    boolean mouseReleased(MouseEvent e, ImageDisplay ic) {
         return !Layers.activeIsImageLayer();
     }
 }

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.animation;
 
 import pixelitor.ChangeReason;
@@ -38,6 +39,7 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         this.animation = tweenAnimation;
     }
 
+    @SuppressWarnings("ProhibitedExceptionDeclared")
     @Override
     protected Void doInBackground() throws Exception {
         try {

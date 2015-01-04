@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,18 +8,18 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.transform;
 
-import pixelitor.ImageComponent;
+import pixelitor.ImageDisplay;
 import pixelitor.utils.Utils;
 
-import javax.swing.*;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -52,14 +52,14 @@ public class TransformSupport {
         handles.paint(g);
     }
 
-    public void mousePressed(MouseEvent e, ImageComponent ic) {
+    public void mousePressed(MouseEvent e) {
         dragStartX = e.getX();
         dragStartY = e.getY();
         dragStartRectWidth = (int) compSpaceRect.getWidth();
         dragStartRectHeight = (int) compSpaceRect.getHeight();
     }
 
-    public void mouseDragged(MouseEvent e, JComponent ic) {
+    public void mouseDragged(MouseEvent e, ImageDisplay ic) {
         int cursorType = ic.getCursor().getType();
         int mouseX = e.getX();
         int mouseY = e.getY();
@@ -105,11 +105,11 @@ public class TransformSupport {
         adjusting = false;
     }
 
-    public void mouseMoved(MouseEvent e, ImageComponent ic) {
+    public void mouseMoved(MouseEvent e, ImageDisplay ic) {
         handles.setCursorForPoint(e.getX(), e.getY(), ic);
     }
 
-    public Rectangle getImageSpaceRectangle(ImageComponent ic) {
+    public Rectangle getImageSpaceRectangle(ImageDisplay ic) {
         if(adjusting) {
             imageSpaceRect = Utils.toPositiveRectangle(ic.fromComponentToImageSpace(compSpaceRect));
         }

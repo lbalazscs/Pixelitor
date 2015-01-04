@@ -163,7 +163,7 @@ public final class PixelitorWindow extends JFrame {
     public void addLayeredComposition(Composition comp, File file) {
         ImageComponent ic = new ImageComponent(file, comp);
         ImageComponents.setActiveImageComponent(ic, false);
-        comp.restoreAfterDeserialization(ic);
+        comp.restoreAfterDeserialization();
 
         try {
             addNewImageComponent(ic);

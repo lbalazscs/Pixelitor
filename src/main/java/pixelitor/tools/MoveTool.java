@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,16 +8,17 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools;
 
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
+import pixelitor.ImageDisplay;
 
 import java.awt.Cursor;
 import java.awt.event.MouseEvent;
@@ -38,12 +39,12 @@ public class MoveTool extends Tool {
     }
 
     @Override
-    public void toolMousePressed(MouseEvent e, ImageComponent ic) {
+    public void toolMousePressed(MouseEvent e, ImageDisplay ic) {
         ic.getComp().startTranslation(e.isAltDown());
     }
 
     @Override
-    public void toolMouseDragged(MouseEvent e, ImageComponent ic) {
+    public void toolMouseDragged(MouseEvent e, ImageDisplay ic) {
         Composition c = ic.getComp();
         int relativeX = userDrag.getHorizontalDifference();
         int relativeY = userDrag.getVerticalDifference();
@@ -51,7 +52,7 @@ public class MoveTool extends Tool {
     }
 
     @Override
-    public void toolMouseReleased(MouseEvent e, ImageComponent ic) {
+    public void toolMouseReleased(MouseEvent e, ImageDisplay ic) {
         ic.getComp().endTranslation();
     }
 

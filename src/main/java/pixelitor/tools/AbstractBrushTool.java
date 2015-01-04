@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,18 +8,20 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.Composition;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
+import pixelitor.ImageDisplay;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.layers.ImageLayer;
 import pixelitor.utils.ImageSwitchListener;
@@ -103,7 +105,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     }
 
     @Override
-    public void toolMousePressed(MouseEvent e, ImageComponent ic) {
+    public void toolMousePressed(MouseEvent e, ImageDisplay ic) {
         boolean withLine = !firstMouseDown && e.isShiftDown();
 
         Paint p;
@@ -137,7 +139,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     }
 
     @Override
-    public void toolMouseDragged(MouseEvent e, ImageComponent ic) {
+    public void toolMouseDragged(MouseEvent e, ImageDisplay ic) {
         int x = userDrag.getEndX();
         int y = userDrag.getEndY();
 
@@ -148,7 +150,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     }
 
     @Override
-    public void toolMouseReleased(MouseEvent e, ImageComponent ic) {
+    public void toolMouseReleased(MouseEvent e, ImageDisplay ic) {
         finishBrushStroke(ic.getComp());
     }
 

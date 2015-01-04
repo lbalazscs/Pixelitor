@@ -324,13 +324,12 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     /**
      * Makes sure that not the whole area is repainted, only the image
      */
-    private static boolean adjustClipBoundsForImage(Graphics g, double drawStartX, double drawStartY, int maxWidth, int maxHeight) {
+    private static void adjustClipBoundsForImage(Graphics g, double drawStartX, double drawStartY, int maxWidth, int maxHeight) {
         Rectangle clipBounds = g.getClipBounds();
         Rectangle imageRect = new Rectangle((int) drawStartX, (int) drawStartY, maxWidth, maxHeight);
         clipBounds = clipBounds.intersection(imageRect);
 
         g.setClip(clipBounds);
-        return false;
     }
 
     /**
@@ -486,6 +485,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         return true;
     }
 
+    @Override
     public void increaseZoom(int mouseX, int mouseY) {
         ZoomLevel oldZoom = zoomLevel;
         ZoomLevel newZoom = zoomLevel.zoomIn();
@@ -494,6 +494,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         }
     }
 
+    @Override
     public void decreaseZoom(int mouseX, int mouseY) {
         ZoomLevel oldZoom = zoomLevel;
         ZoomLevel newZoom = zoomLevel.zoomOut();
@@ -537,10 +538,12 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         drawStartY = (height - canvasZoomedHeight) / 2.0;
     }
 
+    @Override
     public int componentXToImageSpace(int mouseX) {
         return (int) ((mouseX - drawStartX) / viewScale);
     }
 
+    @Override
     public int componentYToImageSpace(int mouseY) {
         return (int) ((mouseY - drawStartY) / viewScale);
     }
@@ -569,6 +572,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         );
     }
 
+    @Override
     public Rectangle fromComponentToImageSpace(Rectangle input) {
         return new Rectangle(
                 componentXToImageSpace(input.x),
@@ -578,6 +582,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         );
     }
 
+    @Override
     public Rectangle fromImageToComponentSpace(Rectangle input) {
         return new Rectangle(
                 imageXToComponentSpace(input.x),
@@ -611,6 +616,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
      * Returns how much of this ImageComponent is currently visible considering that
      * the JScrollPane might show only a part of it
      */
+    @Override
     public Rectangle getViewRectangle() {
         return internalFrame.getScrollPane().getViewport().getViewRect();
     }

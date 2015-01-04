@@ -20,8 +20,8 @@ package pixelitor.tools;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.GlobalKeyboardWatch;
-import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
+import pixelitor.ImageDisplay;
 import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.history.PartialImageEdit;
@@ -114,12 +114,12 @@ public abstract class Tool {
         return toolMessage;
     }
 
-    public boolean mouseClicked(MouseEvent e, ImageComponent ic) {
+    public boolean mouseClicked(MouseEvent e, ImageDisplay ic) {
         // empty for the convenience of subclasses
         return false;
     }
 
-    public void mousePressed(MouseEvent e, ImageComponent ic) {
+    public void mousePressed(MouseEvent e, ImageDisplay ic) {
         if (mouseDown) {
             // can happen if the tool is changed while drawing, and then changed back
             MouseEvent fake = new MouseEvent((Component) e.getSource(), e.getID(), e.getWhen(), e.getModifiers(),
@@ -136,7 +136,7 @@ public abstract class Tool {
         endPointInitialized = false;
     }
 
-    public void mouseReleased(MouseEvent e, ImageComponent ic) {
+    public void mouseReleased(MouseEvent e, ImageDisplay ic) {
         if (!mouseDown) { // can happen if the tool is changed while drawing
             mousePressed(e, ic); // try to initialize
         }
@@ -149,7 +149,7 @@ public abstract class Tool {
         endPointInitialized = false;
     }
 
-    public void mouseDragged(MouseEvent e, ImageComponent ic) {
+    public void mouseDragged(MouseEvent e, ImageDisplay ic) {
         if (!mouseDown) { // can happen if the tool is changed while drawing
             mousePressed(e, ic); // try to initialize
         }
@@ -265,19 +265,19 @@ public abstract class Tool {
      * A possibility to paint temporarily something (like marching ants) on the ImageComponent
      * after all the layers have been painted.
      */
-    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent callingIC, AffineTransform unscaledTransform) {
+    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageDisplay callingIC, AffineTransform unscaledTransform) {
         // empty for the convenience of subclasses
     }
 
-    public void mouseMoved(MouseEvent e, ImageComponent ic) {
+    public void mouseMoved(MouseEvent e, ImageDisplay ic) {
         // empty for the convenience of subclasses
     }
 
-    public abstract void toolMousePressed(MouseEvent e, ImageComponent ic);
+    public abstract void toolMousePressed(MouseEvent e, ImageDisplay ic);
 
-    public abstract void toolMouseDragged(MouseEvent e, ImageComponent ic);
+    public abstract void toolMouseDragged(MouseEvent e, ImageDisplay ic);
 
-    public abstract void toolMouseReleased(MouseEvent e, ImageComponent ic);
+    public abstract void toolMouseReleased(MouseEvent e, ImageDisplay ic);
 
     public void setToolSettingsPanel(ToolSettingsPanel toolSettingsPanel) {
         this.toolSettingsPanel = toolSettingsPanel;

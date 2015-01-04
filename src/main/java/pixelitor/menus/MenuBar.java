@@ -41,7 +41,7 @@ import pixelitor.filters.lookup.Levels;
 import pixelitor.filters.lookup.Luminosity;
 import pixelitor.filters.painters.TextFilter;
 import pixelitor.history.History;
-import pixelitor.io.FileChooser;
+import pixelitor.io.FileChoosers;
 import pixelitor.io.OpenSaveManager;
 import pixelitor.io.OptimizedJpegSavePanel;
 import pixelitor.layers.AddNewLayerAction;
@@ -159,7 +159,7 @@ public class MenuBar extends JMenuBar {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    FileChooser.open();
+                    FileChoosers.open();
                 } catch (Exception ex) {
                     Dialogs.showExceptionDialog(ex);
                 }

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.history;
 
 import pixelitor.Composition;
@@ -61,7 +62,7 @@ public class ImageEdit extends FadeableEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        swapImages();
+        swapImages(); // TODO should throw CannotUndoException if swapImages returns false?
     }
 
     @Override

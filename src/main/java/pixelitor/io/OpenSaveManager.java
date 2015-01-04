@@ -108,7 +108,7 @@ public class OpenSaveManager {
     private static boolean save(Composition comp, boolean saveAs) {
         boolean needsFileChooser = saveAs || (comp.getFile() == null);
         if (needsFileChooser) {
-            return FileChooser.saveWithFileChooser(comp);
+            return FileChoosers.saveWithFileChooser(comp);
         } else {
             File file = comp.getFile();
             OutputFormat outputFormat = OutputFormat.valueFromFile(file);
@@ -184,34 +184,23 @@ public class OpenSaveManager {
     }
 
     public static void serializePXC(Composition comp, File f) {
-        ObjectOutputStream oos = null;
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(f);
-
+        try (FileOutputStream fos = new FileOutputStream(f)) {
             fos.write(new byte[]{(byte) 0xAB, (byte) 0xC4, CURRENT_PXC_VERSION_NUMBER});
 
-            GZIPOutputStream gz = new GZIPOutputStream(fos);
-            oos = new ObjectOutputStream(gz);
-            oos.writeObject(comp);
+            try (GZIPOutputStream gz = new GZIPOutputStream(fos)) {
+                try (ObjectOutputStream oos = new ObjectOutputStream(gz)) {
+                    oos.writeObject(comp);
+                    oos.flush();
+                }
+            }
         } catch (IOException e) {
             Dialogs.showExceptionDialog(e);
-        } finally {
-            try {
-                oos.flush();
-                oos.close();
-                fos.close();
-            } catch (IOException e) {
-                Dialogs.showExceptionDialog(e);
-            }
         }
     }
 
     private static Composition deserializeComposition(File f) throws NotPxcFormatException {
         Composition comp = null;
-        try {
-            FileInputStream fis = new FileInputStream(f);
-
+        try (FileInputStream fis = new FileInputStream(f)) {
             int firstByte = fis.read();
             int secondByte = fis.read();
             if (firstByte == 0xAB && secondByte == 0xC4) {
@@ -233,11 +222,11 @@ public class OpenSaveManager {
                 throw new NotPxcFormatException(f.getName() + " has unknown version byte " + versionByte);
             }
 
-            GZIPInputStream gs = new GZIPInputStream(fis);
-            ObjectInputStream ois = new ObjectInputStream(gs);
-            comp = (Composition) ois.readObject();
-            ois.close();
-            fis.close();
+            try (GZIPInputStream gs = new GZIPInputStream(fis)) {
+                try (ObjectInputStream ois = new ObjectInputStream(gs)) {
+                    comp = (Composition) ois.readObject();
+                }
+            }
         } catch (IOException | ClassNotFoundException e) {
             Dialogs.showExceptionDialog(e);
         }
@@ -292,7 +281,7 @@ public class OpenSaveManager {
                 ImageLayer imageLayer = (ImageLayer) layer;
                 BufferedImage image = imageLayer.getImage();
 
-                File outputDir = FileChooser.getLastSaveDir();
+                File outputDir = FileChoosers.getLastSaveDir();
 
                 String fileName = String.format("%03d_%s.%s", i, Utils.toFileName(layer.getName()), "png");
 
@@ -309,7 +298,7 @@ public class OpenSaveManager {
         if (cancelled) {
             return;
         }
-        final File saveDir = FileChooser.getLastSaveDir();
+        final File saveDir = FileChoosers.getLastSaveDir();
         if (saveDir != null) {
             OutputFormat[] outputFormats = OutputFormat.values();
             for (OutputFormat outputFormat : outputFormats) {
@@ -326,7 +315,7 @@ public class OpenSaveManager {
         }
 
         final OutputFormat outputFormat = OutputFormat.getLastOutputFormat();
-        final File saveDir = FileChooser.getLastSaveDir();
+        final File saveDir = FileChoosers.getLastSaveDir();
         final List<ImageComponent> imageComponents = ImageComponents.getImageComponents();
 
         final ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("Saving All Images to Folder");
@@ -356,13 +345,13 @@ public class OpenSaveManager {
 
     public static void saveJpegWithQuality(float quality) {
         try {
-            FileChooser.initSaveFileChooser();
-            FileChooser.setOnlyOneSaveExtension(FileChooser.jpegFilter);
+            FileChoosers.initSaveFileChooser();
+            FileChoosers.setOnlyOneSaveExtension(FileChoosers.jpegFilter);
 
             jpegQuality = quality;
-            FileChooser.showSaveFileChooserAndSaveComp(ImageComponents.getActiveComp().get());
+            FileChoosers.showSaveFileChooserAndSaveComp(ImageComponents.getActiveComp().get());
         } finally {
-            FileChooser.setDefaultSaveExtensions();
+            FileChoosers.setDefaultSaveExtensions();
             jpegQuality = DEFAULT_JPEG_QUALITY;
         }
     }

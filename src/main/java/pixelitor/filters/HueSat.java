@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor.filters;
@@ -86,25 +86,25 @@ public class HueSat extends FilterWithParametrizedGUI {
 
             tmpHSBArray = Color.RGBtoHSB(r, g, b, tmpHSBArray);
 
-            float hue = tmpHSBArray[0] + hueShift;
-            float sat = tmpHSBArray[1] + satShift;
-            float bri = tmpHSBArray[2] + briShift;
+            float shiftedHue = tmpHSBArray[0] + hueShift;
+            float shiftedSat = tmpHSBArray[1] + satShift;
+            float shiftedBri = tmpHSBArray[2] + briShift;
 
-            if (sat < 0.0f) {
-                sat = 0.0f;
+            if (shiftedSat < 0.0f) {
+                shiftedSat = 0.0f;
             }
-            if (sat > 1.0f) {
-                sat = 1.0f;
-            }
-
-            if (bri < 0.0f) {
-                bri = 0.0f;
-            }
-            if (bri > 1.0f) {
-                bri = 1.0f;
+            if (shiftedSat > 1.0f) {
+                shiftedSat = 1.0f;
             }
 
-            int newRGB = Color.HSBtoRGB(hue, sat, bri);  // alpha is 255 here
+            if (shiftedBri < 0.0f) {
+                shiftedBri = 0.0f;
+            }
+            if (shiftedBri > 1.0f) {
+                shiftedBri = 1.0f;
+            }
+
+            int newRGB = Color.HSBtoRGB(shiftedHue, shiftedSat, shiftedBri);  // alpha is 255 here
             newRGB &= 0x00FFFFFF;  // set alpha to 0
             destData[i] = a | newRGB; // add the real alpha
         }

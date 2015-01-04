@@ -14,11 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools;
 
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
+import pixelitor.ImageDisplay;
 import pixelitor.layers.ImageLayer;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
@@ -41,7 +42,7 @@ public class EraseTool extends AbstractBrushTool {
     }
 
     @Override
-    public void toolMouseReleased(MouseEvent e, ImageComponent ic) {
+    public void toolMouseReleased(MouseEvent e, ImageDisplay ic) {
         super.toolMouseReleased(e, ic);
         copyBeforeStart.flush();
         copyBeforeStart = null;

@@ -20,7 +20,7 @@ package pixelitor.tools.shapestool;
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import org.jdesktop.swingx.painter.effects.AreaEffect;
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
+import pixelitor.ImageDisplay;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.history.History;
@@ -164,7 +164,7 @@ public class ShapesTool extends Tool {
     }
 
     @Override
-    public void toolMousePressed(MouseEvent e, ImageComponent ic) {
+    public void toolMousePressed(MouseEvent e, ImageDisplay ic) {
         Composition comp = ic.getComp();
         Optional<Selection> selection = comp.getSelection();
         if (selection.isPresent()) {
@@ -175,7 +175,7 @@ public class ShapesTool extends Tool {
     }
 
     @Override
-    public void toolMouseDragged(MouseEvent e, ImageComponent ic) {
+    public void toolMouseDragged(MouseEvent e, ImageDisplay ic) {
         drawing = true;
         userDrag.setStartFromCenter(e.isAltDown());
 
@@ -186,7 +186,7 @@ public class ShapesTool extends Tool {
     }
 
     @Override
-    public void toolMouseReleased(MouseEvent e, ImageComponent ic) {
+    public void toolMouseReleased(MouseEvent e, ImageDisplay ic) {
         userDrag.setStartFromCenter(e.isAltDown());
 
         Composition comp = ic.getComp();
@@ -289,7 +289,7 @@ public class ShapesTool extends Tool {
     }
 
     /**
-     * Paint a shape on the given ImageComponent. Can be used programmatically.
+     * Paint a shape on the given ImageDisplay. Can be used programmatically.
      * The start and end point points are given relative to the Composition (not Layer)
      */
     public void paintShapeOnIC(Composition comp, UserDrag userDrag) {

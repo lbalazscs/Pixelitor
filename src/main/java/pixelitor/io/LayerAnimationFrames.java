@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,32 +8,31 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.io;
 
 import pd.AnimatedGifEncoder;
 import pixelitor.Composition;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
-import pixelitor.utils.Dialogs;
 import pixelitor.utils.Utils;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AnimationFrames {
+public class LayerAnimationFrames {
     private int delayMillis;
     List<BufferedImage> images = new ArrayList<>();
 
-    public AnimationFrames(Composition comp, int delayMillis) {
+    public LayerAnimationFrames(Composition comp, int delayMillis) {
         this.delayMillis = delayMillis;
         addComposition(comp);
     }
@@ -50,7 +49,7 @@ public class AnimationFrames {
         }
     }
 
-    private void export(File f) throws IOException {
+    private void export(File f) {
         AnimatedGifEncoder e = new AnimatedGifEncoder();
         e.start(f);
         e.setDelay(delayMillis);
@@ -68,14 +67,9 @@ public class AnimationFrames {
         Runnable r = new Runnable() {
             @Override
             public void run() {
-                try {
-                    export(selectedFile);
-                } catch (IOException e) {
-                    Dialogs.showExceptionDialog(e);
-                }
+                export(selectedFile);
             }
         };
         Utils.executeWithBusyCursor(r);
     }
-
 }

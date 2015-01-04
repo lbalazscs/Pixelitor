@@ -14,9 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools.toolhandlers;
 
-import pixelitor.ImageComponent;
+import pixelitor.ImageDisplay;
 
 import java.awt.event.MouseEvent;
 
@@ -34,7 +35,7 @@ public abstract class ToolHandler {
         successor = handler;
     }
 
-    public void handleMousePressed(MouseEvent e, ImageComponent ic) {
+    public void handleMousePressed(MouseEvent e, ImageDisplay ic) {
         if (mousePressed(e, ic)) {
             return;
         }
@@ -45,24 +46,24 @@ public abstract class ToolHandler {
     /**
      * @return true if the event was handled and it should no be forwarded to the next handler
      */
-    abstract boolean mousePressed(MouseEvent e, ImageComponent ic);
+    abstract boolean mousePressed(MouseEvent e, ImageDisplay ic);
 
-    public void handleMouseDragged(MouseEvent e, ImageComponent ic) {
+    public void handleMouseDragged(MouseEvent e, ImageDisplay ic) {
         if (mouseDragged(e, ic)) {
             return;
         }
         successor.handleMouseDragged(e, ic);
     }
 
-    abstract boolean mouseDragged(MouseEvent e, ImageComponent ic);
+    abstract boolean mouseDragged(MouseEvent e, ImageDisplay ic);
 
-    public void handleMouseReleased(MouseEvent e, ImageComponent ic) {
+    public void handleMouseReleased(MouseEvent e, ImageDisplay ic) {
         if (mouseReleased(e, ic)) {
             return;
         }
         successor.handleMouseReleased(e, ic);
     }
 
-    abstract boolean mouseReleased(MouseEvent e, ImageComponent ic);
+    abstract boolean mouseReleased(MouseEvent e, ImageDisplay ic);
 
 }

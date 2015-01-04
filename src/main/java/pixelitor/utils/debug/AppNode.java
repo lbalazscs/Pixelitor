@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,12 +8,13 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.utils.debug;
 
 import pixelitor.Build;
@@ -21,7 +22,7 @@ import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
 import pixelitor.PixelitorWindow;
 import pixelitor.history.History;
-import pixelitor.io.FileChooser;
+import pixelitor.io.FileChoosers;
 
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -55,8 +56,8 @@ public class AppNode extends DebugNode {
         }
 
         addStringChild("Pixelitor Version", Build.VERSION_NUMBER);
-        addQuotedStringChild("Opening Folder", FileChooser.getLastOpenDir().getAbsolutePath());
-        addQuotedStringChild("Saving Folder", FileChooser.getLastSaveDir().getAbsolutePath());
+        addQuotedStringChild("Opening Folder", FileChoosers.getLastOpenDir().getAbsolutePath());
+        addQuotedStringChild("Saving Folder", FileChoosers.getLastSaveDir().getAbsolutePath());
 
         addBooleanChild("Can Undo", History.canUndo());
         addBooleanChild("Can Redo", History.canRedo());

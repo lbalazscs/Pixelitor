@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.utils.test;
 
 import pixelitor.ChangeReason;
@@ -27,7 +28,7 @@ import pixelitor.filters.FilterUtils;
 import pixelitor.filters.comp.CompositionUtils;
 import pixelitor.filters.gui.ParametrizedAdjustPanel;
 import pixelitor.history.History;
-import pixelitor.io.FileChooser;
+import pixelitor.io.FileChoosers;
 import pixelitor.io.OutputFormat;
 import pixelitor.utils.Optional;
 import pixelitor.utils.Utils;
@@ -51,7 +52,7 @@ public class OpTests {
         if (cancelled) {
             return;
         }
-        final File selectedDir = FileChooser.getLastSaveDir();
+        final File selectedDir = FileChoosers.getLastSaveDir();
         final OutputFormat outputFormat = OutputFormat.getLastOutputFormat();
 
         ParametrizedAdjustPanel.setResetParams(false);
