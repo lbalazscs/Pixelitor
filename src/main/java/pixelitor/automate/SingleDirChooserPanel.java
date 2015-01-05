@@ -45,14 +45,15 @@ public class SingleDirChooserPanel extends ValidatedForm {
 
         if (addOutputChooser) {
             setLayout(new GridBagLayout());
-            GridBagHelper.addLabel(this, dirLabel, 0, 0);
-            GridBagHelper.addControl(this, dirTF);
-            GridBagHelper.addNextControl(this, browseButton);
+            GridBagHelper gridBagHelper = new GridBagHelper(this);
+            gridBagHelper.addLabel(dirLabel, 0, 0);
+            gridBagHelper.addControl(dirTF);
+            gridBagHelper.addNextControl(browseButton);
 
             outputFormatSelector = new OutputFormatSelector();
 
-            GridBagHelper.addLabel(this, outputFormatSelector.getLabelText(), 0, 1);
-            GridBagHelper.addControlNoFill(this, outputFormatSelector.getFormatCombo());
+            gridBagHelper.addLabel(outputFormatSelector.getLabelText(), 0, 1);
+            gridBagHelper.addControlNoFill(outputFormatSelector.getFormatCombo());
         } else {
             setLayout(new FlowLayout(FlowLayout.LEFT));
             add(dirLabel);

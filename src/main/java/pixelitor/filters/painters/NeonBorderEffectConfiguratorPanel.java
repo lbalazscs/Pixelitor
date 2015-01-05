@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,18 +8,17 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters.painters;
 
 import com.bric.swing.ColorPicker;
 import com.bric.swing.ColorSwatch;
 import pixelitor.PixelitorWindow;
-import pixelitor.utils.GridBagHelper;
 
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
@@ -54,8 +53,8 @@ public class NeonBorderEffectConfiguratorPanel extends SimpleEffectConfiguratorP
             }
         });
 
-        GridBagHelper.addLabel(this, "Inner Color:", 0, 4);
-        GridBagHelper.addControlNoFill(this, innerColorSwatch);
+        gridBagHelper.addLabel("Inner Color:", 0, 4);
+        gridBagHelper.addControlNoFill(innerColorSwatch);
     }
 
     public Color getInnerColor() {

@@ -56,7 +56,7 @@ public class CopyAction extends AbstractAction {
             } catch (RasterFormatException rfe) {
                 rfe.printStackTrace();
                 BufferedImageNode node = new BufferedImageNode(activeImage);
-                String s = node.toString();
+                String s = node.toDetailedString();
                 System.out.println(String.format("CopyAction::RasterFormatException in actionPerformed: s = '%s'", s));
             }
         } catch (Exception ex) {

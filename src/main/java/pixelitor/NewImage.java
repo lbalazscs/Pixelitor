@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor;
@@ -107,20 +107,21 @@ public final class NewImage {
 
         private NewImagePanel(int defaultWidth, int defaultHeight) {
             setLayout(new GridBagLayout());
+            GridBagHelper gridBagHelper = new GridBagHelper(this);
 
             setBorder(BorderFactory.createEmptyBorder(WIDGET_DISTANCE, WIDGET_DISTANCE, WIDGET_DISTANCE, WIDGET_DISTANCE));
 
-            GridBagHelper.addLabel(this, "Width:", 0, 0);
+            gridBagHelper.addLabel("Width:", 0, 0);
             widthTextField = new IntTextField(String.valueOf(defaultWidth));
-            GridBagHelper.addControl(this, widthTextField);
+            gridBagHelper.addControl(widthTextField);
 
-            GridBagHelper.addLabel(this, "Height:", 0, 1);
+            gridBagHelper.addLabel("Height:", 0, 1);
             heightTextField = new IntTextField(String.valueOf(defaultHeight));
-            GridBagHelper.addControl(this, heightTextField);
+            gridBagHelper.addControl(heightTextField);
 
-            GridBagHelper.addLabel(this, "Fill:", 0, 2);
+            gridBagHelper.addLabel("Fill:", 0, 2);
             backgroundSelector = new JComboBox(FillType.values());
-            GridBagHelper.addControl(this, backgroundSelector);
+            gridBagHelper.addControl(backgroundSelector);
         }
 
         private int getSelectedWidth() {

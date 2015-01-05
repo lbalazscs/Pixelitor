@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.utils;
 
@@ -23,27 +23,25 @@ import java.awt.GridBagConstraints;
 import java.awt.Insets;
 
 /**
- * Static and not thread-safe methods to help with GridBagLayout
+ * Helper object for GridBagLayout
  */
-public final class
-        GridBagHelper {
+public class GridBagHelper {
     private static final Insets insets = new Insets(2, 2, 2, 2);
     private static final GridBagConstraints labelConstraint = new GridBagConstraints(0, 0, 1, 1, 0.0, 1.0, GridBagConstraints.EAST, GridBagConstraints.NONE, insets, 0, 0);
     private static final GridBagConstraints nextControlConstraint = new GridBagConstraints(0, 0, 1, 1, 0.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, insets, 0, 0);
     private static final GridBagConstraints nextLastControlConstraint = new GridBagConstraints(0, 0, GridBagConstraints.REMAINDER, 1, 0.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, insets, 0, 0);
+    private Container container;
 
-    /**
-     * Utility class with static methods
-     */
-    private GridBagHelper() {
+    public GridBagHelper(Container container) {
+        this.container = container;
     }
 
-    public static void addLabel(Container container, String labelText, int gridX, int gridY) {
+    public void addLabel(String labelText, int gridX, int gridY) {
         JLabel label = new JLabel(labelText, SwingConstants.RIGHT);
-        addLabel(container, label, gridX, gridY);
+        addLabel(label, gridX, gridY);
     }
 
-    public static void addLabel(Container container, JLabel label, int gridX, int gridY) {
+    public void addLabel(JLabel label, int gridX, int gridY) {
         labelConstraint.gridx = gridX;
         labelConstraint.gridy = gridY;
         container.add(label, labelConstraint);
@@ -52,13 +50,13 @@ public final class
     /**
      * Adds the specified control to the right of the last label
      */
-    public static void addControl(Container container, Component component) {
+    public void addControl(Component component) {
         nextControlConstraint.gridx = labelConstraint.gridx + 1;
         nextControlConstraint.gridy = labelConstraint.gridy;
         container.add(component, nextControlConstraint);
     }
 
-    public static void addLabelWithControl(Container container, String labelText, Component component, int gridY) {
+    public void addLabelWithControl(String labelText, Component component, int gridY) {
         JLabel label = new JLabel(labelText, SwingConstants.RIGHT);
         labelConstraint.gridx = 0;
         labelConstraint.gridy = gridY;
@@ -73,7 +71,7 @@ public final class
     /**
      * Adds the specified control to the right of the last label without stretching
      */
-    public static void addControlNoFill(Container container, Component component) {
+    public void addControlNoFill(Component component) {
         nextControlConstraint.gridx = labelConstraint.gridx + 1;
         nextControlConstraint.gridy = labelConstraint.gridy;
         nextControlConstraint.fill = GridBagConstraints.NONE;
@@ -86,18 +84,18 @@ public final class
     /**
      * Adds the specified control to the right of the last control
      */
-    public static void addNextControl(Container container, Component component) {
+    public void addNextControl(Component component) {
         nextControlConstraint.gridx++;
         container.add(component, nextControlConstraint);
     }
 
-    public static void addLastControl(Container container, Component component) {
+    public void addLastControl(Component component) {
         nextLastControlConstraint.gridx = labelConstraint.gridx + 1;
         nextLastControlConstraint.gridy = labelConstraint.gridy;
         container.add(component, nextLastControlConstraint);
     }
 
-    public static void addOnlyControlToRow(Container container, Component component, int row) {
+    public void addOnlyControlToRow(Component component, int row) {
         nextLastControlConstraint.gridx = 0;
         nextLastControlConstraint.gridy = row;
         container.add(component, nextLastControlConstraint);

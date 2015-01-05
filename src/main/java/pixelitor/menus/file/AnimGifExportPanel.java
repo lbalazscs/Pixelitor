@@ -32,8 +32,10 @@ import java.io.File;
 
 public class AnimGifExportPanel extends JPanel {
     private JTextField delayTF;
+    private JCheckBox pingPongCB;
 
-    public AnimGifExportPanel() {
+    public AnimGifExportPanel(int nrLayers) {
+        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         setLayout(new VerticalLayout(10));
 
         add(new JLabel(" Animation frames are based on the layers of the image. "));
@@ -45,10 +47,22 @@ public class AnimGifExportPanel extends JPanel {
         settings.add(delayTF);
 
         add(settings);
+
+        if (nrLayers > 2) {
+            pingPongCB = new JCheckBox("Ping Pong Animation");
+        } else {
+            pingPongCB = new JCheckBox("Ping Pong Animation (min 3 layers needed)");
+            pingPongCB.setEnabled(false);
+        }
+        add(pingPongCB);
     }
 
     public int getDelayMillis() {
         return Integer.parseInt(delayTF.getText());
+    }
+
+    public boolean isPingPong() {
+        return pingPongCB.isSelected();
     }
 
     public static void showInDialog(JFrame parent) {
@@ -61,14 +75,15 @@ public class AnimGifExportPanel extends JPanel {
             return;
         }
 
-        final AnimGifExportPanel p = new AnimGifExportPanel();
+        final AnimGifExportPanel p = new AnimGifExportPanel(activeComp.getNrLayers());
         OKCancelDialog d = new OKCancelDialog(p, parent, "Export Animated GIF", "Export", "Cancel", false) {
             @Override
             protected void dialogAccepted() {
                 close();
                 File file = FileChoosers.selectSaveFileForSpecificFormat(FileChoosers.gifFilter);
                 if(file != null) {
-                    LayerAnimationFrames animation = new LayerAnimationFrames(activeComp, p.getDelayMillis());
+                    LayerAnimationFrames animation = new LayerAnimationFrames(activeComp,
+                            p.getDelayMillis(), p.isPingPong());
                     animation.saveToFile(file);
                     AppLogic.showFileSavedMessage(file);
                 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters.painters;
 
@@ -46,6 +46,8 @@ public abstract class EffectConfiguratorPanel extends JPanel {
     private final RangeParam opacityRange;
     private final SliderSpinner opacitySlider;
 
+    protected GridBagHelper gridBagHelper;
+
     EffectConfiguratorPanel(String effectName, boolean defaultSelected, final Color defaultColor) {
         setBorder(BorderFactory.createTitledBorder('"' + effectName + "\" Configuration"));
 
@@ -76,14 +78,17 @@ public abstract class EffectConfiguratorPanel extends JPanel {
 
 
         setLayout(new GridBagLayout());
-        GridBagHelper.addLabel(this, "Enabled:", 0, 0);
-        GridBagHelper.addControl(this, enabledCheckBox);
 
-        GridBagHelper.addLabel(this, "Color:", 0, 1);
-        GridBagHelper.addControlNoFill(this, colorSwatch);
 
-        GridBagHelper.addLabel(this, "Opacity:", 0, 2);
-        GridBagHelper.addControlNoFill(this, opacitySlider);
+        gridBagHelper = new GridBagHelper(this);
+        gridBagHelper.addLabel("Enabled:", 0, 0);
+        gridBagHelper.addControl(enabledCheckBox);
+
+        gridBagHelper.addLabel("Color:", 0, 1);
+        gridBagHelper.addControlNoFill(colorSwatch);
+
+        gridBagHelper.addLabel("Opacity:", 0, 2);
+        gridBagHelper.addControlNoFill(opacitySlider);
     }
 
     ButtonModel getEnabledModel() {

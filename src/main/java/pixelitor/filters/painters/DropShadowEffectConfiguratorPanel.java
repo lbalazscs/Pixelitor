@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters.painters;
 
@@ -20,7 +20,6 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.AngleSelectorComponent;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.utils.GridBagHelper;
 import pixelitor.utils.SliderSpinner;
 import pixelitor.utils.Utils;
 
@@ -40,18 +39,18 @@ public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
 
         distanceParam = new RangeParam("Distance:", 1, 100, 10);
         SliderSpinner distanceSlider = new SliderSpinner(distanceParam, false, SliderSpinner.TextPosition.NONE);
-        GridBagHelper.addLabel(this, "Distance:", 0, 3);
-        GridBagHelper.addControl(this, distanceSlider);
+        gridBagHelper.addLabel("Distance:", 0, 3);
+        gridBagHelper.addControl(distanceSlider);
 
         angleParam = new AngleParam("Angle", 0.7);
         AngleSelectorComponent angleSelectorComponent = new AngleSelectorComponent(angleParam);
-        GridBagHelper.addLabel(this, "Angle:", 0, 4);
-        GridBagHelper.addControl(this, angleSelectorComponent);
+        gridBagHelper.addLabel("Angle:", 0, 4);
+        gridBagHelper.addControl(angleSelectorComponent);
 
         spreadParam = new RangeParam("Spread:", 1, 100, 10);
         SliderSpinner spreadSlider = new SliderSpinner(spreadParam, false, SliderSpinner.TextPosition.NONE);
-        GridBagHelper.addLabel(this, "Spread:", 0, 5);
-        GridBagHelper.addControl(this, spreadSlider);
+        gridBagHelper.addLabel("Spread:", 0, 5);
+        gridBagHelper.addControl(spreadSlider);
     }
 
     @Override

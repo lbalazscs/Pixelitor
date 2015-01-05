@@ -397,10 +397,11 @@ public final class AppPreferences {
 
         Panel() {
             setLayout(new GridBagLayout());
-            GridBagHelper.addLabel(this, "Undo/Redo Levels: ", 0, 0);
+            GridBagHelper gridBagHelper = new GridBagHelper(this);
+            gridBagHelper.addLabel("Undo/Redo Levels: ", 0, 0);
             undoLevelsTF = new IntTextField(3);
             undoLevelsTF.setText(String.valueOf(History.getUndoLevels()));
-            GridBagHelper.addControl(this, undoLevelsTF);
+            gridBagHelper.addControl(undoLevelsTF);
         }
 
         private int getUndoLevels() {

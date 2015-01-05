@@ -50,16 +50,18 @@ public class FilterCreator extends JPanel {
     private FilterCreator() {
         setLayout(new GridBagLayout());
 
-        GridBagHelper.addLabel(this, "Name:", 0, 0);
-        nameTextField = new JTextField(20);
-        GridBagHelper.addLastControl(this, nameTextField);
+        GridBagHelper gridBagHelper = new GridBagHelper(this);
 
-        GridBagHelper.addLabel(this, "GUI:", 0, 1);
+        gridBagHelper.addLabel("Name:", 0, 0);
+        nameTextField = new JTextField(20);
+        gridBagHelper.addLastControl(nameTextField);
+
+        gridBagHelper.addLabel("GUI:", 0, 1);
         guiCB = new JCheckBox();
         guiCB.setSelected(true);
-        GridBagHelper.addControl(this, guiCB);
+        gridBagHelper.addControl(guiCB);
 
-        GridBagHelper.addLabel(this, "Parametrized GUI:", 2, 1);
+        gridBagHelper.addLabel("Parametrized GUI:", 2, 1);
         parametrizedGuiCB = new JCheckBox();
         parametrizedGuiCB.setSelected(true);
         parametrizedGuiCB.addChangeListener(new ChangeListener() {
@@ -70,21 +72,21 @@ public class FilterCreator extends JPanel {
                 }
             }
         });
-        GridBagHelper.addControl(this, parametrizedGuiCB);
+        gridBagHelper.addControl(parametrizedGuiCB);
 
-        GridBagHelper.addLabel(this, "Copy Src -> Dest:", 4, 1);
+        gridBagHelper.addLabel("Copy Src -> Dest:", 4, 1);
         copySrcCB = new JCheckBox();
-        GridBagHelper.addControl(this, copySrcCB);
+        gridBagHelper.addControl(copySrcCB);
 
-        GridBagHelper.addLabel(this, "Angle Param:", 6, 1);
+        gridBagHelper.addLabel("Angle Param:", 6, 1);
         angleParamCB = new JCheckBox();
-        GridBagHelper.addControl(this, angleParamCB);
+        gridBagHelper.addControl(angleParamCB);
 
-        GridBagHelper.addLabel(this, "Pixel Loop:", 0, 2);
+        gridBagHelper.addLabel("Pixel Loop:", 0, 2);
         pixelLoopCB = new JCheckBox();
-        GridBagHelper.addControl(this, pixelLoopCB);
+        gridBagHelper.addControl(pixelLoopCB);
 
-        GridBagHelper.addLabel(this, "Proxy Filter:", 2, 2);
+        gridBagHelper.addLabel("Proxy Filter:", 2, 2);
         proxyCB = new JCheckBox();
 //        proxyCB.setSelected(true);
         proxyCB.addChangeListener(new ChangeListener() {
@@ -93,39 +95,39 @@ public class FilterCreator extends JPanel {
                 proxyNameTF.setEnabled(proxyCB.isSelected());
             }
         });
-        GridBagHelper.addControl(this, proxyCB);
+        gridBagHelper.addControl(proxyCB);
 
-        GridBagHelper.addLabel(this, "Proxy Name:", 4, 2);
+        gridBagHelper.addLabel("Proxy Name:", 4, 2);
         proxyNameTF = new JTextField(10);
         proxyNameTF.setEnabled(proxyCB.isSelected());
-        GridBagHelper.addControl(this, proxyNameTF);
+        gridBagHelper.addControl(proxyNameTF);
 
-        GridBagHelper.addLabel(this, "Center Selector:", 0, 3);
+        gridBagHelper.addLabel("Center Selector:", 0, 3);
         centerSelectorCB = new JCheckBox();
-        GridBagHelper.addControl(this, centerSelectorCB);
+        gridBagHelper.addControl(centerSelectorCB);
 
-        GridBagHelper.addLabel(this, "Edge Action:", 2, 3);
+        gridBagHelper.addLabel("Edge Action:", 2, 3);
         edgeActionCB = new JCheckBox();
-        GridBagHelper.addControl(this, edgeActionCB);
+        gridBagHelper.addControl(edgeActionCB);
 
-        GridBagHelper.addLabel(this, "Interpolation:", 4, 3);
+        gridBagHelper.addLabel("Interpolation:", 4, 3);
         interpolationCB = new JCheckBox();
-        GridBagHelper.addControl(this, interpolationCB);
+        gridBagHelper.addControl(interpolationCB);
 
-        GridBagHelper.addLabel(this, "Color:", 6, 3);
+        gridBagHelper.addLabel("Color:", 6, 3);
         colorCB = new JCheckBox();
-        GridBagHelper.addControl(this, colorCB);
+        gridBagHelper.addControl(colorCB);
 
-        GridBagHelper.addLabel(this, "Gradient:", 8, 3);
+        gridBagHelper.addLabel("Gradient:", 8, 3);
         gradientCB = new JCheckBox();
-        GridBagHelper.addControl(this, gradientCB);
+        gridBagHelper.addControl(gradientCB);
 
 
         for (int i = 0; i < paramPanels.length; i++) {
-            GridBagHelper.addLabel(this, "Param " + (i + 1) + ':', 0, i + 4);
+            gridBagHelper.addLabel("Param " + (i + 1) + ':', 0, i + 4);
             ParamPanel pp = new ParamPanel();
             paramPanels[i] = pp;
-            GridBagHelper.addLastControl(this, pp);
+            gridBagHelper.addLastControl(pp);
         }
     }
 

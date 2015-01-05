@@ -32,20 +32,29 @@ public class LayerAnimationFrames {
     private int delayMillis;
     List<BufferedImage> images = new ArrayList<>();
 
-    public LayerAnimationFrames(Composition comp, int delayMillis) {
+    public LayerAnimationFrames(Composition comp, int delayMillis, boolean pingPong) {
         this.delayMillis = delayMillis;
-        addComposition(comp);
+        addComposition(comp, pingPong);
     }
 
-    private void addComposition(Composition comp) {
+    private void addComposition(Composition comp, boolean pingPong) {
         int nrLayers = comp.getNrLayers();
         for (int i = 0; i < nrLayers; i++) {
-            Layer layer = comp.getLayer(i);
-            if (layer instanceof ImageLayer) {
-                ImageLayer imageLayer = (ImageLayer) layer;
-                BufferedImage image = imageLayer.getImage();
-                images.add(image);
+            addLayerToAnimation(comp, i);
+        }
+        if (pingPong && nrLayers > 2) {
+            for (int i = nrLayers - 2; i > 0; i--) {
+                addLayerToAnimation(comp, i);
             }
+        }
+    }
+
+    private void addLayerToAnimation(Composition comp, int layerIndex) {
+        Layer layer = comp.getLayer(layerIndex);
+        if (layer instanceof ImageLayer) {
+            ImageLayer imageLayer = (ImageLayer) layer;
+            BufferedImage image = imageLayer.getImage();
+            images.add(image);
         }
     }
 

@@ -40,19 +40,20 @@ class OpenSaveDirsPanel extends ValidatedForm {
     OpenSaveDirsPanel(boolean allowToBeTheSame) {
         this.allowToBeTheSame = allowToBeTheSame;
         setLayout(new GridBagLayout());
+        GridBagHelper gridBagHelper = new GridBagHelper(this);
 
-        GridBagHelper.addLabel(this, "Input Folder:", 0, 0);
-        GridBagHelper.addControl(this, inputChooser.getNameTF());
-        GridBagHelper.addNextControl(this, inputChooser.getBrowseButton());
+        gridBagHelper.addLabel("Input Folder:", 0, 0);
+        gridBagHelper.addControl(inputChooser.getNameTF());
+        gridBagHelper.addNextControl(inputChooser.getBrowseButton());
 
-        GridBagHelper.addLabel(this, "Output Folder:", 0, 1);
-        GridBagHelper.addControl(this, outputChooser.getNameTF());
-        GridBagHelper.addNextControl(this, outputChooser.getBrowseButton());
+        gridBagHelper.addLabel("Output Folder:", 0, 1);
+        gridBagHelper.addControl(outputChooser.getNameTF());
+        gridBagHelper.addNextControl(outputChooser.getBrowseButton());
 
-        GridBagHelper.addLabel(this, "Output Format:", 0, 2);
+        gridBagHelper.addLabel("Output Format:", 0, 2);
         outputFormatSelector = new OutputFormatSelector();
 
-        GridBagHelper.addControlNoFill(this, outputFormatSelector.getFormatCombo());
+        gridBagHelper.addControlNoFill(outputFormatSelector.getFormatCombo());
     }
 
     private OutputFormat getSelectedFormat() {

@@ -36,6 +36,9 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
 
+/**
+ * The settings for the tweening animation output
+ */
 public class OutputSettingsPanel extends ValidatedForm implements TextFieldValidator {
     private JTextField nrSecondsTF = new JTextField("2", 3);
     private JTextField fpsTF = new JTextField("24", 3);
@@ -44,7 +47,8 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
     private double fps;
     private final JComboBox<Interpolation> ipCB;
     private final JComboBox<TweenOutputType> outputTypeCB;
-    private BrowseFilesSupport browseFilesSupport = new BrowseFilesSupport(FileChoosers.getLastSaveDir().getAbsolutePath());
+    private final JCheckBox pingPongCB;
+    private final BrowseFilesSupport browseFilesSupport = new BrowseFilesSupport(FileChoosers.getLastSaveDir().getAbsolutePath());
     private final JTextField fileNameTF;
     private String errorMessage;
 
@@ -66,9 +70,10 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
         });
         outputTypeChanged(); // initial setup
 
-        GridBagHelper.addLabelWithControl(contentPanel, "Output Type:", outputTypeCB, 0);
+        GridBagHelper gridBagHelper = new GridBagHelper(contentPanel);
+        gridBagHelper.addLabelWithControl("Output Type:", outputTypeCB, 0);
 
-        GridBagHelper.addLabelWithControl(contentPanel, "Number of Seconds:",
+        gridBagHelper.addLabelWithControl("Number of Seconds:",
                 new JLayer<>(nrSecondsTF, tfLayerUI), 1);
 
         KeyAdapter keyAdapter = new KeyAdapter() {
@@ -79,7 +84,7 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
         };
         nrSecondsTF.addKeyListener(keyAdapter);
 
-        GridBagHelper.addLabelWithControl(contentPanel, "Frames per Second:",
+        gridBagHelper.addLabelWithControl("Frames per Second:",
                 new JLayer<>(fpsTF, tfLayerUI), 2);
 
         fpsTF.addKeyListener(keyAdapter);
@@ -87,19 +92,22 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
         nrFramesLabel = new JLabel();
         updateCalculations();
 
-        GridBagHelper.addLabelWithControl(contentPanel, "Number of Frames:", nrFramesLabel, 3);
+        gridBagHelper.addLabelWithControl("Number of Frames:", nrFramesLabel, 3);
 
         EnumComboBoxModel<Interpolation> ipCBM = new EnumComboBoxModel<>(Interpolation.class);
         ipCB = new JComboBox<>(ipCBM);
 
-        GridBagHelper.addLabelWithControl(contentPanel, "Interpolation:", ipCB, 4);
+        gridBagHelper.addLabelWithControl("Interpolation:", ipCB, 4);
+
+        pingPongCB = new JCheckBox();
+        gridBagHelper.addLabelWithControl("Ping Pong:", pingPongCB, 5);
 
         JPanel filePanel = new JPanel(new FlowLayout());
         filePanel.setBorder(BorderFactory.createTitledBorder("Output File/Folder"));
         fileNameTF = browseFilesSupport.getNameTF();
         filePanel.add(new JLayer<>(fileNameTF, tfLayerUI));
         filePanel.add(browseFilesSupport.getBrowseButton());
-        GridBagHelper.addOnlyControlToRow(contentPanel, filePanel, 5);
+        gridBagHelper.addOnlyControlToRow(filePanel, 6);
 
         add(contentPanel);
     }

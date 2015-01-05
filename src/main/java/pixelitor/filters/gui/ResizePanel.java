@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor.filters.gui;
@@ -70,21 +70,23 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
         JPanel p = new JPanel();
         p.setLayout(new GridBagLayout());
 
-        GridBagHelper.addLabel(p, "Width:", 0, 0);
+        GridBagHelper gridBagHelper = new GridBagHelper(p);
+
+        gridBagHelper.addLabel("Width:", 0, 0);
         widthTextField = new JTextField(NR_OF_COLUMNS);
         widthTextField.addKeyListener(this);
         widthTextField.setText(String.valueOf(oldWidth));
-        GridBagHelper.addControl(p, widthTextField);
+        gridBagHelper.addControl(widthTextField);
         pixelPercentChooser1 = new JComboBox<>(comboBoxModel);
-        GridBagHelper.addNextControl(p, pixelPercentChooser1);
+        gridBagHelper.addNextControl(pixelPercentChooser1);
 
-        GridBagHelper.addLabel(p, "Height:", 0, 1);
+        gridBagHelper.addLabel("Height:", 0, 1);
         heightTextField = new JTextField(NR_OF_COLUMNS);
         heightTextField.setText(String.valueOf(oldHeight));
-        GridBagHelper.addControl(p, heightTextField);
+        gridBagHelper.addControl(heightTextField);
         heightTextField.addKeyListener(this);
         JComboBox<String> pixelPercentChooser2 = new JComboBox<>(comboBoxModel);
-        GridBagHelper.addNextControl(p, pixelPercentChooser2);
+        gridBagHelper.addNextControl(pixelPercentChooser2);
 
         p.setBorder(BorderFactory.createTitledBorder("Resize from " + oldWidth + 'x' + oldHeight));
         Box verticalBox = Box.createVerticalBox();

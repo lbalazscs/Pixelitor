@@ -65,22 +65,24 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
         int row = 0;
         JPanel buttonsPanel = null;
 
+        GridBagHelper gridBagHelper = new GridBagHelper(panel);
+
         for (GUIParam param : params) {
             JComponent control = param.createGUI();
 
             if (param instanceof ActionParam) { // all the buttons go in one row
                 if (buttonsPanel == null) {
                     buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-                    GridBagHelper.addOnlyControlToRow(panel, buttonsPanel, row);
+                    gridBagHelper.addOnlyControlToRow(buttonsPanel, row);
                 }
                 buttonsPanel.add(control);
             } else {
                 int nrOfGridBagCols = param.getNrOfGridBagCols();
                 if (nrOfGridBagCols == 1) {
-                    GridBagHelper.addOnlyControlToRow(panel, control, row);
+                    gridBagHelper.addOnlyControlToRow(control, row);
                 } else if (nrOfGridBagCols == 2) {
-                    GridBagHelper.addLabel(panel, param.getName() + ':', 0, row);
-                    GridBagHelper.addLastControl(panel, control);
+                    gridBagHelper.addLabel(param.getName() + ':', 0, row);
+                    gridBagHelper.addLastControl(control);
                 }
             }
 

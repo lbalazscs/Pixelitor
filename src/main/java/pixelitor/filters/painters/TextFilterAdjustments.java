@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters.painters;
 
@@ -92,7 +92,9 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
         JPanel textPanel = new JPanel();
         textPanel.setLayout(new GridBagLayout());
 
-        GridBagHelper.addLabel(textPanel, "Text:", 0, 0);
+        GridBagHelper gridBagHelper = new GridBagHelper(textPanel);
+
+        gridBagHelper.addLabel("Text:", 0, 0);
         textTF = new JTextField(20);
 
         textTF.getDocument().addDocumentListener(new DocumentListener() {
@@ -111,22 +113,22 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
                 paramAdjusted();
             }
         });
-        GridBagHelper.addLastControl(textPanel, textTF);
+        gridBagHelper.addLastControl(textTF);
 
-        GridBagHelper.addLabel(textPanel, "Color", 0, 1);
+        gridBagHelper.addLabel("Color", 0, 1);
         colorSelector = new ColorSelector(colorParam);
-        GridBagHelper.addLastControl(textPanel, colorSelector);
+        gridBagHelper.addLastControl(colorSelector);
         colorParam.setAdjustmentListener(this);
 
-        GridBagHelper.addLabel(textPanel, "Vertical Alignment", 0, 2);
+        gridBagHelper.addLabel("Vertical Alignment", 0, 2);
         verticalAlignmentCombo = new JComboBox(AbstractLayoutPainter.VerticalAlignment.values());
         verticalAlignmentCombo.addActionListener(this);
-        GridBagHelper.addControl(textPanel, verticalAlignmentCombo);
+        gridBagHelper.addControl(verticalAlignmentCombo);
 
-        GridBagHelper.addLabel(textPanel, "Horizontal Alignment", 2, 2);
+        gridBagHelper.addLabel("Horizontal Alignment", 2, 2);
         horizontalAlignmentCombo = new JComboBox(AbstractLayoutPainter.HorizontalAlignment.values());
         horizontalAlignmentCombo.addActionListener(this);
-        GridBagHelper.addControl(textPanel, horizontalAlignmentCombo);
+        gridBagHelper.addControl(horizontalAlignmentCombo);
 
 
         return textPanel;
@@ -137,43 +139,45 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
         fontPanel.setBorder(BorderFactory.createTitledBorder("Font"));
         fontPanel.setLayout(new GridBagLayout());
 
-        GridBagHelper.addLabel(fontPanel, "Font Size:", 0, 0);
+        GridBagHelper gridBagHelper = new GridBagHelper(fontPanel);
+
+        gridBagHelper.addLabel("Font Size:", 0, 0);
         RangeParam fontSizeParam = new RangeParam("", 1, 1000, 100);
         fontSizeSlider = new SliderSpinner(fontSizeParam, false, SliderSpinner.TextPosition.NONE);
         fontSizeParam.setAdjustmentListener(this);
-        GridBagHelper.addLastControl(fontPanel, fontSizeSlider);
+        gridBagHelper.addLastControl(fontSizeSlider);
 
-        GridBagHelper.addLabel(fontPanel, "Font Type:", 0, 1);
+        gridBagHelper.addLabel("Font Type:", 0, 1);
         GraphicsEnvironment localGE = GraphicsEnvironment.getLocalGraphicsEnvironment();
         String[] availableFonts = localGE.getAvailableFontFamilyNames();
         fontFamilyChooserCB = new JComboBox(availableFonts);
         fontFamilyChooserCB.addActionListener(this);
-        GridBagHelper.addLastControl(fontPanel, fontFamilyChooserCB);
+        gridBagHelper.addLastControl(fontFamilyChooserCB);
 
-        GridBagHelper.addLabel(fontPanel, "Bold:", 0, 2);
+        gridBagHelper.addLabel("Bold:", 0, 2);
         boldCB = new JCheckBox();
         boldCB.addActionListener(this);
-        GridBagHelper.addControl(fontPanel, boldCB);
+        gridBagHelper.addControl(boldCB);
 
-        GridBagHelper.addLabel(fontPanel, "Italic:", 2, 2);
+        gridBagHelper.addLabel("Italic:", 2, 2);
         italicCB = new JCheckBox();
         italicCB.addActionListener(this);
-        GridBagHelper.addControl(fontPanel, italicCB);
+        gridBagHelper.addControl(italicCB);
 
-        GridBagHelper.addLabel(fontPanel, "Underline:", 4, 2);
+        gridBagHelper.addLabel("Underline:", 4, 2);
         underlineCB = new JCheckBox();
         underlineCB.addActionListener(this);
-        GridBagHelper.addControl(fontPanel, underlineCB);
+        gridBagHelper.addControl(underlineCB);
 
-        GridBagHelper.addLabel(fontPanel, "Strikethrough:", 6, 2);
+        gridBagHelper.addLabel("Strikethrough:", 6, 2);
         strikeThroughCB = new JCheckBox();
         strikeThroughCB.addActionListener(this);
-        GridBagHelper.addControl(fontPanel, strikeThroughCB);
+        gridBagHelper.addControl(strikeThroughCB);
 
-//        GridBagHelper.addLabel(fontPanel, "Kerning:", 8, 2);
+//        gridBagHelper.addLabel("Kerning:", 8, 2);
 //        kerningCB = new JCheckBox();
 //        kerningCB.addActionListener(this);
-//        GridBagHelper.addControl(fontPanel, kerningCB);
+//        gridBagHelper.addControl(kerningCB);
 
         return fontPanel;
     }

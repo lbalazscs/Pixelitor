@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor.menus.help;
@@ -67,14 +67,16 @@ public class AboutDialog extends OKDialog {
         JPanel p = new JPanel();
         p.setLayout(new GridBagLayout());
 
-        GridBagHelper.addLabel(p, "Java Version:", 0, 0);
-        GridBagHelper.addControl(p, new JLabel(System.getProperty("java.version")));
+        GridBagHelper gridBagHelper = new GridBagHelper(p);
 
-        GridBagHelper.addLabel(p, "Java VM:", 0, 1);
-        GridBagHelper.addControl(p, new JLabel(System.getProperty("java.vm.name")));
+        gridBagHelper.addLabel("Java Version:", 0, 0);
+        gridBagHelper.addControl(new JLabel(System.getProperty("java.version")));
 
-        GridBagHelper.addLabel(p, "OS:", 0, 2);
-        GridBagHelper.addControl(p, new JLabel(System.getProperty("os.name")));
+        gridBagHelper.addLabel("Java VM:", 0, 1);
+        gridBagHelper.addControl(new JLabel(System.getProperty("java.vm.name")));
+
+        gridBagHelper.addLabel("OS:", 0, 2);
+        gridBagHelper.addControl(new JLabel(System.getProperty("os.name")));
 
         MemoryInfo memoryInfo = new MemoryInfo();
         long freeMemoryMB = memoryInfo.getFreeMemoryMB();
@@ -82,17 +84,17 @@ public class AboutDialog extends OKDialog {
         long totalMemoryMB = memoryInfo.getTotalMemoryMB();
         long usedMemoryMB = memoryInfo.getUsedMemoryMB();
 
-        GridBagHelper.addLabel(p, "Allocated Memory:", 0, 3);
-        GridBagHelper.addControl(p, new JLabel(totalMemoryMB + " megabytes"));
+        gridBagHelper.addLabel("Allocated Memory:", 0, 3);
+        gridBagHelper.addControl(new JLabel(totalMemoryMB + " megabytes"));
 
-        GridBagHelper.addLabel(p, "Used Memory:", 0, 4);
-        GridBagHelper.addControl(p, new JLabel(usedMemoryMB + " megabytes"));
+        gridBagHelper.addLabel("Used Memory:", 0, 4);
+        gridBagHelper.addControl(new JLabel(usedMemoryMB + " megabytes"));
 
-        GridBagHelper.addLabel(p, "Free Memory:", 0, 5);
-        GridBagHelper.addControl(p, new JLabel(freeMemoryMB + " megabytes"));
+        gridBagHelper.addLabel("Free Memory:", 0, 5);
+        gridBagHelper.addControl(new JLabel(freeMemoryMB + " megabytes"));
 
-        GridBagHelper.addLabel(p, "Max Memory:", 0, 6);
-        GridBagHelper.addControl(p, new JLabel(maxMemoryMB + " megabytes"));
+        gridBagHelper.addLabel("Max Memory:", 0, 6);
+        gridBagHelper.addControl(new JLabel(maxMemoryMB + " megabytes"));
 
         return p;
     }
