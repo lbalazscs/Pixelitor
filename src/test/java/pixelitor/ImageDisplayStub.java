@@ -25,7 +25,7 @@ import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Rectangle;
 
-public class MockImageDisplay implements ImageDisplay {
+public class ImageDisplayStub implements ImageDisplay {
     private Cursor cursor = Cursor.getDefaultCursor();
     private final JViewport parent = new JViewport();
     private Composition comp;

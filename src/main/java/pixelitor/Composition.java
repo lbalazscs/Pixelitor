@@ -117,7 +117,7 @@ public class Composition implements Serializable {
                 History.addEdit(edit);
             }
         }
-        assert checkConsistency();
+        assert checkInvariant();
     }
 
     public int getNrLayers() {
@@ -163,13 +163,13 @@ public class Composition implements Serializable {
         }
 
         imageChanged(updateHistogram, updateHistogram); // if the histogram is updated,a  repaint is also necessary
-        assert checkConsistency();
+        assert checkInvariant();
     }
 
     public void duplicateLayer() {
         Layer duplicate = activeLayer.duplicate();
         addLayer(duplicate, true, true, false);
-        assert checkConsistency();
+        assert checkInvariant();
     }
 
     public Layer getActiveLayer() {
@@ -287,7 +287,7 @@ public class Composition implements Serializable {
     }
 
     public void mergeDown() {
-        assert checkConsistency();
+        assert checkInvariant();
 
         int activeIndex = layerList.indexOf(activeLayer);
         if (activeIndex > 0) {
@@ -307,7 +307,7 @@ public class Composition implements Serializable {
     }
 
     public void moveActiveLayer(boolean up) {
-        assert checkConsistency();
+        assert checkInvariant();
 
         int oldIndex = layerList.indexOf(activeLayer);
         int newIndex = up ? oldIndex + 1 : oldIndex - 1;
@@ -315,14 +315,14 @@ public class Composition implements Serializable {
     }
 
     public void moveActiveLayerToTop() {
-        assert checkConsistency();
+        assert checkInvariant();
 
         int oldIndex = layerList.indexOf(activeLayer);
         swapLayers(oldIndex, layerList.size() - 1, false);
     }
 
     public void moveActiveLayerToBottom() {
-        assert checkConsistency();
+        assert checkInvariant();
 
         int oldIndex = layerList.indexOf(activeLayer);
         swapLayers(oldIndex, 0, false);
@@ -720,7 +720,7 @@ public class Composition implements Serializable {
 
     // called from assertions and unit tests
     @SuppressWarnings("SameReturnValue")
-    public boolean checkConsistency() {
+    public boolean checkInvariant() {
         if (layerList.isEmpty()) {
             throw new IllegalStateException("no layer in " + getName());
         }
@@ -731,5 +731,9 @@ public class Composition implements Serializable {
             throw new IllegalStateException("active layer (" + activeLayer.getName() + ") not in list (" + layerList.toString() + ")");
         }
         return true;
+    }
+
+    public int getLayerPosition(Layer layer) {
+        return layerList.indexOf(layer);
     }
 }

@@ -21,7 +21,6 @@ package pixelitor;
 import org.junit.Before;
 import org.junit.Test;
 import pixelitor.layers.ImageLayer;
-import pixelitor.layers.ImageLayerTest;
 import pixelitor.layers.Layer;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionInteraction;
@@ -34,46 +33,22 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
+import static pixelitor.selection.SelectionInteraction.ADD;
+import static pixelitor.selection.SelectionType.ELLIPSE;
+import static pixelitor.selection.SelectionType.RECTANGLE;
 
 public class CompositionTest {
-    public static final int sizeX = 20;
-    public static final int sizeY = 10;
     private Composition comp;
-
-    public static Composition createEmptyTestComposition() {
-        MockImageDisplay mockImageDisplay = new MockImageDisplay();
-        Canvas canvas = new Canvas(mockImageDisplay, sizeX, sizeY);
-        Composition c = new Composition(mockImageDisplay, new File("unit_test.jpg"), "Composition", canvas);
-        mockImageDisplay.setComp(c);
-
-        return c;
-    }
-
-    public static Composition create2LayerTestComposition() {
-        Composition c = createEmptyTestComposition();
-
-        ImageLayer layer1 = ImageLayerTest.createTestImageLayer("layer 1", c);
-        ImageLayer layer2 = ImageLayerTest.createTestImageLayer("layer 2", c);
-
-        c.addLayer(layer1, false, false, false);
-        c.addLayer(layer2, false, false, false);
-        c.setActiveLayer(layer1, false);
-
-        assert layer1 == c.getActiveLayer();
-        assert layer1 == c.getLayer(0);
-        assert layer2 == c.getLayer(1);
-
-        return c;
-    }
 
     @Before
     public void setUp() {
-        comp = create2LayerTestComposition();
+        comp = TestHelper.create2LayerTestComposition();
     }
 
     @Test
@@ -81,7 +56,7 @@ public class CompositionTest {
         comp.addNewEmptyLayer("newLayer", true);
         comp.addNewEmptyLayer("newLayer", false);
         assertEquals(4, comp.getNrLayers());
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
@@ -91,27 +66,27 @@ public class CompositionTest {
         assertSame(layer, comp.getActiveLayer());
         comp.setActiveLayer(layer, false);
         assertSame(layer, comp.getActiveLayer());
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testGetNrLayers() {
         int nrLayers = comp.getNrLayers();
         assertEquals(2, nrLayers);
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testAddLayerNoGUI() {
-        ImageLayer newLayer = ImageLayerTest.createTestImageLayer("layer", comp);
+        ImageLayer newLayer = TestHelper.createTestImageLayer("layer", comp);
         comp.addLayerNoGUI(newLayer);
         assertEquals(3, comp.getNrLayers());
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testAddLayer() {
-        ImageLayer newLayer = ImageLayerTest.createTestImageLayer("layer", comp);
+        ImageLayer newLayer = TestHelper.createTestImageLayer("layer", comp);
         comp.addLayer(newLayer, true, true, true);
         comp.addLayer(newLayer, true, true, false);
         comp.addLayer(newLayer, true, false, true);
@@ -132,42 +107,42 @@ public class CompositionTest {
         comp.addLayer(newLayer, false, false, 1);
 
         assertEquals(18, comp.getNrLayers());
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testDuplicateLayer() {
         comp.duplicateLayer();
         assertEquals(3, comp.getNrLayers());
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testGetActiveLayer() {
         Layer activeLayer = comp.getActiveLayer();
         assertNotNull(activeLayer);
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testGetActiveLayerIndex() {
         int index = comp.getActiveLayerIndex();
-        assertEquals(0, index);
-        comp.checkConsistency();
+        assertThat(index, equalTo(0));
+        comp.checkInvariant();
     }
 
     @Test
     public void testFilterWithoutDialogFinished() {
-        BufferedImage image = ImageLayerTest.createTestImage();
+        BufferedImage image = TestHelper.createTestImage();
         comp.filterWithoutDialogFinished(image, ChangeReason.OP_WITHOUT_DIALOG, "opName");
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testGetActiveImageLayer() {
         ImageLayer imageLayer = comp.getActiveImageLayer();
         assertNotNull(imageLayer);
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
@@ -180,42 +155,42 @@ public class CompositionTest {
         assertNotNull(imageFT);
         BufferedImage imageFF = comp.getImageOrSubImageIfSelectedForActiveLayer(false, false);
         assertNotNull(imageFF);
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testGetFilterSource() {
         BufferedImage image = comp.getFilterSource();
         assertNotNull(image);
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testGetCanvas() {
         Canvas canvas = comp.getCanvas();
         assertNotNull(canvas);
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testIsEmpty() {
         boolean empty = comp.isEmpty();
-        assertFalse(empty);
-        comp.checkConsistency();
+        assertThat(empty, is(false));
+        comp.checkInvariant();
     }
 
     @Test
     public void testGetName() {
         String name = comp.getName();
         assertNotNull(name);
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testStartTranslation() {
         comp.startTranslation(true);
         comp.startTranslation(false);
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
@@ -227,118 +202,118 @@ public class CompositionTest {
     public void testGetLayer() {
         Layer layer = comp.getLayer(0);
         assertNotNull(layer);
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testFlattenImage() {
         comp.flattenImage(false);
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testMergeDown() {
         comp.mergeDown();
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testMoveActiveLayer() {
         comp.moveActiveLayer(true);
-        comp.checkConsistency();
+        comp.checkInvariant();
         comp.moveActiveLayer(false);
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testMoveActiveLayerToTop() {
         comp.moveActiveLayerToTop();
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testMoveActiveLayerToBottom() {
         comp.moveActiveLayerToBottom();
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testSwapLayers() {
         comp.swapLayers(0, 1, false);
-        comp.checkConsistency();
+        comp.checkInvariant();
         comp.swapLayers(0, 1, true);
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testMoveLayerSelectionUp() {
         comp.moveLayerSelectionUp();
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testMoveLayerSelectionDown() {
         comp.moveLayerSelectionDown();
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testSetCanvas() {
-        comp.setCanvas(new Canvas(null, sizeX, sizeY));
-        comp.checkConsistency();
+        comp.setCanvas(new Canvas(null, TestHelper.sizeX, TestHelper.sizeY));
+        comp.checkInvariant();
     }
 
     @Test
     public void testGenerateNewLayerName() {
         String newLayerName = comp.generateNewLayerName();
         assertEquals("layer 1", newLayerName);
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testIsDirty() {
         boolean dirty = comp.isDirty();
-        assertFalse(dirty);
-        comp.checkConsistency();
+        assertThat(dirty, is(false));
+        comp.checkInvariant();
     }
 
     @Test
     public void testUpdateRegion() {
         comp.updateRegion(4, 4, 8, 8, 2);
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testSetImageComponent() {
         comp.setImageComponent(null);
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testGetCanvasBounds() {
         Rectangle bounds = comp.getCanvasBounds();
         assertNotNull(bounds);
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testGetFile() {
         File file = comp.getFile();
         assertNotNull(file);
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testSetFile() {
         comp.setFile(new File("unit_test.jpg"));
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testRemoveActiveLayer() {
         comp.removeActiveLayer();
         assertEquals(1, comp.getNrLayers());
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
@@ -346,117 +321,118 @@ public class CompositionTest {
         Layer layer2 = comp.getLayer(0);
         comp.removeLayer(layer2, true);
         assertEquals(1, comp.getNrLayers());
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testDispose() {
         comp.dispose();
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testAddNewLayerFromComposite() {
         comp.addNewLayerFromComposite("composite layer");
         assertEquals(3, comp.getNrLayers());
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testPaintSelection() {
-        Graphics2D g2 = ImageLayerTest.createTestImage().createGraphics();
+        Graphics2D g2 = TestHelper.createGraphics();
         comp.paintSelection(g2);
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testDeselect() {
         comp.deselect(false);
-        comp.checkConsistency();
+        comp.checkInvariant();
         comp.deselect(true);
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testGetSelection() {
         Optional<Selection> selection = comp.getSelection();
-        assertFalse(selection.isPresent());
+        assertThat(selection.isPresent(), is(false));
 
-        comp.startSelection(SelectionType.ELLIPSE, SelectionInteraction.ADD);
+        comp.startSelection(ELLIPSE, ADD);
 
         selection = comp.getSelection();
-        assertTrue(selection.isPresent());
-        comp.checkConsistency();
+
+        assertThat(selection.isPresent(), is(true));
+        comp.checkInvariant();
     }
 
     @Test
     public void testHasSelection() {
-        assertFalse(comp.hasSelection());
+        assertThat(comp.hasSelection(), is(false));
 
-        comp.startSelection(SelectionType.RECTANGLE, SelectionInteraction.ADD);
-        assertTrue(comp.hasSelection());
-        comp.checkConsistency();
+        comp.startSelection(RECTANGLE, ADD);
+        assertThat(comp.hasSelection(), is(true));
+        comp.checkInvariant();
     }
 
     @Test
     public void testGetCompositeImage() {
         BufferedImage image = comp.getCompositeImage();
         assertNotNull(image);
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testImageChanged() {
         comp.imageChanged(true, true);
-        comp.checkConsistency();
+        comp.checkInvariant();
         comp.imageChanged(true, false);
-        comp.checkConsistency();
+        comp.checkInvariant();
         comp.imageChanged(false, true);
-        comp.checkConsistency();
+        comp.checkInvariant();
         comp.imageChanged(false, false);
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testSetDirty() {
         comp.setDirty(true);
-        assertTrue(comp.isDirty());
-        comp.checkConsistency();
+        assertThat(comp.isDirty(), is(true));
+        comp.checkInvariant();
     }
 
     @Test
     public void testMoveActiveContentRelative() {
         comp.moveActiveContentRelative(2, 2, false);
-        comp.checkConsistency();
+        comp.checkInvariant();
         comp.moveActiveContentRelative(2, 2, true);
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testIsActiveLayer() {
         Layer layer = comp.getLayer(0);
         boolean b = comp.isActiveLayer(layer);
-        assertTrue(b);
-        comp.checkConsistency();
+        assertThat(b, is(true));
+        comp.checkInvariant();
     }
 
     @Test
     public void testSetSelectionClipping() {
-        Graphics2D g2 = ImageLayerTest.createTestImage().createGraphics();
+        Graphics2D g2 = TestHelper.createGraphics();
         comp.setSelectionClipping(g2, AffineTransform.getTranslateInstance(1, 1));
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testInvertSelection() {
         comp.invertSelection();
-        comp.checkConsistency();
+        comp.checkInvariant();
 
         comp.startSelection(SelectionType.RECTANGLE, SelectionInteraction.ADD);
         comp.getSelection().get().setShape(new Rectangle(3, 3, 4, 4));
 
         comp.invertSelection();
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
@@ -467,7 +443,7 @@ public class CompositionTest {
         for (SelectionType selectionType : selectionTypes) {
             for (SelectionInteraction interaction : selectionInteractions) {
                 comp.startSelection(selectionType, interaction);
-                comp.checkConsistency();
+                comp.checkInvariant();
             }
         }
     }
@@ -475,39 +451,39 @@ public class CompositionTest {
     @Test
     public void testCreateSelectionFromShape() {
         comp.createSelectionFromShape(new Rectangle(3, 3, 5, 5));
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testLayerToCanvasSize() {
         comp.layerToCanvasSize();
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testEnlargeCanvas() {
         comp.enlargeCanvas(3, 4, 5, -2);
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 
     @Test
     public void testGetCanvasWidth() {
         int canvasWidth = comp.getCanvasWidth();
-        assertEquals(sizeX, canvasWidth);
-        comp.checkConsistency();
+        assertEquals(TestHelper.sizeX, canvasWidth);
+        comp.checkInvariant();
     }
 
     @Test
     public void testGetCanvasHeight() {
         int canvasHeight = comp.getCanvasHeight();
-        assertEquals(sizeY, canvasHeight);
-        comp.checkConsistency();
+        assertEquals(TestHelper.sizeY, canvasHeight);
+        comp.checkInvariant();
     }
 
     @Test
     public void testDragFinished() {
         Layer layer = comp.getLayer(0);
         comp.dragFinished(layer, 1);
-        comp.checkConsistency();
+        comp.checkInvariant();
     }
 }

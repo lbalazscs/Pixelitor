@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.layers;
 
@@ -34,7 +34,7 @@ public class LayerButton extends JToggleButton {
     private static final Icon CLOSED_EYE_ICON = IconUtils.loadIcon("eye_closed.png");
 
     private static final String uiClassID = "LayerButtonUI";
-    private final JToggleButton visibilityButton;
+    private final JCheckBox visibilityCB;
 
     private boolean userInteraction = true;
     private final JTextField nameEditor;
@@ -57,13 +57,13 @@ public class LayerButton extends JToggleButton {
     public LayerButton(final Layer layer) {
         this.layer = layer;
         setLayout(new LayerButtonLayout(5, 5));
-        visibilityButton = new JCheckBox(CLOSED_EYE_ICON);
-        visibilityButton.setRolloverIcon(CLOSED_EYE_ICON);
+        visibilityCB = new JCheckBox(CLOSED_EYE_ICON);
+        visibilityCB.setRolloverIcon(CLOSED_EYE_ICON);
 
-        visibilityButton.setSelected(true);
-        visibilityButton.setToolTipText("Layer Visibility");
-        visibilityButton.setSelectedIcon(OPEN_EYE_ICON);
-        add(visibilityButton, LayerButtonLayout.VISIBILITY_BUTTON);
+        visibilityCB.setSelected(true);
+        visibilityCB.setToolTipText("Layer Visibility");
+        visibilityCB.setSelectedIcon(OPEN_EYE_ICON);
+        add(visibilityCB, LayerButtonLayout.VISIBILITY_BUTTON);
 
         nameEditor = new LayerNameEditor(this, layer);
         add(nameEditor, LayerButtonLayout.NAME_EDITOR);
@@ -84,10 +84,10 @@ public class LayerButton extends JToggleButton {
             }
         });
 
-        visibilityButton.addItemListener(new ItemListener() {
+        visibilityCB.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
-                layer.setVisible(visibilityButton.isSelected(), true);
+                layer.setVisible(visibilityCB.isSelected(), true);
             }
         });
     }
@@ -100,7 +100,7 @@ public class LayerButton extends JToggleButton {
     }
 
     public void setOpenEye(boolean newVisibility) {
-        visibilityButton.setSelected(newVisibility);
+        visibilityCB.setSelected(newVisibility);
     }
 
     public void setUserInteraction(boolean userInteraction) {
@@ -142,5 +142,9 @@ public class LayerButton extends JToggleButton {
 
     public boolean isNameEditing() {
         return nameEditor.isEditable();
+    }
+
+    public boolean isVisibilityChecked() {
+        return visibilityCB.isSelected();
     }
 }
