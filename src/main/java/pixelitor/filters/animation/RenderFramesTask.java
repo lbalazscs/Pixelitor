@@ -68,15 +68,31 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
 
         activeImageLayer.tweenCalculatingStarted();
 
-        for (int frameNr = 0; frameNr < numFrames; frameNr++) {
+        int numTotalFrames = numFrames;
+        boolean pingPong = animation.isPingPong() && numFrames > 2;
+        if (pingPong) {
+            numTotalFrames = 2 * numFrames - 2;
+        }
+
+        for (int frameNr = 0; frameNr < numTotalFrames; frameNr++) {
             if (isCancelled()) {
                 canceled = true;
                 break;
             }
-            int percentProgress = (int) ((100.0 * frameNr) / numFrames);
+            int percentProgress = (int) ((100.0 * frameNr) / numTotalFrames);
             setProgress(percentProgress);
 
-            double time = ((double) frameNr) / numFrames;
+            double time;
+            if (frameNr < numFrames) { // normal animation forwards
+                time = ((double) frameNr) / numFrames;
+            } else { // pong: animating backwards
+                // TODO we are calculating the same frame again
+                // somewhere it should be cached
+                // perhaps in an array of soft references with the calculated frames
+                // or on the disk
+                int effectiveFrame = 2 * (numFrames - 1) - frameNr;
+                time = ((double) effectiveFrame) / numFrames;
+            }
 
             BufferedImage image = renderFrame(filter, time, busyCursorParent);
 
@@ -88,6 +104,7 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
                 break;
             }
         }
+
         setProgress(100);
         activeImageLayer.tweenCalculatingEnded();
 

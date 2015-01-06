@@ -102,6 +102,13 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
         pingPongCB = new JCheckBox();
         gridBagHelper.addLabelWithControl("Ping Pong:", pingPongCB, 5);
 
+        pingPongCB.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateCalculations();
+            }
+        });
+
         JPanel filePanel = new JPanel(new FlowLayout());
         filePanel.setBorder(BorderFactory.createTitledBorder("Output File/Folder"));
         fileNameTF = browseFilesSupport.getNameTF();
@@ -132,7 +139,14 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
             double nrSeconds = Double.parseDouble(nrSecondsTF.getText().trim());
             fps = Double.parseDouble(fpsTF.getText().trim());
             nrFrames = (int) (nrSeconds * fps);
-            nrFramesLabel.setText(String.valueOf(nrFrames));
+            String labelText = String.valueOf(nrFrames);
+
+            if (pingPongCB.isSelected()) {
+                int totalFrames = 2 * nrFrames - 2;
+                double totalSeconds = totalFrames / fps;
+                labelText += String.format(" (with PP: %d frames, %.2f seconds)", totalFrames, totalSeconds);
+            }
+            nrFramesLabel.setText(labelText);
         } catch (Exception ex) {
             nrFramesLabel.setText("??");
         }
@@ -178,6 +192,7 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
         animation.setNumFrames(nrFrames);
         animation.setMillisBetweenFrames((int) (1000.0 / fps));
         animation.setInterpolation((Interpolation) ipCB.getSelectedItem());
+        animation.setPingPong(pingPongCB.isSelected());
 
         if (output.isDirectory()) {
             FileChoosers.setLastSaveDir(output);
