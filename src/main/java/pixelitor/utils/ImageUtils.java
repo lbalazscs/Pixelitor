@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.utils;
 
 import com.jhlabs.composite.OverlayComposite;
@@ -65,10 +66,11 @@ public class ImageUtils {
     private ImageUtils() {
     }
 
-    public static BufferedImage transformToCompatibleImage(BufferedImage input) {
+    public static BufferedImage toCompatibleImage(BufferedImage input) {
         assert input != null;
 
-        GraphicsConfiguration gc = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
+        GraphicsConfiguration gc = GraphicsEnvironment.getLocalGraphicsEnvironment()
+                .getDefaultScreenDevice().getDefaultConfiguration();
 
         if (input.getColorModel().equals(gc.getColorModel())) {
             // already compatible
@@ -217,7 +219,7 @@ public class ImageUtils {
         return ret;
     }
 
-    // TODO possibly duplicate functionality
+    // TODO duplicate functionality
     public static BufferedImage resizeImage(double newSize, BufferedImage original) {
         int originalWidth = original.getWidth();
         int originalHeight = original.getHeight();

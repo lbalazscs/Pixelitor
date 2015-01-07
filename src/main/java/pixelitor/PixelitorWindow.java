@@ -38,9 +38,7 @@ import java.awt.Image;
 import java.awt.dnd.DropTarget;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
 import java.beans.PropertyVetoException;
-import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -158,14 +156,15 @@ public final class PixelitorWindow extends JFrame {
     }
 
     /**
-     * Adds a complete (deserialized or OpenRaster) composition
+     * Adds a composition to the app.
      */
-    public void addLayeredComposition(Composition comp, File file) {
-        ImageComponent ic = new ImageComponent(file, comp);
-        ImageComponents.setActiveImageComponent(ic, false);
-        comp.restoreAfterDeserialization();
-
+    public void addComposition(Composition comp) {
         try {
+            ImageComponent ic = new ImageComponent(comp);
+            ic.setCursor(Tools.getCurrentTool().getCursor());
+            ImageComponents.setActiveImageComponent(ic, false);
+            comp.addLayersToGUI();
+
             addNewImageComponent(ic);
         } catch (Exception e) {
             Dialogs.showExceptionDialog(e);
@@ -175,18 +174,12 @@ public final class PixelitorWindow extends JFrame {
     /**
      * If the file argument is not null, then the name argument is ignored
      */
-    public void addNewImage(BufferedImage img, File file, String name) {
-        ImageComponent ic = new ImageComponent(file, name, img);
-        ImageComponents.setActiveImageComponent(ic, false);
-//        ic.addBaseLayer(img);
-        ic.setCursor(Tools.getCurrentTool().getCursor());
-
-        try {
-            addNewImageComponent(ic);
-        } catch (Exception e) {
-            Dialogs.showExceptionDialog(e);
-        }
-    }
+//    public void addNewImage(BufferedImage img, File file, String name) {
+//        ImageComponent ic = new ImageComponent(file, name, img);
+//        ImageComponents.setActiveImageComponent(ic, false);
+////        ic.addBaseLayer(img);
+//
+//    }
 
     public void cascadeWindows() {
         List<ImageComponent> imageComponents = ImageComponents.getImageComponents();

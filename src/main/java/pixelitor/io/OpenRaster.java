@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright (c) 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.io;
 
@@ -22,7 +22,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.ImageLayer;
@@ -157,7 +156,8 @@ public class OpenRaster {
             System.out.println(String.format("OpenRaster::readOpenRaster: w = '%s', h = '%s', compositionWidth = %d, compositionHeight = %d", w, h, compositionWidth, compositionHeight));
         }
 
-        Composition comp = new Composition(null, file, null, new Canvas(null, compositionWidth, compositionHeight));
+        Composition comp = Composition.empty(compositionWidth, compositionHeight);
+        comp.setFile(file);
 
         NodeList layers = documentElement.getElementsByTagName("layer");
         for (int i = layers.getLength() - 1; i >= 0; i--) { // stack.xml contains layers in reverse order
@@ -174,7 +174,7 @@ public class OpenRaster {
             String layerY = element.getAttribute("y");
 
             BufferedImage image = images.get(layerImageSource);
-            image = ImageUtils.transformToCompatibleImage(image);
+            image = ImageUtils.toCompatibleImage(image);
 
             if(DEBUG) {
                 int imageWidth = image.getWidth();

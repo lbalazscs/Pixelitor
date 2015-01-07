@@ -31,7 +31,6 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.File;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -180,13 +179,6 @@ public class CompositionTest {
     }
 
     @Test
-    public void testGetName() {
-        String name = comp.getName();
-        assertNotNull(name);
-        comp.checkInvariant();
-    }
-
-    @Test
     public void testStartTranslation() {
         comp.startTranslation(true);
         comp.startTranslation(false);
@@ -259,7 +251,7 @@ public class CompositionTest {
 
     @Test
     public void testSetCanvas() {
-        comp.setCanvas(new Canvas(null, TestHelper.sizeX, TestHelper.sizeY));
+        comp.setCanvas(new Canvas(TestHelper.sizeX, TestHelper.sizeY));
         comp.checkInvariant();
     }
 
@@ -293,19 +285,6 @@ public class CompositionTest {
     public void testGetCanvasBounds() {
         Rectangle bounds = comp.getCanvasBounds();
         assertNotNull(bounds);
-        comp.checkInvariant();
-    }
-
-    @Test
-    public void testGetFile() {
-        File file = comp.getFile();
-        assertNotNull(file);
-        comp.checkInvariant();
-    }
-
-    @Test
-    public void testSetFile() {
-        comp.setFile(new File("unit_test.jpg"));
         comp.checkInvariant();
     }
 

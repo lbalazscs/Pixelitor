@@ -21,7 +21,6 @@ import pixelitor.layers.ImageLayer;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
 
 public class TestHelper {
     public static final int sizeX = 20;
@@ -34,11 +33,13 @@ public class TestHelper {
 
     public static Composition createEmptyTestComposition() {
         ImageDisplayStub imageDisplayStub = new ImageDisplayStub();
-        Canvas canvas = new Canvas(imageDisplayStub, sizeX, sizeY);
-        Composition c = new Composition(imageDisplayStub, new File("unit_test.jpg"), "Composition", canvas);
-        imageDisplayStub.setComp(c);
 
-        return c;
+        Composition comp = Composition.empty(sizeX, sizeY);
+        comp.setImageComponent(imageDisplayStub);
+
+        imageDisplayStub.setComp(comp);
+
+        return comp;
     }
 
     public static Composition create2LayerTestComposition() {

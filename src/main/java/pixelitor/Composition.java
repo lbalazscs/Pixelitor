@@ -34,6 +34,7 @@ import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionInteraction;
 import pixelitor.selection.SelectionType;
 import pixelitor.utils.HistogramsPanel;
+import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Optional;
 
 import java.awt.Graphics2D;
@@ -66,35 +67,60 @@ public class Composition implements Serializable {
     private Canvas canvas;
 
     //
-    // the following variables are all transient, their state does not need saving
+    // the following variables are all transient, their state is not saved in PXC!
     //
     private transient File file;
     private transient boolean dirty = false;
     private transient boolean compositeImageUpToDate = false;
     private transient BufferedImage cachedCompositeImage = null;
     private transient ImageDisplay ic;
-
     private transient Selection selection;
 
+    // A Composition can be created either with one of the following static
+    // factory methods or through deserialization (pxc)
+
     /**
-     * If the file argument is not null, then the name argument is ignored
-     * (the name of the composition will be the file name)
+     * Creates a single-layered composition from the given image
      */
-    public Composition(ImageDisplay ic, File file, String name, Canvas canvas) {
-        this.ic = ic; // can be null
-        this.canvas = canvas;
+    public static Composition fromImage(BufferedImage img, File file, String name) {
+        assert img != null;
+
+        img = ImageUtils.toCompatibleImage(img);
+        Canvas canvas = new Canvas(img.getWidth(), img.getHeight());
+        Composition comp = new Composition(canvas);
+        comp.addBaseLayer(img);
+
         if (file != null) {
-            setFile(file);
+            comp.setFile(file); // also sets the name based on the file name
+        } else if (name != null) {
+            comp.setName(name);
         } else {
-            this.name = name;
+            // of of the file and name arguments must be set to non-null
+            throw new IllegalArgumentException("no name could be set");
         }
+        return comp;
+    }
+
+    /**
+     * Creates an empty composition (no layers, no name)
+     */
+    public static Composition empty(int width, int height) {
+        Canvas canvas = new Canvas(width, height);
+        Composition comp = new Composition(canvas);
+        return comp;
+    }
+
+    private Composition(Canvas canvas) {
+        this.canvas = canvas;
     }
 
     public void addBaseLayer(BufferedImage baseLayerImage) {
-        canvas.updateSize(baseLayerImage.getWidth(), baseLayerImage.getHeight());
+//        canvas.updateSize(baseLayerImage.getWidth(), baseLayerImage.getHeight());
         ImageLayer newLayer = new ImageLayer(this, baseLayerImage, null);
 
-        addLayer(newLayer, false, true, false);
+        addLayerNoGUI(newLayer);
+        activeLayer = newLayer;
+//        imageChanged(true, true);
     }
 
     public void addNewEmptyLayer(String name, boolean bellowActive) {
@@ -125,7 +151,7 @@ public class Composition implements Serializable {
     }
 
     /**
-     * Adds a layer to the bottom without updating any GUI
+     * Adds a layer to the top without updating any GUI
      */
     public void addLayerNoGUI(Layer newLayer) {
         layerList.add(newLayer);
@@ -162,7 +188,7 @@ public class Composition implements Serializable {
             History.addEdit(newLayerEdit);
         }
 
-        imageChanged(updateHistogram, updateHistogram); // if the histogram is updated,a  repaint is also necessary
+        imageChanged(updateHistogram, updateHistogram); // if the histogram is updated, a repaint is also necessary
         assert checkInvariant();
     }
 
@@ -437,6 +463,7 @@ public class Composition implements Serializable {
      */
     public void setImageComponent(ImageDisplay ic) {
         this.ic = ic;
+        canvas.setIc(ic);
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
@@ -444,26 +471,21 @@ public class Composition implements Serializable {
 
     }
 
-    /**
-     * This is called then the deserialization is complete in order to provide additional
-     * initialization
-     */
-    public void restoreAfterDeserialization() {
-        Layer activeLayerRef = activeLayer;
+    public void addLayersToGUI() {
+        // when adding layer buttons the last layer always gets active
+        // but here we don't want to change the selected layer
+        Layer previousActiveLayer = activeLayer;
 
         for (Layer layer : layerList) {
-            restoreLayerAfterDeserialization(layer);
+            addLayerToGUI(layer);
         }
 
-        setActiveLayer(activeLayerRef, false);
+        setActiveLayer(previousActiveLayer, false);
     }
 
-    private void restoreLayerAfterDeserialization(Layer layer) {
-        if (layerList == null) {
-            throw new IllegalStateException("layerList is null");
-        }
+    private void addLayerToGUI(Layer layer) {
         int layerIndex = layerList.indexOf(layer);
-        setActiveLayer(layer, false);
+//        setActiveLayer(layer, false);
         ic.addLayerToGUI(layer, layerIndex);
     }
 
@@ -736,4 +758,5 @@ public class Composition implements Serializable {
     public int getLayerPosition(Layer layer) {
         return layerList.indexOf(layer);
     }
+
 }

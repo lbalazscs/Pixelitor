@@ -42,9 +42,14 @@ public final class NewImage {
     }
 
     public static void addNewImage(FillType bg, int width, int height, String title) {
+        Composition comp = createNewComposition(bg, width, height, title);
+        PixelitorWindow.getInstance().addComposition(comp);
+    }
+
+    public static Composition createNewComposition(FillType bg, int width, int height, String title) {
         BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB_PRE);
         fillImage(newImage, bg);
-        PixelitorWindow.getInstance().addNewImage(newImage, null, title);
+        return Composition.fromImage(newImage, null, title);
     }
 
     private static void fillImage(BufferedImage img, FillType bg) {

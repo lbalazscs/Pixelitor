@@ -7,11 +7,9 @@ hs_err_pid*
 build.num
 *.nsh
 *.nsi
-*.ora
 *.exe
 *.sh
 *.ico
-*.gif
 *.zip
 *.7z
 Pixelitor.iml

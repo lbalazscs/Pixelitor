@@ -28,7 +28,6 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.utils.Dialogs;
-import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
 
 import javax.imageio.ImageIO;
@@ -57,41 +56,67 @@ public class OpenSaveManager {
     private OpenSaveManager() {
     }
 
-    public static void openFile(final File selectedFile) {
+    public static void openFile(final File file) {
         assert SwingUtilities.isEventDispatchThread();
-
-        String ext = FileExtensionUtils.getFileExtension(selectedFile.getName());
-        if ("pxc".equals(ext)) {
-            openLayered(selectedFile, "pxc");
-        } else if ("ora".equals(ext)) {
-            openLayered(selectedFile, "ora");
-        } else {
-            openOneLayeredFile(selectedFile);
-        }
-        RecentFilesMenu.getInstance().addFile(selectedFile);
-    }
-
-    private static void openOneLayeredFile(final File selectedFile) {
         Runnable r = new Runnable() {
             @Override
             public void run() {
-                BufferedImage img = null;
-                try {
-                    img = ImageIO.read(selectedFile);
-                } catch (IOException ex) {
-                    Dialogs.showExceptionDialog(ex);
-                }
-                if (img == null) {
-                    JOptionPane.showMessageDialog(PixelitorWindow.getInstance(), "Could not load \"" + selectedFile.getName() + "\" as an image file", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                img = ImageUtils.transformToCompatibleImage(img);
-                PixelitorWindow.getInstance().addNewImage(img, selectedFile, null);
+                Composition comp = createCompositionFromFile(file);
+                PixelitorWindow.getInstance().addComposition(comp);
             }
         };
         Utils.executeWithBusyCursor(r);
+
+        RecentFilesMenu.getInstance().addFile(file);
     }
 
+    public static Composition createCompositionFromFile(File file) {
+        String ext = FileExtensionUtils.getFileExtension(file.getName());
+        if ("pxc".equals(ext)) {
+            return openLayered(file, "pxc");
+        } else if ("ora".equals(ext)) {
+            return openLayered(file, "ora");
+        } else {
+            return openSimpleFile(file);
+        }
+    }
+
+    // opens an a file with an 1-layer image format
+    private static Composition openSimpleFile(final File file) {
+        BufferedImage img = null;
+        try {
+            img = ImageIO.read(file);
+        } catch (IOException ex) {
+            Dialogs.showExceptionDialog(ex);
+        }
+        if (img == null) {
+            JOptionPane.showMessageDialog(PixelitorWindow.getInstance(), "Could not load \"" + file.getName() + "\" as an image file", "Error", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+
+//        PixelitorWindow.getInstance().addNewImage(img, file, null);
+        Composition comp = Composition.fromImage(img, file, null);
+        return comp;
+    }
+
+    private static Composition openLayered(final File selectedFile, final String type) {
+        Composition comp = null;
+        try {
+            switch (type) {
+                case "pxc":
+                    comp = deserializeComposition(selectedFile);
+                    break;
+                case "ora":
+                    comp = OpenRaster.readOpenRaster(selectedFile);
+                    break;
+                default:
+                    throw new IllegalStateException("type = " + type);
+            }
+        } catch (NotPxcFormatException | ParserConfigurationException | IOException | SAXException e) {
+            Dialogs.showExceptionDialog(e);
+        }
+        return comp;
+    }
 
     public static void save(boolean saveAs) {
         try {
@@ -198,64 +223,43 @@ public class OpenSaveManager {
         }
     }
 
-    private static Composition deserializeComposition(File f) throws NotPxcFormatException {
+    private static Composition deserializeComposition(File file) throws NotPxcFormatException {
         Composition comp = null;
-        try (FileInputStream fis = new FileInputStream(f)) {
+        try (FileInputStream fis = new FileInputStream(file)) {
             int firstByte = fis.read();
             int secondByte = fis.read();
             if (firstByte == 0xAB && secondByte == 0xC4) {
                 // identification bytes OK
             } else {
-                throw new NotPxcFormatException(f.getName() + " is not in the pxc format.");
+                throw new NotPxcFormatException(file.getName() + " is not in the pxc format.");
             }
             int versionByte = fis.read();
             if (versionByte == 0) {
-                throw new NotPxcFormatException(f.getName() + " is in an obsolete pxc format, it can only be opened in the old beta Pixelitor versions 0.9.2-0.9.7");
+                throw new NotPxcFormatException(file.getName() + " is in an obsolete pxc format, it can only be opened in the old beta Pixelitor versions 0.9.2-0.9.7");
             }
             if (versionByte == 1) {
-                throw new NotPxcFormatException(f.getName() + " is in an obsolete pxc format, it can only be opened in the old beta Pixelitor version 0.9.8");
+                throw new NotPxcFormatException(file.getName() + " is in an obsolete pxc format, it can only be opened in the old beta Pixelitor version 0.9.8");
             }
             if (versionByte == 2) {
-                throw new NotPxcFormatException(f.getName() + " is in an obsolete pxc format, it can only be opened in the old Pixelitor versions 0.9.9-1.1.2");
+                throw new NotPxcFormatException(file.getName() + " is in an obsolete pxc format, it can only be opened in the old Pixelitor versions 0.9.9-1.1.2");
             }
             if (versionByte > 3) {
-                throw new NotPxcFormatException(f.getName() + " has unknown version byte " + versionByte);
+                throw new NotPxcFormatException(file.getName() + " has unknown version byte " + versionByte);
             }
 
             try (GZIPInputStream gs = new GZIPInputStream(fis)) {
                 try (ObjectInputStream ois = new ObjectInputStream(gs)) {
                     comp = (Composition) ois.readObject();
+
+                    // file is transient in Composition because the pxc file can be renamed
+                    comp.setFile(file);
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
             Dialogs.showExceptionDialog(e);
         }
-        return comp;
-    }
 
-    private static void openLayered(final File selectedFile, final String type) {
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Composition comp;
-                    switch (type) {
-                        case "pxc":
-                            comp = deserializeComposition(selectedFile);
-                            break;
-                        case "ora":
-                            comp = OpenRaster.readOpenRaster(selectedFile);
-                            break;
-                        default:
-                            throw new IllegalStateException("type = " + type);
-                    }
-                    PixelitorWindow.getInstance().addLayeredComposition(comp, selectedFile);
-                } catch (NotPxcFormatException | ParserConfigurationException | IOException | SAXException e) {
-                    Dialogs.showExceptionDialog(e);
-                }
-            }
-        };
-        Utils.executeWithBusyCursor(r);
+        return comp;
     }
 
     public static void openAllImagesInDir(File dir) {

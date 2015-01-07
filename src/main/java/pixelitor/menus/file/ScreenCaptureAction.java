@@ -14,8 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.menus.file;
 
+import pixelitor.Composition;
 import pixelitor.PixelitorWindow;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.GridBagHelper;
@@ -83,8 +85,6 @@ public class ScreenCaptureAction extends AbstractAction {
 
             if (hidePixelitor) {
                 window.deiconify();
-//                window.setVisible(true);
-//                Thread.sleep(1000);
             }
 
             int type = screenCapture.getType();
@@ -93,7 +93,9 @@ public class ScreenCaptureAction extends AbstractAction {
             }
 
             String name = "Screen Capture " + captureCount;
-            window.addNewImage(screenCapture, null, name);
+            Composition comp = Composition.fromImage(screenCapture, null, name);
+            window.addComposition(comp);
+
             captureCount++;
         } catch (Exception ex) {
             Dialogs.showExceptionDialog(ex);

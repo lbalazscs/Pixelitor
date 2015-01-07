@@ -43,10 +43,10 @@ public class Canvas implements Serializable {
      * and later associated with the (transient!) ImageComponent
      * In the case of a new image, this object is first created in ImageComponent
      */
-    public Canvas(ImageDisplay ic, int width, int height) {
+    public Canvas(int width, int height) {
         this.width = width;
         this.height = height;
-        this.ic = ic;
+//        this.ic = ic;
     }
 
     public int getWidth() {
@@ -89,7 +89,7 @@ public class Canvas implements Serializable {
         return zoomedHeight;
     }
 
-    public void setIc(ImageComponent ic) {
+    public void setIc(ImageDisplay ic) {
         this.ic = ic;
     }
 }

@@ -53,7 +53,11 @@ public enum PasteDestination {
         @Override
         void addImage(BufferedImage pastedImage) {
             String title = "Pasted Image " + pastedCount;
-            PixelitorWindow.getInstance().addNewImage(pastedImage, null, title);
+
+            Composition comp = Composition.fromImage(pastedImage,
+                    null, title);
+
+            PixelitorWindow.getInstance().addComposition(comp);
             pastedCount++;
         }
     };

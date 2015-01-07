@@ -432,7 +432,11 @@ public final class Utils {
         Composition save = ImageComponents.getActiveComp().get();
 
         BufferedImage copy = ImageUtils.copyImage(img);
-        PixelitorWindow.getInstance().addNewImage(copy, null, description);
+
+        Composition comp = Composition.fromImage(copy, null, description);
+
+//        PixelitorWindow.getInstance().addNewImage(copy, null, description);
+        PixelitorWindow.getInstance().addComposition(comp);
 
         if (save != null) {
             ImageComponents.setActiveImageComponent(save.getIC(), true);

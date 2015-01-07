@@ -47,7 +47,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyVetoException;
-import java.io.File;
 
 /**
  * The GUI component that shows a composition
@@ -73,41 +72,12 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     double drawStartX;
     double drawStartY;
 
-    /**
-     * Called when a regular file (jpeg, png, etc.) is opened or when
-     * a new composition is created or something is pasted
-     * If the file argument is not null, then the name argument is ignored
-     */
-    public ImageComponent(File file, String name, BufferedImage baseLayerImage) {
-        if (baseLayerImage == null) {
-            throw new IllegalArgumentException("baseLayerImage is null");
-        }
-
-        int width = baseLayerImage.getWidth();
-        int height = baseLayerImage.getHeight();
-        canvas = new Canvas(this, width, height);
-        comp = new Composition(this, file, name, canvas);
-
-        init(width, height);
-
-        comp.addBaseLayer(baseLayerImage);
-    }
-
-    /**
-     * Called when a Composition is deserialized or an OpenRaster file is opened
-     */
-    public ImageComponent(File file, Composition comp) {
-        assert file != null;
+    public ImageComponent(Composition comp) {
         assert comp != null;
 
         this.comp = comp;
+        this.canvas = comp.getCanvas();
         comp.setImageComponent(this);
-
-        // file is transient in Composition because the pxc file can be renamed
-        comp.setFile(file);
-
-        canvas = comp.getCanvas();
-        canvas.setIc(this);
 
         init(canvas.getWidth(), canvas.getHeight());
     }
@@ -243,10 +213,6 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
     public ZoomLevel getZoomLevel() {
         return zoomLevel;
-    }
-
-    public void addLayerButton(LayerButton layerButton, int newLayerIndex) {
-        layersPanel.addLayerButton(layerButton, newLayerIndex);
     }
 
     @Override
@@ -624,7 +590,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     @Override
     public void addLayerToGUI(Layer newLayer, int newLayerIndex) {
         LayerButton layerButton = newLayer.getLayerButton();
-        addLayerButton(layerButton, newLayerIndex);
+        layersPanel.addLayerButton(layerButton, newLayerIndex);
 
         if (ImageComponents.isActive(this)) {
             AppLogic.activeCompLayerCountChanged(comp, comp.getNrLayers());

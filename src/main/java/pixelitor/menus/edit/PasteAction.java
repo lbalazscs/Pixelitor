@@ -47,7 +47,7 @@ public class PasteAction extends AbstractAction {
         try {
             BufferedImage pastedImage = getImageFromClipboard();
             if (pastedImage != null) {
-                // pastedImage = ImageUtils.transformToCompatibleImage(pastedImage);
+                // pastedImage = ImageUtils.toCompatibleImage(pastedImage);
 
                 int type = pastedImage.getType();
                 if (type != BufferedImage.TYPE_INT_ARGB_PRE) {
