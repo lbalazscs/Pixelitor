@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters.jhlabsproxies;
 
@@ -34,8 +34,8 @@ public class JHPinch extends FilterWithParametrizedGUI {
     private final RangeParam radius = new RangeParam("Radius", 1, 999, 200);
     private final RangeParam twirlAngle = new RangeParam("Twirl Angle", -360, 360, 90);
     private final RangeParam pinchBulgeAmount = new RangeParam("Pinch-Bulge Amount", -100, 100, 50);
-    private RangeParam zoomParam = new RangeParam("Zoom (%)", 1, 500, 100);
-    private AngleParam rotateResult = new AngleParam("Rotate Result", 0);
+    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 500, 100);
+    private final AngleParam rotateResult = new AngleParam("Rotate Result", 0);
 
 
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
@@ -50,7 +50,7 @@ public class JHPinch extends FilterWithParametrizedGUI {
                 twirlAngle,
                 radius.adjustRangeToImageSize(1.0),
                 center,
-                zoomParam,
+                zoom,
                 rotateResult,
                 edgeAction,
                 interpolation
@@ -71,7 +71,7 @@ public class JHPinch extends FilterWithParametrizedGUI {
         filter.setCenterX(center.getRelativeX());
         filter.setCenterY(center.getRelativeY());
 
-        filter.setZoom(zoomParam.getValueAsPercentage());
+        filter.setZoom(zoom.getValueAsPercentage());
         filter.setRotateResultAngle((float) rotateResult.getValueInIntuitiveRadians());
         filter.setEdgeAction(edgeAction.getValue());
 

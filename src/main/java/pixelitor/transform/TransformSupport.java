@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,10 +29,10 @@ import java.awt.event.MouseEvent;
  * Helps with interactive manipulation of selections/transforms
  */
 public class TransformSupport {
-    private Handles handles;
+    private final Handles handles;
     private Rectangle compSpaceRect;
     private Rectangle imageSpaceRect; // used only while the image component is resized
-    private TransformToolChangeListener changeListener;
+    private final TransformToolChangeListener changeListener;
     private int dragStartX;
     private int dragStartY;
     private int dragStartRectWidth;

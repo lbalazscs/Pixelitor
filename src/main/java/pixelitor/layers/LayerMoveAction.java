@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ import java.awt.event.ActionEvent;
 public class LayerMoveAction extends AbstractAction implements ImageSwitchListener, LayerChangeListener {
     public static final LayerMoveAction INSTANCE_UP = new LayerMoveAction(true);
     public static final LayerMoveAction INSTANCE_DOWN = new LayerMoveAction(false);
-    private boolean up;
+    private final boolean up;
 
     private LayerMoveAction(boolean up) {
         super(getName(up), getIcon(up));

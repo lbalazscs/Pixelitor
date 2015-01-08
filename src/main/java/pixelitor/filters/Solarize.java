@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters;
 
@@ -54,18 +54,18 @@ public class Solarize extends FilterWithParametrizedGUI {
         int[] srcData = ImageUtils.getPixelsAsArray(src);
         int[] destData = ImageUtils.getPixelsAsArray(dest);
 
-        float redThreshold = this.redThreshold.getValueAsFloat();
-        float greenThreshold = this.greenThreshold.getValueAsFloat();
-        float blueThreshold = this.blueThreshold.getValueAsFloat();
+        float redThr = redThreshold.getValueAsFloat();
+        float greenThr = greenThreshold.getValueAsFloat();
+        float blueThr = blueThreshold.getValueAsFloat();
 
-        float m1Red = 255.0f / redThreshold;
-        float m2Red = 255.0f / (255.0f - redThreshold);
+        float m1Red = 255.0f / redThr;
+        float m2Red = 255.0f / (255.0f - redThr);
 
-        float m1Green = 255.0f / greenThreshold;
-        float m2Green = 255.0f / (255.0f - greenThreshold);
+        float m1Green = 255.0f / greenThr;
+        float m2Green = 255.0f / (255.0f - greenThr);
 
-        float m1Blue = 255.0f / blueThreshold;
-        float m2Blue = 255.0f / (255.0f - blueThreshold);
+        float m1Blue = 255.0f / blueThr;
+        float m2Blue = 255.0f / (255.0f - blueThr);
 
         int[] redLookup = new int[256];
         int[] greenLookup = new int[256];
@@ -74,42 +74,42 @@ public class Solarize extends FilterWithParametrizedGUI {
         int solarizeType = type.getValue();
         if (solarizeType == TYPE_CLASSIC) {
             for (int i = 0; i < 256; i++) {
-                if (i > redThreshold) {
-                    redLookup[i] = 255 - (int) (m2Red * (i - redThreshold));
+                if (i > redThr) {
+                    redLookup[i] = 255 - (int) (m2Red * (i - redThr));
                 } else {
-                    redLookup[i] = 255 - (int) (m1Red * (redThreshold - i));
+                    redLookup[i] = 255 - (int) (m1Red * (redThr - i));
                 }
 
-                if (i > greenThreshold) {
-                    greenLookup[i] = 255 - (int) (m2Green * (i - greenThreshold));
+                if (i > greenThr) {
+                    greenLookup[i] = 255 - (int) (m2Green * (i - greenThr));
                 } else {
-                    greenLookup[i] = 255 - (int) (m1Green * (greenThreshold - i));
+                    greenLookup[i] = 255 - (int) (m1Green * (greenThr - i));
                 }
 
-                if (i > blueThreshold) {
-                    blueLookup[i] = 255 - (int) (m2Blue * (i - blueThreshold));
+                if (i > blueThr) {
+                    blueLookup[i] = 255 - (int) (m2Blue * (i - blueThr));
                 } else {
-                    blueLookup[i] = 255 - (int) (m1Blue * (blueThreshold - i));
+                    blueLookup[i] = 255 - (int) (m1Blue * (blueThr - i));
                 }
             }
         } else if (solarizeType == TYPE_INVERTED) {
             for (int i = 0; i < 256; i++) {
-                if (i > redThreshold) {
-                    redLookup[i] = (int) (m2Red * (i - redThreshold));
+                if (i > redThr) {
+                    redLookup[i] = (int) (m2Red * (i - redThr));
                 } else {
-                    redLookup[i] = (int) (m1Red * (redThreshold - i));
+                    redLookup[i] = (int) (m1Red * (redThr - i));
                 }
 
-                if (i > greenThreshold) {
-                    greenLookup[i] = (int) (m2Green * (i - greenThreshold));
+                if (i > greenThr) {
+                    greenLookup[i] = (int) (m2Green * (i - greenThr));
                 } else {
-                    greenLookup[i] = (int) (m1Green * (greenThreshold - i));
+                    greenLookup[i] = (int) (m1Green * (greenThr - i));
                 }
 
-                if (i > blueThreshold) {
-                    blueLookup[i] = (int) (m2Blue * (i - blueThreshold));
+                if (i > blueThr) {
+                    blueLookup[i] = (int) (m2Blue * (i - blueThr));
                 } else {
-                    blueLookup[i] = (int) (m1Blue * (blueThreshold - i));
+                    blueLookup[i] = (int) (m1Blue * (blueThr - i));
                 }
             }
         }

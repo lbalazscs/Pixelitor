@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -82,7 +82,7 @@ public class OpenSaveManager {
     }
 
     // opens an a file with an 1-layer image format
-    private static Composition openSimpleFile(final File file) {
+    private static Composition openSimpleFile(File file) {
         BufferedImage img = null;
         try {
             img = ImageIO.read(file);
@@ -99,7 +99,7 @@ public class OpenSaveManager {
         return comp;
     }
 
-    private static Composition openLayered(final File selectedFile, final String type) {
+    private static Composition openLayered(File selectedFile, String type) {
         Composition comp = null;
         try {
             switch (type) {
@@ -302,7 +302,7 @@ public class OpenSaveManager {
         if (cancelled) {
             return;
         }
-        final File saveDir = FileChoosers.getLastSaveDir();
+        File saveDir = FileChoosers.getLastSaveDir();
         if (saveDir != null) {
             OutputFormat[] outputFormats = OutputFormat.values();
             for (OutputFormat outputFormat : outputFormats) {

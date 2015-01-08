@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class OpenRasterExportPanel extends JPanel {
-    private JCheckBox mergedLayersCB;
+    private final JCheckBox mergedLayersCB;
 
     public OpenRasterExportPanel() {
         mergedLayersCB = new JCheckBox("Add merged image? (Useful only for image viewers)", false);

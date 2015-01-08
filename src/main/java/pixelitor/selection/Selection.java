@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -146,7 +146,7 @@ public class Selection {
     /**
      * As the mouse is dragged or released, the current selection shape is continuously updated
      */
-    public final void updateSelection(UserDrag userDrag) {
+    public void updateSelection(UserDrag userDrag) {
         currentSelectionShape = selectionType.updateShape(userDrag, currentSelectionShape);
 
         if (state == State.NO_SHAPE_YET) {

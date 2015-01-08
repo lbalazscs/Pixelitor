@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters.jhlabsproxies;
 
@@ -40,14 +40,14 @@ public class JHPolarCoordinates extends FilterWithParametrizedGUI {
     private final IntChoiceParam type = new IntChoiceParam("Type", gridTypeChoices);
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
     private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
-    private RangeParam zoomParam = new RangeParam("Zoom (%)", 1, 500, 100);
-    private AngleParam angleParam = new AngleParam("Angle", 0);
+    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 500, 100);
+    private final AngleParam angle = new AngleParam("Angle", 0);
 
     private PolarFilter filter;
 
     public JHPolarCoordinates() {
         super("Polar Coordinates", true, false);
-        setParamSet(new ParamSet(center, type, zoomParam, angleParam, edgeAction, interpolation));
+        setParamSet(new ParamSet(center, type, zoom, angle, edgeAction, interpolation));
     }
 
     @Override
@@ -60,8 +60,8 @@ public class JHPolarCoordinates extends FilterWithParametrizedGUI {
         filter.setRelativeCentreX(center.getRelativeX());
         filter.setRelativeCentreY(center.getRelativeY());
         filter.setInterpolation(interpolation.getValue());
-        filter.setZoom(zoomParam.getValueAsPercentage());
-        filter.setAngle(angleParam.getValueInIntuitiveRadians());
+        filter.setZoom(zoom.getValueAsPercentage());
+        filter.setAngle(angle.getValueInIntuitiveRadians());
 
         dest = filter.filter(src, dest);
         return dest;

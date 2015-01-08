@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import java.util.List;
  * Each ImageComponent has its own LayersPanel instance.
  */
 public class LayersPanel extends JLayeredPane {
-    private List<LayerButton> layerButtons = new ArrayList<>();
+    private final List<LayerButton> layerButtons = new ArrayList<>();
     private final ButtonGroup buttonGroup = new ButtonGroup();
     private final LayersMouseHandler mouseHandler;
     private LayerButton draggedButton = null;

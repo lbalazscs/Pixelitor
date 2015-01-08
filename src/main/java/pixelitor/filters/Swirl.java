@@ -1,3 +1,20 @@
+/*
+ * Copyright 2015 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.filters;
 
 import pixelitor.filters.gui.AngleParam;
@@ -13,14 +30,14 @@ import java.awt.image.BufferedImage;
  * Swirl filter
  */
 public class Swirl extends FilterWithParametrizedGUI {
-    private RangeParam amount = new RangeParam("Amount", -400, 400, 100);
-    private RangeParam radius = new RangeParam("Radius", 0, 1000, 300);
-    private RangeParam zoom = new RangeParam("Zoom (%)", 1, 500, 100);
-    private AngleParam rotateResult = new AngleParam("Rotate Result", 0);
+    private final RangeParam amount = new RangeParam("Amount", -400, 400, 100);
+    private final RangeParam radius = new RangeParam("Radius", 0, 1000, 300);
+    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 500, 100);
+    private final AngleParam rotateResult = new AngleParam("Rotate Result", 0);
 
-    private ImagePositionParam center = new ImagePositionParam("Center");
-    private IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
-    private IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
+    private final ImagePositionParam center = new ImagePositionParam("Center");
+    private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
+    private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
 
     private SwirlFilter filter;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -126,7 +126,7 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Undoa
     }
 
     public void showHistory() {
-        final JList<UndoableEdit> historyList = new JList<>(this);
+        JList<UndoableEdit> historyList = new JList<>(this);
         historyList.setSelectionModel(selectionModel);
 
         if (historyDialog == null) {

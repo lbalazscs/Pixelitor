@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,10 +31,7 @@ import java.awt.image.BufferedImage;
  * They are enabled by the Build setting or by the assertions
  */
 public final class ConsistencyChecks {
-    /**
-     * Utility class with static methods
-     */
-    private ConsistencyChecks() {
+    private ConsistencyChecks() { // do not instantiate
     }
 
     public static void checkAll() {
@@ -123,10 +120,12 @@ public final class ConsistencyChecks {
         if (action == null) {
             return true;
         }
-        Composition comp = ImageComponents.getActiveComp().get();
-        if (comp == null) {
+
+        Optional<Composition> optComp = ImageComponents.getActiveComp();
+        if (!optComp.isPresent()) {
             return true;
         }
+        Composition comp = optComp.get();
 
         boolean enabled = action.isEnabled();
 

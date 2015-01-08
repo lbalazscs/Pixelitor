@@ -1,3 +1,20 @@
+/*
+ * Copyright 2015 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.DitherFilter;
@@ -13,9 +30,9 @@ import java.awt.image.BufferedImage;
  * Dither based on the JHLabs DitherFilter
  */
 public class JHDither extends FilterWithParametrizedGUI {
-    private RangeParam levelsParam = new RangeParam("Levels", 2, 100, 8);
-    private BooleanParam colorDitherParam = new BooleanParam("Color Dither", true);
-    private IntChoiceParam matrixMethod = new IntChoiceParam("Matrix Type", new IntChoiceParam.Value[] {
+    private final RangeParam levels = new RangeParam("Levels", 2, 100, 8);
+    private final BooleanParam colorDither = new BooleanParam("Color Dither", true);
+    private final IntChoiceParam matrixMethod = new IntChoiceParam("Matrix Type", new IntChoiceParam.Value[]{
             new IntChoiceParam.Value("2x2", DitherFilter.MATRIX_2x2),
             new IntChoiceParam.Value("4x4 Square", DitherFilter.MATRIX_4x4_SQUARE),
             new IntChoiceParam.Value("4x4 Ordered", DitherFilter.MATRIX_4x4_ORDERED),
@@ -33,8 +50,8 @@ public class JHDither extends FilterWithParametrizedGUI {
     public JHDither() {
         super("Dither", true, false);
         setParamSet(new ParamSet(
-                levelsParam,
-                colorDitherParam,
+                levels,
+                colorDither,
                 matrixMethod
         ));
     }
@@ -45,11 +62,8 @@ public class JHDither extends FilterWithParametrizedGUI {
             filter = new DitherFilter();
         }
 
-        int levels =  levelsParam.getValue();
-        boolean colorDither = colorDitherParam.getValue();
-
-        filter.setLevels(levels);
-        filter.setColorDither(colorDither);
+        filter.setLevels(levels.getValue());
+        filter.setColorDither(colorDither.getValue());
         filter.setMatrixMethod(matrixMethod.getValue());
 
         filter.initialize();

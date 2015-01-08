@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters;
 
@@ -30,14 +30,14 @@ import java.awt.image.BufferedImage;
  * Little Planet
  */
 public class LittlePlanet extends FilterWithParametrizedGUI {
-    private ImagePositionParam centerParam = new ImagePositionParam("Center");
-    private AngleParam rotateResultParam = new AngleParam("Rotate Result", - Math.PI / 2);
-    private RangeParam zoomParam = new RangeParam("Zoom (%)", 1, 300, 100);
-    private RangeParam innerZoomParam = new RangeParam("Inner Zoom (%)", 30, 180, 100);
-    private BooleanParam invertParam = new BooleanParam("Invert", false);
+    private final ImagePositionParam center = new ImagePositionParam("Center");
+    private final AngleParam rotateResult = new AngleParam("Rotate Result", -Math.PI / 2);
+    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 300, 100);
+    private final RangeParam innerZoom = new RangeParam("Inner Zoom (%)", 30, 180, 100);
+    private final BooleanParam invert = new BooleanParam("Invert", false);
 
-    private IntChoiceParam edgeActionParam =  IntChoiceParam.getEdgeActionChoices(true);
-    private IntChoiceParam interpolationParam = IntChoiceParam.getInterpolationChoices();
+    private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices(true);
+    private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
 
 
     private LittlePlanetFilter filter;
@@ -45,13 +45,13 @@ public class LittlePlanet extends FilterWithParametrizedGUI {
     public LittlePlanet() {
         super("Little Planet", true, false);
         setParamSet(new ParamSet(
-                rotateResultParam,
-                zoomParam,
-                innerZoomParam,
-                centerParam,
-                invertParam,
-                edgeActionParam,
-                interpolationParam
+                rotateResult,
+                zoom,
+                innerZoom,
+                center,
+                invert,
+                edgeAction,
+                interpolation
         ));
     }
 
@@ -61,16 +61,16 @@ public class LittlePlanet extends FilterWithParametrizedGUI {
             filter = new LittlePlanetFilter();
         }
 
-        filter.setZoom(zoomParam.getValueAsPercentage());
-        filter.setInnerZoom(innerZoomParam.getValueAsPercentage());
-        filter.setRotateResult(rotateResultParam.getValueInIntuitiveRadians());
-        filter.setInverted(invertParam.getValue());
+        filter.setZoom(zoom.getValueAsPercentage());
+        filter.setInnerZoom(innerZoom.getValueAsPercentage());
+        filter.setRotateResult(rotateResult.getValueInIntuitiveRadians());
+        filter.setInverted(invert.getValue());
 
-        filter.setCenterX(centerParam.getRelativeX());
-        filter.setCenterY(centerParam.getRelativeY());
+        filter.setCenterX(center.getRelativeX());
+        filter.setCenterY(center.getRelativeY());
 
-        filter.setEdgeAction(edgeActionParam.getValue());
-        filter.setInterpolation(interpolationParam.getValue());
+        filter.setEdgeAction(edgeAction.getValue());
+        filter.setInterpolation(interpolation.getValue());
 
         dest = filter.filter(src, dest);
         return dest;

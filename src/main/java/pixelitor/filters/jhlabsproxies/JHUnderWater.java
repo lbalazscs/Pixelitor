@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters.jhlabsproxies;
 
@@ -30,14 +30,14 @@ import java.awt.image.BufferedImage;
  * UnderWater filter based on JHLabs SwimFilter
  */
 public class JHUnderWater extends FilterWithParametrizedGUI {
-    private RangeParam amount = new RangeParam("Amount", 0, 100, 50);
-    private RangeParam scale = new RangeParam("Scale", 1, 300, 150);
-    private RangeParam stretch = new RangeParam("Stretch", 1, 50, 1);
+    private final RangeParam amount = new RangeParam("Amount", 0, 100, 50);
+    private final RangeParam scale = new RangeParam("Scale", 1, 300, 150);
+    private final RangeParam stretch = new RangeParam("Stretch", 1, 50, 1);
 //    private RangeParam turbulenceParam = new RangeParam("Turbulence", 0, 100, 0);
-private RangeParam time = new RangeParam("Time", 100, 1000, 100);
-    private AngleParam angle = new AngleParam("Angle", 0);
-    private IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices(true);
-    private IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
+private final RangeParam time = new RangeParam("Time", 100, 1000, 100);
+    private final AngleParam angle = new AngleParam("Angle", 0);
+    private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices(true);
+    private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
 
     private SwimFilter filter;
 

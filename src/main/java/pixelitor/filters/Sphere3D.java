@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters;
 
@@ -29,22 +29,22 @@ import java.awt.image.BufferedImage;
  * Sphere3D based on Sphere3DFilter
  */
 public class Sphere3D extends FilterWithParametrizedGUI {
-    private RangeParam alphaParam = new RangeParam("alpha", 0, 100, 50);
-    private RangeParam betaParam = new RangeParam("beta", 0, 100, 50);
-    private RangeParam gammaParam = new RangeParam("gamma", 0, 100, 50);
-    private ImagePositionParam centerParam = new ImagePositionParam("Center");
-    private IntChoiceParam interpolationParam = IntChoiceParam.getInterpolationChoices();
+    private final RangeParam alpha = new RangeParam("alpha", 0, 100, 50);
+    private final RangeParam beta = new RangeParam("beta", 0, 100, 50);
+    private final RangeParam gamma = new RangeParam("gamma", 0, 100, 50);
+    private final ImagePositionParam center = new ImagePositionParam("Center");
+    private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
 
     private Sphere3DFilter filter;
 
     public Sphere3D() {
         super("Sphere3D", true, false);
         setParamSet(new ParamSet(
-                centerParam,
-                alphaParam,
-                betaParam,
-                gammaParam,
-                interpolationParam
+                center,
+                alpha,
+                beta,
+                gamma,
+                interpolation
         ));
     }
 
@@ -54,13 +54,13 @@ public class Sphere3D extends FilterWithParametrizedGUI {
             filter = new Sphere3DFilter();
         }
 
-        filter.setAlpha(alphaParam.getValueAsPercentage());
-        filter.setBeta(betaParam.getValueAsPercentage());
-        filter.setGamma(gammaParam.getValueAsPercentage());
+        filter.setAlpha(alpha.getValueAsPercentage());
+        filter.setBeta(beta.getValueAsPercentage());
+        filter.setGamma(gamma.getValueAsPercentage());
 
-        filter.setCenterX(centerParam.getRelativeX());
-        filter.setCenterY(centerParam.getRelativeY());
-        filter.setInterpolation(interpolationParam.getValue());
+        filter.setCenterX(center.getRelativeX());
+        filter.setCenterY(center.getRelativeY());
+        filter.setInterpolation(interpolation.getValue());
         filter.setEdgeAction(TransformFilter.TRANSPARENT);
 
         dest = filter.filter(src, dest);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -111,7 +111,7 @@ public class OpTests {
     public static void runAllOpsOnCurrentLayer() {
         ParametrizedAdjustPanel.setResetParams(false);
         try {
-            final ProgressMonitor progressMonitor = new ProgressMonitor(PixelitorWindow.getInstance(),
+            ProgressMonitor progressMonitor = new ProgressMonitor(PixelitorWindow.getInstance(),
                     "Run All Operations on Current Layer",
                     "", 0, 100);
 
@@ -146,7 +146,7 @@ public class OpTests {
         Runnable task = new Runnable() {
             @Override
             public void run() {
-                final long startTime = System.nanoTime();
+                long startTime = System.nanoTime();
                 int times = 100;
                 for (int i = 0; i < times; i++) {
                     comp.getCompositeImage();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,7 +48,7 @@ public abstract class EffectConfiguratorPanel extends JPanel {
 
     protected GridBagHelper gridBagHelper;
 
-    EffectConfiguratorPanel(String effectName, boolean defaultSelected, final Color defaultColor) {
+    EffectConfiguratorPanel(String effectName, boolean defaultSelected, Color defaultColor) {
         setBorder(BorderFactory.createTitledBorder('"' + effectName + "\" Configuration"));
 
         opacityRange = new RangeParam("Width:", 1, 100, 100);

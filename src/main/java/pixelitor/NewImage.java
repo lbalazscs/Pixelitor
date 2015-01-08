@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -66,7 +66,9 @@ public final class NewImage {
     }
 
     private static void showInDialog() {
+        assert SwingUtilities.isEventDispatchThread();
         if(lastNew == null) {
+            //noinspection NonThreadSafeLazyInitialization
             lastNew = AppPreferences.loadNewImageSize();
         }
         final NewImagePanel p = new NewImagePanel(lastNew.width, lastNew.height);

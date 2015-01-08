@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters.gui;
 
@@ -29,10 +29,10 @@ import java.awt.event.ActionListener;
  */
 public class IntChoiceSelector extends JPanel implements ActionListener {
     private final IntChoiceParam model;
-    private JComboBox<IntChoiceParam.Value> comboBox;
+    private final JComboBox<IntChoiceParam.Value> comboBox;
     private final DefaultButton defaultButton;
 
-    public IntChoiceSelector(final IntChoiceParam model) {
+    public IntChoiceSelector(IntChoiceParam model) {
         this.model = model;
         setLayout(new FlowLayout(FlowLayout.LEFT));
 

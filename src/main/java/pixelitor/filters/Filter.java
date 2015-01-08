@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -137,7 +137,7 @@ public abstract class Filter extends AbstractAction implements Comparable<Filter
 //                    comp.changeActiveLayerImage(dest, changeReason, getName());
     }
 
-    public void execute(final ChangeReason changeReason) {
+    public void execute(ChangeReason changeReason) {
         // only filters without a GUI call this on the EDT
 
         Utils.executeFilterWithBusyCursor(this, changeReason, PixelitorWindow.getInstance());

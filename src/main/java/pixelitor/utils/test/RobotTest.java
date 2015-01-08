@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -102,7 +102,7 @@ public class RobotTest {
 
     private static boolean continueRunning = true;
 
-    private static WeightedCaller weightedCaller = new WeightedCaller();
+    private static final WeightedCaller weightedCaller = new WeightedCaller();
     public static final boolean PRINT_MEMORY = false;
     private static KeyStroke stopKeyStroke;
 
@@ -146,7 +146,7 @@ public class RobotTest {
 
         System.out.println("RobotTest.runRobot CALLED at " + new Date() + ", press the 'u' key to stop it");
 
-        final Robot r = new Robot();
+        Robot r = new Robot();
         setupWeightedCaller(r);
 
         Point p = generateRandomPoint();
@@ -835,8 +835,8 @@ public class RobotTest {
             @Override
             public void run() {
                 Point randomPoint = generateRandomPoint();
-                final int randomX = randomPoint.x;
-                final int randomY = randomPoint.y;
+                int randomX = randomPoint.x;
+                int randomY = randomPoint.y;
                 move(r, randomX, randomY);
             }
         });
@@ -846,8 +846,8 @@ public class RobotTest {
             @Override
             public void run() {
                 Point randomPoint = generateRandomPoint();
-                final int randomX = randomPoint.x;
-                final int randomY = randomPoint.y;
+                int randomX = randomPoint.x;
+                int randomY = randomPoint.y;
                 drag(r, randomX, randomY);
             }
         });

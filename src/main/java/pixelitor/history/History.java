@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -183,7 +183,11 @@ public final class History {
     }
 
     public static boolean canFade() {
-        Composition comp = ImageComponents.getActiveComp().get();
+        Optional<Composition> optComp = ImageComponents.getActiveComp();
+        if (!optComp.isPresent()) {
+            return false;
+        }
+        Composition comp = optComp.get();
         return (getPreviousEditForFade(comp).isPresent());
     }
 

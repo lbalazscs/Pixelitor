@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,7 @@ import java.beans.PropertyChangeListener;
 public class TweenWizard {
     private OKCancelDialog dialog = null;
     private TweenWizardPage wizardPage = TweenWizardPage.SELECT_FILTER;
-    private TweenAnimation animation = new TweenAnimation();
+    private final TweenAnimation animation = new TweenAnimation();
 
     /**
      * Show the wizard in a dialog
@@ -51,7 +51,7 @@ public class TweenWizard {
         }
     }
 
-    private void showDialog(final JFrame dialogParent) {
+    private void showDialog(JFrame dialogParent) {
         dialog = new OKCancelDialog(
                 wizardPage.getPanel(TweenWizard.this),
                 dialogParent,

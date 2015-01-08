@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters.jhlabsproxies;
 
@@ -36,7 +36,7 @@ public class JHKaleidoscope extends FilterWithParametrizedGUI {
     private final RangeParam sides = new RangeParam("Sides", 0, 10, 3);
 //    private final RangeParam radius = new RangeParam("Radius", 0, 999, 0);
 
-    private RangeParam zoomParam = new RangeParam("Zoom (%)", 1, 500, 100);
+    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 500, 100);
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices(true);
     private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
 
@@ -49,7 +49,7 @@ public class JHKaleidoscope extends FilterWithParametrizedGUI {
                 angle,
                 sides,
 //                radius,
-                zoomParam,
+                zoom,
                 rotateResult,
                 edgeAction,
                 interpolation
@@ -69,7 +69,7 @@ public class JHKaleidoscope extends FilterWithParametrizedGUI {
         filter.setSides(sides.getValue());
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
-        filter.setZoom(zoomParam.getValueAsPercentage());
+        filter.setZoom(zoom.getValueAsPercentage());
 
         dest = filter.filter(src, dest);
         return dest;

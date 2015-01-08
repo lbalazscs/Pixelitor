@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import pixelitor.utils.OKCancelDialog;
 /**
  * A dialog for the filter adjustments
  */
-public final class AdjustDialog extends OKCancelDialog {
+public class AdjustDialog extends OKCancelDialog {
     private final Filter activeFilter;
 
     private AdjustDialog(AdjustPanel adjustPanel, Filter activeFilter) {
@@ -42,7 +42,6 @@ public final class AdjustDialog extends OKCancelDialog {
     @Override
     public void dialogAccepted() {
         Composition comp = ImageComponents.getActiveComp().get();
-//        comp.changeActiveLayerImage(null, ChangeReason.OP_WITH_PREVIEW_FINISHED, activeFilter.getName());
         comp.okPressedInDialog(activeFilter.getName());
         FilterUtils.setLastExecutedFilter(activeFilter);
 

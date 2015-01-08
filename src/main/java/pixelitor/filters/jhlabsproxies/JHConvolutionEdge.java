@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters.jhlabsproxies;
 
@@ -30,7 +30,7 @@ import java.awt.image.BufferedImage;
  */
 public class JHConvolutionEdge extends FilterWithParametrizedGUI {
 
-    private IntChoiceParam horizontalMethod = new IntChoiceParam("Horizontal Edges", new IntChoiceParam.Value[]{
+    private final IntChoiceParam horizontalMethod = new IntChoiceParam("Horizontal Edges", new IntChoiceParam.Value[]{
             new IntChoiceParam.Value("Sobel", METHOD_SOBEL),
             new IntChoiceParam.Value("Prewitt", METHOD_PREWITT),
             new IntChoiceParam.Value("Roberts", METHOD_ROBERTS),
@@ -38,7 +38,7 @@ public class JHConvolutionEdge extends FilterWithParametrizedGUI {
             new IntChoiceParam.Value("None", METHOD_NONE),
     });
 
-    private IntChoiceParam verticalMethod = new IntChoiceParam("Vertical Edges", new IntChoiceParam.Value[]{
+    private final IntChoiceParam verticalMethod = new IntChoiceParam("Vertical Edges", new IntChoiceParam.Value[]{
             new IntChoiceParam.Value("Sobel", METHOD_SOBEL),
             new IntChoiceParam.Value("Prewitt", METHOD_PREWITT),
             new IntChoiceParam.Value("Roberts", METHOD_ROBERTS),
@@ -46,7 +46,7 @@ public class JHConvolutionEdge extends FilterWithParametrizedGUI {
             new IntChoiceParam.Value("None", METHOD_NONE),
     });
 
-    private BooleanParam invertImage = new BooleanParam("Invert", false, true);
+    private final BooleanParam invertImage = new BooleanParam("Invert", false, true);
 
     private EdgeFilter filter;
     private static final int METHOD_SOBEL = 1;
@@ -92,7 +92,7 @@ public class JHConvolutionEdge extends FilterWithParametrizedGUI {
                 filter.setHEdgeMatrix(NONE_MATRIX);
                 break;
             default:
-                throw new IllegalStateException();
+                throw new IllegalStateException("horizontal = " + horizontal);
         }
 
         int vertical = verticalMethod.getValue();
@@ -113,7 +113,7 @@ public class JHConvolutionEdge extends FilterWithParametrizedGUI {
                 filter.setVEdgeMatrix(NONE_MATRIX);
                 break;
             default:
-                throw new IllegalStateException();
+                throw new IllegalStateException("vertical = " + vertical);
         }
 
         dest = filter.filter(src, dest);

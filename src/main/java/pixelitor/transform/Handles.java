@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,16 +32,16 @@ import java.util.List;
  * The eight handles of the TransformSupport
  */
 public class Handles {
-    private Handle upperLeft = new Handle(Cursor.NW_RESIZE_CURSOR);
-    private Handle upper = new Handle(Cursor.N_RESIZE_CURSOR);
-    private Handle upperRight = new Handle(Cursor.NE_RESIZE_CURSOR);
-    private Handle right = new Handle(Cursor.E_RESIZE_CURSOR);
-    private Handle left = new Handle(Cursor.W_RESIZE_CURSOR);
-    private Handle lowerLeft = new Handle(Cursor.SW_RESIZE_CURSOR);
-    private Handle lower = new Handle(Cursor.S_RESIZE_CURSOR);
-    private Handle lowerRight = new Handle(Cursor.SE_RESIZE_CURSOR);
+    private final Handle upperLeft = new Handle(Cursor.NW_RESIZE_CURSOR);
+    private final Handle upper = new Handle(Cursor.N_RESIZE_CURSOR);
+    private final Handle upperRight = new Handle(Cursor.NE_RESIZE_CURSOR);
+    private final Handle right = new Handle(Cursor.E_RESIZE_CURSOR);
+    private final Handle left = new Handle(Cursor.W_RESIZE_CURSOR);
+    private final Handle lowerLeft = new Handle(Cursor.SW_RESIZE_CURSOR);
+    private final Handle lower = new Handle(Cursor.S_RESIZE_CURSOR);
+    private final Handle lowerRight = new Handle(Cursor.SE_RESIZE_CURSOR);
 
-    private List<Handle> handles = Arrays.asList(upperLeft, upperRight, lowerRight, lowerLeft,
+    private final List<Handle> handles = Arrays.asList(upperLeft, upperRight, lowerRight, lowerLeft,
             right, upper, lower, left);
 
     public Handles(Rectangle compSpaceRectangle) {

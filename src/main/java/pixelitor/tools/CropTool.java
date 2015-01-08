@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,7 +56,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
 
     private Composite hideComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, maskOpacityParam.getValueAsPercentage());
 
-    private JButton cancelButton = new JButton("Cancel");
+    private final JButton cancelButton = new JButton("Cancel");
     private JButton cropButton;
 
     // The crop rectangle in image space.

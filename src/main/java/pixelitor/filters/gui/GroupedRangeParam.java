@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters.gui;
 
@@ -27,7 +27,7 @@ import java.awt.Rectangle;
  * Two or more range params that are grouped and can be linked.
  */
 public class GroupedRangeParam extends AbstractGUIParam implements RangeBasedOnImageSize {
-    private RangeParam[] rangeParams;
+    private final RangeParam[] rangeParams;
     private final JToggleButton.ToggleButtonModel checkBoxModel;
     private final boolean linkedByDefault;
     private boolean linkable = true; // whether a "Linked" checkbox appears
@@ -245,7 +245,7 @@ public class GroupedRangeParam extends AbstractGUIParam implements RangeBasedOnI
     }
 
     private static class GRState implements ParamState {
-        private double[] values;
+        private final double[] values;
 
         public GRState(double[] values) {
             this.values = values;

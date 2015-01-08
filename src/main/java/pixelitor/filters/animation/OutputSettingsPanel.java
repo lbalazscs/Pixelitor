@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,8 +40,8 @@ import java.io.File;
  * The settings for the tweening animation output
  */
 public class OutputSettingsPanel extends ValidatedForm implements TextFieldValidator {
-    private JTextField nrSecondsTF = new JTextField("2", 3);
-    private JTextField fpsTF = new JTextField("24", 3);
+    private final JTextField nrSecondsTF = new JTextField("2", 3);
+    private final JTextField fpsTF = new JTextField("24", 3);
     private int nrFrames;
     private final JLabel nrFramesLabel;
     private double fps;

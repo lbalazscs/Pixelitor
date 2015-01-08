@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters;
 
@@ -28,8 +28,8 @@ import java.awt.image.BufferedImage;
  *
  */
 public class Transition2D extends FilterWithParametrizedGUI {
-    private RangeParam progressParam = new RangeParam("Progress (%)", 0, 100, 0);
-    private IntChoiceParam type = new IntChoiceParam("Type", new IntChoiceParam.Value[]{
+    private final RangeParam progress = new RangeParam("Progress (%)", 0, 100, 0);
+    private final IntChoiceParam type = new IntChoiceParam("Type", new IntChoiceParam.Value[]{
             new IntChoiceParam.Value("Box In", BricTransitionFilter.BOX_IN),
             new IntChoiceParam.Value("Box Out", BricTransitionFilter.BOX_OUT),
             new IntChoiceParam.Value("Bars (Horizontal)", BricTransitionFilter.BARS_HORIZONTAL),
@@ -71,7 +71,7 @@ public class Transition2D extends FilterWithParametrizedGUI {
 
     public Transition2D() {
         super("2D Transitions", true, false);
-        setParamSet(new ParamSet(type, progressParam));
+        setParamSet(new ParamSet(type, progress));
     }
 
     @Override
@@ -81,7 +81,7 @@ public class Transition2D extends FilterWithParametrizedGUI {
         }
 
         filter.setType(type.getValue());
-        filter.setProgress(progressParam.getValueAsPercentage());
+        filter.setProgress(progress.getValueAsPercentage());
 
         dest = filter.filter(src, dest);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,7 +43,7 @@ public class AddNoise extends FilterWithParametrizedGUI {
             new IntChoiceParam.Value("Smooth Coverage Animation", METHOD_COVERAGE_ANIM),
     });
 
-    private float[] tmpHSV = new float[3];
+    private final float[] tmpHSV = new float[3];
 
     public AddNoise() {
         super("Add Noise", true, false);

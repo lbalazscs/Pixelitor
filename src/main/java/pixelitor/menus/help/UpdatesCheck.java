@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -79,11 +79,7 @@ public class UpdatesCheck {
             return false; // we always have at least Java 7, otherwise this code would not run
         }
         int currentMainJavaVersion = getCurrentMainJavaVersion();
-        if(Integer.parseInt(requiredJavaVersion) > currentMainJavaVersion) {
-            return true;
-        } else {
-            return  false;
-        }
+        return Integer.parseInt(requiredJavaVersion) > currentMainJavaVersion;
     }
 
     private static int getCurrentMainJavaVersion() {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 class RenderFramesTask extends SwingWorker<Void, Void> {
-    private TweenAnimation animation;
+    private final TweenAnimation animation;
 
     public RenderFramesTask(TweenAnimation tweenAnimation) {
         this.animation = tweenAnimation;

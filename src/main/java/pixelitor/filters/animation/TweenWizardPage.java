@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,7 +44,7 @@ public enum TweenWizardPage {
         }
 
         @Override
-        JComponent getPanel(final TweenWizard wizard) {
+        JComponent getPanel(TweenWizard wizard) {
             JPanel p = new JPanel(new FlowLayout());
             p.add(new JLabel("Select Filter:"));
             filtersCB = new JComboBox<>(FilterUtils.getAnimationFiltersSorted());

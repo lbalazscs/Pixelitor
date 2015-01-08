@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -120,11 +120,11 @@ public class Automate {
     }
 
     private static void processFile(File file,
-                                    final CompositionAction action,
+                                    CompositionAction action,
                                     File lastSaveDir,
                                     boolean closeImagesAfterProcessing) {
         OpenSaveManager.openFile(file);
-        final Composition comp = ImageComponents.getActiveComp().get();
+        Composition comp = ImageComponents.getActiveComp().get();
 
         InternalImageFrame frame = comp.getIC().getInternalFrame();
         frame.paintImmediately(frame.getBounds());

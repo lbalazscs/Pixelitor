@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,7 @@ public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
     private final RangeParam distanceParam;
     private final RangeParam spreadParam;
 
-    DropShadowEffectConfiguratorPanel(boolean defaultSelected, final Color defaultColor) {
+    DropShadowEffectConfiguratorPanel(boolean defaultSelected, Color defaultColor) {
         super("Drop Shadow", defaultSelected, defaultColor);
 
         distanceParam = new RangeParam("Distance:", 1, 100, 10);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.layers;
 
@@ -26,28 +26,12 @@ import java.awt.event.FocusEvent;
  * A JTextField for layer names that becomes editable if double-clicked
  */
 public class LayerNameEditor extends JTextField {
-    private LayerButton layerButton;
+    private final LayerButton layerButton;
 
     public LayerNameEditor(LayerButton layerButton, final Layer layer) {
         super(layer.getName());
         this.layerButton = layerButton;
         disableEditing();
-
-//        addMouseListener(new MouseAdapter() {
-//            @Override
-//            public void mouseClicked(MouseEvent e) {
-//                if (e.getClickCount() == 2) {   // enable if double-clicked
-//                    enableEditing();
-//                } else {                        // a simple click selects the layer
-//                    requestFocus();
-//                    Container container = getParent();
-//                    if (container != null) {
-//                        LayerButton b = (LayerButton) container;
-//                        b.setSelected(true);
-//                    }
-//                }
-//            }
-//        });
 
         addFocusListener(new FocusAdapter() {
             @Override

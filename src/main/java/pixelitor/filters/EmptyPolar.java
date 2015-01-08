@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters;
 
@@ -29,13 +29,13 @@ import java.awt.image.BufferedImage;
  *
  */
 public class EmptyPolar extends FilterWithParametrizedGUI {
-    private ImagePositionParam centerParam = new ImagePositionParam("Center");
+    private final ImagePositionParam centerParam = new ImagePositionParam("Center");
 
-    private RangeParam zoomParam = new RangeParam("Zoom (%)", 1, 500, 100);
-    private AngleParam rotateResultParam = new AngleParam("Rotate Result", 0);
+    private final RangeParam zoomParam = new RangeParam("Zoom (%)", 1, 500, 100);
+    private final AngleParam rotateResultParam = new AngleParam("Rotate Result", 0);
 
-    private IntChoiceParam edgeActionParam = IntChoiceParam.getEdgeActionChoices();
-    private IntChoiceParam interpolationParam = IntChoiceParam.getInterpolationChoices();
+    private final IntChoiceParam edgeActionParam = IntChoiceParam.getEdgeActionChoices();
+    private final IntChoiceParam interpolationParam = IntChoiceParam.getInterpolationChoices();
 
     private EmptyPolarFilter filter;
 

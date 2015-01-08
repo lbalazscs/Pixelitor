@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters;
 
@@ -29,17 +29,17 @@ import java.awt.image.BufferedImage;
  * Radial waves in a polar coordinate system
  */
 public class RadialWaves extends FilterWithParametrizedGUI {
-    private RangeParam angularDivision = new RangeParam("Angular Division", 1, 100, 10);
-    private RangeParam radialAmplitude = new RangeParam("Radial Amplitude", 0, 100, 20);
+    private final RangeParam angularDivision = new RangeParam("Angular Division", 1, 100, 10);
+    private final RangeParam radialAmplitude = new RangeParam("Radial Amplitude", 0, 100, 20);
 
-    private RangeParam phase = new RangeParam("Phase (time)", 0, 360, 0);
+    private final RangeParam phase = new RangeParam("Phase (time)", 0, 360, 0);
 
-    private ImagePositionParam center = new ImagePositionParam("Center");
-    private RangeParam zoom = new RangeParam("Zoom (%)", 1, 500, 100);
+    private final ImagePositionParam center = new ImagePositionParam("Center");
+    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 500, 100);
     private final IntChoiceParam waveType = IntChoiceParam.getWaveTypeChoices();
 
-    private IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
-    private IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
+    private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
+    private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
 
     private RadialWavesFilter filter;
 

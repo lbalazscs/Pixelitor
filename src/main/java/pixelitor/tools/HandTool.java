@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ import java.awt.event.MouseEvent;
  * The Hand Tool
  */
 public class HandTool extends Tool {
-    private HandToolSupport handToolSupport = new HandToolSupport();
+    private final HandToolSupport handToolSupport = new HandToolSupport();
     
     HandTool() {
         super('h', "Hand", "hand_tool_icon.gif", "drag to move the view (if scrollbars are present)",

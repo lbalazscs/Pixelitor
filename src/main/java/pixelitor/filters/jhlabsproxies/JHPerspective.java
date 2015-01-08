@@ -1,3 +1,20 @@
+/*
+ * Copyright 2015 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.PerspectiveFilter;
@@ -14,40 +31,40 @@ import java.awt.image.BufferedImage;
  * Perspective based on the JHLabs PerspectiveFilter
  */
 public class JHPerspective extends FilterWithParametrizedGUI {
-    private ImagePositionParam northWestParam = new ImagePositionParam("North West", 0.05f, 0.05f);
-    private ImagePositionParam northEastParam = new ImagePositionParam("North East", 0.95f, 0.05f);
-    private ImagePositionParam southWestParam = new ImagePositionParam("South West", 0.05f, 0.95f);
-    private ImagePositionParam southEastParam = new ImagePositionParam("South East", 0.95f, 0.95f);
+    private final ImagePositionParam northWest = new ImagePositionParam("North West", 0.05f, 0.05f);
+    private final ImagePositionParam northEast = new ImagePositionParam("North East", 0.95f, 0.05f);
+    private final ImagePositionParam southWest = new ImagePositionParam("South West", 0.05f, 0.95f);
+    private final ImagePositionParam southEast = new ImagePositionParam("South East", 0.95f, 0.95f);
 
-    private IntChoiceParam edgeActionParam =  IntChoiceParam.getEdgeActionChoices();
-    private IntChoiceParam interpolationParam = IntChoiceParam.getInterpolationChoices();
+    private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
+    private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
 
     private PerspectiveFilter filter;
 
     public JHPerspective() {
         super("Perspective", true, false);
         setParamSet(new ParamSet(
-                northWestParam, northEastParam, southWestParam, southEastParam,
-                edgeActionParam, interpolationParam
+                northWest, northEast, southWest, southEast,
+                edgeAction, interpolation
         ));
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        float northWestX = northWestParam.getRelativeX();
-        float northWestY = northWestParam.getRelativeY();
-        float northEastX = northEastParam.getRelativeX();
-        float northEastY = northEastParam.getRelativeY();
-        float southWestX = southWestParam.getRelativeX();
-        float southWestY = southWestParam.getRelativeY();
-        float southEastX = southEastParam.getRelativeX();
-        float southEastY = southEastParam.getRelativeY();
+        float northWestX = northWest.getRelativeX();
+        float northWestY = northWest.getRelativeY();
+        float northEastX = northEast.getRelativeX();
+        float northEastY = northEast.getRelativeY();
+        float southWestX = southWest.getRelativeX();
+        float southWestY = southWest.getRelativeY();
+        float southEastX = southEast.getRelativeX();
+        float southEastY = southEast.getRelativeY();
 
         filter = new PerspectiveFilter(northWestX, northWestY, northEastX, northEastY,
                 southEastX, southEastY, southWestX, southWestY);
 
-        filter.setEdgeAction(edgeActionParam.getValue());
-        filter.setInterpolation(interpolationParam.getValue());
+        filter.setEdgeAction(edgeAction.getValue());
+        filter.setInterpolation(interpolation.getValue());
 
         dest = filter.filter(src, dest);
         return dest;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class RandomFilterAdjustPanel extends AdjustPanel {
-    private JPanel realSettingsPanel;
+    private final JPanel realSettingsPanel;
     private JPanel lastFilterPanel;
     private Filter lastFilter;
 

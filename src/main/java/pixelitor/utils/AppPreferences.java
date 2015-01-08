@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -226,7 +226,7 @@ public final class AppPreferences {
         int retVal = mainUserNode.getInt(UNDO_LEVELS_KEY, -1);
         if (retVal == -1) {
 //            return getDefaultUndoLevels();
-            return Math.min(3, getDefaultUndoLevels());
+            return Math.min(5, getDefaultUndoLevels());
         }
         return retVal;
     }

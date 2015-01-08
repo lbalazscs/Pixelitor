@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import java.util.Collection;
 /**
  * Static methods to support global application logic
  */
-public final class AppLogic {
+public class AppLogic {
     private static final Collection<LayerChangeListener> layerChangeListeners = new ArrayList<>();
 
     private AppLogic() {
@@ -69,7 +69,7 @@ public final class AppLogic {
     }
 
     public static void showDebugAppDialog() {
-        final AppNode node = new AppNode();
+        AppNode node = new AppNode();
         String title = "Pixelitor Debug";
 
         JTree tree = new JTree(node);

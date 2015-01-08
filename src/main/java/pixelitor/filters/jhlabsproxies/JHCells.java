@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters.jhlabsproxies;
 
@@ -41,27 +41,27 @@ public class JHCells extends FilterWithParametrizedGUI {
     private static final int TYPE_GRID = 2;
     private static final int TYPE_STRANGE = 3;
 
-    private GradientParam gradient = new GradientParam("Colors", Color.BLACK, Color.WHITE);
+    private final GradientParam gradient = new GradientParam("Colors", Color.BLACK, Color.WHITE);
 
-    private RangeParam scale = new RangeParam("Zoom", 1, 500, 100);
-    private RangeParam stretch = new RangeParam("Stretch (%)", 100, 999, 100);
+    private final RangeParam scale = new RangeParam("Zoom", 1, 500, 100);
+    private final RangeParam stretch = new RangeParam("Stretch (%)", 100, 999, 100);
 //    private RangeParam f1Param = new RangeParam("F1", -100, 100, -100);
 //    private RangeParam f2Param = new RangeParam("F2", -100, 100, -100);
 //    private RangeParam f3Param = new RangeParam("F3", -100, 100, 0);
 
-    private RangeParam gridRandomness = new RangeParam("Grid Randomness", 1, 100, 1);
-    private IntChoiceParam gridType = IntChoiceParam.getGridTypeChoices("Grid Type", gridRandomness);
+    private final RangeParam gridRandomness = new RangeParam("Grid Randomness", 1, 100, 1);
+    private final IntChoiceParam gridType = IntChoiceParam.getGridTypeChoices("Grid Type", gridRandomness);
 
-    private IntChoiceParam type = new IntChoiceParam("Type", new IntChoiceParam.Value[]{
+    private final IntChoiceParam type = new IntChoiceParam("Type", new IntChoiceParam.Value[]{
 //            new IntChoiceParam.Value("Free", 0),
             new IntChoiceParam.Value("Cells", TYPE_CELLS),
             new IntChoiceParam.Value("Grid", TYPE_GRID),
             new IntChoiceParam.Value("Grid 2", TYPE_STRANGE),
     });
-    private RangeParam refineType = new RangeParam("Refine Type", 0, 100, 0);
-    private RangeParam darkLightBalance = new RangeParam("Dark/Light Balance", -20, 20, 0);
+    private final RangeParam refineType = new RangeParam("Refine Type", 0, 100, 0);
+    private final RangeParam darkLightBalance = new RangeParam("Dark/Light Balance", -20, 20, 0);
 
-    private AngleParam angle = new AngleParam("Angle", 0);
+    private final AngleParam angle = new AngleParam("Angle", 0);
 
     private final ActionParam reseedAction = new ReseedNoiseActionParam(new ActionListener() {
         @Override
@@ -120,7 +120,7 @@ public class JHCells extends FilterWithParametrizedGUI {
                 f3 = 0.15f + tune / 2;
                 break;
             default:
-                throw new IllegalStateException();
+                throw new IllegalStateException("type.getValue() = " + type.getValue());
         }
 
         float bw = darkLightBalance.getValueAsPercentage();

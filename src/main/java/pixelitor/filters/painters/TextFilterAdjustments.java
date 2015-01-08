@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -54,7 +54,7 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
     private JCheckBox strikeThroughCB;
 //    private JCheckBox kerningCB;
 
-    private ColorParam colorParam = new ColorParam("Color", Color.BLACK, true, false);
+    private final ColorParam color = new ColorParam("Color", Color.BLACK, true, false);
     private ColorSelector colorSelector;
 
     private EffectsPanel effectsPanel;
@@ -116,9 +116,9 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
         gridBagHelper.addLastControl(textTF);
 
         gridBagHelper.addLabel("Color", 0, 1);
-        colorSelector = new ColorSelector(colorParam);
+        colorSelector = new ColorSelector(color);
         gridBagHelper.addLastControl(colorSelector);
-        colorParam.setAdjustmentListener(this);
+        color.setAdjustmentListener(this);
 
         gridBagHelper.addLabel("Vertical Alignment", 0, 2);
         verticalAlignmentCombo = new JComboBox(AbstractLayoutPainter.VerticalAlignment.values());
@@ -230,7 +230,7 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
 
         textFilter.setVerticalAlignment((AbstractLayoutPainter.VerticalAlignment) verticalAlignmentCombo.getSelectedItem());
         textFilter.setHorizontalAlignment((AbstractLayoutPainter.HorizontalAlignment) horizontalAlignmentCombo.getSelectedItem());
-        textFilter.setColor(colorParam.getColor());
+        textFilter.setColor(color.getColor());
 
         super.executeFilterPreview();
     }

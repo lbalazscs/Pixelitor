@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -53,7 +53,7 @@ import java.beans.PropertyVetoException;
  */
 public class ImageComponent extends JComponent implements MouseListener, MouseMotionListener, ImageDisplay {
     private double viewScale = 1.0f;
-    private Canvas canvas;
+    private final Canvas canvas;
     private ZoomLevel zoomLevel = ZoomLevel.Z100;
 
     private InternalImageFrame internalFrame = null;
@@ -61,7 +61,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     private static final Color BG_GRAY = new Color(200, 200, 200);
     private static final CheckerboardPainter checkerBoardPainter = new CheckerboardPainter(BG_GRAY, Color.WHITE);
 
-    private LayersPanel layersPanel;
+    private final LayersPanel layersPanel;
 
     private final Composition comp;
 
@@ -79,12 +79,14 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         this.canvas = comp.getCanvas();
         comp.setImageComponent(this);
 
-        init(canvas.getWidth(), canvas.getHeight());
+        setupFitScreenZoomSize(canvas.getWidth(), canvas.getHeight(), false);
+
+        layersPanel = new LayersPanel();
+
+        addListeners();
     }
 
-    private void init(int width, int height) {
-        setupFitScreenZoomSize(width, height, false);
-
+    private void addListeners() {
         addMouseListener(this);
         addMouseMotionListener(this);
 
@@ -102,8 +104,6 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
                 }
             }
         });
-
-        layersPanel = new LayersPanel();
 
         // make sure that the image is drawn at the middle
         addComponentListener(new ComponentAdapter() {

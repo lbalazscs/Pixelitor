@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters;
 
@@ -31,20 +31,20 @@ import java.awt.image.BufferedImage;
  */
 public class PolarTiles extends FilterWithParametrizedGUI {
 
-    private ImagePositionParam center = new ImagePositionParam("Center");
+    private final ImagePositionParam center = new ImagePositionParam("Center");
 
-    private RangeParam numAngDivisions = new RangeParam("Number of Angular Divisions", 0, 100, 7);
-    private RangeParam numRadDivisions = new RangeParam("Number of Radial Divisions", 0, 50, 7);
-    private RangeParam rotateEffect = new RangeParam("Rotate Effect", 0, 100, 0);
+    private final RangeParam numAngDivisions = new RangeParam("Number of Angular Divisions", 0, 100, 7);
+    private final RangeParam numRadDivisions = new RangeParam("Number of Radial Divisions", 0, 50, 7);
+    private final RangeParam rotateEffect = new RangeParam("Rotate Effect", 0, 100, 0);
 
-    private RangeParam randomness = new RangeParam("Randomness", 0, 100, 0);
-    private RangeParam curvature = new RangeParam("Curvature", 0, 20, 4);
+    private final RangeParam randomness = new RangeParam("Randomness", 0, 100, 0);
+    private final RangeParam curvature = new RangeParam("Curvature", 0, 20, 4);
 
-    private RangeParam zoom = new RangeParam("Zoom (%)", 1, 500, 100);
-    private AngleParam rotateImage = new AngleParam("Rotate Image", 0);
+    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 500, 100);
+    private final AngleParam rotateImage = new AngleParam("Rotate Image", 0);
 
-    private IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices(true);
-    private IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
+    private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices(true);
+    private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
 
     private PolarTilesFilter filter;
 

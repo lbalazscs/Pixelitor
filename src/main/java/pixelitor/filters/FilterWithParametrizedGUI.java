@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters;
 
@@ -37,8 +37,8 @@ public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
     private BooleanParam showOriginalParam = null;
     private BooleanParam showAffectedAreaParam = null;
     private ShowOriginalHelper showOriginalHelper;
-    private boolean hasShowOriginal;
-    private boolean hasAffectedAreaShapeParam;
+    private final boolean hasShowOriginal;
+    private final boolean hasAffectedAreaShapeParam;
     private Shape[] affectedAreaShapes;
 
     protected FilterWithParametrizedGUI(String name, boolean addShowOriginal, boolean hasAffectedAreaShape) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ public class NeonBorderEffectConfiguratorPanel extends SimpleEffectConfiguratorP
     private Color innerColor;
     private final ColorSwatch innerColorSwatch;
 
-    NeonBorderEffectConfiguratorPanel(boolean defaultSelected, final Color defaultColor, Color innerColorParam, int defaultWidth) {
+    NeonBorderEffectConfiguratorPanel(boolean defaultSelected, Color defaultColor, Color innerColorParam, int defaultWidth) {
         super("Neon Border", defaultSelected, defaultColor, defaultWidth);
 
         this.innerColor = innerColorParam;

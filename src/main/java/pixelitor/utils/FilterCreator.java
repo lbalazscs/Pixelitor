@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -142,7 +142,7 @@ public class FilterCreator extends JPanel {
         return piList.toArray(new ParameterInfo[piList.size()]);
     }
 
-    public static void showInDialog(final Frame owner) {
+    public static void showInDialog(Frame owner) {
         final FilterCreator filterCreator = new FilterCreator();
         OKCancelDialog d = new OKCancelDialog(filterCreator, owner, "Filter Creator", "Show Source", "Close") {
             @Override

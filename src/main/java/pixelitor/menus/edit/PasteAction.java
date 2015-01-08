@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,7 @@ import java.io.IOException;
  * Pastes an image from the system clipboard
  */
 public class PasteAction extends AbstractAction {
-    private PasteDestination destination;
+    private final PasteDestination destination;
 
     public PasteAction(PasteDestination destination) {
         super(destination.toString());

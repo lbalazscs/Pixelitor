@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters;
 
@@ -26,13 +26,13 @@ import java.awt.image.BufferedImage;
  * Sepia filter based on Daniel Wreczycki's sepia filter
  */
 public class Sepia extends FilterWithParametrizedGUI  {
-    private RangeParam intensityParam = new RangeParam("Intensity", 0, 100, 20);
+    private final RangeParam intensity = new RangeParam("Intensity", 0, 100, 20);
 
     private SepiaFilter filter;
 
     public Sepia() {
         super("Sepia", true, false);
-        setParamSet(new ParamSet(intensityParam));
+        setParamSet(new ParamSet(intensity));
     }
 
     @Override
@@ -41,7 +41,7 @@ public class Sepia extends FilterWithParametrizedGUI  {
             filter = new SepiaFilter();
         }
 
-        filter.setSepiaIntensity(intensityParam.getValue());
+        filter.setSepiaIntensity(intensity.getValue());
 
         dest = filter.filter(src, dest);
         return dest;

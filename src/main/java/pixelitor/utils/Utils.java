@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -466,6 +466,7 @@ public final class Utils {
         debugImage(debugImage);
     }
 
+    @SuppressWarnings("SuspiciousNameCombination")
     public static GeneralPath createUnitArrow() {
         float arrowWidth = 0.3f;
         float arrowHeadWidth = 0.7f;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,8 +31,8 @@ import java.awt.FlowLayout;
 import java.io.File;
 
 public class AnimGifExportPanel extends JPanel {
-    private JTextField delayTF;
-    private JCheckBox pingPongCB;
+    private final JTextField delayTF;
+    private final JCheckBox pingPongCB;
 
     public AnimGifExportPanel(int nrLayers) {
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));

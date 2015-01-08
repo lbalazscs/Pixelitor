@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -98,7 +98,7 @@ public class ShapesTool extends Tool {
     @Override
     public void initSettingsPanel() {
         toolSettingsPanel.add(new JLabel("Shape:"));
-        final JComboBox<ShapeType> shapeTypeCB = new JComboBox<>(typeModel);
+        JComboBox<ShapeType> shapeTypeCB = new JComboBox<>(typeModel);
         toolSettingsPanel.add(shapeTypeCB);
 
         // make sure all values are visible without a scrollbar
@@ -379,7 +379,7 @@ public class ShapesTool extends Tool {
                 selectionShape = stroke.createStrokedShape(currentShape);
             } else if (!shapeType.isClosed()) {
                 if (basicStrokeForOpenShapes == null) {
-                    throw new IllegalStateException();
+                    throw new IllegalStateException("action = " + action + ", shapeType = " + shapeType);
                 }
                 selectionShape = basicStrokeForOpenShapes.createStrokedShape(currentShape);
             } else {

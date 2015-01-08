@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -201,18 +201,13 @@ public class ToolTests {
             return;
         }
 
-        int r = rand.nextInt(2);
-        switch (r) {
-            case 0:
-                Tools.BRUSH.randomize();
-                Tools.BRUSH.drawBrushStrokeProgrammatically(comp, start, end);
-                break;
-            case 1:
-                Tools.SHAPES.randomize();
-                Tools.SHAPES.paintShapeOnIC(comp, new UserDrag(start.x, start.y, end.x, end.y));
-                break;
-            default:
-                throw new IllegalStateException();
+        boolean b = rand.nextBoolean();
+        if (b) {
+            Tools.BRUSH.randomize();
+            Tools.BRUSH.drawBrushStrokeProgrammatically(comp, start, end);
+        } else {
+            Tools.SHAPES.randomize();
+            Tools.SHAPES.paintShapeOnIC(comp, new UserDrag(start.x, start.y, end.x, end.y));
         }
     }
 }
