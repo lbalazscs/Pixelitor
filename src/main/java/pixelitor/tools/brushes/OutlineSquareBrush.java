@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,26 +8,27 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.tools.brushes;
 
 import pixelitor.tools.StrokeType;
 
+import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.geom.Rectangle2D;
 
 /**
- *
+ * The "Squares" brush
  */
 public class OutlineSquareBrush extends StrokeBrush {
     public OutlineSquareBrush() {
-        super(StrokeType.OUTLINE_SQUARE);
+        super(StrokeType.OUTLINE, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL);
     }
 
     @Override
@@ -35,7 +36,7 @@ public class OutlineSquareBrush extends StrokeBrush {
         int diameter = 2 * radius;
         Rectangle2D.Float rectangle = new Rectangle2D.Float(x - radius, y - radius, diameter, diameter);
         Stroke saveStroke = g.getStroke();
-        g.setStroke(StrokeType.OUTLINE_SQUARE.getInnerStroke());
+        g.setStroke(StrokeType.OUTLINE.getInnerStroke());
         g.draw(rectangle);
         g.setStroke(saveStroke);
     }

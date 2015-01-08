@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.tools;
 
@@ -95,29 +95,11 @@ public enum StrokeType {
         public int getExtraWidth(int specifiedWidth) {
             return specifiedWidth / 2;
         }
-    }, OUTLINE_CIRCLE("Outline Circle") {
+    }, OUTLINE("Outline") {
         @Override
         public Stroke getStroke(float width, int cap, int join, float[] dashFloats) {
             Stroke stroke = new CompositeStroke(
-                    new BasicStroke(width, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND),
-                    innerOutlineStroke);
-            return stroke;
-        }
-
-        @Override
-        public Stroke getInnerStroke() {
-            return innerOutlineStroke;
-        }
-
-        @Override
-        public int getExtraWidth(int specifiedWidth) {
-            return 0;
-        }
-    }, OUTLINE_SQUARE("Outline Square") {
-        @Override
-        public Stroke getStroke(float width, int cap, int join, float[] dashFloats) {
-            Stroke stroke = new CompositeStroke(
-                    new BasicStroke(width, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL),
+                    new BasicStroke(width, cap, join),
                     innerOutlineStroke);
             return stroke;
         }
@@ -174,7 +156,7 @@ public enum StrokeType {
     };
 
     private static final float OUTLINE_WIDTH = 1.0f;
-    public BasicStroke innerOutlineStroke = new BasicStroke(OUTLINE_WIDTH);
+    public final BasicStroke innerOutlineStroke = new BasicStroke(OUTLINE_WIDTH);
 
     private final String guiName;
 
@@ -203,12 +185,12 @@ public enum StrokeType {
      */
     public abstract int getExtraWidth(int specifiedWidth);
 
-    /**
-     * A simple getter for the brushes
-     */
-    public Stroke getStroke(float width) {
-        return getStroke(width, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, null);
-    }
+//    /**
+//     * A simple getter for the brushes
+//     */
+//    public Stroke getStroke(float width) {
+//        return getStroke(width, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, null);
+//    }
 
     @Override
     public String toString() {
