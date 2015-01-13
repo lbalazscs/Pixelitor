@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,6 +29,7 @@ import pixelitor.ImageComponents;
 import pixelitor.NewImage;
 import pixelitor.PixelitorWindow;
 import pixelitor.TipsOfTheDay;
+import pixelitor.automate.BatchFilter;
 import pixelitor.automate.BatchResize;
 import pixelitor.filters.*;
 import pixelitor.filters.animation.TweenWizard;
@@ -284,6 +285,18 @@ public class MenuBar extends JMenuBar {
             }
         };
         createMenuItem(batchResizeAction, batchSubmenu, EnabledIf.ACTION_ENABLED);
+
+        Action batchFilterAction = new AbstractAction("Batch Filter...") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    BatchFilter.runBatchFilter();
+                } catch (Exception ex) {
+                    Dialogs.showExceptionDialog(ex);
+                }
+            }
+        };
+        createMenuItem(batchFilterAction, batchSubmenu, EnabledIf.ACTION_ENABLED);
 
         Action exportLayersAction = new AbstractAction("Export Layers to PNG...") {
             @Override

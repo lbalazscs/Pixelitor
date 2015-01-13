@@ -14,9 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.animation;
 
 import pixelitor.ImageComponents;
+import pixelitor.automate.Wizard;
+import pixelitor.automate.WizardPage;
 import pixelitor.filters.FilterUtils;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.AdjustPanel;
@@ -29,22 +32,22 @@ import java.awt.FlowLayout;
 /**
  * The pages of the tweening animation export dialog
  */
-public enum TweenWizardPage {
+public enum TweenWizardPage implements WizardPage {
     SELECT_FILTER {
         JComboBox<FilterWithParametrizedGUI> filtersCB;
 
         @Override
-        String getHeaderText(TweenWizard wizard) {
+        public String getHeaderText(Wizard wizard) {
             return "<html> Here you can create a tweening animation <br>based on the settings of a filter.";
         }
 
         @Override
-        TweenWizardPage getNext() {
+        public WizardPage getNext() {
             return INITIAL_FILTER_SETTINGS;
         }
 
         @Override
-        JComponent getPanel(TweenWizard wizard) {
+        public JComponent getPanel(Wizard wizard) {
             JPanel p = new JPanel(new FlowLayout());
             p.add(new JLabel("Select Filter:"));
             filtersCB = new JComboBox<>(FilterUtils.getAnimationFiltersSorted());
@@ -53,28 +56,28 @@ public enum TweenWizardPage {
         }
 
         @Override
-        void onWizardCancelled(TweenWizard wizard) {
+        public void onWizardCancelled(Wizard wizard) {
         }
 
         @Override
-        void onMovingToTheNext(TweenWizard wizard) {
+        public void onMovingToTheNext(Wizard wizard) {
             FilterWithParametrizedGUI filter = (FilterWithParametrizedGUI) filtersCB.getSelectedItem();
-            wizard.getAnimation().setFilter(filter);
+            getAnimation(wizard).setFilter(filter);
         }
     }, INITIAL_FILTER_SETTINGS {
         @Override
-        String getHeaderText(TweenWizard wizard) {
+        public String getHeaderText(Wizard wizard) {
             return "<html> Select the <b><font color=blue size=+1>initial</font></b> settings for the filter";
         }
 
         @Override
-        TweenWizardPage getNext() {
+        public WizardPage getNext() {
             return FINAL_FILTER_SETTINGS;
         }
 
         @Override
-        JComponent getPanel(TweenWizard wizard) {
-            FilterWithParametrizedGUI filter = wizard.getAnimation().getFilter();
+        public JComponent getPanel(Wizard wizard) {
+            FilterWithParametrizedGUI filter = getAnimation(wizard).getFilter();
             ImageComponents.getActiveImageLayer().get().startPreviewing();
             AdjustPanel adjustPanel = filter.createAdjustPanel();
             filter.startDialogSession();
@@ -83,24 +86,24 @@ public enum TweenWizardPage {
         }
 
         @Override
-        void onWizardCancelled(TweenWizard wizard) {
-            FilterWithParametrizedGUI filter = wizard.getAnimation().getFilter();
+        public void onWizardCancelled(Wizard wizard) {
+            FilterWithParametrizedGUI filter = getAnimation(wizard).getFilter();
             ImageComponents.getActiveImageLayer().get().cancelPressedInDialog();
             filter.endDialogSession();
         }
 
         @Override
-        void onMovingToTheNext(TweenWizard wizard) {
-            wizard.getAnimation().copyInitialStateFromCurrent();
+        public void onMovingToTheNext(Wizard wizard) {
+            getAnimation(wizard).copyInitialStateFromCurrent();
 
             ParametrizedAdjustPanel.setResetParams(false);
-            wizard.getAnimation().getFilter().getParamSet().setFinalAnimationSettingMode(true);
+            getAnimation(wizard).getFilter().getParamSet().setFinalAnimationSettingMode(true);
         }
     }, FINAL_FILTER_SETTINGS {
         @Override
-        String getHeaderText(TweenWizard wizard) {
+        public String getHeaderText(Wizard wizard) {
             String text = "<html> Select the <b><font color=green size=+1>final</font></b> settings for the filter.";
-            boolean hasGradient = wizard.getAnimation().getFilter().getParamSet().hasGradient();
+            boolean hasGradient = getAnimation(wizard).getFilter().getParamSet().hasGradient();
             if (hasGradient) {
                 text += "<br>Do not change the number of thumbs for the gradient, only their color or position.";
             }
@@ -108,56 +111,56 @@ public enum TweenWizardPage {
         }
 
         @Override
-        TweenWizardPage getNext() {
+        public WizardPage getNext() {
             return OUTPUT_SETTINGS;
         }
 
         @Override
-        JComponent getPanel(TweenWizard wizard) {
+        public JComponent getPanel(Wizard wizard) {
             // the following 3 lines are necessary because otherwise the image position
             // selectors will show the result of the initial filter and not the original image
             ImageLayer imageLayer = ImageComponents.getActiveImageLayer().get();
             imageLayer.cancelPressedInDialog(); // cancel the initial one
             imageLayer.startPreviewing(); // start the final one
 
-            FilterWithParametrizedGUI filter = wizard.getAnimation().getFilter();
+            FilterWithParametrizedGUI filter = getAnimation(wizard).getFilter();
             AdjustPanel adjustPanel = filter.createAdjustPanel();
 
             return adjustPanel;
         }
 
         @Override
-        void onWizardCancelled(TweenWizard wizard) {
-            FilterWithParametrizedGUI filter = wizard.getAnimation().getFilter();
+        public void onWizardCancelled(Wizard wizard) {
+            FilterWithParametrizedGUI filter = getAnimation(wizard).getFilter();
             ImageComponents.getActiveImageLayer().get().cancelPressedInDialog();
             filter.endDialogSession();
         }
 
         @Override
-        void onMovingToTheNext(TweenWizard wizard) {
+        public void onMovingToTheNext(Wizard wizard) {
             // cancel the previewing
             onWizardCancelled(wizard);
 
             // save final state
-            wizard.getAnimation().copyFinalStateFromCurrent();
+            getAnimation(wizard).copyFinalStateFromCurrent();
         }
     }, OUTPUT_SETTINGS {
         OutputSettingsPanel outputSettingsPanel;
 
         @Override
-        String getHeaderText(TweenWizard wizard) {
+        public String getHeaderText(Wizard wizard) {
             return "<html> <b>Output settings</b>" +
                     "<p>For file sequence output select an existing folder." +
                     "<br>For file output select a new or existing file in an existing folder.";
         }
 
         @Override
-        TweenWizardPage getNext() {
+        public WizardPage getNext() {
             return null;
         }
 
         @Override
-        JComponent getPanel(TweenWizard wizard) {
+        public JComponent getPanel(Wizard wizard) {
             if (outputSettingsPanel == null) {
                 outputSettingsPanel = new OutputSettingsPanel();
             }
@@ -165,32 +168,22 @@ public enum TweenWizardPage {
         }
 
         @Override
-        void onWizardCancelled(TweenWizard wizard) {
+        public void onWizardCancelled(Wizard wizard) {
 
         }
 
 
         @Override
-        void onMovingToTheNext(TweenWizard wizard) {
-            TweenAnimation animation = wizard.getAnimation();
+        public void onMovingToTheNext(Wizard wizard) {
+            TweenAnimation animation = getAnimation(wizard);
             outputSettingsPanel.copySettingsInto(animation);
         }
 
     };
 
-    abstract String getHeaderText(TweenWizard wizard);
+    private static TweenAnimation getAnimation(Wizard wizard) {
+        // all wizards here can be case to TweenWizard
+        return ((TweenWizard) wizard).getAnimation();
+    }
 
-    abstract TweenWizardPage getNext();
-
-    abstract JComponent getPanel(TweenWizard wizard);
-
-    /**
-     * Called if the wizard was cancelled while in this state
-     */
-    abstract void onWizardCancelled(TweenWizard wizard);
-
-    /**
-     * Called if next was pressed while in this state before moving to the next
-     */
-    abstract void onMovingToTheNext(TweenWizard wizard);
 }

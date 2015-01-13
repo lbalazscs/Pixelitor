@@ -27,15 +27,15 @@ import pixelitor.utils.ValidatedForm;
 import javax.swing.*;
 
 /**
- * The batch resize functionality
+ * The batch filter functionality
  */
-public class BatchResize {
-    private BatchResize() { // do not instantiate
+public class BatchFilter {
+    private BatchFilter() { // do not instantiate
     }
 
-    public static void runBatchResize() {
-        BatchResizePanel p = new BatchResizePanel();
-        ValidatedDialog chooser = new ValidatedDialog(p, PixelitorWindow.getInstance(), "Batch Resize");
+    public static void runBatchFilter() {
+        BatchFilterPanel p = new BatchFilterPanel();
+        ValidatedDialog chooser = new ValidatedDialog(p, PixelitorWindow.getInstance(), "Batch Filter");
         chooser.setVisible(true);
         if (!chooser.isOkPressed()) {
             return;
@@ -51,16 +51,16 @@ public class BatchResize {
                 CompositionUtils.resize(comp, maxWidth, maxHeight, true);
             }
         };
-        Automate.processEachFile(resizeAction, true, "Batch Resize...");
+        Automate.processEachFile(resizeAction, true, "Batch Filter...");
     }
 
-    static class BatchResizePanel extends ValidatedForm {
+    static class BatchFilterPanel extends ValidatedForm {
         private String errorMessage;
         private final OpenSaveDirsPanel openSaveDirsPanel = new OpenSaveDirsPanel(false);
         private final IntTextField withTextField;
         private final IntTextField heightTextField;
 
-        BatchResizePanel() {
+        BatchFilterPanel() {
             JPanel dimensionsPanel = new JPanel();
             dimensionsPanel.add(new JLabel("Max Width:"));
             withTextField = new IntTextField(5);

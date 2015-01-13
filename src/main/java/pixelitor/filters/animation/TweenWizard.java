@@ -14,9 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.animation;
 
 import pixelitor.PixelitorWindow;
+import pixelitor.automate.Wizard;
+import pixelitor.automate.WizardPage;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.ParametrizedAdjustPanel;
 import pixelitor.utils.Dialogs;
@@ -31,9 +34,9 @@ import java.beans.PropertyChangeListener;
 /**
  * Wizard for tweening animations
  */
-public class TweenWizard {
+public class TweenWizard extends Wizard {
     private OKCancelDialog dialog = null;
-    private TweenWizardPage wizardPage = TweenWizardPage.SELECT_FILTER;
+    private WizardPage wizardPage = TweenWizardPage.SELECT_FILTER;
     private final TweenAnimation animation = new TweenAnimation();
 
     /**
@@ -86,7 +89,7 @@ public class TweenWizard {
                     }
                 }
 
-                TweenWizardPage nextPage = wizardPage.getNext();
+                WizardPage nextPage = wizardPage.getNext();
                 if (nextPage == null) { // dialog finished
                     dispose();
                     calculateAnimation();
