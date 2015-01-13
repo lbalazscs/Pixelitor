@@ -23,11 +23,10 @@ import pixelitor.automate.WizardPage;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.ParametrizedAdjustPanel;
 import pixelitor.utils.Dialogs;
-import pixelitor.utils.GUIUtils;
-import pixelitor.utils.OKCancelDialog;
 import pixelitor.utils.ValidatedForm;
 
 import javax.swing.*;
+import java.awt.Component;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -35,84 +34,18 @@ import java.beans.PropertyChangeListener;
  * Wizard for tweening animations
  */
 public class TweenWizard extends Wizard {
-    private OKCancelDialog dialog = null;
-    private WizardPage wizardPage = TweenWizardPage.SELECT_FILTER;
     private final TweenAnimation animation = new TweenAnimation();
 
-    /**
-     * Show the wizard in a dialog
-     */
-    public void start(JFrame dialogParent) {
-        try {
-            showDialog(dialogParent);
-        } finally {
-            ParametrizedAdjustPanel.setResetParams(true);
-            FilterWithParametrizedGUI filter = animation.getFilter();
-            if (filter != null) { // a filter was already selected
-                filter.getParamSet().setFinalAnimationSettingMode(false);
-            }
-        }
+    public TweenWizard() {
+        super(TweenWizardPage.SELECT_FILTER, "Export Tweening Animation");
     }
 
-    private void showDialog(JFrame dialogParent) {
-        dialog = new OKCancelDialog(
-                wizardPage.getPanel(TweenWizard.this),
-                dialogParent,
-                "Export Tweening Animation",
-                "Next", "Cancel") {
-
-            @Override
-            protected void dialogCanceled() {
-                wizardPage.onWizardCancelled(TweenWizard.this);
-                super.dialogCanceled();
-                dispose();
-            }
-
-            @Override
-            protected void dialogAccepted() { // "next" was pressed
-                // check if it may move forward
-                if (wizardPage == TweenWizardPage.OUTPUT_SETTINGS) {
-                    ValidatedForm settings = (ValidatedForm) wizardPage.getPanel(TweenWizard.this);
-                    if (!settings.isDataValid()) {
-                        Dialogs.showErrorDialog(this, "Error", settings.getErrorMessage());
-                        return;
-                    }
-                }
-
-                // move forward
-                wizardPage.onMovingToTheNext(TweenWizard.this);
-
-                // final overwrite check - must be called after onMovingToTheNext
-                if (wizardPage == TweenWizardPage.OUTPUT_SETTINGS) {
-                    if (!animation.checkOverwrite(this)) {
-                        return;
-                    }
-                }
-
-                WizardPage nextPage = wizardPage.getNext();
-                if (nextPage == null) { // dialog finished
-                    dispose();
-                    calculateAnimation();
-                } else {
-                    JComponent panel = nextPage.getPanel(TweenWizard.this);
-                    dialog.changeForm(panel);
-                    dialog.setHeaderMessage(nextPage.getHeaderText(TweenWizard.this));
-                    wizardPage = nextPage;
-
-                    if (wizardPage.getNext() == null) { // this is the last page
-                        setOKButtonText("Render");
-                    }
-                }
-            }
-        };
-        dialog.setHeaderMessage(wizardPage.getHeaderText(TweenWizard.this));
-
-        // it was packed already, but this is not correct because of the header message
-        // and anyway we don't know the size of the filter dialogs in advance
-        dialog.setSize(450, 380);
-
-        GUIUtils.centerOnScreen(dialog);
-        dialog.setVisible(true);
+    protected void finalCleanup() {
+        ParametrizedAdjustPanel.setResetParams(true);
+        FilterWithParametrizedGUI filter = animation.getFilter();
+        if (filter != null) { // a filter was already selected
+            filter.getParamSet().setFinalAnimationSettingMode(false);
+        }
     }
 
     private void calculateAnimation() {
@@ -147,6 +80,33 @@ public class TweenWizard extends Wizard {
 
     public TweenAnimation getAnimation() {
         return animation;
+    }
+
+    @Override
+    protected boolean mayMoveForwardIfNextPressed(WizardPage actualPage, Component dialogParent) {
+        if (actualPage == TweenWizardPage.OUTPUT_SETTINGS) {
+            ValidatedForm settings = (ValidatedForm) actualPage.getPanel(TweenWizard.this);
+            if (!settings.isDataValid()) {
+                Dialogs.showErrorDialog(dialogParent, "Error", settings.getErrorMessage());
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    protected boolean mayProceedAfterMovingForward(WizardPage wizardPage, Component dialogParent) {
+        if (wizardPage == TweenWizardPage.OUTPUT_SETTINGS) {
+            if (!animation.checkOverwrite(dialogParent)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    protected void executeFinalAction() {
+        calculateAnimation();
     }
 }
 

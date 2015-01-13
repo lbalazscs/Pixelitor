@@ -29,7 +29,7 @@ import pixelitor.ImageComponents;
 import pixelitor.NewImage;
 import pixelitor.PixelitorWindow;
 import pixelitor.TipsOfTheDay;
-import pixelitor.automate.BatchFilter;
+import pixelitor.automate.BatchFilterWizard;
 import pixelitor.automate.BatchResize;
 import pixelitor.filters.*;
 import pixelitor.filters.animation.TweenWizard;
@@ -248,7 +248,7 @@ public class MenuBar extends JMenuBar {
         };
         createMenuItem(closeAllAction, fileMenu, CTRL_ALT_W);
 
-        initAutomateSubmenu(fileMenu);
+        initAutomateSubmenu(fileMenu, pixelitorWindow);
 
         if (!JVM.isMac) {
             Action newFromScreenCapture = new ScreenCaptureAction();
@@ -270,7 +270,7 @@ public class MenuBar extends JMenuBar {
         this.add(fileMenu);
     }
 
-    private static void initAutomateSubmenu(JMenu fileMenu) {
+    private static void initAutomateSubmenu(JMenu fileMenu, final PixelitorWindow pixelitorWindow) {
         JMenu batchSubmenu = new JMenu("Automate");
         fileMenu.add(batchSubmenu);
 
@@ -290,7 +290,7 @@ public class MenuBar extends JMenuBar {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    BatchFilter.runBatchFilter();
+                    new BatchFilterWizard().start(pixelitorWindow);
                 } catch (Exception ex) {
                     Dialogs.showExceptionDialog(ex);
                 }
