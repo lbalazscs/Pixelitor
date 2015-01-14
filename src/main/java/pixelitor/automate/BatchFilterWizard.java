@@ -17,34 +17,55 @@
 
 package pixelitor.automate;
 
+import pixelitor.ChangeReason;
+import pixelitor.Composition;
+import pixelitor.PixelitorWindow;
+import pixelitor.filters.Filter;
+import pixelitor.layers.ImageLayer;
+import pixelitor.utils.CompositionAction;
+
 import java.awt.Component;
 
 /**
  * The batch filter wizard
  */
 public class BatchFilterWizard extends Wizard {
+    private BatchFilterConfig config = new BatchFilterConfig();
 
     public BatchFilterWizard() {
-        super(BatchFilterWizardPage.SELECT_FILTER, "Batch Filter");
+        super(BatchFilterWizardPage.SELECT_FILTER_AND_DIRS, "Batch Filter", "Start Processing", 490, 380);
     }
 
     @Override
     protected boolean mayMoveForwardIfNextPressed(WizardPage wizardPage, Component dialogParent) {
-        return false;
+        return true;
     }
 
     @Override
     protected boolean mayProceedAfterMovingForward(WizardPage wizardPage, Component dialogParent) {
-        return false;
+        return true;
     }
 
     @Override
     protected void executeFinalAction() {
+        final Filter filter = config.getFilter();
+        final PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
 
+        Automate.processEachFile(new CompositionAction() {
+            @Override
+            public void process(Composition comp) {
+                final ImageLayer layer = comp.getActiveImageLayer();
+                comp.executeFilterWithBusyCursor(filter, ChangeReason.OP_WITHOUT_DIALOG, busyCursorParent);
+            }
+        }, true, "Batch Filter Progress");
     }
 
     @Override
     protected void finalCleanup() {
 
+    }
+
+    public BatchFilterConfig getConfig() {
+        return config;
     }
 }

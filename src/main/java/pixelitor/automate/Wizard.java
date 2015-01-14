@@ -23,14 +23,23 @@ import pixelitor.utils.OKCancelDialog;
 import javax.swing.*;
 import java.awt.Component;
 
+/**
+ * A wizard. The individual pages implement the WizardPage interface.
+ */
 public abstract class Wizard {
     private OKCancelDialog dialog = null;
     private WizardPage wizardPage;
-    private String dialogTitle;
+    private final String dialogTitle;
+    private final String finishButtonText;
+    private int initialDialogWidth;
+    private int initialDialogHeight;
 
-    protected Wizard(WizardPage initialWizardPage, String dialogTitle) {
+    protected Wizard(WizardPage initialWizardPage, String dialogTitle, String finishButtonText, int initialDialogWidth, int initialDialogHeight) {
         this.wizardPage = initialWizardPage;
         this.dialogTitle = dialogTitle;
+        this.finishButtonText = finishButtonText;
+        this.initialDialogWidth = initialDialogWidth;
+        this.initialDialogHeight = initialDialogHeight;
     }
 
     /**
@@ -44,7 +53,9 @@ public abstract class Wizard {
         }
     }
 
-    public void showDialog(JFrame dialogParent, final String title) {
+    public void showDialog(JFrame dialogParent, String title) {
+        assert dialog == null; // this should be called once per object
+
         dialog = new OKCancelDialog(
                 wizardPage.getPanel(Wizard.this),
                 dialogParent,
@@ -82,7 +93,7 @@ public abstract class Wizard {
                     wizardPage = nextPage;
 
                     if (wizardPage.getNext() == null) { // this is the last page
-                        setOKButtonText("Render");
+                        setOKButtonText(finishButtonText);
                     }
                 }
             }
@@ -91,7 +102,7 @@ public abstract class Wizard {
 
         // it was packed already, but this is not correct because of the header message
         // and anyway we don't know the size of the filter dialogs in advance
-        dialog.setSize(450, 380);
+        dialog.setSize(initialDialogWidth, initialDialogHeight);
 
         GUIUtils.centerOnScreen(dialog);
         dialog.setVisible(true);

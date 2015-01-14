@@ -37,7 +37,7 @@ public class TweenWizard extends Wizard {
     private final TweenAnimation animation = new TweenAnimation();
 
     public TweenWizard() {
-        super(TweenWizardPage.SELECT_FILTER, "Export Tweening Animation");
+        super(TweenWizardPage.SELECT_FILTER, "Export Tweening Animation", "Render", 450, 380);
     }
 
     protected void finalCleanup() {
@@ -83,9 +83,9 @@ public class TweenWizard extends Wizard {
     }
 
     @Override
-    protected boolean mayMoveForwardIfNextPressed(WizardPage actualPage, Component dialogParent) {
-        if (actualPage == TweenWizardPage.OUTPUT_SETTINGS) {
-            ValidatedForm settings = (ValidatedForm) actualPage.getPanel(TweenWizard.this);
+    protected boolean mayMoveForwardIfNextPressed(WizardPage currentPage, Component dialogParent) {
+        if (currentPage == TweenWizardPage.OUTPUT_SETTINGS) {
+            ValidatedForm settings = (ValidatedForm) currentPage.getPanel(TweenWizard.this);
             if (!settings.isDataValid()) {
                 Dialogs.showErrorDialog(dialogParent, "Error", settings.getErrorMessage());
                 return false;

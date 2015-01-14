@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,9 @@
 
 package pixelitor;
 
+import pixelitor.filters.Filter;
+import pixelitor.filters.FilterUtils;
+import pixelitor.filters.RepeatLastOp;
 import pixelitor.history.DeleteLayerEdit;
 import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;
@@ -33,10 +36,13 @@ import pixelitor.menus.SelectionActions;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionInteraction;
 import pixelitor.selection.SelectionType;
+import pixelitor.utils.Dialogs;
 import pixelitor.utils.HistogramsPanel;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Optional;
+import pixelitor.utils.Utils;
 
+import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -757,6 +763,50 @@ public class Composition implements Serializable {
 
     public int getLayerPosition(Layer layer) {
         return layerList.indexOf(layer);
+    }
+
+    /**
+     * Executes the given filter with busy cursor
+     */
+    public void executeFilterWithBusyCursor(final Filter filter, final ChangeReason changeReason, Component busyCursorParent) {
+        String filterMenuName = filter.getMenuName();
+        try {
+            if (changeReason == ChangeReason.OP_PREVIEW) {
+                ImageLayer layer = getActiveImageLayer();
+                layer.startNewPreviewFromDialog();
+            } else {
+                // e.g. OP WITHOUT DIALOG
+                FilterUtils.setLastExecutedFilter(filter);
+            }
+
+            long startTime = System.nanoTime();
+
+            Runnable task = new Runnable() {
+                @Override
+                public void run() {
+                    filter.runit(Composition.this, changeReason);
+                }
+            };
+            Utils.executeWithBusyCursor(busyCursorParent, task);
+
+            long totalTime = (System.nanoTime() - startTime) / 1_000_000;
+            String performanceMessage;
+            if (totalTime < 1000) {
+                performanceMessage = filterMenuName + " took " + totalTime + " ms";
+            } else {
+                float seconds = totalTime / 1000.0f;
+                performanceMessage = String.format("%s took %.1f s", filterMenuName, seconds);
+            }
+            AppLogic.setStatusMessage(performanceMessage);
+        } catch (OutOfMemoryError e) {
+            Dialogs.showOutOfMemoryDialog(e);
+        } catch (Throwable e) { // make sure AssertionErrors are caught
+            if (Build.CURRENT.isRobotTest()) {
+                throw e; // we can debug the exact filter parameters only in RobotTest
+            }
+            Dialogs.showExceptionDialog(e);
+        }
+        RepeatLastOp.INSTANCE.setMenuName("Repeat " + filterMenuName);
     }
 
 }

@@ -182,7 +182,7 @@ public enum TweenWizardPage implements WizardPage {
     };
 
     private static TweenAnimation getAnimation(Wizard wizard) {
-        // all wizards here can be case to TweenWizard
+        // all wizards here can be casted to TweenWizard
         return ((TweenWizard) wizard).getAnimation();
     }
 

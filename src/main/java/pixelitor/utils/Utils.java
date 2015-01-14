@@ -17,7 +17,6 @@
 
 package pixelitor.utils;
 
-import pixelitor.AppLogic;
 import pixelitor.Build;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
@@ -29,9 +28,7 @@ import pixelitor.filters.Filter;
 import pixelitor.filters.FilterUtils;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.Lightning;
-import pixelitor.filters.RepeatLastOp;
 import pixelitor.filters.gui.FilterWithGUI;
-import pixelitor.layers.ImageLayer;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -115,51 +112,8 @@ public final class Utils {
      * Executes the given filter with busy cursor
      */
     public static void executeFilterWithBusyCursor(final Filter filter, final ChangeReason changeReason, Component busyCursorParent) {
-        String filterMenuName = filter.getMenuName();
-        try {
-            final Composition comp = ImageComponents.getActiveComp().get();
-            if (comp == null) {
-                Dialogs.showErrorDialog("Error",
-                        "No active composition found while executing " + filter.getName());
-                return;
-            }
-
-            if (changeReason == ChangeReason.OP_PREVIEW) {
-                ImageLayer layer = comp.getActiveImageLayer();
-                layer.startNewPreviewFromDialog();
-            } else {
-                // e.g. OP WITHOUT DIALOG
-                FilterUtils.setLastExecutedFilter(filter);
-            }
-
-            long startTime = System.nanoTime();
-
-            Runnable task = new Runnable() {
-                @Override
-                public void run() {
-                    filter.runit(comp, changeReason);
-                }
-            };
-            executeWithBusyCursor(busyCursorParent, task);
-
-            long totalTime = (System.nanoTime() - startTime) / 1_000_000;
-            String performanceMessage;
-            if (totalTime < 1000) {
-                performanceMessage = filterMenuName + " took " + totalTime + " ms";
-            } else {
-                float seconds = totalTime / 1000.0f;
-                performanceMessage = String.format("%s took %.1f s", filterMenuName, seconds);
-            }
-            AppLogic.setStatusMessage(performanceMessage);
-        } catch (OutOfMemoryError e) {
-            Dialogs.showOutOfMemoryDialog(e);
-        } catch (Throwable e) { // make sure AssertionErrors are caught
-            if (Build.CURRENT.isRobotTest()) {
-                throw e; // we can debug the exact filter parameters only in RobotTest
-            }
-            Dialogs.showExceptionDialog(e);
-        }
-        RepeatLastOp.INSTANCE.setMenuName("Repeat " + filterMenuName);
+        Composition comp = ImageComponents.getActiveComp().get();
+        comp.executeFilterWithBusyCursor(filter, changeReason, busyCursorParent);
     }
 
     public static void openURI(URI uri) {
