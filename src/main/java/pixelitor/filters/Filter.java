@@ -124,17 +124,11 @@ public abstract class Filter extends AbstractAction implements Comparable<Filter
         BufferedImage dest = executeForOneLayer(src);
         assert dest != null;
 
-        if (changeReason == ChangeReason.OP_PREVIEW) {
+        if (changeReason.isPreview()) {
             comp.changePreviewImage(dest, getName());
-        } else if (changeReason == ChangeReason.OP_WITHOUT_DIALOG) {
-            comp.filterWithoutDialogFinished(dest, changeReason, getName());
-        } else if (changeReason == ChangeReason.PERFORMANCE_TEST) {
-            comp.filterWithoutDialogFinished(dest, changeReason, getName());
         } else {
-            throw new IllegalStateException(changeReason.toString());
+            comp.filterWithoutDialogFinished(dest, changeReason, getName());
         }
-//
-//                    comp.changeActiveLayerImage(dest, changeReason, getName());
     }
 
     public void execute(ChangeReason changeReason) {

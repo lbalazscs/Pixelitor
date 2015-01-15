@@ -771,7 +771,7 @@ public class Composition implements Serializable {
     public void executeFilterWithBusyCursor(final Filter filter, final ChangeReason changeReason, Component busyCursorParent) {
         String filterMenuName = filter.getMenuName();
         try {
-            if (changeReason == ChangeReason.OP_PREVIEW) {
+            if (changeReason.isPreview()) {
                 ImageLayer layer = getActiveImageLayer();
                 layer.startNewPreviewFromDialog();
             } else {

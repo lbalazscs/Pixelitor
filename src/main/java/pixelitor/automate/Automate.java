@@ -173,6 +173,7 @@ public class Automate {
                     return;
             }
         } else { // the file does not exist or overwrite all was pressed previously
+            frame.paintImmediately(frame.getBounds());
             outputFormat.saveComposition(comp, outputFile);
         }
         if (closeImagesAfterProcessing) {

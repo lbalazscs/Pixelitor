@@ -21,7 +21,6 @@ import pixelitor.ChangeReason;
 import pixelitor.Composition;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.Filter;
-import pixelitor.layers.ImageLayer;
 import pixelitor.utils.CompositionAction;
 
 import java.awt.Component;
@@ -54,8 +53,8 @@ public class BatchFilterWizard extends Wizard {
         Automate.processEachFile(new CompositionAction() {
             @Override
             public void process(Composition comp) {
-                final ImageLayer layer = comp.getActiveImageLayer();
-                comp.executeFilterWithBusyCursor(filter, ChangeReason.OP_WITHOUT_DIALOG, busyCursorParent);
+//                final ImageLayer layer = comp.getActiveImageLayer();
+                comp.executeFilterWithBusyCursor(filter, ChangeReason.BATCH_AUTOMATE, busyCursorParent);
             }
         }, true, "Batch Filter Progress");
     }

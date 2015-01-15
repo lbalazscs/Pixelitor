@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,33 +8,40 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor;
 
 /**
- * Why is an image changed
+ * Why is an image changed...
  */
 public enum ChangeReason {
-    OP_WITHOUT_DIALOG(true) {
-    }, OP_PREVIEW(false) {
-    }, UNDO_REDO(false) {
-    }, PERFORMANCE_TEST(false) {
+    OP_WITHOUT_DIALOG(true, false) {
+    }, OP_PREVIEW(false, true) {
+    }, PERFORMANCE_TEST(false, false) {
+    }, TWEEN_PREVIEW(false, true) {
+    }, BATCH_AUTOMATE(false, false) {
     };
 
-    private final boolean needsUndo;
+    private final boolean makeUndoBackup;
+    private final boolean preview;
 
-    public boolean makeUndoBackup() {
-        return needsUndo;
+    public boolean needsUndo() {
+        return makeUndoBackup;
     }
 
-    ChangeReason(boolean makeUndoBackup) {
-        this.needsUndo = makeUndoBackup;
+    public boolean isPreview() {
+        return preview;
+    }
+
+    ChangeReason(boolean makeUndoBackup, boolean preview) {
+        this.makeUndoBackup = makeUndoBackup;
+        this.preview = preview;
     }
 }
 

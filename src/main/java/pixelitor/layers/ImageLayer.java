@@ -370,8 +370,7 @@ public class ImageLayer extends ContentLayer {
         BufferedImage imageForUndo = getFilterSourceImage();
         setImageWithSelection(transformedImage);
 
-        if (changeReason == ChangeReason.PERFORMANCE_TEST) {
-            // no undo is necessary for performance tests
+        if (!changeReason.needsUndo()) {
             return;
         }
 
