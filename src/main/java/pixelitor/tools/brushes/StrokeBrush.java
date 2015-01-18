@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools.brushes;
 
 import pixelitor.tools.StrokeType;
@@ -37,7 +38,7 @@ public abstract class StrokeBrush implements Brush {
         this(strokeType, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
     }
 
-    public StrokeBrush(StrokeType strokeType, int cap, int join) {
+    protected StrokeBrush(StrokeType strokeType, int cap, int join) {
         this.strokeType = strokeType;
         this.cap = cap;
         this.join = join;

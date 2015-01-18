@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -77,7 +77,7 @@ public class Starburst extends FilterWithParametrizedGUI {
         g.setColor(fgColor.getColor());
 
         int numberOfRays = numberOfRaysParam.getValue();
-        boolean useRandomColors = randomColorsParam.getValue();
+        boolean useRandomColors = randomColorsParam.isChecked();
 
         double averageRayAngle = Math.PI / numberOfRays;
         double startAngle = rotate.getValueInRadians();

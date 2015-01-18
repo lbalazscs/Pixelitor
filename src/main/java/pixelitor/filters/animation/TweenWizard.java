@@ -40,6 +40,7 @@ public class TweenWizard extends Wizard {
         super(TweenWizardPage.SELECT_FILTER, "Export Tweening Animation", "Render", 450, 380);
     }
 
+    @Override
     protected void finalCleanup() {
         ParametrizedAdjustPanel.setResetParams(true);
         FilterWithParametrizedGUI filter = animation.getFilter();

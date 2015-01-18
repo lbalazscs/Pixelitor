@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import pixelitor.filters.gui.BooleanParam;
@@ -61,7 +62,7 @@ public class ExtractChannel extends FilterWithParametrizedGUI {
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         int channel = channelParam.getValue();
 
-        if (bwParam.getValue()) {
+        if (bwParam.isChecked()) {
             RGBPixelOp rgbOp;
             switch (channel) {
                 case RED_CHANNEL:

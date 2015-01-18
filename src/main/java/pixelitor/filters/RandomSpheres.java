@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -93,29 +93,27 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
         int width = dest.getWidth();
         int height = dest.getHeight();
 
-        float radius = this.radius.getValueAsFloat();
+        float r = radius.getValueAsFloat();
         double angle = highlightAngleSelector.getValueInRadians();
         angle += Math.PI;
 
         double elevation = highlightElevationSelector.getValueInRadians();
 
-        int centerShiftX = (int) (radius * Math.cos(angle) * Math.cos(elevation));
-        int centerShiftY = (int) (radius * Math.sin(angle) * Math.cos(elevation));
+        int centerShiftX = (int) (r * Math.cos(angle) * Math.cos(elevation));
+        int centerShiftY = (int) (r * Math.sin(angle) * Math.cos(elevation));
 
-        boolean addHighlights = addHighLightsCB.getValue();
-        float density = this.density.getValueAsPercentage();
-        float opacity = this.opacity.getValueAsPercentage();
+        boolean addHighlights = addHighLightsCB.isChecked();
 
-        g.setComposite(AlphaComposite.SrcOver.derive(opacity));
+        g.setComposite(AlphaComposite.SrcOver.derive(opacity.getValueAsPercentage()));
 
-        int colorSource = this.colorSource.getValue();
+        int colorSrc = colorSource.getValue();
 
-        int numCircles = (int) ((width * height * density) / (radius * radius));
+        int numCircles = (int) ((width * height * density.getValueAsPercentage()) / (r * r));
 
         Color[] colors = null;
         Color c = null;
 
-        if (colorSource == COLORS_FG_BG) {
+        if (colorSrc == COLORS_FG_BG) {
             colors = new Color[]{FgBgColorSelector.getFG(), FgBgColorSelector.getBG()};
             c = colors[0];
         }
@@ -133,7 +131,7 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
                 continue;
             }
 
-            if (colorSource == COLORS_SAMPLE_IMAGE) {
+            if (colorSrc == COLORS_SAMPLE_IMAGE) {
                 c = new Color(srcColor);
                 if (addHighlights) {
                     colors = new Color[]{c.brighter().brighter(), c};
@@ -143,7 +141,7 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
             if (addHighlights && (type == TYPE_SPHERES)) {
                 float[] fractions = {0.0f, 1.0f};
                 MultipleGradientPaint.CycleMethod cycleMethod = MultipleGradientPaint.CycleMethod.NO_CYCLE;
-                RadialGradientPaint gradientPaint = new RadialGradientPaint(x + centerShiftX, y + centerShiftY, radius, fractions, colors, cycleMethod);
+                RadialGradientPaint gradientPaint = new RadialGradientPaint(x + centerShiftX, y + centerShiftY, r, fractions, colors, cycleMethod);
 
                 g.setPaint(gradientPaint);
             } else {
@@ -153,9 +151,9 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
 
-            float drawX = x - radius;
-            float drawY = y - radius;
-            float diameter = 2 * radius;
+            float drawX = x - r;
+            float drawY = y - r;
+            float diameter = 2 * r;
             if (type == TYPE_SPHERES) {
                 Ellipse2D.Float circle = new Ellipse2D.Float(drawX, drawY, diameter, diameter);
                 g.fill(circle);

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import com.jhlabs.composite.AddComposite;
@@ -79,7 +80,7 @@ public class MysticRose extends FilterWithParametrizedGUI {
             }
         }
 
-        if(glow.getValue()) {
+        if (glow.isChecked()) {
             BufferedImage copy = ImageUtils.copyImage(dest);
             // TODO FastBlurFilter takes an int as constructor argument - not good for animation
             // BoxBlurFilter on the other hand might be OK

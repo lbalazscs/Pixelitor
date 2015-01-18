@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import pixelitor.filters.gui.AngleParam;
@@ -64,7 +65,7 @@ public class LittlePlanet extends FilterWithParametrizedGUI {
         filter.setZoom(zoom.getValueAsPercentage());
         filter.setInnerZoom(innerZoom.getValueAsPercentage());
         filter.setRotateResult(rotateResult.getValueInIntuitiveRadians());
-        filter.setInverted(invert.getValue());
+        filter.setInverted(invert.isChecked());
 
         filter.setCenterX(center.getRelativeX());
         filter.setCenterY(center.getRelativeY());

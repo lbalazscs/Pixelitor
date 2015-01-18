@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import pixelitor.filters.gui.AdjustPanel;
@@ -85,7 +86,7 @@ public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
     @Override
     protected BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (hasShowOriginal) {
-            boolean showOriginal = showOriginalParam.getValue();
+            boolean showOriginal = showOriginalParam.isChecked();
             showOriginalHelper.setShowOriginal(showOriginal);
             if (showOriginal) {
                 return src;
@@ -103,7 +104,7 @@ public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
             showOriginalHelper.setLastTransformed(dest);
         }
 
-        if(hasAffectedAreaShapeParam && showAffectedAreaParam.getValue()) {
+        if (hasAffectedAreaShapeParam && showAffectedAreaParam.isChecked()) {
             ImageUtils.paintAffectedAreaShapes(dest, affectedAreaShapes);
         }
 

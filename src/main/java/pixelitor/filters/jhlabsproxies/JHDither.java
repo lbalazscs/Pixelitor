@@ -63,7 +63,7 @@ public class JHDither extends FilterWithParametrizedGUI {
         }
 
         filter.setLevels(levels.getValue());
-        filter.setColorDither(colorDither.getValue());
+        filter.setColorDither(colorDither.isChecked());
         filter.setMatrixMethod(matrixMethod.getValue());
 
         filter.initialize();

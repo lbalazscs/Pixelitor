@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.EdgeFilter;
@@ -118,7 +119,7 @@ public class JHConvolutionEdge extends FilterWithParametrizedGUI {
 
         dest = filter.filter(src, dest);
 
-        if (invertImage.getValue()) {
+        if (invertImage.isChecked()) {
             Invert.invertImage(dest, dest);
         }
 

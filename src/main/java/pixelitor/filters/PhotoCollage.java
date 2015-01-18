@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -128,7 +128,7 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
             // step 2: translate
             int tx;
             int ty;
-            if (allowOutsideParam.getValue()) {
+            if (allowOutsideParam.isChecked()) {
                 tx = rand.nextInt(dest.getWidth() + xSize) - xSize;
                 ty = rand.nextInt(dest.getHeight() + ySize) - ySize;
             } else {
