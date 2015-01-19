@@ -34,7 +34,7 @@ public class AnimGifExportPanel extends JPanel {
     private final JTextField delayTF;
     private final JCheckBox pingPongCB;
 
-    public AnimGifExportPanel(int nrLayers) {
+    private AnimGifExportPanel(int nrLayers) {
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         setLayout(new VerticalLayout(10));
 
@@ -57,11 +57,11 @@ public class AnimGifExportPanel extends JPanel {
         add(pingPongCB);
     }
 
-    public int getDelayMillis() {
+    private int getDelayMillis() {
         return Integer.parseInt(delayTF.getText());
     }
 
-    public boolean isPingPong() {
+    private boolean isPingPong() {
         return pingPongCB.isSelected();
     }
 

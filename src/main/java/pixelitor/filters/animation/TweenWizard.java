@@ -86,7 +86,7 @@ public class TweenWizard extends Wizard {
     @Override
     protected boolean mayMoveForwardIfNextPressed(WizardPage currentPage, Component dialogParent) {
         if (currentPage == TweenWizardPage.OUTPUT_SETTINGS) {
-            ValidatedForm settings = (ValidatedForm) currentPage.getPanel(TweenWizard.this);
+            ValidatedForm settings = (ValidatedForm) currentPage.getPanel(this);
             if (!settings.isDataValid()) {
                 Dialogs.showErrorDialog(dialogParent, "Error", settings.getErrorMessage());
                 return false;

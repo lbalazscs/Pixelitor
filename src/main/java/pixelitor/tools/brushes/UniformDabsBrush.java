@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.tools.brushes;
 
@@ -25,7 +25,10 @@ public abstract class UniformDabsBrush implements AngledBrush {
     private double distanceFromLastDab = 0;
     private double spacingRatio = 2.0; // the spacing relative to the radius
     protected boolean angleAware;
-    double prevX = 0, prevY = 0; // used only for angle-aware drawings
+
+    // used only for angle-aware drawings
+    private double prevX = 0;
+    private double prevY = 0;
 
     protected UniformDabsBrush(double spacingRatio, boolean angleAware) {
         this.spacingRatio = spacingRatio;

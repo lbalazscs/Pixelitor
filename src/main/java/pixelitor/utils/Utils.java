@@ -111,7 +111,7 @@ public final class Utils {
     /**
      * Executes the given filter with busy cursor
      */
-    public static void executeFilterWithBusyCursor(final Filter filter, final ChangeReason changeReason, Component busyCursorParent) {
+    public static void executeFilterWithBusyCursor(Filter filter, ChangeReason changeReason, Component busyCursorParent) {
         Composition comp = ImageComponents.getActiveComp().get();
         comp.executeFilterWithBusyCursor(filter, changeReason, busyCursorParent);
     }

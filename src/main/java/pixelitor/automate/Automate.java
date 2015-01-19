@@ -44,8 +44,8 @@ public class Automate {
     private static final String OVERWRITE_NO = "No (Skip)";
     private static final String OVERWRITE_CANCEL = "Cancel Processing";
 
-    static volatile boolean overwriteAll = false;
-    static volatile boolean stopProcessing = false;
+    private static volatile boolean overwriteAll = false;
+    private static volatile boolean stopProcessing = false;
 
     private Automate() {
     }

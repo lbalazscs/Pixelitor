@@ -279,7 +279,7 @@ public final class AppPreferences {
         return UIManager.getSystemLookAndFeelClassName();
     }
 
-    public static void savePrefsAndExit() {
+    private static void savePrefsAndExit() {
         savePreferencesBeforeExit();
         System.exit(0);
     }

@@ -120,7 +120,7 @@ public class Composition implements Serializable {
         this.canvas = canvas;
     }
 
-    public void addBaseLayer(BufferedImage baseLayerImage) {
+    private void addBaseLayer(BufferedImage baseLayerImage) {
 //        canvas.updateSize(baseLayerImage.getWidth(), baseLayerImage.getHeight());
         ImageLayer newLayer = new ImageLayer(this, baseLayerImage, null);
 

@@ -69,8 +69,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
     // the start of the image if the ImageComponent is resized to bigger
     // than the canvas, and the image needs to be centralized
-    double drawStartX;
-    double drawStartY;
+    private double drawStartX;
+    private double drawStartY;
 
     public ImageComponent(Composition comp) {
         assert comp != null;

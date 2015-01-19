@@ -29,7 +29,7 @@ import java.awt.Component;
  * The batch filter wizard
  */
 public class BatchFilterWizard extends Wizard {
-    private BatchFilterConfig config = new BatchFilterConfig();
+    private final BatchFilterConfig config = new BatchFilterConfig();
 
     public BatchFilterWizard() {
         super(BatchFilterWizardPage.SELECT_FILTER_AND_DIRS, "Batch Filter", "Start Processing", 490, 380);

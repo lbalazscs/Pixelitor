@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.automate;
 
 import pixelitor.Composition;
@@ -60,7 +61,7 @@ public class BatchResize {
         private final IntTextField withTextField;
         private final IntTextField heightTextField;
 
-        BatchResizePanel() {
+        private BatchResizePanel() {
             JPanel dimensionsPanel = new JPanel();
             dimensionsPanel.add(new JLabel("Max Width:"));
             withTextField = new IntTextField(5);
@@ -99,15 +100,15 @@ public class BatchResize {
             return true;
         }
 
-        public void saveValues() {
+        private void saveValues() {
             openSaveDirsPanel.saveValues();
         }
 
-        public int getWidthValue() {
+        private int getWidthValue() {
             return withTextField.getIntValue();
         }
 
-        public int getHeightValue() {
+        private int getHeightValue() {
             return heightTextField.getIntValue();
         }
     }

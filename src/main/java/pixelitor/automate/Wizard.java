@@ -31,8 +31,8 @@ public abstract class Wizard {
     private WizardPage wizardPage;
     private final String dialogTitle;
     private final String finishButtonText;
-    private int initialDialogWidth;
-    private int initialDialogHeight;
+    private final int initialDialogWidth;
+    private final int initialDialogHeight;
 
     protected Wizard(WizardPage initialWizardPage, String dialogTitle, String finishButtonText, int initialDialogWidth, int initialDialogHeight) {
         this.wizardPage = initialWizardPage;
@@ -53,7 +53,7 @@ public abstract class Wizard {
         }
     }
 
-    public void showDialog(JFrame dialogParent, String title) {
+    private void showDialog(JFrame dialogParent, String title) {
         assert dialog == null; // this should be called once per object
 
         dialog = new OKCancelDialog(
@@ -98,7 +98,7 @@ public abstract class Wizard {
                 }
             }
         };
-        dialog.setHeaderMessage(wizardPage.getHeaderText(Wizard.this));
+        dialog.setHeaderMessage(wizardPage.getHeaderText(this));
 
         // it was packed already, but this is not correct because of the header message
         // and anyway we don't know the size of the filter dialogs in advance

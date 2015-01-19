@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,7 @@ public class AboutDialog extends OKDialog {
     private static Box box;
     public static final String HOME_PAGE = "http://pixelitor.sourceforge.net";
 
-    public AboutDialog(JFrame owner, JComponent form) {
+    private AboutDialog(JFrame owner, JComponent form) {
         super(owner, "About Pixelitor", form);
     }
 

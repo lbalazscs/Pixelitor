@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ import java.awt.event.MouseEvent;
  * which forwards the events to the current tool in order to do the real job of the tool
  */
 public class CurrentToolHandler extends ToolHandler {
-    Tool tool;
+    private Tool tool;
 
     public CurrentToolHandler(Tool tool) {
         this.tool = tool;

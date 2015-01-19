@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor.filters;
@@ -26,16 +26,16 @@ import pixelitor.utils.SliderSpinner;
 import java.awt.image.BufferedImage;
 
 public class Threshold extends FilterWithParametrizedGUI {
-    public static final int CRIT_LUMINOSITY = 1;
-    public static final int CRIT_RED = 2;
-    public static final int CRIT_GREEN = 3;
-    public static final int CRIT_BLUE = 4;
-    public static final int CRIT_SATURATION = 5;
+    private static final int CRIT_LUMINOSITY = 1;
+    private static final int CRIT_RED = 2;
+    private static final int CRIT_GREEN = 3;
+    private static final int CRIT_BLUE = 4;
+    private static final int CRIT_SATURATION = 5;
 
     private final RangeParam threshold = new RangeParam("Threshold", 0,
             255, 128, false, SliderSpinner.TextPosition.BORDER);
 
-    IntChoiceParam criterion = new IntChoiceParam("Based on",
+    private IntChoiceParam criterion = new IntChoiceParam("Based on",
             new IntChoiceParam.Value[]{
                 new IntChoiceParam.Value("Luminosity", CRIT_LUMINOSITY),
                 new IntChoiceParam.Value("Red Channel", CRIT_RED),
@@ -56,7 +56,7 @@ public class Threshold extends FilterWithParametrizedGUI {
         return FilterUtils.runRGBPixelOp(pixelOp, src, dest);
     }
 
-    RGBPixelOp getRGBPixelOp(final double threshold, int basedOn) {
+    private RGBPixelOp getRGBPixelOp(final double threshold, int basedOn) {
         switch (basedOn) {
             case CRIT_LUMINOSITY:
                 return new RGBPixelOp() {

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools;
 
 import com.bric.awt.CalligraphyStroke;
@@ -156,7 +157,7 @@ public enum StrokeType {
     };
 
     private static final float OUTLINE_WIDTH = 1.0f;
-    public final BasicStroke innerOutlineStroke = new BasicStroke(OUTLINE_WIDTH);
+    private final static BasicStroke innerOutlineStroke = new BasicStroke(OUTLINE_WIDTH);
 
     private final String guiName;
 

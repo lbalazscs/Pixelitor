@@ -918,7 +918,7 @@ public class ImageLayer extends ContentLayer {
         }
     }
 
-    boolean isImageContentChanged() {
+    private boolean isImageContentChanged() {
         assert state == State.PREVIEW;
         return imageContentChanged;
     }

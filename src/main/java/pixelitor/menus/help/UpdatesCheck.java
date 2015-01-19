@@ -74,7 +74,7 @@ public class UpdatesCheck {
         }
     }
 
-    static boolean needsJavaUpdate(String requiredJavaVersion) {
+    private static boolean needsJavaUpdate(String requiredJavaVersion) {
         if(requiredJavaVersion.equals("7")) {
             return false; // we always have at least Java 7, otherwise this code would not run
         }

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.animation;
 
 import javax.imageio.ImageIO;
@@ -23,7 +24,7 @@ import java.io.IOException;
 
 public class PNGFileSequenceWriter implements AnimationWriter {
     private final File outputDir;
-    int fileSequenceNumber;
+    private int fileSequenceNumber;
 
     public PNGFileSequenceWriter(File outputDir) {
         this.outputDir = outputDir;
