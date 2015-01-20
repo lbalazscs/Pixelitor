@@ -211,10 +211,14 @@ public class FilterCreator extends JPanel {
 
         ParameterInfo[] params = getParameterInfoArray();
 
-        return getCode(parametrizedGui, gui, copySrc, name, pixelLoop, proxy, proxyName, angleParam, center, edge, color, gradient, interpolation, params);
+        return getCode(parametrizedGui, gui, copySrc, name, pixelLoop, proxy, proxyName,
+                angleParam, center, edge, color, gradient, interpolation, params);
     }
 
-    private static String getCode(boolean parametrizedGui, boolean gui, boolean copySrc, String name, boolean pixelLoop, boolean proxy, String proxyName, boolean angleParam, boolean center, boolean edge, boolean color, boolean gradient, boolean interpolation, ParameterInfo[] params) {
+    private static String getCode(boolean parametrizedGui, boolean gui, boolean copySrc,
+                                  String name, boolean pixelLoop, boolean proxy, String proxyName,
+                                  boolean angleParam, boolean center, boolean edge, boolean color,
+                                  boolean gradient, boolean interpolation, ParameterInfo[] params) {
         String retVal = addImports(name, pixelLoop, parametrizedGui, proxy, proxyName);
         String className = name.replaceAll(" ", "");
 
@@ -229,7 +233,7 @@ public class FilterCreator extends JPanel {
         }
 
         retVal += addConstructor(name, gui, parametrizedGui, className, copySrc, edge, interpolation, params);
-        retVal += addTransform(pixelLoop, proxy, proxyName, center, angleParam, edge, interpolation, params);
+        retVal += addTransform(pixelLoop, proxy, proxyName, center, angleParam, edge, interpolation);
         retVal += addGetAdjustPanel(gui, parametrizedGui, className);
 
         return retVal;
@@ -248,17 +252,12 @@ public class FilterCreator extends JPanel {
         return retVal;
     }
 
-    private static String addTransform(boolean pixelLoop, boolean proxy, String proxyName, boolean center, boolean angleParam, boolean edgeAction, boolean interpolation, ParameterInfo[] params) {
+    private static String addTransform(boolean pixelLoop, boolean proxy,
+                                       String proxyName, boolean center, boolean angleParam,
+                                       boolean edgeAction, boolean interpolation) {
         String retVal = "";
         retVal += "\n    @Override\n";
         retVal += "    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {\n";
-
-        for (ParameterInfo param : params) {
-            String paramName = param.getParamVariableName();
-            String variableName = param.getVariableName();
-            retVal += "       int " + variableName + " =  " + paramName + ".getValue();\n";
-        }
-
 
         if (pixelLoop) {
             retVal += "        int[] srcData = ImageUtils.getPixelsAsArray(src);\n";
@@ -277,16 +276,16 @@ public class FilterCreator extends JPanel {
                 retVal += "        filter.setCenterY(center.getRelativeY());\n";
             }
             if (edgeAction) {
-                retVal += "        filter.setEdgeAction(edgeActionParam.getValue());\n";
+                retVal += "        filter.setEdgeAction(edgeAction.getValue());\n";
             }
             if (interpolation) {
-                retVal += "        filter.setInterpolation(interpolationParam.getValue());\n";
+                retVal += "        filter.setInterpolation(interpolation.getValue());\n";
             }
 
             retVal += '\n';
 
             if (angleParam) {
-                retVal += "        filter.setAngle(angleParam.getValueInRadians());\n";
+                retVal += "        filter.setAngle(angle.getValueInRadians());\n";
             }
 
             retVal += "        dest = filter.filter(src, dest);\n";
@@ -361,12 +360,12 @@ public class FilterCreator extends JPanel {
     private static String addParamSetToConstructor(boolean edge, boolean interpolation, ParameterInfo... params) {
         String retVal = "";
         if (params.length == 1) {
-            retVal += "        setParamSet(new ParamSet(" + params[0].getParamVariableName() + "));\n";
+            retVal += "        setParamSet(new ParamSet(" + params[0].getVariableName() + "));\n";
         } else {
             retVal += "        setParamSet(new ParamSet(\n";
             for (int i = 0; i < params.length; i++) {
                 ParameterInfo param = params[i];
-                String paramName = param.getParamVariableName();
+                String paramName = param.getVariableName();
                 retVal += "            " + paramName;
                 if (i < params.length - 1 || edge || interpolation) {
                     retVal += ',';
@@ -374,10 +373,10 @@ public class FilterCreator extends JPanel {
                 retVal += '\n';
             }
             if(edge) {
-                retVal += "            edgeActionParam,\n";
+                retVal += "            edgeAction,\n";
             }
             if(interpolation) {
-                retVal += "            interpolationParam\n";
+                retVal += "            interpolation\n";
             }
 
             retVal += "        ));\n";
@@ -385,42 +384,44 @@ public class FilterCreator extends JPanel {
         return retVal;
     }
 
-    private static String addParamsDeclaration(boolean center, boolean angleParam, boolean edge, boolean color, boolean gradient, boolean interpolation, ParameterInfo... params) {
+    private static String addParamsDeclaration(boolean center, boolean angleParam, boolean edge,
+                                               boolean color, boolean gradient, boolean interpolation,
+                                               ParameterInfo... params) {
         String retVal = "";
         for (ParameterInfo param : params) {
-            String paramVarName = param.getParamVariableName();
+            String paramVarName = param.getVariableName();
 
-            retVal += "    private RangeParam " + paramVarName + " = new RangeParam(\"" + param.getName() + "\", " + param.getMin() + ", " + param.getMax() + ", " + param.getDefaultValue() + ");";
+            retVal += "    private RangeParam " + paramVarName + " = new RangeParam(\"" + param.getName() + "\", "
+                    + param.getMin() + ", " + param.getMax() + ", " + param.getDefaultValue() + ");";
 
             retVal += '\n';
         }
 
         if (center) {
-            retVal += "    private ImagePositionParam centerParam = new ImagePositionParam(\"Center\");\n";
+            retVal += "    private ImagePositionParam center = new ImagePositionParam(\"Center\");\n";
         }
         if (angleParam) {
-            retVal += "    private AngleParam angleParam = new AngleParam(\"Angle\", 0);\n";
+            retVal += "    private AngleParam angle = new AngleParam(\"Angle\", 0);\n";
         }
         if (edge) {
-            retVal += "    private IntChoiceParam edgeActionParam =  IntChoiceParam.getEdgeActionChoices();\n";
+            retVal += "    private IntChoiceParam edgeAction =  IntChoiceParam.getEdgeActionChoices();\n";
         }
         if (interpolation) {
-            retVal += "    private IntChoiceParam interpolationParam = IntChoiceParam.getInterpolationChoices();\n";
+            retVal += "    private IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();\n";
         }
         if (color) {
-            retVal += "    private ColorParam colorParam = new ColorParam(\"Color:\", Color.WHITE, false, false);\n";
+            retVal += "    private ColorParam color = new ColorParam(\"Color:\", Color.WHITE, false, false);\n";
         }
         if (gradient) {
             retVal += "    private float[] defaultThumbPositions = new float[]{0f, 1f};\n";
             retVal += "    private Color[] defaultValues = new Color[]{Color.BLACK, Color.WHITE};\n";
-            retVal += "    private GradientParam gradientParam = new GradientParam(\"Colors:\", defaultThumbPositions, defaultValues);\n";
+            retVal += "    private GradientParam gradient = new GradientParam(\"Colors:\", defaultThumbPositions, defaultValues);\n";
         }
         return retVal;
     }
 
     public static class ParameterInfo {
         String name;
-        String paramVariableName;
         String variableName;
         int min;
         int max;
@@ -434,15 +435,10 @@ public class FilterCreator extends JPanel {
 
             String tmp = name.replaceAll(" ", "");
             this.variableName = tmp.substring(0, 1).toLowerCase() + tmp.substring(1);
-            this.paramVariableName = variableName + "Param";
         }
 
         private String getName() {
             return name;
-        }
-
-        private String getParamVariableName() {
-            return paramVariableName;
         }
 
         private String getVariableName() {
