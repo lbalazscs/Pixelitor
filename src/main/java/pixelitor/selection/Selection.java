@@ -55,8 +55,8 @@ public class Selection {
     private SelectionType selectionType;
     private SelectionInteraction selectionInteraction;
 
-    public static final double DASH_WIDTH = 1.0;
-    public static final float DASH_LENGTH = 4.0f;
+    private static final double DASH_WIDTH = 1.0;
+    private static final float DASH_LENGTH = 4.0f;
     private static final float[] MARCHING_ANTS_DASH = {DASH_LENGTH, DASH_LENGTH};
 
     enum State {

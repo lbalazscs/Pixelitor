@@ -103,7 +103,7 @@ public class RobotTest {
     private static boolean continueRunning = true;
 
     private static final WeightedCaller weightedCaller = new WeightedCaller();
-    public static final boolean PRINT_MEMORY = false;
+    private static final boolean PRINT_MEMORY = false;
     private static KeyStroke stopKeyStroke;
 
     private static int numPastedImages = 0;

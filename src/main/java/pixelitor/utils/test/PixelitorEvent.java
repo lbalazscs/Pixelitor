@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -52,18 +52,14 @@ public class PixelitorEvent implements Comparable<PixelitorEvent> {
         }
     }
 
-    public Date getDate() {
-        return date;
-    }
-
     public String getMessage() {
         return description;
     }
 
     @Override
     public int compareTo(PixelitorEvent o) {
-        Date thisDate = getDate();
-        Date otherDate = o.getDate();
+        Date thisDate = date;
+        Date otherDate = o.date;
 
         return thisDate.compareTo(otherDate);
     }

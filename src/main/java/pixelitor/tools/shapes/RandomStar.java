@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools.shapes;
 
 import net.jafama.FastMath;
@@ -37,7 +38,7 @@ public class RandomStar implements Shape {
     // Things are OK with this delegate
     private GeneralPath delegate = null;
 
-    private static Random random = new Random();
+    private static final Random random = new Random();
 
     private static int numPoints;
     private static int numRadius;

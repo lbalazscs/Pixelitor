@@ -71,7 +71,7 @@ public class Handles {
         }
     }
 
-    public Rectangle getSelectedRectangleInComponentSpace() {
+    private Rectangle getSelectedRectangleInComponentSpace() {
         int upperLeftX = upperLeft.getX();
         int upperRightX = upperRight.getX();
         int upperLeftY = upperLeft.getY();

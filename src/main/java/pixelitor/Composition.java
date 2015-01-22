@@ -695,7 +695,7 @@ public class Composition implements Serializable {
         }
     }
 
-    public boolean isActiveComp() {
+    private boolean isActiveComp() {
         // TODO this was a hack in order to isolate the unit tests from ImageComponents
         if (!(ic instanceof ImageComponent)) {
             return false;

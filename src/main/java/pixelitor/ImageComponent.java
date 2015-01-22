@@ -370,7 +370,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         setupFitScreenZoomSize(width, height, true);
     }
 
-    public void setupFitScreenZoomSize(int imageWidth, int imageHeight, boolean alsoZoomInToFitScreen) {
+    private void setupFitScreenZoomSize(int imageWidth, int imageHeight, boolean alsoZoomInToFitScreen) {
         Dimension desktopSize = PixelitorWindow.getInstance().getDesktopSize();
         double desktopWidth = desktopSize.getWidth();
         double desktopHeight = desktopSize.getHeight();

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor;
 
 import com.jhlabs.image.CausticsFilter;
@@ -94,7 +95,7 @@ class FilterWrapper {
         this(filter, filter.getClass().getSimpleName());
     }
 
-    FilterWrapper(BufferedImageOp filter, String description) {
+    private FilterWrapper(BufferedImageOp filter, String description) {
         this.filter = filter;
         this.description = description;
         if(filter instanceof TransformFilter) {

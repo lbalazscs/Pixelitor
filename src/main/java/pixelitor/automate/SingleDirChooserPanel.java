@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@ public class SingleDirChooserPanel extends ValidatedForm {
     private final BrowseFilesSupport directoryChooser;
     private OutputFormatSelector outputFormatSelector;
 
-    public SingleDirChooserPanel(String label, String dialogTitle, String initialPath, boolean addOutputChooser) {
+    private SingleDirChooserPanel(String label, String dialogTitle, String initialPath, boolean addOutputChooser) {
         directoryChooser = new BrowseFilesSupport(initialPath, dialogTitle, true);
         JLabel dirLabel = new JLabel(label);
         JTextField dirTF = directoryChooser.getNameTF();

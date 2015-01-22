@@ -27,7 +27,7 @@ import java.awt.event.MouseEvent;
  * which forwards the events to the current tool in order to do the real job of the tool
  */
 public class CurrentToolHandler extends ToolHandler {
-    private Tool tool;
+    private final Tool tool;
 
     public CurrentToolHandler(Tool tool) {
         this.tool = tool;

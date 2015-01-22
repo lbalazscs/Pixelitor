@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -215,7 +215,7 @@ public class OpenRaster {
         return comp;
     }
 
-    public static Document loadXMLFromString(String xml) throws ParserConfigurationException, IOException, SAXException {
+    private static Document loadXMLFromString(String xml) throws ParserConfigurationException, IOException, SAXException {
         if (xml.startsWith("\uFEFF")) { // starts with UTF BOM character
             // paint.net exported xml files start with this
             // see http://www.rgagnon.com/javadetails/java-handle-utf8-file-with-bom.html

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.transform;
 
 import java.awt.Cursor;
@@ -22,8 +23,8 @@ import java.awt.Shape;
 
 public class Handle {
     // All handle coordinates and sizes are in component space
-    public static final int RADIUS = 5;
-    public static final int DIAMETER = 2*RADIUS;
+    private static final int RADIUS = 5;
+    private static final int DIAMETER = 2 * RADIUS;
 
     private int x;
     private int y;

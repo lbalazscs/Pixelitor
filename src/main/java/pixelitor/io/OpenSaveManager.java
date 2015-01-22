@@ -46,7 +46,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class OpenSaveManager {
-    public static final int CURRENT_PXC_VERSION_NUMBER = 0x03;
+    private static final int CURRENT_PXC_VERSION_NUMBER = 0x03;
     private static final float DEFAULT_JPEG_QUALITY = 0.87f;
     private static float jpegQuality = DEFAULT_JPEG_QUALITY;
 
@@ -188,7 +188,7 @@ public class OpenSaveManager {
                     imageComponent.close();
                 } else if (answer == JOptionPane.CANCEL_OPTION) { // cancel
                     // do nothing
-                } else {
+                } else { // dialog closed by pressing X
                     // do nothing
                 }
             } else {

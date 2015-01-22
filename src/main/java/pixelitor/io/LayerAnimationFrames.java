@@ -30,7 +30,7 @@ import java.util.List;
 
 public class LayerAnimationFrames {
     private final int delayMillis;
-    List<BufferedImage> images = new ArrayList<>();
+    private final List<BufferedImage> images = new ArrayList<>();
 
     public LayerAnimationFrames(Composition comp, int delayMillis, boolean pingPong) {
         this.delayMillis = delayMillis;

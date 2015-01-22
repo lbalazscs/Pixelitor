@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.layers;
 
 import javax.swing.event.MouseInputAdapter;
@@ -27,7 +28,7 @@ import java.awt.event.MouseEvent;
 public class LayersMouseHandler extends MouseInputAdapter {
     private static final Cursor MOVE_CURSOR = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
     private static final Cursor DEFAULT_CURSOR = Cursor.getDefaultCursor();
-    public static final int DRAG_X_INDENT = 10;
+    private static final int DRAG_X_INDENT = 10;
     private final LayersPanel layersPanel;
     private int dragStartYInButton;
     private boolean dragging = false;
@@ -96,7 +97,7 @@ public class LayersMouseHandler extends MouseInputAdapter {
      * Returns the layer button for the mouse event and also translate
      * the coordinates of the argument into the layer button space
      */
-    public static LayerButton getLayerButtonFromEvent(MouseEvent e) {
+    private static LayerButton getLayerButtonFromEvent(MouseEvent e) {
         LayerButton layerButton = null;
         Component c = e.getComponent();
         // the source of the event must be either the layer button

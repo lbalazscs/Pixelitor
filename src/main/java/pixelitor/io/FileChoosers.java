@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,14 +42,17 @@ public class FileChoosers {
     private static final FileFilter pxcFilter = new FileNameExtensionFilter("PXC files", "pxc");
     public static final FileFilter oraFilter = new FileNameExtensionFilter("OpenRaster files", "ora");
 
-    private static final FileFilter[] DFAULT_OPEN_SAVE_FILTERS = {bmpFilter, gifFilter, jpegFilter, oraFilter, pngFilter, pxcFilter};
+    private static final FileFilter[] DEFAULT_OPEN_SAVE_FILTERS = {bmpFilter, gifFilter, jpegFilter, oraFilter, pngFilter, pxcFilter};
+
     private static final FileFilter[] NON_DEFAULT_OPEN_SAVE_FILTERS = {};
 
     private FileChoosers() {
     }
 
-    public static synchronized void initOpenFileChooser() {
+    private static void initOpenFileChooser() {
+        assert SwingUtilities.isEventDispatchThread();
         if (openFileChooser == null) {
+            //noinspection NonThreadSafeLazyInitialization
             openFileChooser = new JFileChooser(lastOpenDir);
 
             setDefaultOpenExtensions();
@@ -60,8 +63,10 @@ public class FileChoosers {
         }
     }
 
-    public static synchronized void initSaveFileChooser() {
+    public static void initSaveFileChooser() {
+        assert SwingUtilities.isEventDispatchThread();
         if (saveFileChooser == null) {
+            //noinspection NonThreadSafeLazyInitialization
             saveFileChooser = new CustomFileChooser(lastSaveDir);
             saveFileChooser.setDialogTitle("Save As");
 
@@ -113,10 +118,6 @@ public class FileChoosers {
             outputFormat.saveComposition(comp, selectedFile);
             return true;
         }
-        if (status == JFileChooser.CANCEL_OPTION) {
-            // save cancelled
-            return false;
-        }
         return false;
     }
 
@@ -151,12 +152,11 @@ public class FileChoosers {
         FileChoosers.lastSaveDir = newSaveDir;
     }
 
-    public static FileFilter getFileFilterForExtension(String ext) {
+    private static FileFilter getFileFilterForExtension(String ext) {
         if(ext == null) {
             return jpegFilter; // default
-        } else {
-            ext = ext.toLowerCase();
         }
+        ext = ext.toLowerCase();
         switch (ext) {
             case "jpg":
                 return jpegFilter;
@@ -174,7 +174,7 @@ public class FileChoosers {
         return jpegFilter; // default
     }
 
-    public static void setDefaultOpenExtensions() {
+    private static void setDefaultOpenExtensions() {
         addDefaultFilters(openFileChooser);
     }
 
@@ -196,13 +196,13 @@ public class FileChoosers {
             chooser.removeChoosableFileFilter(filter);
         }
 
-        for (FileFilter filter : DFAULT_OPEN_SAVE_FILTERS) {
+        for (FileFilter filter : DEFAULT_OPEN_SAVE_FILTERS) {
             chooser.addChoosableFileFilter(filter);
         }
     }
 
     private static void setupFilterToOnlyOneFormat(JFileChooser chooser, FileFilter chosenFilter) {
-        for (FileFilter filter : DFAULT_OPEN_SAVE_FILTERS) {
+        for (FileFilter filter : DEFAULT_OPEN_SAVE_FILTERS) {
             if(filter != chosenFilter) {
                 chooser.removeChoosableFileFilter(filter);
             }

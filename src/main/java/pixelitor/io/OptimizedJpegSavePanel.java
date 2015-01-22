@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.io;
 
@@ -42,7 +42,7 @@ public class OptimizedJpegSavePanel extends JPanel {
     private final RangeParam qualityParam;
     private final JLabel sizeLabel;
 
-    public OptimizedJpegSavePanel(BufferedImage image) {
+    private OptimizedJpegSavePanel(BufferedImage image) {
         this.image = image;
         qualityParam = new RangeParam("JPEG Quality", 1, 100, 60);
         sizeLabel = new JLabel();
@@ -138,17 +138,10 @@ class ImagePanel extends JPanel {
     private BufferedImage image;
 
     ImagePanel() {
-        init();
     }
 
     ImagePanel(BufferedImage image) {
         this.image = image;
-
-        init();
-    }
-
-    private void init() {
-
     }
 
     public void updateImage(BufferedImage newImage) {
