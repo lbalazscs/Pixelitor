@@ -14,15 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.lookup;
 
+import com.jhlabs.image.PixelUtils;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.RangeWithColorsParam;
 import pixelitor.filters.levels.RGBLookup;
-import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -106,29 +107,29 @@ public class ColorBalance extends FilterWithParametrizedGUI {
         if (affect == EVERYTHING) {
             for (short i = 0; i < LUT_TABLE_SIZE; i++) {
                 short r = (short) (i + cr - (mg / 2) - (yb / 2));
-                r = ImageUtils.limitTo8Bits(r);
+                r = PixelUtils.clamp(r);
                 redMapping[i] = r;
 
                 short g = (short) (i + mg - (cr / 2) - (yb / 2));
-                g = ImageUtils.limitTo8Bits(g);
+                g = PixelUtils.clamp(g);
                 greenMapping[i] = g;
 
                 short b = (short) (i + yb - (mg / 2) - (cr / 2));
-                b = ImageUtils.limitTo8Bits(b);
+                b = PixelUtils.clamp(b);
                 blueMapping[i] = b;
             }
         } else {
             for (short i = 0; i < LUT_TABLE_SIZE; i++) {
                 short r = (short) (i + affectFactor[i] * (cr - (mg / 2) - (yb / 2)));
-                r = ImageUtils.limitTo8Bits(r);
+                r = PixelUtils.clamp(r);
                 redMapping[i] = r;
 
                 short g = (short) (i + affectFactor[i] * (mg - (cr / 2) - (yb / 2)));
-                g = ImageUtils.limitTo8Bits(g);
+                g = PixelUtils.clamp(g);
                 greenMapping[i] = g;
 
                 short b = (short) (i + affectFactor[i] * (yb - (mg / 2) - (cr / 2)));
-                b = ImageUtils.limitTo8Bits(b);
+                b = PixelUtils.clamp(b);
                 blueMapping[i] = b;
             }
 

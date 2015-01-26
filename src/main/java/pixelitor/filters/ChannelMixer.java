@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,15 +8,16 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor.filters;
 
+import com.jhlabs.image.PixelUtils;
 import pixelitor.filters.gui.ActionParam;
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.ChannelMixerAdjustments;
@@ -171,7 +172,6 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
         }
     };
 
-
     private final Action averageBW = new AbstractAction("average BW") {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -236,7 +236,6 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
     };
 
     private final Action[] actions = {switchRedGreen, switchRedBlue, switchGreenBlue, shiftRGBR, shiftRBGR, averageBW, luminosityBW, sepia};
-
 
     public ChannelMixer() {
         super("Channel Mixer", true, false);
@@ -318,13 +317,13 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
                 int newGreen = (int) (greenFromRed * r + greenFromGreen * g + greenFromBlue * b);
                 int newBlue = (int) (blueFromRed * r + blueFromGreen * g + blueFromBlue * b);
 
-                newRed = ImageUtils.limitTo8Bits(newRed);
-                newGreen = ImageUtils.limitTo8Bits(newGreen);
-                newBlue = ImageUtils.limitTo8Bits(newBlue);
+                newRed = PixelUtils.clamp(newRed);
+                newGreen = PixelUtils.clamp(newGreen);
+                newBlue = PixelUtils.clamp(newBlue);
 
                 destData[i] = a | (newRed << 16) | (newGreen << 8) | newBlue;
             }
-        } else {
+        } else { // not packed int
             BandCombineOp bandCombineOp = new BandCombineOp(new float[][]{
                     {redFromRed, redFromGreen, redFromBlue},
                     {greenFromRed, greenFromGreen, greenFromBlue},

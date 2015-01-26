@@ -350,26 +350,6 @@ public class ImageUtils {
         return image;
     }
 
-    public static int limitTo8Bits(int value) {
-        if (value > 0xFF) {
-            return 0xFF;
-        }
-        if (value < 0) {
-            return 0;
-        }
-        return value;
-    }
-
-    public static short limitTo8Bits(short value) {
-        if (value > 0xFF) {
-            return 0xFF;
-        }
-        if (value < 0) {
-            return 0;
-        }
-        return value;
-    }
-
     public static BufferedImage convertToARGB_PRE(BufferedImage src, boolean oldCanBeFlushed) {
         assert src != null;
 

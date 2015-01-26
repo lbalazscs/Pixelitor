@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,14 +8,15 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters;
 
+import com.jhlabs.image.PixelUtils;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
@@ -26,7 +27,7 @@ public class Brightness extends FilterWithParametrizedGUI {
     private final RangeParam power = new RangeParam("Brightness Power (%)", 50, 150, 100);
     private final RangeParam multiply = new RangeParam("Brightness Multiply (%)", 1, 200, 100);
     private final RangeParam add = new RangeParam("Brightness Add", -255, 255, 0);
-    private final RangeParam contrastParam = new RangeParam("Contrast", -255, 255, 0);
+    private final RangeParam contrast = new RangeParam("Contrast", -255, 255, 0);
 
     public Brightness() {
         super("Brightness/Contrast", true, false);
@@ -34,16 +35,16 @@ public class Brightness extends FilterWithParametrizedGUI {
                 power,
                 multiply,
                 add,
-                contrastParam
+                contrast
         ));
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         int addValue = add.getValue();
-        int contrast = contrastParam.getValue();
+        int contrastValue = contrast.getValue();
 
-        if ((addValue == 0) && (multiply.getValue() == 100) && (power.getValue() == 100) && contrast == 0) {
+        if ((addValue == 0) && (multiply.getValue() == 100) && (power.getValue() == 100) && contrastValue == 0) {
             return src;
         }
 
@@ -56,7 +57,7 @@ public class Brightness extends FilterWithParametrizedGUI {
         int[] lookup = new int[256];
 
 
-        double contrastFactor = (259.0 * (contrast + 255)) / (255.0 * (259 - contrast));
+        double contrastFactor = (259.0 * (contrastValue + 255)) / (255.0 * (259 - contrastValue));
 
         for (int i = 0; i < lookup.length; i++) {
             float lookupValue = i; // by default do nothing
@@ -64,10 +65,10 @@ public class Brightness extends FilterWithParametrizedGUI {
             lookupValue = (float) Math.pow(lookupValue, powerValue);
             int lookupValueInt = ((int) (lookupValue * multiplyValue)) + addValue;
 
-            // contrast
+            // contrastValue
             lookupValueInt = (int)(contrastFactor * (lookupValueInt - 128) + 128);
 
-            lookup[i] = ImageUtils.limitTo8Bits(lookupValueInt);
+            lookup[i] = PixelUtils.clamp(lookupValueInt);
         }
 
         for (int i = 0; i < destData.length; i++) {
@@ -87,7 +88,7 @@ public class Brightness extends FilterWithParametrizedGUI {
                 b = lookup[b];
 
                 // now the contrast
-/*                if(contrast != 0)  {
+/*                if(contrastValue != 0)  {
                     r  = (int)(contrastFactor * (r - 128) + 128);
                     g  = (int)(contrastFactor * (g - 128) + 128);
                     b  = (int)(contrastFactor * (b - 128) + 128);

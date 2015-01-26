@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,16 +8,16 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor.filters.levels;
 
-import pixelitor.utils.ImageUtils;
+import com.jhlabs.image.PixelUtils;
 
 /**
  * Contains a lookup array of 256 elements, describing the pixel-by-pixel adjustments
@@ -32,7 +32,7 @@ public class GrayScaleLookup {
         for (int i = 0; i < mapping.length; i++) {
             double multiplier = ((double) (outputWhiteValue - outputBlackValue)) / ((double) (inputWhiteValue - inputBlackValue));
             double constant = (outputBlackValue) - (multiplier * inputBlackValue);
-            mapping[i] = (short) ImageUtils.limitTo8Bits((int) ((multiplier * i) + constant));
+            mapping[i] = (short) PixelUtils.clamp((int) ((multiplier * i) + constant));
         }
     }
 

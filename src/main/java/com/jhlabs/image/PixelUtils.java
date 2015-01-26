@@ -63,6 +63,19 @@ public class PixelUtils {
     }
 
     /**
+     * Clamp for shorts
+     */
+    public static short clamp(short c) {
+        if (c < 0) {
+            return 0;
+        }
+        if (c > 255) {
+            return 255;
+        }
+        return c;
+    }
+
+    /**
      * Makes sure that the value is not higher than 255
      */
     public static int max255(int c) {

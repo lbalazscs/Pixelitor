@@ -52,7 +52,7 @@ public class SingleDirChooserPanel extends ValidatedForm {
 
             outputFormatSelector = new OutputFormatSelector();
 
-            gridBagHelper.addLabel(outputFormatSelector.getLabelText(), 0, 1);
+            gridBagHelper.addLabel("Output Format:", 0, 1);
             gridBagHelper.addControlNoFill(outputFormatSelector.getFormatCombo());
         } else {
             setLayout(new FlowLayout(FlowLayout.LEFT));

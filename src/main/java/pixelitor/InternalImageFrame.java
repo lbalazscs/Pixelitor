@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor;
@@ -105,7 +105,6 @@ public class InternalImageFrame extends JInternalFrame implements InternalFrameL
         int maxWidth = Math.max(0, desktopSize.width - 20 - locationX);
         int maxHeight = Math.max(0, desktopSize.height - 40 - locationY);
 
-
         if (width > maxWidth) {
             width = maxWidth;
         }
@@ -114,10 +113,6 @@ public class InternalImageFrame extends JInternalFrame implements InternalFrameL
         }
 
         setSize(width + NIMBUS_HORIZONTAL_ADJUSTMENT, height + NIMBUS_VERTICAL_ADJUSTMENT);
-    }
-
-    public void updateTitle() {
-        setTitle(ic.createFrameTitle());
     }
 
     public void makeSureItIsVisible() {

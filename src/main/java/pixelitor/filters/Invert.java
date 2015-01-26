@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,14 +8,15 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters;
 
+import com.jhlabs.image.PixelUtils;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -84,9 +85,9 @@ public class Invert extends Filter {
                 g = (int) (ug * f2);
                 b = (int) (ub * f2);
 
-                r = ImageUtils.limitTo8Bits(r);
-                g = ImageUtils.limitTo8Bits(g);
-                b = ImageUtils.limitTo8Bits(b);
+                r = PixelUtils.clamp(r);
+                g = PixelUtils.clamp(g);
+                b = PixelUtils.clamp(b);
 
                 destData[i] = (a << 24) | (r << 16) | (g << 8) | b;
             }
