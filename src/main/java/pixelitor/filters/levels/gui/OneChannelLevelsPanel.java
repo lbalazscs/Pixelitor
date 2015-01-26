@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor.filters.levels.gui;
@@ -62,19 +62,19 @@ public class OneChannelLevelsPanel extends CardPanelWithCombo.Card implements Pa
 
         RangeParam inputBlackParam = new RangeParam("Input Dark", 0, 255, BLACK_DEFAULT);
         inputBlackParam.setAdjustmentListener(this);
-        inputBlackSlider = new SliderSpinner(Color.GRAY, type.getBackColor(), inputBlackParam);
+        inputBlackSlider = new SliderSpinner(inputBlackParam, Color.GRAY, type.getBackColor());
 
         RangeParam inputWhiteParam = new RangeParam("Input Light", 0, 255, WHITE_DEFAULT);
         inputWhiteParam.setAdjustmentListener(this);
-        inputWhiteSlider = new SliderSpinner(type.getWhiteColor(), Color.GRAY, inputWhiteParam);
+        inputWhiteSlider = new SliderSpinner(inputWhiteParam, type.getWhiteColor(), Color.GRAY);
 
         RangeParam outputBlackParam = new RangeParam("Output Dark", 0, 255, BLACK_DEFAULT);
         outputBlackParam.setAdjustmentListener(this);
-        outputBlackSlider = new SliderSpinner(Color.GRAY, type.getWhiteColor(), outputBlackParam);
+        outputBlackSlider = new SliderSpinner(outputBlackParam, Color.GRAY, type.getWhiteColor());
 
         RangeParam outputWhiteParam = new RangeParam("Output Light", 0, 255, WHITE_DEFAULT);
         outputWhiteParam.setAdjustmentListener(this);
-        outputWhiteSlider = new SliderSpinner(type.getBackColor(), Color.GRAY, outputWhiteParam);
+        outputWhiteSlider = new SliderSpinner(outputWhiteParam, type.getBackColor(), Color.GRAY);
 
         addSliderSpinner(inputBlackSlider);
         addSliderSpinner(inputWhiteSlider);

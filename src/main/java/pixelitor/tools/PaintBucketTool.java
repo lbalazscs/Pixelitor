@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -52,7 +52,7 @@ public class PaintBucketTool extends Tool {
 
     @Override
     public void initSettingsPanel() {
-        toolSettingsPanel.add(new SliderSpinner(toleranceParam, false, SliderSpinner.TextPosition.WEST));
+        toolSettingsPanel.add(new SliderSpinner(toleranceParam, SliderSpinner.TextPosition.WEST, false));
         toolSettingsPanel.add(new JLabel("Fill With:"));
 
         fillComboBox = new JComboBox<>(new FillType[]{FillType.FOREGROUND, FillType.BACKGROUND, FillType.TRANSPARENT});

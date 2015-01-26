@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.history;
 
@@ -21,6 +21,7 @@ import pixelitor.Composition;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import java.awt.Shape;
+import java.util.Objects;
 
 /**
  * Represents a deselect
@@ -33,11 +34,7 @@ public class DeselectEdit extends PixelitorEdit {
         super(comp, "Deselect");
         this.reason = reason;
 
-        if (backupShape == null) {
-            throw new IllegalArgumentException("backupShape is null");
-        }
-
-        this.backupShape = backupShape;
+        this.backupShape = Objects.requireNonNull(backupShape);
     }
 
     @Override

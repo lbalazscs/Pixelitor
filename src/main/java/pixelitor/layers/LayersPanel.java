@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.layers;
 
 import pixelitor.Composition;
@@ -23,6 +24,7 @@ import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * The GUI container for LayerButton objects.
@@ -39,11 +41,7 @@ public class LayersPanel extends JLayeredPane {
     }
 
     public void addLayerButton(LayerButton button, int newLayerIndex) {
-        if (button == null) {
-            throw new IllegalArgumentException("button is null");
-        }
-
-        buttonGroup.add(button);
+        buttonGroup.add(Objects.requireNonNull(button));
         layerButtons.add(newLayerIndex, button);
 
         add(button, JLayeredPane.DEFAULT_LAYER);

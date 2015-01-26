@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.gui;
 
 import pixelitor.utils.SliderSpinner;
@@ -36,7 +37,7 @@ public class AngleSelector extends JPanel {
         add(asc, BorderLayout.WEST);
 
         final RangeParam spinnerModel = angleParam.createRangeParam();
-        SliderSpinner sliderSpinner = new SliderSpinner(spinnerModel, true, SliderSpinner.TextPosition.NONE);
+        SliderSpinner sliderSpinner = new SliderSpinner(spinnerModel, SliderSpinner.TextPosition.NONE, true);
 
         sliderSpinner.setResettable(angleParam);
         int maxAngleInDegrees = angleParam.getMaxAngleInDegrees();

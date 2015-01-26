@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import pixelitor.utils.Optional;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import java.awt.Shape;
+import java.util.Objects;
 
 /**
  * Represents the change of a selection shape (via add, subtract, intersect or invert)
@@ -33,11 +34,7 @@ public class SelectionChangeEdit extends PixelitorEdit {
     public SelectionChangeEdit(Composition comp, Shape backupShape, String name) {
         super(comp, name);
 
-        if (backupShape == null) {
-            throw new IllegalArgumentException("backupShape is null");
-        }
-
-        this.backupShape = backupShape;
+        this.backupShape = Objects.requireNonNull(backupShape);
     }
 
     @Override

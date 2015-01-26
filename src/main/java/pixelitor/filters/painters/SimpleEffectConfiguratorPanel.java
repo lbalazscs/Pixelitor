@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ public class SimpleEffectConfiguratorPanel extends EffectConfiguratorPanel {
         super(effectName, defaultSelected, defaultColor);
 
         widthRange = new RangeParam("Width:", 1, 100, defaultWidth);
-        widthSlider = new SliderSpinner(widthRange, false, SliderSpinner.TextPosition.NONE);
+        widthSlider = new SliderSpinner(widthRange, SliderSpinner.TextPosition.NONE, false);
 
         gridBagHelper.addLabel("Width:", 0, 6);
         gridBagHelper.addControl(widthSlider);

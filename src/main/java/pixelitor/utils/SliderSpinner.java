@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor.utils;
@@ -54,15 +54,15 @@ public class SliderSpinner extends JPanel implements ChangeListener {
     private boolean sliderMoved = false;
     private boolean spinnerMoved = false;
 
-    public SliderSpinner(RangeParam model, boolean addDefaultButton, TextPosition position) {
-        this(null, null, model, addDefaultButton, position);
+    public SliderSpinner(RangeParam model, TextPosition position, boolean addDefaultButton) {
+        this(model, null, null, position, addDefaultButton);
     }
 
-    public SliderSpinner(Color leftColor, Color rightColor, RangeParam model) {
-        this(leftColor, rightColor, model, true, TextPosition.BORDER);
+    public SliderSpinner(RangeParam model, Color leftColor, Color rightColor) {
+        this(model, leftColor, rightColor, TextPosition.BORDER, true);
     }
 
-    private SliderSpinner(Color leftColor, Color rightColor, RangeParam model, boolean addDefaultButton, TextPosition textPosition) {
+    private SliderSpinner(RangeParam model, Color leftColor, Color rightColor, TextPosition textPosition, boolean addDefaultButton) {
         setLayout(new BorderLayout());
         this.model = model;
 

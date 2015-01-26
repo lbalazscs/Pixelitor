@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@ public class GroupedRangeSelector extends JPanel {
         int numParams = model.getNumParams();
         for (int i = 0; i < numParams; i++) {
             RangeParam param = model.getRangeParam(i);
-            SliderSpinner slider = new SliderSpinner(param, true, SliderSpinner.TextPosition.NONE);
+            SliderSpinner slider = new SliderSpinner(param, SliderSpinner.TextPosition.NONE, true);
             slider.setupTicks();
             gridBagHelper.addLabelWithControl(param.getName(), slider, i);
         }

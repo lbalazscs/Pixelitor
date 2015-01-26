@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.io;
 
 import pixelitor.filters.gui.ParamAdjustmentListener;
@@ -86,7 +87,7 @@ public class OptimizedJpegSavePanel extends JPanel {
             }
         });
 
-        SliderSpinner qualitySpinner = new SliderSpinner(qualityParam, false, SliderSpinner.TextPosition.WEST);
+        SliderSpinner qualitySpinner = new SliderSpinner(qualityParam, SliderSpinner.TextPosition.WEST, false);
         JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         southPanel.add(qualitySpinner);
 

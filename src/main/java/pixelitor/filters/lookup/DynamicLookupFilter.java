@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters.lookup;
 
@@ -23,6 +23,7 @@ import pixelitor.filters.levels.RGBLookup;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ShortLookupTable;
+import java.util.Objects;
 import java.util.Random;
 
 /**
@@ -36,10 +37,7 @@ public abstract class DynamicLookupFilter extends FilterWithGUI {
     }
 
     public void setRGBLookup(RGBLookup rgbLookup) {
-        if (rgbLookup == null) {
-            throw new IllegalArgumentException("rgbLookup is null");
-        }
-        this.rgbLookup = rgbLookup;
+        this.rgbLookup = Objects.requireNonNull(rgbLookup);
     }
 
     @Override

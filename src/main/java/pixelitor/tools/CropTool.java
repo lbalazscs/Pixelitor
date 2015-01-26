@@ -90,7 +90,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
 
     @Override
     public void initSettingsPanel() {
-        SliderSpinner maskOpacitySpinner = new SliderSpinner(maskOpacityParam, false, SliderSpinner.TextPosition.WEST);
+        SliderSpinner maskOpacitySpinner = new SliderSpinner(maskOpacityParam, SliderSpinner.TextPosition.WEST, false);
         toolSettingsPanel.add(maskOpacitySpinner);
 
         allowGrowingCB = new JCheckBox("Allow Growing", false);

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.painters;
 
 import com.bric.util.JVM;
@@ -143,7 +144,7 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
 
         gridBagHelper.addLabel("Font Size:", 0, 0);
         RangeParam fontSizeParam = new RangeParam("", 1, 1000, 100);
-        fontSizeSlider = new SliderSpinner(fontSizeParam, false, SliderSpinner.TextPosition.NONE);
+        fontSizeSlider = new SliderSpinner(fontSizeParam, SliderSpinner.TextPosition.NONE, false);
         fontSizeParam.setAdjustmentListener(this);
         gridBagHelper.addLastControl(fontSizeSlider);
 

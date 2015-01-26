@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -67,10 +67,10 @@ public class EnlargeCanvas {
 
         private EnlargeCanvasPanel() {
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-            add(new SliderSpinner(northRange, false, SliderSpinner.TextPosition.BORDER));
-            add(new SliderSpinner(eastRange, false, SliderSpinner.TextPosition.BORDER));
-            add(new SliderSpinner(southRange, false, SliderSpinner.TextPosition.BORDER));
-            add(new SliderSpinner(westRange, false, SliderSpinner.TextPosition.BORDER));
+            add(new SliderSpinner(northRange, SliderSpinner.TextPosition.BORDER, false));
+            add(new SliderSpinner(eastRange, SliderSpinner.TextPosition.BORDER, false));
+            add(new SliderSpinner(southRange, SliderSpinner.TextPosition.BORDER, false));
+            add(new SliderSpinner(westRange, SliderSpinner.TextPosition.BORDER, false));
         }
 
         public int getNorth() {

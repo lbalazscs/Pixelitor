@@ -44,6 +44,7 @@ import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Objects;
 
 /**
  * An image layer.
@@ -246,13 +247,9 @@ public class ImageLayer extends ContentLayer {
 
     // sets the image object ignoring the selection
     public void setImage(BufferedImage newImage) {
-        if (newImage == null) {
-            throw new IllegalArgumentException("newImage is null");
-        }
+        image = Objects.requireNonNull(newImage);
 
         assert Utils.checkRasterMinimum(newImage);
-
-        image = newImage;
 
         comp.imageChanged(false, false);
     }

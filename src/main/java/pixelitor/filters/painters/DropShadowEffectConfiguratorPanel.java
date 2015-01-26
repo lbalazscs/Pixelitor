@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.painters;
 
 import pixelitor.filters.gui.AngleParam;
@@ -38,7 +39,7 @@ public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
         super("Drop Shadow", defaultSelected, defaultColor);
 
         distanceParam = new RangeParam("Distance:", 1, 100, 10);
-        SliderSpinner distanceSlider = new SliderSpinner(distanceParam, false, SliderSpinner.TextPosition.NONE);
+        SliderSpinner distanceSlider = new SliderSpinner(distanceParam, SliderSpinner.TextPosition.NONE, false);
         gridBagHelper.addLabel("Distance:", 0, 3);
         gridBagHelper.addControl(distanceSlider);
 
@@ -48,7 +49,7 @@ public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
         gridBagHelper.addControl(angleSelectorComponent);
 
         spreadParam = new RangeParam("Spread:", 1, 100, 10);
-        SliderSpinner spreadSlider = new SliderSpinner(spreadParam, false, SliderSpinner.TextPosition.NONE);
+        SliderSpinner spreadSlider = new SliderSpinner(spreadParam, SliderSpinner.TextPosition.NONE, false);
         gridBagHelper.addLabel("Spread:", 0, 5);
         gridBagHelper.addControl(spreadSlider);
     }

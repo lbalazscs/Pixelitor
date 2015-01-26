@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -93,7 +93,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         // make sure all values are visible without a scrollbar
         typeSelector.setMaximumRowCount(BrushType.values().length);
 
-        SliderSpinner brushSizeSpinner = new SliderSpinner(brushRadiusParam, false, SliderSpinner.TextPosition.WEST);
+        SliderSpinner brushSizeSpinner = new SliderSpinner(brushRadiusParam, SliderSpinner.TextPosition.WEST, false);
         toolSettingsPanel.add(brushSizeSpinner);
 
         toolSettingsPanel.add(new JLabel("Mirror:"));

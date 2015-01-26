@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.painters;
 
 import com.bric.swing.ColorPicker;
@@ -52,7 +53,7 @@ public abstract class EffectConfiguratorPanel extends JPanel {
         setBorder(BorderFactory.createTitledBorder('"' + effectName + "\" Configuration"));
 
         opacityRange = new RangeParam("Width:", 1, 100, 100);
-        opacitySlider = new SliderSpinner(opacityRange, false, SliderSpinner.TextPosition.NONE);
+        opacitySlider = new SliderSpinner(opacityRange, SliderSpinner.TextPosition.NONE, false);
 
         enabledCheckBox = new JCheckBox();
         enabledCheckBox.setSelected(defaultSelected);
