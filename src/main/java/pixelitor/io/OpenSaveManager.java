@@ -81,7 +81,7 @@ public class OpenSaveManager {
         }
     }
 
-    // opens an a file with an 1-layer image format
+    // opens an a file with a single-layer image format
     private static Composition openSimpleFile(File file) {
         BufferedImage img = null;
         try {
@@ -90,11 +90,11 @@ public class OpenSaveManager {
             Dialogs.showExceptionDialog(ex);
         }
         if (img == null) {
-            JOptionPane.showMessageDialog(PixelitorWindow.getInstance(), "Could not load \"" + file.getName() + "\" as an image file", "Error", JOptionPane.ERROR_MESSAGE);
+            String message = String.format("Could not load \"%s\" as an image file", file.getName());
+            Dialogs.showErrorDialog("Error", message);
             return null;
         }
 
-//        PixelitorWindow.getInstance().addNewImage(img, file, null);
         Composition comp = Composition.fromImage(img, file, null);
         return comp;
     }
@@ -176,8 +176,9 @@ public class OpenSaveManager {
                 Object[] options = {"Save",
                         "Don't save",
                         "Cancel"};
-                Object message = new JLabel("<html><b>Do you want to save the changes made to " + comp.getName() + "?</b><br>Your changes will be lost if you don't save them.</html>");
-                int answer = JOptionPane.showOptionDialog(PixelitorWindow.getInstance(), message,
+                String question = String.format("<html><b>Do you want to save the changes made to %s?</b>" +
+                        "<br>Your changes will be lost if you don't save them.</html>", comp.getName());
+                int answer = JOptionPane.showOptionDialog(PixelitorWindow.getInstance(), new JLabel(question),
                         "Unsaved changes", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
                 if (answer == JOptionPane.YES_OPTION) { // save
                     boolean fileSaved = OpenSaveManager.save(comp, false);

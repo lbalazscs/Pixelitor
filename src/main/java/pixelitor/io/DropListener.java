@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.io;
 
 import pixelitor.PixelitorWindow;
@@ -54,8 +55,10 @@ public class DropListener extends DropTargetAdapter {
 
                     for (File file : list) {
                         if (file.isDirectory()) {
+                            String question = String.format("You have dropped the folder \"%s\". " +
+                                    "Do you want to open all image files inside it?", file.getName());
                             int answer = JOptionPane.showConfirmDialog(PixelitorWindow.getInstance(),
-                                    "You have dropped the folder \"" + file.getName() + "\". Do you want to open all image files inside it?",
+                                    question,
                                     "Question", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
                             if (answer == JOptionPane.YES_OPTION) {
                                 OpenSaveManager.openAllImagesInDir(file);

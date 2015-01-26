@@ -139,7 +139,9 @@ public class Automate {
         File outputFile = new File(lastSaveDir, outFileName);
 
         if (outputFile.exists() && (!overwriteAll)) {
-            JOptionPane pane = new JOptionPane("File " + outputFile + " already exists. Overwrite?", JOptionPane.WARNING_MESSAGE);
+            String message = String.format("File %s already exists. Overwrite?", outputFile);
+            JOptionPane pane = new JOptionPane(message, JOptionPane.WARNING_MESSAGE);
+
             pane.setOptions(new String[]{OVERWRITE_YES, OVERWRITE_YES_ALL, OVERWRITE_NO, OVERWRITE_CANCEL});
             pane.setInitialValue(OVERWRITE_NO);
 

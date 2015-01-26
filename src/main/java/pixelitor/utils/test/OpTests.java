@@ -30,6 +30,7 @@ import pixelitor.filters.gui.ParametrizedAdjustPanel;
 import pixelitor.history.History;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.OutputFormat;
+import pixelitor.utils.Dialogs;
 import pixelitor.utils.Optional;
 import pixelitor.utils.Utils;
 
@@ -153,8 +154,10 @@ public class OpTests {
                 }
 
                 long totalTime = (System.nanoTime() - startTime) / 1000000;
-                String msg = "Executing getCompositeImage() " + times + " times took " + totalTime + " ms, average time = " + totalTime / times + " ms";
-                JOptionPane.showMessageDialog(PixelitorWindow.getInstance(), msg, "Test Result", JOptionPane.INFORMATION_MESSAGE);
+                String msg = String.format(
+                        "Executing getCompositeImage() %d times took %d ms, average time = %d ms",
+                        times, totalTime, totalTime / times);
+                Dialogs.showInfoDialog("Test Result", msg);
             }
         };
         Utils.executeWithBusyCursor(task);

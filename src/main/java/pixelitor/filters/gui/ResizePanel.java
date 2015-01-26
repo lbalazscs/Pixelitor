@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -258,7 +258,7 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
             @Override
             protected void dialogAccepted() {
                 if (!p.validData()) {
-                    JOptionPane.showMessageDialog(this, p.getErrorMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    Dialogs.showErrorDialog(this, "Error", p.getErrorMessage());
                     return;
                 }
                 CompositionUtils.resize(comp, p.getNewWidth(), p.getNewHeight(), false);

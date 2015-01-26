@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,6 @@ import pixelitor.menus.view.ZoomLevel;
 import pixelitor.utils.debug.BufferedImageNode;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
@@ -326,7 +325,8 @@ public class ImageUtils {
         String iconPath = "/images/" + fileName;
         URL imgURL = ImageUtils.class.getResource(iconPath);
         if (imgURL == null) {
-            JOptionPane.showMessageDialog(null, iconPath + " not found", "Error", JOptionPane.ERROR_MESSAGE);
+            String message = iconPath + " not found";
+            Dialogs.showErrorDialog("Error", message);
         }
         return imgURL;
     }

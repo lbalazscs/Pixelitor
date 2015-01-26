@@ -21,6 +21,7 @@ import pixelitor.Composition;
 import pixelitor.PixelitorWindow;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.CustomFileChooser;
+import pixelitor.utils.Dialogs;
 import pixelitor.utils.ImagePreviewPanel;
 
 import javax.swing.*;
@@ -103,7 +104,7 @@ public class FileChoosers {
         } else {
             msg += "files of type " + extension + " are not supported.";
         }
-        JOptionPane.showMessageDialog(PixelitorWindow.getInstance(), msg, "Error", JOptionPane.ERROR_MESSAGE);
+        Dialogs.showErrorDialog("Error", msg);
     }
 
     public static boolean showSaveFileChooserAndSaveComp(Composition comp) {

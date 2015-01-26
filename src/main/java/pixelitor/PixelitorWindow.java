@@ -126,15 +126,15 @@ public class PixelitorWindow extends JFrame {
             icons.add(new ImageIcon(imgURL256).getImage());
             setIconImages(icons);
         } else {
-            JOptionPane.showMessageDialog(this, "icon imgURL is null", "Error", JOptionPane.ERROR_MESSAGE);
+            String message = "icon imgURL is null";
+//            JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+            Dialogs.showErrorDialog(this, "Error", message);
         }
 
         GlobalKeyboardWatch.init();
 
-//        pack();
         AppPreferences.loadFramePosition(this);
         setVisible(true);
-//        GlobalKeyboardWatch.registerMouseWheelWatching();
     }
 
     public void activateInternalImageFrame(InternalImageFrame frame) {

@@ -46,7 +46,9 @@ public final class RecentFilesMenu extends JMenu {
                 if (f.exists()) {
                     OpenSaveManager.openFile(f);
                 } else {
-                    JOptionPane.showMessageDialog(null, "The file " + f + " does not exist.", "Problem", JOptionPane.ERROR_MESSAGE);
+                    // the file was deleted since Pixelitor started
+                    String message = String.format("The file %s does not exist.", f.toString());
+                    Dialogs.showErrorDialog("Problem", message);
                 }
             } catch (Exception ex) {
                 Dialogs.showExceptionDialog(ex);
