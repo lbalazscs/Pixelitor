@@ -22,6 +22,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * An AnimationWriter implementation that writes a sequence of PNG files
+ */
 public class PNGFileSequenceWriter implements AnimationWriter {
     private final File outputDir;
     private int fileSequenceNumber;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters.comp;
 
@@ -22,7 +22,7 @@ import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Layer;
 
 /**
- * Flips an image horizontally or vertically
+ * Flips a ContentLayer horizontally or vertically
  */
 public class Flip extends CompOperation {
     private final Flip.Direction direction;
@@ -47,7 +47,6 @@ public class Flip extends CompOperation {
 
     @Override
     public void transform(Composition comp) {
-
         OneLayerUndoableEdit.createAndAddToHistory(comp, "Flip", true, false);
         int nrLayers = comp.getNrLayers();
 
@@ -64,15 +63,16 @@ public class Flip extends CompOperation {
         comp.imageChanged(true, false);
     }
 
-
+    /**
+     * The direction of the flip
+     */
     public enum Direction {
         HORIZONTAL {
             @Override
             public String getName() {
                 return "Flip Horizontal";
             }
-        },
-        VERTICAL {
+        }, VERTICAL {
             @Override
             public String getName() {
                 return "Flip Vertical";

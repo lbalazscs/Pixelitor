@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters;
 
@@ -90,7 +90,7 @@ public class ValueNoise extends FilterWithParametrizedGUI {
         final float persistence = 0.6f;
         final float amplitude = 1.0f;
 
-        boolean multiThreaded = true;
+        boolean multiThreaded = ThreadPool.runMultiThreaded();
         if(multiThreaded) {
             Future<?>[] futures = new Future[height];
             for (int y = 0; y < height; y++) {
@@ -109,7 +109,6 @@ public class ValueNoise extends FilterWithParametrizedGUI {
             for (int y = 0; y < height; y++) {
                 calculateLine(lookupTable, destData, width, frequency, persistence, amplitude, y);
             }
-
         }
 
         return dest;

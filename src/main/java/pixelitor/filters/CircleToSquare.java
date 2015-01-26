@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters;
 
@@ -25,15 +25,13 @@ import pixelitor.filters.impl.CircleToSquareFilter;
 import java.awt.image.BufferedImage;
 
 /**
- * Circle To Square
+ * "Circle to Square" filter
  */
 public class CircleToSquare extends FilterWithParametrizedGUI {
 //    private final CoupledRangeParam radius = new CoupledRangeParam("Radius", 0, 500, 200);
     private final RangeParam radius = new RangeParam("Radius", 0, 500, 200);
 
     private final RangeParam amount = new RangeParam("Amount (%)", -200, 200, 100);
-
-
     private final ImagePositionParam center = new ImagePositionParam("Center");
 
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
@@ -61,12 +59,13 @@ public class CircleToSquare extends FilterWithParametrizedGUI {
         filter.setCenterX(center.getRelativeX());
         filter.setCenterY(center.getRelativeY());
 
+// ellipse
 //        filter.setRadiusX(radius.getValue(0));
 //        filter.setRadiusY(radius.getValue(1));
 
+// circle
         filter.setRadiusX(radius.getValueAsFloat());
         filter.setRadiusY(radius.getValueAsFloat());
-
 
         filter.setAmount(amount.getValueAsPercentage());
 

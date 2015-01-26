@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,11 @@ import java.util.concurrent.Future;
 
 public class ThreadPool {
     public static final int NUM_AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
+
+    // not all filters respect this setting!
+    public static boolean runMultiThreaded() {
+        return NUM_AVAILABLE_PROCESSORS > 1;
+    }
 
     public static final ExecutorService executorService =
             Executors.newFixedThreadPool(NUM_AVAILABLE_PROCESSORS);

@@ -35,7 +35,6 @@ public class ColorWheel extends FilterWithParametrizedGUI {
     private final RangeParam brightnessParam = new RangeParam("Brightness (%)", 0, 100, 75);
     private final RangeParam satParam = new RangeParam("Saturation (%)", 0, 100, 90);
 
-
     public ColorWheel() {
         super("Color Wheel", false, false);
         setParamSet(new ParamSet(center, hueShiftParam, brightnessParam, satParam));
@@ -56,7 +55,7 @@ public class ColorWheel extends FilterWithParametrizedGUI {
         final float saturation = satParam.getValueAsPercentage();
         final float brightness = brightnessParam.getValueAsPercentage();
 
-        boolean multiThreaded = true;
+        boolean multiThreaded = ThreadPool.runMultiThreaded();
         if (multiThreaded) {
             Future<?>[] futures = new Future[height];
             for (int y = 0; y < height; y++) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters;
 
@@ -29,7 +29,7 @@ import java.awt.image.BufferedImage;
  * Colorize
  */
 public class Colorize extends FilterWithParametrizedGUI {
-    private final RangeParam adjustBrightnessParam = new RangeParam("Adjust Brightness", -100, 100, 0);
+    private final RangeParam adjustBrightness = new RangeParam("Adjust Brightness", -100, 100, 0);
     private final ColorParam colorParam = new ColorParam("Color:", new Color(255, 207, 119), false, false);
     private final RangeParam opacityParam = new RangeParam("Amount (%)", 0, 100, 100);
 
@@ -37,15 +37,14 @@ public class Colorize extends FilterWithParametrizedGUI {
         super("Colorize", true, false);
         setParamSet(new ParamSet(
                 colorParam,
-                adjustBrightnessParam,
+                adjustBrightness,
                 opacityParam
         ));
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-
-        float briShift = adjustBrightnessParam.getValueAsPercentage();
+        float briShift = adjustBrightness.getValueAsPercentage();
         float opacity = opacityParam.getValueAsPercentage();
 
         Color colorizeColor = colorParam.getColor();
