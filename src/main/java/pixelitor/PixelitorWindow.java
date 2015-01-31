@@ -47,8 +47,6 @@ import java.util.List;
  * The main window.
  */
 public class PixelitorWindow extends JFrame {
-    private static volatile PixelitorWindow singleInstance;
-
     private final JDesktopPane desktopPane;
     private final JLabel statusBar;
     private final HistogramsPanel histogramsPanel;
@@ -78,7 +76,6 @@ public class PixelitorWindow extends JFrame {
         GlobalKeyboardWatch.setAlwaysVisibleComponent(desktopPane);
         GlobalKeyboardWatch.registerBrushSizeActions();
 
-
         new DropTarget(desktopPane, new DropListener());
 
         desktopPane.setBackground(Color.GRAY);
@@ -87,10 +84,10 @@ public class PixelitorWindow extends JFrame {
         verticalBoxEast = Box.createVerticalBox();
         histogramsPanel = HistogramsPanel.INSTANCE;
         ImageComponents.addImageSwitchListener(histogramsPanel);
+
         if (AppPreferences.WorkSpace.getHistogramsVisibility()) {
             verticalBoxEast.add(histogramsPanel);
         }
-
         if (AppPreferences.WorkSpace.getLayersVisibility()) {
             verticalBoxEast.add(LayersContainer.INSTANCE);
         }
@@ -170,16 +167,6 @@ public class PixelitorWindow extends JFrame {
             Dialogs.showExceptionDialog(e);
         }
     }
-
-    /**
-     * If the file argument is not null, then the name argument is ignored
-     */
-//    public void addNewImage(BufferedImage img, File file, String name) {
-//        ImageComponent ic = new ImageComponent(file, name, img);
-//        ImageComponents.setActiveImageComponent(ic, false);
-////        ic.addBaseLayer(img);
-//
-//    }
 
     public void cascadeWindows() {
         List<ImageComponent> imageComponents = ImageComponents.getImageComponents();
