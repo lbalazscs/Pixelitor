@@ -54,14 +54,11 @@ public class PerformanceTestingDialog extends JDialog implements ActionListener,
         northPanel.setLayout(new FlowLayout());
 
         opSelector = new JComboBox<>(FilterUtils.getAllFiltersSorted());
-        opSelector.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Filter op = (Filter) opSelector.getSelectedItem();
-                if (op instanceof FilterWithGUI) {
-                    FilterWithGUI dialogOp = (FilterWithGUI) op;
-                    dialogOp.actionPerformed(null);
-                }
+        opSelector.addActionListener(e -> {
+            Filter op = (Filter) opSelector.getSelectedItem();
+            if (op instanceof FilterWithGUI) {
+                FilterWithGUI dialogOp = (FilterWithGUI) op;
+                dialogOp.actionPerformed(null);
             }
         });
         northPanel.add(new JLabel("Select op: "));
@@ -217,12 +214,7 @@ public class PerformanceTestingDialog extends JDialog implements ActionListener,
         }
 
         private void showResults(final String results) {
-            EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    JOptionPane.showMessageDialog(PerformanceTestingDialog.this, results, "Performance Testing Results", JOptionPane.INFORMATION_MESSAGE);
-                }
-            });
+            EventQueue.invokeLater(() -> JOptionPane.showMessageDialog(PerformanceTestingDialog.this, results, "Performance Testing Results", JOptionPane.INFORMATION_MESSAGE));
         }
 
         private String getReport(String opName, int executions, long totalTime, long shortestTime) {

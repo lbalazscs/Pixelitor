@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor.filters.levels.gui;
@@ -27,8 +27,6 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
@@ -69,12 +67,7 @@ public class LevelsPanel extends AdjustPanel implements ItemListener, GrayScaleA
         northPanel.setLayout(new FlowLayout());
         northPanel.add(selector);
         JButton resetAllButton = new JButton("Reset all");
-        resetAllButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                resetToDefaultSettings();
-            }
-        });
+        resetAllButton.addActionListener(e -> resetToDefaultSettings());
         northPanel.add(resetAllButton);
         add(northPanel, BorderLayout.NORTH);
 
@@ -113,9 +106,7 @@ public class LevelsPanel extends AdjustPanel implements ItemListener, GrayScaleA
     }
 
     private void resetToDefaultSettings() {
-        for (OneChannelLevelsPanel chPanel : levelsPanels) {
-            chPanel.resetToDefaultSettings();
-        }
+        levelsPanels.forEach(OneChannelLevelsPanel::resetToDefaultSettings);
         grayScaleAdjustmentHasChanged();
     }
 

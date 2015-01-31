@@ -39,9 +39,7 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.color.ColorSpace;
 import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Transferable;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
@@ -238,11 +236,8 @@ public final class Utils {
         StringSelection stringSelection = new StringSelection(text);
 
         Clipboard systemClipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-        systemClipboard.setContents(stringSelection, new ClipboardOwner() {
-            @Override
-            public void lostOwnership(Clipboard clipboard, Transferable contents) {
-                //do nothing
-            }
+        systemClipboard.setContents(stringSelection, (clipboard, contents) -> {
+            //do nothing
         });
     }
 

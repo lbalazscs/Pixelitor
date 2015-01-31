@@ -32,8 +32,6 @@ import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.Stroke;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.geom.Area;
 
 /**
@@ -207,13 +205,10 @@ public class Selection {
         assert ic != null;
 
         marchingAntsTimer = new Timer(100, null);
-        marchingAntsTimer.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent evt) {
-                dashPhase += 1 / ic.getViewScale();
+        marchingAntsTimer.addActionListener(evt -> {
+            dashPhase += 1 / ic.getViewScale();
 
-                updateComponent();
-            }
+            updateComponent();
         });
         marchingAntsTimer.start();
     }

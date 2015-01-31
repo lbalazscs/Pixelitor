@@ -48,8 +48,6 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.Stroke;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
@@ -108,12 +106,7 @@ public class ShapesTool extends Tool {
         JComboBox<ShapesAction> actionCB = new JComboBox<>(actionModel);
         toolSettingsPanel.add(actionCB);
 
-        actionCB.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                enableSettings();
-            }
-        });
+        actionCB.addActionListener(e -> enableSettings());
 
         toolSettingsPanel.add(new JLabel("Fill:"));
         toolSettingsPanel.add(fillCombo);
@@ -123,21 +116,11 @@ public class ShapesTool extends Tool {
 
         strokeSettingsButton = new JButton("Stroke Settings...");
         toolSettingsPanel.add(strokeSettingsButton);
-        strokeSettingsButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                initAndShowStrokeSettingsDialog();
-            }
-        });
+        strokeSettingsButton.addActionListener(e -> initAndShowStrokeSettingsDialog());
 
         effectsButton = new JButton("Effects...");
         toolSettingsPanel.add(effectsButton);
-        effectsButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showEffectsDialog();
-            }
-        });
+        effectsButton.addActionListener(e -> showEffectsDialog());
 
         enableSettings();
     }

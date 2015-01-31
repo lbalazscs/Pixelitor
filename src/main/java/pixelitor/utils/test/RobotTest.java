@@ -199,19 +199,16 @@ public class RobotTest {
 
                     r.delay(100 + rand.nextInt(400));
 
-                    Runnable runnable = new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                weightedCaller.callRandomAction();
-                                if (ImageComponents.getActiveComp() == null) {
-                                    throw new IllegalStateException("no active composition");
-                                }
-                                ConsistencyChecks.checkAll();
-                            } catch (Exception e) {
-                                Dialogs.showExceptionDialog(e);
+                    Runnable runnable = () -> {
+                        try {
+                            weightedCaller.callRandomAction();
+                            if (ImageComponents.getActiveComp() == null) {
+                                throw new IllegalStateException("no active composition");
                             }
-                        } // end of run
+                            ConsistencyChecks.checkAll();
+                        } catch (Exception e) {
+                            Dialogs.showExceptionDialog(e);
+                        }
                     };
                     try {
                         EventQueue.invokeAndWait(runnable);
@@ -831,243 +828,82 @@ public class RobotTest {
 
     private static void setupWeightedCaller(final Robot r) {
         // random move
-        weightedCaller.registerCallback(10, new Runnable() {
-            @Override
-            public void run() {
-                Point randomPoint = generateRandomPoint();
-                int randomX = randomPoint.x;
-                int randomY = randomPoint.y;
-                move(r, randomX, randomY);
-            }
+        weightedCaller.registerCallback(10, () -> {
+            Point randomPoint = generateRandomPoint();
+            int randomX = randomPoint.x;
+            int randomY = randomPoint.y;
+            move(r, randomX, randomY);
         });
 
         // random drag
-        weightedCaller.registerCallback(70, new Runnable() {
-            @Override
-            public void run() {
-                Point randomPoint = generateRandomPoint();
-                int randomX = randomPoint.x;
-                int randomY = randomPoint.y;
-                drag(r, randomX, randomY);
-            }
+        weightedCaller.registerCallback(70, () -> {
+            Point randomPoint = generateRandomPoint();
+            int randomX = randomPoint.x;
+            int randomY = randomPoint.y;
+            drag(r, randomX, randomY);
         });
 
-        weightedCaller.registerCallback(5, new Runnable() {
-            @Override
-            public void run() {
-                click(r);
-            }
-        });
+        weightedCaller.registerCallback(5, () -> click(r));
 
-        weightedCaller.registerCallback(1, new Runnable() {
-            @Override
-            public void run() {
-                randomRightClick(r);
-            }
-        });
+        weightedCaller.registerCallback(1, () -> randomRightClick(r));
 
-        weightedCaller.registerCallback(1, new Runnable() {
-            @Override
-            public void run() {
-                randomResize();
-            }
-        });
+        weightedCaller.registerCallback(1, RobotTest::randomResize);
 
-        weightedCaller.registerCallback(2, new Runnable() {
-            @Override
-            public void run() {
-                repeat();
-            }
-        });
+        weightedCaller.registerCallback(2, RobotTest::repeat);
 
-        weightedCaller.registerCallback(1, new Runnable() {
-            @Override
-            public void run() {
-                randomUndoRedo();
-            }
-        });
+        weightedCaller.registerCallback(1, RobotTest::randomUndoRedo);
 
-        weightedCaller.registerCallback(1, new Runnable() {
-            @Override
-            public void run() {
-                randomCrop();
-            }
-        });
+        weightedCaller.registerCallback(1, RobotTest::randomCrop);
 
-        weightedCaller.registerCallback(1, new Runnable() {
-            @Override
-            public void run() {
-                randomFade();
-            }
-        });
+        weightedCaller.registerCallback(1, RobotTest::randomFade);
 
-        weightedCaller.registerCallback(2, new Runnable() {
-            @Override
-            public void run() {
-                randomizeToolSettings();
-            }
-        });
+        weightedCaller.registerCallback(2, RobotTest::randomizeToolSettings);
 
-        weightedCaller.registerCallback(1, new Runnable() {
-            @Override
-            public void run() {
-                arrangeWindows();
-            }
-        });
+        weightedCaller.registerCallback(1, RobotTest::arrangeWindows);
 
-        weightedCaller.registerCallback(1, new Runnable() {
-            @Override
-            public void run() {
-                randomColors();
-            }
-        });
+        weightedCaller.registerCallback(1, RobotTest::randomColors);
 
-        weightedCaller.registerCallback(5, new Runnable() {
-            @Override
-            public void run() {
-                randomOperation();
-            }
-        });
+        weightedCaller.registerCallback(5, RobotTest::randomOperation);
 
-        weightedCaller.registerCallback(25, new Runnable() {
-            @Override
-            public void run() {
-                randomTweenOperation();
-            }
-        });
+        weightedCaller.registerCallback(25, RobotTest::randomTweenOperation);
 
-        weightedCaller.registerCallback(10, new Runnable() {
-            @Override
-            public void run() {
-                randomFitToScreen();
-            }
-        });
+        weightedCaller.registerCallback(10, RobotTest::randomFitToScreen);
 
-        weightedCaller.registerCallback(3, new Runnable() {
-            @Override
-            public void run() {
-                randomKey(r);
-            }
-        });
+        weightedCaller.registerCallback(3, () -> randomKey(r));
 
-        weightedCaller.registerCallback(1, new Runnable() {
-            @Override
-            public void run() {
-                randomZoom(rand);
-            }
-        });
+        weightedCaller.registerCallback(1, () -> randomZoom(rand));
 
-        weightedCaller.registerCallback(1, new Runnable() {
-            @Override
-            public void run() {
-                randomZoomOut();
-            }
-        });
+        weightedCaller.registerCallback(1, RobotTest::randomZoomOut);
 
-        weightedCaller.registerCallback(5, new Runnable() {
-            @Override
-            public void run() {
-                deselect();
-            }
-        });
+        weightedCaller.registerCallback(5, RobotTest::deselect);
 
-        weightedCaller.registerCallback(1, new Runnable() {
-            @Override
-            public void run() {
-                layerToCanvasSize();
-            }
-        });
+        weightedCaller.registerCallback(1, RobotTest::layerToCanvasSize);
 
-        weightedCaller.registerCallback(1, new Runnable() {
-            @Override
-            public void run() {
-                invertSelection();
-            }
-        });
+        weightedCaller.registerCallback(1, RobotTest::invertSelection);
 
-        weightedCaller.registerCallback(1, new Runnable() {
-            @Override
-            public void run() {
-                traceWithCurrentBrush();
-            }
-        });
+        weightedCaller.registerCallback(1, RobotTest::traceWithCurrentBrush);
 
-        weightedCaller.registerCallback(1, new Runnable() {
-            @Override
-            public void run() {
-                traceWithCurrentEraser();
-            }
-        });
+        weightedCaller.registerCallback(1, RobotTest::traceWithCurrentEraser);
 
-        weightedCaller.registerCallback(1, new Runnable() {
-            @Override
-            public void run() {
-                randomRotateFlip();
-            }
-        });
+        weightedCaller.registerCallback(1, RobotTest::randomRotateFlip);
 
-        weightedCaller.registerCallback(1, new Runnable() {
-            @Override
-            public void run() {
-                layerOrderChange();
-            }
-        });
+        weightedCaller.registerCallback(1, RobotTest::layerOrderChange);
 
-        weightedCaller.registerCallback(3, new Runnable() {
-            @Override
-            public void run() {
-                layerMerge();
-            }
-        });
+        weightedCaller.registerCallback(3, RobotTest::layerMerge);
 
-        weightedCaller.registerCallback(3, new Runnable() {
-            @Override
-            public void run() {
-                layerAddDelete();
-            }
-        });
+        weightedCaller.registerCallback(3, RobotTest::layerAddDelete);
 
-        weightedCaller.registerCallback(1, new Runnable() {
-            @Override
-            public void run() {
-                randomHideShow();
-            }
-        });
+        weightedCaller.registerCallback(1, RobotTest::randomHideShow);
 
-        weightedCaller.registerCallback(1, new Runnable() {
-            @Override
-            public void run() {
-                randomCopy();
-            }
-        });
+        weightedCaller.registerCallback(1, RobotTest::randomCopy);
 
-        weightedCaller.registerCallback(1, new Runnable() {
-            @Override
-            public void run() {
-                randomPaste();
-            }
-        });
+        weightedCaller.registerCallback(1, RobotTest::randomPaste);
 
-        weightedCaller.registerCallback(1, new Runnable() {
-            @Override
-            public void run() {
-                randomChangeLayerOpacityOrBlending();
-            }
-        });
+        weightedCaller.registerCallback(1, RobotTest::randomChangeLayerOpacityOrBlending);
 
-        weightedCaller.registerCallback(1, new Runnable() {
-            @Override
-            public void run() {
-                randomChangeLayerVisibility();
-            }
-        });
+        weightedCaller.registerCallback(1, RobotTest::randomChangeLayerVisibility);
 
-        weightedCaller.registerCallback(3, new Runnable() {
-            @Override
-            public void run() {
-                randomTool();
-            }
-        });
+        weightedCaller.registerCallback(3, RobotTest::randomTool);
 
         // Not called now:
 //        randomCloseImageWOSaving();

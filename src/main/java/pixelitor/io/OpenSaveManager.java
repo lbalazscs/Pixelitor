@@ -58,12 +58,9 @@ public class OpenSaveManager {
 
     public static void openFile(final File file) {
         assert SwingUtilities.isEventDispatchThread();
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                Composition comp = createCompositionFromFile(file);
-                PixelitorWindow.getInstance().addComposition(comp);
-            }
+        Runnable r = () -> {
+            Composition comp = createCompositionFromFile(file);
+            PixelitorWindow.getInstance().addComposition(comp);
         };
         Utils.executeWithBusyCursor(r);
 
@@ -152,18 +149,15 @@ public class OpenSaveManager {
         if (format == null) {
             throw new IllegalArgumentException("format is null");
         }
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if ("jpg".equals(format)) {
-                        JpegOutput.writeJPG(image, selectedFile, jpegQuality);
-                    } else {
-                        ImageIO.write(image, format, selectedFile);
-                    }
-                } catch (IOException e) {
-                    Dialogs.showExceptionDialog(e);
+        Runnable r = () -> {
+            try {
+                if ("jpg".equals(format)) {
+                    JpegOutput.writeJPG(image, selectedFile, jpegQuality);
+                } else {
+                    ImageIO.write(image, format, selectedFile);
                 }
+            } catch (IOException e) {
+                Dialogs.showExceptionDialog(e);
             }
         };
         Utils.executeWithBusyCursor(r);

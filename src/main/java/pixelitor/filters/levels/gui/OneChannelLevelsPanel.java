@@ -83,9 +83,7 @@ public class OneChannelLevelsPanel extends CardPanelWithCombo.Card implements Pa
     }
 
     public void resetToDefaultSettings() {
-        for (SliderSpinner slider : sliders) {
-            slider.resetToDefaultSettings();
-        }
+        sliders.forEach(SliderSpinner::resetToDefaultSettings);
         updateAdjustment();
     }
 

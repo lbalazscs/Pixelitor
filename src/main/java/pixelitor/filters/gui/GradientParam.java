@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters.gui;
 
@@ -25,8 +25,6 @@ import javax.swing.*;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 
 /**
  * Represents a gradient. (Note that unlike other GUIParam implementations,
@@ -60,20 +58,17 @@ public class GradientParam extends AbstractGUIParam {
 
     public void createGradientSlider(float[] defaultThumbPositions, Color[] defaultColors) {
         gradientSlider = new GradientSlider(GradientSlider.HORIZONTAL, defaultThumbPositions, defaultColors);
-        gradientSlider.addPropertyChangeListener(new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                if (evt.getPropertyName().equals(GRADIENT_SLIDER_USE_BEVEL)) {
-                    return;
-                }
-                if (!dontTrigger) {
-                    if (!gradientSlider.isValueAdjusting()) {
-                        if (adjustmentListener != null) {
-                            String propertyName = evt.getPropertyName();
-                            if (!"ancestor".equals(propertyName)) {
-                                if (!"selected thumb".equals(propertyName)) {
-                                    adjustmentListener.paramAdjusted();
-                                }
+        gradientSlider.addPropertyChangeListener(evt -> {
+            if (evt.getPropertyName().equals(GRADIENT_SLIDER_USE_BEVEL)) {
+                return;
+            }
+            if (!dontTrigger) {
+                if (!gradientSlider.isValueAdjusting()) {
+                    if (adjustmentListener != null) {
+                        String propertyName = evt.getPropertyName();
+                        if (!"ancestor".equals(propertyName)) {
+                            if (!"selected thumb".equals(propertyName)) {
+                                adjustmentListener.paramAdjusted();
                             }
                         }
                     }
@@ -92,15 +87,12 @@ public class GradientParam extends AbstractGUIParam {
     }
 
     public Colormap getValue() {
-        return new Colormap() {
-            @Override
-            public int getColor(float v) {
-                Color c = (Color) gradientSlider.getValue(v);
-                if (c == null) {
-                    throw new IllegalStateException("null color for v = " + v);
-                }
-                return c.getRGB();
+        return v -> {
+            Color c = (Color) gradientSlider.getValue(v);
+            if (c == null) {
+                throw new IllegalStateException("null color for v = " + v);
             }
+            return c.getRGB();
         };
     }
 

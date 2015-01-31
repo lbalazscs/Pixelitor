@@ -64,12 +64,9 @@ public class FilterCreator extends JPanel {
         gridBagHelper.addLabel("Parametrized GUI:", 2, 1);
         parametrizedGuiCB = new JCheckBox();
         parametrizedGuiCB.setSelected(true);
-        parametrizedGuiCB.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                if (parametrizedGuiCB.isSelected()) {
-                    guiCB.setSelected(true);
-                }
+        parametrizedGuiCB.addChangeListener(e -> {
+            if (parametrizedGuiCB.isSelected()) {
+                guiCB.setSelected(true);
             }
         });
         gridBagHelper.addControl(parametrizedGuiCB);

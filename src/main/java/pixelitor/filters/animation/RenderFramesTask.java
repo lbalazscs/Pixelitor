@@ -45,12 +45,7 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         try {
             renderFrames();
         } catch (final Exception e) {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    Dialogs.showExceptionDialog(e);
-                }
-            });
+            SwingUtilities.invokeLater(() -> Dialogs.showExceptionDialog(e));
         }
 
         return null;

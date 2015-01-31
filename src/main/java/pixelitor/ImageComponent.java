@@ -41,8 +41,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.image.BufferedImage;
@@ -90,17 +88,14 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         addMouseListener(this);
         addMouseMotionListener(this);
 
-        addMouseWheelListener(new MouseWheelListener() {
-            @Override
-            public void mouseWheelMoved(MouseWheelEvent e) {
-                if (e.isControlDown()) {
-                    int x = e.getX();
-                    int y = e.getY();
-                    if (e.getWheelRotation() < 0) { // up, away from the user
-                        increaseZoom(x, y);
-                    } else {  // down, towards the user
-                        decreaseZoom(x, y);
-                    }
+        addMouseWheelListener(e -> {
+            if (e.isControlDown()) {
+                int x = e.getX();
+                int y = e.getY();
+                if (e.getWheelRotation() < 0) { // up, away from the user
+                    increaseZoom(x, y);
+                } else {  // down, towards the user
+                    decreaseZoom(x, y);
                 }
             }
         });
@@ -436,12 +431,9 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         // only after all pending AWT events have been processed
         // because then this component will have the final size
         // and updateDrawStart can calculate correct results
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                updateDrawStart();
-                repaint();
-            }
+        Runnable r = () -> {
+            updateDrawStart();
+            repaint();
         };
         SwingUtilities.invokeLater(r);
 
@@ -484,13 +476,10 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
                 viewRect.height
         );
 
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                scrollRectToVisible(areaThatShouldBeVisible);
+        SwingUtilities.invokeLater(() -> {
+            scrollRectToVisible(areaThatShouldBeVisible);
 //                updateDrawStart();
-                repaint();
-            }
+            repaint();
         });
     }
 

@@ -17,7 +17,6 @@
 
 package pixelitor.automate;
 
-import pixelitor.Composition;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.comp.CompositionUtils;
 import pixelitor.utils.CompositionAction;
@@ -46,12 +45,7 @@ public class BatchResize {
         final int maxWidth = p.getWidthValue();
         final int maxHeight = p.getHeightValue();
 
-        CompositionAction resizeAction = new CompositionAction() {
-            @Override
-            public void process(Composition comp) {
-                CompositionUtils.resize(comp, maxWidth, maxHeight, true);
-            }
-        };
+        CompositionAction resizeAction = comp -> CompositionUtils.resize(comp, maxWidth, maxHeight, true);
         Automate.processEachFile(resizeAction, true, "Batch Resize...");
     }
 

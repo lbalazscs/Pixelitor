@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools.shapestool;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
@@ -26,8 +27,6 @@ import pixelitor.utils.SliderSpinner;
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class StrokeSettingsDialog extends JDialog {
 
@@ -71,12 +70,9 @@ public class StrokeSettingsDialog extends JDialog {
         this.setLayout(new BorderLayout());
         this.add(p, BorderLayout.CENTER);
         JButton okButton = new JButton("OK");
-        okButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                StrokeSettingsDialog.this.setVisible(false);
-                StrokeSettingsDialog.this.dispose();
-            }
+        okButton.addActionListener(e -> {
+            StrokeSettingsDialog.this.setVisible(false);
+            StrokeSettingsDialog.this.dispose();
         });
         JPanel southPanel = new JPanel();
         southPanel.add(okButton);
@@ -97,21 +93,11 @@ public class StrokeSettingsDialog extends JDialog {
         shapeTypeCB = new JComboBox(typeModel);
 
         strokeTypeCB = new JComboBox(strokeTypeModel);
-        strokeTypeCB.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setWhetherShapeTypeCBIsEnabled();
-            }
-        });
+        strokeTypeCB.addActionListener(e -> setWhetherShapeTypeCBIsEnabled());
 
         setWhetherShapeTypeCBIsEnabled();
 
-        shapeTypeCB.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                StrokeType.SHAPE.setShapeType(typeModel.getSelectedItem());
-            }
-        });
+        shapeTypeCB.addActionListener(e -> StrokeType.SHAPE.setShapeType(typeModel.getSelectedItem()));
 
         strokeTypePanel.add(new JLabel("Line Type:", JLabel.RIGHT));
         strokeTypePanel.add(strokeTypeCB);

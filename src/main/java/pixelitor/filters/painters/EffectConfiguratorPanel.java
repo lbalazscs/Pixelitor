@@ -29,8 +29,6 @@ import pixelitor.utils.SliderSpinner;
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -116,12 +114,7 @@ public abstract class EffectConfiguratorPanel extends JPanel {
         }
 
         this.adjustmentListener = adjustmentListener;
-        enabledCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                adjustmentListener.paramAdjusted();
-            }
-        });
+        enabledCheckBox.addActionListener(e -> adjustmentListener.paramAdjusted());
 
         opacityRange.setAdjustmentListener(adjustmentListener);
     }

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor;
 
 import net.jafama.FastMath;
@@ -47,14 +48,11 @@ public class Pixelitor {
         setupForMacintosh();
 
         ExceptionHandler.INSTANCE.register();
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    createAndShowGUI(args);
-                } catch (Exception e) {
-                    Dialogs.showExceptionDialog(e);
-                }
+        EventQueue.invokeLater(() -> {
+            try {
+                createAndShowGUI(args);
+            } catch (Exception e) {
+                Dialogs.showExceptionDialog(e);
             }
         });
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters;
 
@@ -34,8 +34,6 @@ import pixelitor.layers.BlendingMode;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 
 /**
@@ -56,11 +54,8 @@ public class ParamTest extends FilterWithParametrizedGUI {
             new IntChoiceParam.Value("value 2", 2),
     });
     private final ColorParam colorParam = new ColorParam("ColorParam:", Color.WHITE, true, true);
-    private final ActionParam actionParam = new ActionParam("ActionParam", new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
+    private final ActionParam actionParam = new ActionParam("ActionParam", e -> {
 
-        }
     }, "Tooltip");
     private final AngleParam angleParam = new AngleParam("AngleParam", 0);
     private final ElevationAngleParam elevationAngleParam = new ElevationAngleParam("ElevationAngleParam", 0);

@@ -63,9 +63,7 @@ public class LayerAnimationFrames {
         e.start(f);
         e.setDelay(delayMillis);
         e.setRepeat(0);
-        for (BufferedImage image : images) {
-            e.addFrame(image);
-        }
+        images.forEach(e::addFrame);
         boolean ok = e.finish();
     }
 
@@ -73,12 +71,7 @@ public class LayerAnimationFrames {
         if (selectedFile == null) {
             throw new IllegalArgumentException("selectedFile is null");
         }
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                export(selectedFile);
-            }
-        };
+        Runnable r = () -> export(selectedFile);
         Utils.executeWithBusyCursor(r);
     }
 }

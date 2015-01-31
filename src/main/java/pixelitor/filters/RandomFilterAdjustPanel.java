@@ -26,8 +26,6 @@ import pixelitor.layers.ImageLayer;
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class RandomFilterAdjustPanel extends AdjustPanel {
     private final JPanel realSettingsPanel;
@@ -38,12 +36,7 @@ public class RandomFilterAdjustPanel extends AdjustPanel {
         super(null); // the actual filter will be determined bellow
         setLayout(new BorderLayout());
         JButton nextRandomButton = new JButton("Next Random Filter");
-        nextRandomButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                nextRandomFilter();
-            }
-        });
+        nextRandomButton.addActionListener(e -> nextRandomFilter());
         JPanel northPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         northPanel.add(nextRandomButton);
         add(northPanel, BorderLayout.NORTH);

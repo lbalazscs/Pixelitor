@@ -14,11 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.layers;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 
@@ -42,12 +41,9 @@ public class LayerNameEditor extends JTextField {
         });
 
         // disable if enter pressed
-        addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                disableEditing();
-                layer.setName(getText(), true);
-            }
+        addActionListener(e -> {
+            disableEditing();
+            layer.setName(getText(), true);
         });
 
     }

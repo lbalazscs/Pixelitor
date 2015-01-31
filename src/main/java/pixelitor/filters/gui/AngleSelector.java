@@ -20,8 +20,6 @@ package pixelitor.filters.gui;
 import pixelitor.utils.SliderSpinner;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 
@@ -49,24 +47,18 @@ public class AngleSelector extends JPanel {
 
         add(sliderSpinner, BorderLayout.CENTER);
 
-        angleParam.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                asc.repaint();
-                userChangedSpinner = false;
-                spinnerModel.setValue(angleParam.getValueInDegrees());
-                userChangedSpinner = true;
-            }
+        angleParam.addChangeListener(e -> {
+            asc.repaint();
+            userChangedSpinner = false;
+            spinnerModel.setValue(angleParam.getValueInDegrees());
+            userChangedSpinner = true;
         });
-        spinnerModel.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                if (userChangedSpinner) {
-                    boolean trigger = !spinnerModel.getValueIsAdjusting();
+        spinnerModel.addChangeListener(e -> {
+            if (userChangedSpinner) {
+                boolean trigger = !spinnerModel.getValueIsAdjusting();
 
-                    int value = spinnerModel.getValue();
-                    angleParam.setValueInDegrees(value, trigger);
-                }
+                int value = spinnerModel.getValue();
+                angleParam.setValueInDegrees(value, trigger);
             }
         });
 

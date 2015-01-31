@@ -38,8 +38,6 @@ import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
@@ -97,23 +95,15 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
         toolSettingsPanel.add(allowGrowingCB);
 
         cropButton = new JButton("Crop");
-        cropButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ImageComponents.toolCropActiveImage(allowGrowingCB.isSelected());
-                ImageComponents.repaintActive();
-                resetStateToInitial();
-            }
+        cropButton.addActionListener(e -> {
+            ImageComponents.toolCropActiveImage(allowGrowingCB.isSelected());
+            ImageComponents.repaintActive();
+            resetStateToInitial();
         });
         cropButton.setEnabled(false);
         toolSettingsPanel.add(cropButton);
 
-        cancelButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                state.cancelPressed(CropTool.this);
-            }
-        });
+        cancelButton.addActionListener(e -> state.cancelPressed(CropTool.this));
         cancelButton.setEnabled(false);
         toolSettingsPanel.add(cancelButton);
     }
@@ -131,7 +121,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
             transformSupport.mousePressed(e);
             cropButton.setEnabled(true);
             cancelButton.setEnabled(true);
-        } else if(state == CropToolState.USERDRAG) {
+        } else if (state == CropToolState.USER_DRAG) {
             cropButton.setEnabled(true);
             cancelButton.setEnabled(true);
         }
@@ -162,7 +152,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
         switch (state) {
             case INITIAL:
                 break;
-            case USERDRAG:
+            case USER_DRAG:
                 if(transformSupport != null) {
                     throw new IllegalStateException();
                 }
@@ -249,7 +239,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
             case INITIAL:
                 lastCropRectangle = null;
                 break;
-            case USERDRAG:
+            case USER_DRAG:
                 lastCropRectangle = userDrag.createPositiveRectangle();
                 break;
             case TRANSFORM:

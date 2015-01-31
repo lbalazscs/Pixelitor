@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters.gui;
 
@@ -21,8 +21,6 @@ import pixelitor.utils.IconUtils;
 
 import java.awt.EventQueue;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -56,22 +54,12 @@ public class ParamSet implements Iterable<GUIParam> {
     }
 
     private void addRandomizeAction() {
-        ActionParam randomizeAction = new ActionParam("Randomize Settings", new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                randomize();
-            }
-        }, null);
+        ActionParam randomizeAction = new ActionParam("Randomize Settings", e -> randomize(), null);
         paramList.add(randomizeAction);
     }
 
     private void addResetAllAction() {
-        ActionParam randomizeAction = new ActionParam("Reset All", new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                reset();
-            }
-        }, IconUtils.getWestArrowIcon(), "Reset all settings to their default values.");
+        ActionParam randomizeAction = new ActionParam("Reset All", e -> reset(), IconUtils.getWestArrowIcon(), "Reset all settings to their default values.");
         paramList.add(randomizeAction);
     }
 
@@ -94,9 +82,7 @@ public class ParamSet implements Iterable<GUIParam> {
 
         long before = Filter.runCount;
 
-        for (GUIParam param : paramList) {
-            param.randomize();
-        }
+        paramList.forEach(GUIParam::randomize);
 
         // this call is not supposed to trigger the filter
         long after = Filter.runCount;
@@ -140,12 +126,12 @@ public class ParamSet implements Iterable<GUIParam> {
 
     public void setState(ParamSetState newState) {
         Iterator<ParamState> newStateIterator = newState.iterator();
-        for (GUIParam param : paramList) {
-            if(param.canBeAnimated()) {
-                ParamState newParamState = newStateIterator.next();
-                param.setState(newParamState);
-            }
-        }
+        paramList.stream()
+                .filter(GUIParam::canBeAnimated)
+                .forEach(param -> {
+                    ParamState newParamState = newStateIterator.next();
+                    param.setState(newParamState);
+                });
     }
 
     /**

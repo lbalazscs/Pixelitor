@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,8 +36,6 @@ import java.awt.Graphics2D;
 import java.awt.LinearGradientPaint;
 import java.awt.MultipleGradientPaint;
 import java.awt.Paint;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.ShortLookupTable;
 
@@ -51,11 +49,8 @@ public class Lightning extends FilterWithParametrizedGUI {
     private final RangeParam boltExpansion = new RangeParam("Bolt Expansion", 1, 255, 70);
 
     @SuppressWarnings("FieldCanBeLocal")
-    private final ActionParam reseedAction = new ReseedNoiseActionParam(new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            Clouds.reseed();
-        }
+    private final ActionParam reseedAction = new ReseedNoiseActionParam(e -> {
+        Clouds.reseed();
     });
 
     public Lightning() {

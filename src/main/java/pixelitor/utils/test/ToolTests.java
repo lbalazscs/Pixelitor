@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.utils.test;
 
 import pixelitor.Composition;
@@ -156,31 +157,23 @@ public class ToolTests {
             final Random rand = new Random();
 
             // So far we are on the EDT
-            Runnable notEDTThreadTask = new Runnable() {
-                @Override
-                public void run() {
-                    for (int i = 0; i < numStrokes; i++) {
-                        int progressPercentage = (int) ((float) i * 100 / numStrokes);
-                        progressMonitor.setProgress(progressPercentage);
-                        progressMonitor.setNote(progressPercentage + "%");
+            Runnable notEDTThreadTask = () -> {
+                for (int i = 0; i < numStrokes; i++) {
+                    int progressPercentage = (int) ((float) i * 100 / numStrokes);
+                    progressMonitor.setProgress(progressPercentage);
+                    progressMonitor.setNote(progressPercentage + "%");
 
-                        Runnable edtRunnable = new Runnable() {
-                            @Override
-                            public void run() {
-                                testToolAction(comp, random, canvasWidth, canvasHeight, rand, brushOnly);
-                            }
-                        };
+                    Runnable edtRunnable = () -> testToolAction(comp, random, canvasWidth, canvasHeight, rand, brushOnly);
 
-                        try {
-                            SwingUtilities.invokeAndWait(edtRunnable);
-                        } catch (InterruptedException | InvocationTargetException e) {
-                            e.printStackTrace();
-                        }
-                        comp.getIC().paintImmediately(0, 0, comp.getIC().getWidth(), comp.getIC().getHeight());
-
+                    try {
+                        SwingUtilities.invokeAndWait(edtRunnable);
+                    } catch (InterruptedException | InvocationTargetException e) {
+                        e.printStackTrace();
                     }
-                    progressMonitor.close();
+                    comp.getIC().paintImmediately(0, 0, comp.getIC().getWidth(), comp.getIC().getHeight());
+
                 }
+                progressMonitor.close();
             };
             new Thread(notEDTThreadTask).start();
         }

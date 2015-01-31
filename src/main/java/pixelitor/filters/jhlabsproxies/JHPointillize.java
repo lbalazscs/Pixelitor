@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.PointillizeFilter;
@@ -29,8 +30,6 @@ import pixelitor.filters.gui.ReseedNoiseActionParam;
 import pixelitor.utils.CachedFloatRandom;
 
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 
 /**
@@ -46,12 +45,9 @@ public class JHPointillize extends FilterWithParametrizedGUI {
     private final RangeParam randomness = new RangeParam("Grid Randomness (%)", 0, 100, 0);
     private final IntChoiceParam gridType = IntChoiceParam.getGridTypeChoices("Grid Type", randomness);
 
-    private final ActionParam reseedAction = new ReseedNoiseActionParam(new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            CachedFloatRandom.reseedCache();
-            Noise.reseed();
-        }
+    private final ActionParam reseedAction = new ReseedNoiseActionParam(e -> {
+        CachedFloatRandom.reseedCache();
+        Noise.reseed();
     });
 
 

@@ -482,9 +482,7 @@ public class Composition implements Serializable {
         // but here we don't want to change the selected layer
         Layer previousActiveLayer = activeLayer;
 
-        for (Layer layer : layerList) {
-            addLayerToGUI(layer);
-        }
+        layerList.forEach(this::addLayerToGUI);
 
         setActiveLayer(previousActiveLayer, false);
     }
@@ -712,12 +710,12 @@ public class Composition implements Serializable {
     }
 
     public void enlargeCanvas(int north, int east, int south, int west) {
-        for (Layer layer : layerList) {
-            if (layer instanceof ContentLayer) {
-                ContentLayer contentLayer = (ContentLayer) layer;
-                contentLayer.enlargeCanvas(north, east, south, west);
-            }
-        }
+        layerList.stream()
+                .filter(layer -> layer instanceof ContentLayer)
+                .forEach(layer -> {
+                    ContentLayer contentLayer = (ContentLayer) layer;
+                    contentLayer.enlargeCanvas(north, east, south, west);
+                });
 
         canvas.updateSize(canvas.getWidth() + east + west, canvas.getHeight() + north + south);
 
@@ -781,12 +779,7 @@ public class Composition implements Serializable {
 
             long startTime = System.nanoTime();
 
-            Runnable task = new Runnable() {
-                @Override
-                public void run() {
-                    filter.runit(Composition.this, changeReason);
-                }
-            };
+            Runnable task = () -> filter.runit(Composition.this, changeReason);
             Utils.executeWithBusyCursor(busyCursorParent, task);
 
             long totalTime = (System.nanoTime() - startTime) / 1_000_000;

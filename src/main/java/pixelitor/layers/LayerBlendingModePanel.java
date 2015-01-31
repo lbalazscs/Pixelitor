@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,9 +24,6 @@ import pixelitor.utils.BlendingModePanel;
 import pixelitor.utils.ImageSwitchListener;
 import pixelitor.utils.Optional;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 /**
  * The GUI selector for the opacity and blending mode of the layers
  */
@@ -41,21 +38,15 @@ public class LayerBlendingModePanel extends BlendingModePanel implements ImageSw
         ImageComponents.addImageSwitchListener(this);
         AppLogic.addLayerChangeListener(this);
 
-        opacityDDSlider.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (userInteractionChange) {
-                    opacityChanged();
-                }
+        opacityDDSlider.addActionListener(e -> {
+            if (userInteractionChange) {
+                opacityChanged();
             }
         });
 
-        blendingModeCombo.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (userInteractionChange) {
-                    blendingModeChanged();
-                }
+        blendingModeCombo.addActionListener(e -> {
+            if (userInteractionChange) {
+                blendingModeChanged();
             }
         });
 

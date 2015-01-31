@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor.filters;
@@ -28,85 +28,70 @@ public class NoDialogPixelOpFactory {
     }
 
     public static Action getRedChannelOp() {
-        RGBPixelOp rgbOp = new RGBPixelOp() {
-            @Override
-            public int changeRGB(int a, int r, int g, int b) {
-                g = r;
-                b = r;
-                return (a << 24) | (r << 16) | (g << 8) | b;
-            }
+        RGBPixelOp rgbOp = (a, r, g, b) -> {
+            g = r;
+            b = r;
+            return (a << 24) | (r << 16) | (g << 8) | b;
         };
         return new PixelFilter("Red (as BW)", rgbOp);
     }
 
     public static Action getGreenChannelOp() {
-        RGBPixelOp rgbOp = new RGBPixelOp() {
-            @Override
-            public int changeRGB(int a, int r, int g, int b) {
-                r = g;
-                b = g;
-                return (a << 24) | (r << 16) | (g << 8) | b;
-            }
+        RGBPixelOp rgbOp = (a, r, g, b) -> {
+            r = g;
+            b = g;
+            return (a << 24) | (r << 16) | (g << 8) | b;
         };
         return new PixelFilter("Green (as BW)", rgbOp);
     }
 
     public static Action getBlueChannelOp() {
-        RGBPixelOp rgbOp = new RGBPixelOp() {
-            @Override
-            public int changeRGB(int a, int r, int g, int b) {
-                r = b;
-                g = b;
-                return (a << 24) | (r << 16) | (g << 8) | b;
-            }
+        RGBPixelOp rgbOp = (a, r, g, b) -> {
+            r = b;
+            g = b;
+            return (a << 24) | (r << 16) | (g << 8) | b;
         };
         return new PixelFilter("Blue (as BW)", rgbOp);
     }
 
     public static Action getValueChannelOp() {
-        RGBPixelOp rgbOp = new RGBPixelOp() {
-            @Override
-            public int changeRGB(int a, int r, int g, int b) {
-                // value = max(R, G, B)
-                int maxRGB = (r > g) ? r : g;
-                if (b > maxRGB) {
-                    maxRGB = b;
-                }
-
-                int value = maxRGB;
-
-                r = value;
-                g = value;
-                b = value;
-
-                return (a << 24) | (r << 16) | (g << 8) | b;
+        RGBPixelOp rgbOp = (a, r, g, b) -> {
+            // value = max(R, G, B)
+            int maxRGB = (r > g) ? r : g;
+            if (b > maxRGB) {
+                maxRGB = b;
             }
+
+            int value = maxRGB;
+
+            r = value;
+            g = value;
+            b = value;
+
+            return (a << 24) | (r << 16) | (g << 8) | b;
         };
         return new PixelFilter("Value = max(R,G,B)", rgbOp);
     }
 
     public static Action getDesaturateChannelOp() {
-        RGBPixelOp rgbOp = new RGBPixelOp() {
-            @Override
-            public int changeRGB(int a, int r, int g, int b) {
-                // brightness = [max(R, G, B) + min (R, G, B)] / 2
-                int maxRGB = (r > g) ? r : g;
-                if (b > maxRGB) {
-                    maxRGB = b;
-                }
-                int minRGB = (r < g) ? r : g;
-                if (b < minRGB) {
-                    minRGB = b;
-                }
-
-                int brightness = (maxRGB + minRGB) / 2;
-
-                r = brightness;
-                g = brightness;
-                b = brightness;
-
-                return (a << 24) | (r << 16) | (g << 8) | b;
+        RGBPixelOp rgbOp = (a, r, g, b) -> {
+            // brightness = [max(R, G, B) + min (R, G, B)] / 2
+            int maxRGB = (r > g) ? r : g;
+            if (b > maxRGB) {
+                maxRGB = b;
             }
+            int minRGB = (r < g) ? r : g;
+            if (b < minRGB) {
+                minRGB = b;
+            }
+
+            int brightness = (maxRGB + minRGB) / 2;
+
+            r = brightness;
+            g = brightness;
+            b = brightness;
+
+            return (a << 24) | (r << 16) | (g << 8) | b;
         };
 //        return new PixelOperation("Brightness = [max(R,G,B) + min (R,G,B)] / 2 = Desaturate", rgbOp);
         return new PixelFilter("Desaturate", rgbOp);
@@ -114,30 +99,27 @@ public class NoDialogPixelOpFactory {
 
 
     public static Action getSaturationChannelOp() {
-        RGBPixelOp rgbOp = new RGBPixelOp() {
-            @Override
-            public int changeRGB(int a, int r, int g, int b) {
-                int rgbMax = (r > g) ? r : g;
-                if (b > rgbMax) {
-                    rgbMax = b;
-                }
-                int rgbMin = (r < g) ? r : g;
-                if (b < rgbMin) {
-                    rgbMin = b;
-                }
-
-                int saturation = 0;
-                if (rgbMax != 0) {
-                    saturation = (int) (((float) (rgbMax - rgbMin)) / ((float) rgbMax) * 255);
-                }
-
-                r = saturation;
-                g = saturation;
-                b = saturation;
-
-
-                return (a << 24) | (r << 16) | (g << 8) | b;
+        RGBPixelOp rgbOp = (a, r, g, b) -> {
+            int rgbMax = (r > g) ? r : g;
+            if (b > rgbMax) {
+                rgbMax = b;
             }
+            int rgbMin = (r < g) ? r : g;
+            if (b < rgbMin) {
+                rgbMin = b;
+            }
+
+            int saturation = 0;
+            if (rgbMax != 0) {
+                saturation = (int) (((float) (rgbMax - rgbMin)) / ((float) rgbMax) * 255);
+            }
+
+            r = saturation;
+            g = saturation;
+            b = saturation;
+
+
+            return (a << 24) | (r << 16) | (g << 8) | b;
         };
         return new PixelFilter("Saturation", rgbOp);
     }

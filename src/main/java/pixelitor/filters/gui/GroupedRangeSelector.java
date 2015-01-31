@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.gui;
 
 import pixelitor.utils.GUIUtils;
@@ -22,8 +23,6 @@ import pixelitor.utils.SliderSpinner;
 
 import javax.swing.*;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
  * GUI for a GroupedRangeParam
@@ -47,12 +46,7 @@ public class GroupedRangeSelector extends JPanel {
             final JCheckBox linkedCB = new JCheckBox();
             linkedCB.setModel(model.getCheckBoxModel());
             gridBagHelper.addLabelWithControl("Linked:", linkedCB, numParams);
-            linkedCB.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    model.setLinked(linkedCB.isSelected());
-                }
-            });
+            linkedCB.addActionListener(e -> model.setLinked(linkedCB.isSelected()));
         }
 
         setBorder(BorderFactory.createTitledBorder(model.getName()));

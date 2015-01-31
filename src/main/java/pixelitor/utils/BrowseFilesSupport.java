@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.utils;
 
 import pixelitor.PixelitorWindow;
@@ -21,8 +22,6 @@ import pixelitor.io.FileExtensionUtils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 
 /**
@@ -50,12 +49,7 @@ public class BrowseFilesSupport {
     private void init(String initialPath) {
         nameTF = new JTextField(25);
         nameTF.setText(initialPath);
-        button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                browseButtonClicked(dialogTitle);
-            }
-        });
+        button.addActionListener(e -> browseButtonClicked(dialogTitle));
     }
 
     /**

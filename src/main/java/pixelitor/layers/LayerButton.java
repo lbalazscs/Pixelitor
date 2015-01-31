@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,10 +19,6 @@ package pixelitor.layers;
 import pixelitor.utils.IconUtils;
 
 import javax.swing.*;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 
 /**
  * A GUI element representing a layer in an image
@@ -68,28 +64,15 @@ public class LayerButton extends JToggleButton {
         nameEditor = new LayerNameEditor(this, layer);
         add(nameEditor, LayerButtonLayout.NAME_EDITOR);
 
-        addPropertyChangeListener("name", new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                nameEditor.setText(getName());
+        addPropertyChangeListener("name", evt -> nameEditor.setText(getName()));
+
+        addItemListener(e -> {
+            if (isSelected()) {
+                layer.makeActive(userInteraction);
             }
         });
 
-        addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if (isSelected()) {
-                    layer.makeActive(userInteraction);
-                }
-            }
-        });
-
-        visibilityCB.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                layer.setVisible(visibilityCB.isSelected(), true);
-            }
-        });
+        visibilityCB.addItemListener(e -> layer.setVisible(visibilityCB.isSelected(), true));
     }
 
     @Override

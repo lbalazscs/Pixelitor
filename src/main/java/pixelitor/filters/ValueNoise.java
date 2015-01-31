@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import pixelitor.ThreadPool;
@@ -25,8 +26,6 @@ import pixelitor.filters.gui.ReseedNoiseActionParam;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 import java.util.concurrent.Future;
@@ -48,11 +47,8 @@ public class ValueNoise extends FilterWithParametrizedGUI {
     private final RangeParam details = new RangeParam("Octaves (Details)", 1, 8, 5);
 
     @SuppressWarnings("FieldCanBeLocal")
-    private final ActionParam reseedAction = new ReseedNoiseActionParam(new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            reseed();
-        }
+    private final ActionParam reseedAction = new ReseedNoiseActionParam(e -> {
+        reseed();
     });
 
     private final ColorParam color1 = new ColorParam("Color 1", Color.BLACK, true, false);
@@ -95,12 +91,7 @@ public class ValueNoise extends FilterWithParametrizedGUI {
             Future<?>[] futures = new Future[height];
             for (int y = 0; y < height; y++) {
                 final int finalY = y;
-                Runnable lineTask = new Runnable() {
-                    @Override
-                    public void run() {
-                        calculateLine(lookupTable, destData, width, frequency, persistence, amplitude, finalY);
-                    }
-                };
+                Runnable lineTask = () -> calculateLine(lookupTable, destData, width, frequency, persistence, amplitude, finalY);
                 Future<?> future = ThreadPool.executorService.submit(lineTask);
                 futures[y] = future;
             }

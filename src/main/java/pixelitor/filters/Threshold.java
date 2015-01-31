@@ -59,74 +59,62 @@ public class Threshold extends FilterWithParametrizedGUI {
     private RGBPixelOp getRGBPixelOp(final double threshold, int basedOn) {
         switch (basedOn) {
             case CRIT_LUMINOSITY:
-                return new RGBPixelOp() {
-                    @Override
-                    public int changeRGB(int a, int r, int g, int b) {
-                        // TODO can be faster with the luminosity lookup?
-                        double luminosity = 0.299 * r + 0.587 * g + 0.114 * b;
-                        if (luminosity > threshold) {
-                            r = 255;
-                            g = 255;
-                            b = 255;
-                        } else {
-                            r = 0;
-                            g = 0;
-                            b = 0;
-                        }
-
-                        return (a << 24) | (r << 16) | (g << 8) | b;
+                return (a, r, g, b) -> {
+                    // TODO can be faster with the luminosity lookup?
+                    double luminosity = 0.299 * r + 0.587 * g + 0.114 * b;
+                    if (luminosity > threshold) {
+                        r = 255;
+                        g = 255;
+                        b = 255;
+                    } else {
+                        r = 0;
+                        g = 0;
+                        b = 0;
                     }
+
+                    return (a << 24) | (r << 16) | (g << 8) | b;
                 };
             case CRIT_RED:
-                return new RGBPixelOp() {
-                    @Override
-                    public int changeRGB(int a, int r, int g, int b) {
-                        if (r > threshold) {
-                            r = 255;
-                            g = 255;
-                            b = 255;
-                        } else {
-                            r = 0;
-                            g = 0;
-                            b = 0;
-                        }
-
-                        return (a << 24) | (r << 16) | (g << 8) | b;
+                return (a, r, g, b) -> {
+                    if (r > threshold) {
+                        r = 255;
+                        g = 255;
+                        b = 255;
+                    } else {
+                        r = 0;
+                        g = 0;
+                        b = 0;
                     }
+
+                    return (a << 24) | (r << 16) | (g << 8) | b;
                 };
             case CRIT_GREEN:
-                return new RGBPixelOp() {
-                    @Override
-                    public int changeRGB(int a, int r, int g, int b) {
-                        if (g > threshold) {
-                            r = 255;
-                            g = 255;
-                            b = 255;
-                        } else {
-                            r = 0;
-                            g = 0;
-                            b = 0;
-                        }
-
-                        return (a << 24) | (r << 16) | (g << 8) | b;
+                return (a, r, g, b) -> {
+                    if (g > threshold) {
+                        r = 255;
+                        g = 255;
+                        b = 255;
+                    } else {
+                        r = 0;
+                        g = 0;
+                        b = 0;
                     }
+
+                    return (a << 24) | (r << 16) | (g << 8) | b;
                 };
             case CRIT_BLUE:
-                return new RGBPixelOp() {
-                    @Override
-                    public int changeRGB(int a, int r, int g, int b) {
-                        if (b > threshold) {
-                            r = 255;
-                            g = 255;
-                            b = 255;
-                        } else {
-                            r = 0;
-                            g = 0;
-                            b = 0;
-                        }
-
-                        return (a << 24) | (r << 16) | (g << 8) | b;
+                return (a, r, g, b) -> {
+                    if (b > threshold) {
+                        r = 255;
+                        g = 255;
+                        b = 255;
+                    } else {
+                        r = 0;
+                        g = 0;
+                        b = 0;
                     }
+
+                    return (a << 24) | (r << 16) | (g << 8) | b;
                 };
             case CRIT_SATURATION:
                 return new RGBPixelOp() {

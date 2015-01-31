@@ -36,8 +36,6 @@ import java.awt.Paint;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Shape;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.PathIterator;
@@ -82,12 +80,9 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         toolSettingsPanel.add(new JLabel("Type:"));
         typeSelector = new JComboBox<>(BrushType.values());
         toolSettingsPanel.add(typeSelector);
-        typeSelector.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                BrushType brushType = (BrushType) typeSelector.getSelectedItem();
-                brushes.brushTypeChanged(brushType);
-            }
+        typeSelector.addActionListener(e -> {
+            BrushType brushType = (BrushType) typeSelector.getSelectedItem();
+            brushes.brushTypeChanged(brushType);
         });
 
         // make sure all values are visible without a scrollbar

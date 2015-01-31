@@ -17,7 +17,6 @@
 
 package pixelitor.io;
 
-import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.tools.HandToolSupport;
 import pixelitor.utils.Dialogs;
@@ -80,12 +79,7 @@ public class OptimizedJpegSavePanel extends JPanel {
         setLayout(new BorderLayout(3, 3));
         add(comparePanel, BorderLayout.CENTER);
 
-        qualityParam.setAdjustmentListener(new ParamAdjustmentListener() {
-            @Override
-            public void paramAdjusted() {
-                updateAfterPreview();
-            }
-        });
+        qualityParam.setAdjustmentListener(this::updateAfterPreview);
 
         SliderSpinner qualitySpinner = new SliderSpinner(qualityParam, SliderSpinner.TextPosition.WEST, false);
         JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -100,12 +94,7 @@ public class OptimizedJpegSavePanel extends JPanel {
         final float quality = getSelectedQuality();
 
         final JpegOutput.ImageWithSize[] imageWithSize = new JpegOutput.ImageWithSize[1];
-        Runnable task = new Runnable() {
-            @Override
-            public void run() {
-                imageWithSize[0] = JpegOutput.writeJPGtoPreviewImage(OptimizedJpegSavePanel.this.image, quality);
-            }
-        };
+        Runnable task = () -> imageWithSize[0] = JpegOutput.writeJPGtoPreviewImage(OptimizedJpegSavePanel.this.image, quality);
         Utils.executeWithBusyCursor(this, task);
 
         BufferedImage newPreview = imageWithSize[0].getImage();

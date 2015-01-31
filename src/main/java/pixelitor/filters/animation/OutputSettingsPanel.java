@@ -30,8 +30,6 @@ import javax.swing.*;
 import javax.swing.plaf.LayerUI;
 import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -62,12 +60,7 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
         //noinspection unchecked
         EnumComboBoxModel<TweenOutputType> model = new EnumComboBoxModel(TweenOutputType.class);
         outputTypeCB = new JComboBox<>(model);
-        outputTypeCB.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                outputTypeChanged();
-            }
-        });
+        outputTypeCB.addActionListener(e -> outputTypeChanged());
         outputTypeChanged(); // initial setup
 
         GridBagHelper gridBagHelper = new GridBagHelper(contentPanel);
@@ -102,12 +95,7 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
         pingPongCB = new JCheckBox();
         gridBagHelper.addLabelWithControl("Ping Pong:", pingPongCB, 5);
 
-        pingPongCB.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateCalculations();
-            }
-        });
+        pingPongCB.addActionListener(e -> updateCalculations());
 
         JPanel filePanel = new JPanel(new FlowLayout());
         filePanel.setBorder(BorderFactory.createTitledBorder("Output File/Folder"));

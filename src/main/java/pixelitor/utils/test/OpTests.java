@@ -144,21 +144,18 @@ public class OpTests {
     public static void getCompositeImagePerformanceTest() {
         final Composition comp = ImageComponents.getActiveComp().get();
 
-        Runnable task = new Runnable() {
-            @Override
-            public void run() {
-                long startTime = System.nanoTime();
-                int times = 100;
-                for (int i = 0; i < times; i++) {
-                    comp.getCompositeImage();
-                }
-
-                long totalTime = (System.nanoTime() - startTime) / 1000000;
-                String msg = String.format(
-                        "Executing getCompositeImage() %d times took %d ms, average time = %d ms",
-                        times, totalTime, totalTime / times);
-                Dialogs.showInfoDialog("Test Result", msg);
+        Runnable task = () -> {
+            long startTime = System.nanoTime();
+            int times = 100;
+            for (int i = 0; i < times; i++) {
+                comp.getCompositeImage();
             }
+
+            long totalTime = (System.nanoTime() - startTime) / 1000000;
+            String msg = String.format(
+                    "Executing getCompositeImage() %d times took %d ms, average time = %d ms",
+                    times, totalTime, totalTime / times);
+            Dialogs.showInfoDialog("Test Result", msg);
         };
         Utils.executeWithBusyCursor(task);
     }

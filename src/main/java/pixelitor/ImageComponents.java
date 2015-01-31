@@ -204,9 +204,7 @@ public class ImageComponents {
 
     private static void allImagesAreClosed() {
         setActiveImageComponent(null, false);
-        for (ImageSwitchListener listener : imageSwitchListeners) {
-            listener.noOpenImageAnymore();
-        }
+        imageSwitchListeners.forEach(ImageSwitchListener::noOpenImageAnymore);
         History.allImagesAreClosed();
         SelectionActions.setEnabled(false, null);
 
@@ -236,9 +234,7 @@ public class ImageComponents {
 
     public static void newImageOpened() {
 //        numFramesOpen++;
-        for (ImageSwitchListener listener : imageSwitchListeners) {
-            listener.newImageOpened();
-        }
+        imageSwitchListeners.forEach(ImageSwitchListener::newImageOpened);
     }
 
     public static void repaintActive() {

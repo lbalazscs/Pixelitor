@@ -22,7 +22,6 @@ import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Dialogs;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.List;
@@ -37,22 +36,19 @@ public final class RecentFilesMenu extends JMenu {
 
     private List<RecentFileInfo> recentFileInfos;
 
-    private final ActionListener fileOpener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            try {
-                RecentFilesMenuItem mi = (RecentFilesMenuItem) e.getSource();
-                File f = mi.getFileInfo().getFile();
-                if (f.exists()) {
-                    OpenSaveManager.openFile(f);
-                } else {
-                    // the file was deleted since Pixelitor started
-                    String message = String.format("The file %s does not exist.", f.toString());
-                    Dialogs.showErrorDialog("Problem", message);
-                }
-            } catch (Exception ex) {
-                Dialogs.showExceptionDialog(ex);
+    private final ActionListener fileOpener = e -> {
+        try {
+            RecentFilesMenuItem mi = (RecentFilesMenuItem) e.getSource();
+            File f = mi.getFileInfo().getFile();
+            if (f.exists()) {
+                OpenSaveManager.openFile(f);
+            } else {
+                // the file was deleted since Pixelitor started
+                String message = String.format("The file %s does not exist.", f.toString());
+                Dialogs.showErrorDialog("Problem", message);
             }
+        } catch (Exception ex) {
+            Dialogs.showExceptionDialog(ex);
         }
     };
 
@@ -60,14 +56,11 @@ public final class RecentFilesMenu extends JMenu {
         super("Recent Files");
         maxRecentFiles = DEFAULT_MAX_RECENT_FILES;
         clearMenuItem = new JMenuItem("Clear Recent Files");
-        ActionListener clearer = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    clear();
-                } catch (Exception ex) {
-                    Dialogs.showExceptionDialog(ex);
-                }
+        ActionListener clearer = e -> {
+            try {
+                clear();
+            } catch (Exception ex) {
+                Dialogs.showExceptionDialog(ex);
             }
         };
         clearMenuItem.addActionListener(clearer);

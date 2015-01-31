@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import com.jhlabs.image.ImageMath;
@@ -26,8 +27,6 @@ import pixelitor.filters.gui.ReseedNoiseActionParam;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 import java.util.concurrent.Future;
@@ -49,11 +48,8 @@ public class Clouds extends FilterWithParametrizedGUI {
     private final ColorParam color2 = new ColorParam("Color 2", Color.WHITE, true, false);
 
     @SuppressWarnings("FieldCanBeLocal")
-    private final ActionParam reseedAction = new ReseedNoiseActionParam(new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            reseed();
-        }
+    private final ActionParam reseedAction = new ReseedNoiseActionParam(e -> {
+        reseed();
     });
 
     public Clouds() {
@@ -92,12 +88,7 @@ public class Clouds extends FilterWithParametrizedGUI {
             Future<?>[] futures = new Future[height];
             for (int y = 0; y < height; y++) {
                 final int finalY = y;
-                Runnable lineTask = new Runnable() {
-                    @Override
-                    public void run() {
-                        calculateLine(scaleValue, roughnessValue, width, destData, color1, color2, finalY);
-                    }
-                };
+                Runnable lineTask = () -> calculateLine(scaleValue, roughnessValue, width, destData, color1, color2, finalY);
                 Future<?> future = ThreadPool.executorService.submit(lineTask);
                 futures[y] = future;
             }

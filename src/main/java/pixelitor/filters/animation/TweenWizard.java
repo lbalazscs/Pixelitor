@@ -27,8 +27,6 @@ import pixelitor.utils.ValidatedForm;
 
 import javax.swing.*;
 import java.awt.Component;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 
 /**
  * Wizard for tweening animations
@@ -55,25 +53,22 @@ public class TweenWizard extends Wizard {
         progressMonitor.setProgress(0);
 
         final RenderFramesTask task = new RenderFramesTask(animation);
-        task.addPropertyChangeListener(new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                if ("progress".equals(evt.getPropertyName())) {
-                    int progress = (Integer) evt.getNewValue();
+        task.addPropertyChangeListener(evt -> {
+            if ("progress".equals(evt.getPropertyName())) {
+                int progress = (Integer) evt.getNewValue();
 
-                    progressMonitor.setProgress(progress);
-                    String message =
-                            String.format("Completed %d%%.\n", progress);
-                    progressMonitor.setNote(message);
-                    if (progressMonitor.isCanceled()) {
-                        // Probably nothing bad happens if the current frame rendering is
-                        // interrupted, but to be on the safe side, let the current frame
-                        // finish by passing false to cancel
-                        task.cancel(false);
-                    }
+                progressMonitor.setProgress(progress);
+                String message =
+                        String.format("Completed %d%%.\n", progress);
+                progressMonitor.setNote(message);
+                if (progressMonitor.isCanceled()) {
+                    // Probably nothing bad happens if the current frame rendering is
+                    // interrupted, but to be on the safe side, let the current frame
+                    // finish by passing false to cancel
+                    task.cancel(false);
+                }
 //                    if( task.isDone()) {
 //                    }
-                }
             }
         });
         task.execute();

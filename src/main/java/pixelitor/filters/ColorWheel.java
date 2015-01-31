@@ -60,12 +60,7 @@ public class ColorWheel extends FilterWithParametrizedGUI {
             Future<?>[] futures = new Future[height];
             for (int y = 0; y < height; y++) {
                 final int finalY = y;
-                Runnable lineTask = new Runnable() {
-                    @Override
-                    public void run() {
-                        calculateLine(destData, width, cx, cy, hueShift, saturation, brightness, finalY);
-                    }
-                };
+                Runnable lineTask = () -> calculateLine(destData, width, cx, cy, hueShift, saturation, brightness, finalY);
                 futures[y] = ThreadPool.executorService.submit(lineTask);
             }
             ThreadPool.waitForFutures(futures);

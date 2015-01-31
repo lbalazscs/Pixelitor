@@ -14,13 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.gui;
 
 import com.jhlabs.image.ImageMath;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.Rectangle;
 
 /**
@@ -71,18 +70,15 @@ public class GroupedRangeParam extends AbstractGUIParam implements RangeBasedOnI
         setLinked(linkedByDefault);
 
         for (final RangeParam param : rangeParams) {
-            param.addChangeListener(new ChangeListener() {
-                @Override
-                public void stateChanged(ChangeEvent e) {
-                    if (isLinked()) {
-                        // set the value of every other param to the value of the current param
-                        for (RangeParam otherParam : rangeParams) {
-                            if (otherParam != param) {
+            param.addChangeListener(e -> {
+                if (isLinked()) {
+                    // set the value of every other param to the value of the current param
+                    for (RangeParam otherParam : rangeParams) {
+                        if (otherParam != param) {
 //                                otherParam.setDontTrigger(true);
-                                int newValue = param.getValue();
-                                otherParam.setValueWithoutTrigger(newValue);
+                            int newValue = param.getValue();
+                            otherParam.setValueWithoutTrigger(newValue);
 //                                otherParam.setDontTrigger(false);
-                            }
                         }
                     }
                 }

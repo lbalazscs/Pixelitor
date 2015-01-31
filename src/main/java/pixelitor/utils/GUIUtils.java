@@ -46,30 +46,27 @@ public final class GUIUtils {
     }
 
     public static void testJComponent(final JComponent p) {
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    String lookAndFeelClass = AppPreferences.getLookAndFeelClass();
-                    UIManager.setLookAndFeel(lookAndFeelClass);
-                } catch (Exception e) {
-                    Dialogs.showExceptionDialog(e);
-                }
-
-                JFrame frame = new JFrame("Test");
-
-                frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-                frame.setLayout(new BorderLayout());
-
-                frame.add(p, BorderLayout.CENTER);
-
-
-                SwingUtilities.updateComponentTreeUI(frame);
-
-                frame.pack();
-                centerOnScreen(frame);
-                frame.setVisible(true);
+        Runnable runnable = () -> {
+            try {
+                String lookAndFeelClass = AppPreferences.getLookAndFeelClass();
+                UIManager.setLookAndFeel(lookAndFeelClass);
+            } catch (Exception e) {
+                Dialogs.showExceptionDialog(e);
             }
+
+            JFrame frame = new JFrame("Test");
+
+            frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+            frame.setLayout(new BorderLayout());
+
+            frame.add(p, BorderLayout.CENTER);
+
+
+            SwingUtilities.updateComponentTreeUI(frame);
+
+            frame.pack();
+            centerOnScreen(frame);
+            frame.setVisible(true);
         };
         EventQueue.invokeLater(runnable);
     }

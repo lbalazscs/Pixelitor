@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.gui;
 
 import javax.swing.*;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
@@ -89,12 +89,9 @@ public class ActionParam extends AbstractGUIParam {
                 setIcon(icon);
             }
 
-            addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    actionListener.actionPerformed(e);
-                    adjustmentListener.paramAdjusted();
-                }
+            addActionListener(e -> {
+                actionListener.actionPerformed(e);
+                adjustmentListener.paramAdjusted();
             });
         }
     }

@@ -95,12 +95,7 @@ public class Automate {
 
                     System.out.println("Processing " + file.getName());
 
-                    Runnable edtTask = new Runnable() {
-                        @Override
-                        public void run() {
-                            processFile(file, action, lastSaveDir, closeImagesAfterProcessing);
-                        }
-                    };
+                    Runnable edtTask = () -> processFile(file, action, lastSaveDir, closeImagesAfterProcessing);
                     try {
                         EventQueue.invokeAndWait(edtTask);
                     } catch (InterruptedException | InvocationTargetException e) {

@@ -91,21 +91,18 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
                         break;
                     }
 
-                    Runnable guiTask = new Runnable() {
-                        @Override
-                        public void run() {
-                            createSplashImage();
+                    Runnable guiTask = () -> {
+                        createSplashImage();
 
-                            File lastSaveDir = FileChoosers.getLastSaveDir();
-                            File f = new File(lastSaveDir, fileName);
+                        File lastSaveDir = FileChoosers.getLastSaveDir();
+                        File f = new File(lastSaveDir, fileName);
 
-                            Composition comp = ImageComponents.getActiveComp().get();
+                        Composition comp = ImageComponents.getActiveComp().get();
 
-                            outputFormat.saveComposition(comp, f);
+                        outputFormat.saveComposition(comp, f);
 
-                            ImageComponents.getActiveImageComponent().close();
-                            ValueNoise.reseed();
-                        }
+                        ImageComponents.getActiveImageComponent().close();
+                        ValueNoise.reseed();
                     };
                     try {
                         EventQueue.invokeAndWait(guiTask);
@@ -169,15 +166,12 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
             return;
         }
 
-        CompositionAction ca = new CompositionAction() {
-            @Override
-            public void process(Composition comp) {
-                comp.addNewLayerFromComposite("Overlay Blur");
-                comp.getActiveLayer().setBlendingMode(BlendingMode.OVERLAY, true, true, true);
-                JHGaussianBlur blur = new JHGaussianBlur();
-                blur.setRadius(5);
-                blur.execute(ChangeReason.OP_WITHOUT_DIALOG);
-            }
+        CompositionAction ca = comp -> {
+            comp.addNewLayerFromComposite("Overlay Blur");
+            comp.getActiveLayer().setBlendingMode(BlendingMode.OVERLAY, true, true, true);
+            JHGaussianBlur blur = new JHGaussianBlur();
+            blur.setRadius(5);
+            blur.execute(ChangeReason.OP_WITHOUT_DIALOG);
         };
         Automate.processEachFile(ca, false, "Overlay Blur Progress");
     }

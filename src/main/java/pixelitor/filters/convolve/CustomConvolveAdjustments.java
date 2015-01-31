@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor.filters.convolve;
@@ -117,22 +117,16 @@ public class CustomConvolveAdjustments extends AdjustPanel implements ActionList
         presetsBox.add(Box.createVerticalStrut(20));
 
         JButton randomizeButton = new JButton("Randomize");
-        randomizeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setValues(Convolve.getRandomKernelMatrix(size));
-                CustomConvolveAdjustments.this.actionPerformed(e);
-            }
+        randomizeButton.addActionListener(e -> {
+            setValues(Convolve.getRandomKernelMatrix(size));
+            actionPerformed(e);
         });
         presetsBox.add(randomizeButton);
 
         JButton doNothingButton = new JButton("Do Nothing");
-        doNothingButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                reset(size);
-                CustomConvolveAdjustments.this.actionPerformed(e);
-            }
+        doNothingButton.addActionListener(e -> {
+            reset(size);
+            actionPerformed(e);
         });
         presetsBox.add(doNothingButton);
 
@@ -144,12 +138,9 @@ public class CustomConvolveAdjustments extends AdjustPanel implements ActionList
 
     private void initPreset(String name, final float[] kernel) {
         JButton button = new JButton(name);
-        button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setValues(kernel);
-                CustomConvolveAdjustments.this.actionPerformed(e);
-            }
+        button.addActionListener(e -> {
+            setValues(kernel);
+            actionPerformed(e);
         });
         presetsBox.add(button);
     }
