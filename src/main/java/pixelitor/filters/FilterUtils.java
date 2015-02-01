@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import pixelitor.history.History;
@@ -25,6 +26,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * An utility class for managing filters
@@ -46,29 +49,32 @@ public class FilterUtils {
     }
 
     public static FilterWithParametrizedGUI[] getAnimationFiltersSorted() {
-        List<FilterWithParametrizedGUI> animFilters = new ArrayList<>(100);
-        for (Filter filter : allFilters) {
-            if(filter instanceof FilterWithParametrizedGUI) {
-                FilterWithParametrizedGUI parametrizedFilter = (FilterWithParametrizedGUI) filter;
-                if (parametrizedFilter.getParamSet().canBeAnimated() && !parametrizedFilter.excludeFromAnimation()) {
-                    // include Fade only if there is something to fade
-                    if (parametrizedFilter instanceof Fade) {
-                        if (!History.canFade()) {
-                            continue;
-                        }
+        List<FilterWithParametrizedGUI> animFilters = allFilters.stream()
+                .filter(filter -> filter instanceof FilterWithParametrizedGUI) // allow only FilterWithParametrizedGUI filters
+                .map(filter -> (FilterWithParametrizedGUI) filter) // cast for further filtering
+                .filter(fpg -> fpg.getParamSet().canBeAnimated()) // that can be animated
+                .filter(fpg -> !fpg.excludeFromAnimation()) // and excludeFromAnimation does not return true
+                .filter(fpg -> { // include Fade only if there is something to fade
+                    if (fpg instanceof Fade) {
+                        return History.canFade();
                     }
+                    return true;
+                })
+                .sorted()
+                .collect(Collectors.toList());
 
-                    animFilters.add(parametrizedFilter);
-                }
-            }
-        }
         FilterWithParametrizedGUI[] animFiltersSorted = animFilters.toArray(new FilterWithParametrizedGUI[animFilters.size()]);
-        Arrays.sort(animFiltersSorted);
         return animFiltersSorted;
     }
 
-    public static Filter getRandomFilter() {
-        return allFilters.get((int) (Math.random() * allFilters.size()));
+    public static Filter getRandomFilter(Predicate<Filter> conditions) {
+        Filter filter;
+        do {
+            // try a random filter until all conditions are true
+            filter = allFilters.get((int) (Math.random() * allFilters.size()));
+        } while (!conditions.test(filter));
+
+        return filter;
     }
 
     public static Filter[] getAllFiltersShuffled() {

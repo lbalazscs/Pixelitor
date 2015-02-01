@@ -152,10 +152,8 @@ public class RobotTest {
         Point p = generateRandomPoint();
         r.mouseMove(p.x, p.y);
 
-//        if (ImageComponents.getActiveComp() == null) {
-            logRobotEvent("initial splash");
-            ImageTests.createSplashImage();
-        //}
+        logRobotEvent("initial splash");
+        ImageTests.createSplashImage();
         randomCopy(); // ensure an image is on the clipboard
 
         SwingWorker<Void, Void> worker = createOneRoundSwingWorker(r, true);
@@ -294,21 +292,14 @@ public class RobotTest {
             return;
         }
 
-        Filter op = getRandomFilter();
-        if (op instanceof Fade) {
-            return;
-        }
-        if (op instanceof Brick) {
-            return;
-        }
-        if (op instanceof RandomFilter) {
-            return;
-        }
+        Filter op = FilterUtils.getRandomFilter(filter ->
+                (!(filter instanceof Fade)) &&
+                        (!(filter instanceof Brick)) &&
+                        (!(filter instanceof RandomFilter)));
 
         long runCountBefore = Filter.runCount;
 
         String opName = op.getName();
-//        System.out.println(String.format("RobotTest::randomOperation: opName = '%s'", opName));
 
         logRobotEvent("random operation: " + opName);
 
@@ -367,7 +358,6 @@ public class RobotTest {
 
         FilterWithParametrizedGUI filter = getRandomTweenFilter();
         String filterName = filter.getName();
-//        System.out.println(String.format("RobotTest::randomTweenOperation: filterName = '%s'", filterName));
 
         TweenAnimation animation = new TweenAnimation();
         animation.setFilter(filter);
@@ -915,16 +905,9 @@ public class RobotTest {
     }
 
     private static FilterWithParametrizedGUI getRandomTweenFilter() {
-//        return canny;
         FilterWithParametrizedGUI[] filters = FilterUtils.getAnimationFiltersSorted();
         return filters[(int) (Math.random() * filters.length)];
     }
-
-    private static Filter getRandomFilter() {
-        return FilterUtils.getRandomFilter();
-    }
-
-//    private static Canny canny = new Canny();
 }
 
 

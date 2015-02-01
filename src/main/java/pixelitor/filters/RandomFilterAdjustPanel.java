@@ -51,14 +51,11 @@ public class RandomFilterAdjustPanel extends AdjustPanel {
         if (lastFilterPanel != null) {
             realSettingsPanel.remove(lastFilterPanel);
         }
-        Filter newFilter;
-        do {
-            newFilter = FilterUtils.getRandomFilter();
-        } while (newFilter == op ||
-                (newFilter instanceof Fade) ||
-                (newFilter instanceof RandomFilter) ||
-                (newFilter instanceof RepeatLastOp)
-                );
+        Filter newFilter = FilterUtils.getRandomFilter(filter ->
+                (filter != op
+                        && (!(filter instanceof Fade))
+                        && (!(filter instanceof RandomFilter))
+                        && (!(filter instanceof RepeatLastOp))));
 
         op = newFilter;
         String filterName = newFilter.getListName();
