@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,13 +20,13 @@ import pixelitor.Composition;
 import pixelitor.layers.ImageLayer;
 import pixelitor.selection.Selection;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Optional;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
+import java.util.Optional;
 
 /**
  * Represents the changes made to a part of an image (for example brush strokes).

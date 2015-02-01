@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor;
 
 import pixelitor.history.FadeableEdit;
@@ -21,10 +22,10 @@ import pixelitor.history.History;
 import pixelitor.layers.DeleteActiveLayerAction;
 import pixelitor.layers.ImageLayer;
 import pixelitor.menus.SelectionActions;
-import pixelitor.utils.Optional;
 
 import javax.swing.*;
 import java.awt.image.BufferedImage;
+import java.util.Optional;
 
 /**
  * Consistency checks that run only in developer mode.

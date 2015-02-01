@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,12 +28,12 @@ import pixelitor.menus.SelectionActions;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionInteraction;
 import pixelitor.selection.SelectionType;
-import pixelitor.utils.Optional;
 
 import javax.swing.*;
 import java.awt.Cursor;
 import java.awt.Shape;
 import java.awt.event.MouseEvent;
+import java.util.Optional;
 
 /**
  * The selection tool

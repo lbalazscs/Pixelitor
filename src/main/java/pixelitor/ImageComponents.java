@@ -29,7 +29,6 @@ import pixelitor.selection.Selection;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.ImageSwitchListener;
-import pixelitor.utils.Optional;
 
 import java.awt.Cursor;
 import java.awt.Rectangle;
@@ -37,9 +36,10 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
- * Static methods for maintaining the list of open image components
+ * Static methods for maintaining the list of open ImageComponent objects
  */
 public class ImageComponents {
     private static final List<ImageComponent> imageComponents = new ArrayList<>();

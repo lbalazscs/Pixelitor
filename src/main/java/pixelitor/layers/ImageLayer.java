@@ -28,7 +28,6 @@ import pixelitor.selection.Selection;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Optional;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.ImageLayerNode;
 
@@ -45,6 +44,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * An image layer.

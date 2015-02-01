@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,12 +25,15 @@ import pixelitor.selection.Selection;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Dialogs;
-import pixelitor.utils.Optional;
 
 import javax.swing.*;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
+import java.util.Optional;
 
+/**
+ * Static methods for managing the selection actions
+ */
 public final class SelectionActions {
 
     private static final AbstractAction cropAction = new AbstractAction("Crop") {

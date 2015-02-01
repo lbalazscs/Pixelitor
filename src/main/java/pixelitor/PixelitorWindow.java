@@ -27,7 +27,6 @@ import pixelitor.tools.ToolsPanel;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.HistogramsPanel;
-import pixelitor.utils.Optional;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -42,9 +41,10 @@ import java.beans.PropertyVetoException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
- * The main window.
+ * The main application window.
  */
 public class PixelitorWindow extends JFrame {
     private final JDesktopPane desktopPane;

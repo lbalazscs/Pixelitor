@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,12 +21,12 @@ import pixelitor.ImageComponents;
 import pixelitor.filters.Filter;
 import pixelitor.layers.Layers;
 import pixelitor.utils.Dialogs;
-import pixelitor.utils.Optional;
 
 import java.awt.event.ActionEvent;
+import java.util.Optional;
 
 /**
- * An operation that has a GUI for customization
+ * A filter that has a GUI for customization
  */
 public abstract class FilterWithGUI extends Filter {
     private final String name;

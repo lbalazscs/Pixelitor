@@ -14,16 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.history;
 
 import pixelitor.Composition;
 import pixelitor.selection.Selection;
-import pixelitor.utils.Optional;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import java.awt.Shape;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Represents the change of a selection shape (via add, subtract, intersect or invert)

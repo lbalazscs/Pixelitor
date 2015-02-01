@@ -39,7 +39,6 @@ import pixelitor.selection.SelectionType;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.HistogramsPanel;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Optional;
 import pixelitor.utils.Utils;
 
 import java.awt.Component;
@@ -55,6 +54,7 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * An image composition consisting of multiple layers
@@ -121,12 +121,10 @@ public class Composition implements Serializable {
     }
 
     private void addBaseLayer(BufferedImage baseLayerImage) {
-//        canvas.updateSize(baseLayerImage.getWidth(), baseLayerImage.getHeight());
         ImageLayer newLayer = new ImageLayer(this, baseLayerImage, null);
 
         addLayerNoGUI(newLayer);
         activeLayer = newLayer;
-//        imageChanged(true, true);
     }
 
     public void addNewEmptyLayer(String name, boolean bellowActive) {
@@ -397,7 +395,6 @@ public class Composition implements Serializable {
 
         assert ConsistencyChecks.fadeCheck(this);
     }
-
 
     public void moveLayerSelectionDown() {
         int oldIndex = layerList.indexOf(activeLayer);
@@ -801,5 +798,4 @@ public class Composition implements Serializable {
         }
         RepeatLastOp.INSTANCE.setMenuName("Repeat " + filterMenuName);
     }
-
 }

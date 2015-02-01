@@ -23,18 +23,18 @@ import pixelitor.ConsistencyChecks;
 import pixelitor.ImageComponents;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Dialogs;
-import pixelitor.utils.Optional;
 import pixelitor.utils.test.DebugEventQueue;
 import pixelitor.utils.test.HistoryEvent;
 
 import javax.swing.event.UndoableEditListener;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEditSupport;
+import java.util.Optional;
 
 /**
- * Manages history and undo/redo for all open images
+ * Static methods for managing history and undo/redo for all open images
  */
-public final class History {
+public class History {
     private static final UndoableEditSupport undoableEditSupport = new UndoableEditSupport();
     private static final PixelitorUndoManager undoManager = new PixelitorUndoManager();
     private static int undoDepth = 0; // how deep we are back in time
@@ -43,9 +43,6 @@ public final class History {
         setUndoLevels(AppPreferences.loadUndoLevels());
     }
 
-    /**
-     * Utility class with static methods
-     */
     private History() {
     }
 

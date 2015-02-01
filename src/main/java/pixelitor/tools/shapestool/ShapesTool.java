@@ -38,7 +38,6 @@ import pixelitor.tools.ToolAffectedArea;
 import pixelitor.tools.UserDrag;
 import pixelitor.utils.GUIUtils;
 import pixelitor.utils.OKCancelDialog;
-import pixelitor.utils.Optional;
 
 import javax.swing.*;
 import java.awt.BasicStroke;
@@ -50,6 +49,7 @@ import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.util.Optional;
 
 /**
  * The Shapes Tool

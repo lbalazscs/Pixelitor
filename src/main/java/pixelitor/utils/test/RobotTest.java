@@ -401,7 +401,7 @@ public class RobotTest {
 
         try {
             Utils.executeFilterWithBusyCursor(filter, ChangeReason.OP_PREVIEW, busyCursorParent);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             BufferedImage src = layer.getFilterSourceImage();
             System.out.println(String.format(
                     "RobotTest::randomTweenOperation: name = %s, width = %d, height = %d, params = %s",

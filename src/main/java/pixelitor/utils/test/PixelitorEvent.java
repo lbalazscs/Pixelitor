@@ -14,16 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.utils.test;
 
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
 import pixelitor.layers.Layer;
-import pixelitor.utils.Optional;
 
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Optional;
 
 /**
  *

@@ -73,7 +73,6 @@ import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.FilterCreator;
 import pixelitor.utils.HistogramsPanel;
-import pixelitor.utils.Optional;
 import pixelitor.utils.PerformanceTestingDialog;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.DebugEventQueue;
@@ -89,6 +88,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.util.Optional;
 
 /**
  * The menu bar of the app

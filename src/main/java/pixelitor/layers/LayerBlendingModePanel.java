@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.layers;
 
 import pixelitor.AppLogic;
@@ -22,7 +23,8 @@ import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
 import pixelitor.utils.BlendingModePanel;
 import pixelitor.utils.ImageSwitchListener;
-import pixelitor.utils.Optional;
+
+import java.util.Optional;
 
 /**
  * The GUI selector for the opacity and blending mode of the layers

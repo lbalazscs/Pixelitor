@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,16 +18,16 @@ package pixelitor.filters;
 
 import pixelitor.history.History;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Optional;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
- * An utility class for managing operations
+ * An utility class for managing filters
  */
 public class FilterUtils {
     private static final List<Filter> allFilters = new ArrayList<>();

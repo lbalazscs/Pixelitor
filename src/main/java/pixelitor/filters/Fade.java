@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,10 +24,13 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.history.FadeableEdit;
 import pixelitor.history.History;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Optional;
 
 import java.awt.image.BufferedImage;
+import java.util.Optional;
 
+/**
+ * The Fade filter
+ */
 public class Fade extends FilterWithParametrizedGUI {
     private static final int FADE_MIN = 0;
     private static final int FADE_MAX = 100;

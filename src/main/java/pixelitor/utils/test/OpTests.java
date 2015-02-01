@@ -31,11 +31,11 @@ import pixelitor.history.History;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.OutputFormat;
 import pixelitor.utils.Dialogs;
-import pixelitor.utils.Optional;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.io.File;
+import java.util.Optional;
 
 /**
  *

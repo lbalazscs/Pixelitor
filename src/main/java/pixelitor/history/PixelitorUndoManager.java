@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.history;
 
 import pixelitor.PixelitorWindow;
 import pixelitor.utils.GUIUtils;
-import pixelitor.utils.Optional;
 
 import javax.swing.*;
 import javax.swing.event.EventListenerList;
@@ -28,6 +28,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;
+import java.util.Optional;
 
 /**
  * An undo manager that is also a list model for debugging history

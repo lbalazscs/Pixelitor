@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,9 +18,9 @@
 package pixelitor.filters;
 
 import pixelitor.ChangeReason;
-import pixelitor.utils.Optional;
 
 import java.awt.image.BufferedImage;
+import java.util.Optional;
 
 public class RepeatLastOp extends Filter {
     public static final RepeatLastOp INSTANCE = new RepeatLastOp();
