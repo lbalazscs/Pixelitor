@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor;
 
 import javax.swing.*;
@@ -73,7 +74,7 @@ public enum Build {
 
     public static Build CURRENT = FINAL;
 
-    public static final String VERSION_NUMBER = "2.3.1";
+    public static final String VERSION_NUMBER = "3.0.0";
 
     private static String fixTitle = null;
 
