@@ -35,22 +35,22 @@ import java.awt.image.BufferedImage;
 public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
     private ParamSet paramSet;
 
-    private BooleanParam showOriginalParam = null;
+    //    private BooleanParam showOriginalParam = null;
     private BooleanParam showAffectedAreaParam = null;
     //    private ShowOriginalHelper showOriginalHelper;
-    private final boolean hasShowOriginal;
+    private final boolean showOriginal;
     private final boolean hasAffectedAreaShapeParam;
     private Shape[] affectedAreaShapes;
 
-    protected FilterWithParametrizedGUI(String name, boolean addShowOriginal, boolean hasAffectedAreaShape) {
+    protected FilterWithParametrizedGUI(String name, boolean showOriginal, boolean hasAffectedAreaShape) {
         super(name);
-        hasShowOriginal = addShowOriginal;
+        this.showOriginal = showOriginal;
         this.hasAffectedAreaShapeParam = hasAffectedAreaShape;
-        if (addShowOriginal) {
-            showOriginalParam = BooleanParam.createParamForShowOriginal();
-            showOriginalParam.setIgnoreFinalAnimationSettingMode(true);
-//            showOriginalHelper = new ShowOriginalHelper();
-        }
+//        if (showOriginal) {
+//            showOriginalParam = BooleanParam.createParamForShowOriginal();
+//            showOriginalParam.setIgnoreFinalAnimationSettingMode(true);
+////            showOriginalHelper = new ShowOriginalHelper();
+//        }
         if(hasAffectedAreaShapeParam) {
             showAffectedAreaParam = new BooleanParam("Show Affected Area", false);
         }
@@ -63,13 +63,13 @@ public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
 
     @Override
     public AdjustPanel createAdjustPanel() {
-        return new ParametrizedAdjustPanel(this);
+        return new ParametrizedAdjustPanel(this, showOriginal);
     }
 
 //    // from here show original functionality
 //    @Override
 //    public void endDialogSession() {
-//        if (hasShowOriginal) {
+//        if (showOriginal) {
 //            BufferedImage img = showOriginalHelper.getLastTransformed();
 //            if (img != null) {
 //                // cannot be always flushed because it might be the active layer image as well
@@ -85,7 +85,7 @@ public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
 
     @Override
     protected BufferedImage transform(BufferedImage src, BufferedImage dest) {
-//        if (hasShowOriginal) {
+//        if (showOriginal) {
 //            boolean showOriginal = showOriginalParam.isChecked();
 //            showOriginalHelper.setShowOriginal(showOriginal);
 //            if (showOriginal) {
@@ -100,7 +100,7 @@ public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
 //        }
         dest = doTransform(src, dest);
 
-//        if (hasShowOriginal) {
+//        if (showOriginal) {
 //            showOriginalHelper.setLastTransformed(dest);
 //        }
 
@@ -118,7 +118,8 @@ public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
         // switch the affected area functionality here on-off
 
 //        paramSet.addCommonActions(showAffectedAreaParam, showOriginalParam);
-        paramSet.addCommonActions(showOriginalParam);
+//        paramSet.addCommonActions(showOriginalParam);
+        paramSet.addCommonActions();
     }
 
     public ParamSet getParamSet() {

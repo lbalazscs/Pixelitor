@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package pixelitor.filters.gui;
 import pixelitor.ImageComponents;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.utils.GridBagHelper;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.FlowLayout;
@@ -32,11 +33,11 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
      */
     private static boolean resetParams = true;
 
-    public ParametrizedAdjustPanel(FilterWithParametrizedGUI filter) {
-        this(filter, null);
+    public ParametrizedAdjustPanel(FilterWithParametrizedGUI filter, boolean showOriginal) {
+        this(filter, null, showOriginal);
     }
 
-    public ParametrizedAdjustPanel(FilterWithParametrizedGUI filter, Object otherInfo) {
+    public ParametrizedAdjustPanel(FilterWithParametrizedGUI filter, Object otherInfo, boolean showOriginal) {
         super(filter);
 
         ParamSet params = filter.getParamSet();
@@ -46,7 +47,7 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
         }
         params.setAdjustmentListener(this);
 
-        setupGUI(params, otherInfo);
+        setupGUI(params, otherInfo, showOriginal);
 
         paramAdjusted();
     }
@@ -55,11 +56,11 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
     /**
      * This can be overridden if a custom GUI is necessary
      */
-    protected void setupGUI(ParamSet params, Object otherInfo) {
-        setupControlsInColumn(this, params);
+    protected void setupGUI(ParamSet params, Object otherInfo, boolean showOriginal) {
+        setupControlsInColumn(this, params, showOriginal);
     }
 
-    public static void setupControlsInColumn(JPanel panel, ParamSet params) {
+    public static void setupControlsInColumn(JPanel panel, ParamSet params, boolean showOriginal) {
         panel.setLayout(new GridBagLayout());
 
         int row = 0;
@@ -87,6 +88,14 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
             }
 
             row++;
+        }
+        if (showOriginal) {
+            gridBagHelper.addLabel("Show Original X:", 0, row);
+
+            JCheckBox showOriginalCB = new JCheckBox();
+            showOriginalCB.addActionListener(e -> Utils.setShowOriginal(showOriginalCB.isSelected()));
+
+            gridBagHelper.addLastControl(showOriginalCB);
         }
     }
 

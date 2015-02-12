@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.gui;
 
 import pixelitor.filters.FilterWithParametrizedGUI;
@@ -29,13 +30,13 @@ import java.awt.GridLayout;
 public class GeographicalAdjustmentPanel extends ParametrizedAdjustPanel {
     private final boolean addLabels;
 
-    public GeographicalAdjustmentPanel(FilterWithParametrizedGUI filter, boolean addLabels) {
-        super(filter);
+    public GeographicalAdjustmentPanel(FilterWithParametrizedGUI filter, boolean addLabels, boolean showOriginal) {
+        super(filter, showOriginal);
         this.addLabels = addLabels;
     }
 
     @Override
-    protected void setupGUI(ParamSet params, Object otherInfo) {
+    protected void setupGUI(ParamSet params, Object otherInfo, boolean showOriginal) {
         setLayout(new BorderLayout(5, 5));
         JPanel controlPanel = new JPanel(new BorderLayout(5, 5));
         JPanel nonGeoControls = new JPanel();

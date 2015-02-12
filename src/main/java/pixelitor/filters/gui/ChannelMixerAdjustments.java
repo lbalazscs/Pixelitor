@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor.filters.gui;
@@ -26,15 +26,15 @@ import java.awt.FlowLayout;
 public class ChannelMixerAdjustments extends ParametrizedAdjustPanel {
 
     public ChannelMixerAdjustments(FilterWithParametrizedGUI filter, Action[] actions) {
-        super(filter, actions);
+        super(filter, actions, true);
     }
 
     @Override
-    protected void setupGUI(ParamSet params, Object otherInfo) {
+    protected void setupGUI(ParamSet params, Object otherInfo, boolean showOriginal) {
         Action[] actions = (Action[]) otherInfo;
 
         JPanel leftPanel = new JPanel();
-        ParametrizedAdjustPanel.setupControlsInColumn(leftPanel, params);
+        ParametrizedAdjustPanel.setupControlsInColumn(leftPanel, params, showOriginal);
 
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));

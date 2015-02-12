@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.gui;
 
 import pixelitor.filters.Filter;
@@ -42,7 +43,7 @@ public class ParamSet implements Iterable<GUIParam> {
     }
 
     public void addCommonActions(GUIParam... actions ) {
-        if (paramList.size() > 1) {
+        if (paramList.size() > 1) { // no need for "randomize"/"reset all" if the filter has only one parameter
             for (GUIParam action : actions) {
                 if(action != null) {
                     paramList.add(action);

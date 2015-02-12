@@ -48,9 +48,9 @@ public class BooleanParam extends AbstractGUIParam {
         return new BooleanParam("High-Pass Sharpening", false, true);
     }
 
-    public static BooleanParam createParamForShowOriginal() {
-        return new BooleanParam("Show Original", false, true);
-    }
+//    public static BooleanParam createParamForShowOriginal() {
+//        return new BooleanParam("Show Original", false, true);
+//    }
 
     @Override
     public boolean isSetToDefault() {

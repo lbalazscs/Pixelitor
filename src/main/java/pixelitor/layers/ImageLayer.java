@@ -46,6 +46,10 @@ import java.io.ObjectOutputStream;
 import java.util.Objects;
 import java.util.Optional;
 
+import static pixelitor.layers.ImageLayer.State.NORMAL;
+import static pixelitor.layers.ImageLayer.State.PREVIEW;
+import static pixelitor.layers.ImageLayer.State.SHOW_ORIGINAL;
+
 /**
  * An image layer.
  *
@@ -97,7 +101,7 @@ public class ImageLayer extends ContentLayer {
     //
     // transient variables from here!
     //
-    private transient State state = State.NORMAL;
+    private transient State state = NORMAL;
 
     private transient TmpDrawingLayer tmpDrawingLayer;
 
@@ -274,7 +278,7 @@ public class ImageLayer extends ContentLayer {
             // the previewImage reference will be overwritten
             previewImage = image;
         }
-        setState(State.PREVIEW);
+        setState(PREVIEW);
     }
 
     /**
@@ -285,7 +289,7 @@ public class ImageLayer extends ContentLayer {
     }
 
     public void okPressedInDialog(String filterName) {
-        assert state == State.PREVIEW;
+        assert (state == PREVIEW) || (state == SHOW_ORIGINAL);
         assert previewImage != null;
 
         if (isImageContentChanged()) {
@@ -296,27 +300,27 @@ public class ImageLayer extends ContentLayer {
         image = previewImage;
         previewImage = null;
 
-        setState(State.NORMAL);
+        setState(NORMAL);
     }
 
     public void cancelPressedInDialog() {
-        assert state == State.PREVIEW;
+        assert state == PREVIEW;
         assert previewImage != null;
 
-        setState(State.NORMAL);
+        setState(NORMAL);
         previewImage = null;
         comp.imageChanged(true, true);
     }
 
     public void tweenCalculatingStarted() {
-        assert state == State.NORMAL;
+        assert state == NORMAL;
         startPreviewing();
     }
 
     // currently the same as cancelPressedInDialog
     public void tweenCalculatingEnded() {
-        assert state == State.PREVIEW;
-        setState(State.NORMAL);
+        assert state == PREVIEW;
+        setState(NORMAL);
 
         getComposition().repaint(); // TODO necessary?
     }
@@ -327,7 +331,7 @@ public class ImageLayer extends ContentLayer {
     public boolean changePreviewImage(BufferedImage img, String filterName) {
 //        System.out.println(String.format("ImageLayer::changePreviewImage: filterName = '%s'", filterName));
 
-        assert state == State.PREVIEW : "state was " + state +
+        assert state == PREVIEW : "state was " + state +
                 ", with the filter " + filterName +
                 ", in the composition " + comp.getName();
         assert previewImage != null : "previewImage was null with " + filterName;
@@ -352,7 +356,7 @@ public class ImageLayer extends ContentLayer {
         imageContentChanged = true; // history will be necessary
 
         setPreviewWithSelection(img);
-        setState(State.PREVIEW);
+        setState(PREVIEW);
         return true;
     }
 
@@ -366,7 +370,7 @@ public class ImageLayer extends ContentLayer {
         }
 
         // filters without dialog run in the normal state
-        assert state == State.NORMAL;
+        assert state == NORMAL;
 
         BufferedImage imageForUndo = getFilterSourceImage();
         setImageWithSelection(transformedImage);
@@ -394,7 +398,7 @@ public class ImageLayer extends ContentLayer {
             throw new IllegalArgumentException("img == null");
         }
         assert img != image; // simple filters always change something
-        assert state == State.NORMAL;
+        assert state == NORMAL;
         setImageWithSelection(img);
     }
 
@@ -492,7 +496,7 @@ public class ImageLayer extends ContentLayer {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         setImage(ImageUtils.deserializeImage(in));
-        state = State.NORMAL;
+        state = NORMAL;
         imageContentChanged = false;
     }
 
@@ -913,18 +917,18 @@ public class ImageLayer extends ContentLayer {
 
     public void setShowOriginal(boolean b) {
         if (b) {
-            assert state == State.PREVIEW;
-            setState(State.SHOW_ORIGINAL);
+            assert state == PREVIEW;
+            setState(SHOW_ORIGINAL);
         } else {
-            assert state == State.SHOW_ORIGINAL;
-            setState(State.PREVIEW);
+            assert state == SHOW_ORIGINAL;
+            setState(PREVIEW);
         }
         comp.repaint();
     }
 
     private void setState(State newState) {
         state = newState;
-        if (newState == State.NORMAL) {
+        if (newState == NORMAL) {
             previewImage = null;
             filterSourceImage = null;
         }
@@ -941,7 +945,7 @@ public class ImageLayer extends ContentLayer {
     }
 
     private boolean isImageContentChanged() {
-        assert state == State.PREVIEW;
+        assert state == PREVIEW || state == SHOW_ORIGINAL;
         return imageContentChanged;
     }
 
