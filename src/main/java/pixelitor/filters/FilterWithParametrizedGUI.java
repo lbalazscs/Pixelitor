@@ -37,7 +37,7 @@ public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
 
     private BooleanParam showOriginalParam = null;
     private BooleanParam showAffectedAreaParam = null;
-    private ShowOriginalHelper showOriginalHelper;
+    //    private ShowOriginalHelper showOriginalHelper;
     private final boolean hasShowOriginal;
     private final boolean hasAffectedAreaShapeParam;
     private Shape[] affectedAreaShapes;
@@ -49,7 +49,7 @@ public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
         if (addShowOriginal) {
             showOriginalParam = BooleanParam.createParamForShowOriginal();
             showOriginalParam.setIgnoreFinalAnimationSettingMode(true);
-            showOriginalHelper = new ShowOriginalHelper();
+//            showOriginalHelper = new ShowOriginalHelper();
         }
         if(hasAffectedAreaShapeParam) {
             showAffectedAreaParam = new BooleanParam("Show Affected Area", false);
@@ -66,43 +66,43 @@ public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
         return new ParametrizedAdjustPanel(this);
     }
 
-    // from here show original functionality
-    @Override
-    public void endDialogSession() {
-        if (hasShowOriginal) {
-            BufferedImage img = showOriginalHelper.getLastTransformed();
-            if (img != null) {
-                // cannot be always flushed because it might be the active layer image as well
-                // TODO keep track of it
-                // img.flush();
-                showOriginalHelper.setLastTransformed(null);
-            }
-            showOriginalHelper.setPreviousShowOriginal(false);
-
-            showOriginalHelper.releaseCachedImage();
-        }
-    }
+//    // from here show original functionality
+//    @Override
+//    public void endDialogSession() {
+//        if (hasShowOriginal) {
+//            BufferedImage img = showOriginalHelper.getLastTransformed();
+//            if (img != null) {
+//                // cannot be always flushed because it might be the active layer image as well
+//                // TODO keep track of it
+//                // img.flush();
+//                showOriginalHelper.setLastTransformed(null);
+//            }
+//            showOriginalHelper.setPreviousShowOriginal(false);
+//
+//            showOriginalHelper.releaseCachedImage();
+//        }
+//    }
 
     @Override
     protected BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (hasShowOriginal) {
-            boolean showOriginal = showOriginalParam.isChecked();
-            showOriginalHelper.setShowOriginal(showOriginal);
-            if (showOriginal) {
-                return src;
-            }
-
-            if (showOriginalHelper.showCached()) {
-                dest = showOriginalHelper.getLastTransformed();
-                assert dest != null;
-                return dest;
-            }
-        }
+//        if (hasShowOriginal) {
+//            boolean showOriginal = showOriginalParam.isChecked();
+//            showOriginalHelper.setShowOriginal(showOriginal);
+//            if (showOriginal) {
+//                return src;
+//            }
+//
+//            if (showOriginalHelper.showCached()) {
+//                dest = showOriginalHelper.getLastTransformed();
+//                assert dest != null;
+//                return dest;
+//            }
+//        }
         dest = doTransform(src, dest);
 
-        if (hasShowOriginal) {
-            showOriginalHelper.setLastTransformed(dest);
-        }
+//        if (hasShowOriginal) {
+//            showOriginalHelper.setLastTransformed(dest);
+//        }
 
         if (hasAffectedAreaShapeParam && showAffectedAreaParam.isChecked()) {
             ImageUtils.paintAffectedAreaShapes(dest, affectedAreaShapes);
