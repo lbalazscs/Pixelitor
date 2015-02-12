@@ -85,7 +85,7 @@ public final class Utils {
     /**
      * Executes a task with busy cursor
      */
-    public static void executeWithBusyCursor(final Component parent, Runnable task) {
+    public static void executeWithBusyCursor(Component parent, Runnable task) {
         Timer timer = new Timer();
         TimerTask startBusyCursorTask = new TimerTask() {
             @Override
@@ -112,6 +112,11 @@ public final class Utils {
     public static void executeFilterWithBusyCursor(Filter filter, ChangeReason changeReason, Component busyCursorParent) {
         Composition comp = ImageComponents.getActiveComp().get();
         comp.executeFilterWithBusyCursor(filter, changeReason, busyCursorParent);
+    }
+
+    public static void setShowOriginal(boolean b) {
+        Composition comp = ImageComponents.getActiveComp().get();
+        comp.setShowOriginal(b);
     }
 
     public static void openURI(URI uri) {
@@ -316,7 +321,7 @@ public final class Utils {
         Build.CURRENT.setPerformanceTest(true);
         Filter[] filters = FilterUtils.getAllFiltersShuffled();
         List<Filter> filtersToTest = new ArrayList<>();
-        final Map<String, Double> results = new HashMap<>();
+        Map<String, Double> results = new HashMap<>();
 
         for (Filter op : filters) {
             if (op instanceof Fade || op instanceof Canny || op instanceof Lightning) {

@@ -78,6 +78,11 @@ public class ImageLayer extends ContentLayer {
          * dialog when invoked from places like the the "Random Filter"
          */
         PREVIEW {
+        },
+        /**
+         * The layer is in previewing mode, but "Show Original" is pressed in the dialog
+         */
+        SHOW_ORIGINAL {
         };
     }
 
@@ -305,7 +310,6 @@ public class ImageLayer extends ContentLayer {
 
     public void tweenCalculatingStarted() {
         assert state == State.NORMAL;
-//        setState(State.PREVIEW);
         startPreviewing();
     }
 
@@ -854,11 +858,21 @@ public class ImageLayer extends ContentLayer {
         setupDrawingComposite(g, isFirstVisibleLayer);
 
         BufferedImage visibleImage = null;
-        if (state == State.NORMAL) {
-            visibleImage = image;
-        } else {
-            assert previewImage != null : "no preview image in state " + state;
-            visibleImage = previewImage;
+
+        switch (state) {
+            case NORMAL:
+                visibleImage = image;
+                break;
+            case PREVIEW:
+                assert previewImage != null : "no preview image in state " + state;
+                visibleImage = previewImage;
+                break;
+            case SHOW_ORIGINAL:
+                assert previewImage != null : "no preview image in state " + state;
+                visibleImage = image;
+                break;
+            default:
+                throw new IllegalStateException("state = " + state);
         }
 
         if (tmpDrawingLayer == null) {
@@ -895,6 +909,17 @@ public class ImageLayer extends ContentLayer {
                 g.drawImage(mergedLayerBrushImg, getTranslationX(), getTranslationY(), null);
             }
         }
+    }
+
+    public void setShowOriginal(boolean b) {
+        if (b) {
+            assert state == State.PREVIEW;
+            setState(State.SHOW_ORIGINAL);
+        } else {
+            assert state == State.SHOW_ORIGINAL;
+            setState(State.PREVIEW);
+        }
+        comp.repaint();
     }
 
     private void setState(State newState) {

@@ -22,6 +22,7 @@ import pixelitor.filters.levels.GrayScaleLookup;
 import pixelitor.filters.levels.RGBLookup;
 import pixelitor.filters.lookup.DynamicLookupFilter;
 import pixelitor.utils.GUIUtils;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -44,7 +45,7 @@ public class LevelsPanel extends AdjustPanel implements ItemListener, GrayScaleA
     private final OneChannelLevelsPanel rbPanel;
     private final JPanel cardPanel;
     private final Collection<OneChannelLevelsPanel> levelsPanels = new ArrayList<>();
-//    private final JCheckBox showOriginalCB;
+    private final JCheckBox showOriginalCB;
 
     public LevelsPanel(DynamicLookupFilter filter) {
         super(filter);
@@ -84,8 +85,9 @@ public class LevelsPanel extends AdjustPanel implements ItemListener, GrayScaleA
 
         add(cardPanel, BorderLayout.CENTER);
 
-//        showOriginalCB = new JCheckBox("Show Original");
-//        add(showOriginalCB, BorderLayout.SOUTH);
+        showOriginalCB = new JCheckBox("Show Original");
+        showOriginalCB.addActionListener(e -> Utils.setShowOriginal(showOriginalCB.isSelected()));
+        add(showOriginalCB, BorderLayout.SOUTH);
     }
 
     private void addNewCard(OneChannelLevelsPanel chPanel) {
