@@ -71,7 +71,7 @@ public final class NewImage {
             //noinspection NonThreadSafeLazyInitialization
             lastNew = AppPreferences.loadNewImageSize();
         }
-        final NewImagePanel p = new NewImagePanel(lastNew.width, lastNew.height);
+        NewImagePanel p = new NewImagePanel(lastNew.width, lastNew.height);
         OKCancelDialog d = new OKCancelDialog(p, "New Image") {
             @Override
             public void dialogAccepted() {

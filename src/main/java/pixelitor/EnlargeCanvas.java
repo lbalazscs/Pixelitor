@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor;
 
 import pixelitor.filters.gui.RangeParam;
@@ -34,7 +35,7 @@ public class EnlargeCanvas {
     }
 
     private static void showInDialog() {
-        final EnlargeCanvasPanel panel = new EnlargeCanvasPanel();
+        EnlargeCanvasPanel panel = new EnlargeCanvasPanel();
         OKCancelDialog d = new OKCancelDialog(panel, "Enlarge Canvas") {
             @Override
             protected void dialogAccepted() {

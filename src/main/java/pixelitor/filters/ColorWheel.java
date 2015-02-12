@@ -43,23 +43,23 @@ public class ColorWheel extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        final int[] destData = ImageUtils.getPixelsAsArray(dest);
+        int[] destData = ImageUtils.getPixelsAsArray(dest);
 
-        final int width = dest.getWidth();
+        int width = dest.getWidth();
         int height = dest.getHeight();
 
-        final int cx = (int) (width * center.getRelativeX());
-        final int cy = (int) (height * center.getRelativeY());
+        int cx = (int) (width * center.getRelativeX());
+        int cy = (int) (height * center.getRelativeY());
 
-        final float hueShift = (float) hueShiftParam.getValueInRadians();
-        final float saturation = satParam.getValueAsPercentage();
-        final float brightness = brightnessParam.getValueAsPercentage();
+        float hueShift = (float) hueShiftParam.getValueInRadians();
+        float saturation = satParam.getValueAsPercentage();
+        float brightness = brightnessParam.getValueAsPercentage();
 
         boolean multiThreaded = ThreadPool.runMultiThreaded();
         if (multiThreaded) {
             Future<?>[] futures = new Future[height];
             for (int y = 0; y < height; y++) {
-                final int finalY = y;
+                int finalY = y;
                 Runnable lineTask = () -> calculateLine(destData, width, cx, cy, hueShift, saturation, brightness, finalY);
                 futures[y] = ThreadPool.executorService.submit(lineTask);
             }

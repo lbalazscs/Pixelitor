@@ -53,8 +53,8 @@ public class Automate {
     /**
      * Processes each file in the input directory with the given CompositionAction
      */
-    public static void processEachFile(final CompositionAction action,
-                                       final boolean closeImagesAfterProcessing,
+    public static void processEachFile(CompositionAction action,
+                                       boolean closeImagesAfterProcessing,
                                        String progressMonitorTitle) {
         File lastOpenDir = FileChoosers.getLastOpenDir();
         if (lastOpenDir == null) {
@@ -64,7 +64,7 @@ public class Automate {
             throw new IllegalStateException("Last open dir " + lastOpenDir.getAbsolutePath() + " does not exist");
         }
 
-        final File lastSaveDir = FileChoosers.getLastSaveDir();
+        File lastSaveDir = FileChoosers.getLastSaveDir();
         if (lastSaveDir == null) {
             throw new IllegalStateException("lastSaveDir is null");
         }
@@ -72,13 +72,13 @@ public class Automate {
             throw new IllegalStateException("Last save dir " + lastSaveDir.getAbsolutePath() + " does not exist");
         }
 
-        final File[] children = FileExtensionUtils.getAllSupportedFilesInDir(lastOpenDir);
+        File[] children = FileExtensionUtils.getAllSupportedFilesInDir(lastOpenDir);
         if (children.length == 0) {
             Dialogs.showInfoDialog("No files", "There are no supported files in " + lastOpenDir.getAbsolutePath());
             return;
         }
 
-        final ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor(progressMonitorTitle);
+        ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor(progressMonitorTitle);
         SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
             @Override
             public Void doInBackground() {
@@ -89,7 +89,7 @@ public class Automate {
                         break;
                     }
 
-                    final File file = children[i];
+                    File file = children[i];
                     progressMonitor.setProgress((int) ((float) i * 100 / nrOfFiles));
                     progressMonitor.setNote("Processing " + file.getName());
 

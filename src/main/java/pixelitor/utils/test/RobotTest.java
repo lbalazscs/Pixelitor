@@ -135,7 +135,7 @@ public class RobotTest {
         continueRunning = true;
 
         // and the j key exits the app
-        final KeyStroke exitKeyStroke = KeyStroke.getKeyStroke('j');
+        KeyStroke exitKeyStroke = KeyStroke.getKeyStroke('j');
         GlobalKeyboardWatch.addKeyboardShortCut(exitKeyStroke, "exit", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -160,7 +160,7 @@ public class RobotTest {
         worker.execute();
     }
 
-    private static SwingWorker<Void, Void> createOneRoundSwingWorker(final Robot r, final boolean forever) {
+    private static SwingWorker<Void, Void> createOneRoundSwingWorker(Robot r, boolean forever) {
         return new SwingWorker<Void, Void>() {
             @Override
             public Void doInBackground() {
@@ -816,7 +816,7 @@ public class RobotTest {
         ImageComponents.getActiveLayer().get().addTestLayerMask();
     }
 
-    private static void setupWeightedCaller(final Robot r) {
+    private static void setupWeightedCaller(Robot r) {
         // random move
         weightedCaller.registerCallback(10, () -> {
             Point randomPoint = generateRandomPoint();

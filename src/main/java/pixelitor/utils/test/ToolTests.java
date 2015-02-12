@@ -144,17 +144,17 @@ public class ToolTests {
                 false);
     }
 
-    public static void randomToolActions(final int numStrokes, final boolean brushOnly) {
-        final Composition comp = ImageComponents.getActiveComp().get();
-        final Random random = new Random();
+    public static void randomToolActions(int numStrokes, boolean brushOnly) {
+        Composition comp = ImageComponents.getActiveComp().get();
+        Random random = new Random();
 
         if (comp != null) {
-            final int canvasWidth = comp.getCanvasWidth();
-            final int canvasHeight = comp.getCanvasHeight();
+            int canvasWidth = comp.getCanvasWidth();
+            int canvasHeight = comp.getCanvasHeight();
 
-            final ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("1001 Tool Actions");
+            ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("1001 Tool Actions");
 
-            final Random rand = new Random();
+            Random rand = new Random();
 
             // So far we are on the EDT
             Runnable notEDTThreadTask = () -> {

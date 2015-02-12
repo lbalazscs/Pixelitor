@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools;
 
 import javax.swing.*;
@@ -73,8 +74,8 @@ public class HandToolSupport {
      */
     public static void addBehavior(JScrollPane scrollPane) {
         scrollPane.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        final HandToolSupport support = new HandToolSupport();
-        final JViewport viewport = scrollPane.getViewport();
+        HandToolSupport support = new HandToolSupport();
+        JViewport viewport = scrollPane.getViewport();
         Component panel = viewport.getView();
 
         panel.addMouseListener(new MouseAdapter() {

@@ -56,7 +56,7 @@ public class Threshold extends FilterWithParametrizedGUI {
         return FilterUtils.runRGBPixelOp(pixelOp, src, dest);
     }
 
-    private RGBPixelOp getRGBPixelOp(final double threshold, int basedOn) {
+    private RGBPixelOp getRGBPixelOp(double threshold, int basedOn) {
         switch (basedOn) {
             case CRIT_LUMINOSITY:
                 return (a, r, g, b) -> {

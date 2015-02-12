@@ -67,7 +67,7 @@ public class LayerAnimationFrames {
         boolean ok = e.finish();
     }
 
-    public void saveToFile(final File selectedFile) {
+    public void saveToFile(File selectedFile) {
         if (selectedFile == null) {
             throw new IllegalArgumentException("selectedFile is null");
         }

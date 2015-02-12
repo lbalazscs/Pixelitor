@@ -87,7 +87,7 @@ public class StrokeSettingsDialog extends JDialog {
 
         strokeTypePanel.setLayout(new GridLayout(3, 2, 5, 5));
 
-        final EnumComboBoxModel<ShapeType> typeModel = new EnumComboBoxModel<>(ShapeType.class);
+        EnumComboBoxModel<ShapeType> typeModel = new EnumComboBoxModel<>(ShapeType.class);
         typeModel.setSelectedItem(ShapeType.KIWI);
 
         shapeTypeCB = new JComboBox(typeModel);

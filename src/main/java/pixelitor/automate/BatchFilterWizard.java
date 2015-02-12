@@ -45,8 +45,8 @@ public class BatchFilterWizard extends Wizard {
 
     @Override
     protected void executeFinalAction() {
-        final Filter filter = config.getFilter();
-        final PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
+        Filter filter = config.getFilter();
+        PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
 
         Automate.processEachFile(comp -> {
 //                final ImageLayer layer = comp.getActiveImageLayer();

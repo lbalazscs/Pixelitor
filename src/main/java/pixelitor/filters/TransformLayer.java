@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,7 @@ import java.awt.image.BufferedImage;
  * Arbitrary Rotate
  */
 public class TransformLayer extends FilterWithParametrizedGUI {
-    private final ImagePositionParam centerParam = new ImagePositionParam("Center");
+    private final ImagePositionParam centerParam = new ImagePositionParam("Pivot Point");
     private final AngleParam angleParam = new AngleParam("Rotate Angle", 0);
     private final ColorParam bgColorParam = new ColorParam("Background Color:", Utils.TRANSPARENT_COLOR, true, false);
     private final GroupedRangeParam scaleParam = new GroupedRangeParam("Scale (%)", 1, 500, 100);

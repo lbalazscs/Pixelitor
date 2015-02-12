@@ -149,7 +149,7 @@ public class MenuBar extends JMenuBar {
         initHelpMenu(pixelitorWindow);
     }
 
-    private void initFileMenu(final PixelitorWindow pixelitorWindow) {
+    private void initFileMenu(PixelitorWindow pixelitorWindow) {
         JMenu fileMenu = createMenu("File", 'F');
 
         // new image
@@ -270,7 +270,7 @@ public class MenuBar extends JMenuBar {
         this.add(fileMenu);
     }
 
-    private static void initAutomateSubmenu(JMenu fileMenu, final PixelitorWindow pixelitorWindow) {
+    private static void initAutomateSubmenu(JMenu fileMenu, PixelitorWindow pixelitorWindow) {
         JMenu batchSubmenu = new JMenu("Automate");
         fileMenu.add(batchSubmenu);
 
@@ -744,7 +744,7 @@ public class MenuBar extends JMenuBar {
         this.add(viewMenu);
     }
 
-    private static void initArrangeWindowsSubmenu(JMenu viewMenu, final PixelitorWindow pixelitorWindow) {
+    private static void initArrangeWindowsSubmenu(JMenu viewMenu, PixelitorWindow pixelitorWindow) {
         JMenu arrangeWindowsSubmenu = new JMenu("Arrange Windows");
 
         AbstractAction cascadeWindowsAction = new AbstractAction("Cascade") {
@@ -774,7 +774,7 @@ public class MenuBar extends JMenuBar {
         viewMenu.add(arrangeWindowsSubmenu);
     }
 
-    private void initDevelopMenu(final PixelitorWindow pixelitorWindow) {
+    private void initDevelopMenu(PixelitorWindow pixelitorWindow) {
         JMenu developMenu = createMenu("Develop", 'D');
 
         initDebugSubmenu(developMenu, pixelitorWindow);
@@ -936,7 +936,7 @@ public class MenuBar extends JMenuBar {
 
     }
 
-    private static void initTestSubmenu(JMenu developMenu, final PixelitorWindow pixelitorWindow) {
+    private static void initTestSubmenu(JMenu developMenu, PixelitorWindow pixelitorWindow) {
         JMenu testSubmenu = new JMenu("Test");
 
         createMenuItem(new ParamTest(), testSubmenu);
@@ -1070,7 +1070,7 @@ public class MenuBar extends JMenuBar {
         developMenu.add(testSubmenu);
     }
 
-    private static void initDebugSubmenu(JMenu develMenu, final PixelitorWindow pixelitorWindow) {
+    private static void initDebugSubmenu(JMenu develMenu, PixelitorWindow pixelitorWindow) {
         JMenu debugSubmenu = new JMenu("Debug");
 
         AbstractAction debugAppAction = new AbstractAction("Debug App...") {
@@ -1172,7 +1172,7 @@ public class MenuBar extends JMenuBar {
         develMenu.add(debugSubmenu);
     }
 
-    private void initHelpMenu(final PixelitorWindow pixelitorWindow) {
+    private void initHelpMenu(PixelitorWindow pixelitorWindow) {
         JMenu helpMenu = createMenu("Help", 'H');
 
         AbstractAction tipOfTheDayAction = new AbstractAction("Tip of the Day") {

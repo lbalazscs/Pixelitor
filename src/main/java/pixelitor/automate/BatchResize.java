@@ -42,8 +42,8 @@ public class BatchResize {
         }
         p.saveValues();
 
-        final int maxWidth = p.getWidthValue();
-        final int maxHeight = p.getHeightValue();
+        int maxWidth = p.getWidthValue();
+        int maxHeight = p.getHeightValue();
 
         CompositionAction resizeAction = comp -> CompositionUtils.resize(comp, maxWidth, maxHeight, true);
         Automate.processEachFile(resizeAction, true, "Batch Resize...");

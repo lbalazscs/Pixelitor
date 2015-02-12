@@ -28,7 +28,7 @@ import java.awt.GridBagLayout;
  * GUI for a GroupedRangeParam
  */
 public class GroupedRangeSelector extends JPanel {
-    public GroupedRangeSelector(final GroupedRangeParam model) {
+    public GroupedRangeSelector(GroupedRangeParam model) {
         setLayout(new GridBagLayout());
 
         GridBagHelper gridBagHelper = new GridBagHelper(this);
@@ -43,7 +43,7 @@ public class GroupedRangeSelector extends JPanel {
 
         boolean linkable = model.isLinkable();
         if(linkable) {
-            final JCheckBox linkedCB = new JCheckBox();
+            JCheckBox linkedCB = new JCheckBox();
             linkedCB.setModel(model.getCheckBoxModel());
             gridBagHelper.addLabelWithControl("Linked:", linkedCB, numParams);
             linkedCB.addActionListener(e -> model.setLinked(linkedCB.isSelected()));

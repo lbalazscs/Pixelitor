@@ -108,7 +108,7 @@ public abstract class EffectConfiguratorPanel extends JPanel {
 
     public abstract int getBrushWidth();
 
-    public void setAdjustmentListener(final ParamAdjustmentListener adjustmentListener) {
+    public void setAdjustmentListener(ParamAdjustmentListener adjustmentListener) {
         if (this.adjustmentListener != null) {
             throw new IllegalStateException("only one is allowed");
         }

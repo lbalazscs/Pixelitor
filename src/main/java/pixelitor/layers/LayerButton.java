@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.layers;
 
 import pixelitor.utils.IconUtils;
@@ -50,7 +51,7 @@ public class LayerButton extends JToggleButton {
         setUI(new LayerButtonUI());
     }
 
-    public LayerButton(final Layer layer) {
+    public LayerButton(Layer layer) {
         this.layer = layer;
         setLayout(new LayerButtonLayout(5, 5));
         visibilityCB = new JCheckBox(CLOSED_EYE_ICON);

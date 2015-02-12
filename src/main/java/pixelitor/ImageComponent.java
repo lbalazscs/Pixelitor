@@ -469,7 +469,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
         Rectangle viewRect = getViewRectangle();
 
-        final Rectangle areaThatShouldBeVisible = new Rectangle(
+        Rectangle areaThatShouldBeVisible = new Rectangle(
                 newComponentSpacePoint.x - viewRect.width / 2,
                 newComponentSpacePoint.y - viewRect.height / 2,
                 viewRect.width,

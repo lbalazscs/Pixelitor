@@ -56,7 +56,7 @@ public class OpenSaveManager {
     private OpenSaveManager() {
     }
 
-    public static void openFile(final File file) {
+    public static void openFile(File file) {
         assert SwingUtilities.isEventDispatchThread();
         Runnable r = () -> {
             Composition comp = createCompositionFromFile(file);
@@ -139,7 +139,7 @@ public class OpenSaveManager {
         }
     }
 
-    public static void saveImageToFile(final File selectedFile, final BufferedImage image, final String format) {
+    public static void saveImageToFile(File selectedFile, BufferedImage image, String format) {
         if (selectedFile == null) {
             throw new IllegalArgumentException("selectedFile is null");
         }
@@ -313,11 +313,11 @@ public class OpenSaveManager {
             return;
         }
 
-        final OutputFormat outputFormat = OutputFormat.getLastOutputFormat();
-        final File saveDir = FileChoosers.getLastSaveDir();
-        final List<ImageComponent> imageComponents = ImageComponents.getImageComponents();
+        OutputFormat outputFormat = OutputFormat.getLastOutputFormat();
+        File saveDir = FileChoosers.getLastSaveDir();
+        List<ImageComponent> imageComponents = ImageComponents.getImageComponents();
 
-        final ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("Saving All Images to Folder");
+        ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("Saving All Images to Folder");
 
         SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
             @Override

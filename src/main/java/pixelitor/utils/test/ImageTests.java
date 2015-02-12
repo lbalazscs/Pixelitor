@@ -73,7 +73,7 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
             return;
         }
 
-        final ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("Save Many Splash Images");
+        ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("Save Many Splash Images");
 
         SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
             @Override
@@ -81,9 +81,9 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
                 int nurOfSplashImages = 32;
 
                 for (int i = 0; i < nurOfSplashImages; i++) {
-                    final OutputFormat outputFormat = OutputFormat.getLastOutputFormat();
+                    OutputFormat outputFormat = OutputFormat.getLastOutputFormat();
 
-                    final String fileName = String.format("splash%04d.%s", i, outputFormat.toString());
+                    String fileName = String.format("splash%04d.%s", i, outputFormat.toString());
 
                     progressMonitor.setProgress((int) ((float) i * 100 / nurOfSplashImages));
                     progressMonitor.setNote("Creating " + fileName);

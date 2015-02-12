@@ -45,7 +45,7 @@ public final class GUIUtils {
         testJComponent(contentPane);
     }
 
-    public static void testJComponent(final JComponent p) {
+    public static void testJComponent(JComponent p) {
         Runnable runnable = () -> {
             try {
                 String lookAndFeelClass = AppPreferences.getLookAndFeelClass();
@@ -105,7 +105,7 @@ public final class GUIUtils {
         return false;
     }
 
-    public static void showTextDialog(JComponent form, String title, final String text) {
+    public static void showTextDialog(JComponent form, String title, String text) {
         OKCancelDialog d = new OKCancelDialog(form, PixelitorWindow.getInstance(), title,
                 "Copy as Text to the Clipboard", "Close") {
             @Override

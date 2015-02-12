@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.gui;
 
 import javax.swing.*;
@@ -50,7 +51,6 @@ public class BooleanParam extends AbstractGUIParam {
     public static BooleanParam createParamForShowOriginal() {
         return new BooleanParam("Show Original", false, true);
     }
-
 
     @Override
     public boolean isSetToDefault() {

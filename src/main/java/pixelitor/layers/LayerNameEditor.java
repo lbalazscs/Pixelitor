@@ -27,7 +27,7 @@ import java.awt.event.FocusEvent;
 public class LayerNameEditor extends JTextField {
     private final LayerButton layerButton;
 
-    public LayerNameEditor(LayerButton layerButton, final Layer layer) {
+    public LayerNameEditor(LayerButton layerButton, Layer layer) {
         super(layer.getName());
         this.layerButton = layerButton;
         disableEditing();

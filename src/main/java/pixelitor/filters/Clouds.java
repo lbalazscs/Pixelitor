@@ -76,18 +76,18 @@ public class Clouds extends FilterWithParametrizedGUI {
         return dest;
     }
 
-    public static void renderClouds(BufferedImage dest, final float scaleValue, final float roughnessValue, Color c1, Color c2) {
-        final int width = dest.getWidth();
+    public static void renderClouds(BufferedImage dest, float scaleValue, float roughnessValue, Color c1, Color c2) {
+        int width = dest.getWidth();
         int height = dest.getHeight();
-        final int[] destData = ImageUtils.getPixelsAsArray(dest);
-        final int[] color1 = {c1.getAlpha(), c1.getRed(), c1.getGreen(), c1.getBlue()};
-        final int[] color2 = {c2.getAlpha(), c2.getRed(), c2.getGreen(), c2.getBlue()};
+        int[] destData = ImageUtils.getPixelsAsArray(dest);
+        int[] color1 = {c1.getAlpha(), c1.getRed(), c1.getGreen(), c1.getBlue()};
+        int[] color2 = {c2.getAlpha(), c2.getRed(), c2.getGreen(), c2.getBlue()};
 
         boolean multiThreaded = ThreadPool.runMultiThreaded();
         if(multiThreaded) {
             Future<?>[] futures = new Future[height];
             for (int y = 0; y < height; y++) {
-                final int finalY = y;
+                int finalY = y;
                 Runnable lineTask = () -> calculateLine(scaleValue, roughnessValue, width, destData, color1, color2, finalY);
                 Future<?> future = ThreadPool.executorService.submit(lineTask);
                 futures[y] = future;

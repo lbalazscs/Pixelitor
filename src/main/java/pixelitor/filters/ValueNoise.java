@@ -68,7 +68,7 @@ public class ValueNoise extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        final int[] lookupTable = new int[256];
+        int[] lookupTable = new int[256];
         Color c1 = color1.getColor();
         Color c2 = color2.getColor();
         int[] colorArray1 = {c1.getAlpha(), c1.getRed(), c1.getGreen(), c1.getBlue()};
@@ -78,19 +78,19 @@ public class ValueNoise extends FilterWithParametrizedGUI {
             lookupTable[i] = ImageUtils.lerpAndPremultiplyColorWithAlpha(i / 255.0f, colorArray1, colorArray2);
         }
 
-        final int[] destData = ImageUtils.getPixelsAsArray(dest);
-        final int width = dest.getWidth();
+        int[] destData = ImageUtils.getPixelsAsArray(dest);
+        int width = dest.getWidth();
         int height = dest.getHeight();
-        final float frequency = 1.0f / scale.getValueAsFloat();
+        float frequency = 1.0f / scale.getValueAsFloat();
 
-        final float persistence = 0.6f;
-        final float amplitude = 1.0f;
+        float persistence = 0.6f;
+        float amplitude = 1.0f;
 
         boolean multiThreaded = ThreadPool.runMultiThreaded();
         if(multiThreaded) {
             Future<?>[] futures = new Future[height];
             for (int y = 0; y < height; y++) {
-                final int finalY = y;
+                int finalY = y;
                 Runnable lineTask = () -> calculateLine(lookupTable, destData, width, frequency, persistence, amplitude, finalY);
                 Future<?> future = ThreadPool.executorService.submit(lineTask);
                 futures[y] = future;

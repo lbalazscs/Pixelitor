@@ -91,9 +91,9 @@ public class OptimizedJpegSavePanel extends JPanel {
     }
 
     private void updateAfterPreview() {
-        final float quality = getSelectedQuality();
+        float quality = getSelectedQuality();
 
-        final JpegOutput.ImageWithSize[] imageWithSize = new JpegOutput.ImageWithSize[1];
+        JpegOutput.ImageWithSize[] imageWithSize = new JpegOutput.ImageWithSize[1];
         Runnable task = () -> imageWithSize[0] = JpegOutput.writeJPGtoPreviewImage(OptimizedJpegSavePanel.this.image, quality);
         Utils.executeWithBusyCursor(this, task);
 
@@ -111,7 +111,7 @@ public class OptimizedJpegSavePanel extends JPanel {
     public static void showInDialog(BufferedImage image, JFrame frame) {
         BufferedImage rgbImage = ImageUtils.convertToRGB(image, false);
 
-        final OptimizedJpegSavePanel p = new OptimizedJpegSavePanel(rgbImage);
+        OptimizedJpegSavePanel p = new OptimizedJpegSavePanel(rgbImage);
         OKCancelDialog d = new OKCancelDialog(p, frame, "Save Optimized JPEG", "Save", "Cancel", false) {
             @Override
             protected void dialogAccepted() {

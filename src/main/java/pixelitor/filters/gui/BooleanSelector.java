@@ -27,7 +27,7 @@ public class BooleanSelector extends JPanel implements ParamGUI {
     private final BooleanParam model;
     private final JCheckBox checkBox;
 
-    public BooleanSelector(final BooleanParam model) {
+    public BooleanSelector(BooleanParam model) {
         this.model = model;
         setLayout(new FlowLayout(FlowLayout.LEFT));
         checkBox = new JCheckBox();

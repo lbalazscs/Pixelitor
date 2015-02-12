@@ -69,7 +69,7 @@ public class GroupedRangeParam extends AbstractGUIParam implements RangeBasedOnI
         this.linkedByDefault = linked;
         setLinked(linkedByDefault);
 
-        for (final RangeParam param : rangeParams) {
+        for (RangeParam param : rangeParams) {
             param.addChangeListener(e -> {
                 if (isLinked()) {
                     // set the value of every other param to the value of the current param

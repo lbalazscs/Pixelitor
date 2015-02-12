@@ -411,7 +411,7 @@ public final class AppPreferences {
         }
 
         public static void showInDialog() {
-            final Panel p = new Panel();
+            Panel p = new Panel();
             OKCancelDialog d = new OKCancelDialog(p, "Preferences") {
                 @Override
                 protected void dialogAccepted() {

@@ -66,7 +66,7 @@ public class AnimGifExportPanel extends JPanel {
     }
 
     public static void showInDialog(JFrame parent) {
-        final Composition activeComp = ImageComponents.getActiveComp().get();
+        Composition activeComp = ImageComponents.getActiveComp().get();
         int nrLayers = activeComp.getNrLayers();
         if(nrLayers < 2) {
             Dialogs.showInfoDialog("Only one layer",
@@ -75,7 +75,7 @@ public class AnimGifExportPanel extends JPanel {
             return;
         }
 
-        final AnimGifExportPanel p = new AnimGifExportPanel(activeComp.getNrLayers());
+        AnimGifExportPanel p = new AnimGifExportPanel(activeComp.getNrLayers());
         OKCancelDialog d = new OKCancelDialog(p, parent, "Export Animated GIF", "Export", "Cancel", false) {
             @Override
             protected void dialogAccepted() {

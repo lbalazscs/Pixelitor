@@ -136,7 +136,7 @@ public class CustomConvolveAdjustments extends AdjustPanel implements ActionList
         add(presetsBox);
     }
 
-    private void initPreset(String name, final float[] kernel) {
+    private void initPreset(String name, float[] kernel) {
         JButton button = new JButton(name);
         button.addActionListener(e -> {
             setValues(kernel);

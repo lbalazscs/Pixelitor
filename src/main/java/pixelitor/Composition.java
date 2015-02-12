@@ -763,7 +763,7 @@ public class Composition implements Serializable {
     /**
      * Executes the given filter with busy cursor
      */
-    public void executeFilterWithBusyCursor(final Filter filter, final ChangeReason changeReason, Component busyCursorParent) {
+    public void executeFilterWithBusyCursor(Filter filter, ChangeReason changeReason, Component busyCursorParent) {
         String filterMenuName = filter.getMenuName();
         try {
             if (changeReason.isPreview()) {
@@ -797,5 +797,9 @@ public class Composition implements Serializable {
             Dialogs.showExceptionDialog(e);
         }
         RepeatLastOp.INSTANCE.setMenuName("Repeat " + filterMenuName);
+    }
+
+    public void setShowOriginal(boolean b) {
+        getActiveImageLayer().setShowOriginal(b);
     }
 }

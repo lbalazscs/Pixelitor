@@ -42,7 +42,7 @@ public class OpenRasterExportPanel extends JPanel {
     }
 
     public static void showInDialog(JFrame parent) {
-        final Composition activeComp = ImageComponents.getActiveComp().get();
+        Composition activeComp = ImageComponents.getActiveComp().get();
         int nrLayers = activeComp.getNrLayers();
         if(nrLayers < 2) {
             boolean exportAnyway = Dialogs.showYesNoQuestionDialog("Only one layer", activeComp.getName() + " has only one layer.\n" +
@@ -52,7 +52,7 @@ public class OpenRasterExportPanel extends JPanel {
             }
         }
 
-        final OpenRasterExportPanel p = new OpenRasterExportPanel();
+        OpenRasterExportPanel p = new OpenRasterExportPanel();
         OKCancelDialog d = new OKCancelDialog(p, parent, "Export OpenRaster", "Export", "Cancel", false) {
             @Override
             protected void dialogAccepted() {

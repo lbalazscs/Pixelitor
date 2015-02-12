@@ -29,12 +29,12 @@ import java.awt.Dimension;
 public class AngleSelector extends JPanel {
     private boolean userChangedSpinner = true;
 
-    public AngleSelector(final AngleParam angleParam) {
+    public AngleSelector(AngleParam angleParam) {
         setLayout(new BorderLayout(10, 0));
-        final AbstractAngleSelectorComponent asc = angleParam.getAngleSelectorComponent();
+        AbstractAngleSelectorComponent asc = angleParam.getAngleSelectorComponent();
         add(asc, BorderLayout.WEST);
 
-        final RangeParam spinnerModel = angleParam.createRangeParam();
+        RangeParam spinnerModel = angleParam.createRangeParam();
         SliderSpinner sliderSpinner = new SliderSpinner(spinnerModel, SliderSpinner.TextPosition.NONE, true);
 
         sliderSpinner.setResettable(angleParam);

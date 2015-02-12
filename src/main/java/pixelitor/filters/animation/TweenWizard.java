@@ -48,11 +48,11 @@ public class TweenWizard extends Wizard {
     }
 
     private void calculateAnimation() {
-        final ProgressMonitor progressMonitor = new ProgressMonitor(PixelitorWindow.getInstance(),
+        ProgressMonitor progressMonitor = new ProgressMonitor(PixelitorWindow.getInstance(),
                 "Rendering Frames", "", 1, 100);
         progressMonitor.setProgress(0);
 
-        final RenderFramesTask task = new RenderFramesTask(animation);
+        RenderFramesTask task = new RenderFramesTask(animation);
         task.addPropertyChangeListener(evt -> {
             if ("progress".equals(evt.getPropertyName())) {
                 int progress = (Integer) evt.getNewValue();

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.gui;
 
 import pixelitor.utils.SliderSpinner;
@@ -32,7 +33,7 @@ public class ImagePositionPanel extends JPanel implements ParamGUI {
     private final ImagePositionSelector imagePositionSelector;
     private boolean slidersMovedByUser = true;
 
-    public ImagePositionPanel(final ImagePositionParam model, int defaultX, int defaultY) {
+    public ImagePositionPanel(ImagePositionParam model, int defaultX, int defaultY) {
         this.model = model;
 
         xSliderModel = new RangeParam("Horizontal Position (%)", 0, 100, defaultX, true, SliderSpinner.TextPosition.NORTH);

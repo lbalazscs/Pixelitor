@@ -252,8 +252,8 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
         return newHeight;
     }
 
-    public static void showInDialog(final Composition comp) {
-        final ResizePanel p = new ResizePanel(comp);
+    public static void showInDialog(Composition comp) {
+        ResizePanel p = new ResizePanel(comp);
         OKCancelDialog d = new OKCancelDialog(p, "Resize") {
             @Override
             protected void dialogAccepted() {

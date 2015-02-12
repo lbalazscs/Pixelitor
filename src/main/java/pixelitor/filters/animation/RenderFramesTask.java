@@ -44,7 +44,7 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
     protected Void doInBackground() throws Exception {
         try {
             renderFrames();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             SwingUtilities.invokeLater(() -> Dialogs.showExceptionDialog(e));
         }
 

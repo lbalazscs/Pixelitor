@@ -213,7 +213,7 @@ public class PerformanceTestingDialog extends JDialog implements ActionListener,
             return null;
         }
 
-        private void showResults(final String results) {
+        private void showResults(String results) {
             EventQueue.invokeLater(() -> JOptionPane.showMessageDialog(PerformanceTestingDialog.this, results, "Performance Testing Results", JOptionPane.INFORMATION_MESSAGE));
         }
 

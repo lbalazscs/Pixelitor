@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools;
 
 import pixelitor.GlobalKeyboardWatch;
@@ -52,7 +53,7 @@ public class ToolsPanel extends JPanel {
         GlobalKeyboardWatch.addKeyboardShortCut('t', true, "text", textToolAction);
     }
 
-    private static void setupKeyboardShortcut(final Tool tool) {
+    private static void setupKeyboardShortcut(Tool tool) {
         Action pressToolAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {

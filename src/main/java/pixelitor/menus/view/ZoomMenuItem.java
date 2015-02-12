@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.menus.view;
 
 import pixelitor.ImageComponent;
@@ -25,7 +26,7 @@ import pixelitor.menus.OpenImageEnabledRadioButtonMenuItem;
  */
 public class ZoomMenuItem extends OpenImageEnabledRadioButtonMenuItem {
 
-    public ZoomMenuItem(final ZoomLevel zoomLevel) {
+    public ZoomMenuItem(ZoomLevel zoomLevel) {
         super(zoomLevel.toString());
 
         addActionListener(e -> {

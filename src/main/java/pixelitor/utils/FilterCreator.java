@@ -140,7 +140,7 @@ public class FilterCreator extends JPanel {
     }
 
     public static void showInDialog(Frame owner) {
-        final FilterCreator filterCreator = new FilterCreator();
+        FilterCreator filterCreator = new FilterCreator();
         OKCancelDialog d = new OKCancelDialog(filterCreator, owner, "Filter Creator", "Show Source", "Close") {
             @Override
             protected void dialogAccepted() {

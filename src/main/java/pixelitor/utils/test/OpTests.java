@@ -53,11 +53,11 @@ public class OpTests {
         if (cancelled) {
             return;
         }
-        final File selectedDir = FileChoosers.getLastSaveDir();
-        final OutputFormat outputFormat = OutputFormat.getLastOutputFormat();
+        File selectedDir = FileChoosers.getLastSaveDir();
+        OutputFormat outputFormat = OutputFormat.getLastOutputFormat();
 
         ParametrizedAdjustPanel.setResetParams(false);
-        final ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("Saving the Results of Each Operation");
+        ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("Saving the Results of Each Operation");
 
         SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
             @Override
@@ -142,7 +142,7 @@ public class OpTests {
     }
 
     public static void getCompositeImagePerformanceTest() {
-        final Composition comp = ImageComponents.getActiveComp().get();
+        Composition comp = ImageComponents.getActiveComp().get();
 
         Runnable task = () -> {
             long startTime = System.nanoTime();

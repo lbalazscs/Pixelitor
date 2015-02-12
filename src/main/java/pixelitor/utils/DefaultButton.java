@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.utils;
 
 import pixelitor.filters.gui.GUIParam;
@@ -29,7 +30,7 @@ public class DefaultButton extends JButton {
     private static final Icon defaultIcon = IconUtils.getWestArrowIcon();
     private Resettable resettable;
 
-    public DefaultButton(final Resettable resettable) {
+    public DefaultButton(Resettable resettable) {
         this.resettable = resettable;
         addActionListener(e -> resettable.reset(true));
         setToolTipText("Reset the default setting");

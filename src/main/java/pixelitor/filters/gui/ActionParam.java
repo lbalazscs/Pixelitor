@@ -66,7 +66,6 @@ public class ActionParam extends AbstractGUIParam {
         // do nothing
     }
 
-
     @Override
     public int getNrOfGridBagCols() {
         return 1;
@@ -78,11 +77,11 @@ public class ActionParam extends AbstractGUIParam {
     }
 
     /**
-     * A button that executes first its ActionListener, and after then its ChangeListener
+     * A button that executes first its ActionListener, and after then its ParamAdjustmentListener
      */
     private static class OrderedExecutionButton extends JButton {
 
-        private OrderedExecutionButton(String name, final ActionListener actionListener, final ParamAdjustmentListener adjustmentListener, Icon icon) {
+        private OrderedExecutionButton(String name, ActionListener actionListener, ParamAdjustmentListener adjustmentListener, Icon icon) {
             super(name);
 
             if (icon != null) {
