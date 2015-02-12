@@ -88,6 +88,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 import java.util.Random;
 
+import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
+import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
+
 /**
  * An automatic test using java.awt.Robot.
  * Can be dangerous because of the random native mouse events that can control other apps as well if they escape.
@@ -581,11 +584,11 @@ public class RobotTest {
                 break;
             case 3:
                 logRobotEvent("flip horizontal");
-                action = Flip.createFlipOp(Flip.Direction.HORIZONTAL);
+                action = Flip.createFlip(HORIZONTAL);
                 break;
             case 4:
                 logRobotEvent("flip vertical");
-                action = Flip.createFlipOp(Flip.Direction.VERTICAL);
+                action = Flip.createFlip(VERTICAL);
                 break;
         }
 

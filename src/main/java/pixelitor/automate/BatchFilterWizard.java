@@ -23,6 +23,8 @@ import pixelitor.filters.Filter;
 
 import java.awt.Component;
 
+import static pixelitor.automate.BatchFilterWizardPage.SELECT_FILTER_AND_DIRS;
+
 /**
  * The batch filter wizard
  */
@@ -30,7 +32,7 @@ public class BatchFilterWizard extends Wizard {
     private final BatchFilterConfig config = new BatchFilterConfig();
 
     public BatchFilterWizard() {
-        super(BatchFilterWizardPage.SELECT_FILTER_AND_DIRS, "Batch Filter", "Start Processing", 490, 380);
+        super(SELECT_FILTER_AND_DIRS, "Batch Filter", "Start Processing", 490, 380);
     }
 
     @Override

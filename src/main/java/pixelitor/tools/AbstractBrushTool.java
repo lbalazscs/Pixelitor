@@ -71,7 +71,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
 
     AbstractBrushTool(char activationKeyChar, String name, String iconFileName, String toolMessage) {
         super(activationKeyChar, name, iconFileName, toolMessage,
-                Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR), true, true, false, ClipStrategy.IMAGE_ONLY);
+                Cursor.getDefaultCursor(), true, true, false, ClipStrategy.IMAGE_ONLY);
         ImageComponents.addImageSwitchListener(this);
     }
 

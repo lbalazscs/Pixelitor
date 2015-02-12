@@ -42,11 +42,15 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 
+import static pixelitor.tools.CropToolState.INITIAL;
+import static pixelitor.tools.CropToolState.TRANSFORM;
+import static pixelitor.tools.CropToolState.USER_DRAG;
+
 /**
  * The crop tool
  */
 public class CropTool extends Tool implements ImageSwitchListener, TransformToolChangeListener {
-    private CropToolState state = CropToolState.INITIAL;
+    private CropToolState state = INITIAL;
 
     private TransformSupport transformSupport;
 
@@ -65,17 +69,17 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
     CropTool() {
         super('c', "Crop", "crop_tool_icon.png",
                 "Click and drag to define the crop area. Hold SPACE down to move the entire region.",
-                Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR), true, true, true, ClipStrategy.FULL_AREA);
+                Cursor.getDefaultCursor(), true, true, true, ClipStrategy.FULL_AREA);
         spaceDragBehavior = true;
         maskOpacityParam.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
                 float alpha = maskOpacityParam.getValueAsPercentage();
                 // because of a swing bug, the slider can get out of range
-                if (alpha < 0.0f) {
+                if(alpha < 0.0f) {
                     alpha = 0.0f;
                     maskOpacityParam.setValue(0);
-                } else if (alpha > 1.0f) {
+                } else if(alpha > 1.0f) {
                     alpha = 1.0f;
                     maskOpacityParam.setValue(100);
                 }
@@ -116,12 +120,12 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
 
         state = state.getNextAfterMousePressed();
 
-        if(state == CropToolState.TRANSFORM) {
+        if(state == TRANSFORM) {
             assert transformSupport != null;
             transformSupport.mousePressed(e);
             cropButton.setEnabled(true);
             cancelButton.setEnabled(true);
-        } else if (state == CropToolState.USER_DRAG) {
+        } else if(state == USER_DRAG) {
             cropButton.setEnabled(true);
             cancelButton.setEnabled(true);
         }
@@ -130,7 +134,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
     @Override
     public void toolMouseDragged(MouseEvent e, ImageDisplay ic) {
         ic.repaint();
-        if(state == CropToolState.TRANSFORM) {
+        if(state == TRANSFORM) {
             transformSupport.mouseDragged(e, ic);
         }
     }
@@ -139,7 +143,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
     @Override
     public void mouseMoved(MouseEvent e, ImageDisplay ic) {
         super.mouseMoved(e, ic);
-        if(state == CropToolState.TRANSFORM) {
+        if(state == TRANSFORM) {
             transformSupport.mouseMoved(e, ic);
         }
     }
@@ -149,7 +153,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
         Composition comp = ic.getComp();
         comp.imageChanged(true, true);
 
-        switch (state) {
+        switch(state) {
             case INITIAL:
                 break;
             case USER_DRAG:
@@ -161,7 +165,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
 
                 transformSupport = new TransformSupport(compSpaceRectangle, imageSpaceRectangle, this);
 
-                state = CropToolState.TRANSFORM;
+                state = TRANSFORM;
                 break;
             case TRANSFORM:
                 if(transformSupport == null) {
@@ -174,14 +178,14 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
 
     @Override
     public void paintOverImage(Graphics2D g2, Canvas canvas, ImageDisplay callingIC, AffineTransform unscaledTransform) {
-        if (ended) {
+        if(ended) {
             return;
         }
-        if (callingIC != ImageComponents.getActiveImageComponent()) {
+        if(callingIC != ImageComponents.getActiveImageComponent()) {
             return;
         }
         Rectangle cropRectangle = getCropRectangle(callingIC);
-        if (cropRectangle == null) {
+        if(cropRectangle == null) {
             return;
         }
 
@@ -215,7 +219,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
         g2.setColor(previousColor);
         g2.setComposite(previousComposite);
 
-        if (state == CropToolState.TRANSFORM) {
+        if(state == TRANSFORM) {
             // Paint the handles.
             // The zooming is temporarily reset because the transformSupport works in component space
             AffineTransform scaledTransform = g2.getTransform();
@@ -232,10 +236,11 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
 
     /**
      * Returns the crop rectangle in image space
+     *
      * @param zoomLevel
      */
     public Rectangle getCropRectangle(ImageDisplay ic) {
-        switch (state) {
+        switch(state) {
             case INITIAL:
                 lastCropRectangle = null;
                 break;
@@ -280,7 +285,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
     public void resetStateToInitial() {
         ended = true;
         transformSupport = null;
-        state = CropToolState.INITIAL;
+        state = INITIAL;
         cancelButton.setEnabled(false);
         cropButton.setEnabled(false);
 
@@ -288,7 +293,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
     }
 
     public void imageComponentResized(ImageComponent ic) {
-        if(transformSupport != null && lastCropRectangle != null && state == CropToolState.TRANSFORM) {
+        if(transformSupport != null && lastCropRectangle != null && state == TRANSFORM) {
             transformSupport.setComponentSpaceRect(ic.fromImageToComponentSpace(lastCropRectangle));
         }
         ic.repaint();

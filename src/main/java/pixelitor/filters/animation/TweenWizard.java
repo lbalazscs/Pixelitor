@@ -28,6 +28,9 @@ import pixelitor.utils.ValidatedForm;
 import javax.swing.*;
 import java.awt.Component;
 
+import static pixelitor.filters.animation.TweenWizardPage.OUTPUT_SETTINGS;
+import static pixelitor.filters.animation.TweenWizardPage.SELECT_FILTER;
+
 /**
  * Wizard for tweening animations
  */
@@ -35,7 +38,7 @@ public class TweenWizard extends Wizard {
     private final TweenAnimation animation = new TweenAnimation();
 
     public TweenWizard() {
-        super(TweenWizardPage.SELECT_FILTER, "Export Tweening Animation", "Render", 450, 380);
+        super(SELECT_FILTER, "Export Tweening Animation", "Render", 450, 380);
     }
 
     @Override
@@ -80,7 +83,7 @@ public class TweenWizard extends Wizard {
 
     @Override
     protected boolean mayMoveForwardIfNextPressed(WizardPage currentPage, Component dialogParent) {
-        if (currentPage == TweenWizardPage.OUTPUT_SETTINGS) {
+        if(currentPage == OUTPUT_SETTINGS) {
             ValidatedForm settings = (ValidatedForm) currentPage.getPanel(this);
             if (!settings.isDataValid()) {
                 Dialogs.showErrorDialog(dialogParent, "Error", settings.getErrorMessage());
@@ -92,7 +95,7 @@ public class TweenWizard extends Wizard {
 
     @Override
     protected boolean mayProceedAfterMovingForward(WizardPage wizardPage, Component dialogParent) {
-        if (wizardPage == TweenWizardPage.OUTPUT_SETTINGS) {
+        if(wizardPage == OUTPUT_SETTINGS) {
             if (!animation.checkOverwrite(dialogParent)) {
                 return false;
             }

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.MotionBlur;
@@ -29,6 +30,9 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
+
+import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.MOTION_BLUR;
+import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
 
 /**
  * Motion Blur based on the JHLabs MotionBlur
@@ -89,7 +93,7 @@ public class JHMotionBlur extends FilterWithParametrizedGUI {
         super(mode.toString(), true, false);
         this.mode = mode;
 
-        if (mode == Mode.MOTION_BLUR) {
+        if(mode == MOTION_BLUR) {
             setParamSet(new ParamSet(
                     distance,
                     angle,
@@ -97,7 +101,7 @@ public class JHMotionBlur extends FilterWithParametrizedGUI {
                     hpSharpening
             ));
 
-        } else if (mode == Mode.SPIN_ZOOM_BLUR) {
+        } else if(mode == SPIN_ZOOM_BLUR) {
             setParamSet(new ParamSet(
                     rotation,
                     zoom,
@@ -115,11 +119,11 @@ public class JHMotionBlur extends FilterWithParametrizedGUI {
         int distanceValue = distance.getValue();
         float zoomValue = zoom.getValueAsPercentage();
         float rotationValue = rotation.getValueInRadians();
-        if (mode == Mode.MOTION_BLUR) {
+        if(mode == MOTION_BLUR) {
             if (distanceValue == 0) {
                 return src;
             }
-        } else if (mode == Mode.SPIN_ZOOM_BLUR) {
+        } else if(mode == SPIN_ZOOM_BLUR) {
             if (zoomValue == 0.0f && rotationValue == 0.0f) {
                 return src;
             }

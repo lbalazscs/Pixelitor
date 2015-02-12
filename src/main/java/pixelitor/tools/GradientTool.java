@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -54,7 +54,7 @@ public class GradientTool extends Tool {
 
     GradientTool() {
         super('g', "Gradient", "gradient_tool_icon.png", "click and drag to draw a gradient",
-                Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR), true, true, true, ClipStrategy.IMAGE_ONLY);
+                Cursor.getDefaultCursor(), true, true, true, ClipStrategy.IMAGE_ONLY);
     }
 
     @Override

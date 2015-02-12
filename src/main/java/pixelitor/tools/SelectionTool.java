@@ -50,7 +50,7 @@ public class SelectionTool extends Tool {
     SelectionTool() {
         super('m', "Selection", "selection_tool_icon.gif",
                 "Click and drag to select an area. Hold SPACE down to move the entire selection.",
-                Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR), false, true, false, ClipStrategy.FULL_AREA);
+                Cursor.getDefaultCursor(), false, true, false, ClipStrategy.FULL_AREA);
         spaceDragBehavior = true;
     }
 

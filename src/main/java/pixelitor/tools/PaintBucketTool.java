@@ -38,6 +38,10 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
+import static pixelitor.FillType.BACKGROUND;
+import static pixelitor.FillType.FOREGROUND;
+import static pixelitor.FillType.TRANSPARENT;
+
 /**
  * A paint bucket tool.
  */
@@ -47,7 +51,7 @@ public class PaintBucketTool extends Tool {
 
     public PaintBucketTool() {
         super('p', "Paint Bucket", "paint_bucket_tool_icon.gif", "click to fill with the selected color",
-                Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR), true, true, false, ClipStrategy.IMAGE_ONLY);
+                Cursor.getDefaultCursor(), true, true, false, ClipStrategy.IMAGE_ONLY);
     }
 
     @Override
@@ -55,7 +59,7 @@ public class PaintBucketTool extends Tool {
         toolSettingsPanel.add(new SliderSpinner(toleranceParam, SliderSpinner.TextPosition.WEST, false));
         toolSettingsPanel.add(new JLabel("Fill With:"));
 
-        fillComboBox = new JComboBox<>(new FillType[]{FillType.FOREGROUND, FillType.BACKGROUND, FillType.TRANSPARENT});
+        fillComboBox = new JComboBox<>(new FillType[]{FOREGROUND, BACKGROUND, TRANSPARENT});
         toolSettingsPanel.add(fillComboBox);
     }
 

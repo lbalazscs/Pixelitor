@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.comp;
 
 import pixelitor.Composition;
@@ -21,20 +22,23 @@ import pixelitor.history.OneLayerUndoableEdit;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Layer;
 
+import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
+import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
+
 /**
  * Flips a ContentLayer horizontally or vertically
  */
 public class Flip extends CompOperation {
     private final Flip.Direction direction;
 
-    private static final Flip horizontalFlip = new Flip(Direction.HORIZONTAL);
-    private static final Flip verticalFlip = new Flip(Direction.VERTICAL);
+    private static final Flip horizontalFlip = new Flip(HORIZONTAL);
+    private static final Flip verticalFlip = new Flip(VERTICAL);
 
-    public static Flip createFlipOp(Direction dir) {
-        if (dir == Direction.HORIZONTAL) {
+    public static Flip createFlip(Direction dir) {
+        if(dir == HORIZONTAL) {
             return horizontalFlip;
         }
-        if (dir == Direction.VERTICAL) {
+        if(dir == VERTICAL) {
             return verticalFlip;
         }
         throw new IllegalStateException("should not get here");

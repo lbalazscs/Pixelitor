@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ public class LassoTool extends Tool {
 
     public LassoTool() {
         super('l', "Lasso", "lasso_tool_icon.gif", "",
-                Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR), false, true, false, ClipStrategy.FULL_AREA);
+                Cursor.getDefaultCursor(), false, true, false, ClipStrategy.FULL_AREA);
     }
 
     @Override

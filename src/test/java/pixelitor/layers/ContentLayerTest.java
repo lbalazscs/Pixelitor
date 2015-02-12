@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import org.junit.Before;
 import org.junit.Test;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
-import pixelitor.filters.comp.Flip;
 import pixelitor.history.TranslateEdit;
 
 import java.awt.Graphics2D;
@@ -30,6 +29,8 @@ import java.awt.image.BufferedImage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
+import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
 
 public class ContentLayerTest {
     private Composition comp;
@@ -90,8 +91,8 @@ public class ContentLayerTest {
     @Test
     // this method is abstract in ImageLayer, test separately for subclasses
     public void testFlip() {
-        layer.flip(Flip.Direction.HORIZONTAL);
-        layer.flip(Flip.Direction.VERTICAL);
+        layer.flip(HORIZONTAL);
+        layer.flip(VERTICAL);
     }
 
     @Test

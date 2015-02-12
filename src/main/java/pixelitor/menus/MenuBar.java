@@ -90,6 +90,11 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.Optional;
 
+import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
+import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
+import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.MOTION_BLUR;
+import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
+
 /**
  * The menu bar of the app
  */
@@ -370,8 +375,8 @@ public class MenuBar extends JMenuBar {
         createMenuItem(new Rotate(270, "Rotate 90\u00B0 CCW"), rotateSubmenu);
         rotateSubmenu.addSeparator();
         // flip
-        createMenuItem(Flip.createFlipOp(Flip.Direction.HORIZONTAL), rotateSubmenu);
-        createMenuItem(Flip.createFlipOp(Flip.Direction.VERTICAL), rotateSubmenu);
+        createMenuItem(Flip.createFlip(HORIZONTAL), rotateSubmenu);
+        createMenuItem(Flip.createFlip(VERTICAL), rotateSubmenu);
 
         createMenuItem(new TransformLayer(), editMenu);
 
@@ -545,8 +550,8 @@ public class MenuBar extends JMenuBar {
         createMenuItem(new JHBoxBlur(), bsSubmenu);
         createMenuItem(new FastBlur(), bsSubmenu);
         createMenuItem(new JHLensBlur(), bsSubmenu);
-        createMenuItem(new JHMotionBlur(JHMotionBlur.Mode.MOTION_BLUR), bsSubmenu);
-        createMenuItem(new JHMotionBlur(JHMotionBlur.Mode.SPIN_ZOOM_BLUR), bsSubmenu);
+        createMenuItem(new JHMotionBlur(MOTION_BLUR), bsSubmenu);
+        createMenuItem(new JHMotionBlur(SPIN_ZOOM_BLUR), bsSubmenu);
         bsSubmenu.addSeparator();
         createMenuItem(new JHUnsharpMask(), bsSubmenu);
         filterMenu.add(bsSubmenu);

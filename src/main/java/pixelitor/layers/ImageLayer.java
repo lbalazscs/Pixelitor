@@ -46,6 +46,7 @@ import java.io.ObjectOutputStream;
 import java.util.Objects;
 import java.util.Optional;
 
+import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
 import static pixelitor.layers.ImageLayer.State.NORMAL;
 import static pixelitor.layers.ImageLayer.State.PREVIEW;
 import static pixelitor.layers.ImageLayer.State.SHOW_ORIGINAL;
@@ -69,7 +70,6 @@ import static pixelitor.layers.ImageLayer.State.SHOW_ORIGINAL;
  * or cancelPressedInDialog() is called.
  */
 public class ImageLayer extends ContentLayer {
-    //    enum State {NORMAL, EDITING_PREVIEW, EDITING_SHOW_ORIGINAL}  // TODO
     enum State {
         /**
          * The layer is in normal state when no filter is running on it
@@ -530,7 +530,7 @@ public class ImageLayer extends ContentLayer {
         BufferedImage dest = new BufferedImage(imageWidth, imageHeight, src.getType());
         Graphics2D g2 = dest.createGraphics();
 
-        if (direction == Flip.Direction.HORIZONTAL) {
+        if(direction == HORIZONTAL) {
             g2.translate(imageWidth, 0);
             g2.scale(-1, 1);
 

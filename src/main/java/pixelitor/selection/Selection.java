@@ -34,6 +34,10 @@ import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.Area;
 
+import static pixelitor.selection.Selection.State.DIED;
+import static pixelitor.selection.Selection.State.HAS_SHAPE;
+import static pixelitor.selection.Selection.State.NO_SHAPE_YET;
+
 /**
  * Represents a selection on an image.
  */
@@ -109,7 +113,7 @@ public class Selection {
         this.selectionType = selectionType;
         this.selectionInteraction = selectionInteraction;
 
-        state = State.NO_SHAPE_YET;
+        state = NO_SHAPE_YET;
     }
 
 //    /**
@@ -138,7 +142,7 @@ public class Selection {
         // selectionType is not set, but this shouldn't be a problem
 
         startMarching();
-        state = State.HAS_SHAPE;
+        state = HAS_SHAPE;
     }
 
     /**
@@ -147,9 +151,9 @@ public class Selection {
     public void updateSelection(UserDrag userDrag) {
         currentSelectionShape = selectionType.updateShape(userDrag, currentSelectionShape);
 
-        if (state == State.NO_SHAPE_YET) {
+        if(state == NO_SHAPE_YET) {
             startMarching();
-            state = State.HAS_SHAPE;
+            state = HAS_SHAPE;
         }
     }
 
@@ -157,7 +161,7 @@ public class Selection {
      * We get here if there is already a selection when the user starts a new selection shape
      */
     public void startNewShape(SelectionType selectionType, SelectionInteraction selectionInteraction) {
-        if (state != State.HAS_SHAPE) {
+        if(state != HAS_SHAPE) {
             throw new IllegalStateException("state = " + state);
         }
 
@@ -271,13 +275,13 @@ public class Selection {
     public void deselectAndDispose() {
         switch (state) {
             case NO_SHAPE_YET:
-                state = State.DIED;
+                state = DIED;
                 break;
             case HAS_SHAPE:
                 marchingAntsTimer.stop();
                 updateComponent();
                 ic = null;
-                state = State.DIED;
+                state = DIED;
                 break;
             case DIED:
                 throw new IllegalStateException("died twice");

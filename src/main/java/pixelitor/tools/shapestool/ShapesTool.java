@@ -85,7 +85,7 @@ public class ShapesTool extends Tool {
     public ShapesTool() {
         super('s', "Shapes", "shapes_tool_icon.gif",
                 "Click and drag to draw a shape. Hold SPACE down while drawing to move the shape. ",
-                Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR), true, true, false, ClipStrategy.IMAGE_ONLY);
+                Cursor.getDefaultCursor(), true, true, false, ClipStrategy.IMAGE_ONLY);
 
         strokeFillModel.setSelectedItem(TwoPointBasedPaint.BACKGROUND);
         strokeFillCombo = new JComboBox<>(strokeFillModel);
