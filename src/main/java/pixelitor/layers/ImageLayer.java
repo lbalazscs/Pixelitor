@@ -304,7 +304,7 @@ public class ImageLayer extends ContentLayer {
     }
 
     public void cancelPressedInDialog() {
-        assert state == PREVIEW;
+        assert state == PREVIEW || state == SHOW_ORIGINAL;
         assert previewImage != null;
 
         setState(NORMAL);

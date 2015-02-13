@@ -18,6 +18,7 @@
 package pixelitor.filters.gui;
 
 import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -39,26 +40,37 @@ public class GeographicalAdjustmentPanel extends ParametrizedAdjustPanel {
     protected void setupGUI(ParamSet params, Object otherInfo, boolean showOriginal) {
         setLayout(new BorderLayout(5, 5));
         JPanel controlPanel = new JPanel(new BorderLayout(5, 5));
+
+        // a panel for parameters like "Edge Action", "Interpolation"
         JPanel nonGeoControls = new JPanel();
+
         GridLayout layout;
-        if (addLabels) {
+        if(addLabels) {
             layout = new GridLayout(2, 4, 5, 5);
         } else {
             layout = new GridLayout(2, 2, 5, 5);
         }
+        // the central panel
         JPanel geoPanel = new JPanel(layout);
+
+        // A panel for global actions like "Randomize Settings", "Reset All"
         JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        if(showOriginal) {
+            JCheckBox showOriginalCB = new JCheckBox("Show Original");
+            showOriginalCB.addActionListener(e -> Utils.setShowOriginal(showOriginalCB.isSelected()));
+            buttonsPanel.add(showOriginalCB);
+        }
 
         int added = 0;
-        for (GUIParam param : params) {
+        for(GUIParam param : params) {
             JComponent control = param.createGUI();
 
-            if (control instanceof JButton) {
+            if(control instanceof JButton) {
                 buttonsPanel.add(control);
             } else {
                 String labelText = param.getName() + ':';
-                if (added < 4) {
-                    if (addLabels) {
+                if(added < 4) {
+                    if(addLabels) {
                         geoPanel.add(new JLabel(labelText));
                     }
                     geoPanel.add(control);
@@ -75,6 +87,5 @@ public class GeographicalAdjustmentPanel extends ParametrizedAdjustPanel {
 
         add(controlPanel, BorderLayout.CENTER);
         add(buttonsPanel, BorderLayout.SOUTH);
-
     }
 }
