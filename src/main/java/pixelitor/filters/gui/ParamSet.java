@@ -55,13 +55,17 @@ public class ParamSet implements Iterable<GUIParam> {
     }
 
     private void addRandomizeAction() {
-        ActionParam randomizeAction = new ActionParam("Randomize Settings", e -> randomize(), null);
+        ActionParam randomizeAction = new ActionParam("Randomize Settings", e -> randomize(), "Randomize the settings for this filter.");
         paramList.add(randomizeAction);
     }
 
     private void addResetAllAction() {
         ActionParam randomizeAction = new ActionParam("Reset All", e -> reset(), IconUtils.getWestArrowIcon(), "Reset all settings to their default values.");
         paramList.add(randomizeAction);
+    }
+
+    public void insertActionParam(ActionParam param, int index) {
+        paramList.add(index, param);
     }
 
     @Override

@@ -33,7 +33,7 @@ import java.awt.image.BufferedImage;
  * they only specify their ParamSet, and the GUI is built automatically
  */
 public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
-    private ParamSet paramSet;
+    protected ParamSet paramSet;
 
     //    private BooleanParam showOriginalParam = null;
     private BooleanParam showAffectedAreaParam = null;
@@ -132,7 +132,7 @@ public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
 
     /**
      * Some filters cannot be animated well, they can return true
-     * here in order to be excluded from the animation filters
+     * here in order to be excluded from the list of animation filters
      */
     public boolean excludeFromAnimation() {
         return false;

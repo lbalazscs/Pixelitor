@@ -90,7 +90,7 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
             row++;
         }
         if (showOriginal) {
-            gridBagHelper.addLabel("Show Original X:", 0, row);
+            gridBagHelper.addLabel("Show Original:", 0, row);
 
             JCheckBox showOriginalCB = new JCheckBox();
             showOriginalCB.addActionListener(e -> Utils.setShowOriginal(showOriginalCB.isSelected()));
