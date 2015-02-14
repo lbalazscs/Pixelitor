@@ -48,6 +48,7 @@ import java.util.Optional;
 
 import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
+import static pixelitor.Composition.ImageChangeActions.REPAINT;
 import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
 import static pixelitor.layers.ImageLayer.State.NORMAL;
 import static pixelitor.layers.ImageLayer.State.PREVIEW;
@@ -55,13 +56,13 @@ import static pixelitor.layers.ImageLayer.State.SHOW_ORIGINAL;
 
 /**
  * An image layer.
- *
+ * <p>
  * Filter without a dialog are executed as ChangeReason.OP_WITHOUT_DIALOG on the EDT.
  * The filter asks getFilterSource() in the NORMAL state, and
  * (if there is no selection) the image (not a copy!) is returned as the filter source.
  * The filter transforms the image, and calls filterWithoutDialogFinished
  * with the transformed image.
- *
+ * <p>
  * Filters with dialog are executed as ChangeReason.OP_PREVIEW on the EDT.
  * startPreviewing() is called when a new dialog appears,
  * right before creating the adjustment panel.
@@ -133,7 +134,7 @@ public class ImageLayer extends ContentLayer {
     public ImageLayer(Composition comp, BufferedImage image, String name) {
         super(comp, name == null ? comp.generateNewLayerName() : name);
         canvas = comp.getCanvas();
-        if (image == null) {
+        if(image == null) {
             throw new IllegalArgumentException("image is null");
         }
 
@@ -148,7 +149,7 @@ public class ImageLayer extends ContentLayer {
         super(comp, name);
         canvas = comp.getCanvas();
 
-        if (pastedImage == null) {
+        if(pastedImage == null) {
             throw new IllegalArgumentException("image is null");
         }
 
@@ -160,7 +161,7 @@ public class ImageLayer extends ContentLayer {
         boolean addYTranslation = pastedHeight > height;
 
         BufferedImage newImage = pastedImage;
-        if (createNewImage) { // if the pasted image is too small, a new image is created
+        if(createNewImage) { // if the pasted image is too small, a new image is created
             int newWidth = Math.max(width, pastedWidth);
             int newHeight = Math.max(height, pastedHeight);
             newImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB_PRE);
@@ -178,11 +179,11 @@ public class ImageLayer extends ContentLayer {
         // the right thing to do would be respecting the selection
         setImage(newImage);
 
-        if (addXTranslation) {
+        if(addXTranslation) {
             int newXTrans = -(pastedWidth - width) / 2;
             setTranslationX(newXTrans);
         }
-        if (addYTranslation) {
+        if(addYTranslation) {
             int newYTrans = -(pastedHeight - height) / 2;
             setTranslationY(newYTrans);
         }
@@ -227,11 +228,11 @@ public class ImageLayer extends ContentLayer {
         assert Utils.checkRasterMinimum(newImage);
 
         Optional<Selection> selection = comp.getSelection();
-        if (!selection.isPresent()) {
+        if(!selection.isPresent()) {
             return newImage;
         } else {
             Shape selectionShape = selection.get().getShape();
-            if (selectionShape != null) {
+            if(selectionShape != null) {
                 // the argument image pixels will replace the old ones only where selected
                 Graphics2D g = src.createGraphics();
                 g.translate(-getTranslationX(), -getTranslationY());
@@ -270,7 +271,7 @@ public class ImageLayer extends ContentLayer {
      * right before creating the adjustment panel
      */
     public void startPreviewing() {
-        if (comp.hasSelection()) {
+        if(comp.hasSelection()) {
             // if we have a selection, then the preview image reference cannot be simply
             // the image reference, because when we draw into the preview image, we would
             // also draw on the real image, and after cancel we would still have the changed version.
@@ -294,7 +295,7 @@ public class ImageLayer extends ContentLayer {
         assert (state == PREVIEW) || (state == SHOW_ORIGINAL);
         assert previewImage != null;
 
-        if (isImageContentChanged()) {
+        if(isImageContentChanged()) {
             ImageEdit edit = new ImageEdit(filterName, comp, this, getImageOrSubImageIfSelected(true, true), true);
             History.addEdit(edit);
         }
@@ -302,7 +303,14 @@ public class ImageLayer extends ContentLayer {
         image = previewImage;
         previewImage = null;
 
+        boolean wasShowOriginal = (state == SHOW_ORIGINAL);
         setState(NORMAL);
+
+        if(wasShowOriginal) {
+            comp.imageChanged(FULL);
+//        } else {
+//            comp.imageChanged(INVALIDATE_CACHE);
+        }
     }
 
     public void cancelPressedInDialog() {
@@ -324,7 +332,7 @@ public class ImageLayer extends ContentLayer {
         assert state == PREVIEW;
         setState(NORMAL);
 
-        getComposition().repaint(); // TODO necessary?
+        comp.imageChanged(REPAINT); // TODO necessary?
     }
 
     /**
@@ -338,10 +346,10 @@ public class ImageLayer extends ContentLayer {
                 ", in the composition " + comp.getName();
         assert previewImage != null : "previewImage was null with " + filterName;
 
-        if (img == null) {
+        if(img == null) {
             throw new IllegalArgumentException("img == null");
         }
-        if (img == image) {
+        if(img == image) {
             // this can happen if a filter with preview decides that no
             // change is necessary and returns the src
 
@@ -359,15 +367,16 @@ public class ImageLayer extends ContentLayer {
 
         setPreviewWithSelection(img);
         setState(PREVIEW);
+        comp.imageChanged(INVALIDATE_CACHE);
         return true;
     }
 
     public void filterWithoutDialogFinished(BufferedImage transformedImage, ChangeReason changeReason, String opName) {
-        if (transformedImage == null) {
+        if(transformedImage == null) {
             throw new IllegalArgumentException("transformedImage == null");
         }
         // A filter without dialog should never return the original image
-        if (transformedImage == image) { // the filter returned the original
+        if(transformedImage == image) { // the filter returned the original
             throw new IllegalStateException(opName + " returned the original image");
         }
 
@@ -377,13 +386,13 @@ public class ImageLayer extends ContentLayer {
         BufferedImage imageForUndo = getFilterSourceImage();
         setImageWithSelection(transformedImage);
 
-        if (!changeReason.needsUndo()) {
+        if(!changeReason.needsUndo()) {
             return;
         }
 
         // at this point we are sure that the image changed,
         // considering that a filter without dialog was running
-        if (imageForUndo == image) {
+        if(imageForUndo == image) {
             throw new IllegalStateException("imageForUndo == image");
         }
         assert imageForUndo != null;
@@ -396,7 +405,7 @@ public class ImageLayer extends ContentLayer {
     }
 
     public void changeImageUndoRedo(BufferedImage img) {
-        if (img == null) {
+        if(img == null) {
             throw new IllegalArgumentException("img == null");
         }
         assert img != image; // simple filters always change something
@@ -423,20 +432,20 @@ public class ImageLayer extends ContentLayer {
 
     public void enlargeLayer() {
         try {
-            if (translationX >= 0) {
-                if (translationY >= 0) {
+            if(translationX >= 0) {
+                if(translationY >= 0) {
                     enlargeNW();
                 } else {
                     enlargeSW();
                 }
             } else {
-                if (translationY >= 0) {
+                if(translationY >= 0) {
                     enlargeNE();
                 } else {
                     enlargeSE();
                 }
             }
-        } catch (OutOfMemoryError e) {
+        } catch(OutOfMemoryError e) {
             Dialogs.showOutOfMemoryDialog(e);
         }
     }
@@ -507,7 +516,7 @@ public class ImageLayer extends ContentLayer {
      */
     public BufferedImage getImageForFilterDialogs() {
         Optional<Selection> selection = comp.getSelection();
-        if (!selection.isPresent()) {
+        if(!selection.isPresent()) {
             return image;
         }
 
@@ -549,7 +558,7 @@ public class ImageLayer extends ContentLayer {
         g2.drawImage(src, 0, 0, imageWidth, imageHeight, null);
         g2.dispose();
 
-        if (!comp.hasSelection()) {
+        if(!comp.hasSelection()) {
             setTranslationX(-newTranslationXAbs);
             setTranslationY(-newTranslationYAbs);
         }
@@ -573,13 +582,13 @@ public class ImageLayer extends ContentLayer {
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
 
-        if (angleDegree == 90) {
+        if(angleDegree == 90) {
             newTranslationXAbs = imageHeight - translationYAbs - canvasHeight;
             newTranslationYAbs = translationXAbs;
-        } else if (angleDegree == 270) {
+        } else if(angleDegree == 270) {
             newTranslationXAbs = translationYAbs;
             newTranslationYAbs = imageWidth - translationXAbs - canvasWidth;
-        } else if (angleDegree == 180) {
+        } else if(angleDegree == 180) {
             newTranslationXAbs = imageWidth - canvasWidth - translationXAbs;
             newTranslationYAbs = imageHeight - canvasHeight - translationYAbs;
         }
@@ -587,7 +596,7 @@ public class ImageLayer extends ContentLayer {
         int newImageWidth;
         int newImageHeight;
 
-        if (angleDegree == 90 || angleDegree == 270) {
+        if(angleDegree == 90 || angleDegree == 270) {
             newImageWidth = imageHeight;
             newImageHeight = imageWidth;
         } else {
@@ -604,11 +613,11 @@ public class ImageLayer extends ContentLayer {
         // TODO we should not need bicubic here as long as we have only 90, 180, 270 degrees
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 
-        if (angleDegree == 90) {
+        if(angleDegree == 90) {
             g2.translate(imageHeight, 0);
-        } else if (angleDegree == 180) {
+        } else if(angleDegree == 180) {
             g2.translate(imageWidth, imageHeight);
-        } else if (angleDegree == 270) {
+        } else if(angleDegree == 270) {
             g2.translate(0, imageWidth);
         }
 
@@ -616,7 +625,7 @@ public class ImageLayer extends ContentLayer {
         g2.drawImage(img, 0, 0, imageWidth, imageHeight, null);
         g2.dispose();
 
-        if (!comp.hasSelection()) {
+        if(!comp.hasSelection()) {
             setTranslationX(-newTranslationXAbs);
             setTranslationY(-newTranslationYAbs);
         }
@@ -646,7 +655,7 @@ public class ImageLayer extends ContentLayer {
     }
 
     public void mergeTmpDrawingImageDown() {
-        if (tmpDrawingLayer == null) {
+        if(tmpDrawingLayer == null) {
             return;
         }
         Graphics2D g = image.createGraphics();
@@ -676,7 +685,7 @@ public class ImageLayer extends ContentLayer {
         BufferedImage subImage;
         try {
             subImage = image.getSubimage(x, y, canvasWidth, canvasHeight);
-        } catch (RasterFormatException e) {
+        } catch(RasterFormatException e) {
             System.out.println("ImageLayer.createCompositionSizedSubImage x = " + x + ", y = " + y + ", canvasWidth = " + canvasWidth + ", canvasHeight = " + canvasHeight);
             WritableRaster raster = image.getRaster();
             int minX = raster.getMinX();
@@ -690,7 +699,7 @@ public class ImageLayer extends ContentLayer {
     }
 
     public BufferedImage getFilterSourceImage() {
-        if (filterSourceImage == null) {
+        if(filterSourceImage == null) {
             filterSourceImage = getImageOrSubImageIfSelected(false, true);
         }
         return filterSourceImage;
@@ -704,8 +713,8 @@ public class ImageLayer extends ContentLayer {
 //                ", copyAndTranslateIfSelected = " + copyAndTranslateIfSelected)
 //                .printStackTrace();
         Optional<Selection> selection = comp.getSelection();
-        if (!selection.isPresent()) {
-            if (copyIfNoSelection) {
+        if(!selection.isPresent()) {
+            if(copyIfNoSelection) {
                 return ImageUtils.copyImage(image);
             }
             return image;
@@ -724,15 +733,15 @@ public class ImageLayer extends ContentLayer {
         // TODO SwingUtilities.computeIntersection can do this without allocating a rectangle
         bounds = bounds.intersection(imageBounds);
 
-        if (bounds.isEmpty()) { // TODO if the selection is outside the image?
-            if (copyAndTranslateIfSelected) {
+        if(bounds.isEmpty()) { // TODO if the selection is outside the image?
+            if(copyAndTranslateIfSelected) {
                 return ImageUtils.copyImage(src);
             } else {
                 return src;
             }
         }
 
-        if (copyAndTranslateIfSelected) {
+        if(copyAndTranslateIfSelected) {
             return ImageUtils.copyAndTranslateSubimage(src, bounds);
         } else {
             BufferedImage retVal = src.getSubimage(bounds.x, bounds.y, bounds.width, bounds.height);
@@ -746,7 +755,7 @@ public class ImageLayer extends ContentLayer {
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
 
-        if ((imageWidth > canvasWidth) || (imageHeight > canvasHeight)) {
+        if((imageWidth > canvasWidth) || (imageHeight > canvasHeight)) {
             BufferedImage newImage = ImageUtils.crop(image, -getTranslationX(), -getTranslationY(), canvasWidth, canvasHeight);
 
             BufferedImage tmp = image;
@@ -790,13 +799,13 @@ public class ImageLayer extends ContentLayer {
     TranslateEdit createTranslateEdit(int oldTranslationX, int oldTranslationY) {
         TranslateEdit edit = null;
         boolean needsEnlarging = checkForLayerEnlargement();
-        if (needsEnlarging) {
+        if(needsEnlarging) {
             edit = new TranslateEdit(this, getImage(), oldTranslationX, oldTranslationY);
         } else {
             edit = new TranslateEdit(this, null, oldTranslationX, oldTranslationY);
         }
 
-        if (needsEnlarging) {
+        if(needsEnlarging) {
             enlargeLayer();
         }
 
@@ -818,7 +827,7 @@ public class ImageLayer extends ContentLayer {
 
         double horizontalResizeRatio = 1.0;
         double verticalResizeRatio = 1.0;
-        if (bigLayer) {
+        if(bigLayer) {
             horizontalResizeRatio = ((double) targetWidth) / canvas.getWidth();
             verticalResizeRatio = ((double) targetHeight) / canvas.getHeight();
             resizeWidth = (int) (img.getWidth() * horizontalResizeRatio);
@@ -828,7 +837,7 @@ public class ImageLayer extends ContentLayer {
         BufferedImage resizedImg = ImageUtils.getFasterScaledInstance(img, resizeWidth, resizeHeight, RenderingHints.VALUE_INTERPOLATION_BICUBIC, progressiveBilinear);
         setImage(resizedImg);
 
-        if (bigLayer) {
+        if(bigLayer) {
             setTranslationX((int) (getTranslationX() * horizontalResizeRatio));
             setTranslationY((int) (getTranslationY() * verticalResizeRatio));
         }
@@ -865,7 +874,7 @@ public class ImageLayer extends ContentLayer {
 
         BufferedImage visibleImage = null;
 
-        switch (state) {
+        switch(state) {
             case NORMAL:
                 visibleImage = image;
                 break;
@@ -881,8 +890,8 @@ public class ImageLayer extends ContentLayer {
                 throw new IllegalStateException("state = " + state);
         }
 
-        if (tmpDrawingLayer == null) {
-            if (Tools.isShapesDrawing() && isActiveLayer()) {
+        if(tmpDrawingLayer == null) {
+            if(Tools.isShapesDrawing() && isActiveLayer()) {
                 // we need to draw inside the layer, but only temporarily
                 BufferedImage tmp = createCompositionSizedTmpImage();
                 Graphics2D tmpG = tmp.createGraphics();
@@ -900,7 +909,7 @@ public class ImageLayer extends ContentLayer {
             }
         } else { // we are in the middle of a brush draw
 
-            if (blendingMode == BlendingMode.NORMAL && opacity > 0.999f) {  // layer in normal mode, opacity  = 100%
+            if(blendingMode == BlendingMode.NORMAL && opacity > 0.999f) {  // layer in normal mode, opacity  = 100%
                 g.drawImage(visibleImage, getTranslationX(), getTranslationY(), null);
                 tmpDrawingLayer.paintLayer(g, 0, 0);
             } else { // layer is not in normal mode
@@ -918,14 +927,14 @@ public class ImageLayer extends ContentLayer {
     }
 
     public void setShowOriginal(boolean b) {
-        if (b) {
+        if(b) {
             assert state == PREVIEW;
             setState(SHOW_ORIGINAL);
         } else {
             assert state == SHOW_ORIGINAL;
             setState(PREVIEW);
         }
-        comp.repaint();
+        comp.imageChanged(REPAINT);
     }
 
     private void setState(State newState) {
@@ -934,12 +943,11 @@ public class ImageLayer extends ContentLayer {
             previewImage = null;
             filterSourceImage = null;
         }
-        comp.imageChanged(INVALIDATE_CACHE);
     }
 
     public void debugImages() {
         Utils.debugImage(image, "image");
-        if (previewImage != null) {
+        if(previewImage != null) {
             Utils.debugImage(previewImage, "previewImage");
         } else {
             Dialogs.showInfoDialog("null", "previewImage is null");
