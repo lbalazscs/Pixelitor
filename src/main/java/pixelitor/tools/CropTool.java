@@ -42,6 +42,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 
+import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.tools.CropToolState.INITIAL;
 import static pixelitor.tools.CropToolState.TRANSFORM;
 import static pixelitor.tools.CropToolState.USER_DRAG;
@@ -151,7 +152,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
     @Override
     public void toolMouseReleased(MouseEvent e, ImageDisplay ic) {
         Composition comp = ic.getComp();
-        comp.imageChanged(true, true);
+        comp.imageChanged(FULL);
 
         switch(state) {
             case INITIAL:

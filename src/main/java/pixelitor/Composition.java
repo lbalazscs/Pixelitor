@@ -56,6 +56,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static pixelitor.Composition.ImageChangeActions.FULL;
+import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
+import static pixelitor.Composition.ImageChangeActions.REPAINT;
+
 /**
  * An image composition consisting of multiple layers
  */
@@ -192,7 +196,11 @@ public class Composition implements Serializable {
             History.addEdit(newLayerEdit);
         }
 
-        imageChanged(updateHistogram, updateHistogram); // if the histogram is updated, a repaint is also necessary
+        if(updateHistogram) {
+            imageChanged(FULL); // if the histogram is updated, a repaint is also necessary
+        } else {
+            imageChanged(INVALIDATE_CACHE);
+        }
         assert checkInvariant();
     }
 
@@ -219,13 +227,13 @@ public class Composition implements Serializable {
 
         ((ImageLayer) activeLayer).filterWithoutDialogFinished(img, changeReason, opName);
 
-        imageChanged(true, true);
+        imageChanged(FULL);
     }
 
     public void changePreviewImage(BufferedImage img, String filterName) {
         ImageLayer layer = (ImageLayer) activeLayer;
         if (layer.changePreviewImage(img, filterName)) {
-            imageChanged(true, true);
+            imageChanged(FULL);
         }
     }
 
@@ -285,7 +293,7 @@ public class Composition implements Serializable {
         }
 
         ((ContentLayer) activeLayer).endTranslation();
-        imageChanged(true, true);
+        imageChanged(FULL);
     }
 
     public Layer getLayer(int i) {
@@ -374,7 +382,7 @@ public class Composition implements Serializable {
         layerList.add(newIndex, layer);
         ic.changeLayerOrderInTheGUI(oldIndex, newIndex);
 
-        imageChanged(true, true);
+        imageChanged(FULL);
 
         AppLogic.layerOrderChanged(this);
 
@@ -549,7 +557,7 @@ public class Composition implements Serializable {
             AppLogic.activeCompLayerCountChanged(this, layerList.size());
         }
 
-        imageChanged(true, true);
+        imageChanged(FULL);
     }
 
     public void dispose() {
@@ -603,6 +611,9 @@ public class Composition implements Serializable {
         return (selection != null);
     }
 
+    /**
+     * Returns the composite image which jas the same dimensions as the canvas.
+     */
     public BufferedImage getCompositeImage() {
         if (compositeImageUpToDate) {
             return cachedCompositeImage; // this caching is useful for example when using the Color Picker Tool
@@ -614,19 +625,21 @@ public class Composition implements Serializable {
         return cachedCompositeImage;
     }
 
+
     /**
-     *
+     * The contents of this composition have been changed, the cache is invalidated,
+     * and additional actions might be necessary
      */
-    public void imageChanged(boolean repaint, boolean updateHistogram) {
+    public void imageChanged(ImageChangeActions actions) {
         compositeImageUpToDate = false;
 
-        if (repaint) {
+        if(actions.isRepaint()) {
             if (ic != null) {
                 ic.repaint();
             }
         }
 
-        if (updateHistogram) {
+        if(actions.isUpdateHistogram()) {
             HistogramsPanel.INSTANCE.updateFromCompIfShown(this);
         }
     }
@@ -635,11 +648,11 @@ public class Composition implements Serializable {
         this.dirty = dirty;
     }
 
-    public void moveActiveContentRelative(int relativeX, int relativeY, boolean repaint) {
+    public void moveActiveContentRelative(int relativeX, int relativeY) {
         if (activeLayer instanceof ContentLayer) {
             ContentLayer contentLayer = (ContentLayer) activeLayer;
             contentLayer.moveLayerRelative(relativeX, relativeY);
-            imageChanged(repaint, false);
+            imageChanged(FULL);
         }
     }
 
@@ -716,7 +729,7 @@ public class Composition implements Serializable {
 
         canvas.updateSize(canvas.getWidth() + east + west, canvas.getHeight() + north + south);
 
-        imageChanged(true, false);
+        imageChanged(REPAINT);
         setDirty(true);
     }
 
@@ -734,7 +747,7 @@ public class Composition implements Serializable {
     public void dragFinished(Layer layer, int newIndex) {
         layerList.remove(layer);
         layerList.add(newIndex, layer);
-        imageChanged(true, true);
+        imageChanged(FULL);
     }
 
     public void repaint() {
@@ -801,5 +814,29 @@ public class Composition implements Serializable {
 
     public void setShowOriginal(boolean b) {
         getActiveImageLayer().setShowOriginal(b);
+    }
+
+    public enum ImageChangeActions {
+        INVALIDATE_CACHE(false, false) {
+        }, REPAINT(true, false) {
+        }, HISTOGRAM(false, true) {
+        }, FULL(true, true) {
+        };
+
+        private boolean repaint;
+        private boolean updateHistogram;
+
+        private ImageChangeActions(boolean repaint, boolean updateHistogram) {
+            this.repaint = repaint;
+            this.updateHistogram = updateHistogram;
+        }
+
+        public boolean isRepaint() {
+            return repaint;
+        }
+
+        public boolean isUpdateHistogram() {
+            return updateHistogram;
+        }
     }
 }

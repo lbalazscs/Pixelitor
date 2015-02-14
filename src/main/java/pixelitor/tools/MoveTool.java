@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,7 +48,7 @@ public class MoveTool extends Tool {
         Composition c = ic.getComp();
         int relativeX = userDrag.getHorizontalDifference();
         int relativeY = userDrag.getVerticalDifference();
-        c.moveActiveContentRelative(relativeX, relativeY, true);
+        c.moveActiveContentRelative(relativeX, relativeY);
     }
 
     @Override
@@ -61,8 +61,7 @@ public class MoveTool extends Tool {
      */
     public static void move(Composition comp, int relativeX, int relativeY) {
         comp.startTranslation(false);
-        comp.moveActiveContentRelative(relativeX, relativeY, false);
-        comp.imageChanged(true, true);
+        comp.moveActiveContentRelative(relativeX, relativeY);
         comp.endTranslation();
     }
 

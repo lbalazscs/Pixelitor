@@ -53,6 +53,8 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
+import static pixelitor.Composition.ImageChangeActions.FULL;
+
 /**
  *
  */
@@ -217,7 +219,7 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
         // ColorBalance
         // Channel mixer
 
-        comp.imageChanged(true, true);
+        comp.imageChanged(FULL);
     }
 
     private static void addTextLayer(Composition ic, String text, int translationY) {

@@ -90,6 +90,7 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.Optional;
 
+import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
 import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.MOTION_BLUR;
@@ -1120,7 +1121,7 @@ public class MenuBar extends JMenuBar {
         AbstractAction imageChangedActive = new AbstractAction("imageChanged(true, true) on the active image") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ImageComponents.getActiveComp().get().imageChanged(true, true);
+                ImageComponents.getActiveComp().get().imageChanged(FULL);
             }
         };
         createMenuItem(imageChangedActive, debugSubmenu);
@@ -1142,7 +1143,7 @@ public class MenuBar extends JMenuBar {
                     ContentLayer contentLayer = (ContentLayer) layer;
                     contentLayer.setTranslationX(0);
                     contentLayer.setTranslationY(0);
-                    comp.imageChanged(true, true);
+                    comp.imageChanged(FULL);
                 }
             }
         };

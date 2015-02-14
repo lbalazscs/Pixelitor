@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,8 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import java.awt.image.BufferedImage;
 import java.lang.ref.SoftReference;
+
+import static pixelitor.Composition.ImageChangeActions.FULL;
 
 /**
  * A PixelitorEdit that represents the changes made to an image.
@@ -83,7 +85,7 @@ public class ImageEdit extends FadeableEdit {
 
         BufferedImage tmp = layer.getImageOrSubImageIfSelected(false, true);
         layer.changeImageUndoRedo(backupImage);
-        comp.imageChanged(true, true);
+        comp.imageChanged(FULL);
 
         // create new backup image from tmp
         imgRef = new SoftReference<>(tmp);

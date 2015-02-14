@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.history;
 
 import pixelitor.Composition;
@@ -27,6 +28,8 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.util.Optional;
+
+import static pixelitor.Composition.ImageChangeActions.FULL;
 
 /**
  * Represents the changes made to a part of an image (for example brush strokes).
@@ -82,7 +85,7 @@ public class PartialImageEdit extends FadeableEdit {
         image.setData(backupRaster);
         backupRaster = tmpRaster;
 
-        comp.imageChanged(true, true);
+        comp.imageChanged(FULL);
 
         History.postEdit(this);
     }

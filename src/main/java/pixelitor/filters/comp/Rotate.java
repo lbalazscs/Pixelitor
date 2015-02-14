@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.comp;
 
 import pixelitor.AppLogic;
@@ -21,6 +22,8 @@ import pixelitor.Composition;
 import pixelitor.history.OneLayerUndoableEdit;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Layer;
+
+import static pixelitor.Composition.ImageChangeActions.REPAINT;
 
 /**
  * Rotates an image
@@ -59,7 +62,7 @@ public class Rotate extends CompOperation {
         }
 
         comp.setDirty(true);
-        comp.imageChanged(true, false);
+        comp.imageChanged(REPAINT);
 
         AppLogic.activeCompositionDimensionsChanged(comp);
     }

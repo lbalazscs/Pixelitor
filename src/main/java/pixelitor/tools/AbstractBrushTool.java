@@ -41,6 +41,8 @@ import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.PathIterator;
 import java.awt.image.BufferedImage;
 
+import static pixelitor.Composition.ImageChangeActions.HISTOGRAM;
+
 /**
  * Abstract superclass for tools like brush or erase.
  */
@@ -162,7 +164,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         }
         g = null;
 
-        comp.imageChanged(false, true); // for the histogram update
+        comp.imageChanged(HISTOGRAM);
     }
 
     public void drawBrushStrokeProgrammatically(Composition comp, Point startingPoint, Point endPoint) {

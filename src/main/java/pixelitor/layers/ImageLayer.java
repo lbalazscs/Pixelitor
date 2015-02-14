@@ -46,6 +46,8 @@ import java.io.ObjectOutputStream;
 import java.util.Objects;
 import java.util.Optional;
 
+import static pixelitor.Composition.ImageChangeActions.FULL;
+import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
 import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
 import static pixelitor.layers.ImageLayer.State.NORMAL;
 import static pixelitor.layers.ImageLayer.State.PREVIEW;
@@ -251,7 +253,7 @@ public class ImageLayer extends ContentLayer {
 
     private void setImageWithSelection(BufferedImage newImage) {
         image = replaceImageWithSelection(image, newImage);
-        comp.imageChanged(false, false);
+        comp.imageChanged(INVALIDATE_CACHE);
     }
 
     // sets the image object ignoring the selection
@@ -260,7 +262,7 @@ public class ImageLayer extends ContentLayer {
 
         assert Utils.checkRasterMinimum(newImage);
 
-        comp.imageChanged(false, false);
+        comp.imageChanged(INVALIDATE_CACHE);
     }
 
     /**
@@ -309,7 +311,7 @@ public class ImageLayer extends ContentLayer {
 
         setState(NORMAL);
         previewImage = null;
-        comp.imageChanged(true, true);
+        comp.imageChanged(FULL);
     }
 
     public void tweenCalculatingStarted() {
@@ -928,11 +930,11 @@ public class ImageLayer extends ContentLayer {
 
     private void setState(State newState) {
         state = newState;
-        if (newState == NORMAL) {
+        if(newState == NORMAL) { // back to normal: cleanup
             previewImage = null;
             filterSourceImage = null;
         }
-        comp.imageChanged(false, false);
+        comp.imageChanged(INVALIDATE_CACHE);
     }
 
     public void debugImages() {

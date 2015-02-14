@@ -37,6 +37,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
+import static pixelitor.Composition.ImageChangeActions.FULL;
+import static pixelitor.Composition.ImageChangeActions.HISTOGRAM;
+import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
+import static pixelitor.Composition.ImageChangeActions.REPAINT;
 import static pixelitor.selection.SelectionInteraction.ADD;
 import static pixelitor.selection.SelectionType.ELLIPSE;
 import static pixelitor.selection.SelectionType.RECTANGLE;
@@ -361,13 +365,13 @@ public class CompositionTest {
 
     @Test
     public void testImageChanged() {
-        comp.imageChanged(true, true);
+        comp.imageChanged(FULL);
         comp.checkInvariant();
-        comp.imageChanged(true, false);
+        comp.imageChanged(REPAINT);
         comp.checkInvariant();
-        comp.imageChanged(false, true);
+        comp.imageChanged(HISTOGRAM);
         comp.checkInvariant();
-        comp.imageChanged(false, false);
+        comp.imageChanged(INVALIDATE_CACHE);
         comp.checkInvariant();
     }
 
@@ -380,9 +384,7 @@ public class CompositionTest {
 
     @Test
     public void testMoveActiveContentRelative() {
-        comp.moveActiveContentRelative(2, 2, false);
-        comp.checkInvariant();
-        comp.moveActiveContentRelative(2, 2, true);
+        comp.moveActiveContentRelative(2, 2);
         comp.checkInvariant();
     }
 

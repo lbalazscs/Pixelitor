@@ -51,6 +51,9 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.Optional;
 
+import static pixelitor.Composition.ImageChangeActions.FULL;
+import static pixelitor.Composition.ImageChangeActions.REPAINT;
+
 /**
  * The Shapes Tool
  */
@@ -165,7 +168,7 @@ public class ShapesTool extends Tool {
         Composition comp = ic.getComp();
 
         // this will trigger paintOverLayer, therefore the continuous drawing of the shape
-        comp.imageChanged(true, false); // TODO optimize, the whole image should not be repainted
+        comp.imageChanged(REPAINT); // TODO optimize, the whole image should not be repainted
     }
 
     @Override
@@ -228,7 +231,7 @@ public class ShapesTool extends Tool {
 
         drawing = false;
         stroke = null;
-        comp.imageChanged(true, true);
+        comp.imageChanged(FULL);
     }
 
     private void enableSettings() {

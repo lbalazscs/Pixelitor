@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.comp;
 
 import pixelitor.AppLogic;
@@ -25,6 +26,9 @@ import pixelitor.layers.Layer;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
+
+import static pixelitor.Composition.ImageChangeActions.FULL;
+import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
 
 /**
  * Composition-related static utility methods
@@ -67,7 +71,7 @@ public final class CompositionUtils {
         ic.makeSureItIsVisible();
 
         ic.updateDrawStart();
-        comp.imageChanged(true, true);
+        comp.imageChanged(FULL);
 
         AppLogic.activeCompositionDimensionsChanged(comp);
     }
@@ -115,7 +119,7 @@ public final class CompositionUtils {
         }
 
         comp.getCanvas().updateSize(targetWidth, targetHeight);
-        comp.imageChanged(false, false);
+        comp.imageChanged(INVALIDATE_CACHE);
 
         AppLogic.activeCompositionDimensionsChanged(comp);
     }

@@ -22,6 +22,7 @@ import pixelitor.history.OneLayerUndoableEdit;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Layer;
 
+import static pixelitor.Composition.ImageChangeActions.REPAINT;
 import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
 import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
 
@@ -64,7 +65,7 @@ public class Flip extends CompOperation {
         }
 
         comp.setDirty(true);
-        comp.imageChanged(true, false);
+        comp.imageChanged(REPAINT);
     }
 
     /**

@@ -35,6 +35,8 @@ import java.awt.RenderingHints;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 
+import static pixelitor.Composition.ImageChangeActions.FULL;
+
 /**
  * The gradient tool
  */
@@ -114,7 +116,7 @@ public class GradientTool extends Tool {
             );
 
             thereWasDragging = false;
-            comp.imageChanged(true, true);
+            comp.imageChanged(FULL);
         }
     }
 

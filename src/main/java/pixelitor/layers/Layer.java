@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.layers;
 
@@ -33,6 +33,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+
+import static pixelitor.Composition.ImageChangeActions.FULL;
 
 /**
  * The abstract superclass of all layer classes
@@ -69,7 +71,7 @@ public abstract class Layer implements Serializable {
         }
 
         this.visible = newVisibility;
-        comp.imageChanged(true, true);
+        comp.imageChanged(FULL);
         comp.setDirty(true);
         layerButton.setOpenEye(newVisibility);
 
@@ -122,7 +124,7 @@ public abstract class Layer implements Serializable {
     }
 
     private void updateAfterBMorOpacityChange() {
-        comp.imageChanged(true, true);
+        comp.imageChanged(FULL);
 
         HistogramsPanel hp = HistogramsPanel.INSTANCE;
         if (hp.areHistogramsShown()) {
@@ -234,7 +236,7 @@ public abstract class Layer implements Serializable {
 
         layerMask = new LayerMask(bwLayerMask);
 
-        comp.imageChanged(true, true);
+        comp.imageChanged(FULL);
     }
 
     /**

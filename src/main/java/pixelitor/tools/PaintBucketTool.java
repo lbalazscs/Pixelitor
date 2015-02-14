@@ -38,6 +38,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
+import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.FillType.BACKGROUND;
 import static pixelitor.FillType.FOREGROUND;
 import static pixelitor.FillType.TRANSPARENT;
@@ -125,9 +126,7 @@ public class PaintBucketTool extends Tool {
             g.drawImage(workingCopy, 0, 0, null);
             g.dispose();
 
-//            layer.setImage(workingCopy, false);
-
-            comp.imageChanged(true, true);
+            comp.imageChanged(FULL);
         }
 
         workingCopy.flush();
