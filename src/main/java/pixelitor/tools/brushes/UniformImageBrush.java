@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.tools.brushes;
 
@@ -24,9 +24,15 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.util.EnumMap;
+import java.util.Map;
 
+/**
+ * A "uniform dabs" brush that is based on images.
+ */
 public class UniformImageBrush extends UniformDabsBrush {
-    private final BufferedImage templateImage;
+    static Map<ImageBrushType, BufferedImage> templateImages = new EnumMap<>(ImageBrushType.class);
+    private BufferedImage templateImage;
     private BufferedImage coloredBrushImage;
     private BufferedImage finalScaledImage;
     private Color lastColor;
@@ -34,9 +40,14 @@ public class UniformImageBrush extends UniformDabsBrush {
     public UniformImageBrush(ImageBrushType imageBrushType, double spacingRatio, boolean angleAware) {
         super(spacingRatio, angleAware);
 
-        templateImage = imageBrushType.createTemplateBrush(AbstractBrushTool.MAX_BRUSH_RADIUS);
+        // for each brush type multiple brush instances are created because of the symmetry
+        // however the template image can be shared between them
+        templateImage = templateImages.get(imageBrushType);
+        if(templateImage == null) {
+            templateImage = imageBrushType.createTemplateBrush(AbstractBrushTool.MAX_BRUSH_RADIUS);
+            templateImages.put(imageBrushType, templateImage);
+        }
     }
-
 
     @Override
     void setupBrushStamp(Graphics2D g, float diameter) {
@@ -101,7 +112,6 @@ public class UniformImageBrush extends UniformDabsBrush {
 
     @Override
     public void drawPoint(Graphics2D g, int x, int y, int radius) {
-//        System.out.println("UniformImageBrush::drawPoint: x = " + x + ", y = " + y);
         super.drawPoint(g, x, y, radius);
 
         if(angleAware) {
