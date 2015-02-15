@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.tools;
 
@@ -21,7 +21,7 @@ import pixelitor.tools.shapestool.ShapesTool;
 import java.util.Random;
 
 /**
- *
+ * Tool-related static utility methods
  */
 public class Tools {
     private Tools() {
@@ -33,6 +33,8 @@ public class Tools {
     public static final SelectionTool SELECTION = new SelectionTool();
     //    public static final LassoTool LASSO = new LassoTool();
     public static final BrushTool BRUSH = new BrushTool();
+    public static final CloneTool CLONE = new CloneTool();
+
     public static final EraseTool ERASER = new EraseTool();
     public static final GradientTool GRADIENT = new GradientTool();
     public static final PaintBucketTool PAINT_BUCKET = new PaintBucketTool();
@@ -48,7 +50,9 @@ public class Tools {
      * All the subclass tools in an array.
      */
     private static final Tool[] allTools =
-            {MOVE, CROP, SELECTION, BRUSH, ERASER, GRADIENT, PAINT_BUCKET, COLOR_PICKER, SHAPES, HAND, ZOOM};
+            {MOVE, CROP, SELECTION, BRUSH,
+                    CLONE,
+                    ERASER, GRADIENT, PAINT_BUCKET, COLOR_PICKER, SHAPES, HAND, ZOOM};
 
     public static Tool[] getTools() {
         return allTools;
