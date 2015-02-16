@@ -55,7 +55,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
 
     private JComboBox<BrushType> typeSelector;
 
-    Graphics2D g;
+    Graphics2D drawingGraphics;
     private final RangeParam brushRadiusParam = new RangeParam("Radius", MIN_BRUSH_RADIUS, MAX_BRUSH_RADIUS, DEFAULT_BRUSH_RADIUS);
 
 //    private Composition comp;
@@ -159,10 +159,10 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         ToolAffectedArea affectedArea = new ToolAffectedArea(comp, brushes.getRectangleAffectedByBrush(), false);
         saveSubImageForUndo(getFullUntouchedImage(comp), affectedArea);
         mergeTmpLayer(comp);
-        if (g != null) {
-            g.dispose();
+        if(drawingGraphics != null) {
+            drawingGraphics.dispose();
         }
-        g = null;
+        drawingGraphics = null;
 
         comp.imageChanged(HISTOGRAM);
     }
@@ -180,7 +180,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     }
 
     /**
-     * Creates the global Graphics2D object g.
+     * Creates the global Graphics2D object drawingGraphics.
      */
     abstract void initDrawingGraphics(ImageLayer layer);
 
@@ -192,7 +192,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         setupDrawingRadius();
         Symmetry currentSymmetry = symmetryModel.getSelectedItem();
 
-        if (g == null) {
+        if(drawingGraphics == null) {
             if(!connectClickWithLine) {
                 brushes.reset();
             }
@@ -200,8 +200,8 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
 
             ImageLayer imageLayer = (ImageLayer) comp.getActiveLayer();
             initDrawingGraphics(imageLayer);
-            setupGraphics(g, p);
-            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            setupGraphics(drawingGraphics, p);
+            drawingGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
             if (connectClickWithLine) {
                 currentSymmetry.drawLine(brushes, previousMouseX, previousMouseY, x, y);
@@ -270,7 +270,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
 
             ImageLayer imageLayer = (ImageLayer) comp.getActiveLayer();
             initDrawingGraphics(imageLayer);
-            setupGraphics(g, FgBgColorSelector.getFG());
+            setupGraphics(drawingGraphics, FgBgColorSelector.getFG());
 
             int startingX = 0;
             int startingY = 0;
@@ -283,23 +283,27 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
                 int y = (int) coords[1];
                 brushes.updateAffectedCoordinates(x, y);
 
-                if (type == PathIterator.SEG_MOVETO) {
-                    startingX = x;
-                    startingY = y;
+                switch(type) {
+                    case PathIterator.SEG_MOVETO:
+                        startingX = x;
+                        startingY = y;
 
-                    previousMouseX = x;
-                    previousMouseY = y;
+                        previousMouseX = x;
+                        previousMouseY = y;
 
-                } else if (type == PathIterator.SEG_LINETO) {
-                    brushes.drawLine(0, previousMouseX, previousMouseY, x, y);
+                        break;
+                    case PathIterator.SEG_LINETO:
+                        brushes.drawLine(0, previousMouseX, previousMouseY, x, y);
 
-                    previousMouseX = x;
-                    previousMouseY = y;
+                        previousMouseX = x;
+                        previousMouseY = y;
 
-                } else if (type == PathIterator.SEG_CLOSE) {
-                    brushes.drawLine(0, previousMouseX, previousMouseY, startingX, startingY);
-                } else {
-                    throw new IllegalArgumentException("type = " + type);
+                        break;
+                    case PathIterator.SEG_CLOSE:
+                        brushes.drawLine(0, previousMouseX, previousMouseY, startingX, startingY);
+                        break;
+                    default:
+                        throw new IllegalArgumentException("type = " + type);
                 }
 
                 fpi.next();

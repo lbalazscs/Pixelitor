@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -52,11 +52,11 @@ public class EraseTool extends AbstractBrushTool {
     void initDrawingGraphics(ImageLayer layer) {
         // uses the graphics of the buffered image contained in the layer
         BufferedImage drawImage = layer.createCompositionSizedSubImage();
-        g = drawImage.createGraphics();
+        drawingGraphics = drawImage.createGraphics();
         if (respectSelection) {
-            layer.getComposition().setSelectionClipping(g, null);
+            layer.getComposition().setSelectionClipping(drawingGraphics, null);
         }
-        brushes.setDrawingGraphics(g);
+        brushes.setDrawingGraphics(drawingGraphics);
     }
 
     @Override
