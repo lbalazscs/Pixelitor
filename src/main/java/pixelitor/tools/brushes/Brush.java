@@ -49,28 +49,6 @@ public interface Brush {
      */
     void onNewMousePoint(int x, int y);
 
-//    /**
-//     * Draws a point, usually at the first mouse click
-//     *
-//     * @param g
-//     * @param x        the x of the mouse event (NOT translated with the radius)
-//     * @param y        the y of the mouse event (NOT translated with the radius)
-//     * @param radius
-//     */
-//    void drawPoint(Graphics2D g, int x, int y, int radius);
-//
-//    /**
-//     * Draws a line between the two points
-//     *
-//     * @param g
-//     * @param startX   the x of the first mouse drag event(NOT translated with the radius)
-//     * @param startY   the y of the first mouse drag event(NOT translated with the radius)
-//     * @param endX     the x of the second mouse drag event(NOT translated with the radius)
-//     * @param endY     the y of the second mouse drag event(NOT translated with the radius)
-//     * @param radius
-//     */
-//    void drawLine(Graphics2D g, int startX, int startY, int endX, int endY, int radius);
-//
 
     /**
      * TODO
