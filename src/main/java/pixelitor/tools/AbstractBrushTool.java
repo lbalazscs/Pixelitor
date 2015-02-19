@@ -51,7 +51,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     public static final int MAX_BRUSH_RADIUS = 100;
     public static final int DEFAULT_BRUSH_RADIUS = 10;
 
-    boolean respectSelection = true;
+    boolean respectSelection = true; // false while tracing a selection
 
     private JComboBox<BrushType> typeSelector;
 
@@ -204,13 +204,14 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
             drawingGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
             if (connectClickWithLine) {
-                currentSymmetry.drawLine(brushes, previousMouseX, previousMouseY, x, y);
+                currentSymmetry.onNewMousePoint(brushes, previousMouseX, previousMouseY, x, y);
             } else {
-                currentSymmetry.drawPoint(brushes, x, y);
+                // TODO this is not drag start
+                currentSymmetry.onDragStart(brushes, x, y);
             }
 
         } else {
-            currentSymmetry.drawLine(brushes, previousMouseX, previousMouseY, x, y);
+            currentSymmetry.onNewMousePoint(brushes, previousMouseX, previousMouseY, x, y);
         }
 
         previousMouseX = x;
@@ -293,14 +294,14 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
 
                         break;
                     case PathIterator.SEG_LINETO:
-                        brushes.drawLine(0, previousMouseX, previousMouseY, x, y);
+                        brushes.onNewMousePoint(0, previousMouseX, previousMouseY, x, y);
 
                         previousMouseX = x;
                         previousMouseY = y;
 
                         break;
                     case PathIterator.SEG_CLOSE:
-                        brushes.drawLine(0, previousMouseX, previousMouseY, startingX, startingY);
+                        brushes.onNewMousePoint(0, previousMouseX, previousMouseY, startingX, startingY);
                         break;
                     default:
                         throw new IllegalArgumentException("type = " + type);

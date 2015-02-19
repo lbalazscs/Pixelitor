@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,10 +19,8 @@ package pixelitor.tools.brushes;
 
 import pixelitor.tools.StrokeType;
 
-import java.awt.Graphics2D;
-
 /**
- *
+ * A brush that paints with vector-based "perfect" circles
  */
 public class IdealBrush extends StrokeBrush {
 
@@ -31,8 +29,7 @@ public class IdealBrush extends StrokeBrush {
     }
 
     @Override
-    public void drawPoint(Graphics2D g, int x, int y, int radius) {
-        int diameter = 2 * radius;
+    public void drawShape(int x, int y) {
         g.fillOval(x - radius, y - radius, diameter, diameter);
     }
 }

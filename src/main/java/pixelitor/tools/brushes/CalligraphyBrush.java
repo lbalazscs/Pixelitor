@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,18 +8,17 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.tools.brushes;
 
 import pixelitor.tools.StrokeType;
 
 import java.awt.BasicStroke;
-import java.awt.Graphics2D;
 import java.awt.Stroke;
 
 /**
@@ -32,10 +31,7 @@ public class CalligraphyBrush extends StrokeBrush {
         super(StrokeType.CALLIGRAPHY);
     }
 
-    @Override
-    public void drawPoint(Graphics2D g, int x, int y, int radius) {
-        int diameter = 2 * radius;
-
+    public void drawShape(int x, int y) {
         // TODO these calculations could be simpler
 
         float projectedShift = diameter / 1.4142f;
@@ -57,11 +53,11 @@ public class CalligraphyBrush extends StrokeBrush {
         }
     }
 
-    @Override
-    public void drawLine(Graphics2D g, int startX, int startY, int endX, int endY, int radius) {
-        super.drawLine(g, startX, startY, endX, endY, radius);
+    public void drawLine(int startX, int startY, int endX, int endY) {
+        super.drawLine(startX, startY, endX, endY);
 
         // for some reason this must be called, otherwise gaps remain
-        drawPoint(g, startX, startY, radius);
+        // TODO still true?
+        drawShape(startX, startY);
     }
 }

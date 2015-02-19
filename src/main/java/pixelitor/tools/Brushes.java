@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools;
 
 import pixelitor.Composition;
@@ -36,7 +37,6 @@ public class Brushes {
     private int maxY = 0;
 
     private final Brush[] brushes = new Brush[MAX_BRUSHES];
-    private Graphics2D g;
     private int radius = AbstractBrushTool.DEFAULT_BRUSH_RADIUS;
     private Composition comp;
 
@@ -56,22 +56,22 @@ public class Brushes {
         }
     }
 
-    public void drawPoint(int brushNo, int x, int y) {
+    public void onDragStart(int brushNo, int x, int y) {
         updateAffectedCoordinates(x, y);
 
-        brushes[brushNo].drawPoint(g, x, y, radius);
+        brushes[brushNo].onDragStart(x, y);
 
         comp.updateRegion(x - radius, y - radius, x + radius + 1, y + radius + 1, 0);
     }
 
-    public void drawLine(int brushNo, int startX, int startY, int endX, int endY) {
+    public void onNewMousePoint(int brushNo, int startX, int startY, int endX, int endY) {
         updateAffectedCoordinates(endX, endY);
 
         if (radius <= 0) {
             throw new IllegalStateException("radius is " + radius);
         }
 
-        brushes[brushNo].drawLine(g, startX, startY, endX, endY, radius);
+        brushes[brushNo].onNewMousePoint(endX, endY);
         comp.updateRegion(startX, startY, endX, endY, 2 * radius);
     }
 
@@ -111,11 +111,16 @@ public class Brushes {
 
 
     public void setDrawingGraphics(Graphics2D g) {
-        this.g = g;
+        for(int i = 0; i < MAX_BRUSHES; i++) {
+            brushes[i].setTargetGraphics(g);
+        }
     }
 
     public void setRadius(int radius) {
         this.radius = radius;
+        for(int i = 0; i < MAX_BRUSHES; i++) {
+            brushes[i].setRadius(radius);
+        }
     }
 
     public void setComp(Composition comp) {

@@ -14,12 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools.brushes;
 
 import pixelitor.tools.StrokeType;
 
 import java.awt.BasicStroke;
-import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.geom.Ellipse2D;
 
@@ -32,8 +32,7 @@ public class OutlineCircleBrush extends StrokeBrush {
     }
 
     @Override
-    public void drawPoint(Graphics2D g, int x, int y, int radius) {
-        int diameter = 2 * radius;
+    public void drawShape(int x, int y) {
         Ellipse2D.Float circle = new Ellipse2D.Float(x - radius, y - radius, diameter, diameter);
         Stroke saveStroke = g.getStroke();
         g.setStroke(StrokeType.OUTLINE.getInnerStroke());

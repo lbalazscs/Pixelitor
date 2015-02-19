@@ -20,18 +20,17 @@ package pixelitor.tools.brushes;
 import pixelitor.tools.StrokeType;
 
 import java.awt.BasicStroke;
-import java.awt.Graphics2D;
 import java.awt.Stroke;
 
 /**
  * A Brush that uses a Stroke to draw
  */
-public abstract class StrokeBrush implements Brush {
+public abstract class StrokeBrush extends AbstractBrush {
     private final StrokeType strokeType;
     private final int cap;
     private final int join;
 
-    int lastThickness = -1;
+    int lastDiameter = -1;
     Stroke lastStroke;
 
     protected StrokeBrush(StrokeType strokeType) {
@@ -45,11 +44,24 @@ public abstract class StrokeBrush implements Brush {
     }
 
     @Override
-    public void drawLine(Graphics2D g, int startX, int startY, int endX, int endY, int radius) {
+    public void onDragStart(int x, int y) {
+        drawShape(x, y);
+        setPreviousCoordinates(x, y);
+    }
+
+    @Override
+    public void onNewMousePoint(int x, int y) {
+        drawLine(previousX, previousY, x, y);
+        setPreviousCoordinates(x, y);
+    }
+
+    abstract void drawShape(int x, int y);
+
+    public void drawLine(int startX, int startY, int endX, int endY) {
         int thickness = 2*radius;
-        if (thickness != lastThickness) {
+        if(thickness != lastDiameter) {
             lastStroke = strokeType.getStroke(thickness, cap, join, null);
-            lastThickness = thickness;
+            lastDiameter = thickness;
         }
 
         g.setStroke(lastStroke);

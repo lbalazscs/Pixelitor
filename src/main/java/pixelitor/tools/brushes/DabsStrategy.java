@@ -17,26 +17,12 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.tools.StrokeType;
+public interface DabsStrategy {
+    void onDragStart(int x, int y);
 
-import java.awt.BasicStroke;
-import java.awt.Stroke;
-import java.awt.geom.Rectangle2D;
+    void onNewMousePoint(int x, int y);
 
-/**
- * The "Squares" brush
- */
-public class OutlineSquareBrush extends StrokeBrush {
-    public OutlineSquareBrush() {
-        super(StrokeType.OUTLINE, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL);
-    }
+    void setRadius(int radius);
 
-    @Override
-    public void drawShape(int x, int y) {
-        Rectangle2D.Float rectangle = new Rectangle2D.Float(x - radius, y - radius, diameter, diameter);
-        Stroke saveStroke = g.getStroke();
-        g.setStroke(StrokeType.OUTLINE.getInnerStroke());
-        g.draw(rectangle);
-        g.setStroke(saveStroke);
-    }
+    void reset();
 }

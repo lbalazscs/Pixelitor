@@ -16,7 +16,6 @@
  */
 package pixelitor.tools;
 
-import pixelitor.tools.brushes.AngledShapeBrush;
 import pixelitor.tools.brushes.Brush;
 import pixelitor.tools.brushes.BrushShapeProvider;
 import pixelitor.tools.brushes.CalligraphyBrush;
@@ -24,6 +23,7 @@ import pixelitor.tools.brushes.IdealBrush;
 import pixelitor.tools.brushes.ImageBrushType;
 import pixelitor.tools.brushes.OutlineCircleBrush;
 import pixelitor.tools.brushes.OutlineSquareBrush;
+import pixelitor.tools.brushes.ShapeDabsBrush;
 import pixelitor.tools.brushes.UniformImageBrush;
 import pixelitor.tools.brushes.WobbleBrush;
 
@@ -64,7 +64,7 @@ enum BrushType {
     }, HEART("Heart") {
         @Override
         public Brush createBrush() {
-            return new AngledShapeBrush(BrushShapeProvider.HEART, 2.3);
+            return new ShapeDabsBrush(BrushShapeProvider.HEART, 2.3);
         }
 //    }, ARROW("Image-Based Arrow") {
 //        @Override

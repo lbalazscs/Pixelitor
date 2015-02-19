@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,18 +8,17 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.tools.brushes;
 
 import com.jhlabs.awt.WobbleStroke;
 import pixelitor.tools.StrokeType;
 
-import java.awt.Graphics2D;
 import java.awt.geom.Ellipse2D;
 
 /**
@@ -33,11 +32,10 @@ public class WobbleBrush extends StrokeBrush {
     }
 
     @Override
-    public void drawPoint(Graphics2D g, int x, int y, int radius) {
-        int thickness = 2 * radius;
-        float smallThickness = thickness / SIZE_DIVIDING_FACTOR;
+    public void drawShape(int x, int y) {
+        float smallThickness = diameter / SIZE_DIVIDING_FACTOR;
 
-        if (thickness != lastThickness) {
+        if(diameter != lastDiameter) {
             lastStroke = new WobbleStroke(0.5f, smallThickness, smallThickness);
         }
         g.setStroke(lastStroke);
@@ -47,7 +45,10 @@ public class WobbleBrush extends StrokeBrush {
     }
 
     @Override
-    public void drawLine(Graphics2D g, int startX, int startY, int endX, int endY, int radius) {
-        super.drawLine(g, startX, startY, endX, endY, (int) (radius / SIZE_DIVIDING_FACTOR));
+    public void drawLine(int startX, int startY, int endX, int endY) {
+        int savedRadius = radius;
+        radius = (int) (radius / SIZE_DIVIDING_FACTOR);
+        super.drawLine(startX, startY, endX, endY);
+        radius = savedRadius;
     }
 }

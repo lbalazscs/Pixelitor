@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools.brushes;
 
 import java.awt.Graphics2D;
@@ -23,28 +24,56 @@ import java.awt.Graphics2D;
  */
 public interface Brush {
     /**
-     * Draws a point, usually at the first mouse click
+     * Sets the Graphics2D object on which this brush will draw
+     */
+    void setTargetGraphics(Graphics2D g);
+
+    /**
+     * Sets the radius of the brush
+     */
+    void setRadius(int radius);
+
+    /**
+     * The start of a new brush stroke
      *
-     * @param g
      * @param x        the x of the mouse event (NOT translated with the radius)
      * @param y        the y of the mouse event (NOT translated with the radius)
-     * @param radius
      */
-    void drawPoint(Graphics2D g, int x, int y, int radius);
+    void onDragStart(int x, int y);
 
     /**
-     * Draws a line between the two points
+     * A new drawing mouse event has been received;
      *
-     * @param g
-     * @param startX   the x of the first mouse drag event(NOT translated with the radius)
-     * @param startY   the y of the first mouse drag event(NOT translated with the radius)
-     * @param endX     the x of the second mouse drag event(NOT translated with the radius)
-     * @param endY     the y of the second mouse drag event(NOT translated with the radius)
-     * @param radius
+     * @param x        the x of the mouse event (NOT translated with the radius)
+     * @param y        the y of the mouse event (NOT translated with the radius)
      */
-    void drawLine(Graphics2D g, int startX, int startY, int endX, int endY, int radius);
+    void onNewMousePoint(int x, int y);
+
+//    /**
+//     * Draws a point, usually at the first mouse click
+//     *
+//     * @param g
+//     * @param x        the x of the mouse event (NOT translated with the radius)
+//     * @param y        the y of the mouse event (NOT translated with the radius)
+//     * @param radius
+//     */
+//    void drawPoint(Graphics2D g, int x, int y, int radius);
+//
+//    /**
+//     * Draws a line between the two points
+//     *
+//     * @param g
+//     * @param startX   the x of the first mouse drag event(NOT translated with the radius)
+//     * @param startY   the y of the first mouse drag event(NOT translated with the radius)
+//     * @param endX     the x of the second mouse drag event(NOT translated with the radius)
+//     * @param endY     the y of the second mouse drag event(NOT translated with the radius)
+//     * @param radius
+//     */
+//    void drawLine(Graphics2D g, int startX, int startY, int endX, int endY, int radius);
+//
 
     /**
+     * TODO
      * Resets the state of the brush. Called when a new brushstroke is started.
      */
     void reset();

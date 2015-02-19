@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools.brushes;
 
 import pixelitor.tools.AbstractBrushTool;
@@ -30,7 +31,7 @@ import java.util.Map;
 /**
  * A "uniform dabs" brush that is based on images.
  */
-public class UniformImageBrush extends UniformDabsBrush {
+public class UniformImageBrush extends DabsBrush {
     static Map<ImageBrushType, BufferedImage> templateImages = new EnumMap<>(ImageBrushType.class);
     private BufferedImage templateImage;
     private BufferedImage coloredBrushImage;
@@ -50,7 +51,7 @@ public class UniformImageBrush extends UniformDabsBrush {
     }
 
     @Override
-    void setupBrushStamp(Graphics2D g, float diameter) {
+    void setupBrushStamp() {
         Color c = g.getColor();
 
         if (!c.equals(lastColor)) {
@@ -111,29 +112,18 @@ public class UniformImageBrush extends UniformDabsBrush {
     }
 
     @Override
-    public void drawPoint(Graphics2D g, int x, int y, int radius) {
-        super.drawPoint(g, x, y, radius);
-
-        if(angleAware) {
-            // for angle-aware brushes looks better if the first point is not drawn
-            // because the correct angle cannot be calculated
-            return;
+    public void putDab(double x, double y, double theta) {
+        if(!angleAware || theta == 0) {
+            setupBrushStamp();
+            g.drawImage(finalScaledImage, (int) x - radius, (int) y - radius, null);
+        } else {
+            AffineTransform oldTransform = g.getTransform();
+            g.rotate(theta, x, y);
+            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g.drawImage(finalScaledImage, (int) x - radius, (int) y - radius, null);
+            g.setTransform(oldTransform);
         }
-
-        setupBrushStamp(g, 2*radius);
-        g.drawImage(finalScaledImage, x - radius, y - radius, null);
     }
 
-    @Override
-    public void drawPointWithAngle(Graphics2D g, int x, int y, int radius, double theta) {
-//        double degrees = Math.toDegrees(theta);
-//        System.out.println(String.format("UniformImageBrush::drawPointWithAngle: x = %d,y = %d, degrees = %.2f, radians = %.2f", x, y, degrees, theta));
 
-        setupBrushStamp(g, 2 * radius);
-        AffineTransform oldTransform = g.getTransform();
-        g.rotate(theta, x, y);
-        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g.drawImage(finalScaledImage, x - radius, y - radius, null);
-        g.setTransform(oldTransform);
-    }
 }

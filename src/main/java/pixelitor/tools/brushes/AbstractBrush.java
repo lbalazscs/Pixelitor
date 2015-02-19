@@ -17,26 +17,30 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.tools.StrokeType;
+import pixelitor.tools.AbstractBrushTool;
 
-import java.awt.BasicStroke;
-import java.awt.Stroke;
-import java.awt.geom.Rectangle2D;
+import java.awt.Graphics2D;
 
-/**
- * The "Squares" brush
- */
-public class OutlineSquareBrush extends StrokeBrush {
-    public OutlineSquareBrush() {
-        super(StrokeType.OUTLINE, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL);
+public abstract class AbstractBrush implements Brush {
+    protected Graphics2D g;
+    protected int radius = AbstractBrushTool.DEFAULT_BRUSH_RADIUS;
+    protected int diameter;
+    protected int previousX;
+    protected int previousY;
+
+    @Override
+    public void setRadius(int radius) {
+        this.radius = radius;
+        this.diameter = 2 * radius;
     }
 
     @Override
-    public void drawShape(int x, int y) {
-        Rectangle2D.Float rectangle = new Rectangle2D.Float(x - radius, y - radius, diameter, diameter);
-        Stroke saveStroke = g.getStroke();
-        g.setStroke(StrokeType.OUTLINE.getInnerStroke());
-        g.draw(rectangle);
-        g.setStroke(saveStroke);
+    public void setTargetGraphics(Graphics2D g) {
+        this.g = g;
+    }
+
+    protected void setPreviousCoordinates(int previousX, int previousY) {
+        this.previousX = previousX;
+        this.previousY = previousY;
     }
 }
