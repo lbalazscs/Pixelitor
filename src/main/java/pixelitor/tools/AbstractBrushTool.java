@@ -292,6 +292,8 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
                         previousMouseX = x;
                         previousMouseY = y;
 
+                        brushes.onDragStart(0, x, y);
+
                         break;
                     case PathIterator.SEG_LINETO:
                         brushes.onNewMousePoint(0, previousMouseX, previousMouseY, x, y);
