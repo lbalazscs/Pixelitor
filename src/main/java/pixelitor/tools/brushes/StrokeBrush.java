@@ -70,9 +70,4 @@ public abstract class StrokeBrush extends AbstractBrush {
 
         g.drawLine(startX, startY, endX, endY);
     }
-
-    @Override
-    public void reset() {
-
-    }
 }

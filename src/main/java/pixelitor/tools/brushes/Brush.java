@@ -50,11 +50,4 @@ public interface Brush {
      * @param y        the y of the mouse event (NOT translated with the radius)
      */
     void onNewMousePoint(int x, int y);
-
-
-    /**
-     * TODO
-     * Resets the state of the brush. Called when a new brushstroke is started.
-     */
-    void reset();
 }

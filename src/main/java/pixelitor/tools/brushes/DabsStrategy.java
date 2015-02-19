@@ -23,6 +23,4 @@ public interface DabsStrategy {
     void onNewMousePoint(int x, int y);
 
     void setRadius(int radius);
-
-    void reset();
 }

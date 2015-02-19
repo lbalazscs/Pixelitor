@@ -38,11 +38,6 @@ public abstract class DabsBrush extends AbstractBrush {
     abstract void setupBrushStamp();
 
     @Override
-    public void reset() {
-        strategy.reset();
-    }
-
-    @Override
     public void onDragStart(int x, int y) {
         strategy.onDragStart(x, y);
         updateComp(x, y);

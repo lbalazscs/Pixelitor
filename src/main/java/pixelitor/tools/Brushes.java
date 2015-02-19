@@ -50,12 +50,6 @@ public class Brushes {
         }
     }
 
-    public void reset() {
-        for (int i = 0; i < MAX_BRUSHES; i++) {
-            brushes[i].reset();
-        }
-    }
-
     public void onDragStart(int brushNo, int x, int y) {
         updateAffectedCoordinates(x, y);
 

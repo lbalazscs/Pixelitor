@@ -43,9 +43,12 @@ public class LinearDabsStrategy implements DabsStrategy {
 
     @Override
     public void onDragStart(int x, int y) {
+        distanceFromLastDab = 0; // moved from reset()
+
         prevX = x;
         prevY = y;
         if(angleAware) {
+            // TODO why?? - check original implementation
             distanceFromLastDab = radius * spacingRatio * 0.8;
         } else {
             // for angle-aware brushes looks better if the first point is not drawn
@@ -92,11 +95,4 @@ public class LinearDabsStrategy implements DabsStrategy {
         prevX = endX;
         prevY = endY;
     }
-
-    @Override
-    // TODO
-    public void reset() {
-        distanceFromLastDab = 0;
-    }
-
 }

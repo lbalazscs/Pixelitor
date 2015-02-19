@@ -185,11 +185,10 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         setupDrawingRadius();
         Symmetry currentSymmetry = symmetryModel.getSelectedItem();
 
-        if(drawingGraphics == null) {
-            if(!connectClickWithLine) {
-                brushes.reset();
-            }
-//            brushes.setComp(comp);
+        if(drawingGraphics == null) { // a new brush stroke has to be initialized
+//            if(!connectClickWithLine) {
+//                brushes.reset();
+//            }
 
             ImageLayer imageLayer = (ImageLayer) comp.getActiveLayer();
             initDrawingGraphics(comp, imageLayer);
@@ -199,7 +198,6 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
             if (connectClickWithLine) {
                 currentSymmetry.onNewMousePoint(brushes, x, y);
             } else {
-                // TODO this is not drag start
                 currentSymmetry.onDragStart(brushes, x, y);
             }
 
