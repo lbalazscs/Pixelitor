@@ -264,6 +264,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
      */
     public void trace(Composition comp, Shape shape) {
         brushes.setComp(comp); // just to be sure
+        Symmetry currentSymmetry = symmetryModel.getSelectedItem();
 
         setupDrawingRadius();
         try {
@@ -292,18 +293,18 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
                         previousMouseX = x;
                         previousMouseY = y;
 
-                        brushes.onDragStart(0, x, y);
+                        currentSymmetry.onDragStart(brushes, x, y);
 
                         break;
                     case PathIterator.SEG_LINETO:
-                        brushes.onNewMousePoint(0, previousMouseX, previousMouseY, x, y);
+                        currentSymmetry.onNewMousePoint(brushes, previousMouseX, previousMouseY, x, y);
 
                         previousMouseX = x;
                         previousMouseY = y;
 
                         break;
                     case PathIterator.SEG_CLOSE:
-                        brushes.onNewMousePoint(0, previousMouseX, previousMouseY, startingX, startingY);
+                        currentSymmetry.onNewMousePoint(brushes, previousMouseX, previousMouseY, startingX, startingY);
                         break;
                     default:
                         throw new IllegalArgumentException("type = " + type);
