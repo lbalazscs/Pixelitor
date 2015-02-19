@@ -123,7 +123,6 @@ public class UniformImageBrush extends DabsBrush {
             g.drawImage(finalScaledImage, (int) x - radius, (int) y - radius, null);
             g.setTransform(oldTransform);
         }
+        updateComp((int) x, (int) y);
     }
-
-
 }

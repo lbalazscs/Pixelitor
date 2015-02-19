@@ -39,6 +39,7 @@ public class ShapeDabsBrush extends DabsBrush {
             Shape shape = shapeProvider.getShape(x - radius, y - radius, diameter, diameter);
             g.fill(shape);
         }
+        updateComp((int) x, (int) y);
     }
 
     @Override
