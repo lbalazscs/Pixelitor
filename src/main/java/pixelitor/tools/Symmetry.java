@@ -28,8 +28,8 @@ public enum Symmetry {
         }
 
         @Override
-        public void onNewMousePoint(Brushes brushes, int startX, int startY, int endX, int endY) {
-            brushes.onNewMousePoint(0, startX, startY, endX, endY);
+        public void onNewMousePoint(Brushes brushes, int x, int y) {
+            brushes.onNewMousePoint(0, x, y);
         }
     }, VERTICAL_MIRROR("Vertical") {
         @Override
@@ -39,9 +39,9 @@ public enum Symmetry {
         }
 
         @Override
-        public void onNewMousePoint(Brushes brushes, int startX, int startY, int endX, int endY) {
-            brushes.onNewMousePoint(0, startX, startY, endX, endY);
-            brushes.onNewMousePoint(1, compositionWidth - startX, startY, compositionWidth - endX, endY);
+        public void onNewMousePoint(Brushes brushes, int x, int y) {
+            brushes.onNewMousePoint(0, x, y);
+            brushes.onNewMousePoint(1, compositionWidth - x, y);
         }
     }, HORIZONTAL_MIRROR("Horizontal") {
         @Override
@@ -51,9 +51,9 @@ public enum Symmetry {
         }
 
         @Override
-        public void onNewMousePoint(Brushes brushes, int startX, int startY, int endX, int endY) {
-            brushes.onNewMousePoint(0, startX, startY, endX, endY);
-            brushes.onNewMousePoint(1, startX, compositionHeight - startY, endX, compositionHeight - endY);
+        public void onNewMousePoint(Brushes brushes, int x, int y) {
+            brushes.onNewMousePoint(0, x, y);
+            brushes.onNewMousePoint(1, x, compositionHeight - y);
         }
     }, TWO_MIRRORS("Two Mirrors") {
         @Override
@@ -65,11 +65,11 @@ public enum Symmetry {
         }
 
         @Override
-        public void onNewMousePoint(Brushes brushes, int startX, int startY, int endX, int endY) {
-            brushes.onNewMousePoint(0, startX, startY, endX, endY);
-            brushes.onNewMousePoint(1, startX, compositionHeight - startY, endX, compositionHeight - endY);
-            brushes.onNewMousePoint(2, compositionWidth - startX, startY, compositionWidth - endX, endY);
-            brushes.onNewMousePoint(3, compositionWidth - startX, compositionHeight - startY, compositionWidth - endX, compositionHeight - endY);
+        public void onNewMousePoint(Brushes brushes, int x, int y) {
+            brushes.onNewMousePoint(0, x, y);
+            brushes.onNewMousePoint(1, x, compositionHeight - y);
+            brushes.onNewMousePoint(2, compositionWidth - x, y);
+            brushes.onNewMousePoint(3, compositionWidth - x, compositionHeight - y);
         }
     }, CENTRAL_SYMMETRY("Central Symmetry") {
         @Override
@@ -79,9 +79,9 @@ public enum Symmetry {
         }
 
         @Override
-        public void onNewMousePoint(Brushes brushes, int startX, int startY, int endX, int endY) {
-            brushes.onNewMousePoint(0, startX, startY, endX, endY);
-            brushes.onNewMousePoint(1, compositionWidth - startX, compositionHeight - startY, compositionWidth - endX, compositionHeight - endY);
+        public void onNewMousePoint(Brushes brushes, int x, int y) {
+            brushes.onNewMousePoint(0, x, y);
+            brushes.onNewMousePoint(1, compositionWidth - x, compositionHeight - y);
         }
     }, CENTRAL_3("Central 3") {
         private static final double cos120 = -0.5;
@@ -119,37 +119,27 @@ public enum Symmetry {
         }
 
         @Override
-        public void onNewMousePoint(Brushes brushes, int startX, int startY, int endX, int endY) {
-            brushes.onNewMousePoint(0, startX, startY, endX, endY);
+        public void onNewMousePoint(Brushes brushes, int x, int y) {
+            brushes.onNewMousePoint(0, x, y);
 
-            double relStartX = startX - compositionCenterX;
-            double relStartY = compositionCenterY - startY;
-            double relEndX = endX - compositionCenterX;
-            double relEndY = compositionCenterY - endY;
+            double relX = x - compositionCenterX;
+            double relY = compositionCenterY - y;
 
-            double rotStartX = relStartX * cos120 - relStartY * sin120;
-            double rotStartY = relStartX * sin120 + relStartY * cos120;
-            double rotEndX = relEndX * cos120 - relEndY * sin120;
-            double rotEndY = relEndX * sin120 + relEndY * cos120;
+            double rotX = relX * cos120 - relY * sin120;
+            double rotY = relX * sin120 + relY * cos120;
 
-            int finalStartX = (int) (compositionCenterX + rotStartX);
-            int finalStartY = (int) (compositionCenterY - rotStartY);
-            int finalEndX = (int) (compositionCenterX + rotEndX);
-            int finalEndY = (int) (compositionCenterY - rotEndY);
+            int finalEndX = (int) (compositionCenterX + rotX);
+            int finalEndY = (int) (compositionCenterY - rotY);
 
-            brushes.onNewMousePoint(1, finalStartX, finalStartY, finalEndX, finalEndY);
+            brushes.onNewMousePoint(1, finalEndX, finalEndY);
 
-            rotStartX = relStartX * cos240 - relStartY * sin240;
-            rotStartY = relStartX * sin240 + relStartY * cos240;
-            rotEndX = relEndX * cos240 - relEndY * sin240;
-            rotEndY = relEndX * sin240 + relEndY * cos240;
+            rotX = relX * cos240 - relY * sin240;
+            rotY = relX * sin240 + relY * cos240;
 
-            finalStartX = (int) (compositionCenterX + rotStartX);
-            finalStartY = (int) (compositionCenterY - rotStartY);
-            finalEndX = (int) (compositionCenterX + rotEndX);
-            finalEndY = (int) (compositionCenterY - rotEndY);
+            finalEndX = (int) (compositionCenterX + rotX);
+            finalEndY = (int) (compositionCenterY - rotY);
 
-            brushes.onNewMousePoint(2, finalStartX, finalStartY, finalEndX, finalEndY);
+            brushes.onNewMousePoint(2, finalEndX, finalEndY);
         }
     };
 
@@ -173,7 +163,7 @@ public enum Symmetry {
 
     public abstract void onDragStart(Brushes brushes, int x, int y);
 
-    public abstract void onNewMousePoint(Brushes brushes, int startX, int startY, int endX, int endY);
+    public abstract void onNewMousePoint(Brushes brushes, int x, int y);
 
     @Override
     public String toString() {

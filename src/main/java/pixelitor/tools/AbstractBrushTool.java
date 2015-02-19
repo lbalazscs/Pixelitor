@@ -58,16 +58,9 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     Graphics2D drawingGraphics;
     private final RangeParam brushRadiusParam = new RangeParam("Radius", MIN_BRUSH_RADIUS, MAX_BRUSH_RADIUS, DEFAULT_BRUSH_RADIUS);
 
-//    private Composition comp;
-
-
     private final EnumComboBoxModel<Symmetry> symmetryModel = new EnumComboBoxModel<>(Symmetry.class);
 
-//    private Brush brush = BrushType.IDEAL.getBrush();
     Brushes brushes = new Brushes(BrushType.values()[0]);
-
-    private int previousMouseX = 0;
-    private int previousMouseY = 0;
 
     private boolean firstMouseDown = true; // for the first click don't draw lines even if it is a shift-click
 
@@ -182,7 +175,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     /**
      * Creates the global Graphics2D object drawingGraphics.
      */
-    abstract void initDrawingGraphics(ImageLayer layer);
+    abstract void initDrawingGraphics(Composition comp, ImageLayer layer);
 
     /**
      * Called from mousePressed, mouseDragged, and drawBrushStroke
@@ -196,26 +189,23 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
             if(!connectClickWithLine) {
                 brushes.reset();
             }
-            brushes.setComp(comp);
+//            brushes.setComp(comp);
 
             ImageLayer imageLayer = (ImageLayer) comp.getActiveLayer();
-            initDrawingGraphics(imageLayer);
+            initDrawingGraphics(comp, imageLayer);
             setupGraphics(drawingGraphics, p);
             drawingGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
             if (connectClickWithLine) {
-                currentSymmetry.onNewMousePoint(brushes, previousMouseX, previousMouseY, x, y);
+                currentSymmetry.onNewMousePoint(brushes, x, y);
             } else {
                 // TODO this is not drag start
                 currentSymmetry.onDragStart(brushes, x, y);
             }
 
         } else {
-            currentSymmetry.onNewMousePoint(brushes, previousMouseX, previousMouseY, x, y);
+            currentSymmetry.onNewMousePoint(brushes, x, y);
         }
-
-        previousMouseX = x;
-        previousMouseY = y;
     }
 
     private void setupDrawingRadius() {
@@ -263,7 +253,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
      * Traces the given shape and paint with the current brush tool
      */
     public void trace(Composition comp, Shape shape) {
-        brushes.setComp(comp); // just to be sure
+//        brushes.setComp(comp); // just to be sure
         Symmetry currentSymmetry = symmetryModel.getSelectedItem();
 
         setupDrawingRadius();
@@ -271,7 +261,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
             respectSelection = false;
 
             ImageLayer imageLayer = (ImageLayer) comp.getActiveLayer();
-            initDrawingGraphics(imageLayer);
+            initDrawingGraphics(comp, imageLayer);
             setupGraphics(drawingGraphics, FgBgColorSelector.getFG());
 
             int startingX = 0;
@@ -290,21 +280,15 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
                         startingX = x;
                         startingY = y;
 
-                        previousMouseX = x;
-                        previousMouseY = y;
-
                         currentSymmetry.onDragStart(brushes, x, y);
 
                         break;
                     case PathIterator.SEG_LINETO:
-                        currentSymmetry.onNewMousePoint(brushes, previousMouseX, previousMouseY, x, y);
-
-                        previousMouseX = x;
-                        previousMouseY = y;
+                        currentSymmetry.onNewMousePoint(brushes, x, y);
 
                         break;
                     case PathIterator.SEG_CLOSE:
-                        currentSymmetry.onNewMousePoint(brushes, previousMouseX, previousMouseY, startingX, startingY);
+                        currentSymmetry.onNewMousePoint(brushes, startingX, startingY);
                         break;
                     default:
                         throw new IllegalArgumentException("type = " + type);

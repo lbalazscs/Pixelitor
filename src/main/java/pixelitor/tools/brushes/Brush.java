@@ -17,6 +17,8 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.Composition;
+
 import java.awt.Graphics2D;
 
 /**
@@ -24,9 +26,9 @@ import java.awt.Graphics2D;
  */
 public interface Brush {
     /**
-     * Sets the Graphics2D object on which this brush will draw
+     * Sets the Composition and the Graphics2D object on which this brush will draw
      */
-    void setTargetGraphics(Graphics2D g);
+    void setTarget(Composition comp, Graphics2D g);
 
     /**
      * Sets the radius of the brush

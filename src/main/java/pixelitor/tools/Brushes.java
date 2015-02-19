@@ -38,7 +38,7 @@ public class Brushes {
 
     private final Brush[] brushes = new Brush[MAX_BRUSHES];
     private int radius = AbstractBrushTool.DEFAULT_BRUSH_RADIUS;
-    private Composition comp;
+//    private Composition comp;
 
     public Brushes(BrushType brushType) {
         brushTypeChanged(brushType);
@@ -61,10 +61,10 @@ public class Brushes {
 
         brushes[brushNo].onDragStart(x, y);
 
-        comp.updateRegion(x - radius, y - radius, x + radius + 1, y + radius + 1, 0);
+//        comp.updateRegion(x - radius, y - radius, x + radius + 1, y + radius + 1, 0);
     }
 
-    public void onNewMousePoint(int brushNo, int startX, int startY, int endX, int endY) {
+    public void onNewMousePoint(int brushNo, int endX, int endY) {
         updateAffectedCoordinates(endX, endY);
 
         if (radius <= 0) {
@@ -72,7 +72,7 @@ public class Brushes {
         }
 
         brushes[brushNo].onNewMousePoint(endX, endY);
-        comp.updateRegion(startX, startY, endX, endY, 2 * radius);
+//        comp.updateRegion(startX, startY, endX, endY, 2 * radius);
     }
 
     public void updateAffectedCoordinates(int x, int y) {
@@ -110,9 +110,9 @@ public class Brushes {
     }
 
 
-    public void setDrawingGraphics(Graphics2D g) {
+    public void setTarget(Composition comp, Graphics2D g) {
         for(int i = 0; i < MAX_BRUSHES; i++) {
-            brushes[i].setTargetGraphics(g);
+            brushes[i].setTarget(comp, g);
         }
     }
 
@@ -121,9 +121,5 @@ public class Brushes {
         for(int i = 0; i < MAX_BRUSHES; i++) {
             brushes[i].setRadius(radius);
         }
-    }
-
-    public void setComp(Composition comp) {
-        this.comp = comp;
     }
 }

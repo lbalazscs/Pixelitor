@@ -24,7 +24,7 @@ public abstract class DabsBrush extends AbstractBrush {
     protected final boolean angleAware;
     private final DabsStrategy strategy;
 
-    public DabsBrush(double spacingRatio, boolean angleAware) {
+    protected DabsBrush(double spacingRatio, boolean angleAware) {
         this.angleAware = angleAware;
         this.strategy = new LinearDabsStrategy(this, spacingRatio, angleAware);
     }
@@ -45,11 +45,13 @@ public abstract class DabsBrush extends AbstractBrush {
     @Override
     public void onDragStart(int x, int y) {
         strategy.onDragStart(x, y);
+        updateComp(x, y);
     }
 
     @Override
     public void onNewMousePoint(int x, int y) {
         strategy.onNewMousePoint(x, y);
+        updateComp(x, y);
     }
 
     @Override

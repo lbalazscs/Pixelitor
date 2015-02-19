@@ -298,8 +298,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
      */
     @Override
     public void updateRegion(int startX, int startY, int endX, int endY, int thickness) {
-        double diff = viewScale - 1.0f;
-        if (diff > 0.0001f || diff < -0.0001f) { // not the 100% view - avoids testing for floating point equality
+        if(zoomLevel != ZoomLevel.Z100) { // not the 100% view
             startX = (int) (drawStartX + viewScale * startX);
             startY = (int) (drawStartY + viewScale * startY);
             endX = (int) (drawStartX + viewScale * endX);

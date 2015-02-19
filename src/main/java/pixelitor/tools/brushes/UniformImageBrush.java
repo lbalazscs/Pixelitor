@@ -32,7 +32,7 @@ import java.util.Map;
  * A "uniform dabs" brush that is based on images.
  */
 public class UniformImageBrush extends DabsBrush {
-    static Map<ImageBrushType, BufferedImage> templateImages = new EnumMap<>(ImageBrushType.class);
+    private static Map<ImageBrushType, BufferedImage> templateImages = new EnumMap<>(ImageBrushType.class);
     private BufferedImage templateImage;
     private BufferedImage coloredBrushImage;
     private BufferedImage finalScaledImage;

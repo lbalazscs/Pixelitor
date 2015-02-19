@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools;
 
 import pixelitor.Composition;
@@ -48,9 +49,9 @@ public class BrushTool extends AbstractBrushTool {
     }
 
     @Override
-    protected void initDrawingGraphics(ImageLayer layer) {
+    protected void initDrawingGraphics(Composition comp, ImageLayer layer) {
         drawingGraphics = layer.createTmpDrawingLayer(blendingModePanel.getComposite(), respectSelection).getGraphics();
-        brushes.setDrawingGraphics(drawingGraphics);
+        brushes.setTarget(comp, drawingGraphics);
     }
 
     @Override

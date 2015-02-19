@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools.brushes;
 
 import pixelitor.tools.StrokeType;
@@ -31,7 +32,8 @@ public class CalligraphyBrush extends StrokeBrush {
         super(StrokeType.CALLIGRAPHY);
     }
 
-    public void drawShape(int x, int y) {
+    @Override
+    protected void drawShape(int x, int y) {
         // TODO these calculations could be simpler
 
         float projectedShift = diameter / 1.4142f;
@@ -53,6 +55,7 @@ public class CalligraphyBrush extends StrokeBrush {
         }
     }
 
+    @Override
     public void drawLine(int startX, int startY, int endX, int endY) {
         super.drawLine(startX, startY, endX, endY);
 

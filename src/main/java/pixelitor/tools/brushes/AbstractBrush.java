@@ -17,12 +17,15 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.Composition;
 import pixelitor.tools.AbstractBrushTool;
 
 import java.awt.Graphics2D;
 
 public abstract class AbstractBrush implements Brush {
     protected Graphics2D g;
+    private Composition comp;
+
     protected int radius = AbstractBrushTool.DEFAULT_BRUSH_RADIUS;
     protected int diameter;
     protected int previousX;
@@ -35,12 +38,19 @@ public abstract class AbstractBrush implements Brush {
     }
 
     @Override
-    public void setTargetGraphics(Graphics2D g) {
+    public void setTarget(Composition comp, Graphics2D g) {
+        this.comp = comp;
         this.g = g;
     }
 
-    protected void setPreviousCoordinates(int previousX, int previousY) {
-        this.previousX = previousX;
-        this.previousY = previousY;
+    // call before setPrevious
+    protected void updateComp(int x, int y) {
+        comp.updateRegion(previousX, previousY, x, y, diameter);
+    }
+
+    // call after updateComp
+    protected void setPrevious(int x, int y) {
+        this.previousX = x;
+        this.previousY = y;
     }
 }

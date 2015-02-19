@@ -49,14 +49,14 @@ public class EraseTool extends AbstractBrushTool {
     }
 
     @Override
-    void initDrawingGraphics(ImageLayer layer) {
+    void initDrawingGraphics(Composition comp, ImageLayer layer) {
         // uses the graphics of the buffered image contained in the layer
         BufferedImage drawImage = layer.createCompositionSizedSubImage();
         drawingGraphics = drawImage.createGraphics();
         if (respectSelection) {
-            layer.getComposition().setSelectionClipping(drawingGraphics, null);
+            comp.setSelectionClipping(drawingGraphics, null);
         }
-        brushes.setDrawingGraphics(drawingGraphics);
+        brushes.setTarget(comp, drawingGraphics);
     }
 
     @Override

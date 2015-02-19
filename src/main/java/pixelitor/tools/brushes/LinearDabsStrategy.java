@@ -18,16 +18,16 @@
 package pixelitor.tools.brushes;
 
 public class LinearDabsStrategy implements DabsStrategy {
-    private DabsBrush brush;
+    private final DabsBrush brush;
     private double distanceFromLastDab = 0;
     private double spacingRatio = 2.0; // the spacing relative to the radius
-    protected boolean angleAware;
+    private boolean angleAware;
 
     private double prevX = 0;
     private double prevY = 0;
 
     private int radius;
-    private int diameter;
+//    private int diameter;
 
     public LinearDabsStrategy(DabsBrush brush, double spacingRatio, boolean angleAware) {
         this.brush = brush;
@@ -38,7 +38,7 @@ public class LinearDabsStrategy implements DabsStrategy {
     @Override
     public void setRadius(int radius) {
         this.radius = radius;
-        this.diameter = 2 * radius;
+//        this.diameter = 2 * radius;
     }
 
     @Override
