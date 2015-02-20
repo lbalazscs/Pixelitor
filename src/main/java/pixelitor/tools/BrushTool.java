@@ -56,7 +56,7 @@ public class BrushTool extends AbstractBrushTool {
     @Override
     protected void initDrawingGraphics(Composition comp, ImageLayer layer) {
         drawingGraphics = layer.createTmpDrawingLayer(blendingModePanel.getComposite(), respectSelection).getGraphics();
-        brushes.setTarget(comp, drawingGraphics);
+        brush.setTarget(comp, drawingGraphics);
     }
 
     @Override

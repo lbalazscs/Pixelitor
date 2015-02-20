@@ -38,7 +38,7 @@ public class CloneTool extends BrushTool {
     }
 
     private State state = STARTED;
-    private CloneBrush cloneBrush;
+//    private CloneBrush cloneBrush;
 
     protected CloneTool() {
         super('k', "Clone", "clone_tool_icon.png",
@@ -54,15 +54,16 @@ public class CloneTool extends BrushTool {
     }
 
     @Override
-    protected void initBrushes() {
-        cloneBrush = new CloneBrush(ImageBrushType.SOFT);
-        brushes = new Brushes(() -> cloneBrush, Symmetry.NONE);
+    protected void initBrush() {
+        brush = new CloneBrush(ImageBrushType.SOFT);
     }
 
     @Override
     public void toolMousePressed(MouseEvent e, ImageDisplay ic) {
         int x = userDrag.getStartX();
         int y = userDrag.getStartY();
+
+        CloneBrush cloneBrush = (CloneBrush) brush;
 
         if(e.isAltDown()) {
             state = SOURCE_DEFINED;

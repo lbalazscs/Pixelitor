@@ -56,7 +56,7 @@ public class EraseTool extends AbstractBrushTool {
         if (respectSelection) {
             comp.setSelectionClipping(drawingGraphics, null);
         }
-        brushes.setTarget(comp, drawingGraphics);
+        brush.setTarget(comp, drawingGraphics);
     }
 
     @Override

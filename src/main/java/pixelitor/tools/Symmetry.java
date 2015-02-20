@@ -17,71 +17,73 @@
 
 package pixelitor.tools;
 
+import pixelitor.tools.brushes.SymmetryBrush;
+
 /**
  * The "Mirror" option for brushes
  */
 public enum Symmetry {
     NONE("None", 1) {
         @Override
-        public void onDragStart(Brushes brushes, int x, int y) {
-            brushes.onDragStart(0, x, y);
+        public void onDragStart(SymmetryBrush symmetryBrush, int x, int y) {
+            symmetryBrush.onDragStart(0, x, y);
         }
 
         @Override
-        public void onNewMousePoint(Brushes brushes, int x, int y) {
-            brushes.onNewMousePoint(0, x, y);
+        public void onNewMousePoint(SymmetryBrush symmetryBrush, int x, int y) {
+            symmetryBrush.onNewMousePoint(0, x, y);
         }
     }, VERTICAL_MIRROR("Vertical", 2) {
         @Override
-        public void onDragStart(Brushes brushes, int x, int y) {
-            brushes.onDragStart(0, x, y);
-            brushes.onDragStart(1, compositionWidth - x, y);
+        public void onDragStart(SymmetryBrush symmetryBrush, int x, int y) {
+            symmetryBrush.onDragStart(0, x, y);
+            symmetryBrush.onDragStart(1, compositionWidth - x, y);
         }
 
         @Override
-        public void onNewMousePoint(Brushes brushes, int x, int y) {
-            brushes.onNewMousePoint(0, x, y);
-            brushes.onNewMousePoint(1, compositionWidth - x, y);
+        public void onNewMousePoint(SymmetryBrush symmetryBrush, int x, int y) {
+            symmetryBrush.onNewMousePoint(0, x, y);
+            symmetryBrush.onNewMousePoint(1, compositionWidth - x, y);
         }
     }, HORIZONTAL_MIRROR("Horizontal", 2) {
         @Override
-        public void onDragStart(Brushes brushes, int x, int y) {
-            brushes.onDragStart(0, x, y);
-            brushes.onDragStart(1, x, compositionHeight - y);
+        public void onDragStart(SymmetryBrush symmetryBrush, int x, int y) {
+            symmetryBrush.onDragStart(0, x, y);
+            symmetryBrush.onDragStart(1, x, compositionHeight - y);
         }
 
         @Override
-        public void onNewMousePoint(Brushes brushes, int x, int y) {
-            brushes.onNewMousePoint(0, x, y);
-            brushes.onNewMousePoint(1, x, compositionHeight - y);
+        public void onNewMousePoint(SymmetryBrush symmetryBrush, int x, int y) {
+            symmetryBrush.onNewMousePoint(0, x, y);
+            symmetryBrush.onNewMousePoint(1, x, compositionHeight - y);
         }
     }, TWO_MIRRORS("Two Mirrors", 4) {
         @Override
-        public void onDragStart(Brushes brushes, int x, int y) {
-            brushes.onDragStart(0, x, y);
-            brushes.onDragStart(1, compositionWidth - x, y);
-            brushes.onDragStart(2, x, compositionHeight - y);
-            brushes.onDragStart(3, compositionWidth - x, compositionHeight - y);
+        public void onDragStart(SymmetryBrush symmetryBrush, int x, int y) {
+            symmetryBrush.onDragStart(0, x, y);
+            symmetryBrush.onDragStart(1, compositionWidth - x, y);
+            symmetryBrush.onDragStart(2, x, compositionHeight - y);
+            symmetryBrush.onDragStart(3, compositionWidth - x, compositionHeight - y);
         }
 
         @Override
-        public void onNewMousePoint(Brushes brushes, int x, int y) {
-            brushes.onNewMousePoint(0, x, y);
-            brushes.onNewMousePoint(1, x, compositionHeight - y);
-            brushes.onNewMousePoint(2, compositionWidth - x, y);
-            brushes.onNewMousePoint(3, compositionWidth - x, compositionHeight - y);
+        public void onNewMousePoint(SymmetryBrush symmetryBrush, int x, int y) {
+            symmetryBrush.onNewMousePoint(0, x, y);
+            symmetryBrush.onNewMousePoint(1, x, compositionHeight - y);
+            symmetryBrush.onNewMousePoint(2, compositionWidth - x, y);
+            symmetryBrush.onNewMousePoint(3, compositionWidth - x, compositionHeight - y);
         }
     }, CENTRAL_SYMMETRY("Central Symmetry", 2) {
         @Override
-        public void onDragStart(Brushes brushes, int x, int y) {
-            brushes.onDragStart(0, x, y);
-            brushes.onDragStart(1, compositionWidth - x, compositionHeight - y);
+        public void onDragStart(SymmetryBrush symmetryBrush, int x, int y) {
+            symmetryBrush.onDragStart(0, x, y);
+            symmetryBrush.onDragStart(1, compositionWidth - x, compositionHeight - y);
         }
 
         @Override
-        public void onNewMousePoint(Brushes brushes, int x, int y) {
-            brushes.onNewMousePoint(0, x, y);
-            brushes.onNewMousePoint(1, compositionWidth - x, compositionHeight - y);
+        public void onNewMousePoint(SymmetryBrush symmetryBrush, int x, int y) {
+            symmetryBrush.onNewMousePoint(0, x, y);
+            symmetryBrush.onNewMousePoint(1, compositionWidth - x, compositionHeight - y);
         }
     }, CENTRAL_3("Central 3", 3) {
         private static final double cos120 = -0.5;
@@ -90,8 +92,8 @@ public enum Symmetry {
         private static final double sin240 = -sin120;
 
         @Override
-        public void onDragStart(Brushes brushes, int x, int y) {
-            brushes.onDragStart(0, x, y);
+        public void onDragStart(SymmetryBrush symmetryBrush, int x, int y) {
+            symmetryBrush.onDragStart(0, x, y);
 
             // coordinates relative to the center
             double relX = x - compositionCenterX;
@@ -105,7 +107,7 @@ public enum Symmetry {
             int finalX = (int) (compositionCenterX + rotX);
             int finalY = (int) (compositionCenterY - rotY);
 
-            brushes.onDragStart(1, finalX, finalY);
+            symmetryBrush.onDragStart(1, finalX, finalY);
 
             // coordinates rotated with 240 degrees
             rotX = relX * cos240 - relY * sin240;
@@ -115,12 +117,12 @@ public enum Symmetry {
             finalX = (int) (compositionCenterX + rotX);
             finalY = (int) (compositionCenterY - rotY);
 
-            brushes.onDragStart(2, finalX, finalY);
+            symmetryBrush.onDragStart(2, finalX, finalY);
         }
 
         @Override
-        public void onNewMousePoint(Brushes brushes, int x, int y) {
-            brushes.onNewMousePoint(0, x, y);
+        public void onNewMousePoint(SymmetryBrush symmetryBrush, int x, int y) {
+            symmetryBrush.onNewMousePoint(0, x, y);
 
             double relX = x - compositionCenterX;
             double relY = compositionCenterY - y;
@@ -131,7 +133,7 @@ public enum Symmetry {
             int finalEndX = (int) (compositionCenterX + rotX);
             int finalEndY = (int) (compositionCenterY - rotY);
 
-            brushes.onNewMousePoint(1, finalEndX, finalEndY);
+            symmetryBrush.onNewMousePoint(1, finalEndX, finalEndY);
 
             rotX = relX * cos240 - relY * sin240;
             rotY = relX * sin240 + relY * cos240;
@@ -139,7 +141,7 @@ public enum Symmetry {
             finalEndX = (int) (compositionCenterX + rotX);
             finalEndY = (int) (compositionCenterY - rotY);
 
-            brushes.onNewMousePoint(2, finalEndX, finalEndY);
+            symmetryBrush.onNewMousePoint(2, finalEndX, finalEndY);
         }
     };
 
@@ -163,9 +165,9 @@ public enum Symmetry {
         this.numBrushes = numBrushes;
     }
 
-    public abstract void onDragStart(Brushes brushes, int x, int y);
+    public abstract void onDragStart(SymmetryBrush symmetryBrush, int x, int y);
 
-    public abstract void onNewMousePoint(Brushes brushes, int x, int y);
+    public abstract void onNewMousePoint(SymmetryBrush symmetryBrush, int x, int y);
 
     public int getNumBrushes() {
         return numBrushes;

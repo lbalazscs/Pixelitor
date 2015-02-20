@@ -24,6 +24,9 @@ import pixelitor.ImageComponents;
 import pixelitor.ImageDisplay;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.layers.ImageLayer;
+import pixelitor.tools.brushes.Brush;
+import pixelitor.tools.brushes.BrushAffectedArea;
+import pixelitor.tools.brushes.SymmetryBrush;
 import pixelitor.utils.ImageSwitchListener;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.SliderSpinner;
@@ -60,7 +63,9 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
 
     private final EnumComboBoxModel<Symmetry> symmetryModel = new EnumComboBoxModel<>(Symmetry.class);
 
-    Brushes brushes;
+    //    Brushes brushes;
+    protected Brush brush;
+    private BrushAffectedArea brushAffectedArea = new BrushAffectedArea();
 
     private boolean firstMouseDown = true; // for the first click don't draw lines even if it is a shift-click
 
@@ -68,11 +73,12 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         super(activationKeyChar, name, iconFileName, toolMessage,
                 Cursor.getDefaultCursor(), true, true, false, ClipStrategy.IMAGE_ONLY);
         ImageComponents.addImageSwitchListener(this);
-        initBrushes();
+        initBrush();
     }
 
-    protected void initBrushes() {
-        brushes = new Brushes(BrushType.values()[0], getCurrentSymmetry());
+    protected void initBrush() {
+//        brushes = new Brushes(BrushType.values()[0], getCurrentSymmetry());
+        brush = new SymmetryBrush(BrushType.values()[0], getCurrentSymmetry(), brushAffectedArea);
     }
 
     Symmetry getCurrentSymmetry() {
@@ -86,7 +92,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         toolSettingsPanel.add(typeSelector);
         typeSelector.addActionListener(e -> {
             BrushType brushType = (BrushType) typeSelector.getSelectedItem();
-            brushes.brushTypeChanged(brushType);
+            ((SymmetryBrush) brush).brushTypeChanged(brushType);
         });
 
         // make sure all values are visible without a scrollbar
@@ -98,7 +104,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
 
         @SuppressWarnings("unchecked")
         JComboBox<Symmetry> symmetryCombo = new JComboBox<>(symmetryModel);
-        symmetryCombo.addActionListener(e -> brushes.symmetryChanged(getCurrentSymmetry()));
+        symmetryCombo.addActionListener(e -> ((SymmetryBrush) brush).symmetryChanged(getCurrentSymmetry()));
 
         toolSettingsPanel.add(symmetryCombo);
     }
@@ -136,9 +142,9 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         firstMouseDown = false;
 
         if (withLine) {
-            brushes.updateAffectedCoordinates(x, y);
+            brushAffectedArea.updateAffectedCoordinates(x, y);
         } else {
-            brushes.initAffectedCoordinates(x, y);
+            brushAffectedArea.initAffectedCoordinates(x, y);
         }
     }
 
@@ -163,7 +169,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     abstract void mergeTmpLayer(Composition comp);
 
     private void finishBrushStroke(Composition comp) {
-        ToolAffectedArea affectedArea = new ToolAffectedArea(comp, brushes.getRectangleAffectedByBrush(), false);
+        ToolAffectedArea affectedArea = new ToolAffectedArea(comp, brushAffectedArea.getRectangleAffectedByBrush(brushRadiusParam.getValue()), false);
         saveSubImageForUndo(getFullUntouchedImage(comp), affectedArea);
         mergeTmpLayer(comp);
         if(drawingGraphics != null) {
@@ -210,13 +216,13 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
             drawingGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
             if (connectClickWithLine) {
-                currentSymmetry.onNewMousePoint(brushes, x, y);
+                brush.onNewMousePoint(x, y);
             } else {
-                currentSymmetry.onDragStart(brushes, x, y);
+                brush.onDragStart(x, y);
             }
 
         } else {
-            currentSymmetry.onNewMousePoint(brushes, x, y);
+            brush.onNewMousePoint(x, y);
         }
     }
 
@@ -229,7 +235,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
             brushRadiusParam.setValue(MIN_BRUSH_RADIUS);
         }
 
-        brushes.setRadius(value);
+        brush.setRadius(value);
     }
 
     protected abstract void setupGraphics(Graphics2D g, Paint p);
@@ -285,22 +291,22 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
                 int type = fpi.currentSegment(coords);
                 int x = (int) coords[0];
                 int y = (int) coords[1];
-                brushes.updateAffectedCoordinates(x, y);
+                brushAffectedArea.updateAffectedCoordinates(x, y);
 
                 switch(type) {
                     case PathIterator.SEG_MOVETO:
                         startingX = x;
                         startingY = y;
 
-                        currentSymmetry.onDragStart(brushes, x, y);
+                        brush.onDragStart(x, y);
 
                         break;
                     case PathIterator.SEG_LINETO:
-                        currentSymmetry.onNewMousePoint(brushes, x, y);
+                        brush.onNewMousePoint(x, y);
 
                         break;
                     case PathIterator.SEG_CLOSE:
-                        currentSymmetry.onNewMousePoint(brushes, startingX, startingY);
+                        brush.onNewMousePoint(startingX, startingY);
                         break;
                     default:
                         throw new IllegalArgumentException("type = " + type);

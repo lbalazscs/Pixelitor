@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools;
 
 import pixelitor.tools.brushes.Brush;
@@ -22,6 +23,7 @@ import pixelitor.tools.brushes.CalligraphyBrush;
 import pixelitor.tools.brushes.IdealBrush;
 import pixelitor.tools.brushes.ImageBrushType;
 import pixelitor.tools.brushes.ImageDabsBrush;
+import pixelitor.tools.brushes.OnePixelBrush;
 import pixelitor.tools.brushes.OutlineCircleBrush;
 import pixelitor.tools.brushes.OutlineSquareBrush;
 import pixelitor.tools.brushes.ShapeDabsBrush;
@@ -32,7 +34,7 @@ import java.util.function.Supplier;
 /**
  * The brush types the user can use
  */
-enum BrushType implements Supplier<Brush> {
+public enum BrushType implements Supplier<Brush> {
     IDEAL("Hard") {
         @Override
         public Brush get() {
@@ -87,6 +89,11 @@ enum BrushType implements Supplier<Brush> {
         @Override
         public Brush get() {
             return new OutlineSquareBrush();
+        }
+    }, ONE_PIXEL("1 Pixel") {
+        @Override
+        public Brush get() {
+            return new OnePixelBrush();
         }
     };
 
