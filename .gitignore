@@ -3,7 +3,6 @@
 hs_err_pid*
 *.txt
 *.bat
-*.xml
 build.num
 *.nsh
 *.nsi

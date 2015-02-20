@@ -1,0 +1,65 @@
+<!--
+  ~ Copyright 2015 Laszlo Balazs-Csiki
+  ~
+  ~ This file is part of Pixelitor. Pixelitor is free software: you
+  ~ can redistribute it and/or modify it under the terms of the GNU
+  ~ General Public License, version 3 as published by the Free
+  ~ Software Foundation.
+  ~
+  ~ Pixelitor is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>pixelitor</groupId>
+    <artifactId>Pixelitor</artifactId>
+    <packaging>jar</packaging>
+    <version>3.0.0</version>
+    <name>pixelitor</name>
+    <url>http://pixelitor.sourceforge.net</url>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>pixelitor.Pixelitor</mainClass>
+                        </manifest>
+                        <manifestEntries>
+                            <SplashScreen-Image>images/splash.png</SplashScreen-Image>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
