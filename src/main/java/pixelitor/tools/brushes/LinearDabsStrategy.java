@@ -21,7 +21,8 @@ public class LinearDabsStrategy implements DabsStrategy {
     private final DabsBrush brush;
     private double distanceFromLastDab = 0;
     private double spacingRatio = 2.0; // the spacing relative to the radius
-    private boolean angleAware;
+    private final boolean angleAware;
+    private final boolean refreshBrushForEachDab;
 
     private double prevX = 0;
     private double prevY = 0;
@@ -29,10 +30,11 @@ public class LinearDabsStrategy implements DabsStrategy {
     private int radius;
 //    private int diameter;
 
-    public LinearDabsStrategy(DabsBrush brush, double spacingRatio, boolean angleAware) {
+    public LinearDabsStrategy(DabsBrush brush, double spacingRatio, boolean angleAware, boolean refreshBrushForEachDab) {
         this.brush = brush;
         this.spacingRatio = spacingRatio;
         this.angleAware = angleAware;
+        this.refreshBrushForEachDab = refreshBrushForEachDab;
     }
 
     @Override
@@ -43,6 +45,7 @@ public class LinearDabsStrategy implements DabsStrategy {
 
     @Override
     public void onDragStart(int x, int y) {
+        brush.setupBrushStamp(x, y);
         distanceFromLastDab = 0; // moved from reset()
 
         prevX = x;
@@ -59,7 +62,6 @@ public class LinearDabsStrategy implements DabsStrategy {
 
     @Override
     public void onNewMousePoint(int endX, int endY) {
-        brush.setupBrushStamp();
         double dx = endX - prevX;
         double dy = endY - prevY;
         double lineDistance = Math.sqrt(dx * dx + dy * dy);
@@ -79,6 +81,10 @@ public class LinearDabsStrategy implements DabsStrategy {
         for(double t = initialRelativeSpacingDistance; t < 1.0; t += relativeSpacingDistance) {
             x = prevX + t * dx;
             y = prevY + t * dy;
+
+            if(refreshBrushForEachDab) {
+                brush.setupBrushStamp(x, y);
+            }
 
             brush.putDab(x, y, theta);
             drew = true;

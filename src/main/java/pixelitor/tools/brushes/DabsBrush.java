@@ -24,18 +24,22 @@ public abstract class DabsBrush extends AbstractBrush {
     protected final boolean angleAware;
     private final DabsStrategy strategy;
 
-    protected DabsBrush(double spacingRatio, boolean angleAware) {
+    protected DabsBrush(double spacingRatio, boolean angleAware, boolean refreshBrushForEachDab) {
         this.angleAware = angleAware;
-        this.strategy = new LinearDabsStrategy(this, spacingRatio, angleAware);
+        this.strategy = new LinearDabsStrategy(this, spacingRatio, angleAware, refreshBrushForEachDab);
     }
 
     public abstract void putDab(double x, double y, double theta);
 
     /**
+     * TODO in new version before each stroke
+     *
      * Called once before each line. An opportunity to setup things (color, image, angle)
      * that will not change during the line, in order to improve performance
+     * @param x
+     * @param y
      */
-    abstract void setupBrushStamp();
+    abstract void setupBrushStamp(double x, double y);
 
     @Override
     public void onDragStart(int x, int y) {

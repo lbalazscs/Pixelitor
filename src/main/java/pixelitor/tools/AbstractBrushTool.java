@@ -60,7 +60,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
 
     private final EnumComboBoxModel<Symmetry> symmetryModel = new EnumComboBoxModel<>(Symmetry.class);
 
-    Brushes brushes = new Brushes(BrushType.values()[0]);
+    Brushes brushes;
 
     private boolean firstMouseDown = true; // for the first click don't draw lines even if it is a shift-click
 
@@ -68,6 +68,15 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         super(activationKeyChar, name, iconFileName, toolMessage,
                 Cursor.getDefaultCursor(), true, true, false, ClipStrategy.IMAGE_ONLY);
         ImageComponents.addImageSwitchListener(this);
+        initBrushes();
+    }
+
+    protected void initBrushes() {
+        brushes = new Brushes(BrushType.values()[0], getCurrentSymmetry());
+    }
+
+    Symmetry getCurrentSymmetry() {
+        return symmetryModel.getSelectedItem();
     }
 
     @Override
@@ -83,15 +92,20 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         // make sure all values are visible without a scrollbar
         typeSelector.setMaximumRowCount(BrushType.values().length);
 
-        SliderSpinner brushSizeSpinner = new SliderSpinner(brushRadiusParam, SliderSpinner.TextPosition.WEST, false);
-        toolSettingsPanel.add(brushSizeSpinner);
+        addSizeSelector();
 
         toolSettingsPanel.add(new JLabel("Mirror:"));
 
         @SuppressWarnings("unchecked")
         JComboBox<Symmetry> symmetryCombo = new JComboBox<>(symmetryModel);
+        symmetryCombo.addActionListener(e -> brushes.symmetryChanged(getCurrentSymmetry()));
 
         toolSettingsPanel.add(symmetryCombo);
+    }
+
+    protected void addSizeSelector() {
+        SliderSpinner brushSizeSelector = new SliderSpinner(brushRadiusParam, SliderSpinner.TextPosition.WEST, false);
+        toolSettingsPanel.add(brushSizeSelector);
     }
 
     @Override
@@ -183,7 +197,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     private void drawTo(Composition comp, Paint p, int x, int y, boolean connectClickWithLine) {
         // TODO these two variables could be initialized outside this function
         setupDrawingRadius();
-        Symmetry currentSymmetry = symmetryModel.getSelectedItem();
+        Symmetry currentSymmetry = getCurrentSymmetry();
 
         if(drawingGraphics == null) { // a new brush stroke has to be initialized
 //            if(!connectClickWithLine) {
@@ -306,5 +320,10 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
 
     public void decreaseBrushSize() {
         brushRadiusParam.decreaseValue();
+    }
+
+    @Override
+    protected boolean doColorPickerForwarding() {
+        return true;
     }
 }

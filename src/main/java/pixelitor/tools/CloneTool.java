@@ -18,9 +18,11 @@
 package pixelitor.tools;
 
 import pixelitor.ImageDisplay;
+import pixelitor.tools.brushes.CloneBrush;
+import pixelitor.tools.brushes.ImageBrushType;
+import pixelitor.utils.BlendingModePanel;
 import pixelitor.utils.Dialogs;
 
-import java.awt.Cursor;
 import java.awt.event.MouseEvent;
 
 import static pixelitor.tools.CloneTool.State.SOURCE_DEFINED;
@@ -29,45 +31,71 @@ import static pixelitor.tools.CloneTool.State.STARTED;
 /**
  * The Clone Stamp tool
  */
-public class CloneTool extends Tool {
+public class CloneTool extends BrushTool {
     enum State {
         STARTED,
         SOURCE_DEFINED
     }
 
     private State state = STARTED;
+    private CloneBrush cloneBrush;
 
     protected CloneTool() {
         super('k', "Clone", "clone_tool_icon.png",
-                "Alt-click to select source, then paint with the copied pixels",
-                Cursor.getDefaultCursor(), true, true, false, ClipStrategy.IMAGE_ONLY);
+                "Alt-click to select source, then paint with the copied pixels");
     }
 
     @Override
     public void initSettingsPanel() {
+        addSizeSelector();
 
+        blendingModePanel = new BlendingModePanel(true);
+        toolSettingsPanel.add(blendingModePanel);
+    }
+
+    @Override
+    protected void initBrushes() {
+        cloneBrush = new CloneBrush(ImageBrushType.SOFT);
+        brushes = new Brushes(() -> cloneBrush, Symmetry.NONE);
     }
 
     @Override
     public void toolMousePressed(MouseEvent e, ImageDisplay ic) {
+        int x = userDrag.getStartX();
+        int y = userDrag.getStartY();
+
         if(e.isAltDown()) {
-            System.out.println("CloneTool::toolMousePressed: ALT DOWN");
             state = SOURCE_DEFINED;
+            cloneBrush.setSource(ic.getComp().getActiveImageLayer().getImage(), x, y);
         } else {
-            System.out.println("CloneTool::toolMousePressed: NORMAL PRESS");
             if(state != SOURCE_DEFINED) {
                 Dialogs.showErrorDialog("No source", "Define a source point first with Alt-Click");
             }
+            cloneBrush.setDestination(x, y);
+
+            // TODO refactor the reusable parts
+            // super.toolMousePressed(e, ic);
         }
     }
 
-    @Override
-    public void toolMouseDragged(MouseEvent e, ImageDisplay ic) {
+//    @Override
+//    public void toolMouseDragged(MouseEvent e, ImageDisplay ic) {
+//
+//    }
+//
+//    @Override
+//    public void toolMouseReleased(MouseEvent e, ImageDisplay ic) {
+//
+//    }
 
+    @Override
+    protected boolean doColorPickerForwarding() {
+        return false; // this tool uses Alt-click for source selection
     }
 
     @Override
-    public void toolMouseReleased(MouseEvent e, ImageDisplay ic) {
-
+    Symmetry getCurrentSymmetry() {
+        return Symmetry.NONE;
     }
+
 }

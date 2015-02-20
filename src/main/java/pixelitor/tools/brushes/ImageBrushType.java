@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools.brushes;
 
 import pixelitor.utils.ImageUtils;
@@ -58,6 +59,9 @@ public enum ImageBrushType {
 
     };
 
+    // TODO why create, why not cache
+
+    // TODO always AbstractBrushTool.MAX_BRUSH_RADIUS is passed
     /**
      * Creates a brush template that is not colorized yet. Areas that should be transparent in the final
      * brush image are white, and semi-transparent images are gray

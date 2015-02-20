@@ -66,8 +66,8 @@ public abstract class StrokeBrush extends AbstractBrush {
             lastDiameter = thickness;
         }
 
-        g.setStroke(lastStroke);
+        targetG.setStroke(lastStroke);
 
-        g.drawLine(startX, startY, endX, endY);
+        targetG.drawLine(startX, startY, endX, endY);
     }
 }

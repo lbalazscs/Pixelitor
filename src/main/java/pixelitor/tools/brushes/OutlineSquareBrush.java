@@ -34,9 +34,9 @@ public class OutlineSquareBrush extends StrokeBrush {
     @Override
     public void drawShape(int x, int y) {
         Rectangle2D.Float rectangle = new Rectangle2D.Float(x - radius, y - radius, diameter, diameter);
-        Stroke saveStroke = g.getStroke();
-        g.setStroke(StrokeType.OUTLINE.getInnerStroke());
-        g.draw(rectangle);
-        g.setStroke(saveStroke);
+        Stroke saveStroke = targetG.getStroke();
+        targetG.setStroke(StrokeType.OUTLINE.getInnerStroke());
+        targetG.draw(rectangle);
+        targetG.setStroke(saveStroke);
     }
 }

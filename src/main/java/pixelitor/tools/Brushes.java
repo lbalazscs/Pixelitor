@@ -22,6 +22,7 @@ import pixelitor.tools.brushes.Brush;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.util.function.Supplier;
 
 /**
  * This class maintains up to four brushes (due to the symmetry drawings)
@@ -38,15 +39,33 @@ public class Brushes {
 
     private final Brush[] brushes = new Brush[MAX_BRUSHES];
     private int radius = AbstractBrushTool.DEFAULT_BRUSH_RADIUS;
-//    private Composition comp;
+    //    private Composition comp;
+    private int numInstantiatedBrushes;
+    private Supplier<Brush> brushSupplier;
 
-    public Brushes(BrushType brushType) {
-        brushTypeChanged(brushType);
+    Brushes(Supplier<Brush> brushSupplier, Symmetry symmetry) {
+        this.brushSupplier = brushSupplier;
+        numInstantiatedBrushes = symmetry.getNumBrushes();
+        assert numInstantiatedBrushes <= MAX_BRUSHES;
+        brushTypeChanged(brushSupplier);
     }
 
-    public void brushTypeChanged(BrushType brushType) {
-        for (int i = 0; i < MAX_BRUSHES; i++) {
-            brushes[i] = brushType.createBrush();
+    public void brushTypeChanged(Supplier<Brush> brushSupplier) {
+        this.brushSupplier = brushSupplier;
+        for(int i = 0; i < numInstantiatedBrushes; i++) {
+            brushes[i] = brushSupplier.get();
+        }
+    }
+
+    public void symmetryChanged(Symmetry symmetry) {
+        if(symmetry.getNumBrushes() > numInstantiatedBrushes) {
+            // we need to create more brushes of the same type
+            int newNumBrushes = symmetry.getNumBrushes();
+            assert newNumBrushes <= MAX_BRUSHES;
+            for(int i = numInstantiatedBrushes; i < newNumBrushes; i++) {
+                brushes[i] = brushSupplier.get();
+            }
+            numInstantiatedBrushes = newNumBrushes;
         }
     }
 
@@ -61,7 +80,7 @@ public class Brushes {
     public void onNewMousePoint(int brushNo, int endX, int endY) {
         updateAffectedCoordinates(endX, endY);
 
-        if (radius <= 0) {
+        if(radius <= 0) {
             throw new IllegalStateException("radius is " + radius);
         }
 
@@ -70,15 +89,15 @@ public class Brushes {
     }
 
     public void updateAffectedCoordinates(int x, int y) {
-        if (x > maxX) {
+        if(x > maxX) {
             maxX = x;
-        } else if (x < minX) {
+        } else if(x < minX) {
             minX = x;
         }
 
-        if (y > maxY) {
+        if(y > maxY) {
             maxY = y;
-        } else if (y < minY) {
+        } else if(y < minY) {
             minY = y;
         }
     }
@@ -90,6 +109,9 @@ public class Brushes {
         maxY = y;
     }
 
+    /**
+     * Calculates the rectangle affected by a brush stroke for the undo mechanism
+     */
     public Rectangle getRectangleAffectedByBrush() {
         // To be on the safe side, save a little more than necessary - some brushes have randomness
         int radius2 = 2 * radius;
@@ -105,14 +127,15 @@ public class Brushes {
 
 
     public void setTarget(Composition comp, Graphics2D g) {
-        for(int i = 0; i < MAX_BRUSHES; i++) {
+        for(int i = 0; i < numInstantiatedBrushes; i++) {
             brushes[i].setTarget(comp, g);
         }
     }
 
     public void setRadius(int radius) {
         this.radius = radius;
-        for(int i = 0; i < MAX_BRUSHES; i++) {
+        for(int i = 0; i < numInstantiatedBrushes; i++) {
+            assert brushes[i] != null : "i = " + i + ", numInstantiatedBrushes = " + numInstantiatedBrushes;
             brushes[i].setRadius(radius);
         }
     }

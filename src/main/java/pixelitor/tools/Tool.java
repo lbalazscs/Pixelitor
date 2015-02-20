@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -88,13 +88,17 @@ public abstract class Tool {
             handToolHandler = new HandToolHandler(cursor);
             lastHandler = addHandlerToChain(handToolHandler, lastHandler);
         }
-        if (this instanceof AbstractBrushTool) {
+        if(doColorPickerForwarding()) {
             // brush tools behave like the color picker if Alt is pressed
             ColorPickerToolHandler colorPickerHandler = new ColorPickerToolHandler();
             lastHandler = addHandlerToChain(colorPickerHandler, lastHandler);
         }
         // if there was no special case, the current tool should handle the events
         addHandlerToChain(new CurrentToolHandler(this), lastHandler);
+    }
+
+    protected boolean doColorPickerForwarding() {
+        return false;
     }
 
     /**

@@ -21,7 +21,7 @@ package pixelitor.tools;
  * The "Mirror" option for brushes
  */
 public enum Symmetry {
-    NO_SYMMETRY("None") {
+    NONE("None", 1) {
         @Override
         public void onDragStart(Brushes brushes, int x, int y) {
             brushes.onDragStart(0, x, y);
@@ -31,7 +31,7 @@ public enum Symmetry {
         public void onNewMousePoint(Brushes brushes, int x, int y) {
             brushes.onNewMousePoint(0, x, y);
         }
-    }, VERTICAL_MIRROR("Vertical") {
+    }, VERTICAL_MIRROR("Vertical", 2) {
         @Override
         public void onDragStart(Brushes brushes, int x, int y) {
             brushes.onDragStart(0, x, y);
@@ -43,7 +43,7 @@ public enum Symmetry {
             brushes.onNewMousePoint(0, x, y);
             brushes.onNewMousePoint(1, compositionWidth - x, y);
         }
-    }, HORIZONTAL_MIRROR("Horizontal") {
+    }, HORIZONTAL_MIRROR("Horizontal", 2) {
         @Override
         public void onDragStart(Brushes brushes, int x, int y) {
             brushes.onDragStart(0, x, y);
@@ -55,7 +55,7 @@ public enum Symmetry {
             brushes.onNewMousePoint(0, x, y);
             brushes.onNewMousePoint(1, x, compositionHeight - y);
         }
-    }, TWO_MIRRORS("Two Mirrors") {
+    }, TWO_MIRRORS("Two Mirrors", 4) {
         @Override
         public void onDragStart(Brushes brushes, int x, int y) {
             brushes.onDragStart(0, x, y);
@@ -71,7 +71,7 @@ public enum Symmetry {
             brushes.onNewMousePoint(2, compositionWidth - x, y);
             brushes.onNewMousePoint(3, compositionWidth - x, compositionHeight - y);
         }
-    }, CENTRAL_SYMMETRY("Central Symmetry") {
+    }, CENTRAL_SYMMETRY("Central Symmetry", 2) {
         @Override
         public void onDragStart(Brushes brushes, int x, int y) {
             brushes.onDragStart(0, x, y);
@@ -83,7 +83,7 @@ public enum Symmetry {
             brushes.onNewMousePoint(0, x, y);
             brushes.onNewMousePoint(1, compositionWidth - x, compositionHeight - y);
         }
-    }, CENTRAL_3("Central 3") {
+    }, CENTRAL_3("Central 3", 3) {
         private static final double cos120 = -0.5;
         private static final double sin120 = 0.86602540378443864676372317075294;
         private static final double cos240 = cos120;
@@ -156,14 +156,20 @@ public enum Symmetry {
     }
 
     private final String guiName;
+    private int numBrushes;
 
-    Symmetry(String guiName) {
+    Symmetry(String guiName, int numBrushes) {
         this.guiName = guiName;
+        this.numBrushes = numBrushes;
     }
 
     public abstract void onDragStart(Brushes brushes, int x, int y);
 
     public abstract void onNewMousePoint(Brushes brushes, int x, int y);
+
+    public int getNumBrushes() {
+        return numBrushes;
+    }
 
     @Override
     public String toString() {

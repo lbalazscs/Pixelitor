@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools.brushes;
 
 import com.jhlabs.awt.WobbleStroke;
@@ -38,10 +39,10 @@ public class WobbleBrush extends StrokeBrush {
         if(diameter != lastDiameter) {
             lastStroke = new WobbleStroke(0.5f, smallThickness, smallThickness);
         }
-        g.setStroke(lastStroke);
+        targetG.setStroke(lastStroke);
 
         Ellipse2D.Float circle = new Ellipse2D.Float(x + radius, y + radius, 0.1f, 0.1f);
-        g.draw(circle);
+        targetG.draw(circle);
     }
 
     @Override

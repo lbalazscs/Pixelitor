@@ -45,13 +45,13 @@ public class CalligraphyBrush extends StrokeBrush {
         int endX = (int) (x + projectedEnd) - radius;
         int endY = (int) (y + projectedStart) - radius;
 
-        g.setStroke(pointStroke);
+        targetG.setStroke(pointStroke);
 
         // for some reasons (rounding errors previously?) these ones have to be added and subtracted
-        g.drawLine(startX + 1, startY - 1, endX - 1, endY + 1);
+        targetG.drawLine(startX + 1, startY - 1, endX - 1, endY + 1);
 
         if (lastStroke != null) {
-            g.setStroke(lastStroke);
+            targetG.setStroke(lastStroke);
         }
     }
 

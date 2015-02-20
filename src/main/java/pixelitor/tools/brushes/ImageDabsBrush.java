@@ -29,17 +29,17 @@ import java.util.EnumMap;
 import java.util.Map;
 
 /**
- * A "uniform dabs" brush that is based on images.
+ * A dabs brush based on images
  */
-public class UniformImageBrush extends DabsBrush {
-    private static Map<ImageBrushType, BufferedImage> templateImages = new EnumMap<>(ImageBrushType.class);
+public class ImageDabsBrush extends DabsBrush {
+    private static final Map<ImageBrushType, BufferedImage> templateImages = new EnumMap<>(ImageBrushType.class);
     private BufferedImage templateImage;
     private BufferedImage coloredBrushImage;
     private BufferedImage finalScaledImage;
     private Color lastColor;
 
-    public UniformImageBrush(ImageBrushType imageBrushType, double spacingRatio, boolean angleAware) {
-        super(spacingRatio, angleAware);
+    public ImageDabsBrush(ImageBrushType imageBrushType, double spacingRatio, boolean angleAware) {
+        super(spacingRatio, angleAware, false);
 
         // for each brush type multiple brush instances are created because of the symmetry
         // however the template image can be shared between them
@@ -51,8 +51,8 @@ public class UniformImageBrush extends DabsBrush {
     }
 
     @Override
-    void setupBrushStamp() {
-        Color c = g.getColor();
+    void setupBrushStamp(double x, double y) {
+        Color c = targetG.getColor();
 
         if (!c.equals(lastColor)) {
             colorizeBrushImage(c);
@@ -114,14 +114,14 @@ public class UniformImageBrush extends DabsBrush {
     @Override
     public void putDab(double x, double y, double theta) {
         if(!angleAware || theta == 0) {
-            setupBrushStamp();
-            g.drawImage(finalScaledImage, (int) x - radius, (int) y - radius, null);
+            setupBrushStamp(x, y);
+            targetG.drawImage(finalScaledImage, (int) x - radius, (int) y - radius, null);
         } else {
-            AffineTransform oldTransform = g.getTransform();
-            g.rotate(theta, x, y);
-            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            g.drawImage(finalScaledImage, (int) x - radius, (int) y - radius, null);
-            g.setTransform(oldTransform);
+            AffineTransform oldTransform = targetG.getTransform();
+            targetG.rotate(theta, x, y);
+            targetG.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            targetG.drawImage(finalScaledImage, (int) x - radius, (int) y - radius, null);
+            targetG.setTransform(oldTransform);
         }
         updateComp((int) x, (int) y);
     }

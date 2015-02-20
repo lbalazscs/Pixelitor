@@ -31,10 +31,15 @@ import java.awt.image.BufferedImage;
  * The brush tool
  */
 public class BrushTool extends AbstractBrushTool {
-    private BlendingModePanel blendingModePanel;
+    protected BlendingModePanel blendingModePanel;
 
     public BrushTool() {
         super('b', "Brush", "brush_tool_icon.gif", "click and drag to draw with the current brush, Shift-click to draw lines, right-click to draw with the background color");
+    }
+
+    // for subclasses
+    protected BrushTool(char activationKeyChar, String name, String iconFileName, String toolMessage) {
+        super(activationKeyChar, name, iconFileName, toolMessage);
     }
 
     @Override

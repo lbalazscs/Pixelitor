@@ -24,7 +24,7 @@ public class ShapeDabsBrush extends DabsBrush {
     private final BrushShapeProvider shapeProvider;
 
     public ShapeDabsBrush(BrushShapeProvider shapeProvider, double spacingRatio) {
-        super(spacingRatio, true);
+        super(spacingRatio, true, false);
         this.shapeProvider = shapeProvider;
     }
 
@@ -34,16 +34,16 @@ public class ShapeDabsBrush extends DabsBrush {
             Shape shape = shapeProvider.getShape(x - radius, y - radius, diameter, diameter);
             AffineTransform t = AffineTransform.getRotateInstance(theta, x, y);
             Shape transformedShape = t.createTransformedShape(shape);
-            g.fill(transformedShape);
+            targetG.fill(transformedShape);
         } else {
             Shape shape = shapeProvider.getShape(x - radius, y - radius, diameter, diameter);
-            g.fill(shape);
+            targetG.fill(shape);
         }
         updateComp((int) x, (int) y);
     }
 
     @Override
-    void setupBrushStamp() {
+    void setupBrushStamp(double x, double y) {
         // no setup is necessary for shape brushes
     }
 }

@@ -23,7 +23,7 @@ import pixelitor.tools.AbstractBrushTool;
 import java.awt.Graphics2D;
 
 public abstract class AbstractBrush implements Brush {
-    protected Graphics2D g;
+    protected Graphics2D targetG;
     private Composition comp;
 
     protected int radius = AbstractBrushTool.DEFAULT_BRUSH_RADIUS;
@@ -40,7 +40,7 @@ public abstract class AbstractBrush implements Brush {
     @Override
     public void setTarget(Composition comp, Graphics2D g) {
         this.comp = comp;
-        this.g = g;
+        this.targetG = g;
     }
 
     // call before setPrevious
