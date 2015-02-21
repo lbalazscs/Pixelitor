@@ -19,8 +19,12 @@ package pixelitor.tools.brushes;
 
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 
+/**
+ * The brush used by the Clone Tool
+ */
 public class CloneBrush extends DabsBrush {
     private BufferedImage sourceImage;
     private int srcX;
@@ -29,6 +33,7 @@ public class CloneBrush extends DabsBrush {
     private int destY;
 
     private BufferedImage brushImage;
+    private Ellipse2D.Double circleClip;
 
     public CloneBrush(ImageBrushType imageBrushType) {
         super(0.25, false, true);
@@ -38,6 +43,7 @@ public class CloneBrush extends DabsBrush {
     public void setRadius(int radius) {
         super.setRadius(radius);
         brushImage = new BufferedImage(diameter, diameter, BufferedImage.TYPE_INT_ARGB);
+        circleClip = new Ellipse2D.Double(0, 0, diameter, diameter);
     }
 
     public void setSource(BufferedImage sourceImage, int srcX, int srcY) {
@@ -54,19 +60,21 @@ public class CloneBrush extends DabsBrush {
 
     @Override
     public void putDab(double x, double y, double theta) {
-        System.out.println("CloneBrush::putDab: CALLED");
-        targetG.drawImage(brushImage, (int) x, (int) y, null);
+//        targetG.drawImage(brushImage, (int) x - radius, (int) y - radius, null);
+        targetG.drawImage(brushImage, AffineTransform.getTranslateInstance(
+                x - radius,
+                y - radius
+        ), null);
     }
 
     @Override
     void setupBrushStamp(double x, double y) {
-        System.out.println("CloneBrush::setupBrushStamp: CALLED");
-
         Graphics2D g = brushImage.createGraphics();
+        g.setClip(circleClip);
         g.drawImage(sourceImage,
                 AffineTransform.getTranslateInstance(
-                        -srcX + destX - x,
-                        -srcY + destY - y), null);
+                        -srcX + destX - x + radius,
+                        -srcY + destY - y + radius), null);
         g.dispose();
     }
 }
