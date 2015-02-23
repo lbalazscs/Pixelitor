@@ -418,11 +418,11 @@ public class FilterCreator extends JPanel {
     }
 
     public static class ParameterInfo {
-        String name;
-        String variableName;
-        int min;
-        int max;
-        int defaultValue;
+        final String name;
+        final String variableName;
+        final int min;
+        final int max;
+        final int defaultValue;
 
         public ParameterInfo(String name, int min, int max, int defaultValue) {
             this.name = name;

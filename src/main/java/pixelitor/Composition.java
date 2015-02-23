@@ -789,7 +789,7 @@ public class Composition implements Serializable {
 
             long startTime = System.nanoTime();
 
-            Runnable task = () -> filter.runit(Composition.this, changeReason);
+            Runnable task = () -> filter.runit(this, changeReason);
             Utils.executeWithBusyCursor(busyCursorParent, task);
 
             long totalTime = (System.nanoTime() - startTime) / 1_000_000;
@@ -823,19 +823,19 @@ public class Composition implements Serializable {
         }, FULL(true, true) {
         };
 
-        private boolean repaint;
-        private boolean updateHistogram;
+        private final boolean repaint;
+        private final boolean updateHistogram;
 
-        private ImageChangeActions(boolean repaint, boolean updateHistogram) {
+        ImageChangeActions(boolean repaint, boolean updateHistogram) {
             this.repaint = repaint;
             this.updateHistogram = updateHistogram;
         }
 
-        public boolean isRepaint() {
+        private boolean isRepaint() {
             return repaint;
         }
 
-        public boolean isUpdateHistogram() {
+        private boolean isUpdateHistogram() {
             return updateHistogram;
         }
     }

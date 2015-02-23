@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.io;
 
 import pixelitor.utils.Dialogs;
@@ -87,8 +88,8 @@ public final class JpegOutput {
     }
 
     static class ImageWithSize {
-        BufferedImage image;
-        int size;
+        final BufferedImage image;
+        final int size;
 
         private ImageWithSize(BufferedImage image, int size) {
             this.image = image;

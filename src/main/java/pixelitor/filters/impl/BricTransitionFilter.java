@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.impl;
 
 import com.bric.image.transition.*;
@@ -88,7 +89,7 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
         g2.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
         g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
 
-        Transition transition = null;
+        Transition transition;
         switch (type) {
             case BARS_HORIZONTAL:
                 transition = new BarsTransition2D(BarsTransition2D.HORIZONTAL, false);

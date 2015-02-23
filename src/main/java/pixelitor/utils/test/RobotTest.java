@@ -747,7 +747,7 @@ public class RobotTest {
     }
 
     private static void randomTool() {
-        Tool tool = null;
+        Tool tool;
         if (preferredTool != null) {
             tool = preferredTool;
         } else {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.utils.test;
 
@@ -74,7 +74,7 @@ class FastMultiplyCompositeContext implements CompositeContext {
 
             int dstPixel = dstPixels[i];
 
-            int dstA = (dstPixel >>> 24) & 0xFF;
+//            int dstA = (dstPixel >>> 24) & 0xFF;
             int dstR = (dstPixel >>> 16) & 0xFF;
             int dstG = (dstPixel >>> 8) & 0xFF;
             int dstB = (dstPixel) & 0xFF;

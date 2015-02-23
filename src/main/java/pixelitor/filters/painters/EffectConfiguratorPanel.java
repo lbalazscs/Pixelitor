@@ -45,7 +45,7 @@ public abstract class EffectConfiguratorPanel extends JPanel {
     private final RangeParam opacityRange;
     private final SliderSpinner opacitySlider;
 
-    protected GridBagHelper gridBagHelper;
+    protected final GridBagHelper gridBagHelper;
 
     EffectConfiguratorPanel(String effectName, boolean defaultSelected, Color defaultColor) {
         setBorder(BorderFactory.createTitledBorder('"' + effectName + "\" Configuration"));

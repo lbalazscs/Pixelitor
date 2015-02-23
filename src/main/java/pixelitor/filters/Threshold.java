@@ -35,7 +35,7 @@ public class Threshold extends FilterWithParametrizedGUI {
     private final RangeParam threshold = new RangeParam("Threshold", 0,
             255, 128, false, SliderSpinner.TextPosition.BORDER);
 
-    private IntChoiceParam criterion = new IntChoiceParam("Based on",
+    private final IntChoiceParam criterion = new IntChoiceParam("Based on",
             new IntChoiceParam.Value[]{
                 new IntChoiceParam.Value("Luminosity", CRIT_LUMINOSITY),
                 new IntChoiceParam.Value("Red Channel", CRIT_RED),
@@ -118,7 +118,7 @@ public class Threshold extends FilterWithParametrizedGUI {
                 };
             case CRIT_SATURATION:
                 return new RGBPixelOp() {
-                    float satThreshold = (float) (threshold / 255.0f);
+                    final float satThreshold = (float) (threshold / 255.0f);
                     @Override
                     public int changeRGB(int a, int r, int g, int b) {
                         float sat = ImageUtils.calcSaturation(r, g, b);

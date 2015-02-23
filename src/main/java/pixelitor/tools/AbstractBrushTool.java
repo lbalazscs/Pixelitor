@@ -65,7 +65,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
 
     //    Brushes brushes;
     protected Brush brush;
-    private BrushAffectedArea brushAffectedArea = new BrushAffectedArea();
+    private final BrushAffectedArea brushAffectedArea = new BrushAffectedArea();
 
     private boolean firstMouseDown = true; // for the first click don't draw lines even if it is a shift-click
 
@@ -205,7 +205,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     private void drawTo(Composition comp, Paint p, int x, int y, boolean connectClickWithLine) {
         // TODO these two variables could be initialized outside this function
         setupDrawingRadius();
-        Symmetry currentSymmetry = getCurrentSymmetry();
+//        Symmetry currentSymmetry = getCurrentSymmetry();
 
         if(drawingGraphics == null) { // a new brush stroke has to be initialized
 //            if(!connectClickWithLine) {

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.gui;
 
 import com.jhlabs.image.ImageMath;
@@ -348,7 +349,7 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
     }
 
     private static class RPState implements ParamState {
-        double value;
+        final double value;
 
         public RPState(double value) {
             this.value = value;

@@ -61,10 +61,10 @@ public class EnlargeCanvas {
     }
 
     static class EnlargeCanvasPanel extends JPanel {
-        RangeParam northRange = new RangeParam("North", 0, 500, 0);
-        RangeParam eastRange = new RangeParam("East", 0, 500, 0);
-        RangeParam southRange = new RangeParam("South", 0, 500, 0);
-        RangeParam westRange = new RangeParam("West", 0, 500, 0);
+        final RangeParam northRange = new RangeParam("North", 0, 500, 0);
+        final RangeParam eastRange = new RangeParam("East", 0, 500, 0);
+        final RangeParam southRange = new RangeParam("South", 0, 500, 0);
+        final RangeParam westRange = new RangeParam("West", 0, 500, 0);
 
         private EnlargeCanvasPanel() {
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));

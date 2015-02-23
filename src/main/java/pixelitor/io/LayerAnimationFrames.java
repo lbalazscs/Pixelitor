@@ -65,6 +65,7 @@ public class LayerAnimationFrames {
         e.setRepeat(0);
         images.forEach(e::addFrame);
         boolean ok = e.finish();
+        // TODO handle ok status
     }
 
     public void saveToFile(File selectedFile) {

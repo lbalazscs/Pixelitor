@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters.jhlabsproxies;
 
@@ -29,14 +29,11 @@ import java.awt.image.BufferedImage;
  * Ripple based on the JHLabs RippleFilter
  */
 public class JHWaves extends FilterWithParametrizedGUI {
-    GroupedRangeParam wavelengthParam = new GroupedRangeParam("Wavelength", 1, 200, 20);
-    GroupedRangeParam amplitudeParam = new GroupedRangeParam("Amplitude", 0, 200, 10);
-
-    GroupedRangeParam phaseParam = new GroupedRangeParam("Phase (Time)", 0, 100, 0, false);
-
+    private final GroupedRangeParam wavelengthParam = new GroupedRangeParam("Wavelength", 1, 200, 20);
+    private final GroupedRangeParam amplitudeParam = new GroupedRangeParam("Amplitude", 0, 200, 10);
+    private final GroupedRangeParam phaseParam = new GroupedRangeParam("Phase (Time)", 0, 100, 0, false);
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
     private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
-
     private final IntChoiceParam waveType = IntChoiceParam.getWaveTypeChoices();
 
     private RippleFilter filter;

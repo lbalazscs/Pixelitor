@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor;
 
 import pixelitor.utils.Dialogs;
@@ -22,7 +23,7 @@ import pixelitor.utils.Dialogs;
  * Handles uncaught exceptions and other errors
  */
 public class ExceptionHandler implements Thread.UncaughtExceptionHandler {
-    public static ExceptionHandler INSTANCE = new ExceptionHandler();
+    public static final ExceptionHandler INSTANCE = new ExceptionHandler();
 
     private ExceptionHandler() {
     }

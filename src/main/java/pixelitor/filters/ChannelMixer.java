@@ -52,7 +52,6 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
     private final RangeParam rpBlueFromGreen = new RangeParam("<html><b><font color=blue>Blue</font></b> from <font color=green>green</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 0, true, SliderSpinner.TextPosition.NONE);
     private final RangeParam rpBlueFromBlue = new RangeParam("<html><b><font color=blue>Blue</font></b> from <font color=blue>blue</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 100, true, SliderSpinner.TextPosition.NONE);
 
-    @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener normalizeAction = e -> {
         getParamSet().startPresetAdjusting();
 

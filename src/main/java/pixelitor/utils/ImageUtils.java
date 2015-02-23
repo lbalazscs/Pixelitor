@@ -922,6 +922,7 @@ public class ImageUtils {
 
         for (int i = 0; i < numIntermediatePointIterations; i++) {
         }
+        // TODO not finished?
     }
 
     public static void paintAffectedAreaShapes(BufferedImage image, Shape[] shapes) {

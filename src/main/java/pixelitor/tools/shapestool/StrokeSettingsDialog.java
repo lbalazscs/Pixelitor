@@ -71,8 +71,8 @@ public class StrokeSettingsDialog extends JDialog {
         this.add(p, BorderLayout.CENTER);
         JButton okButton = new JButton("OK");
         okButton.addActionListener(e -> {
-            StrokeSettingsDialog.this.setVisible(false);
-            StrokeSettingsDialog.this.dispose();
+            this.setVisible(false);
+            this.dispose();
         });
         JPanel southPanel = new JPanel();
         southPanel.add(okButton);

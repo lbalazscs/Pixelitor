@@ -94,7 +94,7 @@ public class OptimizedJpegSavePanel extends JPanel {
         float quality = getSelectedQuality();
 
         JpegOutput.ImageWithSize[] imageWithSize = new JpegOutput.ImageWithSize[1];
-        Runnable task = () -> imageWithSize[0] = JpegOutput.writeJPGtoPreviewImage(OptimizedJpegSavePanel.this.image, quality);
+        Runnable task = () -> imageWithSize[0] = JpegOutput.writeJPGtoPreviewImage(this.image, quality);
         Utils.executeWithBusyCursor(this, task);
 
         BufferedImage newPreview = imageWithSize[0].getImage();

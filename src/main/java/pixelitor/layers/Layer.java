@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.layers;
 
 import pixelitor.Canvas;
@@ -45,7 +46,7 @@ public abstract class Layer implements Serializable {
     protected Canvas canvas;
     String name;
     private boolean visible = true;
-    Composition comp;
+    final Composition comp;
     LayerMask layerMask;
 
     private transient LayerButton layerButton;

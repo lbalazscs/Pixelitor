@@ -90,7 +90,7 @@ public class ImageLayer extends ContentLayer {
          * The layer is in previewing mode, but "Show Original" is pressed in the dialog
          */
         SHOW_ORIGINAL {
-        };
+        }
     }
 
     /**
@@ -771,8 +771,8 @@ public class ImageLayer extends ContentLayer {
     public void enlargeCanvas(int north, int east, int south, int west) {
         int width = image.getWidth();
         int height = image.getHeight();
-        int canvasWidth = canvas.getWidth();
-        int canvasHeight = canvas.getHeight();
+//        int canvasWidth = canvas.getWidth();
+//        int canvasHeight = canvas.getHeight();
 
         // TODO the layer can already be larger than the canvas
 
@@ -797,7 +797,7 @@ public class ImageLayer extends ContentLayer {
 
     @Override
     TranslateEdit createTranslateEdit(int oldTranslationX, int oldTranslationY) {
-        TranslateEdit edit = null;
+        TranslateEdit edit;
         boolean needsEnlarging = checkForLayerEnlargement();
         if(needsEnlarging) {
             edit = new TranslateEdit(this, getImage(), oldTranslationX, oldTranslationY);
@@ -872,7 +872,7 @@ public class ImageLayer extends ContentLayer {
     public void paintLayerOnGraphics(Graphics2D g, boolean isFirstVisibleLayer) {
         setupDrawingComposite(g, isFirstVisibleLayer);
 
-        BufferedImage visibleImage = null;
+        BufferedImage visibleImage;
 
         switch(state) {
             case NORMAL:

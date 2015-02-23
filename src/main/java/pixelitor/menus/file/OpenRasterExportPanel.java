@@ -32,7 +32,7 @@ import java.io.IOException;
 public class OpenRasterExportPanel extends JPanel {
     private final JCheckBox mergedLayersCB;
 
-    public OpenRasterExportPanel() {
+    private OpenRasterExportPanel() {
         mergedLayersCB = new JCheckBox("Add merged image? (Useful only for image viewers)", false);
         add(mergedLayersCB);
     }

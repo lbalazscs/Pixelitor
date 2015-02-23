@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.gui;
 
 import com.bric.swing.GradientSlider;
@@ -32,7 +33,7 @@ import java.awt.Rectangle;
  * the actual value is stored only inside the GradientSlider)
  */
 public class GradientParam extends AbstractGUIParam {
-    public static final String GRADIENT_SLIDER_USE_BEVEL = "GradientSlider.useBevel";
+    private static final String GRADIENT_SLIDER_USE_BEVEL = "GradientSlider.useBevel";
     private GradientSlider gradientSlider;
     private final float[] defaultThumbPositions;
     private final Color[] defaultColors;
@@ -172,8 +173,8 @@ public class GradientParam extends AbstractGUIParam {
     }
 
     private static class GState implements ParamState {
-        float[] thumbPositions;
-        Color[] colors;
+        final float[] thumbPositions;
+        final Color[] colors;
 
         public GState(float[] thumbPositions, Color[] colors) {
             this.thumbPositions = thumbPositions;

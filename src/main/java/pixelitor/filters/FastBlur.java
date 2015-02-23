@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import org.jdesktop.swingx.image.FastBlurFilter;
@@ -57,7 +58,7 @@ public class FastBlur extends FilterWithParametrizedGUI {
             return src;
         }
 
-        BufferedImageOp filter = null;
+        BufferedImageOp filter;
         int method = qualityParam.getValue();
         if (method == METHOD_BETTER) {
             filter = new StackBlurFilter(radiusParam.getValue());

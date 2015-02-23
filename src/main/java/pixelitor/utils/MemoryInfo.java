@@ -14,15 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.utils;
 
 public class MemoryInfo {
     public static final int ONE_MEGABYTE = 1024*1024;
 
-    private long freeMemoryMB;
-    private long totalMemoryMB;
-    private long usedMemoryMB;
-    private long maxMemoryMB;
+    private final long freeMemoryMB;
+    private final long totalMemoryMB;
+    private final long usedMemoryMB;
+    private final long maxMemoryMB;
 
     public MemoryInfo() {
         Runtime runtime = Runtime.getRuntime();

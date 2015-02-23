@@ -28,7 +28,7 @@ import java.util.function.Supplier;
  * Delegates the work to other brushes according to the symmetry and brush type settings
  */
 public class SymmetryBrush implements Brush {
-    public static final int MAX_BRUSHES = 4;
+    private static final int MAX_BRUSHES = 4;
 
     private final Brush[] brushes = new Brush[MAX_BRUSHES];
     private int radius = AbstractBrushTool.DEFAULT_BRUSH_RADIUS;
@@ -36,7 +36,7 @@ public class SymmetryBrush implements Brush {
     private int numInstantiatedBrushes;
     private Supplier<Brush> brushSupplier;
     private Symmetry symmetry;
-    private BrushAffectedArea affectedArea;
+    private final BrushAffectedArea affectedArea;
 
     public SymmetryBrush(Supplier<Brush> brushSupplier, Symmetry symmetry, BrushAffectedArea affectedArea) {
         this.brushSupplier = brushSupplier;
@@ -47,12 +47,14 @@ public class SymmetryBrush implements Brush {
         brushTypeChanged(brushSupplier);
     }
 
+    @Override
     public void setTarget(Composition comp, Graphics2D g) {
         for(int i = 0; i < numInstantiatedBrushes; i++) {
             brushes[i].setTarget(comp, g);
         }
     }
 
+    @Override
     public void setRadius(int radius) {
         this.radius = radius;
         for(int i = 0; i < numInstantiatedBrushes; i++) {

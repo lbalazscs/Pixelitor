@@ -109,7 +109,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
         cropButton.setEnabled(false);
         toolSettingsPanel.add(cropButton);
 
-        cancelButton.addActionListener(e -> state.cancelPressed(CropTool.this));
+        cancelButton.addActionListener(e -> state.cancelPressed(this));
         cancelButton.setEnabled(false);
         toolSettingsPanel.add(cancelButton);
     }

@@ -158,7 +158,7 @@ public enum Symmetry {
     }
 
     private final String guiName;
-    private int numBrushes;
+    private final int numBrushes;
 
     Symmetry(String guiName, int numBrushes) {
         this.guiName = guiName;

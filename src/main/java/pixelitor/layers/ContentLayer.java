@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.layers;
 
@@ -150,15 +150,15 @@ public abstract class ContentLayer extends Layer {
     @Override
     public void mergeDownOn(ImageLayer bellowImageLayer) {
 
-        int aX = getTranslationX();
-        int aY = getTranslationY();
+//        int aX = getTranslationX();
+//        int aY = getTranslationY();
         BufferedImage bellowImage = bellowImageLayer.getImage();
-        int bX = bellowImageLayer.getTranslationX();
-        int bY = bellowImageLayer.getTranslationY();
+//        int bX = bellowImageLayer.getTranslationX();
+//        int bY = bellowImageLayer.getTranslationY();
 
         Graphics2D g = bellowImage.createGraphics();
-        int x = aX - bX;
-        int y = aY - bY;
+//        int x = aX - bX;
+//        int y = aY - bY;
 
         // TODO use x,y
         paintLayerOnGraphics(g, false);

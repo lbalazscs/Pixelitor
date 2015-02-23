@@ -50,7 +50,7 @@ public abstract class Tool {
     private final String name;
     private final String iconFileName;
     private final String toolMessage;
-    protected Cursor cursor;
+    private final Cursor cursor;
     private final boolean constrainIfShiftDown;
     private final ClipStrategy clipStrategy;
 
