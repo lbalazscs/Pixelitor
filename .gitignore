@@ -15,3 +15,5 @@ Pixelitor.iml
 MUI*.bmp
 website/*
 out/*
+target/*
+.idea/*
