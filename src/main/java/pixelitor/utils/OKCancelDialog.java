@@ -58,7 +58,9 @@ public abstract class OKCancelDialog extends JDialog {
         addForm(form, addScrollBars);
         JPanel southPanel = new JPanel();
         okButton = new JButton(okText);
+        okButton.setName("ok");
         JButton cancelButton = new JButton(cancelText);
+        cancelButton.setName("cancel");
 
         GlobalKeyboardWatch.setShowHideAllForTab(false);
 

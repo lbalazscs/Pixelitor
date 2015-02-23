@@ -100,6 +100,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
         toolSettingsPanel.add(allowGrowingCB);
 
         cropButton = new JButton("Crop");
+        cropButton.setName("cropButton");
         cropButton.addActionListener(e -> {
             ImageComponents.toolCropActiveImage(allowGrowingCB.isSelected());
             ImageComponents.repaintActive();

@@ -120,10 +120,12 @@ public final class NewImage {
 
             gridBagHelper.addLabel("Width:", 0, 0);
             widthTextField = new IntTextField(String.valueOf(defaultWidth));
+            widthTextField.setName("widthTF");
             gridBagHelper.addControl(widthTextField);
 
             gridBagHelper.addLabel("Height:", 0, 1);
             heightTextField = new IntTextField(String.valueOf(defaultHeight));
+            heightTextField.setName("heightTF");
             gridBagHelper.addControl(heightTextField);
 
             gridBagHelper.addLabel("Fill:", 0, 2);

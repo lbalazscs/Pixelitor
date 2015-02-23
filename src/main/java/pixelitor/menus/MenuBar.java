@@ -159,7 +159,7 @@ public class MenuBar extends JMenuBar {
         JMenu fileMenu = createMenu("File", 'F');
 
         // new image
-        createMenuItem(NewImage.getAction(), fileMenu, EnabledIf.ACTION_ENABLED, CTRL_N);
+        createMenuItem(NewImage.getAction(), fileMenu, EnabledIf.ACTION_ENABLED, CTRL_N, "new");
 
         // open
         Action openAction = new AbstractAction("Open...") {
@@ -1222,12 +1222,19 @@ public class MenuBar extends JMenuBar {
         return menu;
     }
 
-    private static void createMenuItem(Action a, JMenu parent, EnabledIf whenToEnable, KeyStroke keyStroke) {
+    private static void createMenuItem(Action a, JMenu parent, EnabledIf whenToEnable, KeyStroke keyStroke, String name) {
         JMenuItem menuItem = whenToEnable.getMenuItem(a);
+        if(name != null) {
+            menuItem.setName(name);
+        }
         parent.add(menuItem);
         if (keyStroke != null) {
             menuItem.setAccelerator(keyStroke);
         }
+    }
+
+    private static void createMenuItem(Action action, JMenu parent, EnabledIf whenToEnable, KeyStroke keyStroke) {
+        createMenuItem(action, parent, whenToEnable, keyStroke, null);
     }
 
     private static void createMenuItem(Action action, JMenu parent, EnabledIf whenToEnable) {

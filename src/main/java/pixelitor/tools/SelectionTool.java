@@ -58,23 +58,28 @@ public class SelectionTool extends Tool {
     public void initSettingsPanel() {
         toolSettingsPanel.add(new JLabel("Type:"));
         typeCombo = new JComboBox<>(SelectionType.values());
+        typeCombo.setName("selectionTypeCombo");
         toolSettingsPanel.add(typeCombo);
 
         toolSettingsPanel.addSeparator();
 
         toolSettingsPanel.add(new JLabel("New Selection:"));
         interactionCombo = new JComboBox<>(SelectionInteraction.values());
+        interactionCombo.setName("selectionInteractionCombo");
         toolSettingsPanel.add(interactionCombo);
 
         toolSettingsPanel.addSeparator();
 
         JButton brushTraceButton = new JButton(SelectionActions.getTraceWithBrush());
+        brushTraceButton.setName("brushTraceButton");
         toolSettingsPanel.add(brushTraceButton);
 
         JButton eraserTraceButton = new JButton(SelectionActions.getTraceWithEraser());
+        eraserTraceButton.setName("eraserTraceButton");
         toolSettingsPanel.add(eraserTraceButton);
 
         JButton cropButton = new JButton(SelectionActions.getCropAction());
+        cropButton.setName("cropSelectionButton");
         toolSettingsPanel.add(cropButton);
     }
 
