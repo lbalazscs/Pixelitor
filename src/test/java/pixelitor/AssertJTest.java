@@ -17,12 +17,13 @@
 
 package pixelitor;
 
+import org.assertj.swing.core.BasicRobot;
 import org.assertj.swing.core.MouseButton;
 import org.assertj.swing.core.Robot;
 import org.assertj.swing.finder.WindowFinder;
 import org.assertj.swing.fixture.FrameFixture;
-import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
 import org.assertj.swing.launcher.ApplicationLauncher;
+import org.junit.Before;
 import org.junit.Test;
 import pixelitor.tools.BrushType;
 import pixelitor.tools.GradientColorType;
@@ -30,6 +31,7 @@ import pixelitor.tools.GradientTool;
 import pixelitor.tools.GradientType;
 import pixelitor.tools.Symmetry;
 
+import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -39,11 +41,27 @@ import static java.awt.event.KeyEvent.VK_CONTROL;
 import static java.awt.event.KeyEvent.VK_D;
 import static java.awt.event.KeyEvent.VK_Z;
 
-public class AssertJTest extends AssertJSwingJUnitTestCase {
+public class AssertJTest {
     private static FrameFixture window;
     Random random = new Random();
+    private static RepaintManager oldRepaintManager;
+    private Robot robot;
 
-    @Override
+//    @BeforeClass
+//    public static void saveRepaintManager() {
+//        oldRepaintManager = RepaintManager.currentManager(null);
+//    }
+
+    protected final void setUpRobot() {
+        robot = BasicRobot.robotWithNewAwtHierarchy();
+    }
+
+    @Before
+    public final void setUp() {
+        setUpRobot();
+        onSetUp();
+    }
+
     protected void onSetUp() {
         ApplicationLauncher
                 .application("pixelitor.Pixelitor")
@@ -51,9 +69,14 @@ public class AssertJTest extends AssertJSwingJUnitTestCase {
                 .start();
         window = WindowFinder.findFrame("frame0")
                 .withTimeout(5, TimeUnit.SECONDS)
-                .using(robot());
+                .using(robot);
         PixelitorWindow.getInstance().setLocation(0, 0);
     }
+
+//    @AfterClass
+//    public static void restoreRepaintManager() {
+//        RepaintManager.setCurrentManager(oldRepaintManager);
+//    }
 
     @Test
     public void testApp() {
@@ -208,7 +231,7 @@ public class AssertJTest extends AssertJSwingJUnitTestCase {
     }
 
     private void move(int x, int y) {
-        robot().moveMouse(x, y);
+        robot.moveMouse(x, y);
     }
 
     private void moveRandom() {
@@ -224,7 +247,6 @@ public class AssertJTest extends AssertJSwingJUnitTestCase {
     }
 
     private void drag(int x, int y) {
-        Robot robot = robot();
         robot.pressMouse(MouseButton.LEFT_BUTTON);
         robot.moveMouse(x, y);
         robot.releaseMouse(MouseButton.LEFT_BUTTON);
