@@ -32,6 +32,7 @@ public class AdjustDialog extends OKCancelDialog {
     private AdjustDialog(AdjustPanel adjustPanel, Filter activeFilter) {
         super(adjustPanel, activeFilter.getName());
         this.activeFilter = activeFilter;
+        setName("filterDialog");
     }
 
     public static void showDialog(AdjustPanel adjustPanel, Filter activeFilter) {

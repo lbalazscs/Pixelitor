@@ -77,6 +77,7 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
                     gridBagHelper.addOnlyControlToRow(buttonsPanel, row);
                 }
                 buttonsPanel.add(control);
+                control.setName(param.getName());
             } else {
                 int nrOfGridBagCols = param.getNrOfGridBagCols();
                 if (nrOfGridBagCols == 1) {

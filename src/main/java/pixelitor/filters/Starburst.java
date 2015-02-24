@@ -45,7 +45,7 @@ public class Starburst extends FilterWithParametrizedGUI {
     private final AngleParam rotate = new AngleParam("Rotate", 0);
 
     public Starburst() {
-        super("Starburst ", true, false);
+        super("Starburst", true, false);
         setParamSet(new ParamSet(
                 numberOfRaysParam,
                 bgColor,

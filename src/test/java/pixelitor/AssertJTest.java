@@ -21,6 +21,7 @@ import org.assertj.swing.core.BasicRobot;
 import org.assertj.swing.core.MouseButton;
 import org.assertj.swing.core.Robot;
 import org.assertj.swing.finder.WindowFinder;
+import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.launcher.ApplicationLauncher;
 import org.junit.Before;
@@ -31,7 +32,6 @@ import pixelitor.tools.GradientTool;
 import pixelitor.tools.GradientType;
 import pixelitor.tools.Symmetry;
 
-import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -42,9 +42,8 @@ import static java.awt.event.KeyEvent.VK_D;
 import static java.awt.event.KeyEvent.VK_Z;
 
 public class AssertJTest {
-    private static FrameFixture window;
-    Random random = new Random();
-    private static RepaintManager oldRepaintManager;
+    private FrameFixture window;
+    private Random random = new Random();
     private Robot robot;
 
 //    @BeforeClass
@@ -54,6 +53,7 @@ public class AssertJTest {
 
     protected final void setUpRobot() {
         robot = BasicRobot.robotWithNewAwtHierarchy();
+        robot.settings().delayBetweenEvents(500);
     }
 
     @Before
@@ -68,7 +68,7 @@ public class AssertJTest {
                 .withArgs("C:\\Users\\Laci\\Desktop\\bagoly.png")
                 .start();
         window = WindowFinder.findFrame("frame0")
-                .withTimeout(5, TimeUnit.SECONDS)
+                .withTimeout(10, TimeUnit.SECONDS)
                 .using(robot);
         PixelitorWindow.getInstance().setLocation(0, 0);
     }
@@ -86,6 +86,15 @@ public class AssertJTest {
 //        newImageDialog.textBox("heightTF").enterText("400");
 //        newImageDialog.button("ok").click();
 
+
+//        window.menuItem("open").click();
+//        JFileChooserFixture openDialog = JFileChooserFinder.findFileChooser("open").using(robot);
+//        openDialog.cancel();
+//        window.menuItem("open").click();
+//        openDialog = JFileChooserFinder.findFileChooser("open").using(robot);
+//        openDialog.selectFile(new File("C:\\Users\\Laci\\Desktop\\ee.png"));
+//        openDialog.approve();
+
         testZoomTool();
 //        testMoveTool();
 //        testCropTool();
@@ -95,12 +104,119 @@ public class AssertJTest {
 //        testBrushTool();
 //        testGradientTool();
 
+//        testFilterWithDialog("Color Balance...", true);
+//        testFilterWithDialog("Hue/Saturation...", true);
+//        testFilterWithDialog("Colorize...", true);
+//        testFilterWithDialog("Levels...", false);
+//        testFilterWithDialog("Brightness/Contrast...", true);
+//        testFilterWithDialog("Solarize...", true);
+//        testFilterWithDialog("Sepia...", false);
+//        testNoDialogFilter("Invert");
+//        testFilterWithDialog("Channel Invert...", false);
+//        testFilterWithDialog("Channel Mixer...", false); // TODO
+//        testFilterWithDialog("Extract Channel...", true);
+//        testNoDialogFilter("Luminosity");
+//        testNoDialogFilter("Value = max(R,G,B)");
+//        testNoDialogFilter("Desaturate");
+//        testNoDialogFilter("Hue");
+//        testNoDialogFilter("Hue (with colors)");
+//        testNoDialogFilter("Saturation");
+//        testFilterWithDialog("Quantize...", true);
+//        testFilterWithDialog("Posterize...", false);
+//        testFilterWithDialog("Threshold...", true);
+//        testFilterWithDialog("Tritone...", true);
+//        testFilterWithDialog("Gradient Map...", false);
+//        testFilterWithDialog("Color Halftone...", true);
+//        testFilterWithDialog("Dither...", true);
+//        testNoDialogFilter("Foreground Color");
+//        testNoDialogFilter("Background Color");
+//        testNoDialogFilter("Transparent");
+//        testFilterWithDialog("Color Wheel...", true);
+//        testFilterWithDialog("Four Color Gradient...", false); // TODO
+//        testFilterWithDialog("Starburst...", true);
+//        testFilterWithDialog("Gaussian Blur...", true);
+//        testFilterWithDialog("Smart Blur...", true);
+//        testFilterWithDialog("Box Blur...", true);
+//        testFilterWithDialog("Fast Blur...", true);
+//        testFilterWithDialog("Lens Blur...", true);
+//        testFilterWithDialog("Motion Blur...", true);
+//        testFilterWithDialog("Spin and Zoom Blur...", true);
+//        testFilterWithDialog("Unsharp Mask...", true);
+//        testFilterWithDialog("Swirl, Pinch, Bulge...", true);
+//        testFilterWithDialog("Circle to Square...", true);
+//        testFilterWithDialog("Perspective...", false); // TODO
+//        testFilterWithDialog("Lens Over Image...", true);
+//        testFilterWithDialog("Magnify...", true);
+//        testFilterWithDialog("Turbulent Distortion...", true);
+//        testFilterWithDialog("Underwater...", true);
+//        testFilterWithDialog("Water Ripple...", true);
+//        testFilterWithDialog("Waves...", true);
+//        testFilterWithDialog("Angular Waves...", true);
+//        testFilterWithDialog("Radial Waves...", true);
+//        testFilterWithDialog("Glass Tiles...", true);
+//        testFilterWithDialog("Polar Glass Tiles...", true);
+//        testFilterWithDialog("Frosted Glass...", true);
+//        testFilterWithDialog("Little Planet...", true);
+//        testFilterWithDialog("Polar Coordinates...", true);
+//        testFilterWithDialog("Wrap Around Arc...", true);
+//        testFilterWithDialog("Kaleidoscope...", true);
+//        testFilterWithDialog("Video Feedback...", true);
+        testFilterWithDialog("Offset...", false); // TODO
+        testFilterWithDialog("Slice...", true);
+        testFilterWithDialog("Mirror...", true);
+        testFilterWithDialog("Glow...", true);
+        testFilterWithDialog("Sparkle...", true);
+        testFilterWithDialog("Rays...", true);
+        testFilterWithDialog("Glint...", true);
+        testNoDialogFilter("Reduce Single Pixel Noise");
+        testNoDialogFilter("3x3 Median Filter");
+        testFilterWithDialog("Add Noise...", true);
+        testFilterWithDialog("Pixelate...", true);
+        testFilterWithDialog("Clouds...", true);
+        testFilterWithDialog("Value Noise...", true);
+        testFilterWithDialog("Caustics...", true);
+        testFilterWithDialog("Plasma...", true);
+        testFilterWithDialog("Wood...", true);
+        testFilterWithDialog("Cells...", true);
+        testFilterWithDialog("Brushed Metal...", true);
+        testFilterWithDialog("Crystallize...", true);
+        testFilterWithDialog("Pointillize...", true);
+        testFilterWithDialog("Stamp...", true);
+        testFilterWithDialog("Dry Brush...", true);
+        testFilterWithDialog("Random Spheres...", true);
+        testFilterWithDialog("Smear...", true);
+        testFilterWithDialog("Emboss...", true);
+        testFilterWithDialog("Orton Effect...", true);
+        testFilterWithDialog("Photo Collage...", true);
+        testFilterWithDialog("Convolution Edge Detection...", true);
+        testNoDialogFilter("Laplacian");
+        testFilterWithDialog("Difference of Gaussians...", true);
+        testFilterWithDialog("Canny Edge Detector...", true);
+        testFilterWithDialog("Drop Shadow...", true);
+        testFilterWithDialog("2D Transitions...", true);
+
+
         testPaintBucketTool();
         testColorPickerTool();
         testShapesTool();
         testHandTool();
 
         sleep(5);
+    }
+
+    private void testNoDialogFilter(String name) {
+        window.menuItem(name).click();
+    }
+
+    private void testFilterWithDialog(String name, boolean randomize) {
+        window.menuItem(name).click();
+        DialogFixture filterDialog = WindowFinder.findDialog("filterDialog").using(robot);
+        if(randomize) {
+            filterDialog.button("Randomize Settings").click();
+            filterDialog.button("Reset All").click();
+            filterDialog.button("Randomize Settings").click();
+        }
+        filterDialog.button("ok").click();
     }
 
     protected void testHandTool() {

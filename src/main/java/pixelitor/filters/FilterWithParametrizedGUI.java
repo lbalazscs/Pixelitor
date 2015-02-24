@@ -35,9 +35,7 @@ import java.awt.image.BufferedImage;
 public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
     protected ParamSet paramSet;
 
-    //    private BooleanParam showOriginalParam = null;
     private BooleanParam showAffectedAreaParam = null;
-    //    private ShowOriginalHelper showOriginalHelper;
     private final boolean showOriginal;
     private final boolean hasAffectedAreaShapeParam;
     private Shape[] affectedAreaShapes;
@@ -46,11 +44,6 @@ public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
         super(name);
         this.showOriginal = showOriginal;
         this.hasAffectedAreaShapeParam = hasAffectedAreaShape;
-//        if (showOriginal) {
-//            showOriginalParam = BooleanParam.createParamForShowOriginal();
-//            showOriginalParam.setIgnoreFinalAnimationSettingMode(true);
-////            showOriginalHelper = new ShowOriginalHelper();
-//        }
         if(hasAffectedAreaShapeParam) {
             showAffectedAreaParam = new BooleanParam("Show Affected Area", false);
         }
@@ -66,43 +59,9 @@ public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
         return new ParametrizedAdjustPanel(this, showOriginal);
     }
 
-//    // from here show original functionality
-//    @Override
-//    public void endDialogSession() {
-//        if (showOriginal) {
-//            BufferedImage img = showOriginalHelper.getLastTransformed();
-//            if (img != null) {
-//                // cannot be always flushed because it might be the active layer image as well
-//                // TODO keep track of it
-//                // img.flush();
-//                showOriginalHelper.setLastTransformed(null);
-//            }
-//            showOriginalHelper.setPreviousShowOriginal(false);
-//
-//            showOriginalHelper.releaseCachedImage();
-//        }
-//    }
-
     @Override
     protected BufferedImage transform(BufferedImage src, BufferedImage dest) {
-//        if (showOriginal) {
-//            boolean showOriginal = showOriginalParam.isChecked();
-//            showOriginalHelper.setShowOriginal(showOriginal);
-//            if (showOriginal) {
-//                return src;
-//            }
-//
-//            if (showOriginalHelper.showCached()) {
-//                dest = showOriginalHelper.getLastTransformed();
-//                assert dest != null;
-//                return dest;
-//            }
-//        }
         dest = doTransform(src, dest);
-
-//        if (showOriginal) {
-//            showOriginalHelper.setLastTransformed(dest);
-//        }
 
         if (hasAffectedAreaShapeParam && showAffectedAreaParam.isChecked()) {
             ImageUtils.paintAffectedAreaShapes(dest, affectedAreaShapes);

@@ -55,6 +55,7 @@ public class FileChoosers {
         if (openFileChooser == null) {
             //noinspection NonThreadSafeLazyInitialization
             openFileChooser = new JFileChooser(lastOpenDir);
+            openFileChooser.setName("open");
 
             setDefaultOpenExtensions();
 

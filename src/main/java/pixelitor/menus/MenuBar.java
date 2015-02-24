@@ -172,7 +172,7 @@ public class MenuBar extends JMenuBar {
                 }
             }
         };
-        createMenuItem(openAction, fileMenu, EnabledIf.ACTION_ENABLED, CTRL_O);
+        createMenuItem(openAction, fileMenu, EnabledIf.ACTION_ENABLED, CTRL_O, "open");
 
         // recent files
         JMenu recentFiles = RecentFilesMenu.getInstance();
@@ -1234,7 +1234,7 @@ public class MenuBar extends JMenuBar {
     }
 
     private static void createMenuItem(Action action, JMenu parent, EnabledIf whenToEnable, KeyStroke keyStroke) {
-        createMenuItem(action, parent, whenToEnable, keyStroke, null);
+        createMenuItem(action, parent, whenToEnable, keyStroke, (String) action.getValue(Action.NAME));
     }
 
     private static void createMenuItem(Action action, JMenu parent, EnabledIf whenToEnable) {
