@@ -28,7 +28,6 @@ import pixelitor.tools.brushes.Brush;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.SymmetryBrush;
 import pixelitor.utils.ImageSwitchListener;
-import pixelitor.utils.ImageUtils;
 import pixelitor.utils.SliderSpinner;
 
 import javax.swing.*;
@@ -118,26 +117,9 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
 
     @Override
     public void toolMousePressed(MouseEvent e, ImageDisplay ic) {
-        boolean withLine = !firstMouseDown && e.isShiftDown();
+        Paint p = getPaint(e);
 
-        Paint p;
-        int button = e.getButton();
-
-        if (button == MouseEvent.BUTTON3) {
-            p = FgBgColorSelector.getBG();
-        } else if (button == MouseEvent.BUTTON2) {
-            // we never get here because isAltDown is always true for middle-button events, even if Alt is not pressed
-            Color fg = FgBgColorSelector.getFG();
-            Color bg = FgBgColorSelector.getBG();
-            if (e.isControlDown()) {
-                p = ImageUtils.getHSBAverageColor(fg, bg);
-            } else {
-                p = ImageUtils.getRGBAverageColor(fg, bg);
-            }
-        } else {
-            p = FgBgColorSelector.getFG();
-        }
-
+        boolean withLine = withLine(e);
         int x = userDrag.getStartX();
         int y = userDrag.getStartY();
         drawTo(ic.getComp(), p, x, y, withLine);
@@ -149,6 +131,13 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
             brushAffectedArea.initAffectedCoordinates(x, y);
         }
     }
+
+    protected boolean withLine(MouseEvent e) {
+        return !firstMouseDown && e.isShiftDown();
+    }
+
+    // only the Brush Tool returns non-null here
+    protected abstract Paint getPaint(MouseEvent e);
 
     @Override
     public void toolMouseDragged(MouseEvent e, ImageDisplay ic) {
@@ -203,7 +192,6 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
      * Called from mousePressed, mouseDragged, and drawBrushStroke
      */
     private void drawTo(Composition comp, Paint p, int x, int y, boolean connectClickWithLine) {
-        // TODO these two variables could be initialized outside this function
         setupDrawingRadius();
 //        Symmetry currentSymmetry = getCurrentSymmetry();
 

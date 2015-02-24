@@ -57,14 +57,13 @@ public class CloneBrush extends DabsBrush {
         this.destY = destY;
     }
 
-
     @Override
     public void putDab(double x, double y, double theta) {
-//        targetG.drawImage(brushImage, (int) x - radius, (int) y - radius, null);
         targetG.drawImage(brushImage, AffineTransform.getTranslateInstance(
                 x - radius,
                 y - radius
         ), null);
+        updateComp((int) x, (int) y);
     }
 
     @Override

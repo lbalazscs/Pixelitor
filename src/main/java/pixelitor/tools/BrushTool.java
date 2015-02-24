@@ -20,11 +20,14 @@ package pixelitor.tools;
 import pixelitor.Composition;
 import pixelitor.layers.ImageLayer;
 import pixelitor.utils.BlendingModePanel;
+import pixelitor.utils.ImageUtils;
 
 import java.awt.AlphaComposite;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Point;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
 /**
@@ -91,5 +94,27 @@ public class BrushTool extends AbstractBrushTool {
             throw new IllegalStateException();
         }
         return retVal;
+    }
+
+    @Override
+    protected Paint getPaint(MouseEvent e) {
+        Paint p;
+        int button = e.getButton();
+
+        if(button == MouseEvent.BUTTON3) {
+            p = FgBgColorSelector.getBG();
+        } else if(button == MouseEvent.BUTTON2) {
+            // we never get here because isAltDown is always true for middle-button events, even if Alt is not pressed
+            Color fg = FgBgColorSelector.getFG();
+            Color bg = FgBgColorSelector.getBG();
+            if(e.isControlDown()) {
+                p = ImageUtils.getHSBAverageColor(fg, bg);
+            } else {
+                p = ImageUtils.getRGBAverageColor(fg, bg);
+            }
+        } else {
+            p = FgBgColorSelector.getFG();
+        }
+        return p;
     }
 }

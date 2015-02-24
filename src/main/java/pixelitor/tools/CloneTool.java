@@ -17,12 +17,14 @@
 
 package pixelitor.tools;
 
+import pixelitor.Build;
 import pixelitor.ImageDisplay;
 import pixelitor.tools.brushes.CloneBrush;
 import pixelitor.tools.brushes.ImageBrushType;
 import pixelitor.utils.BlendingModePanel;
 import pixelitor.utils.Dialogs;
 
+import java.awt.Paint;
 import java.awt.event.MouseEvent;
 
 import static pixelitor.tools.CloneTool.State.SOURCE_DEFINED;
@@ -38,7 +40,6 @@ public class CloneTool extends BrushTool {
     }
 
     private State state = STARTED;
-//    private CloneBrush cloneBrush;
 
     protected CloneTool() {
         super('k', "Clone", "clone_tool_icon.png",
@@ -70,24 +71,28 @@ public class CloneTool extends BrushTool {
             cloneBrush.setSource(ic.getComp().getActiveImageLayer().getImage(), x, y);
         } else {
             if(state != SOURCE_DEFINED) {
-                Dialogs.showErrorDialog("No source", "Define a source point first with Alt-Click");
+                if(Build.CURRENT.isRobotTest()) {
+                    // do not show dialogs for random robot tests, just act as
+                    // if this was an alt-click
+                    state = SOURCE_DEFINED;
+                    cloneBrush.setSource(ic.getComp().getActiveImageLayer().getImage(), x, y);
+                } else {
+                    Dialogs.showErrorDialog("No source", "Define a source point first with Alt-Click");
+                }
             }
-            cloneBrush.setDestination(x, y);
 
-            // TODO refactor the reusable parts
-            // super.toolMousePressed(e, ic);
+            if(!withLine(e)) {  // the destination should not change for mouse press when drawing with line
+                cloneBrush.setDestination(x, y);
+            }
+
+            super.toolMousePressed(e, ic);
         }
     }
 
-//    @Override
-//    public void toolMouseDragged(MouseEvent e, ImageDisplay ic) {
-//
-//    }
-//
-//    @Override
-//    public void toolMouseReleased(MouseEvent e, ImageDisplay ic) {
-//
-//    }
+    @Override
+    protected Paint getPaint(MouseEvent e) {
+        return null; // this tool doesn't use a Paint
+    }
 
     @Override
     protected boolean doColorPickerForwarding() {
@@ -98,5 +103,4 @@ public class CloneTool extends BrushTool {
     Symmetry getCurrentSymmetry() {
         return Symmetry.NONE;
     }
-
 }

@@ -84,4 +84,9 @@ public class EraseTool extends AbstractBrushTool {
     void mergeTmpLayer(Composition comp) {
         // do nothing - this tool draws directly into the image
     }
+
+    @Override
+    protected Paint getPaint(MouseEvent e) {
+        return null; // this tool doesn't use a Paint
+    }
 }
