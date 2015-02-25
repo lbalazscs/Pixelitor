@@ -63,6 +63,7 @@ import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.menus.file.ScreenCaptureAction;
 import pixelitor.menus.help.AboutDialog;
 import pixelitor.menus.help.UpdatesCheck;
+import pixelitor.menus.view.ShowHideAction;
 import pixelitor.menus.view.ShowHideAllAction;
 import pixelitor.menus.view.ShowHideHistogramsAction;
 import pixelitor.menus.view.ShowHideLayersAction;
@@ -729,11 +730,13 @@ public class MenuBar extends JMenuBar {
 
         viewMenu.addSeparator();
 
-        viewMenu.add(new ShowHideStatusBarAction());
-        createMenuItem(new ShowHideHistogramsAction(), viewMenu, EnabledIf.ACTION_ENABLED, F6);
-        createMenuItem(new ShowHideLayersAction(), viewMenu, EnabledIf.ACTION_ENABLED, F7);
-        viewMenu.add(new ShowHideToolsAction());
-        createMenuItem(ShowHideAllAction.INSTANCE, viewMenu, EnabledIf.ACTION_ENABLED, TAB);
+        //viewMenu.add(new ShowHideStatusBarAction());
+        createShowHideMenuItem(new ShowHideStatusBarAction(), viewMenu, null);
+
+        createShowHideMenuItem(new ShowHideHistogramsAction(), viewMenu, F6);
+        createShowHideMenuItem(new ShowHideLayersAction(), viewMenu, F7);
+        createShowHideMenuItem(new ShowHideToolsAction(), viewMenu, null);
+        createShowHideMenuItem(ShowHideAllAction.INSTANCE, viewMenu, TAB);
 
         AbstractAction defaultWorkspaceAction = new AbstractAction("Set Default Workspace") {
             @Override
@@ -741,7 +744,7 @@ public class MenuBar extends JMenuBar {
                 AppPreferences.WorkSpace.setDefault();
             }
         };
-        createMenuItem(defaultWorkspaceAction, viewMenu, EnabledIf.ACTION_ENABLED);
+        createMenuItem(defaultWorkspaceAction, viewMenu, EnabledIf.ACTION_ENABLED, null, "Set Default Workspace");
 
         viewMenu.addSeparator();
 
@@ -1231,6 +1234,9 @@ public class MenuBar extends JMenuBar {
         if (keyStroke != null) {
             menuItem.setAccelerator(keyStroke);
         }
+        if(a instanceof ShowHideAction) {
+            ((ShowHideAction) a).setMenuItem(menuItem);
+        }
     }
 
     private static void createMenuItem(Action action, JMenu parent, EnabledIf whenToEnable, KeyStroke keyStroke) {
@@ -1245,7 +1251,12 @@ public class MenuBar extends JMenuBar {
         createMenuItem(action, parent, EnabledIf.THERE_IS_OPEN_IMAGE, keyStroke);
     }
 
+    public static void createShowHideMenuItem(ShowHideAction action, JMenu parent, KeyStroke keyStroke) {
+        createMenuItem(action, parent, EnabledIf.ACTION_ENABLED, keyStroke, action.getName());
+    }
+
     public static void createMenuItem(Action action, JMenu parent) {
         createMenuItem(action, parent, EnabledIf.THERE_IS_OPEN_IMAGE, null);
     }
+
 }
