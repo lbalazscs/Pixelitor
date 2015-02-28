@@ -137,12 +137,10 @@ public class ImageComponents {
      */
     public static void selectionCropActiveImage() {
         try {
-            getActiveComp().ifPresent(comp -> {
-                comp.getSelection().ifPresent(selection -> {
-                    Rectangle selectionBounds = selection.getShapeBounds();
-                    CompositionUtils.cropImage(comp, selectionBounds, true, true);
-                });
-            });
+            getActiveComp().ifPresent(comp -> comp.getSelection().ifPresent(selection -> {
+                Rectangle selectionBounds = selection.getShapeBounds();
+                CompositionUtils.cropImage(comp, selectionBounds, true, true);
+            }));
         } catch (Exception ex) {
             Dialogs.showExceptionDialog(ex);
         }

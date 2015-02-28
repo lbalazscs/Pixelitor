@@ -920,8 +920,8 @@ public class ImageUtils {
         int numIntermediatePointIterations = 10;
         float maxDeviationDist = (float) (dist / 2);
 
-        for (int i = 0; i < numIntermediatePointIterations; i++) {
-        }
+//        for (int i = 0; i < numIntermediatePointIterations; i++) {
+//        }
         // TODO not finished?
     }
 

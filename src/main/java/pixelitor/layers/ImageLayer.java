@@ -604,8 +604,7 @@ public class ImageLayer extends ContentLayer {
             newImageHeight = imageHeight;
         }
 
-        // TODO for arbitrary  rotation create a rectangle, then rotate it with the same AffineTransform
-        // something like this: http://forums.sun.com/thread.jspa?threadID=5362614
+        // TODO arbitrary rotation create a rectangle, then rotate it with the same AffineTransform
 
         BufferedImage dest = new BufferedImage(newImageWidth, newImageHeight, img.getType());
 
