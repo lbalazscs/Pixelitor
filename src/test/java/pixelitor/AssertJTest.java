@@ -18,13 +18,18 @@
 package pixelitor;
 
 import org.assertj.swing.core.BasicRobot;
+import org.assertj.swing.core.GenericTypeMatcher;
 import org.assertj.swing.core.MouseButton;
 import org.assertj.swing.core.Robot;
 import org.assertj.swing.finder.JFileChooserFinder;
+import org.assertj.swing.finder.JOptionPaneFinder;
 import org.assertj.swing.finder.WindowFinder;
 import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.FrameFixture;
+import org.assertj.swing.fixture.JButtonFixture;
 import org.assertj.swing.fixture.JFileChooserFixture;
+import org.assertj.swing.fixture.JMenuItemFixture;
+import org.assertj.swing.fixture.JOptionPaneFixture;
 import org.assertj.swing.launcher.ApplicationLauncher;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +39,7 @@ import pixelitor.tools.GradientTool;
 import pixelitor.tools.GradientType;
 import pixelitor.tools.Symmetry;
 
+import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.Random;
@@ -49,13 +55,13 @@ public class AssertJTest {
     private Random random = new Random();
     private Robot robot;
 
-    protected final void setUpRobot() {
+    protected void setUpRobot() {
         robot = BasicRobot.robotWithNewAwtHierarchy();
         robot.settings().delayBetweenEvents(500);
     }
 
     @Before
-    public final void setUp() {
+    public void setUp() {
         setUpRobot();
         onSetUp();
     }
@@ -73,14 +79,80 @@ public class AssertJTest {
 
     @Test
     public void testApp() {
+//        testTools();
+        testMenus();
+//        testLayers();
+
+        sleep(5, TimeUnit.SECONDS);
+    }
+
+    private void testLayers() {
+        // TODO add, remove, change visibility, all the Layers menus
+    }
+
+    protected void testMenus() {
+//        testFileMenu();
+//        testEditMenu();
+//        testFilters();
+//        testZoomCommands();
+//        testViewCommands();
+        testHelpMenu();
+    }
+
+    protected void testHelpMenu() {
+        testTipOfTheDay();
+//        testCheckForUpdate();
+//        testAbout();
+    }
+
+
+    private void testAbout() {
+        findMenuItemByText("About").click();
+        DialogFixture aboutDialog = findDialogByTitle("About Pixelitor");
+        aboutDialog.button("ok").click();
+    }
+
+    private void testCheckForUpdate() {
+        findMenuItemByText("Check for Update...").click();
+        JOptionPaneFixture optionPane = JOptionPaneFinder.findOptionPane().withTimeout(10, TimeUnit.SECONDS).using(robot);
+        optionPane.cancelButton().click();
+    }
+
+    private void testTipOfTheDay() {
+        findMenuItemByText("Tip of the Day").click();
+        DialogFixture dialog = findDialogByTitle("Tip of the Day");
+        findButtonInDialogByText(dialog, "Next >").click();
+        findButtonInDialogByText(dialog, "Next >").click();
+        findButtonInDialogByText(dialog, "< Back").click();
+        findButtonInDialogByText(dialog, "Close").click();
+    }
+
+    protected void testEditMenu() {
+        // TODO testRepeatLast
+        // TODO testUndo
+        // TODO testRedo
+        // TODO testCopyPaste // copy layer, copy composite, paste as layer, paste as new image
+        // TODO testResize
+        // TODO testRotateFlip
+        // TODO testTransformLater
+        // TODO testPreferences
+    }
+
+    protected void testFileMenu() {
         testNewImage();
         testFileOpen();
-        testTools();
-        testFilters();
-        testZoomCommands();
-        testViewCommands();
-
-        sleep(5);
+        // TODO testFileSave - both new and opened files
+        // TODO testFileSaveAs
+        // TODO testExportOptimizedJPEG
+        // TODO testExportOpenRaster
+        // TODO testExportLayerAnimation
+        // TODO testExportTweeningAnimation
+        // TODO testClose
+        // TODO testCloseAll
+        // TODO testBatchResize
+        // TODO testBatchFilter
+        // TODO testExportLayerToPNG
+        // TODO testScreenCapture
     }
 
     protected void testViewCommands() {
@@ -103,15 +175,15 @@ public class AssertJTest {
     }
 
     protected void testNewImage() {
-        window.menuItem("new").click();
-        DialogFixture newImageDialog = WindowFinder.findDialog("dialog0").using(robot);
+        findMenuItemByText("New Image...").click();
+        DialogFixture newImageDialog = findDialogByTitle("New Image");
         newImageDialog.textBox("widthTF").enterText("600");
         newImageDialog.textBox("heightTF").enterText("400");
         newImageDialog.button("ok").click();
     }
 
     protected void testFileOpen() {
-        window.menuItem("open").click();
+        findMenuItemByText("Open...").click();
         JFileChooserFixture openDialog = JFileChooserFinder.findFileChooser("open").using(robot);
         openDialog.cancel();
         window.menuItem("open").click();
@@ -252,6 +324,11 @@ public class AssertJTest {
         testFilterWithDialog("Canny Edge Detector...", true);
         testFilterWithDialog("Drop Shadow...", true);
         testFilterWithDialog("2D Transitions...", true);
+
+        // TODO    Custom 3x3 Convolution...
+        // TODO    Custom 5x5 Convolution...
+        // TODO    Random Filter...
+        // TODO    Text...
     }
 
     private void testMenuCommand(String name) {
@@ -363,6 +440,8 @@ public class AssertJTest {
         drag(500, 300);
         window.button("eraserTraceButton").click();
         deselect();
+        // TODO test crop from tool and also from menu
+        // TODO test all items from selection menu
     }
 
     protected void testCropTool() {
@@ -372,7 +451,7 @@ public class AssertJTest {
         drag(450, 450);
         move(200, 200);
         drag(150, 150);
-        sleep(1);
+        sleep(1, TimeUnit.SECONDS);
         window.button("cropButton").click();
         undo();
     }
@@ -422,11 +501,41 @@ public class AssertJTest {
         robot.releaseMouse(MouseButton.LEFT_BUTTON);
     }
 
-    private void sleep(int seconds) {
+    private void sleep(int duration, TimeUnit unit) {
         try {
-            Thread.sleep(seconds * 1000);
+            Thread.sleep(unit.toMillis(duration));
         } catch(InterruptedException e) {
             throw new IllegalStateException("interrupted!");
         }
     }
+
+    private JMenuItemFixture findMenuItemByText(String guiName) {
+        return new JMenuItemFixture(robot, robot.finder().find(new GenericTypeMatcher<JMenuItem>(JMenuItem.class) {
+            @Override
+            protected boolean isMatching(JMenuItem menuItem) {
+                return guiName.equals(menuItem.getText());
+            }
+        }));
+    }
+
+    private DialogFixture findDialogByTitle(String title) {
+        return new DialogFixture(robot, robot.finder().find(new GenericTypeMatcher<JDialog>(JDialog.class) {
+            @Override
+            protected boolean isMatching(JDialog dialog) {
+                return dialog.getTitle().equals(title);
+            }
+        }));
+    }
+
+    private JButtonFixture findButtonInDialogByText(DialogFixture dialog, String text) {
+        JButtonFixture button = dialog.button(new GenericTypeMatcher<JButton>(JButton.class) {
+            @Override
+            protected boolean isMatching(JButton button) {
+                return button.getText().equals(text);
+            }
+        });
+
+        return button;
+    }
+
 }

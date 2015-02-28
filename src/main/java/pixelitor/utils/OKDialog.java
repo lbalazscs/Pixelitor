@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.utils;
 
 import pixelitor.GlobalKeyboardWatch;
@@ -35,6 +36,7 @@ public class OKDialog extends JDialog {
 
         JPanel p2 = new JPanel();
         JButton ok = new JButton("OK");
+        ok.setName("ok");
         p2.add(ok);
         add(p2, BorderLayout.SOUTH);
 
