@@ -321,7 +321,7 @@ public class MenuBar extends JMenuBar {
         JMenu editMenu = createMenu("Edit", 'E');
 
         // last op
-        createMenuItem(RepeatLastOp.INSTANCE, editMenu, EnabledIf.CAN_REPEAT_OPERATION, CTRL_F);
+        createMenuItem(RepeatLast.INSTANCE, editMenu, EnabledIf.CAN_REPEAT_OPERATION, CTRL_F);
         editMenu.addSeparator();
 
         // undo

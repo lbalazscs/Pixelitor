@@ -24,7 +24,7 @@ import pixelitor.ImageComponents;
 import pixelitor.utils.BlendingModePanel;
 import pixelitor.utils.ImageSwitchListener;
 
-import java.util.Optional;
+import static pixelitor.ImageComponents.getActiveLayer;
 
 /**
  * The GUI selector for the opacity and blending mode of the layers
@@ -55,23 +55,18 @@ public class LayerBlendingModePanel extends BlendingModePanel implements ImageSw
         setEnabled(false);
     }
 
-
     private void opacityChanged() {
-        Optional<Layer> activeLayer = ImageComponents.getActiveLayer();
-
-        if (activeLayer.isPresent()) {
+        getActiveLayer().ifPresent(layer -> {
             float floatValue = getOpacity();
-            activeLayer.get().setOpacity(floatValue, false, true, true);
-        }
+            layer.setOpacity(floatValue, false, true, true);
+        });
     }
 
     private void blendingModeChanged() {
-        Optional<Layer> activeLayer = ImageComponents.getActiveLayer();
-
-        if (activeLayer.isPresent()) {
+        getActiveLayer().ifPresent(layer -> {
             BlendingMode blendingMode = getBlendingMode();
-            activeLayer.get().setBlendingMode(blendingMode, false, true, true);
-        }
+            layer.setBlendingMode(blendingMode, false, true, true);
+        });
     }
 
     @Override

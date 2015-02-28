@@ -17,16 +17,13 @@
 
 package pixelitor.filters;
 
-import pixelitor.Composition;
 import pixelitor.ImageComponents;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.history.FadeableEdit;
 import pixelitor.history.History;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
-import java.util.Optional;
 
 /**
  * The Fade filter
@@ -57,14 +54,12 @@ public class Fade extends FilterWithParametrizedGUI {
             return src;
         }
 
-        Composition activeComp = ImageComponents.getActiveComp().get();
-        Optional<FadeableEdit> edit = History.getPreviousEditForFade(activeComp);
+        // the fade menu item must be active only if History.canFade()
+        BufferedImage previous = ImageComponents.getActiveComp()
+                .flatMap(History::getPreviousEditForFade)
+                .orElseThrow(() -> new IllegalStateException("no FadeableEdit"))
+                .getBackupImage();
 
-        if (!edit.isPresent()) { // the fade menu item must be active only if History.canFade()
-            throw new IllegalStateException("no FadeableEdit");
-        }
-
-        BufferedImage previous = edit.get().getBackupImage();
         if(previous == null) {
             // soft reference expired
             return src;
@@ -76,21 +71,22 @@ public class Fade extends FilterWithParametrizedGUI {
 
         int length = srcData.length;
 
-        if (length != prevData.length) {
-            Composition previousComp = edit.get().getComp();
-            if (activeComp != previousComp) {
-                throw new IllegalArgumentException("activeComp != previousComp");
-            }
-
-            int width = src.getWidth();
-            int height = src.getHeight();
-            int previousWidth = previous.getWidth();
-            int previousHeight = previous.getHeight();
-
-            String debugInfo = "Fade.transform width = " + width + ", height = " + height + ", previousWidth = " + previousWidth + ", previousHeight = " + previousHeight;
-            debugInfo += (" comp = " + activeComp.getName());
-            throw new IllegalArgumentException("the image and the previous are not the same size: " + debugInfo);
-        }
+//        if (length != prevData.length) {
+//            Composition previousComp = ImageComponents.getActiveComp()
+//                    .flatMap(History::getPreviousEditForFade).get().getComp();
+//            if (activeComp != previousComp) {
+//                throw new IllegalArgumentException("activeComp != previousComp");
+//            }
+//
+//            int width = src.getWidth();
+//            int height = src.getHeight();
+//            int previousWidth = previous.getWidth();
+//            int previousHeight = previous.getHeight();
+//
+//            String debugInfo = "Fade.transform width = " + width + ", height = " + height + ", previousWidth = " + previousWidth + ", previousHeight = " + previousHeight;
+//            debugInfo += (" comp = " + activeComp.getName());
+//            throw new IllegalArgumentException("the image and the previous are not the same size: " + debugInfo);
+//        }
 
         float fadeFactor = opacityParam.getValueAsPercentage();
 

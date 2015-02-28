@@ -14,16 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.gui;
 
-import pixelitor.Composition;
 import pixelitor.ImageComponents;
 import pixelitor.filters.Filter;
 import pixelitor.layers.Layers;
 import pixelitor.utils.Dialogs;
 
 import java.awt.event.ActionEvent;
-import java.util.Optional;
 
 /**
  * A filter that has a GUI for customization
@@ -59,15 +58,15 @@ public abstract class FilterWithGUI extends Filter {
             return;
         }
 
-        Optional<Composition> comp = ImageComponents.getActiveComp();
-        if (comp.isPresent()) {
-            comp.get().getActiveImageLayer().startPreviewing();
+        ImageComponents.getActiveImageLayer()
+                .ifPresent(layer -> {
+                    layer.startPreviewing();
 
-            AdjustPanel p = createAdjustPanel();
-            startDialogSession();
-            AdjustDialog.showDialog(p, this);
-            endDialogSession();
-        }
+                    AdjustPanel p = createAdjustPanel();
+                    startDialogSession();
+                    AdjustDialog.showDialog(p, this);
+                    endDialogSession();
+                });
     }
 
     public void startDialogSession() {

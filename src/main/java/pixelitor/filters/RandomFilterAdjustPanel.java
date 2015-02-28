@@ -55,7 +55,7 @@ public class RandomFilterAdjustPanel extends AdjustPanel {
                 (filter != op
                         && (!(filter instanceof Fade))
                         && (!(filter instanceof RandomFilter))
-                        && (!(filter instanceof RepeatLastOp))));
+                        && (!(filter instanceof RepeatLast))));
 
         op = newFilter;
         String filterName = newFilter.getListName();

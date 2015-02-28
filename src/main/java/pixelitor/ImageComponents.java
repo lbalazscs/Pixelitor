@@ -25,7 +25,6 @@ import pixelitor.layers.Layer;
 import pixelitor.menus.SelectionActions;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.menus.view.ZoomMenu;
-import pixelitor.selection.Selection;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.ImageSwitchListener;
@@ -95,19 +94,11 @@ public class ImageComponents {
     }
 
     public static Optional<Layer> getActiveLayer() {
-        Optional<Composition> activeComp = getActiveComp();
-        if (activeComp.isPresent()) {
-            return Optional.of(activeComp.get().getActiveLayer());
-        }
-        return Optional.empty();
+        return getActiveComp().map(Composition::getActiveLayer);
     }
 
     public static Optional<ImageLayer> getActiveImageLayer() {
-        Optional<Composition> activeComp = getActiveComp();
-        if (activeComp.isPresent()) {
-            return Optional.of(activeComp.get().getActiveImageLayer());
-        }
-        return Optional.empty();
+        return getActiveComp().flatMap(Composition::getActiveImageLayerOpt);
     }
 
     public static int getNrOfOpenImages() {
@@ -115,12 +106,14 @@ public class ImageComponents {
     }
 
     public static Optional<BufferedImage> getActiveCompositeImage() {
-        Optional<Composition> comp = getActiveComp();
-        if (comp.isPresent()) {
-            return Optional.of(comp.get().getCompositeImage());
-        }
+        return getActiveComp().map(Composition::getCompositeImage);
 
-        return Optional.empty();
+//        Optional<Composition> comp = getActiveComp();
+//        if (comp.isPresent()) {
+//            return Optional.of(comp.get().getCompositeImage());
+//        }
+//
+//        return Optional.empty();
     }
 
     /**
@@ -130,11 +123,10 @@ public class ImageComponents {
     public static void toolCropActiveImage(boolean allowGrowing) {
         try {
             Optional<Composition> opt = getActiveComp();
-            if (opt.isPresent()) {
-                Composition comp = opt.get();
+            opt.ifPresent(comp -> {
                 Rectangle cropRectangle = Tools.CROP.getCropRectangle(comp.getIC());
                 CompositionUtils.cropImage(comp, cropRectangle, false, allowGrowing);
-            }
+            });
         } catch (Exception ex) {
             Dialogs.showExceptionDialog(ex);
         }
@@ -145,15 +137,12 @@ public class ImageComponents {
      */
     public static void selectionCropActiveImage() {
         try {
-            Optional<Composition> opt = getActiveComp();
-            if (opt.isPresent()) {
-                Composition comp = opt.get();
-                Optional<Selection> selection = comp.getSelection();
-                if (selection.isPresent()) {
-                    Rectangle selectionBounds = selection.get().getShapeBounds();
+            getActiveComp().ifPresent(comp -> {
+                comp.getSelection().ifPresent(selection -> {
+                    Rectangle selectionBounds = selection.getShapeBounds();
                     CompositionUtils.cropImage(comp, selectionBounds, true, true);
-                }
-            }
+                });
+            });
         } catch (Exception ex) {
             Dialogs.showExceptionDialog(ex);
         }
@@ -161,8 +150,9 @@ public class ImageComponents {
 
     public static void resizeActiveImage() {
         try {
-            Optional<Composition> opt = getActiveComp();
-            ResizePanel.showInDialog(opt.get());
+            Composition comp = getActiveComp()
+                    .orElseThrow(() -> new IllegalStateException("no active image"));
+            ResizePanel.showInDialog(comp);
         } catch (Exception ex) {
             Dialogs.showExceptionDialog(ex);
         }

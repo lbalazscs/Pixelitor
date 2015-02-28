@@ -215,18 +215,17 @@ public class ShapesTool extends Tool {
         paintShapeOnIC(comp, userDrag);
 
         if (selectionMode) {
-            Optional<Selection> selection = comp.getSelection();
-            if (selection.isPresent()) {
-                selection.get().clipToCompSize(comp); // the selection can be too big
+            comp.getSelection().ifPresent((selection) -> {
+                selection.clipToCompSize(comp); // the selection can be too big
 
                 PixelitorEdit edit;
                 if (backupSelectionShape != null) {
                     edit = new SelectionChangeEdit(comp, backupSelectionShape, "Selection Change");
                 } else {
-                    edit = new NewSelectionEdit(comp, selection.get().getShape());
+                    edit = new NewSelectionEdit(comp, selection.getShape());
                 }
                 History.addEdit(edit);
-            }
+            });
         }
 
         drawing = false;
@@ -328,7 +327,7 @@ public class ShapesTool extends Tool {
 
         if (action.hasStroke()) {
             TwoPointBasedPaint strokeFill = strokeFillModel.getSelectedItem();
-            if(stroke == null) {
+            if (stroke == null) {
                 // During a single mouse drag, only one stroke should be created
                 // This is particularly important for "random shape"
                 stroke = createStroke();
@@ -373,10 +372,11 @@ public class ShapesTool extends Tool {
             }
 
             Optional<Selection> selection = comp.getSelection();
-            if (!selection.isPresent()) {
-                comp.createSelectionFromShape(selectionShape);
-            } else {
+
+            if (selection.isPresent()) {
                 selection.get().setShape(selectionShape);
+            } else {
+                comp.createSelectionFromShape(selectionShape);
             }
         }
     }

@@ -35,7 +35,6 @@ import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.io.File;
-import java.util.Optional;
 
 /**
  *
@@ -161,11 +160,10 @@ public class OpTests {
     }
 
     public static void randomResize() {
-        Optional<Composition> comp = ImageComponents.getActiveComp();
-        if (comp.isPresent()) {
+        ImageComponents.getActiveComp().ifPresent(comp -> {
             int targetWidth = 10 + RobotTest.rand.nextInt(1200);
             int targetHeight = 10 + RobotTest.rand.nextInt(800);
-            CompositionUtils.resize(comp.get(), targetWidth, targetHeight, false);
-        }
+            CompositionUtils.resize(comp, targetWidth, targetHeight, false);
+        });
     }
 }

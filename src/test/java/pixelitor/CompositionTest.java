@@ -37,6 +37,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.Composition.ImageChangeActions.HISTOGRAM;
 import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
@@ -142,8 +143,7 @@ public class CompositionTest {
 
     @Test
     public void testGetActiveImageLayer() {
-        ImageLayer imageLayer = comp.getActiveImageLayer();
-        assertNotNull(imageLayer);
+        assertTrue(comp.getActiveImageLayerOpt().isPresent());
         comp.checkInvariant();
     }
 

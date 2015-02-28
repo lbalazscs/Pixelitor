@@ -21,7 +21,6 @@ import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
 import pixelitor.layers.Layers;
-import pixelitor.selection.Selection;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Dialogs;
@@ -29,7 +28,8 @@ import pixelitor.utils.Dialogs;
 import javax.swing.*;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
-import java.util.Optional;
+
+import static pixelitor.ImageComponents.getActiveComp;
 
 /**
  * Static methods for managing the selection actions
@@ -46,14 +46,14 @@ public final class SelectionActions {
     private static final AbstractAction deselectAction = new AbstractAction("Deselect") {
         @Override
         public void actionPerformed(ActionEvent e) {
-            ImageComponents.getActiveComp().get().deselect(true);
+            getActiveComp().get().deselect(true);
         }
     };
 
     private static final AbstractAction invertSelectionAction = new AbstractAction("Invert Selection") {
         @Override
         public void actionPerformed(ActionEvent e) {
-            ImageComponents.getActiveComp().get().invertSelection();
+            getActiveComp().get().invertSelection();
         }
     };
 
@@ -127,14 +127,14 @@ public final class SelectionActions {
                 return;
             }
 
-            Composition comp = ImageComponents.getActiveComp().get();
-            Optional<Selection> selection = comp.getSelection();
-            if (selection.isPresent()) {
-                Shape shape = selection.get().getShape();
-                if (shape != null) {
-                    brushTool.trace(comp, shape);
-                }
-            }
+            getActiveComp()
+                    .flatMap(Composition::getSelection)
+                    .ifPresent(selection -> {
+                        Shape shape = selection.getShape();
+                        if (shape != null) {
+                            brushTool.trace(getActiveComp().get(), shape);
+                        }
+                    });
         }
     }
 }

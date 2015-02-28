@@ -41,7 +41,6 @@ import java.beans.PropertyVetoException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * The main application window.
@@ -285,10 +284,7 @@ public class PixelitorWindow extends JFrame {
         if (v) {
             verticalBoxEast.add(histogramsPanel);
 
-            Optional<Composition> comp = ImageComponents.getActiveComp();
-            if (comp.isPresent()) {
-                histogramsPanel.updateFromCompIfShown(comp.get());
-            }
+            ImageComponents.getActiveComp().ifPresent(histogramsPanel::updateFromCompIfShown);
         } else {
             verticalBoxEast.remove(histogramsPanel);
         }

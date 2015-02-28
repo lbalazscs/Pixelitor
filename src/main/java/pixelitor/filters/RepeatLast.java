@@ -20,12 +20,13 @@ package pixelitor.filters;
 import pixelitor.ChangeReason;
 
 import java.awt.image.BufferedImage;
-import java.util.Optional;
 
-public class RepeatLastOp extends Filter {
-    public static final RepeatLastOp INSTANCE = new RepeatLastOp();
+import static pixelitor.filters.FilterUtils.getLastExecutedFilter;
 
-    private RepeatLastOp() {
+public class RepeatLast extends Filter {
+    public static final RepeatLast INSTANCE = new RepeatLast();
+
+    private RepeatLast() {
         super("Repeat Last Operation");
         setEnabled(false);
     }
@@ -37,17 +38,13 @@ public class RepeatLastOp extends Filter {
 
     @Override
     public void execute(ChangeReason changeReason) {
-        Optional<Filter> lastOp = FilterUtils.getLastExecutedFilter();
-        if (lastOp.isPresent()) {
-            lastOp.get().execute(changeReason);
-        }
+        getLastExecutedFilter()
+                .ifPresent(filter -> filter.execute(changeReason));
     }
 
     @Override
     public void randomizeSettings() {
-        Optional<Filter> lastOp = FilterUtils.getLastExecutedFilter();
-        if (lastOp.isPresent()) {
-            lastOp.get().randomizeSettings();
-        }
+        getLastExecutedFilter()
+                .ifPresent(Filter::randomizeSettings);
     }
 }

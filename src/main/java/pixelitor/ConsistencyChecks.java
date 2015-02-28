@@ -27,6 +27,8 @@ import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.util.Optional;
 
+import static pixelitor.ImageComponents.getActiveComp;
+
 /**
  * Consistency checks that run only in developer mode.
  * They are enabled by the Build setting or by the assertions
@@ -36,14 +38,12 @@ public final class ConsistencyChecks {
     }
 
     public static void checkAll() {
-        Optional<Composition> opt = ImageComponents.getActiveComp();
-        if (opt.isPresent()) {
-            Composition comp = opt.get();
+        getActiveComp().ifPresent(comp -> {
             selectionCheck(comp);
             fadeCheck(comp);
             translationCheck(comp);
             layerDeleteActionEnabledCheck();
-        }
+        });
     }
 
     /**
@@ -52,12 +52,13 @@ public final class ConsistencyChecks {
     public static boolean fadeCheck(Composition comp) {
         Optional<FadeableEdit> edit = History.getPreviousEditForFade(comp);
         if (edit.isPresent()) {  // can fade
-            ImageLayer layer = comp.getActiveImageLayer();
-            if (layer != null) {
+            Optional<ImageLayer> opt = comp.getActiveImageLayerOpt();
+            if (opt.isPresent()) {
+                ImageLayer layer = opt.get();
                 BufferedImage current = layer.getImageOrSubImageIfSelected(false, true);
 
                 BufferedImage previous = edit.get().getBackupImage();
-                if(previous == null) {
+                if (previous == null) {
                     // soft reference expired
                     return true;
                 }
@@ -78,8 +79,8 @@ public final class ConsistencyChecks {
     }
 
     private static void selectionCheck(Composition comp) {
-        if(!SwingUtilities.isEventDispatchThread()) {
-            if(!Build.CURRENT.isPerformanceTest()) {
+        if (!SwingUtilities.isEventDispatchThread()) {
+            if (!Build.CURRENT.isPerformanceTest()) {
                 throw new IllegalStateException("ConsistencyChecks::selectionCheck: not on EDT");
             }
         }
@@ -95,24 +96,23 @@ public final class ConsistencyChecks {
 
     public static boolean translationCheck(Composition comp) {
         ImageLayer layer = comp.getActiveImageLayer();
-        if (layer != null) {
-            BufferedImage bufferedImage = layer.getImage();
+        BufferedImage bufferedImage = layer.getImage();
 
-            int x = -layer.getTranslationX();
-            int canvasWidth = comp.getCanvasWidth();
-            int imageWidth = bufferedImage.getWidth();
-            if (x + canvasWidth > imageWidth) {
-                throw new IllegalStateException("x = " + x + ", canvasWidth = " + canvasWidth + ", imageWidth = " + imageWidth + ", comp = " + comp.getName());
-            }
-
-            int y = -layer.getTranslationY();
-            int canvasHeight = comp.getCanvasHeight();
-            int imageHeight = bufferedImage.getHeight();
-
-            if (y + canvasHeight > imageHeight) {
-                throw new IllegalStateException("y = " + y + ", canvasHeight = " + canvasHeight + ", imageHeight = " + imageHeight + ", comp = " + comp.getName());
-            }
+        int x = -layer.getTranslationX();
+        int canvasWidth = comp.getCanvasWidth();
+        int imageWidth = bufferedImage.getWidth();
+        if (x + canvasWidth > imageWidth) {
+            throw new IllegalStateException("x = " + x + ", canvasWidth = " + canvasWidth + ", imageWidth = " + imageWidth + ", comp = " + comp.getName());
         }
+
+        int y = -layer.getTranslationY();
+        int canvasHeight = comp.getCanvasHeight();
+        int imageHeight = bufferedImage.getHeight();
+
+        if (y + canvasHeight > imageHeight) {
+            throw new IllegalStateException("y = " + y + ", canvasHeight = " + canvasHeight + ", imageHeight = " + imageHeight + ", comp = " + comp.getName());
+        }
+
         return true;
     }
 
@@ -122,7 +122,7 @@ public final class ConsistencyChecks {
             return true;
         }
 
-        Optional<Composition> optComp = ImageComponents.getActiveComp();
+        Optional<Composition> optComp = getActiveComp();
         if (!optComp.isPresent()) {
             return true;
         }

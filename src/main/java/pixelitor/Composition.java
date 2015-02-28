@@ -19,7 +19,7 @@ package pixelitor;
 
 import pixelitor.filters.Filter;
 import pixelitor.filters.FilterUtils;
-import pixelitor.filters.RepeatLastOp;
+import pixelitor.filters.RepeatLast;
 import pixelitor.history.DeleteLayerEdit;
 import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;
@@ -237,30 +237,36 @@ public class Composition implements Serializable {
         }
     }
 
+    /**
+     * This method assumes that the active layer is an image layer
+     */
     public ImageLayer getActiveImageLayer() {
+        checkInvariant();
         if (activeLayer instanceof ImageLayer) {
             ImageLayer imageLayer = (ImageLayer) activeLayer;
             return imageLayer;
         }
-        return null;
+        throw new IllegalStateException("active layer is not image layer");
+    }
+
+    /**
+     * This should be called if the active layer might not be an image layer
+     */
+    public Optional<ImageLayer> getActiveImageLayerOpt() {
+        if (activeLayer instanceof ImageLayer) {
+            ImageLayer imageLayer = (ImageLayer) activeLayer;
+            return Optional.of(imageLayer);
+        }
+        return Optional.empty();
     }
 
     public BufferedImage getImageOrSubImageIfSelectedForActiveLayer(boolean copyIfFull, boolean copyAndTranslateIfSelected) {
-        ImageLayer imageLayer = getActiveImageLayer();
-        if (imageLayer != null) {
-            return imageLayer.getImageOrSubImageIfSelected(copyIfFull, copyAndTranslateIfSelected);
-        }
-
-        return null;
+        return getActiveImageLayer()
+                .getImageOrSubImageIfSelected(copyIfFull, copyAndTranslateIfSelected);
     }
 
     public BufferedImage getFilterSource() {
-        ImageLayer imageLayer = getActiveImageLayer();
-        if (imageLayer != null) {
-            return imageLayer.getFilterSourceImage();
-        }
-
-        return null;
+        return getActiveImageLayer().getFilterSourceImage();
     }
 
     public Canvas getCanvas() {
@@ -712,10 +718,12 @@ public class Composition implements Serializable {
     }
 
     public void layerToCanvasSize() {
-        ImageLayer layer = getActiveImageLayer();
-        if (layer != null) {
-            layer.cropToCanvasSize();
+        Optional<ImageLayer> layer = getActiveImageLayerOpt();
+        if (layer.isPresent()) {
+            layer.get().cropToCanvasSize();
             History.addEdit(new NotUndoableEdit(this, "Layer to Canvas Size")); // TODO ImageEdit would be better
+        } else {
+            Dialogs.showErrorDialog("Not an image layer", "The active layer is not an image layer");
         }
     }
 
@@ -809,7 +817,7 @@ public class Composition implements Serializable {
             }
             Dialogs.showExceptionDialog(e);
         }
-        RepeatLastOp.INSTANCE.setMenuName("Repeat " + filterMenuName);
+        RepeatLast.INSTANCE.setMenuName("Repeat " + filterMenuName);
     }
 
     public void setShowOriginal(boolean b) {

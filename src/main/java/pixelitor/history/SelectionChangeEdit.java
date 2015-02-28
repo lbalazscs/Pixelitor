@@ -24,7 +24,6 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import java.awt.Shape;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Represents the change of a selection shape (via add, subtract, intersect or invert)
@@ -53,14 +52,12 @@ public class SelectionChangeEdit extends PixelitorEdit {
     }
 
     private void swapShapes() {
-        Optional<Selection> selection = comp.getSelection();
         Shape tmp;
-        if (selection.isPresent()) {
-            tmp = selection.get().getShape(); // TODO create swapShapes in Selection?
-            selection.get().setShape(backupShape);
-        } else {
-            throw new IllegalStateException("no selection in " + comp.getName());
-        }
+
+        Selection selection = comp.getSelection()
+                .orElseThrow(() -> new IllegalStateException("no selection in " + comp.getName()));
+        tmp = selection.getShape(); // TODO create swapShapes in Selection?
+        selection.setShape(backupShape);
 
         backupShape = tmp;
         History.postEdit(this);
