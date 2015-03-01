@@ -30,6 +30,7 @@ import org.assertj.swing.fixture.JButtonFixture;
 import org.assertj.swing.fixture.JFileChooserFixture;
 import org.assertj.swing.fixture.JMenuItemFixture;
 import org.assertj.swing.fixture.JOptionPaneFixture;
+import org.assertj.swing.fixture.JTextComponentFixture;
 import org.assertj.swing.launcher.ApplicationLauncher;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,6 +49,7 @@ import java.util.concurrent.TimeUnit;
 import static java.awt.event.KeyEvent.VK_ALT;
 import static java.awt.event.KeyEvent.VK_CONTROL;
 import static java.awt.event.KeyEvent.VK_D;
+import static java.awt.event.KeyEvent.VK_I;
 import static java.awt.event.KeyEvent.VK_Z;
 
 public class AssertJTest {
@@ -92,11 +94,11 @@ public class AssertJTest {
 
     protected void testMenus() {
 //        testFileMenu();
-//        testEditMenu();
+        testEditMenu();
 //        testFilters();
 //        testZoomCommands();
 //        testViewCommands();
-        testHelpMenu();
+//        testHelpMenu();
     }
 
     protected void testHelpMenu() {
@@ -128,19 +130,59 @@ public class AssertJTest {
     }
 
     protected void testEditMenu() {
-        // TODO testRepeatLast
-        // TODO testUndo
-        // TODO testRedo
-        // TODO testCopyPaste // copy layer, copy composite, paste as layer, paste as new image
-        // TODO testResize
-        // TODO testRotateFlip
+//        keyboardInvert();
+//        runMenuCommand("Repeat Invert");
+//        runMenuCommand("Undo Invert");
+//        runMenuCommand("Redo Invert");
+//        testFilterWithDialog("Fade Invert", false);
+
+//        // select for crop
+//        window.toggleButton("Selection Tool Button").click();
+//        move(200, 200);
+//        drag(400, 400);
+//        runMenuCommand("Crop");
+//        keyboardUndo();
+//        keyboardDeselect();
+
+//        testCopyPaste();
+
+        testResize();
+        testRotateFlip();
         // TODO testTransformLater
         // TODO testPreferences
     }
 
+    private void testRotateFlip() {
+        runMenuCommand("Rotate 90° CW");
+        runMenuCommand("Rotate 180°");
+        runMenuCommand("Rotate 90° CCW");
+        runMenuCommand("Flip Horizontal");
+        runMenuCommand("Flip Vertical");
+    }
+
+    private void testResize() {
+        runMenuCommand("Resize...");
+        DialogFixture resizeDialog = findDialogByTitle("Resize");
+
+        JTextComponentFixture widthTF = resizeDialog.textBox("widthTF");
+        widthTF.deleteText().enterText("622");
+
+        JTextComponentFixture heightTF = resizeDialog.textBox("heightTF");
+        heightTF.deleteText().enterText("422");
+
+        resizeDialog.button("ok").click();
+    }
+
+    private void testCopyPaste() {
+        runMenuCommand("Copy Layer");
+        runMenuCommand("Paste as New Layer");
+        runMenuCommand("Copy Composite");
+        runMenuCommand("Paste as New Image");
+    }
+
     protected void testFileMenu() {
         testNewImage();
-        testFileOpen();
+        //testFileOpen();
         // TODO testFileSave - both new and opened files
         // TODO testFileSaveAs
         // TODO testExportOptimizedJPEG
@@ -156,29 +198,29 @@ public class AssertJTest {
     }
 
     protected void testViewCommands() {
-        testMenuCommand("Set Default Workspace");
-        testMenuCommand("Hide Status Bar");
-        testMenuCommand("Show Status Bar");
-        testMenuCommand("Show Histograms");
-        testMenuCommand("Hide Histograms");
-        testMenuCommand("Hide Layers");
-        testMenuCommand("Show Layers");
+        runMenuCommand("Set Default Workspace");
+        runMenuCommand("Hide Status Bar");
+        runMenuCommand("Show Status Bar");
+        runMenuCommand("Show Histograms");
+        runMenuCommand("Hide Histograms");
+        runMenuCommand("Hide Layers");
+        runMenuCommand("Show Layers");
 
-        testMenuCommand("Hide Tools");
-        testMenuCommand("Show Tools");
+        runMenuCommand("Hide Tools");
+        runMenuCommand("Show Tools");
 
-        testMenuCommand("Hide All");
-        testMenuCommand("Show Hidden");
+        runMenuCommand("Hide All");
+        runMenuCommand("Show Hidden");
 
-        testMenuCommand("Cascade");
-        testMenuCommand("Tile");
+        runMenuCommand("Cascade");
+        runMenuCommand("Tile");
     }
 
     protected void testNewImage() {
         findMenuItemByText("New Image...").click();
         DialogFixture newImageDialog = findDialogByTitle("New Image");
-        newImageDialog.textBox("widthTF").enterText("600");
-        newImageDialog.textBox("heightTF").enterText("400");
+        newImageDialog.textBox("widthTF").deleteText().enterText("611");
+        newImageDialog.textBox("heightTF").deleteText().enterText("411");
         newImageDialog.button("ok").click();
     }
 
@@ -208,29 +250,29 @@ public class AssertJTest {
     }
 
     protected void testZoomCommands() {
-        testMenuCommand("Zoom In");
-        testMenuCommand("Zoom Out");
-        testMenuCommand("Actual Pixels");
-        testMenuCommand("Fit Screen");
-        testMenuCommand("12.5 %");
-        testMenuCommand("17.7 %");
-        testMenuCommand("25 %");
-        testMenuCommand("35.3 %");
-        testMenuCommand("50 %");
-        testMenuCommand("70.7 %");
-        testMenuCommand("100 %");
-        testMenuCommand("141.4 %");
-        testMenuCommand("200 %");
-        testMenuCommand("282.8 %");
-        testMenuCommand("400 %");
-        testMenuCommand("565.7 %");
-        testMenuCommand("800 %");
-        testMenuCommand("1131.4 %");
-        testMenuCommand("1600 %");
-        testMenuCommand("2262.7 %");
-        testMenuCommand("3200 %");
-        testMenuCommand("4525.5 %");
-        testMenuCommand("6400 %");
+        runMenuCommand("Zoom In");
+        runMenuCommand("Zoom Out");
+        runMenuCommand("Actual Pixels");
+        runMenuCommand("Fit Screen");
+        runMenuCommand("12.5 %");
+        runMenuCommand("17.7 %");
+        runMenuCommand("25 %");
+        runMenuCommand("35.3 %");
+        runMenuCommand("50 %");
+        runMenuCommand("70.7 %");
+        runMenuCommand("100 %");
+        runMenuCommand("141.4 %");
+        runMenuCommand("200 %");
+        runMenuCommand("282.8 %");
+        runMenuCommand("400 %");
+        runMenuCommand("565.7 %");
+        runMenuCommand("800 %");
+        runMenuCommand("1131.4 %");
+        runMenuCommand("1600 %");
+        runMenuCommand("2262.7 %");
+        runMenuCommand("3200 %");
+        runMenuCommand("4525.5 %");
+        runMenuCommand("6400 %");
     }
 
     protected void testFilters() {
@@ -331,8 +373,8 @@ public class AssertJTest {
         // TODO    Text...
     }
 
-    private void testMenuCommand(String name) {
-        window.menuItem(name).click();
+    private void runMenuCommand(String text) {
+        findMenuItemByText(text).click();
     }
 
     private void testNoDialogFilter(String name) {
@@ -340,7 +382,8 @@ public class AssertJTest {
     }
 
     private void testFilterWithDialog(String name, boolean randomize) {
-        window.menuItem(name).click();
+        // window.menuItem(name).click();
+        findMenuItemByText(name).click();
         DialogFixture filterDialog = WindowFinder.findDialog("filterDialog").using(robot);
         if(randomize) {
             filterDialog.button("Randomize Settings").click();
@@ -429,9 +472,9 @@ public class AssertJTest {
         move(200, 200);
         drag(400, 400);
         window.button("brushTraceButton").click();
-        deselect();
-        undo(); // undo deselection
-        undo(); // undo tracing
+        keyboardDeselect();
+        keyboardUndo(); // keyboardUndo deselection
+        keyboardUndo(); // keyboardUndo tracing
         window.comboBox("selectionTypeCombo").selectItem("Ellipse");
         move(200, 200);
         drag(400, 400);
@@ -439,7 +482,7 @@ public class AssertJTest {
         move(400, 200);
         drag(500, 300);
         window.button("eraserTraceButton").click();
-        deselect();
+        keyboardDeselect();
         // TODO test crop from tool and also from menu
         // TODO test all items from selection menu
     }
@@ -453,14 +496,14 @@ public class AssertJTest {
         drag(150, 150);
         sleep(1, TimeUnit.SECONDS);
         window.button("cropButton").click();
-        undo();
+        keyboardUndo();
     }
 
     protected void testMoveTool() {
         window.toggleButton("Move Tool Button").click();
         move(300, 300);
         drag(400, 400);
-        undo();
+        keyboardUndo();
     }
 
     protected void testZoomTool() {
@@ -471,11 +514,15 @@ public class AssertJTest {
         // TODO Alt-click to zoom out and all the zoom methods, including mouse wheel
     }
 
-    private void undo() {
+    private void keyboardUndo() {
         window.pressKey(VK_CONTROL).pressKey(VK_Z).releaseKey(VK_Z).releaseKey(VK_CONTROL);
     }
 
-    private void deselect() {
+    private void keyboardInvert() {
+        window.pressKey(VK_CONTROL).pressKey(VK_I).releaseKey(VK_I).releaseKey(VK_CONTROL);
+    }
+
+    private void keyboardDeselect() {
         window.pressKey(VK_CONTROL).pressKey(VK_D).releaseKey(VK_D).releaseKey(VK_CONTROL);
     }
 

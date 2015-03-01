@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.menus.view;
 
 import javax.swing.*;
@@ -25,7 +26,6 @@ import java.awt.event.ActionEvent;
 public abstract class ShowHideAction extends AbstractAction {
     private final String showName;
     private final String hideName;
-    private JMenuItem menuItem;
 
     protected ShowHideAction(String showName, String hideName) {
         this.showName = showName;
@@ -57,9 +57,6 @@ public abstract class ShowHideAction extends AbstractAction {
             newName = hideName;
         }
         setName(newName);
-        if(menuItem != null) {
-            menuItem.setName(newName);
-        }
     }
 
     public abstract boolean getVisibilityAtStartUp();
@@ -67,8 +64,4 @@ public abstract class ShowHideAction extends AbstractAction {
     public abstract boolean getCurrentVisibility();
 
     public abstract void setVisibilityAction(boolean value);
-
-    public void setMenuItem(JMenuItem menuItem) {
-        this.menuItem = menuItem;
-    }
 }

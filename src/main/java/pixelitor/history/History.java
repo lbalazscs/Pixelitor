@@ -67,7 +67,7 @@ public class History {
             undoManager.discardAllEdits();
         }
 
-        undoDepth = 0; // reset before calling postEdit, so that the fade menu item can become enabled
+        undoDepth = 0; // reset BEFORE calling postEdit, so that the fade menu item can become enabled
         undoableEditSupport.postEdit(edit);
 
         if (Build.CURRENT != Build.FINAL) {
@@ -90,11 +90,11 @@ public class History {
         }
 
         try {
+            undoDepth--; // after redo we should be fadeable again
             undoManager.redo();
         } catch (Exception e) {
             Dialogs.showExceptionDialog(e);
         }
-        undoDepth--;
     }
 
     public static void undo() {
@@ -185,7 +185,7 @@ public class History {
             return false;
         }
         Composition comp = optComp.get();
-        return (getPreviousEditForFade(comp).isPresent());
+        return getPreviousEditForFade(comp).isPresent();
     }
 
     public static void allImagesAreClosed() {

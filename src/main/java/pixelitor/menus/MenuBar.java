@@ -36,6 +36,7 @@ import pixelitor.filters.animation.TweenWizard;
 import pixelitor.filters.comp.Flip;
 import pixelitor.filters.comp.Rotate;
 import pixelitor.filters.convolve.Convolve;
+import pixelitor.filters.gui.ResizePanel;
 import pixelitor.filters.jhlabsproxies.*;
 import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.filters.lookup.Levels;
@@ -363,7 +364,7 @@ public class MenuBar extends JMenuBar {
         Action resizeAction = new AbstractAction("Resize...") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ImageComponents.resizeActiveImage();
+                ResizePanel.resizeActiveImage();
             }
         };
         createMenuItem(resizeAction, editMenu, CTRL_ALT_I);

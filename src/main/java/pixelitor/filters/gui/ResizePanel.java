@@ -18,6 +18,7 @@
 package pixelitor.filters.gui;
 
 import pixelitor.Composition;
+import pixelitor.ImageComponents;
 import pixelitor.filters.comp.CompositionUtils;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.GridBagHelper;
@@ -74,6 +75,7 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
 
         gridBagHelper.addLabel("Width:", 0, 0);
         widthTextField = new JTextField(NR_OF_COLUMNS);
+        widthTextField.setName("widthTF");
         widthTextField.addKeyListener(this);
         widthTextField.setText(String.valueOf(oldWidth));
         gridBagHelper.addControl(widthTextField);
@@ -82,6 +84,7 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
 
         gridBagHelper.addLabel("Height:", 0, 1);
         heightTextField = new JTextField(NR_OF_COLUMNS);
+        heightTextField.setName("heightTF");
         heightTextField.setText(String.valueOf(oldHeight));
         gridBagHelper.addControl(heightTextField);
         heightTextField.addKeyListener(this);
@@ -268,4 +271,13 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
         d.setVisible(true);
     }
 
+    public static void resizeActiveImage() {
+        try {
+            Composition comp = ImageComponents.getActiveComp()
+                    .orElseThrow(() -> new IllegalStateException("no active image"));
+            showInDialog(comp);
+        } catch (Exception ex) {
+            Dialogs.showExceptionDialog(ex);
+        }
+    }
 }

@@ -18,7 +18,6 @@
 package pixelitor;
 
 import pixelitor.filters.comp.CompositionUtils;
-import pixelitor.filters.gui.ResizePanel;
 import pixelitor.history.History;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
@@ -141,16 +140,6 @@ public class ImageComponents {
                 Rectangle selectionBounds = selection.getShapeBounds();
                 CompositionUtils.cropImage(comp, selectionBounds, true, true);
             }));
-        } catch (Exception ex) {
-            Dialogs.showExceptionDialog(ex);
-        }
-    }
-
-    public static void resizeActiveImage() {
-        try {
-            Composition comp = getActiveComp()
-                    .orElseThrow(() -> new IllegalStateException("no active image"));
-            ResizePanel.showInDialog(comp);
         } catch (Exception ex) {
             Dialogs.showExceptionDialog(ex);
         }
