@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.layers;
 
 import pixelitor.utils.ImageUtils;
@@ -28,6 +29,7 @@ import java.awt.image.WritableRaster;
  */
 public class LayerMask {
     private BufferedImage transparentImage;
+    @SuppressWarnings("FieldMayBeFinal")
     private BufferedImage bwImage;
 
     private static final ColorModel transparencyColorModel;

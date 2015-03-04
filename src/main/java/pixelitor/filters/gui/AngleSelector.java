@@ -27,6 +27,7 @@ import java.awt.Dimension;
  * Contains an AbstractAngleSelectorComponent and a SliderSpinner
  */
 public class AngleSelector extends JPanel {
+    @SuppressWarnings("FieldMayBeFinal") // idea bug: it cannot be final
     private boolean userChangedSpinner = true;
 
     public AngleSelector(AngleParam angleParam) {
