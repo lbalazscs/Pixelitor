@@ -27,6 +27,7 @@ import org.assertj.swing.finder.WindowFinder;
 import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.fixture.JButtonFixture;
+import org.assertj.swing.fixture.JCheckBoxFixture;
 import org.assertj.swing.fixture.JFileChooserFixture;
 import org.assertj.swing.fixture.JMenuItemFixture;
 import org.assertj.swing.fixture.JOptionPaneFixture;
@@ -51,6 +52,8 @@ import static java.awt.event.KeyEvent.VK_CONTROL;
 import static java.awt.event.KeyEvent.VK_D;
 import static java.awt.event.KeyEvent.VK_I;
 import static java.awt.event.KeyEvent.VK_Z;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class AssertJTest {
     private FrameFixture window;
@@ -76,7 +79,7 @@ public class AssertJTest {
                 .withArgs("C:\\Users\\Laci\\Desktop\\bagoly.png")
                 .start();
         window = WindowFinder.findFrame("frame0")
-                .withTimeout(10, TimeUnit.SECONDS)
+                .withTimeout(15, TimeUnit.SECONDS)
                 .using(robot);
         PixelitorWindow.getInstance().setLocation(0, 0);
     }
@@ -118,8 +121,7 @@ public class AssertJTest {
 
     private void testCheckForUpdate() {
         findMenuItemByText("Check for Update...").click();
-        JOptionPaneFixture optionPane = JOptionPaneFinder.findOptionPane().withTimeout(10, TimeUnit.SECONDS).using(robot);
-        optionPane.cancelButton().click();
+        findJOptionPane().cancelButton().click();
     }
 
     private void testTipOfTheDay() {
@@ -191,20 +193,161 @@ public class AssertJTest {
     }
 
     protected void testFileMenu() {
-        testNewImage();
-        //testFileOpen();
-        // TODO testFileSave - both new and opened files
-        // TODO testFileSaveAs
-        // TODO testExportOptimizedJPEG
-        // TODO testExportOpenRaster
-        // TODO testExportLayerAnimation
-        // TODO testExportTweeningAnimation
-        // TODO testClose
-        // TODO testCloseAll
-        // TODO testBatchResize
-        // TODO testBatchFilter
-        // TODO testExportLayerToPNG
-        // TODO testScreenCapture
+//        testNewImage();
+//        testFileOpen();
+//        testFileSave();
+//
+//        testExportOptimizedJPEG();
+//        testExportOpenRaster();
+//        testExportLayerAnimation();
+//        testExportTweeningAnimation();
+//        testClose();
+        testCloseAll();
+//        testBatchResize();
+//        testBatchFilter();
+//        testExportLayerToPNG();
+//        testScreenCapture();
+    }
+
+    private void testFileSave() {
+        // new unsaved image, will be saved as save as
+        runMenuCommand("Save");
+        JFileChooserFixture saveDialog = findSaveFileChooser();
+        // due to an assertj bug, the file must exist - TODO investigate, report
+        saveDialog.selectFile(new File("C:\\pix_tests\\saved.png"));
+        saveDialog.approve();
+        // say OK to the overwrite question
+        findJOptionPane().yesButton().click();
+
+        // TODO test save as menuitem and simple save (wityhout file chooser)
+    }
+
+    private void testExportOptimizedJPEG() {
+        runMenuCommand("Export Optimized JPEG...");
+        findDialogByTitle("Save Optimized JPEG").button("ok").click();
+        saveWithOverwrite("saved.png");
+    }
+
+    private void testExportOpenRaster() {
+        // precondition: the active image has only 1 layer
+        checkNumLayers(1);
+
+        runMenuCommand("Export OpenRaster...");
+        findJOptionPane().noButton().click(); // don't save
+
+        runMenuCommand("Export OpenRaster...");
+        findJOptionPane().yesButton().click(); // save anyway
+        findDialogByTitle("Export OpenRaster").button("ok").click(); // save with default settings
+        saveWithOverwrite("saved.ora");
+
+        // TODO test multi-layer save
+    }
+
+    private void testExportLayerAnimation() {
+        // precondition: the active image has only 1 layer
+        checkNumLayers(1);
+
+        runMenuCommand("Export Layer Animation...");
+        findJOptionPane().okButton().click();
+
+        // now add another layer
+        runMenuCommand("Duplicate Layer");
+        checkNumLayers(2);
+        keyboardInvert();
+
+        // this time it should work
+        runMenuCommand("Export Layer Animation...");
+        findDialogByTitle("Export Animated GIF").button("ok").click();
+
+        saveWithOverwrite("layeranim.gif");
+    }
+
+    private void testExportTweeningAnimation() {
+        assertTrue(ImageComponents.getActiveComp().isPresent());
+        runMenuCommand("Export Tweening Animation...");
+        DialogFixture dialog = findDialogByTitle("Export Tweening Animation");
+        dialog.comboBox().selectItem("Angular Waves");
+        dialog.button("ok").click(); // next
+        dialog.button("Randomize Settings").click();
+        dialog.button("ok").click(); // next
+        dialog.button("Randomize Settings").click();
+        dialog.button("ok").click(); // next
+        dialog.button("ok").click(); // render
+
+        // say OK to the folder not empty question
+        JOptionPaneFixture optionPane = findJOptionPane();
+        optionPane.yesButton().click();
+
+        sleep(2, TimeUnit.SECONDS); // wait until progress monitor comes up
+
+        boolean dialogRunning = true;
+        while (dialogRunning) {
+            sleep(1, TimeUnit.SECONDS);
+            try {
+                findDialogByTitle("Progress...");
+            } catch (Exception e) {
+                dialogRunning = false;
+            }
+        }
+    }
+
+    private void testClose() {
+        assertEquals(1, ImageComponents.getNrOfOpenImages());
+        runMenuCommand("Copy Composite");
+        runMenuCommand("Paste as New Image");
+
+        assertEquals(2, ImageComponents.getNrOfOpenImages());
+
+        runMenuCommand("Close");
+
+        assertEquals(1, ImageComponents.getNrOfOpenImages());
+    }
+
+    private void testCloseAll() {
+        assertEquals(1, ImageComponents.getNrOfOpenImages());
+        runMenuCommand("Copy Composite");
+        runMenuCommand("Paste as New Image");
+
+        assertEquals(2, ImageComponents.getNrOfOpenImages());
+
+        runMenuCommand("Close All");
+
+        assertEquals(0, ImageComponents.getNrOfOpenImages());
+
+        // restore for next test
+        runMenuCommand("Paste as New Image");
+    }
+
+    private void testBatchFilter() {
+        assertTrue(ImageComponents.getActiveComp().isPresent());
+        // TODO
+    }
+
+    private void testBatchResize() {
+        // TODO
+    }
+
+    private void testExportLayerToPNG() {
+        int nrLayers = ImageComponents.getActiveComp().get().getNrLayers();
+        assertTrue(nrLayers > 1);
+        // TODO
+    }
+
+    private void testScreenCapture() {
+        testScreenCapture(true);
+        testScreenCapture(false);
+    }
+
+    private void testScreenCapture(boolean hidePixelitor) {
+        runMenuCommand("Screen Capture...");
+        DialogFixture dialog = findDialogByTitle("Screen Capture");
+        JCheckBoxFixture cb = dialog.checkBox();
+        if (hidePixelitor) {
+            cb.check();
+        } else {
+            cb.uncheck();
+        }
+        dialog.button("ok").click();
     }
 
     protected void testViewCommands() {
@@ -427,12 +570,12 @@ public class AssertJTest {
 
     protected void testGradientTool() {
         window.toggleButton("Gradient Tool Button").click();
-        for(GradientType gradientType : GradientType.values()) {
+        for (GradientType gradientType : GradientType.values()) {
             window.comboBox("gradientTypeSelector").selectItem(gradientType.toString());
-            for(String cycleMethod : GradientTool.CYCLE_METHODS) {
+            for (String cycleMethod : GradientTool.CYCLE_METHODS) {
                 window.comboBox("gradientCycleMethodSelector").selectItem(cycleMethod);
                 GradientColorType[] gradientColorTypes = GradientColorType.values();
-                for(GradientColorType colorType : gradientColorTypes) {
+                for (GradientColorType colorType : gradientColorTypes) {
                     window.comboBox("gradientColorTypeSelector").selectItem(colorType.toString());
                     window.checkBox("gradientInvert").uncheck();
                     move(200, 200);
@@ -460,16 +603,16 @@ public class AssertJTest {
         move(300, 300);
         window.pressKey(VK_ALT).click().releaseKey(VK_ALT);
         move(400, 300);
-        for(int i = 1; i <= 20; i++) {
+        for (int i = 1; i <= 20; i++) {
             drag(400 + i * 5, 300);
             drag(400 + i * 5, 400);
         }
     }
 
     protected void testBrushStrokes() {
-        for(BrushType brushType : BrushType.values()) {
+        for (BrushType brushType : BrushType.values()) {
             window.comboBox("brushTypeSelector").selectItem(brushType.toString());
-            for(Symmetry symmetry : Symmetry.values()) {
+            for (Symmetry symmetry : Symmetry.values()) {
                 window.comboBox("symmetrySelector").selectItem(symmetry.toString());
                 window.pressAndReleaseKeys(KeyEvent.VK_R);
                 moveRandom();
@@ -562,7 +705,7 @@ public class AssertJTest {
     private void sleep(int duration, TimeUnit unit) {
         try {
             Thread.sleep(unit.toMillis(duration));
-        } catch(InterruptedException e) {
+        } catch (InterruptedException e) {
             throw new IllegalStateException("interrupted!");
         }
     }
@@ -594,6 +737,28 @@ public class AssertJTest {
         });
 
         return button;
+    }
+
+    private JOptionPaneFixture findJOptionPane() {
+        return JOptionPaneFinder.findOptionPane().withTimeout(10, TimeUnit.SECONDS).using(robot);
+    }
+
+    private JFileChooserFixture findSaveFileChooser() {
+        return JFileChooserFinder.findFileChooser("save").using(robot);
+    }
+
+    private void saveWithOverwrite(String fileName) {
+        JFileChooserFixture saveDialog = findSaveFileChooser();
+        saveDialog.selectFile(new File("C:\\pix_tests\\" + fileName));
+        saveDialog.approve();
+        // say OK to the overwrite question
+        JOptionPaneFixture optionPane = findJOptionPane();
+        optionPane.yesButton().click();
+    }
+
+    private void checkNumLayers(int num) {
+        int nrLayers = ImageComponents.getActiveComp().get().getNrLayers();
+        assertTrue(nrLayers == num);
     }
 
 }

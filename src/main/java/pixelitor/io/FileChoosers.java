@@ -70,6 +70,7 @@ public class FileChoosers {
         if (saveFileChooser == null) {
             //noinspection NonThreadSafeLazyInitialization
             saveFileChooser = new CustomFileChooser(lastSaveDir);
+            saveFileChooser.setName("save");
             saveFileChooser.setDialogTitle("Save As");
 
             setDefaultSaveExtensions();

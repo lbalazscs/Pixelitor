@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,7 @@ import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 
 /**
- *
+ * The screen capture.
  */
 public class ScreenCaptureAction extends AbstractAction {
     private JCheckBox hidePixelitorCB;
@@ -100,6 +100,5 @@ public class ScreenCaptureAction extends AbstractAction {
         } catch (Exception ex) {
             Dialogs.showExceptionDialog(ex);
         }
-
     }
 }
