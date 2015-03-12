@@ -53,6 +53,7 @@ public enum BatchFilterWizardPage implements WizardPage {
             p.add(new JLabel("Select Filter:"));
             if (filtersCB == null) {
                 filtersCB = new JComboBox<>(FilterUtils.getAllFiltersSorted());
+                filtersCB.setName("filtersCB");
             }
             p.add(filtersCB);
 

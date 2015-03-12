@@ -33,17 +33,17 @@ public class BatchResize {
     private BatchResize() { // do not instantiate
     }
 
-    public static void runBatchResize() {
-        BatchResizePanel p = new BatchResizePanel();
-        ValidatedDialog chooser = new ValidatedDialog(p, PixelitorWindow.getInstance(), "Batch Resize");
+    public static void start() {
+        BatchResizePanel batchResizePanel = new BatchResizePanel();
+        ValidatedDialog chooser = new ValidatedDialog(batchResizePanel, PixelitorWindow.getInstance(), "Batch Resize");
         chooser.setVisible(true);
         if (!chooser.isOkPressed()) {
             return;
         }
-        p.saveValues();
+        batchResizePanel.saveValues();
 
-        int maxWidth = p.getWidthValue();
-        int maxHeight = p.getHeightValue();
+        int maxWidth = batchResizePanel.getNewWidth();
+        int maxHeight = batchResizePanel.getNewHeight();
 
         CompositionAction resizeAction = comp -> CompositionUtils.resize(comp, maxWidth, maxHeight, true);
         Automate.processEachFile(resizeAction, true, "Batch Resize...");
@@ -52,19 +52,21 @@ public class BatchResize {
     static class BatchResizePanel extends ValidatedForm {
         private String errorMessage;
         private final OpenSaveDirsPanel openSaveDirsPanel = new OpenSaveDirsPanel(false);
-        private final IntTextField withTextField;
-        private final IntTextField heightTextField;
+        private final IntTextField widthTF;
+        private final IntTextField heightTF;
 
         private BatchResizePanel() {
             JPanel dimensionsPanel = new JPanel();
             dimensionsPanel.add(new JLabel("Max Width:"));
-            withTextField = new IntTextField(5);
-            withTextField.setText("300");
-            dimensionsPanel.add(withTextField);
+            widthTF = new IntTextField(5);
+            widthTF.setName("widthTF");
+            widthTF.setText("300");
+            dimensionsPanel.add(widthTF);
             dimensionsPanel.add(new JLabel("Max Height:"));
-            heightTextField = new IntTextField(5);
-            heightTextField.setText("300");
-            dimensionsPanel.add(heightTextField);
+            heightTF = new IntTextField(5);
+            heightTF.setName("heightTF");
+            heightTF.setText("300");
+            dimensionsPanel.add(heightTF);
 
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
             add(dimensionsPanel);
@@ -82,11 +84,11 @@ public class BatchResize {
                 errorMessage = openSaveDirsPanel.getErrorMessage();
                 return false;
             }
-            if (withTextField.getText().trim().isEmpty()) {
+            if (widthTF.getText().trim().isEmpty()) {
                 errorMessage = "The 'width' field is empty";
                 return false;
             }
-            if (heightTextField.getText().trim().isEmpty()) {
+            if (heightTF.getText().trim().isEmpty()) {
                 errorMessage = "The 'height' field is empty";
                 return false;
             }
@@ -98,12 +100,12 @@ public class BatchResize {
             openSaveDirsPanel.saveValues();
         }
 
-        private int getWidthValue() {
-            return withTextField.getIntValue();
+        private int getNewWidth() {
+            return widthTF.getIntValue();
         }
 
-        private int getHeightValue() {
-            return heightTextField.getIntValue();
+        private int getNewHeight() {
+            return heightTF.getIntValue();
         }
     }
 }

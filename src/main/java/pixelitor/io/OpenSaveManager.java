@@ -168,7 +168,7 @@ public class OpenSaveManager {
             Composition comp = imageComponent.getComp();
             if (comp.isDirty()) {
                 Object[] options = {"Save",
-                        "Don't save",
+                        "Don't Save",
                         "Cancel"};
                 String question = String.format("<html><b>Do you want to save the changes made to %s?</b>" +
                         "<br>Your changes will be lost if you don't save them.</html>", comp.getName());

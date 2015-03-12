@@ -33,8 +33,10 @@ import org.assertj.swing.fixture.JMenuItemFixture;
 import org.assertj.swing.fixture.JOptionPaneFixture;
 import org.assertj.swing.fixture.JTextComponentFixture;
 import org.assertj.swing.launcher.ApplicationLauncher;
+import org.fest.util.Files;
 import org.junit.Before;
 import org.junit.Test;
+import pixelitor.io.FileChoosers;
 import pixelitor.tools.BrushType;
 import pixelitor.tools.GradientColorType;
 import pixelitor.tools.GradientTool;
@@ -52,10 +54,17 @@ import static java.awt.event.KeyEvent.VK_CONTROL;
 import static java.awt.event.KeyEvent.VK_D;
 import static java.awt.event.KeyEvent.VK_I;
 import static java.awt.event.KeyEvent.VK_Z;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class AssertJTest {
+    public static final File BASE_TESTING_DIR = new File("C:\\pix_tests");
+    public static final File INPUT_DIR = new File(BASE_TESTING_DIR, "input");
+    public static final File BATCH_RESIZE_OUTPUT_DIR = new File(BASE_TESTING_DIR, "batch_resize_output");
+    public static final File BATCH_FILTER_OUTPUT_DIR = new File(BASE_TESTING_DIR, "batch_filter_output");
+
     private FrameFixture window;
     private Random random = new Random();
     private Robot robot;
@@ -76,10 +85,10 @@ public class AssertJTest {
     protected void onSetUp() {
         ApplicationLauncher
                 .application("pixelitor.Pixelitor")
-                .withArgs("C:\\Users\\Laci\\Desktop\\bagoly.png")
+                .withArgs((new File(INPUT_DIR, "a.jpg")).getPath())
                 .start();
         window = WindowFinder.findFrame("frame0")
-                .withTimeout(15, TimeUnit.SECONDS)
+                .withTimeout(15, SECONDS)
                 .using(robot);
         PixelitorWindow.getInstance().setLocation(0, 0);
     }
@@ -90,7 +99,7 @@ public class AssertJTest {
         testMenus();
 //        testLayers();
 
-        sleep(5, TimeUnit.SECONDS);
+        sleep(5, SECONDS);
     }
 
     private void testLayers() {
@@ -193,33 +202,54 @@ public class AssertJTest {
     }
 
     protected void testFileMenu() {
-//        testNewImage();
-//        testFileOpen();
-//        testFileSave();
-//
-//        testExportOptimizedJPEG();
-//        testExportOpenRaster();
-//        testExportLayerAnimation();
-//        testExportTweeningAnimation();
-//        testClose();
+        checkTestingDirs();
+
+        testNewImage();
+        testSaveUnnamed();
+        testClose();
+        testFileOpen();
+        testClose();
+        testExportOptimizedJPEG();
+        testExportOpenRaster();
+        testExportLayerAnimation();
+        testExportTweeningAnimation();
+        testBatchResize();
+        testBatchFilter();
+        testExportLayerToPNG();
+        testScreenCapture();
         testCloseAll();
-//        testBatchResize();
-//        testBatchFilter();
-//        testExportLayerToPNG();
-//        testScreenCapture();
     }
 
-    private void testFileSave() {
+    protected void testNewImage() {
+        findMenuItemByText("New Image...").click();
+        DialogFixture newImageDialog = findDialogByTitle("New Image");
+        newImageDialog.textBox("widthTF").deleteText().enterText("611");
+        newImageDialog.textBox("heightTF").deleteText().enterText("411");
+        newImageDialog.button("ok").click();
+    }
+
+    protected void testFileOpen() {
+        findMenuItemByText("Open...").click();
+        JFileChooserFixture openDialog = JFileChooserFinder.findFileChooser("open").using(robot);
+        openDialog.cancel();
+
+        findMenuItemByText("Open...").click();
+        openDialog = JFileChooserFinder.findFileChooser("open").using(robot);
+        openDialog.selectFile(new File(INPUT_DIR, "b.jpg"));
+        openDialog.approve();
+    }
+
+    private void testSaveUnnamed() {
         // new unsaved image, will be saved as save as
         runMenuCommand("Save");
         JFileChooserFixture saveDialog = findSaveFileChooser();
         // due to an assertj bug, the file must exist - TODO investigate, report
-        saveDialog.selectFile(new File("C:\\pix_tests\\saved.png"));
+        saveDialog.selectFile(new File(BASE_TESTING_DIR, "saved.png"));
         saveDialog.approve();
         // say OK to the overwrite question
         findJOptionPane().yesButton().click();
 
-        // TODO test save as menuitem and simple save (wityhout file chooser)
+        // TODO test save as menuitem and simple save (without file chooser)
     }
 
     private void testExportOptimizedJPEG() {
@@ -249,11 +279,7 @@ public class AssertJTest {
 
         runMenuCommand("Export Layer Animation...");
         findJOptionPane().okButton().click();
-
-        // now add another layer
-        runMenuCommand("Duplicate Layer");
-        checkNumLayers(2);
-        keyboardInvert();
+        addNewLayer();
 
         // this time it should work
         runMenuCommand("Export Layer Animation...");
@@ -278,24 +304,10 @@ public class AssertJTest {
         JOptionPaneFixture optionPane = findJOptionPane();
         optionPane.yesButton().click();
 
-        sleep(2, TimeUnit.SECONDS); // wait until progress monitor comes up
-
-        boolean dialogRunning = true;
-        while (dialogRunning) {
-            sleep(1, TimeUnit.SECONDS);
-            try {
-                findDialogByTitle("Progress...");
-            } catch (Exception e) {
-                dialogRunning = false;
-            }
-        }
+        waitForProgressMonitorEnd();
     }
 
     private void testClose() {
-        assertEquals(1, ImageComponents.getNrOfOpenImages());
-        runMenuCommand("Copy Composite");
-        runMenuCommand("Paste as New Image");
-
         assertEquals(2, ImageComponents.getNrOfOpenImages());
 
         runMenuCommand("Close");
@@ -304,38 +316,78 @@ public class AssertJTest {
     }
 
     private void testCloseAll() {
-        assertEquals(1, ImageComponents.getNrOfOpenImages());
-        runMenuCommand("Copy Composite");
-        runMenuCommand("Paste as New Image");
+        assertThat(ImageComponents.getNrOfOpenImages() > 1);
 
-        assertEquals(2, ImageComponents.getNrOfOpenImages());
+        // save for the next test
+        runMenuCommand("Copy Composite");
 
         runMenuCommand("Close All");
 
+        // close all warnings
+        boolean warnings = true;
+        while (warnings) {
+            try {
+                JOptionPaneFixture pane = findJOptionPane();
+                // click "Don't Save"
+                pane.button(new GenericTypeMatcher<JButton>(JButton.class) {
+                    @Override
+                    protected boolean isMatching(JButton button) {
+                        return button.getText().equals("Don't Save");
+                    }
+                }).click();
+            } catch (Exception e) { // no more JOptionPane found
+                warnings = false;
+            }
+        }
+
         assertEquals(0, ImageComponents.getNrOfOpenImages());
 
-        // restore for next test
+        // restore for the next test
         runMenuCommand("Paste as New Image");
     }
 
-    private void testBatchFilter() {
-        assertTrue(ImageComponents.getActiveComp().isPresent());
-        // TODO
+    private void testBatchResize() {
+        // TODO before stating the test check that the output dir is empty
+        FileChoosers.setLastOpenDir(INPUT_DIR);
+        FileChoosers.setLastSaveDir(BATCH_RESIZE_OUTPUT_DIR);
+        runMenuCommand("Batch Resize...");
+        DialogFixture dialog = findDialogByTitle("Batch Resize");
+
+        dialog.textBox("widthTF").setText("200");
+        dialog.textBox("heightTF").setText("200");
+        dialog.button("ok").click();
     }
 
-    private void testBatchResize() {
-        // TODO
+    private void testBatchFilter() {
+        // TODO before stating the test check that the output dir is empty
+        FileChoosers.setLastOpenDir(INPUT_DIR);
+        FileChoosers.setLastSaveDir(BATCH_FILTER_OUTPUT_DIR);
+
+        assertTrue(ImageComponents.getActiveComp().isPresent());
+        runMenuCommand("Batch Filter...");
+        DialogFixture dialog = findDialogByTitle("Batch Filter");
+        dialog.comboBox("filtersCB").selectItem("Angular Waves");
+        dialog.button("ok").click(); // next
+        sleep(3, SECONDS);
+        dialog.button("Randomize Settings").click();
+        dialog.button("ok").click(); // start processing
+
+        waitForProgressMonitorEnd();
     }
 
     private void testExportLayerToPNG() {
-        int nrLayers = ImageComponents.getActiveComp().get().getNrLayers();
-        assertTrue(nrLayers > 1);
-        // TODO
+        FileChoosers.setLastSaveDir(BASE_TESTING_DIR);
+        addNewLayer();
+        runMenuCommand("Export Layers to PNG...");
+        findDialogByTitle("Select Output Folder").button("ok").click();
+        sleep(2, SECONDS);
     }
 
     private void testScreenCapture() {
+        ImageComponent activeIC = ImageComponents.getActiveImageComponent();
         testScreenCapture(true);
         testScreenCapture(false);
+        ImageComponents.setActiveImageComponent(activeIC, true);
     }
 
     private void testScreenCapture(boolean hidePixelitor) {
@@ -367,24 +419,6 @@ public class AssertJTest {
 
         runMenuCommand("Cascade");
         runMenuCommand("Tile");
-    }
-
-    protected void testNewImage() {
-        findMenuItemByText("New Image...").click();
-        DialogFixture newImageDialog = findDialogByTitle("New Image");
-        newImageDialog.textBox("widthTF").deleteText().enterText("611");
-        newImageDialog.textBox("heightTF").deleteText().enterText("411");
-        newImageDialog.button("ok").click();
-    }
-
-    protected void testFileOpen() {
-        findMenuItemByText("Open...").click();
-        JFileChooserFixture openDialog = JFileChooserFinder.findFileChooser("open").using(robot);
-        openDialog.cancel();
-        window.menuItem("open").click();
-        openDialog = JFileChooserFinder.findFileChooser("open").using(robot);
-        openDialog.selectFile(new File("C:\\Users\\Laci\\Desktop\\ee.png"));
-        openDialog.approve();
     }
 
     protected void testTools() {
@@ -648,7 +682,7 @@ public class AssertJTest {
         drag(450, 450);
         move(200, 200);
         drag(150, 150);
-        sleep(1, TimeUnit.SECONDS);
+        sleep(1, SECONDS);
         window.button("cropButton").click();
         keyboardUndo();
     }
@@ -740,7 +774,7 @@ public class AssertJTest {
     }
 
     private JOptionPaneFixture findJOptionPane() {
-        return JOptionPaneFinder.findOptionPane().withTimeout(10, TimeUnit.SECONDS).using(robot);
+        return JOptionPaneFinder.findOptionPane().withTimeout(10, SECONDS).using(robot);
     }
 
     private JFileChooserFixture findSaveFileChooser() {
@@ -749,7 +783,7 @@ public class AssertJTest {
 
     private void saveWithOverwrite(String fileName) {
         JFileChooserFixture saveDialog = findSaveFileChooser();
-        saveDialog.selectFile(new File("C:\\pix_tests\\" + fileName));
+        saveDialog.selectFile(new File(BASE_TESTING_DIR, fileName));
         saveDialog.approve();
         // say OK to the overwrite question
         JOptionPaneFixture optionPane = findJOptionPane();
@@ -761,4 +795,34 @@ public class AssertJTest {
         assertTrue(nrLayers == num);
     }
 
+    private void waitForProgressMonitorEnd() {
+        sleep(2, SECONDS); // wait until progress monitor comes up
+
+        boolean dialogRunning = true;
+        while (dialogRunning) {
+            sleep(1, SECONDS);
+            try {
+                findDialogByTitle("Progress...");
+            } catch (Exception e) {
+                dialogRunning = false;
+            }
+        }
+    }
+
+    private void addNewLayer() {
+        int nrLayers = ImageComponents.getActiveComp().get().getNrLayers();
+        runMenuCommand("Duplicate Layer");
+        checkNumLayers(nrLayers + 1);
+        keyboardInvert();
+    }
+
+    private void checkTestingDirs() {
+        assertThat(BASE_TESTING_DIR).exists().isDirectory();
+        assertThat(INPUT_DIR).exists().isDirectory();
+        assertThat(BATCH_RESIZE_OUTPUT_DIR).exists().isDirectory();
+        assertThat(BATCH_FILTER_OUTPUT_DIR).exists().isDirectory();
+
+        assertThat(Files.fileNamesIn(BATCH_RESIZE_OUTPUT_DIR.getPath(), false)).isEmpty();
+        assertThat(Files.fileNamesIn(BATCH_FILTER_OUTPUT_DIR.getPath(), false)).isEmpty();
+    }
 }
