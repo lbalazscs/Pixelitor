@@ -55,10 +55,7 @@ public class History {
 
     public static void addEdit(PixelitorEdit edit) {
         if (edit == null) {
-            // TODO temporarily only return because ShapeLayer doesn't implement createTranslateEdit properly
-            return;
-
-            // throw new IllegalArgumentException("edit is null");
+            throw new IllegalArgumentException("edit is null");
         }
 
         if (edit.canUndo()) {

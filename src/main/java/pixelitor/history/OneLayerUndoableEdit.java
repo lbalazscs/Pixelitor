@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.history;
 
 import pixelitor.Composition;
@@ -32,7 +33,7 @@ import java.util.Optional;
  * such as resize, a crop, flip, or image rotation.
  * These are undoable only if the composition consists of a single layer
  */
-// TODO find better name for the class - perhaps MultiLayerEdit
+// TODO find better name for the class - perhaps MultiLayerEdit. Or maybe redesign it.
 public class OneLayerUndoableEdit extends PixelitorEdit {
     private BufferedImage backupImage;
     private final boolean saveSelection;
