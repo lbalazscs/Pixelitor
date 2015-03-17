@@ -19,6 +19,7 @@ package pixelitor;
 
 import org.junit.Before;
 import org.junit.Test;
+import pixelitor.history.AddToHistory;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.selection.Selection;
@@ -52,6 +53,7 @@ public class CompositionTest {
     @Before
     public void setUp() {
         comp = TestHelper.create2LayerTestComposition();
+        assertEquals(2, comp.getNrLayers());
     }
 
     @Test
@@ -65,9 +67,9 @@ public class CompositionTest {
     @Test
     public void testSetActiveLayer() {
         Layer layer = comp.getLayer(0);
-        comp.setActiveLayer(layer, true);
+        comp.setActiveLayer(layer, AddToHistory.YES);
         assertSame(layer, comp.getActiveLayer());
-        comp.setActiveLayer(layer, false);
+        comp.setActiveLayer(layer, AddToHistory.NO);
         assertSame(layer, comp.getActiveLayer());
         comp.checkInvariant();
     }
@@ -83,38 +85,39 @@ public class CompositionTest {
     public void testAddLayerNoGUI() {
         ImageLayer newLayer = TestHelper.createTestImageLayer("layer", comp);
         comp.addLayerNoGUI(newLayer);
-        assertEquals(3, comp.getNrLayers());
+        assertEquals(4, comp.getNrLayers());
         comp.checkInvariant();
     }
 
     @Test
     public void testAddLayer() {
         ImageLayer newLayer = TestHelper.createTestImageLayer("layer", comp);
-        comp.addLayer(newLayer, true, true, true);
-        comp.addLayer(newLayer, true, true, false);
-        comp.addLayer(newLayer, true, false, true);
-        comp.addLayer(newLayer, true, false, false);
-        comp.addLayer(newLayer, false, true, true);
-        comp.addLayer(newLayer, false, true, false);
-        comp.addLayer(newLayer, false, false, true);
-        comp.addLayer(newLayer, false, false, false);
+        comp.addLayer(newLayer, AddToHistory.YES, true, true);
+        comp.addLayer(newLayer, AddToHistory.YES, true, false);
+        comp.addLayer(newLayer, AddToHistory.YES, false, true);
+        comp.addLayer(newLayer, AddToHistory.YES, false, false);
+        comp.addLayer(newLayer, AddToHistory.NO, true, true);
+        comp.addLayer(newLayer, AddToHistory.NO, true, false);
+        comp.addLayer(newLayer, AddToHistory.NO, false, true);
+        comp.addLayer(newLayer, AddToHistory.NO, false, false);
 
-        comp.addLayer(newLayer, true, true, 0);
-        comp.addLayer(newLayer, true, false, 0);
-        comp.addLayer(newLayer, false, true, 0);
-        comp.addLayer(newLayer, false, false, 0);
+        comp.addLayer(newLayer, AddToHistory.YES, true, 0);
+        comp.addLayer(newLayer, AddToHistory.YES, false, 0);
+        comp.addLayer(newLayer, AddToHistory.NO, true, 0);
+        comp.addLayer(newLayer, AddToHistory.NO, false, 0);
 
-        comp.addLayer(newLayer, true, true, 1);
-        comp.addLayer(newLayer, true, false, 1);
-        comp.addLayer(newLayer, false, true, 1);
-        comp.addLayer(newLayer, false, false, 1);
+        comp.addLayer(newLayer, AddToHistory.YES, true, 1);
+        comp.addLayer(newLayer, AddToHistory.YES, false, 1);
+        comp.addLayer(newLayer, AddToHistory.NO, true, 1);
+        comp.addLayer(newLayer, AddToHistory.NO, false, 1);
 
-        assertEquals(18, comp.getNrLayers());
+        assertEquals(19, comp.getNrLayers());
         comp.checkInvariant();
     }
 
     @Test
     public void testDuplicateLayer() {
+        assertEquals(2, comp.getNrLayers());
         comp.duplicateLayer();
         assertEquals(3, comp.getNrLayers());
         comp.checkInvariant();

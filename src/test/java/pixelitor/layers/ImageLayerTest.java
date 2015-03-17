@@ -40,6 +40,8 @@ public class ImageLayerTest {
     public void setUp() {
         comp = TestHelper.createEmptyTestComposition();
         layer = TestHelper.createTestImageLayer("layer 1", comp);
+
+        assert layer.getComposition().checkInvariant();
     }
 
     @After

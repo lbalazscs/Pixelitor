@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package pixelitor.menus.edit;
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
 import pixelitor.PixelitorWindow;
+import pixelitor.history.AddToHistory;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 
@@ -40,7 +41,7 @@ public enum PasteDestination {
             Composition comp = ImageComponents.getActiveComp().get();
             Layer newLayer = new ImageLayer(comp, pastedImage, "Pasted Layer", comp.getCanvasWidth(), comp.getCanvasHeight());
 
-            comp.addLayer(newLayer, true, true, false);
+            comp.addLayer(newLayer, AddToHistory.YES, true, false);
         }
     }, NEW_IMAGE {
         private int pastedCount = 1;

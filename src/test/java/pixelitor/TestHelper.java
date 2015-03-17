@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor;
 
+import pixelitor.history.AddToHistory;
 import pixelitor.layers.ImageLayer;
 
 import java.awt.Graphics2D;
@@ -28,7 +29,10 @@ public class TestHelper {
 
     public static ImageLayer createTestImageLayer(String layerName, Composition comp) {
         BufferedImage image = createTestImage();
-        return new ImageLayer(comp, image, layerName);
+        ImageLayer layer = new ImageLayer(comp, image, layerName);
+        comp.addLayerNoGUI(layer);
+        comp.setActiveLayer(layer, AddToHistory.NO);
+        return layer;
     }
 
     public static Composition createEmptyTestComposition() {
@@ -48,9 +52,7 @@ public class TestHelper {
         ImageLayer layer1 = createTestImageLayer("layer 1", c);
         ImageLayer layer2 = createTestImageLayer("layer 2", c);
 
-        c.addLayer(layer1, false, false, false);
-        c.addLayer(layer2, false, false, false);
-        c.setActiveLayer(layer1, false);
+        c.setActiveLayer(layer1, AddToHistory.NO);
 
         assert layer1 == c.getActiveLayer();
         assert layer1 == c.getLayer(0);

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.io;
 
 import org.w3c.dom.Document;
@@ -23,6 +24,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import pixelitor.Composition;
+import pixelitor.history.AddToHistory;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
@@ -190,16 +192,16 @@ public class OpenRaster {
             boolean visibility = layerVisibility == null ? true : layerVisibility.equals("visible");
 
             ImageLayer layer = new ImageLayer(comp, image, layerName);
-            layer.setVisible(visibility, false);
+            layer.setVisible(visibility, AddToHistory.NO);
             BlendingMode blendingMode = BlendingMode.fromSVGName(layerBlendingMode);
 
             if(DEBUG) {
                 System.out.println("OpenRaster::readOpenRaster: blendingMode = " + blendingMode);
             }
 
-            layer.setBlendingMode(blendingMode, false, false, false);
+            layer.setBlendingMode(blendingMode, false, AddToHistory.NO, false);
             float opacity = Utils.parseFloat(layerOpacity, 1.0f);
-            layer.setOpacity(opacity, false, false, false);
+            layer.setOpacity(opacity, false, AddToHistory.NO, false);
             int translationX = Utils.parseInt(layerX, 0);
             layer.setTranslationX(translationX);
             int translationY = Utils.parseInt(layerY, 0);
@@ -211,7 +213,7 @@ public class OpenRaster {
 
             comp.addLayerNoGUI(layer);
         }
-        comp.setActiveLayer(comp.getLayer(0), false);
+        comp.setActiveLayer(comp.getLayer(0), AddToHistory.NO);
         return comp;
     }
 

@@ -42,6 +42,7 @@ import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.filters.lookup.Levels;
 import pixelitor.filters.lookup.Luminosity;
 import pixelitor.filters.painters.TextFilter;
+import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.OpenSaveManager;
@@ -796,7 +797,7 @@ public class MenuBar extends JMenuBar {
                 Composition comp = ImageComponents.getActiveComp().get();
                 TextLayer textLayer = new TextLayer(comp, "text layer", s);
 
-                comp.addLayer(textLayer, true, true, false);
+                comp.addLayer(textLayer, AddToHistory.YES, true, false);
             }
         };
         createMenuItem(newTextLayer, developMenu);
@@ -807,7 +808,7 @@ public class MenuBar extends JMenuBar {
                 Composition comp = ImageComponents.getActiveComp().get();
                 AdjustmentLayer adjustmentLayer = new AdjustmentLayer(comp, "invert adjustment", new Invert());
 
-                comp.addLayer(adjustmentLayer, true, true, false);
+                comp.addLayer(adjustmentLayer, AddToHistory.YES, true, false);
             }
         };
         createMenuItem(newAdjustmentLayer, developMenu);

@@ -34,6 +34,7 @@ import pixelitor.filters.ValueNoise;
 import pixelitor.filters.jhlabsproxies.JHDropShadow;
 import pixelitor.filters.jhlabsproxies.JHGaussianBlur;
 import pixelitor.filters.painters.TextFilter;
+import pixelitor.history.AddToHistory;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.OutputFormat;
 import pixelitor.layers.AddNewLayerAction;
@@ -127,7 +128,7 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
         NewImage.addNewImage(FillType.WHITE, 400, 247, "Splash");
 
         Composition ic = ImageComponents.getActiveComp().get();
-        ic.getActiveLayer().setName("Color Wheel", true);
+        ic.getActiveLayer().setName("Color Wheel", AddToHistory.YES);
         new ColorWheel().execute(ChangeReason.OP_WITHOUT_DIALOG);
 
         addNewLayer("Value Noise");
@@ -135,14 +136,14 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
         valueNoise.setDetails(7);
         valueNoise.execute(ChangeReason.OP_WITHOUT_DIALOG);
         ImageLayer layer = (ImageLayer) ic.getActiveLayer();
-        layer.setOpacity(0.3f, true, true, true);
-        layer.setBlendingMode(BlendingMode.SCREEN, true, true, true);
+        layer.setOpacity(0.3f, true, AddToHistory.YES, true);
+        layer.setBlendingMode(BlendingMode.SCREEN, true, AddToHistory.YES, true);
 
         addNewLayer("Gradient");
         ToolTests.addRadialBWGradientToActiveLayer(ic, true);
         layer = (ImageLayer) ic.getActiveLayer();
-        layer.setOpacity(0.4f, true, true, true);
-        layer.setBlendingMode(BlendingMode.LUMINOSITY, true, true, true);
+        layer.setOpacity(0.4f, true, AddToHistory.YES, true);
+        layer.setBlendingMode(BlendingMode.LUMINOSITY, true, AddToHistory.YES, true);
 
         FgBgColorSelector.INSTANCE.setFgColor(Color.WHITE);
         Font font = new Font(SPLASH_SCREEN_FONT, Font.BOLD, 48);
@@ -170,7 +171,7 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
 
         CompositionAction ca = comp -> {
             comp.addNewLayerFromComposite("Overlay Blur");
-            comp.getActiveLayer().setBlendingMode(BlendingMode.OVERLAY, true, true, true);
+            comp.getActiveLayer().setBlendingMode(BlendingMode.OVERLAY, true, AddToHistory.YES, true);
             JHGaussianBlur blur = new JHGaussianBlur();
             blur.setRadius(5);
             blur.execute(ChangeReason.OP_WITHOUT_DIALOG);
@@ -188,7 +189,7 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
 
     private static void addNewLayer(String name) {
         AddNewLayerAction.INSTANCE.actionPerformed(new ActionEvent(PixelitorWindow.getInstance(), 0, name));
-        ImageComponents.getActiveLayer().get().setName(name, true);
+        ImageComponents.getActiveLayer().get().setName(name, AddToHistory.YES);
     }
 
     public static void testLayers() {
@@ -248,7 +249,7 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
 
         layer.enlargeLayer();
 
-        layer.setOpacity(opacity, true, true, true);
-        layer.setBlendingMode(blendingMode, true, true, true);
+        layer.setOpacity(opacity, true, AddToHistory.YES, true);
+        layer.setBlendingMode(blendingMode, true, AddToHistory.YES, true);
     }
 }

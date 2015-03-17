@@ -17,6 +17,7 @@
 
 package pixelitor.layers;
 
+import pixelitor.history.AddToHistory;
 import pixelitor.utils.IconUtils;
 
 import javax.swing.*;
@@ -69,11 +70,11 @@ public class LayerButton extends JToggleButton {
 
         addItemListener(e -> {
             if (isSelected()) {
-                layer.makeActive(userInteraction);
+                layer.makeActive(userInteraction ? AddToHistory.YES : AddToHistory.NO);
             }
         });
 
-        visibilityCB.addItemListener(e -> layer.setVisible(visibilityCB.isSelected(), true));
+        visibilityCB.addItemListener(e -> layer.setVisible(visibilityCB.isSelected(), AddToHistory.YES));
     }
 
     @Override

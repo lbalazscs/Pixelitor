@@ -19,6 +19,7 @@ package pixelitor.layers;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
+import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.history.LayerBlendingEdit;
 import pixelitor.history.LayerOpacityEdit;
@@ -66,7 +67,7 @@ public abstract class Layer implements Serializable {
         return visible;
     }
 
-    public void setVisible(boolean newVisibility, boolean addToHistory) {
+    public void setVisible(boolean newVisibility, AddToHistory addToHistory) {
         if (this.visible == newVisibility) {
             return;
         }
@@ -76,7 +77,7 @@ public abstract class Layer implements Serializable {
         comp.setDirty(true);
         layerButton.setOpenEye(newVisibility);
 
-        if (addToHistory) {
+        if (addToHistory == AddToHistory.YES) {
             LayerVisibilityChangeEdit edit = new LayerVisibilityChangeEdit(comp, this, newVisibility);
             History.addEdit(edit);
         }
@@ -133,7 +134,7 @@ public abstract class Layer implements Serializable {
         }
     }
 
-    public void setOpacity(float newOpacity, boolean updateGUI, boolean addToHistory, boolean updateImage) {
+    public void setOpacity(float newOpacity, boolean updateGUI, AddToHistory addToHistory, boolean updateImage) {
         if (newOpacity > 1.0f) {
             throw new IllegalArgumentException("newOpacity = " + newOpacity);
         }
@@ -141,7 +142,7 @@ public abstract class Layer implements Serializable {
             throw new IllegalArgumentException("newOpacity = " + newOpacity);
         }
 
-        if (addToHistory) {
+        if (addToHistory == AddToHistory.YES) {
             LayerOpacityEdit edit = new LayerOpacityEdit(this, opacity);
             History.addEdit(edit);
         }
@@ -156,8 +157,8 @@ public abstract class Layer implements Serializable {
         }
     }
 
-    public void setBlendingMode(BlendingMode mode, boolean updateGUI, boolean addToHistory, boolean updateImage) {
-        if (addToHistory) {
+    public void setBlendingMode(BlendingMode mode, boolean updateGUI, AddToHistory addToHistory, boolean updateImage) {
+        if (addToHistory == AddToHistory.YES) {
             LayerBlendingEdit edit = new LayerBlendingEdit(this, blendingMode);
             History.addEdit(edit);
         }
@@ -172,7 +173,7 @@ public abstract class Layer implements Serializable {
         }
     }
 
-    public void setName(String newName, boolean addToHistory) {
+    public void setName(String newName, AddToHistory addToHistory) {
         String previousName = name;
         this.name = newName;
 
@@ -182,7 +183,7 @@ public abstract class Layer implements Serializable {
 
         layerButton.setName(newName);
 
-        if (addToHistory) {
+        if (addToHistory == AddToHistory.YES) {
             LayerRenameEdit edit = new LayerRenameEdit(this, previousName, name);
             History.addEdit(edit);
         }
@@ -198,7 +199,7 @@ public abstract class Layer implements Serializable {
 
     public abstract void mergeDownOn(ImageLayer bellow);
 
-    public void makeActive(boolean addToHistory) {
+    public void makeActive(AddToHistory addToHistory) {
         comp.setActiveLayer(this, addToHistory);
     }
 

@@ -21,6 +21,7 @@ import pixelitor.ChangeReason;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.filters.comp.Flip;
+import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.history.TranslateEdit;
@@ -206,10 +207,11 @@ public class ImageLayer extends ContentLayer {
     public ImageLayer duplicate() {
         BufferedImage imageCopy = ImageUtils.copyImage(image);
         ImageLayer d = new ImageLayer(comp, imageCopy, getDuplicateLayerName());
-        d.setOpacity(opacity, false, true, true);
+        // TODO why add opacity and blending mode to history
+        d.setOpacity(opacity, false, AddToHistory.YES, true);
         d.setTranslationX(translationX);
         d.setTranslationY(translationY);
-        d.setBlendingMode(blendingMode, false, true, true);
+        d.setBlendingMode(blendingMode, false, AddToHistory.YES, true);
 
         return d;
     }

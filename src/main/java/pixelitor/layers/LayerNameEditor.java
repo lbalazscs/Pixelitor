@@ -17,6 +17,8 @@
 
 package pixelitor.layers;
 
+import pixelitor.history.AddToHistory;
+
 import javax.swing.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -36,14 +38,14 @@ public class LayerNameEditor extends JTextField {
             @Override
             public void focusLost(FocusEvent e) {
                 disableEditing();
-                layer.setName(getText(), true);
+                layer.setName(getText(), AddToHistory.YES);
             }
         });
 
         // disable if enter pressed
         addActionListener(e -> {
             disableEditing();
-            layer.setName(getText(), true);
+            layer.setName(getText(), AddToHistory.YES);
         });
 
     }

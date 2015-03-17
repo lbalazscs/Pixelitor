@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
+import pixelitor.history.AddToHistory;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -48,7 +49,7 @@ public class LayerTest {
         assertThat(layer.isVisible(), is(true));
         assertThat(layerButton.isVisibilityChecked(), is(true));
 
-        layer.setVisible(false, true);
+        layer.setVisible(false, AddToHistory.YES);
         assertThat(layer.isVisible(), is(false));
         assertThat(layerButton.isVisibilityChecked(), is(false));
     }
@@ -79,19 +80,19 @@ public class LayerTest {
 
     @Test
     public void testSetOpacity() {
-        layer.setOpacity(0.7f, true, true, true);
+        layer.setOpacity(0.7f, true, AddToHistory.YES, true);
         assertThat(layer.getOpacity(), is(0.7f));
     }
 
     @Test
     public void testSetBlendingMode() {
-        layer.setBlendingMode(BlendingMode.DIFFERENCE, true, true, true);
+        layer.setBlendingMode(BlendingMode.DIFFERENCE, true, AddToHistory.YES, true);
         assertSame(BlendingMode.DIFFERENCE, layer.getBlendingMode());
     }
 
     @Test
     public void testSetName() {
-        layer.setName("newName", true);
+        layer.setName("newName", AddToHistory.YES);
         assertEquals("newName", layer.getName());
     }
 
@@ -103,7 +104,7 @@ public class LayerTest {
 
     @Test
     public void testMakeActive() {
-        layer.makeActive(true);
+        layer.makeActive(AddToHistory.YES);
         assertEquals(true, layer.isActiveLayer());
     }
 

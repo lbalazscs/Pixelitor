@@ -39,6 +39,7 @@ import pixelitor.filters.comp.Rotate;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ParamSetState;
+import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.layers.AddNewLayerAction;
 import pixelitor.layers.AdjustmentLayer;
@@ -715,16 +716,16 @@ public class RobotTest {
             if (f > opacity) {
                 // always increase
                 logRobotEvent("random increase opacity");
-                layer.setOpacity(f, true, true, true);
+                layer.setOpacity(f, true, AddToHistory.YES, true);
             } else if (rand.nextFloat() > 0.75) { // sometimes decrease
                 logRobotEvent("random decrease opacity");
-                layer.setOpacity(f, true, true, true);
+                layer.setOpacity(f, true, AddToHistory.YES, true);
             }
         } else {
             logRobotEvent("random change layer blending mode");
             BlendingMode[] blendingModes = BlendingMode.values();
             BlendingMode randomBlendingMode = blendingModes[rand.nextInt(blendingModes.length)];
-            layer.setBlendingMode(randomBlendingMode, true, true, true);
+            layer.setBlendingMode(randomBlendingMode, true, AddToHistory.YES, true);
         }
     }
 
@@ -734,13 +735,13 @@ public class RobotTest {
         if (rand.nextBoolean()) {
             if (!visible) {
                 logRobotEvent("random showing layer");
-                layer.setVisible(true, true);
+                layer.setVisible(true, AddToHistory.YES);
             }
         } else {
             if (visible) {
                 if (rand.nextFloat() > 0.8) { // sometimes hide
                     logRobotEvent("random hiding layer");
-                    layer.setVisible(false, true);
+                    layer.setVisible(false, AddToHistory.YES);
                 }
             }
         }
@@ -810,7 +811,7 @@ public class RobotTest {
             newLayer = new AdjustmentLayer(comp, "invert adjustment", new Invert());
         }
 
-        comp.addLayer(newLayer, true, true, false);
+        comp.addLayer(newLayer, AddToHistory.YES, true, false);
     }
 
     private static void randomLayerMask() {
