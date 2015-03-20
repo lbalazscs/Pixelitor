@@ -675,9 +675,14 @@ public class ImageLayer extends ContentLayer {
         return new BufferedImage(width, height, type);
     }
 
-    public BufferedImage createCompositionSizedSubImage() {
+    public BufferedImage getCompositionSizedSubImage() {
         int x = -getTranslationX();
         int y = -getTranslationY();
+
+        if (x == 0 && y == 0) {
+            return image;
+        }
+
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
 
@@ -687,11 +692,11 @@ public class ImageLayer extends ContentLayer {
         try {
             subImage = image.getSubimage(x, y, canvasWidth, canvasHeight);
         } catch(RasterFormatException e) {
-            System.out.println("ImageLayer.createCompositionSizedSubImage x = " + x + ", y = " + y + ", canvasWidth = " + canvasWidth + ", canvasHeight = " + canvasHeight);
+            System.out.println("ImageLayer.getCompositionSizedSubImage x = " + x + ", y = " + y + ", canvasWidth = " + canvasWidth + ", canvasHeight = " + canvasHeight);
             WritableRaster raster = image.getRaster();
             int minX = raster.getMinX();
             int minY = raster.getMinY();
-            System.out.println("ImageLayer.createCompositionSizedSubImage minX = " + minX + ", minY = " + minY);
+            System.out.println("ImageLayer.getCompositionSizedSubImage minX = " + minX + ", minY = " + minY);
 
             throw e;
         }

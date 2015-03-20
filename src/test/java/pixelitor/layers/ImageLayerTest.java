@@ -185,7 +185,7 @@ public class ImageLayerTest {
 
     @Test
     public void testCreateCompositionSizedSubImage() {
-        BufferedImage image = layer.createCompositionSizedSubImage();
+        BufferedImage image = layer.getCompositionSizedSubImage();
         assertNotNull(image);
     }
 

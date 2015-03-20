@@ -454,8 +454,4 @@ public class FilterCreator extends JPanel {
             return defaultValue;
         }
     }
-
-    public static void main(String[] args) {
-        // showInDialog(null);
-    }
 }

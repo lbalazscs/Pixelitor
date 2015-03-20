@@ -59,7 +59,7 @@ import pixelitor.menus.edit.CopyAction;
 import pixelitor.menus.edit.CopySource;
 import pixelitor.menus.edit.PasteAction;
 import pixelitor.menus.edit.PasteDestination;
-import pixelitor.menus.file.AnimGifExportPanel;
+import pixelitor.menus.file.AnimGifExport;
 import pixelitor.menus.file.OpenRasterExportPanel;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.menus.file.ScreenCaptureAction;
@@ -223,7 +223,7 @@ public class MenuBar extends JMenuBar {
         Action exportLayerAnim = new AbstractAction("Export Layer Animation...") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                AnimGifExportPanel.showInDialog(pixelitorWindow);
+                AnimGifExport.start(pixelitorWindow);
             }
         };
         createMenuItem(exportLayerAnim, fileMenu);

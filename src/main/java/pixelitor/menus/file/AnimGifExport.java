@@ -30,42 +30,11 @@ import javax.swing.*;
 import java.awt.FlowLayout;
 import java.io.File;
 
-public class AnimGifExportPanel extends JPanel {
-    private final JTextField delayTF;
-    private final JCheckBox pingPongCB;
-
-    private AnimGifExportPanel(int nrLayers) {
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        setLayout(new VerticalLayout(10));
-
-        add(new JLabel(" Animation frames are based on the layers of the image. "));
-
-        JPanel settings = new JPanel();
-        settings.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
-        settings.add(new JLabel("Delay Between Frames (Milliseconds):"));
-        delayTF = new JTextField("200", 4);
-        settings.add(delayTF);
-
-        add(settings);
-
-        if (nrLayers > 2) {
-            pingPongCB = new JCheckBox("Ping Pong Animation");
-        } else {
-            pingPongCB = new JCheckBox("Ping Pong Animation (min 3 layers needed)");
-            pingPongCB.setEnabled(false);
-        }
-        add(pingPongCB);
+public class AnimGifExport {
+    private AnimGifExport() {
     }
 
-    private int getDelayMillis() {
-        return Integer.parseInt(delayTF.getText());
-    }
-
-    private boolean isPingPong() {
-        return pingPongCB.isSelected();
-    }
-
-    public static void showInDialog(JFrame parent) {
+    public static void start(JFrame dialogParent) {
         Composition activeComp = ImageComponents.getActiveComp().get();
         int nrLayers = activeComp.getNrLayers();
         if(nrLayers < 2) {
@@ -75,8 +44,8 @@ public class AnimGifExportPanel extends JPanel {
             return;
         }
 
-        AnimGifExportPanel p = new AnimGifExportPanel(activeComp.getNrLayers());
-        OKCancelDialog d = new OKCancelDialog(p, parent, "Export Animated GIF", "Export", "Cancel", false) {
+        ExportPanel p = new ExportPanel(activeComp.getNrLayers());
+        OKCancelDialog d = new OKCancelDialog(p, dialogParent, "Export Animated GIF", "Export", "Cancel", false) {
             @Override
             protected void dialogAccepted() {
                 close();
@@ -90,5 +59,41 @@ public class AnimGifExportPanel extends JPanel {
             }
         };
         d.setVisible(true);
+    }
+
+    static class ExportPanel extends JPanel {
+        private final JTextField delayTF;
+        private final JCheckBox pingPongCB;
+
+        public ExportPanel(int nrLayers) {
+            setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+            setLayout(new VerticalLayout(10));
+
+            add(new JLabel(" Animation frames are based on the layers of the image. "));
+
+            JPanel settings = new JPanel();
+            settings.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
+            settings.add(new JLabel("Delay Between Frames (Milliseconds):"));
+            delayTF = new JTextField("200", 4);
+            settings.add(delayTF);
+
+            add(settings);
+
+            if (nrLayers > 2) {
+                pingPongCB = new JCheckBox("Ping Pong Animation");
+            } else {
+                pingPongCB = new JCheckBox("Ping Pong Animation (min 3 layers needed)");
+                pingPongCB.setEnabled(false);
+            }
+            add(pingPongCB);
+        }
+
+        private int getDelayMillis() {
+            return Integer.parseInt(delayTF.getText());
+        }
+
+        private boolean isPingPong() {
+            return pingPongCB.isSelected();
+        }
     }
 }
