@@ -32,11 +32,13 @@ import org.assertj.swing.fixture.JFileChooserFixture;
 import org.assertj.swing.fixture.JMenuItemFixture;
 import org.assertj.swing.fixture.JOptionPaneFixture;
 import org.assertj.swing.fixture.JTextComponentFixture;
+import org.assertj.swing.fixture.JToggleButtonFixture;
 import org.assertj.swing.launcher.ApplicationLauncher;
 import org.fest.util.Files;
 import org.junit.Before;
 import org.junit.Test;
 import pixelitor.io.FileChoosers;
+import pixelitor.layers.LayerButton;
 import pixelitor.tools.BrushType;
 import pixelitor.tools.GradientColorType;
 import pixelitor.tools.GradientTool;
@@ -96,41 +98,40 @@ public class AssertJTest {
     @Test
     public void testApp() {
 //        testTools();
-        testMenus();
-//        testLayers();
+//        testMenus();
+        testLayers();
 
         sleep(5, SECONDS);
     }
 
     private void testLayers() {
         // TODO add, remove, change visibility, all the Layers menus
+
+        // TODO create a LayerButtonFixture class??
+    }
+
+    private JToggleButtonFixture findLayerButton(String layerName) {
+        return new JToggleButtonFixture(robot, robot.finder().find(new GenericTypeMatcher<LayerButton>(LayerButton.class) {
+            @Override
+            protected boolean isMatching(LayerButton layerButton) {
+                return layerButton.getLayerName().equals(layerName);
+            }
+        }));
     }
 
     protected void testMenus() {
         testFileMenu();
-//        testEditMenu();
-//        testFilters();
-//        testZoomCommands();
-//        testViewCommands();
-//        testHelpMenu();
+        testEditMenu();
+        testFilters();
+        testZoomCommands();
+        testViewCommands();
+        testHelpMenu();
     }
 
     protected void testHelpMenu() {
         testTipOfTheDay();
-//        testCheckForUpdate();
-//        testAbout();
-    }
-
-
-    private void testAbout() {
-        findMenuItemByText("About").click();
-        DialogFixture aboutDialog = findDialogByTitle("About Pixelitor");
-        aboutDialog.button("ok").click();
-    }
-
-    private void testCheckForUpdate() {
-        findMenuItemByText("Check for Update...").click();
-        findJOptionPane().cancelButton().click();
+        testCheckForUpdate();
+        testAbout();
     }
 
     private void testTipOfTheDay() {
@@ -140,6 +141,17 @@ public class AssertJTest {
         findButtonInDialogByText(dialog, "Next >").click();
         findButtonInDialogByText(dialog, "< Back").click();
         findButtonInDialogByText(dialog, "Close").click();
+    }
+
+    private void testCheckForUpdate() {
+        findMenuItemByText("Check for Update...").click();
+        findJOptionPane().cancelButton().click();
+    }
+
+    private void testAbout() {
+        findMenuItemByText("About").click();
+        DialogFixture aboutDialog = findDialogByTitle("About Pixelitor");
+        aboutDialog.button("ok").click();
     }
 
     protected void testEditMenu() {

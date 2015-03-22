@@ -711,8 +711,8 @@ public class Composition implements Serializable {
     }
 
     private boolean isActiveComp() {
-        // TODO this was a hack in order to isolate the unit tests from ImageComponents
         if (!(ic instanceof ImageComponent)) {
+            // we are in a unit test
             return false;
         }
         return (ImageComponents.getActiveComp().get() == this);
