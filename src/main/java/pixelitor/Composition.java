@@ -56,6 +56,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.IntSupplier;
 
 import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
@@ -352,25 +353,24 @@ public class Composition implements Serializable {
     }
 
     public void moveActiveLayer(boolean up) {
-        assert checkInvariant();
-
         int oldIndex = layerList.indexOf(activeLayer);
-        int newIndex = up ? oldIndex + 1 : oldIndex - 1;
-        swapLayers(oldIndex, newIndex, false);
+        moveActiveLayerImpl(() -> up ? oldIndex + 1 : oldIndex - 1);
     }
 
     public void moveActiveLayerToTop() {
-        assert checkInvariant();
-
-        int oldIndex = layerList.indexOf(activeLayer);
-        swapLayers(oldIndex, layerList.size() - 1, false);
+        moveActiveLayerImpl(() -> layerList.size() - 1);
     }
 
     public void moveActiveLayerToBottom() {
+        moveActiveLayerImpl(() -> 0);
+    }
+
+    private void moveActiveLayerImpl(IntSupplier newIndexSupplier) {
         assert checkInvariant();
 
         int oldIndex = layerList.indexOf(activeLayer);
-        swapLayers(oldIndex, 0, false);
+        int newIndex = newIndexSupplier.getAsInt();
+        swapLayers(oldIndex, newIndex, false);
     }
 
     public void swapLayers(int oldIndex, int newIndex, boolean isUndoRedo) {

@@ -33,7 +33,6 @@ import java.awt.image.BufferedImage;
 import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
@@ -53,15 +52,14 @@ public class CompositionTest {
     @Before
     public void setUp() {
         comp = TestHelper.create2LayerTestComposition();
-        assertEquals(2, comp.getNrLayers());
+        checkNumLayers(2);
     }
 
     @Test
     public void testAddNewEmptyLayer() {
         comp.addNewEmptyLayer("newLayer", true);
         comp.addNewEmptyLayer("newLayer", false);
-        assertEquals(4, comp.getNrLayers());
-        comp.checkInvariant();
+        checkNumLayers(4);
     }
 
     @Test
@@ -75,18 +73,10 @@ public class CompositionTest {
     }
 
     @Test
-    public void testGetNrLayers() {
-        int nrLayers = comp.getNrLayers();
-        assertEquals(2, nrLayers);
-        comp.checkInvariant();
-    }
-
-    @Test
     public void testAddLayerNoGUI() {
         ImageLayer newLayer = TestHelper.createTestImageLayer("layer", comp);
         comp.addLayerNoGUI(newLayer);
-        assertEquals(4, comp.getNrLayers());
-        comp.checkInvariant();
+        checkNumLayers(4);
     }
 
     @Test
@@ -111,30 +101,14 @@ public class CompositionTest {
         comp.addLayer(newLayer, AddToHistory.NO, true, 1);
         comp.addLayer(newLayer, AddToHistory.NO, false, 1);
 
-        assertEquals(19, comp.getNrLayers());
-        comp.checkInvariant();
+        checkNumLayers(19);
     }
 
     @Test
     public void testDuplicateLayer() {
-        assertEquals(2, comp.getNrLayers());
+        checkNumLayers(2);
         comp.duplicateLayer();
-        assertEquals(3, comp.getNrLayers());
-        comp.checkInvariant();
-    }
-
-    @Test
-    public void testGetActiveLayer() {
-        Layer activeLayer = comp.getActiveLayer();
-        assertNotNull(activeLayer);
-        comp.checkInvariant();
-    }
-
-    @Test
-    public void testGetActiveLayerIndex() {
-        int index = comp.getActiveLayerIndex();
-        assertThat(index, equalTo(0));
-        comp.checkInvariant();
+        checkNumLayers(3);
     }
 
     @Test
@@ -205,42 +179,49 @@ public class CompositionTest {
 
     @Test
     public void testFlattenImage() {
+        checkNumLayers(2);
         comp.flattenImage(false);
-        comp.checkInvariant();
+        checkNumLayers(1);
     }
 
     @Test
     public void testMergeDown() {
+        checkNumLayers(2);
+        comp.setActiveLayer(comp.getLayer(1), AddToHistory.NO);
         comp.mergeDown();
-        comp.checkInvariant();
+        checkNumLayers(1);
     }
 
     @Test
     public void testMoveActiveLayer() {
+        checkActiveLayerIndex(0);
         comp.moveActiveLayer(true);
-        comp.checkInvariant();
+        checkActiveLayerIndex(1);
         comp.moveActiveLayer(false);
-        comp.checkInvariant();
+        checkActiveLayerIndex(0);
     }
 
     @Test
     public void testMoveActiveLayerToTop() {
+        checkActiveLayerIndex(0);
         comp.moveActiveLayerToTop();
-        comp.checkInvariant();
+        checkActiveLayerIndex(1);
     }
 
     @Test
     public void testMoveActiveLayerToBottom() {
+        checkActiveLayerIndex(0);
         comp.moveActiveLayerToBottom();
-        comp.checkInvariant();
+        checkActiveLayerIndex(0);
     }
 
     @Test
     public void testSwapLayers() {
+        checkActiveLayerIndex(0);
         comp.swapLayers(0, 1, false);
-        comp.checkInvariant();
+        checkActiveLayerIndex(1);
         comp.swapLayers(0, 1, true);
-        comp.checkInvariant();
+        checkActiveLayerIndex(0);
     }
 
     @Test
@@ -296,17 +277,17 @@ public class CompositionTest {
 
     @Test
     public void testRemoveActiveLayer() {
+        checkNumLayers(2);
         comp.removeActiveLayer();
-        assertEquals(1, comp.getNrLayers());
-        comp.checkInvariant();
+        checkNumLayers(1);
     }
 
     @Test
     public void testRemoveLayer() {
+        checkNumLayers(2);
         Layer layer2 = comp.getLayer(0);
         comp.removeLayer(layer2, true);
-        assertEquals(1, comp.getNrLayers());
-        comp.checkInvariant();
+        checkNumLayers(1);
     }
 
     @Test
@@ -469,4 +450,15 @@ public class CompositionTest {
         comp.dragFinished(layer, 1);
         comp.checkInvariant();
     }
+
+    private void checkNumLayers(int expected) {
+        assertEquals(expected, comp.getNrLayers());
+        comp.checkInvariant();
+    }
+
+    private void checkActiveLayerIndex(int expected) {
+        assertEquals(expected, comp.getActiveLayerIndex());
+        comp.checkInvariant();
+    }
+
 }
