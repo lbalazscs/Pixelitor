@@ -17,6 +17,7 @@
 
 package pixelitor.tools;
 
+import com.bric.util.JVM;
 import pixelitor.Build;
 import pixelitor.ImageDisplay;
 import pixelitor.tools.brushes.CloneBrush;
@@ -67,17 +68,19 @@ public class CloneTool extends BrushTool {
         CloneBrush cloneBrush = (CloneBrush) brush;
 
         if(e.isAltDown()) {
-            state = SOURCE_DEFINED;
-            cloneBrush.setSource(ic.getComp().getActiveImageLayer().getImage(), x, y);
+            setCloningSource(ic, x, y, cloneBrush);
         } else {
             if(state != SOURCE_DEFINED) {
                 if(Build.CURRENT.isRobotTest()) {
-                    // do not show dialogs for random robot tests, just act as
-                    // if this was an alt-click
-                    state = SOURCE_DEFINED;
-                    cloneBrush.setSource(ic.getComp().getActiveImageLayer().getImage(), x, y);
+                    // special case: do not show dialogs for random robot tests,
+                    // just act as if this was an alt-click
+                    setCloningSource(ic, x, y, cloneBrush);
                 } else {
-                    Dialogs.showErrorDialog("No source", "Define a source point first with Alt-Click");
+                    String msg = "Define a source point first with Alt-Click.";
+                    if (JVM.isLinux) {
+                        msg += "\n(You might need to disable Alt-Click for window dragging in the window manager)";
+                    }
+                    Dialogs.showErrorDialog("No source", msg);
                 }
             }
 
@@ -87,6 +90,11 @@ public class CloneTool extends BrushTool {
 
             super.toolMousePressed(e, ic);
         }
+    }
+
+    protected void setCloningSource(ImageDisplay ic, int x, int y, CloneBrush cloneBrush) {
+        cloneBrush.setSource(ic.getComp().getActiveImageLayer().getImage(), x, y);
+        state = SOURCE_DEFINED;
     }
 
     @Override

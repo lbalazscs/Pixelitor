@@ -97,11 +97,28 @@ public class AssertJTest {
 
     @Test
     public void testApp() {
-//        testTools();
-//        testMenus();
+        checkTestingDirs();
+
+        testTools();
+        testMenus();
         testLayers();
 
         sleep(5, SECONDS);
+    }
+
+    protected void testTools() {
+        testZoomTool();
+        testMoveTool();
+        testCropTool();
+        testSelectionTool();
+        testCloneTool();
+        testEraserTool();
+        testBrushTool();
+        testGradientTool();
+        testPaintBucketTool();
+        testColorPickerTool();
+        testShapesTool();
+        testHandTool();
     }
 
     private void testLayers() {
@@ -214,8 +231,6 @@ public class AssertJTest {
     }
 
     protected void testFileMenu() {
-        checkTestingDirs();
-
         testNewImage();
         testSaveUnnamed();
         testClose();
@@ -433,21 +448,6 @@ public class AssertJTest {
         runMenuCommand("Tile");
     }
 
-    protected void testTools() {
-        testZoomTool();
-        testMoveTool();
-        testCropTool();
-        testSelectionTool();
-        testCloneTool();
-        testEraserTool();
-        testBrushTool();
-        testGradientTool();
-        testPaintBucketTool();
-        testColorPickerTool();
-        testShapesTool();
-        testHandTool();
-    }
-
     protected void testZoomCommands() {
         runMenuCommand("Zoom In");
         runMenuCommand("Zoom Out");
@@ -577,7 +577,7 @@ public class AssertJTest {
     }
 
     private void testNoDialogFilter(String name) {
-        window.menuItem(name).click();
+        runMenuCommand(name);
     }
 
 
