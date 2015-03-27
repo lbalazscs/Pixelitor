@@ -19,15 +19,12 @@ package pixelitor.menus.help;
 
 import pixelitor.Build;
 import pixelitor.PixelitorWindow;
-import pixelitor.utils.GridBagHelper;
-import pixelitor.utils.MemoryInfo;
 import pixelitor.utils.OKDialog;
 import pixelitor.utils.OpenInBrowserAction;
 
 import javax.swing.*;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.GridBagLayout;
 import java.net.URL;
 
 public class AboutDialog extends OKDialog {
@@ -44,7 +41,7 @@ public class AboutDialog extends OKDialog {
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.add("About", new JScrollPane(box));
         tabbedPane.add("Credits", new JScrollPane(createCreditsPanel()));
-        tabbedPane.add("System Info", new JScrollPane(createSysInfoPanel()));
+        tabbedPane.add("System Info", new JScrollPane(new SystemInfoPanel()));
 
         new AboutDialog(pixelitorWindow, tabbedPane);
     }
@@ -63,42 +60,6 @@ public class AboutDialog extends OKDialog {
         return p;
     }
 
-    private static JPanel createSysInfoPanel() {
-        JPanel p = new JPanel();
-        p.setLayout(new GridBagLayout());
-
-        GridBagHelper gridBagHelper = new GridBagHelper(p);
-
-        gridBagHelper.addLabel("Java Version:", 0, 0);
-        gridBagHelper.addControl(new JLabel(System.getProperty("java.version")));
-
-        gridBagHelper.addLabel("Java VM:", 0, 1);
-        gridBagHelper.addControl(new JLabel(System.getProperty("java.vm.name")));
-
-        gridBagHelper.addLabel("OS:", 0, 2);
-        gridBagHelper.addControl(new JLabel(System.getProperty("os.name")));
-
-        MemoryInfo memoryInfo = new MemoryInfo();
-        long freeMemoryMB = memoryInfo.getFreeMemoryMB();
-        long maxMemoryMB = memoryInfo.getMaxMemoryMB();
-        long totalMemoryMB = memoryInfo.getTotalMemoryMB();
-        long usedMemoryMB = memoryInfo.getUsedMemoryMB();
-
-        gridBagHelper.addLabel("Allocated Memory:", 0, 3);
-        gridBagHelper.addControl(new JLabel(totalMemoryMB + " megabytes"));
-
-        gridBagHelper.addLabel("Used Memory:", 0, 4);
-        gridBagHelper.addControl(new JLabel(usedMemoryMB + " megabytes"));
-
-        gridBagHelper.addLabel("Free Memory:", 0, 5);
-        gridBagHelper.addControl(new JLabel(freeMemoryMB + " megabytes"));
-
-        gridBagHelper.addLabel("Max Memory:", 0, 6);
-        gridBagHelper.addControl(new JLabel(maxMemoryMB + " megabytes"));
-
-        return p;
-    }
-
     private static void createAboutBox() {
         box = Box.createVerticalBox();
 
@@ -110,6 +71,13 @@ public class AboutDialog extends OKDialog {
         addLabel("<html><center> Copyright \u00A9 2009-2014 L\u00E1szl\u00F3 Bal\u00E1zs-Cs\u00EDki <br>and Contributors<br><br>");
         addLabel("lbalazscs\u0040gmail.com");
 
+        JButton linkButton = createLinkButton();
+        box.add(linkButton);
+
+        box.add(Box.createGlue());
+    }
+
+    private static JButton createLinkButton() {
         OpenInBrowserAction browserAction = new OpenInBrowserAction(null, HOME_PAGE);
 
         JButton linkButton = new JButton("<HTML><FONT color=\"#000099\"><U>" + HOME_PAGE + "</U></FONT></HTML>");
@@ -122,9 +90,7 @@ public class AboutDialog extends OKDialog {
         linkButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         linkButton.addActionListener(browserAction);
-
-        box.add(linkButton);
-        box.add(Box.createGlue());
+        return linkButton;
     }
 
     private static void addLabel(URL url) {

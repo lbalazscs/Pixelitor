@@ -261,9 +261,6 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
      * Traces the given shape and paint with the current brush tool
      */
     public void trace(Composition comp, Shape shape) {
-//        brushes.setComp(comp); // just to be sure
-        Symmetry currentSymmetry = symmetryModel.getSelectedItem();
-
         setupDrawingRadius();
         try {
             respectSelection = false;
@@ -272,41 +269,46 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
             initDrawingGraphics(comp, imageLayer);
             setupGraphics(drawingGraphics, FgBgColorSelector.getFG());
 
-            int startingX = 0;
-            int startingY = 0;
+            doTraceAfterSetup(shape);
 
-            FlatteningPathIterator fpi = new FlatteningPathIterator(shape.getPathIterator(null), 1.0);
-            float[] coords = new float[2];
-            while (!fpi.isDone()) {
-                int type = fpi.currentSegment(coords);
-                int x = (int) coords[0];
-                int y = (int) coords[1];
-                brushAffectedArea.updateAffectedCoordinates(x, y);
-
-                switch(type) {
-                    case PathIterator.SEG_MOVETO:
-                        startingX = x;
-                        startingY = y;
-
-                        brush.onDragStart(x, y);
-
-                        break;
-                    case PathIterator.SEG_LINETO:
-                        brush.onNewMousePoint(x, y);
-
-                        break;
-                    case PathIterator.SEG_CLOSE:
-                        brush.onNewMousePoint(startingX, startingY);
-                        break;
-                    default:
-                        throw new IllegalArgumentException("type = " + type);
-                }
-
-                fpi.next();
-            }
             finishBrushStroke(comp);
         } finally {
             resetState();
+        }
+    }
+
+    private void doTraceAfterSetup(Shape shape) {
+        int startingX = 0;
+        int startingY = 0;
+
+        FlatteningPathIterator fpi = new FlatteningPathIterator(shape.getPathIterator(null), 1.0);
+        float[] coords = new float[2];
+        while (!fpi.isDone()) {
+            int type = fpi.currentSegment(coords);
+            int x = (int) coords[0];
+            int y = (int) coords[1];
+            brushAffectedArea.updateAffectedCoordinates(x, y);
+
+            switch (type) {
+                case PathIterator.SEG_MOVETO:
+                    startingX = x;
+                    startingY = y;
+
+                    brush.onDragStart(x, y);
+
+                    break;
+                case PathIterator.SEG_LINETO:
+                    brush.onNewMousePoint(x, y);
+
+                    break;
+                case PathIterator.SEG_CLOSE:
+                    brush.onNewMousePoint(startingX, startingY);
+                    break;
+                default:
+                    throw new IllegalArgumentException("type = " + type);
+            }
+
+            fpi.next();
         }
     }
 

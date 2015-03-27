@@ -35,25 +35,18 @@ public class AngleSelector extends JPanel {
         AbstractAngleSelectorComponent asc = angleParam.getAngleSelectorComponent();
         add(asc, BorderLayout.WEST);
 
-        RangeParam spinnerModel = angleParam.createRangeParam();
-        SliderSpinner sliderSpinner = new SliderSpinner(spinnerModel, SliderSpinner.TextPosition.NONE, true);
-
-        sliderSpinner.setResettable(angleParam);
-        int maxAngleInDegrees = angleParam.getMaxAngleInDegrees();
-        if (maxAngleInDegrees == 360) {
-            sliderSpinner.setupTicks(180, 90);
-        } else if (maxAngleInDegrees == 90) {
-            sliderSpinner.setupTicks(15, 0);
-        }
-
+        SliderSpinner sliderSpinner = createSliderSpinner(angleParam, asc);
         add(sliderSpinner, BorderLayout.CENTER);
 
-        angleParam.addChangeListener(e -> {
-            asc.repaint();
-            userChangedSpinner = false;
-            spinnerModel.setValue(angleParam.getValueInDegrees());
-            userChangedSpinner = true;
-        });
+        setBorder(BorderFactory.createTitledBorder(angleParam.getName()));
+
+        Dimension preferredSize = getPreferredSize();
+        Dimension sliderPreferredSize = sliderSpinner.getPreferredSize();
+        setPreferredSize(new Dimension(sliderPreferredSize.width, preferredSize.height));
+    }
+
+    private SliderSpinner createSliderSpinner(AngleParam angleParam, AbstractAngleSelectorComponent asc) {
+        RangeParam spinnerModel = angleParam.createRangeParam();
         spinnerModel.addChangeListener(e -> {
             if (userChangedSpinner) {
                 boolean trigger = !spinnerModel.getValueIsAdjusting();
@@ -63,11 +56,22 @@ public class AngleSelector extends JPanel {
             }
         });
 
-        setBorder(BorderFactory.createTitledBorder(angleParam.getName()));
+        SliderSpinner sliderSpinner = new SliderSpinner(spinnerModel, SliderSpinner.TextPosition.NONE, true);
 
-        Dimension preferredSize = getPreferredSize();
-        Dimension sliderPreferredSize = sliderSpinner.getPreferredSize();
-        setPreferredSize(new Dimension(sliderPreferredSize.width, preferredSize.height));
+        sliderSpinner.setResettable(angleParam);
+        int maxAngleInDegrees = angleParam.getMaxAngleInDegrees();
+        if (maxAngleInDegrees == 360) {
+            sliderSpinner.setupTicks(180, 90);
+        } else if (maxAngleInDegrees == 90) {
+            sliderSpinner.setupTicks(15, 0);
+        }
+        angleParam.addChangeListener(e -> {
+            asc.repaint();
+            userChangedSpinner = false;
+            spinnerModel.setValue(angleParam.getValueInDegrees());
+            userChangedSpinner = true;
+        });
+        return sliderSpinner;
     }
 }
 
