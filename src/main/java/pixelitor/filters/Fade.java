@@ -65,28 +65,13 @@ public class Fade extends FilterWithParametrizedGUI {
             return src;
         }
 
+        // TODO why not with a simple AlphaComposite?
+
         int[] srcData = ImageUtils.getPixelsAsArray(src);
         int[] destData = ImageUtils.getPixelsAsArray(dest);
         int[] prevData = ImageUtils.getPixelsAsArray(previous);
 
         int length = srcData.length;
-
-//        if (length != prevData.length) {
-//            Composition previousComp = ImageComponents.getActiveComp()
-//                    .flatMap(History::getPreviousEditForFade).get().getComp();
-//            if (activeComp != previousComp) {
-//                throw new IllegalArgumentException("activeComp != previousComp");
-//            }
-//
-//            int width = src.getWidth();
-//            int height = src.getHeight();
-//            int previousWidth = previous.getWidth();
-//            int previousHeight = previous.getHeight();
-//
-//            String debugInfo = "Fade.transform width = " + width + ", height = " + height + ", previousWidth = " + previousWidth + ", previousHeight = " + previousHeight;
-//            debugInfo += (" comp = " + activeComp.getName());
-//            throw new IllegalArgumentException("the image and the previous are not the same size: " + debugInfo);
-//        }
 
         float fadeFactor = opacityParam.getValueAsPercentage();
 

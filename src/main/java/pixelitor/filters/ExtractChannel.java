@@ -63,59 +63,63 @@ public class ExtractChannel extends FilterWithParametrizedGUI {
         int channel = channelParam.getValue();
 
         if (bwParam.isChecked()) {
-            RGBPixelOp rgbOp;
-            switch (channel) {
-                case RED_CHANNEL:
-                    rgbOp = (a, r, g, b) -> {
-                        g = r;
-                        b = r;
-                        return (a << 24) | (r << 16) | (g << 8) | b;
-                    };
-                    return FilterUtils.runRGBPixelOp(rgbOp, src, dest);
-                case REMOVE_RED_CHANNEL:
-                    rgbOp = (a, r, g, b) -> {
-                        int val = (g + b) / 2;
-                        return (a << 24) | (val << 16) | (val << 8) | val;
-                    };
-                    return FilterUtils.runRGBPixelOp(rgbOp, src, dest);
-                case GREEN_CHANNEL:
-                    rgbOp = (a, r, g, b) -> {
-                        r = g;
-                        b = g;
-                        return (a << 24) | (r << 16) | (g << 8) | b;
-                    };
-                    return FilterUtils.runRGBPixelOp(rgbOp, src, dest);
-                case REMOVE_GREEN_CHANNEL:
-                    rgbOp = (a, r, g, b) -> {
-                        int val = (r + b) / 2;
-                        return (a << 24) | (val << 16) | (val << 8) | val;
-                    };
-                    return FilterUtils.runRGBPixelOp(rgbOp, src, dest);
-                case BLUE_CHANNEL:
-                    rgbOp = (a, r, g, b) -> {
-                        r = b;
-                        g = b;
-                        return (a << 24) | (r << 16) | (g << 8) | b;
-                    };
-                    return FilterUtils.runRGBPixelOp(rgbOp, src, dest);
-                case REMOVE_BLUE_CHANNEL:
-                    rgbOp = (a, r, g, b) -> {
-                        int val = (r + g) / 2;
-                        return (a << 24) | (val << 16) | (val << 8) | val;
-                    };
-                    return FilterUtils.runRGBPixelOp(rgbOp, src, dest);
-                default:
-                    throw new IllegalStateException("should not het here");
-            }
+            dest = bwExtractChannel(src, dest, channel);
         } else {
-            colorExtractChannel(src, dest, channel);
+            dest = colorExtractChannel(src, dest, channel);
         }
-
 
         return dest;
     }
 
-    private static void colorExtractChannel(BufferedImage src, BufferedImage dest, int channel) {
+    private BufferedImage bwExtractChannel(BufferedImage src, BufferedImage dest, int channel) {
+        RGBPixelOp rgbOp;
+        switch (channel) {
+            case RED_CHANNEL:
+                rgbOp = (a, r, g, b) -> {
+                    g = r;
+                    b = r;
+                    return (a << 24) | (r << 16) | (g << 8) | b;
+                };
+                break;
+            case REMOVE_RED_CHANNEL:
+                rgbOp = (a, r, g, b) -> {
+                    int val = (g + b) / 2;
+                    return (a << 24) | (val << 16) | (val << 8) | val;
+                };
+                break;
+            case GREEN_CHANNEL:
+                rgbOp = (a, r, g, b) -> {
+                    r = g;
+                    b = g;
+                    return (a << 24) | (r << 16) | (g << 8) | b;
+                };
+                break;
+            case REMOVE_GREEN_CHANNEL:
+                rgbOp = (a, r, g, b) -> {
+                    int val = (r + b) / 2;
+                    return (a << 24) | (val << 16) | (val << 8) | val;
+                };
+                break;
+            case BLUE_CHANNEL:
+                rgbOp = (a, r, g, b) -> {
+                    r = b;
+                    g = b;
+                    return (a << 24) | (r << 16) | (g << 8) | b;
+                };
+                break;
+            case REMOVE_BLUE_CHANNEL:
+                rgbOp = (a, r, g, b) -> {
+                    int val = (r + g) / 2;
+                    return (a << 24) | (val << 16) | (val << 8) | val;
+                };
+                break;
+            default:
+                throw new IllegalStateException("should not het here");
+        }
+        return FilterUtils.runRGBPixelOp(rgbOp, src, dest);
+    }
+
+    private static BufferedImage colorExtractChannel(BufferedImage src, BufferedImage dest, int channel) {
         LookupTable lookupTable;
 
         switch (channel) {
@@ -143,5 +147,6 @@ public class ExtractChannel extends FilterWithParametrizedGUI {
 
         BufferedImageOp filterOp = new FastLookupOp((ShortLookupTable) lookupTable);
         filterOp.filter(src, dest);
+        return dest;
     }
 }

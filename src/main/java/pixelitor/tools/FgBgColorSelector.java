@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.tools;
 
@@ -26,14 +26,14 @@ import javax.swing.*;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
- *
+ * A panel that contains the buttons for selecting the foreground and background colors
  */
-public class FgBgColorSelector extends JLayeredPane implements ActionListener {
-    private final JButton fgButton = new JButton();
-    private final JButton bgButton = new JButton();
+public class FgBgColorSelector extends JLayeredPane {
+    private JButton fgButton;
+    private JButton bgButton;
+
     private Color fgColor = Color.black;
     private Color bgColor = Color.white;
 
@@ -41,60 +41,60 @@ public class FgBgColorSelector extends JLayeredPane implements ActionListener {
     private static final int SMALL_BUTTON_SIZE = 16;
     private static final int SMALL_BUTTON_VERTICAL_SPACE = 20;
 
-//    private JColorChooser colorChooser;
-
-
     public static final FgBgColorSelector INSTANCE = new FgBgColorSelector();
-    private final Action randomizeColorsAction;
 
-    private final Action resetToDefaultAction;
-    private final Action switchColorsAction;
+    private Action randomizeColorsAction;
+    private Action resetToDefaultAction;
+    private Action swapColorsAction;
 
     private final boolean layerMaskEditing = false;
 
     private FgBgColorSelector() {
         setLayout(null);
 
-        initButton(fgButton, "Set Foreground Color", BIG_BUTTON_SIZE, 2);
-        fgButton.addActionListener(this);
+        initFGButton();
+        initBGButton();
+        initResetDefaultsButton();
+        initSwapColorsButton();
+        initRandomizeButton();
 
-        initButton(bgButton, "Set Background Color", BIG_BUTTON_SIZE, 1);
-        bgButton.addActionListener(this);
-
-        JButton defaultsButton = new JButton();
-        initButton(defaultsButton, "Reset Default Colors (D)", SMALL_BUTTON_SIZE, 1);
-        JButton swapButton = new JButton();
-        initButton(swapButton, "Swap Colors (X)", SMALL_BUTTON_SIZE, 1);
-        JButton randomizeButton = new JButton();
-        initButton(randomizeButton, "Randomize Colors (R)", SMALL_BUTTON_SIZE, 1);
-
-        defaultsButton.setLocation(0, 0);
-        swapButton.setLocation(SMALL_BUTTON_SIZE, 0);
-        randomizeButton.setLocation(2 * SMALL_BUTTON_SIZE, 0);
-
-        fgButton.setLocation(0, SMALL_BUTTON_VERTICAL_SPACE);
-        bgButton.setLocation(BIG_BUTTON_SIZE / 2, SMALL_BUTTON_VERTICAL_SPACE + BIG_BUTTON_SIZE / 2);
-
-        int preferredHorizontalSize = (int) (BIG_BUTTON_SIZE * 1.5);
-        int preferredVerticalSize = preferredHorizontalSize + SMALL_BUTTON_VERTICAL_SPACE;
-        Dimension preferredDim = new Dimension(preferredHorizontalSize, preferredVerticalSize);
-        setPreferredSize(preferredDim);
-        setMinimumSize(preferredDim);
-        setMaximumSize(preferredDim);
+        setupSize();
 
         setFgColor(AppPreferences.loadFgColor());
         setBgColor(AppPreferences.loadBgColor());
 
+        setupKeyboardShortcuts();
+    }
+
+    private void initFGButton() {
+        fgButton = initButton("Set Foreground Color", BIG_BUTTON_SIZE, 2);
+        fgButton.addActionListener(e -> fgButtonPressed());
+        fgButton.setLocation(0, SMALL_BUTTON_VERTICAL_SPACE);
+    }
+
+    private void initBGButton() {
+        bgButton = initButton("Set Background Color", BIG_BUTTON_SIZE, 1);
+        bgButton.addActionListener(e -> bgButtonPressed());
+        bgButton.setLocation(BIG_BUTTON_SIZE / 2, SMALL_BUTTON_VERTICAL_SPACE + BIG_BUTTON_SIZE / 2);
+    }
+
+    private void initResetDefaultsButton() {
+        JButton defaultsButton = initButton("Reset Default Colors (D)", SMALL_BUTTON_SIZE, 1);
+        defaultsButton.setLocation(0, 0);
         resetToDefaultAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                setFgColor(Color.black);
-                setBgColor(Color.white);
+                setFgColor(Color.BLACK);
+                setBgColor(Color.WHITE);
             }
         };
         defaultsButton.addActionListener(resetToDefaultAction);
+    }
 
-        switchColorsAction = new AbstractAction() {
+    private void initSwapColorsButton() {
+        JButton swapButton = initButton("Swap Colors (X)", SMALL_BUTTON_SIZE, 1);
+        swapButton.setLocation(SMALL_BUTTON_SIZE, 0);
+        swapColorsAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Color tmpFgColor = fgColor;
@@ -103,8 +103,12 @@ public class FgBgColorSelector extends JLayeredPane implements ActionListener {
                 setBgColor(tmpFgColor);
             }
         };
-        swapButton.addActionListener(switchColorsAction);
+        swapButton.addActionListener(swapColorsAction);
+    }
 
+    private void initRandomizeButton() {
+        JButton randomizeButton = initButton("Randomize Colors (R)", SMALL_BUTTON_SIZE, 1);
+        randomizeButton.setLocation(2 * SMALL_BUTTON_SIZE, 0);
         randomizeColorsAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -113,29 +117,36 @@ public class FgBgColorSelector extends JLayeredPane implements ActionListener {
             }
         };
         randomizeButton.addActionListener(randomizeColorsAction);
-
-        setupKeyboardShortcuts();
     }
 
+    private void setupSize() {
+        int preferredHorizontalSize = (int) (BIG_BUTTON_SIZE * 1.5);
+        int preferredVerticalSize = preferredHorizontalSize + SMALL_BUTTON_VERTICAL_SPACE;
+        Dimension preferredDim = new Dimension(preferredHorizontalSize, preferredVerticalSize);
+        setPreferredSize(preferredDim);
+        setMinimumSize(preferredDim);
+        setMaximumSize(preferredDim);
+    }
 
-    private void initButton(JButton button, String toolTipText, int size, int addLayer) {
+    private JButton initButton(String toolTipText, int size, int addLayer) {
+        JButton button = new JButton();
         button.setToolTipText(toolTipText);
         button.setSize(size, size);
         add(button, Integer.valueOf(addLayer));
+        return button;
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == fgButton) {
-            Color c = ColorPicker.showDialog(PixelitorWindow.getInstance(), "Set foreground color", fgColor, false);
-            if (c != null) {
-                setFgColor(c);
-            }
-        } else if (e.getSource() == bgButton) {
-            Color c = ColorPicker.showDialog(PixelitorWindow.getInstance(), "Set background color", bgColor, false);
-            if (c != null) {
-                setBgColor(c);
-            }
+    private void bgButtonPressed() {
+        Color c = ColorPicker.showDialog(PixelitorWindow.getInstance(), "Set background color", bgColor, false);
+        if (c != null) {
+            setBgColor(c);
+        }
+    }
+
+    private void fgButtonPressed() {
+        Color c = ColorPicker.showDialog(PixelitorWindow.getInstance(), "Set foreground color", fgColor, false);
+        if (c != null) {
+            setFgColor(c);
         }
     }
 
@@ -185,7 +196,6 @@ public class FgBgColorSelector extends JLayeredPane implements ActionListener {
         INSTANCE.randomizeColorsAction.actionPerformed(null);
     }
 
-
     public void setFgColor(Color c) {
         Color old = fgColor;
         fgColor = c;
@@ -212,8 +222,7 @@ public class FgBgColorSelector extends JLayeredPane implements ActionListener {
 
     private void setupKeyboardShortcuts() {
         GlobalKeyboardWatch.addKeyboardShortCut('d', true, "reset", resetToDefaultAction);
-        GlobalKeyboardWatch.addKeyboardShortCut('x', true, "switch", switchColorsAction);
+        GlobalKeyboardWatch.addKeyboardShortCut('x', true, "switch", swapColorsAction);
         GlobalKeyboardWatch.addKeyboardShortCut('r', true, "randomize", randomizeColorsAction);
     }
-
 }

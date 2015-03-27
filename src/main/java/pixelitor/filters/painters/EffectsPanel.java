@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.painters;
 
 import org.jdesktop.swingx.painter.effects.AreaEffect;
@@ -22,7 +23,6 @@ import org.jdesktop.swingx.painter.effects.InnerGlowPathEffect;
 import org.jdesktop.swingx.painter.effects.NeonBorderEffect;
 import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
 import pixelitor.filters.gui.ParamAdjustmentListener;
-import pixelitor.utils.GUIUtils;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -79,20 +79,31 @@ public class EffectsPanel extends JPanel {
     }
 
     public void updateEffectsFromGUI() {
+        updateGlowFromGUI();
+        updateInnerGlowFromGUI();
+        updateNeonBorderFromGUI();
+        updateDropShadowFromGUI();
+    }
+
+    private void updateGlowFromGUI() {
         if (glowConfigurator.isSelected()) {
             glowEffect = new GlowPathEffect(glowConfigurator.getOpacity());
             glowConfigurator.updateEffectColorAndBrush(glowEffect);
         } else {
             glowEffect = null;
         }
+    }
 
+    private void updateInnerGlowFromGUI() {
         if (innerGlowConfigurator.isSelected()) {
             innerGlowEffect = new InnerGlowPathEffect(innerGlowConfigurator.getOpacity());
             innerGlowConfigurator.updateEffectColorAndBrush(innerGlowEffect);
         } else {
             innerGlowEffect = null;
         }
+    }
 
+    private void updateNeonBorderFromGUI() {
         if (neonBorderConfigurator.isSelected()) {
             Color edgeColor = neonBorderConfigurator.getColor();
             Color centerColor = neonBorderConfigurator.getInnerColor();
@@ -103,7 +114,9 @@ public class EffectsPanel extends JPanel {
         } else {
             neonBorderEffect = null;
         }
+    }
 
+    private void updateDropShadowFromGUI() {
         if (dropShadowConfigurator.isSelected()) {
             dropShadowEffect = new ShadowPathEffect(dropShadowConfigurator.getOpacity());
             dropShadowConfigurator.updateEffectColorAndBrush(dropShadowEffect);
@@ -112,7 +125,6 @@ public class EffectsPanel extends JPanel {
             dropShadowEffect = null;
         }
     }
-
 
     private void addTab(String name, EffectConfiguratorPanel configurator) {
         JPanel tabPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -148,6 +160,7 @@ public class EffectsPanel extends JPanel {
     }
 
     public int getMaxEffectThickness() {
+        // TODO what about the inner glow?
         int max = 0;
         if (glowEffect != null) {
             int effectWidth = glowEffect.getEffectWidth();
@@ -179,12 +192,5 @@ public class EffectsPanel extends JPanel {
 
         return max;
     }
-
-
-    public static void main(String[] args) {
-        GUIUtils.testJComponent(new EffectsPanel(null));
-    }
-
-
 }
 
