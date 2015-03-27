@@ -31,16 +31,13 @@ import java.awt.image.BufferedImageOp;
 import java.awt.image.ShortLookupTable;
 
 /**
- *
+ * Color balance filter
  */
 public class ColorBalance extends FilterWithParametrizedGUI {
-
     private static final int EVERYTHING = 0;
     private static final int SHADOWS = 1;
     private static final int MIDTONES = 2;
     private static final int HIGHLIGHTS = 4;
-
-    private static final int LUT_TABLE_SIZE = 256;
 
     private final IntChoiceParam affectParam = new IntChoiceParam("Affect", new IntChoiceParam.Value[]{
             new IntChoiceParam.Value("Everything", EVERYTHING),
@@ -77,68 +74,101 @@ public class ColorBalance extends FilterWithParametrizedGUI {
 
         int affect = affectParam.getValue();
 
-        float[] affectFactor = new float[LUT_TABLE_SIZE];
-        for (int i = 0; i < LUT_TABLE_SIZE; i++) {
-            switch (affect) {
-                case EVERYTHING:
-                    affectFactor[i] = 1.0f;
-                    break;
-                case SHADOWS:
-                    affectFactor[i] = 1.0f - (1.0f * i) / LUT_TABLE_SIZE;
-                    break;
-                case HIGHLIGHTS:
-                    affectFactor[i] = (1.0f * i) / LUT_TABLE_SIZE;
-                    break;
-                case MIDTONES:
-                    int halfSize = LUT_TABLE_SIZE / 2;
-                    if (i <= halfSize) {
-                        affectFactor[i] = (2.0f * i) / LUT_TABLE_SIZE;
-                    } else {
-                        affectFactor[i] = 2 * (1.0f - (1.0f * i) / LUT_TABLE_SIZE);
-                    }
-                    break;
-            }
-        }
+        RGBLookup rgbLookup = new LookupCalculator(cr, mg, yb, affect).getLookup();
+
+        BufferedImageOp filterOp = new FastLookupOp((ShortLookupTable) rgbLookup.getLookupOp());
+        filterOp.filter(src, dest);
+
+        return dest;
+    }
+
+    private static class LookupCalculator {
+        private final float cyanRed;
+        private final float magentaGreen;
+        private final float yellowBlue;
+        private final int affect;
+
+        private static final int LUT_TABLE_SIZE = 256;
 
         short[] redMapping = new short[LUT_TABLE_SIZE];
         short[] greenMapping = new short[LUT_TABLE_SIZE];
         short[] blueMapping = new short[LUT_TABLE_SIZE];
 
-        if (affect == EVERYTHING) {
-            for (short i = 0; i < LUT_TABLE_SIZE; i++) {
-                short r = (short) (i + cr - (mg / 2) - (yb / 2));
-                r = PixelUtils.clamp(r);
-                redMapping[i] = r;
-
-                short g = (short) (i + mg - (cr / 2) - (yb / 2));
-                g = PixelUtils.clamp(g);
-                greenMapping[i] = g;
-
-                short b = (short) (i + yb - (mg / 2) - (cr / 2));
-                b = PixelUtils.clamp(b);
-                blueMapping[i] = b;
-            }
-        } else {
-            for (short i = 0; i < LUT_TABLE_SIZE; i++) {
-                short r = (short) (i + affectFactor[i] * (cr - (mg / 2) - (yb / 2)));
-                r = PixelUtils.clamp(r);
-                redMapping[i] = r;
-
-                short g = (short) (i + affectFactor[i] * (mg - (cr / 2) - (yb / 2)));
-                g = PixelUtils.clamp(g);
-                greenMapping[i] = g;
-
-                short b = (short) (i + affectFactor[i] * (yb - (mg / 2) - (cr / 2)));
-                b = PixelUtils.clamp(b);
-                blueMapping[i] = b;
-            }
-
+        public LookupCalculator(float cyanRed, float magentaGreen, float yellowBlue, int affect) {
+            this.cyanRed = cyanRed;
+            this.magentaGreen = magentaGreen;
+            this.yellowBlue = yellowBlue;
+            this.affect = affect;
         }
 
-        RGBLookup rgbLookup = new RGBLookup(redMapping, greenMapping, blueMapping);
-        BufferedImageOp filterOp = new FastLookupOp((ShortLookupTable) rgbLookup.getLookupOp());
-        filterOp.filter(src, dest);
+        public RGBLookup getLookup() {
+            if (affect == EVERYTHING) {
+                setupMappingsForTotallyAffected();
+            } else {
+                setupMappingsForPartiallyAffected();
+            }
 
-        return dest;
+            return new RGBLookup(redMapping, greenMapping, blueMapping);
+        }
+
+        private void setupMappingsForTotallyAffected() {
+            for (short i = 0; i < LUT_TABLE_SIZE; i++) {
+                short r = (short) (i + cyanRed - (magentaGreen / 2) - (yellowBlue / 2));
+                r = PixelUtils.clamp(r);
+                redMapping[i] = r;
+
+                short g = (short) (i + magentaGreen - (cyanRed / 2) - (yellowBlue / 2));
+                g = PixelUtils.clamp(g);
+                greenMapping[i] = g;
+
+                short b = (short) (i + yellowBlue - (magentaGreen / 2) - (cyanRed / 2));
+                b = PixelUtils.clamp(b);
+                blueMapping[i] = b;
+            }
+        }
+
+        private void setupMappingsForPartiallyAffected() {
+            float[] affectFactor = calculateAffectFactor(affect);
+            for (short i = 0; i < LUT_TABLE_SIZE; i++) {
+                short r = (short) (i + affectFactor[i] * (cyanRed - (magentaGreen / 2) - (yellowBlue / 2)));
+                r = PixelUtils.clamp(r);
+                redMapping[i] = r;
+
+                short g = (short) (i + affectFactor[i] * (magentaGreen - (cyanRed / 2) - (yellowBlue / 2)));
+                g = PixelUtils.clamp(g);
+                greenMapping[i] = g;
+
+                short b = (short) (i + affectFactor[i] * (yellowBlue - (magentaGreen / 2) - (cyanRed / 2)));
+                b = PixelUtils.clamp(b);
+                blueMapping[i] = b;
+            }
+        }
+
+        private static float[] calculateAffectFactor(int affect) {
+            float[] affectFactor = new float[LUT_TABLE_SIZE];
+            for (int i = 0; i < LUT_TABLE_SIZE; i++) {
+                switch (affect) {
+                    case SHADOWS:
+                        affectFactor[i] = 1.0f - (1.0f * i) / LUT_TABLE_SIZE;
+                        break;
+                    case HIGHLIGHTS:
+                        affectFactor[i] = (1.0f * i) / LUT_TABLE_SIZE;
+                        break;
+                    case MIDTONES:
+                        int halfSize = LUT_TABLE_SIZE / 2;
+                        if (i <= halfSize) {
+                            affectFactor[i] = (2.0f * i) / LUT_TABLE_SIZE;
+                        } else {
+                            affectFactor[i] = 2 * (1.0f - (1.0f * i) / LUT_TABLE_SIZE);
+                        }
+                        break;
+                    case EVERYTHING:
+                        // should not get here
+                        affectFactor[i] = 1.0f;
+                        break;
+                }
+            }
+            return affectFactor;
+        }
     }
 }

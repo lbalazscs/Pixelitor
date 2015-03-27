@@ -62,22 +62,11 @@ public abstract class EffectConfiguratorPanel extends JPanel {
         colorSwatch.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                Color selectedColor = ColorPicker.showDialog(PixelitorWindow.getInstance(), "Select Color", color, true);
-                if (selectedColor != null) { // ok was pressed
-                    color = selectedColor;
-                    colorSwatch.setForeground(color);
-                    colorSwatch.paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
-
-                    if (adjustmentListener != null) {
-                        adjustmentListener.paramAdjusted();
-                    }
-                }
+                changeColor();
             }
         });
 
-
         setLayout(new GridBagLayout());
-
 
         gridBagHelper = new GridBagHelper(this);
         gridBagHelper.addLabel("Enabled:", 0, 0);
@@ -88,6 +77,19 @@ public abstract class EffectConfiguratorPanel extends JPanel {
 
         gridBagHelper.addLabel("Opacity:", 0, 2);
         gridBagHelper.addControlNoFill(opacitySlider);
+    }
+
+    private void changeColor() {
+        Color selectedColor = ColorPicker.showDialog(PixelitorWindow.getInstance(), "Select Color", color, true);
+        if (selectedColor != null) { // ok was pressed
+            color = selectedColor;
+            colorSwatch.setForeground(color);
+            colorSwatch.paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
+
+            if (adjustmentListener != null) {
+                adjustmentListener.paramAdjusted();
+            }
+        }
     }
 
     ButtonModel getEnabledModel() {

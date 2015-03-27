@@ -336,17 +336,15 @@ public class Composition implements Serializable {
         assert checkInvariant();
 
         int activeIndex = layerList.indexOf(activeLayer);
-        if (activeIndex > 0) {
-            if (activeLayer.isVisible()) {
-                Layer bellow = layerList.get(activeIndex - 1);
-                if (bellow instanceof ImageLayer) {
-                    ImageLayer imageLayerBellow = (ImageLayer) bellow;
-                    if (imageLayerBellow.isVisible()) {
-                        activeLayer.mergeDownOn(imageLayerBellow);
-                        removeActiveLayer();
+        if (activeIndex > 0 && activeLayer.isVisible()) {
+            Layer bellow = layerList.get(activeIndex - 1);
+            if (bellow instanceof ImageLayer) {
+                ImageLayer imageLayerBellow = (ImageLayer) bellow;
+                if (imageLayerBellow.isVisible()) {
+                    activeLayer.mergeDownOn(imageLayerBellow);
+                    removeActiveLayer();
 
-                        History.addEdit(new NotUndoableEdit(this, "Merge Down"));
-                    }
+                    History.addEdit(new NotUndoableEdit(this, "Merge Down"));
                 }
             }
         }
@@ -387,10 +385,9 @@ public class Composition implements Serializable {
         Layer layer = layerList.get(oldIndex);
         layerList.remove(layer);
         layerList.add(newIndex, layer);
+
         ic.changeLayerOrderInTheGUI(oldIndex, newIndex);
-
         imageChanged(FULL);
-
         AppLogic.layerOrderChanged(this);
 
         if (!isUndoRedo) {
@@ -546,8 +543,6 @@ public class Composition implements Serializable {
             History.addEdit(newLayerEdit);
         }
 
-        LayerButton button = layerToBeRemoved.getLayerButton();
-
         layerList.remove(layerToBeRemoved);
 
         if (layerToBeRemoved == activeLayer) {
@@ -558,6 +553,7 @@ public class Composition implements Serializable {
             }
         }
 
+        LayerButton button = layerToBeRemoved.getLayerButton();
         ic.deleteLayerButton(button);
 
         if (isActiveComp()) {
@@ -792,6 +788,7 @@ public class Composition implements Serializable {
                 ImageLayer layer = getActiveImageLayer();
                 layer.startNewPreviewFromDialog();
             } else {
+                // TODO always set last if not preview?
                 // e.g. OP WITHOUT DIALOG
                 FilterUtils.setLastExecutedFilter(filter);
             }

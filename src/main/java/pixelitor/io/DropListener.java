@@ -52,23 +52,7 @@ public class DropListener extends DropTargetAdapter {
                 try {
                     @SuppressWarnings("unchecked")
                     List<File> list = (List<File>) transferable.getTransferData(flavor);
-
-                    for (File file : list) {
-                        if (file.isDirectory()) {
-                            String question = String.format("You have dropped the folder \"%s\". " +
-                                    "Do you want to open all image files inside it?", file.getName());
-                            int answer = JOptionPane.showConfirmDialog(PixelitorWindow.getInstance(),
-                                    question,
-                                    "Question", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-                            if (answer == JOptionPane.YES_OPTION) {
-                                OpenSaveManager.openAllImagesInDir(file);
-                            } else if (answer == JOptionPane.NO_OPTION) {
-                                // do nothing
-                            }
-                        } else if (file.isFile()) {
-                            OpenSaveManager.openFile(file);
-                        }
-                    }
+                    dropFiles(list);
                 } catch (UnsupportedFlavorException | IOException e) {
                     Dialogs.showExceptionDialog(e);
                     dtde.rejectDrop();
@@ -80,5 +64,24 @@ public class DropListener extends DropTargetAdapter {
 
         // DataFlavor not recognized
         dtde.rejectDrop();
+    }
+
+    private static void dropFiles(List<File> list) {
+        for (File file : list) {
+            if (file.isDirectory()) {
+                String question = String.format("You have dropped the folder \"%s\". " +
+                        "Do you want to open all image files inside it?", file.getName());
+                int answer = JOptionPane.showConfirmDialog(PixelitorWindow.getInstance(),
+                        question,
+                        "Question", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                if (answer == JOptionPane.YES_OPTION) {
+                    OpenSaveManager.openAllImagesInDir(file);
+                } else if (answer == JOptionPane.NO_OPTION) {
+                    // do nothing
+                }
+            } else if (file.isFile()) {
+                OpenSaveManager.openFile(file);
+            }
+        }
     }
 }
