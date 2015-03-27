@@ -69,7 +69,7 @@ public final class NewImage {
         assert SwingUtilities.isEventDispatchThread();
         if(lastNew == null) {
             //noinspection NonThreadSafeLazyInitialization
-            lastNew = AppPreferences.loadNewImageSize();
+            lastNew = AppPreferences.getNewImageSize();
         }
         NewImagePanel p = new NewImagePanel(lastNew.width, lastNew.height);
         OKCancelDialog d = new OKCancelDialog(p, "New Image") {

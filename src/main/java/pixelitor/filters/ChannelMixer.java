@@ -25,7 +25,6 @@ import pixelitor.filters.gui.GUIParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.SliderSpinner;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -36,28 +35,30 @@ import java.awt.image.DataBufferInt;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 
+import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
+
 public class ChannelMixer extends FilterWithParametrizedGUI {
     private static final int MIN_PERCENT = -200;
     private static final int MAX_PERCENT = 200;
 
-    private final RangeParam rpRedFromRed = new RangeParam("<html><b><font color=red>Red</font></b> from <font color=red>red</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 100, true, SliderSpinner.TextPosition.NONE);
-    private final RangeParam rpRedFromGreen = new RangeParam("<html><b><font color=red>Red</font></b> from <font color=green>green</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 0, true, SliderSpinner.TextPosition.NONE);
-    private final RangeParam rpRedFromBlue = new RangeParam("<html><b><font color=red>Red</font></b> from <font color=blue>blue</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 0, true, SliderSpinner.TextPosition.NONE);
+    private final RangeParam redFromRed = new RangeParam("<html><b><font color=red>Red</font></b> from <font color=red>red</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 100, true, NONE);
+    private final RangeParam redFromGreen = new RangeParam("<html><b><font color=red>Red</font></b> from <font color=green>green</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 0, true, NONE);
+    private final RangeParam redFromBlue = new RangeParam("<html><b><font color=red>Red</font></b> from <font color=blue>blue</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 0, true, NONE);
 
-    private final RangeParam rpGreenFromRed = new RangeParam("<html><b><font color=green>Green</font></b> from <font color=red>red</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 0, true, SliderSpinner.TextPosition.NONE);
-    private final RangeParam rpGreenFromGreen = new RangeParam("<html><b><font color=green>Green</font></b> from <font color=green>green</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 100, true, SliderSpinner.TextPosition.NONE);
-    private final RangeParam rpGreenFromBlue = new RangeParam("<html><b><font color=green>Green</font></b> from <font color=blue>blue</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 0, true, SliderSpinner.TextPosition.NONE);
+    private final RangeParam greenFromRed = new RangeParam("<html><b><font color=green>Green</font></b> from <font color=red>red</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 0, true, NONE);
+    private final RangeParam greenFromGreen = new RangeParam("<html><b><font color=green>Green</font></b> from <font color=green>green</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 100, true, NONE);
+    private final RangeParam greenFromBlue = new RangeParam("<html><b><font color=green>Green</font></b> from <font color=blue>blue</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 0, true, NONE);
 
-    private final RangeParam rpBlueFromRed = new RangeParam("<html><b><font color=blue>Blue</font></b> from <font color=red>red</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 0, true, SliderSpinner.TextPosition.NONE);
-    private final RangeParam rpBlueFromGreen = new RangeParam("<html><b><font color=blue>Blue</font></b> from <font color=green>green</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 0, true, SliderSpinner.TextPosition.NONE);
-    private final RangeParam rpBlueFromBlue = new RangeParam("<html><b><font color=blue>Blue</font></b> from <font color=blue>blue</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 100, true, SliderSpinner.TextPosition.NONE);
+    private final RangeParam blueFromRed = new RangeParam("<html><b><font color=blue>Blue</font></b> from <font color=red>red</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 0, true, NONE);
+    private final RangeParam blueFromGreen = new RangeParam("<html><b><font color=blue>Blue</font></b> from <font color=green>green</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 0, true, NONE);
+    private final RangeParam blueFromBlue = new RangeParam("<html><b><font color=blue>Blue</font></b> from <font color=blue>blue</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 100, true, NONE);
 
     private final ActionListener normalizeAction = e -> {
         getParamSet().startPresetAdjusting();
 
-        normalizeChannel(rpRedFromRed, rpRedFromGreen, rpRedFromBlue);
-        normalizeChannel(rpGreenFromRed, rpGreenFromGreen, rpGreenFromBlue);
-        normalizeChannel(rpBlueFromRed, rpBlueFromGreen, rpBlueFromBlue);
+        normalizeChannel(redFromRed, redFromGreen, redFromBlue);
+        normalizeChannel(greenFromRed, greenFromGreen, greenFromBlue);
+        normalizeChannel(blueFromRed, blueFromGreen, blueFromBlue);
 
         getParamSet().endPresetAdjusting(false);
     };
@@ -68,17 +69,17 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
         public void actionPerformed(ActionEvent e) {
             getParamSet().startPresetAdjusting();
 
-            rpRedFromRed.setValue(0);
-            rpRedFromGreen.setValue(100);
-            rpRedFromBlue.setValue(0);
+            redFromRed.setValue(0);
+            redFromGreen.setValue(100);
+            redFromBlue.setValue(0);
 
-            rpGreenFromRed.setValue(100);
-            rpGreenFromGreen.setValue(0);
-            rpGreenFromBlue.setValue(0);
+            greenFromRed.setValue(100);
+            greenFromGreen.setValue(0);
+            greenFromBlue.setValue(0);
 
-            rpBlueFromRed.setValue(0);
-            rpBlueFromGreen.setValue(0);
-            rpBlueFromBlue.setValue(100);
+            blueFromRed.setValue(0);
+            blueFromGreen.setValue(0);
+            blueFromBlue.setValue(100);
 
             getParamSet().endPresetAdjusting(true);
         }
@@ -89,17 +90,17 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
         public void actionPerformed(ActionEvent e) {
             getParamSet().startPresetAdjusting();
 
-            rpRedFromRed.setValue(0);
-            rpRedFromGreen.setValue(0);
-            rpRedFromBlue.setValue(100);
+            redFromRed.setValue(0);
+            redFromGreen.setValue(0);
+            redFromBlue.setValue(100);
 
-            rpGreenFromRed.setValue(0);
-            rpGreenFromGreen.setValue(100);
-            rpGreenFromBlue.setValue(0);
+            greenFromRed.setValue(0);
+            greenFromGreen.setValue(100);
+            greenFromBlue.setValue(0);
 
-            rpBlueFromRed.setValue(100);
-            rpBlueFromGreen.setValue(0);
-            rpBlueFromBlue.setValue(0);
+            blueFromRed.setValue(100);
+            blueFromGreen.setValue(0);
+            blueFromBlue.setValue(0);
 
             getParamSet().endPresetAdjusting(true);
         }
@@ -110,17 +111,17 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
         public void actionPerformed(ActionEvent e) {
             getParamSet().startPresetAdjusting();
 
-            rpRedFromRed.setValue(100);
-            rpRedFromGreen.setValue(0);
-            rpRedFromBlue.setValue(0);
+            redFromRed.setValue(100);
+            redFromGreen.setValue(0);
+            redFromBlue.setValue(0);
 
-            rpGreenFromRed.setValue(0);
-            rpGreenFromGreen.setValue(0);
-            rpGreenFromBlue.setValue(100);
+            greenFromRed.setValue(0);
+            greenFromGreen.setValue(0);
+            greenFromBlue.setValue(100);
 
-            rpBlueFromRed.setValue(0);
-            rpBlueFromGreen.setValue(100);
-            rpBlueFromBlue.setValue(0);
+            blueFromRed.setValue(0);
+            blueFromGreen.setValue(100);
+            blueFromBlue.setValue(0);
 
             getParamSet().endPresetAdjusting(true);
         }
@@ -131,17 +132,17 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
         public void actionPerformed(ActionEvent e) {
             getParamSet().startPresetAdjusting();
 
-            rpRedFromRed.setValue(0);
-            rpRedFromGreen.setValue(0);
-            rpRedFromBlue.setValue(100);
+            redFromRed.setValue(0);
+            redFromGreen.setValue(0);
+            redFromBlue.setValue(100);
 
-            rpGreenFromRed.setValue(100);
-            rpGreenFromGreen.setValue(0);
-            rpGreenFromBlue.setValue(0);
+            greenFromRed.setValue(100);
+            greenFromGreen.setValue(0);
+            greenFromBlue.setValue(0);
 
-            rpBlueFromRed.setValue(0);
-            rpBlueFromGreen.setValue(100);
-            rpBlueFromBlue.setValue(0);
+            blueFromRed.setValue(0);
+            blueFromGreen.setValue(100);
+            blueFromBlue.setValue(0);
 
             getParamSet().endPresetAdjusting(true);
         }
@@ -152,17 +153,17 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
         public void actionPerformed(ActionEvent e) {
             getParamSet().startPresetAdjusting();
 
-            rpRedFromRed.setValue(0);
-            rpRedFromGreen.setValue(100);
-            rpRedFromBlue.setValue(0);
+            redFromRed.setValue(0);
+            redFromGreen.setValue(100);
+            redFromBlue.setValue(0);
 
-            rpGreenFromRed.setValue(0);
-            rpGreenFromGreen.setValue(0);
-            rpGreenFromBlue.setValue(100);
+            greenFromRed.setValue(0);
+            greenFromGreen.setValue(0);
+            greenFromBlue.setValue(100);
 
-            rpBlueFromRed.setValue(100);
-            rpBlueFromGreen.setValue(0);
-            rpBlueFromBlue.setValue(0);
+            blueFromRed.setValue(100);
+            blueFromGreen.setValue(0);
+            blueFromBlue.setValue(0);
 
             getParamSet().endPresetAdjusting(true);
         }
@@ -173,17 +174,17 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
         public void actionPerformed(ActionEvent e) {
             getParamSet().startPresetAdjusting();
 
-            rpRedFromRed.setValue(33);
-            rpRedFromGreen.setValue(33);
-            rpRedFromBlue.setValue(33);
+            redFromRed.setValue(33);
+            redFromGreen.setValue(33);
+            redFromBlue.setValue(33);
 
-            rpGreenFromRed.setValue(33);
-            rpGreenFromGreen.setValue(33);
-            rpGreenFromBlue.setValue(33);
+            greenFromRed.setValue(33);
+            greenFromGreen.setValue(33);
+            greenFromBlue.setValue(33);
 
-            rpBlueFromRed.setValue(33);
-            rpBlueFromGreen.setValue(33);
-            rpBlueFromBlue.setValue(33);
+            blueFromRed.setValue(33);
+            blueFromGreen.setValue(33);
+            blueFromBlue.setValue(33);
 
             getParamSet().endPresetAdjusting(true);
         }
@@ -194,17 +195,17 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
         public void actionPerformed(ActionEvent e) {
             getParamSet().startPresetAdjusting();
 
-            rpRedFromRed.setValue(22);
-            rpRedFromGreen.setValue(71);
-            rpRedFromBlue.setValue(7);
+            redFromRed.setValue(22);
+            redFromGreen.setValue(71);
+            redFromBlue.setValue(7);
 
-            rpGreenFromRed.setValue(22);
-            rpGreenFromGreen.setValue(71);
-            rpGreenFromBlue.setValue(7);
+            greenFromRed.setValue(22);
+            greenFromGreen.setValue(71);
+            greenFromBlue.setValue(7);
 
-            rpBlueFromRed.setValue(22);
-            rpBlueFromGreen.setValue(71);
-            rpBlueFromBlue.setValue(7);
+            blueFromRed.setValue(22);
+            blueFromGreen.setValue(71);
+            blueFromBlue.setValue(7);
 
             getParamSet().endPresetAdjusting(true);
         }
@@ -215,17 +216,17 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
         public void actionPerformed(ActionEvent e) {
             getParamSet().startPresetAdjusting();
 
-            rpRedFromRed.setValue(39);
-            rpRedFromGreen.setValue(77);
-            rpRedFromBlue.setValue(19);
+            redFromRed.setValue(39);
+            redFromGreen.setValue(77);
+            redFromBlue.setValue(19);
 
-            rpGreenFromRed.setValue(35);
-            rpGreenFromGreen.setValue(69);
-            rpGreenFromBlue.setValue(17);
+            greenFromRed.setValue(35);
+            greenFromGreen.setValue(69);
+            greenFromBlue.setValue(17);
 
-            rpBlueFromRed.setValue(27);
-            rpBlueFromGreen.setValue(53);
-            rpBlueFromBlue.setValue(13);
+            blueFromRed.setValue(27);
+            blueFromGreen.setValue(53);
+            blueFromBlue.setValue(13);
 
             getParamSet().endPresetAdjusting(true);
         }
@@ -237,17 +238,17 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
         super("Channel Mixer", true, false);
         ActionParam normalize = new ActionParam("Normalize", normalizeAction, "Makes sure that the sum of the channel contributions is 100%");
         GUIParam[] params = {
-                rpRedFromRed,
-                rpRedFromGreen,
-                rpRedFromBlue,
+                redFromRed,
+                redFromGreen,
+                redFromBlue,
 
-                rpGreenFromRed,
-                rpGreenFromGreen,
-                rpGreenFromBlue,
+                greenFromRed,
+                greenFromGreen,
+                greenFromBlue,
 
-                rpBlueFromRed,
-                rpBlueFromGreen,
-                rpBlueFromBlue,
+                blueFromRed,
+                blueFromGreen,
+                blueFromBlue,
 
                 normalize
         };
@@ -280,17 +281,17 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        float redFromRed = rpRedFromRed.getValueAsPercentage();
-        float redFromGreen = rpRedFromGreen.getValueAsPercentage();
-        float redFromBlue = rpRedFromBlue.getValueAsPercentage();
+        float redFromRed = this.redFromRed.getValueAsPercentage();
+        float redFromGreen = this.redFromGreen.getValueAsPercentage();
+        float redFromBlue = this.redFromBlue.getValueAsPercentage();
 
-        float greenFromRed = rpGreenFromRed.getValueAsPercentage();
-        float greenFromGreen = rpGreenFromGreen.getValueAsPercentage();
-        float greenFromBlue = rpGreenFromBlue.getValueAsPercentage();
+        float greenFromRed = this.greenFromRed.getValueAsPercentage();
+        float greenFromGreen = this.greenFromGreen.getValueAsPercentage();
+        float greenFromBlue = this.greenFromBlue.getValueAsPercentage();
 
-        float blueFromRed = rpBlueFromRed.getValueAsPercentage();
-        float blueFromGreen = rpBlueFromGreen.getValueAsPercentage();
-        float blueFromBlue = rpBlueFromBlue.getValueAsPercentage();
+        float blueFromRed = this.blueFromRed.getValueAsPercentage();
+        float blueFromGreen = this.blueFromGreen.getValueAsPercentage();
+        float blueFromBlue = this.blueFromBlue.getValueAsPercentage();
 
         if ((redFromRed == 1.0f) && (redFromGreen == 0.0f) && (redFromBlue == 0.0f)) {
             if ((greenFromRed == 0.0f) && (greenFromGreen == 1.0f) && (greenFromBlue == 0.0f)) {

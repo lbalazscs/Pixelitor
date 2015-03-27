@@ -71,24 +71,28 @@ public class CloneTool extends BrushTool {
             setCloningSource(ic, x, y, cloneBrush);
         } else {
             if(state != SOURCE_DEFINED) {
-                if(Build.CURRENT.isRobotTest()) {
-                    // special case: do not show dialogs for random robot tests,
-                    // just act as if this was an alt-click
-                    setCloningSource(ic, x, y, cloneBrush);
-                } else {
-                    String msg = "Define a source point first with Alt-Click.";
-                    if (JVM.isLinux) {
-                        msg += "\n(You might need to disable Alt-Click for window dragging in the window manager)";
-                    }
-                    Dialogs.showErrorDialog("No source", msg);
-                }
+                handleUndefinedSource(ic, x, y, cloneBrush);
             }
 
-            if(!withLine(e)) {  // the destination should not change for mouse press when drawing with line
+            if (!withLine(e)) {  // when drawing with line, the destination should not change for mouse press
                 cloneBrush.setDestination(x, y);
             }
 
             super.toolMousePressed(e, ic);
+        }
+    }
+
+    private void handleUndefinedSource(ImageDisplay ic, int x, int y, CloneBrush cloneBrush) {
+        if (Build.CURRENT.isRobotTest()) {
+            // special case: do not show dialogs for random robot tests,
+            // just act as if this was an alt-click
+            setCloningSource(ic, x, y, cloneBrush);
+        } else {
+            String msg = "Define a source point first with Alt-Click.";
+            if (JVM.isLinux) {
+                msg += "\n(You might need to disable Alt-Click for window dragging in the window manager)";
+            }
+            Dialogs.showErrorDialog("No source", msg);
         }
     }
 

@@ -72,8 +72,8 @@ public class Automate {
             throw new IllegalStateException("Last save dir " + lastSaveDir.getAbsolutePath() + " does not exist");
         }
 
-        File[] children = FileExtensionUtils.getAllSupportedFilesInDir(lastOpenDir);
-        if (children.length == 0) {
+        File[] inputFiles = FileExtensionUtils.getAllSupportedFilesInDir(lastOpenDir);
+        if (inputFiles.length == 0) {
             Dialogs.showInfoDialog("No files", "There are no supported files in " + lastOpenDir.getAbsolutePath());
             return;
         }
@@ -84,12 +84,12 @@ public class Automate {
             public Void doInBackground() {
                 overwriteAll = false;
 
-                for (int i = 0, nrOfFiles = children.length; i < nrOfFiles; i++) {
+                for (int i = 0, nrOfFiles = inputFiles.length; i < nrOfFiles; i++) {
                     if (progressMonitor.isCanceled()) {
                         break;
                     }
 
-                    File file = children[i];
+                    File file = inputFiles[i];
                     progressMonitor.setProgress((int) ((float) i * 100 / nrOfFiles));
                     progressMonitor.setNote("Processing " + file.getName());
 

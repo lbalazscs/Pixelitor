@@ -30,6 +30,8 @@ import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.io.File;
 
+import static pixelitor.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
+
 /**
  * A panel that can be used to select a single directory and optionally an output format
  */
@@ -38,7 +40,7 @@ public class SingleDirChooserPanel extends ValidatedForm {
     private OutputFormatSelector outputFormatSelector;
 
     private SingleDirChooserPanel(String label, String dialogTitle, String initialPath, boolean addOutputChooser) {
-        directoryChooser = new BrowseFilesSupport(initialPath, dialogTitle, true);
+        directoryChooser = new BrowseFilesSupport(initialPath, dialogTitle, DIRECTORY);
         JLabel dirLabel = new JLabel(label);
         JTextField dirTF = directoryChooser.getNameTF();
         JButton browseButton = directoryChooser.getBrowseButton();

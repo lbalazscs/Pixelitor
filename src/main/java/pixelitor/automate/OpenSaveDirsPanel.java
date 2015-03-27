@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,12 +26,14 @@ import pixelitor.utils.ValidatedForm;
 import java.awt.GridBagLayout;
 import java.io.File;
 
+import static pixelitor.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
+
 /**
  * A panel for selecting the opening and the saving directory
  */
 class OpenSaveDirsPanel extends ValidatedForm {
-    private final BrowseFilesSupport inputChooser = new BrowseFilesSupport(FileChoosers.getLastOpenDir().getAbsolutePath(), "Select Input Folder", true);
-    private final BrowseFilesSupport outputChooser = new BrowseFilesSupport(FileChoosers.getLastSaveDir().getAbsolutePath(), "Select Output Folder", true);
+    private final BrowseFilesSupport inputChooser = new BrowseFilesSupport(FileChoosers.getLastOpenDir().getAbsolutePath(), "Select Input Folder", DIRECTORY);
+    private final BrowseFilesSupport outputChooser = new BrowseFilesSupport(FileChoosers.getLastSaveDir().getAbsolutePath(), "Select Output Folder", DIRECTORY);
     private final boolean allowToBeTheSame;
     private String errMessage;
 

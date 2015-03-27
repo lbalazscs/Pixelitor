@@ -89,29 +89,31 @@ public final class AppPreferences {
         mainUserNode.putInt(FRAME_HEIGHT_KEY, height);
     }
 
-    public static Dimension loadNewImageSize() {
+    public static Dimension getNewImageSize() {
         if (newImageSize == null) {
-            int defaultWidth = 600;
-            int defaultHeight = 400;
-            PixelitorWindow window = PixelitorWindow.getInstance();
-            if(window != null) {
-                Dimension desktopSize = window.getDesktopSize();
-                if(desktopSize != null) {
-                    defaultWidth = Math.max(600, desktopSize.width - 30);
-                    defaultHeight = Math.max(400, desktopSize.height - 50);
-                }
-            }
-            int width = mainUserNode.getInt(NEW_IMAGE_WIDTH, defaultWidth);
-            int height = mainUserNode.getInt(NEW_IMAGE_HEIGHT, defaultHeight);
-            //noinspection NonThreadSafeLazyInitialization
-            newImageSize = new Dimension(width, height);
+            loadNewImageSize();
         }
         return newImageSize;
     }
 
+    private static void loadNewImageSize() {
+        int defaultWidth = 600;
+        int defaultHeight = 400;
+        PixelitorWindow window = PixelitorWindow.getInstance();
+        Dimension desktopSize = window.getDesktopSize();
+        if (desktopSize != null) {
+            defaultWidth = Math.max(600, desktopSize.width - 30);
+            defaultHeight = Math.max(400, desktopSize.height - 50);
+        }
+        int width = mainUserNode.getInt(NEW_IMAGE_WIDTH, defaultWidth);
+        int height = mainUserNode.getInt(NEW_IMAGE_HEIGHT, defaultHeight);
+        //noinspection NonThreadSafeLazyInitialization
+        newImageSize = new Dimension(width, height);
+    }
+
     private static void saveNewImageSize() {
         Dimension lastNew = NewImage.getLastNew();
-        if(lastNew != null) {
+        if (lastNew != null) {
             mainUserNode.putInt(NEW_IMAGE_WIDTH, lastNew.width);
             mainUserNode.putInt(NEW_IMAGE_HEIGHT, lastNew.height);
         }
@@ -146,22 +148,22 @@ public final class AppPreferences {
     }
 
     public static List<RecentFileInfo> loadRecentFiles(int maxNum) {
-        List<RecentFileInfo> recentFileNames = new ArrayList<>();
+        List<RecentFileInfo> recentFileInfos = new ArrayList<>();
         for (int i = 0; i < maxNum; i++) {
             String key = RECENT_FILE_PREFS_KEY + i;
-            String value = recentFilesUserNode.get(key, null);
-            if (value == null) {
+            String fileName = recentFilesUserNode.get(key, null);
+            if (fileName == null) {
                 break;
             }
-            File file = new File(value);
+            File file = new File(fileName);
             if (file.exists()) {
                 RecentFileInfo fileInfo = new RecentFileInfo(file);
-                if (!recentFileNames.contains(fileInfo)) {
-                    recentFileNames.add(fileInfo);
+                if (!recentFileInfos.contains(fileInfo)) {
+                    recentFileInfos.add(fileInfo);
                 }
             }
         }
-        return recentFileNames;
+        return recentFileInfos;
     }
 
     private static void saveRecentFiles(List<RecentFileInfo> fileNames) {

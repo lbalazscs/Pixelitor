@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,16 +29,32 @@ import java.awt.GraphicsEnvironment;
 import java.util.List;
 
 /**
- * A debugging node for the whole application
+ * A debugging node for the application as a whole, the root of the debug tree
  */
 public class AppNode extends DebugNode {
     public AppNode() {
         super("Pixelitor", PixelitorWindow.getInstance());
 
+        addSystemNode();
+        addImageNodes();
+
+        addStringChild("Pixelitor Version", Build.VERSION_NUMBER);
+        addQuotedStringChild("Opening Folder", FileChoosers.getLastOpenDir().getAbsolutePath());
+        addQuotedStringChild("Saving Folder", FileChoosers.getLastSaveDir().getAbsolutePath());
+
+        addBooleanChild("Can Undo", History.canUndo());
+        addBooleanChild("Can Redo", History.canRedo());
+        addBooleanChild("Can Fade", History.canFade());
+        addBooleanChild("Can Repeat", History.canRepeatOperation());
+    }
+
+    private void addSystemNode() {
         GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
         SystemNode systemNode = new SystemNode(device);
         add(systemNode);
+    }
 
+    private void addImageNodes() {
         List<ImageComponent> images = ImageComponents.getImageComponents();
 
         int nrOpenImages = images.size();
@@ -54,14 +70,5 @@ public class AppNode extends DebugNode {
             }
             add(node);
         }
-
-        addStringChild("Pixelitor Version", Build.VERSION_NUMBER);
-        addQuotedStringChild("Opening Folder", FileChoosers.getLastOpenDir().getAbsolutePath());
-        addQuotedStringChild("Saving Folder", FileChoosers.getLastSaveDir().getAbsolutePath());
-
-        addBooleanChild("Can Undo", History.canUndo());
-        addBooleanChild("Can Redo", History.canRedo());
-        addBooleanChild("Can Fade", History.canFade());
-        addBooleanChild("Can Repeat", History.canRepeatOperation());
     }
 }

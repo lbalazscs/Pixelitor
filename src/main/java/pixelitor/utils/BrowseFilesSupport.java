@@ -24,6 +24,9 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 
+import static pixelitor.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
+import static pixelitor.utils.BrowseFilesSupport.SelectionMode.FILE;
+
 /**
  * The GUI elements of a file/directory chooser (a textfield and a
  * "Browse..." button) are separated into this non-component class
@@ -33,16 +36,18 @@ public class BrowseFilesSupport {
     private JTextField nameTF;
     private final JButton button = new JButton("Browse...");
     private String dialogTitle;
-    private boolean selectDirs;
     private FileNameExtensionFilter fileFilter; // used for filtering when in file selection mode
+
+    public enum SelectionMode {DIRECTORY, FILE}
+    private SelectionMode mode;
 
     public BrowseFilesSupport(String initialPath) {
         init(initialPath);
     }
 
-    public BrowseFilesSupport(String initialPath, String dialogTitle, boolean selectDirs) {
+    public BrowseFilesSupport(String initialPath, String dialogTitle, SelectionMode mode) {
         this.dialogTitle = dialogTitle;
-        this.selectDirs = selectDirs;
+        this.mode = mode;
         init(initialPath);
     }
 
@@ -52,54 +57,64 @@ public class BrowseFilesSupport {
         button.addActionListener(e -> browseButtonClicked(dialogTitle));
     }
 
-    /**
-     * Determines whether this will be a directory or file selector;
-     * @param selectDirs
-     */
-    public void setSelectDirs(boolean selectDirs) {
-        this.selectDirs = selectDirs;
+    public void setSelectionMode(SelectionMode mode) {
+        this.mode = mode;
     }
 
     private void browseButtonClicked(String dialogTitle) {
         JFileChooser chooser;
 
-        if(selectDirs) {
-            chooser = new JFileChooser(nameTF.getText());
-            chooser.setApproveButtonText("Select Folder");
-            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        if(mode == DIRECTORY) {
+            chooser = createChooserForDirectorySelection();
         } else {
-            // get the parent dir of the file
-            File selectorCurrentDir;
-            File f = new File(nameTF.getText());
-            if (f.isDirectory()) {
-                selectorCurrentDir = f;
-            } else {
-                selectorCurrentDir = f.getParentFile();
-            }
-
-            chooser = new JFileChooser(selectorCurrentDir);
-            chooser.setApproveButtonText("Select File");
-            if (fileFilter != null) {
-                // First remove the All Files option...
-                chooser.setAcceptAllFileFilterUsed(false);
-                // ... then add the extension filter corresponding to the saved file type...
-                chooser.addChoosableFileFilter(fileFilter);
-                // ... then add back the All Files option so that it is at the end
-                chooser.setAcceptAllFileFilterUsed(true);
-            }
+            chooser = createChooserForFileSelection();
         }
-        chooser.setDialogTitle(dialogTitle);
 
+        chooser.setDialogTitle(dialogTitle);
         chooser.showOpenDialog(PixelitorWindow.getInstance());
         File selectedFile = chooser.getSelectedFile();
+        fillFileNameTextField(selectedFile);
+    }
+
+    private JFileChooser createChooserForDirectorySelection() {
+        JFileChooser chooser;
+        chooser = new JFileChooser(nameTF.getText());
+        chooser.setApproveButtonText("Select Folder");
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        return chooser;
+    }
+
+    private JFileChooser createChooserForFileSelection() {
+        File selectorCurrentDir;
+        File f = new File(nameTF.getText());
+        if (f.isDirectory()) {
+            selectorCurrentDir = f;
+        } else {
+            selectorCurrentDir = f.getParentFile();
+        }
+
+        JFileChooser chooser = new JFileChooser(selectorCurrentDir);
+        chooser.setApproveButtonText("Select File");
+        if (fileFilter != null) {
+            // First remove the All Files option...
+            chooser.setAcceptAllFileFilterUsed(false);
+            // ... then add the extension filter corresponding to the saved file type...
+            chooser.addChoosableFileFilter(fileFilter);
+            // ... then add back the All Files option so that it is at the end
+            chooser.setAcceptAllFileFilterUsed(true);
+        }
+        return chooser;
+    }
+
+    private void fillFileNameTextField(File selectedFile) {
         if (selectedFile != null) {
             String fileName = selectedFile.toString();
 
-            if (!selectDirs) {
+            if (mode == FILE) {
                 String extension = FileExtensionUtils.getFileExtension(selectedFile.getName());
                 if (extension == null) { // the user entered no extension
                     if (fileFilter != null) {
-                        fileName = fileName + "." + fileFilter.getExtensions()[0];
+                        fileName = fileName + '.' + fileFilter.getExtensions()[0];
                     }
                 }
             }

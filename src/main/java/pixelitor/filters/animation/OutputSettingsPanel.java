@@ -34,6 +34,9 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
 
+import static pixelitor.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
+import static pixelitor.utils.BrowseFilesSupport.SelectionMode.FILE;
+
 /**
  * The settings for the tweening animation output
  */
@@ -110,10 +113,10 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
     private void outputTypeChanged() {
         TweenOutputType selected = (TweenOutputType) outputTypeCB.getSelectedItem();
         if(selected.needsDirectory()) {
-            browseFilesSupport.setSelectDirs(true);
+            browseFilesSupport.setSelectionMode(DIRECTORY);
             browseFilesSupport.setDialogTitle("Select Output Folder");
         } else {
-            browseFilesSupport.setSelectDirs(false);
+            browseFilesSupport.setSelectionMode(FILE);
             browseFilesSupport.setDialogTitle("Select Output File");
             browseFilesSupport.setFileFilter(selected.getFileFilter());
         }

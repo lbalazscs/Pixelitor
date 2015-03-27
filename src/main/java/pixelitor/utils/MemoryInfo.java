@@ -55,6 +55,10 @@ public class MemoryInfo {
         return maxMemoryMB;
     }
 
+    public long getAvailableMemoryMB() {
+        return maxMemoryMB - usedMemoryMB;
+    }
+
     @Override
     public String toString() {
         return String.format("allocated = %d, used = %d, free = %d, max = %d", totalMemoryMB, usedMemoryMB, freeMemoryMB, maxMemoryMB);

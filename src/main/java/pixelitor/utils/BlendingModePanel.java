@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.utils;
 
 import pixelitor.layers.BlendingMode;
@@ -47,7 +48,6 @@ public class BlendingModePanel extends JPanel {
         blendingModeCombo = new JComboBox<>(blendingModes);
         blendingModeCombo.setMaximumRowCount(blendingModes.length);
         add(blendingModeCombo);
-
     }
 
     protected float getOpacity() {

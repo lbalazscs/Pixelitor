@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import pd.CannyEdgeDetector;
@@ -49,23 +50,16 @@ public class Canny extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        int width = src.getWidth();
-        int height = src.getHeight();
-        long numPixels = width * height;
-        // 6 arrays with 4-byte data type
-        int estimatedMemoryMB = (int) (6 * numPixels * 4 / MemoryInfo.ONE_MEGABYTE);
-        estimatedMemoryMB *= 1.8; // found experimentally, this is still needed to prevent OutOfMemory errors
-        System.gc(); // we need this.
+        long estimatedMemoryMB = estimateNeededMemoryMB(src);
+        System.gc(); // needed for the memory estimation
         MemoryInfo memoryInfo = new MemoryInfo();
-        int availableMemoryMB = (int) (memoryInfo.getMaxMemoryMB() - memoryInfo.getUsedMemoryMB());
-
-//        System.out.println("Canny::doTransform: availableMemoryMB = " + availableMemoryMB + ", estimatedMemoryMB = " + estimatedMemoryMB);
+        long availableMemoryMB = memoryInfo.getAvailableMemoryMB();
 
         if (estimatedMemoryMB > availableMemoryMB) {
             Dialogs.showInfoDialog("Not enough memory",
                     "This image is too large for the Canny edge detection algorithm.\n" +
                             "Press Cancel in the following dialog and try with smaller images.\n" +
-                            "Available memory = " + availableMemoryMB + " megabytes, memory needed for this image = " + estimatedMemoryMB + " megabytes.");
+                            "Available memory is " + availableMemoryMB + " megabytes, memory needed for this image is " + estimatedMemoryMB + " megabytes.");
             dest = src;
             return dest;
         }
@@ -81,10 +75,19 @@ public class Canny extends FilterWithParametrizedGUI {
 
         detector.setSourceImage(src);
 
-
         detector.process();
         dest = detector.getEdgesImage();
 
         return dest;
+    }
+
+    private static long estimateNeededMemoryMB(BufferedImage src) {
+        int width = src.getWidth();
+        int height = src.getHeight();
+        long numPixels = width * height;
+        // 6 arrays with 4-byte data type
+        long estimatedMemoryMB = (int) (6 * numPixels * 4 / MemoryInfo.ONE_MEGABYTE);
+        estimatedMemoryMB *= 1.8; // found experimentally, this is still needed to prevent OutOfMemory errors
+        return estimatedMemoryMB;
     }
 }

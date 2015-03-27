@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import com.jhlabs.image.PixelUtils;
@@ -86,33 +87,6 @@ public class Brightness extends FilterWithParametrizedGUI {
                 r = lookup[r];
                 g = lookup[g];
                 b = lookup[b];
-
-                // now the contrast
-/*                if(contrastValue != 0)  {
-                    r  = (int)(contrastFactor * (r - 128) + 128);
-                    g  = (int)(contrastFactor * (g - 128) + 128);
-                    b  = (int)(contrastFactor * (b - 128) + 128);
-                    if(r > 255) {
-                        r = 255;
-                    }
-                    if(g > 255) {
-                        g = 255;
-                    }
-                    if(b > 255) {
-                        b = 255;
-                    }
-                    if(r < 0) {
-                        r = 0;
-                    }
-                    if(g < 0) {
-                        g = 0;
-                    }
-                    if(b < 0) {
-                        b = 0;
-                    }
-
-                }
-    */
 
                 destData[i] = a | (r << 16) | (g << 8) | b;
             }

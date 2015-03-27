@@ -104,7 +104,7 @@ public class BrushTool extends AbstractBrushTool {
         if(button == MouseEvent.BUTTON3) {
             p = FgBgColorSelector.getBG();
         } else if(button == MouseEvent.BUTTON2) {
-            // we never get here because isAltDown is always true for middle-button events, even if Alt is not pressed
+            // TODO we never get here because isAltDown is always true for middle-button events, even if Alt is not pressed?
             Color fg = FgBgColorSelector.getFG();
             Color bg = FgBgColorSelector.getBG();
             if(e.isControlDown()) {
