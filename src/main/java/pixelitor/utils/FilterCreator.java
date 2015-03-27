@@ -18,8 +18,6 @@
 package pixelitor.utils;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
@@ -29,6 +27,7 @@ import java.util.List;
 
 /**
  * Creates a skeleton of source code for a filter
+ * (used only for development)
  */
 public class FilterCreator extends JPanel {
     private final JTextField nameTextField;
@@ -39,7 +38,7 @@ public class FilterCreator extends JPanel {
     private final ParamPanel[] paramPanels = new ParamPanel[10];
     private final JCheckBox pixelLoopCB;
     private final JCheckBox proxyCB;
-    private final JTextField proxyNameTF;
+    private JTextField proxyNameTF;
     private final JCheckBox edgeActionCB;
     private final JCheckBox interpolationCB;
     private final JCheckBox centerSelectorCB;
@@ -86,12 +85,7 @@ public class FilterCreator extends JPanel {
         gridBagHelper.addLabel("Proxy Filter:", 2, 2);
         proxyCB = new JCheckBox();
 //        proxyCB.setSelected(true);
-        proxyCB.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                proxyNameTF.setEnabled(proxyCB.isSelected());
-            }
-        });
+        proxyCB.addChangeListener(e -> proxyNameTF.setEnabled(proxyCB.isSelected()));
         gridBagHelper.addControl(proxyCB);
 
         gridBagHelper.addLabel("Proxy Name:", 4, 2);
@@ -118,7 +112,6 @@ public class FilterCreator extends JPanel {
         gridBagHelper.addLabel("Gradient:", 8, 3);
         gradientCB = new JCheckBox();
         gridBagHelper.addControl(gradientCB);
-
 
         for (int i = 0; i < paramPanels.length; i++) {
             gridBagHelper.addLabel("Param " + (i + 1) + ':', 0, i + 4);
@@ -208,40 +201,35 @@ public class FilterCreator extends JPanel {
 
         ParameterInfo[] params = getParameterInfoArray();
 
-        return getCode(parametrizedGui, gui, copySrc, name, pixelLoop, proxy, proxyName,
-                angleParam, center, edge, color, gradient, interpolation, params);
+        return getCode(new FilterDescription(parametrizedGui, gui, copySrc, name, pixelLoop, proxy, proxyName, angleParam, center, edge, color, gradient, interpolation, params));
     }
 
-    private static String getCode(boolean parametrizedGui, boolean gui, boolean copySrc,
-                                  String name, boolean pixelLoop, boolean proxy, String proxyName,
-                                  boolean angleParam, boolean center, boolean edge, boolean color,
-                                  boolean gradient, boolean interpolation, ParameterInfo[] params) {
-        String retVal = addImports(name, pixelLoop, parametrizedGui, proxy, proxyName);
-        String className = name.replaceAll(" ", "");
+    private static String getCode(FilterDescription desc) {
+        String retVal = addImports(desc);
 
-        retVal += addSuperClass(gui, parametrizedGui, className);
+        retVal += addSuperClass(desc);
 
-        if (gui && parametrizedGui) {
-            retVal += addParamsDeclaration(center, angleParam, edge, color, gradient, interpolation, params);
+        if (desc.isGui() && desc.isParametrizedGui()) {
+            retVal += addParamsDeclaration(desc);
         }
 
-        if (proxy) {
-            retVal += "\n    private " + proxyName + " filter;\n";
+        if (desc.isProxy()) {
+            retVal += "\n    private " + desc.getProxyName() + " filter;\n";
         }
 
-        retVal += addConstructor(name, gui, parametrizedGui, className, copySrc, edge, interpolation, params);
-        retVal += addTransform(pixelLoop, proxy, proxyName, center, angleParam, edge, interpolation);
-        retVal += addGetAdjustPanel(gui, parametrizedGui, className);
+        retVal += addConstructor(desc);
+        retVal += addTransform(desc);
+        retVal += addGetAdjustPanel(desc);
 
         return retVal;
     }
 
-    private static String addGetAdjustPanel(boolean gui, boolean parametrizedGui, String className) {
+    private static String addGetAdjustPanel(FilterDescription desc) {
         String retVal = "";
-        if (gui && (!parametrizedGui)) {
+        if (desc.isGui() && (!desc.isParametrizedGui())) {
             retVal += "\n    @Override\n";
             retVal += "    public AdjustPanel createAdjustPanel() {\n";
-            retVal += "        return new " + className + "Adjustments(this);\n";
+            retVal += "        return new " + desc.getClassName() + "Adjustments(this);\n";
             retVal += "    }\n";
         }
 
@@ -249,39 +237,37 @@ public class FilterCreator extends JPanel {
         return retVal;
     }
 
-    private static String addTransform(boolean pixelLoop, boolean proxy,
-                                       String proxyName, boolean center, boolean angleParam,
-                                       boolean edgeAction, boolean interpolation) {
+    private static String addTransform(FilterDescription desc) {
         String retVal = "";
         retVal += "\n    @Override\n";
         retVal += "    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {\n";
 
-        if (pixelLoop) {
+        if (desc.hasPixelLoop()) {
             retVal += "        int[] srcData = ImageUtils.getPixelsAsArray(src);\n";
             retVal += "        int[] destData = ImageUtils.getPixelsAsArray(dest);\n";
         }
 
-        if (proxy) {
+        if (desc.isProxy()) {
             retVal += "       if(filter == null) {\n";
-            retVal += "           filter = new " + proxyName + "();\n";
+            retVal += "           filter = new " + desc.getProxyName() + "();\n";
             retVal += "       }\n";
 
             retVal += '\n';
 
-            if (center) {
+            if (desc.hasCenter()) {
                 retVal += "        filter.setCenterX(center.getRelativeX());\n";
                 retVal += "        filter.setCenterY(center.getRelativeY());\n";
             }
-            if (edgeAction) {
+            if (desc.hasEdgeAction()) {
                 retVal += "        filter.setEdgeAction(edgeAction.getValue());\n";
             }
-            if (interpolation) {
+            if (desc.hasInterpolation()) {
                 retVal += "        filter.setInterpolation(interpolation.getValue());\n";
             }
 
             retVal += '\n';
 
-            if (angleParam) {
+            if (desc.hasAngleParam()) {
                 retVal += "        filter.setAngle(angle.getValueInRadians());\n";
             }
 
@@ -293,11 +279,11 @@ public class FilterCreator extends JPanel {
         return retVal;
     }
 
-    private static String addSuperClass(boolean gui, boolean parametrizedGui, String className) {
+    private static String addSuperClass(FilterDescription desc) {
         String retVal = "";
         String superClassName1;
-        if (gui) {
-            if (parametrizedGui) {
+        if (desc.isGui()) {
+            if (desc.isParametrizedGui()) {
                 superClassName1 = "FilterWithParametrizedGUI";
             } else {
                 superClassName1 = "FilterWithGUI";
@@ -307,72 +293,72 @@ public class FilterCreator extends JPanel {
         }
         String superClassName = superClassName1;
 
-        retVal += "public class " + className;
+        retVal += "public class " + desc.getClassName();
         retVal += " extends " + superClassName;
         retVal += " {\n";
         return retVal;
     }
 
-    private static String addImports(String name, boolean pixelLoop, boolean parametrizedGUI, boolean proxy, String proxyName) {
+    private static String addImports(FilterDescription desc) {
         String retVal = "";
-        if (pixelLoop) {
+        if (desc.hasPixelLoop()) {
             retVal += "import pixelitor.utils.ImageUtils;\n";
         }
         retVal += "import pixelitor.filters.gui.ParamSet;\n";
         retVal += "import pixelitor.filters.gui.RangeParam;\n";
-        if (parametrizedGUI) {
+        if (desc.isParametrizedGui()) {
             retVal += "import pixelitor.filters.FilterWithParametrizedGUI;\n";
         }
 
         retVal += "\nimport java.awt.image.BufferedImage;\n";
         retVal += "\n/**\n";
 
-        if (proxy) {
-            retVal += " * " + name + " based on " + proxyName + '\n';
+        if (desc.isProxy()) {
+            retVal += " * " + desc.getName() + " based on " + desc.getProxyName() + '\n';
         } else {
-            retVal += " * " + name + '\n';
+            retVal += " * " + desc.getName() + '\n';
         }
 
         retVal += " */\n";
         return retVal;
     }
 
-    private static String addConstructor(String name, boolean gui, boolean parametrizedGui, String className, boolean copySrc, boolean edge, boolean interpolation, ParameterInfo... params) {
+    private static String addConstructor(FilterDescription desc) {
         String retVal = "";
-        retVal += "\n    public " + className + "() {\n";
+        retVal += "\n    public " + desc.getClassName() + "() {\n";
 
-        retVal += "        super(\"" + name + "\", true, false);\n";
+        retVal += "        super(\"" + desc.getName() + "\", true, false);\n";
 
-        if (copySrc) {
+        if (desc.copySrc()) {
             retVal += "        copySrcToDstBeforeRunning = true;\n";
         }
 
-        if (gui && parametrizedGui) {
-            retVal += addParamSetToConstructor(edge, interpolation, params);
+        if (desc.isGui() && desc.isParametrizedGui()) {
+            retVal += addParamSetToConstructor(desc);
         }
         retVal += "    }\n";
         return retVal;
     }
 
-    private static String addParamSetToConstructor(boolean edge, boolean interpolation, ParameterInfo... params) {
+    private static String addParamSetToConstructor(FilterDescription desc) {
         String retVal = "";
-        if (params.length == 1) {
-            retVal += "        setParamSet(new ParamSet(" + params[0].getVariableName() + "));\n";
+        if (desc.getParams().length == 1) {
+            retVal += "        setParamSet(new ParamSet(" + desc.getParams()[0].getVariableName() + "));\n";
         } else {
             retVal += "        setParamSet(new ParamSet(\n";
-            for (int i = 0; i < params.length; i++) {
-                ParameterInfo param = params[i];
+            for (int i = 0; i < desc.getParams().length; i++) {
+                ParameterInfo param = desc.getParams()[i];
                 String paramName = param.getVariableName();
                 retVal += "            " + paramName;
-                if (i < params.length - 1 || edge || interpolation) {
+                if (i < desc.getParams().length - 1 || desc.hasEdgeAction() || desc.hasInterpolation()) {
                     retVal += ',';
                 }
                 retVal += '\n';
             }
-            if(edge) {
+            if (desc.hasEdgeAction()) {
                 retVal += "            edgeAction,\n";
             }
-            if(interpolation) {
+            if (desc.hasInterpolation()) {
                 retVal += "            interpolation\n";
             }
 
@@ -381,11 +367,9 @@ public class FilterCreator extends JPanel {
         return retVal;
     }
 
-    private static String addParamsDeclaration(boolean center, boolean angleParam, boolean edge,
-                                               boolean color, boolean gradient, boolean interpolation,
-                                               ParameterInfo... params) {
+    private static String addParamsDeclaration(FilterDescription desc) {
         String retVal = "";
-        for (ParameterInfo param : params) {
+        for (ParameterInfo param : desc.getParams()) {
             String paramVarName = param.getVariableName();
 
             retVal += "    private RangeParam " + paramVarName + " = new RangeParam(\"" + param.getName() + "\", "
@@ -394,22 +378,22 @@ public class FilterCreator extends JPanel {
             retVal += '\n';
         }
 
-        if (center) {
+        if (desc.hasCenter()) {
             retVal += "    private ImagePositionParam center = new ImagePositionParam(\"Center\");\n";
         }
-        if (angleParam) {
+        if (desc.hasAngleParam()) {
             retVal += "    private AngleParam angle = new AngleParam(\"Angle\", 0);\n";
         }
-        if (edge) {
+        if (desc.hasEdgeAction()) {
             retVal += "    private IntChoiceParam edgeAction =  IntChoiceParam.getEdgeActionChoices();\n";
         }
-        if (interpolation) {
+        if (desc.hasInterpolation()) {
             retVal += "    private IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();\n";
         }
-        if (color) {
+        if (desc.hasColor()) {
             retVal += "    private ColorParam color = new ColorParam(\"Color:\", Color.WHITE, false, false);\n";
         }
-        if (gradient) {
+        if (desc.hasGradient()) {
             retVal += "    private float[] defaultThumbPositions = new float[]{0f, 1f};\n";
             retVal += "    private Color[] defaultValues = new Color[]{Color.BLACK, Color.WHITE};\n";
             retVal += "    private GradientParam gradient = new GradientParam(\"Colors:\", defaultThumbPositions, defaultValues);\n";
@@ -417,7 +401,101 @@ public class FilterCreator extends JPanel {
         return retVal;
     }
 
-    public static class ParameterInfo {
+    private static class FilterDescription {
+        private final boolean parametrizedGui;
+        private final boolean gui;
+        private final boolean copySrc;
+        private final String name;
+        private final boolean pixelLoop;
+        private final boolean proxy;
+        private final String proxyName;
+        private final boolean angleParam;
+        private final boolean center;
+        private final boolean edge;
+        private final boolean color;
+        private final boolean gradient;
+        private final boolean interpolation;
+        private final ParameterInfo[] params;
+
+        private FilterDescription(boolean parametrizedGui, boolean gui, boolean copySrc, String name, boolean pixelLoop, boolean proxy, String proxyName, boolean angleParam, boolean center, boolean edge, boolean color, boolean gradient, boolean interpolation, ParameterInfo[] params) {
+            this.parametrizedGui = parametrizedGui;
+            this.gui = gui;
+            this.copySrc = copySrc;
+            this.name = name;
+            this.pixelLoop = pixelLoop;
+            this.proxy = proxy;
+            this.proxyName = proxyName;
+            this.angleParam = angleParam;
+            this.center = center;
+            this.edge = edge;
+            this.color = color;
+            this.gradient = gradient;
+            this.interpolation = interpolation;
+            this.params = params;
+        }
+
+        public boolean isParametrizedGui() {
+            return parametrizedGui;
+        }
+
+        public boolean isGui() {
+            return gui;
+        }
+
+        public boolean copySrc() {
+            return copySrc;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public boolean hasPixelLoop() {
+            return pixelLoop;
+        }
+
+        public boolean isProxy() {
+            return proxy;
+        }
+
+        public String getProxyName() {
+            return proxyName;
+        }
+
+        public boolean hasAngleParam() {
+            return angleParam;
+        }
+
+        public boolean hasCenter() {
+            return center;
+        }
+
+        public boolean hasEdgeAction() {
+            return edge;
+        }
+
+        public boolean hasColor() {
+            return color;
+        }
+
+        public boolean hasGradient() {
+            return gradient;
+        }
+
+        public boolean hasInterpolation() {
+            return interpolation;
+        }
+
+        public ParameterInfo[] getParams() {
+            return params;
+        }
+
+        public String getClassName() {
+            return getName().replaceAll(" ", "");
+        }
+    }
+
+    private static class ParameterInfo {
         final String name;
         final String variableName;
         final int min;
