@@ -58,12 +58,11 @@ public class ScreenCaptureAction extends AbstractAction {
     public JPanel getSettingsPanel() {
         JPanel p = new JPanel();
         p.setLayout(new GridBagLayout());
-        GridBagHelper gridBagHelper = new GridBagHelper(p);
+        GridBagHelper gbHelper = new GridBagHelper(p);
 
-        gridBagHelper.addLabel("Hide Pixelitor", 0, 0);
         hidePixelitorCB = new JCheckBox();
         hidePixelitorCB.setSelected(true);
-        gridBagHelper.addControl(hidePixelitorCB);
+        gbHelper.addLabelWithControl("Hide Pixelitor", hidePixelitorCB);
 
         return p;
     }

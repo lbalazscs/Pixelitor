@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.utils;
 
 import javax.swing.*;
@@ -31,6 +32,7 @@ public class GridBagHelper {
     private static final GridBagConstraints nextControlConstraint = new GridBagConstraints(0, 0, 1, 1, 0.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, insets, 0, 0);
     private static final GridBagConstraints nextLastControlConstraint = new GridBagConstraints(0, 0, GridBagConstraints.REMAINDER, 1, 0.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, insets, 0, 0);
     private final Container container;
+    int autoIncrementedGridY = 0;
 
     public GridBagHelper(Container container) {
         this.container = container;
@@ -41,7 +43,7 @@ public class GridBagHelper {
         addLabel(label, gridX, gridY);
     }
 
-    public void addLabel(JLabel label, int gridX, int gridY) {
+    private void addLabel(JLabel label, int gridX, int gridY) {
         labelConstraint.gridx = gridX;
         labelConstraint.gridy = gridY;
         container.add(label, labelConstraint);
@@ -54,6 +56,26 @@ public class GridBagHelper {
         nextControlConstraint.gridx = labelConstraint.gridx + 1;
         nextControlConstraint.gridy = labelConstraint.gridy;
         container.add(component, nextControlConstraint);
+    }
+
+    public void addLabelWithTwoControls(String labelText, Component c1, Component c2) {
+        addLabelWithControl(labelText, c1);
+        addNextControl(c2);
+    }
+
+    public void addLabelWithControlNoFill(String labelText, Component component) {
+        addLabel(labelText, 0, autoIncrementedGridY);
+        addControlNoFill(component);
+        autoIncrementedGridY++;
+    }
+
+    public void addTwoLabels(String text1, String text2) {
+        addLabelWithControl(text1, new JLabel(text2));
+    }
+
+    public void addLabelWithControl(String labelText, Component component) {
+        addLabelWithControl(labelText, component, autoIncrementedGridY);
+        autoIncrementedGridY++;
     }
 
     public void addLabelWithControl(String labelText, Component component, int gridY) {
@@ -79,7 +101,6 @@ public class GridBagHelper {
 
         nextControlConstraint.fill = GridBagConstraints.HORIZONTAL; // reset
     }
-
 
     /**
      * Adds the specified control to the right of the last control

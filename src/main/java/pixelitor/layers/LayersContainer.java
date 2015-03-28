@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.layers;
 
@@ -35,29 +35,29 @@ public class LayersContainer extends JPanel implements ImageSwitchListener {
     private LayersContainer() {
         setLayout(new BorderLayout());
 
-        scrollPane = new JScrollPane();
-        add(scrollPane, BorderLayout.CENTER);
         add(LayerBlendingModePanel.INSTANCE, BorderLayout.NORTH);
 
+        scrollPane = new JScrollPane();
+        add(scrollPane, BorderLayout.CENTER);
+
+        JPanel southPanel = initSouthPanel();
+        add(southPanel, BorderLayout.SOUTH);
+
+        setBorder(BorderFactory.createTitledBorder("Layers"));
+
+        ImageComponents.addImageSwitchListener(this);
+    }
+
+    private static JPanel initSouthPanel() {
         JPanel southPanel = new JPanel();
         southPanel.setLayout(new BoxLayout(southPanel, BoxLayout.X_AXIS));
 
         JButton addButton = createButtonFromAction(AddNewLayerAction.INSTANCE);
         JButton deleteButton = createButtonFromAction(DeleteActiveLayerAction.INSTANCE);
 
-//        JButton layerUpButton = createButtonFromAction(LayerMoveAction.INSTANCE_UP);
-//        JButton layerDownButton = createButtonFromAction(LayerMoveAction.INSTANCE_DOWN);
-
         southPanel.add(addButton);
         southPanel.add(deleteButton);
-//        southPanel.add(Box.createHorizontalGlue());
-//        southPanel.add(layerUpButton);
-//        southPanel.add(layerDownButton);
-
-        add(southPanel, BorderLayout.SOUTH);
-
-        ImageComponents.addImageSwitchListener(this);
-        setBorder(BorderFactory.createTitledBorder("Layers"));
+        return southPanel;
     }
 
     private static JButton createButtonFromAction(Action a) {

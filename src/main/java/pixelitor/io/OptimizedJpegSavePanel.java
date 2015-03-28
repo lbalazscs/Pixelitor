@@ -34,60 +34,78 @@ import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
 
 /**
- *
+ * The panel shown in the "Export Optimized JPEG..." dialog
  */
 public class OptimizedJpegSavePanel extends JPanel {
     private final BufferedImage image;
-    private final ImagePanel optimized;
-    private final RangeParam qualityParam;
-    private final JLabel sizeLabel;
+    private ImagePanel optimized;
+    private RangeParam qualityParam;
+    private JLabel sizeLabel;
+    private ImagePanel original;
 
     private OptimizedJpegSavePanel(BufferedImage image) {
         this.image = image;
-        qualityParam = new RangeParam("JPEG Quality", 1, 100, 60);
-        sizeLabel = new JLabel();
 
-        JPanel comparePanel = new JPanel();
-        comparePanel.setLayout(new GridLayout(1, 2, 10, 10));
-
-        ImagePanel original = new ImagePanel(image);
-        optimized = new ImagePanel();
-
-        Dimension imageSize = new Dimension(image.getWidth(), image.getHeight());
-        original.setPreferredSize(imageSize);
-        optimized.setPreferredSize(imageSize);
-
-        updateAfterPreview();
-
-
-        JScrollPane originalSP = new JScrollPane(original);
-        comparePanel.add(originalSP);
-        HandToolSupport.addBehavior(originalSP);
-
-        JScrollPane optimizedSP = new JScrollPane(optimized);
-        comparePanel.add(optimizedSP);
-        HandToolSupport.addBehavior(optimizedSP);
-
-        originalSP.setBorder(BorderFactory.createTitledBorder("Original"));
-        optimizedSP.setBorder(BorderFactory.createTitledBorder("Optimized"));
-
-
-        optimizedSP.getVerticalScrollBar().setModel(originalSP.getVerticalScrollBar().getModel());
-        optimizedSP.getHorizontalScrollBar().setModel(originalSP.getHorizontalScrollBar().getModel());
-
+        JPanel controlsPanel = createControlsPanel(); // must be constructed before the comparePanel
+        JPanel comparePanel = createComparePanel(image);
 
         setLayout(new BorderLayout(3, 3));
         add(comparePanel, BorderLayout.CENTER);
+        add(controlsPanel, BorderLayout.SOUTH);
+    }
 
+    private JPanel createComparePanel(BufferedImage image) {
+        JPanel comparePanel = new JPanel();
+        comparePanel.setLayout(new GridLayout(1, 2, 10, 10));
+        Dimension imageSize = new Dimension(image.getWidth(), image.getHeight());
+
+        original = createViewPanel(imageSize);
+        original.setImage(image);
+
+        optimized = createViewPanel(imageSize);
+        updateAfterPreview(); // to set a first preview image
+
+        setupScrollPanes(comparePanel);
+
+        return comparePanel;
+    }
+
+    private void setupScrollPanes(JPanel comparePanel) {
+        JScrollPane originalSP = createScrollPane(original, "Original");
+        JScrollPane optimizedSP = createScrollPane(optimized, "Optimized");
+
+        comparePanel.add(originalSP);
+        comparePanel.add(optimizedSP);
+
+        optimizedSP.getVerticalScrollBar().setModel(originalSP.getVerticalScrollBar().getModel());
+        optimizedSP.getHorizontalScrollBar().setModel(originalSP.getHorizontalScrollBar().getModel());
+    }
+
+    private static JScrollPane createScrollPane(ImagePanel original, String borderTitle) {
+        JScrollPane sp = new JScrollPane(original);
+        HandToolSupport.addBehavior(sp);
+        sp.setBorder(BorderFactory.createTitledBorder(borderTitle));
+
+        return sp;
+    }
+
+    private static ImagePanel createViewPanel(Dimension imageSize) {
+        ImagePanel view = new ImagePanel();
+        view.setPreferredSize(imageSize);
+
+        return view;
+    }
+
+    private JPanel createControlsPanel() {
+        qualityParam = new RangeParam("JPEG Quality", 1, 100, 60);
         qualityParam.setAdjustmentListener(this::updateAfterPreview);
-
         SliderSpinner qualitySpinner = new SliderSpinner(qualityParam, SliderSpinner.TextPosition.WEST, false);
         JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         southPanel.add(qualitySpinner);
-
+        sizeLabel = new JLabel();
         southPanel.add(sizeLabel);
 
-        add(southPanel, BorderLayout.SOUTH);
+        return southPanel;
     }
 
     private void updateAfterPreview() {
@@ -122,35 +140,36 @@ public class OptimizedJpegSavePanel extends JPanel {
         };
         d.setVisible(true);
     }
-}
 
-class ImagePanel extends JPanel {
-    private BufferedImage image;
+    static class ImagePanel extends JPanel {
+        private BufferedImage image;
 
-    ImagePanel() {
-    }
-
-    ImagePanel(BufferedImage image) {
-        this.image = image;
-    }
-
-    public void updateImage(BufferedImage newImage) {
-        if (image != null) {
-            image.flush();
+        ImagePanel() {
         }
 
-        image = newImage;
-        repaint();
-    }
+        // used for the original
+        public void setImage(BufferedImage image) {
+            this.image = image;
+        }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        try {
-            g.drawImage(image, 0, 0, null);
-        } catch (OutOfMemoryError e) {
-            Dialogs.showOutOfMemoryDialog(e);
+        // used for the preview
+        public void updateImage(BufferedImage newImage) {
+            if (image != null) {
+                image.flush();
+            }
+
+            image = newImage;
+            repaint();
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            try {
+                g.drawImage(image, 0, 0, null);
+            } catch (OutOfMemoryError e) {
+                Dialogs.showOutOfMemoryDialog(e);
+            }
         }
     }
-
-
 }
+

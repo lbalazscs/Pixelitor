@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor.utils;
@@ -33,8 +33,7 @@ import java.io.IOException;
 /**
  * Image preview panel for the open file chooser
  */
-public class ImagePreviewPanel extends JPanel
-        implements PropertyChangeListener {
+public class ImagePreviewPanel extends JPanel implements PropertyChangeListener {
     private static final int SIZE = 200;
     private static final int EMPTY_SPACE_AT_LEFT = 5;
 
@@ -52,21 +51,10 @@ public class ImagePreviewPanel extends JPanel
         backgroundColor = getBackground();
     }
 
+    // the property change events form the JFileChooser
     @Override
     public void propertyChange(PropertyChangeEvent e) {
-        String propertyName = e.getPropertyName();
-        File file;
-
-        switch (propertyName) {
-            case JFileChooser.DIRECTORY_CHANGED_PROPERTY:
-                file = null;
-                break;
-            case JFileChooser.SELECTED_FILE_CHANGED_PROPERTY:
-                file = (File) e.getNewValue();
-                break;
-            default:
-                return;
-        }
+        File file = getFileFromFileChooserEvent(e);
         if (file == null) {
             smallImage = null;
             repaint();
@@ -75,25 +63,48 @@ public class ImagePreviewPanel extends JPanel
 
         String fileName = file.getAbsolutePath();
 
-
         if (FileExtensionUtils.isSupportedExtension(fileName, FileExtensionUtils.SUPPORTED_INPUT_EXTENSIONS)) {
-            Image bigImage = null;
-            if (fileName.toLowerCase().endsWith(".bmp")) {
-                try {
-                    bigImage = ImageIO.read(file);
-                } catch (IOException ex) {
-                    Dialogs.showExceptionDialog(ex);
-                }
-            } else {
-                // TODO: load all with ImageIO and cache
-                // it seems that ImageIcon loads slower but it is cached
-                ImageIcon icon = new ImageIcon(fileName);
-                bigImage = icon.getImage();
-            }
-
-            smallImage = scaleImage(bigImage);
+            createThumbImage(file, fileName);
             repaint();
         }
+    }
+
+    private void createThumbImage(File file, String fileName) {
+        // we read the whole image and downscale it to a thumb
+        // TODO perhaps it is possible to read a thumb directly
+
+        // TODO another problem is that ora and pxc files are reported as "Unrecognized"
+        Image bigImage = null;
+        if (fileName.toLowerCase().endsWith(".bmp")) {
+            try {
+                bigImage = ImageIO.read(file);
+            } catch (IOException ex) {
+                Dialogs.showExceptionDialog(ex);
+            }
+        } else {
+            // TODO: load all with ImageIO and cache
+            // it seems that ImageIcon loads slower but it is cached
+            ImageIcon icon = new ImageIcon(fileName);
+            bigImage = icon.getImage();
+        }
+
+        smallImage = scaleImage(bigImage);
+    }
+
+    private static File getFileFromFileChooserEvent(PropertyChangeEvent e) {
+        File file;
+        String propertyName = e.getPropertyName();
+        switch (propertyName) {
+            case JFileChooser.DIRECTORY_CHANGED_PROPERTY:
+                file = null;
+                break;
+            case JFileChooser.SELECTED_FILE_CHANGED_PROPERTY:
+                file = (File) e.getNewValue();
+                break;
+            default:
+                file = null;
+        }
+        return file;
     }
 
     private Image scaleImage(Image img) {

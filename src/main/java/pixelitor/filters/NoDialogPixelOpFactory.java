@@ -75,7 +75,7 @@ public class NoDialogPixelOpFactory {
 
     public static Action getDesaturateChannelOp() {
         RGBPixelOp rgbOp = (a, r, g, b) -> {
-            // brightness = [max(R, G, B) + min (R, G, B)] / 2
+            // achieves desaturation by setting the brightness to [max(R, G, B) + min (R, G, B)] / 2
             int maxRGB = (r > g) ? r : g;
             if (b > maxRGB) {
                 maxRGB = b;
@@ -93,7 +93,6 @@ public class NoDialogPixelOpFactory {
 
             return (a << 24) | (r << 16) | (g << 8) | b;
         };
-//        return new PixelOperation("Brightness = [max(R,G,B) + min (R,G,B)] / 2 = Desaturate", rgbOp);
         return new PixelFilter("Desaturate", rgbOp);
     }
 

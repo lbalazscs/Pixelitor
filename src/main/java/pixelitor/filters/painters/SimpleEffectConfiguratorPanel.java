@@ -37,8 +37,7 @@ public class SimpleEffectConfiguratorPanel extends EffectConfiguratorPanel {
         widthRange = new RangeParam("Width:", 1, 100, defaultWidth);
         widthSlider = new SliderSpinner(widthRange, SliderSpinner.TextPosition.NONE, false);
 
-        gridBagHelper.addLabel("Width:", 0, 6);
-        gridBagHelper.addControl(widthSlider);
+        gbHelper.addLabelWithControl("Width:", widthSlider);
     }
 
     @Override

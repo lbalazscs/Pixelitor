@@ -17,7 +17,6 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.utils.GUIUtils;
 import pixelitor.utils.GridBagHelper;
 import pixelitor.utils.SliderSpinner;
 
@@ -28,33 +27,39 @@ import java.awt.GridBagLayout;
  * GUI for a GroupedRangeParam
  */
 public class GroupedRangeSelector extends JPanel {
+    private final int numParams;
+    private final GroupedRangeParam model;
+    private final GridBagHelper gridBagHelper;
+
     public GroupedRangeSelector(GroupedRangeParam model) {
+        this.model = model;
+        numParams = model.getNumParams();
+
         setLayout(new GridBagLayout());
+        gridBagHelper = new GridBagHelper(this);
 
-        GridBagHelper gridBagHelper = new GridBagHelper(this);
+        addSliderSpinners();
 
-        int numParams = model.getNumParams();
+        if(model.isLinkable()) {
+            addLinkCheckBox();
+        }
+
+        setBorder(BorderFactory.createTitledBorder(model.getName()));
+    }
+
+    private void addSliderSpinners() {
         for (int i = 0; i < numParams; i++) {
             RangeParam param = model.getRangeParam(i);
             SliderSpinner slider = new SliderSpinner(param, SliderSpinner.TextPosition.NONE, true);
             slider.setupTicks();
             gridBagHelper.addLabelWithControl(param.getName(), slider, i);
         }
-
-        boolean linkable = model.isLinkable();
-        if(linkable) {
-            JCheckBox linkedCB = new JCheckBox();
-            linkedCB.setModel(model.getCheckBoxModel());
-            gridBagHelper.addLabelWithControl("Linked:", linkedCB, numParams);
-            linkedCB.addActionListener(e -> model.setLinked(linkedCB.isSelected()));
-        }
-
-        setBorder(BorderFactory.createTitledBorder(model.getName()));
     }
 
-    public static void main(String[] args) {
-        GroupedRangeParam model = new GroupedRangeParam("HUHU", 0, 100, 50);
-        GUIUtils.testJComponent(new GroupedRangeSelector(model));
+    private void addLinkCheckBox() {
+        JCheckBox linkedCB = new JCheckBox();
+        linkedCB.setModel(model.getCheckBoxModel());
+        gridBagHelper.addLabelWithControl("Linked:", linkedCB, numParams);
+        linkedCB.addActionListener(e -> model.setLinked(linkedCB.isSelected()));
     }
-
 }

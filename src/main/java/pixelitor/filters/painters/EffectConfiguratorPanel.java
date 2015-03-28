@@ -45,7 +45,7 @@ public abstract class EffectConfiguratorPanel extends JPanel {
     private final RangeParam opacityRange;
     private final SliderSpinner opacitySlider;
 
-    protected final GridBagHelper gridBagHelper;
+    protected final GridBagHelper gbHelper;
 
     EffectConfiguratorPanel(String effectName, boolean defaultSelected, Color defaultColor) {
         setBorder(BorderFactory.createTitledBorder('"' + effectName + "\" Configuration"));
@@ -68,15 +68,10 @@ public abstract class EffectConfiguratorPanel extends JPanel {
 
         setLayout(new GridBagLayout());
 
-        gridBagHelper = new GridBagHelper(this);
-        gridBagHelper.addLabel("Enabled:", 0, 0);
-        gridBagHelper.addControl(enabledCheckBox);
-
-        gridBagHelper.addLabel("Color:", 0, 1);
-        gridBagHelper.addControlNoFill(colorSwatch);
-
-        gridBagHelper.addLabel("Opacity:", 0, 2);
-        gridBagHelper.addControlNoFill(opacitySlider);
+        gbHelper = new GridBagHelper(this);
+        gbHelper.addLabelWithControl("Enabled:", enabledCheckBox);
+        gbHelper.addLabelWithControlNoFill("Color:", colorSwatch);
+        gbHelper.addLabelWithControlNoFill("Opacity:", opacitySlider);
     }
 
     private void changeColor() {

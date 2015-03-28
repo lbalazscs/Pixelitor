@@ -41,24 +41,25 @@ public class SingleDirChooserPanel extends ValidatedForm {
 
     private SingleDirChooserPanel(String label, String dialogTitle, String initialPath, boolean addOutputChooser) {
         directoryChooser = new BrowseFilesSupport(initialPath, dialogTitle, DIRECTORY);
-        JLabel dirLabel = new JLabel(label);
         JTextField dirTF = directoryChooser.getNameTF();
         JButton browseButton = directoryChooser.getBrowseButton();
 
         if (addOutputChooser) {
             setLayout(new GridBagLayout());
-            GridBagHelper gridBagHelper = new GridBagHelper(this);
-            gridBagHelper.addLabel(dirLabel, 0, 0);
-            gridBagHelper.addControl(dirTF);
-            gridBagHelper.addNextControl(browseButton);
+            GridBagHelper gbHelper = new GridBagHelper(this);
+//            gbHelper.addLabel(dirLabel, 0, 0);
+//            gbHelper.addControl(dirTF);
+//            gbHelper.addNextControl(browseButton);
+            gbHelper.addLabelWithTwoControls(label, dirTF, browseButton);
 
             outputFormatSelector = new OutputFormatSelector();
 
-            gridBagHelper.addLabel("Output Format:", 0, 1);
-            gridBagHelper.addControlNoFill(outputFormatSelector.getFormatCombo());
+//            gbHelper.addLabel("Output Format:", 0, 1);
+//            gbHelper.addControlNoFill(outputFormatSelector.getFormatCombo());
+            gbHelper.addLabelWithControlNoFill("Output Format:", outputFormatSelector.getFormatCombo());
         } else {
             setLayout(new FlowLayout(FlowLayout.LEFT));
-            add(dirLabel);
+            add(new JLabel(label));
             add(dirTF);
             add(browseButton);
         }

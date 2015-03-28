@@ -281,11 +281,6 @@ public final class AppPreferences {
         return UIManager.getSystemLookAndFeelClassName();
     }
 
-    private static void savePrefsAndExit() {
-        savePreferencesBeforeExit();
-        System.exit(0);
-    }
-
     public static void exitApp() {
         if (ImageComponents.thereAreUnsavedChanges()) {
             int answer = JOptionPane.showConfirmDialog(null, "There are unsaved changes. Are you sure you want to exit?", "Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
@@ -295,6 +290,11 @@ public final class AppPreferences {
         } else {
             savePrefsAndExit();
         }
+    }
+
+    private static void savePrefsAndExit() {
+        savePreferencesBeforeExit();
+        System.exit(0);
     }
 
     public static class WorkSpace {
@@ -400,10 +400,10 @@ public final class AppPreferences {
         Panel() {
             setLayout(new GridBagLayout());
             GridBagHelper gridBagHelper = new GridBagHelper(this);
-            gridBagHelper.addLabel("Undo/Redo Levels: ", 0, 0);
+
             undoLevelsTF = new IntTextField(3);
             undoLevelsTF.setText(String.valueOf(History.getUndoLevels()));
-            gridBagHelper.addControl(undoLevelsTF);
+            gridBagHelper.addLabelWithControl("Undo/Redo Levels: ", undoLevelsTF);
         }
 
         private int getUndoLevels() {

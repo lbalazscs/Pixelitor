@@ -109,28 +109,25 @@ public final class NewImage {
         private final JTextField widthTextField;
         private final JTextField heightTextField;
 
-        private static final int WIDGET_DISTANCE = 5;
+        private static final int BORDER_WIDTH = 5;
         private final JComboBox<FillType> backgroundSelector;
 
         private NewImagePanel(int defaultWidth, int defaultHeight) {
             setLayout(new GridBagLayout());
             GridBagHelper gridBagHelper = new GridBagHelper(this);
 
-            setBorder(BorderFactory.createEmptyBorder(WIDGET_DISTANCE, WIDGET_DISTANCE, WIDGET_DISTANCE, WIDGET_DISTANCE));
+            setBorder(BorderFactory.createEmptyBorder(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH));
 
-            gridBagHelper.addLabel("Width:", 0, 0);
             widthTextField = new IntTextField(String.valueOf(defaultWidth));
             widthTextField.setName("widthTF");
-            gridBagHelper.addControl(widthTextField);
+            gridBagHelper.addLabelWithControl("Width:", widthTextField);
 
-            gridBagHelper.addLabel("Height:", 0, 1);
             heightTextField = new IntTextField(String.valueOf(defaultHeight));
             heightTextField.setName("heightTF");
-            gridBagHelper.addControl(heightTextField);
+            gridBagHelper.addLabelWithControl("Height:", heightTextField);
 
-            gridBagHelper.addLabel("Fill:", 0, 2);
             backgroundSelector = new JComboBox(FillType.values());
-            gridBagHelper.addControl(backgroundSelector);
+            gridBagHelper.addLabelWithControl("Fill:", backgroundSelector);
         }
 
         private int getSelectedWidth() {

@@ -32,10 +32,10 @@ public class LayerButton extends JToggleButton {
     private static final Icon CLOSED_EYE_ICON = IconUtils.loadIcon("eye_closed.png");
 
     private static final String uiClassID = "LayerButtonUI";
-    private final JCheckBox visibilityCB;
+    private JCheckBox visibilityCB;
 
     private boolean userInteraction = true;
-    private final JTextField nameEditor;
+    private JTextField nameEditor;
 
     /**
      * The Y coordinate in the parent when it is not dragging
@@ -55,6 +55,13 @@ public class LayerButton extends JToggleButton {
     public LayerButton(Layer layer) {
         this.layer = layer;
         setLayout(new LayerButtonLayout(5, 5));
+
+        initVisibilityControl(layer);
+        initLayerNameEditor(layer);
+        wireSelectionWithLayerActivation(layer);
+    }
+
+    private void initVisibilityControl(Layer layer) {
         visibilityCB = new JCheckBox(CLOSED_EYE_ICON);
         visibilityCB.setRolloverIcon(CLOSED_EYE_ICON);
 
@@ -62,26 +69,21 @@ public class LayerButton extends JToggleButton {
         visibilityCB.setToolTipText("Layer Visibility");
         visibilityCB.setSelectedIcon(OPEN_EYE_ICON);
         add(visibilityCB, LayerButtonLayout.VISIBILITY_BUTTON);
+        visibilityCB.addItemListener(e -> layer.setVisible(visibilityCB.isSelected(), AddToHistory.YES));
+    }
 
+    private void initLayerNameEditor(Layer layer) {
         nameEditor = new LayerNameEditor(this, layer);
         add(nameEditor, LayerButtonLayout.NAME_EDITOR);
-
         addPropertyChangeListener("name", evt -> nameEditor.setText(getName()));
+    }
 
+    private void wireSelectionWithLayerActivation(Layer layer) {
         addItemListener(e -> {
             if (isSelected()) {
                 layer.makeActive(userInteraction ? AddToHistory.YES : AddToHistory.NO);
             }
         });
-
-        visibilityCB.addItemListener(e -> layer.setVisible(visibilityCB.isSelected(), AddToHistory.YES));
-    }
-
-    @Override
-    public String toString() {
-        return "LayerButton{" +
-                "name='" + layer.getName() + '\'' +
-                '}';
     }
 
     public void setOpenEye(boolean newVisibility) {
@@ -118,9 +120,6 @@ public class LayerButton extends JToggleButton {
         layer.dragFinished(newLayerIndex);
     }
 
-    /**
-     * Can be used for debugging
-     */
     public String getLayerName() {
         return layer.getName();
     }
@@ -131,5 +130,12 @@ public class LayerButton extends JToggleButton {
 
     public boolean isVisibilityChecked() {
         return visibilityCB.isSelected();
+    }
+
+    @Override
+    public String toString() {
+        return "LayerButton{" +
+                "name='" + getLayerName() + '\'' +
+                '}';
     }
 }

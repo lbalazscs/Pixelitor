@@ -17,7 +17,6 @@
 
 package pixelitor.filters.animation;
 
-import org.jdesktop.swingx.VerticalLayout;
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.io.FileChoosers;
 import pixelitor.utils.BrowseFilesSupport;
@@ -32,6 +31,7 @@ import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
 
 import static pixelitor.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
@@ -44,70 +44,82 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
     private final JTextField nrSecondsTF = new JTextField("2", 3);
     private final JTextField fpsTF = new JTextField("24", 3);
     private int nrFrames;
-    private final JLabel nrFramesLabel;
+    private JLabel nrFramesLabel;
     private double fps;
-    private final JComboBox<Interpolation> ipCB;
-    private final JComboBox<TweenOutputType> outputTypeCB;
-    private final JCheckBox pingPongCB;
+    private JComboBox<Interpolation> ipCB;
+    private JComboBox<TweenOutputType> outputTypeCB;
+    private JCheckBox pingPongCB;
     private final BrowseFilesSupport browseFilesSupport = new BrowseFilesSupport(FileChoosers.getLastSaveDir().getAbsolutePath());
-    private final JTextField fileNameTF;
+    private JTextField fileNameTF;
     private String errorMessage;
 
     public OutputSettingsPanel() {
-        super(new VerticalLayout());
-        JPanel contentPanel = new JPanel(new GridBagLayout());
+        super(new GridBagLayout());
 
         // A single TFValidationLayerUI for all the textfields.
         LayerUI<JTextField> tfLayerUI = new TFValidationLayerUI(this);
 
+        GridBagHelper gbHelper = new GridBagHelper(this);
+
+        addOutputTypeSelector(gbHelper);
+        addAnimationLengthSelector(tfLayerUI, gbHelper);
+        addInterpolationSelector(gbHelper);
+        addPingPongSelector(gbHelper);
+        addFileSelector(tfLayerUI, gbHelper);
+    }
+
+    private void addOutputTypeSelector(GridBagHelper gbHelper) {
         //noinspection unchecked
         EnumComboBoxModel<TweenOutputType> model = new EnumComboBoxModel(TweenOutputType.class);
         outputTypeCB = new JComboBox<>(model);
         outputTypeCB.addActionListener(e -> outputTypeChanged());
         outputTypeChanged(); // initial setup
 
-        GridBagHelper gridBagHelper = new GridBagHelper(contentPanel);
-        gridBagHelper.addLabelWithControl("Output Type:", outputTypeCB, 0);
+        gbHelper.addLabelWithControl("Output Type:", outputTypeCB);
+    }
 
-        gridBagHelper.addLabelWithControl("Number of Seconds:",
-                new JLayer<>(nrSecondsTF, tfLayerUI), 1);
+    private void addAnimationLengthSelector(LayerUI<JTextField> tfLayerUI, GridBagHelper gbHelper) {
+        gbHelper.addLabelWithControl("Number of Seconds:",
+                new JLayer<>(nrSecondsTF, tfLayerUI));
 
-        KeyAdapter keyAdapter = new KeyAdapter() {
+        KeyListener keyListener = new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent keyEvent) {
                 updateCalculations();
             }
         };
-        nrSecondsTF.addKeyListener(keyAdapter);
+        nrSecondsTF.addKeyListener(keyListener);
 
-        gridBagHelper.addLabelWithControl("Frames per Second:",
-                new JLayer<>(fpsTF, tfLayerUI), 2);
-
-        fpsTF.addKeyListener(keyAdapter);
+        gbHelper.addLabelWithControl("Frames per Second:",
+                new JLayer<>(fpsTF, tfLayerUI));
+        fpsTF.addKeyListener(keyListener);
 
         nrFramesLabel = new JLabel();
         updateCalculations();
+        gbHelper.addLabelWithControl("Number of Frames:", nrFramesLabel);
+    }
 
-        gridBagHelper.addLabelWithControl("Number of Frames:", nrFramesLabel, 3);
-
+    private void addInterpolationSelector(GridBagHelper gbHelper) {
         EnumComboBoxModel<Interpolation> ipCBM = new EnumComboBoxModel<>(Interpolation.class);
         ipCB = new JComboBox<>(ipCBM);
 
-        gridBagHelper.addLabelWithControl("Interpolation:", ipCB, 4);
+        gbHelper.addLabelWithControl("Interpolation:", ipCB);
+    }
 
+    private void addPingPongSelector(GridBagHelper gbHelper) {
         pingPongCB = new JCheckBox();
-        gridBagHelper.addLabelWithControl("Ping Pong:", pingPongCB, 5);
+        gbHelper.addLabelWithControl("Ping Pong:", pingPongCB);
 
         pingPongCB.addActionListener(e -> updateCalculations());
+    }
 
+    private void addFileSelector(LayerUI<JTextField> tfLayerUI, GridBagHelper gbHelper) {
         JPanel filePanel = new JPanel(new FlowLayout());
         filePanel.setBorder(BorderFactory.createTitledBorder("Output File/Folder"));
         fileNameTF = browseFilesSupport.getNameTF();
         filePanel.add(new JLayer<>(fileNameTF, tfLayerUI));
         filePanel.add(browseFilesSupport.getBrowseButton());
-        gridBagHelper.addOnlyControlToRow(filePanel, 6);
-
-        add(contentPanel);
+        gbHelper.addOnlyControlToRow(filePanel, 6);
     }
 
     private void outputTypeChanged() {
@@ -127,20 +139,24 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
 
     private void updateCalculations() {
         try {
-            double nrSeconds = Double.parseDouble(nrSecondsTF.getText().trim());
-            fps = Double.parseDouble(fpsTF.getText().trim());
-            nrFrames = (int) (nrSeconds * fps);
-            String labelText = String.valueOf(nrFrames);
-
-            if (pingPongCB.isSelected()) {
-                int totalFrames = 2 * nrFrames - 2;
-                double totalSeconds = totalFrames / fps;
-                labelText += String.format(" (with PP: %d frames, %.2f seconds)", totalFrames, totalSeconds);
-            }
-            nrFramesLabel.setText(labelText);
+            nrFramesLabel.setText(calculateNrFramesText());
         } catch (Exception ex) {
             nrFramesLabel.setText("??");
         }
+    }
+
+    private String calculateNrFramesText() {
+        double nrSeconds = Double.parseDouble(nrSecondsTF.getText().trim());
+        fps = Double.parseDouble(fpsTF.getText().trim());
+        nrFrames = (int) (nrSeconds * fps);
+        String labelText = String.valueOf(nrFrames);
+
+        if (pingPongCB.isSelected()) {
+            int totalFrames = 2 * nrFrames - 2;
+            double totalSeconds = totalFrames / fps;
+            labelText += String.format(" (with PP: %d frames, %.2f seconds)", totalFrames, totalSeconds);
+        }
+        return labelText;
     }
 
     @Override
@@ -155,20 +171,26 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
 
     @Override
     public boolean isValid(JTextField textField) {
-        boolean valid = true;
         if (textField == nrSecondsTF || textField == fpsTF) {
-            String text = textField.getText().trim();
-            try {
-                //noinspection ResultOfMethodCallIgnored
-                Double.parseDouble(text);
-            } catch (NumberFormatException ex) {
-                valid = false;
-                errorMessage = text + " is not a valid number.";
-            }
+            return isTextFieldWithDoubleValid(textField);
         } else if (textField == fileNameTF) {
             TweenOutputType outputType = (TweenOutputType) outputTypeCB.getSelectedItem();
             errorMessage = outputType.checkFile(new File(textField.getText().trim()));
-            valid = (errorMessage == null);
+            return (errorMessage == null);
+        } else {
+            throw new IllegalStateException("unexpected JTextField");
+        }
+    }
+
+    private boolean isTextFieldWithDoubleValid(JTextField textField) {
+        boolean valid = true;
+        String text = textField.getText().trim();
+        try {
+            //noinspection ResultOfMethodCallIgnored
+            Double.parseDouble(text);
+        } catch (NumberFormatException ex) {
+            valid = false;
+            errorMessage = text + " is not a valid number.";
         }
         return valid;
     }

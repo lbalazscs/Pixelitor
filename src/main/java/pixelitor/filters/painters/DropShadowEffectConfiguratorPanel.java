@@ -40,18 +40,15 @@ public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
 
         distanceParam = new RangeParam("Distance:", 1, 100, 10);
         SliderSpinner distanceSlider = new SliderSpinner(distanceParam, SliderSpinner.TextPosition.NONE, false);
-        gridBagHelper.addLabel("Distance:", 0, 3);
-        gridBagHelper.addControl(distanceSlider);
+        gbHelper.addLabelWithControl("Distance:", distanceSlider);
 
         angleParam = new AngleParam("Angle", 0.7);
         AngleSelectorComponent angleSelectorComponent = new AngleSelectorComponent(angleParam);
-        gridBagHelper.addLabel("Angle:", 0, 4);
-        gridBagHelper.addControl(angleSelectorComponent);
+        gbHelper.addLabelWithControl("Angle:", angleSelectorComponent);
 
         spreadParam = new RangeParam("Spread:", 1, 100, 10);
         SliderSpinner spreadSlider = new SliderSpinner(spreadParam, SliderSpinner.TextPosition.NONE, false);
-        gridBagHelper.addLabel("Spread:", 0, 5);
-        gridBagHelper.addControl(spreadSlider);
+        gbHelper.addLabelWithControl("Spread:", spreadSlider);
     }
 
     @Override

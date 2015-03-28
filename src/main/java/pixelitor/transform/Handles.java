@@ -25,6 +25,7 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.Stroke;
 import java.util.Arrays;
 import java.util.List;
 
@@ -49,9 +50,14 @@ public class Handles {
     }
 
     public void paint(Graphics2D g) {
-        BasicStroke bigStroke = new BasicStroke(3);
-        BasicStroke smallStroke = new BasicStroke(1);
+        Stroke bigStroke = new BasicStroke(3);
+        Stroke smallStroke = new BasicStroke(1);
 
+        drawRectangle(g, bigStroke, smallStroke);
+        drawHandles(g, bigStroke, smallStroke);
+    }
+
+    private void drawRectangle(Graphics2D g, Stroke bigStroke, Stroke smallStroke) {
         Rectangle rect = getSelectedRectangleInComponentSpace();
 
         g.setColor(Color.BLACK);
@@ -60,7 +66,9 @@ public class Handles {
         g.setColor(Color.WHITE);
         g.setStroke(smallStroke);
         g.draw(rect);
+    }
 
+    private void drawHandles(Graphics2D g, Stroke bigStroke, Stroke smallStroke) {
         for (Handle handle : handles) {
             g.setStroke(bigStroke);
             g.setColor(Color.BLACK);

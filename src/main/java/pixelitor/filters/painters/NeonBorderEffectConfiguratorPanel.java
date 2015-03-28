@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.painters;
 
 import com.bric.swing.ColorPicker;
@@ -53,8 +54,7 @@ public class NeonBorderEffectConfiguratorPanel extends SimpleEffectConfiguratorP
             }
         });
 
-        gridBagHelper.addLabel("Inner Color:", 0, 4);
-        gridBagHelper.addControlNoFill(innerColorSwatch);
+        gbHelper.addLabelWithControl("Inner Color:", innerColorSwatch);
     }
 
     public Color getInnerColor() {

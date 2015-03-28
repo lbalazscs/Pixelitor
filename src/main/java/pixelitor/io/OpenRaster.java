@@ -67,22 +67,7 @@ public class OpenRaster {
         // Reverse iteration: in stack.xml the first element in a stack is the uppermost.
         for (int i = nrLayers - 1; i >= 0; i--) {
             Layer layer = comp.getLayer(i);
-            if (layer instanceof ImageLayer) {
-                ImageLayer imageLayer = (ImageLayer) layer;
-                stackXML += String.format(Locale.ENGLISH, "<layer name=\"%s\" visibility=\"%s\" composite-op=\"%s\" opacity=\"%f\" src=\"data/%d.png\" x=\"%d\" y=\"%d\"/>\n",
-                        layer.getName(),
-                        layer.getVisibilityAsORAString(),
-                        layer.getBlendingMode().toSVGName(),
-                        layer.getOpacity(),
-                        i,
-                        imageLayer.getTranslationX(),
-                        imageLayer.getTranslationX());
-                ZipEntry entry = new ZipEntry(String.format("data/%d.png", i));
-                zos.putNextEntry(entry);
-                BufferedImage image = imageLayer.getImage();
-                ImageIO.write(image, "PNG", zos);
-                zos.closeEntry();
-            }
+            stackXML += writeLayer(zos, i, layer);
         }
 
         if(addMergedImage) {
@@ -91,8 +76,9 @@ public class OpenRaster {
             zos.closeEntry();
         }
 
-        // write the stack.xml
         stackXML += "</stack>\n</image>";
+
+        // write the stack.xml file
         zos.putNextEntry(new ZipEntry("stack.xml"));
         zos.write(stackXML.getBytes("UTF-8"));
         zos.closeEntry();
@@ -102,6 +88,28 @@ public class OpenRaster {
         zos.write("image/openraster".getBytes("UTF-8"));
         zos.closeEntry();
         zos.close();
+    }
+
+    private static String writeLayer(ZipOutputStream zos, int layerIndex, Layer layer) throws IOException {
+        if (!(layer instanceof ImageLayer)) {
+            return ""; // currently only image layers are supported
+        }
+        ImageLayer imageLayer = (ImageLayer) layer;
+
+        String stackXML = String.format(Locale.ENGLISH, "<layer name=\"%s\" visibility=\"%s\" composite-op=\"%s\" opacity=\"%f\" src=\"data/%d.png\" x=\"%d\" y=\"%d\"/>\n",
+                layer.getName(),
+                layer.getVisibilityAsORAString(),
+                layer.getBlendingMode().toSVGName(),
+                layer.getOpacity(),
+                layerIndex,
+                imageLayer.getTranslationX(),
+                imageLayer.getTranslationX());
+        ZipEntry entry = new ZipEntry(String.format("data/%d.png", layerIndex));
+        zos.putNextEntry(entry);
+        BufferedImage image = imageLayer.getImage();
+        ImageIO.write(image, "PNG", zos);
+        zos.closeEntry();
+        return stackXML;
     }
 
     public static Composition readOpenRaster(File file) throws IOException, ParserConfigurationException, SAXException {

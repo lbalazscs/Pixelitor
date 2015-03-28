@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,6 @@ import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
@@ -38,7 +37,7 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
     private final ImagePositionPanel imagePositionPanel;
     private final ImagePositionParam model;
     private final BufferedImage thumb;
-    private static final int CONTROL_SIZE = 5;
+    private static final int CENTRAL_SQUARE_SIZE = 5;
 
     public ImagePositionSelector(ImagePositionPanel imagePositionPanel, ImagePositionParam model, int size) {
         this.imagePositionPanel = imagePositionPanel;
@@ -54,40 +53,42 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
 
     @Override
     public void paintComponent(Graphics g) {
-        int totalWidth = thumb.getWidth();
-        int totalHeight = thumb.getHeight();
+        int thumbWidth = thumb.getWidth();
+        int thumbHeight = thumb.getHeight() - 1;
 
         g.drawImage(thumb, 0, 0, null);
 
         Graphics2D g2 = (Graphics2D) g;
-        int currentX = (int) (model.getRelativeX() * totalWidth);
-        int currentY = (int) (model.getRelativeY() * totalHeight);
+        int x = (int) (model.getRelativeX() * thumbWidth);
+        int y = (int) (model.getRelativeY() * thumbHeight);
 
-        // lines
-        g.setColor(Color.BLACK);
-        g.drawLine(currentX + 1, 0, currentX + 1, totalHeight - 1); // west
-        g.drawLine(currentX - 1, 0, currentX - 1, totalHeight - 1); // east
+        drawLines(g2, x, y, thumbWidth, thumbHeight);
 
-        if (currentY <= totalHeight) {
-            Line2D.Float horizontalLineNorth = new Line2D.Float(0, currentY - 1, totalWidth, currentY - 1);
-            Line2D.Float horizontalLineSouth = new Line2D.Float(0, currentY + 1, totalWidth, currentY + 1);
-            g2.draw(horizontalLineNorth);
-            g2.draw(horizontalLineSouth);
+        drawCentralSquare(g2, x, y);
+    }
+
+    private static void drawLines(Graphics2D g2, int x, int y, int width, int height) {
+        g2.setColor(Color.BLACK);
+        g2.drawLine(x + 1, 0, x + 1, height); // vertical west
+        g2.drawLine(x - 1, 0, x - 1, height); // vertical east
+
+        if(y < height) {
+            g2.drawLine(0, y - 1, width, y - 1); // horizontal north
+            g2.drawLine(0, y + 1, width, y + 1); // horizontal south
         }
 
-        g.setColor(Color.WHITE);
-        Line2D.Float verticalLine = new Line2D.Float(currentX, 0, currentX, totalHeight);
-        g2.draw(verticalLine);
-        if (currentY <= totalHeight) {
-            Line2D.Float horizontalLine = new Line2D.Float(0, currentY, totalWidth, currentY);
-            g2.draw(horizontalLine);
+        g2.setColor(Color.WHITE);
+        g2.drawLine(x, 0, x, height); // vertical
+        if(y < height) {
+            g2.drawLine(0, y, width, y); // horizontal
         }
+    }
 
-        // rectangle in the middle
-        g.setColor(Color.BLACK);
-        g2.draw(new Rectangle2D.Float(currentX - CONTROL_SIZE, currentY - CONTROL_SIZE, CONTROL_SIZE * 2, CONTROL_SIZE * 2));
-        g.setColor(Color.WHITE);
-        g2.fill(new Rectangle2D.Float(currentX - CONTROL_SIZE + 1, currentY - CONTROL_SIZE + 1, CONTROL_SIZE * 2 - 1, CONTROL_SIZE * 2 - 1));
+    private static void drawCentralSquare(Graphics2D g2, int x, int y) {
+        g2.setColor(Color.BLACK);
+        g2.draw(new Rectangle2D.Float(x - CENTRAL_SQUARE_SIZE, y - CENTRAL_SQUARE_SIZE, CENTRAL_SQUARE_SIZE * 2, CENTRAL_SQUARE_SIZE * 2));
+        g2.setColor(Color.WHITE);
+        g2.fill(new Rectangle2D.Float(x - CENTRAL_SQUARE_SIZE + 1, y - CENTRAL_SQUARE_SIZE + 1, CENTRAL_SQUARE_SIZE * 2 - 1, CENTRAL_SQUARE_SIZE * 2 - 1));
     }
 
     @Override

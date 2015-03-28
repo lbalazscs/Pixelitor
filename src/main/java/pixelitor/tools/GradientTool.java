@@ -134,21 +134,18 @@ public class GradientTool extends Tool {
         return false;
     }
 
-    public static void drawGradient(ImageLayer layer, GradientType type, GradientColorType colorType, MultipleGradientPaint.CycleMethod cycleMethod, Composite composite, UserDrag userDrag, boolean invert) {
+    public static void drawGradient(ImageLayer layer, GradientType gradientType, GradientColorType colorType, MultipleGradientPaint.CycleMethod cycleMethod, Composite composite, UserDrag userDrag, boolean invert) {
         if (userDrag.isClick()) {
             return;
         }
 
         TmpDrawingLayer tmpDrawingLayer = layer.createTmpDrawingLayer(composite, true);
-
         Graphics2D g = tmpDrawingLayer.getGraphics();
-
         // repeated gradients are still jaggy
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         Color[] colors = {colorType.getStartColor(invert), colorType.getEndColor(invert)};
-
-        Paint gradient = type.getGradient(userDrag, colors, cycleMethod);
+        Paint gradient = gradientType.getGradient(userDrag, colors, cycleMethod);
 
         g.setPaint(gradient);
 

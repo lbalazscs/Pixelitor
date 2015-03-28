@@ -34,6 +34,12 @@ class SystemInfoPanel extends JPanel {
         addMemoryProperties();
     }
 
+    private void addSystemProperties() {
+        gridBagHelper.addTwoLabels("Java Version:", System.getProperty("java.version"));
+        gridBagHelper.addTwoLabels("Java VM:", System.getProperty("java.vm.name"));
+        gridBagHelper.addTwoLabels("OS:", System.getProperty("os.name"));
+    }
+
     private void addMemoryProperties() {
         MemoryInfo memoryInfo = new MemoryInfo();
         long freeMemoryMB = memoryInfo.getFreeMemoryMB();
@@ -41,27 +47,9 @@ class SystemInfoPanel extends JPanel {
         long totalMemoryMB = memoryInfo.getTotalMemoryMB();
         long usedMemoryMB = memoryInfo.getUsedMemoryMB();
 
-        gridBagHelper.addLabel("Allocated Memory:", 0, 3);
-        gridBagHelper.addControl(new JLabel(totalMemoryMB + " megabytes"));
-
-        gridBagHelper.addLabel("Used Memory:", 0, 4);
-        gridBagHelper.addControl(new JLabel(usedMemoryMB + " megabytes"));
-
-        gridBagHelper.addLabel("Free Memory:", 0, 5);
-        gridBagHelper.addControl(new JLabel(freeMemoryMB + " megabytes"));
-
-        gridBagHelper.addLabel("Max Memory:", 0, 6);
-        gridBagHelper.addControl(new JLabel(maxMemoryMB + " megabytes"));
-    }
-
-    private void addSystemProperties() {
-        gridBagHelper.addLabel("Java Version:", 0, 0);
-        gridBagHelper.addControl(new JLabel(System.getProperty("java.version")));
-
-        gridBagHelper.addLabel("Java VM:", 0, 1);
-        gridBagHelper.addControl(new JLabel(System.getProperty("java.vm.name")));
-
-        gridBagHelper.addLabel("OS:", 0, 2);
-        gridBagHelper.addControl(new JLabel(System.getProperty("os.name")));
+        gridBagHelper.addTwoLabels("Allocated Memory:", totalMemoryMB + " megabytes");
+        gridBagHelper.addTwoLabels("Used Memory:", usedMemoryMB + " megabytes");
+        gridBagHelper.addTwoLabels("Free Memory:", freeMemoryMB + " megabytes");
+        gridBagHelper.addTwoLabels("Max Memory:", maxMemoryMB + " megabytes");
     }
 }

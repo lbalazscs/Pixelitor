@@ -175,10 +175,10 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
         strikeThroughCB.addActionListener(this);
         gridBagHelper.addControl(strikeThroughCB);
 
-//        gridBagHelper.addLabel("Kerning:", 8, 2);
+//        gbHelper.addLabel("Kerning:", 8, 2);
 //        kerningCB = new JCheckBox();
 //        kerningCB.addActionListener(this);
-//        gridBagHelper.addControl(kerningCB);
+//        gbHelper.addControl(kerningCB);
 
         return fontPanel;
     }

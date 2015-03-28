@@ -44,18 +44,14 @@ class OpenSaveDirsPanel extends ValidatedForm {
         setLayout(new GridBagLayout());
         GridBagHelper gridBagHelper = new GridBagHelper(this);
 
-        gridBagHelper.addLabel("Input Folder:", 0, 0);
-        gridBagHelper.addControl(inputChooser.getNameTF());
-        gridBagHelper.addNextControl(inputChooser.getBrowseButton());
+        gridBagHelper.addLabelWithTwoControls("Input Folder:",
+                inputChooser.getNameTF(), inputChooser.getBrowseButton());
 
-        gridBagHelper.addLabel("Output Folder:", 0, 1);
-        gridBagHelper.addControl(outputChooser.getNameTF());
-        gridBagHelper.addNextControl(outputChooser.getBrowseButton());
+        gridBagHelper.addLabelWithTwoControls("Output Folder:",
+                outputChooser.getNameTF(), outputChooser.getBrowseButton());
 
-        gridBagHelper.addLabel("Output Format:", 0, 2);
         outputFormatSelector = new OutputFormatSelector();
-
-        gridBagHelper.addControlNoFill(outputFormatSelector.getFormatCombo());
+        gridBagHelper.addLabelWithControlNoFill("Output Format:", outputFormatSelector.getFormatCombo());
     }
 
     private OutputFormat getSelectedFormat() {

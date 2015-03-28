@@ -71,25 +71,21 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
         JPanel p = new JPanel();
         p.setLayout(new GridBagLayout());
 
-        GridBagHelper gridBagHelper = new GridBagHelper(p);
+        GridBagHelper gbHelper = new GridBagHelper(p);
 
-        gridBagHelper.addLabel("Width:", 0, 0);
         widthTextField = new JTextField(NR_OF_COLUMNS);
         widthTextField.setName("widthTF");
         widthTextField.addKeyListener(this);
         widthTextField.setText(String.valueOf(oldWidth));
-        gridBagHelper.addControl(widthTextField);
         pixelPercentChooser1 = new JComboBox<>(comboBoxModel);
-        gridBagHelper.addNextControl(pixelPercentChooser1);
+        gbHelper.addLabelWithTwoControls("Width:", widthTextField, pixelPercentChooser1);
 
-        gridBagHelper.addLabel("Height:", 0, 1);
         heightTextField = new JTextField(NR_OF_COLUMNS);
         heightTextField.setName("heightTF");
         heightTextField.setText(String.valueOf(oldHeight));
-        gridBagHelper.addControl(heightTextField);
         heightTextField.addKeyListener(this);
         JComboBox<String> pixelPercentChooser2 = new JComboBox<>(comboBoxModel);
-        gridBagHelper.addNextControl(pixelPercentChooser2);
+        gbHelper.addLabelWithTwoControls("Height:", heightTextField, pixelPercentChooser2);
 
         p.setBorder(BorderFactory.createTitledBorder("Resize from " + oldWidth + 'x' + oldHeight));
         Box verticalBox = Box.createVerticalBox();

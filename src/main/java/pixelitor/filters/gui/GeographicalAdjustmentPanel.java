@@ -42,25 +42,24 @@ public class GeographicalAdjustmentPanel extends ParametrizedAdjustPanel {
         JPanel controlPanel = new JPanel(new BorderLayout(5, 5));
 
         // a panel for parameters like "Edge Action", "Interpolation"
-        JPanel nonGeoControls = new JPanel();
+        JPanel nonGeoPanel = new JPanel();
 
-        GridLayout layout;
-        if(addLabels) {
-            layout = new GridLayout(2, 4, 5, 5);
-        } else {
-            layout = new GridLayout(2, 2, 5, 5);
-        }
-        // the central panel
-        JPanel geoPanel = new JPanel(layout);
+        // the central panel, with max 4 controls
+        JPanel geoPanel = createGeoPanel();
 
         // A panel for global actions like "Randomize Settings", "Reset All"
-        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        if(showOriginal) {
-            JCheckBox showOriginalCB = new JCheckBox("Show Original");
-            showOriginalCB.addActionListener(e -> Utils.setShowOriginal(showOriginalCB.isSelected()));
-            buttonsPanel.add(showOriginalCB);
-        }
+        JPanel buttonsPanel = createButtonsPanel(showOriginal);
 
+        addParams(params, geoPanel, nonGeoPanel, buttonsPanel);
+
+        controlPanel.add(geoPanel, BorderLayout.CENTER);
+        controlPanel.add(nonGeoPanel, BorderLayout.SOUTH);
+
+        add(controlPanel, BorderLayout.CENTER);
+        add(buttonsPanel, BorderLayout.SOUTH);
+    }
+
+    private void addParams(ParamSet params, JPanel geoPanel, JPanel nonGeoPanel, JPanel buttonsPanel) {
         int added = 0;
         for(GUIParam param : params) {
             JComponent control = param.createGUI();
@@ -69,23 +68,37 @@ public class GeographicalAdjustmentPanel extends ParametrizedAdjustPanel {
                 buttonsPanel.add(control);
             } else {
                 String labelText = param.getName() + ':';
-                if(added < 4) {
+                if (added < 4) { // the first 4 are added into the 4 "geographical" positions...
                     if(addLabels) {
                         geoPanel.add(new JLabel(labelText));
                     }
                     geoPanel.add(control);
-                } else {
-                    nonGeoControls.add(new JLabel(labelText)); // these always need a label
-                    nonGeoControls.add(control);
+                } else { // ...and the rest into "non geographical" positions.
+                    nonGeoPanel.add(new JLabel(labelText)); // these always need a label
+                    nonGeoPanel.add(control);
                 }
-
             }
             added++;
         }
-        controlPanel.add(geoPanel, BorderLayout.CENTER);
-        controlPanel.add(nonGeoControls, BorderLayout.SOUTH);
+    }
 
-        add(controlPanel, BorderLayout.CENTER);
-        add(buttonsPanel, BorderLayout.SOUTH);
+    private JPanel createGeoPanel() {
+        GridLayout layout;
+        if (addLabels) {
+            layout = new GridLayout(2, 4, 5, 5);
+        } else {
+            layout = new GridLayout(2, 2, 5, 5);
+        }
+        return new JPanel(layout);
+    }
+
+    private static JPanel createButtonsPanel(boolean showOriginal) {
+        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        if (showOriginal) {
+            JCheckBox showOriginalCB = new JCheckBox("Show Original");
+            showOriginalCB.addActionListener(e -> Utils.setShowOriginal(showOriginalCB.isSelected()));
+            buttonsPanel.add(showOriginalCB);
+        }
+        return buttonsPanel;
     }
 }

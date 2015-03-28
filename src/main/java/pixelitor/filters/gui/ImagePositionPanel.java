@@ -54,8 +54,16 @@ public class ImagePositionPanel extends JPanel implements ParamGUI {
         verticalBox.add(ySlider);
         add(verticalBox, BorderLayout.CENTER);
 
-        // if one of the sliders was moved by the users, update the
-        // image position selector and run the filter
+        Dimension preferredSize = getPreferredSize();
+        Dimension sliderPreferredSize = xSlider.getPreferredSize();
+        setPreferredSize(new Dimension(sliderPreferredSize.width, preferredSize.height));
+
+        linkSliderChangesToModel(model);
+    }
+
+    // if one of the sliders was moved by the users, update the
+    // image position selector and run the filter
+    private void linkSliderChangesToModel(ImagePositionParam model) {
         xSliderModel.addChangeListener(e -> {
             if (slidersMovedByUser) {
                 model.setRelativeX(xSliderModel.getValue() / 100.0f);
@@ -74,10 +82,6 @@ public class ImagePositionPanel extends JPanel implements ParamGUI {
                 }
             }
         });
-
-        Dimension preferredSize = getPreferredSize();
-        Dimension sliderPreferredSize = xSlider.getPreferredSize();
-        setPreferredSize(new Dimension(sliderPreferredSize.width, preferredSize.height));
     }
 
     /**

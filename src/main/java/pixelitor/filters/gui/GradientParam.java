@@ -26,6 +26,7 @@ import javax.swing.*;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.beans.PropertyChangeEvent;
 
 /**
  * Represents a gradient. (Note that unlike other GUIParam implementations,
@@ -60,26 +61,29 @@ public class GradientParam extends AbstractGUIParam {
     public void createGradientSlider(float[] defaultThumbPositions, Color[] defaultColors) {
         gradientSlider = new GradientSlider(GradientSlider.HORIZONTAL, defaultThumbPositions, defaultColors);
         gradientSlider.addPropertyChangeListener(evt -> {
-            if (evt.getPropertyName().equals(GRADIENT_SLIDER_USE_BEVEL)) {
-                return;
-            }
-            if (!dontTrigger) {
-                if (!gradientSlider.isValueAdjusting()) {
-                    if (adjustmentListener != null) {
-                        String propertyName = evt.getPropertyName();
-                        if (!"ancestor".equals(propertyName)) {
-                            if (!"selected thumb".equals(propertyName)) {
-                                adjustmentListener.paramAdjusted();
-                            }
-                        }
-                    }
-                }
+            if(shouldStartFilter(evt)) {
+                adjustmentListener.paramAdjusted();
             }
         });
         gradientSlider.putClientProperty(GRADIENT_SLIDER_USE_BEVEL, "true");
 
         // if there other controls in the dialog, they will determine the horizontal size
         gradientSlider.setPreferredSize(new Dimension(250, 30));
+    }
+
+    private boolean shouldStartFilter(PropertyChangeEvent evt) {
+        if (evt.getPropertyName().equals(GRADIENT_SLIDER_USE_BEVEL)) {
+            return false;
+        }
+        if (!dontTrigger && !gradientSlider.isValueAdjusting() && adjustmentListener != null) {
+            String propertyName = evt.getPropertyName();
+            if (!"ancestor".equals(propertyName)) {
+                if (!"selected thumb".equals(propertyName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -116,29 +120,42 @@ public class GradientParam extends AbstractGUIParam {
 
     @Override
     public boolean isSetToDefault() {
-        Color[] colors = (Color[]) gradientSlider.getValues();
-        if (colors.length != defaultColors.length) {
+        if (areThumbPositionsChanged()) {
             return false;
         }
 
-        float[] thumbPositions = gradientSlider.getThumbPositions();
-        for (int i = 0; i < thumbPositions.length; i++) {
-            float thumbPosition = thumbPositions[i];
-            float defaultThumbPosition = defaultThumbPositions[i];
-            if (thumbPosition != defaultThumbPosition) {
-                return false;
-            }
-        }
-
-        for (int i = 0; i < defaultColors.length; i++) {
-            Color defaultColor = defaultColors[i];
-            Color actualColor = colors[i];
-            if (!defaultColor.equals(actualColor)) {
-                return false;
-            }
+        if (areColorsChanged()) {
+            return false;
         }
 
         return true;
+    }
+
+    private boolean areThumbPositionsChanged() {
+        float[] thumbPositions = gradientSlider.getThumbPositions();
+        if(thumbPositions.length != defaultThumbPositions.length) {
+            return true;
+        }
+        for (int i = 0; i < thumbPositions.length; i++) {
+            if (thumbPositions[i] != defaultThumbPositions[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean areColorsChanged() {
+        Color[] colors = (Color[]) gradientSlider.getValues();
+        if (colors.length != defaultColors.length) {
+            return true;
+        }
+
+        for (int i = 0; i < defaultColors.length; i++) {
+            if (!defaultColors[i].equals(colors[i])) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -186,24 +203,34 @@ public class GradientParam extends AbstractGUIParam {
             // This will not work if the number of thumbs changes
             GState grEndState = (GState) endState;
 
+            float[] interpolatedPositions = getInterpolatedPositions((float) progress, grEndState);
+
+            Color[] interpolatedColors = getInterpolatedColors((float) progress, grEndState);
+
+            return new GState(interpolatedPositions, interpolatedColors);
+        }
+
+        private float[] getInterpolatedPositions(float progress, GState grEndState) {
             float[] interpolatedPositions = new float[thumbPositions.length];
             for (int i = 0; i < thumbPositions.length; i++) {
                 float initial = thumbPositions[i];
                 float end = grEndState.thumbPositions[i];
-                float interpolated = ImageMath.lerp((float)progress, initial, end);
+                float interpolated = ImageMath.lerp(progress, initial, end);
                 interpolatedPositions[i] = interpolated;
             }
+            return interpolatedPositions;
+        }
 
+        private Color[] getInterpolatedColors(float progress, GState grEndState) {
             Color[] interpolatedColors = new Color[colors.length];
             for (int i = 0; i < colors.length; i++) {
                 Color initial = colors[i];
                 Color end = grEndState.colors[i];
                 // TODO interpolate in HSB space?
-                Color interpolated = new Color(ImageMath.mixColors((float)progress, initial.getRGB(), end.getRGB()));
+                Color interpolated = new Color(ImageMath.mixColors(progress, initial.getRGB(), end.getRGB()));
                 interpolatedColors[i] = interpolated;
             }
-
-            return new GState(interpolatedPositions, interpolatedColors);
+            return interpolatedColors;
         }
     }
 

@@ -44,22 +44,30 @@ public class GlobalKeyboardWatch {
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(e -> {
             int id = e.getID();
             if (id == KeyEvent.KEY_PRESSED) {
-                int keyCode = e.getKeyCode();
-                if (showHideAllForTab && keyCode == KeyEvent.VK_TAB) {
-                    ShowHideAllAction.INSTANCE.actionPerformed(null);
-                } else if (keyCode == KeyEvent.VK_SPACE) {
-                    Tools.getCurrentTool().spacePressed();
-                    spaceDown = true;
-                }
+                keyPressed(e);
             } else if (id == KeyEvent.KEY_RELEASED) {
-                int keyCode = e.getKeyCode();
-                if (keyCode == KeyEvent.VK_SPACE) {
-                    Tools.getCurrentTool().spaceReleased();
-                    spaceDown = false;
-                }
+                keyReleased(e);
             }
             return false;
         });
+    }
+
+    private static void keyPressed(KeyEvent e) {
+        int keyCode = e.getKeyCode();
+        if (showHideAllForTab && keyCode == KeyEvent.VK_TAB) {
+            ShowHideAllAction.INSTANCE.actionPerformed(null);
+        } else if (keyCode == KeyEvent.VK_SPACE) {
+            Tools.getCurrentTool().spacePressed();
+            spaceDown = true;
+        }
+    }
+
+    private static void keyReleased(KeyEvent e) {
+        int keyCode = e.getKeyCode();
+        if (keyCode == KeyEvent.VK_SPACE) {
+            Tools.getCurrentTool().spaceReleased();
+            spaceDown = false;
+        }
     }
 
     public static boolean isSpaceDown() {

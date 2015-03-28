@@ -36,6 +36,7 @@ import org.assertj.swing.fixture.JToggleButtonFixture;
 import org.assertj.swing.launcher.ApplicationLauncher;
 import org.fest.util.Files;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import pixelitor.io.FileChoosers;
 import pixelitor.layers.LayerButton;
@@ -61,6 +62,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+@Ignore
 public class AssertJTest {
     public static final File BASE_TESTING_DIR = new File("C:\\pix_tests");
     public static final File INPUT_DIR = new File(BASE_TESTING_DIR, "input");
