@@ -57,13 +57,12 @@ public class PasteAction extends AbstractAction {
                 } else {
                     // if a layer was pasted from Pixelitor,
                     // then we get back here the same object reference
-                    WritableRaster raster = pastedImage.getRaster();
-                    int minX = raster.getMinX();
-                    int minY = raster.getMinY();
-
                     try {
                         pastedImage = ImageUtils.copyImage(pastedImage);
                     } catch (IllegalArgumentException ex) {
+                        WritableRaster raster = pastedImage.getRaster();
+                        int minX = raster.getMinX();
+                        int minY = raster.getMinY();
                         System.out.println("PasteAction.actionPerformed minX = " + minX + ", minY = " + minY);
                         throw ex;
                     }

@@ -36,13 +36,13 @@ public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
     protected ParamSet paramSet;
 
     private BooleanParam showAffectedAreaParam = null;
-    private final boolean showOriginal;
+    private final boolean addShowOriginal;
     private final boolean hasAffectedAreaShapeParam;
     private Shape[] affectedAreaShapes;
 
-    protected FilterWithParametrizedGUI(String name, boolean showOriginal, boolean hasAffectedAreaShape) {
+    protected FilterWithParametrizedGUI(String name, boolean addShowOriginal, boolean hasAffectedAreaShape) {
         super(name);
-        this.showOriginal = showOriginal;
+        this.addShowOriginal = addShowOriginal;
         this.hasAffectedAreaShapeParam = hasAffectedAreaShape;
         if(hasAffectedAreaShapeParam) {
             showAffectedAreaParam = new BooleanParam("Show Affected Area", false);
@@ -56,7 +56,7 @@ public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
 
     @Override
     public AdjustPanel createAdjustPanel() {
-        return new ParametrizedAdjustPanel(this, showOriginal);
+        return new ParametrizedAdjustPanel(this, addShowOriginal);
     }
 
     @Override

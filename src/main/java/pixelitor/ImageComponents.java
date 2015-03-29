@@ -161,7 +161,7 @@ public class ImageComponents {
                 throw new IllegalStateException("cannot activate null imageComponent");
             }
             InternalImageFrame internalFrame = activeImageComponent.getInternalFrame();
-            PixelitorWindow.getInstance().activateInternalImageFrame(internalFrame);
+            Desktop.INSTANCE.activateInternalImageFrame(internalFrame);
             newActiveComponent.onActivation();
         }
     }

@@ -92,23 +92,23 @@ public final class SelectionActions {
         return cropAction.isEnabled();
     }
 
-    public static AbstractAction getCropAction() {
+    public static Action getCropAction() {
         return cropAction;
     }
 
-    public static AbstractAction getTraceWithBrush() {
+    public static Action getTraceWithBrush() {
         return traceWithBrush;
     }
 
-    public static AbstractAction getTraceWithEraser() {
+    public static Action getTraceWithEraser() {
         return traceWithEraser;
     }
 
-    public static AbstractAction getDeselectAction() {
+    public static Action getDeselectAction() {
         return deselectAction;
     }
 
-    public static AbstractAction getInvertSelectionAction() {
+    public static Action getInvertSelectionAction() {
         return invertSelectionAction;
     }
 

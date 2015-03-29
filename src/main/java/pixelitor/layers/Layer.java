@@ -30,6 +30,7 @@ import pixelitor.utils.HistogramsPanel;
 import java.awt.Color;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
+import java.awt.Paint;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -229,7 +230,7 @@ public abstract class Layer implements Serializable {
 //        Color hideColor = new Color(255, 255, 255, 0);
         Color showColor = Color.WHITE;
         Color hideColor = Color.BLACK;
-        GradientPaint mask = new GradientPaint(0, 0,
+        Paint mask = new GradientPaint(0, 0,
                 showColor,
                 0, canvasHeight, hideColor);
         g.setPaint(mask);

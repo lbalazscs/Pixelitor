@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.gui;
 
 import javax.swing.*;
@@ -40,10 +41,9 @@ public class AngleSelectorComponent extends AbstractAngleSelectorComponent {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         g.setColor(Color.BLACK);
-        Ellipse2D.Float ellipse = new Ellipse2D.Float(0, 0, SIZE, SIZE);
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.draw(ellipse);
+        g2.draw(new Ellipse2D.Float(0, 0, SIZE, SIZE));
 
         double angle = model.getValueInRadians();
 

@@ -69,8 +69,7 @@ public class UpdatesCheck {
 
         int userAnswer = JOptionPane.showConfirmDialog(frame, msg, "Pixelitor is not up to date", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
         if(userAnswer == JOptionPane.OK_OPTION) {
-            OpenInBrowserAction browserAction = new OpenInBrowserAction(null, AboutDialog.HOME_PAGE);
-            browserAction.actionPerformed(null);
+            new OpenInBrowserAction(null, AboutDialog.HOME_PAGE).actionPerformed(null);
         }
     }
 

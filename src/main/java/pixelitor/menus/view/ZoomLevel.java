@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,15 +8,16 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.menus.view;
 
 import java.awt.BasicStroke;
+import java.awt.Stroke;
 import java.util.Random;
 
 /**
@@ -334,14 +335,14 @@ public enum ZoomLevel {
         return menuItem;
     }
 
-    public BasicStroke getOuterGeometryStroke() {
+    public Stroke getOuterGeometryStroke() {
         if (outerGeometryStroke == null) {
             outerGeometryStroke = new BasicStroke((float) (300.0f / getPercentValue()));
         }
         return outerGeometryStroke;
     }
 
-    public BasicStroke getInnerGeometryStroke() {
+    public Stroke getInnerGeometryStroke() {
         if (innerGeometryStroke == null) {
             innerGeometryStroke = new BasicStroke((float) (100.0f / getPercentValue()));
         }

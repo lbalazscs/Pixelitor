@@ -17,7 +17,6 @@
 
 package pixelitor;
 
-import pixelitor.io.DropListener;
 import pixelitor.layers.LayersContainer;
 import pixelitor.menus.MenuBar;
 import pixelitor.tools.FgBgColorSelector;
@@ -30,14 +29,10 @@ import pixelitor.utils.HistogramsPanel;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Image;
-import java.awt.dnd.DropTarget;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.beans.PropertyVetoException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,40 +41,53 @@ import java.util.List;
  * The main application window.
  */
 public class PixelitorWindow extends JFrame {
-    private final JDesktopPane desktopPane;
-    private final JLabel statusBar;
-    private final HistogramsPanel histogramsPanel;
-    private final Box verticalBoxEast;
-    private final Box verticalBoxWest;
-    private final ToolsPanel toolsPanel;
-    private static final int CASCADE_HORIZONTAL_SHIFT = 15;
-    private static final int CASCADE_VERTICAL_SHIFT = 25;
+    private JLabel statusBar;
+    private HistogramsPanel histogramsPanel;
+    private Box verticalBoxEast;
+    private Box verticalBoxWest;
+    private ToolsPanel toolsPanel;
 
     private PixelitorWindow() {
         super(Build.getPixelitorWindowFixTitle());
 
+        setupWindowClosing();
+
+        addMenus();
+        addDesktopArea();
+        addLayersAndHistograms();
+        addToolsPanel();
+        addStatusBar();
+
+        setupFrameIcons();
+
+        GlobalKeyboardWatch.init();
+
+        AppPreferences.loadFramePosition(this);
+        setVisible(true);
+    }
+
+    private void setupWindowClosing() {
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         addWindowListener(
                 new WindowAdapter() {
                     @Override
                     public void windowClosing(WindowEvent we) {
-                        AppPreferences.exitApp();
+                        AppLogic.exitApp(PixelitorWindow.this);
                     }
                 }
         );
+    }
 
+    private void addMenus() {
         MenuBar menuBar = new MenuBar(this);
         setJMenuBar(menuBar);
+    }
 
-        desktopPane = new JDesktopPane();
-        GlobalKeyboardWatch.setAlwaysVisibleComponent(desktopPane);
-        GlobalKeyboardWatch.registerBrushSizeActions();
+    private void addDesktopArea() {
+        add(Desktop.INSTANCE.getDesktopPane(), BorderLayout.CENTER);
+    }
 
-        new DropTarget(desktopPane, new DropListener());
-
-        desktopPane.setBackground(Color.GRAY);
-        add(desktopPane, BorderLayout.CENTER);
-
+    private void addLayersAndHistograms() {
         verticalBoxEast = Box.createVerticalBox();
         histogramsPanel = HistogramsPanel.INSTANCE;
         ImageComponents.addImageSwitchListener(histogramsPanel);
@@ -92,7 +100,9 @@ public class PixelitorWindow extends JFrame {
         }
 
         add(verticalBoxEast, BorderLayout.EAST);
+    }
 
+    private void addToolsPanel() {
         verticalBoxWest = Box.createVerticalBox();
         toolsPanel = new ToolsPanel();
 
@@ -103,14 +113,18 @@ public class PixelitorWindow extends JFrame {
         }
 
         add(verticalBoxWest, BorderLayout.WEST);
+    }
 
+    private void addStatusBar() {
         statusBar = new JLabel("Pixelitor started");
         statusBar.setBorder(BorderFactory.createEtchedBorder());
 
         if (AppPreferences.WorkSpace.getStatusBarVisibility()) {
             add(statusBar, BorderLayout.SOUTH);
         }
+    }
 
+    private void setupFrameIcons() {
         URL imgURL32 = getClass().getResource("/images/pixelitor_icon32.png");
         URL imgURL48 = getClass().getResource("/images/pixelitor_icon48.png");
         URL imgURL256 = getClass().getResource("/images/pixelitor_icon256.png");
@@ -126,18 +140,6 @@ public class PixelitorWindow extends JFrame {
 //            JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
             Dialogs.showErrorDialog(this, "Error", message);
         }
-
-        GlobalKeyboardWatch.init();
-
-        AppPreferences.loadFramePosition(this);
-        setVisible(true);
-    }
-
-    public void activateInternalImageFrame(InternalImageFrame frame) {
-        if (frame == null) {
-            throw new IllegalArgumentException("frame is null");
-        }
-        desktopPane.getDesktopManager().activateFrame(frame);
     }
 
     public static PixelitorWindow getInstance() {
@@ -161,102 +163,8 @@ public class PixelitorWindow extends JFrame {
             ImageComponents.setActiveImageComponent(ic, false);
             comp.addLayersToGUI();
 
-            addNewImageComponent(ic);
+            Desktop.INSTANCE.addNewImageComponent(ic);
         } catch (Exception e) {
-            Dialogs.showExceptionDialog(e);
-        }
-    }
-
-    public void cascadeWindows() {
-        List<ImageComponent> imageComponents = ImageComponents.getImageComponents();
-        int locationX = 0;
-        int locationY = 0;
-        for (ImageComponent ic : imageComponents) {
-            InternalImageFrame internalFrame = ic.getInternalFrame();
-            internalFrame.setLocation(locationX, locationY);
-            internalFrame.setToNaturalSize(locationX, locationY);
-            try {
-                internalFrame.setIcon(false);
-                internalFrame.setMaximum(false);
-            } catch (PropertyVetoException e) {
-                e.printStackTrace();
-            }
-
-            locationX += CASCADE_HORIZONTAL_SHIFT;
-            locationY += CASCADE_VERTICAL_SHIFT;
-
-            // wrap
-            int maxWidth = desktopPane.getWidth() - CASCADE_HORIZONTAL_SHIFT;
-            int maxHeight = desktopPane.getHeight() - CASCADE_VERTICAL_SHIFT;
-
-            if (locationX > maxWidth) {
-                locationX = 0;
-            }
-            if (locationY > maxHeight) {
-                locationY = 0;
-            }
-        }
-    }
-
-    public void tileWindows() {
-        List<ImageComponent> imageComponents = ImageComponents.getImageComponents();
-        int numComponents = imageComponents.size();
-
-        int rows = (int) Math.sqrt(numComponents);
-        int cols = numComponents / rows;
-        int extra = numComponents % rows;
-
-        int width = desktopPane.getWidth() / cols;
-        int height = desktopPane.getHeight() / rows;
-        int currentRow = 0;
-        int currentColumn = 0;
-
-        for (ImageComponent ic : imageComponents) {
-            InternalImageFrame frame = ic.getInternalFrame();
-            try {
-                frame.setIcon(false);
-                frame.setMaximum(false);
-            } catch (PropertyVetoException e) {
-                e.printStackTrace();
-            }
-            frame.reshape(currentColumn * width, currentRow * height, width, height);
-            currentRow++;
-            if (currentRow == rows) {
-                currentRow = 0;
-                currentColumn++;
-                if (currentColumn == cols - extra) {
-                    rows++;
-                    height = desktopPane.getHeight() / rows;
-                }
-            }
-        }
-    }
-
-    private void addNewImageComponent(ImageComponent ic) {
-        int nrOfOpenImages = ImageComponents.getNrOfOpenImages();
-
-        // called deliberately after nrOfOpenImages is set
-        ImageComponents.addImageComponent(ic);
-
-        int locationX = CASCADE_HORIZONTAL_SHIFT * nrOfOpenImages;
-        int locationY = CASCADE_VERTICAL_SHIFT * nrOfOpenImages;
-
-        int maxWidth = desktopPane.getWidth() - CASCADE_HORIZONTAL_SHIFT;
-        locationX %= maxWidth;
-
-        int maxHeight = desktopPane.getHeight() - CASCADE_VERTICAL_SHIFT;
-        locationY %= maxHeight;
-
-        InternalImageFrame internalFrame = new InternalImageFrame(ImageComponents.getActiveImageComponent(), locationX, locationY);
-
-        ImageComponents.getActiveImageComponent().setInternalFrame(internalFrame);
-
-        desktopPane.add(internalFrame);
-        try {
-            internalFrame.setSelected(true);
-            desktopPane.getDesktopManager().activateFrame(internalFrame);
-            ImageComponents.newImageOpened();
-        } catch (PropertyVetoException e) {
             Dialogs.showExceptionDialog(e);
         }
     }
@@ -326,10 +234,6 @@ public class PixelitorWindow extends JFrame {
 
     public boolean areToolsShown() {
         return (toolsPanel.getParent() != null);
-    }
-
-    public Dimension getDesktopSize() {
-        return desktopPane.getSize();
     }
 
     /**

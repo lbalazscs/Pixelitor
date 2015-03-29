@@ -264,7 +264,7 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
                     }
                 }, "Randomizes settings and normalizes brightness");
         // insert it right after "Randomize Settings"
-        paramSet.insertActionParam(randomizeAndNormalize, 11);
+        paramSet.insertParam(randomizeAndNormalize, 11);
     }
 
     private static void normalizeChannel(RangeParam fromRed, RangeParam fromGreen, RangeParam fromBlue) {

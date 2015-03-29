@@ -42,6 +42,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.PathIterator;
 import java.awt.image.BufferedImage;
+import java.util.function.Supplier;
 
 import static pixelitor.Composition.ImageChangeActions.HISTOGRAM;
 
@@ -91,7 +92,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         typeSelector.setName("brushTypeSelector");
         toolSettingsPanel.add(typeSelector);
         typeSelector.addActionListener(e -> {
-            BrushType brushType = (BrushType) typeSelector.getSelectedItem();
+            Supplier<Brush> brushType = (Supplier<Brush>) typeSelector.getSelectedItem();
             ((SymmetryBrush) brush).brushTypeChanged(brushType);
         });
 
@@ -281,7 +282,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         int startingX = 0;
         int startingY = 0;
 
-        FlatteningPathIterator fpi = new FlatteningPathIterator(shape.getPathIterator(null), 1.0);
+        PathIterator fpi = new FlatteningPathIterator(shape.getPathIterator(null), 1.0);
         float[] coords = new float[2];
         while (!fpi.isDone()) {
             int type = fpi.currentSegment(coords);

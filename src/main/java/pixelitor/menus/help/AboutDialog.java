@@ -78,8 +78,6 @@ public class AboutDialog extends OKDialog {
     }
 
     private static JButton createLinkButton() {
-        OpenInBrowserAction browserAction = new OpenInBrowserAction(null, HOME_PAGE);
-
         JButton linkButton = new JButton("<HTML><FONT color=\"#000099\"><U>" + HOME_PAGE + "</U></FONT></HTML>");
 
         linkButton.setHorizontalAlignment(SwingConstants.CENTER);
@@ -89,7 +87,7 @@ public class AboutDialog extends OKDialog {
         linkButton.setBackground(box.getBackground());
         linkButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        linkButton.addActionListener(browserAction);
+        linkButton.addActionListener(new OpenInBrowserAction(null, HOME_PAGE));
         return linkButton;
     }
 
@@ -105,7 +103,6 @@ public class AboutDialog extends OKDialog {
         label.setAlignmentX(Component.CENTER_ALIGNMENT);
         box.add(label);
     }
-
 }
 
 

@@ -17,7 +17,7 @@
 
 package pixelitor.utils;
 
-import pixelitor.ImageComponents;
+import pixelitor.Desktop;
 import pixelitor.NewImage;
 import pixelitor.PixelitorWindow;
 import pixelitor.TipsOfTheDay;
@@ -99,8 +99,7 @@ public final class AppPreferences {
     private static void loadNewImageSize() {
         int defaultWidth = 600;
         int defaultHeight = 400;
-        PixelitorWindow window = PixelitorWindow.getInstance();
-        Dimension desktopSize = window.getDesktopSize();
+        Dimension desktopSize = Desktop.INSTANCE.getDesktopSize();
         if (desktopSize != null) {
             defaultWidth = Math.max(600, desktopSize.width - 30);
             defaultHeight = Math.max(400, desktopSize.height - 50);
@@ -281,18 +280,7 @@ public final class AppPreferences {
         return UIManager.getSystemLookAndFeelClassName();
     }
 
-    public static void exitApp() {
-        if (ImageComponents.thereAreUnsavedChanges()) {
-            int answer = JOptionPane.showConfirmDialog(null, "There are unsaved changes. Are you sure you want to exit?", "Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-            if (answer == JOptionPane.YES_OPTION) {
-                savePrefsAndExit();
-            }
-        } else {
-            savePrefsAndExit();
-        }
-    }
-
-    private static void savePrefsAndExit() {
+    public static void savePrefsAndExit() {
         savePreferencesBeforeExit();
         System.exit(0);
     }

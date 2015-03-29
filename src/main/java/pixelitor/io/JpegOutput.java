@@ -23,6 +23,7 @@ import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -66,7 +67,7 @@ public final class JpegOutput {
         return new ImageWithSize(previewImage, sizeInBytes);
     }
 
-    private static void writeJPGtoStream(BufferedImage image, ImageOutputStream ios, float quality) throws IOException {
+    private static void writeJPGtoStream(BufferedImage image, ImageInputStream ios, float quality) throws IOException {
         Iterator<ImageWriter> jpgWriters = ImageIO.getImageWritersByFormatName("jpg");
         if (!jpgWriters.hasNext()) {
             throw new IllegalStateException("No JPG writers found");

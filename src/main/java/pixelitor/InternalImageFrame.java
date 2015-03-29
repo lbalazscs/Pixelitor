@@ -101,7 +101,7 @@ public class InternalImageFrame extends JInternalFrame implements InternalFrameL
             locationY = getLocation().y;
         }
 
-        Dimension desktopSize = PixelitorWindow.getInstance().getDesktopSize();
+        Dimension desktopSize = Desktop.INSTANCE.getDesktopSize();
         int maxWidth = Math.max(0, desktopSize.width - 20 - locationX);
         int maxHeight = Math.max(0, desktopSize.height - 40 - locationY);
 

@@ -20,6 +20,7 @@ package pixelitor.tools.brushes;
 import com.jhlabs.awt.WobbleStroke;
 import pixelitor.tools.StrokeType;
 
+import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 
 /**
@@ -41,7 +42,7 @@ public class WobbleBrush extends StrokeBrush {
         }
         targetG.setStroke(lastStroke);
 
-        Ellipse2D.Float circle = new Ellipse2D.Float(x + radius, y + radius, 0.1f, 0.1f);
+        Shape circle = new Ellipse2D.Float(x + radius, y + radius, 0.1f, 0.1f);
         targetG.draw(circle);
     }
 

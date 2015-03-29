@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.gui;
 
 import javax.swing.*;
@@ -96,8 +97,7 @@ public abstract class AbstractAngleSelectorComponent extends JComponent implemen
 
         g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
 
-        Line2D.Float line = new Line2D.Float(startX, startY, endX, endY);
-        g2.draw(line);
+        g2.draw(new Line2D.Float(startX, startY, endX, endY));
 
         double backAngle1 = 2.8797926 + angle;
         double backAngle2 = 3.4033926 + angle;
@@ -108,11 +108,7 @@ public abstract class AbstractAngleSelectorComponent extends JComponent implemen
         float arrowEnd2X = (float) (endX + (arrowRadius * Math.cos(backAngle2)));
         float arrowEnd2Y = (float) (endY + (arrowRadius * Math.sin(backAngle2)));
 
-        Line2D.Float line1 = new Line2D.Float(endX, endY, arrowEnd1X, arrowEnd1Y);
-        Line2D.Float line2 = new Line2D.Float(endX, endY, arrowEnd2X, arrowEnd2Y);
-
-        g2.draw(line1);
-        g2.draw(line2);
+        g2.draw(new Line2D.Float(endX, endY, arrowEnd1X, arrowEnd1Y));
+        g2.draw(new Line2D.Float(endX, endY, arrowEnd2X, arrowEnd2Y));
     }
-
 }

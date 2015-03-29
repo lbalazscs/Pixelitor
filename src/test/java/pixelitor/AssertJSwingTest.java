@@ -63,7 +63,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @Ignore
-public class AssertJTest {
+public class AssertJSwingTest {
     public static final File BASE_TESTING_DIR = new File("C:\\pix_tests");
     public static final File INPUT_DIR = new File(BASE_TESTING_DIR, "input");
     public static final File BATCH_RESIZE_OUTPUT_DIR = new File(BASE_TESTING_DIR, "batch_resize_output");

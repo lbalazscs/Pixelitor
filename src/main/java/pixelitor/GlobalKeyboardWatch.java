@@ -116,7 +116,6 @@ public class GlobalKeyboardWatch {
             }
         };
 
-
         Action decreaseActiveBrushSizeAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -152,5 +151,4 @@ public class GlobalKeyboardWatch {
 //            }
 //        }, AWTEvent.MOUSE_WHEEL_EVENT_MASK);
 //    }
-
 }

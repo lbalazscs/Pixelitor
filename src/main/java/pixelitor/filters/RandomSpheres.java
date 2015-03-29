@@ -31,12 +31,15 @@ import pixelitor.utils.ReseedSupport;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.MultipleGradientPaint;
+import java.awt.Paint;
 import java.awt.RadialGradientPaint;
 import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
+
+import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
 
 /**
  * Fills the image with random circles
@@ -89,25 +92,21 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
         Random rand = ReseedSupport.getRand();
 
         Graphics2D g = dest.createGraphics();
-
-        int width = dest.getWidth();
-        int height = dest.getHeight();
-
-        float r = radius.getValueAsFloat();
-        double angle = highlightAngleSelector.getValueInRadians();
-        angle += Math.PI;
-
-        double elevation = highlightElevationSelector.getValueInRadians();
-
-        int centerShiftX = (int) (r * Math.cos(angle) * Math.cos(elevation));
-        int centerShiftY = (int) (r * Math.sin(angle) * Math.cos(elevation));
-
-        boolean addHighlights = addHighLightsCB.isChecked();
-
         g.setComposite(AlphaComposite.SrcOver.derive(opacity.getValueAsPercentage()));
 
         int colorSrc = colorSource.getValue();
 
+        double angle = highlightAngleSelector.getValueInRadians();
+        angle += Math.PI;
+
+        float r = radius.getValueAsFloat();
+        float diameter = 2 * r;
+        double elevation = highlightElevationSelector.getValueInRadians();
+        int centerShiftX = (int) (r * Math.cos(angle) * Math.cos(elevation));
+        int centerShiftY = (int) (r * Math.sin(angle) * Math.cos(elevation));
+
+        int width = dest.getWidth();
+        int height = dest.getHeight();
         int numCircles = (int) ((width * height * density.getValueAsPercentage()) / (r * r));
 
         Color[] colors = null;
@@ -121,11 +120,13 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
 //        int type = typeParam.getValue();
         int type = TYPE_SPHERES;
 
+        boolean addHighlights = addHighLightsCB.isChecked();
+
         for (int i = 0; i < numCircles; i++) {
             int x = rand.nextInt(width);
             int y = rand.nextInt(height);
 
-            int srcColor = src.getRGB(x, y);
+            int srcColor = src.getRGB(x, y);  // TODO could be faster
             int alpha = (srcColor >>> 24) & 0xFF;
             if (alpha == 0) {
                 continue;
@@ -138,10 +139,10 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
                 }
             }
 
+            // setup paint
             if (addHighlights && (type == TYPE_SPHERES)) {
                 float[] fractions = {0.0f, 1.0f};
-                MultipleGradientPaint.CycleMethod cycleMethod = MultipleGradientPaint.CycleMethod.NO_CYCLE;
-                RadialGradientPaint gradientPaint = new RadialGradientPaint(x + centerShiftX, y + centerShiftY, r, fractions, colors, cycleMethod);
+                Paint gradientPaint = new RadialGradientPaint(x + centerShiftX, y + centerShiftY, r, fractions, colors, NO_CYCLE);
 
                 g.setPaint(gradientPaint);
             } else {
@@ -153,12 +154,12 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
 
             float drawX = x - r;
             float drawY = y - r;
-            float diameter = 2 * r;
+            // render the sphere
             if (type == TYPE_SPHERES) {
-                Ellipse2D.Float circle = new Ellipse2D.Float(drawX, drawY, diameter, diameter);
+                Shape circle = new Ellipse2D.Float(drawX, drawY, diameter, diameter);
                 g.fill(circle);
             } else if (type == TYPE_BUBBLES) {
-                Ellipse2D.Float circle = new Ellipse2D.Float(drawX, drawY, diameter, diameter);
+                Shape circle = new Ellipse2D.Float(drawX, drawY, diameter, diameter);
                 g.draw(circle);
 
                 InnerGlowPathEffect innerGlow = new InnerGlowPathEffect(1.0f);

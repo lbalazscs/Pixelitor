@@ -169,7 +169,7 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
                     newWidth = Integer.parseInt(widthTextField.getText());
                     if (constrainProportions()) {
                         newHeight = (int) (newWidth / originalProportion);
-                        if(newHeight == 0) {
+                        if (newHeight == 0) {
                             newHeight = 1;
                         }
                         heightTextField.setText(String.valueOf(newHeight));
@@ -200,7 +200,7 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
                     newHeight = Integer.parseInt(heightTextField.getText());
                     if (constrainProportions()) {
                         newWidth = (int) (newHeight * originalProportion);
-                        if(newWidth == 0) {
+                        if (newWidth == 0) {
                             newWidth = 1;
                         }
                         widthTextField.setText(String.valueOf(newWidth));
@@ -268,12 +268,8 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
     }
 
     public static void resizeActiveImage() {
-        try {
-            Composition comp = ImageComponents.getActiveComp()
-                    .orElseThrow(() -> new IllegalStateException("no active image"));
-            showInDialog(comp);
-        } catch (Exception ex) {
-            Dialogs.showExceptionDialog(ex);
-        }
+        Composition comp = ImageComponents.getActiveComp()
+                .orElseThrow(() -> new IllegalStateException("no active image"));
+        showInDialog(comp);
     }
 }

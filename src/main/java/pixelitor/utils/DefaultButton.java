@@ -17,7 +17,6 @@
 
 package pixelitor.utils;
 
-import pixelitor.filters.gui.GUIParam;
 import pixelitor.filters.gui.Resettable;
 
 import javax.swing.*;
@@ -46,9 +45,5 @@ public class DefaultButton extends JButton {
         } else {
             setIcon(defaultIcon);
         }
-    }
-
-    public void setResettable(GUIParam resettable) {
-        this.resettable = resettable;
     }
 }

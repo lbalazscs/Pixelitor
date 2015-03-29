@@ -20,6 +20,7 @@ package pixelitor;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerChangeListener;
 import pixelitor.tools.Symmetry;
+import pixelitor.utils.AppPreferences;
 import pixelitor.utils.GUIUtils;
 import pixelitor.utils.debug.AppNode;
 
@@ -80,6 +81,18 @@ public class AppLogic {
 
     public static void showFileSavedMessage(File file) {
         AppLogic.setStatusMessage("File " + file.getAbsolutePath() + " saved.");
+    }
+
+    public static void exitApp(PixelitorWindow pw) {
+        pw.setVisible(false);
+        if (ImageComponents.thereAreUnsavedChanges()) {
+            int answer = JOptionPane.showConfirmDialog(null, "There are unsaved changes. Are you sure you want to exit?", "Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (answer == JOptionPane.YES_OPTION) {
+                AppPreferences.savePrefsAndExit();
+            }
+        } else {
+            AppPreferences.savePrefsAndExit();
+        }
     }
 }
 

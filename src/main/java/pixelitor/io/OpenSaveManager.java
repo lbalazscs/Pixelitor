@@ -38,7 +38,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInput;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -115,13 +117,9 @@ public class OpenSaveManager {
         return comp;
     }
 
-    public static void save(boolean saveAs) {
-        try {
-            Composition comp = ImageComponents.getActiveComp().get();
-            save(comp, saveAs);
-        } catch (Exception e) {
-            Dialogs.showExceptionDialog(e);
-        }
+    public static boolean save(boolean saveAs) {
+        Composition comp = ImageComponents.getActiveComp().get();
+        return save(comp, saveAs);
     }
 
     /**
@@ -208,7 +206,7 @@ public class OpenSaveManager {
             fos.write(new byte[]{(byte) 0xAB, (byte) 0xC4, CURRENT_PXC_VERSION_NUMBER});
 
             try (GZIPOutputStream gz = new GZIPOutputStream(fos)) {
-                try (ObjectOutputStream oos = new ObjectOutputStream(gz)) {
+                try (ObjectOutput oos = new ObjectOutputStream(gz)) {
                     oos.writeObject(comp);
                     oos.flush();
                 }
@@ -243,7 +241,7 @@ public class OpenSaveManager {
             }
 
             try (GZIPInputStream gs = new GZIPInputStream(fis)) {
-                try (ObjectInputStream ois = new ObjectInputStream(gs)) {
+                try (ObjectInput ois = new ObjectInputStream(gs)) {
                     comp = (Composition) ois.readObject();
 
                     // file is transient in Composition because the pxc file can be renamed

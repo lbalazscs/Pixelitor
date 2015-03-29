@@ -30,11 +30,11 @@ public class ChannelMixerAdjustments extends ParametrizedAdjustPanel {
     }
 
     @Override
-    protected void setupGUI(ParamSet params, Object otherInfo, boolean showOriginal) {
+    protected void setupGUI(ParamSet params, Object otherInfo, boolean addShowOriginal) {
         Action[] actions = (Action[]) otherInfo;
 
         JPanel leftPanel = new JPanel();
-        ParametrizedAdjustPanel.setupControlsInColumn(leftPanel, params, showOriginal);
+        ParametrizedAdjustPanel.setupControlsInColumn(leftPanel, params, addShowOriginal);
 
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));

@@ -37,7 +37,7 @@ public class GeographicalAdjustmentPanel extends ParametrizedAdjustPanel {
     }
 
     @Override
-    protected void setupGUI(ParamSet params, Object otherInfo, boolean showOriginal) {
+    protected void setupGUI(ParamSet params, Object otherInfo, boolean addShowOriginal) {
         setLayout(new BorderLayout(5, 5));
         JPanel controlPanel = new JPanel(new BorderLayout(5, 5));
 
@@ -48,7 +48,7 @@ public class GeographicalAdjustmentPanel extends ParametrizedAdjustPanel {
         JPanel geoPanel = createGeoPanel();
 
         // A panel for global actions like "Randomize Settings", "Reset All"
-        JPanel buttonsPanel = createButtonsPanel(showOriginal);
+        JPanel buttonsPanel = createButtonsPanel(addShowOriginal);
 
         addParams(params, geoPanel, nonGeoPanel, buttonsPanel);
 

@@ -21,6 +21,7 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.Resettable;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.BorderLayout;
@@ -72,8 +73,8 @@ public class SliderSpinner extends JPanel implements ChangeListener {
 
         if (textPosition == TextPosition.BORDER) {
             if ((leftColor != null) && (rightColor != null)) {
-                GradientBorder border = new GradientBorder(leftColor, rightColor);
-                this.setBorder(BorderFactory.createTitledBorder(border, model.getName()));
+                Border gradientBorder = new GradientBorder(leftColor, rightColor);
+                this.setBorder(BorderFactory.createTitledBorder(gradientBorder, model.getName()));
             } else {
                 this.setBorder(BorderFactory.createTitledBorder(model.getName()));
                 this.leftColor = Color.GRAY;

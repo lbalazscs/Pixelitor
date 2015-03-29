@@ -33,11 +33,11 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
      */
     private static boolean resetParams = true;
 
-    public ParametrizedAdjustPanel(FilterWithParametrizedGUI filter, boolean showOriginal) {
-        this(filter, null, showOriginal);
+    public ParametrizedAdjustPanel(FilterWithParametrizedGUI filter, boolean addShowOriginal) {
+        this(filter, null, addShowOriginal);
     }
 
-    public ParametrizedAdjustPanel(FilterWithParametrizedGUI filter, Object otherInfo, boolean showOriginal) {
+    public ParametrizedAdjustPanel(FilterWithParametrizedGUI filter, Object otherInfo, boolean addShowOriginal) {
         super(filter);
 
         ParamSet params = filter.getParamSet();
@@ -47,26 +47,25 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
         }
         params.setAdjustmentListener(this);
 
-        setupGUI(params, otherInfo, showOriginal);
+        setupGUI(params, otherInfo, addShowOriginal);
 
         paramAdjusted();
     }
 
-
     /**
      * This can be overridden if a custom GUI is necessary
      */
-    protected void setupGUI(ParamSet params, Object otherInfo, boolean showOriginal) {
-        setupControlsInColumn(this, params, showOriginal);
+    protected void setupGUI(ParamSet params, Object otherInfo, boolean addShowOriginal) {
+        setupControlsInColumn(this, params, addShowOriginal);
     }
 
-    public static void setupControlsInColumn(JPanel panel, ParamSet params, boolean showOriginal) {
-        panel.setLayout(new GridBagLayout());
+    public static void setupControlsInColumn(JPanel parent, Iterable<GUIParam> params, boolean addShowOriginal) {
+        parent.setLayout(new GridBagLayout());
 
         int row = 0;
         JPanel buttonsPanel = null;
 
-        GridBagHelper gridBagHelper = new GridBagHelper(panel);
+        GridBagHelper gbHelper = new GridBagHelper(parent);
 
         for (GUIParam param : params) {
             JComponent control = param.createGUI();
@@ -74,29 +73,29 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
             if (param instanceof ActionParam) { // all the buttons go in one row
                 if (buttonsPanel == null) {
                     buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-                    gridBagHelper.addOnlyControlToRow(buttonsPanel, row);
+                    gbHelper.addOnlyControlToRow(buttonsPanel, row);
                 }
                 buttonsPanel.add(control);
                 control.setName(param.getName());
             } else {
-                int nrOfGridBagCols = param.getNrOfGridBagCols();
-                if (nrOfGridBagCols == 1) {
-                    gridBagHelper.addOnlyControlToRow(control, row);
-                } else if (nrOfGridBagCols == 2) {
-                    gridBagHelper.addLabel(param.getName() + ':', 0, row);
-                    gridBagHelper.addLastControl(control);
+                int numColumns = param.getNrOfGridBagCols();
+                if (numColumns == 1) {
+                    gbHelper.addOnlyControlToRow(control, row);
+                } else if (numColumns == 2) {
+                    gbHelper.addLabel(param.getName() + ':', 0, row);
+                    gbHelper.addLastControl(control);
                 }
             }
 
             row++;
         }
-        if (showOriginal) {
-            gridBagHelper.addLabel("Show Original:", 0, row);
+        if (addShowOriginal) {
+            gbHelper.addLabel("Show Original:", 0, row);
 
             JCheckBox showOriginalCB = new JCheckBox();
             showOriginalCB.addActionListener(e -> Utils.setShowOriginal(showOriginalCB.isSelected()));
 
-            gridBagHelper.addLastControl(showOriginalCB);
+            gbHelper.addLastControl(showOriginalCB);
         }
     }
 

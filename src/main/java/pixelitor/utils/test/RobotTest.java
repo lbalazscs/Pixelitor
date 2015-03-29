@@ -21,6 +21,7 @@ import pixelitor.Build;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
+import pixelitor.Desktop;
 import pixelitor.GlobalKeyboardWatch;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
@@ -118,7 +119,7 @@ public class RobotTest {
     private RobotTest() {
     }
 
-    public static void runRobot() throws AWTException {
+    public static void runRobot() {
         if (Build.CURRENT != Build.DEVELOPMENT) {
             Dialogs.showErrorDialog("Error", "Build is not DEVELOPMENT");
             return;
@@ -150,7 +151,12 @@ public class RobotTest {
 
         System.out.println("RobotTest.runRobot CALLED at " + new Date() + ", press the 'u' key to stop it");
 
-        Robot r = new Robot();
+        Robot r = null;
+        try {
+            r = new Robot();
+        } catch (AWTException e) {
+            e.printStackTrace();
+        }
         setupWeightedCaller(r);
 
         Point p = generateRandomPoint();
@@ -526,10 +532,10 @@ public class RobotTest {
         double r = Math.random();
         if (r < 0.8) {
             logRobotEvent("arrange windows - tile");
-            PixelitorWindow.getInstance().tileWindows();
+            Desktop.INSTANCE.tileWindows();
         } else {
             logRobotEvent("arrange windows - cascade");
-            PixelitorWindow.getInstance().cascadeWindows();
+            Desktop.INSTANCE.cascadeWindows();
         }
     }
 

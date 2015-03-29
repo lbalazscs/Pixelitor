@@ -51,8 +51,7 @@ public class JHMotionBlur extends FilterWithParametrizedGUI {
         FAST {
             @Override
             public MotionBlur getImplementation() {
-                MotionBlurOp op = new MotionBlurOp();
-                return op;
+                return new MotionBlurOp();
             }
         }, GOOD {
             @Override
@@ -71,6 +70,7 @@ public class JHMotionBlur extends FilterWithParametrizedGUI {
             new IntChoiceParam.Value("Faster", MBMethod.FAST.ordinal()),
             new IntChoiceParam.Value("High Quality", MBMethod.GOOD.ordinal()),
     };
+
     private final IntChoiceParam method = new IntChoiceParam("Quality", methodChoices, true);
 
     public enum Mode {

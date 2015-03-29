@@ -20,6 +20,7 @@ package pixelitor.tools.brushes;
 import pixelitor.tools.StrokeType;
 
 import java.awt.BasicStroke;
+import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.Ellipse2D;
 
@@ -33,7 +34,7 @@ public class OutlineCircleBrush extends StrokeBrush {
 
     @Override
     public void drawShape(int x, int y) {
-        Ellipse2D.Float circle = new Ellipse2D.Float(x - radius, y - radius, diameter, diameter);
+        Shape circle = new Ellipse2D.Float(x - radius, y - radius, diameter, diameter);
         Stroke saveStroke = targetG.getStroke();
         targetG.setStroke(StrokeType.OUTLINE.getInnerStroke());
         targetG.draw(circle);

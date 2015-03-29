@@ -27,6 +27,7 @@ import pixelitor.utils.test.DebugEventQueue;
 import pixelitor.utils.test.HistoryEvent;
 
 import javax.swing.event.UndoableEditListener;
+import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEditSupport;
 import java.util.Optional;
@@ -89,7 +90,8 @@ public class History {
         try {
             undoDepth--; // after redo we should be fadeable again
             undoManager.redo();
-        } catch (Exception e) {
+        } catch (CannotRedoException e) {
+            // TODO is a "No redo avaliable" scenario possible?
             Dialogs.showExceptionDialog(e);
         }
     }
@@ -104,8 +106,6 @@ public class History {
             undoManager.undo();
         } catch (CannotUndoException e) {
             Dialogs.showInfoDialog("No undo available", "No undo available, probably because the undo image was discarded in order to save memory");
-        } catch (Exception ex) {
-            Dialogs.showExceptionDialog(ex);
         }
     }
 

@@ -50,8 +50,7 @@ public class AppNode extends DebugNode {
 
     private void addSystemNode() {
         GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-        SystemNode systemNode = new SystemNode(device);
-        add(systemNode);
+        add(new SystemNode(device));
     }
 
     private void addImageNodes() {

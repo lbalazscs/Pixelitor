@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.convolve;
 
 import com.jhlabs.image.ConvolveFilter;
@@ -43,8 +44,7 @@ enum ConvolveMethod {
     }, AWT {
         @Override
         BufferedImageOp getConvolveOp(Kernel kernel) {
-            ConvolveOp op = new ConvolveOp(kernel);
-            return op;
+            return new ConvolveOp(kernel);
         }
 
         @Override

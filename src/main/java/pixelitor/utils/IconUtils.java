@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.utils;
 
@@ -20,7 +20,7 @@ import javax.swing.*;
 import java.net.URL;
 
 /**
- *
+ * Icon-related utility methods
  */
 public final class IconUtils {
     private static final Icon westArrowIcon = loadIcon("west_arrow.gif");
@@ -37,7 +37,7 @@ public final class IconUtils {
         return westArrowIcon;
     }
 
-    public static ImageIcon loadIcon(String iconFileName) {
+    public static Icon loadIcon(String iconFileName) {
         assert iconFileName != null;
 
         URL imgURL = ImageUtils.resourcePathToURL(iconFileName);

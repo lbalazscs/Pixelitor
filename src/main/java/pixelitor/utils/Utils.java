@@ -40,6 +40,7 @@ import java.awt.Toolkit;
 import java.awt.color.ColorSpace;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
@@ -238,7 +239,7 @@ public final class Utils {
     }
 
     public static void copyStringToClipboard(String text) {
-        StringSelection stringSelection = new StringSelection(text);
+        Transferable stringSelection = new StringSelection(text);
 
         Clipboard systemClipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         systemClipboard.setContents(stringSelection, (clipboard, contents) -> {

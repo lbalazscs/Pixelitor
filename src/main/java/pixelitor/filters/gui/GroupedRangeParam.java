@@ -27,7 +27,7 @@ import java.awt.Rectangle;
  */
 public class GroupedRangeParam extends AbstractGUIParam implements RangeBasedOnImageSize {
     private final RangeParam[] rangeParams;
-    private final JToggleButton.ToggleButtonModel checkBoxModel;
+    private final ButtonModel checkBoxModel;
     private final boolean linkedByDefault;
     private boolean linkable = true; // whether a "Linked" checkbox appears
 
@@ -88,7 +88,7 @@ public class GroupedRangeParam extends AbstractGUIParam implements RangeBasedOnI
         }
     }
 
-    public JToggleButton.ToggleButtonModel getCheckBoxModel() {
+    public ButtonModel getCheckBoxModel() {
         return checkBoxModel;
     }
 
