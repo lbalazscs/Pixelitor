@@ -84,13 +84,14 @@ public class AppLogic {
     }
 
     public static void exitApp(PixelitorWindow pw) {
-        pw.setVisible(false);
         if (ImageComponents.thereAreUnsavedChanges()) {
             int answer = JOptionPane.showConfirmDialog(null, "There are unsaved changes. Are you sure you want to exit?", "Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
             if (answer == JOptionPane.YES_OPTION) {
+                pw.setVisible(false);
                 AppPreferences.savePrefsAndExit();
             }
         } else {
+            pw.setVisible(false);
             AppPreferences.savePrefsAndExit();
         }
     }
