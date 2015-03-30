@@ -25,8 +25,10 @@ import pixelitor.tools.brushes.ImageBrushType;
 import pixelitor.utils.BlendingModePanel;
 import pixelitor.utils.Dialogs;
 
+import javax.swing.*;
 import java.awt.Paint;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 
 import static pixelitor.tools.CloneTool.State.SOURCE_DEFINED;
 import static pixelitor.tools.CloneTool.State.STARTED;
@@ -41,6 +43,7 @@ public class CloneTool extends BrushTool {
     }
 
     private State state = STARTED;
+    private boolean sampleAllLayers = false;
 
     protected CloneTool() {
         super('k', "Clone", "clone_tool_icon.png",
@@ -53,6 +56,18 @@ public class CloneTool extends BrushTool {
 
         blendingModePanel = new BlendingModePanel(true);
         toolSettingsPanel.add(blendingModePanel);
+
+        toolSettingsPanel.addSeparator();
+
+        JCheckBox alignedCB = new JCheckBox("Aligned", true);
+        toolSettingsPanel.add(alignedCB);
+        alignedCB.addActionListener(e -> ((CloneBrush) brush).setAligned(alignedCB.isSelected()));
+
+        toolSettingsPanel.addSeparator();
+
+        JCheckBox sampleAllLayersCB = new JCheckBox("Sample All Layers");
+        toolSettingsPanel.add(sampleAllLayersCB);
+        sampleAllLayersCB.addActionListener(e -> sampleAllLayers = sampleAllLayersCB.isSelected());
     }
 
     @Override
@@ -75,7 +90,7 @@ public class CloneTool extends BrushTool {
             }
 
             if (!withLine(e)) {  // when drawing with line, the destination should not change for mouse press
-                cloneBrush.setDestination(x, y);
+                cloneBrush.setCloningStartPoint(x, y);
             }
 
             super.toolMousePressed(e, ic);
@@ -97,7 +112,13 @@ public class CloneTool extends BrushTool {
     }
 
     protected void setCloningSource(ImageDisplay ic, int x, int y, CloneBrush cloneBrush) {
-        cloneBrush.setSource(ic.getComp().getActiveImageLayer().getImage(), x, y);
+        BufferedImage sourceImage;
+        if (sampleAllLayers) {
+            sourceImage = ic.getComp().getCompositeImage();
+        } else {
+            sourceImage = ic.getComp().getActiveImageLayer().getImage();
+        }
+        cloneBrush.setSource(sourceImage, x, y);
         state = SOURCE_DEFINED;
     }
 

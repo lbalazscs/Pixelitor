@@ -29,11 +29,13 @@ public class CloneBrush extends DabsBrush {
     private BufferedImage sourceImage;
     private int srcX;
     private int srcY;
-    private int destX;
-    private int destY;
+    private int dx;
+    private int dy;
+    private boolean aligned = true;
 
     private BufferedImage brushImage;
     private Ellipse2D.Double circleClip;
+    private boolean firstCloningStart = true;
 
     public CloneBrush(ImageBrushType imageBrushType) {
         super(0.25, false, true);
@@ -50,11 +52,23 @@ public class CloneBrush extends DabsBrush {
         this.sourceImage = sourceImage;
         this.srcX = srcX;
         this.srcY = srcY;
+        firstCloningStart = true;
     }
 
-    public void setDestination(int destX, int destY) {
-        this.destX = destX;
-        this.destY = destY;
+    // marks the point where the cloning was started
+    public void setCloningStartPoint(int destX, int destY) {
+        boolean reinitializeDistance = false;
+        // aligned = forces the source point to follow the mouse, even after a stroke is completed
+        // unaligned =  the cloning distance is reinitialized for each stroke
+        if ((aligned && firstCloningStart) || (!aligned)) {
+            reinitializeDistance = true;
+        }
+        firstCloningStart = false;
+
+        if (reinitializeDistance) {
+            this.dx = -srcX + destX + radius;
+            this.dy = -srcY + destY + radius;
+        }
     }
 
     @Override
@@ -72,8 +86,12 @@ public class CloneBrush extends DabsBrush {
         g.setClip(circleClip);
         g.drawImage(sourceImage,
                 AffineTransform.getTranslateInstance(
-                        -srcX + destX - x + radius,
-                        -srcY + destY - y + radius), null);
+                        dx - x,
+                        dy - y), null);
         g.dispose();
+    }
+
+    public void setAligned(boolean aligned) {
+        this.aligned = aligned;
     }
 }
