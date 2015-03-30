@@ -24,21 +24,18 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
 
-import java.awt.AlphaComposite;
-import java.awt.Graphics2D;
-import java.awt.Paint;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
 /**
- * The erase tool.
+ * A brush tool that draws directly into the image of
+ * the current image layer
  */
-public class EraseTool extends AbstractBrushTool {
+public class DirectBrushTool extends AbstractBrushTool {
     private BufferedImage copyBeforeStart;
 
-    public EraseTool() {
-        super('e', "Erase", "erase_tool_icon.gif", "click and drag to erase pixels");
-//        useFillOval = true;
+    public DirectBrushTool(char activationKeyChar, String name, String iconFileName, String toolMessage) {
+        super(activationKeyChar, name, iconFileName, toolMessage);
     }
 
     @Override
@@ -49,24 +46,18 @@ public class EraseTool extends AbstractBrushTool {
     }
 
     @Override
-    void initDrawingGraphics(Composition comp, ImageLayer layer) {
+    void createGraphics(Composition comp, ImageLayer layer) {
         // uses the graphics of the buffered image contained in the layer
         BufferedImage drawImage = layer.getCompositionSizedSubImage();
-        drawingGraphics = drawImage.createGraphics();
+        graphics = drawImage.createGraphics();
         if (respectSelection) {
-            comp.setSelectionClipping(drawingGraphics, null);
+            comp.setSelectionClipping(graphics, null);
         }
-        brush.setTarget(comp, drawingGraphics);
-    }
-
-    @Override
-    public void setupGraphics(Graphics2D g, Paint p) {
-        // the color does not matter as long as AlphaComposite.CLEAR is used
-        g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OUT, 1.0f));
+        brush.setTarget(comp, graphics);
 
         BufferedImage image = ImageComponents.getActiveImageLayer().get().getImage();
 
-        Utils.checkRasterMinimum(image); // TODO remove if raster bug is corrected
+        assert Utils.checkRasterMinimum(image);
 
         copyBeforeStart = ImageUtils.copyImage(image);
     }
@@ -83,10 +74,6 @@ public class EraseTool extends AbstractBrushTool {
     @Override
     void mergeTmpLayer(Composition comp) {
         // do nothing - this tool draws directly into the image
-    }
-
-    @Override
-    protected Paint getPaint(MouseEvent e) {
-        return null; // this tool doesn't use a Paint
+        // TODO should not have to implement this
     }
 }

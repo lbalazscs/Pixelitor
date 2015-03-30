@@ -22,11 +22,9 @@ import pixelitor.Build;
 import pixelitor.ImageDisplay;
 import pixelitor.tools.brushes.CloneBrush;
 import pixelitor.tools.brushes.ImageBrushType;
-import pixelitor.utils.BlendingModePanel;
 import pixelitor.utils.Dialogs;
 
 import javax.swing.*;
-import java.awt.Paint;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
@@ -36,7 +34,7 @@ import static pixelitor.tools.CloneTool.State.STARTED;
 /**
  * The Clone Stamp tool
  */
-public class CloneTool extends BrushTool {
+public class CloneTool extends TmpLayerBrushTool {
     enum State {
         STARTED,
         SOURCE_DEFINED
@@ -54,8 +52,7 @@ public class CloneTool extends BrushTool {
     public void initSettingsPanel() {
         addSizeSelector();
 
-        blendingModePanel = new BlendingModePanel(true);
-        toolSettingsPanel.add(blendingModePanel);
+        addBlendingModePanel();
 
         toolSettingsPanel.addSeparator();
 
@@ -120,11 +117,6 @@ public class CloneTool extends BrushTool {
         }
         cloneBrush.setSource(sourceImage, x, y);
         state = SOURCE_DEFINED;
-    }
-
-    @Override
-    protected Paint getPaint(MouseEvent e) {
-        return null; // this tool doesn't use a Paint
     }
 
     @Override

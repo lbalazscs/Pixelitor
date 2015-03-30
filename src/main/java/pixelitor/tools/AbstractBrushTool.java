@@ -31,10 +31,8 @@ import pixelitor.utils.ImageSwitchListener;
 import pixelitor.utils.SliderSpinner;
 
 import javax.swing.*;
-import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
-import java.awt.Paint;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Shape;
@@ -47,7 +45,7 @@ import java.util.function.Supplier;
 import static pixelitor.Composition.ImageChangeActions.HISTOGRAM;
 
 /**
- * Abstract superclass for tools like brush or erase.
+ * Abstract superclass for tools like brush, erase, clone.
  */
 public abstract class AbstractBrushTool extends Tool implements ImageSwitchListener {
     private static final int MIN_BRUSH_RADIUS = 1;
@@ -58,12 +56,11 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
 
     private JComboBox<BrushType> typeSelector;
 
-    Graphics2D drawingGraphics;
+    protected Graphics2D graphics;
     private final RangeParam brushRadiusParam = new RangeParam("Radius", MIN_BRUSH_RADIUS, MAX_BRUSH_RADIUS, DEFAULT_BRUSH_RADIUS);
 
     private final EnumComboBoxModel<Symmetry> symmetryModel = new EnumComboBoxModel<>(Symmetry.class);
 
-    //    Brushes brushes;
     protected Brush brush;
     private final BrushAffectedArea brushAffectedArea = new BrushAffectedArea();
 
@@ -77,7 +74,6 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     }
 
     protected void initBrush() {
-//        brushes = new Brushes(BrushType.values()[0], getCurrentSymmetry());
         brush = new SymmetryBrush(BrushType.values()[0], getCurrentSymmetry(), brushAffectedArea);
     }
 
@@ -118,12 +114,10 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
 
     @Override
     public void toolMousePressed(MouseEvent e, ImageDisplay ic) {
-        Paint p = getPaint(e);
-
         boolean withLine = withLine(e);
         int x = userDrag.getStartX();
         int y = userDrag.getStartY();
-        drawTo(ic.getComp(), p, x, y, withLine);
+        drawTo(ic.getComp(), x, y, withLine);
         firstMouseDown = false;
 
         if (withLine) {
@@ -137,9 +131,6 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         return !firstMouseDown && e.isShiftDown();
     }
 
-    // only the Brush Tool returns non-null here
-    protected abstract Paint getPaint(MouseEvent e);
-
     @Override
     public void toolMouseDragged(MouseEvent e, ImageDisplay ic) {
         int x = userDrag.getEndX();
@@ -148,7 +139,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         // at this point x and y are already scaled according to the zoom level
         // (unlike e.getX(), e.getY())
 
-        drawTo(ic.getComp(), null, x, y, false);
+        drawTo(ic.getComp(), x, y, false);
     }
 
     @Override
@@ -156,6 +147,9 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         finishBrushStroke(ic.getComp());
     }
 
+    /**
+     * Returns the original image for undo
+     */
     abstract BufferedImage getFullUntouchedImage(Composition comp);
 
     abstract void mergeTmpLayer(Composition comp);
@@ -164,10 +158,10 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         ToolAffectedArea affectedArea = new ToolAffectedArea(comp, brushAffectedArea.getRectangleAffectedByBrush(brushRadiusParam.getValue()), false);
         saveSubImageForUndo(getFullUntouchedImage(comp), affectedArea);
         mergeTmpLayer(comp);
-        if(drawingGraphics != null) {
-            drawingGraphics.dispose();
+        if (graphics != null) {
+            graphics.dispose();
         }
-        drawingGraphics = null;
+        graphics = null;
 
         comp.imageChanged(HISTOGRAM);
     }
@@ -178,33 +172,30 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         int endX = endPoint.x;
         int endY = endPoint.y;
 
-        Color c = FgBgColorSelector.getFG();
-        drawTo(comp, c, startX, startY, false);
-        drawTo(comp, c, endX, endY, false);
+        drawTo(comp, startX, startY, false);
+        drawTo(comp, endX, endY, false);
         finishBrushStroke(comp);
     }
 
     /**
-     * Creates the global Graphics2D object drawingGraphics.
+     * Creates the global Graphics2D object graphics.
      */
-    abstract void initDrawingGraphics(Composition comp, ImageLayer layer);
+    abstract void createGraphics(Composition comp, ImageLayer layer);
 
     /**
      * Called from mousePressed, mouseDragged, and drawBrushStroke
      */
-    private void drawTo(Composition comp, Paint p, int x, int y, boolean connectClickWithLine) {
+    private void drawTo(Composition comp, int x, int y, boolean connectClickWithLine) {
         setupDrawingRadius();
-//        Symmetry currentSymmetry = getCurrentSymmetry();
 
-        if(drawingGraphics == null) { // a new brush stroke has to be initialized
+        if (graphics == null) { // a new brush stroke has to be initialized
 //            if(!connectClickWithLine) {
 //                brushes.reset();
 //            }
 
             ImageLayer imageLayer = (ImageLayer) comp.getActiveLayer();
-            initDrawingGraphics(comp, imageLayer);
-            setupGraphics(drawingGraphics, p);
-            drawingGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            createGraphics(comp, imageLayer);
+            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
             if (connectClickWithLine) {
                 brush.onNewMousePoint(x, y);
@@ -229,8 +220,6 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         brush.setRadius(value);
     }
 
-    protected abstract void setupGraphics(Graphics2D g, Paint p);
-
     @Override
     protected void toolStarted() {
         super.toolStarted();
@@ -250,7 +239,6 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     @Override
     public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
         resetState();
-
     }
 
     private void resetState() {
@@ -267,8 +255,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
             respectSelection = false;
 
             ImageLayer imageLayer = (ImageLayer) comp.getActiveLayer();
-            initDrawingGraphics(comp, imageLayer);
-            setupGraphics(drawingGraphics, FgBgColorSelector.getFG());
+            createGraphics(comp, imageLayer);
 
             doTraceAfterSetup(shape);
 

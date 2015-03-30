@@ -49,16 +49,20 @@ public class AnimGifExport {
             @Override
             protected void dialogAccepted() {
                 close();
-                File file = FileChoosers.selectSaveFileForSpecificFormat(FileChoosers.gifFilter);
-                if(file != null) {
-                    LayerAnimationFrames animation = new LayerAnimationFrames(activeComp,
-                            p.getDelayMillis(), p.isPingPong());
-                    animation.saveToFile(file);
-                    AppLogic.showFileSavedMessage(file);
-                }
+                export(activeComp, p.getDelayMillis(), p.isPingPong());
             }
         };
         d.setVisible(true);
+    }
+
+    private static void export(Composition activeComp, int delayMillis, boolean pingPong) {
+        File file = FileChoosers.selectSaveFileForSpecificFormat(FileChoosers.gifFilter);
+        if (file != null) {
+            LayerAnimationFrames animation = new LayerAnimationFrames(activeComp,
+                    delayMillis, pingPong);
+            animation.saveToFile(file);
+            AppLogic.showFileSavedMessage(file);
+        }
     }
 
     static class ExportPanel extends JPanel {

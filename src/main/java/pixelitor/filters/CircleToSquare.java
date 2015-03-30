@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import pixelitor.filters.gui.ImagePositionParam;
@@ -28,7 +29,7 @@ import java.awt.image.BufferedImage;
  * "Circle to Square" filter
  */
 public class CircleToSquare extends FilterWithParametrizedGUI {
-//    private final CoupledRangeParam radius = new CoupledRangeParam("Radius", 0, 500, 200);
+    // private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 0, 500, 200);
     private final RangeParam radius = new RangeParam("Radius", 0, 500, 200);
 
     private final RangeParam amount = new RangeParam("Amount (%)", -200, 200, 100);

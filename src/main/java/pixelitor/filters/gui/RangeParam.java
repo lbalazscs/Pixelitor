@@ -29,7 +29,8 @@ import java.util.Random;
 
 /**
  * Represents an integer value with a minimum, a maximum and a default.
- * Suitable as the model of a JSlider.
+ * Suitable as the model of a JSlider (but usually used as a model of
+ * an entire SliderSpinner)
  */
 public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, RangeBasedOnImageSize {
     private int minValue;

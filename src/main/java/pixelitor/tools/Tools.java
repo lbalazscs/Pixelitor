@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools;
 
 import pixelitor.tools.shapestool.ShapesTool;
@@ -35,7 +36,7 @@ public class Tools {
     public static final BrushTool BRUSH = new BrushTool();
     public static final CloneTool CLONE = new CloneTool();
 
-    public static final EraseTool ERASER = new EraseTool();
+    public static final EraserTool ERASER = new EraserTool();
     public static final GradientTool GRADIENT = new GradientTool();
     public static final PaintBucketTool PAINT_BUCKET = new PaintBucketTool();
     public static final ColorPickerTool COLOR_PICKER = new ColorPickerTool();

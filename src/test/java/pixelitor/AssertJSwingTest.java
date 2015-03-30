@@ -637,7 +637,7 @@ public class AssertJSwingTest {
     }
 
     protected void testEraserTool() {
-        window.toggleButton("Erase Tool Button").click();
+        window.toggleButton("Eraser Tool Button").click();
         testBrushStrokes();
     }
 

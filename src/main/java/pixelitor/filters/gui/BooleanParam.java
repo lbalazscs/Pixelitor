@@ -31,6 +31,7 @@ public class BooleanParam extends AbstractGUIParam {
     private boolean finalAnimationSettingMode;
 
     // show original should ignore the final animation setting
+    // TODO "Show Original" is not a BooleanParam anymore - is this still needed?
     private boolean ignoreFinalAnimationSettingMode = false;
 
     public BooleanParam(String name, boolean defaultValue) {

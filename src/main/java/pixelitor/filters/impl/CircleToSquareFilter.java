@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.impl;
 
 import net.jafama.FastMath;
@@ -58,7 +59,6 @@ public class CircleToSquareFilter extends CenteredTransformFilter {
         return new Shape[] {rect, ellipse};
     }
 
-
     @Override
     protected void transformInverse(int x, int y, float[] out) {
         float dx = x - cx;
@@ -73,14 +73,17 @@ public class CircleToSquareFilter extends CenteredTransformFilter {
         }
 
         double angle;
-        if (xDist >= (yDist * radiusRatio)) { // we want to move from a vertical line  to the circle
+        if (xDist >= yDist) { // we want to move from a vertical line  to the circle
             angle = FastMath.atan2(dy, xDist);
         } else { // move from horizontal line
             angle = FastMath.atan2(dx, yDist);
         }
 
         double magnificationInverse = FastMath.cos(angle);
-        float transformedX = cx + (float) (dx * magnificationInverse);
+
+        // dividing by radiusRatio transforms the circle-to-square transformation
+        // into an ellipse-to-rectangle transformation
+        float transformedX = cx + (float) (dx * magnificationInverse / radiusRatio);
         float transformedY = cy + (float) (dy * magnificationInverse);
 
         if (amount == 1.0f) {
@@ -91,5 +94,4 @@ public class CircleToSquareFilter extends CenteredTransformFilter {
             out[1] = y + amount * (transformedY - y);
         }
     }
-
 }

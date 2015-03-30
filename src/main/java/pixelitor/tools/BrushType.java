@@ -90,7 +90,7 @@ public enum BrushType implements Supplier<Brush> {
         public Brush get() {
             return new OutlineSquareBrush();
         }
-    }, ONE_PIXEL("1 Pixel") {
+    }, ONE_PIXEL("One Pixel") {
         @Override
         public Brush get() {
             return new OnePixelBrush();
@@ -102,7 +102,6 @@ public enum BrushType implements Supplier<Brush> {
     BrushType(String guiName) {
         this.guiName = guiName;
     }
-
 
     @Override
     public String toString() {
