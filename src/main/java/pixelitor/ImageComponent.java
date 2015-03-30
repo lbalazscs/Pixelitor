@@ -278,8 +278,24 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
         currentTool.paintOverImage(g2, canvas, this, unscaledTransform);
 
-        // restore original transform - is this necessary?
+        // restore original transform
         g2.setTransform(unscaledTransform);
+
+        // draw pixel grid
+        if (zoomLevel.drawPixelGrid()) {
+            g2.setXORMode(Color.BLACK);
+            int pixelSize = (int) zoomLevel.getViewScale();
+            int width = getWidth();
+            int height = getHeight();
+            // vertical lines
+            for (int i = pixelSize; i < width; i += pixelSize) {
+                g2.drawLine(i, 0, i, height);
+            }
+            // horizontal lines
+            for (int i = pixelSize; i < height; i += pixelSize) {
+                g2.drawLine(0, i, width, i);
+            }
+        }
     }
 
     /**
@@ -298,7 +314,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
      */
     @Override
     public void updateRegion(int startX, int startY, int endX, int endY, int thickness) {
-        if(zoomLevel != ZoomLevel.Z100) { // not the 100% view
+        if (zoomLevel != ZoomLevel.Z100) { // not the 100% view
             startX = (int) (drawStartX + viewScale * startX);
             startY = (int) (drawStartY + viewScale * startY);
             endX = (int) (drawStartX + viewScale * endX);
