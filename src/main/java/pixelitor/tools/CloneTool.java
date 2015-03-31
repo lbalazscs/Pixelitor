@@ -20,6 +20,7 @@ package pixelitor.tools;
 import com.bric.util.JVM;
 import pixelitor.Build;
 import pixelitor.ImageDisplay;
+import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.CloneBrush;
 import pixelitor.tools.brushes.ImageBrushType;
 import pixelitor.utils.Dialogs;
@@ -43,6 +44,8 @@ public class CloneTool extends TmpLayerBrushTool {
     private State state = STARTED;
     private boolean sampleAllLayers = false;
 
+    private CloneBrush cloneBrush;
+
     protected CloneTool() {
         super('k', "Clone", "clone_tool_icon.png",
                 "Alt-click to select source, then paint with the copied pixels");
@@ -58,7 +61,7 @@ public class CloneTool extends TmpLayerBrushTool {
 
         JCheckBox alignedCB = new JCheckBox("Aligned", true);
         toolSettingsPanel.add(alignedCB);
-        alignedCB.addActionListener(e -> ((CloneBrush) brush).setAligned(alignedCB.isSelected()));
+        alignedCB.addActionListener(e -> cloneBrush.setAligned(alignedCB.isSelected()));
 
         toolSettingsPanel.addSeparator();
 
@@ -68,8 +71,10 @@ public class CloneTool extends TmpLayerBrushTool {
     }
 
     @Override
-    protected void initBrush() {
-        brush = new CloneBrush(ImageBrushType.SOFT);
+    protected void initBrushVariables() {
+        cloneBrush = new CloneBrush(ImageBrushType.SOFT);
+        brush = new BrushAffectedArea(cloneBrush);
+        brushAffectedArea = (BrushAffectedArea) brush;
     }
 
     @Override
@@ -77,13 +82,11 @@ public class CloneTool extends TmpLayerBrushTool {
         int x = userDrag.getStartX();
         int y = userDrag.getStartY();
 
-        CloneBrush cloneBrush = (CloneBrush) brush;
-
         if(e.isAltDown()) {
-            setCloningSource(ic, x, y, cloneBrush);
+            setCloningSource(ic, x, y);
         } else {
             if(state != SOURCE_DEFINED) {
-                handleUndefinedSource(ic, x, y, cloneBrush);
+                handleUndefinedSource(ic, x, y);
             }
 
             if (!withLine(e)) {  // when drawing with line, the destination should not change for mouse press
@@ -94,11 +97,11 @@ public class CloneTool extends TmpLayerBrushTool {
         }
     }
 
-    private void handleUndefinedSource(ImageDisplay ic, int x, int y, CloneBrush cloneBrush) {
+    private void handleUndefinedSource(ImageDisplay ic, int x, int y) {
         if (Build.CURRENT.isRobotTest()) {
             // special case: do not show dialogs for random robot tests,
             // just act as if this was an alt-click
-            setCloningSource(ic, x, y, cloneBrush);
+            setCloningSource(ic, x, y);
         } else {
             String msg = "Define a source point first with Alt-Click.";
             if (JVM.isLinux) {
@@ -108,7 +111,7 @@ public class CloneTool extends TmpLayerBrushTool {
         }
     }
 
-    protected void setCloningSource(ImageDisplay ic, int x, int y, CloneBrush cloneBrush) {
+    protected void setCloningSource(ImageDisplay ic, int x, int y) {
         BufferedImage sourceImage;
         if (sampleAllLayers) {
             sourceImage = ic.getComp().getCompositeImage();

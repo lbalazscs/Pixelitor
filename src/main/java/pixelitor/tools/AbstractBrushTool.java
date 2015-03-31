@@ -62,7 +62,8 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     private final EnumComboBoxModel<Symmetry> symmetryModel = new EnumComboBoxModel<>(Symmetry.class);
 
     protected Brush brush;
-    private final BrushAffectedArea brushAffectedArea = new BrushAffectedArea();
+    private SymmetryBrush symmetryBrush;
+    protected BrushAffectedArea brushAffectedArea;
 
     private boolean firstMouseDown = true; // for the first click don't draw lines even if it is a shift-click
 
@@ -70,11 +71,14 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         super(activationKeyChar, name, iconFileName, toolMessage,
                 Cursor.getDefaultCursor(), true, true, false, ClipStrategy.IMAGE_ONLY);
         ImageComponents.addImageSwitchListener(this);
-        initBrush();
+        initBrushVariables();
     }
 
-    protected void initBrush() {
-        brush = new SymmetryBrush(BrushType.values()[0], getCurrentSymmetry(), brushAffectedArea);
+    protected void initBrushVariables() {
+        symmetryBrush = new SymmetryBrush(
+                BrushType.values()[0], getCurrentSymmetry());
+        brush = symmetryBrush;
+        brushAffectedArea = symmetryBrush.getAffectedArea();
     }
 
     Symmetry getCurrentSymmetry() {
@@ -89,7 +93,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         toolSettingsPanel.add(typeSelector);
         typeSelector.addActionListener(e -> {
             Supplier<Brush> brushType = (Supplier<Brush>) typeSelector.getSelectedItem();
-            ((SymmetryBrush) brush).brushTypeChanged(brushType);
+            symmetryBrush.brushTypeChanged(brushType);
         });
 
         // make sure all values are visible without a scrollbar
@@ -102,7 +106,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         @SuppressWarnings("unchecked")
         JComboBox<Symmetry> symmetryCombo = new JComboBox<>(symmetryModel);
         symmetryCombo.setName("symmetrySelector");
-        symmetryCombo.addActionListener(e -> ((SymmetryBrush) brush).symmetryChanged(getCurrentSymmetry()));
+        symmetryCombo.addActionListener(e -> symmetryBrush.symmetryChanged(getCurrentSymmetry()));
 
         toolSettingsPanel.add(symmetryCombo);
     }
@@ -148,16 +152,20 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     }
 
     /**
-     * Returns the original image for undo
+     * Returns the original (untouched) image for undo
      */
-    abstract BufferedImage getFullUntouchedImage(Composition comp);
+    abstract BufferedImage getOriginalImage(Composition comp);
 
     abstract void mergeTmpLayer(Composition comp);
 
     private void finishBrushStroke(Composition comp) {
-        ToolAffectedArea affectedArea = new ToolAffectedArea(comp, brushAffectedArea.getRectangleAffectedByBrush(brushRadiusParam.getValue()), false);
-        saveSubImageForUndo(getFullUntouchedImage(comp), affectedArea);
+        int radius = brushRadiusParam.getValue();
+        ToolAffectedArea affectedArea = new ToolAffectedArea(comp,
+                brushAffectedArea.getRectangleAffectedByBrush(radius), false);
+        saveSubImageForUndo(getOriginalImage(comp), affectedArea);
+
         mergeTmpLayer(comp);
+
         if (graphics != null) {
             graphics.dispose();
         }

@@ -63,7 +63,7 @@ public class DirectBrushTool extends AbstractBrushTool {
     }
 
     @Override
-    BufferedImage getFullUntouchedImage(Composition comp) {
+    BufferedImage getOriginalImage(Composition comp) {
         if (copyBeforeStart == null) {
             throw new IllegalStateException("EraseTool: copyBeforeStart == null");
         }

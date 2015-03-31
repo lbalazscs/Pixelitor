@@ -217,8 +217,8 @@ public abstract class Tool {
      * It saves the intersection of the selection (if there is one) with the maximal affected area.
      */
     // TODO currently it does not take the selection into account
-    public void saveSubImageForUndo(BufferedImage fullUntouchedImage, ToolAffectedArea affectedArea) {
-        assert (fullUntouchedImage != null);
+    public void saveSubImageForUndo(BufferedImage originalImage, ToolAffectedArea affectedArea) {
+        assert (originalImage != null);
         Rectangle rectangleAffectedByTool = affectedArea.getRectangle();
         if (rectangleAffectedByTool.isEmpty()) {
             return;
@@ -226,12 +226,12 @@ public abstract class Tool {
 
         Composition comp = affectedArea.getComp();
 
-        Rectangle fullImageBounds = new Rectangle(0, 0, fullUntouchedImage.getWidth(), fullUntouchedImage.getHeight());
+        Rectangle fullImageBounds = new Rectangle(0, 0, originalImage.getWidth(), originalImage.getHeight());
         // TODO SwingUtilities.computeIntersection can do this without allocating a rectangle
         Rectangle saveRectangle = rectangleAffectedByTool.intersection(fullImageBounds);
 
         if (!saveRectangle.isEmpty()) {
-            PartialImageEdit edit = new PartialImageEdit(getName(), comp, fullUntouchedImage, saveRectangle, false);
+            PartialImageEdit edit = new PartialImageEdit(getName(), comp, originalImage, saveRectangle, false);
             History.addEdit(edit);
         }
     }

@@ -18,7 +18,6 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.Composition;
-import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.Symmetry;
 
 import java.awt.Graphics2D;
@@ -31,20 +30,22 @@ public class SymmetryBrush implements Brush {
     private static final int MAX_BRUSHES = 4;
 
     private final Brush[] brushes = new Brush[MAX_BRUSHES];
-    private int radius = AbstractBrushTool.DEFAULT_BRUSH_RADIUS;
-    //    private Composition comp;
     private int numInstantiatedBrushes;
     private Supplier<Brush> brushSupplier;
     private Symmetry symmetry;
     private final BrushAffectedArea affectedArea;
 
-    public SymmetryBrush(Supplier<Brush> brushSupplier, Symmetry symmetry, BrushAffectedArea affectedArea) {
+    public SymmetryBrush(Supplier<Brush> brushSupplier, Symmetry symmetry) {
         this.brushSupplier = brushSupplier;
         this.symmetry = symmetry;
-        this.affectedArea = affectedArea;
+        this.affectedArea = new BrushAffectedArea();
         numInstantiatedBrushes = symmetry.getNumBrushes();
         assert numInstantiatedBrushes <= MAX_BRUSHES;
         brushTypeChanged(brushSupplier);
+    }
+
+    public BrushAffectedArea getAffectedArea() {
+        return affectedArea;
     }
 
     @Override
@@ -56,7 +57,6 @@ public class SymmetryBrush implements Brush {
 
     @Override
     public void setRadius(int radius) {
-        this.radius = radius;
         for(int i = 0; i < numInstantiatedBrushes; i++) {
             assert brushes[i] != null : "i = " + i + ", numInstantiatedBrushes = " + numInstantiatedBrushes;
             brushes[i].setRadius(radius);
@@ -100,12 +100,6 @@ public class SymmetryBrush implements Brush {
 
     public void onNewMousePoint(int brushNo, int endX, int endY) {
         affectedArea.updateAffectedCoordinates(endX, endY);
-
-        if(radius <= 0) {
-            throw new IllegalStateException("radius is " + radius);
-        }
-
         brushes[brushNo].onNewMousePoint(endX, endY);
-//        comp.updateRegion(startX, startY, endX, endY, 2 * radius);
     }
 }

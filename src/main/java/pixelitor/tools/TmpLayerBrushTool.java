@@ -55,7 +55,7 @@ public abstract class TmpLayerBrushTool extends AbstractBrushTool {
 
 
     @Override
-    BufferedImage getFullUntouchedImage(Composition comp) {
+    BufferedImage getOriginalImage(Composition comp) {
         // it can simply return the layer image because
         // the drawing was on the temporary layer
         return comp.getActiveImageLayer().getImage();
