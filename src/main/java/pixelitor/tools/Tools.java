@@ -37,6 +37,7 @@ public class Tools {
     public static final CloneTool CLONE = new CloneTool();
 
     public static final EraserTool ERASER = new EraserTool();
+    //    public static final SmudgeTool SMUDGE = new SmudgeTool();
     public static final GradientTool GRADIENT = new GradientTool();
     public static final PaintBucketTool PAINT_BUCKET = new PaintBucketTool();
     public static final ColorPickerTool COLOR_PICKER = new ColorPickerTool();
@@ -51,9 +52,9 @@ public class Tools {
      * All the subclass tools in an array.
      */
     private static final Tool[] allTools =
-            {MOVE, CROP, SELECTION, BRUSH,
-                    CLONE,
-                    ERASER, GRADIENT, PAINT_BUCKET, COLOR_PICKER, SHAPES, HAND, ZOOM};
+            {MOVE, CROP, SELECTION, BRUSH, CLONE, ERASER,
+//                    SMUDGE,
+                    GRADIENT, PAINT_BUCKET, COLOR_PICKER, SHAPES, HAND, ZOOM};
 
     public static Tool[] getTools() {
         return allTools;
