@@ -369,12 +369,13 @@ public class ImageLayer extends ContentLayer {
             if (shouldRefresh) {
                 comp.imageChanged(FULL);
             }
-        }
-        imageContentChanged = true; // history will be necessary
+        } else {
+            imageContentChanged = true; // history will be necessary
 
-        setPreviewWithSelection(img);
-        setState(PREVIEW);
-        comp.imageChanged(FULL);
+            setPreviewWithSelection(img);
+            setState(PREVIEW);
+            comp.imageChanged(FULL);
+        }
     }
 
     public void filterWithoutDialogFinished(BufferedImage transformedImage, ChangeReason changeReason, String opName) {
