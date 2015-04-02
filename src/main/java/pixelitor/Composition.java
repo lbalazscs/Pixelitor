@@ -234,9 +234,7 @@ public class Composition implements Serializable {
 
     public void changePreviewImage(BufferedImage img, String filterName) {
         ImageLayer layer = (ImageLayer) activeLayer;
-        if (layer.changePreviewImage(img, filterName)) {
-            imageChanged(FULL);
-        }
+        layer.changePreviewImage(img, filterName);
     }
 
     /**

@@ -340,12 +340,15 @@ public class ImageLayer extends ContentLayer {
     /**
      * @return true if the image has to be repainted
      */
-    public boolean changePreviewImage(BufferedImage img, String filterName) {
+    public void changePreviewImage(BufferedImage img, String filterName) {
 //        System.out.println(String.format("ImageLayer::changePreviewImage: filterName = '%s'", filterName));
 
-        assert state == PREVIEW : "state was " + state +
-                ", with the filter " + filterName +
-                ", in the composition " + comp.getName();
+        if (state == SHOW_ORIGINAL) {
+            // something was adjusted while in show original mode
+        } else if (state == NORMAL) {
+            throw new IllegalStateException("change preview in normal");
+        }
+
         assert previewImage != null : "previewImage was null with " + filterName;
 
         if(img == null) {
@@ -363,14 +366,15 @@ public class ImageLayer extends ContentLayer {
             boolean shouldRefresh = image != previewImage;
             previewImage = image;
 
-            return shouldRefresh;
+            if (shouldRefresh) {
+                comp.imageChanged(FULL);
+            }
         }
         imageContentChanged = true; // history will be necessary
 
         setPreviewWithSelection(img);
         setState(PREVIEW);
-        comp.imageChanged(INVALIDATE_CACHE);
-        return true;
+        comp.imageChanged(FULL);
     }
 
     public void filterWithoutDialogFinished(BufferedImage transformedImage, ChangeReason changeReason, String opName) {

@@ -25,6 +25,8 @@ import pixelitor.utils.Utils;
 import javax.swing.*;
 import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustmentListener {
     /**
@@ -32,6 +34,7 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
      * ParametrizedAdjustPanel is created
      */
     private static boolean resetParams = true;
+    private ShowOriginalCB showOriginalCB;
 
     public ParametrizedAdjustPanel(FilterWithParametrizedGUI filter, boolean addShowOriginal) {
         this(filter, null, addShowOriginal);
@@ -59,7 +62,7 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
         setupControlsInColumn(this, params, addShowOriginal);
     }
 
-    public static void setupControlsInColumn(JPanel parent, Iterable<GUIParam> params, boolean addShowOriginal) {
+    public void setupControlsInColumn(JPanel parent, Iterable<GUIParam> params, boolean addShowOriginal) {
         parent.setLayout(new GridBagLayout());
 
         int row = 0;
@@ -92,8 +95,7 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
         if (addShowOriginal) {
             gbHelper.addLabel("Show Original:", 0, row);
 
-            JCheckBox showOriginalCB = new JCheckBox();
-            showOriginalCB.addActionListener(e -> Utils.setShowOriginal(showOriginalCB.isSelected()));
+            showOriginalCB = new ShowOriginalCB();
 
             gbHelper.addLastControl(showOriginalCB);
         }
@@ -101,10 +103,32 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
 
     @Override
     public void paramAdjusted() {
+        showOriginalCB.deselectWithoutTriggering();
         super.executeFilterPreview();
     }
 
     public static void setResetParams(boolean resetParams) {
         ParametrizedAdjustPanel.resetParams = resetParams;
+    }
+
+    static class ShowOriginalCB extends JCheckBox {
+        private boolean trigger = true;
+
+        public ShowOriginalCB() {
+            addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (trigger) {
+                        Utils.setShowOriginal(isSelected());
+                    }
+                }
+            });
+        }
+
+        public void deselectWithoutTriggering() {
+            trigger = false;
+            setSelected(false);
+            trigger = true;
+        }
     }
 }

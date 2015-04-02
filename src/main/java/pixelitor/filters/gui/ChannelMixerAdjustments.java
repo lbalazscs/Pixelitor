@@ -34,7 +34,7 @@ public class ChannelMixerAdjustments extends ParametrizedAdjustPanel {
         Action[] actions = (Action[]) otherInfo;
 
         JPanel leftPanel = new JPanel();
-        ParametrizedAdjustPanel.setupControlsInColumn(leftPanel, params, addShowOriginal);
+        setupControlsInColumn(leftPanel, params, addShowOriginal);
 
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
