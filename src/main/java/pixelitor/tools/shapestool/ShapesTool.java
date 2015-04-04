@@ -208,8 +208,10 @@ public class ShapesTool extends Tool {
             Rectangle shapeBounds = currentShape.getBounds();
             shapeBounds.grow(thickness, thickness);
 
-            ToolAffectedArea affectedArea = new ToolAffectedArea(comp, shapeBounds, false);
-            saveSubImageForUndo(comp.getActiveImageLayer().getImage(), affectedArea);
+            if (!shapeBounds.isEmpty()) {
+                ToolAffectedArea affectedArea = new ToolAffectedArea(comp, shapeBounds, false);
+                saveSubImageForUndo(comp.getActiveImageLayer().getImage(), affectedArea);
+            }
         }
 
         paintShapeOnIC(comp, userDrag);

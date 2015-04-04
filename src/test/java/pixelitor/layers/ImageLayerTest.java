@@ -113,7 +113,7 @@ public class ImageLayerTest {
         assertEquals(ImageLayer.State.NORMAL, layer.getState());
     }
 
-    @Test(expected = AssertionError.class)
+    @Test(expected = IllegalStateException.class)
     public void testChangePreviewImage_Fail() {
         layer.changePreviewImage(TestHelper.createTestImage(), "filterName");
         assertEquals(ImageLayer.State.PREVIEW, layer.getState());

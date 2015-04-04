@@ -101,15 +101,21 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
 
     @Override
     public void paramAdjusted() {
-        showOriginalCB.deselectWithoutTriggering();
+        if (hasShowOriginal()) {
+            showOriginalCB.deselectWithoutTriggering();
+        }
         super.executeFilterPreview();
+    }
+
+    private boolean hasShowOriginal() {
+        return showOriginalCB != null;
     }
 
     public static void setResetParams(boolean resetParams) {
         ParametrizedAdjustPanel.resetParams = resetParams;
     }
 
-    static class ShowOriginalCB extends JCheckBox {
+    private static class ShowOriginalCB extends JCheckBox {
         private boolean trigger = true;
 
         public ShowOriginalCB() {

@@ -346,7 +346,7 @@ public class ImageLayer extends ContentLayer {
         if (state == SHOW_ORIGINAL) {
             // something was adjusted while in show original mode
         } else if (state == NORMAL) {
-            throw new IllegalStateException("change preview in normal");
+            throw new IllegalStateException("change preview in normal state");
         }
 
         assert previewImage != null : "previewImage was null with " + filterName;

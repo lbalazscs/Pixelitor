@@ -77,7 +77,7 @@ public class AssertJSwingTest {
 
     protected void setUpRobot() {
         robot = BasicRobot.robotWithNewAwtHierarchy();
-        robot.settings().delayBetweenEvents(500);
+        robot.settings().delayBetweenEvents(100);
     }
 
     @Before
@@ -109,11 +109,11 @@ public class AssertJSwingTest {
     }
 
     protected void testTools() {
+        testSelectionTool();
+        testCloneTool();
         testZoomTool();
         testMoveTool();
         testCropTool();
-        testSelectionTool();
-        testCloneTool();
         testEraserTool();
         testBrushTool();
         testGradientTool();
