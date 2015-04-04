@@ -14,16 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.menus.view;
 
 import pixelitor.PixelitorWindow;
 import pixelitor.layers.LayersContainer;
 
+import javax.swing.*;
+
 /**
  * An either "Show Hidden" or "Hide All" action, depending on the current visibility
  */
 public class ShowHideAllAction extends ShowHideAction {
-    public static final ShowHideAllAction INSTANCE = new ShowHideAllAction();
+    public static final Action INSTANCE = new ShowHideAllAction();
 
     private boolean histogramsWereShown = false;
     private boolean layersWereShown = false;

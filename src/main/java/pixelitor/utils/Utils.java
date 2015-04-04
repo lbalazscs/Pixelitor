@@ -55,7 +55,6 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -346,15 +345,12 @@ public final class Utils {
             double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
             results.put(filter.getName(), estimatedSeconds);
         }
-        Collections.sort(filtersToTest, new Comparator<Filter>() {
-            @Override
-            public int compare(Filter o1, Filter o2) {
-                double o1Time = results.get(o1.getName());
-                double o2Time = results.get(o2.getName());
+        Collections.sort(filtersToTest, (o1, o2) -> {
+            double o1Time = results.get(o1.getName());
+            double o2Time = results.get(o2.getName());
 //                System.out.println(String.format("Utils::compare: % with %s o1Time = %.2f, o2Time = %.2f",
 //                        o1.getName(), o2.getName(), o1Time, o2Time));
-                return (o1Time - o2Time) > 0 ? 1 : -1;
-            }
+            return (o1Time - o2Time) > 0 ? 1 : -1;
         });
         for (Filter filter : filtersToTest) {
             String name = filter.getName();

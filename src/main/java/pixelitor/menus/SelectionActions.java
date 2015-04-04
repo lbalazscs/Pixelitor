@@ -36,29 +36,29 @@ import static pixelitor.ImageComponents.getActiveComp;
  */
 public final class SelectionActions {
 
-    private static final AbstractAction cropAction = new AbstractAction("Crop") {
+    private static final Action cropAction = new AbstractAction("Crop") {
         @Override
         public void actionPerformed(ActionEvent e) {
             ImageComponents.selectionCropActiveImage();
         }
     };
 
-    private static final AbstractAction deselectAction = new AbstractAction("Deselect") {
+    private static final Action deselectAction = new AbstractAction("Deselect") {
         @Override
         public void actionPerformed(ActionEvent e) {
             getActiveComp().get().deselect(true);
         }
     };
 
-    private static final AbstractAction invertSelectionAction = new AbstractAction("Invert Selection") {
+    private static final Action invertSelectionAction = new AbstractAction("Invert Selection") {
         @Override
         public void actionPerformed(ActionEvent e) {
             getActiveComp().get().invertSelection();
         }
     };
 
-    private static final AbstractAction traceWithBrush = new TraceAction("Stroke with Current Brush", Tools.BRUSH);
-    private static final AbstractAction traceWithEraser = new TraceAction("Stroke with Current Eraser", Tools.ERASER);
+    private static final Action traceWithBrush = new TraceAction("Stroke with Current Brush", Tools.BRUSH);
+    private static final Action traceWithEraser = new TraceAction("Stroke with Current Eraser", Tools.ERASER);
 
     static {
         setEnabled(false, null);

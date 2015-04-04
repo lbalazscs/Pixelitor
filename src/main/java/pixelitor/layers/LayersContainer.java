@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.layers;
 
 import pixelitor.ImageComponent;
@@ -55,8 +56,13 @@ public class LayersContainer extends JPanel implements ImageSwitchListener {
         JButton addButton = createButtonFromAction(AddNewLayerAction.INSTANCE);
         JButton deleteButton = createButtonFromAction(DeleteActiveLayerAction.INSTANCE);
 
+        JButton duplicateButton = createButtonFromAction(DuplicateLayerAction.INSTANCE);
+
         southPanel.add(addButton);
         southPanel.add(deleteButton);
+
+        southPanel.add(duplicateButton);
+
         return southPanel;
     }
 

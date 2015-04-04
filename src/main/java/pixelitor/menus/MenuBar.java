@@ -52,6 +52,7 @@ import pixelitor.layers.AddNewLayerAction;
 import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.DeleteActiveLayerAction;
+import pixelitor.layers.DuplicateLayerAction;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMoveAction;
@@ -630,14 +631,14 @@ public class MenuBar extends JMenuBar {
         };
         createMenuItem(mergeDownAction, layersMenu, CTRL_E);
 
-        Action duplicateLayerAction = new MenuAction("Duplicate Layer") {
-            @Override
-            void onClick() {
-                Composition comp = ImageComponents.getActiveComp().get();
-                comp.duplicateLayer();
-            }
-        };
-        createMenuItem(duplicateLayerAction, layersMenu, CTRL_J);
+//        Action duplicateLayerAction = new MenuAction("Duplicate Layer") {
+//            @Override
+//            void onClick() {
+//                Composition comp = ImageComponents.getActiveComp().get();
+//                comp.duplicateLayer();
+//            }
+//        };
+        createMenuItem(DuplicateLayerAction.INSTANCE, layersMenu, CTRL_J);
 
         Action newLayerFromCompositeAction = new MenuAction("New Layer from Composite") {
             @Override

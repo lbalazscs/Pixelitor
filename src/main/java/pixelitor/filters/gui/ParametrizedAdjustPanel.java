@@ -25,8 +25,6 @@ import pixelitor.utils.Utils;
 import javax.swing.*;
 import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustmentListener {
     /**
@@ -115,12 +113,9 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
         private boolean trigger = true;
 
         public ShowOriginalCB() {
-            addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if (trigger) {
-                        Utils.setShowOriginal(isSelected());
-                    }
+            addActionListener(e -> {
+                if (trigger) {
+                    Utils.setShowOriginal(isSelected());
                 }
             });
         }
