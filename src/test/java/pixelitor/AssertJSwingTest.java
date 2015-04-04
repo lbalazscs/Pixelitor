@@ -24,6 +24,7 @@ import org.assertj.swing.core.Robot;
 import org.assertj.swing.finder.JFileChooserFinder;
 import org.assertj.swing.finder.JOptionPaneFinder;
 import org.assertj.swing.finder.WindowFinder;
+import org.assertj.swing.fixture.ComponentContainerFixture;
 import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.fixture.JButtonFixture;
@@ -31,6 +32,7 @@ import org.assertj.swing.fixture.JCheckBoxFixture;
 import org.assertj.swing.fixture.JFileChooserFixture;
 import org.assertj.swing.fixture.JMenuItemFixture;
 import org.assertj.swing.fixture.JOptionPaneFixture;
+import org.assertj.swing.fixture.JTabbedPaneFixture;
 import org.assertj.swing.fixture.JTextComponentFixture;
 import org.assertj.swing.fixture.JToggleButtonFixture;
 import org.assertj.swing.launcher.ApplicationLauncher;
@@ -38,12 +40,16 @@ import org.fest.util.Files;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.io.FileChoosers;
 import pixelitor.layers.LayerButton;
+import pixelitor.menus.view.ZoomLevel;
 import pixelitor.tools.BrushType;
 import pixelitor.tools.GradientColorType;
 import pixelitor.tools.GradientTool;
 import pixelitor.tools.GradientType;
+import pixelitor.tools.ShapeType;
+import pixelitor.tools.ShapesAction;
 import pixelitor.tools.Symmetry;
 
 import javax.swing.*;
@@ -56,6 +62,7 @@ import static java.awt.event.KeyEvent.VK_ALT;
 import static java.awt.event.KeyEvent.VK_CONTROL;
 import static java.awt.event.KeyEvent.VK_D;
 import static java.awt.event.KeyEvent.VK_I;
+import static java.awt.event.KeyEvent.VK_SHIFT;
 import static java.awt.event.KeyEvent.VK_Z;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -64,18 +71,18 @@ import static org.junit.Assert.assertTrue;
 
 @Ignore
 public class AssertJSwingTest {
-    public static final File BASE_TESTING_DIR = new File("C:\\pix_tests");
-    public static final File INPUT_DIR = new File(BASE_TESTING_DIR, "input");
-    public static final File BATCH_RESIZE_OUTPUT_DIR = new File(BASE_TESTING_DIR, "batch_resize_output");
-    public static final File BATCH_FILTER_OUTPUT_DIR = new File(BASE_TESTING_DIR, "batch_filter_output");
+    private static final File BASE_TESTING_DIR = new File("C:\\pix_tests");
+    private static final File INPUT_DIR = new File(BASE_TESTING_DIR, "input");
+    private static final File BATCH_RESIZE_OUTPUT_DIR = new File(BASE_TESTING_DIR, "batch_resize_output");
+    private static final File BATCH_FILTER_OUTPUT_DIR = new File(BASE_TESTING_DIR, "batch_filter_output");
 
     private FrameFixture window;
-    private Random random = new Random();
+    private final Random random = new Random();
     private Robot robot;
 
     enum Randomize {YES, NO}
 
-    protected void setUpRobot() {
+    private void setUpRobot() {
         robot = BasicRobot.robotWithNewAwtHierarchy();
         robot.settings().delayBetweenEvents(100);
     }
@@ -108,7 +115,7 @@ public class AssertJSwingTest {
         sleep(5, SECONDS);
     }
 
-    protected void testTools() {
+    private void testTools() {
         testSelectionTool();
         testCloneTool();
         testZoomTool();
@@ -121,6 +128,15 @@ public class AssertJSwingTest {
         testColorPickerTool();
         testShapesTool();
         testHandTool();
+    }
+
+    private void testMenus() {
+        testFileMenu();
+        testEditMenu();
+        testFilters();
+        testZoomCommands();
+        testViewCommands();
+        testHelpMenu();
     }
 
     private void testLayers() {
@@ -138,16 +154,7 @@ public class AssertJSwingTest {
         }));
     }
 
-    protected void testMenus() {
-        testFileMenu();
-        testEditMenu();
-        testFilters();
-        testZoomCommands();
-        testViewCommands();
-        testHelpMenu();
-    }
-
-    protected void testHelpMenu() {
+    private void testHelpMenu() {
         testTipOfTheDay();
         testCheckForUpdate();
         testAbout();
@@ -156,10 +163,10 @@ public class AssertJSwingTest {
     private void testTipOfTheDay() {
         findMenuItemByText("Tip of the Day").click();
         DialogFixture dialog = findDialogByTitle("Tip of the Day");
-        findButtonInDialogByText(dialog, "Next >").click();
-        findButtonInDialogByText(dialog, "Next >").click();
-        findButtonInDialogByText(dialog, "< Back").click();
-        findButtonInDialogByText(dialog, "Close").click();
+        findButtonByText(dialog, "Next >").click();
+        findButtonByText(dialog, "Next >").click();
+        findButtonByText(dialog, "< Back").click();
+        findButtonByText(dialog, "Close").click();
     }
 
     private void testCheckForUpdate() {
@@ -170,10 +177,17 @@ public class AssertJSwingTest {
     private void testAbout() {
         findMenuItemByText("About").click();
         DialogFixture aboutDialog = findDialogByTitle("About Pixelitor");
+
+        JTabbedPaneFixture tabbedPane = aboutDialog.tabbedPane();
+        tabbedPane.requireTabTitles("About", "Credits", "System Info");
+        tabbedPane.selectTab("Credits");
+        tabbedPane.selectTab("System Info");
+        tabbedPane.selectTab("About");
+
         aboutDialog.button("ok").click();
     }
 
-    protected void testEditMenu() {
+    private void testEditMenu() {
         keyboardInvert();
         runMenuCommand("Repeat Invert");
         runMenuCommand("Undo Invert");
@@ -232,7 +246,7 @@ public class AssertJSwingTest {
         runMenuCommand("Paste as New Image");
     }
 
-    protected void testFileMenu() {
+    private void testFileMenu() {
         testNewImage();
         testSaveUnnamed();
         testClose();
@@ -249,7 +263,7 @@ public class AssertJSwingTest {
         testCloseAll();
     }
 
-    protected void testNewImage() {
+    private void testNewImage() {
         findMenuItemByText("New Image...").click();
         DialogFixture newImageDialog = findDialogByTitle("New Image");
         newImageDialog.textBox("widthTF").deleteText().enterText("611");
@@ -257,7 +271,7 @@ public class AssertJSwingTest {
         newImageDialog.button("ok").click();
     }
 
-    protected void testFileOpen() {
+    private void testFileOpen() {
         findMenuItemByText("Open...").click();
         JFileChooserFixture openDialog = JFileChooserFinder.findFileChooser("open").using(robot);
         openDialog.cancel();
@@ -431,7 +445,7 @@ public class AssertJSwingTest {
         dialog.button("ok").click();
     }
 
-    protected void testViewCommands() {
+    private void testViewCommands() {
         runMenuCommand("Set Default Workspace");
         runMenuCommand("Hide Status Bar");
         runMenuCommand("Show Status Bar");
@@ -450,33 +464,19 @@ public class AssertJSwingTest {
         runMenuCommand("Tile");
     }
 
-    protected void testZoomCommands() {
+    private void testZoomCommands() {
         runMenuCommand("Zoom In");
         runMenuCommand("Zoom Out");
         runMenuCommand("Actual Pixels");
         runMenuCommand("Fit Screen");
-        runMenuCommand("12.5 %");
-        runMenuCommand("17.7 %");
-        runMenuCommand("25 %");
-        runMenuCommand("35.3 %");
-        runMenuCommand("50 %");
-        runMenuCommand("70.7 %");
-        runMenuCommand("100 %");
-        runMenuCommand("141.4 %");
-        runMenuCommand("200 %");
-        runMenuCommand("282.8 %");
-        runMenuCommand("400 %");
-        runMenuCommand("565.7 %");
-        runMenuCommand("800 %");
-        runMenuCommand("1131.4 %");
-        runMenuCommand("1600 %");
-        runMenuCommand("2262.7 %");
-        runMenuCommand("3200 %");
-        runMenuCommand("4525.5 %");
-        runMenuCommand("6400 %");
+
+        ZoomLevel[] values = ZoomLevel.values();
+        for (ZoomLevel zoomLevel : values) {
+            runMenuCommand(zoomLevel.toString());
+        }
     }
 
-    protected void testFilters() {
+    private void testFilters() {
         testFilterWithDialog("Color Balance...", Randomize.YES);
         testFilterWithDialog("Hue/Saturation...", Randomize.YES);
         testFilterWithDialog("Colorize...", Randomize.YES);
@@ -580,8 +580,10 @@ public class AssertJSwingTest {
 
     private void testNoDialogFilter(String name) {
         runMenuCommand(name);
-    }
 
+        keyboardUndoRedo();
+        keyboardUndo();
+    }
 
     private void testFilterWithDialog(String name, Randomize randomize) {
         // window.menuItem(name).click();
@@ -593,30 +595,98 @@ public class AssertJSwingTest {
             filterDialog.button("Randomize Settings").click();
         }
         filterDialog.button("ok").click();
+
+        keyboardUndoRedo();
+        keyboardUndo();
     }
 
-    protected void testHandTool() {
+    private void testHandTool() {
         window.toggleButton("Hand Tool Button").click();
+
+        moveRandom();
+        dragRandom();
     }
 
-    protected void testShapesTool() {
+    private void testShapesTool() {
         window.toggleButton("Shapes Tool Button").click();
+
+        setupEffectsDialog();
+        boolean stokeSettingsSetup = false;
+
+        for (ShapeType shapeType : ShapeType.values()) {
+            window.comboBox("shapeTypeCB").selectItem(shapeType.toString());
+            for (ShapesAction shapesAction : ShapesAction.values()) {
+                window.comboBox("actionCB").selectItem(shapesAction.toString());
+                window.pressAndReleaseKeys(KeyEvent.VK_R);
+
+                if (shapesAction == ShapesAction.STROKE) { // stroke settings will be enabled here
+                    if (!stokeSettingsSetup) {
+                        setupStrokeSettingsDialog();
+                        stokeSettingsSetup = true;
+                    }
+                }
+
+                moveRandom();
+                dragRandom();
+
+                if (shapesAction == ShapesAction.SELECTION || shapesAction == ShapesAction.SELECTION_FROM_STROKE) {
+                    keyboardDeselect();
+                }
+            }
+        }
+
+        keyboardUndoRedo();
+        keyboardUndo();
     }
 
-    protected void testColorPickerTool() {
+    private void setupEffectsDialog() {
+        findButtonByText(window, "Effects...").click();
+
+        DialogFixture dialog = findDialogByTitle("Effects");
+        JTabbedPaneFixture tabbedPane = dialog.tabbedPane();
+        tabbedPane.requireTabTitles(
+                EffectsPanel.GLOW_TAB_NAME,
+                EffectsPanel.INNER_GLOW_TAB_NAME,
+                EffectsPanel.NEON_BORDER_TAB_NAME,
+                EffectsPanel.DROP_SHADOW_TAB_NAME);
+        tabbedPane.selectTab(EffectsPanel.INNER_GLOW_TAB_NAME);
+        tabbedPane.selectTab(EffectsPanel.NEON_BORDER_TAB_NAME);
+        tabbedPane.selectTab(EffectsPanel.DROP_SHADOW_TAB_NAME);
+        tabbedPane.selectTab(EffectsPanel.GLOW_TAB_NAME);
+
+        dialog.checkBox("enabledCB").check();
+
+        dialog.button("ok").click();
+    }
+
+    private void setupStrokeSettingsDialog() {
+        findButtonByText(window, "Stroke Settings...").click();
+        sleep(1, SECONDS);
+        DialogFixture dialog = findDialogByTitle("Stroke Settings");
+
+        dialog.slider().slideTo(20);
+
+        dialog.button("ok").click();
+    }
+
+
+    private void testColorPickerTool() {
         window.toggleButton("Color Picker Tool Button").click();
         move(300, 300);
         window.click();
         drag(400, 400);
     }
 
-    protected void testPaintBucketTool() {
+    private void testPaintBucketTool() {
         window.toggleButton("Paint Bucket Tool Button").click();
         move(300, 300);
         window.click();
+
+        keyboardUndoRedo();
+        keyboardUndo();
     }
 
-    protected void testGradientTool() {
+    private void testGradientTool() {
         window.toggleButton("Gradient Tool Button").click();
         for (GradientType gradientType : GradientType.values()) {
             window.comboBox("gradientTypeSelector").selectItem(gradientType.toString());
@@ -634,30 +704,20 @@ public class AssertJSwingTest {
                 }
             }
         }
+        keyboardUndoRedo();
     }
 
-    protected void testEraserTool() {
+    private void testEraserTool() {
         window.toggleButton("Eraser Tool Button").click();
         testBrushStrokes();
     }
 
-    protected void testBrushTool() {
+    private void testBrushTool() {
         window.toggleButton("Brush Tool Button").click();
         testBrushStrokes();
     }
 
-    protected void testCloneTool() {
-        window.toggleButton("Clone Tool Button").click();
-        move(300, 300);
-        window.pressKey(VK_ALT).click().releaseKey(VK_ALT);
-        move(400, 300);
-        for (int i = 1; i <= 20; i++) {
-            drag(400 + i * 5, 300);
-            drag(400 + i * 5, 400);
-        }
-    }
-
-    protected void testBrushStrokes() {
+    private void testBrushStrokes() {
         for (BrushType brushType : BrushType.values()) {
             window.comboBox("brushTypeSelector").selectItem(brushType.toString());
             for (Symmetry symmetry : Symmetry.values()) {
@@ -667,9 +727,44 @@ public class AssertJSwingTest {
                 dragRandom();
             }
         }
+        keyboardUndoRedo();
     }
 
-    protected void testSelectionTool() {
+    private void testCloneTool() {
+        window.toggleButton("Clone Tool Button").click();
+
+        testClone(false, false, 100);
+        testClone(false, true, 200);
+        testClone(true, false, 300);
+        testClone(true, true, 400);
+    }
+
+    private void testClone(boolean aligned, boolean sampleAllLayers, int startX) {
+        if (aligned) {
+            window.checkBox("alignedCB").check();
+        } else {
+            window.checkBox("alignedCB").uncheck();
+        }
+
+        if (sampleAllLayers) {
+            window.checkBox("sampleAllLayersCB").check();
+        } else {
+            window.checkBox("sampleAllLayersCB").uncheck();
+        }
+
+        move(300, 300);
+        window.pressKey(VK_ALT).click().releaseKey(VK_ALT);
+
+        move(startX, 300);
+        for (int i = 1; i <= 5; i++) {
+            int x = startX + i * 10;
+            drag(x, 300);
+            drag(x, 400);
+        }
+        keyboardUndoRedo();
+    }
+
+    private void testSelectionTool() {
         window.toggleButton("Selection Tool Button").click();
         move(200, 200);
         drag(400, 400);
@@ -689,7 +784,7 @@ public class AssertJSwingTest {
         // TODO test all items from selection menu
     }
 
-    protected void testCropTool() {
+    private void testCropTool() {
         window.toggleButton("Crop Tool Button").click();
         move(200, 200);
         drag(400, 400);
@@ -698,33 +793,55 @@ public class AssertJSwingTest {
         drag(150, 150);
         sleep(1, SECONDS);
         window.button("cropButton").click();
+        keyboardUndoRedo();
         keyboardUndo();
     }
 
-    protected void testMoveTool() {
+    private void testMoveTool() {
         window.toggleButton("Move Tool Button").click();
         move(300, 300);
         drag(400, 400);
+        keyboardUndoRedo();
         keyboardUndo();
     }
 
-    protected void testZoomTool() {
+    private void testZoomTool() {
         window.toggleButton("Zoom Tool Button").click();
         move(300, 300);
         window.click();
         window.click();
         // TODO Alt-click to zoom out and all the zoom methods, including mouse wheel
+
+        // TODO if this works, then extract into altClick
+//        window.pressKey(VK_ALT);
+//        window.click();
+//        window.releaseKey(VK_ALT);
     }
 
     private void keyboardUndo() {
-        window.pressKey(VK_CONTROL).pressKey(VK_Z).releaseKey(VK_Z).releaseKey(VK_CONTROL);
+        // press Ctrl-Z
+        window.pressKey(VK_CONTROL).pressKey(VK_Z)
+                .releaseKey(VK_Z).releaseKey(VK_CONTROL);
+    }
+
+    private void keyboardRedo() {
+        // press Ctrl-Shift-Z
+        window.pressKey(VK_CONTROL).pressKey(VK_SHIFT).pressKey(VK_Z)
+                .releaseKey(VK_Z).releaseKey(VK_SHIFT).releaseKey(VK_CONTROL);
+    }
+
+    private void keyboardUndoRedo() {
+        keyboardUndo();
+        keyboardRedo();
     }
 
     private void keyboardInvert() {
+        // press Ctrl-I
         window.pressKey(VK_CONTROL).pressKey(VK_I).releaseKey(VK_I).releaseKey(VK_CONTROL);
     }
 
     private void keyboardDeselect() {
+        // press Ctrl-D
         window.pressKey(VK_CONTROL).pressKey(VK_D).releaseKey(VK_D).releaseKey(VK_CONTROL);
     }
 
@@ -750,7 +867,7 @@ public class AssertJSwingTest {
         robot.releaseMouse(MouseButton.LEFT_BUTTON);
     }
 
-    private void sleep(int duration, TimeUnit unit) {
+    private static void sleep(int duration, TimeUnit unit) {
         try {
             Thread.sleep(unit.toMillis(duration));
         } catch (InterruptedException e) {
@@ -776,11 +893,20 @@ public class AssertJSwingTest {
         }));
     }
 
-    private JButtonFixture findButtonInDialogByText(DialogFixture dialog, String text) {
-        JButtonFixture button = dialog.button(new GenericTypeMatcher<JButton>(JButton.class) {
+    private static JButtonFixture findButtonByText(ComponentContainerFixture container, String text) {
+        JButtonFixture button = container.button(new GenericTypeMatcher<JButton>(JButton.class) {
             @Override
             protected boolean isMatching(JButton button) {
-                return button.getText().equals(text);
+                String buttonText = button.getText();
+                if (buttonText == null) {
+                    buttonText = "";
+                }
+                return buttonText.equals(text);
+            }
+
+            @Override
+            public String toString() {
+                return "[Button Text Matcher, text = " + text + "]";
             }
         });
 
@@ -804,9 +930,9 @@ public class AssertJSwingTest {
         optionPane.yesButton().click();
     }
 
-    private void checkNumLayers(int num) {
+    private static void checkNumLayers(int num) {
         int nrLayers = ImageComponents.getActiveComp().get().getNrLayers();
-        assertTrue(nrLayers == num);
+        assertEquals(nrLayers, num);
     }
 
     private void waitForProgressMonitorEnd() {
@@ -830,7 +956,7 @@ public class AssertJSwingTest {
         keyboardInvert();
     }
 
-    private void checkTestingDirs() {
+    private static void checkTestingDirs() {
         assertThat(BASE_TESTING_DIR).exists().isDirectory();
         assertThat(INPUT_DIR).exists().isDirectory();
         assertThat(BATCH_RESIZE_OUTPUT_DIR).exists().isDirectory();

@@ -262,6 +262,7 @@ public class RobotTest {
 
     private static void logRobotEvent(String msg) {
         DebugEventQueue.post(new RobotEvent(msg));
+//        System.out.println(msg);
     }
 
     private static void move(Robot r, int x, int y) {
@@ -307,11 +308,10 @@ public class RobotTest {
                         (!(filter instanceof Brick)) &&
                         (!(filter instanceof RandomFilter)));
 
-        long runCountBefore = Filter.runCount;
-
         String opName = op.getName();
-
         logRobotEvent("random operation: " + opName);
+
+        long runCountBefore = Filter.runCount;
 
         op.randomizeSettings();
 
@@ -369,6 +369,8 @@ public class RobotTest {
         FilterWithParametrizedGUI filter = getRandomTweenFilter();
         String filterName = filter.getName();
 
+        logRobotEvent("randomTweenOperation: " + filterName);
+
         TweenAnimation animation = new TweenAnimation();
         animation.setFilter(filter);
 
@@ -387,7 +389,7 @@ public class RobotTest {
         ParamSetState intermediateState = animation.tween(randomTime);
         paramSet.setState(intermediateState);
 
-        logRobotEvent("random operation: " + filterName);
+        logRobotEvent("random operation in randomTweenOperation: " + filterName);
 
 //        System.out.println(String.format("RobotTest::randomTweenOperation: " +
 //                "filterName = '%s' time=%.2f, interpolation = %s",
@@ -420,8 +422,10 @@ public class RobotTest {
 
     private static void randomFitToScreen() {
         if (Math.random() > 0.1) {
+            logRobotEvent("fitActiveToScreen");
             ImageComponents.fitActiveToScreen();
         } else {
+            logRobotEvent("fitActiveToActualPixels");
             ImageComponents.fitActiveToActualPixels();
         }
     }
@@ -456,6 +460,7 @@ public class RobotTest {
         ImageComponent ic = ImageComponents.getActiveImageComponent();
         if (ic != null) {
             ZoomLevel randomZoomLevel = null;
+
             double percentValue = 0;
             while (percentValue < 49) {
                 randomZoomLevel = ZoomLevel.getRandomZoomLevel(rand);
@@ -468,6 +473,8 @@ public class RobotTest {
     }
 
     private static void randomZoomOut() {
+        logRobotEvent("randomZoomOut");
+
         ImageComponent ic = ImageComponents.getActiveImageComponent();
         if (ic != null) {
             ZoomLevel previous = ic.getZoomLevel().zoomOut();
@@ -567,7 +574,7 @@ public class RobotTest {
 
     private static void traceWithCurrentEraser() {
         if (SelectionActions.areEnabled()) {
-            logRobotEvent("trace with current easer");
+            logRobotEvent("trace with current eraser");
             SelectionActions.getTraceWithEraser().actionPerformed(new ActionEvent("", 0, ""));
         }
     }
@@ -578,15 +585,15 @@ public class RobotTest {
 
         switch (r) {
             case 0:
-                logRobotEvent("roate 90 CW");
+                logRobotEvent("rotate 90 CW");
                 action = new Rotate(90, "Rotate 90\u00B0 CW");
                 break;
             case 1:
-                logRobotEvent("roate 180");
+                logRobotEvent("rotate 180");
                 action = new Rotate(180, "Rotate 180\u00B0");
                 break;
             case 2:
-                logRobotEvent("roate 90 CCW");
+                logRobotEvent("rotate 90 CCW");
                 action = new Rotate(270, "Rotate 90\u00B0 CCW");
                 break;
             case 3:

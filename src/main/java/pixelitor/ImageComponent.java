@@ -282,11 +282,20 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         g2.setTransform(unscaledTransform);
 
         // draw pixel grid
-        if (zoomLevel.drawPixelGrid()) {
+        if (zoomLevel.drawPixelGrid() && !comp.hasSelection()) {
+            // TODO why is this very slow if there is selection?
+
             g2.setXORMode(Color.BLACK);
             int pixelSize = (int) zoomLevel.getViewScale();
             int width = getWidth();
             int height = getHeight();
+
+//            System.out.println("ImageComponent::paintComponent: START zoomLevel = " + zoomLevel
+//                    + ", pixelSize = " + pixelSize
+//                    + ", width = " + width + ", height = " + height
+//                    + ", comp = " + comp.getName());
+//            long startTime = System.nanoTime();
+
             // vertical lines
             for (int i = pixelSize; i < width; i += pixelSize) {
                 g2.drawLine(i, 0, i, height);
@@ -295,6 +304,9 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
             for (int i = pixelSize; i < height; i += pixelSize) {
                 g2.drawLine(0, i, width, i);
             }
+
+//            double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
+//            System.out.println(String.format("ImageComponent::paintComponent: FINISHED estimatedSeconds = '%.2f'", estimatedSeconds));
         }
     }
 

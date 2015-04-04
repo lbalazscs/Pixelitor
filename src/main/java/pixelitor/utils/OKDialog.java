@@ -25,12 +25,20 @@ import java.awt.Frame;
 import java.awt.event.KeyEvent;
 
 /**
- *
+ * A dialog with an OK button at the bottom
  */
 public class OKDialog extends JDialog {
     public OKDialog(Frame owner, String title, JComponent form) {
         super(owner, title);
 
+        setupGUI(form, true);
+    }
+
+    public OKDialog(Frame owner, String title) {
+        super(owner, title);
+    }
+
+    public void setupGUI(JComponent form, boolean setVisible) {
         setLayout(new BorderLayout());
         add(form, BorderLayout.CENTER);
 
@@ -48,13 +56,24 @@ public class OKDialog extends JDialog {
         pack();
 
         GUIUtils.centerOnScreen(this);
-        GlobalKeyboardWatch.setShowHideAllForTab(false);
-        setVisible(true);
+
+        if (setVisible) {
+            setVisible(true);
+        }
+    }
+
+    @Override
+    public void setVisible(boolean b) {
+        super.setVisible(b);
+        if (b) {
+            GlobalKeyboardWatch.setShowHideAllForTab(false);
+        } else {
+            GlobalKeyboardWatch.setShowHideAllForTab(true);
+        }
     }
 
     private void closeDialog() {
         setVisible(false);
-        GlobalKeyboardWatch.setShowHideAllForTab(true);
         dispose();
     }
 }

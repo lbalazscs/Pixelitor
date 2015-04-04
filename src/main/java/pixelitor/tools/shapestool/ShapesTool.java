@@ -100,6 +100,7 @@ public class ShapesTool extends Tool {
     public void initSettingsPanel() {
         toolSettingsPanel.add(new JLabel("Shape:"));
         JComboBox<ShapeType> shapeTypeCB = new JComboBox<>(typeModel);
+        shapeTypeCB.setName("shapeTypeCB");
         toolSettingsPanel.add(shapeTypeCB);
 
         // make sure all values are visible without a scrollbar
@@ -107,6 +108,7 @@ public class ShapesTool extends Tool {
 
         toolSettingsPanel.add(new JLabel("Action:"));
         JComboBox<ShapesAction> actionCB = new JComboBox<>(actionModel);
+        actionCB.setName("actionCB");
         toolSettingsPanel.add(actionCB);
 
         actionCB.addActionListener(e -> enableSettings());

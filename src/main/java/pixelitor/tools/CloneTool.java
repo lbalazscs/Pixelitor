@@ -60,12 +60,14 @@ public class CloneTool extends TmpLayerBrushTool {
         toolSettingsPanel.addSeparator();
 
         JCheckBox alignedCB = new JCheckBox("Aligned", true);
+        alignedCB.setName("alignedCB");
         toolSettingsPanel.add(alignedCB);
         alignedCB.addActionListener(e -> cloneBrush.setAligned(alignedCB.isSelected()));
 
         toolSettingsPanel.addSeparator();
 
         JCheckBox sampleAllLayersCB = new JCheckBox("Sample All Layers");
+        sampleAllLayersCB.setName("sampleAllLayersCB");
         toolSettingsPanel.add(sampleAllLayersCB);
         sampleAllLayersCB.addActionListener(e -> sampleAllLayers = sampleAllLayersCB.isSelected());
     }

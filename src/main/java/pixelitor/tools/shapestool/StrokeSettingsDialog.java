@@ -22,13 +22,13 @@ import pixelitor.PixelitorWindow;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.tools.ShapeType;
 import pixelitor.tools.StrokeType;
+import pixelitor.utils.OKDialog;
 import pixelitor.utils.SliderSpinner;
 
 import javax.swing.*;
-import java.awt.BorderLayout;
 import java.awt.GridLayout;
 
-public class StrokeSettingsDialog extends JDialog {
+public class StrokeSettingsDialog extends OKDialog {
 
     private JComboBox<ShapeType> shapeTypeCB;
     private JComboBox<StrokeType> strokeTypeCB;
@@ -67,18 +67,7 @@ public class StrokeSettingsDialog extends JDialog {
 
         p.add(strokeTypePanel);
 
-        this.setLayout(new BorderLayout());
-        this.add(p, BorderLayout.CENTER);
-        JButton okButton = new JButton("OK");
-        okButton.addActionListener(e -> {
-            this.setVisible(false);
-            this.dispose();
-        });
-        JPanel southPanel = new JPanel();
-        southPanel.add(okButton);
-        this.add(southPanel, BorderLayout.SOUTH);
-        this.pack();
-
+        setupGUI(p, false);
     }
 
     private JPanel createStrokeTypePanel(EnumComboBoxModel<StrokeType> strokeTypeModel, ButtonModel dashedModel) {

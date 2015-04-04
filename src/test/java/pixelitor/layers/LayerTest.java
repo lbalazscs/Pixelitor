@@ -32,6 +32,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class LayerTest {
     private Composition comp;
@@ -105,7 +106,7 @@ public class LayerTest {
     @Test
     public void testMakeActive() {
         layer.makeActive(AddToHistory.YES);
-        assertEquals(true, layer.isActiveLayer());
+        assertTrue(layer.isActiveLayer());
     }
 
     @Test

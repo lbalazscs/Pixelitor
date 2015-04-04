@@ -36,7 +36,7 @@ import java.awt.event.MouseEvent;
  * An effect configurator panel...
  */
 public abstract class EffectConfiguratorPanel extends JPanel {
-    private final JCheckBox enabledCheckBox;
+    private final JCheckBox enabledCB;
     private final ColorSwatch colorSwatch;
     private Color color;
     static final int BUTTON_SIZE = 20;
@@ -53,8 +53,9 @@ public abstract class EffectConfiguratorPanel extends JPanel {
         opacityRange = new RangeParam("Width:", 1, 100, 100);
         opacitySlider = new SliderSpinner(opacityRange, SliderSpinner.TextPosition.NONE, false);
 
-        enabledCheckBox = new JCheckBox();
-        enabledCheckBox.setSelected(defaultSelected);
+        enabledCB = new JCheckBox();
+        enabledCB.setName("enabledCB");
+        enabledCB.setSelected(defaultSelected);
 
         colorSwatch = new ColorSwatch(defaultColor, BUTTON_SIZE);
         color = defaultColor;
@@ -69,7 +70,7 @@ public abstract class EffectConfiguratorPanel extends JPanel {
         setLayout(new GridBagLayout());
 
         gbHelper = new GridBagHelper(this);
-        gbHelper.addLabelWithControl("Enabled:", enabledCheckBox);
+        gbHelper.addLabelWithControl("Enabled:", enabledCB);
         gbHelper.addLabelWithControlNoFill("Color:", colorSwatch);
         gbHelper.addLabelWithControlNoFill("Opacity:", opacitySlider);
     }
@@ -88,11 +89,11 @@ public abstract class EffectConfiguratorPanel extends JPanel {
     }
 
     ButtonModel getEnabledModel() {
-        return enabledCheckBox.getModel();
+        return enabledCB.getModel();
     }
 
     public boolean isSelected() {
-        return enabledCheckBox.isSelected();
+        return enabledCB.isSelected();
     }
 
     public Color getColor() {
@@ -111,7 +112,7 @@ public abstract class EffectConfiguratorPanel extends JPanel {
         }
 
         this.adjustmentListener = adjustmentListener;
-        enabledCheckBox.addActionListener(e -> adjustmentListener.paramAdjusted());
+        enabledCB.addActionListener(e -> adjustmentListener.paramAdjusted());
 
         opacityRange.setAdjustmentListener(adjustmentListener);
     }

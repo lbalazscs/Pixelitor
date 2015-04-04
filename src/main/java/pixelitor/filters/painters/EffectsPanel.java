@@ -37,6 +37,11 @@ import java.util.List;
  * Configuration panel for SwingX effects
  */
 public class EffectsPanel extends JPanel {
+    public static final String GLOW_TAB_NAME = "Glow               ";
+    public static final String INNER_GLOW_TAB_NAME = "Inner Glow     ";
+    public static final String NEON_BORDER_TAB_NAME = "Neon Border ";
+    public static final String DROP_SHADOW_TAB_NAME = "Drop Shadow";
+
     private final EffectConfiguratorPanel glowConfigurator;
     private final EffectConfiguratorPanel innerGlowConfigurator;
     private final NeonBorderEffectConfiguratorPanel neonBorderConfigurator;
@@ -68,10 +73,10 @@ public class EffectsPanel extends JPanel {
         tabs.setTabPlacement(JTabbedPane.LEFT);
         tabs.setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT);
 
-        addTab("Glow               ", glowConfigurator);
-        addTab("Inner Glow     ", innerGlowConfigurator);
-        addTab("Neon Border ", neonBorderConfigurator);
-        addTab("Drop Shadow", dropShadowConfigurator);
+        addTab(GLOW_TAB_NAME, glowConfigurator);
+        addTab(INNER_GLOW_TAB_NAME, innerGlowConfigurator);
+        addTab(NEON_BORDER_TAB_NAME, neonBorderConfigurator);
+        addTab(DROP_SHADOW_TAB_NAME, dropShadowConfigurator);
 
         tabs.setPreferredSize(new Dimension(530, 350)); // A width if 520 is enough on windows. TODO: calculate
 
