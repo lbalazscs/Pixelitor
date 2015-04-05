@@ -36,6 +36,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
@@ -243,12 +244,14 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
     @Override
     public void paintComponent(Graphics g) {
+        Shape originalClip = g.getClip();
+
         Graphics2D g2 = (Graphics2D) g;
 
         int zoomedWidth = canvas.getZoomedWidth();
         int zoomedHeight = canvas.getZoomedHeight();
 
-        adjustClipBoundsForImage(g, drawStartX, drawStartY, zoomedWidth, zoomedHeight);
+        Rectangle imageClip = adjustClipBoundsForImage(g, drawStartX, drawStartY, zoomedWidth, zoomedHeight);
 
         AffineTransform unscaledTransform = g2.getTransform(); // a copy of the transform object
 
@@ -281,44 +284,56 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         // restore original transform
         g2.setTransform(unscaledTransform);
 
+        g2.setClip(imageClip);
+
         // draw pixel grid
         if (zoomLevel.drawPixelGrid() && !comp.hasSelection()) {
             // TODO why is this very slow if there is selection?
 
             g2.setXORMode(Color.BLACK);
-            int pixelSize = (int) zoomLevel.getViewScale();
-            int width = getWidth();
-            int height = getHeight();
+            double pixelSize = zoomLevel.getViewScale();
+//            assert pixelSize > 0;
 
 //            System.out.println("ImageComponent::paintComponent: START zoomLevel = " + zoomLevel
 //                    + ", pixelSize = " + pixelSize
-//                    + ", width = " + width + ", height = " + height
+//                    + ", width = " + zoomedWidth + ", height = " + zoomedHeight
 //                    + ", comp = " + comp.getName());
 //            long startTime = System.nanoTime();
 
+            int startX = (int) this.drawStartX;
+            int startY = (int) this.drawStartY;
+
+            int endX = zoomedWidth + startX;
+            int endY = zoomedHeight + startY;
+
             // vertical lines
-            for (int i = pixelSize; i < width; i += pixelSize) {
-                g2.drawLine(i, 0, i, height);
+            for (double i = pixelSize; i < zoomedWidth; i += pixelSize) {
+                int x = (int) (drawStartX + i);
+                g2.drawLine(x, startY, x, endY);
             }
             // horizontal lines
-            for (int i = pixelSize; i < height; i += pixelSize) {
-                g2.drawLine(0, i, width, i);
+            for (double i = pixelSize; i < zoomedHeight; i += pixelSize) {
+                int y = (int) (drawStartY + i);
+                g2.drawLine(startX, y, endX, y);
             }
 
 //            double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
 //            System.out.println(String.format("ImageComponent::paintComponent: FINISHED estimatedSeconds = '%.2f'", estimatedSeconds));
         }
+
+        g2.setClip(originalClip);
     }
 
     /**
      * Makes sure that not the whole area is repainted, only the image
      */
-    private static void adjustClipBoundsForImage(Graphics g, double drawStartX, double drawStartY, int maxWidth, int maxHeight) {
+    private static Rectangle adjustClipBoundsForImage(Graphics g, double drawStartX, double drawStartY, int maxWidth, int maxHeight) {
         Rectangle clipBounds = g.getClipBounds();
         Rectangle imageRect = new Rectangle((int) drawStartX, (int) drawStartY, maxWidth, maxHeight);
         clipBounds = clipBounds.intersection(imageRect);
 
         g.setClip(clipBounds);
+        return clipBounds;
     }
 
     /**

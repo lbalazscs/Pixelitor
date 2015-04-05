@@ -250,11 +250,6 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z800plus;
         }
-
-        @Override
-        public boolean drawPixelGrid() {
-            return true;
-        }
     }, Z1600plus("2262.7 %") {
         @Override
         public double getPercentValue() {
@@ -285,11 +280,6 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z1600plus;
         }
-
-        @Override
-        public boolean drawPixelGrid() {
-            return true;
-        }
     }, Z3200plus("4525.5 %") {
         @Override
         public double getPercentValue() {
@@ -319,11 +309,6 @@ public enum ZoomLevel {
         @Override
         public ZoomLevel zoomOut() {
             return Z3200plus;
-        }
-
-        @Override
-        public boolean drawPixelGrid() {
-            return true;
         }
     };
 
@@ -381,6 +366,6 @@ public enum ZoomLevel {
     }
 
     public boolean drawPixelGrid() {
-        return false;
+        return getPercentValue() > 1500;
     }
 }

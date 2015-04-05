@@ -29,19 +29,21 @@ import javax.swing.*;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
-import static pixelitor.tools.CloneTool.State.SOURCE_DEFINED;
-import static pixelitor.tools.CloneTool.State.STARTED;
+import static pixelitor.tools.CloneTool.State.CLONING;
+import static pixelitor.tools.CloneTool.State.NO_SOURCE;
+import static pixelitor.tools.CloneTool.State.SOURCE_DEFINED_FIRST_STROKE;
 
 /**
  * The Clone Stamp tool
  */
 public class CloneTool extends TmpLayerBrushTool {
     enum State {
-        STARTED,
-        SOURCE_DEFINED
+        NO_SOURCE,
+        SOURCE_DEFINED_FIRST_STROKE,
+        CLONING
     }
 
-    private State state = STARTED;
+    private State state = NO_SOURCE;
     private boolean sampleAllLayers = false;
 
     private CloneBrush cloneBrush;
@@ -87,15 +89,24 @@ public class CloneTool extends TmpLayerBrushTool {
         if(e.isAltDown()) {
             setCloningSource(ic, x, y);
         } else {
-            if(state != SOURCE_DEFINED) {
+            if (state == NO_SOURCE) {
                 handleUndefinedSource(ic, x, y);
+                return;
             }
+            state = CLONING; // must be a new stroke after the source setting
 
             if (!withLine(e)) {  // when drawing with line, the destination should not change for mouse press
                 cloneBrush.setCloningStartPoint(x, y);
             }
 
             super.toolMousePressed(e, ic);
+        }
+    }
+
+    @Override
+    public void toolMouseDragged(MouseEvent e, ImageDisplay ic) {
+        if (state == CLONING) { // make sure that the first source-setting stroke does not clone
+            super.toolMouseDragged(e, ic);
         }
     }
 
@@ -121,7 +132,7 @@ public class CloneTool extends TmpLayerBrushTool {
             sourceImage = ic.getComp().getActiveImageLayer().getImage();
         }
         cloneBrush.setSource(sourceImage, x, y);
-        state = SOURCE_DEFINED;
+        state = SOURCE_DEFINED_FIRST_STROKE;
     }
 
     @Override
