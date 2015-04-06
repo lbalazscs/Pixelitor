@@ -75,7 +75,7 @@ public class GradientParam extends AbstractGUIParam {
         if (evt.getPropertyName().equals(GRADIENT_SLIDER_USE_BEVEL)) {
             return false;
         }
-        if (!dontTrigger && !gradientSlider.isValueAdjusting() && adjustmentListener != null) {
+        if (trigger == Trigger.DO && !gradientSlider.isValueAdjusting() && adjustmentListener != null) {
             String propertyName = evt.getPropertyName();
             if (!"ancestor".equals(propertyName)) {
                 if (!"selected thumb".equals(propertyName)) {
@@ -113,9 +113,7 @@ public class GradientParam extends AbstractGUIParam {
             randomColors[i] = ImageUtils.getRandomColor(false);
         }
 
-        dontTrigger = true;
-        gradientSlider.setValues(defaultThumbPositions, randomColors);
-        dontTrigger = false;
+        executeWithoutTrigger(() -> gradientSlider.setValues(defaultThumbPositions, randomColors));
     }
 
     @Override
@@ -160,11 +158,8 @@ public class GradientParam extends AbstractGUIParam {
 
     @Override
     public void reset(boolean triggerAction) {
-        if (!triggerAction) {
-            dontTrigger = true;
-        }
-        gradientSlider.setValues(defaultThumbPositions, defaultColors);
-        dontTrigger = false;
+        execute(() -> gradientSlider.setValues(defaultThumbPositions, defaultColors),
+                triggerAction);
     }
 
     @Override
@@ -184,9 +179,7 @@ public class GradientParam extends AbstractGUIParam {
     @Override
     public void setState(ParamState state) {
         GState gr = (GState) state;
-        dontTrigger = true;
-        createGradientSlider(gr.thumbPositions, gr.colors);
-        dontTrigger = false;
+        executeWithoutTrigger(() -> createGradientSlider(gr.thumbPositions, gr.colors));
     }
 
     private static class GState implements ParamState {

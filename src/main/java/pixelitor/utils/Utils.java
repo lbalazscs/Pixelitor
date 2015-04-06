@@ -55,6 +55,7 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -436,5 +437,9 @@ public final class Utils {
         unitArrow.lineTo(arrowHeadStart, -halfArrowWidth);
         unitArrow.closePath();
         return unitArrow;
+    }
+
+    public static String getRandomString() {
+        return new Date().toString(); // TODO
     }
 }

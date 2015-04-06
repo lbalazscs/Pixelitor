@@ -14,19 +14,21 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.gui;
 
 import java.util.Objects;
 
+import static pixelitor.filters.gui.GUIParam.Trigger.DO;
+import static pixelitor.filters.gui.GUIParam.Trigger.DONT;
+
 /**
- *
+ * A convenience parent class for GUIParam implementations.
  */
 public abstract class AbstractGUIParam implements GUIParam {
     private final String name;
-//    private boolean animated;
-
     protected ParamAdjustmentListener adjustmentListener;
-    protected boolean dontTrigger = false;
+    protected Trigger trigger = DO;
 
     AbstractGUIParam(String name) {
         this.name = Objects.requireNonNull(name);
@@ -37,9 +39,23 @@ public abstract class AbstractGUIParam implements GUIParam {
         this.adjustmentListener = listener;
     }
 
+    protected void execute(Runnable r, boolean trigger) {
+        if (trigger) {
+            r.run(); // trigger is set by default to DO
+        } else {
+            executeWithoutTrigger(r);
+        }
+    }
+
+    protected void executeWithoutTrigger(Runnable r) {
+        trigger = DONT;
+        r.run();
+        trigger = DO;
+    }
+
     @Override
-    public void setDontTrigger(boolean b) {
-        dontTrigger = b;
+    public void setTrigger(Trigger trigger) {
+        this.trigger = trigger;
     }
 
     @Override

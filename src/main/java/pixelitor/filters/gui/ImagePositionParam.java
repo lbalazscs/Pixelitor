@@ -14,12 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.gui;
 
 import com.jhlabs.image.ImageMath;
 
 import javax.swing.*;
 import java.awt.Rectangle;
+
+import static pixelitor.filters.gui.GUIParam.Trigger.DO;
 
 /**
  * A GUIParam for selecting an image coordinate (relative to the image size)
@@ -63,11 +66,8 @@ public class ImagePositionParam extends AbstractGUIParam {
 
     @Override
     public void reset(boolean triggerAction) {
-        if (!triggerAction) {
-            dontTrigger = true;
-        }
-        setRelativeValues(defaultRelativeX, defaultRelativeY, true);
-        dontTrigger = false;
+        execute(() -> setRelativeValues(defaultRelativeX, defaultRelativeY, true),
+                triggerAction);
     }
 
     @Override
@@ -98,7 +98,7 @@ public class ImagePositionParam extends AbstractGUIParam {
         if (updateGUI && (paramGUI != null)) {
             paramGUI.updateGUI();
         }
-        if (!dontTrigger) {
+        if (DO == trigger) {
             // TODO this should call adjustingListener.paramAdjusted();
         }
     }

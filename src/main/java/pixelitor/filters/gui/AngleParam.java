@@ -26,6 +26,8 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 import java.awt.Rectangle;
 
+import static pixelitor.filters.gui.GUIParam.Trigger.DO;
+
 /**
  * A GUIParam for selecting an angle
  */
@@ -39,14 +41,12 @@ public class AngleParam extends AbstractGUIParam {
     public AngleParam(String name, double defaultValue) {
         super(name);
 
-        dontTrigger = true;
-        setValueInRadians(defaultValue);
-        dontTrigger = false;
+        executeWithoutTrigger(() -> setValueInRadians(defaultValue));
 
         defaultInRadians = defaultValue;
     }
 
-    public void setValueInDegrees(int d, boolean trigger) {
+    public void setValueInDegrees(int d, Trigger trigger) {
         int degrees = d;
         if (degrees < 0) {
             degrees = -degrees;
@@ -62,15 +62,17 @@ public class AngleParam extends AbstractGUIParam {
             angleInRadians = r;
             fireStateChanged();
         }
-        if (!dontTrigger) { // trigger even if this angle was already set, because we had drag events, and now we have mouse up
+        if (DO == trigger) { // trigger even if this angle was already set, because we had drag events, and now we have mouse up
             if (adjustmentListener != null) { // it is null when used in shape tools effects
                 adjustmentListener.paramAdjusted();
             }
         }
     }
 
-    public void setValueInRadians(double r, boolean trigger) {
-        dontTrigger = !trigger;
+    public void setValueInRadians(double r, Trigger trigger) {
+        //dontTrigger = !trigger;
+        this.trigger = trigger;
+
         setValueInRadians(r);
     }
 
@@ -101,12 +103,6 @@ public class AngleParam extends AbstractGUIParam {
      */
     public double getValueInIntuitiveRadians() {
         return Utils.transformAtan2AngleToIntuitive(angleInRadians);
-//
-//        if (angleInRadians <= 0) {
-//            return -angleInRadians;
-//        } else {
-//            return Math.PI * 2 - angleInRadians;
-//        }
     }
 
     @Override
@@ -146,19 +142,15 @@ public class AngleParam extends AbstractGUIParam {
 
     @Override
     public void reset(boolean triggerAction) {
-        if (!triggerAction) {
-            dontTrigger = true;
-        }
-        setValueInRadians(defaultInRadians);
-        dontTrigger = false;
+        execute(() -> setValueInRadians(defaultInRadians), triggerAction);
     }
 
     @Override
     public void randomize() {
-        dontTrigger = true;
-        double r = Math.random();
-        setValueInRadians((r * 2 * Math.PI - Math.PI));
-        dontTrigger = false;
+        executeWithoutTrigger(() -> {
+            double random = Math.random();
+            setValueInRadians((random * 2 * Math.PI - Math.PI));
+        });
     }
 
     public AbstractAngleSelectorComponent getAngleSelectorComponent() {

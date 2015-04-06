@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.gui;
 
 import com.jhlabs.image.ImageMath;
@@ -22,6 +23,8 @@ import pixelitor.utils.ImageUtils;
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.Rectangle;
+
+import static pixelitor.filters.gui.GUIParam.Trigger.DO;
 
 /**
  * A GUIParam for selecting a color
@@ -61,11 +64,7 @@ public class ColorParam extends AbstractGUIParam {
 
     @Override
     public void reset(boolean triggerAction) {
-        if (!triggerAction) {
-            dontTrigger = true;
-        }
-        setColor(defaultColor);
-        dontTrigger = false;
+        execute(() -> setColor(defaultColor), triggerAction);
     }
 
     @Override
@@ -76,9 +75,7 @@ public class ColorParam extends AbstractGUIParam {
     @Override
     public void randomize() {
         Color c = ImageUtils.getRandomColor(allowOpacityAtRandomize);
-        dontTrigger = true;
-        setColor(c);
-        dontTrigger = false;
+        executeWithoutTrigger(() -> setColor(c));
     }
 
     public Color getColor() {
@@ -95,7 +92,7 @@ public class ColorParam extends AbstractGUIParam {
                 paramGUI.updateGUI();
             }
 
-            if (!dontTrigger) {
+            if (DO == trigger) {
                 if (adjustmentListener != null) {  // when called from randomize, this is null
                     adjustmentListener.paramAdjusted();
                 }

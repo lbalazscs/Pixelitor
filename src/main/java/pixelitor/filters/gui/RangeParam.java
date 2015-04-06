@@ -27,6 +27,8 @@ import javax.swing.event.EventListenerList;
 import java.awt.Rectangle;
 import java.util.Random;
 
+import static pixelitor.filters.gui.GUIParam.Trigger.DO;
+
 /**
  * Represents an integer value with a minimum, a maximum and a default.
  * Suitable as the model of a JSlider (but usually used as a model of
@@ -106,12 +108,6 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
         } else {
             setValueWithoutTrigger(defaultValue);
         }
-
-//        if (!triggerAction) {
-//            dontTrigger = true;
-//        }
-//        setValue(defaultValue);
-//        dontTrigger = false;
     }
 
     /**
@@ -142,9 +138,8 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
             int range = maxValue - minValue;
             Random rnd = new Random();
             int newValue = minValue + rnd.nextInt(range);
-            dontTrigger = true;
-            setValue(newValue);
-            dontTrigger = false;
+
+            executeWithoutTrigger(() -> setValue(newValue));
         }
     }
 
@@ -206,7 +201,7 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
             value = n;
             fireStateChanged();
             if (!adjusting) {
-                if (!dontTrigger) {
+                if (DO == trigger) {
                     if (adjustmentListener != null) {
                         adjustmentListener.paramAdjusted();
                     }
@@ -218,7 +213,7 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
     /**
      * This is like setValue, but it guarantees that the filter will not be triggered.
      * (When grouped RangeParams are updating each other, it cannot be done with the
-     * dontTrigger global variable, because dontTrigger will be set to false too early)
+     * trigger global variable, because trigger will be set to DO too early)
      */
     public void setValueWithoutTrigger(int n) {
         if (value != n) {
@@ -341,11 +336,6 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
     @Override
     public void setState(ParamState state) {
         double doubleValue = ((RPState) state).getValue();
-
-//        int intValue = (int) doubleValue;
-//        if(getName().equals("Radial Wavelength")) {
-//            System.out.println(String.format("RangeParam::setState: doubleValue = %.2f intValue = %d", doubleValue, intValue));
-//        }
         value = doubleValue;
     }
 

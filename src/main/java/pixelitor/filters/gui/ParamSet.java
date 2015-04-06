@@ -27,6 +27,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import static pixelitor.filters.gui.GUIParam.Trigger.DO;
+import static pixelitor.filters.gui.GUIParam.Trigger.DONT;
+
 /**
  * A fixed set of GUIParam objects
  */
@@ -89,23 +92,24 @@ public class ParamSet implements Iterable<GUIParam> {
 
         paramList.forEach(GUIParam::randomize);
 
-        // this call is not supposed to trigger the filter
+        // this call is not supposed to trigger the filter!
         long after = Filter.runCount;
         assert before == after : "before = " + before + ", after = " + after;
     }
 
     public void startPresetAdjusting() {
         for (GUIParam param : paramList) {
-            param.setDontTrigger(true);
+            param.setTrigger(DONT);
         }
     }
 
     public void endPresetAdjusting(boolean trigger) {
         for (GUIParam param : paramList) {
-            param.setDontTrigger(false);
+            param.setTrigger(DO);
         }
         if (trigger) {
             if (adjustmentListener != null) {
+                // called only once, not for each GUIParam
                 adjustmentListener.paramAdjusted();
             }
         }

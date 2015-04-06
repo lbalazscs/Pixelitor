@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.gui;
 
 import com.jhlabs.image.CellularFilter;
@@ -29,6 +30,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import static pixelitor.filters.gui.GUIParam.Trigger.DO;
+import static pixelitor.filters.gui.GUIParam.Trigger.DONT;
+
 /**
  * A GUIParam for selecting a choice from a list of values
  */
@@ -38,10 +42,11 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
 
     private Value defaultChoice;
     private Value currentChoice;
+
     private ParamAdjustmentListener adjustmentListener;
-    private boolean dontTrigger = false;
     private final boolean ignoreRandomize;
     private boolean finalAnimationSettingMode;
+    private Trigger trigger;
 
     public IntChoiceParam(String name, Value[] choices) {
         this(name, choices, false);
@@ -79,10 +84,12 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
     @Override
     public void reset(boolean triggerAction) {
         if (!triggerAction) {
-            dontTrigger = true;
+            trigger = DONT;
         }
+
         setSelectedItem(defaultChoice);
-        dontTrigger = false;
+
+        trigger = DO;
     }
 
     @Override
@@ -104,19 +111,15 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
         if (!ignoreRandomize) {
             Random rnd = new Random();
             int randomIndex = rnd.nextInt(choicesList.size());
-            dontTrigger = true;
+            trigger = DONT;
             setCurrentChoice(choicesList.get(randomIndex));
-            dontTrigger = false;
+            trigger = DO;
         }
     }
 
     public int getValue() {
         return currentChoice.getIntValue();
     }
-
-//    public Value getCurrentChoice() {
-//        return (Value) getSelectedItem();
-//    }
 
     public void setCurrentChoice(Value currentChoice) {
         setSelectedItem(currentChoice);
@@ -131,7 +134,7 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
         if (!currentChoice.equals(anItem)) {
             currentChoice = (Value) anItem;
             fireContentsChanged(this, -1, -1);
-            if (!dontTrigger) {
+            if (DO == trigger) {
                 if (adjustmentListener != null) {  // when called from randomize, this is null
                     adjustmentListener.paramAdjusted();
                 }
@@ -258,16 +261,6 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
         return new IntChoiceParam("Wave Type", waveTypeChoices);
     }
 
-//    private static final IntChoiceParam.Value[] rndGeneratorChoices = {
-//            new IntChoiceParam.Value("Faster", CellularFilter.RND_GENERATOR_MSX_INT),
-//            new IntChoiceParam.Value("Faster 2", CellularFilter.RND_GENERATOR_MSX_LONG),
-//            new IntChoiceParam.Value("Uniform (Slower)", CellularFilter.RND_GENERATOR_UNIFORM),
-//    };
-//
-//    public static IntChoiceParam getRndGeneratorChoices() {
-//        return new IntChoiceParam("Randomness Type", rndGeneratorChoices);
-//    }
-
     public static IntChoiceParam getGridTypeChoices(String name, RangeParam randomnessParam) {
         randomnessParam.setEnabledLogically(false);
         IntChoiceParam param = new IntChoiceParam(name, gridTypeChoices);
@@ -291,7 +284,6 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
         return param;
     }
 
-
     @Override
     protected void fireContentsChanged(Object source, int index0, int index1) {
         Object[] listeners = listenerList.getListenerList();
@@ -308,8 +300,8 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
     }
 
     @Override
-    public void setDontTrigger(boolean b) {
-        dontTrigger = b;
+    public void setTrigger(Trigger trigger) {
+        this.trigger = trigger;
     }
 
     @Override

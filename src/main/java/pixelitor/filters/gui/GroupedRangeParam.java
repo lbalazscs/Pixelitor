@@ -49,7 +49,7 @@ public class GroupedRangeParam extends AbstractGUIParam implements RangeBasedOnI
      * 2 linked params
      */
     public GroupedRangeParam(String name, String firstRangeName, String secondRangeName, int minValue, int maxValue, int defaultValue, boolean linked) {
-        this(name, new String[] {firstRangeName, secondRangeName}, minValue, maxValue, defaultValue, linked);
+        this(name, new String[]{firstRangeName, secondRangeName}, minValue, maxValue, defaultValue, linked);
     }
 
     /**
@@ -146,9 +146,9 @@ public class GroupedRangeParam extends AbstractGUIParam implements RangeBasedOnI
     }
 
     @Override
-    public void setDontTrigger(boolean b) {
+    public void setTrigger(Trigger trigger) {
         for (RangeParam param : rangeParams) {
-            param.setDontTrigger(b);
+            param.setTrigger(trigger);
         }
     }
 

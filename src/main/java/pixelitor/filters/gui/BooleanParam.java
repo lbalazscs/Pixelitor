@@ -20,8 +20,10 @@ package pixelitor.filters.gui;
 import javax.swing.*;
 import java.awt.Rectangle;
 
+import static pixelitor.filters.gui.GUIParam.Trigger.DO;
+
 /**
- * A GUIParam for selecting a boolean value
+ * A GUIParam for a boolean value.
  */
 public class BooleanParam extends AbstractGUIParam {
     private final boolean defaultValue;
@@ -72,11 +74,7 @@ public class BooleanParam extends AbstractGUIParam {
 
     @Override
     public void reset(boolean triggerAction) {
-        if (!triggerAction) {
-            dontTrigger = true;
-        }
-        setValue(defaultValue, true);
-        dontTrigger = false;
+        execute(() -> setValue(defaultValue, true), triggerAction);
     }
 
     @Override
@@ -91,9 +89,7 @@ public class BooleanParam extends AbstractGUIParam {
             return;
         }
         if (!ignoreRandomize) {
-            dontTrigger = true;
-            setValue(Math.random() > 0.5, true);
-            dontTrigger = false;
+            executeWithoutTrigger(() -> setValue(Math.random() > 0.5, true));
         }
     }
 
@@ -104,7 +100,7 @@ public class BooleanParam extends AbstractGUIParam {
     public void setValue(boolean newValue, boolean updateGUI) {
         if (currentValue != newValue) {
             currentValue = newValue;
-            if (!dontTrigger) {
+            if (DO == trigger) {
                 adjustmentListener.paramAdjusted();
             }
         }

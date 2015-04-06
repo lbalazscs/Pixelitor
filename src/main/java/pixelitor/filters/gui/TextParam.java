@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,20 +8,23 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters.gui;
+
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.FlowLayout;
 import java.awt.Rectangle;
-import java.util.Date;
+
+import static pixelitor.filters.gui.GUIParam.Trigger.DO;
 
 /**
  * A GUIParam for text input
@@ -52,21 +55,21 @@ public class TextParam extends AbstractGUIParam {
             tf.getDocument().addDocumentListener(new DocumentListener() {
                 @Override
                 public void insertUpdate(DocumentEvent e) {
-                    if (!dontTrigger) {
+                    if (DO == trigger) {
                         adjustmentListener.paramAdjusted();
                     }
                 }
 
                 @Override
                 public void removeUpdate(DocumentEvent e) {
-                    if (!dontTrigger) {
+                    if (DO == trigger) {
                         adjustmentListener.paramAdjusted();
                     }
                 }
 
                 @Override
                 public void changedUpdate(DocumentEvent e) {
-                    if (!dontTrigger) {
+                    if (DO == trigger) {
                         adjustmentListener.paramAdjusted();
                     }
                 }
@@ -81,11 +84,7 @@ public class TextParam extends AbstractGUIParam {
 
     @Override
     public void reset(boolean triggerAction) {
-        if (!triggerAction) {
-            dontTrigger = true;
-        }
-        setValue(defaultValue);
-        dontTrigger = false;
+        execute(() -> setValue(defaultValue), triggerAction);
     }
 
     @Override
@@ -104,9 +103,8 @@ public class TextParam extends AbstractGUIParam {
             assert !canBeAnimated();
             return;
         }
-        dontTrigger = true;
-        setValue(new Date().toString()); // random string...
-        dontTrigger = false;
+
+        executeWithoutTrigger(() -> setValue(Utils.getRandomString()));
     }
 
     public String getValue() {

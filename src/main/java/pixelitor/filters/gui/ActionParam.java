@@ -96,7 +96,7 @@ public class ActionParam extends AbstractGUIParam {
     }
 
     @Override
-    public void setDontTrigger(boolean b) {
+    public void setTrigger(Trigger trigger) {
         // do nothing
     }
 
