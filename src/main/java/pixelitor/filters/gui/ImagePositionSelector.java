@@ -14,9 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.gui;
 
 import pixelitor.ImageComponents;
+import pixelitor.layers.ImageLayer;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
@@ -29,6 +31,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.Optional;
 
 /**
  * The image selector part of an ImagePositionPanel
@@ -36,7 +39,7 @@ import java.awt.image.BufferedImage;
 public class ImagePositionSelector extends JComponent implements MouseMotionListener, MouseListener {
     private final ImagePositionPanel imagePositionPanel;
     private final ImagePositionParam model;
-    private final BufferedImage thumb;
+    private BufferedImage thumb;
     private static final int CENTRAL_SQUARE_SIZE = 5;
 
     public ImagePositionSelector(ImagePositionPanel imagePositionPanel, ImagePositionParam model, int size) {
@@ -45,10 +48,12 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
         addMouseListener(this);
         addMouseMotionListener(this);
 
-        BufferedImage actualImage = ImageComponents.getActiveImageLayer().get().getImageForFilterDialogs();
-        thumb = ImageUtils.createThumbnail(actualImage, size);
-
-        setPreferredSize(new Dimension(thumb.getWidth(), thumb.getHeight()));
+        Optional<ImageLayer> imageLayer = ImageComponents.getActiveImageLayer();
+        if (imageLayer.isPresent()) { // in unit tests it might not be present
+            BufferedImage actualImage = imageLayer.get().getImageForFilterDialogs();
+            thumb = ImageUtils.createThumbnail(actualImage, size);
+            setPreferredSize(new Dimension(thumb.getWidth(), thumb.getHeight()));
+        }
     }
 
     @Override

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.gui;
 
 import javax.swing.*;
@@ -25,14 +26,20 @@ import java.awt.Rectangle;
 public interface GUIParam extends Resettable {
     String getName();
 
-    JComponent createGUI();
-
     void setAdjustmentListener(ParamAdjustmentListener listener);
+
+    JComponent createGUI();
 
     int getNrOfGridBagCols();
 
+    /**
+     * Sets a random value without triggering the filter
+     */
     void randomize();
 
+    /**
+     * Sets the filter-triggering policy
+     */
     void setTrigger(Trigger trigger);
 
     void considerImageSize(Rectangle bounds);
