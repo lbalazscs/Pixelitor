@@ -146,7 +146,7 @@ public class GroupedRangeParam extends AbstractGUIParam implements RangeBasedOnI
     }
 
     @Override
-    public void setTrigger(Trigger trigger) {
+    public void setTrigger(boolean trigger) {
         for (RangeParam param : rangeParams) {
             param.setTrigger(trigger);
         }
@@ -154,7 +154,7 @@ public class GroupedRangeParam extends AbstractGUIParam implements RangeBasedOnI
 
     @Override
     public boolean isSetToDefault() {
-        if(isLinked() == linkedByDefault) {
+        if (isLinked() != linkedByDefault) {
             return false;
         }
         for (RangeParam param : rangeParams) {

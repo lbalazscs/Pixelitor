@@ -98,17 +98,16 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        moveControl(e);
+        moveControl(e, true);
     }
 
-    private void moveControl(MouseEvent e) {
+    private void moveControl(MouseEvent e, boolean isAdjusting) {
         int mouseX = e.getX();
         int mouseY = e.getY();
 
         float relativeX = ((float) mouseX) / thumb.getWidth();
         float relativeY = ((float) mouseY) / thumb.getHeight();
-        model.setRelativeX(relativeX);
-        model.setRelativeY(relativeY);
+        model.setRelativeValues(relativeX, relativeY, false, isAdjusting);
 
         imagePositionPanel.updateSlidersFromModel();
 
@@ -130,11 +129,7 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        moveControl(e);
-        ParamAdjustmentListener listener = model.getAdjustingListener();
-        if (listener != null) {
-            listener.paramAdjusted();
-        }
+        moveControl(e, false);
     }
 
     @Override

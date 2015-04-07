@@ -38,9 +38,12 @@ public interface GUIParam extends Resettable {
     void randomize();
 
     /**
-     * Sets the filter-triggering policy
+     * Sets whether the running of the filter should be triggered
+     * when the value of this GUIParam changes
      */
-    void setTrigger(Trigger trigger);
+    void setTrigger(boolean trigger);
+
+    boolean getTrigger(); // only for tests
 
     void considerImageSize(Rectangle bounds);
 
@@ -58,17 +61,4 @@ public interface GUIParam extends Resettable {
      */
     void setEnabledLogically(boolean b);
     void setFinalAnimationSettingMode(boolean b); // implemented for the non-animatable params
-
-    /**
-     * Whether the running of the filter should be triggered
-     * when the value of this GUIParam changes
-     */
-    enum Trigger {
-        DO, DONT;
-
-        static Trigger fromBoolean(boolean b) {
-            return b ? DO : DONT;
-        }
-    }
-
 }

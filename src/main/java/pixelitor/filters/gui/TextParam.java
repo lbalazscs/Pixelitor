@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.gui;
 
 import pixelitor.utils.Utils;
@@ -23,8 +24,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.FlowLayout;
 import java.awt.Rectangle;
-
-import static pixelitor.filters.gui.GUIParam.Trigger.DO;
 
 /**
  * A GUIParam for text input
@@ -55,21 +54,21 @@ public class TextParam extends AbstractGUIParam {
             tf.getDocument().addDocumentListener(new DocumentListener() {
                 @Override
                 public void insertUpdate(DocumentEvent e) {
-                    if (DO == trigger) {
+                    if (trigger) {
                         adjustmentListener.paramAdjusted();
                     }
                 }
 
                 @Override
                 public void removeUpdate(DocumentEvent e) {
-                    if (DO == trigger) {
+                    if (trigger) {
                         adjustmentListener.paramAdjusted();
                     }
                 }
 
                 @Override
                 public void changedUpdate(DocumentEvent e) {
-                    if (DO == trigger) {
+                    if (trigger) {
                         adjustmentListener.paramAdjusted();
                     }
                 }
@@ -112,7 +111,16 @@ public class TextParam extends AbstractGUIParam {
     }
 
     public void setValue(String s) {
-        tf.setText(s);
+        String old = tf.getText();
+        if (!old.equals(s)) {
+            boolean triggerWasTrue = trigger == true;
+            trigger = false;
+            tf.setText(s);
+            trigger = true;
+            if (triggerWasTrue) { // handle the case when this is called from randomize
+                adjustmentListener.paramAdjusted();
+            }
+        }
     }
 
     @Override

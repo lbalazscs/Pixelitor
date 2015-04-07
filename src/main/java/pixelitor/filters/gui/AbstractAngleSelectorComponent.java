@@ -17,8 +17,6 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.filters.gui.GUIParam.Trigger;
-
 import javax.swing.*;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -55,7 +53,7 @@ public abstract class AbstractAngleSelectorComponent extends JComponent implemen
         addMouseMotionListener(this);
     }
 
-    private void updateAngle(int x, int y, Trigger trigger) {
+    private void updateAngle(int x, int y, boolean trigger) {
         double angle = Math.atan2(y - cy, x - cx);
         repaint();
         model.setValueInRadians(angle, trigger);
@@ -68,12 +66,12 @@ public abstract class AbstractAngleSelectorComponent extends JComponent implemen
 
     @Override
     public void mousePressed(MouseEvent e) {
-        updateAngle(e.getX(), e.getY(), Trigger.DONT);
+        updateAngle(e.getX(), e.getY(), false);
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        updateAngle(e.getX(), e.getY(), Trigger.DO);
+        updateAngle(e.getX(), e.getY(), true);
     }
 
     @Override
@@ -86,7 +84,7 @@ public abstract class AbstractAngleSelectorComponent extends JComponent implemen
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        updateAngle(e.getX(), e.getY(), Trigger.DONT);
+        updateAngle(e.getX(), e.getY(), false);
     }
 
     @Override

@@ -20,15 +20,11 @@ package pixelitor.filters.gui;
 import pixelitor.filters.Filter;
 import pixelitor.utils.IconUtils;
 
-import java.awt.EventQueue;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-
-import static pixelitor.filters.gui.GUIParam.Trigger.DO;
-import static pixelitor.filters.gui.GUIParam.Trigger.DONT;
 
 /**
  * A fixed set of GUIParam objects
@@ -86,8 +82,6 @@ public class ParamSet implements Iterable<GUIParam> {
     }
 
     public void randomize() {
-        assert EventQueue.isDispatchThread();
-
         long before = Filter.runCount;
 
         paramList.forEach(GUIParam::randomize);
@@ -99,13 +93,13 @@ public class ParamSet implements Iterable<GUIParam> {
 
     public void startPresetAdjusting() {
         for (GUIParam param : paramList) {
-            param.setTrigger(DONT);
+            param.setTrigger(false);
         }
     }
 
     public void endPresetAdjusting(boolean trigger) {
         for (GUIParam param : paramList) {
-            param.setTrigger(DO);
+            param.setTrigger(true);
         }
         if (trigger) {
             if (adjustmentListener != null) {
@@ -144,7 +138,7 @@ public class ParamSet implements Iterable<GUIParam> {
     }
 
     /**
-     * A ParamSet can be animated if at least on GUIParam in it can be
+     * A ParamSet can be animated if at least one contained GUIParam can be
      */
     public boolean canBeAnimated() {
         for (GUIParam param : paramList) {

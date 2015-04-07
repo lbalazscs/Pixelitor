@@ -20,8 +20,6 @@ package pixelitor.filters.gui;
 import javax.swing.*;
 import java.awt.Rectangle;
 
-import static pixelitor.filters.gui.GUIParam.Trigger.DO;
-
 /**
  * A GUIParam for a boolean value.
  */
@@ -100,7 +98,7 @@ public class BooleanParam extends AbstractGUIParam {
     public void setValue(boolean newValue, boolean updateGUI) {
         if (currentValue != newValue) {
             currentValue = newValue;
-            if (DO == trigger) {
+            if (trigger) {
                 adjustmentListener.paramAdjusted();
             }
         }

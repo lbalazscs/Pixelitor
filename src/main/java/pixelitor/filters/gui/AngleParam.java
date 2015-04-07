@@ -26,8 +26,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 import java.awt.Rectangle;
 
-import static pixelitor.filters.gui.GUIParam.Trigger.DO;
-
 /**
  * A GUIParam for selecting an angle
  */
@@ -46,7 +44,7 @@ public class AngleParam extends AbstractGUIParam {
         defaultInRadians = defaultValue;
     }
 
-    public void setValueInDegrees(int d, Trigger trigger) {
+    public void setValueInDegrees(int d, boolean trigger) {
         int degrees = d;
         if (degrees < 0) {
             degrees = -degrees;
@@ -62,14 +60,14 @@ public class AngleParam extends AbstractGUIParam {
             angleInRadians = r;
             fireStateChanged();
         }
-        if (DO == trigger) { // trigger even if this angle was already set, because we had drag events, and now we have mouse up
+        if (trigger) { // trigger even if this angle was already set, because we had drag events, and now we have mouse up
             if (adjustmentListener != null) { // it is null when used in shape tools effects
                 adjustmentListener.paramAdjusted();
             }
         }
     }
 
-    public void setValueInRadians(double r, Trigger trigger) {
+    public void setValueInRadians(double r, boolean trigger) {
         //dontTrigger = !trigger;
         this.trigger = trigger;
 

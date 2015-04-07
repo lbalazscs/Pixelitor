@@ -27,8 +27,6 @@ import javax.swing.event.EventListenerList;
 import java.awt.Rectangle;
 import java.util.Random;
 
-import static pixelitor.filters.gui.GUIParam.Trigger.DO;
-
 /**
  * Represents an integer value with a minimum, a maximum and a default.
  * Suitable as the model of a JSlider (but usually used as a model of
@@ -201,7 +199,7 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
             value = n;
             fireStateChanged();
             if (!adjusting) {
-                if (DO == trigger) {
+                if (trigger) {
                     if (adjustmentListener != null) {
                         adjustmentListener.paramAdjusted();
                     }
@@ -213,7 +211,7 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
     /**
      * This is like setValue, but it guarantees that the filter will not be triggered.
      * (When grouped RangeParams are updating each other, it cannot be done with the
-     * trigger global variable, because trigger will be set to DO too early)
+     * trigger global variable, because trigger will be set to true too early)
      */
     public void setValueWithoutTrigger(int n) {
         if (value != n) {

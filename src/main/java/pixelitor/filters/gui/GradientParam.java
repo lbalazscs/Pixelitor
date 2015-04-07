@@ -75,7 +75,7 @@ public class GradientParam extends AbstractGUIParam {
         if (evt.getPropertyName().equals(GRADIENT_SLIDER_USE_BEVEL)) {
             return false;
         }
-        if (trigger == Trigger.DO && !gradientSlider.isValueAdjusting() && adjustmentListener != null) {
+        if (trigger && !gradientSlider.isValueAdjusting() && adjustmentListener != null) {
             String propertyName = evt.getPropertyName();
             if (!"ancestor".equals(propertyName)) {
                 if (!"selected thumb".equals(propertyName)) {
@@ -143,13 +143,13 @@ public class GradientParam extends AbstractGUIParam {
     }
 
     private boolean areColorsChanged() {
-        Color[] colors = (Color[]) gradientSlider.getValues();
-        if (colors.length != defaultColors.length) {
+        Object[] values = gradientSlider.getValues();
+        if (values.length != defaultColors.length) {
             return true;
         }
 
         for (int i = 0; i < defaultColors.length; i++) {
-            if (!defaultColors[i].equals(colors[i])) {
+            if (!defaultColors[i].equals(values[i])) {
                 return true;
             }
         }

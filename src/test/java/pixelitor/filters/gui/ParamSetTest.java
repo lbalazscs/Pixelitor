@@ -1,0 +1,107 @@
+/*
+ * Copyright 2015 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package pixelitor.filters.gui;
+
+import org.junit.Before;
+import org.junit.Test;
+import pixelitor.filters.ParamTest;
+
+import java.awt.Rectangle;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class ParamSetTest {
+    private ParamSet params;
+    private ParamAdjustmentListenerSpy adjustmentListener;
+    private RangeParam extraParam;
+
+    @Before
+    public void setUp() throws Exception {
+        params = new ParamSet(ParamTest.getTestParams());
+        params.addCommonActions();
+        adjustmentListener = new ParamAdjustmentListenerSpy();
+        params.setAdjustmentListener(adjustmentListener);
+        extraParam = new RangeParam("Extra Param", 0, 200, 0);
+        params.insertParam(extraParam, 3);
+        params.considerImageSize(new Rectangle(0, 0, 400, 800));
+    }
+
+    @Test
+    public void testReset() {
+        params.reset();
+        checkThatFilterWasNotCalled();
+    }
+
+    @Test
+    public void testRandomize() {
+        params.randomize();
+        checkThatFilterWasNotCalled();
+    }
+
+    @Test
+    public void testPresetAdjusting() {
+        params.startPresetAdjusting();
+        extraParam.setValue(55);
+        params.endPresetAdjusting(false);
+
+        checkThatFilterWasNotCalled();
+
+        params.startPresetAdjusting();
+        extraParam.setValue(55);
+        params.endPresetAdjusting(true);
+
+        checkThatFilterWasCalled(1);
+    }
+
+    @Test
+    public void testCopyAnSetState() {
+        ParamSetState state = params.copyState();
+        params.setState(state);
+
+        checkThatFilterWasNotCalled();
+    }
+
+    @Test
+    public void testCanBeAnimated() {
+        boolean b = params.canBeAnimated();
+        assertTrue(b);
+    }
+
+    @Test
+    public void testSetFinalAnimationSettingMode() {
+        params.setFinalAnimationSettingMode(false);
+        params.setFinalAnimationSettingMode(true);
+
+        checkThatFilterWasNotCalled();
+    }
+
+    @Test
+    public void testHasGradient() {
+        boolean b = params.hasGradient();
+        assertTrue(b);
+    }
+
+    private void checkThatFilterWasNotCalled() {
+        assertEquals(0, adjustmentListener.getNumCalled());
+    }
+
+    private void checkThatFilterWasCalled(int n) {
+        assertEquals(n, adjustmentListener.getNumCalled());
+    }
+}

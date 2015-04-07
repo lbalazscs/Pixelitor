@@ -30,9 +30,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import static pixelitor.filters.gui.GUIParam.Trigger.DO;
-import static pixelitor.filters.gui.GUIParam.Trigger.DONT;
-
 /**
  * A GUIParam for selecting a choice from a list of values
  */
@@ -46,7 +43,7 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
     private ParamAdjustmentListener adjustmentListener;
     private final boolean ignoreRandomize;
     private boolean finalAnimationSettingMode;
-    private Trigger trigger;
+    private boolean trigger = true;
 
     public IntChoiceParam(String name, Value[] choices) {
         this(name, choices, false);
@@ -84,12 +81,12 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
     @Override
     public void reset(boolean triggerAction) {
         if (!triggerAction) {
-            trigger = DONT;
+            trigger = false;
         }
 
         setSelectedItem(defaultChoice);
 
-        trigger = DO;
+        trigger = true;
     }
 
     @Override
@@ -111,9 +108,9 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
         if (!ignoreRandomize) {
             Random rnd = new Random();
             int randomIndex = rnd.nextInt(choicesList.size());
-            trigger = DONT;
+            trigger = false;
             setCurrentChoice(choicesList.get(randomIndex));
-            trigger = DO;
+            trigger = true;
         }
     }
 
@@ -134,7 +131,7 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
         if (!currentChoice.equals(anItem)) {
             currentChoice = (Value) anItem;
             fireContentsChanged(this, -1, -1);
-            if (DO == trigger) {
+            if (true == trigger) {
                 if (adjustmentListener != null) {  // when called from randomize, this is null
                     adjustmentListener.paramAdjusted();
                 }
@@ -300,8 +297,13 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
     }
 
     @Override
-    public void setTrigger(Trigger trigger) {
+    public void setTrigger(boolean trigger) {
         this.trigger = trigger;
+    }
+
+    @Override
+    public boolean getTrigger() {
+        return trigger;
     }
 
     @Override

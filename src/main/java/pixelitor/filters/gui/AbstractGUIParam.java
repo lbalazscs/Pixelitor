@@ -19,16 +19,13 @@ package pixelitor.filters.gui;
 
 import java.util.Objects;
 
-import static pixelitor.filters.gui.GUIParam.Trigger.DO;
-import static pixelitor.filters.gui.GUIParam.Trigger.DONT;
-
 /**
  * A convenience parent class for GUIParam implementations.
  */
 public abstract class AbstractGUIParam implements GUIParam {
     private final String name;
     protected ParamAdjustmentListener adjustmentListener;
-    protected Trigger trigger = DO;
+    protected boolean trigger = true;
 
     AbstractGUIParam(String name) {
         this.name = Objects.requireNonNull(name);
@@ -41,21 +38,26 @@ public abstract class AbstractGUIParam implements GUIParam {
 
     protected void execute(Runnable r, boolean trigger) {
         if (trigger) {
-            r.run(); // trigger is set by default to DO
+            r.run(); // trigger is set by default to true
         } else {
             executeWithoutTrigger(r);
         }
     }
 
     protected void executeWithoutTrigger(Runnable r) {
-        trigger = DONT;
+        trigger = false;
         r.run();
-        trigger = DO;
+        trigger = true;
     }
 
     @Override
-    public void setTrigger(Trigger trigger) {
+    public void setTrigger(boolean trigger) {
         this.trigger = trigger;
+    }
+
+    @Override
+    public boolean getTrigger() {
+        return trigger;
     }
 
     @Override

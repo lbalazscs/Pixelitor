@@ -24,8 +24,6 @@ import javax.swing.*;
 import java.awt.Color;
 import java.awt.Rectangle;
 
-import static pixelitor.filters.gui.GUIParam.Trigger.DO;
-
 /**
  * A GUIParam for selecting a color
  */
@@ -92,7 +90,7 @@ public class ColorParam extends AbstractGUIParam {
                 paramGUI.updateGUI();
             }
 
-            if (DO == trigger) {
+            if (trigger) {
                 if (adjustmentListener != null) {  // when called from randomize, this is null
                     adjustmentListener.paramAdjusted();
                 }

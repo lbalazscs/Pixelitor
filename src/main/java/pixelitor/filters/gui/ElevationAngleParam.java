@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.gui;
 
 import java.util.Random;
@@ -53,6 +54,7 @@ public class ElevationAngleParam extends AngleParam {
     @Override
     public void randomize() {
         Random r = new Random();
-        setValueInDegrees(r.nextInt(90), Trigger.DONT);
+        setValueInDegrees(r.nextInt(90), false);
+        trigger = true;
     }
 }

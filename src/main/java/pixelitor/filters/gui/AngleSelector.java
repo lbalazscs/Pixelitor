@@ -17,7 +17,6 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.filters.gui.GUIParam.Trigger;
 import pixelitor.utils.SliderSpinner;
 
 import javax.swing.*;
@@ -53,7 +52,7 @@ public class AngleSelector extends JPanel {
                 boolean trigger = !spinnerModel.getValueIsAdjusting();
 
                 int value = spinnerModel.getValue();
-                angleParam.setValueInDegrees(value, Trigger.fromBoolean(trigger));
+                angleParam.setValueInDegrees(value, trigger);
             }
         });
 

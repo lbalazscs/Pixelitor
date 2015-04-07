@@ -66,20 +66,14 @@ public class ImagePositionPanel extends JPanel implements ParamGUI {
     private void linkSliderChangesToModel(ImagePositionParam model) {
         xSliderModel.addChangeListener(e -> {
             if (slidersMovedByUser) {
-                model.setRelativeX(xSliderModel.getValue() / 100.0f);
+                model.setRelativeX(xSliderModel.getValue() / 100.0f, xSliderModel.getValueIsAdjusting());
                 imagePositionSelector.repaint();
-                if (!xSliderModel.getValueIsAdjusting()) {
-                    model.getAdjustingListener().paramAdjusted();
-                }
             }
         });
         ySliderModel.addChangeListener(e -> {
             if (slidersMovedByUser) {
-                model.setRelativeY(ySliderModel.getValue() / 100.0f);
+                model.setRelativeY(ySliderModel.getValue() / 100.0f, ySliderModel.getValueIsAdjusting());
                 imagePositionSelector.repaint();
-                if (!ySliderModel.getValueIsAdjusting()) {
-                    model.getAdjustingListener().paramAdjusted();
-                }
             }
         });
     }

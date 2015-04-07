@@ -22,8 +22,6 @@ import com.jhlabs.image.ImageMath;
 import javax.swing.*;
 import java.awt.Rectangle;
 
-import static pixelitor.filters.gui.GUIParam.Trigger.DO;
-
 /**
  * A GUIParam for selecting an image coordinate (relative to the image size)
  */
@@ -50,7 +48,7 @@ public class ImagePositionParam extends AbstractGUIParam {
 
     @Override
     public boolean isSetToDefault() {
-        return false;
+        return relativeX == defaultRelativeX && relativeY == defaultRelativeY;
     }
 
     @Override
@@ -66,7 +64,7 @@ public class ImagePositionParam extends AbstractGUIParam {
 
     @Override
     public void reset(boolean triggerAction) {
-        execute(() -> setRelativeValues(defaultRelativeX, defaultRelativeY, true),
+        execute(() -> setRelativeValues(defaultRelativeX, defaultRelativeY, true, false),
                 triggerAction);
     }
 
@@ -77,7 +75,10 @@ public class ImagePositionParam extends AbstractGUIParam {
 
     @Override
     public void randomize() {
-        setRelativeValues((float) Math.random(), (float) Math.random(), true);
+        float rx = (float) Math.random();
+        float ry = (float) Math.random();
+
+        executeWithoutTrigger(() -> setRelativeValues(rx, ry, true, false));
     }
 
     public ParamAdjustmentListener getAdjustingListener() {
@@ -92,23 +93,23 @@ public class ImagePositionParam extends AbstractGUIParam {
         return relativeY;
     }
 
-    private void setRelativeValues(float relativeX, float relativeY, boolean updateGUI) {
+    public void setRelativeValues(float relativeX, float relativeY, boolean updateGUI, boolean isAdjusting) {
         this.relativeX = relativeX;
         this.relativeY = relativeY;
         if (updateGUI && (paramGUI != null)) {
             paramGUI.updateGUI();
         }
-        if (DO == trigger) {
-            // TODO this should call adjustingListener.paramAdjusted();
+        if (trigger && !isAdjusting) {
+            adjustmentListener.paramAdjusted();
         }
     }
 
-    public void setRelativeX(float newRelativeX) {
-        setRelativeValues(newRelativeX, relativeY, false);
+    public void setRelativeX(float newRelativeX, boolean isAdjusting) {
+        setRelativeValues(newRelativeX, relativeY, false, isAdjusting);
     }
 
-    public void setRelativeY(float newRelativeY) {
-        setRelativeValues(relativeX, newRelativeY, false);
+    public void setRelativeY(float newRelativeY, boolean isAdjusting) {
+        setRelativeValues(relativeX, newRelativeY, false, isAdjusting);
     }
 
     @Override
