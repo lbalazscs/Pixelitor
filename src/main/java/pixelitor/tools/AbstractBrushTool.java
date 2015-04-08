@@ -117,7 +117,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     }
 
     @Override
-    public void toolMousePressed(MouseEvent e, ImageDisplay ic) {
+    public void mousePressed(MouseEvent e, ImageDisplay ic) {
         boolean withLine = withLine(e);
         int x = userDrag.getStartX();
         int y = userDrag.getStartY();
@@ -136,7 +136,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     }
 
     @Override
-    public void toolMouseDragged(MouseEvent e, ImageDisplay ic) {
+    public void mouseDragged(MouseEvent e, ImageDisplay ic) {
         int x = userDrag.getEndX();
         int y = userDrag.getEndY();
 
@@ -147,7 +147,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     }
 
     @Override
-    public void toolMouseReleased(MouseEvent e, ImageDisplay ic) {
+    public void mouseReleased(MouseEvent e, ImageDisplay ic) {
         finishBrushStroke(ic.getComp());
     }
 

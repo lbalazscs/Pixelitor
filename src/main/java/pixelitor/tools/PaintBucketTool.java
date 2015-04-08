@@ -70,17 +70,17 @@ public class PaintBucketTool extends Tool {
     }
 
     @Override
-    public void toolMousePressed(MouseEvent e, ImageDisplay ic) {
+    public void mousePressed(MouseEvent e, ImageDisplay ic) {
 
     }
 
     @Override
-    public void toolMouseDragged(MouseEvent e, ImageDisplay ic) {
+    public void mouseDragged(MouseEvent e, ImageDisplay ic) {
 
     }
 
     @Override
-    public void toolMouseReleased(MouseEvent e, ImageDisplay ic) {
+    public void mouseReleased(MouseEvent e, ImageDisplay ic) {
         int x = userDrag.getEndX();
         int y = userDrag.getEndY();
 
@@ -112,11 +112,8 @@ public class PaintBucketTool extends Tool {
         Color newColor = getFillColor();
 
         Rectangle replacedArea = scanlineFloodFill(workingCopy, x, y, newColor, toleranceParam.getValue());
-//        System.out.println("PaintBucketTool.mouseReleased replacedArea = " + replacedArea);
 
         if (replacedArea != null) { // something was replaced
-//            AppLogic.debugImage(workingCopy);
-
             ToolAffectedArea affectedArea = new ToolAffectedArea(comp, replacedArea, true);
             saveSubImageForUndo(original, affectedArea);
 

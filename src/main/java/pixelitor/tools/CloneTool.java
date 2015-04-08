@@ -82,7 +82,7 @@ public class CloneTool extends TmpLayerBrushTool {
     }
 
     @Override
-    public void toolMousePressed(MouseEvent e, ImageDisplay ic) {
+    public void mousePressed(MouseEvent e, ImageDisplay ic) {
         int x = userDrag.getStartX();
         int y = userDrag.getStartY();
 
@@ -99,14 +99,14 @@ public class CloneTool extends TmpLayerBrushTool {
                 cloneBrush.setCloningStartPoint(x, y);
             }
 
-            super.toolMousePressed(e, ic);
+            super.mousePressed(e, ic);
         }
     }
 
     @Override
-    public void toolMouseDragged(MouseEvent e, ImageDisplay ic) {
+    public void mouseDragged(MouseEvent e, ImageDisplay ic) {
         if (state == CLONING) { // make sure that the first source-setting stroke does not clone
-            super.toolMouseDragged(e, ic);
+            super.mouseDragged(e, ic);
         }
     }
 

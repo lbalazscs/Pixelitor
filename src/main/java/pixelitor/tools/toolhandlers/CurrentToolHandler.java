@@ -35,20 +35,20 @@ public class CurrentToolHandler extends ToolHandler {
 
     @Override
     boolean mousePressed(MouseEvent e, ImageDisplay ic) {
-        tool.toolMousePressed(e, ic);
+        tool.mousePressed(e, ic);
         // this is the last handler in the chain, therefore it always returns true
         return true;
     }
 
     @Override
     boolean mouseDragged(MouseEvent e, ImageDisplay ic) {
-        tool.toolMouseDragged(e, ic);
+        tool.mouseDragged(e, ic);
         return true;
     }
 
     @Override
     boolean mouseReleased(MouseEvent e, ImageDisplay ic) {
-        tool.toolMouseReleased(e, ic);
+        tool.mouseReleased(e, ic);
         return true;
     }
 }

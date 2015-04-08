@@ -40,19 +40,19 @@ public class HandTool extends Tool {
     }
 
     @Override
-    public void toolMousePressed(MouseEvent e, ImageDisplay ic) {
+    public void mousePressed(MouseEvent e, ImageDisplay ic) {
         JViewport viewport = (JViewport) ic.getParent();
         handToolSupport.mousePressed(e, viewport);
     }
 
     @Override
-    public void toolMouseDragged(MouseEvent e, ImageDisplay ic) {
+    public void mouseDragged(MouseEvent e, ImageDisplay ic) {
         JViewport viewport = (JViewport) ic.getParent();
         handToolSupport.mouseDragged(e, viewport);
     }
 
     @Override
-    public void toolMouseReleased(MouseEvent e, ImageDisplay ic) {
+    public void mouseReleased(MouseEvent e, ImageDisplay ic) {
 
     }
 

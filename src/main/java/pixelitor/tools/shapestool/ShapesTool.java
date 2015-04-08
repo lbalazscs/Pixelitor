@@ -152,7 +152,7 @@ public class ShapesTool extends Tool {
     }
 
     @Override
-    public void toolMousePressed(MouseEvent e, ImageDisplay ic) {
+    public void mousePressed(MouseEvent e, ImageDisplay ic) {
         Composition comp = ic.getComp();
         Optional<Selection> selection = comp.getSelection();
         if (selection.isPresent()) {
@@ -163,7 +163,7 @@ public class ShapesTool extends Tool {
     }
 
     @Override
-    public void toolMouseDragged(MouseEvent e, ImageDisplay ic) {
+    public void mouseDragged(MouseEvent e, ImageDisplay ic) {
         drawing = true;
         userDrag.setStartFromCenter(e.isAltDown());
 
@@ -174,7 +174,7 @@ public class ShapesTool extends Tool {
     }
 
     @Override
-    public void toolMouseReleased(MouseEvent e, ImageDisplay ic) {
+    public void mouseReleased(MouseEvent e, ImageDisplay ic) {
         userDrag.setStartFromCenter(e.isAltDown());
 
         Composition comp = ic.getComp();

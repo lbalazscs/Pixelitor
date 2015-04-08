@@ -115,7 +115,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
     }
 
     @Override
-    public void toolMousePressed(MouseEvent e, ImageDisplay ic) {
+    public void mousePressed(MouseEvent e, ImageDisplay ic) {
         // in case of crop/image change the ended is set to true even if the tool is not ended
         // if a new drag is started, then reset it
         ended = false;
@@ -134,7 +134,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
     }
 
     @Override
-    public void toolMouseDragged(MouseEvent e, ImageDisplay ic) {
+    public void mouseDragged(MouseEvent e, ImageDisplay ic) {
         ic.repaint();
         if(state == TRANSFORM) {
             transformSupport.mouseDragged(e, ic);
@@ -143,15 +143,15 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
 
     // TODO: this is not done with the "toolMouse" mechanism
     @Override
-    public void mouseMoved(MouseEvent e, ImageDisplay ic) {
-        super.mouseMoved(e, ic);
+    public void dispatchMouseMoved(MouseEvent e, ImageDisplay ic) {
+        super.dispatchMouseMoved(e, ic);
         if(state == TRANSFORM) {
             transformSupport.mouseMoved(e, ic);
         }
     }
 
     @Override
-    public void toolMouseReleased(MouseEvent e, ImageDisplay ic) {
+    public void mouseReleased(MouseEvent e, ImageDisplay ic) {
         Composition comp = ic.getComp();
         comp.imageChanged(FULL);
 

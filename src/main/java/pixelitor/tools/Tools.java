@@ -17,8 +17,10 @@
 
 package pixelitor.tools;
 
+import pixelitor.ImageDisplay;
 import pixelitor.tools.shapestool.ShapesTool;
 
+import java.awt.event.MouseEvent;
 import java.util.Random;
 
 /**
@@ -95,5 +97,27 @@ public class Tools {
     public static Tool getRandomTool(Random rand) {
         int index = rand.nextInt(allTools.length);
         return allTools[index];
+    }
+
+    public static class EventDispatcher {
+        public static void mouseClicked(MouseEvent e, ImageDisplay ic) {
+            currentTool.dispatchMouseClicked(e, ic);
+        }
+
+        public static void mousePressed(MouseEvent e, ImageDisplay ic) {
+            currentTool.dispatchMousePressed(e, ic);
+        }
+
+        public static void mouseReleased(MouseEvent e, ImageDisplay ic) {
+            currentTool.dispatchMouseReleased(e, ic);
+        }
+
+        public static void mouseDragged(MouseEvent e, ImageDisplay ic) {
+            currentTool.dispatchMouseDragged(e, ic);
+        }
+
+        public static void mouseMoved(MouseEvent e, ImageDisplay ic) {
+            currentTool.dispatchMouseMoved(e, ic);
+        }
     }
 }

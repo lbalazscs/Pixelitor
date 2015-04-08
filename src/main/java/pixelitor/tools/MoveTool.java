@@ -39,12 +39,12 @@ public class MoveTool extends Tool {
     }
 
     @Override
-    public void toolMousePressed(MouseEvent e, ImageDisplay ic) {
+    public void mousePressed(MouseEvent e, ImageDisplay ic) {
         ic.getComp().startTranslation(e.isAltDown());
     }
 
     @Override
-    public void toolMouseDragged(MouseEvent e, ImageDisplay ic) {
+    public void mouseDragged(MouseEvent e, ImageDisplay ic) {
         Composition c = ic.getComp();
         int relativeX = userDrag.getHorizontalDifference();
         int relativeY = userDrag.getVerticalDifference();
@@ -52,7 +52,7 @@ public class MoveTool extends Tool {
     }
 
     @Override
-    public void toolMouseReleased(MouseEvent e, ImageDisplay ic) {
+    public void mouseReleased(MouseEvent e, ImageDisplay ic) {
         ic.getComp().endTranslation();
     }
 

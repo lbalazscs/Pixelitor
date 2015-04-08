@@ -39,8 +39,8 @@ public class DirectBrushTool extends AbstractBrushTool {
     }
 
     @Override
-    public void toolMouseReleased(MouseEvent e, ImageDisplay ic) {
-        super.toolMouseReleased(e, ic);
+    public void mouseReleased(MouseEvent e, ImageDisplay ic) {
+        super.mouseReleased(e, ic);
         copyBeforeStart.flush();
         copyBeforeStart = null;
     }

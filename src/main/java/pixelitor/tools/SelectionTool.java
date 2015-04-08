@@ -84,7 +84,7 @@ public class SelectionTool extends Tool {
     }
 
     @Override
-    public void toolMousePressed(MouseEvent e, ImageDisplay ic) {
+    public void mousePressed(MouseEvent e, ImageDisplay ic) {
         boolean shiftDown = e.isShiftDown();
         boolean altDown = e.isAltDown();
 
@@ -119,7 +119,7 @@ public class SelectionTool extends Tool {
     }
 
     @Override
-    public void toolMouseDragged(MouseEvent e, ImageDisplay ic) {
+    public void mouseDragged(MouseEvent e, ImageDisplay ic) {
         Composition comp = ic.getComp();
         Optional<Selection> selection = comp.getSelection();
 
@@ -134,14 +134,7 @@ public class SelectionTool extends Tool {
     }
 
     @Override
-    public void mouseMoved(MouseEvent e, ImageDisplay ic) {
-//        if(typeCombo.getSelectedItem() == SelectionType.POLYGONAL_LASSO) {
-//            mouseDragged(e, ic);
-//        }
-    }
-
-    @Override
-    public void toolMouseReleased(MouseEvent e, ImageDisplay ic) {
+    public void mouseReleased(MouseEvent e, ImageDisplay ic) {
         if (userDrag.isClick()) { // will be handled by mouseClicked
             return;
         }
@@ -177,7 +170,7 @@ public class SelectionTool extends Tool {
                 deselect(ic, false); // don't create a DeselectEdit because the backup shape could be null
                 if (!newSelectionStarted()) { // backupShape != null
                     // create a special DeselectEdit with the backupShape
-                    edit = new DeselectEdit(ic.getComp(), backupShape, "SelectionTool.toolMouseReleased 1");
+                    edit = new DeselectEdit(ic.getComp(), backupShape, "SelectionTool.mouseReleased 1");
                     assert !comp.hasSelection();
                 }
             }
@@ -187,7 +180,7 @@ public class SelectionTool extends Tool {
             deselect(ic, false); // don't create a DeselectEdit because the backup shape could be null
             if (!newSelectionStarted()) { // backupShape != null
                 // create a special DeselectEdit with the backupShape
-                edit = new DeselectEdit(ic.getComp(), backupShape, "SelectionTool.toolMouseReleased 2");
+                edit = new DeselectEdit(ic.getComp(), backupShape, "SelectionTool.mouseReleased 2");
                 assert !comp.hasSelection();
             }
         }
@@ -200,8 +193,8 @@ public class SelectionTool extends Tool {
     }
 
     @Override
-    public boolean mouseClicked(MouseEvent e, ImageDisplay ic) {
-        super.mouseClicked(e, ic);
+    public boolean dispatchMouseClicked(MouseEvent e, ImageDisplay ic) {
+        super.dispatchMouseClicked(e, ic);
 
 //        if(typeCombo.getSelectedItem() == SelectionType.POLYGONAL_LASSO) {
 //            addPolygonalLassoPoint(ic);

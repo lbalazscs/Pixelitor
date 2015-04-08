@@ -95,22 +95,22 @@ public class GradientTool extends Tool {
     }
 
     @Override
-    public void toolMousePressed(MouseEvent e, ImageDisplay ic) {
+    public void mousePressed(MouseEvent e, ImageDisplay ic) {
 
     }
 
     @Override
-    public void toolMouseDragged(MouseEvent e, ImageDisplay ic) {
+    public void mouseDragged(MouseEvent e, ImageDisplay ic) {
         thereWasDragging = true;  // the gradient will be drawn only when the mouse is released
         ic.repaint();
     }
 
     @Override
-    public void toolMouseReleased(MouseEvent e, ImageDisplay ic) {
+    public void mouseReleased(MouseEvent e, ImageDisplay ic) {
         if (thereWasDragging) {
             Composition comp = ic.getComp();
 
-            saveImageForUndo(comp);
+            saveFullImageForUndo(comp);
             drawGradient((ImageLayer) comp.getActiveLayer(),
                     (GradientType) typeSelector.getSelectedItem(),
                     (GradientColorType) colorTypeSelector.getSelectedItem(),
@@ -126,8 +126,8 @@ public class GradientTool extends Tool {
     }
 
     @Override
-    public boolean mouseClicked(MouseEvent e, ImageDisplay ic) {
-        if (super.mouseClicked(e, ic)) {
+    public boolean dispatchMouseClicked(MouseEvent e, ImageDisplay ic) {
+        if (super.dispatchMouseClicked(e, ic)) {
             return true;
         }
         thereWasDragging = false;

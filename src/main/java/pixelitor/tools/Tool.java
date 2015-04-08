@@ -118,17 +118,17 @@ public abstract class Tool {
         return toolMessage;
     }
 
-    public boolean mouseClicked(MouseEvent e, ImageDisplay ic) {
+    public boolean dispatchMouseClicked(MouseEvent e, ImageDisplay ic) {
         // empty for the convenience of subclasses
         return false;
     }
 
-    public void mousePressed(MouseEvent e, ImageDisplay ic) {
+    public void dispatchMousePressed(MouseEvent e, ImageDisplay ic) {
         if (mouseDown) {
             // can happen if the tool is changed while drawing, and then changed back
             MouseEvent fake = new MouseEvent((Component) e.getSource(), e.getID(), e.getWhen(), e.getModifiers(),
                     userDrag.getEndX(), userDrag.getEndY(), 1, false);
-            mouseReleased(fake, ic); // try to clean-up
+            dispatchMouseReleased(fake, ic); // try to clean-up
         }
         mouseDown = true;
 
@@ -140,9 +140,9 @@ public abstract class Tool {
         endPointInitialized = false;
     }
 
-    public void mouseReleased(MouseEvent e, ImageDisplay ic) {
+    public void dispatchMouseReleased(MouseEvent e, ImageDisplay ic) {
         if (!mouseDown) { // can happen if the tool is changed while drawing
-            mousePressed(e, ic); // try to initialize
+            dispatchMousePressed(e, ic); // try to initialize
         }
         mouseDown = false;
 
@@ -153,9 +153,9 @@ public abstract class Tool {
         endPointInitialized = false;
     }
 
-    public void mouseDragged(MouseEvent e, ImageDisplay ic) {
+    public void dispatchMouseDragged(MouseEvent e, ImageDisplay ic) {
         if (!mouseDown) { // can happen if the tool is changed while drawing
-            mousePressed(e, ic); // try to initialize
+            dispatchMousePressed(e, ic); // try to initialize
         }
         mouseDown = true;
 
@@ -173,7 +173,7 @@ public abstract class Tool {
                 userDrag.adjustStartForSpaceDownMove();
             }
 
-            endPointInitialized = true; // can be set to true after the first super.mouseDragged(e, ic);
+            endPointInitialized = true;
         }
 
         handlerChainStart.handleMouseDragged(e, ic);
@@ -202,10 +202,9 @@ public abstract class Tool {
     }
 
     /**
-     * This saving method is used only by the Gradient Tool.
-     * It saves the full image or the selected area only if there is a selection
+     * Saves the full image or the selected area only if there is a selection
      */
-    void saveImageForUndo(Composition comp) {
+    void saveFullImageForUndo(Composition comp) {
         BufferedImage copy = comp.getImageOrSubImageIfSelectedForActiveLayer(true, true);
 
         ImageEdit edit = new ImageEdit(getName(), comp, comp.getActiveImageLayer(), copy, false);
@@ -273,15 +272,15 @@ public abstract class Tool {
         // empty for the convenience of subclasses
     }
 
-    public void mouseMoved(MouseEvent e, ImageDisplay ic) {
+    public void dispatchMouseMoved(MouseEvent e, ImageDisplay ic) {
         // empty for the convenience of subclasses
     }
 
-    public abstract void toolMousePressed(MouseEvent e, ImageDisplay ic);
+    public abstract void mousePressed(MouseEvent e, ImageDisplay ic);
 
-    public abstract void toolMouseDragged(MouseEvent e, ImageDisplay ic);
+    public abstract void mouseDragged(MouseEvent e, ImageDisplay ic);
 
-    public abstract void toolMouseReleased(MouseEvent e, ImageDisplay ic);
+    public abstract void mouseReleased(MouseEvent e, ImageDisplay ic);
 
     public void setToolSettingsPanel(ToolSettingsPanel toolSettingsPanel) {
         this.toolSettingsPanel = toolSettingsPanel;

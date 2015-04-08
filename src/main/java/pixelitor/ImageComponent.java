@@ -125,7 +125,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        Tools.getCurrentTool().mouseClicked(e, this);
+        Tools.EventDispatcher.mouseClicked(e, this);
     }
 
     @Override
@@ -140,22 +140,22 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
     @Override
     public void mousePressed(MouseEvent e) {
-        Tools.getCurrentTool().mousePressed(e, this);
+        Tools.EventDispatcher.mousePressed(e, this);
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        Tools.getCurrentTool().mouseReleased(e, this);
+        Tools.EventDispatcher.mouseReleased(e, this);
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        Tools.getCurrentTool().mouseDragged(e, this);
+        Tools.EventDispatcher.mouseDragged(e, this);
     }
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        Tools.getCurrentTool().mouseMoved(e, this);
+        Tools.EventDispatcher.mouseMoved(e, this);
     }
 
     @Override

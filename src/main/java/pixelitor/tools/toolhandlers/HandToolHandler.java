@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -71,7 +71,7 @@ public class HandToolHandler extends ToolHandler {
         normalToolUsage = false;
 
         if (handToolForwarding) {
-            Tools.HAND.toolMouseReleased(e, ic);
+            Tools.HAND.mouseReleased(e, ic);
             handToolForwarding = false;
 
             ImageComponents.setToolCursor(cursor);

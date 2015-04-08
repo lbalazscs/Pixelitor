@@ -47,9 +47,9 @@ public class BrushTool extends TmpLayerBrushTool {
     }
 
     @Override
-    public void toolMousePressed(MouseEvent e, ImageDisplay ic) {
+    public void mousePressed(MouseEvent e, ImageDisplay ic) {
         setupDrawingColor(e);
-        super.toolMousePressed(e, ic);
+        super.mousePressed(e, ic);
     }
 
     @Override
