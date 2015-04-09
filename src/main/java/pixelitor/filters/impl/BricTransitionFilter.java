@@ -21,8 +21,9 @@ import com.bric.image.transition.*;
 import com.jhlabs.image.AbstractBufferedImageOp;
 
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+
+import static java.awt.RenderingHints.*;
 
 /**
  * A transition filter based on the com.bric.image.transition classes
@@ -80,14 +81,14 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
 
         // TODO are they worth it?
         // they increase te processing time, but do not seem to have any effect
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-        g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g2.setRenderingHint(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE);
-        g2.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
-        g2.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
-        g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+        g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
+        g2.setRenderingHint(KEY_FRACTIONALMETRICS, VALUE_FRACTIONALMETRICS_ON);
+        g2.setRenderingHint(KEY_RENDERING, VALUE_RENDER_QUALITY);
+        g2.setRenderingHint(KEY_DITHERING, VALUE_DITHER_ENABLE);
+        g2.setRenderingHint(KEY_ALPHA_INTERPOLATION, VALUE_ALPHA_INTERPOLATION_QUALITY);
+        g2.setRenderingHint(KEY_COLOR_RENDERING, VALUE_COLOR_RENDER_QUALITY);
+        g2.setRenderingHint(KEY_STROKE_CONTROL, VALUE_STROKE_PURE);
 
         Transition transition;
         switch (type) {

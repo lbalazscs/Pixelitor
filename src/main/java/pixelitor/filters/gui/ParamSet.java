@@ -27,56 +27,67 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A fixed set of GUIParam objects
+ * A fixed set of filter parameter objects
  */
-public class ParamSet implements Iterable<GUIParam> {
-    private final List<GUIParam> paramList = new ArrayList<>();
+public class ParamSet {
+    private final List<FilterParam> paramList = new ArrayList<>();
+    private final List<FilterAction> actionList = new ArrayList<>(3);
     private ParamAdjustmentListener adjustmentListener;
 
-    public ParamSet(GUIParam... params) {
+    public ParamSet(FilterParam... params) {
         paramList.addAll(Arrays.asList(params));
     }
 
-    public ParamSet(GUIParam param) {
+    public ParamSet(FilterParam param) {
         paramList.add(param);
     }
 
-    public void addCommonActions(GUIParam... actions ) {
+    public ParamSet withActions(FilterAction... actions) {
+        actionList.addAll(Arrays.asList(actions));
+        return this;
+    }
+
+    public ParamSet withAction(FilterAction action) {
+        actionList.add(action);
+        return this;
+    }
+
+    public ParamSet addCommonActions(FilterAction... actions) {
         if (paramList.size() > 1) { // no need for "randomize"/"reset all" if the filter has only one parameter
-            for (GUIParam action : actions) {
+            for (FilterAction action : actions) {
                 if(action != null) {
-                    paramList.add(action);
+                    actionList.add(action);
                 }
             }
             addRandomizeAction();
             addResetAllAction();
         }
+        return this;
     }
 
     private void addRandomizeAction() {
-        GUIParam randomizeAction = new ActionParam("Randomize Settings", e -> randomize(), "Randomize the settings for this filter.");
-        paramList.add(randomizeAction);
+        FilterAction randomizeAction = new FilterAction("Randomize Settings", e -> randomize(), "Randomize the settings for this filter.");
+        actionList.add(randomizeAction);
     }
 
     private void addResetAllAction() {
-        GUIParam resetAllAction = new ActionParam("Reset All", e -> reset(), IconUtils.getWestArrowIcon(), "Reset all settings to their default values.");
-        paramList.add(resetAllAction);
+        FilterAction resetAllAction = new FilterAction("Reset All", e -> reset(), IconUtils.getWestArrowIcon(), "Reset all settings to their default values.");
+        actionList.add(resetAllAction);
     }
 
-    public void insertParam(GUIParam param, int index) {
+    public void insertParam(FilterParam param, int index) {
         paramList.add(index, param);
     }
 
-    @Override
-    public Iterator<GUIParam> iterator() {
-        return paramList.iterator();
+    public void insertAction(FilterAction action, int index) {
+        actionList.add(index, action);
     }
 
     /**
      * Resets all params without triggering an operation
      */
     public void reset() {
-        for (GUIParam param : paramList) {
+        for (FilterParam param : paramList) {
             param.reset(false);
         }
     }
@@ -84,41 +95,32 @@ public class ParamSet implements Iterable<GUIParam> {
     public void randomize() {
         long before = Filter.runCount;
 
-        paramList.forEach(GUIParam::randomize);
+        paramList.forEach(FilterParam::randomize);
 
         // this call is not supposed to trigger the filter!
         long after = Filter.runCount;
         assert before == after : "before = " + before + ", after = " + after;
     }
 
-    public void startPresetAdjusting() {
-        for (GUIParam param : paramList) {
-            param.setTrigger(false);
-        }
-    }
-
-    public void endPresetAdjusting(boolean trigger) {
-        for (GUIParam param : paramList) {
-            param.setTrigger(true);
-        }
-        if (trigger) {
-            if (adjustmentListener != null) {
-                // called only once, not for each GUIParam
-                adjustmentListener.paramAdjusted();
-            }
+    public void triggerFilter() {
+        if (adjustmentListener != null) {
+            adjustmentListener.paramAdjusted();
         }
     }
 
     public void setAdjustmentListener(ParamAdjustmentListener listener) {
         adjustmentListener = listener;
 
-        for (GUIParam param : paramList) {
+        for (FilterParam param : paramList) {
             param.setAdjustmentListener(listener);
+        }
+        for (FilterAction action : actionList) {
+            action.setAdjustmentListener(listener);
         }
     }
 
     public void considerImageSize(Rectangle bounds) {
-        for (GUIParam param : paramList) {
+        for (FilterParam param : paramList) {
             param.considerImageSize(bounds);
         }
     }
@@ -130,7 +132,7 @@ public class ParamSet implements Iterable<GUIParam> {
     public void setState(ParamSetState newState) {
         Iterator<ParamState> newStateIterator = newState.iterator();
         paramList.stream()
-                .filter(GUIParam::canBeAnimated)
+                .filter(FilterParam::canBeAnimated)
                 .forEach(param -> {
                     ParamState newParamState = newStateIterator.next();
                     param.setState(newParamState);
@@ -138,10 +140,10 @@ public class ParamSet implements Iterable<GUIParam> {
     }
 
     /**
-     * A ParamSet can be animated if at least one contained GUIParam can be
+     * A ParamSet can be animated if at least one contained filter parameter can be
      */
     public boolean canBeAnimated() {
-        for (GUIParam param : paramList) {
+        for (FilterParam param : paramList) {
             if (param.canBeAnimated()) {
                 return true;
             }
@@ -150,13 +152,16 @@ public class ParamSet implements Iterable<GUIParam> {
     }
 
     public void setFinalAnimationSettingMode(boolean b) {
-        for (GUIParam param : paramList) {
+        for (FilterParam param : paramList) {
             param.setFinalAnimationSettingMode(b);
+        }
+        for (FilterAction action : actionList) {
+            action.setFinalAnimationSettingMode(b);
         }
     }
 
     public boolean hasGradient() {
-        for (GUIParam param : paramList) {
+        for (FilterParam param : paramList) {
             if (param instanceof GradientParam) {
                 return true;
             }
@@ -164,10 +169,18 @@ public class ParamSet implements Iterable<GUIParam> {
         return false;
     }
 
+    public List<FilterAction> getActionList() {
+        return actionList;
+    }
+
+    public List<FilterParam> getParamList() {
+        return paramList;
+    }
+
     @Override
     public String toString() {
         String s = "ParamSet[";
-        for (GUIParam param : paramList) {
+        for (FilterParam param : paramList) {
             s += ("\n    " + param.toString());
         }
         s += "\n]";

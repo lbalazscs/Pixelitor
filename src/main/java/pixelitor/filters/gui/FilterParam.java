@@ -17,33 +17,17 @@
 
 package pixelitor.filters.gui;
 
-import javax.swing.*;
 import java.awt.Rectangle;
 
 /**
  * A filter parameter that can be configured by the user
  */
-public interface GUIParam extends Resettable {
-    String getName();
-
-    void setAdjustmentListener(ParamAdjustmentListener listener);
-
-    JComponent createGUI();
-
-    int getNrOfGridBagCols();
+public interface FilterParam extends FilterGUIComponent, Resettable {
 
     /**
      * Sets a random value without triggering the filter
      */
     void randomize();
-
-    /**
-     * Sets whether the running of the filter should be triggered
-     * when the value of this GUIParam changes
-     */
-    void setTrigger(boolean trigger);
-
-    boolean getTrigger(); // only for tests
 
     void considerImageSize(Rectangle bounds);
 
@@ -60,5 +44,4 @@ public interface GUIParam extends Resettable {
      * The following methods are for these two scenarios
      */
     void setEnabledLogically(boolean b);
-    void setFinalAnimationSettingMode(boolean b); // implemented for the non-animatable params
 }

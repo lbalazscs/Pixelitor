@@ -33,6 +33,8 @@ import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
 
+import static pixelitor.utils.SliderSpinner.TextPosition.WEST;
+
 /**
  * The panel shown in the "Export Optimized JPEG..." dialog
  */
@@ -99,7 +101,7 @@ public class OptimizedJpegSavePanel extends JPanel {
     private JPanel createControlsPanel() {
         qualityParam = new RangeParam("JPEG Quality", 1, 100, 60);
         qualityParam.setAdjustmentListener(this::updateAfterPreview);
-        SliderSpinner qualitySpinner = new SliderSpinner(qualityParam, SliderSpinner.TextPosition.WEST, false);
+        SliderSpinner qualitySpinner = new SliderSpinner(qualityParam, WEST, false);
         JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         southPanel.add(qualitySpinner);
         sizeLabel = new JLabel();

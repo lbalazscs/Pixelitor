@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import com.jhlabs.image.Colormap;
@@ -21,14 +22,16 @@ import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.utils.ImageUtils;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
+
+import static java.awt.Color.BLACK;
+import static java.awt.Color.WHITE;
 
 /**
  * Gradient map
  */
 public class GradientMap extends FilterWithParametrizedGUI {
-    private final GradientParam gradientParam = new GradientParam("Colors", Color.BLACK, Color.WHITE);
+    private final GradientParam gradientParam = new GradientParam("Colors", BLACK, WHITE);
 
     public GradientMap() {
         super("Gradient Map", true, false);

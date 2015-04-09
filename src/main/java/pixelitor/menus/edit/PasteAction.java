@@ -30,6 +30,8 @@ import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
 
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
+
 /**
  * Pastes an image from the system clipboard
  */
@@ -50,7 +52,7 @@ public class PasteAction extends AbstractAction {
                 // pastedImage = ImageUtils.toCompatibleImage(pastedImage);
 
                 int type = pastedImage.getType();
-                if (type != BufferedImage.TYPE_INT_ARGB_PRE) {
+                if (type != TYPE_INT_ARGB_PRE) {
                     // needs conversion in the case of
                     // images pasted from other apps
                     pastedImage = ImageUtils.convertToARGB_PRE(pastedImage, true);

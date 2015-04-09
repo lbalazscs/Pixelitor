@@ -22,12 +22,14 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Line2D;
+
+import static java.awt.RenderingHints.KEY_STROKE_CONTROL;
+import static java.awt.RenderingHints.VALUE_STROKE_PURE;
 
 /**
  * An abstract superclass for angle selectors and elevation angle selectors
@@ -95,7 +97,7 @@ public abstract class AbstractAngleSelectorComponent extends JComponent implemen
         g2.setColor(ARROW_COLOR);
         g2.setStroke(ARROW_STROKE);
 
-        g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+        g2.setRenderingHint(KEY_STROKE_CONTROL, VALUE_STROKE_PURE);
 
         g2.draw(new Line2D.Float(startX, startY, endX, endY));
 

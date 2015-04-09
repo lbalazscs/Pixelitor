@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.gui;
 
 import com.jhlabs.math.Noise;
@@ -23,15 +24,15 @@ import java.awt.event.ActionListener;
 /**
  * An ActionParam that deals with reseeding some randomness
  */
-public class ReseedNoiseActionParam extends ActionParam {
+public class ReseedNoiseFilterAction extends FilterAction {
     // the first group of constructors is called if
     // Noise.reseed() does the reseed...
 
-    public ReseedNoiseActionParam() {
+    public ReseedNoiseFilterAction() {
         this("Reseed");
     }
 
-    public ReseedNoiseActionParam(String name) {
+    public ReseedNoiseFilterAction(String name) {
         super(name, e -> Noise.reseed(), "<html>Reinitialize the randomness.<br>Has effect only if some randomness is enabled in the settings.");
         setIgnoreFinalAnimationSettingMode(false);
     }
@@ -39,15 +40,15 @@ public class ReseedNoiseActionParam extends ActionParam {
     // ... and the second group of constructors is called if
     // the given ActionListener does the reseed
 
-    public ReseedNoiseActionParam(ActionListener actionListener) {
+    public ReseedNoiseFilterAction(ActionListener actionListener) {
         this("Reseed", actionListener);
     }
 
-    public ReseedNoiseActionParam(String name, ActionListener actionListener) {
+    public ReseedNoiseFilterAction(String name, ActionListener actionListener) {
         this(name, "Reinitialize the randomness", actionListener);
     }
 
-    public ReseedNoiseActionParam(String name, String toolTipText, ActionListener actionListener) {
+    public ReseedNoiseFilterAction(String name, String toolTipText, ActionListener actionListener) {
         super(name, actionListener, toolTipText);
         setIgnoreFinalAnimationSettingMode(false);
     }

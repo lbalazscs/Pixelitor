@@ -19,17 +19,19 @@ package pixelitor.tools.brushes;
 
 import pixelitor.tools.StrokeType;
 
-import java.awt.BasicStroke;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.Rectangle2D;
+
+import static java.awt.BasicStroke.CAP_SQUARE;
+import static java.awt.BasicStroke.JOIN_BEVEL;
 
 /**
  * The "Squares" brush
  */
 public class OutlineSquareBrush extends StrokeBrush {
     public OutlineSquareBrush() {
-        super(StrokeType.OUTLINE, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL);
+        super(StrokeType.OUTLINE, CAP_SQUARE, JOIN_BEVEL);
     }
 
     @Override

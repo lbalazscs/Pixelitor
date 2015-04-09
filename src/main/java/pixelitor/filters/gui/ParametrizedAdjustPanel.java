@@ -25,6 +25,7 @@ import pixelitor.utils.Utils;
 import javax.swing.*;
 import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
+import java.util.List;
 
 public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustmentListener {
     /**
@@ -60,7 +61,7 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
         setupControlsInColumn(this, params, addShowOriginal);
     }
 
-    public void setupControlsInColumn(JPanel parent, Iterable<GUIParam> params, boolean addShowOriginal) {
+    public void setupControlsInColumn(JPanel parent, ParamSet params, boolean addShowOriginal) {
         parent.setLayout(new GridBagLayout());
 
         int row = 0;
@@ -68,28 +69,35 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
 
         GridBagHelper gbHelper = new GridBagHelper(parent);
 
-        for (GUIParam param : params) {
+        // add filter parameters
+        List<FilterParam> paramList = params.getParamList();
+        for (FilterParam param : paramList) {
             JComponent control = param.createGUI();
 
-            if (param instanceof ActionParam) { // all the buttons go in one row
-                if (buttonsPanel == null) {
-                    buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-                    gbHelper.addOnlyControlToRow(buttonsPanel, row);
-                }
-                buttonsPanel.add(control);
-                control.setName(param.getName());
-            } else {
-                int numColumns = param.getNrOfGridBagCols();
-                if (numColumns == 1) {
-                    gbHelper.addOnlyControlToRow(control, row);
-                } else if (numColumns == 2) {
-                    gbHelper.addLabel(param.getName() + ':', 0, row);
-                    gbHelper.addLastControl(control);
-                }
+            int numColumns = param.getNrOfGridBagCols();
+            if (numColumns == 1) {
+                gbHelper.addOnlyControlToRow(control, row);
+            } else if (numColumns == 2) {
+                gbHelper.addLabel(param.getName() + ':', 0, row);
+                gbHelper.addLastControl(control);
             }
 
             row++;
         }
+
+        // add filter actions
+        List<FilterAction> actionList = params.getActionList();
+        for (FilterAction action : actionList) {
+            // all the buttons go in one row
+            JButton button = (JButton) action.createGUI();
+            if (buttonsPanel == null) {
+                buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+                gbHelper.addOnlyControlToRow(buttonsPanel, row);
+            }
+            buttonsPanel.add(button);
+            button.setName(action.getName());
+        }
+
         if (addShowOriginal) {
             gbHelper.addLabel("Show Original:", 0, row);
 

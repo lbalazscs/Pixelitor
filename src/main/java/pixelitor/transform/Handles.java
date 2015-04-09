@@ -21,13 +21,15 @@ import pixelitor.ImageDisplay;
 import pixelitor.utils.Utils;
 
 import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.util.Arrays;
 import java.util.List;
+
+import static java.awt.Color.BLACK;
+import static java.awt.Color.WHITE;
 
 /**
  * The eight handles of the TransformSupport
@@ -60,10 +62,10 @@ public class Handles {
     private void drawRectangle(Graphics2D g, Stroke bigStroke, Stroke smallStroke) {
         Rectangle rect = getSelectedRectangleInComponentSpace();
 
-        g.setColor(Color.BLACK);
+        g.setColor(BLACK);
         g.setStroke(bigStroke);
         g.draw(rect);
-        g.setColor(Color.WHITE);
+        g.setColor(WHITE);
         g.setStroke(smallStroke);
         g.draw(rect);
     }
@@ -71,10 +73,10 @@ public class Handles {
     private void drawHandles(Graphics2D g, Stroke bigStroke, Stroke smallStroke) {
         for (Handle handle : handles) {
             g.setStroke(bigStroke);
-            g.setColor(Color.BLACK);
+            g.setColor(BLACK);
             g.draw(handle.getShape());
             g.setStroke(smallStroke);
-            g.setColor(Color.WHITE);
+            g.setColor(WHITE);
             g.fill(handle.getShape());
         }
     }

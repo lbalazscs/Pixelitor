@@ -27,12 +27,15 @@ import javax.swing.event.EventListenerList;
 import java.awt.Rectangle;
 import java.util.Random;
 
+import static pixelitor.utils.SliderSpinner.TextPosition.BORDER;
+import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
+
 /**
  * Represents an integer value with a minimum, a maximum and a default.
  * Suitable as the model of a JSlider (but usually used as a model of
  * an entire SliderSpinner)
  */
-public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, RangeBasedOnImageSize {
+public class RangeParam extends AbstractFilterParam implements BoundedRangeModel, RangeBasedOnImageSize {
     private int minValue;
     private int maxValue;
     private int defaultValue;
@@ -58,7 +61,7 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
     private double maxToImageSizeRatio;
 
     public RangeParam(String name, int minValue, int maxValue, int defaultValue) {
-        this(name, minValue, maxValue, defaultValue, true, SliderSpinner.TextPosition.BORDER);
+        this(name, minValue, maxValue, defaultValue, true, BORDER);
     }
 
     public RangeParam(String name, int minValue, int maxValue, int defaultValue, boolean addDefaultButtons, SliderSpinner.TextPosition position) {
@@ -101,11 +104,7 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
      */
     @Override
     public void reset(boolean triggerAction) {
-        if (triggerAction) {
-            setValue(defaultValue);
-        } else {
-            setValueWithoutTrigger(defaultValue);
-        }
+        setValue(defaultValue, triggerAction);
     }
 
     /**
@@ -124,7 +123,7 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
 
     @Override
     public int getNrOfGridBagCols() {
-        if (textPosition == SliderSpinner.TextPosition.NONE) {
+        if (textPosition == NONE) {
             return 2;
         }
         return 1;
@@ -137,7 +136,7 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
             Random rnd = new Random();
             int newValue = minValue + rnd.nextInt(range);
 
-            executeWithoutTrigger(() -> setValue(newValue));
+            setValueNoTrigger(newValue);
         }
     }
 
@@ -195,6 +194,14 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
 
     @Override
     public void setValue(int n) {
+        setValue(n, true);
+    }
+
+    public void setValueNoTrigger(int n) {
+        setValue(n, false);
+    }
+
+    public void setValue(int n, boolean trigger) {
         if (value != n) {
             value = n;
             fireStateChanged();
@@ -205,18 +212,6 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
                     }
                 }
             }
-        }
-    }
-
-    /**
-     * This is like setValue, but it guarantees that the filter will not be triggered.
-     * (When grouped RangeParams are updating each other, it cannot be done with the
-     * trigger global variable, because trigger will be set to true too early)
-     */
-    public void setValueWithoutTrigger(int n) {
-        if (value != n) {
-            value = n;
-            fireStateChanged();
         }
     }
 
@@ -358,7 +353,7 @@ public class RangeParam extends AbstractGUIParam implements BoundedRangeModel, R
 
     @Override
     public void setFinalAnimationSettingMode(boolean b) {
-        // ignored because this GUIParam can be animated
+        // ignored because this filter parameter can be animated
     }
 
     @Override

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import com.jhlabs.composite.DifferenceComposite;
@@ -21,12 +22,12 @@ import com.jhlabs.composite.ScreenComposite;
 import com.jhlabs.image.PolarFilter;
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
-import pixelitor.filters.gui.ActionParam;
 import pixelitor.filters.gui.ColorParam;
+import pixelitor.filters.gui.FilterAction;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseActionParam;
+import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.lookup.FastLookupOp;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
@@ -34,10 +35,15 @@ import pixelitor.utils.Utils;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.LinearGradientPaint;
-import java.awt.MultipleGradientPaint;
 import java.awt.Paint;
 import java.awt.image.BufferedImage;
 import java.awt.image.ShortLookupTable;
+
+import static java.awt.Color.BLACK;
+import static java.awt.Color.WHITE;
+import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
+import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
 
 /**
  * Lightning
@@ -45,11 +51,11 @@ import java.awt.image.ShortLookupTable;
 public class Lightning extends FilterWithParametrizedGUI {
     private final RangeParam numberOfBolts = new RangeParam("Number of Bolts", 1, 20, 8);
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final ColorParam colorParam = new ColorParam("Color:", Color.WHITE, false, false);
+    private final ColorParam colorParam = new ColorParam("Color:", WHITE, NO_OPACITY);
     private final RangeParam boltExpansion = new RangeParam("Bolt Expansion", 1, 255, 70);
 
     @SuppressWarnings("FieldCanBeLocal")
-    private final ActionParam reseedAction = new ReseedNoiseActionParam(e -> {
+    private final FilterAction reseedAction = new ReseedNoiseFilterAction(e -> {
         Clouds.reseed();
     });
 
@@ -58,10 +64,9 @@ public class Lightning extends FilterWithParametrizedGUI {
         setParamSet(new ParamSet(
                 center,
                 numberOfBolts,
-                boltExpansion,
+                boltExpansion
 //                colorParam,        TODO does not work right
-                reseedAction
-        ));
+        ).withAction(reseedAction));
     }
 
     @Override
@@ -75,8 +80,8 @@ public class Lightning extends FilterWithParametrizedGUI {
         float gradientDistance = ((float) lightningImageSize) / (numberOfBolts.getValue());
 
         // create image with vertical bars
-        BufferedImage lightningImage = new BufferedImage(lightningImageSize, lightningImageSize, BufferedImage.TYPE_INT_ARGB);
-        Paint gradient = new LinearGradientPaint(0, 0, gradientDistance, 0, ImageUtils.FRACTIONS_2_COLOR_UNIFORM, new Color[]{Color.BLACK, Color.WHITE}, MultipleGradientPaint.CycleMethod.REFLECT);
+        BufferedImage lightningImage = new BufferedImage(lightningImageSize, lightningImageSize, TYPE_INT_ARGB);
+        Paint gradient = new LinearGradientPaint(0, 0, gradientDistance, 0, ImageUtils.FRACTIONS_2_COLOR_UNIFORM, new Color[]{BLACK, WHITE}, REFLECT);
         Graphics2D g = lightningImage.createGraphics();
         g.setPaint(gradient);
         g.fillRect(0, 0, lightningImage.getWidth(), lightningImage.getHeight());
@@ -103,13 +108,13 @@ public class Lightning extends FilterWithParametrizedGUI {
         int xTrans = -xSizeDiff / 2 + (int) (srcWidth * (center.getRelativeX() - 0.5));
         int yTrans = -ySizeDiff / 2 + (int) (srcHeight * (center.getRelativeY() - 0.5));
 
-        BufferedImage croppedLightningImage = new BufferedImage(srcWidth, srcHeight, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage croppedLightningImage = new BufferedImage(srcWidth, srcHeight, TYPE_INT_ARGB);
         Graphics2D gCroppedLightning = croppedLightningImage.createGraphics();
         gCroppedLightning.drawImage(lightningImage, xTrans, yTrans, null);
 
         // apply difference clouds
-        BufferedImage cloudsImage = new BufferedImage(srcWidth, srcHeight, BufferedImage.TYPE_INT_ARGB);
-        Clouds.renderClouds(cloudsImage, 100.0f, 0.5f, Color.BLACK, Color.WHITE);
+        BufferedImage cloudsImage = new BufferedImage(srcWidth, srcHeight, TYPE_INT_ARGB);
+        Clouds.renderClouds(cloudsImage, 100.0f, 0.5f, BLACK, WHITE);
         gCroppedLightning.setComposite(new DifferenceComposite(1.0f));
         gCroppedLightning.drawImage(cloudsImage, 0, 0, null);
 
@@ -140,7 +145,7 @@ public class Lightning extends FilterWithParametrizedGUI {
         lookupData[2] = invertAndDarkenLUT;
 
         Color color = colorParam.getColor();
-        if (!color.equals(Color.WHITE)) {
+        if (!color.equals(WHITE)) {
             int red = color.getRed();
             int blue = color.getBlue();
             int green = color.getGreen();
@@ -159,7 +164,7 @@ public class Lightning extends FilterWithParametrizedGUI {
         }
 
 
-        BufferedImage invertedImage = new BufferedImage(srcWidth, srcHeight, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage invertedImage = new BufferedImage(srcWidth, srcHeight, TYPE_INT_ARGB);
         invertedImage = new FastLookupOp(new ShortLookupTable(0, lookupData)).filter(croppedLightningImage, invertedImage);
 
         if (debug) {

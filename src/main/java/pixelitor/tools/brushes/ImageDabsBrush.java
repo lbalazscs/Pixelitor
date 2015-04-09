@@ -22,11 +22,14 @@ import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.EnumMap;
 import java.util.Map;
+
+import static java.awt.RenderingHints.KEY_INTERPOLATION;
+import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
 /**
  * A dabs brush based on images
@@ -79,7 +82,7 @@ public class ImageDabsBrush extends DabsBrush {
         }
 
         int newSizeInt = (int) newSize;
-        finalScaledImage = new BufferedImage(newSizeInt, newSizeInt, BufferedImage.TYPE_INT_ARGB);
+        finalScaledImage = new BufferedImage(newSizeInt, newSizeInt, TYPE_INT_ARGB);
         Graphics2D g = finalScaledImage.createGraphics();
         g.drawImage(coloredBrushImage, 0, 0, newSizeInt, newSizeInt, null);
         g.dispose();
@@ -91,7 +94,7 @@ public class ImageDabsBrush extends DabsBrush {
      * @param color
      */
     private void colorizeBrushImage(Color color) {
-        coloredBrushImage = new BufferedImage(templateImage.getWidth(), templateImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        coloredBrushImage = new BufferedImage(templateImage.getWidth(), templateImage.getHeight(), TYPE_INT_ARGB);
         int[] srcPixels = ImageUtils.getPixelsAsArray(templateImage);
         int[] destPixels = ImageUtils.getPixelsAsArray(coloredBrushImage);
 
@@ -119,7 +122,7 @@ public class ImageDabsBrush extends DabsBrush {
         } else {
             AffineTransform oldTransform = targetG.getTransform();
             targetG.rotate(theta, x, y);
-            targetG.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            targetG.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
             targetG.drawImage(finalScaledImage, (int) x - radius, (int) y - radius, null);
             targetG.setTransform(oldTransform);
         }

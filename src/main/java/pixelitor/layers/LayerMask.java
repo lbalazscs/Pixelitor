@@ -24,6 +24,8 @@ import java.awt.image.ColorModel;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
 
+import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
+
 /**
  *
  */
@@ -50,7 +52,7 @@ public class LayerMask {
     private void initFromBWImage(BufferedImage bwImage) {
         assert bwImage.getColorModel() != transparencyColorModel;
 
-        if (bwImage.getType() != BufferedImage.TYPE_BYTE_GRAY) {
+        if (bwImage.getType() != TYPE_BYTE_GRAY) {
             bwImage = ImageUtils.convertToGrayScaleImage(bwImage);
         }
 

@@ -21,9 +21,10 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.SliderSpinner;
 
 import java.awt.image.BufferedImage;
+
+import static pixelitor.utils.SliderSpinner.TextPosition.BORDER;
 
 public class Threshold extends FilterWithParametrizedGUI {
     private static final int CRIT_LUMINOSITY = 1;
@@ -33,7 +34,7 @@ public class Threshold extends FilterWithParametrizedGUI {
     private static final int CRIT_SATURATION = 5;
 
     private final RangeParam threshold = new RangeParam("Threshold", 0,
-            255, 128, false, SliderSpinner.TextPosition.BORDER);
+            255, 128, false, BORDER);
 
     private final IntChoiceParam criterion = new IntChoiceParam("Based on",
             new IntChoiceParam.Value[]{

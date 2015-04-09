@@ -38,6 +38,7 @@ import org.assertj.swing.fixture.JToggleButtonFixture;
 import org.assertj.swing.launcher.ApplicationLauncher;
 import org.fest.util.Files;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import pixelitor.filters.painters.EffectsPanel;
@@ -55,6 +56,7 @@ import pixelitor.tools.Symmetry;
 import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -76,21 +78,33 @@ public class AssertJSwingTest {
     private static final File BATCH_RESIZE_OUTPUT_DIR = new File(BASE_TESTING_DIR, "batch_resize_output");
     private static final File BATCH_FILTER_OUTPUT_DIR = new File(BASE_TESTING_DIR, "batch_filter_output");
 
+    public static final int ROBOT_DELAY_MILLIS = 100;
+
     private FrameFixture window;
     private final Random random = new Random();
     private Robot robot;
 
     enum Randomize {YES, NO}
 
-    private void setUpRobot() {
-        robot = BasicRobot.robotWithNewAwtHierarchy();
-        robot.settings().delayBetweenEvents(100);
+    @BeforeClass
+    public static void cleanOutputs() {
+        try {
+            Runtime.getRuntime().exec(BASE_TESTING_DIR + "\\0000_clean_outputs.bat");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        checkTestingDirs();
     }
 
     @Before
     public void setUp() {
         setUpRobot();
         onSetUp();
+    }
+
+    private void setUpRobot() {
+        robot = BasicRobot.robotWithNewAwtHierarchy();
+        robot.settings().delayBetweenEvents(ROBOT_DELAY_MILLIS);
     }
 
     protected void onSetUp() {
@@ -106,8 +120,6 @@ public class AssertJSwingTest {
 
     @Test
     public void testApp() {
-        checkTestingDirs();
-
         testTools();
         testMenus();
         testLayers();
@@ -116,9 +128,9 @@ public class AssertJSwingTest {
     }
 
     private void testTools() {
+        testZoomTool();
         testSelectionTool();
         testCloneTool();
-        testZoomTool();
         testMoveTool();
         testCropTool();
         testEraserTool();
@@ -171,7 +183,13 @@ public class AssertJSwingTest {
 
     private void testCheckForUpdate() {
         findMenuItemByText("Check for Update...").click();
-        findJOptionPane().cancelButton().click();
+        try {
+            findJOptionPane().cancelButton().click();
+        } catch (org.assertj.swing.exception.ComponentLookupException e) {
+            // can happen if the current version is the same as the latest
+            findJOptionPane().okButton().click();
+        }
+
     }
 
     private void testAbout() {
@@ -753,7 +771,11 @@ public class AssertJSwingTest {
         }
 
         move(300, 300);
-        window.pressKey(VK_ALT).click().releaseKey(VK_ALT);
+
+        robot.pressKey(VK_ALT);
+        robot.pressMouse(MouseButton.LEFT_BUTTON);
+        robot.releaseMouse(MouseButton.LEFT_BUTTON);
+        robot.releaseKey(VK_ALT);
 
         move(startX, 300);
         for (int i = 1; i <= 5; i++) {

@@ -14,13 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseActionParam;
+import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.impl.AngularWavesFilter;
 
 import java.awt.image.BufferedImage;
@@ -53,9 +54,8 @@ public class AngularWaves extends FilterWithParametrizedGUI {
                 phaseParam,
                 zoomParam,
                 edgeActionParam,
-                interpolationParam,
-                new ReseedNoiseActionParam("Reseed Noise")
-        ));
+                interpolationParam
+        ).withAction(new ReseedNoiseFilterAction("Reseed Noise")));
     }
 
     @Override

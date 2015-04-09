@@ -18,17 +18,21 @@
 package pixelitor.filters;
 
 import pixelitor.ThreadPool;
-import pixelitor.filters.gui.ActionParam;
 import pixelitor.filters.gui.ColorParam;
+import pixelitor.filters.gui.FilterAction;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseActionParam;
+import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 import java.util.concurrent.Future;
+
+import static java.awt.Color.BLACK;
+import static java.awt.Color.WHITE;
+import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
 
 /**
  * Renders value noise
@@ -47,12 +51,12 @@ public class ValueNoise extends FilterWithParametrizedGUI {
     private final RangeParam details = new RangeParam("Octaves (Details)", 1, 8, 5);
 
     @SuppressWarnings("FieldCanBeLocal")
-    private final ActionParam reseedAction = new ReseedNoiseActionParam(e -> {
+    private final FilterAction reseedAction = new ReseedNoiseFilterAction(e -> {
         reseed();
     });
 
-    private final ColorParam color1 = new ColorParam("Color 1", Color.BLACK, true, false);
-    private final ColorParam color2 = new ColorParam("Color 2", Color.WHITE, true, false);
+    private final ColorParam color1 = new ColorParam("Color 1", BLACK, USER_ONLY_OPACITY);
+    private final ColorParam color2 = new ColorParam("Color 2", WHITE, USER_ONLY_OPACITY);
 
     public ValueNoise() {
         super("Value Noise", false, false);
@@ -60,9 +64,8 @@ public class ValueNoise extends FilterWithParametrizedGUI {
                 scale.adjustRangeToImageSize(0.3),
                 details,
                 color1,
-                color2,
-                reseedAction
-        ));
+                color2
+        ).withAction(reseedAction));
         listNamePrefix = "Render ";
     }
 

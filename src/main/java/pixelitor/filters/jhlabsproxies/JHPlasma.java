@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,27 +8,33 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.PlasmaFilter;
 import pixelitor.filters.FilterWithParametrizedGUI;
-import pixelitor.filters.gui.ActionParam;
+import pixelitor.filters.gui.FilterAction;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseActionParam;
+import pixelitor.filters.gui.ReseedNoiseFilterAction;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+
+import static java.awt.Color.BLACK;
+import static java.awt.Color.ORANGE;
+import static java.awt.Color.RED;
+import static java.awt.Color.YELLOW;
 
 /**
  * Plasma based on the JHLabs PlasmaFilter
@@ -47,7 +53,7 @@ public class JHPlasma extends FilterWithParametrizedGUI {
     }, true);
 
     @SuppressWarnings("FieldCanBeLocal")
-    private final ActionParam reseedAction = new ReseedNoiseActionParam(new ActionListener() {
+    private final FilterAction reseedAction = new ReseedNoiseFilterAction(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (filter != null) {
@@ -59,7 +65,7 @@ public class JHPlasma extends FilterWithParametrizedGUI {
     private PlasmaFilter filter;
 
     private final float[] defaultThumbPositions = {0.0f, 0.3f, 0.7f, 1.0f};
-    private final Color[] defaultValues = {Color.BLACK, Color.RED, Color.ORANGE, Color.YELLOW};
+    private final Color[] defaultValues = {BLACK, RED, ORANGE, YELLOW};
     private final GradientParam gradient = new GradientParam("Gradient", defaultThumbPositions, defaultValues);
 
 
@@ -68,9 +74,8 @@ public class JHPlasma extends FilterWithParametrizedGUI {
         setParamSet(new ParamSet(
                 turbulence,
                 type,
-                gradient,
-                reseedAction
-        ));
+                gradient
+        ).withAction(reseedAction));
         listNamePrefix = "Render ";
     }
 

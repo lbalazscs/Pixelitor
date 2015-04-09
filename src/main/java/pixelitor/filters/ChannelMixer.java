@@ -18,10 +18,10 @@
 package pixelitor.filters;
 
 import com.jhlabs.image.PixelUtils;
-import pixelitor.filters.gui.ActionParam;
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.ChannelMixerAdjustments;
-import pixelitor.filters.gui.GUIParam;
+import pixelitor.filters.gui.FilterAction;
+import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
@@ -54,181 +54,164 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
     private final RangeParam blueFromBlue = new RangeParam("<html><b><font color=blue>Blue</font></b> from <font color=blue>blue</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 100, true, NONE);
 
     private final ActionListener normalizeAction = e -> {
-        getParamSet().startPresetAdjusting();
-
         normalizeChannel(redFromRed, redFromGreen, redFromBlue);
         normalizeChannel(greenFromRed, greenFromGreen, greenFromBlue);
         normalizeChannel(blueFromRed, blueFromGreen, blueFromBlue);
 
-        getParamSet().endPresetAdjusting(false);
+        // no need for filter triggering here, because this will happen automatically via ActionParam
+        // the actions on the right side DO require explicit triggering because they are simple JButtons
     };
 
     private final Action switchRedGreen
             = new AbstractAction("switch red-green") {
         @Override
         public void actionPerformed(ActionEvent e) {
-            getParamSet().startPresetAdjusting();
+            redFromRed.setValueNoTrigger(0);
+            redFromGreen.setValueNoTrigger(100);
+            redFromBlue.setValueNoTrigger(0);
 
-            redFromRed.setValue(0);
-            redFromGreen.setValue(100);
-            redFromBlue.setValue(0);
+            greenFromRed.setValueNoTrigger(100);
+            greenFromGreen.setValueNoTrigger(0);
+            greenFromBlue.setValueNoTrigger(0);
 
-            greenFromRed.setValue(100);
-            greenFromGreen.setValue(0);
-            greenFromBlue.setValue(0);
+            blueFromRed.setValueNoTrigger(0);
+            blueFromGreen.setValueNoTrigger(0);
+            blueFromBlue.setValueNoTrigger(100);
 
-            blueFromRed.setValue(0);
-            blueFromGreen.setValue(0);
-            blueFromBlue.setValue(100);
-
-            getParamSet().endPresetAdjusting(true);
+            getParamSet().triggerFilter();
         }
     };
 
     private final Action switchRedBlue = new AbstractAction("switch red-blue") {
         @Override
         public void actionPerformed(ActionEvent e) {
-            getParamSet().startPresetAdjusting();
+            redFromRed.setValueNoTrigger(0);
+            redFromGreen.setValueNoTrigger(0);
+            redFromBlue.setValueNoTrigger(100);
 
-            redFromRed.setValue(0);
-            redFromGreen.setValue(0);
-            redFromBlue.setValue(100);
+            greenFromRed.setValueNoTrigger(0);
+            greenFromGreen.setValueNoTrigger(100);
+            greenFromBlue.setValueNoTrigger(0);
 
-            greenFromRed.setValue(0);
-            greenFromGreen.setValue(100);
-            greenFromBlue.setValue(0);
+            blueFromRed.setValueNoTrigger(100);
+            blueFromGreen.setValueNoTrigger(0);
+            blueFromBlue.setValueNoTrigger(0);
 
-            blueFromRed.setValue(100);
-            blueFromGreen.setValue(0);
-            blueFromBlue.setValue(0);
-
-            getParamSet().endPresetAdjusting(true);
+            getParamSet().triggerFilter();
         }
     };
 
     private final Action switchGreenBlue = new AbstractAction("switch green-blue") {
         @Override
         public void actionPerformed(ActionEvent e) {
-            getParamSet().startPresetAdjusting();
+            redFromRed.setValueNoTrigger(100);
+            redFromGreen.setValueNoTrigger(0);
+            redFromBlue.setValueNoTrigger(0);
 
-            redFromRed.setValue(100);
-            redFromGreen.setValue(0);
-            redFromBlue.setValue(0);
+            greenFromRed.setValueNoTrigger(0);
+            greenFromGreen.setValueNoTrigger(0);
+            greenFromBlue.setValueNoTrigger(100);
 
-            greenFromRed.setValue(0);
-            greenFromGreen.setValue(0);
-            greenFromBlue.setValue(100);
+            blueFromRed.setValueNoTrigger(0);
+            blueFromGreen.setValueNoTrigger(100);
+            blueFromBlue.setValueNoTrigger(0);
 
-            blueFromRed.setValue(0);
-            blueFromGreen.setValue(100);
-            blueFromBlue.setValue(0);
-
-            getParamSet().endPresetAdjusting(true);
+            getParamSet().triggerFilter();
         }
     };
 
     private final Action shiftRGBR = new AbstractAction("R -> G -> B -> R") {
         @Override
         public void actionPerformed(ActionEvent e) {
-            getParamSet().startPresetAdjusting();
+            redFromRed.setValueNoTrigger(0);
+            redFromGreen.setValueNoTrigger(0);
+            redFromBlue.setValueNoTrigger(100);
 
-            redFromRed.setValue(0);
-            redFromGreen.setValue(0);
-            redFromBlue.setValue(100);
+            greenFromRed.setValueNoTrigger(100);
+            greenFromGreen.setValueNoTrigger(0);
+            greenFromBlue.setValueNoTrigger(0);
 
-            greenFromRed.setValue(100);
-            greenFromGreen.setValue(0);
-            greenFromBlue.setValue(0);
+            blueFromRed.setValueNoTrigger(0);
+            blueFromGreen.setValueNoTrigger(100);
+            blueFromBlue.setValueNoTrigger(0);
 
-            blueFromRed.setValue(0);
-            blueFromGreen.setValue(100);
-            blueFromBlue.setValue(0);
-
-            getParamSet().endPresetAdjusting(true);
+            getParamSet().triggerFilter();
         }
     };
 
     private final Action shiftRBGR = new AbstractAction("R -> B -> G -> R") {
         @Override
         public void actionPerformed(ActionEvent e) {
-            getParamSet().startPresetAdjusting();
+            redFromRed.setValueNoTrigger(0);
+            redFromGreen.setValueNoTrigger(100);
+            redFromBlue.setValueNoTrigger(0);
 
-            redFromRed.setValue(0);
-            redFromGreen.setValue(100);
-            redFromBlue.setValue(0);
+            greenFromRed.setValueNoTrigger(0);
+            greenFromGreen.setValueNoTrigger(0);
+            greenFromBlue.setValueNoTrigger(100);
 
-            greenFromRed.setValue(0);
-            greenFromGreen.setValue(0);
-            greenFromBlue.setValue(100);
+            blueFromRed.setValueNoTrigger(100);
+            blueFromGreen.setValueNoTrigger(0);
+            blueFromBlue.setValueNoTrigger(0);
 
-            blueFromRed.setValue(100);
-            blueFromGreen.setValue(0);
-            blueFromBlue.setValue(0);
-
-            getParamSet().endPresetAdjusting(true);
+            getParamSet().triggerFilter();
         }
     };
 
     private final Action averageBW = new AbstractAction("average BW") {
         @Override
         public void actionPerformed(ActionEvent e) {
-            getParamSet().startPresetAdjusting();
+            redFromRed.setValueNoTrigger(33);
+            redFromGreen.setValueNoTrigger(33);
+            redFromBlue.setValueNoTrigger(33);
 
-            redFromRed.setValue(33);
-            redFromGreen.setValue(33);
-            redFromBlue.setValue(33);
+            greenFromRed.setValueNoTrigger(33);
+            greenFromGreen.setValueNoTrigger(33);
+            greenFromBlue.setValueNoTrigger(33);
 
-            greenFromRed.setValue(33);
-            greenFromGreen.setValue(33);
-            greenFromBlue.setValue(33);
+            blueFromRed.setValueNoTrigger(33);
+            blueFromGreen.setValueNoTrigger(33);
+            blueFromBlue.setValueNoTrigger(33);
 
-            blueFromRed.setValue(33);
-            blueFromGreen.setValue(33);
-            blueFromBlue.setValue(33);
-
-            getParamSet().endPresetAdjusting(true);
+            getParamSet().triggerFilter();
         }
     };
 
     private final Action luminosityBW = new AbstractAction("luminosity BW") {
         @Override
         public void actionPerformed(ActionEvent e) {
-            getParamSet().startPresetAdjusting();
+            redFromRed.setValueNoTrigger(22);
+            redFromGreen.setValueNoTrigger(71);
+            redFromBlue.setValueNoTrigger(7);
 
-            redFromRed.setValue(22);
-            redFromGreen.setValue(71);
-            redFromBlue.setValue(7);
+            greenFromRed.setValueNoTrigger(22);
+            greenFromGreen.setValueNoTrigger(71);
+            greenFromBlue.setValueNoTrigger(7);
 
-            greenFromRed.setValue(22);
-            greenFromGreen.setValue(71);
-            greenFromBlue.setValue(7);
+            blueFromRed.setValueNoTrigger(22);
+            blueFromGreen.setValueNoTrigger(71);
+            blueFromBlue.setValueNoTrigger(7);
 
-            blueFromRed.setValue(22);
-            blueFromGreen.setValue(71);
-            blueFromBlue.setValue(7);
-
-            getParamSet().endPresetAdjusting(true);
+            getParamSet().triggerFilter();
         }
     };
 
     private final Action sepia = new AbstractAction("sepia") {
         @Override
         public void actionPerformed(ActionEvent e) {
-            getParamSet().startPresetAdjusting();
+            redFromRed.setValueNoTrigger(39);
+            redFromGreen.setValueNoTrigger(77);
+            redFromBlue.setValueNoTrigger(19);
 
-            redFromRed.setValue(39);
-            redFromGreen.setValue(77);
-            redFromBlue.setValue(19);
+            greenFromRed.setValueNoTrigger(35);
+            greenFromGreen.setValueNoTrigger(69);
+            greenFromBlue.setValueNoTrigger(17);
 
-            greenFromRed.setValue(35);
-            greenFromGreen.setValue(69);
-            greenFromBlue.setValue(17);
+            blueFromRed.setValueNoTrigger(27);
+            blueFromGreen.setValueNoTrigger(53);
+            blueFromBlue.setValueNoTrigger(13);
 
-            blueFromRed.setValue(27);
-            blueFromGreen.setValue(53);
-            blueFromBlue.setValue(13);
-
-            getParamSet().endPresetAdjusting(true);
+            getParamSet().triggerFilter();
         }
     };
 
@@ -236,8 +219,8 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
 
     public ChannelMixer() {
         super("Channel Mixer", true, false);
-        ActionParam normalize = new ActionParam("Normalize", normalizeAction, "Makes sure that the sum of the channel contributions is 100%");
-        GUIParam[] params = {
+        FilterAction normalize = new FilterAction("Normalize", normalizeAction, "Makes sure that the sum of the channel contributions is 100%");
+        FilterParam[] params = {
                 redFromRed,
                 redFromGreen,
                 redFromBlue,
@@ -249,13 +232,12 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
                 blueFromRed,
                 blueFromGreen,
                 blueFromBlue,
-
-                normalize
         };
-        setParamSet(new ParamSet(params));
+        setParamSet(new ParamSet(params)
+                .withAction(normalize));
 
         // add this extra action, but after the standard "Randomize Settings"
-        ActionParam randomizeAndNormalize = new ActionParam("Randomize and Normalize",
+        FilterAction randomizeAndNormalize = new FilterAction("Randomize and Normalize",
                 new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
@@ -264,7 +246,7 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
                     }
                 }, "Randomizes settings and normalizes brightness");
         // insert it right after "Randomize Settings"
-        paramSet.insertParam(randomizeAndNormalize, 11);
+        paramSet.insertAction(randomizeAndNormalize, 2);
     }
 
     private static void normalizeChannel(RangeParam fromRed, RangeParam fromGreen, RangeParam fromBlue) {
@@ -273,9 +255,9 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
         int blue = fromBlue.getValue();
         int extra = red + green + blue - 100;
         if (extra != 0) {
-            fromRed.setValue(red - extra / 3);
-            fromGreen.setValue(green - extra / 3);
-            fromBlue.setValue(blue - extra / 3);
+            fromRed.setValueNoTrigger(red - extra / 3);
+            fromGreen.setValueNoTrigger(green - extra / 3);
+            fromBlue.setValueNoTrigger(blue - extra / 3);
         }
     }
 

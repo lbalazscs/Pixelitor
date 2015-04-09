@@ -28,6 +28,10 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import static java.awt.Color.BLACK;
+import static java.awt.Color.GRAY;
+import static java.awt.Color.WHITE;
+
 public class OneChannelLevelsPanel extends CardPanelWithCombo.Card implements ParamAdjustmentListener {
     //    private String channelName;
     private final Collection<SliderSpinner> sliders = new ArrayList<>();
@@ -62,19 +66,19 @@ public class OneChannelLevelsPanel extends CardPanelWithCombo.Card implements Pa
 
         RangeParam inputBlackParam = new RangeParam("Input Dark", 0, 255, BLACK_DEFAULT);
         inputBlackParam.setAdjustmentListener(this);
-        inputBlackSlider = new SliderSpinner(inputBlackParam, Color.GRAY, type.getBackColor());
+        inputBlackSlider = new SliderSpinner(inputBlackParam, GRAY, type.getBackColor());
 
         RangeParam inputWhiteParam = new RangeParam("Input Light", 0, 255, WHITE_DEFAULT);
         inputWhiteParam.setAdjustmentListener(this);
-        inputWhiteSlider = new SliderSpinner(inputWhiteParam, type.getWhiteColor(), Color.GRAY);
+        inputWhiteSlider = new SliderSpinner(inputWhiteParam, type.getWhiteColor(), GRAY);
 
         RangeParam outputBlackParam = new RangeParam("Output Dark", 0, 255, BLACK_DEFAULT);
         outputBlackParam.setAdjustmentListener(this);
-        outputBlackSlider = new SliderSpinner(outputBlackParam, Color.GRAY, type.getWhiteColor());
+        outputBlackSlider = new SliderSpinner(outputBlackParam, GRAY, type.getWhiteColor());
 
         RangeParam outputWhiteParam = new RangeParam("Output Light", 0, 255, WHITE_DEFAULT);
         outputWhiteParam.setAdjustmentListener(this);
-        outputWhiteSlider = new SliderSpinner(outputWhiteParam, type.getBackColor(), Color.GRAY);
+        outputWhiteSlider = new SliderSpinner(outputWhiteParam, type.getBackColor(), GRAY);
 
         addSliderSpinner(inputBlackSlider);
         addSliderSpinner(inputWhiteSlider);
@@ -121,12 +125,12 @@ public class OneChannelLevelsPanel extends CardPanelWithCombo.Card implements Pa
 
             @Override
             Color getBackColor() {
-                return Color.BLACK;
+                return BLACK;
             }
 
             @Override
             Color getWhiteColor() {
-                return Color.WHITE;
+                return WHITE;
             }
         }, R {
             @Override

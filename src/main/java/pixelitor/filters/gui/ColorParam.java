@@ -25,27 +25,22 @@ import java.awt.Color;
 import java.awt.Rectangle;
 
 /**
- * A GUIParam for selecting a color
+ * A filter parameter for selecting a color
  */
-public class ColorParam extends AbstractGUIParam {
+public class ColorParam extends AbstractFilterParam {
     private final Color defaultColor;
     private Color color;
 
     private ParamGUI paramGUI;
-    private boolean allowOpacity = false;
-    private final boolean allowOpacityAtRandomize;
 
-    public ColorParam(String name, Color defaultColor, boolean allowOpacity, boolean allowOpacityAtRandomize) {
+    private final OpacitySetting opacitySetting;
+
+    public ColorParam(String name, Color defaultColor, OpacitySetting opacitySetting) {
         super(name);
-
-        if (allowOpacityAtRandomize && !allowOpacity) {
-            throw new IllegalArgumentException();
-        }
 
         this.defaultColor = defaultColor;
         this.color = defaultColor;
-        this.allowOpacity = allowOpacity;
-        this.allowOpacityAtRandomize = allowOpacityAtRandomize;
+        this.opacitySetting = opacitySetting;
     }
 
     @Override
@@ -62,7 +57,7 @@ public class ColorParam extends AbstractGUIParam {
 
     @Override
     public void reset(boolean triggerAction) {
-        execute(() -> setColor(defaultColor), triggerAction);
+        setColor(defaultColor, triggerAction);
     }
 
     @Override
@@ -72,15 +67,15 @@ public class ColorParam extends AbstractGUIParam {
 
     @Override
     public void randomize() {
-        Color c = ImageUtils.getRandomColor(allowOpacityAtRandomize);
-        executeWithoutTrigger(() -> setColor(c));
+        Color c = ImageUtils.getRandomColor(opacitySetting.allowOpacityAtRandomize);
+        setColor(c, false);
     }
 
     public Color getColor() {
         return color;
     }
 
-    public void setColor(Color newColor) {
+    public void setColor(Color newColor, boolean trigger) {
         if (newColor == null) {
             throw new IllegalArgumentException("newColor is null");
         }
@@ -99,7 +94,7 @@ public class ColorParam extends AbstractGUIParam {
     }
 
     public boolean allowOpacity() {
-        return allowOpacity;
+        return opacitySetting.allowOpacity;
     }
 
     @Override
@@ -146,7 +141,7 @@ public class ColorParam extends AbstractGUIParam {
 
     @Override
     public void setFinalAnimationSettingMode(boolean b) {
-        // ignored because this GUIParam can be animated
+        // ignored because this filter parameter can be animated
     }
 
     @Override
@@ -155,4 +150,17 @@ public class ColorParam extends AbstractGUIParam {
                 getClass().getSimpleName(), getName(), color.toString());
     }
 
+    public enum OpacitySetting {
+        NO_OPACITY(false, false),
+        USER_ONLY_OPACITY(true, false),
+        FREE_OPACITY(true, true);
+
+        private final boolean allowOpacity;
+        private final boolean allowOpacityAtRandomize;
+
+        private OpacitySetting(boolean allowOpacity, boolean allowOpacityAtRandomize) {
+            this.allowOpacity = allowOpacity;
+            this.allowOpacityAtRandomize = allowOpacityAtRandomize;
+        }
+    }
 }

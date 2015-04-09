@@ -22,9 +22,12 @@ import pixelitor.ImageComponent;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
+
+import static java.awt.Color.BLUE;
+import static java.awt.Color.GREEN;
+import static java.awt.Color.RED;
 
 public class HistogramsPanel extends JPanel implements ImageSwitchListener {
     public static final HistogramsPanel INSTANCE = new HistogramsPanel();
@@ -36,9 +39,9 @@ public class HistogramsPanel extends JPanel implements ImageSwitchListener {
     private HistogramsPanel() {
         setLayout(new BorderLayout());
 
-        red = new HistogramPainter(Color.red);
-        green = new HistogramPainter(Color.green);
-        blue = new HistogramPainter(Color.blue);
+        red = new HistogramPainter(RED);
+        green = new HistogramPainter(GREEN);
+        blue = new HistogramPainter(BLUE);
 
         JPanel box = new JPanel();
         box.setLayout(new BoxLayout(box, BoxLayout.Y_AXIS));
@@ -50,7 +53,7 @@ public class HistogramsPanel extends JPanel implements ImageSwitchListener {
         box.add(blue);
         setBorder(BorderFactory.createTitledBorder("Histograms"));
 
-        box.setBorder(BorderFactory.createLineBorder(Color.BLUE));
+        box.setBorder(BorderFactory.createLineBorder(BLUE));
         JScrollPane scrollPane = new JScrollPane(box);
         add(scrollPane, BorderLayout.CENTER);
     }

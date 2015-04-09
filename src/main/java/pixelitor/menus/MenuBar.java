@@ -24,7 +24,6 @@ import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.Desktop;
 import pixelitor.EnlargeCanvas;
-import pixelitor.FillType;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
 import pixelitor.NewImage;
@@ -95,6 +94,9 @@ import java.awt.image.BufferedImage;
 import java.util.Optional;
 
 import static pixelitor.Composition.ImageChangeActions.FULL;
+import static pixelitor.FillType.BACKGROUND;
+import static pixelitor.FillType.FOREGROUND;
+import static pixelitor.FillType.TRANSPARENT;
 import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
 import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.MOTION_BLUR;
@@ -407,9 +409,9 @@ public class MenuBar extends JMenuBar {
 
     private static void initFillSubmenu(JMenu colorsMenu) {
         JMenu fillSubmenu = new JMenu("Fill with");
-        createMenuItem(new Fill(FillType.FOREGROUND), fillSubmenu, ALT_BACKSPACE);
-        createMenuItem(new Fill(FillType.BACKGROUND), fillSubmenu, CTRL_BACKSPACE);
-        createMenuItem(new Fill(FillType.TRANSPARENT), fillSubmenu);
+        createMenuItem(new Fill(FOREGROUND), fillSubmenu, ALT_BACKSPACE);
+        createMenuItem(new Fill(BACKGROUND), fillSubmenu, CTRL_BACKSPACE);
+        createMenuItem(new Fill(TRANSPARENT), fillSubmenu);
         createMenuItem(new ColorWheel(), fillSubmenu);
         createMenuItem(new JHFourColorGradient(), fillSubmenu);
         createMenuItem(new Starburst(), fillSubmenu);

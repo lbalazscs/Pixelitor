@@ -14,9 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.painters;
 
-import org.jdesktop.swingx.painter.AbstractLayoutPainter;
+import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
+import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.jdesktop.swingx.painter.TextPainter;
 import org.jdesktop.swingx.painter.effects.AreaEffect;
 import pixelitor.filters.gui.AdjustPanel;
@@ -29,17 +31,23 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
+import static java.awt.Color.BLACK;
+import static java.awt.Color.WHITE;
+import static java.awt.Font.BOLD;
+import static java.awt.Font.SANS_SERIF;
+import static java.awt.image.BufferedImage.TYPE_INT_RGB;
+
 /**
  * Adds a centered text to the current layer
  */
 public class TextFilter extends FilterWithGUI {
     private String text = "Pixelitor";
-    private Font font = new Font(Font.SANS_SERIF, Font.BOLD, 50);
+    private Font font = new Font(SANS_SERIF, BOLD, 50);
     private AreaEffect[] areaEffects;
-    private Color color = Color.BLACK;
+    private Color color = BLACK;
 
-    private AbstractLayoutPainter.VerticalAlignment verticalAlignment;
-    private AbstractLayoutPainter.HorizontalAlignment horizontalAlignment;
+    private VerticalAlignment verticalAlignment;
+    private HorizontalAlignment horizontalAlignment;
 
     public static final TextFilter INSTANCE = new TextFilter();
     private boolean watermark;
@@ -69,11 +77,11 @@ public class TextFilter extends FilterWithGUI {
 
         if (watermark) {
             // the text is with white on black background on the bump map image
-            BufferedImage bumpImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            BufferedImage bumpImage = new BufferedImage(width, height, TYPE_INT_RGB);
             Graphics2D g = bumpImage.createGraphics();
-            g.setColor(Color.BLACK);
+            g.setColor(BLACK);
             g.fillRect(0, 0, width, height);
-            textPainter.setFillPaint(Color.WHITE);
+            textPainter.setFillPaint(WHITE);
             textPainter.paint(g, this, width, height);
             g.dispose();
 
@@ -111,11 +119,11 @@ public class TextFilter extends FilterWithGUI {
         this.watermark = watermark;
     }
 
-    public void setVerticalAlignment(AbstractLayoutPainter.VerticalAlignment verticalAlignment) {
+    public void setVerticalAlignment(VerticalAlignment verticalAlignment) {
         this.verticalAlignment = verticalAlignment;
     }
 
-    public void setHorizontalAlignment(AbstractLayoutPainter.HorizontalAlignment horizontalAlignment) {
+    public void setHorizontalAlignment(HorizontalAlignment horizontalAlignment) {
         this.horizontalAlignment = horizontalAlignment;
     }
 

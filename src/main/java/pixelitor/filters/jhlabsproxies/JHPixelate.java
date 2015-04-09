@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.BlockFilter;
@@ -24,9 +25,11 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.impl.BrickBlockFilter;
 import pixelitor.utils.ImageUtils;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+
+import static java.awt.Color.GRAY;
+import static java.awt.Color.WHITE;
 
 /**
  * Pixelate based on the JHLabs BlockFilter
@@ -128,13 +131,13 @@ public class JHPixelate extends FilterWithParametrizedGUI {
 
         Graphics2D g = bumpSource.createGraphics();
 
-        g.setColor(Color.WHITE);
+        g.setColor(WHITE);
         g.fillRect(0, 0, width, height);
 
         if (type == TYPE_SQUARE) {
-            ImageUtils.drawGrid(Color.GRAY, g, width, height, gapWidth, cellSize, gapWidth, cellSize, false);
+            ImageUtils.drawGrid(GRAY, g, width, height, gapWidth, cellSize, gapWidth, cellSize, false);
         } else if (type == TYPE_BRICK) {
-            ImageUtils.drawBrickGrid(Color.GRAY, g, cellSize, width, height);
+            ImageUtils.drawBrickGrid(GRAY, g, cellSize, width, height);
         }
 
         g.dispose();

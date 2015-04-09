@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.layers;
 
 import pixelitor.Composition;
@@ -25,6 +26,10 @@ import java.awt.AlphaComposite;
 import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+
+import static java.awt.AlphaComposite.DstIn;
+import static java.awt.AlphaComposite.SRC_OVER;
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
 /**
  * A layer with a content (text or image layer)
@@ -127,10 +132,10 @@ public abstract class ContentLayer extends Layer {
     BufferedImage getMaskedImage(boolean firstVisibleLayer) {
 //        Canvas canvas = comp.getCanvas();
 
-        BufferedImage maskedImage = new BufferedImage(canvas.getWidth(), canvas.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        BufferedImage maskedImage = new BufferedImage(canvas.getWidth(), canvas.getHeight(), TYPE_INT_ARGB);
         Graphics2D mig = maskedImage.createGraphics();
         paintLayerOnGraphics(mig, firstVisibleLayer);
-        mig.setComposite(AlphaComposite.DstIn);
+        mig.setComposite(DstIn);
         mig.drawImage(layerMask.getTransparentImage(), 0, 0, null);
         mig.dispose();
         return maskedImage;
@@ -138,7 +143,7 @@ public abstract class ContentLayer extends Layer {
 
     protected void setupDrawingComposite(Graphics2D g, boolean isFirstVisibleLayer) {
         if (isFirstVisibleLayer) {  // the first visible layer is always painted with normal mode
-            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+            g.setComposite(AlphaComposite.getInstance(SRC_OVER, opacity));
         } else {
             Composite composite = blendingMode.getComposite(opacity);
             g.setComposite(composite);

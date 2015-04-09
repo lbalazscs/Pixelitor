@@ -31,6 +31,8 @@ import java.awt.FlowLayout;
 import java.util.Dictionary;
 import java.util.Enumeration;
 
+import static java.awt.Color.GRAY;
+
 /**
  * A GUI Component consisting of a JSlider, a JSpinner and optionally a default button.
  * The slider and the spinner are synchronized
@@ -77,8 +79,8 @@ public class SliderSpinner extends JPanel implements ChangeListener {
                 this.setBorder(BorderFactory.createTitledBorder(gradientBorder, model.getName()));
             } else {
                 this.setBorder(BorderFactory.createTitledBorder(model.getName()));
-                this.leftColor = Color.GRAY;
-                this.rightColor = Color.GRAY;
+                this.leftColor = GRAY;
+                this.rightColor = GRAY;
             }
         }
 
@@ -112,7 +114,7 @@ public class SliderSpinner extends JPanel implements ChangeListener {
             defaultButton = new DefaultButton(resettableParam == null ? model : resettableParam);
             defaultButton.setPreferredSize(new Dimension(spinnerHeight, spinnerHeight));
             if (colorsUsed) {
-                defaultButton.setBackground(Color.GRAY);
+                defaultButton.setBackground(GRAY);
             }
             p.add(defaultButton);
         }
@@ -199,7 +201,7 @@ public class SliderSpinner extends JPanel implements ChangeListener {
         }
         if (colorsUsed) {
             if (model.isSetToDefault()) {
-                defaultButton.setBackground(Color.GRAY);
+                defaultButton.setBackground(GRAY);
             } else {
                 if (model.getValue() > model.getDefaultValue()) {
                     defaultButton.setBackground(rightColor);

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.SwimFilter;
@@ -22,7 +23,7 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseActionParam;
+import pixelitor.filters.gui.ReseedNoiseFilterAction;
 
 import java.awt.image.BufferedImage;
 
@@ -51,9 +52,8 @@ private final RangeParam time = new RangeParam("Time", 100, 1000, 100);
 //                turbulenceParam,
                 time,
                 edgeAction,
-                interpolation,
-                new ReseedNoiseActionParam()
-        ));
+                interpolation
+        ).withAction(new ReseedNoiseFilterAction()));
     }
 
     @Override

@@ -44,13 +44,14 @@ import java.awt.BasicStroke;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.Optional;
 
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
 
@@ -313,7 +314,7 @@ public class ShapesTool extends Tool {
 
         ShapesAction action = actionModel.getSelectedItem();
 
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         if (action.hasFill()) {
             TwoPointBasedPaint fillType = fillModel.getSelectedItem();

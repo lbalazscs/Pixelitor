@@ -22,7 +22,6 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -32,6 +31,9 @@ import java.awt.event.MouseMotionListener;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.Optional;
+
+import static java.awt.Color.BLACK;
+import static java.awt.Color.WHITE;
 
 /**
  * The image selector part of an ImagePositionPanel
@@ -73,7 +75,7 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
     }
 
     private static void drawLines(Graphics2D g2, int x, int y, int width, int height) {
-        g2.setColor(Color.BLACK);
+        g2.setColor(BLACK);
         g2.drawLine(x + 1, 0, x + 1, height); // vertical west
         g2.drawLine(x - 1, 0, x - 1, height); // vertical east
 
@@ -82,7 +84,7 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
             g2.drawLine(0, y + 1, width, y + 1); // horizontal south
         }
 
-        g2.setColor(Color.WHITE);
+        g2.setColor(WHITE);
         g2.drawLine(x, 0, x, height); // vertical
         if(y < height) {
             g2.drawLine(0, y, width, y); // horizontal
@@ -90,9 +92,9 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
     }
 
     private static void drawCentralSquare(Graphics2D g2, int x, int y) {
-        g2.setColor(Color.BLACK);
+        g2.setColor(BLACK);
         g2.draw(new Rectangle2D.Float(x - CENTRAL_SQUARE_SIZE, y - CENTRAL_SQUARE_SIZE, CENTRAL_SQUARE_SIZE * 2, CENTRAL_SQUARE_SIZE * 2));
-        g2.setColor(Color.WHITE);
+        g2.setColor(WHITE);
         g2.fill(new Rectangle2D.Float(x - CENTRAL_SQUARE_SIZE + 1, y - CENTRAL_SQUARE_SIZE + 1, CENTRAL_SQUARE_SIZE * 2 - 1, CENTRAL_SQUARE_SIZE * 2 - 1));
     }
 
@@ -107,7 +109,7 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
 
         float relativeX = ((float) mouseX) / thumb.getWidth();
         float relativeY = ((float) mouseY) / thumb.getHeight();
-        model.setRelativeValues(relativeX, relativeY, false, isAdjusting);
+        model.setRelativeValues(relativeX, relativeY, false, isAdjusting, true);
 
         imagePositionPanel.updateSlidersFromModel();
 

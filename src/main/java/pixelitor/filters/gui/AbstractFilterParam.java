@@ -20,44 +20,19 @@ package pixelitor.filters.gui;
 import java.util.Objects;
 
 /**
- * A convenience parent class for GUIParam implementations.
+ * A convenience parent class for filter parameter implementations.
  */
-public abstract class AbstractGUIParam implements GUIParam {
+public abstract class AbstractFilterParam implements FilterParam {
     private final String name;
     protected ParamAdjustmentListener adjustmentListener;
-    protected boolean trigger = true;
 
-    AbstractGUIParam(String name) {
+    AbstractFilterParam(String name) {
         this.name = Objects.requireNonNull(name);
     }
 
     @Override
     public void setAdjustmentListener(ParamAdjustmentListener listener) {
         this.adjustmentListener = listener;
-    }
-
-    protected void execute(Runnable r, boolean trigger) {
-        if (trigger) {
-            r.run(); // trigger is set by default to true
-        } else {
-            executeWithoutTrigger(r);
-        }
-    }
-
-    protected void executeWithoutTrigger(Runnable r) {
-        trigger = false;
-        r.run();
-        trigger = true;
-    }
-
-    @Override
-    public void setTrigger(boolean trigger) {
-        this.trigger = trigger;
-    }
-
-    @Override
-    public boolean getTrigger() {
-        return trigger;
     }
 
     @Override

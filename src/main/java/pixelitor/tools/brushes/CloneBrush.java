@@ -22,6 +22,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
+
 /**
  * The brush used by the Clone Tool
  */
@@ -44,7 +46,7 @@ public class CloneBrush extends DabsBrush {
     @Override
     public void setRadius(int radius) {
         super.setRadius(radius);
-        brushImage = new BufferedImage(diameter, diameter, BufferedImage.TYPE_INT_ARGB);
+        brushImage = new BufferedImage(diameter, diameter, TYPE_INT_ARGB);
         circleClip = new Ellipse2D.Double(0, 0, diameter, diameter);
     }
 
@@ -73,10 +75,11 @@ public class CloneBrush extends DabsBrush {
 
     @Override
     public void putDab(double x, double y, double theta) {
-        targetG.drawImage(brushImage, AffineTransform.getTranslateInstance(
+        AffineTransform transform = AffineTransform.getTranslateInstance(
                 x - radius,
                 y - radius
-        ), null);
+        );
+        targetG.drawImage(brushImage, transform, null);
         updateComp((int) x, (int) y);
     }
 
@@ -84,10 +87,16 @@ public class CloneBrush extends DabsBrush {
     void setupBrushStamp(double x, double y) {
         Graphics2D g = brushImage.createGraphics();
         g.setClip(circleClip);
+
+//        double scale = 0.5;
+
+        AffineTransform transform = AffineTransform.getTranslateInstance(
+                (dx - x),
+                (dy - y));
+//        transform.scale(scale, scale);
+
         g.drawImage(sourceImage,
-                AffineTransform.getTranslateInstance(
-                        dx - x,
-                        dy - y), null);
+                transform, null);
         g.dispose();
     }
 

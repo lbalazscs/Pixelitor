@@ -33,13 +33,14 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.RadialGradientPaint;
-import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
 import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 /**
  * Fills the image with random circles
@@ -81,9 +82,8 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
                 colorSource,
                 addHighLightsCB,
                 highlightAngleSelector,
-                highlightElevationSelector,
-                ReseedSupport.createParam()
-        ));
+                highlightElevationSelector
+        ).withAction(ReseedSupport.createAction()));
     }
 
     @Override
@@ -149,8 +149,7 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
                 g.setColor(c);
             }
 
-            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                    RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
             float drawX = x - r;
             float drawY = y - r;

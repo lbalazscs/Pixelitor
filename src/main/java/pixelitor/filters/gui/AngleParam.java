@@ -27,9 +27,9 @@ import javax.swing.event.EventListenerList;
 import java.awt.Rectangle;
 
 /**
- * A GUIParam for selecting an angle
+ * A filter parameter for selecting an angle
  */
-public class AngleParam extends AbstractGUIParam {
+public class AngleParam extends AbstractFilterParam {
     private double angleInRadians; // as returned form Math.atan2, this is between -PI and PI
     private double defaultInRadians = 0.0;
 
@@ -39,7 +39,7 @@ public class AngleParam extends AbstractGUIParam {
     public AngleParam(String name, double defaultValue) {
         super(name);
 
-        executeWithoutTrigger(() -> setValueInRadians(defaultValue));
+        setValueInRadians(defaultValue, false);
 
         defaultInRadians = defaultValue;
     }
@@ -55,7 +55,7 @@ public class AngleParam extends AbstractGUIParam {
         setValueInRadians(r, trigger);
     }
 
-    public void setValueInRadians(double r) {
+    public void setValueInRadians(double r, boolean trigger) {
         if (angleInRadians != r) {
             angleInRadians = r;
             fireStateChanged();
@@ -65,13 +65,6 @@ public class AngleParam extends AbstractGUIParam {
                 adjustmentListener.paramAdjusted();
             }
         }
-    }
-
-    public void setValueInRadians(double r, boolean trigger) {
-        //dontTrigger = !trigger;
-        this.trigger = trigger;
-
-        setValueInRadians(r);
     }
 
     public int getValueInNonIntuitiveDegrees() {
@@ -139,16 +132,14 @@ public class AngleParam extends AbstractGUIParam {
     }
 
     @Override
-    public void reset(boolean triggerAction) {
-        execute(() -> setValueInRadians(defaultInRadians), triggerAction);
+    public void reset(boolean trigger) {
+        setValueInRadians(defaultInRadians, trigger);
     }
 
     @Override
     public void randomize() {
-        executeWithoutTrigger(() -> {
-            double random = Math.random();
-            setValueInRadians((random * 2 * Math.PI - Math.PI));
-        });
+        double random = Math.random();
+        setValueInRadians((random * 2 * Math.PI - Math.PI), false);
     }
 
     public AbstractAngleSelectorComponent getAngleSelectorComponent() {
@@ -215,7 +206,7 @@ public class AngleParam extends AbstractGUIParam {
 
     @Override
     public void setFinalAnimationSettingMode(boolean b) {
-        // ignored because this GUIParam can be animated
+        // ignored because this filter parameter can be animated
     }
 
     @Override

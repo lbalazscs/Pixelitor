@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters.jhlabsproxies;
 
@@ -22,8 +22,9 @@ import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
+
+import static java.awt.Color.WHITE;
 
 /**
  * Glint based on the JHLabs GlintFilter
@@ -35,11 +36,9 @@ public class JHGlint extends FilterWithParametrizedGUI {
 
     private final RangeParam lengthParam = new RangeParam("Length", 0, 100, 20);
     private final RangeParam blur = new RangeParam("Blur", 0, 20, 1);
-//    private ColorParam color1 = new ColorParam("Inner Color", Color.WHITE, true, true);
-//    private ColorParam color2 = new ColorParam("Outer Color", Color.WHITE, true, true);
 //    private BooleanParam glintOnly = new BooleanParam("Glint Only", false);
 
-    private final GradientParam colors = new GradientParam("Colors", Color.WHITE, Color.WHITE);
+    private final GradientParam colors = new GradientParam("Colors", WHITE, WHITE);
 
 
     private GlintFilter filter;

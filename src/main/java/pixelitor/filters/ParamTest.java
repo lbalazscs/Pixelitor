@@ -18,13 +18,12 @@
 package pixelitor.filters;
 
 import pixelitor.Build;
-import pixelitor.filters.gui.ActionParam;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BlendingModeParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ElevationAngleParam;
-import pixelitor.filters.gui.GUIParam;
+import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
@@ -37,6 +36,12 @@ import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+
+import static java.awt.Color.BLACK;
+import static java.awt.Color.BLUE;
+import static java.awt.Color.RED;
+import static java.awt.Color.WHITE;
+import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
 
 /**
  * A test operation with all GUIParam objects
@@ -59,22 +64,20 @@ public class ParamTest extends FilterWithParametrizedGUI {
         return dest;
     }
 
-    public static GUIParam[] getTestParams() {
+    public static FilterParam[] getTestParams() {
         float[] defaultThumbPositions = {0.0f, 0.5f, 1.0f};
-        Color[] defaultValues = {Color.BLACK, Color.BLUE, Color.WHITE};
+        Color[] defaultValues = {BLACK, BLUE, WHITE};
 
-        return new GUIParam[]{
+        return new FilterParam[]{
                 new GradientParam("Colors", defaultThumbPositions, defaultValues),
                 new RangeParam("RangeParam", 0, 100, 50),
-                new RangeWithColorsParam(Color.RED, Color.BLUE, "RangeWithColorsParam", 0, 100, 50),
+                new RangeWithColorsParam(RED, BLUE, "RangeWithColorsParam", 0, 100, 50),
                 new ImagePositionParam("ImagePositionParam"),
                 new IntChoiceParam("IntChoiceParam", new IntChoiceParam.Value[]{
                         new IntChoiceParam.Value("value 1", 1),
                         new IntChoiceParam.Value("value 2", 2),
                 }),
-                new ColorParam("ColorParam:", Color.WHITE, true, true),
-                new ActionParam("ActionParam", e -> {
-                }, "Tooltip"),
+                new ColorParam("ColorParam:", WHITE, FREE_OPACITY),
                 new AngleParam("AngleParam", 0),
                 new ElevationAngleParam("ElevationAngleParam", 0),
                 new BlendingModeParam(BlendingMode.values()),

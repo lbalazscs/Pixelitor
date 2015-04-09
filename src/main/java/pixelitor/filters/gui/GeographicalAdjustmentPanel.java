@@ -24,6 +24,7 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.util.List;
 
 /**
  * An adjustment panel, where the components can be added in "geographical" places (north-west etc.)
@@ -61,24 +62,30 @@ public class GeographicalAdjustmentPanel extends ParametrizedAdjustPanel {
 
     private void addParams(ParamSet params, JPanel geoPanel, JPanel nonGeoPanel, JPanel buttonsPanel) {
         int added = 0;
-        for(GUIParam param : params) {
+
+        List<FilterParam> paramList = params.getParamList();
+
+        for (FilterParam param : paramList) {
             JComponent control = param.createGUI();
 
-            if(control instanceof JButton) {
-                buttonsPanel.add(control);
-            } else {
-                String labelText = param.getName() + ':';
-                if (added < 4) { // the first 4 are added into the 4 "geographical" positions...
-                    if(addLabels) {
-                        geoPanel.add(new JLabel(labelText));
-                    }
-                    geoPanel.add(control);
-                } else { // ...and the rest into "non geographical" positions.
-                    nonGeoPanel.add(new JLabel(labelText)); // these always need a label
-                    nonGeoPanel.add(control);
+            String labelText = param.getName() + ':';
+            if (added < 4) { // the first 4 are added into the 4 "geographical" positions...
+                if (addLabels) {
+                    geoPanel.add(new JLabel(labelText));
                 }
+                geoPanel.add(control);
+            } else { // ...and the rest into "non geographical" positions.
+                nonGeoPanel.add(new JLabel(labelText)); // these always need a label
+                nonGeoPanel.add(control);
             }
+
             added++;
+        }
+
+        List<FilterAction> actionList = params.getActionList();
+        for (FilterAction action : actionList) {
+            JButton control = (JButton) action.createGUI();
+            buttonsPanel.add(control);
         }
     }
 

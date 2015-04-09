@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,12 +8,13 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import pixelitor.filters.gui.AngleParam;
@@ -23,9 +24,11 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.layers.BlendingMode;
 import pixelitor.utils.ImageUtils;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+
+import static java.awt.Color.GRAY;
+import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 
 /**
  * Brick
@@ -63,9 +66,9 @@ public class Brick extends FilterWithParametrizedGUI {
         int width = src.getWidth();
         int height = src.getHeight();
 
-        BufferedImage bumpMap = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        BufferedImage bumpMap = new BufferedImage(width, height, TYPE_INT_RGB);
         Graphics2D bmg = bumpMap.createGraphics();
-        ImageUtils.drawBrickGrid(Color.GRAY, bmg, size, width, height);
+        ImageUtils.drawBrickGrid(GRAY, bmg, size, width, height);
         bmg.dispose();
 
         float azimuth = (float) lightAngleParam.getValueInIntuitiveRadians();

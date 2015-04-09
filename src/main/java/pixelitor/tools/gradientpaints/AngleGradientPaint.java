@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.tools.gradientpaints;
 
@@ -29,6 +29,9 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+
+import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
+import static java.awt.MultipleGradientPaint.CycleMethod.REPEAT;
 
 /**
  * A Paint that creates an "angle gradient"
@@ -119,13 +122,13 @@ public class AngleGradientPaint implements Paint {
                     double interpolationValue = (relativeAngle / (Math.PI * 2)) + 1.0; // between 0..2
                     interpolationValue %= 1.0f; // between 0..1
 
-                    if (cycleMethod == MultipleGradientPaint.CycleMethod.REFLECT) {
+                    if (cycleMethod == REFLECT) {
                         if (interpolationValue < 0.5) {
                             interpolationValue = 2.0f * interpolationValue;
                         } else {
                             interpolationValue = 2.0f * (1 - interpolationValue);
                         }
-                    } else if (cycleMethod == MultipleGradientPaint.CycleMethod.REPEAT) {
+                    } else if (cycleMethod == REPEAT) {
                         if (interpolationValue < 0.5) {
                             interpolationValue = 2.0f * interpolationValue;
                         } else {

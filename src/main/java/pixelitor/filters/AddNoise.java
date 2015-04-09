@@ -51,9 +51,8 @@ public class AddNoise extends FilterWithParametrizedGUI {
                 coverage,
                 saturation,
                 opacity,
-                method,
-                ReseedSupport.createParam()
-        ));
+                method
+        ).withAction(ReseedSupport.createAction()));
     }
 
     @Override

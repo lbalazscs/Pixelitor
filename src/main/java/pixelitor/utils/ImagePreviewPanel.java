@@ -30,6 +30,9 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 
+import static java.awt.Color.BLACK;
+import static java.awt.Color.WHITE;
+
 /**
  * Image preview panel for the open file chooser
  */
@@ -149,10 +152,10 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
                 doubleDrawMsg = false;
             }
 
-            g.setColor(Color.black);
+            g.setColor(BLACK);
             g.drawString(msg, MSG_STRING_X, MSG_STRING_Y);
             if (doubleDrawMsg) {
-                g.setColor(Color.white);
+                g.setColor(WHITE);
                 g.drawString(msg, MSG_STRING_X - 1, MSG_STRING_Y - 1);
             }
 

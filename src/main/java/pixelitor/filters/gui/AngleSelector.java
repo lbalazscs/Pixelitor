@@ -23,6 +23,8 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 
+import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
+
 /**
  * Contains an AbstractAngleSelectorComponent and a SliderSpinner
  */
@@ -56,7 +58,7 @@ public class AngleSelector extends JPanel {
             }
         });
 
-        SliderSpinner sliderSpinner = new SliderSpinner(spinnerModel, SliderSpinner.TextPosition.NONE, true);
+        SliderSpinner sliderSpinner = new SliderSpinner(spinnerModel, NONE, true);
 
         sliderSpinner.setResettable(angleParam);
         int maxAngleInDegrees = angleParam.getMaxAngleInDegrees();

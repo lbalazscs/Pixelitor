@@ -25,11 +25,14 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+
+import static java.awt.Color.BLACK;
+import static java.awt.Color.WHITE;
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 /**
  * Mystic Rose
@@ -56,11 +59,11 @@ public class MysticRose extends FilterWithParametrizedGUI {
         int srcHeight = src.getHeight();
         dest = new BufferedImage(srcWidth, srcHeight, src.getType());
         Graphics2D g2 = dest.createGraphics();
-        g2.setColor(Color.BLACK);
+        g2.setColor(BLACK);
         g2.fillRect(0, 0, srcWidth, srcHeight);
-        g2.setColor(Color.WHITE);
+        g2.setColor(WHITE);
         g2.setStroke(new BasicStroke(lineWidth.getValueAsFloat()));
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         int numPoints = nrPoints.getValue();
         Point[] points = new Point[numPoints];

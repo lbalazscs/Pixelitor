@@ -28,14 +28,15 @@ import pixelitor.utils.SliderSpinner;
 import javax.swing.*;
 import java.awt.GridLayout;
 
-public class StrokeSettingsDialog extends OKDialog {
+import static pixelitor.utils.SliderSpinner.TextPosition.BORDER;
 
+public class StrokeSettingsDialog extends OKDialog {
     private JComboBox<ShapeType> shapeTypeCB;
     private JComboBox<StrokeType> strokeTypeCB;
 
     public StrokeSettingsDialog(RangeParam strokeWidthParam,
-                                EnumComboBoxModel<BasicStrokeCap> strokeCapModel,
-                                EnumComboBoxModel<BasicStrokeJoin> strokeJoinModel,
+                                EnumComboBoxModel<BasicStrokeCap> capModel,
+                                EnumComboBoxModel<BasicStrokeJoin> joinModel,
                                 EnumComboBoxModel<StrokeType> strokeTypeModel,
                                 ButtonModel dashedModel) {
         super(PixelitorWindow.getInstance(), "Stroke Settings");
@@ -43,31 +44,36 @@ public class StrokeSettingsDialog extends OKDialog {
         JPanel p = new JPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
 
-        SliderSpinner strokeWidthSlider = new SliderSpinner(strokeWidthParam, SliderSpinner.TextPosition.BORDER, false);
+        SliderSpinner strokeWidthSlider = new SliderSpinner(strokeWidthParam, BORDER, false);
         p.add(strokeWidthSlider);
         p.add(strokeWidthSlider);
 
+        JPanel capJoinPanel = createCapJoinPanel(capModel, joinModel);
+        p.add(capJoinPanel);
+
+        JPanel strokeTypePanel = createStrokeTypePanel(strokeTypeModel, dashedModel);
+        p.add(strokeTypePanel);
+
+        setupGUI(p, false);
+    }
+
+    private static JPanel createCapJoinPanel(
+            EnumComboBoxModel<BasicStrokeCap> capModel,
+            EnumComboBoxModel<BasicStrokeJoin> joinModel) {
         JPanel capJoinPanel = new JPanel();
         capJoinPanel.setBorder(BorderFactory.createTitledBorder("Line Endpoints"));
         capJoinPanel.setLayout(new GridLayout(2, 2, 5, 5));
 
         capJoinPanel.add(new JLabel("Endpoint Cap:", JLabel.RIGHT));
-        JComboBox<BasicStrokeCap> capCB = new JComboBox(strokeCapModel);
+        JComboBox<BasicStrokeCap> capCB = new JComboBox(capModel);
         capCB.setToolTipText("The shape of the endpoints of the lines");
         capJoinPanel.add(capCB);
 
         capJoinPanel.add(new JLabel("Corner Join:", JLabel.RIGHT));
-        JComboBox<BasicStrokeJoin> joinCB = new JComboBox(strokeJoinModel);
+        JComboBox<BasicStrokeJoin> joinCB = new JComboBox(joinModel);
         joinCB.setToolTipText("The way lines connect at the corners");
         capJoinPanel.add(joinCB);
-
-        p.add(capJoinPanel);
-
-        JPanel strokeTypePanel = createStrokeTypePanel(strokeTypeModel, dashedModel);
-
-        p.add(strokeTypePanel);
-
-        setupGUI(p, false);
+        return capJoinPanel;
     }
 
     private JPanel createStrokeTypePanel(EnumComboBoxModel<StrokeType> strokeTypeModel, ButtonModel dashedModel) {

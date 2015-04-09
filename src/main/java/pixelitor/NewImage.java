@@ -30,6 +30,9 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
+import static pixelitor.FillType.TRANSPARENT;
+
 /**
  * Static utility methods related to creating new images
  */
@@ -47,13 +50,13 @@ public final class NewImage {
     }
 
     public static Composition createNewComposition(FillType bg, int width, int height, String title) {
-        BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB_PRE);
+        BufferedImage newImage = new BufferedImage(width, height, TYPE_INT_ARGB_PRE);
         fillImage(newImage, bg);
         return Composition.fromImage(newImage, null, title);
     }
 
     private static void fillImage(BufferedImage img, FillType bg) {
-        if (bg == FillType.TRANSPARENT) {
+        if (bg == TRANSPARENT) {
             return;
         }
         Color c = bg.getColor();

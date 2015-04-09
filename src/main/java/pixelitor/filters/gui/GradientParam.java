@@ -29,15 +29,16 @@ import java.awt.Rectangle;
 import java.beans.PropertyChangeEvent;
 
 /**
- * Represents a gradient. (Note that unlike other GUIParam implementations,
+ * Represents a gradient. (Note that unlike other filter parameter implementations,
  * this is not really a model for the GradientSlider GUI component,
  * the actual value is stored only inside the GradientSlider)
  */
-public class GradientParam extends AbstractGUIParam {
+public class GradientParam extends AbstractFilterParam {
     private static final String GRADIENT_SLIDER_USE_BEVEL = "GradientSlider.useBevel";
     private GradientSlider gradientSlider;
     private final float[] defaultThumbPositions;
     private final Color[] defaultColors;
+    private boolean trigger = true; // whether the running of the filter should be triggered
 
     public GradientParam(String name, Color firstColor, Color secondColor) {
         this(name, new float[]{0.0f, 1.0f}, new Color[]{firstColor, secondColor});
@@ -50,12 +51,6 @@ public class GradientParam extends AbstractGUIParam {
 
         // has to be created in the constructor because getValue() can be called early
         createGradientSlider(defaultThumbPositions, defaultColors);
-
-//        gradientSlider.addChangeListener(new ChangeListener() {
-//            @Override
-//            public void stateChanged(ChangeEvent e) {
-//            }
-//        });
     }
 
     public void createGradientSlider(float[] defaultThumbPositions, Color[] defaultColors) {
@@ -113,7 +108,9 @@ public class GradientParam extends AbstractGUIParam {
             randomColors[i] = ImageUtils.getRandomColor(false);
         }
 
-        executeWithoutTrigger(() -> gradientSlider.setValues(defaultThumbPositions, randomColors));
+        trigger = false;
+        gradientSlider.setValues(defaultThumbPositions, randomColors);
+        trigger = true;
     }
 
     @Override
@@ -158,8 +155,13 @@ public class GradientParam extends AbstractGUIParam {
 
     @Override
     public void reset(boolean triggerAction) {
-        execute(() -> gradientSlider.setValues(defaultThumbPositions, defaultColors),
-                triggerAction);
+        if (triggerAction) {
+            gradientSlider.setValues(defaultThumbPositions, defaultColors);
+        } else {
+            trigger = false;
+            gradientSlider.setValues(defaultThumbPositions, defaultColors);
+            trigger = true;
+        }
     }
 
     @Override
@@ -179,7 +181,10 @@ public class GradientParam extends AbstractGUIParam {
     @Override
     public void setState(ParamState state) {
         GState gr = (GState) state;
-        executeWithoutTrigger(() -> createGradientSlider(gr.thumbPositions, gr.colors));
+
+        trigger = false;
+        createGradientSlider(gr.thumbPositions, gr.colors);
+        trigger = true;
     }
 
     private static class GState implements ParamState {
@@ -234,7 +239,7 @@ public class GradientParam extends AbstractGUIParam {
 
     @Override
     public void setFinalAnimationSettingMode(boolean b) {
-        // ignored because this GUIParam can be animated
+        // ignored because this filter parameter can be animated
     }
 
     @Override

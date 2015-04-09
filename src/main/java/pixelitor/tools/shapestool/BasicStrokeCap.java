@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,23 +8,25 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.tools.shapestool;
 
-import java.awt.BasicStroke;
+import static java.awt.BasicStroke.CAP_BUTT;
+import static java.awt.BasicStroke.CAP_ROUND;
+import static java.awt.BasicStroke.CAP_SQUARE;
 
 /**
  * An enum wrapper around the cap argument of a BasicStroke constructor
  */
 enum BasicStrokeCap {
-    ROUND("Round", BasicStroke.CAP_ROUND),
-    BUTT("Butt", BasicStroke.CAP_BUTT),
-    SQUARE("Square", BasicStroke.CAP_SQUARE);
+    ROUND("Round", CAP_ROUND),
+    BUTT("Butt", CAP_BUTT),
+    SQUARE("Square", CAP_SQUARE);
 
     private final int value;
     private final String guiName;

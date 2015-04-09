@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters.jhlabsproxies;
 
@@ -23,8 +23,11 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
+
+import static java.awt.Color.BLACK;
+import static java.awt.Color.WHITE;
+import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
 
 /**
  * Stamp based on the JHLabs StampFilter
@@ -33,8 +36,8 @@ public class JHStamp extends FilterWithParametrizedGUI {
     private final RangeParam lightDarkBalance = new RangeParam("Light/Dark Balance (%)", 0, 100, 50);
     private final RangeParam smoothness = new RangeParam("Smoothness", 0, 50, 25);
     private final RangeParam soften = new RangeParam("Soften", 0, 100, 3);
-    private final ColorParam darkColor = new ColorParam("Dark Color", Color.BLACK, true, false);
-    private final ColorParam brightColor = new ColorParam("Bright Color", Color.WHITE, true, false);
+    private final ColorParam darkColor = new ColorParam("Dark Color", BLACK, USER_ONLY_OPACITY);
+    private final ColorParam brightColor = new ColorParam("Bright Color", WHITE, USER_ONLY_OPACITY);
 
     private final IntChoiceParam blurMethod = new IntChoiceParam("Blur Method",
             new IntChoiceParam.Value[] {

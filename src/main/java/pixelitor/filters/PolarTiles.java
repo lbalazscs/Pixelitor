@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import pixelitor.filters.gui.AngleParam;
@@ -21,7 +22,7 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseActionParam;
+import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.impl.PolarTilesFilter;
 
 import java.awt.image.BufferedImage;
@@ -60,9 +61,8 @@ public class PolarTiles extends FilterWithParametrizedGUI {
                 randomness,
                 rotateImage,
                 edgeAction,
-                interpolation,
-                new ReseedNoiseActionParam("Reseed Randomness")
-        ));
+                interpolation
+        ).withAction(new ReseedNoiseFilterAction("Reseed Randomness")));
     }
 
     @Override

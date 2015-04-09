@@ -37,6 +37,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 
+import static java.awt.Color.BLACK;
+import static java.awt.Color.WHITE;
+import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 
 /**
@@ -223,13 +226,13 @@ public abstract class Layer implements Serializable {
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
 
-        BufferedImage bwLayerMask = new BufferedImage(canvasWidth, canvasHeight, BufferedImage.TYPE_BYTE_GRAY);
+        BufferedImage bwLayerMask = new BufferedImage(canvasWidth, canvasHeight, TYPE_BYTE_GRAY);
         Graphics2D g = bwLayerMask.createGraphics();
 
 //        Color showColor = new Color(255, 255, 255, 255);
 //        Color hideColor = new Color(255, 255, 255, 0);
-        Color showColor = Color.WHITE;
-        Color hideColor = Color.BLACK;
+        Color showColor = WHITE;
+        Color hideColor = BLACK;
         Paint mask = new GradientPaint(0, 0,
                 showColor,
                 0, canvasHeight, hideColor);

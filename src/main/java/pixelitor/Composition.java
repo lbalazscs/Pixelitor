@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.IntSupplier;
 
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
@@ -429,7 +430,7 @@ public class Composition implements Serializable {
 //        BufferedImage imageSoFar = ImageUtils.createCompatibleImage(getCanvasWidth(), getCanvasHeight());
 
         BufferedImage imageSoFar = new BufferedImage(
-                canvas.getWidth(), canvas.getHeight(), BufferedImage.TYPE_INT_ARGB_PRE);
+                canvas.getWidth(), canvas.getHeight(), TYPE_INT_ARGB_PRE);
         Graphics2D g = imageSoFar.createGraphics();
 
         boolean firstVisibleLayer = true;

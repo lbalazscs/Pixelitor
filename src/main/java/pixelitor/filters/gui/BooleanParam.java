@@ -21,9 +21,9 @@ import javax.swing.*;
 import java.awt.Rectangle;
 
 /**
- * A GUIParam for a boolean value.
+ * A filter parameter for a boolean value.
  */
-public class BooleanParam extends AbstractGUIParam {
+public class BooleanParam extends AbstractFilterParam {
     private final boolean defaultValue;
     private boolean currentValue;
     private final boolean ignoreRandomize;
@@ -72,7 +72,7 @@ public class BooleanParam extends AbstractGUIParam {
 
     @Override
     public void reset(boolean triggerAction) {
-        execute(() -> setValue(defaultValue, true), triggerAction);
+        setValue(defaultValue, true, triggerAction);
     }
 
     @Override
@@ -86,8 +86,9 @@ public class BooleanParam extends AbstractGUIParam {
             assert !canBeAnimated();
             return;
         }
+
         if (!ignoreRandomize) {
-            executeWithoutTrigger(() -> setValue(Math.random() > 0.5, true));
+            setValue(Math.random() > 0.5, true, false);
         }
     }
 
@@ -95,7 +96,7 @@ public class BooleanParam extends AbstractGUIParam {
         return currentValue;
     }
 
-    public void setValue(boolean newValue, boolean updateGUI) {
+    public void setValue(boolean newValue, boolean updateGUI, boolean trigger) {
         if (currentValue != newValue) {
             currentValue = newValue;
             if (trigger) {

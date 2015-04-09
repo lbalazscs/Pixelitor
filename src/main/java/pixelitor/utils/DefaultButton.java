@@ -22,8 +22,8 @@ import pixelitor.filters.gui.Resettable;
 import javax.swing.*;
 
 /**
- * A button that resets its GUIParam, and displays and arrow when the
- * GUIParam is not set to the default value
+ * A button that resets its filter parameter, and displays and arrow when the
+ * filter parameter is not set to the default value
  */
 public class DefaultButton extends JButton {
     private static final Icon defaultIcon = IconUtils.getWestArrowIcon();

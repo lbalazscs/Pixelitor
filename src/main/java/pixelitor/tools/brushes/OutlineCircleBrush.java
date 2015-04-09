@@ -19,17 +19,19 @@ package pixelitor.tools.brushes;
 
 import pixelitor.tools.StrokeType;
 
-import java.awt.BasicStroke;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.Ellipse2D;
+
+import static java.awt.BasicStroke.CAP_ROUND;
+import static java.awt.BasicStroke.JOIN_ROUND;
 
 /**
  * The "Circles" brush
  */
 public class OutlineCircleBrush extends StrokeBrush {
     public OutlineCircleBrush() {
-        super(StrokeType.OUTLINE, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+        super(StrokeType.OUTLINE, CAP_ROUND, JOIN_ROUND);
     }
 
     @Override

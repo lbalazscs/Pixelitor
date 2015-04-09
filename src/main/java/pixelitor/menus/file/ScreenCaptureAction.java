@@ -32,6 +32,8 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
+
 /**
  * The screen capture.
  */
@@ -87,7 +89,7 @@ public class ScreenCaptureAction extends AbstractAction {
             }
 
             int type = screenCapture.getType();
-            if (type != BufferedImage.TYPE_INT_ARGB_PRE) {
+            if (type != TYPE_INT_ARGB_PRE) {
                 screenCapture = ImageUtils.convertToARGB_PRE(screenCapture, true);
             }
 

@@ -25,7 +25,10 @@ import java.awt.Color;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static java.awt.Color.BLUE;
+import static java.awt.Color.RED;
 import static org.junit.Assert.assertNotNull;
+import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
 
 @RunWith(Parameterized.class)
 public class ParamStateTest {
@@ -39,23 +42,23 @@ public class ParamStateTest {
 
     @Parameterized.Parameters
     public static Collection<Object[]> instancesToTest() {
-        GUIParam angleParamStart = new AngleParam("AngleParam", 0);
-        GUIParam angleParamEnd = new AngleParam("AngleParam", 1);
+        FilterParam angleParamStart = new AngleParam("AngleParam", 0);
+        FilterParam angleParamEnd = new AngleParam("AngleParam", 1);
 
-        GUIParam rangeParamStart = new RangeParam("RangeParam", 0, 100, 10);
-        GUIParam rangeParamEnd = new RangeParam("RangeParam", 0, 100, 100);
+        FilterParam rangeParamStart = new RangeParam("RangeParam", 0, 100, 10);
+        FilterParam rangeParamEnd = new RangeParam("RangeParam", 0, 100, 100);
 
-        GUIParam groupedRangeParamStart = new GroupedRangeParam("GroupedRangeParam", 0, 200, 0);
-        GUIParam groupedRangeParamEnd = new GroupedRangeParam("GroupedRangeParam", 0, 200, 0);
+        FilterParam groupedRangeParamStart = new GroupedRangeParam("GroupedRangeParam", 0, 200, 0);
+        FilterParam groupedRangeParamEnd = new GroupedRangeParam("GroupedRangeParam", 0, 200, 0);
 
-        GUIParam gradientParamStart = new GradientParam("GradientParam", Color.BLACK, Color.GREEN);
-        GUIParam gradientParamEnd = new GradientParam("GradientParam", Color.BLUE, Color.RED);
+        FilterParam gradientParamStart = new GradientParam("GradientParam", Color.BLACK, Color.GREEN);
+        FilterParam gradientParamEnd = new GradientParam("GradientParam", BLUE, RED);
 
-        GUIParam imagePositionParamStart = new ImagePositionParam("ImagePositionParam", 0.1f, 0.0f);
-        GUIParam imagePositionParamEnd = new ImagePositionParam("ImagePositionParam", 0.9f, 1.0f);
+        FilterParam imagePositionParamStart = new ImagePositionParam("ImagePositionParam", 0.1f, 0.0f);
+        FilterParam imagePositionParamEnd = new ImagePositionParam("ImagePositionParam", 0.9f, 1.0f);
 
-        GUIParam colorParamStart = new ColorParam("ColorParam", Color.RED, true, true);
-        GUIParam colorParamEnd = new ColorParam("ColorParam", Color.BLUE, true, true);
+        FilterParam colorParamStart = new ColorParam("ColorParam", RED, FREE_OPACITY);
+        FilterParam colorParamEnd = new ColorParam("ColorParam", BLUE, FREE_OPACITY);
 
         return Arrays.asList(new Object[][]{
                 {angleParamStart.copyState(), angleParamEnd.copyState()},

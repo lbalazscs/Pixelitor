@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.FourColorFilter;
@@ -23,17 +24,22 @@ import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.GeographicalAdjustmentPanel;
 import pixelitor.filters.gui.ParamSet;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
+
+import static java.awt.Color.BLUE;
+import static java.awt.Color.GREEN;
+import static java.awt.Color.ORANGE;
+import static java.awt.Color.RED;
+import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
 
 /**
  * Four Color Gradient based on the JHLabs FourColorFilter
  */
 public class JHFourColorGradient extends FilterWithParametrizedGUI {
-    private final ColorParam northWestParam = new ColorParam("Northwest", Color.GREEN, false, false);
-    private final ColorParam northEastParam = new ColorParam("Northeast", Color.ORANGE, false, false);
-    private final ColorParam southWestParam = new ColorParam("Southwest", Color.BLUE, false, false);
-    private final ColorParam southEastParam = new ColorParam("Southeast", Color.RED, false, false);
+    private final ColorParam northWestParam = new ColorParam("Northwest", GREEN, NO_OPACITY);
+    private final ColorParam northEastParam = new ColorParam("Northeast", ORANGE, NO_OPACITY);
+    private final ColorParam southWestParam = new ColorParam("Southwest", BLUE, NO_OPACITY);
+    private final ColorParam southEastParam = new ColorParam("Southeast", RED, NO_OPACITY);
 
     private FourColorFilter filter;
 

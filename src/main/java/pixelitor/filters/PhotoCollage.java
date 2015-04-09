@@ -28,12 +28,10 @@ import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.Utils;
 
 import java.awt.AlphaComposite;
-import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.TexturePaint;
 import java.awt.geom.AffineTransform;
@@ -41,6 +39,16 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
+
+import static java.awt.AlphaComposite.SRC_OVER;
+import static java.awt.Color.BLACK;
+import static java.awt.Color.WHITE;
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.KEY_INTERPOLATION;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
+import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
 
 /**
  * Photo Collage
@@ -53,7 +61,7 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
     private final RangeParam imageNumberParam = new RangeParam("Number of Images", 1, 100, 10);
     private final RangeParam randomRotationParam = new RangeParam("Random Rotation Amount (%)", 0, 100, 100);
     private final BooleanParam allowOutsideParam = new BooleanParam("Allow Outside", true);
-    private final ColorParam bgColorParam = new ColorParam("Background Color", Color.BLACK, true, false);
+    private final ColorParam bgColorParam = new ColorParam("Background Color", BLACK, USER_ONLY_OPACITY);
 
     private final RangeParam shadowOpacityParam = new RangeParam("Shadow Opacity (%)", 0, 100, 80);
     private final AngleParam shadowAngleParam = new AngleParam("Shadow Angle", 0.7);
@@ -72,9 +80,8 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
                 shadowOpacityParam,
                 shadowAngleParam,
                 shadowDistanceParam.adjustRangeToImageSize(0.02),
-                shadowSoftnessParam.adjustRangeToImageSize(0.01),
-                ReseedSupport.createParam()
-        ));
+                shadowSoftnessParam.adjustRangeToImageSize(0.01)
+        ).withAction(ReseedSupport.createAction()));
     }
 
     @Override
@@ -87,9 +94,8 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
 
         // fill with the background color
         Graphics2D g = dest.createGraphics();
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-//        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
         g.setColor(bgColorParam.getColor());
         g.fillRect(0, 0, dest.getWidth(), dest.getHeight());
 
@@ -104,9 +110,9 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
         // the shadow image must be larger than the image size so that there is room for soft shadows
         int shadowSoftness = shadowSoftnessParam.getValue();
         int softShadowRoom = 1 + (int) (2.3 * shadowSoftness);
-        BufferedImage shadowImage = new BufferedImage(xSize + 2 * softShadowRoom, ySize + 2 * softShadowRoom, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage shadowImage = new BufferedImage(xSize + 2 * softShadowRoom, ySize + 2 * softShadowRoom, TYPE_INT_ARGB);
         Graphics2D gShadow = shadowImage.createGraphics();
-        gShadow.setColor(Color.BLACK);
+        gShadow.setColor(BLACK);
         gShadow.fillRect(softShadowRoom, softShadowRoom, xSize, ySize);
         gShadow.dispose();
         if (shadowSoftness > 0) {
@@ -121,7 +127,7 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
 
 //        Composite shadowComposite = new MultiplyComposite(shadowOpacityParam.getValueAsPercentage());
 // TODO multiply makes sense only if the shadow color is not black
-        Composite shadowComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, shadowOpacityParam.getValueAsPercentage());
+        Composite shadowComposite = AlphaComposite.getInstance(SRC_OVER, shadowOpacityParam.getValueAsPercentage());
 
         for (int i = 0; i < imageNumberParam.getValue(); i++) {
             // Calculate the transform of the image
@@ -172,12 +178,12 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
             g.drawImage(shadowImage, shadowTransform, null);
 
             // Draw the margin and the image
-            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
+            g.setComposite(AlphaComposite.getInstance(SRC_OVER));
             Shape transformedRect = randomTransform.createTransformedShape(fullImageRect);
             Shape transformedImageRect;
             if (margin > 0) {
                 transformedImageRect = randomTransform.createTransformedShape(imageRect);
-                g.setColor(Color.WHITE);
+                g.setColor(WHITE);
                 g.fill(transformedRect);
             } else {
                 transformedImageRect = transformedRect;

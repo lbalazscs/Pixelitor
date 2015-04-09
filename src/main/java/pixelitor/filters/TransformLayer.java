@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import pixelitor.ImageComponents;
@@ -23,12 +24,17 @@ import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.layers.ImageLayer;
-import pixelitor.utils.Utils;
 
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.KEY_INTERPOLATION;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
+import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
+import static pixelitor.utils.Utils.TRANSPARENT_COLOR;
 
 /**
  * Arbitrary Rotate
@@ -36,7 +42,7 @@ import java.awt.image.BufferedImage;
 public class TransformLayer extends FilterWithParametrizedGUI {
     private final ImagePositionParam centerParam = new ImagePositionParam("Pivot Point");
     private final AngleParam angleParam = new AngleParam("Rotate Angle", 0);
-    private final ColorParam bgColorParam = new ColorParam("Background Color:", Utils.TRANSPARENT_COLOR, true, false);
+    private final ColorParam bgColorParam = new ColorParam("Background Color:", TRANSPARENT_COLOR, USER_ONLY_OPACITY);
     private final GroupedRangeParam scaleParam = new GroupedRangeParam("Scale (%)", 1, 500, 100);
     private final GroupedRangeParam shearParam = new GroupedRangeParam("Shear", -500, 500, 0);
 
@@ -56,8 +62,8 @@ public class TransformLayer extends FilterWithParametrizedGUI {
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         // fill with the background color
         Graphics2D g = dest.createGraphics();
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BICUBIC);
         g.setColor(bgColorParam.getColor());
         g.fillRect(0, 0, dest.getWidth(), dest.getHeight());
 

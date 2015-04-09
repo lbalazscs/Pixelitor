@@ -21,11 +21,12 @@ import pixelitor.io.DropListener;
 import pixelitor.utils.Dialogs;
 
 import javax.swing.*;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.dnd.DropTarget;
 import java.beans.PropertyVetoException;
 import java.util.List;
+
+import static java.awt.Color.GRAY;
 
 /**
  * The desktop area of the app
@@ -44,7 +45,7 @@ public class Desktop {
         GlobalKeyboardWatch.registerBrushSizeActions();
         new DropTarget(desktopPane, new DropListener());
 
-        desktopPane.setBackground(Color.GRAY);
+        desktopPane.setBackground(GRAY);
     }
 
     public JDesktopPane getDesktopPane() {

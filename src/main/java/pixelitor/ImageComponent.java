@@ -47,6 +47,8 @@ import java.awt.geom.NoninvertibleTransformException;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyVetoException;
 
+import static java.awt.Color.BLACK;
+
 /**
  * The GUI component that shows a composition
  */
@@ -290,7 +292,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         if (zoomLevel.drawPixelGrid() && !comp.hasSelection()) {
             // TODO why is this very slow if there is selection?
 
-            g2.setXORMode(Color.BLACK);
+            g2.setXORMode(BLACK);
             double pixelSize = zoomLevel.getViewScale();
 //            assert pixelSize > 0;
 

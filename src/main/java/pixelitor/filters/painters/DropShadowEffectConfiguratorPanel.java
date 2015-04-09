@@ -27,6 +27,8 @@ import pixelitor.utils.Utils;
 import java.awt.Color;
 import java.awt.geom.Point2D;
 
+import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
+
 /**
  *
  */
@@ -39,7 +41,7 @@ public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
         super("Drop Shadow", defaultSelected, defaultColor);
 
         distanceParam = new RangeParam("Distance:", 1, 100, 10);
-        SliderSpinner distanceSlider = new SliderSpinner(distanceParam, SliderSpinner.TextPosition.NONE, false);
+        SliderSpinner distanceSlider = new SliderSpinner(distanceParam, NONE, false);
         gbHelper.addLabelWithControl("Distance:", distanceSlider);
 
         angleParam = new AngleParam("Angle", 0.7);
@@ -47,7 +49,7 @@ public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
         gbHelper.addLabelWithControl("Angle:", angleSelectorComponent);
 
         spreadParam = new RangeParam("Spread:", 1, 100, 10);
-        SliderSpinner spreadSlider = new SliderSpinner(spreadParam, SliderSpinner.TextPosition.NONE, false);
+        SliderSpinner spreadSlider = new SliderSpinner(spreadParam, NONE, false);
         gbHelper.addLabelWithControl("Spread:", spreadSlider);
     }
 

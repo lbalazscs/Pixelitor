@@ -42,10 +42,13 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 
+import static java.awt.AlphaComposite.SRC_OVER;
+import static java.awt.Color.BLACK;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.tools.CropToolState.INITIAL;
 import static pixelitor.tools.CropToolState.TRANSFORM;
 import static pixelitor.tools.CropToolState.USER_DRAG;
+import static pixelitor.utils.SliderSpinner.TextPosition.WEST;
 
 /**
  * The crop tool
@@ -57,7 +60,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
 
     private final RangeParam maskOpacityParam = new RangeParam("Mask Opacity (%)", 0, 100, 75);
 
-    private Composite hideComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, maskOpacityParam.getValueAsPercentage());
+    private Composite hideComposite = AlphaComposite.getInstance(SRC_OVER, maskOpacityParam.getValueAsPercentage());
 
     private final JButton cancelButton = new JButton("Cancel");
     private JButton cropButton;
@@ -84,7 +87,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
                     alpha = 1.0f;
                     maskOpacityParam.setValue(100);
                 }
-                hideComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
+                hideComposite = AlphaComposite.getInstance(SRC_OVER, alpha);
                 ImageComponents.repaintActive();
             }
         });
@@ -93,7 +96,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
 
     @Override
     public void initSettingsPanel() {
-        SliderSpinner maskOpacitySpinner = new SliderSpinner(maskOpacityParam, SliderSpinner.TextPosition.WEST, false);
+        SliderSpinner maskOpacitySpinner = new SliderSpinner(maskOpacityParam, WEST, false);
         toolSettingsPanel.add(maskOpacitySpinner);
 
         allowGrowingCB = new JCheckBox("Allow Growing", false);
@@ -211,7 +214,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
         g2.setClip(darkAreaClip);
 
         Color previousColor = g2.getColor();
-        g2.setColor(Color.BLACK);
+        g2.setColor(BLACK);
 
         Composite previousComposite = g2.getComposite();
         g2.setComposite(hideComposite);

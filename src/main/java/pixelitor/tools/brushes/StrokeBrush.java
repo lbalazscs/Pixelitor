@@ -19,8 +19,10 @@ package pixelitor.tools.brushes;
 
 import pixelitor.tools.StrokeType;
 
-import java.awt.BasicStroke;
 import java.awt.Stroke;
+
+import static java.awt.BasicStroke.CAP_ROUND;
+import static java.awt.BasicStroke.JOIN_ROUND;
 
 /**
  * A Brush that uses a Stroke to draw
@@ -34,7 +36,7 @@ public abstract class StrokeBrush extends AbstractBrush {
     Stroke lastStroke;
 
     protected StrokeBrush(StrokeType strokeType) {
-        this(strokeType, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+        this(strokeType, CAP_ROUND, JOIN_ROUND);
     }
 
     protected StrokeBrush(StrokeType strokeType, int cap, int join) {

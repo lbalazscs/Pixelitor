@@ -20,6 +20,7 @@ package pixelitor.filters.gui;
 import org.junit.Before;
 import org.junit.Test;
 import pixelitor.filters.ParamTest;
+import pixelitor.utils.ReseedSupport;
 
 import java.awt.Rectangle;
 
@@ -33,11 +34,13 @@ public class ParamSetTest {
 
     @Before
     public void setUp() throws Exception {
-        params = new ParamSet(ParamTest.getTestParams());
-        params.addCommonActions();
+        params = new ParamSet(ParamTest.getTestParams())
+                .withAction(ReseedSupport.createAction())
+                .addCommonActions();
         adjustmentListener = new ParamAdjustmentListenerSpy();
         params.setAdjustmentListener(adjustmentListener);
         extraParam = new RangeParam("Extra Param", 0, 200, 0);
+        extraParam.setAdjustmentListener(adjustmentListener);
         params.insertParam(extraParam, 3);
         params.considerImageSize(new Rectangle(0, 0, 400, 800));
     }
@@ -55,18 +58,15 @@ public class ParamSetTest {
     }
 
     @Test
-    public void testPresetAdjusting() {
-        params.startPresetAdjusting();
-        extraParam.setValue(55);
-        params.endPresetAdjusting(false);
-
+    public void testFilterTriggering() {
+        extraParam.setValue(42, false);
         checkThatFilterWasNotCalled();
 
-        params.startPresetAdjusting();
-        extraParam.setValue(55);
-        params.endPresetAdjusting(true);
-
+        extraParam.setValue(43, true);
         checkThatFilterWasCalled(1);
+
+        params.triggerFilter();
+        checkThatFilterWasCalled(2);
     }
 
     @Test

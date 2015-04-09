@@ -18,35 +18,32 @@
 package pixelitor.filters.gui;
 
 import javax.swing.*;
-import java.awt.Rectangle;
 import java.awt.event.ActionListener;
 
 /**
  * Creates a button that executes an action when pushed
  */
-public class ActionParam extends AbstractGUIParam {
+public class FilterAction implements FilterGUIComponent {
     private final ActionListener actionListener;
     private final Icon icon;
     private final String toolTipText;
     private boolean finalAnimationSettingMode;
 
+    private String name;
+    protected ParamAdjustmentListener adjustmentListener;
+
     // most actions should be available in the final animation settings
     private boolean ignoreFinalAnimationSettingMode = true;
 
-    public ActionParam(String name, ActionListener actionListener, String toolTipText) {
+    public FilterAction(String name, ActionListener actionListener, String toolTipText) {
         this(name, actionListener, null, toolTipText);
     }
 
-    public ActionParam(String name, ActionListener actionListener, Icon icon, String toolTipText) {
-        super(name);
+    public FilterAction(String name, ActionListener actionListener, Icon icon, String toolTipText) {
+        this.name = name;
         this.actionListener = actionListener;
         this.icon = icon;
         this.toolTipText = toolTipText;
-    }
-
-    @Override
-    public boolean isSetToDefault() {
-        return false;
     }
 
     @Override
@@ -62,25 +59,14 @@ public class ActionParam extends AbstractGUIParam {
     }
 
     @Override
-    public void reset(boolean triggerAction) {
-        // do nothing
-    }
-
-    @Override
     public int getNrOfGridBagCols() {
         return 1;
-    }
-
-    @Override
-    public void randomize() {
-        // do nothing
     }
 
     /**
      * A button that executes first its ActionListener, and after then its ParamAdjustmentListener
      */
     private static class OrderedExecutionButton extends JButton {
-
         private OrderedExecutionButton(String name, ActionListener actionListener, ParamAdjustmentListener adjustmentListener, Icon icon) {
             super(name);
 
@@ -96,41 +82,21 @@ public class ActionParam extends AbstractGUIParam {
     }
 
     @Override
-    public void setTrigger(boolean trigger) {
-        // do nothing
-    }
-
-    @Override
-    public void considerImageSize(Rectangle bounds) {
-    }
-
-    @Override
-    public boolean canBeAnimated() {
-        return false;
-    }
-
-    @Override
-    public ParamState copyState() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setState(ParamState state) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setEnabledLogically(boolean b) {
-        // TODO
-    }
-
-    @Override
     public void setFinalAnimationSettingMode(boolean b) {
         finalAnimationSettingMode = b;
     }
 
     public void setIgnoreFinalAnimationSettingMode(boolean ignoreFinalAnimationSettingMode) {
         this.ignoreFinalAnimationSettingMode = ignoreFinalAnimationSettingMode;
+    }
+
+    public void setAdjustmentListener(ParamAdjustmentListener listener) {
+        this.adjustmentListener = listener;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     @Override

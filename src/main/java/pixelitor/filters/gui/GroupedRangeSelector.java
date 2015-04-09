@@ -23,6 +23,8 @@ import pixelitor.utils.SliderSpinner;
 import javax.swing.*;
 import java.awt.GridBagLayout;
 
+import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
+
 /**
  * GUI for a GroupedRangeParam
  */
@@ -50,7 +52,7 @@ public class GroupedRangeSelector extends JPanel {
     private void addSliderSpinners() {
         for (int i = 0; i < numParams; i++) {
             RangeParam param = model.getRangeParam(i);
-            SliderSpinner slider = new SliderSpinner(param, SliderSpinner.TextPosition.NONE, true);
+            SliderSpinner slider = new SliderSpinner(param, NONE, true);
             slider.setupTicks();
             gridBagHelper.addLabelWithControl(param.getName(), slider, i);
         }

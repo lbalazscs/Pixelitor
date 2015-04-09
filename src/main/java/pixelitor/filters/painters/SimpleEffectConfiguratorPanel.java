@@ -23,6 +23,8 @@ import pixelitor.utils.SliderSpinner;
 
 import java.awt.Color;
 
+import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
+
 /**
  * An EffectConfiguratorPanel that has a width parameter.
  * Most effect configurator panels need this as the superclass
@@ -35,7 +37,7 @@ public class SimpleEffectConfiguratorPanel extends EffectConfiguratorPanel {
         super(effectName, defaultSelected, defaultColor);
 
         widthRange = new RangeParam("Width:", 1, 100, defaultWidth);
-        widthSlider = new SliderSpinner(widthRange, SliderSpinner.TextPosition.NONE, false);
+        widthSlider = new SliderSpinner(widthRange, NONE, false);
 
         gbHelper.addLabelWithControl("Width:", widthSlider);
     }

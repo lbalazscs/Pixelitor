@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import pixelitor.filters.gui.ColorParam;
@@ -25,12 +26,14 @@ import pixelitor.utils.ImageUtils;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
+import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
+
 /**
  * Colorize
  */
 public class Colorize extends FilterWithParametrizedGUI {
     private final RangeParam adjustBrightness = new RangeParam("Adjust Brightness", -100, 100, 0);
-    private final ColorParam colorParam = new ColorParam("Color:", new Color(255, 207, 119), false, false);
+    private final ColorParam colorParam = new ColorParam("Color:", new Color(255, 207, 119), NO_OPACITY);
     private final RangeParam opacityParam = new RangeParam("Amount (%)", 0, 100, 100);
 
     public Colorize() {

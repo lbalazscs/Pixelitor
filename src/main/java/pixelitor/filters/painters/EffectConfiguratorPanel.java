@@ -32,6 +32,8 @@ import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
+
 /**
  * An effect configurator panel...
  */
@@ -51,7 +53,7 @@ public abstract class EffectConfiguratorPanel extends JPanel {
         setBorder(BorderFactory.createTitledBorder('"' + effectName + "\" Configuration"));
 
         opacityRange = new RangeParam("Width:", 1, 100, 100);
-        opacitySlider = new SliderSpinner(opacityRange, SliderSpinner.TextPosition.NONE, false);
+        opacitySlider = new SliderSpinner(opacityRange, NONE, false);
 
         enabledCB = new JCheckBox();
         enabledCB.setName("enabledCB");

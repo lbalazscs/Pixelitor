@@ -33,6 +33,10 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.awt.Color.BLACK;
+import static java.awt.Color.GREEN;
+import static java.awt.Color.WHITE;
+
 /**
  * Configuration panel for SwingX effects
  */
@@ -57,10 +61,10 @@ public class EffectsPanel extends JPanel {
     public EffectsPanel(ParamAdjustmentListener listener) {
         setLayout(new BorderLayout());
 
-        glowConfigurator = new SimpleEffectConfiguratorPanel("Glow", false, Color.WHITE, 10);
-        innerGlowConfigurator = new SimpleEffectConfiguratorPanel("Inner Glow", false, Color.WHITE, 10);
-        neonBorderConfigurator = new NeonBorderEffectConfiguratorPanel(false, Color.GREEN, Color.WHITE, 10);
-        dropShadowConfigurator = new DropShadowEffectConfiguratorPanel(false, Color.BLACK);
+        glowConfigurator = new SimpleEffectConfiguratorPanel("Glow", false, WHITE, 10);
+        innerGlowConfigurator = new SimpleEffectConfiguratorPanel("Inner Glow", false, WHITE, 10);
+        neonBorderConfigurator = new NeonBorderEffectConfiguratorPanel(false, GREEN, WHITE, 10);
+        dropShadowConfigurator = new DropShadowEffectConfiguratorPanel(false, BLACK);
 
         if (listener != null) {
             glowConfigurator.setAdjustmentListener(listener);
@@ -138,7 +142,6 @@ public class EffectsPanel extends JPanel {
         tabPanel.add(tabSelectionCB);
         tabPanel.add(new JLabel(name));
 
-//        tabPanel.setBorder(BorderFactory.createLineBorder(Color.RED));
         tabPanel.setOpaque(false);
 
         tabs.addTab(name, configurator);

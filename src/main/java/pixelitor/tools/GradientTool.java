@@ -31,10 +31,15 @@ import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.MultipleGradientPaint;
 import java.awt.Paint;
-import java.awt.RenderingHints;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 
+import static java.awt.Color.BLACK;
+import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
+import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
+import static java.awt.MultipleGradientPaint.CycleMethod.REPEAT;
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 
 /**
@@ -142,7 +147,7 @@ public class GradientTool extends Tool {
         TmpDrawingLayer tmpDrawingLayer = layer.createTmpDrawingLayer(composite, true);
         Graphics2D g = tmpDrawingLayer.getGraphics();
         // repeated gradients are still jaggy
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         Color[] colors = {colorType.getStartColor(invert), colorType.getEndColor(invert)};
         Paint gradient = gradientType.getGradient(userDrag, colors, cycleMethod);
@@ -159,7 +164,7 @@ public class GradientTool extends Tool {
     @Override
     public void paintOverImage(Graphics2D g2, Canvas canvas, ImageDisplay callingIC, AffineTransform unscaledTransform) {
         if (thereWasDragging) {
-            g2.setXORMode(Color.BLACK);
+            g2.setXORMode(BLACK);
             userDrag.drawLine(g2);
         }
     }
@@ -167,11 +172,11 @@ public class GradientTool extends Tool {
     private static MultipleGradientPaint.CycleMethod getCycleMethodFromString(String s) {
         switch (s) {
             case NO_CYCLE_AS_STRING:
-                return MultipleGradientPaint.CycleMethod.NO_CYCLE;
+                return NO_CYCLE;
             case REFLECT_AS_STRING:
-                return MultipleGradientPaint.CycleMethod.REFLECT;
+                return REFLECT;
             case REPEAT_AS_STRING:
-                return MultipleGradientPaint.CycleMethod.REPEAT;
+                return REPEAT;
         }
         throw new IllegalStateException("should not get here");
     }

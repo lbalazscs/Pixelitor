@@ -26,12 +26,13 @@ import java.awt.FlowLayout;
 import java.awt.Rectangle;
 
 /**
- * A GUIParam for text input
+ * A filter parameter for text input
  */
-public class TextParam extends AbstractGUIParam {
+public class TextParam extends AbstractFilterParam {
     private final String defaultValue;
     private final JTextField tf;
     private boolean finalAnimationSettingMode;
+    private boolean trigger = true; // whether the running of the filter should be triggered
 
     public TextParam(String name, String defaultValue) {
         super(name);
@@ -83,7 +84,13 @@ public class TextParam extends AbstractGUIParam {
 
     @Override
     public void reset(boolean triggerAction) {
-        execute(() -> setValue(defaultValue), triggerAction);
+        if (triggerAction) {
+            setValue(defaultValue);
+        } else {
+            trigger = false;
+            setValue(defaultValue);
+            trigger = true;
+        }
     }
 
     @Override
@@ -103,7 +110,9 @@ public class TextParam extends AbstractGUIParam {
             return;
         }
 
-        executeWithoutTrigger(() -> setValue(Utils.getRandomString()));
+        trigger = false;
+        setValue(Utils.getRandomString());
+        trigger = true;
     }
 
     public String getValue() {

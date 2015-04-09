@@ -17,11 +17,11 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.utils.SliderSpinner;
-
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+
+import static pixelitor.utils.SliderSpinner.TextPosition.NORTH;
 
 /**
  * The GUI component for an ImagePositionParam
@@ -36,8 +36,8 @@ public class ImagePositionPanel extends JPanel implements ParamGUI {
     public ImagePositionPanel(ImagePositionParam model, int defaultX, int defaultY) {
         this.model = model;
 
-        xSliderModel = new RangeParam("Horizontal Position (%)", 0, 100, defaultX, true, SliderSpinner.TextPosition.NORTH);
-        ySliderModel = new RangeParam("Vertical Position (%)", 0, 100, defaultY, true, SliderSpinner.TextPosition.NORTH);
+        xSliderModel = new RangeParam("Horizontal Position (%)", 0, 100, defaultX, true, NORTH);
+        ySliderModel = new RangeParam("Vertical Position (%)", 0, 100, defaultY, true, NORTH);
 
         setBorder(BorderFactory.createTitledBorder(model.getName()));
         setLayout(new BorderLayout(10, 0));

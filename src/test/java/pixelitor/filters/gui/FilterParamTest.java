@@ -23,18 +23,22 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import javax.swing.*;
-import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static java.awt.Color.BLACK;
+import static java.awt.Color.CYAN;
+import static java.awt.Color.RED;
+import static java.awt.Color.WHITE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
 
 @RunWith(Parameterized.class)
-public class GUIParamTest {
-    private GUIParam param;
+public class FilterParamTest {
+    private FilterParam param;
     private ParamAdjustmentListenerSpy adjustmentListener;
 
     @Before
@@ -43,7 +47,7 @@ public class GUIParamTest {
         param.setAdjustmentListener(adjustmentListener);
     }
 
-    public GUIParamTest(GUIParam param) {
+    public FilterParamTest(FilterParam param) {
         this.param = param;
     }
 
@@ -51,12 +55,12 @@ public class GUIParamTest {
     public static Collection<Object[]> instancesToTest() {
         return Arrays.asList(new Object[][]{
                 {new RangeParam("Param Name", 0, 10, 0)},
-                {new RangeWithColorsParam(Color.CYAN, Color.RED, "Param Name", -100, 100, 0)},
+                {new RangeWithColorsParam(CYAN, RED, "Param Name", -100, 100, 0)},
                 {new GroupedRangeParam("Param Name", 0, 100, 0)},
                 {new ImagePositionParam("Param Name")},
-                {new GradientParam("Param Name", Color.BLACK, Color.WHITE)},
+                {new GradientParam("Param Name", BLACK, WHITE)},
                 {new TextParam("Param Name", "default text")},
-                {new ColorParam("Param Name", Color.BLACK, true, true)},
+                {new ColorParam("Param Name", BLACK, FREE_OPACITY)},
                 {new BooleanParam("Param Name", true)},
                 {new AngleParam("Param Name", 0)},
                 {new ElevationAngleParam("Param Name", 0)},
@@ -87,16 +91,12 @@ public class GUIParamTest {
 
     @Test
     public void testRandomizeAndReset() {
-        assertTrue(param.getTrigger());
-
         param.randomize();
         checkThatFilterWasNotCalled();
 
         param.reset(false);
         checkThatFilterWasNotCalled();
         assertTrue(param.isSetToDefault());
-
-        assertTrue(param.getTrigger());
 
         // make sure that randomize changes the value
         boolean changed = false;
@@ -106,8 +106,6 @@ public class GUIParamTest {
             changed = !param.isSetToDefault();
         }
 
-        assertTrue(param.getTrigger());
-
         param.reset(true);
         assertTrue(param.isSetToDefault());
 
@@ -116,13 +114,6 @@ public class GUIParamTest {
         }
 
         assertEquals(1, adjustmentListener.getNumCalled());
-    }
-
-    @Test
-    public void testSetTrigger() {
-        param.setTrigger(false);
-        param.setTrigger(true);
-        checkThatFilterWasNotCalled();
     }
 
     @Test

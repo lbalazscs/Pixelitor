@@ -18,14 +18,12 @@
 package pixelitor.utils.test;
 
 import pixelitor.Composition;
-import pixelitor.FillType;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
 import pixelitor.NewImage;
 import pixelitor.layers.ImageLayer;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.FgBgColorSelector;
-import pixelitor.tools.GradientColorType;
 import pixelitor.tools.GradientTool;
 import pixelitor.tools.GradientType;
 import pixelitor.tools.MoveTool;
@@ -37,10 +35,13 @@ import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.AlphaComposite;
-import java.awt.MultipleGradientPaint;
 import java.awt.Point;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Random;
+
+import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
+import static pixelitor.FillType.WHITE;
+import static pixelitor.tools.GradientColorType.BLACK_TO_WHITE;
 
 /**
  *
@@ -54,7 +55,7 @@ public class ToolTests {
     }
 
     public static void testTools() {
-        NewImage.addNewImage(FillType.WHITE, 400, 400, "Tool Tests");
+        NewImage.addNewImage(WHITE, 400, 400, "Tool Tests");
 
         ImageComponent ic = ImageComponents.getActiveImageComponent();
         Composition comp = ic.getComp();
@@ -137,8 +138,8 @@ public class ToolTests {
 
         GradientTool.drawGradient((ImageLayer) comp.getActiveLayer(),
                 gradientType,
-                GradientColorType.BLACK_TO_WHITE,
-                MultipleGradientPaint.CycleMethod.REFLECT,
+                BLACK_TO_WHITE,
+                REFLECT,
                 AlphaComposite.SrcOver,
                 new UserDrag(startX, startY, endX, endY),
                 false);

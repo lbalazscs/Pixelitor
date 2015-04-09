@@ -23,9 +23,9 @@ import javax.swing.*;
 import java.awt.Rectangle;
 
 /**
- * A GUIParam for selecting an image coordinate (relative to the image size)
+ * A filter parameter for selecting an image coordinate (relative to the image size)
  */
-public class ImagePositionParam extends AbstractGUIParam {
+public class ImagePositionParam extends AbstractFilterParam {
     private float relativeX = 0.5f;
     private float relativeY = 0.5f;
 
@@ -64,8 +64,7 @@ public class ImagePositionParam extends AbstractGUIParam {
 
     @Override
     public void reset(boolean triggerAction) {
-        execute(() -> setRelativeValues(defaultRelativeX, defaultRelativeY, true, false),
-                triggerAction);
+        setRelativeValues(defaultRelativeX, defaultRelativeY, true, false, triggerAction);
     }
 
     @Override
@@ -78,11 +77,7 @@ public class ImagePositionParam extends AbstractGUIParam {
         float rx = (float) Math.random();
         float ry = (float) Math.random();
 
-        executeWithoutTrigger(() -> setRelativeValues(rx, ry, true, false));
-    }
-
-    public ParamAdjustmentListener getAdjustingListener() {
-        return adjustmentListener;
+        setRelativeValues(rx, ry, true, false, false);
     }
 
     public float getRelativeX() {
@@ -93,7 +88,7 @@ public class ImagePositionParam extends AbstractGUIParam {
         return relativeY;
     }
 
-    public void setRelativeValues(float relativeX, float relativeY, boolean updateGUI, boolean isAdjusting) {
+    public void setRelativeValues(float relativeX, float relativeY, boolean updateGUI, boolean isAdjusting, boolean trigger) {
         this.relativeX = relativeX;
         this.relativeY = relativeY;
         if (updateGUI && (paramGUI != null)) {
@@ -105,11 +100,11 @@ public class ImagePositionParam extends AbstractGUIParam {
     }
 
     public void setRelativeX(float newRelativeX, boolean isAdjusting) {
-        setRelativeValues(newRelativeX, relativeY, false, isAdjusting);
+        setRelativeValues(newRelativeX, relativeY, false, isAdjusting, true);
     }
 
     public void setRelativeY(float newRelativeY, boolean isAdjusting) {
-        setRelativeValues(relativeX, newRelativeY, false, isAdjusting);
+        setRelativeValues(relativeX, newRelativeY, false, isAdjusting, true);
     }
 
     @Override
@@ -158,7 +153,7 @@ public class ImagePositionParam extends AbstractGUIParam {
 
     @Override
     public void setFinalAnimationSettingMode(boolean b) {
-        // ignored because this GUIParam can be animated
+        // ignored because this filter parameter can be animated
     }
 
     @Override

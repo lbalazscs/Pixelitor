@@ -36,7 +36,6 @@ import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
@@ -51,6 +50,16 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.util.Random;
+
+import static java.awt.AlphaComposite.SRC_OVER;
+import static java.awt.Color.BLACK;
+import static java.awt.Color.WHITE;
+import static java.awt.RenderingHints.KEY_INTERPOLATION;
+import static java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
+import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
+import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 
 /**
  * Image utility methods
@@ -182,7 +191,7 @@ public class ImageUtils {
                 scratchImage = new BufferedImage(w, h, type);
                 g2 = scratchImage.createGraphics();
             }
-            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, hint);
+            g2.setRenderingHint(KEY_INTERPOLATION, hint);
             g2.drawImage(ret, 0, 0, w, h, 0, 0, prevW, prevH, null);
             prevW = w;
             prevH = h;
@@ -212,7 +221,7 @@ public class ImageUtils {
 
         BufferedImage ret = new BufferedImage(targetWidth, targetHeight, img.getType());
         Graphics2D g2 = ret.createGraphics();
-        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, hint);
+        g2.setRenderingHint(KEY_INTERPOLATION, hint);
         g2.drawImage(img, 0, 0, targetWidth, targetHeight, null);
         g2.dispose();
         return ret;
@@ -226,7 +235,7 @@ public class ImageUtils {
         double ratio = ((double) maxOriginalSize) / newSize;
         int imageWidth = (int) (originalWidth / ratio);
         int imageHeight = (int) (originalHeight / ratio);
-        BufferedImage resizedImage = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB_PRE);
+        BufferedImage resizedImage = new BufferedImage(imageWidth, imageHeight, TYPE_INT_ARGB_PRE);
         Graphics2D g2 = resizedImage.createGraphics();
         g2.drawImage(original, 0, 0, imageWidth, imageHeight, null);
         g2.dispose();
@@ -288,7 +297,7 @@ public class ImageUtils {
 
         int type = image.getType();
 
-        return (type == BufferedImage.TYPE_INT_ARGB_PRE || type == BufferedImage.TYPE_INT_RGB || type == BufferedImage.TYPE_INT_ARGB);
+        return (type == TYPE_INT_ARGB_PRE || type == TYPE_INT_RGB || type == TYPE_INT_ARGB);
     }
 
     /**
@@ -353,7 +362,7 @@ public class ImageUtils {
     public static BufferedImage convertToARGB_PRE(BufferedImage src, boolean oldCanBeFlushed) {
         assert src != null;
 
-        BufferedImage dest = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_INT_ARGB_PRE);
+        BufferedImage dest = new BufferedImage(src.getWidth(), src.getHeight(), TYPE_INT_ARGB_PRE);
         Graphics2D g = dest.createGraphics();
         g.drawImage(src, 0, 0, null);
         g.dispose();
@@ -368,7 +377,7 @@ public class ImageUtils {
     public static BufferedImage convertToARGB(BufferedImage src, boolean oldCanBeFlushed) {
         assert src != null;
 
-        BufferedImage dest = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        BufferedImage dest = new BufferedImage(src.getWidth(), src.getHeight(), TYPE_INT_ARGB);
         Graphics2D g = dest.createGraphics();
         g.drawImage(src, 0, 0, null);
         g.dispose();
@@ -383,7 +392,7 @@ public class ImageUtils {
     public static BufferedImage convertToRGB(BufferedImage src, boolean oldCanBeFlushed) {
         assert src != null;
 
-        BufferedImage dest = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_INT_RGB);
+        BufferedImage dest = new BufferedImage(src.getWidth(), src.getHeight(), TYPE_INT_RGB);
         Graphics2D g = dest.createGraphics();
         g.drawImage(src, 0, 0, null);
         g.dispose();
@@ -542,8 +551,8 @@ public class ImageUtils {
         BufferedImage thumb = new BufferedImage(thumbWidth, thumbHeight, src.getType());
         Graphics2D g = thumb.createGraphics();
         try {
-            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                    RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+            g.setRenderingHint(KEY_INTERPOLATION,
+                    VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
             g.drawImage(src, 0, 0, thumbWidth, thumbHeight, null);
         } finally {
             g.dispose();
@@ -595,7 +604,7 @@ public class ImageUtils {
         int width = raster.getWidth();
         int height = raster.getHeight();
         Raster startingFrom00 = raster.createChild(minX, minY, width, height, 0, 0, null);
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB_PRE);
+        BufferedImage image = new BufferedImage(width, height, TYPE_INT_ARGB_PRE);
         image.setData(startingFrom00);
         return image;
     }
@@ -665,7 +674,7 @@ public class ImageUtils {
         Invert.invertImage(blurred, blurred);
         // ... and blending it at 50% with the original
         Graphics2D g = blurred.createGraphics();
-        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+        g.setComposite(AlphaComposite.getInstance(SRC_OVER, 0.5f));
         g.drawImage(original, 0, 0, null);
         g.dispose();
 
@@ -682,7 +691,7 @@ public class ImageUtils {
             throw new IllegalArgumentException("density is " + density);
         }
 
-        BufferedImage brushImage = new BufferedImage(diameter, diameter, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage brushImage = new BufferedImage(diameter, diameter, TYPE_INT_ARGB);
 
         int radius = diameter / 2;
         int radius2 = radius * radius;
@@ -713,14 +722,14 @@ public class ImageUtils {
     }
 
     public static BufferedImage createSoftTemplateBrush(int size) {
-        BufferedImage brushImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage brushImage = new BufferedImage(size, size, TYPE_INT_ARGB);
 
         Graphics2D g = brushImage.createGraphics();
 
-        g.setColor(Color.WHITE);
+        g.setColor(WHITE);
         g.fillRect(0, 0, size, size);
 
-        g.setColor(Color.BLACK);
+        g.setColor(BLACK);
 
         int softness = size / 4;
 
@@ -736,7 +745,7 @@ public class ImageUtils {
 
     public static BufferedImage getGridImageOnTransparentBackground(Color color, int maxX, int maxY, int hWidth, int hSpacing, int vWidth, int vSpacing, boolean emptyIntersections) {
         // create transparent image
-        BufferedImage img = new BufferedImage(maxX, maxY, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage img = new BufferedImage(maxX, maxY, TYPE_INT_ARGB);
         Graphics2D g = img.createGraphics();
         drawGrid(color, g, maxX, maxY, hWidth, hSpacing, vWidth, vSpacing, emptyIntersections);
         g.dispose();
@@ -906,7 +915,7 @@ public class ImageUtils {
     public static BufferedImage convertToGrayScaleImage(BufferedImage src) {
         BufferedImage dest = new BufferedImage(src.getWidth(),
                 src.getHeight(),
-                BufferedImage.TYPE_BYTE_GRAY);
+                TYPE_BYTE_GRAY);
         ColorConvertOp colorConvertOp = new ColorConvertOp(null);
         dest = colorConvertOp.filter(src, dest);
         return dest;
@@ -927,7 +936,7 @@ public class ImageUtils {
 
     public static void paintAffectedAreaShapes(BufferedImage image, Shape[] shapes) {
         Graphics2D g = image.createGraphics();
-        g.setColor(Color.BLACK);
+        g.setColor(BLACK);
 
         ZoomLevel zoomLevel = ImageComponents.getActiveImageComponent().getZoomLevel();
 
@@ -938,7 +947,7 @@ public class ImageUtils {
         for (Shape shape : shapes) {
             g.draw(shape);
         }
-        g.setColor(Color.WHITE);
+        g.setColor(WHITE);
         g.setStroke(zoomLevel.getInnerGeometryStroke());
 
         for (Shape shape : shapes) {

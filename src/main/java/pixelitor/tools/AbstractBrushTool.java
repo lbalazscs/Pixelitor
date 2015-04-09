@@ -34,7 +34,6 @@ import javax.swing.*;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.geom.FlatteningPathIterator;
@@ -42,7 +41,10 @@ import java.awt.geom.PathIterator;
 import java.awt.image.BufferedImage;
 import java.util.function.Supplier;
 
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.Composition.ImageChangeActions.HISTOGRAM;
+import static pixelitor.utils.SliderSpinner.TextPosition.WEST;
 
 /**
  * Abstract superclass for tools like brush, erase, clone.
@@ -112,7 +114,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     }
 
     protected void addSizeSelector() {
-        SliderSpinner brushSizeSelector = new SliderSpinner(brushRadiusParam, SliderSpinner.TextPosition.WEST, false);
+        SliderSpinner brushSizeSelector = new SliderSpinner(brushRadiusParam, WEST, false);
         toolSettingsPanel.add(brushSizeSelector);
     }
 
@@ -203,7 +205,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
 
             ImageLayer imageLayer = (ImageLayer) comp.getActiveLayer();
             createGraphics(comp, imageLayer);
-            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            graphics.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
             if (connectClickWithLine) {
                 brush.onNewMousePoint(x, y);

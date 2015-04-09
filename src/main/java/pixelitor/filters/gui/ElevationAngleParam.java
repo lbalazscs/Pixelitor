@@ -20,7 +20,7 @@ package pixelitor.filters.gui;
 import java.util.Random;
 
 /**
- * A GUIParam for selecting the elevation (altitude) angle of a light source
+ * A filter parameter for selecting the elevation (altitude) angle of a light source
  */
 public class ElevationAngleParam extends AngleParam {
 
@@ -39,7 +39,7 @@ public class ElevationAngleParam extends AngleParam {
     }
 
     @Override
-    public void setValueInRadians(double r) {
+    public void setValueInRadians(double r, boolean trigger) {
         if (r > 1.5 * Math.PI) {
             // values between 1.5*PI and 2*PI are coming when the user drags the slider, they are OK
         } else if (r > 0) {
@@ -48,13 +48,12 @@ public class ElevationAngleParam extends AngleParam {
             r = -Math.PI / 2;
         }
 
-        super.setValueInRadians(r);
+        super.setValueInRadians(r, trigger);
     }
 
     @Override
     public void randomize() {
         Random r = new Random();
         setValueInDegrees(r.nextInt(90), false);
-        trigger = true;
     }
 }

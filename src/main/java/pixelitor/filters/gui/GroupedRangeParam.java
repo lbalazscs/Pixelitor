@@ -25,7 +25,7 @@ import java.awt.Rectangle;
 /**
  * Two or more range params that are grouped and can be linked.
  */
-public class GroupedRangeParam extends AbstractGUIParam implements RangeBasedOnImageSize {
+public class GroupedRangeParam extends AbstractFilterParam implements RangeBasedOnImageSize {
     private final RangeParam[] rangeParams;
     private final ButtonModel checkBoxModel;
     private final boolean linkedByDefault;
@@ -80,7 +80,7 @@ public class GroupedRangeParam extends AbstractGUIParam implements RangeBasedOnI
                     for (RangeParam otherParam : rangeParams) {
                         if (otherParam != param) {
                             int newValue = param.getValue();
-                            otherParam.setValueWithoutTrigger(newValue);
+                            otherParam.setValueNoTrigger(newValue);
                         }
                     }
                 }
@@ -142,13 +142,6 @@ public class GroupedRangeParam extends AbstractGUIParam implements RangeBasedOnI
             for (RangeParam param : rangeParams) {
                 param.randomize();
             }
-        }
-    }
-
-    @Override
-    public void setTrigger(boolean trigger) {
-        for (RangeParam param : rangeParams) {
-            param.setTrigger(trigger);
         }
     }
 
@@ -269,6 +262,6 @@ public class GroupedRangeParam extends AbstractGUIParam implements RangeBasedOnI
 
     @Override
     public void setFinalAnimationSettingMode(boolean b) {
-        // ignored because this GUIParam can be animated
+        // ignored because this filter parameter can be animated
     }
 }

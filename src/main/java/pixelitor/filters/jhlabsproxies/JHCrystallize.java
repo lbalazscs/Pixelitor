@@ -20,17 +20,19 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.CrystallizeFilter;
 import com.jhlabs.math.Noise;
 import pixelitor.filters.FilterWithParametrizedGUI;
-import pixelitor.filters.gui.ActionParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
+import pixelitor.filters.gui.FilterAction;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseActionParam;
+import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.utils.CachedFloatRandom;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
+
+import static java.awt.Color.BLACK;
+import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
 
 /**
  * Crystallize based on the JHLabs CrystallizeFilter
@@ -38,13 +40,13 @@ import java.awt.image.BufferedImage;
 public class JHCrystallize extends FilterWithParametrizedGUI {
     private final RangeParam edgeThickness = new RangeParam("Edge Thickness", 0, 100, 40);
     private final RangeParam size = new RangeParam("Size", 1, 200, 20);
-    private final ColorParam edgeColor = new ColorParam("Edge Color", Color.BLACK, true, true);
+    private final ColorParam edgeColor = new ColorParam("Edge Color", BLACK, FREE_OPACITY);
     private final BooleanParam fadeEdges = new BooleanParam("Fade Edges", false);
 
     private final RangeParam randomness = new RangeParam("Shape Randomness (%)", 0, 100, 0);
     private final IntChoiceParam gridType = IntChoiceParam.getGridTypeChoices("Shape", randomness);
 
-    private final ActionParam reseedAction = new ReseedNoiseActionParam(e -> {
+    private final FilterAction reseedAction = new ReseedNoiseFilterAction(e -> {
         CachedFloatRandom.reseedCache();
         Noise.reseed();
     });
@@ -59,10 +61,8 @@ public class JHCrystallize extends FilterWithParametrizedGUI {
                 gridType,
                 randomness,
                 edgeColor,
-                fadeEdges,
-                reseedAction
-//                rndGen
-        ));
+                fadeEdges
+        ).withAction(reseedAction));
     }
 
     @Override

@@ -21,6 +21,8 @@ import java.awt.Graphics2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
+
 /**
  * The brush used by the Smudge Tool
  */
@@ -37,7 +39,7 @@ public class SmudgeBrush extends DabsBrush {
     @Override
     public void setRadius(int radius) {
         super.setRadius(radius);
-        brushImage = new BufferedImage(diameter, diameter, BufferedImage.TYPE_INT_ARGB);
+        brushImage = new BufferedImage(diameter, diameter, TYPE_INT_ARGB);
         circleClip = new Ellipse2D.Double(0, 0, diameter, diameter);
     }
 

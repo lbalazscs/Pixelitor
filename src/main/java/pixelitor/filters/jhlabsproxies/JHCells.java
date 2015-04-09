@@ -20,17 +20,19 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.CellularFilter;
 import com.jhlabs.math.Noise;
 import pixelitor.filters.FilterWithParametrizedGUI;
-import pixelitor.filters.gui.ActionParam;
 import pixelitor.filters.gui.AngleParam;
+import pixelitor.filters.gui.FilterAction;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseActionParam;
+import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.utils.CachedFloatRandom;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
+
+import static java.awt.Color.BLACK;
+import static java.awt.Color.WHITE;
 
 /**
  * Cells based on the JHLabs CellularFilter
@@ -40,7 +42,7 @@ public class JHCells extends FilterWithParametrizedGUI {
     private static final int TYPE_GRID = 2;
     private static final int TYPE_STRANGE = 3;
 
-    private final GradientParam gradient = new GradientParam("Colors", Color.BLACK, Color.WHITE);
+    private final GradientParam gradient = new GradientParam("Colors", BLACK, WHITE);
 
     private final RangeParam scale = new RangeParam("Zoom", 1, 500, 100);
     private final RangeParam stretch = new RangeParam("Stretch (%)", 100, 999, 100);
@@ -62,7 +64,7 @@ public class JHCells extends FilterWithParametrizedGUI {
 
     private final AngleParam angle = new AngleParam("Angle", 0);
 
-    private final ActionParam reseedAction = new ReseedNoiseActionParam(e -> {
+    private final FilterAction reseedAction = new ReseedNoiseFilterAction(e -> {
         CachedFloatRandom.reseedCache();
         Noise.reseed();
     });
@@ -80,13 +82,8 @@ public class JHCells extends FilterWithParametrizedGUI {
                 darkLightBalance,
                 scale.adjustRangeToImageSize(0.5),
                 stretch,
-                angle,
-                reseedAction
-//                rndGen
-//                f1Param,
-//                f2Param,
-//                f3Param
-        ));
+                angle
+        ).withAction(reseedAction));
         listNamePrefix = "Render ";
     }
 

@@ -17,12 +17,19 @@
 
 package pixelitor.filters.gui;
 
-public interface RangeBasedOnImageSize {
-    /**
-     * Sets the maximum and default parameters according to the image size
-     *
-     * @param ratio the new maximum will be
-     * @return itself
-     */
-    AbstractFilterParam adjustRangeToImageSize(double ratio);
+import javax.swing.*;
+
+/**
+ * Something that appears in a filter GUI
+ */
+public interface FilterGUIComponent {
+    String getName();
+
+    JComponent createGUI();
+
+    int getNrOfGridBagCols();
+
+    void setAdjustmentListener(ParamAdjustmentListener listener);
+
+    void setFinalAnimationSettingMode(boolean b); // implemented for the non-animatable params
 }

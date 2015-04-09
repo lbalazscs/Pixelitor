@@ -14,14 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.utils;
 
 import javax.swing.*;
 import javax.swing.plaf.LayerUI;
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+
+import static java.awt.Color.RED;
+import static java.awt.Color.WHITE;
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 public class TFValidationLayerUI extends LayerUI<JTextField> {
     private final TextFieldValidator validator;
@@ -40,16 +44,17 @@ public class TFValidationLayerUI extends LayerUI<JTextField> {
             Graphics2D g2 = (Graphics2D) g.create();
 
             // Paint the red X.
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
             int w = c.getWidth();
             int h = c.getHeight();
+
             int s = 8;
             int pad = 10;
             int x = w - pad - s;
             int y = (h - s) / 2;
-            g2.setPaint(Color.red);
+            g2.setPaint(RED);
             g2.fillRect(x, y, s + 1, s + 1);
-            g2.setPaint(Color.white);
+            g2.setPaint(WHITE);
             g2.drawLine(x, y, x + s, y + s);
             g2.drawLine(x, y + s, x + s, y);
 

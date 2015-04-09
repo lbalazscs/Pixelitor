@@ -21,7 +21,7 @@ import javax.swing.*;
 import java.awt.FlowLayout;
 
 /**
- *
+ * The GUI for a BooleanParam.
  */
 public class BooleanSelector extends JPanel implements ParamGUI {
     private final BooleanParam model;
@@ -34,8 +34,7 @@ public class BooleanSelector extends JPanel implements ParamGUI {
         checkBox.setSelected(model.isChecked());
         add(checkBox);
 
-        checkBox.addActionListener(e -> model.setValue(checkBox.isSelected(), false));
-
+        checkBox.addActionListener(e -> model.setValue(checkBox.isSelected(), false, true));
     }
 
     @Override

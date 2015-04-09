@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.SparkleFilter;
@@ -24,8 +25,10 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
+
+import static java.awt.Color.WHITE;
+import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
 
 /**
  * Sparkle based on the JHLabs SparkleFilter
@@ -38,7 +41,7 @@ public class JHSparkle extends FilterWithParametrizedGUI {
     private final RangeParam shine = new RangeParam("Shine", 0, 100, 50);
     private final RangeParam randomness = new RangeParam("Randomness", 0, 50, 25);
 
-    private final ColorParam color = new ColorParam("Color", Color.WHITE, true, false);
+    private final ColorParam color = new ColorParam("Color", WHITE, USER_ONLY_OPACITY);
 
     private SparkleFilter filter;
 

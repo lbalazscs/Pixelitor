@@ -31,9 +31,9 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * A GUIParam for selecting a choice from a list of values
+ * A filter parameter for selecting a choice from a list of values
  */
-public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> implements ComboBoxModel<IntChoiceParam.Value>, GUIParam {
+public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> implements ComboBoxModel<IntChoiceParam.Value>, FilterParam {
     private final String name;
     private final List<Value> choicesList = new ArrayList<>();
 
@@ -43,7 +43,6 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
     private ParamAdjustmentListener adjustmentListener;
     private final boolean ignoreRandomize;
     private boolean finalAnimationSettingMode;
-    private boolean trigger = true;
 
     public IntChoiceParam(String name, Value[] choices) {
         this(name, choices, false);
@@ -80,13 +79,7 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
 
     @Override
     public void reset(boolean triggerAction) {
-        if (!triggerAction) {
-            trigger = false;
-        }
-
-        setSelectedItem(defaultChoice);
-
-        trigger = true;
+        setSelectedItem(defaultChoice, triggerAction);
     }
 
     @Override
@@ -108,9 +101,7 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
         if (!ignoreRandomize) {
             Random rnd = new Random();
             int randomIndex = rnd.nextInt(choicesList.size());
-            trigger = false;
-            setCurrentChoice(choicesList.get(randomIndex));
-            trigger = true;
+            setCurrentChoice(choicesList.get(randomIndex), false);
         }
     }
 
@@ -118,8 +109,8 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
         return currentChoice.getIntValue();
     }
 
-    public void setCurrentChoice(Value currentChoice) {
-        setSelectedItem(currentChoice);
+    public void setCurrentChoice(Value currentChoice, boolean trigger) {
+        setSelectedItem(currentChoice, trigger);
     }
 
     public void setDefaultChoice(Value defaultChoice) {
@@ -127,11 +118,15 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
     }
 
     @Override
-    public void setSelectedItem(Object anItem) {
-        if (!currentChoice.equals(anItem)) {
-            currentChoice = (Value) anItem;
+    public void setSelectedItem(Object item) {
+        setSelectedItem(item, true);
+    }
+
+    public void setSelectedItem(Object item, boolean trigger) {
+        if (!currentChoice.equals(item)) {
+            currentChoice = (Value) item;
             fireContentsChanged(this, -1, -1);
-            if (true == trigger) {
+            if (trigger) {
                 if (adjustmentListener != null) {  // when called from randomize, this is null
                     adjustmentListener.paramAdjusted();
                 }
@@ -294,16 +289,6 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
                 ((ListDataListener) listeners[i + 1]).contentsChanged(e);
             }
         }
-    }
-
-    @Override
-    public void setTrigger(boolean trigger) {
-        this.trigger = trigger;
-    }
-
-    @Override
-    public boolean getTrigger() {
-        return trigger;
     }
 
     @Override

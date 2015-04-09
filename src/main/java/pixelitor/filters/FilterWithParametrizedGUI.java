@@ -75,9 +75,8 @@ public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
     public void setParamSet(ParamSet paramSet) {
         this.paramSet = paramSet;
         // switch the affected area functionality here on-off
+//        paramSet.addCommonActions(showAffectedAreaParam);
 
-//        paramSet.addCommonActions(showAffectedAreaParam, showOriginalParam);
-//        paramSet.addCommonActions(showOriginalParam);
         paramSet.addCommonActions();
     }
 

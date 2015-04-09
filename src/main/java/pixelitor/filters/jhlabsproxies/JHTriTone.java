@@ -22,16 +22,20 @@ import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ParamSet;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
+
+import static java.awt.Color.BLACK;
+import static java.awt.Color.RED;
+import static java.awt.Color.YELLOW;
+import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
 
 /**
  * Tritone based on the JHLabs TritoneFilter
  */
 public class JHTriTone extends FilterWithParametrizedGUI {
-    private final ColorParam shadowColor = new ColorParam("Shadow Color:", Color.BLACK, false, false);
-    private final ColorParam midtonesColor = new ColorParam("Midtones Color:", Color.RED, false, false);
-    private final ColorParam highlightsColor = new ColorParam("Highlights Color:", Color.YELLOW, false, false);
+    private final ColorParam shadowColor = new ColorParam("Shadow Color:", BLACK, NO_OPACITY);
+    private final ColorParam midtonesColor = new ColorParam("Midtones Color:", RED, NO_OPACITY);
+    private final ColorParam highlightsColor = new ColorParam("Highlights Color:", YELLOW, NO_OPACITY);
 
     private TritoneFilter filter;
 
@@ -44,7 +48,7 @@ public class JHTriTone extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        if(filter == null) {
+        if (filter == null) {
             filter = new TritoneFilter();
         }
 

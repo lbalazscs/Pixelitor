@@ -18,7 +18,8 @@
 package pixelitor.filters.painters;
 
 import com.bric.util.JVM;
-import org.jdesktop.swingx.painter.AbstractLayoutPainter;
+import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
+import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.jdesktop.swingx.painter.effects.AreaEffect;
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.ColorParam;
@@ -31,7 +32,6 @@ import pixelitor.utils.SliderSpinner;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridBagLayout;
@@ -40,6 +40,10 @@ import java.awt.event.ActionListener;
 import java.awt.font.TextAttribute;
 import java.util.Hashtable;
 import java.util.Map;
+
+import static java.awt.Color.BLACK;
+import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
+import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
 
 /**
  * Customization Panel for the Centered Text
@@ -55,12 +59,12 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
     private JCheckBox strikeThroughCB;
 //    private JCheckBox kerningCB;
 
-    private final ColorParam color = new ColorParam("Color", Color.BLACK, true, false);
+    private final ColorParam color = new ColorParam("Color", BLACK, USER_ONLY_OPACITY);
     private ColorSelector colorSelector;
 
     private EffectsPanel effectsPanel;
-    private JComboBox<AbstractLayoutPainter.VerticalAlignment> verticalAlignmentCombo;
-    private JComboBox<AbstractLayoutPainter.HorizontalAlignment> horizontalAlignmentCombo;
+    private JComboBox<VerticalAlignment> verticalAlignmentCombo;
+    private JComboBox<HorizontalAlignment> horizontalAlignmentCombo;
 
     private final JCheckBox watermarkCB;
 
@@ -122,12 +126,12 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
         color.setAdjustmentListener(this);
 
         gridBagHelper.addLabel("Vertical Alignment", 0, 2);
-        verticalAlignmentCombo = new JComboBox(AbstractLayoutPainter.VerticalAlignment.values());
+        verticalAlignmentCombo = new JComboBox(VerticalAlignment.values());
         verticalAlignmentCombo.addActionListener(this);
         gridBagHelper.addControl(verticalAlignmentCombo);
 
         gridBagHelper.addLabel("Horizontal Alignment", 2, 2);
-        horizontalAlignmentCombo = new JComboBox(AbstractLayoutPainter.HorizontalAlignment.values());
+        horizontalAlignmentCombo = new JComboBox(HorizontalAlignment.values());
         horizontalAlignmentCombo.addActionListener(this);
         gridBagHelper.addControl(horizontalAlignmentCombo);
 
@@ -144,7 +148,7 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
 
         gridBagHelper.addLabel("Font Size:", 0, 0);
         RangeParam fontSizeParam = new RangeParam("", 1, 1000, 100);
-        fontSizeSlider = new SliderSpinner(fontSizeParam, SliderSpinner.TextPosition.NONE, false);
+        fontSizeSlider = new SliderSpinner(fontSizeParam, NONE, false);
         fontSizeParam.setAdjustmentListener(this);
         gridBagHelper.addLastControl(fontSizeSlider);
 
@@ -229,8 +233,8 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
         }
         textFilter.setWatermark(watermarkCB.isSelected());
 
-        textFilter.setVerticalAlignment((AbstractLayoutPainter.VerticalAlignment) verticalAlignmentCombo.getSelectedItem());
-        textFilter.setHorizontalAlignment((AbstractLayoutPainter.HorizontalAlignment) horizontalAlignmentCombo.getSelectedItem());
+        textFilter.setVerticalAlignment((VerticalAlignment) verticalAlignmentCombo.getSelectedItem());
+        textFilter.setHorizontalAlignment((HorizontalAlignment) horizontalAlignmentCombo.getSelectedItem());
         textFilter.setColor(color.getColor());
 
         super.executeFilterPreview();

@@ -21,7 +21,6 @@ import org.jdesktop.swingx.painter.AbstractLayoutPainter;
 import org.jdesktop.swingx.painter.effects.AreaEffect;
 import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
 import pixelitor.Build;
-import pixelitor.ChangeReason;
 import pixelitor.Composition;
 import pixelitor.FillType;
 import pixelitor.ImageComponents;
@@ -54,6 +53,9 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
+import static java.awt.Color.BLACK;
+import static java.awt.Color.WHITE;
+import static pixelitor.ChangeReason.OP_WITHOUT_DIALOG;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 
 /**
@@ -129,12 +131,12 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
 
         Composition ic = ImageComponents.getActiveComp().get();
         ic.getActiveLayer().setName("Color Wheel", AddToHistory.YES);
-        new ColorWheel().execute(ChangeReason.OP_WITHOUT_DIALOG);
+        new ColorWheel().execute(OP_WITHOUT_DIALOG);
 
         addNewLayer("Value Noise");
         ValueNoise valueNoise = new ValueNoise();
         valueNoise.setDetails(7);
-        valueNoise.execute(ChangeReason.OP_WITHOUT_DIALOG);
+        valueNoise.execute(OP_WITHOUT_DIALOG);
         ImageLayer layer = (ImageLayer) ic.getActiveLayer();
         layer.setOpacity(0.3f, true, AddToHistory.YES, true);
         layer.setBlendingMode(BlendingMode.SCREEN, true, AddToHistory.YES, true);
@@ -145,17 +147,17 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
         layer.setOpacity(0.4f, true, AddToHistory.YES, true);
         layer.setBlendingMode(BlendingMode.LUMINOSITY, true, AddToHistory.YES, true);
 
-        FgBgColorSelector.INSTANCE.setFgColor(Color.WHITE);
+        FgBgColorSelector.INSTANCE.setFgColor(WHITE);
         Font font = new Font(SPLASH_SCREEN_FONT, Font.BOLD, 48);
-        addTextLayer(ic, "Pixelitor", Color.WHITE, font, -17, BlendingMode.NORMAL, 0.9f, false);
+        addTextLayer(ic, "Pixelitor", WHITE, font, -17, BlendingMode.NORMAL, 0.9f, false);
         addDropShadow();
 
         font = new Font(SPLASH_SCREEN_FONT, Font.BOLD, 22);
-        addTextLayer(ic, "Loading...", Color.WHITE, font, -70, BlendingMode.NORMAL, 0.9f, false);
+        addTextLayer(ic, "Loading...", WHITE, font, -70, BlendingMode.NORMAL, 0.9f, false);
         addDropShadow();
 
         font = new Font(SPLASH_SCREEN_FONT, Font.PLAIN, 20);
-        addTextLayer(ic, "version " + Build.VERSION_NUMBER, Color.WHITE, font, 50, BlendingMode.NORMAL, 0.9f, false);
+        addTextLayer(ic, "version " + Build.VERSION_NUMBER, WHITE, font, 50, BlendingMode.NORMAL, 0.9f, false);
         addDropShadow();
 
 //        font = new Font(Font.SANS_SERIF, Font.PLAIN, 10);
@@ -174,7 +176,7 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
             comp.getActiveLayer().setBlendingMode(BlendingMode.OVERLAY, true, AddToHistory.YES, true);
             JHGaussianBlur blur = new JHGaussianBlur();
             blur.setRadius(5);
-            blur.execute(ChangeReason.OP_WITHOUT_DIALOG);
+            blur.execute(OP_WITHOUT_DIALOG);
         };
         Automate.processEachFile(ca, false, "Overlay Blur Progress");
     }
@@ -184,7 +186,7 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
         dropShadow.setDistance(5);
         dropShadow.setSoftness(5);
         dropShadow.setOpacity(0.7f);
-        dropShadow.execute(ChangeReason.OP_WITHOUT_DIALOG);
+        dropShadow.execute(OP_WITHOUT_DIALOG);
     }
 
     private static void addNewLayer(String name) {
@@ -193,8 +195,8 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
     }
 
     public static void testLayers() {
-        FgBgColorSelector.setBG(Color.WHITE);
-        FgBgColorSelector.setFG(Color.BLACK);
+        FgBgColorSelector.setBG(WHITE);
+        FgBgColorSelector.setFG(BLACK);
         NewImage.addNewImage(FillType.TRANSPARENT, 400, 400, "Layer Test");
         Composition comp = ImageComponents.getActiveComp().get();
 
@@ -225,7 +227,7 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
 
     private static void addTextLayer(Composition ic, String text, int translationY) {
         Font font = new Font(Font.SANS_SERIF, Font.BOLD, 20);
-        addTextLayer(ic, text, Color.WHITE, font, translationY, BlendingMode.NORMAL, 1.0f, false);
+        addTextLayer(ic, text, WHITE, font, translationY, BlendingMode.NORMAL, 1.0f, false);
     }
 
     private static void addTextLayer(Composition ic, String text, Color textColor, Font font, int translationY, BlendingMode blendingMode, float opacity, boolean dropShadow) {
@@ -243,7 +245,7 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
         if (dropShadow) {
             textFilter.setAreaEffects(new AreaEffect[]{new ShadowPathEffect(1.0f)});
         }
-        textFilter.execute(ChangeReason.OP_WITHOUT_DIALOG);
+        textFilter.execute(OP_WITHOUT_DIALOG);
         ImageLayer layer = (ImageLayer) ic.getActiveLayer();
         layer.setTranslationY(translationY);
 

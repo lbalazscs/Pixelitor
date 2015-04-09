@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools;
 
 import com.bric.swing.ColorPicker;
@@ -27,6 +28,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 
+import static java.awt.Color.BLACK;
+import static java.awt.Color.WHITE;
+
 /**
  * A panel that contains the buttons for selecting the foreground and background colors
  */
@@ -34,8 +38,8 @@ public class FgBgColorSelector extends JLayeredPane {
     private JButton fgButton;
     private JButton bgButton;
 
-    private Color fgColor = Color.black;
-    private Color bgColor = Color.white;
+    private Color fgColor = BLACK;
+    private Color bgColor = WHITE;
 
     private static final int BIG_BUTTON_SIZE = 32;
     private static final int SMALL_BUTTON_SIZE = 16;
@@ -84,8 +88,8 @@ public class FgBgColorSelector extends JLayeredPane {
         resetToDefaultAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                setFgColor(Color.BLACK);
-                setBgColor(Color.WHITE);
+                setFgColor(BLACK);
+                setBgColor(WHITE);
             }
         };
         defaultsButton.addActionListener(resetToDefaultAction);

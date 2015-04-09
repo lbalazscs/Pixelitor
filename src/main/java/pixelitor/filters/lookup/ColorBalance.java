@@ -25,10 +25,16 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.RangeWithColorsParam;
 import pixelitor.filters.levels.RGBLookup;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ShortLookupTable;
+
+import static java.awt.Color.BLUE;
+import static java.awt.Color.CYAN;
+import static java.awt.Color.GREEN;
+import static java.awt.Color.MAGENTA;
+import static java.awt.Color.RED;
+import static java.awt.Color.YELLOW;
 
 /**
  * Color balance filter
@@ -46,11 +52,9 @@ public class ColorBalance extends FilterWithParametrizedGUI {
             new IntChoiceParam.Value("Highlights", HIGHLIGHTS),
     });
 
-    private final RangeParam cyanRed = new RangeWithColorsParam(Color.CYAN, Color.RED, "Cyan-Red", -100, 100, 0);
-    private final RangeParam magentaGreen = new RangeWithColorsParam(Color.MAGENTA, Color.GREEN, "Magenta-Green", -100, 100,
-            0);
-    private final RangeParam yellowBlue = new RangeWithColorsParam(Color.YELLOW, Color.BLUE, "Yellow-Blue", -100, 100,
-            0);
+    private final RangeParam cyanRed = new RangeWithColorsParam(CYAN, RED, "Cyan-Red", -100, 100, 0);
+    private final RangeParam magentaGreen = new RangeWithColorsParam(MAGENTA, GREEN, "Magenta-Green", -100, 100, 0);
+    private final RangeParam yellowBlue = new RangeWithColorsParam(YELLOW, BLUE, "Yellow-Blue", -100, 100, 0);
 
     public ColorBalance() {
         super("Color Balance", true, false);

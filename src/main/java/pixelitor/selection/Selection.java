@@ -26,7 +26,6 @@ import pixelitor.utils.Dialogs;
 
 import javax.swing.*;
 import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Rectangle;
@@ -34,6 +33,10 @@ import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.Area;
 
+import static java.awt.BasicStroke.CAP_BUTT;
+import static java.awt.BasicStroke.JOIN_ROUND;
+import static java.awt.Color.BLACK;
+import static java.awt.Color.WHITE;
 import static pixelitor.selection.Selection.State.DIED;
 import static pixelitor.selection.Selection.State.HAS_SHAPE;
 import static pixelitor.selection.Selection.State.NO_SHAPE_YET;
@@ -236,7 +239,7 @@ public class Selection {
         double viewScale = ic.getViewScale();
         float lineWidth = (float) (DASH_WIDTH / viewScale);
 
-        g2.setPaint(Color.WHITE);
+        g2.setPaint(WHITE);
 
         float[] dash;
         if (viewScale == 1.0) { // the most common case
@@ -246,15 +249,15 @@ public class Selection {
             dash = new float[]{scaledDashLength, scaledDashLength};
         }
 
-        Stroke stroke = new BasicStroke(lineWidth, BasicStroke.CAP_BUTT,
-                BasicStroke.JOIN_ROUND, 0.0f, dash,
+        Stroke stroke = new BasicStroke(lineWidth, CAP_BUTT,
+                JOIN_ROUND, 0.0f, dash,
                 phase);
         g2.setStroke(stroke);
         g2.draw(shape);
 
-        g2.setPaint(Color.BLACK);
-        Stroke stroke2 = new BasicStroke(lineWidth, BasicStroke.CAP_BUTT,
-                BasicStroke.JOIN_ROUND, 0.0f, dash,
+        g2.setPaint(BLACK);
+        Stroke stroke2 = new BasicStroke(lineWidth, CAP_BUTT,
+                JOIN_ROUND, 0.0f, dash,
                 (float) (phase + DASH_LENGTH / viewScale));
         g2.setStroke(stroke2);
         g2.draw(shape);

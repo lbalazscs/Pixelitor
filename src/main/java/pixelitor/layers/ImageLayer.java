@@ -36,7 +36,6 @@ import java.awt.AlphaComposite;
 import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
 import java.awt.image.RasterFormatException;
@@ -47,6 +46,9 @@ import java.io.ObjectOutputStream;
 import java.util.Objects;
 import java.util.Optional;
 
+import static java.awt.RenderingHints.KEY_INTERPOLATION;
+import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
@@ -165,7 +167,7 @@ public class ImageLayer extends ContentLayer {
         if(createNewImage) { // if the pasted image is too small, a new image is created
             int newWidth = Math.max(width, pastedWidth);
             int newHeight = Math.max(height, pastedHeight);
-            newImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB_PRE);
+            newImage = new BufferedImage(newWidth, newHeight, TYPE_INT_ARGB_PRE);
             Graphics2D g = newImage.createGraphics();
 
             int drawX = Math.max((width - pastedWidth) / 2, 0);
@@ -199,7 +201,7 @@ public class ImageLayer extends ContentLayer {
         super(comp, name == null ? comp.generateNewLayerName() : name);
         canvas = comp.getCanvas();
 
-        setImage(new BufferedImage(canvas.getWidth(), canvas.getHeight(), BufferedImage.TYPE_INT_ARGB_PRE));
+        setImage(new BufferedImage(canvas.getWidth(), canvas.getHeight(), TYPE_INT_ARGB_PRE));
         checkConstructorPostConditions();
     }
 
@@ -617,7 +619,7 @@ public class ImageLayer extends ContentLayer {
 
         Graphics2D g2 = dest.createGraphics();
         // TODO we should not need bicubic here as long as we have only 90, 180, 270 degrees
-        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BICUBIC);
 
         if(angleDegree == 90) {
             g2.translate(imageHeight, 0);
@@ -845,7 +847,7 @@ public class ImageLayer extends ContentLayer {
             resizeHeight = (int) (img.getHeight() * verticalResizeRatio);
         }
 
-        BufferedImage resizedImg = ImageUtils.getFasterScaledInstance(img, resizeWidth, resizeHeight, RenderingHints.VALUE_INTERPOLATION_BICUBIC, progressiveBilinear);
+        BufferedImage resizedImg = ImageUtils.getFasterScaledInstance(img, resizeWidth, resizeHeight, VALUE_INTERPOLATION_BICUBIC, progressiveBilinear);
         setImage(resizedImg);
 
         if(bigLayer) {

@@ -24,6 +24,8 @@ import pixelitor.utils.SliderSpinner;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
+import static pixelitor.utils.SliderSpinner.TextPosition.BORDER;
+
 /**
  *
  */
@@ -68,10 +70,10 @@ public class EnlargeCanvas {
 
         private EnlargeCanvasPanel() {
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-            add(new SliderSpinner(northRange, SliderSpinner.TextPosition.BORDER, false));
-            add(new SliderSpinner(eastRange, SliderSpinner.TextPosition.BORDER, false));
-            add(new SliderSpinner(southRange, SliderSpinner.TextPosition.BORDER, false));
-            add(new SliderSpinner(westRange, SliderSpinner.TextPosition.BORDER, false));
+            add(new SliderSpinner(northRange, BORDER, false));
+            add(new SliderSpinner(eastRange, BORDER, false));
+            add(new SliderSpinner(southRange, BORDER, false));
+            add(new SliderSpinner(westRange, BORDER, false));
         }
 
         public int getNorth() {

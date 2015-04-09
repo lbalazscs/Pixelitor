@@ -22,6 +22,8 @@ import pixelitor.layers.ImageLayer;
 
 import java.awt.AlphaComposite;
 
+import static java.awt.AlphaComposite.DST_OUT;
+
 /**
  * The eraser tool.
  */
@@ -35,6 +37,6 @@ public class EraserTool extends DirectBrushTool {
         super.createGraphics(comp, layer);
 
         // the color does not matter as long as AlphaComposite.DST_OUT is used
-        graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OUT, 1.0f));
+        graphics.setComposite(AlphaComposite.getInstance(DST_OUT, 1.0f));
     }
 }

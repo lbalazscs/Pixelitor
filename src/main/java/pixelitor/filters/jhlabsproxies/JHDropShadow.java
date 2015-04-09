@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.ShadowFilter;
@@ -25,8 +26,10 @@ import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
+
+import static java.awt.Color.BLACK;
+import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
 
 /**
  * Drop Shadow based on the JHLabs ShadowFilter
@@ -38,7 +41,7 @@ public class JHDropShadow extends FilterWithParametrizedGUI {
     private final RangeParam opacity = new RangeParam("Opacity (%)", 0, 100, 90);
     private final RangeParam softness = new RangeParam("Softness", 0, 25, 10);
     private final BooleanParam shadowOnly = new BooleanParam("Shadow Only", false);
-    private final ColorParam color = new ColorParam("Color", Color.BLACK, false, false);
+    private final ColorParam color = new ColorParam("Color", BLACK, NO_OPACITY);
 
     private ShadowFilter filter;
 

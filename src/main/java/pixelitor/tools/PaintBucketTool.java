@@ -42,6 +42,7 @@ import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.FillType.BACKGROUND;
 import static pixelitor.FillType.FOREGROUND;
 import static pixelitor.FillType.TRANSPARENT;
+import static pixelitor.utils.SliderSpinner.TextPosition.WEST;
 
 /**
  * A paint bucket tool.
@@ -57,7 +58,7 @@ public class PaintBucketTool extends Tool {
 
     @Override
     public void initSettingsPanel() {
-        toolSettingsPanel.add(new SliderSpinner(toleranceParam, SliderSpinner.TextPosition.WEST, false));
+        toolSettingsPanel.add(new SliderSpinner(toleranceParam, WEST, false));
         toolSettingsPanel.add(new JLabel("Fill With:"));
 
         fillComboBox = new JComboBox<>(new FillType[]{FOREGROUND, BACKGROUND, TRANSPARENT});

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import pixelitor.filters.gui.AngleParam;
@@ -26,8 +27,15 @@ import pixelitor.utils.ImageUtils;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+
+import static java.awt.AlphaComposite.SRC_ATOP;
+import static java.awt.Color.BLACK;
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.KEY_INTERPOLATION;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
+import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
 
 /**
  * Draw Grid
@@ -35,11 +43,10 @@ import java.awt.image.BufferedImage;
 public class RenderGrid extends FilterWithParametrizedGUI {
     private final RangeParam spacingParam = new RangeParam("Spacing", 1, 100, 40);
     private final RangeParam widthParam = new RangeParam("Width", 1, 100, 20);
-    private final ColorParam colorParam = new ColorParam("Color", Color.BLACK, true, true);
+    private final ColorParam colorParam = new ColorParam("Color", BLACK, FREE_OPACITY);
     private final BooleanParam emptyIntersectionsParam = new BooleanParam("Empty Intersections", false);
     private final RangeParam opacityParam = new RangeParam("Opacity (%)", 0, 100, 100);
     private final AngleParam rotateResult = new AngleParam("Rotate Result", 0);
-
 
     public RenderGrid() {
         super("Grid", true, false);
@@ -80,10 +87,10 @@ public class RenderGrid extends FilterWithParametrizedGUI {
 
         // we draw the grid first on an image with transparent background
         BufferedImage tmp = ImageUtils.getGridImageOnTransparentBackground(color, maxX, maxY, width, spacing, width, spacing, emptyIntersections);
-        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, opacity));
+        g.setComposite(AlphaComposite.getInstance(SRC_ATOP, opacity));
         if(rotated) {
-            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+            g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
 
 
             g.translate(maxX/2, maxY/2);

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.gui;
 
 import com.bric.swing.ColorPicker;
@@ -70,7 +71,7 @@ public class ColorSelector extends JPanel implements ParamGUI {
             colorSwatch.setForeground(color);
             colorSwatch.paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
 
-            model.setColor(color);
+            model.setColor(color, true);
         }
     }
 

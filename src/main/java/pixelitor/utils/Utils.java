@@ -64,6 +64,8 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR_PRE;
+
 public final class Utils {
     private static final int BYTES_IN_1_MEGABYTE = 1048576;
     private static final int BYTES_IN_1_KILOBYTE = 1024;
@@ -413,7 +415,7 @@ public final class Utils {
     }
 
     public static void debugRasterWithEmptySpace(Raster raster) {
-        BufferedImage debugImage = new BufferedImage(raster.getMinX() + raster.getWidth(), raster.getMinY() + raster.getHeight(), BufferedImage.TYPE_4BYTE_ABGR_PRE);
+        BufferedImage debugImage = new BufferedImage(raster.getMinX() + raster.getWidth(), raster.getMinY() + raster.getHeight(), TYPE_4BYTE_ABGR_PRE);
         debugImage.setData(raster);
         debugImage(debugImage);
     }

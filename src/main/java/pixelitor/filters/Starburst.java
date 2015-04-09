@@ -26,12 +26,16 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ReseedSupport;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.util.Random;
+
+import static java.awt.Color.BLACK;
+import static java.awt.Color.WHITE;
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
 
 /**
  * Starburst
@@ -39,8 +43,8 @@ import java.util.Random;
 public class Starburst extends FilterWithParametrizedGUI {
     private final RangeParam numberOfRaysParam = new RangeParam("Number of Rays", 2, 100, 10);
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final ColorParam bgColor = new ColorParam("Background Color:", Color.WHITE, false, false);
-    private final ColorParam fgColor = new ColorParam("Rays Color:", Color.BLACK, false, false);
+    private final ColorParam bgColor = new ColorParam("Background Color:", WHITE, NO_OPACITY);
+    private final ColorParam fgColor = new ColorParam("Rays Color:", BLACK, NO_OPACITY);
     private final BooleanParam randomColorsParam = new BooleanParam("Use Random Colors for Rays", false, true);
     private final AngleParam rotate = new AngleParam("Rotate", 0);
 
@@ -52,9 +56,8 @@ public class Starburst extends FilterWithParametrizedGUI {
                 fgColor,
                 randomColorsParam,
                 center,
-                rotate,
-                ReseedSupport.createParam("Reseed Colors", "Recalculates the random colors")
-        ));
+                rotate
+        ).withAction(ReseedSupport.createAction("Reseed Colors", "Recalculates the random colors")));
         listNamePrefix = "Fill with ";
     }
 
@@ -67,7 +70,7 @@ public class Starburst extends FilterWithParametrizedGUI {
         int height = dest.getHeight();
 
         Graphics2D g = dest.createGraphics();
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         g.setColor(bgColor.getColor());
         g.fillRect(0, 0, width, height);
 
