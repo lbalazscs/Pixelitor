@@ -906,6 +906,7 @@ public class MenuBar extends JMenuBar {
 
         createMenuItem(new MysticRose(), experimentalSubmenu);
 
+        createMenuItem(new Droste(), experimentalSubmenu);
 
         createMenuItem(new Sphere3D(), experimentalSubmenu);
 
