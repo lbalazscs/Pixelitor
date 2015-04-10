@@ -613,7 +613,8 @@ public class ImageLayer extends ContentLayer {
             newImageHeight = imageHeight;
         }
 
-        // TODO arbitrary rotation create a rectangle, then rotate it with the same AffineTransform
+        // TODO implement arbitrary rotation:
+        // create a rectangle, then rotate it with the same AffineTransform
 
         BufferedImage dest = new BufferedImage(newImageWidth, newImageHeight, img.getType());
 

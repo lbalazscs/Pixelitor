@@ -17,6 +17,7 @@
 
 package pixelitor.utils;
 
+import com.jhlabs.image.ImageMath;
 import pixelitor.Build;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
@@ -55,7 +56,6 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -441,7 +441,25 @@ public final class Utils {
         return unitArrow;
     }
 
-    public static String getRandomString() {
-        return new Date().toString(); // TODO
+    public static String getRandomString(int length) {
+        char[] chars = "abcdefghijklmnopqrstuvwxyz -".toCharArray();
+        StringBuilder sb = new StringBuilder(length);
+        Random random = new Random();
+        for (int i = 0; i < length; i++) {
+            char c = chars[random.nextInt(chars.length)];
+            sb.append(c);
+        }
+        String output = sb.toString();
+        return output;
+    }
+
+    public static Color interpolateColor(Color startColor, Color endColor, float progress) {
+        int initialRGB = startColor.getRGB();
+        int finalRGB = endColor.getRGB();
+
+        // linear interpolation in the RGB space
+        // possibly interpolating in HSB space would be better
+        int interpolatedRGB = ImageMath.mixColors(progress, initialRGB, finalRGB);
+        return new Color(interpolatedRGB);
     }
 }

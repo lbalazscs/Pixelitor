@@ -89,7 +89,8 @@ public class AssertJSwingTest {
     @BeforeClass
     public static void cleanOutputs() {
         try {
-            Runtime.getRuntime().exec(BASE_TESTING_DIR + "\\0000_clean_outputs.bat");
+            String cleanerScript = BASE_TESTING_DIR + "\\0000_clean_outputs.bat";
+            Runtime.getRuntime().exec(cleanerScript);
         } catch (IOException e) {
             e.printStackTrace();
         }

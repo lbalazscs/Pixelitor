@@ -21,6 +21,7 @@ import com.bric.swing.GradientSlider;
 import com.jhlabs.image.Colormap;
 import com.jhlabs.image.ImageMath;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -224,8 +225,7 @@ public class GradientParam extends AbstractFilterParam {
             for (int i = 0; i < colors.length; i++) {
                 Color initial = colors[i];
                 Color end = grEndState.colors[i];
-                // TODO interpolate in HSB space?
-                Color interpolated = new Color(ImageMath.mixColors(progress, initial.getRGB(), end.getRGB()));
+                Color interpolated = Utils.interpolateColor(initial, end, progress);
                 interpolatedColors[i] = interpolated;
             }
             return interpolatedColors;

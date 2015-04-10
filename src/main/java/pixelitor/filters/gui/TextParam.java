@@ -111,7 +111,7 @@ public class TextParam extends AbstractFilterParam {
         }
 
         trigger = false;
-        setValue(Utils.getRandomString());
+        setValue(Utils.getRandomString(15));
         trigger = true;
     }
 
@@ -122,7 +122,7 @@ public class TextParam extends AbstractFilterParam {
     public void setValue(String s) {
         String old = tf.getText();
         if (!old.equals(s)) {
-            boolean triggerWasTrue = trigger == true;
+            boolean triggerWasTrue = trigger;
             trigger = false;
             tf.setText(s);
             trigger = true;

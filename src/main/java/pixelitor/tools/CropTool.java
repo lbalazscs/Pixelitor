@@ -144,7 +144,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
         }
     }
 
-    // TODO: this is not done with the "toolMouse" mechanism
+    // TODO: this is done directly with the dispatch mechanism
     @Override
     public void dispatchMouseMoved(MouseEvent e, ImageDisplay ic) {
         super.dispatchMouseMoved(e, ic);

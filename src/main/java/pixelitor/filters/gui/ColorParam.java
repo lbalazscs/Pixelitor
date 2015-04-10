@@ -17,8 +17,8 @@
 
 package pixelitor.filters.gui;
 
-import com.jhlabs.image.ImageMath;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -125,12 +125,8 @@ public class ColorParam extends AbstractFilterParam {
 
         @Override
         public ParamState interpolate(ParamState endState, double progress) {
-            // TODO - interpolating in HSB space would be better?
-
-            int initialRGB = color.getRGB();
-            int finalRGB = ((CState)endState).color.getRGB();
-            int interpolatedRGB = ImageMath.mixColors((float) progress, initialRGB, finalRGB);
-            return new CState(new Color(interpolatedRGB));
+            Color endColor = ((CState) endState).color;
+            return new CState(Utils.interpolateColor(color, endColor, (float) progress));
         }
     }
 
