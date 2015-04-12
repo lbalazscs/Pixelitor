@@ -71,15 +71,10 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     public RangeParam(String name, int minValue, int maxValue, int defaultValue, boolean addDefaultButtons, SliderSpinner.TextPosition position, boolean ignoreRandomize) {
         super(name);
         this.ignoreRandomize = ignoreRandomize;
-        if (minValue > maxValue) {
-            throw new IllegalArgumentException(name + ": minValue (" + minValue + ") > maxValue (" + maxValue + ')');
-        }
-        if (defaultValue < minValue) {
-            throw new IllegalArgumentException(name + ": defaultValue (" + defaultValue + ") < minValue (" + minValue + ')');
-        }
-        if (defaultValue > maxValue) {
-            throw new IllegalArgumentException(name + ": defaultValue (" + defaultValue + ") > maxValue (" + maxValue + ')');
-        }
+
+        assert minValue < maxValue : name + ": minValue (" + minValue + ") >= maxValue (" + maxValue + ')';
+        assert defaultValue >= minValue : name + ": defaultValue (" + defaultValue + ") < minValue (" + minValue + ')';
+        assert defaultValue <= maxValue : name + ": defaultValue (" + defaultValue + ") > maxValue (" + maxValue + ')';
 
         this.minValue = minValue;
         this.maxValue = maxValue;

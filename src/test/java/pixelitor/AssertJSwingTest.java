@@ -86,6 +86,8 @@ public class AssertJSwingTest {
 
     enum Randomize {YES, NO}
 
+    // TODO create independent tests with static initialization of the window
+
     @BeforeClass
     public static void cleanOutputs() {
         try {
@@ -409,7 +411,6 @@ public class AssertJSwingTest {
     }
 
     private void testBatchResize() {
-        // TODO before stating the test check that the output dir is empty
         FileChoosers.setLastOpenDir(INPUT_DIR);
         FileChoosers.setLastSaveDir(BATCH_RESIZE_OUTPUT_DIR);
         runMenuCommand("Batch Resize...");
@@ -421,7 +422,6 @@ public class AssertJSwingTest {
     }
 
     private void testBatchFilter() {
-        // TODO before stating the test check that the output dir is empty
         FileChoosers.setLastOpenDir(INPUT_DIR);
         FileChoosers.setLastSaveDir(BATCH_FILTER_OUTPUT_DIR);
 
@@ -524,7 +524,7 @@ public class AssertJSwingTest {
         testNoDialogFilter("Background Color");
         testNoDialogFilter("Transparent");
         testFilterWithDialog("Color Wheel...", Randomize.YES);
-        testFilterWithDialog("Four Color Gradient...", Randomize.NO); // TODO
+        testFilterWithDialog("Four Color Gradient...", Randomize.YES);
         testFilterWithDialog("Starburst...", Randomize.YES);
         testFilterWithDialog("Gaussian Blur...", Randomize.YES);
         testFilterWithDialog("Smart Blur...", Randomize.YES);
@@ -536,7 +536,7 @@ public class AssertJSwingTest {
         testFilterWithDialog("Unsharp Mask...", Randomize.YES);
         testFilterWithDialog("Swirl, Pinch, Bulge...", Randomize.YES);
         testFilterWithDialog("Circle to Square...", Randomize.YES);
-        testFilterWithDialog("Perspective...", Randomize.NO); // TODO
+        testFilterWithDialog("Perspective...", Randomize.YES);
         testFilterWithDialog("Lens Over Image...", Randomize.YES);
         testFilterWithDialog("Magnify...", Randomize.YES);
         testFilterWithDialog("Turbulent Distortion...", Randomize.YES);
@@ -553,7 +553,7 @@ public class AssertJSwingTest {
         testFilterWithDialog("Wrap Around Arc...", Randomize.YES);
         testFilterWithDialog("Kaleidoscope...", Randomize.YES);
         testFilterWithDialog("Video Feedback...", Randomize.YES);
-        testFilterWithDialog("Offset...", Randomize.NO); // TODO
+        testFilterWithDialog("Offset...", Randomize.NO);
         testFilterWithDialog("Slice...", Randomize.YES);
         testFilterWithDialog("Mirror...", Randomize.YES);
         testFilterWithDialog("Glow...", Randomize.YES);
@@ -609,9 +609,9 @@ public class AssertJSwingTest {
         findMenuItemByText(name).click();
         DialogFixture filterDialog = WindowFinder.findDialog("filterDialog").using(robot);
         if (randomize == Randomize.YES) {
-            filterDialog.button("Randomize Settings").click();
-            filterDialog.button("Reset All").click();
-            filterDialog.button("Randomize Settings").click();
+            findButtonByText(filterDialog, "Randomize Settings").click();
+            findButtonByText(filterDialog, "Reset All").click();
+            findButtonByText(filterDialog, "Randomize Settings").click();
         }
         filterDialog.button("ok").click();
 
@@ -833,7 +833,9 @@ public class AssertJSwingTest {
         move(300, 300);
         window.click();
         window.click();
-        // TODO Alt-click to zoom out and all the zoom methods, including mouse wheel
+        // TODO Alt-click to zoom out
+        // TODO and all the zoom methods,
+        // TODO including mouse wheel
 
         // TODO if this works, then extract into altClick
 //        window.pressKey(VK_ALT);

@@ -95,7 +95,6 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
                 gbHelper.addOnlyControlToRow(buttonsPanel, row);
             }
             buttonsPanel.add(button);
-            button.setName(action.getName());
         }
 
         if (addShowOriginal) {
