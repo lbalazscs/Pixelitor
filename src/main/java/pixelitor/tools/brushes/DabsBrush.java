@@ -32,12 +32,8 @@ public abstract class DabsBrush extends AbstractBrush {
     public abstract void putDab(double x, double y, double theta);
 
     /**
-     * TODO in new version before each stroke
-     *
-     * Called once before each line. An opportunity to setup things (color, image, angle)
-     * that will not change during the line, in order to improve performance
-     * @param x
-     * @param y
+     * Sets up the brush stamp. Depending on the type of brush, it can be
+     * called at the beginning of a stroke or before each dab.
      */
     abstract void setupBrushStamp(double x, double y);
 

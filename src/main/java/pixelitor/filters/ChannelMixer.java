@@ -63,7 +63,7 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
     };
 
     private final Action switchRedGreen
-            = new AbstractAction("switch red-green") {
+            = new AbstractAction("Swap Red-Green") {
         @Override
         public void actionPerformed(ActionEvent e) {
             redFromRed.setValueNoTrigger(0);
@@ -82,7 +82,7 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
         }
     };
 
-    private final Action switchRedBlue = new AbstractAction("switch red-blue") {
+    private final Action switchRedBlue = new AbstractAction("Swap Red-Blue") {
         @Override
         public void actionPerformed(ActionEvent e) {
             redFromRed.setValueNoTrigger(0);
@@ -101,7 +101,7 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
         }
     };
 
-    private final Action switchGreenBlue = new AbstractAction("switch green-blue") {
+    private final Action switchGreenBlue = new AbstractAction("Swap Green-Blue") {
         @Override
         public void actionPerformed(ActionEvent e) {
             redFromRed.setValueNoTrigger(100);
@@ -158,7 +158,7 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
         }
     };
 
-    private final Action averageBW = new AbstractAction("average BW") {
+    private final Action averageBW = new AbstractAction("Average BW") {
         @Override
         public void actionPerformed(ActionEvent e) {
             redFromRed.setValueNoTrigger(33);
@@ -177,7 +177,7 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
         }
     };
 
-    private final Action luminosityBW = new AbstractAction("luminosity BW") {
+    private final Action luminosityBW = new AbstractAction("Luminosity BW") {
         @Override
         public void actionPerformed(ActionEvent e) {
             redFromRed.setValueNoTrigger(22);
@@ -196,7 +196,7 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
         }
     };
 
-    private final Action sepia = new AbstractAction("sepia") {
+    private final Action sepia = new AbstractAction("Sepia") {
         @Override
         public void actionPerformed(ActionEvent e) {
             redFromRed.setValueNoTrigger(39);

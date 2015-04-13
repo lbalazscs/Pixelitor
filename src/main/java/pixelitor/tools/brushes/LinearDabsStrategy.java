@@ -28,7 +28,6 @@ public class LinearDabsStrategy implements DabsStrategy {
     private double prevY = 0;
 
     private int radius;
-//    private int diameter;
 
     public LinearDabsStrategy(DabsBrush brush, double spacingRatio, boolean angleAware, boolean refreshBrushForEachDab) {
         this.brush = brush;
@@ -40,7 +39,6 @@ public class LinearDabsStrategy implements DabsStrategy {
     @Override
     public void setRadius(int radius) {
         this.radius = radius;
-//        this.diameter = 2 * radius;
     }
 
     @Override

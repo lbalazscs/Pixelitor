@@ -80,10 +80,10 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
             public void stateChanged(ChangeEvent e) {
                 float alpha = maskOpacityParam.getValueAsPercentage();
                 // because of a swing bug, the slider can get out of range
-                if(alpha < 0.0f) {
+                if (alpha < 0.0f) {
                     alpha = 0.0f;
                     maskOpacityParam.setValue(0);
-                } else if(alpha > 1.0f) {
+                } else if (alpha > 1.0f) {
                     alpha = 1.0f;
                     maskOpacityParam.setValue(100);
                 }
@@ -102,15 +102,13 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
         allowGrowingCB = new JCheckBox("Allow Growing", false);
         toolSettingsPanel.add(allowGrowingCB);
 
-        cropButton = new JButton("Crop");
-        cropButton.setName("cropButton");
-        cropButton.addActionListener(e -> {
-            ImageComponents.toolCropActiveImage(allowGrowingCB.isSelected());
-            ImageComponents.repaintActive();
-            resetStateToInitial();
-        });
+        cropButton = toolSettingsPanel.addButton("Crop",
+                e -> {
+                    ImageComponents.toolCropActiveImage(allowGrowingCB.isSelected());
+                    ImageComponents.repaintActive();
+                    resetStateToInitial();
+                });
         cropButton.setEnabled(false);
-        toolSettingsPanel.add(cropButton);
 
         cancelButton.addActionListener(e -> state.cancelPressed(this));
         cancelButton.setEnabled(false);
@@ -125,12 +123,12 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
 
         state = state.getNextAfterMousePressed();
 
-        if(state == TRANSFORM) {
+        if (state == TRANSFORM) {
             assert transformSupport != null;
             transformSupport.mousePressed(e);
             cropButton.setEnabled(true);
             cancelButton.setEnabled(true);
-        } else if(state == USER_DRAG) {
+        } else if (state == USER_DRAG) {
             cropButton.setEnabled(true);
             cancelButton.setEnabled(true);
         }
@@ -139,7 +137,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
     @Override
     public void mouseDragged(MouseEvent e, ImageDisplay ic) {
         ic.repaint();
-        if(state == TRANSFORM) {
+        if (state == TRANSFORM) {
             transformSupport.mouseDragged(e, ic);
         }
     }
@@ -148,7 +146,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
     @Override
     public void dispatchMouseMoved(MouseEvent e, ImageDisplay ic) {
         super.dispatchMouseMoved(e, ic);
-        if(state == TRANSFORM) {
+        if (state == TRANSFORM) {
             transformSupport.mouseMoved(e, ic);
         }
     }
@@ -158,11 +156,11 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
         Composition comp = ic.getComp();
         comp.imageChanged(FULL);
 
-        switch(state) {
+        switch (state) {
             case INITIAL:
                 break;
             case USER_DRAG:
-                if(transformSupport != null) {
+                if (transformSupport != null) {
                     throw new IllegalStateException();
                 }
                 Rectangle imageSpaceRectangle = userDrag.createPositiveRectangle();
@@ -173,7 +171,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
                 state = TRANSFORM;
                 break;
             case TRANSFORM:
-                if(transformSupport == null) {
+                if (transformSupport == null) {
                     throw new IllegalStateException();
                 }
                 transformSupport.mouseReleased();
@@ -183,14 +181,14 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
 
     @Override
     public void paintOverImage(Graphics2D g2, Canvas canvas, ImageDisplay callingIC, AffineTransform unscaledTransform) {
-        if(ended) {
+        if (ended) {
             return;
         }
-        if(callingIC != ImageComponents.getActiveImageComponent()) {
+        if (callingIC != ImageComponents.getActiveImageComponent()) {
             return;
         }
         Rectangle cropRectangle = getCropRectangle(callingIC);
-        if(cropRectangle == null) {
+        if (cropRectangle == null) {
             return;
         }
 
@@ -224,7 +222,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
         g2.setColor(previousColor);
         g2.setComposite(previousComposite);
 
-        if(state == TRANSFORM) {
+        if (state == TRANSFORM) {
             // Paint the handles.
             // The zooming is temporarily reset because the transformSupport works in component space
             AffineTransform scaledTransform = g2.getTransform();
@@ -245,7 +243,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
      * @param zoomLevel
      */
     public Rectangle getCropRectangle(ImageDisplay ic) {
-        switch(state) {
+        switch (state) {
             case INITIAL:
                 lastCropRectangle = null;
                 break;
@@ -298,7 +296,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
     }
 
     public void imageComponentResized(ImageComponent ic) {
-        if(transformSupport != null && lastCropRectangle != null && state == TRANSFORM) {
+        if (transformSupport != null && lastCropRectangle != null && state == TRANSFORM) {
             transformSupport.setComponentSpaceRect(ic.fromImageToComponentSpace(lastCropRectangle));
         }
         ic.repaint();

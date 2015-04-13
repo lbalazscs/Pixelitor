@@ -25,7 +25,6 @@ import pixelitor.tools.brushes.CloneBrush;
 import pixelitor.tools.brushes.ImageBrushType;
 import pixelitor.utils.Dialogs;
 
-import javax.swing.*;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
@@ -61,17 +60,13 @@ public class CloneTool extends TmpLayerBrushTool {
 
         toolSettingsPanel.addSeparator();
 
-        JCheckBox alignedCB = new JCheckBox("Aligned", true);
-        alignedCB.setName("alignedCB");
-        toolSettingsPanel.add(alignedCB);
-        alignedCB.addActionListener(e -> cloneBrush.setAligned(alignedCB.isSelected()));
+        toolSettingsPanel.addCheckBox("Aligned", true, "alignedCB",
+                cloneBrush::setAligned);
 
         toolSettingsPanel.addSeparator();
 
-        JCheckBox sampleAllLayersCB = new JCheckBox("Sample All Layers");
-        sampleAllLayersCB.setName("sampleAllLayersCB");
-        toolSettingsPanel.add(sampleAllLayersCB);
-        sampleAllLayersCB.addActionListener(e -> sampleAllLayers = sampleAllLayersCB.isSelected());
+        toolSettingsPanel.addCheckBox("Sample All Layers", false, "sampleAllLayersCB",
+                selected -> sampleAllLayers = selected);
     }
 
     @Override

@@ -117,7 +117,6 @@ public class ImageDabsBrush extends DabsBrush {
     @Override
     public void putDab(double x, double y, double theta) {
         if(!angleAware || theta == 0) {
-            setupBrushStamp(x, y);
             targetG.drawImage(finalScaledImage, (int) x - radius, (int) y - radius, null);
         } else {
             AffineTransform oldTransform = targetG.getTransform();

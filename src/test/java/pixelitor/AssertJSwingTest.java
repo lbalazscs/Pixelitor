@@ -78,7 +78,7 @@ public class AssertJSwingTest {
     private static final File BATCH_RESIZE_OUTPUT_DIR = new File(BASE_TESTING_DIR, "batch_resize_output");
     private static final File BATCH_FILTER_OUTPUT_DIR = new File(BASE_TESTING_DIR, "batch_filter_output");
 
-    public static final int ROBOT_DELAY_MILLIS = 100;
+    public static final int ROBOT_DELAY_MILLIS = 500;
 
     private FrameFixture window;
     private final Random random = new Random();
@@ -505,7 +505,11 @@ public class AssertJSwingTest {
         testFilterWithDialog("Sepia...", Randomize.NO);
         testNoDialogFilter("Invert");
         testFilterWithDialog("Channel Invert...", Randomize.NO);
-        testFilterWithDialog("Channel Mixer...", Randomize.NO); // TODO
+        testFilterWithDialog("Channel Mixer...", Randomize.YES,
+                "Swap Red-Green", "Swap Red-Blue", "Swap Green-Blue",
+                "R -> G -> B -> R", "R -> B -> G -> R",
+                "Average BW", "Luminosity BW", "Sepia",
+                "Normalize", "Randomize and Normalize");
         testFilterWithDialog("Extract Channel...", Randomize.YES);
         testNoDialogFilter("Luminosity");
         testNoDialogFilter("Value = max(R,G,B)");
@@ -604,10 +608,14 @@ public class AssertJSwingTest {
         keyboardUndo();
     }
 
-    private void testFilterWithDialog(String name, Randomize randomize) {
-        // window.menuItem(name).click();
+    private void testFilterWithDialog(String name, Randomize randomize, String... extraButtonsToClick) {
         findMenuItemByText(name).click();
         DialogFixture filterDialog = WindowFinder.findDialog("filterDialog").using(robot);
+
+        for (String buttonText : extraButtonsToClick) {
+            findButtonByText(filterDialog, buttonText).click();
+        }
+
         if (randomize == Randomize.YES) {
             findButtonByText(filterDialog, "Randomize Settings").click();
             findButtonByText(filterDialog, "Reset All").click();
@@ -791,7 +799,10 @@ public class AssertJSwingTest {
         window.toggleButton("Selection Tool Button").click();
         move(200, 200);
         drag(400, 400);
-        window.button("brushTraceButton").click();
+
+        //window.button("brushTraceButton").click();
+        findButtonByText(window, "Stroke with Current Brush").click();
+
         keyboardDeselect();
         keyboardUndo(); // keyboardUndo deselection
         keyboardUndo(); // keyboardUndo tracing
@@ -801,9 +812,12 @@ public class AssertJSwingTest {
         window.comboBox("selectionInteractionCombo").selectItem("Add");
         move(400, 200);
         drag(500, 300);
-        window.button("eraserTraceButton").click();
+
+        //window.button("eraserTraceButton").click();
+        findButtonByText(window, "Stroke with Current Eraser").click();
+
         keyboardDeselect();
-        // TODO test crop from tool and also from menu
+        // TODO test crop from this selection tool and also from menu
         // TODO test all items from selection menu
     }
 
@@ -815,7 +829,10 @@ public class AssertJSwingTest {
         move(200, 200);
         drag(150, 150);
         sleep(1, SECONDS);
-        window.button("cropButton").click();
+
+//        window.button("cropButton").click();
+        findButtonByText(window, "Crop").click();
+
         keyboardUndoRedo();
         keyboardUndo();
     }

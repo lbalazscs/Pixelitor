@@ -56,31 +56,21 @@ public class SelectionTool extends Tool {
 
     @Override
     public void initSettingsPanel() {
-        toolSettingsPanel.add(new JLabel("Type:"));
         typeCombo = new JComboBox<>(SelectionType.values());
-        typeCombo.setName("selectionTypeCombo");
-        toolSettingsPanel.add(typeCombo);
+        toolSettingsPanel.addWithLabel("Type:", typeCombo, "selectionTypeCombo");
 
         toolSettingsPanel.addSeparator();
 
-        toolSettingsPanel.add(new JLabel("New Selection:"));
         interactionCombo = new JComboBox<>(SelectionInteraction.values());
-        interactionCombo.setName("selectionInteractionCombo");
-        toolSettingsPanel.add(interactionCombo);
+        toolSettingsPanel.addWithLabel("New Selection:", interactionCombo, "selectionInteractionCombo");
 
         toolSettingsPanel.addSeparator();
 
-        JButton brushTraceButton = new JButton(SelectionActions.getTraceWithBrush());
-        brushTraceButton.setName("brushTraceButton");
-        toolSettingsPanel.add(brushTraceButton);
+        toolSettingsPanel.addButton(SelectionActions.getTraceWithBrush());
 
-        JButton eraserTraceButton = new JButton(SelectionActions.getTraceWithEraser());
-        eraserTraceButton.setName("eraserTraceButton");
-        toolSettingsPanel.add(eraserTraceButton);
+        toolSettingsPanel.addButton(SelectionActions.getTraceWithEraser());
 
-        JButton cropButton = new JButton(SelectionActions.getCropAction());
-        cropButton.setName("cropSelectionButton");
-        toolSettingsPanel.add(cropButton);
+        toolSettingsPanel.addButton(SelectionActions.getCropAction());
     }
 
     @Override

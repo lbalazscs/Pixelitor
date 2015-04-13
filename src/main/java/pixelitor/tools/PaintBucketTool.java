@@ -59,10 +59,9 @@ public class PaintBucketTool extends Tool {
     @Override
     public void initSettingsPanel() {
         toolSettingsPanel.add(new SliderSpinner(toleranceParam, WEST, false));
-        toolSettingsPanel.add(new JLabel("Fill With:"));
 
         fillComboBox = new JComboBox<>(new FillType[]{FOREGROUND, BACKGROUND, TRANSPARENT});
-        toolSettingsPanel.add(fillComboBox);
+        toolSettingsPanel.addWithLabel("Fill With:", fillComboBox);
     }
 
     private Color getFillColor() {
@@ -72,12 +71,12 @@ public class PaintBucketTool extends Tool {
 
     @Override
     public void mousePressed(MouseEvent e, ImageDisplay ic) {
-
+        // do nothing
     }
 
     @Override
     public void mouseDragged(MouseEvent e, ImageDisplay ic) {
-
+        // do nothing
     }
 
     @Override
@@ -98,13 +97,6 @@ public class PaintBucketTool extends Tool {
         if (translationX != 0 || translationY != 0) {
             translationTransform = AffineTransform.getTranslateInstance(-translationX, -translationY);
         }
-
-//        Selection selection = comp.getSelection();
-//        if(selection != null) {
-//            Rectangle shapeBounds = selection.getShapeBounds();
-//            x -= shapeBounds.x;
-//            x -= shapeBounds.y;
-//        }
 
         BufferedImage image = layer.getImage();
         BufferedImage original = ImageUtils.copyImage(image);

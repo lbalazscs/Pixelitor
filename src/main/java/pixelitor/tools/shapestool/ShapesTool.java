@@ -99,36 +99,26 @@ public class ShapesTool extends Tool {
 
     @Override
     public void initSettingsPanel() {
-        toolSettingsPanel.add(new JLabel("Shape:"));
         JComboBox<ShapeType> shapeTypeCB = new JComboBox<>(typeModel);
-        shapeTypeCB.setName("shapeTypeCB");
-        toolSettingsPanel.add(shapeTypeCB);
-
+        toolSettingsPanel.addWithLabel("Shape:", shapeTypeCB, "shapeTypeCB");
         // make sure all values are visible without a scrollbar
         shapeTypeCB.setMaximumRowCount(ShapeType.values().length);
 
-        toolSettingsPanel.add(new JLabel("Action:"));
         JComboBox<ShapesAction> actionCB = new JComboBox<>(actionModel);
-        actionCB.setName("actionCB");
-        toolSettingsPanel.add(actionCB);
+        toolSettingsPanel.addWithLabel("Action:", actionCB, "actionCB");
+        actionCB.addActionListener(e -> updateWhichSettingsAreEnabled());
 
-        actionCB.addActionListener(e -> enableSettings());
+        toolSettingsPanel.addWithLabel("Fill:", fillCombo);
 
-        toolSettingsPanel.add(new JLabel("Fill:"));
-        toolSettingsPanel.add(fillCombo);
+        toolSettingsPanel.addWithLabel("Stroke:", strokeFillCombo);
 
-        toolSettingsPanel.add(new JLabel("Stroke:"));
-        toolSettingsPanel.add(strokeFillCombo);
+        strokeSettingsButton = toolSettingsPanel.addButton("Stroke Settings...",
+                e -> initAndShowStrokeSettingsDialog());
 
-        strokeSettingsButton = new JButton("Stroke Settings...");
-        toolSettingsPanel.add(strokeSettingsButton);
-        strokeSettingsButton.addActionListener(e -> initAndShowStrokeSettingsDialog());
+        effectsButton = toolSettingsPanel.addButton("Effects...",
+                e -> showEffectsDialog());
 
-        effectsButton = new JButton("Effects...");
-        toolSettingsPanel.add(effectsButton);
-        effectsButton.addActionListener(e -> showEffectsDialog());
-
-        enableSettings();
+        updateWhichSettingsAreEnabled();
     }
 
     private void showEffectsDialog() {
@@ -238,7 +228,7 @@ public class ShapesTool extends Tool {
         comp.imageChanged(FULL);
     }
 
-    private void enableSettings() {
+    private void updateWhichSettingsAreEnabled() {
         ShapesAction action = actionModel.getSelectedItem();
         enableEffectSettings(action.drawEffects());
         enableStrokeSettings(action.enableStrokeSettings());
