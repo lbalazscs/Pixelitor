@@ -26,43 +26,60 @@ import pixelitor.layers.ImageLayer;
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.ActionListener;
 
 public class RandomFilterAdjustPanel extends AdjustPanel {
     private final JPanel realSettingsPanel;
     private JPanel lastFilterPanel;
-    private Filter lastFilter;
+    private RandomFilterSource filterSource;
+    private final JPanel northPanel;
+    private final JButton backButton;
+    private final JButton forwardButton;
 
     protected RandomFilterAdjustPanel() {
         super(null); // the actual filter will be determined bellow
+        filterSource = new RandomFilterSource();
+
         setLayout(new BorderLayout());
-        JButton nextRandomButton = new JButton("Next Random Filter");
-        nextRandomButton.addActionListener(e -> nextRandomFilter());
-        JPanel northPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        northPanel.add(nextRandomButton);
+        northPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+        backButton = createButton("Back", e -> showFilter(filterSource.getPrevious()));
+        forwardButton = createButton("Forward", e -> showFilter(filterSource.getNext()));
+        createButton("Next Random Filter", e -> showFilter(filterSource.getRandom()));
+
         add(northPanel, BorderLayout.NORTH);
         realSettingsPanel = new JPanel();
         add(realSettingsPanel, BorderLayout.CENTER);
 
-        nextRandomFilter();
+        showFilter(filterSource.getRandom());
+        updateEnabled();
     }
 
-    private void nextRandomFilter() {
-        //noinspection InstanceVariableUsedBeforeInitialized
+    private JButton createButton(String text, ActionListener listener) {
+        JButton button = new JButton(text);
+        button.addActionListener(e -> {
+            listener.actionPerformed(e);
+            updateEnabled();
+        });
+        northPanel.add(button);
+        return button;
+    }
+
+    private void updateEnabled() {
+        backButton.setEnabled(filterSource.hasPrevious());
+        forwardButton.setEnabled(filterSource.hasNext());
+    }
+
+    private void showFilter(Filter newFilter) {
         if (lastFilterPanel != null) {
             realSettingsPanel.remove(lastFilterPanel);
         }
-        Filter newFilter = FilterUtils.getRandomFilter(filter ->
-                (filter != op
-                        && (!(filter instanceof Fade))
-                        && (!(filter instanceof RandomFilter))
-                        && (!(filter instanceof RepeatLast))));
 
         op = newFilter;
         String filterName = newFilter.getListName();
         realSettingsPanel.setBorder(BorderFactory.createTitledBorder(filterName));
         if (newFilter instanceof FilterWithGUI) {
-            //noinspection InstanceVariableUsedBeforeInitialized
-            if (lastFilter != null) { // there was a filter before
+            if (filterSource.getLastFilter() != null) { // there was a filter before
                 // need to clear the preview of the previous filters
                 // so that the image position selectors show the original image
                 ImageLayer imageLayer = ImageComponents.getActiveImageLayer().get();
@@ -77,6 +94,5 @@ public class RandomFilterAdjustPanel extends AdjustPanel {
             lastFilterPanel = null;
             op.execute(ChangeReason.OP_PREVIEW);
         }
-        lastFilter = newFilter;
     }
 }
