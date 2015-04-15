@@ -69,6 +69,7 @@ import static java.awt.event.KeyEvent.VK_Z;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @Ignore
@@ -591,10 +592,47 @@ public class AssertJSwingTest {
         testFilterWithDialog("Drop Shadow...", Randomize.YES);
         testFilterWithDialog("2D Transitions...", Randomize.YES);
 
-        // TODO    Custom 3x3 Convolution...
-        // TODO    Custom 5x5 Convolution...
-        // TODO    Random Filter...
+        testFilterWithDialog("Custom 3x3 Convolution...", Randomize.NO,
+                "\"Corner\" Blur", "\"Gaussian\" Blur", "Mean Filter", "Sharpen",
+                "Edge Detection", "Edge Detection 2", "Horizontal Edge Detection",
+                "Vertical Edge Detection", "Emboss", "Emboss 2", "Color Emboss",
+                "Do Nothing", "Randomize");
+        testFilterWithDialog("Custom 5x5 Convolution...", Randomize.NO,
+                "Diamond Blur", "Motion Blur", "Find Horizontal Edges", "Find Vertical Edges",
+                "Find Diagonal Edges", "Find Diagonal Edges 2", "Sharpen",
+                "Do Nothing", "Randomize");
+
+        testRandomFilter();
+
         // TODO    Text...
+    }
+
+    private void testRandomFilter() {
+        findMenuItemByText("Random Filter...").click();
+        DialogFixture dialog = WindowFinder.findDialog("filterDialog").using(robot);
+        JButtonFixture nextRandomButton = findButtonByText(dialog, "Next Random Filter");
+        JButtonFixture backButton = findButtonByText(dialog, "Back");
+        JButtonFixture forwardButton = findButtonByText(dialog, "Forward");
+
+        assertTrue(nextRandomButton.isEnabled());
+        assertFalse(backButton.isEnabled());
+        assertFalse(forwardButton.isEnabled());
+
+        nextRandomButton.click();
+        assertTrue(backButton.isEnabled());
+        assertFalse(forwardButton.isEnabled());
+
+        nextRandomButton.click();
+        backButton.click();
+        assertTrue(forwardButton.isEnabled());
+
+        backButton.click();
+        forwardButton.click();
+        nextRandomButton.click();
+
+        findButtonByText(dialog, "OK").click();
+        keyboardUndoRedo();
+        keyboardUndo();
     }
 
     private void runMenuCommand(String text) {
@@ -610,18 +648,18 @@ public class AssertJSwingTest {
 
     private void testFilterWithDialog(String name, Randomize randomize, String... extraButtonsToClick) {
         findMenuItemByText(name).click();
-        DialogFixture filterDialog = WindowFinder.findDialog("filterDialog").using(robot);
+        DialogFixture dialog = WindowFinder.findDialog("filterDialog").using(robot);
 
         for (String buttonText : extraButtonsToClick) {
-            findButtonByText(filterDialog, buttonText).click();
+            findButtonByText(dialog, buttonText).click();
         }
 
         if (randomize == Randomize.YES) {
-            findButtonByText(filterDialog, "Randomize Settings").click();
-            findButtonByText(filterDialog, "Reset All").click();
-            findButtonByText(filterDialog, "Randomize Settings").click();
+            findButtonByText(dialog, "Randomize Settings").click();
+            findButtonByText(dialog, "Reset All").click();
+            findButtonByText(dialog, "Randomize Settings").click();
         }
-        filterDialog.button("ok").click();
+        dialog.button("ok").click();
 
         keyboardUndoRedo();
         keyboardUndo();
