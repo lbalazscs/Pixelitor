@@ -161,7 +161,10 @@ public class SliderSpinner extends JPanel implements ChangeListener {
         // TODO throws NullPointerException
 
         slider.createStandardLabels(10);
+
+        @SuppressWarnings("unchecked")
         Dictionary<Integer, JLabel> labelsDict = slider.getLabelTable();
+
         Enumeration<Integer> keys = labelsDict.keys();
         while (keys.hasMoreElements()) {
             Integer i = keys.nextElement();
