@@ -93,8 +93,9 @@ public class AssertJSwingTest {
     public static void cleanOutputs() {
         try {
             String cleanerScript = BASE_TESTING_DIR + "\\0000_clean_outputs.bat";
-            Runtime.getRuntime().exec(cleanerScript);
-        } catch (IOException e) {
+            Process process = Runtime.getRuntime().exec(cleanerScript);
+            process.waitFor();
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
         checkTestingDirs();
@@ -132,6 +133,9 @@ public class AssertJSwingTest {
     }
 
     private void testTools() {
+        // make sure we have a big internal frame for the tool tests
+        runMenuCommand("Actual Pixels");
+
         testZoomTool();
         testSelectionTool();
         testCloneTool();
@@ -359,9 +363,9 @@ public class AssertJSwingTest {
         DialogFixture dialog = findDialogByTitle("Export Tweening Animation");
         dialog.comboBox().selectItem("Angular Waves");
         dialog.button("ok").click(); // next
-        dialog.button("Randomize Settings").click();
+        findButtonByText(dialog, "Randomize Settings").click();
         dialog.button("ok").click(); // next
-        dialog.button("Randomize Settings").click();
+        findButtonByText(dialog, "Randomize Settings").click();
         dialog.button("ok").click(); // next
         dialog.button("ok").click(); // render
 
@@ -432,7 +436,7 @@ public class AssertJSwingTest {
         dialog.comboBox("filtersCB").selectItem("Angular Waves");
         dialog.button("ok").click(); // next
         sleep(3, SECONDS);
-        dialog.button("Randomize Settings").click();
+        findButtonByText(dialog, "Randomize Settings").click();
         dialog.button("ok").click(); // start processing
 
         waitForProgressMonitorEnd();
@@ -734,7 +738,6 @@ public class AssertJSwingTest {
         dialog.button("ok").click();
     }
 
-
     private void testColorPickerTool() {
         window.toggleButton("Color Picker Tool Button").click();
         move(300, 300);
@@ -819,10 +822,7 @@ public class AssertJSwingTest {
 
         move(300, 300);
 
-        robot.pressKey(VK_ALT);
-        robot.pressMouse(MouseButton.LEFT_BUTTON);
-        robot.releaseMouse(MouseButton.LEFT_BUTTON);
-        robot.releaseKey(VK_ALT);
+        altClick();
 
         move(startX, 300);
         for (int i = 1; i <= 5; i++) {
@@ -888,11 +888,12 @@ public class AssertJSwingTest {
         move(300, 300);
         window.click();
         window.click();
-        // TODO Alt-click to zoom out
+        altClick();
+        altClick();
+
         // TODO and all the zoom methods,
         // TODO including mouse wheel
 
-        // TODO if this works, then extract into altClick
 //        window.pressKey(VK_ALT);
 //        window.click();
 //        window.releaseKey(VK_ALT);
@@ -977,6 +978,9 @@ public class AssertJSwingTest {
         JButtonFixture button = container.button(new GenericTypeMatcher<JButton>(JButton.class) {
             @Override
             protected boolean isMatching(JButton button) {
+                if (!button.isShowing()) {
+                    return false; // not interested in buttons that are not currently displayed
+                }
                 String buttonText = button.getText();
                 if (buttonText == null) {
                     buttonText = "";
@@ -1044,5 +1048,12 @@ public class AssertJSwingTest {
 
         assertThat(Files.fileNamesIn(BATCH_RESIZE_OUTPUT_DIR.getPath(), false)).isEmpty();
         assertThat(Files.fileNamesIn(BATCH_FILTER_OUTPUT_DIR.getPath(), false)).isEmpty();
+    }
+
+    private void altClick() {
+        robot.pressKey(VK_ALT);
+        robot.pressMouse(MouseButton.LEFT_BUTTON);
+        robot.releaseMouse(MouseButton.LEFT_BUTTON);
+        robot.releaseKey(VK_ALT);
     }
 }
