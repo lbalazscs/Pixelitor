@@ -20,9 +20,6 @@ package pixelitor.filters.gui;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import java.awt.FlowLayout;
 import java.awt.Rectangle;
 
 /**
@@ -30,56 +27,26 @@ import java.awt.Rectangle;
  */
 public class TextParam extends AbstractFilterParam {
     private final String defaultValue;
-    private final JTextField tf;
-    private boolean finalAnimationSettingMode;
+
     private boolean trigger = true; // whether the running of the filter should be triggered
+    private TextParamGUI gui;
 
     public TextParam(String name, String defaultValue) {
         super(name);
         this.defaultValue = defaultValue;
+        gui = new TextParamGUI(this, defaultValue, adjustmentListener);
+    }
 
-        tf = new JTextField(defaultValue);
+    @Override
+    public JComponent createGUI() {
+        paramGUI = gui;
+        paramGUI.setEnabled(shouldBeEnabled());
+        return gui;
     }
 
     @Override
     public boolean isSetToDefault() {
         return defaultValue.equals(getValue());
-    }
-
-    @Override
-    public JComponent createGUI() {
-        JPanel p = new JPanel();
-        p.setLayout(new FlowLayout(FlowLayout.LEFT));
-        p.add(new JLabel(getName() + ": "));
-        if (adjustmentListener != null) {
-            tf.getDocument().addDocumentListener(new DocumentListener() {
-                @Override
-                public void insertUpdate(DocumentEvent e) {
-                    if (trigger) {
-                        adjustmentListener.paramAdjusted();
-                    }
-                }
-
-                @Override
-                public void removeUpdate(DocumentEvent e) {
-                    if (trigger) {
-                        adjustmentListener.paramAdjusted();
-                    }
-                }
-
-                @Override
-                public void changedUpdate(DocumentEvent e) {
-                    if (trigger) {
-                        adjustmentListener.paramAdjusted();
-                    }
-                }
-            });
-        }
-        p.add(tf);
-        if(finalAnimationSettingMode) {
-            tf.setEnabled(false);
-        }
-        return p;
     }
 
     @Override
@@ -105,26 +72,21 @@ public class TextParam extends AbstractFilterParam {
 
     @Override
     public void randomize() {
-        if(finalAnimationSettingMode) {
-            assert !canBeAnimated();
-            return;
-        }
-
         trigger = false;
         setValue(Utils.getRandomString(15));
         trigger = true;
     }
 
     public String getValue() {
-        return tf.getText();
+        return gui.getText();
     }
 
     public void setValue(String s) {
-        String old = tf.getText();
+        String old = gui.getText();
         if (!old.equals(s)) {
             boolean triggerWasTrue = trigger;
             trigger = false;
-            tf.setText(s);
+            gui.setText(s);
             trigger = true;
             if (triggerWasTrue) { // handle the case when this is called from randomize
                 adjustmentListener.paramAdjusted();
@@ -152,19 +114,12 @@ public class TextParam extends AbstractFilterParam {
     }
 
     @Override
-    public void setEnabledLogically(boolean b) {
-        // TODO
-    }
-
-    @Override
-    public void setFinalAnimationSettingMode(boolean b) {
-        finalAnimationSettingMode = b;
-    }
-
-    @Override
     public String toString() {
         return String.format("%s[name = '%s', text = '%s']",
-                getClass().getSimpleName(), getName(), tf == null ? "null" : tf.getText());
+                getClass().getSimpleName(), getName(), gui == null ? "null" : gui.getText());
     }
 
+    public boolean isTrigger() {
+        return trigger;
+    }
 }

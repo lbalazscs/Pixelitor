@@ -22,6 +22,7 @@ import com.jhlabs.image.TransformFilter;
 import com.jhlabs.image.WaveType;
 
 import javax.swing.*;
+import javax.swing.event.EventListenerList;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import java.awt.Rectangle;
@@ -30,37 +31,32 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import static pixelitor.filters.gui.FilterGUIComponent.EnabledReason.FILTER_LOGIC;
+
 /**
  * A filter parameter for selecting a choice from a list of values
  */
-public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> implements ComboBoxModel<IntChoiceParam.Value>, FilterParam {
-    private final String name;
+public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel<IntChoiceParam.Value>, FilterParam {
     private final List<Value> choicesList = new ArrayList<>();
 
     private Value defaultChoice;
     private Value currentChoice;
 
-    private ParamAdjustmentListener adjustmentListener;
+    private final EventListenerList listenerList = new EventListenerList();
     private final boolean ignoreRandomize;
-    private boolean finalAnimationSettingMode;
 
     public IntChoiceParam(String name, Value[] choices) {
         this(name, choices, false);
     }
 
     public IntChoiceParam(String name, Value[] choices, boolean ignoreRandomize) {
+        super(name);
         this.ignoreRandomize = ignoreRandomize;
-        this.name = name;
 
         choicesList.addAll(Arrays.asList(choices));
 
         this.defaultChoice = choices[0];
         currentChoice = defaultChoice;
-    }
-
-    @Override
-    public String getName() {
-        return name;
     }
 
     @Override
@@ -71,9 +67,8 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
     @Override
     public JComponent createGUI() {
         IntChoiceSelector choiceSelector = new IntChoiceSelector(this);
-        if(finalAnimationSettingMode) {
-            choiceSelector.setEnabled(false);
-        }
+        paramGUI = choiceSelector;
+        paramGUI.setEnabled(shouldBeEnabled());
         return choiceSelector;
     }
 
@@ -94,10 +89,6 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
 
     @Override
     public void randomize() {
-        if(finalAnimationSettingMode) {
-            assert !canBeAnimated();
-            return;
-        }
         if (!ignoreRandomize) {
             Random rnd = new Random();
             int randomIndex = rnd.nextInt(choicesList.size());
@@ -147,6 +138,15 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
     @Override
     public Value getElementAt(int index) {
         return choicesList.get(index);
+    }
+
+    @Override
+    public void addListDataListener(ListDataListener l) {
+        listenerList.add(ListDataListener.class, l);
+    }
+
+    public void removeListDataListener(ListDataListener l) {
+        listenerList.remove(ListDataListener.class, l);
     }
 
     /**
@@ -254,7 +254,7 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
     }
 
     public static IntChoiceParam getGridTypeChoices(String name, RangeParam randomnessParam) {
-        randomnessParam.setEnabledLogically(false);
+        randomnessParam.setEnabled(false, FILTER_LOGIC);
         IntChoiceParam param = new IntChoiceParam(name, gridTypeChoices);
         param.addListDataListener(new ListDataListener() {
             @Override
@@ -270,13 +270,12 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
             @Override
             public void contentsChanged(ListDataEvent e) {
                 int selectedValue = param.getValue();
-                randomnessParam.setEnabledLogically(selectedValue != CellularFilter.GR_RANDOM);
+                randomnessParam.setEnabled(selectedValue != CellularFilter.GR_RANDOM, FILTER_LOGIC);
             }
         });
         return param;
     }
 
-    @Override
     protected void fireContentsChanged(Object source, int index0, int index1) {
         Object[] listeners = listenerList.getListenerList();
         ListDataEvent e = null;
@@ -311,18 +310,8 @@ public class IntChoiceParam extends AbstractListModel<IntChoiceParam.Value> impl
     }
 
     @Override
-    public void setEnabledLogically(boolean b) {
-        // TODO
-    }
-
-    @Override
-    public void setFinalAnimationSettingMode(boolean b) {
-        finalAnimationSettingMode = b;
-    }
-
-    @Override
     public String toString() {
         return String.format("%s[name = '%s', selected = '%s']",
-                getClass().getSimpleName(), name, currentChoice.toString());
+                getClass().getSimpleName(), getName(), currentChoice.toString());
     }
 }

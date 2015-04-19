@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.gui;
 
 import pixelitor.utils.SliderSpinner;
@@ -22,7 +23,7 @@ import javax.swing.*;
 import java.awt.Color;
 
 /**
- *
+ * A range where the endpoints correspond to colors.
  */
 public class RangeWithColorsParam extends RangeParam {
     private final Color leftColor;
@@ -37,6 +38,8 @@ public class RangeWithColorsParam extends RangeParam {
     @Override
     public JComponent createGUI() {
         SliderSpinner sliderSpinner = new SliderSpinner(this, leftColor, rightColor);
+        paramGUI = sliderSpinner;
+        paramGUI.setEnabled(shouldBeEnabled());
         return sliderSpinner;
     }
 }

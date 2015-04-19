@@ -54,7 +54,6 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     private ChangeEvent changeEvent = null;
     private final EventListenerList listenerList = new EventListenerList();
-    private boolean enabled = true;
     private SliderSpinner sliderSpinner;
     private final boolean ignoreRandomize;
     private boolean adjustMaxAccordingToImage = false;
@@ -82,6 +81,14 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         this.value = defaultValue;
         this.addDefaultButtons = addDefaultButtons;
         this.textPosition = position;
+    }
+
+    @Override
+    public JComponent createGUI() {
+        sliderSpinner = new SliderSpinner(this, textPosition, addDefaultButtons);
+        paramGUI = sliderSpinner;
+        paramGUI.setEnabled(shouldBeEnabled());
+        return sliderSpinner;
     }
 
     @Override
@@ -133,13 +140,6 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
             setValueNoTrigger(newValue);
         }
-    }
-
-    @Override
-    public JComponent createGUI() {
-        sliderSpinner = new SliderSpinner(this, textPosition, addDefaultButtons);
-        sliderSpinner.setEnabled(enabled);
-        return sliderSpinner;
     }
 
     public void increaseValue() {
@@ -278,14 +278,6 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     @Override
-    public void setEnabledLogically(boolean b) {
-        enabled = b;
-        if (sliderSpinner != null) {
-            sliderSpinner.setEnabled(b);
-        }
-    }
-
-    @Override
     public void considerImageSize(Rectangle bounds) {
         if(adjustMaxAccordingToImage) {
             double defaultToMaxRatio = ((double) defaultValue) / ((double) maxValue);
@@ -344,11 +336,6 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         public double getValue() {
             return value;
         }
-    }
-
-    @Override
-    public void setFinalAnimationSettingMode(boolean b) {
-        // ignored because this filter parameter can be animated
     }
 
     @Override

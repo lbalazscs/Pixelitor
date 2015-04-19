@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.gui;
 
 import pixelitor.utils.DefaultButton;
@@ -27,7 +28,7 @@ import java.awt.event.ActionListener;
 /**
  * Displays a JComboBox as the GUI for an IntChoiceParam
  */
-public class IntChoiceSelector extends JPanel implements ActionListener {
+public class IntChoiceSelector extends JPanel implements ActionListener, ParamGUI {
     private final IntChoiceParam model;
     private final JComboBox<IntChoiceParam.Value> comboBox;
     private final DefaultButton defaultButton;
@@ -48,6 +49,11 @@ public class IntChoiceSelector extends JPanel implements ActionListener {
         int buttonSize = comboBox.getPreferredSize().height;
         defaultButton.setPreferredSize(new Dimension(buttonSize, buttonSize));
         add(defaultButton);
+    }
+
+    @Override
+    public void updateGUI() {
+        // can be empty
     }
 
     @Override

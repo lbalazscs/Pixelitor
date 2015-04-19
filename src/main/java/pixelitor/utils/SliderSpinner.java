@@ -17,6 +17,7 @@
 
 package pixelitor.utils;
 
+import pixelitor.filters.gui.ParamGUI;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.Resettable;
 
@@ -37,7 +38,7 @@ import static java.awt.Color.GRAY;
  * A GUI Component consisting of a JSlider, a JSpinner and optionally a default button.
  * The slider and the spinner are synchronized
  */
-public class SliderSpinner extends JPanel implements ChangeListener {
+public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     private final JLabel label;
     private Resettable resettableParam; // if set to non-null, its reset is called instead of the reset this object
 
@@ -245,5 +246,10 @@ public class SliderSpinner extends JPanel implements ChangeListener {
 
     public void setResettable(Resettable param) {
         resettableParam = param;
+    }
+
+    @Override
+    public void updateGUI() {
+        // nothing to do
     }
 }

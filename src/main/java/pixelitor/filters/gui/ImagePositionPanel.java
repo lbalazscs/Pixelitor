@@ -17,6 +17,8 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.utils.SliderSpinner;
+
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -32,6 +34,8 @@ public class ImagePositionPanel extends JPanel implements ParamGUI {
     private final RangeParam ySliderModel;
     private final ImagePositionSelector imagePositionSelector;
     private boolean slidersMovedByUser = true;
+    private final JComponent xSlider;
+    private final JComponent ySlider;
 
     public ImagePositionPanel(ImagePositionParam model, int defaultX, int defaultY) {
         this.model = model;
@@ -48,9 +52,9 @@ public class ImagePositionPanel extends JPanel implements ParamGUI {
 
         // add the two sliders
         Box verticalBox = Box.createVerticalBox();
-        JComponent xSlider = xSliderModel.createGUI();
+        xSlider = new SliderSpinner(xSliderModel, NORTH, true);
         verticalBox.add(xSlider);
-        JComponent ySlider = ySliderModel.createGUI();
+        ySlider = new SliderSpinner(ySliderModel, NORTH, true);
         verticalBox.add(ySlider);
         add(verticalBox, BorderLayout.CENTER);
 
@@ -101,5 +105,13 @@ public class ImagePositionPanel extends JPanel implements ParamGUI {
     public void updateGUI() {
         updateSlidersFromModel();
         imagePositionSelector.repaint();
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        imagePositionSelector.setEnabled(enabled);
+        xSlider.setEnabled(enabled);
+        ySlider.setEnabled(enabled);
+        super.setEnabled(enabled);
     }
 }

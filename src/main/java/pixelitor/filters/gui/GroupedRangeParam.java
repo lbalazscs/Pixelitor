@@ -72,6 +72,14 @@ public class GroupedRangeParam extends AbstractFilterParam implements RangeBased
         linkParams();
     }
 
+    @Override
+    public JComponent createGUI() {
+        GroupedRangeSelector selector = new GroupedRangeSelector(this);
+        paramGUI = selector;
+        paramGUI.setEnabled(shouldBeEnabled());
+        return selector;
+    }
+
     private void linkParams() {
         for (RangeParam param : rangeParams) {
             param.addChangeListener(e -> {
@@ -97,11 +105,6 @@ public class GroupedRangeParam extends AbstractFilterParam implements RangeBased
         for (RangeParam param : rangeParams) {
             param.setAdjustmentListener(listener);
         }
-    }
-
-    @Override
-    public JComponent createGUI() {
-        return new GroupedRangeSelector(this);
     }
 
     public int getValue(int index) {
@@ -253,15 +256,5 @@ public class GroupedRangeParam extends AbstractFilterParam implements RangeBased
 
             return new GRState(interpolatedValues);
         }
-    }
-
-    @Override
-    public void setEnabledLogically(boolean b) {
-        // TODO
-    }
-
-    @Override
-    public void setFinalAnimationSettingMode(boolean b) {
-        // ignored because this filter parameter can be animated
     }
 }

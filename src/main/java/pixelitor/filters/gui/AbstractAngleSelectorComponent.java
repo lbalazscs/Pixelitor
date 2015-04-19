@@ -39,6 +39,7 @@ public abstract class AbstractAngleSelectorComponent extends JComponent implemen
     static final int SIZE = 50;
     private static final Stroke ARROW_STROKE = new BasicStroke(1.7f);
     private static final Color ARROW_COLOR = new Color(45, 66, 85);
+    private boolean enabled = true;
 
     int cx;
     int cy;
@@ -56,6 +57,9 @@ public abstract class AbstractAngleSelectorComponent extends JComponent implemen
     }
 
     private void updateAngle(int x, int y, boolean trigger) {
+        if (!enabled) {
+            return;
+        }
         double angle = Math.atan2(y - cy, x - cx);
         repaint();
         model.setValueInRadians(angle, trigger);
@@ -112,5 +116,11 @@ public abstract class AbstractAngleSelectorComponent extends JComponent implemen
 
         g2.draw(new Line2D.Float(endX, endY, arrowEnd1X, arrowEnd1Y));
         g2.draw(new Line2D.Float(endX, endY, arrowEnd2X, arrowEnd2Y));
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+        super.setEnabled(enabled);
     }
 }

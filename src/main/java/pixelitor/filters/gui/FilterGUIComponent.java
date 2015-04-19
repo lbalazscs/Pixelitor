@@ -31,5 +31,14 @@ public interface FilterGUIComponent {
 
     void setAdjustmentListener(ParamAdjustmentListener listener);
 
-    void setFinalAnimationSettingMode(boolean b); // implemented for the non-animatable params
+    /**
+     * This object can be disabled for two independent reasons:
+     * (1) because of the filter logic and (2) because non-animatable
+     * parameters should be disabled in the final animation dialogs.
+     */
+    void setEnabled(boolean b, EnabledReason reason);
+
+    enum EnabledReason {
+        FILTER_LOGIC, FINAL_ANIMATION_SETTING
+    }
 }

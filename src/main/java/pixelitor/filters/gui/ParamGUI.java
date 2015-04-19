@@ -25,4 +25,6 @@ public interface ParamGUI {
      * The model state has been changed and the GUI has to be updated accordingly
      */
     void updateGUI();
+
+    void setEnabled(boolean b);
 }

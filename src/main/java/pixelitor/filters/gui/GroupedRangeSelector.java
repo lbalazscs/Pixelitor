@@ -28,7 +28,7 @@ import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
 /**
  * GUI for a GroupedRangeParam
  */
-public class GroupedRangeSelector extends JPanel {
+public class GroupedRangeSelector extends JPanel implements ParamGUI {
     private final int numParams;
     private final GroupedRangeParam model;
     private final GridBagHelper gridBagHelper;
@@ -63,5 +63,10 @@ public class GroupedRangeSelector extends JPanel {
         linkedCB.setModel(model.getCheckBoxModel());
         gridBagHelper.addLabelWithControl("Linked:", linkedCB, numParams);
         linkedCB.addActionListener(e -> model.setLinked(linkedCB.isSelected()));
+    }
+
+    @Override
+    public void updateGUI() {
+        // can be empty
     }
 }

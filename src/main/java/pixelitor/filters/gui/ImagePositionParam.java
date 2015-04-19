@@ -32,8 +32,6 @@ public class ImagePositionParam extends AbstractFilterParam {
     private float defaultRelativeX = 0.5f;
     private float defaultRelativeY = 0.5f;
 
-    private ParamGUI paramGUI;
-
     public ImagePositionParam(String name) {
         super(name);
     }
@@ -47,19 +45,20 @@ public class ImagePositionParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean isSetToDefault() {
-        return relativeX == defaultRelativeX && relativeY == defaultRelativeY;
-    }
-
-    @Override
     public JComponent createGUI() {
         int defaultX = (int) (100 * defaultRelativeX);
         int defaultY = (int) (100 * defaultRelativeX);
 
         ImagePositionPanel selector = new ImagePositionPanel(this, defaultX, defaultY);
         paramGUI = selector;
+        paramGUI.setEnabled(shouldBeEnabled());
         paramGUI.updateGUI();
         return selector;
+    }
+
+    @Override
+    public boolean isSetToDefault() {
+        return relativeX == defaultRelativeX && relativeY == defaultRelativeY;
     }
 
     @Override
@@ -144,16 +143,6 @@ public class ImagePositionParam extends AbstractFilterParam {
             double interpolatedY = ImageMath.lerp(progress, relativeY, ippEndState.relativeY);
             return new IPPState(interpolatedX, interpolatedY);
         }
-    }
-
-    @Override
-    public void setEnabledLogically(boolean b) {
-        // TODO
-    }
-
-    @Override
-    public void setFinalAnimationSettingMode(boolean b) {
-        // ignored because this filter parameter can be animated
     }
 
     @Override

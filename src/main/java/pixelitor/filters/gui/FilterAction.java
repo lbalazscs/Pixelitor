@@ -27,7 +27,7 @@ public class FilterAction implements FilterGUIComponent {
     private final ActionListener actionListener;
     private final Icon icon;
     private final String toolTipText;
-    private boolean finalAnimationSettingMode;
+    private boolean finalAnimationSettingMode = false;
 
     private String name;
     protected ParamAdjustmentListener adjustmentListener;
@@ -81,15 +81,11 @@ public class FilterAction implements FilterGUIComponent {
         }
     }
 
-    @Override
-    public void setFinalAnimationSettingMode(boolean b) {
-        finalAnimationSettingMode = b;
-    }
-
     public void setIgnoreFinalAnimationSettingMode(boolean ignoreFinalAnimationSettingMode) {
         this.ignoreFinalAnimationSettingMode = ignoreFinalAnimationSettingMode;
     }
 
+    @Override
     public void setAdjustmentListener(ParamAdjustmentListener listener) {
         this.adjustmentListener = listener;
     }
@@ -97,6 +93,18 @@ public class FilterAction implements FilterGUIComponent {
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public void setEnabled(boolean b, EnabledReason reason) {
+        switch (reason) {
+            case FILTER_LOGIC:
+                // not implemented yet - it was not needed
+                break;
+            case FINAL_ANIMATION_SETTING:
+                finalAnimationSettingMode = b;
+                break;
+        }
     }
 
     @Override

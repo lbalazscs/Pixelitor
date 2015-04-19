@@ -32,9 +32,12 @@ import static java.awt.Color.CYAN;
 import static java.awt.Color.RED;
 import static java.awt.Color.WHITE;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
+import static pixelitor.filters.gui.FilterGUIComponent.EnabledReason.FILTER_LOGIC;
+import static pixelitor.filters.gui.FilterGUIComponent.EnabledReason.FINAL_ANIMATION_SETTING;
 
 @RunWith(Parameterized.class)
 public class FilterParamTest {
@@ -109,11 +112,7 @@ public class FilterParamTest {
         param.reset(true);
         assertTrue(param.isSetToDefault());
 
-        if (adjustmentListener.getNumCalled() != 1) {
-            System.out.println("GUIParamTest::testRandomizeAndReset: param = " + (param == null ? "null" : (param.toString() + ", class = " + param.getClass().getName())));
-        }
-
-        assertEquals(1, adjustmentListener.getNumCalled());
+        assertEquals("incorrect number of calls for " + param.getClass().getName(), 1, adjustmentListener.getNumCalled());
     }
 
     @Test
@@ -132,20 +131,33 @@ public class FilterParamTest {
     public void testSimpleMethods() {
         assertEquals("Param Name", param.getName());
 
+
+        JComponent gui = param.createGUI();
         param.considerImageSize(new Rectangle(0, 0, 1000, 600));
 
         boolean b = param.canBeAnimated();
 
-        param.setEnabledLogically(true);
-        param.setEnabledLogically(false);
+        assertTrue(param.getClass().getName() + " is not enabled by default", gui.isEnabled());
 
-        param.setFinalAnimationSettingMode(true);
-        param.setFinalAnimationSettingMode(false);
+        param.setEnabled(false, FILTER_LOGIC);
+        assertFalse(param.getClass().getName() + " was enabled", gui.isEnabled());
+        param.setEnabled(true, FILTER_LOGIC);
+        assertTrue(gui.isEnabled());
+
+        param.setEnabled(false, FINAL_ANIMATION_SETTING);
+        if (param.canBeAnimated()) {
+            assertTrue(gui.isEnabled());
+        } else {
+            assertFalse(param.getClass().getName() + " was enabled", gui.isEnabled());
+        }
+
+        param.setEnabled(true, FINAL_ANIMATION_SETTING);
+        assertTrue(gui.isEnabled());
 
         checkThatFilterWasNotCalled();
     }
 
     private void checkThatFilterWasNotCalled() {
-        assertEquals(0, adjustmentListener.getNumCalled());
+        assertEquals("Filter was called for " + param.getClass().getName(), 0, adjustmentListener.getNumCalled());
     }
 }

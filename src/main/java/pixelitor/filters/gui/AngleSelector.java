@@ -28,16 +28,18 @@ import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
 /**
  * Contains an AbstractAngleSelectorComponent and a SliderSpinner
  */
-public class AngleSelector extends JPanel {
+public class AngleSelector extends JPanel implements ParamGUI {
     @SuppressWarnings("FieldMayBeFinal") // idea bug: it cannot be final
     private boolean userChangedSpinner = true;
+    private final SliderSpinner sliderSpinner;
+    private final AbstractAngleSelectorComponent selectorGUI;
 
     public AngleSelector(AngleParam angleParam) {
         setLayout(new BorderLayout(10, 0));
-        AbstractAngleSelectorComponent asc = angleParam.getAngleSelectorComponent();
-        add(asc, BorderLayout.WEST);
+        selectorGUI = angleParam.getAngleSelectorComponent();
+        add(selectorGUI, BorderLayout.WEST);
 
-        SliderSpinner sliderSpinner = createSliderSpinner(angleParam, asc);
+        sliderSpinner = createSliderSpinner(angleParam, selectorGUI);
         add(sliderSpinner, BorderLayout.CENTER);
 
         setBorder(BorderFactory.createTitledBorder(angleParam.getName()));
@@ -58,14 +60,14 @@ public class AngleSelector extends JPanel {
             }
         });
 
-        SliderSpinner sliderSpinner = new SliderSpinner(spinnerModel, NONE, true);
+        SliderSpinner retVal = new SliderSpinner(spinnerModel, NONE, true);
 
-        sliderSpinner.setResettable(angleParam);
+        retVal.setResettable(angleParam);
         int maxAngleInDegrees = angleParam.getMaxAngleInDegrees();
         if (maxAngleInDegrees == 360) {
-            sliderSpinner.setupTicks(180, 90);
+            retVal.setupTicks(180, 90);
         } else if (maxAngleInDegrees == 90) {
-            sliderSpinner.setupTicks(15, 0);
+            retVal.setupTicks(15, 0);
         }
         angleParam.addChangeListener(e -> {
             asc.repaint();
@@ -73,7 +75,19 @@ public class AngleSelector extends JPanel {
             spinnerModel.setValue(angleParam.getValueInDegrees());
             userChangedSpinner = true;
         });
-        return sliderSpinner;
+        return retVal;
+    }
+
+    @Override
+    public void updateGUI() {
+        // nothing to do
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        selectorGUI.setEnabled(enabled);
+        sliderSpinner.setEnabled(enabled);
+        super.setEnabled(enabled);
     }
 }
 

@@ -25,6 +25,9 @@ import java.util.Objects;
 public abstract class AbstractFilterParam implements FilterParam {
     private final String name;
     protected ParamAdjustmentListener adjustmentListener;
+    protected boolean enabledByAnimationSetting = true;
+    protected boolean enabledByFilterLogic = true;
+    protected ParamGUI paramGUI;
 
     AbstractFilterParam(String name) {
         this.name = Objects.requireNonNull(name);
@@ -39,4 +42,33 @@ public abstract class AbstractFilterParam implements FilterParam {
     public String getName() {
         return name;
     }
+
+    @Override
+    public void setEnabled(boolean b, EnabledReason reason) {
+        switch (reason) {
+            case FILTER_LOGIC:
+                enabledByFilterLogic = b;
+                break;
+            case FINAL_ANIMATION_SETTING:
+                if (canBeAnimated()) {
+                    // ignore
+                    return;
+                }
+                enabledByAnimationSetting = b;
+                break;
+        }
+
+        setEnabled(shouldBeEnabled());
+    }
+
+    protected boolean shouldBeEnabled() {
+        return enabledByFilterLogic && enabledByAnimationSetting;
+    }
+
+    void setEnabled(boolean b) {
+        if (paramGUI != null) {
+            paramGUI.setEnabled(b);
+        }
+    }
+
 }

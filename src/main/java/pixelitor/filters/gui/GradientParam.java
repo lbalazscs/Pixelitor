@@ -71,6 +71,10 @@ public class GradientParam extends AbstractFilterParam {
         if (evt.getPropertyName().equals(GRADIENT_SLIDER_USE_BEVEL)) {
             return false;
         }
+        if (evt.getPropertyName().equals("enabled")) {
+            return false;
+        }
+
         if (trigger && !gradientSlider.isValueAdjusting() && adjustmentListener != null) {
             String propertyName = evt.getPropertyName();
             if (!"ancestor".equals(propertyName)) {
@@ -166,6 +170,13 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     @Override
+    void setEnabled(boolean b) {
+        if (gradientSlider != null) {
+            gradientSlider.setEnabled(b);
+        }
+    }
+
+    @Override
     public void considerImageSize(Rectangle bounds) {
     }
 
@@ -230,16 +241,6 @@ public class GradientParam extends AbstractFilterParam {
             }
             return interpolatedColors;
         }
-    }
-
-    @Override
-    public void setEnabledLogically(boolean b) {
-        // TODO
-    }
-
-    @Override
-    public void setFinalAnimationSettingMode(boolean b) {
-        // ignored because this filter parameter can be animated
     }
 
     @Override

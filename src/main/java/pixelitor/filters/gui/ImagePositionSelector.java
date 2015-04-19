@@ -39,13 +39,14 @@ import static java.awt.Color.WHITE;
  * The image selector part of an ImagePositionPanel
  */
 public class ImagePositionSelector extends JComponent implements MouseMotionListener, MouseListener {
-    private final ImagePositionPanel imagePositionPanel;
+    private final ImagePositionPanel parentGUI;
     private final ImagePositionParam model;
     private BufferedImage thumb;
     private static final int CENTRAL_SQUARE_SIZE = 5;
+    private boolean enabled = true;
 
-    public ImagePositionSelector(ImagePositionPanel imagePositionPanel, ImagePositionParam model, int size) {
-        this.imagePositionPanel = imagePositionPanel;
+    public ImagePositionSelector(ImagePositionPanel parentGUI, ImagePositionParam model, int size) {
+        this.parentGUI = parentGUI;
         this.model = model;
         addMouseListener(this);
         addMouseMotionListener(this);
@@ -104,6 +105,9 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
     }
 
     private void moveControl(MouseEvent e, boolean isAdjusting) {
+        if (!enabled) {
+            return;
+        }
         int mouseX = e.getX();
         int mouseY = e.getY();
 
@@ -111,7 +115,7 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
         float relativeY = ((float) mouseY) / thumb.getHeight();
         model.setRelativeValues(relativeX, relativeY, false, isAdjusting, true);
 
-        imagePositionPanel.updateSlidersFromModel();
+        parentGUI.updateSlidersFromModel();
 
         repaint();
     }
@@ -140,5 +144,16 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
 
     @Override
     public void mouseExited(MouseEvent e) {
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+        super.setEnabled(enabled);
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
 }

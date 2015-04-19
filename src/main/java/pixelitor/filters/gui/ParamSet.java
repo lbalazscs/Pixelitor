@@ -26,6 +26,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import static pixelitor.filters.gui.FilterGUIComponent.EnabledReason.FINAL_ANIMATION_SETTING;
+
 /**
  * A fixed set of filter parameter objects
  */
@@ -153,10 +155,10 @@ public class ParamSet {
 
     public void setFinalAnimationSettingMode(boolean b) {
         for (FilterParam param : paramList) {
-            param.setFinalAnimationSettingMode(b);
+            param.setEnabled(!b, FINAL_ANIMATION_SETTING);
         }
         for (FilterAction action : actionList) {
-            action.setFinalAnimationSettingMode(b);
+            action.setEnabled(!b, FINAL_ANIMATION_SETTING);
         }
     }
 

@@ -27,12 +27,6 @@ public class BooleanParam extends AbstractFilterParam {
     private final boolean defaultValue;
     private boolean currentValue;
     private final boolean ignoreRandomize;
-    private ParamGUI paramGUI;
-    private boolean finalAnimationSettingMode;
-
-    // show original should ignore the final animation setting
-    // TODO "Show Original" is not a BooleanParam anymore - is this still needed?
-    private boolean ignoreFinalAnimationSettingMode = false;
 
     public BooleanParam(String name, boolean defaultValue) {
         this(name, defaultValue, false);
@@ -45,29 +39,22 @@ public class BooleanParam extends AbstractFilterParam {
         this.ignoreRandomize = ignoreRandomize;
     }
 
-    public static BooleanParam createParamForHPSharpening() {
-        return new BooleanParam("High-Pass Sharpening", false, true);
-    }
-
-//    public static BooleanParam createParamForShowOriginal() {
-//        return new BooleanParam("Show Original", false, true);
-//    }
-
-    @Override
-    public boolean isSetToDefault() {
-        return (defaultValue == currentValue);
-    }
-
     @Override
     public JComponent createGUI() {
         BooleanSelector selector = new BooleanSelector(this);
         paramGUI = selector;
-
-        if(finalAnimationSettingMode && !ignoreFinalAnimationSettingMode) {
-            selector.setEnabled(false);
-        }
+        paramGUI.setEnabled(shouldBeEnabled());
 
         return selector;
+    }
+
+    public static BooleanParam createParamForHPSharpening() {
+        return new BooleanParam("High-Pass Sharpening", false, true);
+    }
+
+    @Override
+    public boolean isSetToDefault() {
+        return (defaultValue == currentValue);
     }
 
     @Override
@@ -82,11 +69,6 @@ public class BooleanParam extends AbstractFilterParam {
 
     @Override
     public void randomize() {
-        if(finalAnimationSettingMode) {
-            assert !canBeAnimated();
-            return;
-        }
-
         if (!ignoreRandomize) {
             setValue(Math.random() > 0.5, true, false);
         }
@@ -125,20 +107,6 @@ public class BooleanParam extends AbstractFilterParam {
     @Override
     public void setState(ParamState state) {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setEnabledLogically(boolean b) {
-        // TODO
-    }
-
-    @Override
-    public void setFinalAnimationSettingMode(boolean b) {
-        finalAnimationSettingMode = b;
-    }
-
-    public void setIgnoreFinalAnimationSettingMode(boolean ignoreFinalAnimationSettingMode) {
-        this.ignoreFinalAnimationSettingMode = ignoreFinalAnimationSettingMode;
     }
 
     @Override

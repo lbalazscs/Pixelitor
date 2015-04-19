@@ -44,6 +44,14 @@ public class AngleParam extends AbstractFilterParam {
         defaultInRadians = defaultValue;
     }
 
+    @Override
+    public JComponent createGUI() {
+        AngleSelector angleSelector = new AngleSelector(this);
+        paramGUI = angleSelector;
+        paramGUI.setEnabled(shouldBeEnabled());
+        return angleSelector;
+    }
+
     public void setValueInDegrees(int d, boolean trigger) {
         int degrees = d;
         if (degrees < 0) {
@@ -99,11 +107,6 @@ public class AngleParam extends AbstractFilterParam {
     @Override
     public boolean isSetToDefault() {
         return (angleInRadians == defaultInRadians);
-    }
-
-    @Override
-    public JComponent createGUI() {
-        return new AngleSelector(this);
     }
 
     @Override
@@ -197,16 +200,6 @@ public class AngleParam extends AbstractFilterParam {
             double interpolatedAngle = ImageMath.lerp(progress, angle, apEndState.angle);
             return new APState(interpolatedAngle);
         }
-    }
-
-    @Override
-    public void setEnabledLogically(boolean b) {
-        // TODO
-    }
-
-    @Override
-    public void setFinalAnimationSettingMode(boolean b) {
-        // ignored because this filter parameter can be animated
     }
 
     @Override

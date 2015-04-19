@@ -31,8 +31,6 @@ public class ColorParam extends AbstractFilterParam {
     private final Color defaultColor;
     private Color color;
 
-    private ParamGUI paramGUI;
-
     private final OpacitySetting opacitySetting;
 
     public ColorParam(String name, Color defaultColor, OpacitySetting opacitySetting) {
@@ -44,15 +42,17 @@ public class ColorParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean isSetToDefault() {
-        return color.equals(defaultColor);
-    }
-
-    @Override
     public JComponent createGUI() {
         ColorSelector gui = new ColorSelector(this);
         paramGUI = gui;
+        paramGUI.setEnabled(shouldBeEnabled());
+
         return gui;
+    }
+
+    @Override
+    public boolean isSetToDefault() {
+        return color.equals(defaultColor);
     }
 
     @Override
@@ -128,16 +128,6 @@ public class ColorParam extends AbstractFilterParam {
             Color endColor = ((CState) endState).color;
             return new CState(Utils.interpolateColor(color, endColor, (float) progress));
         }
-    }
-
-    @Override
-    public void setEnabledLogically(boolean b) {
-        // TODO
-    }
-
-    @Override
-    public void setFinalAnimationSettingMode(boolean b) {
-        // ignored because this filter parameter can be animated
     }
 
     @Override
