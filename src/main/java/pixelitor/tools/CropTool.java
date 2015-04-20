@@ -24,7 +24,6 @@ import pixelitor.ImageComponents;
 import pixelitor.ImageDisplay;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.transform.TransformSupport;
-import pixelitor.transform.TransformToolChangeListener;
 import pixelitor.utils.ImageSwitchListener;
 import pixelitor.utils.SliderSpinner;
 
@@ -53,7 +52,7 @@ import static pixelitor.utils.SliderSpinner.TextPosition.WEST;
 /**
  * The crop tool
  */
-public class CropTool extends Tool implements ImageSwitchListener, TransformToolChangeListener {
+public class CropTool extends Tool implements ImageSwitchListener {
     private CropToolState state = INITIAL;
 
     private TransformSupport transformSupport;
@@ -166,7 +165,7 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
                 Rectangle imageSpaceRectangle = userDrag.createPositiveRectangle();
                 Rectangle compSpaceRectangle = ic.fromImageToComponentSpace(imageSpaceRectangle);
 
-                transformSupport = new TransformSupport(compSpaceRectangle, imageSpaceRectangle, this);
+                transformSupport = new TransformSupport(compSpaceRectangle, imageSpaceRectangle);
 
                 state = TRANSFORM;
                 break;
@@ -278,11 +277,6 @@ public class CropTool extends Tool implements ImageSwitchListener, TransformTool
     public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
         oldIC.repaint();
         resetStateToInitial();
-    }
-
-    @Override
-    public void transformToolChangeHappened() {
-        // TODO is this necessary?
     }
 
     public void resetStateToInitial() {

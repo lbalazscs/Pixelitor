@@ -29,6 +29,8 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static java.util.Comparator.comparing;
+
 /**
  * An utility class for managing filters
  */
@@ -42,29 +44,35 @@ public class FilterUtils {
     private FilterUtils() {
     }
 
+    // it returns an array because JComboBox does not accept Lists as constructor arguments
     public static Filter[] getAllFiltersSorted() {
         Filter[] filters = allFilters.toArray(new Filter[allFilters.size()]);
-        Arrays.sort(filters);
+        Arrays.sort(filters, comparing(Filter::getName));
         return filters;
     }
 
     public static FilterWithParametrizedGUI[] getAnimationFiltersSorted() {
+        Predicate<FilterWithParametrizedGUI> canBeAnimated = fpg -> fpg.getParamSet().canBeAnimated();
+        Predicate<FilterWithParametrizedGUI> notExcludedFromAnimation = fpg -> !fpg.excludeFromAnimation();
+        Predicate<FilterWithParametrizedGUI> checkFadeInclusion = fpg -> {
+            // include Fade only if there is something to fade
+            if (fpg instanceof Fade) {
+                return History.canFade();
+            }
+            return true;
+        };
+
         List<FilterWithParametrizedGUI> animFilters = allFilters.stream()
-                .filter(filter -> filter instanceof FilterWithParametrizedGUI) // allow only FilterWithParametrizedGUI filters
+                .filter(filter -> filter instanceof FilterWithParametrizedGUI)
                 .map(filter -> (FilterWithParametrizedGUI) filter) // cast for further filtering
-                .filter(fpg -> fpg.getParamSet().canBeAnimated()) // that can be animated
-                .filter(fpg -> !fpg.excludeFromAnimation()) // and excludeFromAnimation does not return true
-                .filter(fpg -> { // include Fade only if there is something to fade
-                    if (fpg instanceof Fade) {
-                        return History.canFade();
-                    }
-                    return true;
-                })
-                .sorted()
+                .filter(canBeAnimated
+                        .and(notExcludedFromAnimation)
+                        .and(checkFadeInclusion))
+                .sorted(comparing(Filter::getListName))
                 .collect(Collectors.toList());
 
-        FilterWithParametrizedGUI[] animFiltersSorted = animFilters.toArray(new FilterWithParametrizedGUI[animFilters.size()]);
-        return animFiltersSorted;
+        FilterWithParametrizedGUI[] asArray = animFilters.toArray(new FilterWithParametrizedGUI[animFilters.size()]);
+        return asArray;
     }
 
     public static Filter getRandomFilter(Predicate<Filter> conditions) {

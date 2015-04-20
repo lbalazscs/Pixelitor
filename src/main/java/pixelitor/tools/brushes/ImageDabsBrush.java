@@ -17,7 +17,6 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.tools.AbstractBrushTool;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
@@ -48,7 +47,7 @@ public class ImageDabsBrush extends DabsBrush {
         // however the template image can be shared between them
         templateImage = templateImages.get(imageBrushType);
         if(templateImage == null) {
-            templateImage = imageBrushType.createTemplateBrush(AbstractBrushTool.MAX_BRUSH_RADIUS);
+            templateImage = imageBrushType.createBWBrushImage();
             templateImages.put(imageBrushType, templateImage);
         }
     }

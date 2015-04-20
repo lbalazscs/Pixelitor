@@ -79,11 +79,11 @@ public class AssertJSwingTest {
     private static final File BATCH_RESIZE_OUTPUT_DIR = new File(BASE_TESTING_DIR, "batch_resize_output");
     private static final File BATCH_FILTER_OUTPUT_DIR = new File(BASE_TESTING_DIR, "batch_filter_output");
 
+    private Robot robot;
     public static final int ROBOT_DELAY_MILLIS = 500;
 
     private FrameFixture window;
     private final Random random = new Random();
-    private Robot robot;
 
     enum Randomize {YES, NO}
 
@@ -197,7 +197,6 @@ public class AssertJSwingTest {
             // can happen if the current version is the same as the latest
             findJOptionPane().okButton().click();
         }
-
     }
 
     private void testAbout() {
@@ -608,7 +607,24 @@ public class AssertJSwingTest {
 
         testRandomFilter();
 
-        // TODO    Text...
+        testText();
+    }
+
+    private void testText() {
+        findMenuItemByText("Text...").click();
+        DialogFixture dialog = WindowFinder.findDialog("filterDialog").using(robot);
+
+        dialog.textBox("textTF").requireEditable().enterText("testing...");
+        dialog.slider("fontSize").slideTo(250);
+
+        dialog.checkBox("boldCB").check().uncheck();
+        dialog.checkBox("italicCB").check();
+        dialog.checkBox("underlineCB").check().uncheck();
+        dialog.checkBox("strikeThroughCB").check().uncheck();
+
+        findButtonByText(dialog, "OK").click();
+        keyboardUndoRedo();
+        keyboardUndo();
     }
 
     private void testRandomFilter() {
@@ -854,9 +870,18 @@ public class AssertJSwingTest {
         //window.button("eraserTraceButton").click();
         findButtonByText(window, "Stroke with Current Eraser").click();
 
-        keyboardDeselect();
-        // TODO test crop from this selection tool and also from menu
-        // TODO test all items from selection menu
+        // crop from this selection tool
+        findButtonByText(window, "Crop").click();
+        keyboardUndo();
+
+        // crop from the menu
+        runMenuCommand("Crop");
+        keyboardUndo();
+
+        runMenuCommand("Invert Selection");
+        runMenuCommand("Stroke with Current Brush");
+        runMenuCommand("Stroke with Current Eraser");
+        runMenuCommand("Deselect");
     }
 
     private void testCropTool() {

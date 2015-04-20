@@ -105,6 +105,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements RangeBased
         for (RangeParam param : rangeParams) {
             param.setAdjustmentListener(listener);
         }
+        adjustmentListener = listener;
     }
 
     public int getValue(int index) {
@@ -164,14 +165,14 @@ public class GroupedRangeParam extends AbstractFilterParam implements RangeBased
     @Override
     public void reset(boolean triggerAction) {
         for (RangeParam param : rangeParams) {
-            param.reset(triggerAction);
+            // call the individual params without trigger...
+            param.reset(false);
         }
-        // TODO previous code was this - only one was given the triggerAction parameter
-        // possibly it is enough or desirable to set triggerAction to true
-        // only once because the rest happens automatically
-        // TODO also an interesting question is whether the setLinked should be called before this
-//        rangeParam1.reset(false);
-//        rangeParam2.reset(triggerAction);
+
+        // ... and then trigger only once
+        if (triggerAction) {
+            adjustmentListener.paramAdjusted();
+        }
 
         setLinked(linkedByDefault);
     }

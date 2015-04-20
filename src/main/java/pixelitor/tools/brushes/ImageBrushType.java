@@ -17,6 +17,7 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.tools.AbstractBrushTool;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -27,44 +28,50 @@ import java.awt.image.BufferedImage;
 public enum ImageBrushType {
     REAL {
         @Override
-        BufferedImage createTemplateBrush(int maxRadius) {
-            return ImageUtils.createRandomPointsTemplateBrush(2 * maxRadius, 0.2f);
+        protected BufferedImage createImpl() {
+            return ImageUtils.createRandomPointsTemplateBrush(SIZE, 0.2f);
         }
     }, HAIR {
         @Override
-        BufferedImage createTemplateBrush(int maxRadius) {
-            return ImageUtils.createRandomPointsTemplateBrush(2 * maxRadius, 0.03f);
+        protected BufferedImage createImpl() {
+            return ImageUtils.createRandomPointsTemplateBrush(SIZE, 0.03f);
         }
     }, SOFT {
         @Override
-        BufferedImage createTemplateBrush(int maxRadius) {
-            return ImageUtils.createSoftTemplateBrush(2 * maxRadius);
+        protected BufferedImage createImpl() {
+            return ImageUtils.createSoftTemplateBrush(SIZE);
         }
     }, GREEK {
         @Override
-        BufferedImage createTemplateBrush(int maxRadius) {
-            int size = 2 * maxRadius;
+        protected BufferedImage createImpl() {
             BufferedImage template = ImageUtils.loadBufferedImage("greek.png");
-            BufferedImage resizedImage = ImageUtils.resizeImage(size, template);
+            BufferedImage resizedImage = ImageUtils.resizeImage(SIZE, template);
             return resizedImage;
         }
     }, ARROW {
         @Override
-        BufferedImage createTemplateBrush(int maxRadius) {
-            int size = 2 * maxRadius;
+        protected BufferedImage createImpl() {
             BufferedImage template = ImageUtils.loadBufferedImage("arrow.png");
-            BufferedImage resizedImage = ImageUtils.resizeImage(size, template);
+            BufferedImage resizedImage = ImageUtils.resizeImage(SIZE, template);
             return resizedImage;
         }
-
     };
 
-    // TODO why create, why not cache
+    private static final int SIZE = 2 * AbstractBrushTool.MAX_BRUSH_RADIUS;
+    private boolean used = false;
 
-    // TODO always AbstractBrushTool.MAX_BRUSH_RADIUS is passed
+    protected abstract BufferedImage createImpl();
+
     /**
      * Creates a brush template that is not colorized yet. Areas that should be transparent in the final
      * brush image are white, and semi-transparent images are gray
      */
-    abstract BufferedImage createTemplateBrush(int maxRadius);
+    BufferedImage createBWBrushImage() {
+        if (used) {
+            throw new IllegalStateException(getClass().getName() + " used twice");
+        }
+        BufferedImage image = createImpl();
+        used = true;
+        return image;
+    }
 }

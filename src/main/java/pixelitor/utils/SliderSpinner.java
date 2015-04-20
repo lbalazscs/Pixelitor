@@ -252,4 +252,8 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     public void updateGUI() {
         // nothing to do
     }
+
+    public void setSliderName(String name) {
+        slider.setName(name);
+    }
 }

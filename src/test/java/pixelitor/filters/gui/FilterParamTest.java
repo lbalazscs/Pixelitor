@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static java.awt.Color.BLACK;
+import static java.awt.Color.BLUE;
 import static java.awt.Color.CYAN;
 import static java.awt.Color.RED;
 import static java.awt.Color.WHITE;
@@ -36,6 +37,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
+import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
+import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
 import static pixelitor.filters.gui.FilterGUIComponent.EnabledReason.FILTER_LOGIC;
 import static pixelitor.filters.gui.FilterGUIComponent.EnabledReason.FINAL_ANIMATION_SETTING;
 
@@ -59,18 +62,17 @@ public class FilterParamTest {
         return Arrays.asList(new Object[][]{
                 {new RangeParam("Param Name", 0, 10, 0)},
                 {new RangeWithColorsParam(CYAN, RED, "Param Name", -100, 100, 0)},
-                {new GroupedRangeParam("Param Name", 0, 100, 0)},
+                {new GroupedRangeParam("Param Name", 0, 100, 0, true)},
+                {new GroupedRangeParam("Param Name", 0, 100, 0, false)},
                 {new ImagePositionParam("Param Name")},
                 {new GradientParam("Param Name", BLACK, WHITE)},
                 {new TextParam("Param Name", "default text")},
                 {new ColorParam("Param Name", BLACK, FREE_OPACITY)},
+                {new ColorParam("Param Name", WHITE, USER_ONLY_OPACITY)},
+                {new ColorParam("Param Name", BLUE, NO_OPACITY)},
                 {new BooleanParam("Param Name", true)},
                 {new AngleParam("Param Name", 0)},
                 {new ElevationAngleParam("Param Name", 0)},
-//                {new ActionParam("Param Name", e -> {
-//                }, "tooltip text")},
-//                {new ReseedNoiseActionParam("Param Name", e -> {
-//                })},
                 {new IntChoiceParam("Param Name", new IntChoiceParam.Value[]{
                         new IntChoiceParam.Value("Better", 0),
                         new IntChoiceParam.Value("Faster", 1),
@@ -93,14 +95,20 @@ public class FilterParamTest {
     }
 
     @Test
-    public void testRandomizeAndReset() {
+    public void testRandomize() {
         param.randomize();
         checkThatFilterWasNotCalled();
+    }
 
+    @Test
+    public void testResetFalse() {
         param.reset(false);
         checkThatFilterWasNotCalled();
         assertTrue(param.isSetToDefault());
+    }
 
+    @Test
+    public void testResetTrue() {
         // make sure that randomize changes the value
         boolean changed = false;
         while (!changed) {

@@ -97,10 +97,33 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
         JPanel textPanel = new JPanel();
         textPanel.setLayout(new GridBagLayout());
 
-        GridBagHelper gridBagHelper = new GridBagHelper(textPanel);
+        GridBagHelper gbh = new GridBagHelper(textPanel);
 
-        gridBagHelper.addLabel("Text:", 0, 0);
+        gbh.addLabel("Text:", 0, 0);
+        createTextTF();
+        gbh.addLastControl(textTF);
+
+        gbh.addLabel("Color", 0, 1);
+        colorSelector = new ColorSelector(color);
+        gbh.addLastControl(colorSelector);
+        color.setAdjustmentListener(this);
+
+        gbh.addLabel("Vertical Alignment", 0, 2);
+        verticalAlignmentCombo = new JComboBox(VerticalAlignment.values());
+        verticalAlignmentCombo.addActionListener(this);
+        gbh.addControl(verticalAlignmentCombo);
+
+        gbh.addLabel("Horizontal Alignment", 2, 2);
+        horizontalAlignmentCombo = new JComboBox(HorizontalAlignment.values());
+        horizontalAlignmentCombo.addActionListener(this);
+        gbh.addControl(horizontalAlignmentCombo);
+
+        return textPanel;
+    }
+
+    private void createTextTF() {
         textTF = new JTextField(20);
+        textTF.setName("textTF");
 
         textTF.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -118,25 +141,6 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
                 paramAdjusted();
             }
         });
-        gridBagHelper.addLastControl(textTF);
-
-        gridBagHelper.addLabel("Color", 0, 1);
-        colorSelector = new ColorSelector(color);
-        gridBagHelper.addLastControl(colorSelector);
-        color.setAdjustmentListener(this);
-
-        gridBagHelper.addLabel("Vertical Alignment", 0, 2);
-        verticalAlignmentCombo = new JComboBox(VerticalAlignment.values());
-        verticalAlignmentCombo.addActionListener(this);
-        gridBagHelper.addControl(verticalAlignmentCombo);
-
-        gridBagHelper.addLabel("Horizontal Alignment", 2, 2);
-        horizontalAlignmentCombo = new JComboBox(HorizontalAlignment.values());
-        horizontalAlignmentCombo.addActionListener(this);
-        gridBagHelper.addControl(horizontalAlignmentCombo);
-
-
-        return textPanel;
     }
 
     private JPanel createFontPanel() {
@@ -144,47 +148,46 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
         fontPanel.setBorder(BorderFactory.createTitledBorder("Font"));
         fontPanel.setLayout(new GridBagLayout());
 
-        GridBagHelper gridBagHelper = new GridBagHelper(fontPanel);
+        GridBagHelper gbh = new GridBagHelper(fontPanel);
 
-        gridBagHelper.addLabel("Font Size:", 0, 0);
+        gbh.addLabel("Font Size:", 0, 0);
         RangeParam fontSizeParam = new RangeParam("", 1, 1000, 100);
         fontSizeSlider = new SliderSpinner(fontSizeParam, NONE, false);
+        fontSizeSlider.setSliderName("fontSize");
         fontSizeParam.setAdjustmentListener(this);
-        gridBagHelper.addLastControl(fontSizeSlider);
+        gbh.addLastControl(fontSizeSlider);
 
-        gridBagHelper.addLabel("Font Type:", 0, 1);
+        gbh.addLabel("Font Type:", 0, 1);
         GraphicsEnvironment localGE = GraphicsEnvironment.getLocalGraphicsEnvironment();
         String[] availableFonts = localGE.getAvailableFontFamilyNames();
         fontFamilyChooserCB = new JComboBox(availableFonts);
         fontFamilyChooserCB.addActionListener(this);
-        gridBagHelper.addLastControl(fontFamilyChooserCB);
+        gbh.addLastControl(fontFamilyChooserCB);
 
-        gridBagHelper.addLabel("Bold:", 0, 2);
-        boldCB = new JCheckBox();
-        boldCB.addActionListener(this);
-        gridBagHelper.addControl(boldCB);
+        gbh.addLabel("Bold:", 0, 2);
+        boldCB = createAndAddEmphasisCheckBox("boldCB", gbh);
 
-        gridBagHelper.addLabel("Italic:", 2, 2);
-        italicCB = new JCheckBox();
-        italicCB.addActionListener(this);
-        gridBagHelper.addControl(italicCB);
+        gbh.addLabel("Italic:", 2, 2);
+        italicCB = createAndAddEmphasisCheckBox("italicCB", gbh);
 
-        gridBagHelper.addLabel("Underline:", 4, 2);
-        underlineCB = new JCheckBox();
-        underlineCB.addActionListener(this);
-        gridBagHelper.addControl(underlineCB);
+        gbh.addLabel("Underline:", 4, 2);
+        underlineCB = createAndAddEmphasisCheckBox("underlineCB", gbh);
 
-        gridBagHelper.addLabel("Strikethrough:", 6, 2);
-        strikeThroughCB = new JCheckBox();
-        strikeThroughCB.addActionListener(this);
-        gridBagHelper.addControl(strikeThroughCB);
+        gbh.addLabel("Strikethrough:", 6, 2);
+        strikeThroughCB = createAndAddEmphasisCheckBox("strikeThroughCB", gbh);
 
 //        gbHelper.addLabel("Kerning:", 8, 2);
-//        kerningCB = new JCheckBox();
-//        kerningCB.addActionListener(this);
-//        gbHelper.addControl(kerningCB);
+//        kerningCB = createAndAddEmphasisCheckBox("kerningCB");
 
         return fontPanel;
+    }
+
+    private JCheckBox createAndAddEmphasisCheckBox(String name, GridBagHelper gbh) {
+        JCheckBox cb = new JCheckBox();
+        cb.setName(name);
+        cb.addActionListener(this);
+        gbh.addControl(cb);
+        return cb;
     }
 
 

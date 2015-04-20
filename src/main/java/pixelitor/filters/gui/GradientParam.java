@@ -245,7 +245,7 @@ public class GradientParam extends AbstractFilterParam {
 
     @Override
     public String toString() {
-        return String.format("%s[name = '%s']",  // TODO add values
+        return String.format("%s[name = '%s']",
                 getClass().getSimpleName(), getName());
     }
 }

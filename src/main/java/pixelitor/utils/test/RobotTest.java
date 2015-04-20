@@ -265,13 +265,20 @@ public class RobotTest {
 //        System.out.println(msg);
     }
 
-    private static void move(Robot r, int x, int y) {
+    private static void randomMove(Robot r) {
+        Point randomPoint = generateRandomPoint();
+        int x = randomPoint.x;
+        int y = randomPoint.y;
         logRobotEvent("random move to (" + x + ", " + y + ')');
         r.mouseMove(x, y);
     }
 
-    private static void drag(Robot r, int x, int y) {
+    private static void randomDrag(Robot r) {
+        Point randomPoint = generateRandomPoint();
+        int x = randomPoint.x;
+        int y = randomPoint.y;
         logRobotEvent("random \"" + Tools.getCurrentTool().getName() + " Tool\" drag to (" + x + ", " + y + ')');
+
         r.mousePress(InputEvent.BUTTON1_MASK);
         r.mouseMove(x, y);
         r.mouseRelease(InputEvent.BUTTON1_MASK);
@@ -777,28 +784,6 @@ public class RobotTest {
         }
     }
 
-    private static void randomCloseImageWOSaving() {
-        if (singleImageTest) {
-            return;
-        }
-//        logRobotEvent("random close image without saving");
-//        ImageComponent ic = AppLogic.getActiveImageComponent();
-//        if(ic != null) {
-//            ic.close();
-//        }
-    }
-
-    private static void randomSaveInAllFormats() {
-//        logRobotEvent("random save in all formats");
-    }
-
-    private static void randomLoadImage() {
-        if (singleImageTest) {
-            return;
-        }
-//        logRobotEvent("random load image");
-    }
-
     private static void randomException() {
 //        logRobotEvent("random exception");
 //        throw new IllegalStateException("test");
@@ -835,20 +820,9 @@ public class RobotTest {
 
     private static void setupWeightedCaller(Robot r) {
         // random move
-        weightedCaller.registerCallback(10, () -> {
-            Point randomPoint = generateRandomPoint();
-            int randomX = randomPoint.x;
-            int randomY = randomPoint.y;
-            move(r, randomX, randomY);
-        });
+        weightedCaller.registerCallback(10, () -> randomMove(r));
 
-        // random drag
-        weightedCaller.registerCallback(70, () -> {
-            Point randomPoint = generateRandomPoint();
-            int randomX = randomPoint.x;
-            int randomY = randomPoint.y;
-            drag(r, randomX, randomY);
-        });
+        weightedCaller.registerCallback(70, () -> randomDrag(r));
 
         weightedCaller.registerCallback(5, () -> click(r));
 

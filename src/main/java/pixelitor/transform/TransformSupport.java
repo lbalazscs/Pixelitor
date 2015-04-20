@@ -32,7 +32,6 @@ public class TransformSupport {
     private final Handles handles;
     private Rectangle compSpaceRect;
     private Rectangle imageSpaceRect; // used only while the image component is resized
-    private final TransformToolChangeListener changeListener;
     private int dragStartX;
     private int dragStartY;
     private int dragStartRectWidth;
@@ -41,10 +40,9 @@ public class TransformSupport {
     // true while the user is adjusting the handles
     private boolean adjusting;
 
-    public TransformSupport(Rectangle compSpaceRectangle, Rectangle imageSpaceRect, TransformToolChangeListener changeListener) {
+    public TransformSupport(Rectangle compSpaceRectangle, Rectangle imageSpaceRect) {
         this.compSpaceRect = compSpaceRectangle;
         this.imageSpaceRect = imageSpaceRect;
-        this.changeListener = changeListener;
         handles = new Handles(compSpaceRectangle);
     }
 
@@ -98,7 +96,6 @@ public class TransformSupport {
         }
         adjusting = true;
         handles.updateRect(compSpaceRect);
-        changeListener.transformToolChangeHappened();
     }
 
     public void mouseReleased() {
@@ -121,7 +118,6 @@ public class TransformSupport {
         return "TransformSupport{" +
                 "handles=" + handles +
                 ", compSpaceRect=" + compSpaceRect +
-                ", changeListener=" + changeListener +
                 ", dragStartX=" + dragStartX +
                 ", dragStartY=" + dragStartY +
                 ", dragStartRectWidth=" + dragStartRectWidth +

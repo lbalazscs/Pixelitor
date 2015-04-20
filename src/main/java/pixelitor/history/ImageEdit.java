@@ -64,14 +64,18 @@ public class ImageEdit extends FadeableEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        swapImages(); // TODO should throw CannotUndoException if swapImages returns false?
+        if (!swapImages()) {
+            throw new CannotUndoException();
+        }
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        swapImages();
+        if (!swapImages()) {
+            throw new CannotRedoException();
+        }
     }
 
     /**

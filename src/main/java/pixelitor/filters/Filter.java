@@ -33,7 +33,7 @@ import java.awt.image.BufferedImage;
 /**
  * The superclass of all Pixelitor filters and color adjustments
  */
-public abstract class Filter extends AbstractAction implements Comparable<Filter> {
+public abstract class Filter extends AbstractAction {
     protected boolean copySrcToDstBeforeRunning = false;
     protected String listNamePrefix = null;
 
@@ -162,13 +162,6 @@ public abstract class Filter extends AbstractAction implements Comparable<Filter
     }
 
     protected abstract BufferedImage transform(BufferedImage src, BufferedImage dest);
-
-    @Override
-    public int compareTo(Filter o) {
-        String name = getListName();
-        String otherName = o.getListName();
-        return name.compareTo(otherName);
-    }
 
     @Override
     public boolean equals(Object o) {

@@ -65,7 +65,7 @@ public class IntChoiceSelector extends JPanel implements ActionListener, ParamGU
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        model.setSelectedItem(comboBox.getSelectedItem());   // TODO is this necessary?
+//        model.setSelectedItem(comboBox.getSelectedItem());
         defaultButton.updateState();
     }
 }
