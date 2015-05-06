@@ -34,7 +34,6 @@ import org.assertj.swing.fixture.JMenuItemFixture;
 import org.assertj.swing.fixture.JOptionPaneFixture;
 import org.assertj.swing.fixture.JTabbedPaneFixture;
 import org.assertj.swing.fixture.JTextComponentFixture;
-import org.assertj.swing.fixture.JToggleButtonFixture;
 import org.assertj.swing.launcher.ApplicationLauncher;
 import org.fest.util.Files;
 import org.junit.Before;
@@ -60,10 +59,12 @@ import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import static java.awt.event.KeyEvent.VK_ADD;
 import static java.awt.event.KeyEvent.VK_ALT;
 import static java.awt.event.KeyEvent.VK_CONTROL;
 import static java.awt.event.KeyEvent.VK_D;
 import static java.awt.event.KeyEvent.VK_I;
+import static java.awt.event.KeyEvent.VK_MINUS;
 import static java.awt.event.KeyEvent.VK_SHIFT;
 import static java.awt.event.KeyEvent.VK_Z;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -160,13 +161,47 @@ public class AssertJSwingTest {
     }
 
     private void testLayers() {
-        // TODO add, remove, change visibility, all the Layers menus
+        LayerButtonFixture layer1Button = findLayerButton("layer 1");
+        layer1Button.requireSelected();
 
-        // TODO create a LayerButtonFixture class??
+        JButtonFixture addEmptyLayerButton = findButtonByToolTip(window, "Add New Layer");
+        JButtonFixture deleteLayerButton = findButtonByToolTip(window, "Delete Layer");
+        JButtonFixture duplicateLayerButton = findButtonByToolTip(window, "Duplicate Layer");
+
+        addEmptyLayerButton.click();
+        LayerButtonFixture layer2Button = findLayerButton("layer 2");
+        layer2Button.requireSelected();
+
+        deleteLayerButton.click();
+        duplicateLayerButton.click();
+        LayerButtonFixture layer1CopyButton = findLayerButton("layer 1 copy");
+        layer1CopyButton.requireSelected();
+
+        layer1CopyButton.setOpenEye(false);
+
+        findMenuItemByText("Lower Layer").click();
+        findMenuItemByText("Raise Layer").click();
+        findMenuItemByText("Layer to Bottom").click();
+        findMenuItemByText("Layer to Top").click();
+        findMenuItemByText("Lower Layer Selection").click();
+        findMenuItemByText("Raise Layer Selection").click();
+
+        // doesn't do much
+        findMenuItemByText("Layer to Canvas Size").click();
+
+        findMenuItemByText("New Layer from Composite").click();
+        findMenuItemByText("Duplicate Layer").click();
+        findMenuItemByText("Merge Down").click();
+        findMenuItemByText("Duplicate Layer").click();
+
+        findMenuItemByText("Add New Layer").click();
+        findMenuItemByText("Delete Layer").click();
+
+        findMenuItemByText("Flatten Image").click();
     }
 
-    private JToggleButtonFixture findLayerButton(String layerName) {
-        return new JToggleButtonFixture(robot, robot.finder().find(new GenericTypeMatcher<LayerButton>(LayerButton.class) {
+    private LayerButtonFixture findLayerButton(String layerName) {
+        return new LayerButtonFixture(robot, robot.finder().find(new GenericTypeMatcher<LayerButton>(LayerButton.class) {
             @Override
             protected boolean isMatching(LayerButton layerButton) {
                 return layerButton.getLayerName().equals(layerName);
@@ -911,17 +946,40 @@ public class AssertJSwingTest {
     private void testZoomTool() {
         window.toggleButton("Zoom Tool Button").click();
         move(300, 300);
-        window.click();
-        window.click();
+
+        click();
+        click();
         altClick();
         altClick();
 
-        // TODO and all the zoom methods,
-        // TODO including mouse wheel
+        testMouseWheelZooming();
+        testControlPlusMinusZooming();
+    }
 
-//        window.pressKey(VK_ALT);
-//        window.click();
-//        window.releaseKey(VK_ALT);
+    private void testControlPlusMinusZooming() {
+        pressCtrlNumpadPlus();
+        pressCtrlNumpadPlus();
+        pressCtrlMinus();
+        pressCtrlMinus();
+    }
+
+    private void pressCtrlNumpadPlus() {
+        window.pressKey(VK_CONTROL).pressKey(VK_ADD)
+                .releaseKey(VK_ADD).releaseKey(VK_CONTROL);
+    }
+
+    private void pressCtrlMinus() {
+        window.pressKey(VK_CONTROL).pressKey(VK_MINUS)
+                .releaseKey(VK_MINUS).releaseKey(VK_CONTROL);
+    }
+
+
+    private void testMouseWheelZooming() {
+        window.pressKey(VK_CONTROL);
+        ImageComponent c = ImageComponents.getActiveImageComponent();
+        robot.rotateMouseWheel(c, 2);
+        robot.rotateMouseWheel(c, -2);
+        window.releaseKey(VK_CONTROL);
     }
 
     private void keyboardUndo() {
@@ -1022,6 +1080,30 @@ public class AssertJSwingTest {
         return button;
     }
 
+    private static JButtonFixture findButtonByToolTip(ComponentContainerFixture container, String toolTip) {
+        JButtonFixture button = container.button(new GenericTypeMatcher<JButton>(JButton.class) {
+            @Override
+            protected boolean isMatching(JButton button) {
+                if (!button.isShowing()) {
+                    return false; // not interested in buttons that are not currently displayed
+                }
+                String buttonToolTip = button.getToolTipText();
+                if (buttonToolTip == null) {
+                    buttonToolTip = "";
+                }
+                return buttonToolTip.equals(toolTip);
+            }
+
+            @Override
+            public String toString() {
+                return "[Button Text Matcher, text = " + toolTip + "]";
+            }
+        });
+
+        return button;
+    }
+
+
     private JOptionPaneFixture findJOptionPane() {
         return JOptionPaneFinder.findOptionPane().withTimeout(10, SECONDS).using(robot);
     }
@@ -1073,6 +1155,11 @@ public class AssertJSwingTest {
 
         assertThat(Files.fileNamesIn(BATCH_RESIZE_OUTPUT_DIR.getPath(), false)).isEmpty();
         assertThat(Files.fileNamesIn(BATCH_FILTER_OUTPUT_DIR.getPath(), false)).isEmpty();
+    }
+
+    private void click() {
+        robot.pressMouse(MouseButton.LEFT_BUTTON);
+        robot.releaseMouse(MouseButton.LEFT_BUTTON);
     }
 
     private void altClick() {
