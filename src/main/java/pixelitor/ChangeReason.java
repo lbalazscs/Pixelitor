@@ -18,12 +18,15 @@
 package pixelitor;
 
 /**
- * Why is an image changed...
+ * The reason for an image change
  */
 public enum ChangeReason {
     OP_WITHOUT_DIALOG(true, false) {
     }, OP_PREVIEW(false, true) {
-    }, PERFORMANCE_TEST(false, false) {
+
+    }, TEST_NO_HISTORY_NO_PREVIEW(false, false) {
+    }, TEST_WITH_HISTORY_AND_PREVIEW(true, true) {
+
     }, TWEEN_PREVIEW(false, true) {
     }, BATCH_AUTOMATE(false, false) {
     };

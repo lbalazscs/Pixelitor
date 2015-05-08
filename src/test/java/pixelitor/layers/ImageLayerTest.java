@@ -67,12 +67,6 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void testStartNewPreviewFromDialog() {
-        layer.startNewPreviewFromDialog();
-        assertEquals(ImageLayer.State.NORMAL, layer.getState());
-    }
-
-    @Test
     public void testOkPressedInDialog() {
         layer.startPreviewing(); // make sure that the layer is in PREVIEW mode
         layer.okPressedInDialog("filterName");

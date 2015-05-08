@@ -153,10 +153,10 @@ public class Automate {
 
             switch (answer) {
                 case OVERWRITE_YES:
-                    outputFormat.saveComposition(comp, outputFile);
+                    outputFormat.saveComposition(comp, outputFile, false);
                     break;
                 case OVERWRITE_YES_ALL:
-                    outputFormat.saveComposition(comp, outputFile);
+                    outputFormat.saveComposition(comp, outputFile, false);
                     overwriteAll = true;
                     break;
                 case OVERWRITE_NO:
@@ -171,7 +171,7 @@ public class Automate {
             }
         } else { // the file does not exist or overwrite all was pressed previously
             frame.paintImmediately(frame.getBounds());
-            outputFormat.saveComposition(comp, outputFile);
+            outputFormat.saveComposition(comp, outputFile, false);
         }
         if (closeImagesAfterProcessing) {
             OpenSaveManager.warnAndCloseImage(comp.getIC());

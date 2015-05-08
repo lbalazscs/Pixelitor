@@ -63,18 +63,7 @@ public abstract class FilterWithGUI extends Filter {
                     layer.startPreviewing();
 
                     AdjustPanel p = createAdjustPanel();
-                    startDialogSession();
                     AdjustDialog.showDialog(p, this);
-                    endDialogSession();
                 });
     }
-
-    public void startDialogSession() {
-        // intended to be overridden
-    }
-
-    public void endDialogSession() {
-        // intended to be overridden
-    }
-
 }

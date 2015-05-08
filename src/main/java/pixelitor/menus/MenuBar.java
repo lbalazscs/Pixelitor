@@ -77,7 +77,6 @@ import pixelitor.utils.Dialogs;
 import pixelitor.utils.FilterCreator;
 import pixelitor.utils.HistogramsPanel;
 import pixelitor.utils.PerformanceTestingDialog;
-import pixelitor.utils.Utils;
 import pixelitor.utils.test.DebugEventQueue;
 import pixelitor.utils.test.ImageTests;
 import pixelitor.utils.test.OpTests;
@@ -962,7 +961,7 @@ public class MenuBar extends JMenuBar {
         };
         createMenuItem(robotTestAction, testSubmenu, EnabledIf.ACTION_ENABLED, CTRL_R);
 
-        Action opPerformanceTestAction = new MenuAction("Operation Performance Test...") {
+        Action opPerformanceTestAction = new MenuAction("Filter Performance Test...") {
             @Override
             void onClick() {
                 new PerformanceTestingDialog(pixelitorWindow);
@@ -973,7 +972,7 @@ public class MenuBar extends JMenuBar {
         Action findSlowestFilter = new MenuAction("Find Slowest Filter") {
             @Override
             void onClick() {
-                Utils.findSlowestFilter();
+                OpTests.findSlowestFilter();
             }
         };
         createMenuItem(findSlowestFilter, testSubmenu);
@@ -988,18 +987,18 @@ public class MenuBar extends JMenuBar {
 
         testSubmenu.addSeparator();
 
-        Action runAllOps = new MenuAction("Run All Operations on Current Layer") {
+        Action runAllOps = new MenuAction("Run All Filters on Current Layer") {
             @Override
             void onClick() {
-                OpTests.runAllOpsOnCurrentLayer();
+                OpTests.runAllFiltersOnCurrentLayer();
             }
         };
         createMenuItem(runAllOps, testSubmenu);
 
-        Action saveAllOps = new MenuAction("Save the Result of Each Operation...") {
+        Action saveAllOps = new MenuAction("Save the Result of Each Filter...") {
             @Override
             void onClick() {
-                OpTests.saveTheResultOfEachOp();
+                OpTests.saveTheResultOfEachFilter();
             }
         };
         createMenuItem(saveAllOps, testSubmenu);
@@ -1060,21 +1059,6 @@ public class MenuBar extends JMenuBar {
         };
         createMenuItem(debugHistoryAction, debugSubmenu);
 
-        Action imageInfo = new MenuAction("Image Info...") {
-            @Override
-            void onClick() {
-                Composition comp = ImageComponents.getActiveComp().get();
-                int canvasWidth = comp.getCanvasWidth();
-                int canvasHeight = comp.getCanvasHeight();
-                long pixels = canvasWidth * canvasHeight * 4;
-
-                float sizeMBytes = pixels / 1048576.0f;
-                String msg = String.format("Canvas Width = %d pixels\nCanvas Height = %d pixels\nSize in Memory = %.2f Mbytes/layer", canvasWidth, canvasHeight, sizeMBytes);
-                Dialogs.showInfoDialog("Image Info - " + comp.getName(), msg);
-            }
-        };
-        createMenuItem(imageInfo, debugSubmenu);
-
         Action repaintActive = new MenuAction("repaint() on the active image") {
             @Override
             void onClick() {
@@ -1083,7 +1067,7 @@ public class MenuBar extends JMenuBar {
         };
         createMenuItem(repaintActive, debugSubmenu);
 
-        Action imageChangedActive = new MenuAction("imageChanged(true, true) on the active image") {
+        Action imageChangedActive = new MenuAction("imageChanged(FULL) on the active image") {
             @Override
             void onClick() {
                 ImageComponents.getActiveComp().get().imageChanged(FULL);

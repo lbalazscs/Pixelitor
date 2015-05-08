@@ -782,16 +782,8 @@ public class Composition implements Serializable {
      */
     public void executeFilterWithBusyCursor(Filter filter, ChangeReason changeReason, Component busyCursorParent) {
         String filterMenuName = filter.getMenuName();
-        try {
-            if (changeReason.isPreview()) {
-                ImageLayer layer = getActiveImageLayer();
-                layer.startNewPreviewFromDialog();
-            } else {
-                // TODO always set last if not preview?
-                // e.g. OP WITHOUT DIALOG
-                FilterUtils.setLastExecutedFilter(filter);
-            }
 
+        try {
             long startTime = System.nanoTime();
 
             Runnable task = () -> filter.runit(this, changeReason);
@@ -814,6 +806,8 @@ public class Composition implements Serializable {
             }
             Dialogs.showExceptionDialog(e);
         }
+
+        FilterUtils.setLastExecutedFilter(filter);
         RepeatLast.INSTANCE.setMenuName("Repeat " + filterMenuName);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,15 +23,15 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /**
- * An operation that acts on a Composition
+ * An action that acts on a Composition
  */
-public abstract class CompOperation extends AbstractAction {
+public abstract class CompAction extends AbstractAction {
 
-    CompOperation(String name) {
+    CompAction(String name) {
         this(name, null);
     }
 
-    private CompOperation(String name, Icon icon) {
+    private CompAction(String name, Icon icon) {
         if (name == null) {
             throw new IllegalArgumentException("name is null");
         }

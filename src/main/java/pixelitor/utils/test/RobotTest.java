@@ -351,8 +351,6 @@ public class RobotTest {
             } else {
                 layer.cancelPressedInDialog();
             }
-
-            fg.endDialogSession();
         } else {
             BufferedImage src = layer.getFilterSourceImage();
             try {
@@ -418,7 +416,6 @@ public class RobotTest {
             throw e;
         }
 
-        filter.endDialogSession();
         layer.tweenCalculatingEnded();
 
         long runCountAfter = Filter.runCount;

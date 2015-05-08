@@ -118,7 +118,7 @@ public class FileChoosers {
 //            OutputFormat outputFormat = saveFileChooser.getOutputFormat();
             String extension = saveFileChooser.getExtension();
             OutputFormat outputFormat =  OutputFormat.valueFromExtension(extension);
-            outputFormat.saveComposition(comp, selectedFile);
+            outputFormat.saveComposition(comp, selectedFile, true);
             return true;
         }
         return false;

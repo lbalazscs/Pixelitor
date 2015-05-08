@@ -29,7 +29,7 @@ import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
 /**
  * Flips a ContentLayer horizontally or vertically
  */
-public class Flip extends CompOperation {
+public class Flip extends CompAction {
     private final Flip.Direction direction;
 
     private static final Flip horizontalFlip = new Flip(HORIZONTAL);

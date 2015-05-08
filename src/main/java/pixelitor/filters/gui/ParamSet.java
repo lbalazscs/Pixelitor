@@ -86,7 +86,7 @@ public class ParamSet {
     }
 
     /**
-     * Resets all params without triggering an operation
+     * Resets all params without triggering the filter
      */
     public void reset() {
         for (FilterParam param : paramList) {

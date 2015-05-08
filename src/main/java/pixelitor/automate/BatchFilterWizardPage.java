@@ -97,7 +97,6 @@ public enum BatchFilterWizardPage implements WizardPage {
 
             ImageComponents.getActiveImageLayer().get().startPreviewing();
             AdjustPanel adjustPanel = filter.createAdjustPanel();
-            filter.startDialogSession();
 
             return adjustPanel;
         }
@@ -105,9 +104,8 @@ public enum BatchFilterWizardPage implements WizardPage {
         @Override
         public void onWizardCancelled(Wizard wizard) {
             // we get here only if the chosen filter is a filter with GUI
-            FilterWithGUI filter = (FilterWithGUI) getConfig(wizard).getFilter();
+//            FilterWithGUI filter = (FilterWithGUI) getConfig(wizard).getFilter();
             ImageComponents.getActiveImageLayer().get().cancelPressedInDialog();
-            filter.endDialogSession();
         }
 
         @Override

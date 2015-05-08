@@ -49,11 +49,12 @@ public class LinearDabsStrategy implements DabsStrategy {
         prevX = x;
         prevY = y;
         if(angleAware) {
-            // TODO why?? - check original implementation
+            // For angle-aware brushes we don't draw a dab in this
+            // method because we have no angle information.
+            // However, we manipulate the distance from the last dab
+            // so that a dab is drawn soon
             distanceFromLastDab = radius * spacingRatio * 0.8;
         } else {
-            // for angle-aware brushes looks better if the first point is not drawn
-            // because the correct angle cannot be calculated
             brush.putDab(x, y, 0);
         }
     }

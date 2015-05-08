@@ -85,8 +85,8 @@ public class FilterUtils {
         return filter;
     }
 
-    public static Filter[] getAllFiltersShuffled() {
-        Filter[] filters = allFilters.toArray(new Filter[allFilters.size()]);
+    public static Filter[] getFiltersShuffled(Predicate<Filter> predicate) {
+        Filter[] filters = allFilters.stream().filter(predicate).toArray(Filter[]::new);
         Collections.shuffle(Arrays.asList(filters));
         return filters;
     }

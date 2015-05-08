@@ -62,7 +62,7 @@ public class OpenRasterExportPanel extends JPanel {
                     boolean addMergedImage = p.getExportMergedImage();
                     try {
                         OpenRaster.writeOpenRaster(activeComp, file, addMergedImage);
-                        OpenSaveManager.afterSaveActions(activeComp, file);
+                        OpenSaveManager.afterSaveActions(activeComp, file, true);
                     } catch (IOException e) {
                         Dialogs.showExceptionDialog(e);
                     }

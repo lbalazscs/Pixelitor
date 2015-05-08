@@ -83,7 +83,7 @@ public class RandomFilterAdjustPanel extends AdjustPanel {
                 // need to clear the preview of the previous filters
                 // so that the image position selectors show the original image
                 ImageLayer imageLayer = ImageComponents.getActiveImageLayer().get();
-                imageLayer.cancelPressedInDialog(); // cancel the last one
+                imageLayer.stopPreviewing(); // stop the last one
                 imageLayer.startPreviewing(); // start the new one
             }
             AdjustPanel adjustPanel = ((FilterWithGUI) newFilter).createAdjustPanel();

@@ -65,7 +65,7 @@ public class Fade extends FilterWithParametrizedGUI {
             return src;
         }
 
-        // TODO why not with a simple AlphaComposite?
+        // A simple AlphaComposite would not handle semitransparent pixels correctly
 
         int[] srcData = ImageUtils.getPixelsAsArray(src);
         int[] destData = ImageUtils.getPixelsAsArray(dest);

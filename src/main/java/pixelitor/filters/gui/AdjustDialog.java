@@ -20,7 +20,6 @@ package pixelitor.filters.gui;
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
 import pixelitor.filters.Filter;
-import pixelitor.filters.FilterUtils;
 import pixelitor.utils.OKCancelDialog;
 
 /**
@@ -44,7 +43,6 @@ public class AdjustDialog extends OKCancelDialog {
     public void dialogAccepted() {
         Composition comp = ImageComponents.getActiveComp().get();
         comp.okPressedInDialog(activeFilter.getName());
-        FilterUtils.setLastExecutedFilter(activeFilter);
 
         close();
     }

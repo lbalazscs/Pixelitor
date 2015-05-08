@@ -164,9 +164,6 @@ public class PerformanceTestingDialog extends JDialog implements ActionListener,
             this.executions = testExecutions;
         }
 
-        /*
-        * Main testingTask. Executed in background thread.
-        */
         @Override
         public Void doInBackground() {
             Build.CURRENT.setPerformanceTest(true);
@@ -183,7 +180,7 @@ public class PerformanceTestingDialog extends JDialog implements ActionListener,
             for (int i = 0; i < executions; i++) {
                 long individualStartTime = System.nanoTime();
 
-                op.execute(ChangeReason.PERFORMANCE_TEST);
+                op.execute(ChangeReason.TEST_NO_HISTORY_NO_PREVIEW);
 
                 long individualTotalTime = (System.nanoTime() - individualStartTime) / 1000000;
                 if (individualTotalTime < shortestTime) {

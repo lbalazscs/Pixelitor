@@ -55,8 +55,6 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
     private static final int NR_OF_COLUMNS = 5;
 
     private ResizePanel(Composition comp) {
-        // so that it is set even if the user changes nothing in the dialog
-//        ((Resize) operation).setTargetSize(oldWidth, oldHeight);
         oldWidth = comp.getCanvasWidth();
         oldHeight = comp.getCanvasHeight();
 

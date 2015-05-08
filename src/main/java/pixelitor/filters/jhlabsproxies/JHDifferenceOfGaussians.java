@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.DoGFilter;
@@ -53,8 +54,11 @@ public class JHDifferenceOfGaussians extends FilterWithParametrizedGUI {
         }
 
         if ((src.getWidth() == 1) || (src.getHeight() == 1)) {
-            // otherwise we get ArrayIndexOutOfBoundsException in BoxBlurFilter
-            // TODO return black image?
+            // BoxBlurFilter throws ArrayIndexOutOfBoundsException for such images
+
+            // Give up. A workaround would be to use a filter that can use another
+            // blurring algorithm, but it is not worth it, because this case is very
+            // unlikely to occur.
             return src;
         }
 

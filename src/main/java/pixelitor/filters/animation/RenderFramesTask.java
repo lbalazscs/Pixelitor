@@ -78,11 +78,11 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
             setProgress(percentProgress);
 
             double time;
-            if (frameNr < numFrames) { // normal animation forwards
+            if (frameNr < numFrames) { // ping: normal animation forwards
                 time = ((double) frameNr) / numFrames;
             } else { // pong: animating backwards
-                // TODO we are calculating the same frame again
-                // somewhere it should be cached
+                // TODO we are calculating the same frames again
+                // they could be cached somewhere
                 // perhaps in an array of soft references with the calculated frames
                 // or on the disk
                 int effectiveFrame = 2 * (numFrames - 1) - frameNr;

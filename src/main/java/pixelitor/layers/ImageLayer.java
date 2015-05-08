@@ -111,10 +111,6 @@ public class ImageLayer extends ContentLayer {
 
     private transient TmpDrawingLayer tmpDrawingLayer;
 
-    // During dialog previews the image displayed by this layer will be replaced
-    // and the original image (or a subimage if there is selection) is stored here
-//    private transient BufferedImage backupForPreviewBufferedImage = null;
-
     /**
      * The image content of this image layer
      */
@@ -271,8 +267,7 @@ public class ImageLayer extends ContentLayer {
     }
 
     /**
-     * This method is called when a new dialog appears,
-     * right before creating the adjustment panel
+     * Initializes a preview session
      */
     public void startPreviewing() {
         if(comp.hasSelection()) {
@@ -286,13 +281,6 @@ public class ImageLayer extends ContentLayer {
             previewImage = image;
         }
         setState(PREVIEW);
-    }
-
-    /**
-     * This method is called when a new adjustment is made in the dialog, before running the filter
-     */
-    public void startNewPreviewFromDialog() {
-//        restoreOriginalFromPreviewBackup();
     }
 
     public void okPressedInDialog(String filterName) {
@@ -318,6 +306,10 @@ public class ImageLayer extends ContentLayer {
     }
 
     public void cancelPressedInDialog() {
+        stopPreviewing();
+    }
+
+    public void stopPreviewing() {
         assert state == PREVIEW || state == SHOW_ORIGINAL;
         assert previewImage != null;
 
@@ -345,8 +337,9 @@ public class ImageLayer extends ContentLayer {
     public void changePreviewImage(BufferedImage img, String filterName) {
 //        System.out.println(String.format("ImageLayer::changePreviewImage: filterName = '%s'", filterName));
 
+        // typically we should be in PREVIEW mode
         if (state == SHOW_ORIGINAL) {
-            // something was adjusted while in show original mode
+            // this is OK, something was adjusted while in show original mode
         } else if (state == NORMAL) {
             throw new IllegalStateException("change preview in normal state");
         }

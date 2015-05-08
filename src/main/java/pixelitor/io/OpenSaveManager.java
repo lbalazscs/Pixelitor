@@ -132,7 +132,7 @@ public class OpenSaveManager {
         } else {
             File file = comp.getFile();
             OutputFormat outputFormat = OutputFormat.valueFromFile(file);
-            outputFormat.saveComposition(comp, file);
+            outputFormat.saveComposition(comp, file, true);
             return true;
         }
     }
@@ -300,11 +300,12 @@ public class OpenSaveManager {
             OutputFormat[] outputFormats = OutputFormat.values();
             for (OutputFormat outputFormat : outputFormats) {
                 File f = new File(saveDir, "all_formats." + outputFormat.toString());
-                outputFormat.saveComposition(comp, f);
+                outputFormat.saveComposition(comp, f, false);
             }
         }
     }
 
+    // called by the "Save All Images to Folder..." menu
     public static void saveAllImagesToDir() {
         boolean cancelled = !SingleDirChooserPanel.selectOutputDir(true);
         if (cancelled) {
@@ -331,7 +332,7 @@ public class OpenSaveManager {
                     String fileName = String.format("%04d_%s.%s", i, Utils.toFileName(comp.getName()), outputFormat.toString());
                     File f = new File(saveDir, fileName);
                     progressMonitor.setNote("Saving " + fileName);
-                    outputFormat.saveComposition(comp, f);
+                    outputFormat.saveComposition(comp, f, false);
                 }
                 progressMonitor.close();
                 return null;
@@ -353,12 +354,14 @@ public class OpenSaveManager {
         }
     }
 
-    public static void afterSaveActions(Composition comp, File file) {
+    public static void afterSaveActions(Composition comp, File file, boolean addToRecentMenus) {
         // TODO for a multilayered image this should be set only if it was saved in a layered format?
         comp.setDirty(false);
 
         comp.setFile(file);
-        RecentFilesMenu.getInstance().addFile(file);
+        if(addToRecentMenus) {
+            RecentFilesMenu.getInstance().addFile(file);
+        }
         AppLogic.showFileSavedMessage(file);
     }
 }

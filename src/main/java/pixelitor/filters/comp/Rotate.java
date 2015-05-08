@@ -28,7 +28,7 @@ import static pixelitor.Composition.ImageChangeActions.REPAINT;
 /**
  * Rotates an image
  */
-public class Rotate extends CompOperation {
+public class Rotate extends CompAction {
     private final int angleDegree;
 
     private int newCanvasWidth;

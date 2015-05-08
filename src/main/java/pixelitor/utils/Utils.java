@@ -23,13 +23,7 @@ import pixelitor.ChangeReason;
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
 import pixelitor.PixelitorWindow;
-import pixelitor.filters.Canny;
-import pixelitor.filters.Fade;
 import pixelitor.filters.Filter;
-import pixelitor.filters.FilterUtils;
-import pixelitor.filters.FilterWithParametrizedGUI;
-import pixelitor.filters.Lightning;
-import pixelitor.filters.gui.FilterWithGUI;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -54,12 +48,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -320,57 +309,15 @@ public final class Utils {
         }
     }
 
-    public static void findSlowestFilter() {
-        Build.CURRENT.setPerformanceTest(true);
-        Filter[] filters = FilterUtils.getAllFiltersShuffled();
-        List<Filter> filtersToTest = new ArrayList<>();
-        Map<String, Double> results = new HashMap<>();
-
-        for (Filter op : filters) {
-            if (op instanceof Fade || op instanceof Canny || op instanceof Lightning) {
-                continue;
-            }
-            if (op.isEnabled() && (op instanceof FilterWithParametrizedGUI)) {
-                System.out.println("Warmup for " + op.getName());
-
-                op.execute(ChangeReason.OP_WITHOUT_DIALOG); // a  reason that makes backup
-                ((FilterWithGUI) op).endDialogSession();
-                filtersToTest.add(op);
-            }
-        }
-        for (Filter filter : filtersToTest) {
-            long startTime = System.nanoTime();
-            System.out.println("Testing " + filter.getName());
-
-            filter.execute(ChangeReason.OP_WITHOUT_DIALOG);
-            ((FilterWithGUI) filter).endDialogSession();
-
-            double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
-            results.put(filter.getName(), estimatedSeconds);
-        }
-        Collections.sort(filtersToTest, (o1, o2) -> {
-            double o1Time = results.get(o1.getName());
-            double o2Time = results.get(o2.getName());
-//                System.out.println(String.format("Utils::compare: % with %s o1Time = %.2f, o2Time = %.2f",
-//                        o1.getName(), o2.getName(), o1Time, o2Time));
-            return (o1Time - o2Time) > 0 ? 1 : -1;
-        });
-        for (Filter filter : filtersToTest) {
-            String name = filter.getName();
-            double time = results.get(name);
-            System.out.println(String.format("%s: %.2f seconds", name, time));
-        }
-    }
-
     public static float parseFloat(String input, float defaultValue) {
-        if((input != null) && !input.isEmpty()) {
+        if ((input != null) && !input.isEmpty()) {
             return Float.parseFloat(input);
         }
         return defaultValue;
     }
 
     public static int parseInt(String input, int defaultValue) {
-        if((input != null) && !input.isEmpty()) {
+        if ((input != null) && !input.isEmpty()) {
             return Integer.parseInt(input);
         }
         return defaultValue;
