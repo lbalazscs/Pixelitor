@@ -17,6 +17,10 @@
 
 package pixelitor.tools.brushes;
 
+/**
+ * A dabs strategy specifies the way the dabs of a
+ * DabsBrush are placed in response to GUI events
+ */
 public interface DabsStrategy {
     void onDragStart(int x, int y);
 

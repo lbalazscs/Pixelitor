@@ -78,9 +78,7 @@ public class LayersPanel extends JLayeredPane {
      * @param firstDragUpdate true if called for the first time during this drag
      */
     public void updateDrag(LayerButton newDraggedButton, int dragY, boolean firstDragUpdate) {
-        if (newDraggedButton == null) {
-            throw new IllegalArgumentException("newDraggedButton is null");
-        }
+        assert newDraggedButton != null;
 
         if (firstDragUpdate) {
             // put it into the drag layer so that it is always visible

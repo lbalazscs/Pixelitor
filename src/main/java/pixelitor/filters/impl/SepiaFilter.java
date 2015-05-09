@@ -19,41 +19,33 @@ package pixelitor.filters.impl;
 import com.jhlabs.image.PointFilter;
 
 public class SepiaFilter extends PointFilter {
+    private int intensity = 20;
 
-    /*
-    * Adjust the sepia parameters, basically higher value makes image brighter and so on
-    * @min = 15;
-    * @max = 30;
-    * @default = 20;
-    */
-    private int sepiaIntensity = 20;
     public SepiaFilter() {
     }
 
-    public SepiaFilter(int sepiaIntensity) {
-        this.sepiaIntensity = sepiaIntensity;
+    public SepiaFilter(int intensity) {
+        this.intensity = intensity;
     }
 
-    public void setSepiaIntensity(int sepiaIntensity) {
-        this.sepiaIntensity = sepiaIntensity;
-    }
-    public int getSepiaIntensity() {
-        return sepiaIntensity;
+    public void setIntensity(int intensity) {
+        this.intensity = intensity;
     }
 
     @Override
     public int filterRGB(int x, int y, int rgb) {
-        int sepiaDepth = 20;
-
         int a = (rgb >>> 24) & 0xFF;
         int r = (rgb >>> 16) & 0xFF;
         int g = (rgb >>> 8) & 0xFF;
         int b = rgb & 0xFF;
 
         int gry = (r + g + b) / 3;
+//        int gry = (r + r + b + g + g + g) / 6;
         r = g = b = gry;
-        r += (sepiaDepth * 2);
-        g += sepiaDepth;
+
+        int depth = 20;
+        r += (depth * 2);
+        g += depth;
 
         if (r > 255) {
             r = 255;
@@ -61,10 +53,9 @@ public class SepiaFilter extends PointFilter {
         if (g > 255) {
             g = 255;
         }
-//        if (b>255) b=255;
 
         // Darken blue color to increase sepia effect
-        b -= sepiaIntensity;
+        b -= intensity;
 
         // normalize if out of bounds
         if (b < 0) {

@@ -27,7 +27,7 @@ import javax.swing.*;
  */
 public class DefaultButton extends JButton {
     private static final Icon defaultIcon = IconUtils.getWestArrowIcon();
-    private Resettable resettable;
+    private final Resettable resettable;
 
     public DefaultButton(Resettable resettable) {
         this.resettable = resettable;

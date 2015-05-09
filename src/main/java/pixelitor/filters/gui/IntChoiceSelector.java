@@ -29,12 +29,10 @@ import java.awt.event.ActionListener;
  * Displays a JComboBox as the GUI for an IntChoiceParam
  */
 public class IntChoiceSelector extends JPanel implements ActionListener, ParamGUI {
-    private final IntChoiceParam model;
     private final JComboBox<IntChoiceParam.Value> comboBox;
     private final DefaultButton defaultButton;
 
     public IntChoiceSelector(IntChoiceParam model) {
-        this.model = model;
         setLayout(new FlowLayout(FlowLayout.LEFT));
 
         comboBox = new JComboBox<>(model);

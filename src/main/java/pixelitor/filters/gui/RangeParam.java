@@ -54,7 +54,6 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     private ChangeEvent changeEvent = null;
     private final EventListenerList listenerList = new EventListenerList();
-    private SliderSpinner sliderSpinner;
     private final boolean ignoreRandomize;
     private boolean adjustMaxAccordingToImage = false;
     private double maxToImageSizeRatio;
@@ -85,7 +84,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     @Override
     public JComponent createGUI() {
-        sliderSpinner = new SliderSpinner(this, textPosition, addDefaultButtons);
+        SliderSpinner sliderSpinner = new SliderSpinner(this, textPosition, addDefaultButtons);
         paramGUI = sliderSpinner;
         paramGUI.setEnabled(shouldBeEnabled());
         return sliderSpinner;

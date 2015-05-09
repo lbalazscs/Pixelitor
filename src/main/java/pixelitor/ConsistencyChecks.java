@@ -101,7 +101,7 @@ public final class ConsistencyChecks {
         int x = -layer.getTranslationX();
         int canvasWidth = comp.getCanvasWidth();
         int imageWidth = bufferedImage.getWidth();
-        if (x + canvasWidth > imageWidth) {
+        if (x + canvasWidth > imageWidth + 1) { // allow one pixel difference for rounding effects
             throw new IllegalStateException("x = " + x + ", canvasWidth = " + canvasWidth + ", imageWidth = " + imageWidth + ", comp = " + comp.getName());
         }
 
@@ -109,7 +109,7 @@ public final class ConsistencyChecks {
         int canvasHeight = comp.getCanvasHeight();
         int imageHeight = bufferedImage.getHeight();
 
-        if (y + canvasHeight > imageHeight) {
+        if (y + canvasHeight > imageHeight + 1) {
             throw new IllegalStateException("y = " + y + ", canvasHeight = " + canvasHeight + ", imageHeight = " + imageHeight + ", comp = " + comp.getName());
         }
 

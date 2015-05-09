@@ -55,9 +55,7 @@ public class History {
     }
 
     public static void addEdit(PixelitorEdit edit) {
-        if (edit == null) {
-            throw new IllegalArgumentException("edit is null");
-        }
+        assert edit != null;
 
         if (edit.canUndo()) {
             undoManager.addEdit(edit);

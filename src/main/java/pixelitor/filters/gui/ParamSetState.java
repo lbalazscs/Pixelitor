@@ -44,9 +44,7 @@ public class ParamSetState implements Iterable<ParamState> {
 
     private ParamSetState(List<ParamState> states) {
         for (ParamState state : states) {
-            if (state == null) {
-                throw new IllegalArgumentException("A state is null");
-            }
+            assert state != null;
         }
         this.states = states;
     }

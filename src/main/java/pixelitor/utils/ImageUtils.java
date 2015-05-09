@@ -28,6 +28,7 @@ import pixelitor.menus.view.ZoomLevel;
 import pixelitor.utils.debug.BufferedImageNode;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
@@ -579,12 +580,19 @@ public class ImageUtils {
         assert src != null;
         assert bounds != null;
 
-        Rectangle imageBounds = new Rectangle(0, 0, src.getWidth(), src.getHeight());
-        // TODO SwingUtilities.computeIntersection can do this without allocating a rectangle
-        Rectangle intersection = bounds.intersection(imageBounds);
+//        Rectangle imageBounds = new Rectangle(0, 0, src.getWidth(), src.getHeight());
+//        Rectangle intersection = bounds.intersection(imageBounds);
+
+        Rectangle intersection = SwingUtilities.computeIntersection(
+                0, 0, src.getWidth(), src.getHeight(), // image bounds
+                bounds
+        );
 
         if (intersection.width <= 0 || intersection.height <= 0) {
-            throw new IllegalStateException("empty intersection: bounds = " + bounds + ", imageBounds = " + imageBounds + ", intersection = " + intersection);
+            throw new IllegalStateException("empty intersection: bounds = " + bounds
+                    + ", src width = " + src.getWidth()
+                    + ", src height = " + src.getHeight()
+                    + ", intersection = " + intersection);
         }
 
         Raster copyRaster = src.getData(intersection);  // a copy
@@ -919,19 +927,6 @@ public class ImageUtils {
         ColorConvertOp colorConvertOp = new ColorConvertOp(null);
         dest = colorConvertOp.filter(src, dest);
         return dest;
-    }
-
-    public static void drawLightning(float startX, float startY, float endX, float endY) {
-        float dx = endX - startX;
-        float dy = endY - startY;
-        double dist = Math.sqrt(dx * dx + dy * dy);
-
-        int numIntermediatePointIterations = 10;
-        float maxDeviationDist = (float) (dist / 2);
-
-//        for (int i = 0; i < numIntermediatePointIterations; i++) {
-//        }
-        // TODO not finished?
     }
 
     public static void paintAffectedAreaShapes(BufferedImage image, Shape[] shapes) {

@@ -45,7 +45,6 @@ public abstract class EffectConfiguratorPanel extends JPanel {
     ParamAdjustmentListener adjustmentListener;
 
     private final RangeParam opacityRange;
-    private final SliderSpinner opacitySlider;
 
     protected final GridBagHelper gbHelper;
 
@@ -53,7 +52,7 @@ public abstract class EffectConfiguratorPanel extends JPanel {
         setBorder(BorderFactory.createTitledBorder('"' + effectName + "\" Configuration"));
 
         opacityRange = new RangeParam("Width:", 1, 100, 100);
-        opacitySlider = new SliderSpinner(opacityRange, NONE, false);
+        SliderSpinner opacitySlider = new SliderSpinner(opacityRange, NONE, false);
 
         enabledCB = new JCheckBox();
         enabledCB.setName("enabledCB");

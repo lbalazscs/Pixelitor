@@ -76,9 +76,7 @@ public class ColorParam extends AbstractFilterParam {
     }
 
     public void setColor(Color newColor, boolean trigger) {
-        if (newColor == null) {
-            throw new IllegalArgumentException("newColor is null");
-        }
+        assert newColor != null;
         if (!color.equals(newColor)) {
             this.color = newColor;
             if (paramGUI != null) {
@@ -144,7 +142,7 @@ public class ColorParam extends AbstractFilterParam {
         private final boolean allowOpacity;
         private final boolean allowOpacityAtRandomize;
 
-        private OpacitySetting(boolean allowOpacity, boolean allowOpacityAtRandomize) {
+        OpacitySetting(boolean allowOpacity, boolean allowOpacityAtRandomize) {
             this.allowOpacity = allowOpacity;
             this.allowOpacityAtRandomize = allowOpacityAtRandomize;
         }

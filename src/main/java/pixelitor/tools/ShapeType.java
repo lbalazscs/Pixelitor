@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,12 +8,13 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools;
 
 import org.jdesktop.swingx.geom.Star2D;
@@ -93,7 +94,9 @@ public enum ShapeType {
             } else if (height > width) {
                 innerRadius = halfWidth;
                 outerRadius = halfHeight;
-            } else { // TODO
+            } else {
+                // the Star2D constructor insists that the outer radius
+                // must be greater than the inner radius
                 innerRadius = halfWidth;
                 outerRadius = innerRadius + 0.01;
             }
@@ -102,7 +105,6 @@ public enum ShapeType {
         }
     }, RANDOM_STAR("Random Star", true) {
         private UserDrag lastUserDrag;
-        private RandomStar lastStar;
 
         @Override
         public Shape getShape(UserDrag userDrag) {

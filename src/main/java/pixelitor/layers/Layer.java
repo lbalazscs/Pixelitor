@@ -139,12 +139,8 @@ public abstract class Layer implements Serializable {
     }
 
     public void setOpacity(float newOpacity, boolean updateGUI, AddToHistory addToHistory, boolean updateImage) {
-        if (newOpacity > 1.0f) {
-            throw new IllegalArgumentException("newOpacity = " + newOpacity);
-        }
-        if (newOpacity < 0.0f) {
-            throw new IllegalArgumentException("newOpacity = " + newOpacity);
-        }
+        assert newOpacity <= 1.0f : "newOpacity = " + newOpacity;
+        assert newOpacity >= 0.0f : "newOpacity = " + newOpacity;
 
         if (addToHistory == AddToHistory.YES) {
             LayerOpacityEdit edit = new LayerOpacityEdit(this, opacity);

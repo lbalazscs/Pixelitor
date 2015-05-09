@@ -24,6 +24,7 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
+import java.util.Objects;
 
 import static java.awt.Color.BLUE;
 import static java.awt.Color.GREEN;
@@ -80,9 +81,7 @@ public class HistogramsPanel extends JPanel implements ImageSwitchListener {
     }
 
     public void updateFromCompIfShown(Composition comp) {
-        if (comp == null) {
-            throw new IllegalArgumentException("trying to update with null comp");
-        }
+        Objects.requireNonNull(comp);
         if (!areHistogramsShown()) {
             return;
         }

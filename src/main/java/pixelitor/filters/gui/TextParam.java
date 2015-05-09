@@ -29,7 +29,7 @@ public class TextParam extends AbstractFilterParam {
     private final String defaultValue;
 
     private boolean trigger = true; // whether the running of the filter should be triggered
-    private TextParamGUI gui;
+    private final TextParamGUI gui;
 
     public TextParam(String name, String defaultValue) {
         super(name);

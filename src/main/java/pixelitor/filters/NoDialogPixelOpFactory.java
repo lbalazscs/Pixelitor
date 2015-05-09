@@ -33,7 +33,7 @@ public class NoDialogPixelOpFactory {
             b = r;
             return (a << 24) | (r << 16) | (g << 8) | b;
         };
-        return new PixelFilter("Red (as BW)", rgbOp);
+        return new ExtractChannelFilter("Red (as BW)", rgbOp);
     }
 
     public static Action getGreenChannelOp() {
@@ -42,7 +42,7 @@ public class NoDialogPixelOpFactory {
             b = g;
             return (a << 24) | (r << 16) | (g << 8) | b;
         };
-        return new PixelFilter("Green (as BW)", rgbOp);
+        return new ExtractChannelFilter("Green (as BW)", rgbOp);
     }
 
     public static Action getBlueChannelOp() {
@@ -51,7 +51,7 @@ public class NoDialogPixelOpFactory {
             g = b;
             return (a << 24) | (r << 16) | (g << 8) | b;
         };
-        return new PixelFilter("Blue (as BW)", rgbOp);
+        return new ExtractChannelFilter("Blue (as BW)", rgbOp);
     }
 
     public static Action getValueChannelOp() {
@@ -70,7 +70,7 @@ public class NoDialogPixelOpFactory {
 
             return (a << 24) | (r << 16) | (g << 8) | b;
         };
-        return new PixelFilter("Value = max(R,G,B)", rgbOp);
+        return new ExtractChannelFilter("Value = max(R,G,B)", rgbOp);
     }
 
     public static Action getDesaturateChannelOp() {
@@ -93,7 +93,7 @@ public class NoDialogPixelOpFactory {
 
             return (a << 24) | (r << 16) | (g << 8) | b;
         };
-        return new PixelFilter("Desaturate", rgbOp);
+        return new ExtractChannelFilter("Desaturate", rgbOp);
     }
 
 
@@ -120,7 +120,7 @@ public class NoDialogPixelOpFactory {
 
             return (a << 24) | (r << 16) | (g << 8) | b;
         };
-        return new PixelFilter("Saturation", rgbOp);
+        return new ExtractChannelFilter("Saturation", rgbOp);
     }
 
     public static Action getHueChannelOp() {
@@ -141,7 +141,7 @@ public class NoDialogPixelOpFactory {
                 return (a << 24) | (r << 16) | (g << 8) | b;
             }
         };
-        return new PixelFilter("Hue", rgbOp);
+        return new ExtractChannelFilter("Hue", rgbOp);
     }
 
 
@@ -163,7 +163,7 @@ public class NoDialogPixelOpFactory {
                 return (a << 24) | newRGB; // add the real alpha
             }
         };
-        return new PixelFilter("Hue (with colors)", rgbOp);
+        return new ExtractChannelFilter("Hue (with colors)", rgbOp);
     }
 
 }

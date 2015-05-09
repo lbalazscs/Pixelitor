@@ -29,7 +29,7 @@ public class FilterAction implements FilterGUIComponent {
     private final String toolTipText;
     private boolean finalAnimationSettingMode = false;
 
-    private String name;
+    private final String name;
     protected ParamAdjustmentListener adjustmentListener;
 
     // most actions should be available in the final animation settings

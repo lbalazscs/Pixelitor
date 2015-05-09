@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import pixelitor.FillType;
@@ -44,6 +45,6 @@ public class Fill extends Filter {
 
     @Override
     public void randomizeSettings() {
-        // TODO maybe a FillType returning a random color?
+        // no settings
     }
 }

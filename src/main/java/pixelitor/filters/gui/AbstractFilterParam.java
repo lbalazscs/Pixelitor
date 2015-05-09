@@ -25,8 +25,8 @@ import java.util.Objects;
 public abstract class AbstractFilterParam implements FilterParam {
     private final String name;
     protected ParamAdjustmentListener adjustmentListener;
-    protected boolean enabledByAnimationSetting = true;
-    protected boolean enabledByFilterLogic = true;
+    private boolean enabledByAnimationSetting = true;
+    private boolean enabledByFilterLogic = true;
     protected ParamGUI paramGUI;
 
     AbstractFilterParam(String name) {

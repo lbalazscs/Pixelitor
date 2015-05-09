@@ -64,15 +64,14 @@ public class JHCells extends FilterWithParametrizedGUI {
 
     private final AngleParam angle = new AngleParam("Angle", 0);
 
-    private final FilterAction reseedAction = new ReseedNoiseFilterAction(e -> {
-        CachedFloatRandom.reseedCache();
-        Noise.reseed();
-    });
-
     private CellularFilter filter;
 
     public JHCells() {
         super("Cells", false, false);
+        FilterAction reseedAction = new ReseedNoiseFilterAction(e -> {
+            CachedFloatRandom.reseedCache();
+            Noise.reseed();
+        });
         setParamSet(new ParamSet(
                 type,
                 refineType,

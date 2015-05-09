@@ -53,9 +53,7 @@ public class FastLookupOp implements BufferedImageOp {
             int[] destData = destDataBuffer.getData();
 
             int length = srcData.length;
-            if (length != destData.length) {
-                throw new IllegalArgumentException("src and dest are not the same size");
-            }
+            assert length == destData.length;
 
             short[][] table = lookupTable.getTable();
 

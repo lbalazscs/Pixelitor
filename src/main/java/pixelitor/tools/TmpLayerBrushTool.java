@@ -28,7 +28,7 @@ import java.awt.image.BufferedImage;
  * and therefore has blending mode and opacity settings
  */
 public abstract class TmpLayerBrushTool extends AbstractBrushTool {
-    protected BlendingModePanel blendingModePanel;
+    private BlendingModePanel blendingModePanel;
 
     public TmpLayerBrushTool(char activationKeyChar, String name, String iconFileName, String toolMessage) {
         super(activationKeyChar, name, iconFileName, toolMessage);

@@ -54,7 +54,6 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
  * Photo Collage
  */
 public class PhotoCollage extends FilterWithParametrizedGUI {
-    //    private RangeParam sizeParam = new RangeParam("Image Size", 40, 999, 200);
     private final GroupedRangeParam sizeParam = new GroupedRangeParam("Photo Size", 40, 999, 200);
 
     private final RangeParam marginSizeParam = new RangeParam("Margin", 0, 20, 5);
@@ -99,7 +98,6 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
         g.setColor(bgColorParam.getColor());
         g.fillRect(0, 0, dest.getWidth(), dest.getHeight());
 
-
         Rectangle fullImageRect = new Rectangle(0, 0, xSize, ySize);
         int margin = marginSizeParam.getValue();
         Rectangle imageRect = new Rectangle(fullImageRect);
@@ -119,14 +117,11 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
             shadowImage = new StackBlurFilter(shadowSoftness).filter(shadowImage, shadowImage);
         }
 
-//        Rectangle debugShadowRect = new Rectangle(0, 0, shadowImage.getWidth(), shadowImage.getHeight());
-
         Point2D offset = Utils.calculateOffset(shadowDistanceParam.getValue(), shadowAngleParam.getValueInRadians());
         int shadowOffsetX = (int) offset.getX();
         int shadowOffsetY = (int) offset.getY();
 
-//        Composite shadowComposite = new MultiplyComposite(shadowOpacityParam.getValueAsPercentage());
-// TODO multiply makes sense only if the shadow color is not black
+        // multiply makes sense only if the shadow color is not black
         Composite shadowComposite = AlphaComposite.getInstance(SRC_OVER, shadowOpacityParam.getValueAsPercentage());
 
         for (int i = 0; i < imageNumberParam.getValue(); i++) {
@@ -150,19 +145,12 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
                 ty = rand.nextInt(maxTranslateY);
             }
             AffineTransform randomTransform = AffineTransform.getTranslateInstance(tx, ty);
-            // step 1: rotate
 
+            // step 1: rotate
             float maxRandomRot = randomRotationParam.getValueAsPercentage();
-            double theta;
-            if (maxRandomRot == 0.0f) {
-                // no not rotate
-                theta = 0;
-            } else {
-                // the rotation amount is a number between -PI and PI if maxRandomRot is 1.0;
-                theta = Math.PI * 2 * rand.nextFloat() - Math.PI;
-                // normalize
-                theta *= maxRandomRot;
-            }
+            // the rotation amount is a number between -PI and PI if maxRandomRot is 1.0;
+            double theta = Math.PI * 2 * rand.nextFloat() - Math.PI;
+            theta *= maxRandomRot;
             randomTransform.rotate(theta, xSize / 2.0, ySize / 2.0);
 
             // Calculate the transform of the shadow

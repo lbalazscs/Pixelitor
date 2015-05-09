@@ -39,8 +39,6 @@ public class JHBrushedMetal extends FilterWithParametrizedGUI {
     private final RangeParam amount = new RangeParam("Amount (%)", 0, 100, 50);
     private final RangeParam shine = new RangeParam("Shine (%)", 0, 100, 10);
 
-    private BrushedMetalFilter filter;
-
     public JHBrushedMetal() {
         super("Brushed Metal", false, false);
         setParamSet(new ParamSet(
@@ -57,7 +55,7 @@ public class JHBrushedMetal extends FilterWithParametrizedGUI {
         ReseedSupport.reInitialize();
         Random rand = ReseedSupport.getRand();
 
-        filter = new BrushedMetalFilter(color.getColor().getRGB(),
+        BrushedMetalFilter filter = new BrushedMetalFilter(color.getColor().getRGB(),
                 radius.getValue(),
                 amount.getValueAsPercentage(),
                 true,

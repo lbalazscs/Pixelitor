@@ -36,7 +36,7 @@ import static pixelitor.filters.gui.FilterGUIComponent.EnabledReason.FILTER_LOGI
 /**
  * A filter parameter for selecting a choice from a list of values
  */
-public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel<IntChoiceParam.Value>, FilterParam {
+public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel<IntChoiceParam.Value> {
     private final List<Value> choicesList = new ArrayList<>();
 
     private Value defaultChoice;
@@ -145,6 +145,7 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
         listenerList.add(ListDataListener.class, l);
     }
 
+    @Override
     public void removeListDataListener(ListDataListener l) {
         listenerList.remove(ListDataListener.class, l);
     }

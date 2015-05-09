@@ -32,6 +32,7 @@ import pixelitor.tools.toolhandlers.ImageLayerCheckHandler;
 import pixelitor.tools.toolhandlers.ToolHandler;
 import pixelitor.utils.Utils;
 
+import javax.swing.*;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
@@ -225,9 +226,13 @@ public abstract class Tool {
 
         Composition comp = affectedArea.getComp();
 
-        Rectangle fullImageBounds = new Rectangle(0, 0, originalImage.getWidth(), originalImage.getHeight());
-        // TODO SwingUtilities.computeIntersection can do this without allocating a rectangle
-        Rectangle saveRectangle = rectangleAffectedByTool.intersection(fullImageBounds);
+//        Rectangle fullImageBounds = new Rectangle(0, 0, originalImage.getWidth(), originalImage.getHeight());
+//        Rectangle saveRectangle = rectangleAffectedByTool.intersection(fullImageBounds);
+
+        Rectangle saveRectangle = SwingUtilities.computeIntersection(
+                0, 0, originalImage.getWidth(), originalImage.getHeight(), // full image bounds
+                rectangleAffectedByTool
+        );
 
         if (!saveRectangle.isEmpty()) {
             PartialImageEdit edit = new PartialImageEdit(getName(), comp, originalImage, saveRectangle, false);

@@ -45,9 +45,7 @@ public abstract class Filter extends AbstractAction {
     }
 
     protected Filter(String name, Icon icon) {
-        if (name == null) {
-            throw new IllegalArgumentException("name is null");
-        }
+        assert name != null;
 
         putValue(Action.SMALL_ICON, icon);
         putValue(Action.NAME, name);

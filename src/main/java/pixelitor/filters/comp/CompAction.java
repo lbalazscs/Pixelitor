@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.comp;
 
 import pixelitor.Composition;
@@ -32,9 +33,7 @@ public abstract class CompAction extends AbstractAction {
     }
 
     private CompAction(String name, Icon icon) {
-        if (name == null) {
-            throw new IllegalArgumentException("name is null");
-        }
+        assert name != null;
 
         putValue(Action.SMALL_ICON, icon);
         putValue(Action.NAME, name);

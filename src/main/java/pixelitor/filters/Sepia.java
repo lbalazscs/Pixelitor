@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import pixelitor.filters.gui.ParamSet;
@@ -41,7 +42,7 @@ public class Sepia extends FilterWithParametrizedGUI  {
             filter = new SepiaFilter();
         }
 
-        filter.setSepiaIntensity(intensity.getValue());
+        filter.setIntensity(intensity.getValue());
 
         dest = filter.filter(src, dest);
         return dest;

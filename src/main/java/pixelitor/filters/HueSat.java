@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -71,9 +71,7 @@ public class HueSat extends FilterWithParametrizedGUI {
         int[] destData = ImageUtils.getPixelsAsArray(dest);
 
         int length = srcData.length;
-        if (length != destData.length) {
-            throw new IllegalArgumentException("src and dest are not the same size");
-        }
+        assert length == destData.length;
 
         float[] tmpHSBArray = {0.0f, 0.0f, 0.0f};
 

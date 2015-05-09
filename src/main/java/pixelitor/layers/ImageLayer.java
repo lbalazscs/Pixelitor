@@ -32,6 +32,7 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.ImageLayerNode;
 
+import javax.swing.*;
 import java.awt.AlphaComposite;
 import java.awt.Composite;
 import java.awt.Graphics2D;
@@ -43,12 +44,12 @@ import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.Objects;
 import java.util.Optional;
 
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
+import static java.util.Objects.requireNonNull;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
@@ -133,9 +134,8 @@ public class ImageLayer extends ContentLayer {
     public ImageLayer(Composition comp, BufferedImage image, String name) {
         super(comp, name == null ? comp.generateNewLayerName() : name);
         canvas = comp.getCanvas();
-        if(image == null) {
-            throw new IllegalArgumentException("image is null");
-        }
+
+        requireNonNull(image);
 
         setImage(image);
         checkConstructorPostConditions();
@@ -148,9 +148,7 @@ public class ImageLayer extends ContentLayer {
         super(comp, name);
         canvas = comp.getCanvas();
 
-        if(pastedImage == null) {
-            throw new IllegalArgumentException("image is null");
-        }
+        requireNonNull(pastedImage);
 
         int pastedWidth = pastedImage.getWidth();
         int pastedHeight = pastedImage.getHeight();
@@ -259,7 +257,7 @@ public class ImageLayer extends ContentLayer {
 
     // sets the image object ignoring the selection
     public void setImage(BufferedImage newImage) {
-        image = Objects.requireNonNull(newImage);
+        image = requireNonNull(newImage);
 
         assert Utils.checkRasterMinimum(newImage);
 
@@ -345,10 +343,8 @@ public class ImageLayer extends ContentLayer {
         }
 
         assert previewImage != null : "previewImage was null with " + filterName;
+        assert img != null;
 
-        if(img == null) {
-            throw new IllegalArgumentException("img == null");
-        }
         if(img == image) {
             // this can happen if a filter with preview decides that no
             // change is necessary and returns the src
@@ -374,9 +370,8 @@ public class ImageLayer extends ContentLayer {
     }
 
     public void filterWithoutDialogFinished(BufferedImage transformedImage, ChangeReason changeReason, String opName) {
-        if(transformedImage == null) {
-            throw new IllegalArgumentException("transformedImage == null");
-        }
+        requireNonNull(transformedImage);
+
         // A filter without dialog should never return the original image
         if(transformedImage == image) { // the filter returned the original
             throw new IllegalStateException(opName + " returned the original image");
@@ -407,9 +402,7 @@ public class ImageLayer extends ContentLayer {
     }
 
     public void changeImageUndoRedo(BufferedImage img) {
-        if(img == null) {
-            throw new IllegalArgumentException("img == null");
-        }
+        requireNonNull(img);
         assert img != image; // simple filters always change something
         assert state == NORMAL;
         setImageWithSelection(img);
@@ -736,9 +729,13 @@ public class ImageLayer extends ContentLayer {
         Rectangle bounds = selection.getShapeBounds(); // relative to the composition
 
         bounds.translate(-getTranslationX(), -getTranslationY()); // relative to the image
-        Rectangle imageBounds = new Rectangle(0, 0, src.getWidth(), src.getHeight());
-        // TODO SwingUtilities.computeIntersection can do this without allocating a rectangle
-        bounds = bounds.intersection(imageBounds);
+
+//        Rectangle imageBounds = new Rectangle(0, 0, src.getWidth(), src.getHeight());
+//        bounds = bounds.intersection(imageBounds);
+
+        bounds = SwingUtilities.computeIntersection(
+                0, 0, src.getWidth(), src.getHeight(), // image bounds
+                bounds);
 
         if(bounds.isEmpty()) { // TODO if the selection is outside the image?
             if(copyAndTranslateIfSelected) {

@@ -293,9 +293,7 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
             int[] destData = destDataBuffer.getData();
 
             int length = srcData.length;
-            if (length != destData.length) {
-                throw new IllegalArgumentException("src and dest are not the same size");
-            }
+            assert length == destData.length;
 
             for (int i = 0; i < length; i++) {
                 int rgb = srcData[i];

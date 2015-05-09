@@ -17,6 +17,10 @@
 
 package pixelitor.tools.brushes;
 
+/**
+ * The simplest dabs strategy: it places the dabs along the lines
+ * connecting the mouse events with an uniform spacing between them
+ */
 public class LinearDabsStrategy implements DabsStrategy {
     private final DabsBrush brush;
     private double distanceFromLastDab = 0;

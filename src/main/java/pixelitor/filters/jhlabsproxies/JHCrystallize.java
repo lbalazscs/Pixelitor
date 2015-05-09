@@ -46,15 +46,14 @@ public class JHCrystallize extends FilterWithParametrizedGUI {
     private final RangeParam randomness = new RangeParam("Shape Randomness (%)", 0, 100, 0);
     private final IntChoiceParam gridType = IntChoiceParam.getGridTypeChoices("Shape", randomness);
 
-    private final FilterAction reseedAction = new ReseedNoiseFilterAction(e -> {
-        CachedFloatRandom.reseedCache();
-        Noise.reseed();
-    });
-
     private CrystallizeFilter filter;
 
     public JHCrystallize() {
         super("Crystallize", true, false);
+        FilterAction reseedAction = new ReseedNoiseFilterAction(e -> {
+            CachedFloatRandom.reseedCache();
+            Noise.reseed();
+        });
         setParamSet(new ParamSet(
                 size.adjustRangeToImageSize(0.2),
                 edgeThickness,

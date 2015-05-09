@@ -31,7 +31,7 @@ import java.awt.event.ActionListener;
 public class RandomFilterAdjustPanel extends AdjustPanel {
     private final JPanel realSettingsPanel;
     private JPanel lastFilterPanel;
-    private RandomFilterSource filterSource;
+    private final RandomFilterSource filterSource;
     private final JPanel northPanel;
     private final JButton backButton;
     private final JButton forwardButton;

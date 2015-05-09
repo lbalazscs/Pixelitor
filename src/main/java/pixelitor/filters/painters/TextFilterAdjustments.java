@@ -60,7 +60,6 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
 //    private JCheckBox kerningCB;
 
     private final ColorParam color = new ColorParam("Color", BLACK, USER_ONLY_OPACITY);
-    private ColorSelector colorSelector;
 
     private EffectsPanel effectsPanel;
     private JComboBox<VerticalAlignment> verticalAlignmentCombo;
@@ -104,7 +103,7 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
         gbh.addLastControl(textTF);
 
         gbh.addLabel("Color", 0, 1);
-        colorSelector = new ColorSelector(color);
+        ColorSelector colorSelector = new ColorSelector(color);
         gbh.addLastControl(colorSelector);
         color.setAdjustmentListener(this);
 

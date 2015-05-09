@@ -44,6 +44,7 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -138,15 +139,10 @@ public class OpenSaveManager {
     }
 
     public static void saveImageToFile(File selectedFile, BufferedImage image, String format) {
-        if (selectedFile == null) {
-            throw new IllegalArgumentException("selectedFile is null");
-        }
-        if (image == null) {
-            throw new IllegalArgumentException("image is null");
-        }
-        if (format == null) {
-            throw new IllegalArgumentException("format is null");
-        }
+        Objects.requireNonNull(selectedFile);
+        Objects.requireNonNull(image);
+        Objects.requireNonNull(format);
+
         Runnable r = () -> {
             try {
                 if ("jpg".equals(format)) {

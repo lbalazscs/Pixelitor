@@ -94,9 +94,9 @@ public class ColorBalance extends FilterWithParametrizedGUI {
 
         private static final int LUT_TABLE_SIZE = 256;
 
-        short[] redMapping = new short[LUT_TABLE_SIZE];
-        short[] greenMapping = new short[LUT_TABLE_SIZE];
-        short[] blueMapping = new short[LUT_TABLE_SIZE];
+        final short[] redMapping = new short[LUT_TABLE_SIZE];
+        final short[] greenMapping = new short[LUT_TABLE_SIZE];
+        final short[] blueMapping = new short[LUT_TABLE_SIZE];
 
         public LookupCalculator(float cyanRed, float magentaGreen, float yellowBlue, int affect) {
             this.cyanRed = cyanRed;

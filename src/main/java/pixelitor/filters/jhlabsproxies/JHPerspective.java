@@ -39,8 +39,6 @@ public class JHPerspective extends FilterWithParametrizedGUI {
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
     private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
 
-    private PerspectiveFilter filter;
-
     public JHPerspective() {
         super("Perspective", true, false);
         setParamSet(new ParamSet(
@@ -60,7 +58,7 @@ public class JHPerspective extends FilterWithParametrizedGUI {
         float southEastX = southEast.getRelativeX();
         float southEastY = southEast.getRelativeY();
 
-        filter = new PerspectiveFilter(northWestX, northWestY, northEastX, northEastY,
+        PerspectiveFilter filter = new PerspectiveFilter(northWestX, northWestY, northEastX, northEastY,
                 southEastX, southEastY, southWestX, southWestY);
 
         filter.setEdgeAction(edgeAction.getValue());

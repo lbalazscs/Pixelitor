@@ -53,9 +53,7 @@ public class Desktop {
     }
 
     public void activateInternalImageFrame(InternalImageFrame frame) {
-        if (frame == null) {
-            throw new IllegalArgumentException("frame is null");
-        }
+        assert frame != null;
         desktopPane.getDesktopManager().activateFrame(frame);
     }
 

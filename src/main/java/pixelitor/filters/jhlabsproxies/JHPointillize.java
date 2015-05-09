@@ -47,16 +47,14 @@ public class JHPointillize extends FilterWithParametrizedGUI {
     private final RangeParam randomness = new RangeParam("Grid Randomness (%)", 0, 100, 0);
     private final IntChoiceParam gridType = IntChoiceParam.getGridTypeChoices("Grid Type", randomness);
 
-    private final FilterAction reseedAction = new ReseedNoiseFilterAction(e -> {
-        CachedFloatRandom.reseedCache();
-        Noise.reseed();
-    });
-
-
     private PointillizeFilter filter;
 
     public JHPointillize() {
         super("Pointillize", true, false);
+        FilterAction reseedAction = new ReseedNoiseFilterAction(e -> {
+            CachedFloatRandom.reseedCache();
+            Noise.reseed();
+        });
         setParamSet(new ParamSet(
                 gridSize.adjustRangeToImageSize(0.2),
                 gridType,

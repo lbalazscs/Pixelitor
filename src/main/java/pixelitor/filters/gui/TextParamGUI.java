@@ -23,11 +23,9 @@ import javax.swing.event.DocumentListener;
 import java.awt.FlowLayout;
 
 public class TextParamGUI extends JPanel implements ParamGUI {
-    private TextParam param;
     private final JTextField tf;
 
     public TextParamGUI(TextParam param, String defaultValue, ParamAdjustmentListener adjustmentListener) {
-        this.param = param;
         tf = new JTextField(defaultValue);
 
         setLayout(new FlowLayout(FlowLayout.LEFT));
