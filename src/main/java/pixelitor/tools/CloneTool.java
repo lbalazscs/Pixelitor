@@ -18,13 +18,15 @@
 package pixelitor.tools;
 
 import com.bric.util.JVM;
+import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.Build;
 import pixelitor.ImageDisplay;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.CloneBrush;
-import pixelitor.tools.brushes.ImageBrushType;
+import pixelitor.tools.brushes.CloneBrushType;
 import pixelitor.utils.Dialogs;
 
+import javax.swing.*;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
@@ -42,6 +44,8 @@ public class CloneTool extends TmpLayerBrushTool {
         CLONING
     }
 
+    private final EnumComboBoxModel<CloneBrushType> typeModel = new EnumComboBoxModel<>(CloneBrushType.class);
+
     private State state = NO_SOURCE;
     private boolean sampleAllLayers = false;
 
@@ -54,24 +58,32 @@ public class CloneTool extends TmpLayerBrushTool {
 
     @Override
     public void initSettingsPanel() {
+        JComboBox<ShapeType> typeCB = new JComboBox<>(typeModel);
+        settingsPanel.addWithLabel("Brush:", typeCB, "typeCB");
+        typeCB.addActionListener(e -> {
+            CloneBrushType brushType = (CloneBrushType) typeCB.getSelectedItem();
+            cloneBrush.typeChanged(brushType);
+        });
+
+
         addSizeSelector();
 
         addBlendingModePanel();
 
-        toolSettingsPanel.addSeparator();
+        settingsPanel.addSeparator();
 
-        toolSettingsPanel.addCheckBox("Aligned", true, "alignedCB",
+        settingsPanel.addCheckBox("Aligned", true, "alignedCB",
                 cloneBrush::setAligned);
 
-        toolSettingsPanel.addSeparator();
+        settingsPanel.addSeparator();
 
-        toolSettingsPanel.addCheckBox("Sample All Layers", false, "sampleAllLayersCB",
+        settingsPanel.addCheckBox("Sample All Layers", false, "sampleAllLayersCB",
                 selected -> sampleAllLayers = selected);
     }
 
     @Override
     protected void initBrushVariables() {
-        cloneBrush = new CloneBrush(ImageBrushType.SOFT);
+        cloneBrush = new CloneBrush(CloneBrushType.HARD);
         brush = new BrushAffectedArea(cloneBrush);
         brushAffectedArea = (BrushAffectedArea) brush;
     }

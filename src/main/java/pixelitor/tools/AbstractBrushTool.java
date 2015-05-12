@@ -90,7 +90,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     @Override
     public void initSettingsPanel() {
         typeSelector = new JComboBox<>(BrushType.values());
-        toolSettingsPanel.addWithLabel("Type:", typeSelector, "brushTypeSelector");
+        settingsPanel.addWithLabel("Type:", typeSelector, "brushTypeSelector");
         typeSelector.addActionListener(e -> {
             Supplier<Brush> brushType = (Supplier<Brush>) typeSelector.getSelectedItem();
             symmetryBrush.brushTypeChanged(brushType);
@@ -102,13 +102,13 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         addSizeSelector();
 
         JComboBox<Symmetry> symmetryCombo = new JComboBox<>(symmetryModel);
-        toolSettingsPanel.addWithLabel("Mirror:", symmetryCombo, "symmetrySelector");
+        settingsPanel.addWithLabel("Mirror:", symmetryCombo, "symmetrySelector");
         symmetryCombo.addActionListener(e -> symmetryBrush.symmetryChanged(getCurrentSymmetry()));
     }
 
     protected void addSizeSelector() {
         SliderSpinner brushSizeSelector = new SliderSpinner(brushRadiusParam, WEST, false);
-        toolSettingsPanel.add(brushSizeSelector);
+        settingsPanel.add(brushSizeSelector);
     }
 
     @Override

@@ -64,7 +64,7 @@ public abstract class Tool {
     private ToolHandler handlerChainStart;
     private HandToolHandler handToolHandler;
 
-    protected ToolSettingsPanel toolSettingsPanel;
+    protected ToolSettingsPanel settingsPanel;
     protected boolean ended = false;
 
     protected Tool(char activationKeyChar, String name, String iconFileName, String toolMessage, Cursor cursor, boolean allowOnlyImageLayers, boolean handToolForwarding, boolean constrainIfShiftDown, ClipStrategy clipStrategy) {
@@ -287,12 +287,12 @@ public abstract class Tool {
 
     public abstract void mouseReleased(MouseEvent e, ImageDisplay ic);
 
-    public void setToolSettingsPanel(ToolSettingsPanel toolSettingsPanel) {
-        this.toolSettingsPanel = toolSettingsPanel;
+    public void setSettingsPanel(ToolSettingsPanel settingsPanel) {
+        this.settingsPanel = settingsPanel;
     }
 
     public void randomize() {
-        Utils.randomizeGUIWidgetsOn(toolSettingsPanel);
+        Utils.randomizeGUIWidgetsOn(settingsPanel);
     }
 
     public UserDrag getUserDrag() {

@@ -24,7 +24,7 @@ import java.awt.event.ActionListener;
 import java.util.function.Consumer;
 
 /**
- * THe upper horizontal panel with the settings of the active tool.
+ * The upper horizontal panel with the settings of the active tool.
  */
 public class ToolSettingsPanel extends JPanel {
     public ToolSettingsPanel() {

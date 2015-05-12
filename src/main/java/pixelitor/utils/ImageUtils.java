@@ -729,7 +729,7 @@ public class ImageUtils {
         return brushImage;
     }
 
-    public static BufferedImage createSoftTemplateBrush(int size) {
+    public static BufferedImage createSoftBWBrush(int size) {
         BufferedImage brushImage = new BufferedImage(size, size, TYPE_INT_ARGB);
 
         Graphics2D g = brushImage.createGraphics();
@@ -749,6 +749,17 @@ public class ImageUtils {
         brushImage = blur.filter(brushImage, brushImage);
 
         return brushImage;
+    }
+
+    public static BufferedImage createSoftTransparencyImage(int size) {
+        BufferedImage image = createSoftBWBrush(size);
+        int[] pixels = ImageUtils.getPixelsAsArray(image);
+        for (int i = 0, pixelsLength = pixels.length; i < pixelsLength; i++) {
+            int pixelValue = pixels[i] & 0xFF; // take the blue channel: they are all the same
+            int alpha = 255 - pixelValue;
+            pixels[i] = alpha << 24;
+        }
+        return image;
     }
 
     public static BufferedImage getGridImageOnTransparentBackground(Color color, int maxX, int maxY, int hWidth, int hSpacing, int vWidth, int vSpacing, boolean emptyIntersections) {

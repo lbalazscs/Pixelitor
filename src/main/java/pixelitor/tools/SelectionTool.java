@@ -57,20 +57,20 @@ public class SelectionTool extends Tool {
     @Override
     public void initSettingsPanel() {
         typeCombo = new JComboBox<>(SelectionType.values());
-        toolSettingsPanel.addWithLabel("Type:", typeCombo, "selectionTypeCombo");
+        settingsPanel.addWithLabel("Type:", typeCombo, "selectionTypeCombo");
 
-        toolSettingsPanel.addSeparator();
+        settingsPanel.addSeparator();
 
         interactionCombo = new JComboBox<>(SelectionInteraction.values());
-        toolSettingsPanel.addWithLabel("New Selection:", interactionCombo, "selectionInteractionCombo");
+        settingsPanel.addWithLabel("New Selection:", interactionCombo, "selectionInteractionCombo");
 
-        toolSettingsPanel.addSeparator();
+        settingsPanel.addSeparator();
 
-        toolSettingsPanel.addButton(SelectionActions.getTraceWithBrush());
+        settingsPanel.addButton(SelectionActions.getTraceWithBrush());
 
-        toolSettingsPanel.addButton(SelectionActions.getTraceWithEraser());
+        settingsPanel.addButton(SelectionActions.getTraceWithEraser());
 
-        toolSettingsPanel.addButton(SelectionActions.getCropAction());
+        settingsPanel.addButton(SelectionActions.getCropAction());
     }
 
     @Override

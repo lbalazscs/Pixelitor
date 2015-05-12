@@ -42,7 +42,7 @@ public class ColorPickerTool extends Tool {
 
     @Override
     public void initSettingsPanel() {
-        toolSettingsPanel.add(sampleLayerOnly);
+        settingsPanel.add(sampleLayerOnly);
     }
 
 

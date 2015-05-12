@@ -19,7 +19,6 @@ package pixelitor.tools.brushes;
 
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
@@ -36,18 +35,19 @@ public class CloneBrush extends DabsBrush {
     private boolean aligned = true;
 
     private BufferedImage brushImage;
-    private Ellipse2D.Double circleClip;
     private boolean firstCloningStart = true;
+    private CloneBrushType type;
 
-    public CloneBrush(ImageBrushType imageBrushType) {
+    public CloneBrush(CloneBrushType type) {
         super(0.25, false, true);
+        this.type = type;
     }
 
     @Override
     public void setRadius(int radius) {
         super.setRadius(radius);
         brushImage = new BufferedImage(diameter, diameter, TYPE_INT_ARGB);
-        circleClip = new Ellipse2D.Double(0, 0, diameter, diameter);
+        type.setSize(diameter);
     }
 
     public void setSource(BufferedImage sourceImage, int srcX, int srcY) {
@@ -86,7 +86,8 @@ public class CloneBrush extends DabsBrush {
     @Override
     void setupBrushStamp(double x, double y) {
         Graphics2D g = brushImage.createGraphics();
-        g.setClip(circleClip);
+
+        type.beforeDrawImage(g);
 
 //        double scale = 0.5;
 
@@ -97,10 +98,17 @@ public class CloneBrush extends DabsBrush {
 
         g.drawImage(sourceImage,
                 transform, null);
+
+        type.afterDrawImage(g);
+
         g.dispose();
     }
 
     public void setAligned(boolean aligned) {
         this.aligned = aligned;
+    }
+
+    public void typeChanged(CloneBrushType type) {
+        this.type = type;
     }
 }

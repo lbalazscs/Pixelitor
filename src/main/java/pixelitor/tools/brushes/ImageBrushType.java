@@ -39,7 +39,7 @@ public enum ImageBrushType {
     }, SOFT {
         @Override
         protected BufferedImage createImpl() {
-            return ImageUtils.createSoftTemplateBrush(SIZE);
+            return ImageUtils.createSoftBWBrush(SIZE);
         }
     }, GREEK {
         @Override

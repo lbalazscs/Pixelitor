@@ -39,7 +39,7 @@ public class ZoomTool extends Tool {
 
     @Override
     public void initSettingsPanel() {
-        AutoZoomButtons.addAutoZoomButtons(toolSettingsPanel);
+        AutoZoomButtons.addAutoZoomButtons(settingsPanel);
     }
 
     @Override

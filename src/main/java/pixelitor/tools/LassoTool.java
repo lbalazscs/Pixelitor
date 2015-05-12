@@ -36,12 +36,12 @@ public class LassoTool extends Tool {
 
     @Override
     public void initSettingsPanel() {
-        toolSettingsPanel.add(new JLabel("Type:"));
+        settingsPanel.add(new JLabel("Type:"));
 
 //        SelectionType[] types = new SelectionType[]{SelectionType.POLYGONAL_LASSO, SelectionType.LASSO};
 //
 //        typeCombo = new JComboBox(types);
-//        toolSettingsPanel.add(typeCombo);
+//        settingsPanel.add(typeCombo);
     }
 
     @Override

@@ -96,12 +96,12 @@ public class CropTool extends Tool implements ImageSwitchListener {
     @Override
     public void initSettingsPanel() {
         SliderSpinner maskOpacitySpinner = new SliderSpinner(maskOpacityParam, WEST, false);
-        toolSettingsPanel.add(maskOpacitySpinner);
+        settingsPanel.add(maskOpacitySpinner);
 
         allowGrowingCB = new JCheckBox("Allow Growing", false);
-        toolSettingsPanel.add(allowGrowingCB);
+        settingsPanel.add(allowGrowingCB);
 
-        cropButton = toolSettingsPanel.addButton("Crop",
+        cropButton = settingsPanel.addButton("Crop",
                 e -> {
                     ImageComponents.toolCropActiveImage(allowGrowingCB.isSelected());
                     ImageComponents.repaintActive();
@@ -111,7 +111,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
 
         cancelButton.addActionListener(e -> state.cancelPressed(this));
         cancelButton.setEnabled(false);
-        toolSettingsPanel.add(cancelButton);
+        settingsPanel.add(cancelButton);
     }
 
     @Override

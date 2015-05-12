@@ -100,22 +100,22 @@ public class ShapesTool extends Tool {
     @Override
     public void initSettingsPanel() {
         JComboBox<ShapeType> shapeTypeCB = new JComboBox<>(typeModel);
-        toolSettingsPanel.addWithLabel("Shape:", shapeTypeCB, "shapeTypeCB");
+        settingsPanel.addWithLabel("Shape:", shapeTypeCB, "shapeTypeCB");
         // make sure all values are visible without a scrollbar
         shapeTypeCB.setMaximumRowCount(ShapeType.values().length);
 
         JComboBox<ShapesAction> actionCB = new JComboBox<>(actionModel);
-        toolSettingsPanel.addWithLabel("Action:", actionCB, "actionCB");
+        settingsPanel.addWithLabel("Action:", actionCB, "actionCB");
         actionCB.addActionListener(e -> updateWhichSettingsAreEnabled());
 
-        toolSettingsPanel.addWithLabel("Fill:", fillCombo);
+        settingsPanel.addWithLabel("Fill:", fillCombo);
 
-        toolSettingsPanel.addWithLabel("Stroke:", strokeFillCombo);
+        settingsPanel.addWithLabel("Stroke:", strokeFillCombo);
 
-        strokeSettingsButton = toolSettingsPanel.addButton("Stroke Settings...",
+        strokeSettingsButton = settingsPanel.addButton("Stroke Settings...",
                 e -> initAndShowStrokeSettingsDialog());
 
-        effectsButton = toolSettingsPanel.addButton("Effects...",
+        effectsButton = settingsPanel.addButton("Effects...",
                 e -> showEffectsDialog());
 
         updateWhichSettingsAreEnabled();

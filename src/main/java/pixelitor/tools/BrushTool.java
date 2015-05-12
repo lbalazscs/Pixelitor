@@ -41,7 +41,7 @@ public class BrushTool extends TmpLayerBrushTool {
 
         super.initSettingsPanel();
 
-        toolSettingsPanel.addSeparator();
+        settingsPanel.addSeparator();
 
         addBlendingModePanel();
     }

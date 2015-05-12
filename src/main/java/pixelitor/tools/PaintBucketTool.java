@@ -58,10 +58,10 @@ public class PaintBucketTool extends Tool {
 
     @Override
     public void initSettingsPanel() {
-        toolSettingsPanel.add(new SliderSpinner(toleranceParam, WEST, false));
+        settingsPanel.add(new SliderSpinner(toleranceParam, WEST, false));
 
         fillComboBox = new JComboBox<>(new FillType[]{FOREGROUND, BACKGROUND, TRANSPARENT});
-        toolSettingsPanel.addWithLabel("Fill With:", fillComboBox);
+        settingsPanel.addWithLabel("Fill With:", fillComboBox);
     }
 
     private Color getFillColor() {

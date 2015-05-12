@@ -42,7 +42,7 @@ public abstract class TmpLayerBrushTool extends AbstractBrushTool {
 
     protected void addBlendingModePanel() {
         blendingModePanel = new BlendingModePanel(true);
-        toolSettingsPanel.add(blendingModePanel);
+        settingsPanel.add(blendingModePanel);
     }
 
     @Override
