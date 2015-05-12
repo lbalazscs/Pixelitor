@@ -36,6 +36,7 @@ public class HistogramsPanel extends JPanel implements ImageSwitchListener {
     private final HistogramPainter red;
     private final HistogramPainter green;
     private final HistogramPainter blue;
+    public static final int HISTOGRAM_RESOLUTION = 256;
 
     private HistogramsPanel() {
         setLayout(new BorderLayout());
@@ -87,10 +88,9 @@ public class HistogramsPanel extends JPanel implements ImageSwitchListener {
         }
         BufferedImage image = comp.getCompositeImage();
 
-        int histogramResolution = 256;
-        int[] redValues = new int[histogramResolution];
-        int[] blueValues = new int[histogramResolution];
-        int[] greenValues = new int[histogramResolution];
+        int[] redValues = new int[HISTOGRAM_RESOLUTION];
+        int[] blueValues = new int[HISTOGRAM_RESOLUTION];
+        int[] greenValues = new int[HISTOGRAM_RESOLUTION];
 
         int[] data = ImageUtils.getPixelsAsArray(image);
         for (int rgb : data) {
@@ -106,7 +106,7 @@ public class HistogramsPanel extends JPanel implements ImageSwitchListener {
 
         boolean useLogarithm = false;
         if (useLogarithm) {
-            for (int i = 0; i < histogramResolution; i++) {
+            for (int i = 0; i < HISTOGRAM_RESOLUTION; i++) {
                 redValues[i] = (int) (1000.0 * Math.log(redValues[i]));
                 greenValues[i] = (int) (1000.0 * Math.log(greenValues[i]));
                 blueValues[i] = (int) (1000.0 * Math.log(blueValues[i]));
