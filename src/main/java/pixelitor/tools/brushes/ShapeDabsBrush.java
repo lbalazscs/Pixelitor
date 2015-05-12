@@ -24,7 +24,7 @@ public class ShapeDabsBrush extends DabsBrush {
     private final BrushShapeProvider shapeProvider;
 
     public ShapeDabsBrush(BrushShapeProvider shapeProvider, double spacingRatio) {
-        super(spacingRatio, true, false);
+        super(new RadiusRatioSpacingStrategy(spacingRatio), true, false);
         this.shapeProvider = shapeProvider;
     }
 

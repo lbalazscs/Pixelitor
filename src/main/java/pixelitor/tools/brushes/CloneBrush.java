@@ -39,7 +39,7 @@ public class CloneBrush extends DabsBrush {
     private CloneBrushType type;
 
     public CloneBrush(CloneBrushType type) {
-        super(0.25, false, true);
+        super(new RadiusRatioSpacingStrategy(0.25), false, true);
         this.type = type;
     }
 
@@ -74,16 +74,6 @@ public class CloneBrush extends DabsBrush {
     }
 
     @Override
-    public void putDab(double x, double y, double theta) {
-        AffineTransform transform = AffineTransform.getTranslateInstance(
-                x - radius,
-                y - radius
-        );
-        targetG.drawImage(brushImage, transform, null);
-        updateComp((int) x, (int) y);
-    }
-
-    @Override
     void setupBrushStamp(double x, double y) {
         Graphics2D g = brushImage.createGraphics();
 
@@ -102,6 +92,16 @@ public class CloneBrush extends DabsBrush {
         type.afterDrawImage(g);
 
         g.dispose();
+    }
+
+    @Override
+    public void putDab(double x, double y, double theta) {
+        AffineTransform transform = AffineTransform.getTranslateInstance(
+                x - radius,
+                y - radius
+        );
+        targetG.drawImage(brushImage, transform, null);
+        updateComp((int) x, (int) y);
     }
 
     public void setAligned(boolean aligned) {

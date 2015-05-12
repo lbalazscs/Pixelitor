@@ -24,25 +24,18 @@ package pixelitor.tools.brushes;
 public class LinearDabsStrategy implements DabsStrategy {
     private final DabsBrush brush;
     private double distanceFromLastDab = 0;
-    private double spacingRatio = 2.0; // the spacing relative to the radius
+    private SpacingStrategy spacingStrategy;
     private final boolean angleAware;
     private final boolean refreshBrushForEachDab;
 
     private double prevX = 0;
     private double prevY = 0;
 
-    private int radius;
-
-    public LinearDabsStrategy(DabsBrush brush, double spacingRatio, boolean angleAware, boolean refreshBrushForEachDab) {
+    public LinearDabsStrategy(DabsBrush brush, SpacingStrategy spacingStrategy, boolean angleAware, boolean refreshBrushForEachDab) {
         this.brush = brush;
-        this.spacingRatio = spacingRatio;
+        this.spacingStrategy = spacingStrategy;
         this.angleAware = angleAware;
         this.refreshBrushForEachDab = refreshBrushForEachDab;
-    }
-
-    @Override
-    public void setRadius(int radius) {
-        this.radius = radius;
     }
 
     @Override
@@ -57,7 +50,7 @@ public class LinearDabsStrategy implements DabsStrategy {
             // method because we have no angle information.
             // However, we manipulate the distance from the last dab
             // so that a dab is drawn soon
-            distanceFromLastDab = radius * spacingRatio * 0.8;
+            distanceFromLastDab = spacingStrategy.getSpacing() * 0.8;
         } else {
             brush.putDab(x, y, 0);
         }
@@ -69,7 +62,7 @@ public class LinearDabsStrategy implements DabsStrategy {
         double dy = endY - prevY;
         double lineDistance = Math.sqrt(dx * dx + dy * dy);
 
-        double spacing = radius * spacingRatio;
+        double spacing = spacingStrategy.getSpacing();
         double relativeSpacingDistance = spacing / lineDistance;
         double initialRelativeSpacingDistance = (spacing - distanceFromLastDab) / lineDistance;
 

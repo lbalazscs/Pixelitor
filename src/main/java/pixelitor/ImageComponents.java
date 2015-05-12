@@ -92,6 +92,13 @@ public class ImageComponents {
         return Optional.empty();
     }
 
+    public static Optional<Composition> findCompositionByName(String name) {
+        return imageComponents.stream()
+                .map(ImageComponent::getComp)
+                .filter(c -> c.getName().equals(name))
+                .findFirst();
+    }
+
     public static Optional<Layer> getActiveLayer() {
         return getActiveComp().map(Composition::getActiveLayer);
     }

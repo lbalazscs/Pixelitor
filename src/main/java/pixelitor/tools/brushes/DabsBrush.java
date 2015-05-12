@@ -21,15 +21,15 @@ package pixelitor.tools.brushes;
  * A brush that works by putting down dabs
  */
 public abstract class DabsBrush extends AbstractBrush {
+    private SpacingStrategy spacingStrategy;
     protected final boolean angleAware;
-    private final DabsStrategy strategy;
+    private final DabsStrategy dabsStrategy;
 
-    protected DabsBrush(double spacingRatio, boolean angleAware, boolean refreshBrushForEachDab) {
+    protected DabsBrush(SpacingStrategy spacingStrategy, boolean angleAware, boolean refreshBrushForEachDab) {
+        this.spacingStrategy = spacingStrategy;
         this.angleAware = angleAware;
-        this.strategy = new LinearDabsStrategy(this, spacingRatio, angleAware, refreshBrushForEachDab);
+        this.dabsStrategy = new LinearDabsStrategy(this, spacingStrategy, angleAware, refreshBrushForEachDab);
     }
-
-    public abstract void putDab(double x, double y, double theta);
 
     /**
      * Sets up the brush stamp. Depending on the type of brush, it can be
@@ -37,21 +37,23 @@ public abstract class DabsBrush extends AbstractBrush {
      */
     abstract void setupBrushStamp(double x, double y);
 
+    public abstract void putDab(double x, double y, double theta);
+
     @Override
     public void onDragStart(int x, int y) {
-        strategy.onDragStart(x, y);
+        dabsStrategy.onDragStart(x, y);
         updateComp(x, y);
     }
 
     @Override
     public void onNewMousePoint(int x, int y) {
-        strategy.onNewMousePoint(x, y);
+        dabsStrategy.onNewMousePoint(x, y);
         updateComp(x, y);
     }
 
     @Override
     public void setRadius(int radius) {
         super.setRadius(radius);
-        strategy.setRadius(radius);
+        spacingStrategy.setRadius(radius);
     }
 }

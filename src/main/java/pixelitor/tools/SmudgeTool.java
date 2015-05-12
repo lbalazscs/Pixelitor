@@ -17,8 +17,16 @@
 
 package pixelitor.tools;
 
-import pixelitor.tools.brushes.ImageBrushType;
+import pixelitor.ImageDisplay;
+import pixelitor.filters.gui.RangeParam;
+import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.SmudgeBrush;
+import pixelitor.utils.SliderSpinner;
+
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+
+import static pixelitor.utils.SliderSpinner.TextPosition.WEST;
 
 /**
  * The Smudge Tool
@@ -28,12 +36,33 @@ public class SmudgeTool extends DirectBrushTool {
         super('r', "Smudge", "smudge_tool_icon.png", "click and drag to smudge");
     }
 
+    private final RangeParam strengthParam = new RangeParam("Strength", 1, 100, 60);
     private SmudgeBrush smudgeBrush;
 
     @Override
     protected void initBrushVariables() {
-//        super.initBrushVariables();
+        smudgeBrush = new SmudgeBrush();
+        brush = new BrushAffectedArea(smudgeBrush);
+        brushAffectedArea = (BrushAffectedArea) brush;
+    }
 
-        smudgeBrush = new SmudgeBrush(ImageBrushType.SOFT);
+    @Override
+    public void initSettingsPanel() {
+        addSizeSelector();
+        addStrengthSelector();
+    }
+
+    private void addStrengthSelector() {
+        SliderSpinner strengthSelector = new SliderSpinner(strengthParam, WEST, false);
+        settingsPanel.add(strengthSelector);
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e, ImageDisplay ic) {
+        BufferedImage sourceImage = ic.getComp().getActiveImageLayer().getImage();
+        int x = userDrag.getStartX();
+        int y = userDrag.getStartY();
+        smudgeBrush.setSource(sourceImage, x, y, strengthParam.getValueAsPercentage());
+        super.mousePressed(e, ic);
     }
 }

@@ -18,11 +18,11 @@
 package pixelitor.tools.brushes;
 
 /**
- * A dabs strategy specifies the way the dabs of a
- * DabsBrush are placed in response to GUI events
+ * Determines the spacing distance between dabs.
+ * Used by the DabsStrategy implementations.
  */
-public interface DabsStrategy {
-    void onDragStart(int x, int y);
+public interface SpacingStrategy {
+    double getSpacing();
 
-    void onNewMousePoint(int x, int y);
+    void setRadius(int radius);
 }

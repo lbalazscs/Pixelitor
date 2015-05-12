@@ -49,6 +49,7 @@ import java.net.URI;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -329,15 +330,20 @@ public final class Utils {
     }
 
     @SuppressWarnings("WeakerAccess")
-    public static void debugImage(BufferedImage img, String description) {
+    public static void debugImage(BufferedImage img, String name) {
+        BufferedImage copy = ImageUtils.copyImage(img);
         Composition save = ImageComponents.getActiveComp().get();
 
-        BufferedImage copy = ImageUtils.copyImage(img);
-
-        Composition comp = Composition.fromImage(copy, null, description);
-
-//        PixelitorWindow.getInstance().addNewImage(copy, null, description);
-        PixelitorWindow.getInstance().addComposition(comp);
+        Optional<Composition> debugCompOpt = ImageComponents.findCompositionByName(name);
+        if(debugCompOpt.isPresent()) {
+            // if we already have a debug composition, simply replace the image
+            Composition comp = debugCompOpt.get();
+            comp.getActiveImageLayer().setImage(copy);
+            comp.repaint();
+        } else {
+            Composition comp = Composition.fromImage(copy, null, name);
+            PixelitorWindow.getInstance().addComposition(comp);
+        }
 
         if (save != null) {
             ImageComponents.setActiveImageComponent(save.getIC(), true);

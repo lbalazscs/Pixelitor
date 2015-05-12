@@ -41,7 +41,7 @@ public class ImageDabsBrush extends DabsBrush {
     private Color lastColor;
 
     public ImageDabsBrush(ImageBrushType imageBrushType, double spacingRatio, boolean angleAware) {
-        super(spacingRatio, angleAware, false);
+        super(new RadiusRatioSpacingStrategy(spacingRatio), angleAware, false);
 
         // for each brush type multiple brush instances are created because of the symmetry
         // however the template image can be shared between them

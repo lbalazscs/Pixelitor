@@ -982,7 +982,7 @@ public class ImageUtils {
         return sat;
     }
 
-    public static void debugImage(BufferedImage img) {
+    public static void debugImageToText(BufferedImage img) {
         BufferedImageNode imgNode = new BufferedImageNode("debug", img);
         String s = imgNode.toDetailedString();
         System.out.println(String.format("ImageUtils::debugImage: s = '%s'", s));

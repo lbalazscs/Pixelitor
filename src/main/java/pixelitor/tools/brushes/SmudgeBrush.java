@@ -17,7 +17,9 @@
 
 package pixelitor.tools.brushes;
 
+import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 
@@ -31,9 +33,12 @@ public class SmudgeBrush extends DabsBrush {
 
     private BufferedImage brushImage;
     private Ellipse2D.Double circleClip;
+    double lastX;
+    double lastY;
+    private float strength;
 
-    public SmudgeBrush(ImageBrushType imageBrushType) {
-        super(0.25, false, true);
+    public SmudgeBrush() {
+        super(new FixedDistanceSpacingStrategy(1.0), false, true);
     }
 
     @Override
@@ -43,21 +48,49 @@ public class SmudgeBrush extends DabsBrush {
         circleClip = new Ellipse2D.Double(0, 0, diameter, diameter);
     }
 
-    @Override
-    public void putDab(double x, double y, double theta) {
-        // TODO
-        updateComp((int) x, (int) y);
+    public void setSource(BufferedImage sourceImage, int srcX, int srcY, float strength) {
+        this.strength = strength;
+//        System.out.println("SmudgeBrush::setSource: srcX = " + srcX + ", srcY = " + srcY);
+        this.sourceImage = sourceImage;
+        lastX = srcX;
+        lastY = srcY;
     }
 
     @Override
     void setupBrushStamp(double x, double y) {
+//        System.out.println(String.format("SmudgeBrush::setupBrushStamp: x = %.2f, y = %.2f", x, y));
+
+        // here we sample the source image at lastX, lastY into the brush image
         Graphics2D g = brushImage.createGraphics();
         g.setClip(circleClip);
-        // TODO
-//        g.drawImage(sourceImage,
-//                AffineTransform.getTranslateInstance(
-//                        dx - x,
-//                        dy - y), null);
+        g.drawImage(sourceImage,
+                AffineTransform.getTranslateInstance(
+                        -lastX + radius,
+                        -lastY + radius), null);
         g.dispose();
+
+//        Utils.debugImage(brushImage, "BrushImage");
+    }
+
+    @Override
+    public void putDab(double x, double y, double theta) {
+//        System.out.println(String.format("SmudgeBrush::putDab: x = %.2f, y = %.2f", x, y));
+
+        AffineTransform transform = AffineTransform.getTranslateInstance(
+                x - radius,
+                y - radius
+        );
+
+        // does not handle transparency
+        targetG.setComposite(AlphaComposite.SrcAtop.derive(strength));
+//        targetG.setComposite(BlendComposite.CrossFade.derive(strength));
+
+        targetG.drawImage(brushImage, transform, null);
+
+
+        lastX = x;
+        lastY = y;
+
+        updateComp((int) x, (int) y);
     }
 }
