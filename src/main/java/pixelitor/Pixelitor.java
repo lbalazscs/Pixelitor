@@ -120,6 +120,8 @@ public class Pixelitor {
             return;
         }
 
+//        new ChannelToTransparency().actionPerformed(null);
+
 //        Tools.SELECTION.getButton().doClick();
 
 //        new BatchFilterWizard().start(pw);

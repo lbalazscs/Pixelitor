@@ -444,6 +444,8 @@ public final class BlendComposite implements Composite {
                     return new Blender() {
                         @Override
                         public void blend(int[] src, int[] dst, int[] result) {
+                            // Takes all the values from the src (upper) layer
+                            // The cross-fading will result from the derive
                             result[0] = src[0];
                             result[1] = src[1];
                             result[2] = src[2];

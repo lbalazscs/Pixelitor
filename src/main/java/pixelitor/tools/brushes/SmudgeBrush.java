@@ -32,11 +32,11 @@ import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
  */
 public class SmudgeBrush extends DabsBrush {
     private BufferedImage sourceImage;
-
     private BufferedImage brushImage;
     private Ellipse2D.Double circleClip;
-    double lastX;
-    double lastY;
+
+    private double lastX;
+    private double lastY;
     private float strength;
     private boolean firstUsageInStroke = true;
     private boolean fingerPainting = false;
@@ -63,9 +63,6 @@ public class SmudgeBrush extends DabsBrush {
 
     @Override
     void setupBrushStamp(double x, double y) {
-//        System.out.println(String.format("SmudgeBrush::setupBrushStamp: x = %.2f, y = %.2f", x, y));
-
-        // here we sample the source image at lastX, lastY into the brush image
         Graphics2D g = brushImage.createGraphics();
         g.setClip(circleClip);
 
@@ -73,6 +70,7 @@ public class SmudgeBrush extends DabsBrush {
             g.setColor(FgBgColorSelector.getFG());
             g.fillRect(0, 0, diameter, diameter);
         } else {
+            // samples the source image at lastX, lastY into the brush image
             g.drawImage(sourceImage,
                     AffineTransform.getTranslateInstance(
                             -lastX + radius,
@@ -81,24 +79,21 @@ public class SmudgeBrush extends DabsBrush {
         g.dispose();
 
         firstUsageInStroke = false;
-//        Utils.debugImage(brushImage, "BrushImage");
     }
 
     @Override
     public void putDab(double x, double y, double theta) {
-//        System.out.println(String.format("SmudgeBrush::putDab: x = %.2f, y = %.2f", x, y));
-
         AffineTransform transform = AffineTransform.getTranslateInstance(
                 x - radius,
                 y - radius
         );
+//        transform.rotate(0.01);
 
         // does not handle transparency
         targetG.setComposite(AlphaComposite.SrcAtop.derive(strength));
 //        targetG.setComposite(BlendComposite.CrossFade.derive(strength));
 
         targetG.drawImage(brushImage, transform, null);
-
 
         lastX = x;
         lastY = y;
