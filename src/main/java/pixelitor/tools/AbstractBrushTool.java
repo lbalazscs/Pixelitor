@@ -22,12 +22,15 @@ import pixelitor.Composition;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
 import pixelitor.ImageDisplay;
+import pixelitor.PixelitorWindow;
+import pixelitor.filters.gui.FilterGUIComponent;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.layers.ImageLayer;
 import pixelitor.tools.brushes.Brush;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.SymmetryBrush;
 import pixelitor.utils.ImageSwitchListener;
+import pixelitor.utils.OKDialog;
 import pixelitor.utils.SliderSpinner;
 
 import javax.swing.*;
@@ -39,7 +42,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.PathIterator;
 import java.awt.image.BufferedImage;
-import java.util.function.Supplier;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
@@ -59,7 +61,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     private JComboBox<BrushType> typeSelector;
 
     protected Graphics2D graphics;
-    private final RangeParam brushRadiusParam = new RangeParam("Radius", MIN_BRUSH_RADIUS, MAX_BRUSH_RADIUS, DEFAULT_BRUSH_RADIUS);
+    private final RangeParam brushRadiusParam = new RangeParam("Radius", MIN_BRUSH_RADIUS, MAX_BRUSH_RADIUS, DEFAULT_BRUSH_RADIUS, false, WEST);
 
     private final EnumComboBoxModel<Symmetry> symmetryModel = new EnumComboBoxModel<>(Symmetry.class);
 
@@ -68,6 +70,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     protected BrushAffectedArea brushAffectedArea;
 
     private boolean firstMouseDown = true; // for the first click don't draw lines even if it is a shift-click
+    private JButton brushSettingsButton;
 
     AbstractBrushTool(char activationKeyChar, String name, String iconFileName, String toolMessage, Cursor cursor) {
         super(activationKeyChar, name, iconFileName, toolMessage,
@@ -87,28 +90,48 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         return symmetryModel.getSelectedItem();
     }
 
-    @Override
-    public void initSettingsPanel() {
+    protected void addTypeSelector() {
         typeSelector = new JComboBox<>(BrushType.values());
         settingsPanel.addWithLabel("Type:", typeSelector, "brushTypeSelector");
         typeSelector.addActionListener(e -> {
-            Supplier<Brush> brushType = (Supplier<Brush>) typeSelector.getSelectedItem();
+            BrushType brushType = (BrushType) typeSelector.getSelectedItem();
             symmetryBrush.brushTypeChanged(brushType);
+
+            brushRadiusParam.setEnabled(brushType.sizeCanBeSet(), FilterGUIComponent.EnabledReason.APP_LOGIC);
+
+            brushSettingsButton.setEnabled(brushType.hasSettings());
         });
 
         // make sure all values are visible without a scrollbar
         typeSelector.setMaximumRowCount(BrushType.values().length);
+    }
 
-        addSizeSelector();
+    protected void addSizeSelector() {
+        SliderSpinner brushSizeSelector = (SliderSpinner) brushRadiusParam.createGUI();
+        settingsPanel.add(brushSizeSelector);
+    }
 
+    protected void addSymmetryCombo() {
         JComboBox<Symmetry> symmetryCombo = new JComboBox<>(symmetryModel);
         settingsPanel.addWithLabel("Mirror:", symmetryCombo, "symmetrySelector");
         symmetryCombo.addActionListener(e -> symmetryBrush.symmetryChanged(getCurrentSymmetry()));
     }
 
-    protected void addSizeSelector() {
-        SliderSpinner brushSizeSelector = new SliderSpinner(brushRadiusParam, WEST, false);
-        settingsPanel.add(brushSizeSelector);
+    protected void addBrushSettingsButton() {
+        brushSettingsButton = settingsPanel.addButton("Brush Settings",
+                e -> {
+                    BrushType brushType = (BrushType) typeSelector.getSelectedItem();
+                    JPanel p = brushType.getSettingsPanel();
+                    new OKDialog(PixelitorWindow.getInstance(), "Brush Settings", p) {
+                        @Override
+                        protected void okPressed() {
+                            super.okPressed();
+                            symmetryBrush.brushTypeChanged(brushType);
+                        }
+                    };
+                });
+
+        brushSettingsButton.setEnabled(false);
     }
 
     @Override

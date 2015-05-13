@@ -32,6 +32,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
+import java.awt.geom.Rectangle2D;
 
 /**
  * The shapes types in the shapes tool
@@ -43,20 +44,34 @@ public enum ShapeType {
             updateCoordinatesPositive(userDrag);
             return new Rectangle(x, y, width, height);
         }
+
+        @Override
+        public Shape getShape(double x, double y, int diameter) {
+            return new Rectangle2D.Double(x, y, diameter, diameter);
+        }
     }, ELLIPSE("Ellipse", true) {
         @Override
         public Shape getShape(UserDrag userDrag) {
             updateCoordinatesPositive(userDrag);
             return new Ellipse2D.Float(x, y, width, height);
         }
+
+        @Override
+        public Shape getShape(double x, double y, int diameter) {
+            return new Ellipse2D.Double(x, y, diameter, diameter);
+        }
     }, DIAMOND("Diamond", true) {
         @Override
         public Shape getShape(UserDrag userDrag) {
             updateCoordinates(userDrag);
+            return createDiamond(x, y, width, height);
+        }
+
+        private Shape createDiamond(double x, double y, int width, int height) {
             Path2D.Float path = new Path2D.Float();
 
-            int cx = x + width / 2;
-            int cy = y + height / 2;
+            double cx = x + width / 2.0;
+            double cy = y + height / 2.0;
 
             path.moveTo(cx, y);
             path.lineTo(x + width, cy);
@@ -66,11 +81,21 @@ public enum ShapeType {
 
             return path;
         }
+
+        @Override
+        public Shape getShape(double x, double y, int diameter) {
+            return createDiamond(x, y, diameter, diameter);
+        }
     }, LINE("Line", false) {
         @Override
         public Shape getShape(UserDrag userDrag) {
 //            updateCoordinatesPositive(start, end);
             return userDrag.asLine();
+        }
+
+        @Override
+        public Shape getShape(double x, double y, int diameter) {
+            return new Rectangle2D.Double(x, y, diameter / 5.0, diameter);
         }
     }, HEART("Heart", true) {
         @Override
@@ -78,10 +103,19 @@ public enum ShapeType {
             updateCoordinates(userDrag);
             return new Heart(x, y, width, height);
         }
+
+        @Override
+        public Shape getShape(double x, double y, int diameter) {
+            return new Heart(x, y, diameter, diameter);
+        }
     }, STAR("Star", true) {
         @Override
         public Shape getShape(UserDrag userDrag) {
             updateCoordinates(userDrag);
+            return createStar(x, y, width, height);
+        }
+
+        protected Shape createStar(double x, double y, int width, int height) {
             double halfWidth = ((double) width) / 2;
             double halfHeight = ((double) height) / 2;
             double cx = x + halfWidth;
@@ -103,6 +137,11 @@ public enum ShapeType {
 
             return new Star2D(cx, cy, innerRadius, outerRadius, 7);
         }
+
+        @Override
+        public Shape getShape(double x, double y, int diameter) {
+            return createStar(x, y, diameter, diameter / 3 + 1);
+        }
     }, RANDOM_STAR("Random Star", true) {
         private UserDrag lastUserDrag;
 
@@ -117,6 +156,12 @@ public enum ShapeType {
 
             updateCoordinates(userDrag);
             return new RandomStar(x, y, width, height);
+        }
+
+        @Override
+        public Shape getShape(double x, double y, int diameter) {
+            RandomStar.randomize();
+            return new RandomStar(x, y, diameter, diameter);
         }
     }, ARROW("Arrow", true) {
         GeneralPath unitArrow = null;
@@ -142,11 +187,28 @@ public enum ShapeType {
             transform.rotate(angle);
             return transform.createTransformedShape(unitArrow);
         }
+
+        @Override
+        public Shape getShape(double x, double y, int diameter) {
+            // TODO USerDrag should be able to accept double parameters as well?
+            int middleY = (int) (y + diameter / 2.0);
+            UserDrag userDrag = new UserDrag(
+                    (int) x,
+                    middleY,
+                    (int) x + diameter,
+                    middleY);
+            return getShape(userDrag);
+        }
     }, CAT("Cat", true) {
         @Override
         public Shape getShape(UserDrag userDrag) {
             updateCoordinates(userDrag);
             return new Cat(x, y, width, height);
+        }
+
+        @Override
+        public Shape getShape(double x, double y, int diameter) {
+            return new Cat(x, y, diameter, diameter);
         }
     }, KIWI("Kiwi", true) {
         @Override
@@ -154,11 +216,21 @@ public enum ShapeType {
             updateCoordinates(userDrag);
             return new Kiwi(x, y, width, height);
         }
+
+        @Override
+        public Shape getShape(double x, double y, int diameter) {
+            return new Kiwi(x, y, diameter, diameter);
+        }
     }, BAT("Bat", true) {
         @Override
         public Shape getShape(UserDrag userDrag) {
             updateCoordinates(userDrag);
             return new Bat(x, y, width, height);
+        }
+
+        @Override
+        public Shape getShape(double x, double y, int diameter) {
+            return new Bat(x, y, diameter, diameter);
         }
     }, RABBIT("Rabbit", true) {
         @Override
@@ -166,7 +238,12 @@ public enum ShapeType {
             updateCoordinates(userDrag);
             return new Rabbit(x, y, width, height);
         }
-//    }, SKULL("Skull", true) {
+
+        @Override
+        public Shape getShape(double x, double y, int diameter) {
+            return new Rabbit(x, y, diameter, diameter);
+        }
+        //    }, SKULL("Skull", true) {
 //        @Override
 //        public Shape getShape(UserDrag userDrag) {
 //            updateCoordinates(userDrag);
@@ -217,4 +294,6 @@ public enum ShapeType {
     public String toString() {
         return guiName;
     }
+
+    public abstract Shape getShape(double x, double y, int diameter);
 }

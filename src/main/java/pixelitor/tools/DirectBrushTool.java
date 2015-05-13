@@ -32,10 +32,10 @@ import java.awt.image.BufferedImage;
  * A brush tool that draws directly into the image of
  * the current image layer
  */
-public class DirectBrushTool extends AbstractBrushTool {
+public abstract class DirectBrushTool extends AbstractBrushTool {
     private BufferedImage copyBeforeStart;
 
-    public DirectBrushTool(char activationKeyChar, String name, String iconFileName, String toolMessage, Cursor cursor) {
+    protected DirectBrushTool(char activationKeyChar, String name, String iconFileName, String toolMessage, Cursor cursor) {
         super(activationKeyChar, name, iconFileName, toolMessage, cursor);
     }
 

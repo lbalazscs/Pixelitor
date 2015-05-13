@@ -31,7 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import static pixelitor.filters.gui.FilterGUIComponent.EnabledReason.FILTER_LOGIC;
+import static pixelitor.filters.gui.FilterGUIComponent.EnabledReason.APP_LOGIC;
 
 /**
  * A filter parameter for selecting a choice from a list of values
@@ -255,7 +255,7 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
     }
 
     public static IntChoiceParam getGridTypeChoices(String name, RangeParam randomnessParam) {
-        randomnessParam.setEnabled(false, FILTER_LOGIC);
+        randomnessParam.setEnabled(false, APP_LOGIC);
         IntChoiceParam param = new IntChoiceParam(name, gridTypeChoices);
         param.addListDataListener(new ListDataListener() {
             @Override
@@ -271,7 +271,7 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
             @Override
             public void contentsChanged(ListDataEvent e) {
                 int selectedValue = param.getValue();
-                randomnessParam.setEnabled(selectedValue != CellularFilter.GR_RANDOM, FILTER_LOGIC);
+                randomnessParam.setEnabled(selectedValue != CellularFilter.GR_RANDOM, APP_LOGIC);
             }
         });
         return param;

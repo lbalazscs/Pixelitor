@@ -20,10 +20,10 @@ package pixelitor.tools.brushes;
 /**
  * A spacing strategy that does not depend on the brush radius
  */
-public class FixedDistanceSpacingStrategy implements SpacingStrategy {
+public class FixedDistanceSpacing implements SpacingStrategy {
     private final double distance;
 
-    public FixedDistanceSpacingStrategy(double distance) {
+    public FixedDistanceSpacing(double distance) {
         this.distance = distance;
     }
 

@@ -26,6 +26,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
+import static pixelitor.tools.brushes.AngleSettings.NOT_ANGLE_AWARE;
 
 /**
  * The brush used by the Smudge Tool
@@ -42,7 +43,7 @@ public class SmudgeBrush extends DabsBrush {
     private boolean fingerPainting = false;
 
     public SmudgeBrush() {
-        super(new FixedDistanceSpacingStrategy(1.0), false, true);
+        super(new FixedDistanceSpacing(1.0), NOT_ANGLE_AWARE, true);
     }
 
     @Override

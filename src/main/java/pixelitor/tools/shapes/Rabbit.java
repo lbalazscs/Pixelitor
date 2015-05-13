@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.tools.shapes;
 
@@ -20,13 +20,13 @@ package pixelitor.tools.shapes;
  * Rabbit shape based on http://commons.wikimedia.org/wiki/File:Lapin01.svg
  */
 public class Rabbit extends GeneralShape {
-    public Rabbit(int x, int y, int width, int height) {
-        float cp1X; // x of control point 1
-        float cp1Y; // y of control point 1
-        float cp2X; // x of control point 2
-        float cp2Y; // y of control point 2
-        float epX;  // x of end point
-        float epY;  // y of end point
+    public Rabbit(double x, double y, int width, int height) {
+        double cp1X; // x of control point 1
+        double cp1Y; // y of control point 1
+        double cp2X; // x of control point 2
+        double cp2Y; // y of control point 2
+        double epX;  // x of end point
+        double epY;  // y of end point
 
         epX = x + 0.040013865f * width;
         epY = y + 1.008531f * height;

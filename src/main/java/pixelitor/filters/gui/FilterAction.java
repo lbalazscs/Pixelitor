@@ -98,7 +98,7 @@ public class FilterAction implements FilterGUIComponent {
     @Override
     public void setEnabled(boolean b, EnabledReason reason) {
         switch (reason) {
-            case FILTER_LOGIC:
+            case APP_LOGIC:
                 // not implemented yet - it was not needed
                 break;
             case FINAL_ANIMATION_SETTING:

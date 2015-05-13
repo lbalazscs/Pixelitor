@@ -14,22 +14,27 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools.brushes;
 
-import pixelitor.tools.shapes.Heart;
-
-import java.awt.Shape;
-
 /**
- * A shape factory for AngledShapeBrush
+ * A spacing strategy where the spacing is proportional to the radius
  */
-public enum BrushShapeProvider {
-    HEART {
-        @Override
-        Shape getShape(double x, double y, int width, int height) {
-            return new Heart((int) x, (int) y, width, height);
-        }
-    };
+public class RadiusRatioSpacing implements SpacingStrategy {
+    private double spacingRatio = 2.0; // the spacing relative to the radius
+    private double spacing;
 
-    abstract Shape getShape(double x, double y, int width, int height);
+    public RadiusRatioSpacing(double spacingRatio) {
+        this.spacingRatio = spacingRatio;
+    }
+
+    @Override
+    public void setRadius(int radius) {
+        spacing = radius * spacingRatio;
+    }
+
+    @Override
+    public double getSpacing() {
+        return spacing;
+    }
 }

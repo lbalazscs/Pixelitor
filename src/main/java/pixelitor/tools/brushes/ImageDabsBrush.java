@@ -40,8 +40,8 @@ public class ImageDabsBrush extends DabsBrush {
     private BufferedImage finalScaledImage;
     private Color lastColor;
 
-    public ImageDabsBrush(ImageBrushType imageBrushType, double spacingRatio, boolean angleAware) {
-        super(new RadiusRatioSpacingStrategy(spacingRatio), angleAware, false);
+    public ImageDabsBrush(ImageBrushType imageBrushType, double spacingRatio, AngleSettings angleSettings) {
+        super(new RadiusRatioSpacing(spacingRatio), angleSettings, false);
 
         // for each brush type multiple brush instances are created because of the symmetry
         // however the template image can be shared between them
@@ -115,7 +115,7 @@ public class ImageDabsBrush extends DabsBrush {
 
     @Override
     public void putDab(double x, double y, double theta) {
-        if(!angleAware || theta == 0) {
+        if (!angleSettings.isAngleAware() || theta == 0) {
             targetG.drawImage(finalScaledImage, (int) x - radius, (int) y - radius, null);
         } else {
             AffineTransform oldTransform = targetG.getTransform();

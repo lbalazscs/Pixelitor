@@ -42,12 +42,14 @@ public class BrushTool extends TmpLayerBrushTool {
 
     @Override
     public void initSettingsPanel() {
-
-        super.initSettingsPanel();
+        addTypeSelector();
+        addSizeSelector();
+        addSymmetryCombo();
 
         settingsPanel.addSeparator();
 
         addBlendingModePanel();
+        addBrushSettingsButton();
     }
 
     @Override

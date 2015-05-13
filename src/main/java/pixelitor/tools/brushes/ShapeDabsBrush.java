@@ -17,26 +17,29 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.tools.ShapeType;
+
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 
 public class ShapeDabsBrush extends DabsBrush {
-    private final BrushShapeProvider shapeProvider;
+    private final ShapeType shapeType;
 
-    public ShapeDabsBrush(BrushShapeProvider shapeProvider, double spacingRatio) {
-        super(new RadiusRatioSpacingStrategy(spacingRatio), true, false);
-        this.shapeProvider = shapeProvider;
+    public ShapeDabsBrush(ShapeType shapeType, double spacingRatio, AngleSettings angleSettings) {
+        super(new RadiusRatioSpacing(spacingRatio), angleSettings, false);
+        this.shapeType = shapeType;
     }
 
     @Override
     public void putDab(double x, double y, double theta) {
-        if(angleAware) {
-            Shape shape = shapeProvider.getShape(x - radius, y - radius, diameter, diameter);
+        if (angleSettings.isAngleAware()) {
+            Shape shape = shapeType.getShape(x - radius, y - radius, diameter);
             AffineTransform t = AffineTransform.getRotateInstance(theta, x, y);
             Shape transformedShape = t.createTransformedShape(shape);
             targetG.fill(transformedShape);
         } else {
-            Shape shape = shapeProvider.getShape(x - radius, y - radius, diameter, diameter);
+            assert theta == 0;
+            Shape shape = shapeType.getShape(x - radius, y - radius, diameter);
             targetG.fill(shape);
         }
         updateComp((int) x, (int) y);

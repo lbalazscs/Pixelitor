@@ -39,6 +39,6 @@ public interface FilterGUIComponent {
     void setEnabled(boolean b, EnabledReason reason);
 
     enum EnabledReason {
-        FILTER_LOGIC, FINAL_ANIMATION_SETTING
+        APP_LOGIC, FINAL_ANIMATION_SETTING
     }
 }

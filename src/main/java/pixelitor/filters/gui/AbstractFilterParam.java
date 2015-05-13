@@ -46,7 +46,7 @@ public abstract class AbstractFilterParam implements FilterParam {
     @Override
     public void setEnabled(boolean b, EnabledReason reason) {
         switch (reason) {
-            case FILTER_LOGIC:
+            case APP_LOGIC:
                 enabledByFilterLogic = b;
                 break;
             case FINAL_ANIMATION_SETTING:

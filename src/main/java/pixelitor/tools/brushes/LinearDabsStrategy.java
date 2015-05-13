@@ -24,17 +24,17 @@ package pixelitor.tools.brushes;
 public class LinearDabsStrategy implements DabsStrategy {
     private final DabsBrush brush;
     private double distanceFromLastDab = 0;
-    private SpacingStrategy spacingStrategy;
-    private final boolean angleAware;
+    private final SpacingStrategy spacingStrategy;
+    private final AngleSettings angleSettings;
     private final boolean refreshBrushForEachDab;
 
     private double prevX = 0;
     private double prevY = 0;
 
-    public LinearDabsStrategy(DabsBrush brush, SpacingStrategy spacingStrategy, boolean angleAware, boolean refreshBrushForEachDab) {
+    public LinearDabsStrategy(DabsBrush brush, SpacingStrategy spacingStrategy, AngleSettings angleSettings, boolean refreshBrushForEachDab) {
         this.brush = brush;
         this.spacingStrategy = spacingStrategy;
-        this.angleAware = angleAware;
+        this.angleSettings = angleSettings;
         this.refreshBrushForEachDab = refreshBrushForEachDab;
     }
 
@@ -45,7 +45,7 @@ public class LinearDabsStrategy implements DabsStrategy {
 
         prevX = x;
         prevY = y;
-        if(angleAware) {
+        if (angleSettings.isAngleAware()) {
             // For angle-aware brushes we don't draw a dab in this
             // method because we have no angle information.
             // However, we manipulate the distance from the last dab
@@ -67,7 +67,7 @@ public class LinearDabsStrategy implements DabsStrategy {
         double initialRelativeSpacingDistance = (spacing - distanceFromLastDab) / lineDistance;
 
         double theta = 0;
-        if(angleAware) {
+        if (angleSettings.isAngleAware()) {
             theta = Math.atan2(dy, dx);
         }
 
@@ -80,6 +80,10 @@ public class LinearDabsStrategy implements DabsStrategy {
 
             if(refreshBrushForEachDab) {
                 brush.setupBrushStamp(x, y);
+            }
+
+            if (angleSettings.shouldScatterAngle()) {
+                theta = angleSettings.calculateScatteredAngle(theta);
             }
 
             brush.putDab(x, y, theta);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.tools.shapes;
 
@@ -20,28 +20,28 @@ package pixelitor.tools.shapes;
  * A heart shape
  */
 public class Heart extends GeneralShape {
-    public Heart(int x, int y, int width, int height) {
-        float maxX = x + width;
+    public Heart(double x, double y, int width, int height) {
+        double maxX = x + width;
 
-        float centerX = x + width / 2.0f;
-        float bottomY = y + height;
+        double centerX = x + width / 2.0f;
+        double bottomY = y + height;
 
-        float cp1XRight = x + 0.58f * width;
-        float cp1XLeft = x + 0.42f * width;
-        float cp1Y = y + 0.78f * height;
+        double cp1XRight = x + 0.58f * width;
+        double cp1XLeft = x + 0.42f * width;
+        double cp1Y = y + 0.78f * height;
 
-        float cp2Y = y + 0.6f * height;
-        float sideY = y + 0.3f * height;
-        float cp3Y = y + 0.18f * height;
-        float cp4XRight = x + 0.9f * width;
-        float cp4XLeft = x + 0.1f * width;
+        double cp2Y = y + 0.6f * height;
+        double sideY = y + 0.3f * height;
+        double cp3Y = y + 0.18f * height;
+        double cp4XRight = x + 0.9f * width;
+        double cp4XLeft = x + 0.1f * width;
 
-        float cp5XRight = x + 0.6f * width;
-        float cp5XLeft = x + 0.4f * width;
-        float topCenterY = y + 0.18f * height;
+        double cp5XRight = x + 0.6f * width;
+        double cp5XLeft = x + 0.4f * width;
+        double topCenterY = y + 0.18f * height;
 
-        float topXRight = x + 0.75f * width;
-        float topXLeft = x + 0.25f * width;
+        double topXRight = x + 0.75f * width;
+        double topXLeft = x + 0.25f * width;
 
         path.moveTo(centerX, bottomY);
         // right side

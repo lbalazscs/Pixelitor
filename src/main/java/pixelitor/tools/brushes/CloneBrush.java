@@ -22,6 +22,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
+import static pixelitor.tools.brushes.AngleSettings.NOT_ANGLE_AWARE;
 
 /**
  * The brush used by the Clone Tool
@@ -39,7 +40,7 @@ public class CloneBrush extends DabsBrush {
     private CloneBrushType type;
 
     public CloneBrush(CloneBrushType type) {
-        super(new RadiusRatioSpacingStrategy(0.25), false, true);
+        super(new RadiusRatioSpacing(0.25), NOT_ANGLE_AWARE, true);
         this.type = type;
     }
 

@@ -39,7 +39,7 @@ import static org.junit.Assert.assertTrue;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
-import static pixelitor.filters.gui.FilterGUIComponent.EnabledReason.FILTER_LOGIC;
+import static pixelitor.filters.gui.FilterGUIComponent.EnabledReason.APP_LOGIC;
 import static pixelitor.filters.gui.FilterGUIComponent.EnabledReason.FINAL_ANIMATION_SETTING;
 
 @RunWith(Parameterized.class)
@@ -147,9 +147,9 @@ public class FilterParamTest {
 
         assertTrue(param.getClass().getName() + " is not enabled by default", gui.isEnabled());
 
-        param.setEnabled(false, FILTER_LOGIC);
+        param.setEnabled(false, APP_LOGIC);
         assertFalse(param.getClass().getName() + " was enabled", gui.isEnabled());
-        param.setEnabled(true, FILTER_LOGIC);
+        param.setEnabled(true, APP_LOGIC);
         assertTrue(gui.isEnabled());
 
         param.setEnabled(false, FINAL_ANIMATION_SETTING);

@@ -67,7 +67,7 @@ public class RandomStar implements Shape {
         randomize();
     }
 
-    public RandomStar(int x, int y, int width, int height) {
+    public RandomStar(double x, double y, int width, int height) {
         double centerX = x + width / 2.0;
         double centerY = y + height / 2.0;
         int[] radii = new int[numRadius];

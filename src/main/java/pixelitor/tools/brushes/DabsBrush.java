@@ -21,14 +21,14 @@ package pixelitor.tools.brushes;
  * A brush that works by putting down dabs
  */
 public abstract class DabsBrush extends AbstractBrush {
-    private SpacingStrategy spacingStrategy;
-    protected final boolean angleAware;
+    private final SpacingStrategy spacingStrategy;
+    protected final AngleSettings angleSettings;
     private final DabsStrategy dabsStrategy;
 
-    protected DabsBrush(SpacingStrategy spacingStrategy, boolean angleAware, boolean refreshBrushForEachDab) {
+    protected DabsBrush(SpacingStrategy spacingStrategy, AngleSettings angleSettings, boolean refreshBrushForEachDab) {
         this.spacingStrategy = spacingStrategy;
-        this.angleAware = angleAware;
-        this.dabsStrategy = new LinearDabsStrategy(this, spacingStrategy, angleAware, refreshBrushForEachDab);
+        this.angleSettings = angleSettings;
+        this.dabsStrategy = new LinearDabsStrategy(this, spacingStrategy, angleSettings, refreshBrushForEachDab);
     }
 
     /**

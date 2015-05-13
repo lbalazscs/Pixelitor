@@ -36,6 +36,14 @@ public class EraserTool extends DirectBrushTool {
     }
 
     @Override
+    public void initSettingsPanel() {
+        addTypeSelector();
+        addSizeSelector();
+        addSymmetryCombo();
+        addBrushSettingsButton();
+    }
+
+    @Override
     void createGraphics(Composition comp, ImageLayer layer) {
         super.createGraphics(comp, layer);
 

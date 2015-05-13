@@ -48,7 +48,7 @@ public class OKDialog extends JDialog {
         p2.add(ok);
         add(p2, BorderLayout.SOUTH);
 
-        ok.addActionListener(evt -> closeDialog());
+        ok.addActionListener(evt -> okPressed());
 
         // cancel when ESC is pressed
         ((JComponent) getContentPane()).registerKeyboardAction(e -> closeDialog(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
@@ -60,6 +60,10 @@ public class OKDialog extends JDialog {
         if (setVisible) {
             setVisible(true);
         }
+    }
+
+    protected void okPressed() {
+        closeDialog();
     }
 
     @Override
