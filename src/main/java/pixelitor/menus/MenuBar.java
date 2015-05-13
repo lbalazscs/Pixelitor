@@ -505,13 +505,17 @@ public class MenuBar extends JMenuBar {
 
     private static void initOtherSubmenu(JMenu filterMenu) {
         JMenu otherFiltersSubmenu = new JMenu("Other");
+        createMenuItem(new RandomFilter(), otherFiltersSubmenu);
+
         createMenuItem(new Convolve(3), otherFiltersSubmenu);
         createMenuItem(new Convolve(5), otherFiltersSubmenu);
 
         createMenuItem(new JHDropShadow(), otherFiltersSubmenu);
         createMenuItem(new Transition2D(), otherFiltersSubmenu);
 
-        createMenuItem(new RandomFilter(), otherFiltersSubmenu);
+        createMenuItem(new ChannelToTransparency(), otherFiltersSubmenu);
+
+
 
         filterMenu.add(otherFiltersSubmenu);
     }

@@ -60,7 +60,7 @@ public class SmudgeTool extends DirectBrushTool {
         settingsPanel.add(strengthSelector);
     }
 
-    protected void addFingerPaintingSelector() {
+    private void addFingerPaintingSelector() {
         fingerPaintingCB = new JCheckBox();
         settingsPanel.addWithLabel("Finger Painting:", fingerPaintingCB);
         fingerPaintingCB.setName("fingerPaintingCB");
