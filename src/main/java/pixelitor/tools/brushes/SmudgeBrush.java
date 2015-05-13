@@ -17,6 +17,8 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.tools.FgBgColorSelector;
+
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
@@ -36,6 +38,8 @@ public class SmudgeBrush extends DabsBrush {
     double lastX;
     double lastY;
     private float strength;
+    private boolean firstUsageInStroke = true;
+    private boolean fingerPainting = false;
 
     public SmudgeBrush() {
         super(new FixedDistanceSpacingStrategy(1.0), false, true);
@@ -54,6 +58,7 @@ public class SmudgeBrush extends DabsBrush {
         this.sourceImage = sourceImage;
         lastX = srcX;
         lastY = srcY;
+        firstUsageInStroke = true;
     }
 
     @Override
@@ -63,12 +68,19 @@ public class SmudgeBrush extends DabsBrush {
         // here we sample the source image at lastX, lastY into the brush image
         Graphics2D g = brushImage.createGraphics();
         g.setClip(circleClip);
-        g.drawImage(sourceImage,
-                AffineTransform.getTranslateInstance(
-                        -lastX + radius,
-                        -lastY + radius), null);
+
+        if (firstUsageInStroke && fingerPainting) {
+            g.setColor(FgBgColorSelector.getFG());
+            g.fillRect(0, 0, diameter, diameter);
+        } else {
+            g.drawImage(sourceImage,
+                    AffineTransform.getTranslateInstance(
+                            -lastX + radius,
+                            -lastY + radius), null);
+        }
         g.dispose();
 
+        firstUsageInStroke = false;
 //        Utils.debugImage(brushImage, "BrushImage");
     }
 
@@ -92,5 +104,9 @@ public class SmudgeBrush extends DabsBrush {
         lastY = y;
 
         updateComp((int) x, (int) y);
+    }
+
+    public void setFingerPainting(boolean fingerPainting) {
+        this.fingerPainting = fingerPainting;
     }
 }

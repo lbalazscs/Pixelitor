@@ -23,6 +23,7 @@ import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.SmudgeBrush;
 import pixelitor.utils.SliderSpinner;
 
+import javax.swing.*;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
@@ -33,11 +34,12 @@ import static pixelitor.utils.SliderSpinner.TextPosition.WEST;
  */
 public class SmudgeTool extends DirectBrushTool {
     public SmudgeTool() {
-        super('r', "Smudge", "smudge_tool_icon.png", "click and drag to smudge");
+        super('u', "Smudge", "smudge_tool_icon.png", "click and drag to smudge");
     }
 
     private final RangeParam strengthParam = new RangeParam("Strength", 1, 100, 60);
     private SmudgeBrush smudgeBrush;
+    private JCheckBox fingerPaintingCB;
 
     @Override
     protected void initBrushVariables() {
@@ -50,11 +52,20 @@ public class SmudgeTool extends DirectBrushTool {
     public void initSettingsPanel() {
         addSizeSelector();
         addStrengthSelector();
+        addFingerPaintingSelector();
     }
 
     private void addStrengthSelector() {
         SliderSpinner strengthSelector = new SliderSpinner(strengthParam, WEST, false);
         settingsPanel.add(strengthSelector);
+    }
+
+    protected void addFingerPaintingSelector() {
+        fingerPaintingCB = new JCheckBox();
+        settingsPanel.addWithLabel("Finger Painting:", fingerPaintingCB);
+        fingerPaintingCB.setName("fingerPaintingCB");
+        fingerPaintingCB.addActionListener(
+                e -> smudgeBrush.setFingerPainting(fingerPaintingCB.isSelected()));
     }
 
     @Override
