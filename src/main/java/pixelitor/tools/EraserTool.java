@@ -21,6 +21,7 @@ import pixelitor.Composition;
 import pixelitor.layers.ImageLayer;
 
 import java.awt.AlphaComposite;
+import java.awt.Cursor;
 
 import static java.awt.AlphaComposite.DST_OUT;
 
@@ -29,7 +30,9 @@ import static java.awt.AlphaComposite.DST_OUT;
  */
 public class EraserTool extends DirectBrushTool {
     public EraserTool() {
-        super('e', "Eraser", "erase_tool_icon.gif", "click and drag to erase pixels");
+        super('e', "Eraser", "erase_tool_icon.gif",
+                "click and drag to erase pixels",
+                Cursor.getDefaultCursor());
     }
 
     @Override

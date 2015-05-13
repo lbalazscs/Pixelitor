@@ -21,6 +21,7 @@ import pixelitor.Composition;
 import pixelitor.layers.ImageLayer;
 import pixelitor.utils.BlendingModePanel;
 
+import java.awt.Cursor;
 import java.awt.image.BufferedImage;
 
 /**
@@ -30,8 +31,8 @@ import java.awt.image.BufferedImage;
 public abstract class TmpLayerBrushTool extends AbstractBrushTool {
     private BlendingModePanel blendingModePanel;
 
-    public TmpLayerBrushTool(char activationKeyChar, String name, String iconFileName, String toolMessage) {
-        super(activationKeyChar, name, iconFileName, toolMessage);
+    public TmpLayerBrushTool(char activationKeyChar, String name, String iconFileName, String toolMessage, Cursor cursor) {
+        super(activationKeyChar, name, iconFileName, toolMessage, cursor);
     }
 
     @Override

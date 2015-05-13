@@ -24,6 +24,7 @@ import pixelitor.tools.brushes.SmudgeBrush;
 import pixelitor.utils.SliderSpinner;
 
 import javax.swing.*;
+import java.awt.Cursor;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
@@ -34,7 +35,8 @@ import static pixelitor.utils.SliderSpinner.TextPosition.WEST;
  */
 public class SmudgeTool extends DirectBrushTool {
     public SmudgeTool() {
-        super('u', "Smudge", "smudge_tool_icon.png", "click and drag to smudge");
+        super('u', "Smudge", "smudge_tool_icon.png",
+                "click and drag to smudge", Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
 
     private final RangeParam strengthParam = new RangeParam("Strength", 1, 100, 60);

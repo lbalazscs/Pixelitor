@@ -69,9 +69,9 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
 
     private boolean firstMouseDown = true; // for the first click don't draw lines even if it is a shift-click
 
-    AbstractBrushTool(char activationKeyChar, String name, String iconFileName, String toolMessage) {
+    AbstractBrushTool(char activationKeyChar, String name, String iconFileName, String toolMessage, Cursor cursor) {
         super(activationKeyChar, name, iconFileName, toolMessage,
-                Cursor.getDefaultCursor(), true, true, false, ClipStrategy.IMAGE_ONLY);
+                cursor, true, true, false, ClipStrategy.IMAGE_ONLY);
         ImageComponents.addImageSwitchListener(this);
         initBrushVariables();
     }

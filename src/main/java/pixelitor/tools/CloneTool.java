@@ -27,6 +27,7 @@ import pixelitor.tools.brushes.CloneBrushType;
 import pixelitor.utils.Dialogs;
 
 import javax.swing.*;
+import java.awt.Cursor;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
@@ -53,7 +54,8 @@ public class CloneTool extends TmpLayerBrushTool {
 
     protected CloneTool() {
         super('k', "Clone", "clone_tool_icon.png",
-                "Alt-click to select source, then paint with the copied pixels");
+                "Alt-click to select source, then paint with the copied pixels",
+                Cursor.getDefaultCursor());
     }
 
     @Override

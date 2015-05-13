@@ -24,6 +24,7 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
 
+import java.awt.Cursor;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
@@ -34,8 +35,8 @@ import java.awt.image.BufferedImage;
 public class DirectBrushTool extends AbstractBrushTool {
     private BufferedImage copyBeforeStart;
 
-    public DirectBrushTool(char activationKeyChar, String name, String iconFileName, String toolMessage) {
-        super(activationKeyChar, name, iconFileName, toolMessage);
+    public DirectBrushTool(char activationKeyChar, String name, String iconFileName, String toolMessage, Cursor cursor) {
+        super(activationKeyChar, name, iconFileName, toolMessage, cursor);
     }
 
     @Override

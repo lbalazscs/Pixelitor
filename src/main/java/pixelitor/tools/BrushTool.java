@@ -23,6 +23,7 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 
@@ -33,7 +34,10 @@ public class BrushTool extends TmpLayerBrushTool {
     private Color drawingColor;
 
     public BrushTool() {
-        super('b', "Brush", "brush_tool_icon.gif", "click and drag to draw with the current brush, Shift-click to draw lines, right-click to draw with the background color");
+        super('b', "Brush", "brush_tool_icon.gif",
+                "click and drag to draw with the current brush, Shift-click to draw lines, right-click to draw with the background color",
+                Cursor.getDefaultCursor()
+        );
     }
 
     @Override
