@@ -21,7 +21,7 @@ package pixelitor.tools.brushes;
  * A brush that works by putting down dabs
  */
 public abstract class DabsBrush extends AbstractBrush {
-    private final SpacingStrategy spacingStrategy;
+    private SpacingStrategy spacingStrategy;
     protected final AngleSettings angleSettings;
     private final DabsStrategy dabsStrategy;
 
@@ -55,5 +55,11 @@ public abstract class DabsBrush extends AbstractBrush {
     public void setRadius(int radius) {
         super.setRadius(radius);
         spacingStrategy.setRadius(radius);
+    }
+
+    public void changeSpacing(SpacingStrategy spacingStrategy) {
+        spacingStrategy.setRadius(radius);
+        this.spacingStrategy = spacingStrategy;
+        dabsStrategy.changeSpacing(spacingStrategy);
     }
 }

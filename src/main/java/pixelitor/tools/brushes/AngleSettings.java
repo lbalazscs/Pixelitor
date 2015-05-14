@@ -22,25 +22,20 @@ package pixelitor.tools.brushes;
  */
 public class AngleSettings {
     private final boolean angleAware;
-    private final boolean shouldScatterAngle;
     private final double maxAngleScattering;
 
-    // global shared immutable instance for the most common case
-    public static final AngleSettings NOT_ANGLE_AWARE = new AngleSettings(false, false, 0);
+    // global shared immutable instances for the most common cases
+    public static final AngleSettings NOT_ANGLE_AWARE = new AngleSettings(false, 0);
+    public static final AngleSettings ANGLE_AWARE_NO_SCATTERING = new AngleSettings(true, 0);
 
-    public AngleSettings(boolean angleAware, boolean shouldScatterAngle, double maxAngleScattering) {
-        if (angleAware) {
-            if (shouldScatterAngle && maxAngleScattering == 0) {
-                throw new IllegalArgumentException("no maxAngleScattering");
-            }
-        } else {
-            if (shouldScatterAngle || maxAngleScattering != 0) {
-                throw new IllegalArgumentException("shouldScatterAngle = " + shouldScatterAngle + ", maxAngleScattering = " + maxAngleScattering);
+    public AngleSettings(boolean angleAware, double maxAngleScattering) {
+        if (!angleAware) {
+            if (maxAngleScattering != 0) {
+                throw new IllegalArgumentException("maxAngleScattering = " + maxAngleScattering);
             }
         }
 
         this.angleAware = angleAware;
-        this.shouldScatterAngle = shouldScatterAngle;
         this.maxAngleScattering = maxAngleScattering;
     }
 
@@ -49,7 +44,7 @@ public class AngleSettings {
     }
 
     public boolean shouldScatterAngle() {
-        return shouldScatterAngle;
+        return maxAngleScattering > 0;
     }
 
     public double calculateScatteredAngle(double theta) {

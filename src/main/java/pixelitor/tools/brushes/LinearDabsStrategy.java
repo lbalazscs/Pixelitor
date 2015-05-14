@@ -24,7 +24,7 @@ package pixelitor.tools.brushes;
 public class LinearDabsStrategy implements DabsStrategy {
     private final DabsBrush brush;
     private double distanceFromLastDab = 0;
-    private final SpacingStrategy spacingStrategy;
+    private SpacingStrategy spacingStrategy;
     private final AngleSettings angleSettings;
     private final boolean refreshBrushForEachDab;
 
@@ -100,5 +100,10 @@ public class LinearDabsStrategy implements DabsStrategy {
 
         prevX = endX;
         prevY = endY;
+    }
+
+    @Override
+    public void changeSpacing(SpacingStrategy spacingStrategy) {
+        this.spacingStrategy = spacingStrategy;
     }
 }

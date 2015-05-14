@@ -25,4 +25,6 @@ public interface DabsStrategy {
     void onDragStart(int x, int y);
 
     void onNewMousePoint(int x, int y);
+
+    void changeSpacing(SpacingStrategy spacingStrategy);
 }

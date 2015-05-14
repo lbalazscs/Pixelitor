@@ -23,7 +23,7 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 
 public class ShapeDabsBrush extends DabsBrush {
-    private final ShapeType shapeType;
+    private ShapeType shapeType;
 
     public ShapeDabsBrush(ShapeType shapeType, double spacingRatio, AngleSettings angleSettings) {
         super(new RadiusRatioSpacing(spacingRatio), angleSettings, false);
@@ -48,5 +48,9 @@ public class ShapeDabsBrush extends DabsBrush {
     @Override
     void setupBrushStamp(double x, double y) {
         // no setup is necessary for shape brushes
+    }
+
+    public void setShapeType(ShapeType shapeType) {
+        this.shapeType = shapeType;
     }
 }

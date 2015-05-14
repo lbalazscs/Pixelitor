@@ -17,7 +17,6 @@
 
 package pixelitor.tools;
 
-import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.tools.brushes.AngleSettings;
 import pixelitor.tools.brushes.Brush;
 import pixelitor.tools.brushes.CalligraphyBrush;
@@ -27,13 +26,14 @@ import pixelitor.tools.brushes.ImageDabsBrush;
 import pixelitor.tools.brushes.OnePixelBrush;
 import pixelitor.tools.brushes.OutlineCircleBrush;
 import pixelitor.tools.brushes.OutlineSquareBrush;
+import pixelitor.tools.brushes.ShapeBrushSettingsPanel;
 import pixelitor.tools.brushes.ShapeDabsBrush;
 import pixelitor.tools.brushes.WobbleBrush;
 
 import javax.swing.*;
-import java.awt.FlowLayout;
 import java.util.function.Supplier;
 
+import static pixelitor.tools.brushes.AngleSettings.ANGLE_AWARE_NO_SCATTERING;
 import static pixelitor.tools.brushes.AngleSettings.NOT_ANGLE_AWARE;
 
 /**
@@ -71,27 +71,24 @@ public enum BrushType implements Supplier<Brush> {
             return new ImageDabsBrush(ImageBrushType.HAIR, 0.02, NOT_ANGLE_AWARE);
         }
     }, SHAPE("Shape", true) {
-        private ShapeType shapeType = ShapeType.CAT;
+        private ShapeDabsBrush shapeDabsBrush;
         private JPanel settingsPanel;
 
         @Override
         public Brush get() {
-            return new ShapeDabsBrush(shapeType, 2.3, new AngleSettings(true, true, Math.PI / 6));
+            if (shapeDabsBrush == null) {
+                ShapeType shapeType = ShapeBrushSettingsPanel.SHAPE_SELECTED_BY_DEFAULT;
+                double spacingRatio = ShapeBrushSettingsPanel.DEFAULT_SPACING_RATIO;
+                AngleSettings angleSettings = ANGLE_AWARE_NO_SCATTERING;
+                shapeDabsBrush = new ShapeDabsBrush(shapeType, spacingRatio, angleSettings);
+            }
+            return shapeDabsBrush;
         }
 
         @Override
         public JPanel getSettingsPanel() {
             if (settingsPanel == null) {
-                settingsPanel = new JPanel(new FlowLayout());
-                settingsPanel.add(new JLabel("Shape:"));
-                EnumComboBoxModel<ShapeType> typeModel = new EnumComboBoxModel<>(ShapeType.class);
-                JComboBox shapeTypeCB = new JComboBox(typeModel);
-                shapeTypeCB.setSelectedItem(ShapeType.CAT);
-                shapeTypeCB.addActionListener(
-                        e -> {
-                            shapeType = (ShapeType) shapeTypeCB.getSelectedItem();
-                        });
-                settingsPanel.add(shapeTypeCB);
+                settingsPanel = new ShapeBrushSettingsPanel(shapeDabsBrush);
             }
             return settingsPanel;
         }
