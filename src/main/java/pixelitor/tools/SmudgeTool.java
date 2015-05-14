@@ -36,7 +36,7 @@ import static pixelitor.utils.SliderSpinner.TextPosition.WEST;
 public class SmudgeTool extends DirectBrushTool {
     public SmudgeTool() {
         super('u', "Smudge", "smudge_tool_icon.png",
-                "click and drag to smudge", Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                "click and drag to smudge. Click and Shift-click to smudge along a line.", Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
 
     private final RangeParam strengthParam = new RangeParam("Strength", 1, 100, 60);
@@ -75,7 +75,9 @@ public class SmudgeTool extends DirectBrushTool {
         BufferedImage sourceImage = ic.getComp().getActiveImageLayer().getImage();
         int x = userDrag.getStartX();
         int y = userDrag.getStartY();
-        smudgeBrush.setSource(sourceImage, x, y, strengthParam.getValueAsPercentage());
+        if (!e.isShiftDown()) { // not a line-click
+            smudgeBrush.setSource(sourceImage, x, y, strengthParam.getValueAsPercentage());
+        }
         super.mousePressed(e, ic);
     }
 }

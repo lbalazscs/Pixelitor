@@ -54,11 +54,10 @@ public class SmudgeBrush extends DabsBrush {
     }
 
     public void setSource(BufferedImage sourceImage, int srcX, int srcY, float strength) {
-        this.strength = strength;
-//        System.out.println("SmudgeBrush::setSource: srcX = " + srcX + ", srcY = " + srcY);
         this.sourceImage = sourceImage;
         lastX = srcX;
         lastY = srcY;
+        this.strength = strength;
         firstUsageInStroke = true;
     }
 
