@@ -86,6 +86,7 @@ public class LevelsPanel extends AdjustPanel implements ItemListener, GrayScaleA
         add(cardPanel, BorderLayout.CENTER);
 
         showOriginalCB = new JCheckBox("Show Original");
+        showOriginalCB.setName("show original");
         showOriginalCB.addActionListener(e -> Utils.setShowOriginal(showOriginalCB.isSelected()));
         add(showOriginalCB, BorderLayout.SOUTH);
     }

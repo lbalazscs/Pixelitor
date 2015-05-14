@@ -81,12 +81,14 @@ public class AssertJSwingTest {
     private static final File BATCH_FILTER_OUTPUT_DIR = new File(BASE_TESTING_DIR, "batch_filter_output");
 
     private Robot robot;
-    public static final int ROBOT_DELAY_MILLIS = 500;
+    public static final int ROBOT_DELAY_MILLIS = 100;
 
     private FrameFixture window;
     private final Random random = new Random();
 
     enum Randomize {YES, NO}
+
+    enum ShowOriginal {YES, NO}
 
     // TODO create independent tests with static initialization of the window
 
@@ -252,7 +254,7 @@ public class AssertJSwingTest {
         runMenuCommand("Repeat Invert");
         runMenuCommand("Undo Invert");
         runMenuCommand("Redo Invert");
-        testFilterWithDialog("Fade Invert", Randomize.NO);
+        testFilterWithDialog("Fade Invert", Randomize.NO, ShowOriginal.YES);
 
         // select for crop
         window.toggleButton("Selection Tool Button").click();
@@ -267,7 +269,7 @@ public class AssertJSwingTest {
         testResize();
         testRotateFlip();
 
-        testFilterWithDialog("Transform Layer...", Randomize.YES);
+        testFilterWithDialog("Transform Layer...", Randomize.YES, ShowOriginal.YES);
 
         testPreferences();
     }
@@ -535,112 +537,115 @@ public class AssertJSwingTest {
     }
 
     private void testFilters() {
-        testFilterWithDialog("Color Balance...", Randomize.YES);
-        testFilterWithDialog("Hue/Saturation...", Randomize.YES);
-        testFilterWithDialog("Colorize...", Randomize.YES);
-        testFilterWithDialog("Levels...", Randomize.NO);
-        testFilterWithDialog("Brightness/Contrast...", Randomize.YES);
-        testFilterWithDialog("Solarize...", Randomize.YES);
-        testFilterWithDialog("Sepia...", Randomize.NO);
+        testFilterWithDialog("Color Balance...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Hue/Saturation...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Colorize...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Levels...", Randomize.NO, ShowOriginal.YES);
+        testFilterWithDialog("Brightness/Contrast...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Solarize...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Sepia...", Randomize.NO, ShowOriginal.YES);
         testNoDialogFilter("Invert");
-        testFilterWithDialog("Channel Invert...", Randomize.NO);
+        testFilterWithDialog("Channel Invert...", Randomize.NO, ShowOriginal.YES);
         testFilterWithDialog("Channel Mixer...", Randomize.YES,
-                "Swap Red-Green", "Swap Red-Blue", "Swap Green-Blue",
+                ShowOriginal.YES, "Swap Red-Green", "Swap Red-Blue", "Swap Green-Blue",
                 "R -> G -> B -> R", "R -> B -> G -> R",
                 "Average BW", "Luminosity BW", "Sepia",
                 "Normalize", "Randomize and Normalize");
-        testFilterWithDialog("Extract Channel...", Randomize.YES);
+        testFilterWithDialog("Extract Channel...", Randomize.YES, ShowOriginal.YES);
         testNoDialogFilter("Luminosity");
         testNoDialogFilter("Value = max(R,G,B)");
         testNoDialogFilter("Desaturate");
         testNoDialogFilter("Hue");
         testNoDialogFilter("Hue (with colors)");
         testNoDialogFilter("Saturation");
-        testFilterWithDialog("Quantize...", Randomize.YES);
-        testFilterWithDialog("Posterize...", Randomize.NO);
-        testFilterWithDialog("Threshold...", Randomize.YES);
-        testFilterWithDialog("Tritone...", Randomize.YES);
-        testFilterWithDialog("Gradient Map...", Randomize.NO);
-        testFilterWithDialog("Color Halftone...", Randomize.YES);
-        testFilterWithDialog("Dither...", Randomize.YES);
+        testFilterWithDialog("Quantize...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Posterize...", Randomize.NO, ShowOriginal.YES);
+        testFilterWithDialog("Threshold...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Tritone...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Gradient Map...", Randomize.NO, ShowOriginal.YES);
+        testFilterWithDialog("Color Halftone...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Dither...", Randomize.YES, ShowOriginal.YES);
         testNoDialogFilter("Foreground Color");
         testNoDialogFilter("Background Color");
         testNoDialogFilter("Transparent");
-        testFilterWithDialog("Color Wheel...", Randomize.YES);
-        testFilterWithDialog("Four Color Gradient...", Randomize.YES);
-        testFilterWithDialog("Starburst...", Randomize.YES);
-        testFilterWithDialog("Gaussian Blur...", Randomize.YES);
-        testFilterWithDialog("Smart Blur...", Randomize.YES);
-        testFilterWithDialog("Box Blur...", Randomize.YES);
-        testFilterWithDialog("Fast Blur...", Randomize.YES);
-        testFilterWithDialog("Lens Blur...", Randomize.YES);
-        testFilterWithDialog("Motion Blur...", Randomize.YES);
-        testFilterWithDialog("Spin and Zoom Blur...", Randomize.YES);
-        testFilterWithDialog("Unsharp Mask...", Randomize.YES);
-        testFilterWithDialog("Swirl, Pinch, Bulge...", Randomize.YES);
-        testFilterWithDialog("Circle to Square...", Randomize.YES);
-        testFilterWithDialog("Perspective...", Randomize.YES);
-        testFilterWithDialog("Lens Over Image...", Randomize.YES);
-        testFilterWithDialog("Magnify...", Randomize.YES);
-        testFilterWithDialog("Turbulent Distortion...", Randomize.YES);
-        testFilterWithDialog("Underwater...", Randomize.YES);
-        testFilterWithDialog("Water Ripple...", Randomize.YES);
-        testFilterWithDialog("Waves...", Randomize.YES);
-        testFilterWithDialog("Angular Waves...", Randomize.YES);
-        testFilterWithDialog("Radial Waves...", Randomize.YES);
-        testFilterWithDialog("Glass Tiles...", Randomize.YES);
-        testFilterWithDialog("Polar Glass Tiles...", Randomize.YES);
-        testFilterWithDialog("Frosted Glass...", Randomize.YES);
-        testFilterWithDialog("Little Planet...", Randomize.YES);
-        testFilterWithDialog("Polar Coordinates...", Randomize.YES);
-        testFilterWithDialog("Wrap Around Arc...", Randomize.YES);
-        testFilterWithDialog("Kaleidoscope...", Randomize.YES);
-        testFilterWithDialog("Video Feedback...", Randomize.YES);
-        testFilterWithDialog("Offset...", Randomize.NO);
-        testFilterWithDialog("Slice...", Randomize.YES);
-        testFilterWithDialog("Mirror...", Randomize.YES);
-        testFilterWithDialog("Glow...", Randomize.YES);
-        testFilterWithDialog("Sparkle...", Randomize.YES);
-        testFilterWithDialog("Rays...", Randomize.YES);
-        testFilterWithDialog("Glint...", Randomize.YES);
+        testFilterWithDialog("Color Wheel...", Randomize.YES, ShowOriginal.NO);
+        testFilterWithDialog("Four Color Gradient...", Randomize.YES, ShowOriginal.NO);
+        testFilterWithDialog("Starburst...", Randomize.YES, ShowOriginal.NO);
+        testFilterWithDialog("Gaussian Blur...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Smart Blur...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Box Blur...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Fast Blur...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Lens Blur...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Motion Blur...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Spin and Zoom Blur...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Unsharp Mask...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Swirl, Pinch, Bulge...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Circle to Square...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Perspective...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Lens Over Image...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Magnify...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Turbulent Distortion...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Underwater...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Water Ripple...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Waves...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Angular Waves...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Radial Waves...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Glass Tiles...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Polar Glass Tiles...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Frosted Glass...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Little Planet...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Polar Coordinates...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Wrap Around Arc...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Kaleidoscope...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Video Feedback...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Offset...", Randomize.NO, ShowOriginal.YES);
+        testFilterWithDialog("Slice...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Mirror...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Glow...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Sparkle...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Rays...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Glint...", Randomize.YES, ShowOriginal.YES);
         testNoDialogFilter("Reduce Single Pixel Noise");
         testNoDialogFilter("3x3 Median Filter");
-        testFilterWithDialog("Add Noise...", Randomize.YES);
-        testFilterWithDialog("Pixelate...", Randomize.YES);
-        testFilterWithDialog("Clouds...", Randomize.YES);
-        testFilterWithDialog("Value Noise...", Randomize.YES);
-        testFilterWithDialog("Caustics...", Randomize.YES);
-        testFilterWithDialog("Plasma...", Randomize.YES);
-        testFilterWithDialog("Wood...", Randomize.YES);
-        testFilterWithDialog("Cells...", Randomize.YES);
-        testFilterWithDialog("Brushed Metal...", Randomize.YES);
-        testFilterWithDialog("Crystallize...", Randomize.YES);
-        testFilterWithDialog("Pointillize...", Randomize.YES);
-        testFilterWithDialog("Stamp...", Randomize.YES);
-        testFilterWithDialog("Dry Brush...", Randomize.YES);
-        testFilterWithDialog("Random Spheres...", Randomize.YES);
-        testFilterWithDialog("Smear...", Randomize.YES);
-        testFilterWithDialog("Emboss...", Randomize.YES);
-        testFilterWithDialog("Orton Effect...", Randomize.YES);
-        testFilterWithDialog("Photo Collage...", Randomize.YES);
-        testFilterWithDialog("Convolution Edge Detection...", Randomize.YES);
+        testFilterWithDialog("Add Noise...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Pixelate...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Clouds...", Randomize.YES, ShowOriginal.NO);
+        testFilterWithDialog("Value Noise...", Randomize.YES, ShowOriginal.NO);
+        testFilterWithDialog("Caustics...", Randomize.YES, ShowOriginal.NO);
+        testFilterWithDialog("Plasma...", Randomize.YES, ShowOriginal.NO);
+        testFilterWithDialog("Wood...", Randomize.YES, ShowOriginal.NO);
+        testFilterWithDialog("Cells...", Randomize.YES, ShowOriginal.NO);
+        testFilterWithDialog("Brushed Metal...", Randomize.YES, ShowOriginal.NO);
+        testFilterWithDialog("Crystallize...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Pointillize...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Stamp...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Dry Brush...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Random Spheres...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Smear...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Emboss...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Orton Effect...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Photo Collage...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Convolution Edge Detection...", Randomize.YES, ShowOriginal.YES);
         testNoDialogFilter("Laplacian");
-        testFilterWithDialog("Difference of Gaussians...", Randomize.YES);
-        testFilterWithDialog("Canny Edge Detector...", Randomize.YES);
-        testFilterWithDialog("Drop Shadow...", Randomize.YES);
-        testFilterWithDialog("2D Transitions...", Randomize.YES);
+        testFilterWithDialog("Difference of Gaussians...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Canny Edge Detector...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Drop Shadow...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("2D Transitions...", Randomize.YES, ShowOriginal.YES);
 
         testFilterWithDialog("Custom 3x3 Convolution...", Randomize.NO,
-                "\"Corner\" Blur", "\"Gaussian\" Blur", "Mean Filter", "Sharpen",
+                ShowOriginal.NO, "\"Corner\" Blur", "\"Gaussian\" Blur", "Mean Filter", "Sharpen",
                 "Edge Detection", "Edge Detection 2", "Horizontal Edge Detection",
                 "Vertical Edge Detection", "Emboss", "Emboss 2", "Color Emboss",
                 "Do Nothing", "Randomize");
         testFilterWithDialog("Custom 5x5 Convolution...", Randomize.NO,
-                "Diamond Blur", "Motion Blur", "Find Horizontal Edges", "Find Vertical Edges",
+                ShowOriginal.NO, "Diamond Blur", "Motion Blur", "Find Horizontal Edges", "Find Vertical Edges",
                 "Find Diagonal Edges", "Find Diagonal Edges 2", "Sharpen",
                 "Do Nothing", "Randomize");
 
         testRandomFilter();
+
+        testFilterWithDialog("Channel to Transparency...", Randomize.YES, ShowOriginal.YES);
+
 
         testText();
     }
@@ -701,7 +706,7 @@ public class AssertJSwingTest {
         keyboardUndo();
     }
 
-    private void testFilterWithDialog(String name, Randomize randomize, String... extraButtonsToClick) {
+    private void testFilterWithDialog(String name, Randomize randomize, ShowOriginal showOriginal, String... extraButtonsToClick) {
         findMenuItemByText(name).click();
         DialogFixture dialog = WindowFinder.findDialog("filterDialog").using(robot);
 
@@ -714,6 +719,12 @@ public class AssertJSwingTest {
             findButtonByText(dialog, "Reset All").click();
             findButtonByText(dialog, "Randomize Settings").click();
         }
+
+        if (showOriginal == ShowOriginal.YES) {
+            dialog.checkBox("show original").click();
+            dialog.checkBox("show original").click();
+        }
+
         dialog.button("ok").click();
 
         keyboardUndoRedo();

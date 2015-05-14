@@ -85,6 +85,15 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
             row++;
         }
 
+        if (addShowOriginal) {
+            gbHelper.addLabel("Show Original:", 0, row);
+            row++;
+
+            showOriginalCB = new ShowOriginalCB();
+
+            gbHelper.addLastControl(showOriginalCB);
+        }
+
         // add filter actions
         List<FilterAction> actionList = params.getActionList();
         for (FilterAction action : actionList) {
@@ -93,16 +102,9 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
             if (buttonsPanel == null) {
                 buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
                 gbHelper.addOnlyControlToRow(buttonsPanel, row);
+                row++;
             }
             buttonsPanel.add(button);
-        }
-
-        if (addShowOriginal) {
-            gbHelper.addLabel("Show Original:", 0, row);
-
-            showOriginalCB = new ShowOriginalCB();
-
-            gbHelper.addLastControl(showOriginalCB);
         }
     }
 
@@ -131,6 +133,7 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
                     Utils.setShowOriginal(isSelected());
                 }
             });
+            setName("show original");
         }
 
         public void deselectWithoutTriggering() {

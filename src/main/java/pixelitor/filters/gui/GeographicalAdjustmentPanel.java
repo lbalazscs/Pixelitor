@@ -103,6 +103,7 @@ public class GeographicalAdjustmentPanel extends ParametrizedAdjustPanel {
         JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         if (showOriginal) {
             JCheckBox showOriginalCB = new JCheckBox("Show Original");
+            showOriginalCB.setName("show original");
             showOriginalCB.addActionListener(e -> Utils.setShowOriginal(showOriginalCB.isSelected()));
             buttonsPanel.add(showOriginalCB);
         }
