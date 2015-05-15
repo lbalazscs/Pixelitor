@@ -31,7 +31,7 @@ public class ShapeBrushSettingsPanel extends JPanel {
     public static final ShapeType SHAPE_SELECTED_BY_DEFAULT = ShapeType.ARROW;
     public static final double DEFAULT_SPACING_RATIO = 2.3;
 
-    public ShapeBrushSettingsPanel(ShapeDabsBrush shapeDabsBrush) {
+    public ShapeBrushSettingsPanel(ShapeDabsBrushSettings settings) {
         super(new GridBagLayout());
 
         GridBagHelper gbh = new GridBagHelper(this);
@@ -41,7 +41,7 @@ public class ShapeBrushSettingsPanel extends JPanel {
         shapeTypeCB.addActionListener(
                 e -> {
                     ShapeType shapeType = (ShapeType) shapeTypeCB.getSelectedItem();
-                    shapeDabsBrush.setShapeType(shapeType);
+                    settings.setShapeType(shapeType);
                 });
 
 
@@ -50,7 +50,7 @@ public class ShapeBrushSettingsPanel extends JPanel {
         RangeParam spacingSelector = new RangeParam("Spacing", 1, 1000, (int) Math.round(DEFAULT_SPACING_RATIO * 100), false, NONE);
         gbh.addLabelWithControl("Spacing (radius %):", spacingSelector.createGUI());
         spacingSelector.setAdjustmentListener(
-                () -> shapeDabsBrush.changeSpacing(new RadiusRatioSpacing(spacingSelector.getValueAsPercentage())));
+                () -> settings.changeSpacing(new RadiusRatioSpacing(spacingSelector.getValueAsPercentage())));
     }
 
 }

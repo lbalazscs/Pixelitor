@@ -26,8 +26,10 @@ import pixelitor.tools.brushes.ImageDabsBrush;
 import pixelitor.tools.brushes.OnePixelBrush;
 import pixelitor.tools.brushes.OutlineCircleBrush;
 import pixelitor.tools.brushes.OutlineSquareBrush;
+import pixelitor.tools.brushes.RadiusRatioSpacing;
 import pixelitor.tools.brushes.ShapeBrushSettingsPanel;
 import pixelitor.tools.brushes.ShapeDabsBrush;
+import pixelitor.tools.brushes.ShapeDabsBrushSettings;
 import pixelitor.tools.brushes.WobbleBrush;
 
 import javax.swing.*;
@@ -71,24 +73,30 @@ public enum BrushType implements Supplier<Brush> {
             return new ImageDabsBrush(ImageBrushType.HAIR, 0.02, NOT_ANGLE_AWARE);
         }
     }, SHAPE("Shape", true) {
-        private ShapeDabsBrush shapeDabsBrush;
+        private ShapeDabsBrushSettings settings;
         private JPanel settingsPanel;
 
         @Override
         public Brush get() {
-            if (shapeDabsBrush == null) {
+            if(settings == null) {
                 ShapeType shapeType = ShapeBrushSettingsPanel.SHAPE_SELECTED_BY_DEFAULT;
                 double spacingRatio = ShapeBrushSettingsPanel.DEFAULT_SPACING_RATIO;
                 AngleSettings angleSettings = ANGLE_AWARE_NO_SCATTERING;
-                shapeDabsBrush = new ShapeDabsBrush(shapeType, spacingRatio, angleSettings);
+                RadiusRatioSpacing spacing = new RadiusRatioSpacing(spacingRatio);
+
+                ShapeDabsBrush shapeDabsBrush = new ShapeDabsBrush(shapeType, spacing, angleSettings);
+                settings = (ShapeDabsBrushSettings) shapeDabsBrush.getSettings();
+                return shapeDabsBrush;
+            } else {
+                ShapeDabsBrush shapeDabsBrush = new ShapeDabsBrush(settings);
+                return  shapeDabsBrush;
             }
-            return shapeDabsBrush;
         }
 
         @Override
         public JPanel getSettingsPanel() {
             if (settingsPanel == null) {
-                settingsPanel = new ShapeBrushSettingsPanel(shapeDabsBrush);
+                settingsPanel = new ShapeBrushSettingsPanel(settings);
             }
             return settingsPanel;
         }

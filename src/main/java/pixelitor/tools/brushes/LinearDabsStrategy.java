@@ -25,7 +25,7 @@ public class LinearDabsStrategy implements DabsStrategy {
     private final DabsBrush brush;
     private double distanceFromLastDab = 0;
     private SpacingStrategy spacingStrategy;
-    private final AngleSettings angleSettings;
+    private AngleSettings angleSettings;
     private final boolean refreshBrushForEachDab;
 
     private double prevX = 0;
@@ -103,7 +103,9 @@ public class LinearDabsStrategy implements DabsStrategy {
     }
 
     @Override
-    public void changeSpacing(SpacingStrategy spacingStrategy) {
-        this.spacingStrategy = spacingStrategy;
+    public void settingsChanged() {
+        DabsBrushSettings settings = brush.getSettings();
+        angleSettings = settings.getAngleSettings();
+        spacingStrategy = settings.getSpacingStrategy();
     }
 }

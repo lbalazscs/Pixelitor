@@ -17,17 +17,21 @@
 
 package pixelitor.tools.brushes;
 
-/**
- * A dabs strategy specifies the way the dabs of a
- * DabsBrush are placed in response to GUI events.
- *
- * Unlike brush settings, these objects cannot be shared
- * between symmetry brushes, because they call back a specific brush.
- */
-public interface DabsStrategy {
-    void onDragStart(int x, int y);
+import pixelitor.tools.ShapeType;
 
-    void onNewMousePoint(int x, int y);
+public class ShapeDabsBrushSettings extends DabsBrushSettings {
+    private ShapeType shapeType;
 
-    void settingsChanged();
+    public ShapeDabsBrushSettings(AngleSettings angleSettings, SpacingStrategy spacingStrategy, ShapeType shapeType) {
+        super(angleSettings, spacingStrategy);
+        this.shapeType = shapeType;
+    }
+
+    public ShapeType getShapeType() {
+        return shapeType;
+    }
+
+    public void setShapeType(ShapeType shapeType) {
+        this.shapeType = shapeType;
+    }
 }

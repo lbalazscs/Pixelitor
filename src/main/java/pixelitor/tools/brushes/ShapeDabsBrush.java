@@ -23,16 +23,23 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 
 public class ShapeDabsBrush extends DabsBrush {
-    private ShapeType shapeType;
+    public ShapeDabsBrush(ShapeType shapeType, SpacingStrategy spacingStrategy,
+                          AngleSettings angleSettings) {
+        super(new ShapeDabsBrushSettings(
+                angleSettings,
+                spacingStrategy,
+                shapeType
+        ), false);
+    }
 
-    public ShapeDabsBrush(ShapeType shapeType, double spacingRatio, AngleSettings angleSettings) {
-        super(new RadiusRatioSpacing(spacingRatio), angleSettings, false);
-        this.shapeType = shapeType;
+    public ShapeDabsBrush(ShapeDabsBrushSettings settings) {
+        super(settings, false);
     }
 
     @Override
     public void putDab(double x, double y, double theta) {
-        if (angleSettings.isAngleAware()) {
+        ShapeType shapeType = ((ShapeDabsBrushSettings)settings).getShapeType();
+        if (settings.isAngleAware()) {
             Shape shape = shapeType.getShape(x - radius, y - radius, diameter);
             AffineTransform t = AffineTransform.getRotateInstance(theta, x, y);
             Shape transformedShape = t.createTransformedShape(shape);
@@ -48,9 +55,5 @@ public class ShapeDabsBrush extends DabsBrush {
     @Override
     void setupBrushStamp(double x, double y) {
         // no setup is necessary for shape brushes
-    }
-
-    public void setShapeType(ShapeType shapeType) {
-        this.shapeType = shapeType;
     }
 }

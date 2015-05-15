@@ -78,6 +78,7 @@ public class SymmetryBrush implements Brush {
         for(int i = 0; i < numInstantiatedBrushes; i++) {
             brushes[i] = brushSupplier.get();
         }
+        assert checkThatAllBrushesAreDifferentInstances();
     }
 
     public void symmetryChanged(Symmetry symmetry) {
@@ -91,6 +92,20 @@ public class SymmetryBrush implements Brush {
             }
             numInstantiatedBrushes = newNumBrushes;
         }
+        assert checkThatAllBrushesAreDifferentInstances();
+    }
+
+    private boolean checkThatAllBrushesAreDifferentInstances() {
+        for (int i = 0; i < numInstantiatedBrushes; i++) {
+            for (int j = 0; j < numInstantiatedBrushes; j++) {
+                if(i != j) {
+                    if(brushes[i] == brushes[j]) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     public void onDragStart(int brushNo, int x, int y) {

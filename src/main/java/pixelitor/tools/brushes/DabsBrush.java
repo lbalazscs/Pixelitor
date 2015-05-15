@@ -21,14 +21,25 @@ package pixelitor.tools.brushes;
  * A brush that works by putting down dabs
  */
 public abstract class DabsBrush extends AbstractBrush {
-    private SpacingStrategy spacingStrategy;
-    protected final AngleSettings angleSettings;
+    protected DabsBrushSettings settings;
     private final DabsStrategy dabsStrategy;
 
     protected DabsBrush(SpacingStrategy spacingStrategy, AngleSettings angleSettings, boolean refreshBrushForEachDab) {
-        this.spacingStrategy = spacingStrategy;
-        this.angleSettings = angleSettings;
-        this.dabsStrategy = new LinearDabsStrategy(this, spacingStrategy, angleSettings, refreshBrushForEachDab);
+        settings = new DabsBrushSettings(angleSettings, spacingStrategy);
+        dabsStrategy = new LinearDabsStrategy(this,
+                spacingStrategy,
+                angleSettings,
+                refreshBrushForEachDab);
+        settings.registerBrush(this);
+    }
+
+    protected DabsBrush(DabsBrushSettings settings, boolean refreshBrushForEachDab) {
+        this.settings = settings;
+        dabsStrategy = new LinearDabsStrategy(this,
+                settings.getSpacingStrategy(),
+                settings.getAngleSettings(),
+                refreshBrushForEachDab);
+        settings.registerBrush(this);
     }
 
     /**
@@ -54,12 +65,18 @@ public abstract class DabsBrush extends AbstractBrush {
     @Override
     public void setRadius(int radius) {
         super.setRadius(radius);
-        spacingStrategy.setRadius(radius);
+        settings.setRadius(radius);
     }
 
-    public void changeSpacing(SpacingStrategy spacingStrategy) {
-        spacingStrategy.setRadius(radius);
-        this.spacingStrategy = spacingStrategy;
-        dabsStrategy.changeSpacing(spacingStrategy);
+    public DabsBrushSettings getSettings() {
+        return settings;
+    }
+
+    public void setSettings(DabsBrushSettings settings) {
+        this.settings = settings;
+    }
+
+    public void settingsChanged() {
+        dabsStrategy.settingsChanged();
     }
 }
