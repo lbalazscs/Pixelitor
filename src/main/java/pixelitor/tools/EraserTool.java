@@ -30,7 +30,7 @@ import static java.awt.AlphaComposite.DST_OUT;
  */
 public class EraserTool extends DirectBrushTool {
     public EraserTool() {
-        super('e', "Eraser", "erase_tool_icon.gif",
+        super('e', "Eraser", "erase_tool_icon.png",
                 "click and drag to erase pixels",
                 Cursor.getDefaultCursor());
     }
@@ -38,9 +38,10 @@ public class EraserTool extends DirectBrushTool {
     @Override
     public void initSettingsPanel() {
         addTypeSelector();
+        addBrushSettingsButton();
+        settingsPanel.addSeparator();
         addSizeSelector();
         addSymmetryCombo();
-        addBrushSettingsButton();
     }
 
     @Override

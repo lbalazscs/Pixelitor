@@ -52,7 +52,7 @@ public class PaintBucketTool extends Tool {
     private JComboBox<FillType> fillComboBox;
 
     public PaintBucketTool() {
-        super('p', "Paint Bucket", "paint_bucket_tool_icon.gif", "click to fill with the selected color",
+        super('p', "Paint Bucket", "paint_bucket_tool_icon.png", "click to fill with the selected color",
                 Cursor.getDefaultCursor(), true, true, false, ClipStrategy.IMAGE_ONLY);
     }
 

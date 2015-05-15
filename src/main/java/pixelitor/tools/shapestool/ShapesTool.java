@@ -87,7 +87,7 @@ public class ShapesTool extends Tool {
     private Stroke stroke;
 
     public ShapesTool() {
-        super('s', "Shapes", "shapes_tool_icon.gif",
+        super('s', "Shapes", "shapes_tool_icon.png",
                 "Click and drag to draw a shape. Hold SPACE down while drawing to move the shape. ",
                 Cursor.getDefaultCursor(), true, true, false, ClipStrategy.IMAGE_ONLY);
 

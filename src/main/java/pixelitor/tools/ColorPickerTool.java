@@ -35,7 +35,7 @@ public class ColorPickerTool extends Tool {
     private final JCheckBox sampleLayerOnly = new JCheckBox("Sample Active Layer Only");
 
     public ColorPickerTool() {
-        super('i', "Color Picker", "color_picker_tool_icon.gif",
+        super('i', "Color Picker", "color_picker_tool_icon.png",
                 "click to pick the foreground color, Alt-click to pick the background color",
                 Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR), false, true, false, ClipStrategy.IMAGE_ONLY);
     }

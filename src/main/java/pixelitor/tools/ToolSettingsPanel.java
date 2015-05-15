@@ -28,7 +28,16 @@ import java.util.function.Consumer;
  */
 public class ToolSettingsPanel extends JPanel {
     public ToolSettingsPanel() {
-        super(new FlowLayout(FlowLayout.LEFT));
+        super(new FlowLayout(FlowLayout.LEFT, 5, 0));
+
+        // TODO we need a layout manager that arranges components
+        // horizontally but unlike FlowLayout it centers vertically
+        // and unlike BoxLayout it considers the preferred vertical size
+
+//        super(new HorizontalLayout(5));
+
+//        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+
     }
 
     public void addSeparator() {

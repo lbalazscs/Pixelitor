@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools;
 
 import pixelitor.AppLogic;
@@ -44,6 +45,9 @@ public class ToolButton extends JToggleButton implements ActionListener {
         Icon icon = IconUtils.loadIcon(tool.getIconFileName());
         setIcon(icon);
 
+        assert icon.getIconWidth() == 30;
+        assert icon.getIconHeight() == 30;
+
         char c = tool.getActivationKeyChar();
         String s = new String(new char[]{c}).toUpperCase();
         setToolTipText(tool.getName() + " Tool (" + s + ')');
@@ -53,7 +57,8 @@ public class ToolButton extends JToggleButton implements ActionListener {
         setRolloverEnabled(false);
         addActionListener(this);
 
-        int size = 46; // the icons are 32*32
+        int size = 44; // the icons are 30*30
+
         Dimension preferredSize = new Dimension(size, size);
         setPreferredSize(preferredSize);
     }

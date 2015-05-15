@@ -41,9 +41,9 @@ public class FgBgColorSelector extends JLayeredPane {
     private Color fgColor = BLACK;
     private Color bgColor = WHITE;
 
-    private static final int BIG_BUTTON_SIZE = 32;
-    private static final int SMALL_BUTTON_SIZE = 16;
-    private static final int SMALL_BUTTON_VERTICAL_SPACE = 20;
+    private static final int BIG_BUTTON_SIZE = 30;
+    private static final int SMALL_BUTTON_SIZE = 15;
+    private static final int SMALL_BUTTON_VERTICAL_SPACE = 15;
 
     public static final FgBgColorSelector INSTANCE = new FgBgColorSelector();
 

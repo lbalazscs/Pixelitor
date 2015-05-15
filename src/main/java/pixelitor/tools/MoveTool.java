@@ -28,7 +28,7 @@ import java.awt.event.MouseEvent;
  */
 public class MoveTool extends Tool {
     public MoveTool() {
-        super('v', "Move", "move_tool_icon.gif",
+        super('v', "Move", "move_tool_icon.png",
                 "drag to move the active layer, Alt-drag to move a duplicate of the active layer",
                 Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR), false, true, true, ClipStrategy.IMAGE_ONLY);
     }

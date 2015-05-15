@@ -34,7 +34,7 @@ public class BrushTool extends TmpLayerBrushTool {
     private Color drawingColor;
 
     public BrushTool() {
-        super('b', "Brush", "brush_tool_icon.gif",
+        super('b', "Brush", "brush_tool_icon.png",
                 "click and drag to draw with the current brush, Shift-click to draw lines, right-click to draw with the background color",
                 Cursor.getDefaultCursor()
         );
@@ -43,13 +43,14 @@ public class BrushTool extends TmpLayerBrushTool {
     @Override
     public void initSettingsPanel() {
         addTypeSelector();
+        addBrushSettingsButton();
+        settingsPanel.addSeparator();
         addSizeSelector();
         addSymmetryCombo();
 
         settingsPanel.addSeparator();
 
         addBlendingModePanel();
-        addBrushSettingsButton();
     }
 
     @Override
