@@ -18,10 +18,11 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.Composition;
+import pixelitor.tools.BrushType;
 import pixelitor.tools.Symmetry;
+import pixelitor.tools.Tool;
 
 import java.awt.Graphics2D;
-import java.util.function.Supplier;
 
 /**
  * Delegates the work to other brushes according to the symmetry and brush type settings
@@ -31,17 +32,19 @@ public class SymmetryBrush implements Brush {
 
     private final Brush[] brushes = new Brush[MAX_BRUSHES];
     private int numInstantiatedBrushes;
-    private Supplier<Brush> brushSupplier;
+    private Tool tool;
+    private BrushType brushType;
     private Symmetry symmetry;
     private final BrushAffectedArea affectedArea;
 
-    public SymmetryBrush(Supplier<Brush> brushSupplier, Symmetry symmetry) {
-        this.brushSupplier = brushSupplier;
+    public SymmetryBrush(Tool tool, BrushType brushType, Symmetry symmetry) {
+        this.tool = tool;
+        this.brushType = brushType;
         this.symmetry = symmetry;
         this.affectedArea = new BrushAffectedArea();
         numInstantiatedBrushes = symmetry.getNumBrushes();
         assert numInstantiatedBrushes <= MAX_BRUSHES;
-        brushTypeChanged(brushSupplier);
+        brushTypeChanged(brushType);
     }
 
     public BrushAffectedArea getAffectedArea() {
@@ -73,10 +76,10 @@ public class SymmetryBrush implements Brush {
         symmetry.onNewMousePoint(this, x, y);
     }
 
-    public void brushTypeChanged(Supplier<Brush> brushSupplier) {
-        this.brushSupplier = brushSupplier;
+    public void brushTypeChanged(BrushType brushType) {
+        this.brushType = brushType;
         for(int i = 0; i < numInstantiatedBrushes; i++) {
-            brushes[i] = brushSupplier.get();
+            brushes[i] = brushType.createBrush(tool);
         }
         assert checkThatAllBrushesAreDifferentInstances();
     }
@@ -88,7 +91,7 @@ public class SymmetryBrush implements Brush {
             int newNumBrushes = symmetry.getNumBrushes();
             assert newNumBrushes <= MAX_BRUSHES;
             for(int i = numInstantiatedBrushes; i < newNumBrushes; i++) {
-                brushes[i] = brushSupplier.get();
+                brushes[i] = brushType.createBrush(tool);
             }
             numInstantiatedBrushes = newNumBrushes;
         }

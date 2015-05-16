@@ -33,7 +33,8 @@ import pixelitor.tools.brushes.ShapeDabsBrushSettings;
 import pixelitor.tools.brushes.WobbleBrush;
 
 import javax.swing.*;
-import java.util.function.Supplier;
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 import static pixelitor.tools.brushes.AngleSettings.ANGLE_AWARE_NO_SCATTERING;
 import static pixelitor.tools.brushes.AngleSettings.NOT_ANGLE_AWARE;
@@ -41,43 +42,46 @@ import static pixelitor.tools.brushes.AngleSettings.NOT_ANGLE_AWARE;
 /**
  * The brush types the user can use
  */
-public enum BrushType implements Supplier<Brush> {
+public enum BrushType {
     IDEAL("Hard", false) {
         @Override
-        public Brush get() {
+        public Brush createBrush(Tool tool) {
             return new IdealBrush();
         }
     }, SOFT("Soft", false) {
         @Override
-        public Brush get() {
+        public Brush createBrush(Tool tool) {
             return new ImageDabsBrush(ImageBrushType.SOFT, 0.25, NOT_ANGLE_AWARE);
         }
     }, WOBBLE("Wobble", false) {
         @Override
-        public Brush get() {
+        public Brush createBrush(Tool tool) {
             return new WobbleBrush();
         }
     }, CALLIGRAPHY("Calligraphy", false) {
         @Override
-        public Brush get() {
+        public Brush createBrush(Tool tool) {
             return new CalligraphyBrush();
         }
     }, REALISTIC("Realistic", false) {
         @Override
-        public Brush get() {
+        public Brush createBrush(Tool tool) {
             return new ImageDabsBrush(ImageBrushType.REAL, 0.05, NOT_ANGLE_AWARE);
         }
     }, HAIR("Hair", false) {
         @Override
-        public Brush get() {
+        public Brush createBrush(Tool tool) {
             return new ImageDabsBrush(ImageBrushType.HAIR, 0.02, NOT_ANGLE_AWARE);
         }
     }, SHAPE("Shape", true) {
-        private ShapeDabsBrushSettings settings;
-        private JPanel settingsPanel;
+        // The settings must be shared between the symmetry-brushes of a tool, but
+        // they must be different between the different tools
+        private Map<Tool, ShapeDabsBrushSettings> settingsByTool = new IdentityHashMap<>();
+        private Map<Tool, JPanel> settingPanelsByTool = new IdentityHashMap<>();
 
         @Override
-        public Brush get() {
+        public Brush createBrush(Tool tool) {
+            ShapeDabsBrushSettings settings = settingsByTool.get(tool);
             if(settings == null) {
                 ShapeType shapeType = ShapeBrushSettingsPanel.SHAPE_SELECTED_BY_DEFAULT;
                 double spacingRatio = ShapeBrushSettingsPanel.DEFAULT_SPACING_RATIO;
@@ -86,6 +90,7 @@ public enum BrushType implements Supplier<Brush> {
 
                 ShapeDabsBrush shapeDabsBrush = new ShapeDabsBrush(shapeType, spacing, angleSettings);
                 settings = (ShapeDabsBrushSettings) shapeDabsBrush.getSettings();
+                settingsByTool.put(tool, settings);
                 return shapeDabsBrush;
             } else {
                 ShapeDabsBrush shapeDabsBrush = new ShapeDabsBrush(settings);
@@ -94,8 +99,10 @@ public enum BrushType implements Supplier<Brush> {
         }
 
         @Override
-        public JPanel getSettingsPanel() {
+        public JPanel getSettingsPanel(Tool tool) {
+            JPanel settingsPanel = settingPanelsByTool.get(tool);
             if (settingsPanel == null) {
+                ShapeDabsBrushSettings settings = settingsByTool.get(tool);
                 settingsPanel = new ShapeBrushSettingsPanel(settings);
             }
             return settingsPanel;
@@ -113,17 +120,17 @@ public enum BrushType implements Supplier<Brush> {
 //        }
     }, OUTLINE_CIRCLE("Circles", false) {
         @Override
-        public Brush get() {
+        public Brush createBrush(Tool tool) {
             return new OutlineCircleBrush();
         }
     }, OUTLINE_SQUARE("Squares", false) {
         @Override
-        public Brush get() {
+        public Brush createBrush(Tool tool) {
             return new OutlineSquareBrush();
         }
     }, ONE_PIXEL("One Pixel", false) {
         @Override
-        public Brush get() {
+        public Brush createBrush(Tool tool) {
             return new OnePixelBrush();
         }
 
@@ -141,6 +148,8 @@ public enum BrushType implements Supplier<Brush> {
         this.hasSettings = hasSettings;
     }
 
+    public abstract Brush createBrush(Tool tool);
+
     @Override
     public String toString() {
         return guiName;
@@ -154,7 +163,7 @@ public enum BrushType implements Supplier<Brush> {
         return hasSettings;
     }
 
-    public JPanel getSettingsPanel() {
+    public JPanel getSettingsPanel(Tool tool) {
         assert hasSettings;
         return null; // intended to be overridden if necessary
     }

@@ -81,7 +81,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
 
     protected void initBrushVariables() {
         symmetryBrush = new SymmetryBrush(
-                BrushType.values()[0], getCurrentSymmetry());
+                this, BrushType.values()[0], getCurrentSymmetry());
         brush = symmetryBrush;
         brushAffectedArea = symmetryBrush.getAffectedArea();
     }
@@ -121,7 +121,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         brushSettingsButton = settingsPanel.addButton("Brush Settings",
                 e -> {
                     BrushType brushType = (BrushType) typeSelector.getSelectedItem();
-                    JPanel p = brushType.getSettingsPanel();
+                    JPanel p = brushType.getSettingsPanel(this);
                     new OKDialog(PixelitorWindow.getInstance(), "Brush Settings", p);
                 });
 
