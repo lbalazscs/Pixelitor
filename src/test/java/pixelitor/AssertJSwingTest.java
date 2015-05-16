@@ -56,6 +56,7 @@ import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -93,14 +94,8 @@ public class AssertJSwingTest {
     // TODO create independent tests with static initialization of the window
 
     @BeforeClass
-    public static void cleanOutputs() {
-        try {
-            String cleanerScript = BASE_TESTING_DIR + "\\0000_clean_outputs.bat";
-            Process process = Runtime.getRuntime().exec(cleanerScript);
-            process.waitFor();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
+    public static void initialize() {
+        cleanOutputs();
         checkTestingDirs();
         checkThatAssertsAreEnabled();
     }
@@ -491,7 +486,13 @@ public class AssertJSwingTest {
         ImageComponent activeIC = ImageComponents.getActiveImageComponent();
         testScreenCapture(true);
         testScreenCapture(false);
-        ImageComponents.setActiveImageComponent(activeIC, true);
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                ImageComponents.setActiveImageComponent(activeIC, true);
+            });
+        } catch (InterruptedException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
     }
 
     private void testScreenCapture(boolean hidePixelitor) {
@@ -1179,6 +1180,16 @@ public class AssertJSwingTest {
         robot.pressMouse(MouseButton.LEFT_BUTTON);
         robot.releaseMouse(MouseButton.LEFT_BUTTON);
         robot.releaseKey(VK_ALT);
+    }
+
+    protected static void cleanOutputs() {
+        try {
+            String cleanerScript = BASE_TESTING_DIR + "\\0000_clean_outputs.bat";
+            Process process = Runtime.getRuntime().exec(cleanerScript);
+            process.waitFor();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     protected static void checkThatAssertsAreEnabled() {
