@@ -102,6 +102,7 @@ public class AssertJSwingTest {
             e.printStackTrace();
         }
         checkTestingDirs();
+        checkThatAssertsAreEnabled();
     }
 
     @Before
@@ -1178,5 +1179,12 @@ public class AssertJSwingTest {
         robot.pressMouse(MouseButton.LEFT_BUTTON);
         robot.releaseMouse(MouseButton.LEFT_BUTTON);
         robot.releaseKey(VK_ALT);
+    }
+
+    protected static void checkThatAssertsAreEnabled() {
+        boolean assertsEnabled = false;
+        //noinspection AssertWithSideEffects
+        assert assertsEnabled = true;
+        assertThat(assertsEnabled).isTrue();
     }
 }
