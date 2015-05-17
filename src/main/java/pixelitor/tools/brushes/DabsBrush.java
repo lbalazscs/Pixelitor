@@ -79,4 +79,9 @@ public abstract class DabsBrush extends AbstractBrush {
     public void settingsChanged() {
         dabsStrategy.settingsChanged();
     }
+
+    @Override
+    public void dispose() {
+        settings.unregisterBrush(this);
+    }
 }

@@ -129,7 +129,7 @@ public class RobotTest {
         numPastedImages = 0;
 
         // make sure it can be stopped by pressing the u key
-        stopKeyStroke = KeyStroke.getKeyStroke('u');
+        stopKeyStroke = KeyStroke.getKeyStroke('w');
         GlobalKeyboardWatch.addKeyboardShortCut(stopKeyStroke, "stoprobot", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -149,7 +149,7 @@ public class RobotTest {
             }
         });
 
-        System.out.println("RobotTest.runRobot CALLED at " + new Date() + ", press the 'u' key to stop it");
+        System.out.println("RobotTest.runRobot CALLED at " + new Date() + ", press the '" + stopKeyStroke.getKeyChar() + "' key to stop it");
 
         Robot r = null;
         try {

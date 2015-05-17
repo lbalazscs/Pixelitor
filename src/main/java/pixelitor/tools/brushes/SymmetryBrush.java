@@ -79,6 +79,9 @@ public class SymmetryBrush implements Brush {
     public void brushTypeChanged(BrushType brushType) {
         this.brushType = brushType;
         for(int i = 0; i < numInstantiatedBrushes; i++) {
+            if(brushes[i] != null) {
+                brushes[i].dispose();
+            }
             brushes[i] = brushType.createBrush(tool);
         }
         assert checkThatAllBrushesAreDifferentInstances();

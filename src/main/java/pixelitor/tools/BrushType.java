@@ -104,6 +104,7 @@ public enum BrushType {
             if (settingsPanel == null) {
                 ShapeDabsBrushSettings settings = settingsByTool.get(tool);
                 settingsPanel = new ShapeBrushSettingsPanel(settings);
+                settingPanelsByTool.put(tool, settingsPanel);
             }
             return settingsPanel;
         }

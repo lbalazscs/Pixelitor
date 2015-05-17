@@ -69,8 +69,8 @@ public enum Symmetry {
         @Override
         public void onNewMousePoint(SymmetryBrush symmetryBrush, int x, int y) {
             symmetryBrush.onNewMousePoint(0, x, y);
-            symmetryBrush.onNewMousePoint(1, x, compositionHeight - y);
-            symmetryBrush.onNewMousePoint(2, compositionWidth - x, y);
+            symmetryBrush.onNewMousePoint(1, compositionWidth - x, y);
+            symmetryBrush.onNewMousePoint(2, x, compositionHeight - y);
             symmetryBrush.onNewMousePoint(3, compositionWidth - x, compositionHeight - y);
         }
     }, CENTRAL_SYMMETRY("Central Symmetry", 2) {

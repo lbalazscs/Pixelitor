@@ -73,6 +73,11 @@ public class DabsBrushSettings {
 
     public void registerBrush(DabsBrush brush) {
         brushes.add(brush);
+
         assert brushes.size() <= 4;
+    }
+
+    public void unregisterBrush(DabsBrush brush) {
+        brushes.remove(brush);
     }
 }

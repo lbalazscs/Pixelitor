@@ -50,4 +50,6 @@ public interface Brush {
      * @param y        the y of the mouse event (NOT translated with the radius)
      */
     void onNewMousePoint(int x, int y);
+
+    default void dispose() {}
 }
