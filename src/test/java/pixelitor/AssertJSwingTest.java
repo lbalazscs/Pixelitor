@@ -135,18 +135,19 @@ public class AssertJSwingTest {
         // make sure we have a big internal frame for the tool tests
         runMenuCommand("Actual Pixels");
 
-        testZoomTool();
-        testSelectionTool();
-        testCloneTool();
         testMoveTool();
         testCropTool();
-        testEraserTool();
+        testSelectionTool();
         testBrushTool();
+        testCloneTool();
+        testEraserTool();
+        testSmudgeTool();
         testGradientTool();
         testPaintBucketTool();
         testColorPickerTool();
         testShapesTool();
         testHandTool();
+        testZoomTool();
     }
 
     private void testMenus() {
@@ -735,6 +736,7 @@ public class AssertJSwingTest {
 
     private void testHandTool() {
         window.toggleButton("Hand Tool Button").click();
+        randomAltClick();
 
         moveRandom();
         dragRandom();
@@ -742,6 +744,7 @@ public class AssertJSwingTest {
 
     private void testShapesTool() {
         window.toggleButton("Shapes Tool Button").click();
+        randomAltClick();
 
         setupEffectsDialog();
         boolean stokeSettingsSetup = false;
@@ -804,6 +807,8 @@ public class AssertJSwingTest {
 
     private void testColorPickerTool() {
         window.toggleButton("Color Picker Tool Button").click();
+        randomAltClick();
+
         move(300, 300);
         window.click();
         drag(400, 400);
@@ -811,6 +816,8 @@ public class AssertJSwingTest {
 
     private void testPaintBucketTool() {
         window.toggleButton("Paint Bucket Tool Button").click();
+        randomAltClick();
+
         move(300, 300);
         window.click();
 
@@ -820,6 +827,8 @@ public class AssertJSwingTest {
 
     private void testGradientTool() {
         window.toggleButton("Gradient Tool Button").click();
+        randomAltClick();
+
         for (GradientType gradientType : GradientType.values()) {
             window.comboBox("gradientTypeSelector").selectItem(gradientType.toString());
             for (String cycleMethod : GradientTool.CYCLE_METHODS) {
@@ -850,6 +859,8 @@ public class AssertJSwingTest {
     }
 
     private void testBrushStrokes() {
+        randomAltClick();
+
         for (BrushType brushType : BrushType.values()) {
             window.comboBox("brushTypeSelector").selectItem(brushType.toString());
             for (Symmetry symmetry : Symmetry.values()) {
@@ -860,6 +871,18 @@ public class AssertJSwingTest {
             }
         }
         keyboardUndoRedo();
+    }
+
+    private void testSmudgeTool() {
+        window.toggleButton("Smudge Tool Button").click();
+        randomAltClick();
+
+        for (int i = 0; i < 3; i++) {
+            randomClick();
+            shiftMoveClickRandom();
+            moveRandom();
+            dragRandom();
+        }
     }
 
     private void testCloneTool() {
@@ -899,6 +922,8 @@ public class AssertJSwingTest {
 
     private void testSelectionTool() {
         window.toggleButton("Selection Tool Button").click();
+        randomAltClick();
+
         move(200, 200);
         drag(400, 400);
 
@@ -934,6 +959,7 @@ public class AssertJSwingTest {
 
     private void testCropTool() {
         window.toggleButton("Crop Tool Button").click();
+        randomAltClick();
         move(200, 200);
         drag(400, 400);
         drag(450, 450);
@@ -950,8 +976,17 @@ public class AssertJSwingTest {
 
     private void testMoveTool() {
         window.toggleButton("Move Tool Button").click();
+        testMoveToolImpl(false);
+        testMoveToolImpl(true);
+    }
+
+    private void testMoveToolImpl(boolean altDrag) {
         move(300, 300);
-        drag(400, 400);
+        if (altDrag) {
+            altDrag(400, 400);
+        } else {
+            drag(400, 400);
+        }
         keyboardUndoRedo();
         keyboardUndo();
     }
@@ -1032,6 +1067,15 @@ public class AssertJSwingTest {
         move(x, y);
     }
 
+    private void shiftMoveClickRandom() {
+        window.pressKey(VK_SHIFT);
+        int x = 200 + random.nextInt(400);
+        int y = 200 + random.nextInt(400);
+        move(x, y);
+        click();
+        window.releaseKey(VK_SHIFT);
+    }
+
     private void dragRandom() {
         int x = 200 + random.nextInt(400);
         int y = 200 + random.nextInt(400);
@@ -1042,6 +1086,12 @@ public class AssertJSwingTest {
         robot.pressMouse(MouseButton.LEFT_BUTTON);
         robot.moveMouse(x, y);
         robot.releaseMouse(MouseButton.LEFT_BUTTON);
+    }
+
+    private void altDrag(int x, int y) {
+        window.pressKey(VK_ALT);
+        drag(x, y);
+        window.releaseKey(VK_ALT);
     }
 
     private static void sleep(int duration, TimeUnit unit) {
@@ -1175,6 +1225,11 @@ public class AssertJSwingTest {
         robot.releaseMouse(MouseButton.LEFT_BUTTON);
     }
 
+    private void randomClick() {
+        moveRandom();
+        click();
+    }
+
     private void altClick() {
         robot.pressKey(VK_ALT);
         robot.pressMouse(MouseButton.LEFT_BUTTON);
@@ -1197,5 +1252,10 @@ public class AssertJSwingTest {
         //noinspection AssertWithSideEffects
         assert assertsEnabled = true;
         assertThat(assertsEnabled).isTrue();
+    }
+
+    private void randomAltClick() {
+        moveRandom();
+        altClick();
     }
 }

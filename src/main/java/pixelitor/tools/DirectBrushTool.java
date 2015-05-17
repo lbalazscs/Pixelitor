@@ -41,13 +41,20 @@ public abstract class DirectBrushTool extends AbstractBrushTool {
 
     @Override
     public void mouseReleased(MouseEvent e, ImageDisplay ic) {
+        if (graphics == null) {
+            // we can get here if the mousePressed was an Alt-press, therefore
+            // consumed by the color picker. Nothing was drawn, therefore
+            // there is no need to save a backup, we can just return
+            return;
+        }
+
         super.mouseReleased(e, ic);
         copyBeforeStart.flush();
         copyBeforeStart = null;
     }
 
     @Override
-    void createGraphics(Composition comp, ImageLayer layer) {
+    void createGraphicsForNewBrushStroke(Composition comp, ImageLayer layer) {
         // uses the graphics of the buffered image contained in the layer
         BufferedImage drawImage = layer.getCompositionSizedSubImage();
         graphics = drawImage.createGraphics();
@@ -66,7 +73,7 @@ public abstract class DirectBrushTool extends AbstractBrushTool {
     @Override
     BufferedImage getOriginalImage(Composition comp) {
         if (copyBeforeStart == null) {
-            throw new IllegalStateException("EraseTool: copyBeforeStart == null");
+            throw new IllegalStateException("DirectBrushTool: copyBeforeStart == null");
         }
 
         return copyBeforeStart;

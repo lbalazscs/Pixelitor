@@ -45,8 +45,8 @@ public class EraserTool extends DirectBrushTool {
     }
 
     @Override
-    void createGraphics(Composition comp, ImageLayer layer) {
-        super.createGraphics(comp, layer);
+    void createGraphicsForNewBrushStroke(Composition comp, ImageLayer layer) {
+        super.createGraphicsForNewBrushStroke(comp, layer);
 
         // the color does not matter as long as AlphaComposite.DST_OUT is used
         graphics.setComposite(AlphaComposite.getInstance(DST_OUT, 1.0f));

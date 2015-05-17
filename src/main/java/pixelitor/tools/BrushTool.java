@@ -60,8 +60,8 @@ public class BrushTool extends TmpLayerBrushTool {
     }
 
     @Override
-    protected void createGraphics(Composition comp, ImageLayer layer) {
-        super.createGraphics(comp, layer);
+    protected void createGraphicsForNewBrushStroke(Composition comp, ImageLayer layer) {
+        super.createGraphicsForNewBrushStroke(comp, layer);
 
         // reinitialize the color for each stroke
         graphics.setColor(drawingColor);

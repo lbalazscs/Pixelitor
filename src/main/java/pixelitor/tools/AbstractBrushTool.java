@@ -200,7 +200,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     /**
      * Creates the global Graphics2D object graphics.
      */
-    abstract void createGraphics(Composition comp, ImageLayer layer);
+    abstract void createGraphicsForNewBrushStroke(Composition comp, ImageLayer layer);
 
     /**
      * Called from mousePressed, mouseDragged, and drawBrushStroke
@@ -214,7 +214,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
 //            }
 
             ImageLayer imageLayer = (ImageLayer) comp.getActiveLayer();
-            createGraphics(comp, imageLayer);
+            createGraphicsForNewBrushStroke(comp, imageLayer);
             graphics.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
             if (connectClickWithLine) {
@@ -275,7 +275,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
             respectSelection = false;
 
             ImageLayer imageLayer = (ImageLayer) comp.getActiveLayer();
-            createGraphics(comp, imageLayer);
+            createGraphicsForNewBrushStroke(comp, imageLayer);
 
             doTraceAfterSetup(shape);
 

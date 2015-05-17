@@ -17,10 +17,15 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.Composition;
 import pixelitor.tools.ShapeType;
 
+import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 public class ShapeDabsBrush extends DabsBrush {
     public ShapeDabsBrush(ShapeType shapeType, SpacingStrategy spacingStrategy,
@@ -34,6 +39,12 @@ public class ShapeDabsBrush extends DabsBrush {
 
     public ShapeDabsBrush(ShapeDabsBrushSettings settings) {
         super(settings, false);
+    }
+
+    @Override
+    public void setTarget(Composition comp, Graphics2D g) {
+        super.setTarget(comp, g);
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
     }
 
     @Override
