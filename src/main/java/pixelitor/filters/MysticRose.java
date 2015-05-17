@@ -20,6 +20,7 @@ package pixelitor.filters;
 import com.jhlabs.composite.AddComposite;
 import org.jdesktop.swingx.image.FastBlurFilter;
 import pixelitor.filters.gui.BooleanParam;
+import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
@@ -38,8 +39,10 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
  * Mystic Rose
  */
 public class MysticRose extends FilterWithParametrizedGUI {
+    private final ImagePositionParam center = new ImagePositionParam("Center");
     private final RangeParam nrPoints = new RangeParam("Number of Points", 3, 42, 10);
     private final RangeParam lineWidth = new RangeParam("Line Width", 1, 10, 1);
+    private final RangeParam radius = new RangeParam("Radius (Height %)", 1, 200, 45);
     private final RangeParam rotate = new RangeParam("Rotate", 0, 100, 0);
     private final BooleanParam glow = new BooleanParam("Glow", false);
 
@@ -47,8 +50,10 @@ public class MysticRose extends FilterWithParametrizedGUI {
         super("Mystic Rose", false, false);
         setParamSet(new ParamSet(
                 nrPoints,
-                lineWidth,
                 rotate,
+                center,
+                radius,
+                lineWidth,
                 glow
         ));
     }
@@ -57,6 +62,7 @@ public class MysticRose extends FilterWithParametrizedGUI {
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         int srcWidth = src.getWidth();
         int srcHeight = src.getHeight();
+
         dest = new BufferedImage(srcWidth, srcHeight, src.getType());
         Graphics2D g2 = dest.createGraphics();
         g2.setColor(BLACK);
@@ -67,13 +73,14 @@ public class MysticRose extends FilterWithParametrizedGUI {
 
         int numPoints = nrPoints.getValue();
         Point[] points = new Point[numPoints];
-        double radius = 0.45 * Math.min(srcWidth, srcHeight);
-        double halfWidth = srcWidth / 2.0;
-        double halfHeight = srcHeight / 2.0;
+        double r = radius.getValueAsPercentage() * srcHeight;
         double startAngle = 2 * Math.PI / numPoints * rotate.getValueAsPercentage();
+        double cx = srcWidth * center.getRelativeX();
+        double cy = srcHeight * center.getRelativeY();
+
         for (int i = 0; i < points.length; i++) {
             double theta = startAngle + 2 * Math.PI * i / numPoints;
-            points[i] = new Point((int)(halfWidth + radius * Math.cos(theta)), (int)(halfHeight + radius * Math.sin(theta)));
+            points[i] = new Point((int) (cx + r * Math.cos(theta)), (int) (cy + r * Math.sin(theta)));
         }
         for (int i = 0; i < points.length; i++) {
             for (int j = 0; j < points.length; j++) {
