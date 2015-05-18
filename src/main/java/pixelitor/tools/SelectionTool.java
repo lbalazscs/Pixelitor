@@ -131,6 +131,12 @@ public class SelectionTool extends Tool {
 
         Composition comp = ic.getComp();
         Optional<Selection> opt = comp.getSelection();
+        if (!opt.isPresent()) {
+            // TODO this should not happen, but it did happen on Mac
+            // robot tests
+            System.out.println("SelectionTool::mouseReleased: no selection");
+            return;
+        }
         Selection selection = opt.get();
 
         if (originalSelectionInteraction != null) {

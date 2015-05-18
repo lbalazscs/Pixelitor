@@ -68,7 +68,8 @@ public final class ConsistencyChecks {
                 if (differentWidth || differentHeight) {
 
                     String lastFadeableOp = History.getLastPresentationName();
-                    throw new IllegalStateException("'Fade " + lastFadeableOp + "' would not work now:\nFadeableEdit class = " + edit.getClass().getName() + "\n" +
+                    throw new IllegalStateException("'Fade " + lastFadeableOp + "' would not work now:\n" +
+                            "FadeableEdit class = " + edit.get().getClass().getName() + "\n" +
                             " current selected dimensions: width = " + current.getWidth() + ", height = " + current.getHeight() +
                             " history dimensions: width = " + previous.getWidth() + ", height = " + previous.getHeight()
                     );
