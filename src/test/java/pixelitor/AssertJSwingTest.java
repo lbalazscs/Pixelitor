@@ -51,6 +51,7 @@ import pixelitor.tools.GradientType;
 import pixelitor.tools.ShapeType;
 import pixelitor.tools.ShapesAction;
 import pixelitor.tools.Symmetry;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.event.KeyEvent;
@@ -97,7 +98,7 @@ public class AssertJSwingTest {
     public static void initialize() {
         cleanOutputs();
         checkTestingDirs();
-        checkThatAssertsAreEnabled();
+        Utils.checkThatAssertionsAreEnabled();
     }
 
     @Before
@@ -1245,13 +1246,6 @@ public class AssertJSwingTest {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-    }
-
-    protected static void checkThatAssertsAreEnabled() {
-        boolean assertsEnabled = false;
-        //noinspection AssertWithSideEffects
-        assert assertsEnabled = true;
-        assertThat(assertsEnabled).isTrue();
     }
 
     private void randomAltClick() {

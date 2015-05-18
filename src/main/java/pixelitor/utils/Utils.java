@@ -415,4 +415,13 @@ public final class Utils {
         int interpolatedRGB = ImageMath.mixColors(progress, initialRGB, finalRGB);
         return new Color(interpolatedRGB);
     }
+
+    public static void checkThatAssertionsAreEnabled() {
+        boolean assertsEnabled = false;
+        //noinspection AssertWithSideEffects
+        assert assertsEnabled = true;
+        if (!assertsEnabled) {
+            throw new IllegalStateException("assertions not enabled");
+        }
+    }
 }

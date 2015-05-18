@@ -23,6 +23,7 @@ import pixelitor.layers.Layers;
 import pixelitor.tools.FgBgColorSelector;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Dialogs;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.EventQueue;
@@ -42,6 +43,7 @@ public class Pixelitor {
         // allows to put the app into development mode by
         // adding -Dpixelitor.development=true to the command line
         if ("true".equals(System.getProperty("pixelitor.development"))) {
+            Utils.checkThatAssertionsAreEnabled();
             Build.CURRENT = Build.DEVELOPMENT;
         }
 
@@ -66,7 +68,7 @@ public class Pixelitor {
         // this works
         System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Pixelitor");
 
-        // it is respected only by the native Aqua look-and-feel
+        // this is respected only by the native Aqua look-and-feel
         System.setProperty("apple.laf.useScreenMenuBar", "true");
     }
 
