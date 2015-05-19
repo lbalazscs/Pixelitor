@@ -146,7 +146,7 @@ public class CloneTool extends TmpLayerBrushTool {
         }
     }
 
-    protected void setCloningSource(ImageDisplay ic, int x, int y) {
+    private void setCloningSource(ImageDisplay ic, int x, int y) {
         BufferedImage sourceImage;
         if (sampleAllLayers) {
             sourceImage = ic.getComp().getCompositeImage();

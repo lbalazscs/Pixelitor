@@ -76,8 +76,8 @@ public enum BrushType {
     }, SHAPE("Shape", true) {
         // The settings must be shared between the symmetry-brushes of a tool, but
         // they must be different between the different tools
-        private Map<Tool, ShapeDabsBrushSettings> settingsByTool = new IdentityHashMap<>();
-        private Map<Tool, JPanel> settingPanelsByTool = new IdentityHashMap<>();
+        private final Map<Tool, ShapeDabsBrushSettings> settingsByTool = new IdentityHashMap<>();
+        private final Map<Tool, JPanel> settingPanelsByTool = new IdentityHashMap<>();
 
         @Override
         public Brush createBrush(Tool tool) {
@@ -93,7 +93,7 @@ public enum BrushType {
                 settingsByTool.put(tool, settings);
                 return shapeDabsBrush;
             } else {
-                ShapeDabsBrush shapeDabsBrush = new ShapeDabsBrush(settings);
+                Brush shapeDabsBrush = new ShapeDabsBrush(settings);
                 return  shapeDabsBrush;
             }
         }

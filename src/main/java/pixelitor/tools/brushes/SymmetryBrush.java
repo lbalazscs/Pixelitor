@@ -32,7 +32,7 @@ public class SymmetryBrush implements Brush {
 
     private final Brush[] brushes = new Brush[MAX_BRUSHES];
     private int numInstantiatedBrushes;
-    private Tool tool;
+    private final Tool tool;
     private BrushType brushType;
     private Symmetry symmetry;
     private final BrushAffectedArea affectedArea;

@@ -51,7 +51,7 @@ public abstract class Tool {
     private final String name;
     private final String iconFileName;
     private final String toolMessage;
-    protected final Cursor cursor;
+    private final Cursor cursor;
     private final boolean constrainIfShiftDown;
     private final ClipStrategy clipStrategy;
 
@@ -217,7 +217,7 @@ public abstract class Tool {
      * It saves the intersection of the selection (if there is one) with the maximal affected area.
      */
     // TODO currently it does not take the selection into account
-    public void saveSubImageForUndo(BufferedImage originalImage, ToolAffectedArea affectedArea) {
+    protected void saveSubImageForUndo(BufferedImage originalImage, ToolAffectedArea affectedArea) {
         assert (originalImage != null);
         Rectangle rectangleAffectedByTool = affectedArea.getRectangle();
         if (rectangleAffectedByTool.isEmpty()) {

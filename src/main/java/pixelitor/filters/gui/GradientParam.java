@@ -54,7 +54,7 @@ public class GradientParam extends AbstractFilterParam {
         createGradientSlider(defaultThumbPositions, defaultColors);
     }
 
-    public void createGradientSlider(float[] defaultThumbPositions, Color[] defaultColors) {
+    private void createGradientSlider(float[] defaultThumbPositions, Color[] defaultColors) {
         gradientSlider = new GradientSlider(GradientSlider.HORIZONTAL, defaultThumbPositions, defaultColors);
         gradientSlider.addPropertyChangeListener(evt -> {
             if(shouldStartFilter(evt)) {

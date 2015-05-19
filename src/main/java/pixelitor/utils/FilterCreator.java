@@ -38,6 +38,7 @@ public class FilterCreator extends JPanel {
     private final ParamPanel[] paramPanels = new ParamPanel[10];
     private final JCheckBox pixelLoopCB;
     private final JCheckBox proxyCB;
+    @SuppressWarnings("FieldMayBeFinal")
     private JTextField proxyNameTF;
     private final JCheckBox edgeActionCB;
     private final JCheckBox interpolationCB;

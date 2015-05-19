@@ -738,12 +738,12 @@ public class MenuBar extends JMenuBar {
 
         viewMenu.addSeparator();
 
-        initArrangeWindowsSubmenu(viewMenu, pixelitorWindow);
+        initArrangeWindowsSubmenu(viewMenu);
 
         this.add(viewMenu);
     }
 
-    private static void initArrangeWindowsSubmenu(JMenu viewMenu, PixelitorWindow pixelitorWindow) {
+    private static void initArrangeWindowsSubmenu(JMenu viewMenu) {
         JMenu arrangeWindowsSubmenu = new JMenu("Arrange Windows");
 
         Action cascadeWindowsAction = new MenuAction("Cascade") {

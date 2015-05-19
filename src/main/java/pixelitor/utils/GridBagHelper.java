@@ -32,7 +32,7 @@ public class GridBagHelper {
     private static final GridBagConstraints nextControlConstraint = new GridBagConstraints(0, 0, 1, 1, 0.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, insets, 0, 0);
     private static final GridBagConstraints nextLastControlConstraint = new GridBagConstraints(0, 0, GridBagConstraints.REMAINDER, 1, 0.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, insets, 0, 0);
     private final Container container;
-    int autoIncrementedGridY = 0;
+    private int autoIncrementedGridY = 0;
 
     public GridBagHelper(Container container) {
         this.container = container;
