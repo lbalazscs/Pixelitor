@@ -18,14 +18,13 @@
 package pixelitor.tools;
 
 import com.bric.util.JVM;
-import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.Build;
 import pixelitor.ImageDisplay;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.CloneBrush;
-import pixelitor.tools.brushes.CloneBrushType;
+import pixelitor.tools.brushes.CopyBrushType;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.GridBagHelper;
 import pixelitor.utils.OKDialog;
@@ -51,8 +50,6 @@ public class CloneTool extends TmpLayerBrushTool {
         CLONING
     }
 
-    private final EnumComboBoxModel<CloneBrushType> typeModel = new EnumComboBoxModel<>(CloneBrushType.class);
-
     private State state = NO_SOURCE;
     private boolean sampleAllLayers = false;
 
@@ -70,13 +67,7 @@ public class CloneTool extends TmpLayerBrushTool {
 
     @Override
     public void initSettingsPanel() {
-        JComboBox<ShapeType> typeCB = new JComboBox<>(typeModel);
-        settingsPanel.addWithLabel("Brush:", typeCB, "typeCB");
-        typeCB.addActionListener(e -> {
-            CloneBrushType brushType = (CloneBrushType) typeCB.getSelectedItem();
-            cloneBrush.typeChanged(brushType);
-        });
-
+        settingsPanel.addCopyBrushTypeSelector(cloneBrush::typeChanged);
 
         addSizeSelector();
 
@@ -104,7 +95,7 @@ public class CloneTool extends TmpLayerBrushTool {
 
     @Override
     protected void initBrushVariables() {
-        cloneBrush = new CloneBrush(CloneBrushType.SOFT);
+        cloneBrush = new CloneBrush(CopyBrushType.SOFT);
         brush = new BrushAffectedArea(cloneBrush);
         brushAffectedArea = (BrushAffectedArea) brush;
     }

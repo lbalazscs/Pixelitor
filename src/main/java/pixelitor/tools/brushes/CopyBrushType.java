@@ -24,7 +24,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 
-public enum CloneBrushType {
+public enum CopyBrushType {
     SOFT("Soft") {
         private BufferedImage transparencyImage;
 
@@ -64,7 +64,7 @@ public enum CloneBrushType {
 
     private final String guiName;
 
-    CloneBrushType(String guiName) {
+    CopyBrushType(String guiName) {
         this.guiName = guiName;
     }
 

@@ -20,6 +20,7 @@ package pixelitor.tools;
 import pixelitor.ImageDisplay;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.tools.brushes.BrushAffectedArea;
+import pixelitor.tools.brushes.CopyBrushType;
 import pixelitor.tools.brushes.SmudgeBrush;
 import pixelitor.utils.SliderSpinner;
 
@@ -45,13 +46,15 @@ public class SmudgeTool extends DirectBrushTool {
 
     @Override
     protected void initBrushVariables() {
-        smudgeBrush = new SmudgeBrush();
+        smudgeBrush = new SmudgeBrush(CopyBrushType.SOFT);
         brush = new BrushAffectedArea(smudgeBrush);
         brushAffectedArea = (BrushAffectedArea) brush;
     }
 
     @Override
     public void initSettingsPanel() {
+        settingsPanel.addCopyBrushTypeSelector(smudgeBrush::typeChanged);
+
         addSizeSelector();
         addStrengthSelector();
         addFingerPaintingSelector();

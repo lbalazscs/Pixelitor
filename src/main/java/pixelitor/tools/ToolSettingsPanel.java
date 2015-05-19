@@ -17,6 +17,10 @@
 
 package pixelitor.tools;
 
+import org.jdesktop.swingx.combobox.EnumComboBoxModel;
+import pixelitor.tools.brushes.CopyBrushType;
+import pixelitor.tools.brushes.CopyBrushTypeChangedListener;
+
 import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -77,5 +81,15 @@ public class ToolSettingsPanel extends JPanel {
         checkBox.addActionListener(e -> consumer.accept(checkBox.isSelected()));
         add(checkBox);
         return checkBox;
+    }
+
+    public void addCopyBrushTypeSelector(CopyBrushTypeChangedListener listener) {
+        EnumComboBoxModel<CopyBrushType> typeModel = new EnumComboBoxModel<>(CopyBrushType.class);
+        JComboBox<CopyBrushType> typeCB = new JComboBox<>(typeModel);
+        addWithLabel("Brush:", typeCB, "typeCB");
+        typeCB.addActionListener(e -> {
+            CopyBrushType brushType = (CopyBrushType) typeCB.getSelectedItem();
+            listener.copyBrushTypeChanged(brushType);
+        });
     }
 }

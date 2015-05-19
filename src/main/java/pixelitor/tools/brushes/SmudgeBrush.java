@@ -22,19 +22,12 @@ import pixelitor.tools.FgBgColorSelector;
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
-
-import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
-import static pixelitor.tools.brushes.AngleSettings.NOT_ANGLE_AWARE;
 
 /**
  * The brush used by the Smudge Tool
  */
-public class SmudgeBrush extends DabsBrush {
-    private BufferedImage sourceImage;
-    private BufferedImage brushImage;
-    private Ellipse2D.Double circleClip;
+public class SmudgeBrush extends CopyBrush {
 
     private double lastX;
     private double lastY;
@@ -42,15 +35,8 @@ public class SmudgeBrush extends DabsBrush {
     private boolean firstUsageInStroke = true;
     private boolean fingerPainting = false;
 
-    public SmudgeBrush() {
-        super(new FixedDistanceSpacing(1.0), NOT_ANGLE_AWARE, true);
-    }
-
-    @Override
-    public void setRadius(int radius) {
-        super.setRadius(radius);
-        brushImage = new BufferedImage(diameter, diameter, TYPE_INT_ARGB);
-        circleClip = new Ellipse2D.Double(0, 0, diameter, diameter);
+    public SmudgeBrush(CopyBrushType type) {
+        super(type, new FixedDistanceSpacing(1.0));
     }
 
     public void setSource(BufferedImage sourceImage, int srcX, int srcY, float strength) {
@@ -64,7 +50,7 @@ public class SmudgeBrush extends DabsBrush {
     @Override
     void setupBrushStamp(double x, double y) {
         Graphics2D g = brushImage.createGraphics();
-        g.setClip(circleClip);
+        type.beforeDrawImage(g);
 
         if (firstUsageInStroke && fingerPainting) {
             g.setColor(FgBgColorSelector.getFG());
@@ -76,6 +62,8 @@ public class SmudgeBrush extends DabsBrush {
                             -lastX + radius,
                             -lastY + radius), null);
         }
+
+        type.afterDrawImage(g);
         g.dispose();
 
         firstUsageInStroke = false;
@@ -87,7 +75,6 @@ public class SmudgeBrush extends DabsBrush {
                 x - radius,
                 y - radius
         );
-//        transform.rotate(0.01);
 
         // does not handle transparency
         targetG.setComposite(AlphaComposite.SrcAtop.derive(strength));

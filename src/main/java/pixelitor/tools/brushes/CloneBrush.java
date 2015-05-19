@@ -23,36 +23,22 @@ import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
-import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
-import static pixelitor.tools.brushes.AngleSettings.NOT_ANGLE_AWARE;
-
 /**
  * The brush used by the Clone Tool
  */
-public class CloneBrush extends DabsBrush {
-    private BufferedImage sourceImage;
+public class CloneBrush extends CopyBrush {
     private int srcX;
     private int srcY;
     private int dx;
     private int dy;
     private boolean aligned = true;
 
-    private BufferedImage brushImage;
     private boolean firstCloningStart = true;
-    private CloneBrushType type;
     private double scale;
     private double rotate;
 
-    public CloneBrush(CloneBrushType type) {
-        super(new RadiusRatioSpacing(0.25), NOT_ANGLE_AWARE, true);
-        this.type = type;
-    }
-
-    @Override
-    public void setRadius(int radius) {
-        super.setRadius(radius);
-        brushImage = new BufferedImage(diameter, diameter, TYPE_INT_ARGB);
-        type.setSize(diameter);
+    public CloneBrush(CopyBrushType type) {
+        super(type, new RadiusRatioSpacing(0.25));
     }
 
     public void setSource(BufferedImage sourceImage, int srcX, int srcY) {
@@ -125,11 +111,6 @@ public class CloneBrush extends DabsBrush {
 
     public void setAligned(boolean aligned) {
         this.aligned = aligned;
-    }
-
-    public void typeChanged(CloneBrushType type) {
-        this.type = type;
-        type.setSize(diameter);
     }
 
     public void setScale(double scale) {
