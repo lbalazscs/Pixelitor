@@ -25,24 +25,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 
 public enum CloneBrushType {
-    HARD("Hard") {
-        private Ellipse2D.Double circleClip;
-
-        @Override
-        public void setSize(int size) {
-            circleClip = new Ellipse2D.Double(0, 0, size, size);
-        }
-
-        @Override
-        public void beforeDrawImage(Graphics2D g) {
-            g.setClip(circleClip);
-        }
-
-        @Override
-        public void afterDrawImage(Graphics2D g) {
-            // do nothing
-        }
-    }, SOFT("Soft") {
+    SOFT("Soft") {
         private BufferedImage transparencyImage;
 
         @Override
@@ -59,6 +42,23 @@ public enum CloneBrushType {
         public void afterDrawImage(Graphics2D g) {
             g.setComposite(AlphaComposite.DstIn);
             g.drawImage(transparencyImage, 0, 0, null);
+        }
+    }, HARD("Hard") {
+        private Ellipse2D.Double circleClip;
+
+        @Override
+        public void setSize(int size) {
+            circleClip = new Ellipse2D.Double(0, 0, size, size);
+        }
+
+        @Override
+        public void beforeDrawImage(Graphics2D g) {
+            g.setClip(circleClip);
+        }
+
+        @Override
+        public void afterDrawImage(Graphics2D g) {
+            // do nothing
         }
     };
 

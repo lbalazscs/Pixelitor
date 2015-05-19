@@ -22,19 +22,13 @@ package pixelitor.tools.brushes;
  */
 public class RadiusRatioSpacing implements SpacingStrategy {
     private double spacingRatio = 2.0; // the spacing relative to the radius
-    private double spacing;
 
     public RadiusRatioSpacing(double spacingRatio) {
         this.spacingRatio = spacingRatio;
     }
 
     @Override
-    public void setRadius(int radius) {
-        spacing = radius * spacingRatio;
-    }
-
-    @Override
-    public double getSpacing() {
-        return spacing;
+    public double getSpacing(int radius) {
+        return radius * spacingRatio;
     }
 }

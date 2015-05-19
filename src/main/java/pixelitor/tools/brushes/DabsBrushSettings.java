@@ -29,7 +29,6 @@ import java.util.List;
 public class DabsBrushSettings {
     private AngleSettings angleSettings;
     private SpacingStrategy spacingStrategy;
-    private int radius;
     private final List<DabsBrush> brushes = new ArrayList<>(4);
 
     public DabsBrushSettings(AngleSettings angleSettings, SpacingStrategy spacingStrategy) {
@@ -38,7 +37,6 @@ public class DabsBrushSettings {
     }
 
     public void changeSpacing(SpacingStrategy spacingStrategy) {
-        spacingStrategy.setRadius(radius); // set the current value
         this.spacingStrategy = spacingStrategy;
         notifyBrushes();
     }
@@ -46,11 +44,6 @@ public class DabsBrushSettings {
     public void changeAngle(AngleSettings angleSettings) {
         this.angleSettings = angleSettings;
         notifyBrushes();
-    }
-
-    public void setRadius(int radius) {
-        this.radius = radius;
-        spacingStrategy.setRadius(radius);
     }
 
     public boolean isAngleAware() {

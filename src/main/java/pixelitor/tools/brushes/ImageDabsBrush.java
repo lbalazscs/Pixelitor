@@ -54,6 +54,7 @@ public class ImageDabsBrush extends DabsBrush {
 
     @Override
     void setupBrushStamp(double x, double y) {
+        assert diameter > 0;
         Color c = targetG.getColor();
 
         if (!c.equals(lastColor)) {
@@ -63,7 +64,6 @@ public class ImageDabsBrush extends DabsBrush {
         } else {
             resizeBrushImage(diameter, false);
         }
-
     }
 
     /**
@@ -81,6 +81,7 @@ public class ImageDabsBrush extends DabsBrush {
         }
 
         int newSizeInt = (int) newSize;
+        assert newSizeInt > 0 : "newSize = " + newSize;
         finalScaledImage = new BufferedImage(newSizeInt, newSizeInt, TYPE_INT_ARGB);
         Graphics2D g = finalScaledImage.createGraphics();
         g.drawImage(coloredBrushImage, 0, 0, newSizeInt, newSizeInt, null);

@@ -33,6 +33,8 @@ public abstract class AbstractBrush implements Brush {
 
     @Override
     public void setRadius(int radius) {
+//        System.out.println("AbstractBrush::setRadius: radius = " + radius
+//                + ", class = " + this.getClass().getName());
         this.radius = radius;
         this.diameter = 2 * radius;
     }
@@ -52,5 +54,9 @@ public abstract class AbstractBrush implements Brush {
     protected void setPrevious(int x, int y) {
         this.previousX = x;
         this.previousY = y;
+    }
+
+    public int getRadius() {
+        return radius;
     }
 }

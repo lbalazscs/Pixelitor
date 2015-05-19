@@ -17,7 +17,9 @@
 
 package pixelitor.tools.brushes;
 
+import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
@@ -38,6 +40,8 @@ public class CloneBrush extends DabsBrush {
     private BufferedImage brushImage;
     private boolean firstCloningStart = true;
     private CloneBrushType type;
+    private double scale;
+    private double rotate;
 
     public CloneBrush(CloneBrushType type) {
         super(new RadiusRatioSpacing(0.25), NOT_ANGLE_AWARE, true);
@@ -59,7 +63,7 @@ public class CloneBrush extends DabsBrush {
     }
 
     // marks the point where the cloning was started
-    public void setCloningStartPoint(int destX, int destY) {
+    public void setCloningDestPoint(int destX, int destY) {
         boolean reinitializeDistance = false;
         // aligned = forces the source point to follow the mouse, even after a stroke is completed
         // unaligned =  the cloning distance is reinitialized for each stroke
@@ -78,14 +82,28 @@ public class CloneBrush extends DabsBrush {
     void setupBrushStamp(double x, double y) {
         Graphics2D g = brushImage.createGraphics();
 
+        // fill with transparency - this is important
+        // in the areas where there is no source defined
+        g.setComposite(AlphaComposite.Clear);
+        g.fillRect(0, 0, diameter, diameter);
+        g.setComposite(AlphaComposite.SrcOver);
+
         type.beforeDrawImage(g);
 
-//        double scale = 0.5;
-
+        // Concatenated transformations have a last-specified-first-applied order,
+        // so start with the last transformation, that works when there is no scaling/rotating
         AffineTransform transform = AffineTransform.getTranslateInstance(
                 (dx - x),
                 (dy - y));
-//        transform.scale(scale, scale);
+
+        if (scale != 1.0 || rotate != 0.0) {
+            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            // first we need to scale/rotate the image around the source point
+            transform.translate(srcX, srcY);
+            transform.scale(scale, scale);
+            transform.rotate(rotate);
+            transform.translate(-srcX, -srcY);
+        }
 
         g.drawImage(sourceImage,
                 transform, null);
@@ -111,5 +129,14 @@ public class CloneBrush extends DabsBrush {
 
     public void typeChanged(CloneBrushType type) {
         this.type = type;
+        type.setSize(diameter);
+    }
+
+    public void setScale(double scale) {
+        this.scale = scale;
+    }
+
+    public void setRotate(double rotate) {
+        this.rotate = rotate;
     }
 }

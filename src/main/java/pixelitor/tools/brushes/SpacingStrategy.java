@@ -22,7 +22,5 @@ package pixelitor.tools.brushes;
  * Used by the DabsStrategy implementations.
  */
 public interface SpacingStrategy {
-    double getSpacing();
-
-    void setRadius(int radius);
+    double getSpacing(int radius);
 }

@@ -62,12 +62,6 @@ public abstract class DabsBrush extends AbstractBrush {
         updateComp(x, y);
     }
 
-    @Override
-    public void setRadius(int radius) {
-        super.setRadius(radius);
-        settings.setRadius(radius);
-    }
-
     public DabsBrushSettings getSettings() {
         return settings;
     }

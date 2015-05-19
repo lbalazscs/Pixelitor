@@ -50,7 +50,7 @@ public class LinearDabsStrategy implements DabsStrategy {
             // method because we have no angle information.
             // However, we manipulate the distance from the last dab
             // so that a dab is drawn soon
-            distanceFromLastDab = spacingStrategy.getSpacing() * 0.8;
+            distanceFromLastDab = spacingStrategy.getSpacing(brush.getRadius()) * 0.8;
         } else {
             brush.putDab(x, y, 0);
         }
@@ -62,7 +62,7 @@ public class LinearDabsStrategy implements DabsStrategy {
         double dy = endY - prevY;
         double lineDistance = Math.sqrt(dx * dx + dy * dy);
 
-        double spacing = spacingStrategy.getSpacing();
+        double spacing = spacingStrategy.getSpacing(brush.getRadius());
         double relativeSpacingDistance = spacing / lineDistance;
         double initialRelativeSpacingDistance = (spacing - distanceFromLastDab) / lineDistance;
 
@@ -107,5 +107,6 @@ public class LinearDabsStrategy implements DabsStrategy {
         DabsBrushSettings settings = brush.getSettings();
         angleSettings = settings.getAngleSettings();
         spacingStrategy = settings.getSpacingStrategy();
+//        assert spacingStrategy.isValid();
     }
 }

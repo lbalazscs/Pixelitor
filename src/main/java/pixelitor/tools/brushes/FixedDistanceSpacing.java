@@ -28,12 +28,7 @@ public class FixedDistanceSpacing implements SpacingStrategy {
     }
 
     @Override
-    public double getSpacing() {
+    public double getSpacing(int radius) {
         return distance;
-    }
-
-    @Override
-    public void setRadius(int radius) {
-        // ignored
     }
 }

@@ -96,6 +96,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         typeSelector.addActionListener(e -> {
             BrushType brushType = (BrushType) typeSelector.getSelectedItem();
             symmetryBrush.brushTypeChanged(brushType);
+            symmetryBrush.setRadius(brushRadiusParam.getValue());
 
             brushRadiusParam.setEnabled(brushType.sizeCanBeSet(), FilterGUIComponent.EnabledReason.APP_LOGIC);
 
@@ -109,6 +110,8 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     protected void addSizeSelector() {
         SliderSpinner brushSizeSelector = (SliderSpinner) brushRadiusParam.createGUI();
         settingsPanel.add(brushSizeSelector);
+        brushRadiusParam.setAdjustmentListener(this::setupDrawingRadius);
+        setupDrawingRadius();
     }
 
     protected void addSymmetryCombo() {
@@ -133,6 +136,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         boolean withLine = withLine(e);
         int x = userDrag.getStartX();
         int y = userDrag.getStartY();
+
         drawTo(ic.getComp(), x, y, withLine);
         firstMouseDown = false;
 
@@ -192,6 +196,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         int endX = endPoint.x;
         int endY = endPoint.y;
 
+//        setupDrawingRadius();
         drawTo(comp, startX, startY, false);
         drawTo(comp, endX, endY, false);
         finishBrushStroke(comp);
@@ -206,13 +211,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
      * Called from mousePressed, mouseDragged, and drawBrushStroke
      */
     private void drawTo(Composition comp, int x, int y, boolean connectClickWithLine) {
-        setupDrawingRadius();
-
         if (graphics == null) { // a new brush stroke has to be initialized
-//            if(!connectClickWithLine) {
-//                brushes.reset();
-//            }
-
             ImageLayer imageLayer = (ImageLayer) comp.getActiveLayer();
             createGraphicsForNewBrushStroke(comp, imageLayer);
             graphics.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
@@ -222,13 +221,15 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
             } else {
                 brush.onDragStart(x, y);
             }
-
         } else {
             brush.onNewMousePoint(x, y);
         }
     }
 
     private void setupDrawingRadius() {
+//        System.out.println("AbstractBrushTool::setupDrawingRadius: CALLED " +
+//                "for " + this.getClass().getName());
+
         int value = brushRadiusParam.getValue();
 
         // because of a JDK bug, sometimes it is possible to drag the slider to negative values
@@ -267,10 +268,10 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     }
 
     /**
-     * Traces the given shape and paint with the current brush tool
+     * Traces the given shape with the current brush tool
      */
     public void trace(Composition comp, Shape shape) {
-        setupDrawingRadius();
+//        setupDrawingRadius();
         try {
             respectSelection = false;
 

@@ -25,6 +25,7 @@ import pixelitor.utils.ImageUtils;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Point;
+import java.awt.Shape;
 import java.awt.event.MouseEvent;
 
 /**
@@ -69,6 +70,8 @@ public class BrushTool extends TmpLayerBrushTool {
 
     @Override
     public void drawBrushStrokeProgrammatically(Composition comp, Point startingPoint, Point endPoint) {
+        createGraphicsForNewBrushStroke(comp, comp.getActiveImageLayer());
+
         graphics.setColor(FgBgColorSelector.getFG());
 
         super.drawBrushStrokeProgrammatically(comp, startingPoint, endPoint);
@@ -93,5 +96,13 @@ public class BrushTool extends TmpLayerBrushTool {
         } else {
             drawingColor = FgBgColorSelector.getFG();
         }
+    }
+
+    @Override
+    public void trace(Composition comp, Shape shape) {
+        if (drawingColor == null) {
+            drawingColor = FgBgColorSelector.getFG();
+        }
+        super.trace(comp, shape);
     }
 }

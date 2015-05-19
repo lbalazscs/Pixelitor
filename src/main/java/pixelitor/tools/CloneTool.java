@@ -21,19 +21,25 @@ import com.bric.util.JVM;
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.Build;
 import pixelitor.ImageDisplay;
+import pixelitor.PixelitorWindow;
+import pixelitor.filters.gui.RangeParam;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.CloneBrush;
 import pixelitor.tools.brushes.CloneBrushType;
 import pixelitor.utils.Dialogs;
+import pixelitor.utils.GridBagHelper;
+import pixelitor.utils.OKDialog;
 
 import javax.swing.*;
 import java.awt.Cursor;
+import java.awt.GridBagLayout;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
 import static pixelitor.tools.CloneTool.State.CLONING;
 import static pixelitor.tools.CloneTool.State.NO_SOURCE;
 import static pixelitor.tools.CloneTool.State.SOURCE_DEFINED_FIRST_STROKE;
+import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
 
 /**
  * The Clone Stamp tool
@@ -51,6 +57,10 @@ public class CloneTool extends TmpLayerBrushTool {
     private boolean sampleAllLayers = false;
 
     private CloneBrush cloneBrush;
+
+    private final RangeParam scaleParam = new RangeParam("Scale", 10, 400, 100, true, NONE);
+    private final RangeParam rotationParam = new RangeParam("Rotation", -180, 180, 0, true, NONE);
+
 
     protected CloneTool() {
         super('k', "Clone", "clone_tool_icon.png",
@@ -81,11 +91,20 @@ public class CloneTool extends TmpLayerBrushTool {
 
         settingsPanel.addCheckBox("Sample All Layers", false, "sampleAllLayersCB",
                 selected -> sampleAllLayers = selected);
+
+        settingsPanel.addSeparator();
+        settingsPanel.addButton("Transform", e -> {
+            JPanel p = new JPanel(new GridBagLayout());
+            GridBagHelper gbh = new GridBagHelper(p);
+            gbh.addLabelWithControl("Scale (%):", scaleParam.createGUI());
+            gbh.addLabelWithControl("Rotate (Degrees):", rotationParam.createGUI());
+            new OKDialog(PixelitorWindow.getInstance(), "Clone Transform", p);
+        });
     }
 
     @Override
     protected void initBrushVariables() {
-        cloneBrush = new CloneBrush(CloneBrushType.HARD);
+        cloneBrush = new CloneBrush(CloneBrushType.SOFT);
         brush = new BrushAffectedArea(cloneBrush);
         brushAffectedArea = (BrushAffectedArea) brush;
     }
@@ -104,8 +123,11 @@ public class CloneTool extends TmpLayerBrushTool {
             }
             state = CLONING; // must be a new stroke after the source setting
 
+            cloneBrush.setScale(scaleParam.getValueAsPercentage());
+            cloneBrush.setRotate(rotationParam.getValueInRadians());
+
             if (!withLine(e)) {  // when drawing with line, the destination should not change for mouse press
-                cloneBrush.setCloningStartPoint(x, y);
+                cloneBrush.setCloningDestPoint(x, y);
             }
 
             super.mousePressed(e, ic);

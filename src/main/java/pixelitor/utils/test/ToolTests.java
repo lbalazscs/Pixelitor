@@ -31,6 +31,7 @@ import pixelitor.tools.ShapeType;
 import pixelitor.tools.Tools;
 import pixelitor.tools.UserDrag;
 import pixelitor.tools.shapestool.ShapesTool;
+import pixelitor.utils.Dialogs;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -155,23 +156,23 @@ public class ToolTests {
 
             ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("1001 Tool Actions");
 
-            Random rand = new Random();
-
             // So far we are on the EDT
             Runnable notEDTThreadTask = () -> {
+                assert !SwingUtilities.isEventDispatchThread();
                 for (int i = 0; i < numStrokes; i++) {
                     int progressPercentage = (int) ((float) i * 100 / numStrokes);
                     progressMonitor.setProgress(progressPercentage);
                     progressMonitor.setNote(progressPercentage + "%");
 
-                    Runnable edtRunnable = () -> testToolAction(comp, random, canvasWidth, canvasHeight, rand, brushOnly);
+                    Runnable edtRunnable = () -> testToolAction(comp, random, canvasWidth, canvasHeight, brushOnly);
 
                     try {
                         SwingUtilities.invokeAndWait(edtRunnable);
                     } catch (InterruptedException | InvocationTargetException e) {
                         e.printStackTrace();
                     }
-                    comp.getIC().paintImmediately(0, 0, comp.getIC().getWidth(), comp.getIC().getHeight());
+
+                    comp.repaint();
 
                 }
                 progressMonitor.close();
@@ -182,26 +183,31 @@ public class ToolTests {
 
 
     // called on the EDT
-    private static void testToolAction(Composition comp, Random random, int canvasWidth, int canvasHeight, Random rand, boolean brushOnly) {
+    private static void testToolAction(Composition comp, Random rand, int canvasWidth, int canvasHeight, boolean brushOnly) {
+        assert SwingUtilities.isEventDispatchThread();
+
         FgBgColorSelector.setRandomColors();
 
-        Point start = new Point(random.nextInt(canvasWidth), random.nextInt(canvasHeight));
-        Point end = new Point(random.nextInt(canvasWidth), random.nextInt(canvasHeight));
+        Point start = new Point(rand.nextInt(canvasWidth), rand.nextInt(canvasHeight));
+        Point end = new Point(rand.nextInt(canvasWidth), rand.nextInt(canvasHeight));
 
-
+        boolean doTheBrush;
         if(brushOnly) {
-            Tools.BRUSH.randomize();
-            Tools.BRUSH.drawBrushStrokeProgrammatically(comp, start, end);
-            return;
+            doTheBrush = true;
+        } else {
+            doTheBrush = rand.nextBoolean();
         }
 
-        boolean b = rand.nextBoolean();
-        if (b) {
-            Tools.BRUSH.randomize();
-            Tools.BRUSH.drawBrushStrokeProgrammatically(comp, start, end);
-        } else {
-            Tools.SHAPES.randomize();
-            Tools.SHAPES.paintShapeOnIC(comp, new UserDrag(start.x, start.y, end.x, end.y));
+        try {
+            if (doTheBrush) {
+                Tools.BRUSH.randomize();
+                Tools.BRUSH.drawBrushStrokeProgrammatically(comp, start, end);
+            } else {
+                Tools.SHAPES.randomize();
+                Tools.SHAPES.paintShapeOnIC(comp, new UserDrag(start.x, start.y, end.x, end.y));
+            }
+        } catch (Exception e) {
+            Dialogs.showExceptionDialog(e);
         }
     }
 }
