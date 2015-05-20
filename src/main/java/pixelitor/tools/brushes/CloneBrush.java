@@ -17,7 +17,6 @@
 
 package pixelitor.tools.brushes;
 
-import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
@@ -67,12 +66,6 @@ public class CloneBrush extends CopyBrush {
     @Override
     void setupBrushStamp(double x, double y) {
         Graphics2D g = brushImage.createGraphics();
-
-        // fill with transparency - this is important
-        // in the areas where there is no source defined
-        g.setComposite(AlphaComposite.Clear);
-        g.fillRect(0, 0, diameter, diameter);
-        g.setComposite(AlphaComposite.SrcOver);
 
         type.beforeDrawImage(g);
 

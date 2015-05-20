@@ -28,7 +28,6 @@ import java.awt.image.BufferedImage;
  * The brush used by the Smudge Tool
  */
 public class SmudgeBrush extends CopyBrush {
-
     private double lastX;
     private double lastY;
     private float strength;

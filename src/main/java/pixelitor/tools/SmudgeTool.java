@@ -46,14 +46,16 @@ public class SmudgeTool extends DirectBrushTool {
 
     @Override
     protected void initBrushVariables() {
-        smudgeBrush = new SmudgeBrush(CopyBrushType.SOFT);
+        smudgeBrush = new SmudgeBrush(CopyBrushType.HARD);
         brush = new BrushAffectedArea(smudgeBrush);
         brushAffectedArea = (BrushAffectedArea) brush;
     }
 
     @Override
     public void initSettingsPanel() {
-        settingsPanel.addCopyBrushTypeSelector(smudgeBrush::typeChanged);
+        settingsPanel.addCopyBrushTypeSelector(
+                CopyBrushType.HARD,
+                smudgeBrush::typeChanged);
 
         addSizeSelector();
         addStrengthSelector();

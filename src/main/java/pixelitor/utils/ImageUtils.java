@@ -987,4 +987,10 @@ public class ImageUtils {
         String s = imgNode.toDetailedString();
         System.out.println(String.format("ImageUtils::debugImage: s = '%s'", s));
     }
+
+    public static void fillWithTransparentRectangle(Graphics2D g, int size) {
+        g.setComposite(AlphaComposite.Clear);
+        g.fillRect(0, 0, size, size);
+        g.setComposite(AlphaComposite.SrcOver);
+    }
 }

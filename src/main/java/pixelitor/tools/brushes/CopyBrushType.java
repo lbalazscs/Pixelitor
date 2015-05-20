@@ -30,12 +30,14 @@ public enum CopyBrushType {
 
         @Override
         public void setSize(int size) {
+            super.setSize(size);
             transparencyImage = ImageUtils.createSoftTransparencyImage(size);
         }
 
         @Override
         public void beforeDrawImage(Graphics2D g) {
-            // do nothing
+            // important in the areas where there is no source defined
+            ImageUtils.fillWithTransparentRectangle(g, size);
         }
 
         @Override
@@ -48,12 +50,27 @@ public enum CopyBrushType {
 
         @Override
         public void setSize(int size) {
+            super.setSize(size);
             circleClip = new Ellipse2D.Double(0, 0, size, size);
         }
 
         @Override
         public void beforeDrawImage(Graphics2D g) {
+            // important in the areas where there is no source defined
+            ImageUtils.fillWithTransparentRectangle(g, size);
+
             g.setClip(circleClip);
+        }
+
+        @Override
+        public void afterDrawImage(Graphics2D g) {
+            // do nothing
+        }
+    }, SQUARE("Square") {
+        @Override
+        public void beforeDrawImage(Graphics2D g) {
+            // important in the areas where there is no source defined
+            ImageUtils.fillWithTransparentRectangle(g, size);
         }
 
         @Override
@@ -63,16 +80,19 @@ public enum CopyBrushType {
     };
 
     private final String guiName;
+    protected int size;
 
     CopyBrushType(String guiName) {
         this.guiName = guiName;
     }
 
-    public abstract void setSize(int size);
-
     public abstract void beforeDrawImage(Graphics2D g);
 
     public abstract void afterDrawImage(Graphics2D g);
+
+    public void setSize(int size) {
+        this.size = size;
+    }
 
     @Override
     public String toString() {

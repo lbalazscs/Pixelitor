@@ -67,7 +67,9 @@ public class CloneTool extends TmpLayerBrushTool {
 
     @Override
     public void initSettingsPanel() {
-        settingsPanel.addCopyBrushTypeSelector(cloneBrush::typeChanged);
+        settingsPanel.addCopyBrushTypeSelector(
+                CopyBrushType.SOFT,
+                cloneBrush::typeChanged);
 
         addSizeSelector();
 
