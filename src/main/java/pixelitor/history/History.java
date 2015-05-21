@@ -67,8 +67,8 @@ public class History {
         undoableEditSupport.postEdit(edit);
 
         if (Build.CURRENT != Build.FINAL) {
-            ConsistencyChecks.checkAll();
             DebugEventQueue.post(new HistoryEvent(edit));
+            ConsistencyChecks.checkAll();
         }
     }
 

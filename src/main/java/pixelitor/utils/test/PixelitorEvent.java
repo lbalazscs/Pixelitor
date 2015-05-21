@@ -21,22 +21,24 @@ import pixelitor.Composition;
 import pixelitor.ImageComponents;
 import pixelitor.layers.Layer;
 
+import java.awt.Rectangle;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
 
 /**
- *
+ * An event that occurred inside Pixelitor.
+ * Used for debugging.
  */
-public class PixelitorEvent implements Comparable<PixelitorEvent> {
+public abstract class PixelitorEvent {
     private final String description;
     private final Date date;
     private final Composition comp;
     private final Layer layer;
     private static final Format dateFormatter = new SimpleDateFormat("HH:mm:ss:SSS");
 
-    public PixelitorEvent(String description) {
+    protected PixelitorEvent(String description) {
         assert description != null;
 
         this.description = description;
@@ -58,15 +60,13 @@ public class PixelitorEvent implements Comparable<PixelitorEvent> {
     }
 
     @Override
-    public int compareTo(PixelitorEvent o) {
-        Date thisDate = date;
-        Date otherDate = o.date;
-
-        return thisDate.compareTo(otherDate);
-    }
-
-    @Override
     public String toString() {
-        return description + " on \"" + comp.getName() + '/' + layer.getName() + "\" at " + dateFormatter.format(date);
+        String selectionInfo = "no selection";
+        if (comp.hasSelection()) {
+            Rectangle rect = comp.getSelection().get().getShapeBounds();
+            selectionInfo = String.format("sel. bounds = '%s'", rect.toString());
+        }
+        return String.format("%s on \"%s/%s\" (%s) at %s",
+                description, comp.getName(), layer.getName(), selectionInfo, dateFormatter.format(date));
     }
 }
