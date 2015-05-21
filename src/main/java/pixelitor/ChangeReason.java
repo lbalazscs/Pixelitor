@@ -22,6 +22,7 @@ package pixelitor;
  */
 public enum ChangeReason {
     OP_WITHOUT_DIALOG(true, false) {
+    }, REPEAT_LAST(true, false) {
     }, OP_PREVIEW(false, true) {
 
     }, TEST_NO_HISTORY_NO_PREVIEW(false, false) {

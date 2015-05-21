@@ -46,7 +46,7 @@ public class SmudgeTool extends DirectBrushTool {
 
     @Override
     protected void initBrushVariables() {
-        smudgeBrush = new SmudgeBrush(CopyBrushType.HARD);
+        smudgeBrush = new SmudgeBrush(getRadius(), CopyBrushType.HARD);
         brush = new BrushAffectedArea(smudgeBrush);
         brushAffectedArea = (BrushAffectedArea) brush;
     }

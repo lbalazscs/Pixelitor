@@ -97,7 +97,7 @@ public class CloneTool extends TmpLayerBrushTool {
 
     @Override
     protected void initBrushVariables() {
-        cloneBrush = new CloneBrush(CopyBrushType.SOFT);
+        cloneBrush = new CloneBrush(getRadius(), CopyBrushType.SOFT);
         brush = new BrushAffectedArea(cloneBrush);
         brushAffectedArea = (BrushAffectedArea) brush;
     }
@@ -165,7 +165,7 @@ public class CloneTool extends TmpLayerBrushTool {
     }
 
     @Override
-    Symmetry getCurrentSymmetry() {
+    protected Symmetry getSymmetry() {
         return Symmetry.NONE;
     }
 }

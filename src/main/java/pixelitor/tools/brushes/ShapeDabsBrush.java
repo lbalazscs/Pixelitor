@@ -28,17 +28,17 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 public class ShapeDabsBrush extends DabsBrush {
-    public ShapeDabsBrush(ShapeType shapeType, SpacingStrategy spacingStrategy,
+    public ShapeDabsBrush(int radius, ShapeType shapeType, SpacingStrategy spacingStrategy,
                           AngleSettings angleSettings) {
-        super(new ShapeDabsBrushSettings(
+        super(radius, new ShapeDabsBrushSettings(
                 angleSettings,
                 spacingStrategy,
                 shapeType
         ), false);
     }
 
-    public ShapeDabsBrush(ShapeDabsBrushSettings settings) {
-        super(settings, false);
+    public ShapeDabsBrush(int radius, ShapeDabsBrushSettings settings) {
+        super(radius, settings, false);
     }
 
     @Override

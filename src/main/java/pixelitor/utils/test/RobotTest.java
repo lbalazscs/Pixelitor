@@ -210,7 +210,7 @@ public class RobotTest {
                     Runnable runnable = () -> {
                         try {
                             weightedCaller.callRandomAction();
-                            if (ImageComponents.getActiveComp() == null) {
+                            if (!ImageComponents.getActiveComp().isPresent()) {
                                 throw new IllegalStateException("no active composition");
                             }
                             ConsistencyChecks.checkAll();

@@ -36,8 +36,8 @@ public class CloneBrush extends CopyBrush {
     private double scale;
     private double rotate;
 
-    public CloneBrush(CopyBrushType type) {
-        super(type, new RadiusRatioSpacing(0.25));
+    public CloneBrush(int radius, CopyBrushType type) {
+        super(radius, type, new RadiusRatioSpacing(0.25));
     }
 
     public void setSource(BufferedImage sourceImage, int srcX, int srcY) {

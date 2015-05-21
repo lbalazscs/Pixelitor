@@ -40,8 +40,8 @@ public class ImageDabsBrush extends DabsBrush {
     private BufferedImage finalScaledImage;
     private Color lastColor;
 
-    public ImageDabsBrush(ImageBrushType imageBrushType, double spacingRatio, AngleSettings angleSettings) {
-        super(new RadiusRatioSpacing(spacingRatio), angleSettings, false);
+    public ImageDabsBrush(int radius, ImageBrushType imageBrushType, double spacingRatio, AngleSettings angleSettings) {
+        super(radius, new RadiusRatioSpacing(spacingRatio), angleSettings, false);
 
         // for each brush type multiple brush instances are created because of the symmetry
         // however the template image can be shared between them
@@ -54,7 +54,7 @@ public class ImageDabsBrush extends DabsBrush {
 
     @Override
     void setupBrushStamp(double x, double y) {
-        assert diameter > 0;
+        assert diameter > 0 : "zero diameter in " + getClass().getName();
         Color c = targetG.getColor();
 
         if (!c.equals(lastColor)) {

@@ -38,7 +38,7 @@ import java.util.Optional;
 public class History {
     private static final UndoableEditSupport undoableEditSupport = new UndoableEditSupport();
     private static final PixelitorUndoManager undoManager = new PixelitorUndoManager();
-    private static int undoDepth = 0; // how deep we are back in time
+    private static int numUndoneEdits = 0;
 
     static {
         setUndoLevels(AppPreferences.loadUndoLevels());
@@ -63,7 +63,7 @@ public class History {
             undoManager.discardAllEdits();
         }
 
-        undoDepth = 0; // reset BEFORE calling postEdit, so that the fade menu item can become enabled
+        numUndoneEdits = 0; // reset BEFORE calling postEdit, so that the fade menu item can become enabled
         undoableEditSupport.postEdit(edit);
 
         if (Build.CURRENT != Build.FINAL) {
@@ -80,30 +80,30 @@ public class History {
         return undoManager.getRedoPresentationName();
     }
 
-    public static void redo() {
-        if (Build.CURRENT != Build.FINAL) {
-            DebugEventQueue.post(HistoryEvent.createRedoEvent());
-        }
-
-        try {
-            undoDepth--; // after redo we should be fadeable again
-            undoManager.redo();
-        } catch (CannotRedoException e) {
-            // TODO is a "No redo avaliable" scenario possible?
-            Dialogs.showExceptionDialog(e);
-        }
-    }
-
     public static void undo() {
         if (Build.CURRENT != Build.FINAL) {
             DebugEventQueue.post(HistoryEvent.createUndoEvent());
         }
 
         try {
-            undoDepth++; // increase it before calling undoManager.undo() so that the result of undo is not fadeable
+            numUndoneEdits++; // increase it before calling undoManager.undo() so that the result of undo is not fadeable
             undoManager.undo();
         } catch (CannotUndoException e) {
             Dialogs.showInfoDialog("No undo available", "No undo available, probably because the undo image was discarded in order to save memory");
+        }
+    }
+
+    public static void redo() {
+        if (Build.CURRENT != Build.FINAL) {
+            DebugEventQueue.post(HistoryEvent.createRedoEvent());
+        }
+
+        try {
+            numUndoneEdits--; // after redo we should be fadeable again
+            undoManager.redo();
+        } catch (CannotRedoException e) {
+            // TODO is a "No redo avaliable" scenario possible?
+            Dialogs.showExceptionDialog(e);
         }
     }
 
@@ -128,7 +128,7 @@ public class History {
     }
 
     public static boolean canRepeatOperation() {
-        if (undoDepth > 0) {
+        if (numUndoneEdits > 0) {
             return false;
         }
 
@@ -142,7 +142,7 @@ public class History {
     /**
      * Used for the name of the fade/repeat menu items
      */
-    public static String getLastPresentationName() {
+    public static String getLastEditName() {
         Optional<PixelitorEdit> lastEdit = undoManager.getLastEdit();
         if (lastEdit.isPresent()) {
             return lastEdit.get().getPresentationName();
@@ -155,7 +155,7 @@ public class History {
      * return it, otherwise return empty Optional
      */
     public static Optional<FadeableEdit> getPreviousEditForFade(Composition comp) {
-        if (undoDepth > 0) {
+        if (numUndoneEdits > 0) {
             return Optional.empty();
         }
         Optional<PixelitorEdit> lastEditOpt = undoManager.getLastEdit();
@@ -184,7 +184,7 @@ public class History {
     }
 
     public static void allImagesAreClosed() {
-        undoDepth = 0;
+        numUndoneEdits = 0;
 //        lastFadeableEdit = null;
 
         undoManager.discardAllEdits();

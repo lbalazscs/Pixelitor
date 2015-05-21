@@ -22,6 +22,7 @@ import pixelitor.history.History;
 import pixelitor.layers.DeleteActiveLayerAction;
 import pixelitor.layers.ImageLayer;
 import pixelitor.menus.SelectionActions;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.image.BufferedImage;
@@ -50,14 +51,18 @@ public final class ConsistencyChecks {
      * Checks whether Fade would work now
      */
     public static boolean fadeCheck(Composition comp) {
+        if (!History.canFade()) {
+            return true;
+        }
         Optional<FadeableEdit> edit = History.getPreviousEditForFade(comp);
-        if (edit.isPresent()) {  // can fade
+        if (edit.isPresent()) {
             Optional<ImageLayer> opt = comp.getActiveImageLayerOpt();
             if (opt.isPresent()) {
                 ImageLayer layer = opt.get();
                 BufferedImage current = layer.getImageOrSubImageIfSelected(false, true);
 
-                BufferedImage previous = edit.get().getBackupImage();
+                FadeableEdit fadeableEdit = edit.get();
+                BufferedImage previous = fadeableEdit.getBackupImage();
                 if (previous == null) {
                     // soft reference expired
                     return true;
@@ -66,12 +71,21 @@ public final class ConsistencyChecks {
                 boolean differentWidth = current.getWidth() != previous.getWidth();
                 boolean differentHeight = current.getHeight() != previous.getHeight();
                 if (differentWidth || differentHeight) {
+                    Utils.debugImage(current, "current");
+                    Utils.debugImage(previous, "previous");
+                    String lastFadeableOp = History.getLastEditName();
+                    throw new IllegalStateException("'Fade " + lastFadeableOp + "' would not work now:"
+                            + "\nFadeableEdit class = " + fadeableEdit.getClass().getName() + ", and name = " + fadeableEdit.getName()
+                            + "\n current selected dimensions: " + current.getWidth() + "x" + current.getHeight() + ", "
+                            + "history dimensions: " + previous.getWidth() + "x" + previous.getHeight()
+                            + "\nchecked composition = " + comp.getName() + "(hasSelection = " + comp.hasSelection()
+                            + (comp.hasSelection() ? ", selection bounds = " + comp.getSelection().get().getShapeBounds() : "") + ")"
+                            + "\nchecked composition canvas = " + comp.getCanvas().getBounds()
+                            + "\nhistory composition = " + fadeableEdit.getComp().getName()
+                            + "\nactive composition = " + ImageComponents.getActiveComp().get().getName()
+                            + "\n"
 
-                    String lastFadeableOp = History.getLastPresentationName();
-                    throw new IllegalStateException("'Fade " + lastFadeableOp + "' would not work now:\n" +
-                            "FadeableEdit class = " + edit.get().getClass().getName() + "\n" +
-                            " current selected dimensions: width = " + current.getWidth() + ", height = " + current.getHeight() +
-                            " history dimensions: width = " + previous.getWidth() + ", height = " + previous.getHeight()
+
                     );
                 }
             }

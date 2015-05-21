@@ -30,16 +30,18 @@ public abstract class CopyBrush extends DabsBrush {
     protected BufferedImage brushImage;
     protected CopyBrushType type;
 
-    protected CopyBrush(CopyBrushType type, SpacingStrategy spacingStrategy) {
-        super(spacingStrategy, NOT_ANGLE_AWARE, true);
+    protected CopyBrush(int radius, CopyBrushType type, SpacingStrategy spacingStrategy) {
+        super(radius, spacingStrategy, NOT_ANGLE_AWARE, true);
         this.type = type;
     }
 
     @Override
     public void setRadius(int radius) {
         super.setRadius(radius);
-        brushImage = new BufferedImage(diameter, diameter, TYPE_INT_ARGB);
-        type.setSize(diameter);
+        if (type != null) { // cannot initialize properly when called from superclass constructor
+            brushImage = new BufferedImage(diameter, diameter, TYPE_INT_ARGB);
+            type.setSize(diameter);
+        }
     }
 
     public void typeChanged(CopyBrushType type) {

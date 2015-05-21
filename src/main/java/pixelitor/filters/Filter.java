@@ -123,7 +123,7 @@ public abstract class Filter extends AbstractAction {
         assert dest != null;
 
         if (changeReason.isPreview()) {
-            comp.changePreviewImage(dest, getName());
+            comp.changePreviewImage(dest, getName(), changeReason);
         } else {
             comp.filterWithoutDialogFinished(dest, changeReason, getName());
         }

@@ -37,14 +37,14 @@ public class SymmetryBrush implements Brush {
     private Symmetry symmetry;
     private final BrushAffectedArea affectedArea;
 
-    public SymmetryBrush(Tool tool, BrushType brushType, Symmetry symmetry) {
+    public SymmetryBrush(Tool tool, BrushType brushType, Symmetry symmetry, int radius) {
         this.tool = tool;
         this.brushType = brushType;
         this.symmetry = symmetry;
         this.affectedArea = new BrushAffectedArea();
         numInstantiatedBrushes = symmetry.getNumBrushes();
         assert numInstantiatedBrushes <= MAX_BRUSHES;
-        brushTypeChanged(brushType);
+        brushTypeChanged(brushType, radius);
     }
 
     public BrushAffectedArea getAffectedArea() {
@@ -76,25 +76,25 @@ public class SymmetryBrush implements Brush {
         symmetry.onNewMousePoint(this, x, y);
     }
 
-    public void brushTypeChanged(BrushType brushType) {
+    public void brushTypeChanged(BrushType brushType, int radius) {
         this.brushType = brushType;
         for(int i = 0; i < numInstantiatedBrushes; i++) {
             if(brushes[i] != null) {
                 brushes[i].dispose();
             }
-            brushes[i] = brushType.createBrush(tool);
+            brushes[i] = brushType.createBrush(tool, radius);
         }
         assert checkThatAllBrushesAreDifferentInstances();
     }
 
-    public void symmetryChanged(Symmetry symmetry) {
+    public void symmetryChanged(Symmetry symmetry, int radius) {
         this.symmetry = symmetry;
         if(symmetry.getNumBrushes() > numInstantiatedBrushes) {
             // we need to create more brushes of the same type
             int newNumBrushes = symmetry.getNumBrushes();
             assert newNumBrushes <= MAX_BRUSHES;
             for(int i = numInstantiatedBrushes; i < newNumBrushes; i++) {
-                brushes[i] = brushType.createBrush(tool);
+                brushes[i] = brushType.createBrush(tool, radius);
             }
             numInstantiatedBrushes = newNumBrushes;
         }

@@ -28,8 +28,8 @@ import java.awt.Stroke;
 public class CalligraphyBrush extends StrokeBrush {
     private static final Stroke pointStroke = new BasicStroke(1.2f);
 
-    public CalligraphyBrush() {
-        super(StrokeType.CALLIGRAPHY);
+    public CalligraphyBrush(int radius) {
+        super(radius, StrokeType.CALLIGRAPHY);
     }
 
     @Override

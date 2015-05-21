@@ -24,8 +24,8 @@ import pixelitor.tools.StrokeType;
  */
 public class IdealBrush extends StrokeBrush {
 
-    public IdealBrush() {
-        super(StrokeType.BASIC);
+    public IdealBrush(int radius) {
+        super(radius, StrokeType.BASIC);
     }
 
     @Override

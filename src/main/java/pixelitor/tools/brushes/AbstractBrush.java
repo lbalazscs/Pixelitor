@@ -31,6 +31,10 @@ public abstract class AbstractBrush implements Brush {
     protected int previousX;
     protected int previousY;
 
+    protected AbstractBrush(int radius) {
+        setRadius(radius);
+    }
+
     @Override
     public void setRadius(int radius) {
 //        System.out.println("AbstractBrush::setRadius: radius = " + radius

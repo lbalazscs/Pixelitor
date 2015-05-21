@@ -81,13 +81,9 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
 
     protected void initBrushVariables() {
         symmetryBrush = new SymmetryBrush(
-                this, BrushType.values()[0], getCurrentSymmetry());
+                this, BrushType.values()[0], getSymmetry(), getRadius());
         brush = symmetryBrush;
         brushAffectedArea = symmetryBrush.getAffectedArea();
-    }
-
-    Symmetry getCurrentSymmetry() {
-        return symmetryModel.getSelectedItem();
     }
 
     protected void addTypeSelector() {
@@ -95,8 +91,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         settingsPanel.addWithLabel("Type:", typeSelector, "brushTypeSelector");
         typeSelector.addActionListener(e -> {
             BrushType brushType = (BrushType) typeSelector.getSelectedItem();
-            symmetryBrush.brushTypeChanged(brushType);
-            symmetryBrush.setRadius(brushRadiusParam.getValue());
+            symmetryBrush.brushTypeChanged(brushType, getRadius());
 
             brushRadiusParam.setEnabled(brushType.sizeCanBeSet(), FilterGUIComponent.EnabledReason.APP_LOGIC);
 
@@ -117,7 +112,8 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     protected void addSymmetryCombo() {
         JComboBox<Symmetry> symmetryCombo = new JComboBox<>(symmetryModel);
         settingsPanel.addWithLabel("Mirror:", symmetryCombo, "symmetrySelector");
-        symmetryCombo.addActionListener(e -> symmetryBrush.symmetryChanged(getCurrentSymmetry()));
+        symmetryCombo.addActionListener(e -> symmetryBrush.symmetryChanged(
+                getSymmetry(), getRadius()));
     }
 
     protected void addBrushSettingsButton() {
@@ -175,7 +171,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     abstract void mergeTmpLayer(Composition comp);
 
     private void finishBrushStroke(Composition comp) {
-        int radius = brushRadiusParam.getValue();
+        int radius = getRadius();
         ToolAffectedArea affectedArea = new ToolAffectedArea(comp,
                 brushAffectedArea.getRectangleAffectedByBrush(radius), false);
         saveSubImageForUndo(getOriginalImage(comp), affectedArea);
@@ -230,15 +226,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
 //        System.out.println("AbstractBrushTool::setupDrawingRadius: CALLED " +
 //                "for " + this.getClass().getName());
 
-        int value = brushRadiusParam.getValue();
-
-        // because of a JDK bug, sometimes it is possible to drag the slider to negative values
-        if (value < MIN_BRUSH_RADIUS) {
-            value = MIN_BRUSH_RADIUS;
-            brushRadiusParam.setValue(MIN_BRUSH_RADIUS);
-        }
-
-        brush.setRadius(value);
+        brush.setRadius(getRadius());
     }
 
     @Override
@@ -327,6 +315,22 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
 
     public void decreaseBrushSize() {
         brushRadiusParam.decreaseValue();
+    }
+
+    protected Symmetry getSymmetry() {
+        return symmetryModel.getSelectedItem();
+    }
+
+    protected int getRadius() {
+        int value = brushRadiusParam.getValue();
+
+        // because of a JDK bug, sometimes it is possible to drag the slider to negative values
+        if (value < MIN_BRUSH_RADIUS) {
+            value = MIN_BRUSH_RADIUS;
+            brushRadiusParam.setValue(MIN_BRUSH_RADIUS);
+        }
+
+        return value;
     }
 
     @Override

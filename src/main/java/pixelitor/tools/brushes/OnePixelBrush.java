@@ -17,7 +17,14 @@
 
 package pixelitor.tools.brushes;
 
+/**
+ * A brush that edits one pixel at a time
+ */
 public class OnePixelBrush extends AbstractBrush {
+    public OnePixelBrush() {
+        super(1); // this radius value is not used by this brush
+    }
+
     @Override
     public void onDragStart(int x, int y) {
         updateComp(x, y);

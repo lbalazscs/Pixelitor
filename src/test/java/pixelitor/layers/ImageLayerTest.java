@@ -31,6 +31,7 @@ import java.awt.image.BufferedImage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static pixelitor.ChangeReason.OP_PREVIEW;
 
 public class ImageLayerTest {
     private Composition comp;
@@ -109,7 +110,7 @@ public class ImageLayerTest {
 
     @Test(expected = IllegalStateException.class)
     public void testChangePreviewImage_Fail() {
-        layer.changePreviewImage(TestHelper.createTestImage(), "filterName");
+        layer.changePreviewImage(TestHelper.createTestImage(), "filterName", OP_PREVIEW);
         assertEquals(ImageLayer.State.PREVIEW, layer.getState());
     }
 
@@ -117,7 +118,7 @@ public class ImageLayerTest {
     public void testChangePreviewImage_OK() {
         layer.startPreviewing(); // make sure that the layer is in PREVIEW mode
 
-        layer.changePreviewImage(TestHelper.createTestImage(), "filterName");
+        layer.changePreviewImage(TestHelper.createTestImage(), "filterName", OP_PREVIEW);
         assertEquals(ImageLayer.State.PREVIEW, layer.getState());
     }
 

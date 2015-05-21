@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.menus.edit;
 
 import pixelitor.ImageComponent;
@@ -41,7 +42,7 @@ public class FadeMenuItem extends JMenuItem implements UndoableEditListener, Ima
         boolean b = History.canFade();
 
         setEnabled(b);
-        getAction().putValue(Action.NAME, "Fade " + History.getLastPresentationName());
+        getAction().putValue(Action.NAME, "Fade " + History.getLastEditName());
     }
 
     @Override

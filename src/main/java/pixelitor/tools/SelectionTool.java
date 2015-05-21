@@ -35,6 +35,8 @@ import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.util.Optional;
 
+import static pixelitor.selection.Selection.State.NO_SHAPE_YET;
+
 /**
  * The selection tool
  */
@@ -93,19 +95,28 @@ public class SelectionTool extends Tool {
             }
         }
 
-
         SelectionType selectionType = (SelectionType) typeCombo.getSelectedItem();
         SelectionInteraction selectionInteraction = (SelectionInteraction) interactionCombo.getSelectedItem();
 
         Composition comp = ic.getComp();
-        Optional<Selection> selection = comp.getSelection();
-        if (!selection.isPresent()) {
-            backupShape = null;
-            comp.startSelection(selectionType, selectionInteraction);
+        Optional<Selection> optionalSelection = comp.getSelection();
+        boolean noSelectionYet;
+
+        if (optionalSelection.isPresent()) {
+            Selection selection = optionalSelection.get();
+            if (selection.getState() == NO_SHAPE_YET) { // TODO it did happen on Mac during robot tests
+                noSelectionYet(selectionType, selectionInteraction, comp);
+            }
+            backupShape = selection.getShape();
+            selection.startNewShape(selectionType, selectionInteraction);
         } else {
-            backupShape = selection.get().getShape();
-            selection.get().startNewShape(selectionType, selectionInteraction);
+            noSelectionYet(selectionType, selectionInteraction, comp);
         }
+    }
+
+    private void noSelectionYet(SelectionType selectionType, SelectionInteraction selectionInteraction, Composition comp) {
+        backupShape = null;
+        comp.startSelection(selectionType, selectionInteraction);
     }
 
     @Override

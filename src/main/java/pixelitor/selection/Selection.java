@@ -64,11 +64,13 @@ public class Selection {
     private static final float DASH_LENGTH = 4.0f;
     private static final float[] MARCHING_ANTS_DASH = {DASH_LENGTH, DASH_LENGTH};
 
-    enum State {
+    public enum State {
         NO_SHAPE_YET { // we had a mouse press, but no drag or mouse up
             @Override
             Rectangle getShapeBounds(Shape currentSelectionShape) {
-                throw new IllegalStateException("no shape yet");
+//                throw new IllegalStateException("no shape yet");
+// TODO this should not be called, but it was on Linux during robot tests
+                return new Rectangle(0, 0, 0, 0);
             }
 
             @Override
@@ -369,9 +371,14 @@ public class Selection {
     /**
      * Returns the shape bounds of the selection
      * Like everything else in this class, this is in image coordinates
+     * (but relative to the composition, not to the image)
      */
     public Rectangle getShapeBounds() {
         return state.getShapeBounds(currentSelectionShape);
+    }
+
+    public State getState() {
+        return state;
     }
 
     @Override

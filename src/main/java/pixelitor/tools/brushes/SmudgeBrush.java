@@ -34,8 +34,8 @@ public class SmudgeBrush extends CopyBrush {
     private boolean firstUsageInStroke = true;
     private boolean fingerPainting = false;
 
-    public SmudgeBrush(CopyBrushType type) {
-        super(type, new FixedDistanceSpacing(1.0));
+    public SmudgeBrush(int radius, CopyBrushType type) {
+        super(radius, type, new FixedDistanceSpacing(1.0));
     }
 
     public void setSource(BufferedImage sourceImage, int srcX, int srcY, float strength) {

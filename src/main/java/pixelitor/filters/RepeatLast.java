@@ -21,6 +21,7 @@ import pixelitor.ChangeReason;
 
 import java.awt.image.BufferedImage;
 
+import static pixelitor.ChangeReason.REPEAT_LAST;
 import static pixelitor.filters.FilterUtils.getLastExecutedFilter;
 
 public class RepeatLast extends Filter {
@@ -39,7 +40,7 @@ public class RepeatLast extends Filter {
     @Override
     public void execute(ChangeReason changeReason) {
         getLastExecutedFilter()
-                .ifPresent(filter -> filter.execute(changeReason));
+                .ifPresent(filter -> filter.execute(REPEAT_LAST));
     }
 
     @Override

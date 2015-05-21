@@ -24,7 +24,8 @@ public abstract class DabsBrush extends AbstractBrush {
     protected DabsBrushSettings settings;
     private final DabsStrategy dabsStrategy;
 
-    protected DabsBrush(SpacingStrategy spacingStrategy, AngleSettings angleSettings, boolean refreshBrushForEachDab) {
+    protected DabsBrush(int radius, SpacingStrategy spacingStrategy, AngleSettings angleSettings, boolean refreshBrushForEachDab) {
+        super(radius);
         settings = new DabsBrushSettings(angleSettings, spacingStrategy);
         dabsStrategy = new LinearDabsStrategy(this,
                 spacingStrategy,
@@ -33,7 +34,8 @@ public abstract class DabsBrush extends AbstractBrush {
         settings.registerBrush(this);
     }
 
-    protected DabsBrush(DabsBrushSettings settings, boolean refreshBrushForEachDab) {
+    protected DabsBrush(int radius, DabsBrushSettings settings, boolean refreshBrushForEachDab) {
+        super(radius);
         this.settings = settings;
         dabsStrategy = new LinearDabsStrategy(this,
                 settings.getSpacingStrategy(),

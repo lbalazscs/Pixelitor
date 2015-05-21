@@ -29,8 +29,8 @@ import java.awt.geom.Ellipse2D;
 public class WobbleBrush extends StrokeBrush {
     private static final float SIZE_DIVIDING_FACTOR = 4.0f;
 
-    public WobbleBrush() {
-        super(StrokeType.WOBBLE);
+    public WobbleBrush(int radius) {
+        super(radius, StrokeType.WOBBLE);
     }
 
     @Override

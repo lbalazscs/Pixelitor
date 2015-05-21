@@ -50,6 +50,7 @@ import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static java.util.Objects.requireNonNull;
+import static pixelitor.ChangeReason.REPEAT_LAST;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
@@ -332,17 +333,21 @@ public class ImageLayer extends ContentLayer {
     /**
      * @return true if the image has to be repainted
      */
-    public void changePreviewImage(BufferedImage img, String filterName) {
+    public void changePreviewImage(BufferedImage img, String filterName, ChangeReason changeReason) {
 //        System.out.println(String.format("ImageLayer::changePreviewImage: filterName = '%s'", filterName));
 
         // typically we should be in PREVIEW mode
         if (state == SHOW_ORIGINAL) {
             // this is OK, something was adjusted while in show original mode
         } else if (state == NORMAL) {
-            throw new IllegalStateException("change preview in normal state");
+            throw new IllegalStateException(String.format(
+                    "change preview in normal state, filter = %s, changeReason = %s)",
+                    filterName, changeReason));
         }
 
-        assert previewImage != null : "previewImage was null with " + filterName;
+        assert previewImage != null :
+                String.format("previewImage was null with %s, changeReason = %s",
+                        filterName, changeReason);
         assert img != null;
 
         if(img == image) {
@@ -372,9 +377,14 @@ public class ImageLayer extends ContentLayer {
     public void filterWithoutDialogFinished(BufferedImage transformedImage, ChangeReason changeReason, String opName) {
         requireNonNull(transformedImage);
 
-        // A filter without dialog should never return the original image
-        if(transformedImage == image) { // the filter returned the original
-            throw new IllegalStateException(opName + " returned the original image");
+        // A filter without dialog should never return the original image...
+        if (transformedImage == image) {
+            // ...unless Repeat Last starts a filter that normally has a dialog without one
+            if (changeReason != REPEAT_LAST) {
+                throw new IllegalStateException(opName + " returned the original image, changeReason = " + changeReason);
+            } else {
+                return;
+            }
         }
 
         // filters without dialog run in the normal state

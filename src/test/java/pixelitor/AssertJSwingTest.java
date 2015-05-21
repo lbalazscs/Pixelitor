@@ -125,11 +125,16 @@ public class AssertJSwingTest {
 
     @Test
     public void testApp() {
+        testDevelopMenu();
         testTools();
         testMenus();
         testLayers();
 
         sleep(5, SECONDS);
+    }
+
+    private void testDevelopMenu() {
+
     }
 
     private void testTools() {

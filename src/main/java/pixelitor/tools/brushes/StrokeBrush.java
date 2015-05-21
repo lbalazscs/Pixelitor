@@ -35,11 +35,12 @@ public abstract class StrokeBrush extends AbstractBrush {
     int lastDiameter = -1;
     Stroke lastStroke;
 
-    protected StrokeBrush(StrokeType strokeType) {
-        this(strokeType, CAP_ROUND, JOIN_ROUND);
+    protected StrokeBrush(int radius, StrokeType strokeType) {
+        this(radius, strokeType, CAP_ROUND, JOIN_ROUND);
     }
 
-    protected StrokeBrush(StrokeType strokeType, int cap, int join) {
+    protected StrokeBrush(int radius, StrokeType strokeType, int cap, int join) {
+        super(radius);
         this.strokeType = strokeType;
         this.cap = cap;
         this.join = join;

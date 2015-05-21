@@ -30,8 +30,8 @@ import static java.awt.BasicStroke.JOIN_BEVEL;
  * The "Squares" brush
  */
 public class OutlineSquareBrush extends StrokeBrush {
-    public OutlineSquareBrush() {
-        super(StrokeType.OUTLINE, CAP_SQUARE, JOIN_BEVEL);
+    public OutlineSquareBrush(int radius) {
+        super(radius, StrokeType.OUTLINE, CAP_SQUARE, JOIN_BEVEL);
     }
 
     @Override
