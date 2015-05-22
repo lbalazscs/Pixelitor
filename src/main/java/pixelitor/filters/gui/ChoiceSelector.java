@@ -26,13 +26,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * Displays a JComboBox as the GUI for an IntChoiceParam
+ * Displays a JComboBox as the GUI for an IntChoiceParam or an EnumParam
  */
-public class IntChoiceSelector extends JPanel implements ActionListener, ParamGUI {
+public class ChoiceSelector extends JPanel implements ActionListener, ParamGUI {
     private final JComboBox<IntChoiceParam.Value> comboBox;
     private final DefaultButton defaultButton;
 
-    public IntChoiceSelector(IntChoiceParam model) {
+    public ChoiceSelector(ComboBoxModel model) {
+        assert model instanceof Resettable;
+
         setLayout(new FlowLayout(FlowLayout.LEFT));
 
         comboBox = new JComboBox<>(model);
@@ -43,7 +45,7 @@ public class IntChoiceSelector extends JPanel implements ActionListener, ParamGU
 
         add(comboBox);
 
-        defaultButton = new DefaultButton(model);
+        defaultButton = new DefaultButton((Resettable) model);
         int buttonSize = comboBox.getPreferredSize().height;
         defaultButton.setPreferredSize(new Dimension(buttonSize, buttonSize));
         add(defaultButton);

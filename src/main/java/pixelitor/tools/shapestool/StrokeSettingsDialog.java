@@ -39,7 +39,7 @@ public class StrokeSettingsDialog extends OKDialog {
                                 EnumComboBoxModel<BasicStrokeJoin> joinModel,
                                 EnumComboBoxModel<StrokeType> strokeTypeModel,
                                 ButtonModel dashedModel) {
-        super(PixelitorWindow.getInstance(), "Stroke Settings");
+        super(PixelitorWindow.getInstance(), "Stroke Settings", "Close");
 
         JPanel p = new JPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));

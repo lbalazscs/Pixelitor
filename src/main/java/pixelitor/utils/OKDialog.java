@@ -28,14 +28,22 @@ import java.awt.event.KeyEvent;
  * A dialog with an OK button at the bottom
  */
 public class OKDialog extends JDialog {
-    public OKDialog(Frame owner, String title, JComponent form) {
+    private String okButtonText;
+
+    public OKDialog(Frame owner, JComponent form, String title) {
+        this(owner, form, title, "OK");
+    }
+
+    public OKDialog(Frame owner, JComponent form, String title, String okButtonText) {
         super(owner, title);
+        this.okButtonText = okButtonText;
 
         setupGUI(form, true);
     }
 
-    public OKDialog(Frame owner, String title) {
+    public OKDialog(Frame owner, String title, String okButtonText) {
         super(owner, title);
+        this.okButtonText = okButtonText;
     }
 
     public void setupGUI(JComponent form, boolean setVisible) {
@@ -43,7 +51,7 @@ public class OKDialog extends JDialog {
         add(form, BorderLayout.CENTER);
 
         JPanel p2 = new JPanel();
-        JButton ok = new JButton("OK");
+        JButton ok = new JButton(okButtonText);
         ok.setName("ok");
         p2.add(ok);
         add(p2, BorderLayout.SOUTH);

@@ -33,7 +33,8 @@ public class CloneBrush extends CopyBrush {
     private boolean aligned = true;
 
     private boolean firstCloningStart = true;
-    private double scale;
+    private double scaleX;
+    private double scaleY;
     private double rotate;
 
     public CloneBrush(int radius, CopyBrushType type) {
@@ -75,11 +76,11 @@ public class CloneBrush extends CopyBrush {
                 (dx - x),
                 (dy - y));
 
-        if (scale != 1.0 || rotate != 0.0) {
+        if (scaleX != 1.0 || scaleY != 1.0 || rotate != 0.0) {
             g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
             // first we need to scale/rotate the image around the source point
             transform.translate(srcX, srcY);
-            transform.scale(scale, scale);
+            transform.scale(scaleX, scaleY);
             transform.rotate(rotate);
             transform.translate(-srcX, -srcY);
         }
@@ -106,8 +107,9 @@ public class CloneBrush extends CopyBrush {
         this.aligned = aligned;
     }
 
-    public void setScale(double scale) {
-        this.scale = scale;
+    public void setScale(double scaleX, double scaleY) {
+        this.scaleX = scaleX;
+        this.scaleY = scaleY;
     }
 
     public void setRotate(double rotate) {

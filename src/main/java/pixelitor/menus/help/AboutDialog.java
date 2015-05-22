@@ -32,7 +32,7 @@ public class AboutDialog extends OKDialog {
     public static final String HOME_PAGE = "http://pixelitor.sourceforge.net";
 
     private AboutDialog(JFrame owner, JComponent form) {
-        super(owner, "About Pixelitor", form);
+        super(owner, form, "About Pixelitor");
     }
 
     public static void showDialog(PixelitorWindow pixelitorWindow) {

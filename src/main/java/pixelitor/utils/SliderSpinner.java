@@ -114,7 +114,6 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         if (addDefaultButton) {
             defaultButton = new DefaultButton(resettableParam == null ? model : resettableParam);
             defaultButton.setPreferredSize(new Dimension(spinnerHeight, spinnerHeight));
-            defaultButton.updateState();
             if (colorsUsed) {
                 defaultButton.setBackground(GRAY);
             }

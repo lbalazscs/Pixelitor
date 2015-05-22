@@ -33,6 +33,7 @@ public class DefaultButton extends JButton {
         this.resettable = resettable;
         addActionListener(e -> resettable.reset(true));
         setToolTipText("Reset the default setting");
+        updateState();
     }
 
     public void updateState() {

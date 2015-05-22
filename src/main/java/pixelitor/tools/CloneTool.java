@@ -21,6 +21,7 @@ import com.bric.util.JVM;
 import pixelitor.Build;
 import pixelitor.ImageDisplay;
 import pixelitor.PixelitorWindow;
+import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.CloneBrush;
@@ -28,6 +29,7 @@ import pixelitor.tools.brushes.CopyBrushType;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.GridBagHelper;
 import pixelitor.utils.OKDialog;
+import pixelitor.utils.ScalingMirror;
 
 import javax.swing.*;
 import java.awt.Cursor;
@@ -55,9 +57,9 @@ public class CloneTool extends TmpLayerBrushTool {
 
     private CloneBrush cloneBrush;
 
-    private final RangeParam scaleParam = new RangeParam("Scale", 10, 400, 100, true, NONE);
-    private final RangeParam rotationParam = new RangeParam("Rotation", -180, 180, 0, true, NONE);
-
+    private final RangeParam scaleParam = new RangeParam("", 10, 400, 100, true, NONE);
+    private final RangeParam rotationParam = new RangeParam("", -180, 180, 0, true, NONE);
+    private final EnumParam<ScalingMirror> mirrorParam = new EnumParam<>("", ScalingMirror.class);
 
     protected CloneTool() {
         super('k', "Clone", "clone_tool_icon.png",
@@ -91,7 +93,8 @@ public class CloneTool extends TmpLayerBrushTool {
             GridBagHelper gbh = new GridBagHelper(p);
             gbh.addLabelWithControl("Scale (%):", scaleParam.createGUI());
             gbh.addLabelWithControl("Rotate (Degrees):", rotationParam.createGUI());
-            new OKDialog(PixelitorWindow.getInstance(), "Clone Transform", p);
+            gbh.addLabelWithControl("Mirror:", mirrorParam.createGUI());
+            new OKDialog(PixelitorWindow.getInstance(), p, "Clone Transform", "Close");
         });
     }
 
@@ -107,7 +110,7 @@ public class CloneTool extends TmpLayerBrushTool {
         int x = userDrag.getStartX();
         int y = userDrag.getStartY();
 
-        if(e.isAltDown()) {
+        if (e.isAltDown()) {
             setCloningSource(ic, x, y);
         } else {
             if (state == NO_SOURCE) {
@@ -116,7 +119,11 @@ public class CloneTool extends TmpLayerBrushTool {
             }
             state = CLONING; // must be a new stroke after the source setting
 
-            cloneBrush.setScale(scaleParam.getValueAsPercentage());
+            float scaleAbs = scaleParam.getValueAsPercentage();
+            ScalingMirror mirror = (ScalingMirror) mirrorParam.getSelectedItem();
+            cloneBrush.setScale(
+                    mirror.getScaleX(scaleAbs),
+                    mirror.getScaleY(scaleAbs));
             cloneBrush.setRotate(rotationParam.getValueInRadians());
 
             if (!withLine(e)) {  // when drawing with line, the destination should not change for mouse press

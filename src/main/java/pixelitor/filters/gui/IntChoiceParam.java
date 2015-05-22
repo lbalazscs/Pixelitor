@@ -66,7 +66,7 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
 
     @Override
     public JComponent createGUI() {
-        IntChoiceSelector choiceSelector = new IntChoiceSelector(this);
+        ChoiceSelector choiceSelector = new ChoiceSelector(this);
         paramGUI = choiceSelector;
         paramGUI.setEnabled(shouldBeEnabled());
         return choiceSelector;
