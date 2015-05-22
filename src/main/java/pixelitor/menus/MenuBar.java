@@ -736,6 +736,13 @@ public class MenuBar extends JMenuBar {
         };
         createMenuItem(defaultWorkspaceAction, viewMenu, EnabledIf.ACTION_ENABLED);
 
+        JCheckBoxMenuItem showPixelGridMI = new JCheckBoxMenuItem("Show Pixel Grid");
+        showPixelGridMI.addActionListener(e -> {
+            ImageComponent.showPixelGrid = showPixelGridMI.getState();
+            ImageComponents.repaintAll();
+        });
+        viewMenu.add(showPixelGridMI);
+
         viewMenu.addSeparator();
 
         initArrangeWindowsSubmenu(viewMenu);

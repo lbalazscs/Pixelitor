@@ -113,18 +113,10 @@ public class ImageComponents {
 
     public static Optional<BufferedImage> getActiveCompositeImage() {
         return getActiveComp().map(Composition::getCompositeImage);
-
-//        Optional<Composition> comp = getActiveComp();
-//        if (comp.isPresent()) {
-//            return Optional.of(comp.get().getCompositeImage());
-//        }
-//
-//        return Optional.empty();
     }
 
     /**
      * Crops tha active image based on the crop tool
-     * @param selected
      */
     public static void toolCropActiveImage(boolean allowGrowing) {
         try {
@@ -224,6 +216,12 @@ public class ImageComponents {
     public static void repaintActive() {
         if (activeImageComponent != null) {
             activeImageComponent.repaint();
+        }
+    }
+
+    public static void repaintAll() {
+        for (ImageComponent ic : imageComponents) {
+            ic.repaint();
         }
     }
 

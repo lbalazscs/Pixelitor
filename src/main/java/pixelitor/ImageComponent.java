@@ -73,6 +73,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     private double drawStartX;
     private double drawStartY;
 
+    public static boolean showPixelGrid = false;
+
     public ImageComponent(Composition comp) {
         assert comp != null;
 
@@ -289,7 +291,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         g2.setClip(imageClip);
 
         // draw pixel grid
-        if (zoomLevel.drawPixelGrid() && !comp.hasSelection()) {
+        if (showPixelGrid && zoomLevel.drawPixelGrid() && !comp.hasSelection()) {
             // TODO why is this very slow if there is selection?
 
             g2.setXORMode(BLACK);
