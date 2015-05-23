@@ -27,21 +27,27 @@ public class BooleanParam extends AbstractFilterParam {
     private final boolean defaultValue;
     private boolean currentValue;
     private final boolean ignoreRandomize;
+    private final boolean addDefaultButton;
 
     public BooleanParam(String name, boolean defaultValue) {
         this(name, defaultValue, false);
     }
 
     public BooleanParam(String name, boolean defaultValue, boolean ignoreRandomize) {
+        this(name, defaultValue, ignoreRandomize, false);
+    }
+
+    public BooleanParam(String name, boolean defaultValue, boolean ignoreRandomize, boolean addDefaultButton) {
         super(name);
         this.defaultValue = defaultValue;
         currentValue = defaultValue;
         this.ignoreRandomize = ignoreRandomize;
+        this.addDefaultButton = addDefaultButton;
     }
 
     @Override
     public JComponent createGUI() {
-        BooleanSelector selector = new BooleanSelector(this);
+        BooleanSelector selector = new BooleanSelector(this, addDefaultButton);
         paramGUI = selector;
         paramGUI.setEnabled(shouldBeEnabled());
 

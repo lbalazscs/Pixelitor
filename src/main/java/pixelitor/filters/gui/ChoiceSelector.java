@@ -46,8 +46,8 @@ public class ChoiceSelector extends JPanel implements ActionListener, ParamGUI {
         add(comboBox);
 
         defaultButton = new DefaultButton((Resettable) model);
-        int buttonSize = comboBox.getPreferredSize().height;
-        defaultButton.setPreferredSize(new Dimension(buttonSize, buttonSize));
+//        int buttonSize = comboBox.getPreferredSize().height;
+//        defaultButton.setPreferredSize(new Dimension(buttonSize, buttonSize));
         add(defaultButton);
     }
 

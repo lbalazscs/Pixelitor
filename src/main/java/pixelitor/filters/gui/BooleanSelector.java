@@ -17,6 +17,8 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.utils.DefaultButton;
+
 import javax.swing.*;
 import java.awt.FlowLayout;
 
@@ -26,8 +28,9 @@ import java.awt.FlowLayout;
 public class BooleanSelector extends JPanel implements ParamGUI {
     private final BooleanParam model;
     private final JCheckBox checkBox;
+    private DefaultButton defaultButton;
 
-    public BooleanSelector(BooleanParam model) {
+    public BooleanSelector(BooleanParam model, boolean addDefaultButton) {
         this.model = model;
         setLayout(new FlowLayout(FlowLayout.LEFT));
         checkBox = new JCheckBox();
@@ -35,6 +38,20 @@ public class BooleanSelector extends JPanel implements ParamGUI {
         add(checkBox);
 
         checkBox.addActionListener(e -> model.setValue(checkBox.isSelected(), false, true));
+
+        if (addDefaultButton) {
+            add(Box.createHorizontalStrut(50));
+            defaultButton = new DefaultButton(model);
+            add(defaultButton);
+
+            // It is important to add here a change listener and not an
+            // action listener because we want to trigger this when the
+            // checkbox is changed by the default button.
+            // Swing is not consistent: in the case of JComboBox, action
+            // listeners are called when the component is changed indirectly,
+            // but not in the case of JCheckBox
+            checkBox.addChangeListener(e -> defaultButton.updateState());
+        }
     }
 
     @Override

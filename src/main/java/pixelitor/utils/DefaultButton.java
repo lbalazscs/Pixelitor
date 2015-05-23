@@ -20,31 +20,37 @@ package pixelitor.utils;
 import pixelitor.filters.gui.Resettable;
 
 import javax.swing.*;
+import java.awt.Dimension;
 
 /**
- * A button that resets its filter parameter, and displays and arrow when the
- * filter parameter is not set to the default value
+ * A button that resets a Resettable, and displays and arrow when the
+ * Resettable is not set to the default value
  */
 public class DefaultButton extends JButton {
-    private static final Icon defaultIcon = IconUtils.getWestArrowIcon();
+    private static final Icon WEST_ARROW_ICON = IconUtils.getWestArrowIcon();
+    private static final Dimension PREFERRED_SIZE = new Dimension(28, 28);
     private final Resettable resettable;
 
     public DefaultButton(Resettable resettable) {
         this.resettable = resettable;
-        addActionListener(e -> resettable.reset(true));
+        setPreferredSize(PREFERRED_SIZE);
+        addActionListener(e -> {
+            resettable.reset(true);
+        });
         setToolTipText("Reset the default setting");
         updateState();
     }
 
     public void updateState() {
-        setDefault(resettable.isSetToDefault());
+        boolean isSetToDefault = resettable.isSetToDefault();
+        setArrowIcon(isSetToDefault);
     }
 
-    private void setDefault(boolean b) {
-        if (b) {
+    private void setArrowIcon(boolean isSetToDefault) {
+        if (isSetToDefault) {
             setIcon(null);
         } else {
-            setIcon(defaultIcon);
+            setIcon(WEST_ARROW_ICON);
         }
     }
 }
