@@ -23,14 +23,20 @@ import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 
+import static java.awt.GridBagConstraints.EAST;
+import static java.awt.GridBagConstraints.HORIZONTAL;
+import static java.awt.GridBagConstraints.NONE;
+import static java.awt.GridBagConstraints.REMAINDER;
+import static java.awt.GridBagConstraints.WEST;
+
 /**
  * Helper object for GridBagLayout
  */
 public class GridBagHelper {
     private static final Insets insets = new Insets(2, 2, 2, 2);
-    private static final GridBagConstraints labelConstraint = new GridBagConstraints(0, 0, 1, 1, 0.0, 1.0, GridBagConstraints.EAST, GridBagConstraints.NONE, insets, 0, 0);
-    private static final GridBagConstraints nextControlConstraint = new GridBagConstraints(0, 0, 1, 1, 0.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, insets, 0, 0);
-    private static final GridBagConstraints nextLastControlConstraint = new GridBagConstraints(0, 0, GridBagConstraints.REMAINDER, 1, 0.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, insets, 0, 0);
+    private static final GridBagConstraints labelConstraint = new GridBagConstraints(0, 0, 1, 1, 0.0, 1.0, EAST, NONE, insets, 0, 0);
+    private static final GridBagConstraints nextControlConstraint = new GridBagConstraints(0, 0, 1, 1, 0.0, 1.0, WEST, HORIZONTAL, insets, 0, 0);
+    private static final GridBagConstraints nextLastControlConstraint = new GridBagConstraints(0, 0, REMAINDER, 1, 0.0, 1.0, WEST, HORIZONTAL, insets, 0, 0);
     private final Container container;
     private int autoIncrementedGridY = 0;
 
@@ -96,10 +102,10 @@ public class GridBagHelper {
     public void addControlNoFill(Component component) {
         nextControlConstraint.gridx = labelConstraint.gridx + 1;
         nextControlConstraint.gridy = labelConstraint.gridy;
-        nextControlConstraint.fill = GridBagConstraints.NONE;
+        nextControlConstraint.fill = NONE;
         container.add(component, nextControlConstraint);
 
-        nextControlConstraint.fill = GridBagConstraints.HORIZONTAL; // reset
+        nextControlConstraint.fill = HORIZONTAL; // reset
     }
 
     /**
@@ -108,6 +114,12 @@ public class GridBagHelper {
     public void addNextControl(Component component) {
         nextControlConstraint.gridx++;
         container.add(component, nextControlConstraint);
+    }
+
+    public void addLabelWithLastControl(String name, Component component) {
+        addLabel(name, 0, autoIncrementedGridY);
+        addLastControl(component);
+        autoIncrementedGridY++;
     }
 
     public void addLastControl(Component component) {

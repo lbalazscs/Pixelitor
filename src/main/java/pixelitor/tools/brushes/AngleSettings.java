@@ -29,11 +29,11 @@ public class AngleSettings {
     public static final AngleSettings ANGLE_AWARE_NO_SCATTERING = new AngleSettings(true, 0);
 
     public AngleSettings(boolean angleAware, double maxAngleScattering) {
-        if (!angleAware) {
-            if (maxAngleScattering != 0) {
-                throw new IllegalArgumentException("maxAngleScattering = " + maxAngleScattering);
-            }
-        }
+//        if (!angleAware) {
+//            if (maxAngleScattering != 0) {
+//                throw new IllegalArgumentException("maxAngleScattering = " + maxAngleScattering);
+//            }
+//        }
 
         this.angleAware = angleAware;
         this.maxAngleScattering = maxAngleScattering;

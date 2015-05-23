@@ -18,6 +18,7 @@
 package pixelitor.tools.brushes;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
+import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.tools.ShapeType;
 import pixelitor.utils.GridBagHelper;
@@ -30,9 +31,13 @@ import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
 public class ShapeBrushSettingsPanel extends JPanel {
     public static final ShapeType SHAPE_SELECTED_BY_DEFAULT = ShapeType.ARROW;
     public static final double DEFAULT_SPACING_RATIO = 2.3;
+    private final ShapeDabsBrushSettings settings;
+    private final BooleanParam angleAware;
+    private final RangeParam angleScattering;
 
     public ShapeBrushSettingsPanel(ShapeDabsBrushSettings settings) {
         super(new GridBagLayout());
+        this.settings = settings;
 
         GridBagHelper gbh = new GridBagHelper(this);
         EnumComboBoxModel<ShapeType> typeModel = new EnumComboBoxModel<>(ShapeType.class);
@@ -44,13 +49,26 @@ public class ShapeBrushSettingsPanel extends JPanel {
                     settings.setShapeType(shapeType);
                 });
 
+        gbh.addLabelWithControlNoFill("Shape:", shapeTypeCB);
 
-        gbh.addLabelWithControl("Shape:", shapeTypeCB);
-
-        RangeParam spacingSelector = new RangeParam("Spacing", 1, 1000, (int) Math.round(DEFAULT_SPACING_RATIO * 100), false, NONE);
-        gbh.addLabelWithControl("Spacing (radius %):", spacingSelector.createGUI());
+        RangeParam spacingSelector = new RangeParam("", 1, 1000, (int) Math.round(DEFAULT_SPACING_RATIO * 100), true, NONE);
+        gbh.addLabelWithControlNoFill("Spacing (radius %):", spacingSelector.createGUI());
         spacingSelector.setAdjustmentListener(
                 () -> settings.changeSpacing(new RadiusRatioSpacing(spacingSelector.getValueAsPercentage())));
+
+        angleScattering = new RangeParam("", 0, 180, 0, true, NONE);
+        gbh.addLabelWithControlNoFill("  Angle Scattering (degrees):", angleScattering.createGUI());
+        angleScattering.setAdjustmentListener(this::changeAngleSettings);
+
+        angleAware = new BooleanParam("", true);
+        gbh.addLabelWithControlNoFill("Angle Follows Movement:", angleAware.createGUI());
+        angleAware.setAdjustmentListener(this::changeAngleSettings);
     }
 
+    private void changeAngleSettings() {
+        boolean angleAwareChecked = angleAware.isChecked();
+        float angleScatteringInRadians = angleScattering.getValueInRadians();
+        AngleSettings angleSettings = new AngleSettings(angleAwareChecked, angleScatteringInRadians);
+        settings.changeAngleSettings(angleSettings);
+    }
 }

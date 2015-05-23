@@ -41,7 +41,7 @@ public class DabsBrushSettings {
         notifyBrushes();
     }
 
-    public void changeAngle(AngleSettings angleSettings) {
+    public void changeAngleSettings(AngleSettings angleSettings) {
         this.angleSettings = angleSettings;
         notifyBrushes();
     }
@@ -73,4 +73,5 @@ public class DabsBrushSettings {
     public void unregisterBrush(DabsBrush brush) {
         brushes.remove(brush);
     }
+
 }

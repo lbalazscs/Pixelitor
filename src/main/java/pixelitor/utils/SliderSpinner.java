@@ -98,8 +98,6 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
                 1));
         spinner.addChangeListener(this);
 
-        int spinnerHeight = (int) spinner.getPreferredSize().getHeight();
-
         label = new JLabel(model.getName() + ": ");
         if (textPosition == TextPosition.WEST) {
             add(label, BorderLayout.WEST);
@@ -113,7 +111,8 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
 
         if (addDefaultButton) {
             defaultButton = new DefaultButton(resettableParam == null ? model : resettableParam);
-            defaultButton.setPreferredSize(new Dimension(spinnerHeight, spinnerHeight));
+//            int spinnerHeight = (int) spinner.getPreferredSize().getHeight();
+//            defaultButton.setPreferredSize(new Dimension(spinnerHeight, spinnerHeight));
             if (colorsUsed) {
                 defaultButton.setBackground(GRAY);
             }

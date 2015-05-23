@@ -50,13 +50,12 @@ public class ShapeDabsBrush extends DabsBrush {
     @Override
     public void putDab(double x, double y, double theta) {
         ShapeType shapeType = ((ShapeDabsBrushSettings)settings).getShapeType();
-        if (settings.isAngleAware()) {
+        if (theta != 0) {
             Shape shape = shapeType.getShape(x - radius, y - radius, diameter);
             AffineTransform t = AffineTransform.getRotateInstance(theta, x, y);
             Shape transformedShape = t.createTransformedShape(shape);
             targetG.fill(transformedShape);
         } else {
-            assert theta == 0;
             Shape shape = shapeType.getShape(x - radius, y - radius, diameter);
             targetG.fill(shape);
         }
