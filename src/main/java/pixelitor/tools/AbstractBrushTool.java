@@ -121,7 +121,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
                 e -> {
                     BrushType brushType = (BrushType) typeSelector.getSelectedItem();
                     JPanel p = brushType.getSettingsPanel(this);
-                    new OKDialog(PixelitorWindow.getInstance(), p, "Brush Settings");
+                    toolDialog = new OKDialog(PixelitorWindow.getInstance(), p, "Brush Settings");
                 });
 
         brushSettingsButton.setEnabled(false);

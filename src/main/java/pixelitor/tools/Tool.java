@@ -67,6 +67,10 @@ public abstract class Tool {
     protected ToolSettingsPanel settingsPanel;
     protected boolean ended = false;
 
+    // a dialog with more settings that will be closed automatically
+    // when the user switches to another tool
+    protected JDialog toolDialog;
+
     protected Tool(char activationKeyChar, String name, String iconFileName, String toolMessage, Cursor cursor, boolean allowOnlyImageLayers, boolean handToolForwarding, boolean constrainIfShiftDown, ClipStrategy clipStrategy) {
         this.activationKeyChar = activationKeyChar;
         this.name = name;
@@ -259,6 +263,15 @@ public abstract class Tool {
 
     protected void toolEnded() {
         ended = true;
+
+        closeToolDialog();
+    }
+
+    protected void closeToolDialog() {
+        if (toolDialog != null && toolDialog.isVisible()) {
+            toolDialog.setVisible(false);
+            toolDialog.dispose();
+        }
     }
 
     public Cursor getCursor() {

@@ -72,7 +72,7 @@ public class ShapesTool extends Tool {
     private final EnumComboBoxModel<BasicStrokeJoin> strokeJoinModel = new EnumComboBoxModel<>(BasicStrokeJoin.class);
     private final EnumComboBoxModel<StrokeType> strokeTypeModel = new EnumComboBoxModel<>(StrokeType.class);
 
-    private JDialog strokeDialog;
+
     private JButton strokeSettingsButton;
     private BasicStroke basicStrokeForOpenShapes;
     private final JComboBox<TwoPointBasedPaint> strokeFillCombo;
@@ -237,27 +237,26 @@ public class ShapesTool extends Tool {
     }
 
     private void initAndShowStrokeSettingsDialog() {
-        if (strokeDialog == null) {
-            strokeDialog = new StrokeSettingsDialog(strokeWidthParam, strokeCapModel,
+        if (toolDialog == null) {
+            toolDialog = new StrokeSettingsDialog(strokeWidthParam, strokeCapModel,
                     strokeJoinModel, strokeTypeModel, dashedModel);
         }
 
-        GUIUtils.centerOnScreen(strokeDialog);
-        strokeDialog.setVisible(true);
+        GUIUtils.centerOnScreen(toolDialog);
+        toolDialog.setVisible(true);
     }
 
-    private static void closeDialog(JDialog d) {
-        if (d != null) {
-            d.setVisible(false);
-            d.dispose();
+    private void closeEffectsDialog() {
+        if (effectsDialog != null) {
+            effectsDialog.setVisible(false);
+            effectsDialog.dispose();
         }
     }
 
     @Override
     protected void toolEnded() {
         super.toolEnded();
-        closeDialog(strokeDialog);
-        closeDialog(effectsDialog);
+        closeEffectsDialog();
     }
 
     @Override
@@ -402,7 +401,7 @@ public class ShapesTool extends Tool {
         strokeSettingsButton.setEnabled(b);
 
         if (!b) {
-            closeDialog(strokeDialog);
+            closeToolDialog();
         }
     }
 
@@ -410,7 +409,7 @@ public class ShapesTool extends Tool {
         effectsButton.setEnabled(b);
 
         if (!b) {
-            closeDialog(effectsDialog);
+            closeEffectsDialog();
         }
     }
 

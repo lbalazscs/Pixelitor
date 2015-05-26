@@ -94,7 +94,7 @@ public class CloneTool extends TmpLayerBrushTool {
             gbh.addLabelWithControl("Scale (%):", scaleParam.createGUI());
             gbh.addLabelWithControl("Rotate (Degrees):", rotationParam.createGUI());
             gbh.addLabelWithControl("Mirror:", mirrorParam.createGUI());
-            new OKDialog(PixelitorWindow.getInstance(), p, "Clone Transform", "Close");
+            toolDialog = new OKDialog(PixelitorWindow.getInstance(), p, "Clone Transform", "Close");
         });
     }
 
