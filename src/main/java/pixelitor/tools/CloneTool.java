@@ -62,7 +62,7 @@ public class CloneTool extends TmpLayerBrushTool {
     private final EnumParam<ScalingMirror> mirrorParam = new EnumParam<>("", ScalingMirror.class);
 
     protected CloneTool() {
-        super('k', "Clone", "clone_tool_icon.png",
+        super('s', "Clone Stamp", "clone_tool_icon.png",
                 "Alt-click to select source, then paint with the copied pixels",
                 Cursor.getDefaultCursor());
     }
