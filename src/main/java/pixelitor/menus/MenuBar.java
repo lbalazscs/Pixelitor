@@ -90,6 +90,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.lang.management.ManagementFactory;
 import java.util.Optional;
 
 import static pixelitor.Composition.ImageChangeActions.FULL;
@@ -856,6 +857,15 @@ public class MenuBar extends JMenuBar {
         createMenuItem(dumpEvents, developMenu);
 
         initLayerMaskSubmenu(developMenu);
+
+        Action dumpPID = new MenuAction("Debug PID") {
+            @Override
+            void onClick() {
+                String vmRuntimeInfo = ManagementFactory.getRuntimeMXBean().getName();
+                System.out.println(String.format("MenuBar::onClick: vmRuntimeInfo = '%s'", vmRuntimeInfo));
+            }
+        };
+        createMenuItem(dumpPID, developMenu);
 
         this.add(developMenu);
     }
