@@ -33,7 +33,7 @@ public class ShapeBrushSettingsPanel extends JPanel {
     public static final double DEFAULT_SPACING_RATIO = 2.3;
     private final ShapeDabsBrushSettings settings;
     private final BooleanParam angleAware;
-    private final RangeParam angleScattering;
+    private final RangeParam angleJitter;
 
     public ShapeBrushSettingsPanel(ShapeDabsBrushSettings settings) {
         super(new GridBagLayout());
@@ -56,9 +56,9 @@ public class ShapeBrushSettingsPanel extends JPanel {
         spacingSelector.setAdjustmentListener(
                 () -> settings.changeSpacing(new RadiusRatioSpacing(spacingSelector.getValueAsPercentage())));
 
-        angleScattering = new RangeParam("", 0, 180, 0, true, NONE);
-        gbh.addLabelWithControlNoFill("  Angle Scattering (degrees):", angleScattering.createGUI());
-        angleScattering.setAdjustmentListener(this::changeAngleSettings);
+        angleJitter = new RangeParam("", 0, 180, 0, true, NONE);
+        gbh.addLabelWithControlNoFill("  Angle Jitter (degrees):", angleJitter.createGUI());
+        angleJitter.setAdjustmentListener(this::changeAngleSettings);
 
         angleAware = new BooleanParam("", true);
         gbh.addLabelWithControlNoFill("Angle Follows Movement:", angleAware.createGUI());
@@ -67,8 +67,8 @@ public class ShapeBrushSettingsPanel extends JPanel {
 
     private void changeAngleSettings() {
         boolean angleAwareChecked = angleAware.isChecked();
-        float angleScatteringInRadians = angleScattering.getValueInRadians();
-        AngleSettings angleSettings = new AngleSettings(angleAwareChecked, angleScatteringInRadians);
+        float angleJitterRadians = angleJitter.getValueInRadians();
+        AngleSettings angleSettings = new AngleSettings(angleAwareChecked, angleJitterRadians);
         settings.changeAngleSettings(angleSettings);
     }
 }

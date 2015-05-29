@@ -66,17 +66,17 @@ public enum CopyBrushType {
         public void afterDrawImage(Graphics2D g) {
             // do nothing
         }
-    }, SQUARE("Square") {
-        @Override
-        public void beforeDrawImage(Graphics2D g) {
-            // important in the areas where there is no source defined
-            ImageUtils.fillWithTransparentRectangle(g, size);
-        }
-
-        @Override
-        public void afterDrawImage(Graphics2D g) {
-            // do nothing
-        }
+//    }, SQUARE("Square") {
+//        @Override
+//        public void beforeDrawImage(Graphics2D g) {
+//            // important in the areas where there is no source defined
+//            ImageUtils.fillWithTransparentRectangle(g, size);
+//        }
+//
+//        @Override
+//        public void afterDrawImage(Graphics2D g) {
+//            // do nothing
+//        }
     };
 
     private final String guiName;

@@ -892,7 +892,7 @@ public class AssertJSwingTest {
     }
 
     private void testCloneTool() {
-        window.toggleButton("Clone Tool Button").click();
+        window.toggleButton("Clone Stamp Tool Button").click();
 
         testClone(false, false, 100);
         testClone(false, true, 200);

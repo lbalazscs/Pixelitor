@@ -36,7 +36,7 @@ import javax.swing.*;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-import static pixelitor.tools.brushes.AngleSettings.ANGLE_AWARE_NO_SCATTERING;
+import static pixelitor.tools.brushes.AngleSettings.ANGLE_AWARE_NO_JITTER;
 import static pixelitor.tools.brushes.AngleSettings.NOT_ANGLE_AWARE;
 
 /**
@@ -85,7 +85,7 @@ public enum BrushType {
             if(settings == null) {
                 ShapeType shapeType = ShapeBrushSettingsPanel.SHAPE_SELECTED_BY_DEFAULT;
                 double spacingRatio = ShapeBrushSettingsPanel.DEFAULT_SPACING_RATIO;
-                AngleSettings angleSettings = ANGLE_AWARE_NO_SCATTERING;
+                AngleSettings angleSettings = ANGLE_AWARE_NO_JITTER;
                 RadiusRatioSpacing spacing = new RadiusRatioSpacing(spacingRatio);
 
                 ShapeDabsBrush shapeDabsBrush = new ShapeDabsBrush(radius, shapeType, spacing, angleSettings);
