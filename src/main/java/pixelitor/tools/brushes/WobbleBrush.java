@@ -42,7 +42,7 @@ public class WobbleBrush extends StrokeBrush {
         }
         targetG.setStroke(lastStroke);
 
-        Shape circle = new Ellipse2D.Float(x + radius, y + radius, 0.1f, 0.1f);
+        Shape circle = new Ellipse2D.Float(x, y, 0.1f, 0.1f);
         targetG.draw(circle);
     }
 
