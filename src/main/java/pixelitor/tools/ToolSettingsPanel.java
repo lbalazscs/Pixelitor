@@ -20,10 +20,10 @@ package pixelitor.tools;
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.tools.brushes.CopyBrushType;
 import pixelitor.tools.brushes.CopyBrushTypeChangedListener;
+import pixelitor.utils.ToolSettingsLayout;
 
 import javax.swing.*;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 import java.util.function.Consumer;
 
@@ -32,16 +32,8 @@ import java.util.function.Consumer;
  */
 public class ToolSettingsPanel extends JPanel {
     public ToolSettingsPanel() {
-        super(new FlowLayout(FlowLayout.LEFT, 5, 0));
-
-        // TODO we need a layout manager that arranges components
-        // horizontally but unlike FlowLayout it centers vertically
-        // and unlike BoxLayout it considers the preferred vertical size
-
-//        super(new HorizontalLayout(5));
-
-//        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-
+        super(new ToolSettingsLayout());
+//        super(new FlowLayout(FlowLayout.LEFT, 5, 0));
     }
 
     public void addSeparator() {

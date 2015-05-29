@@ -91,7 +91,12 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
 
             showOriginalCB = new ShowOriginalCB();
 
-            gbHelper.addLastControl(showOriginalCB);
+            // adds it to a panel so it is aligned to the other controls
+            // TODO but maybe this should be added as it is and the other
+            // controls should be added without gap
+            JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            p.add(showOriginalCB);
+            gbHelper.addLastControl(p);
         }
 
         // add filter actions
