@@ -942,10 +942,14 @@ public class ImageLayer extends ContentLayer {
 
     public void setShowOriginal(boolean b) {
         if(b) {
-            assert state == PREVIEW;
+            if(state == SHOW_ORIGINAL) {
+                return;
+            }
             setState(SHOW_ORIGINAL);
         } else {
-            assert state == SHOW_ORIGINAL;
+            if(state == PREVIEW) {
+                return;
+            }
             setState(PREVIEW);
         }
         comp.imageChanged(REPAINT);
