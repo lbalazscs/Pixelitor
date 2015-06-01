@@ -17,6 +17,7 @@
 
 package pixelitor.tools.brushes;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +31,7 @@ public class DabsBrushSettings {
     private AngleSettings angleSettings;
     private SpacingStrategy spacingStrategy;
     private final List<DabsBrush> brushes = new ArrayList<>(4);
+    private JPanel settingsPanel;
 
     public DabsBrushSettings(AngleSettings angleSettings, SpacingStrategy spacingStrategy) {
         this.angleSettings = angleSettings;
@@ -74,4 +76,14 @@ public class DabsBrushSettings {
         brushes.remove(brush);
     }
 
+    public JPanel getGUI() {
+        if (settingsPanel == null) {
+            settingsPanel = createSettingsPanel();
+        }
+        return settingsPanel;
+    }
+
+    protected JPanel createSettingsPanel() {
+        return new JPanel();
+    }
 }

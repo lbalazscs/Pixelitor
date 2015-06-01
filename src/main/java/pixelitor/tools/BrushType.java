@@ -17,20 +17,7 @@
 
 package pixelitor.tools;
 
-import pixelitor.tools.brushes.AngleSettings;
-import pixelitor.tools.brushes.Brush;
-import pixelitor.tools.brushes.CalligraphyBrush;
-import pixelitor.tools.brushes.IdealBrush;
-import pixelitor.tools.brushes.ImageBrushType;
-import pixelitor.tools.brushes.ImageDabsBrush;
-import pixelitor.tools.brushes.OnePixelBrush;
-import pixelitor.tools.brushes.OutlineCircleBrush;
-import pixelitor.tools.brushes.OutlineSquareBrush;
-import pixelitor.tools.brushes.RadiusRatioSpacing;
-import pixelitor.tools.brushes.ShapeBrushSettingsPanel;
-import pixelitor.tools.brushes.ShapeDabsBrush;
-import pixelitor.tools.brushes.ShapeDabsBrushSettings;
-import pixelitor.tools.brushes.WobbleBrush;
+import pixelitor.tools.brushes.*;
 
 import javax.swing.*;
 import java.util.IdentityHashMap;
@@ -48,7 +35,7 @@ public enum BrushType {
         public Brush createBrush(Tool tool, int radius) {
             return new IdealBrush(radius);
         }
-    }, SOFT("Soft", false) {
+    }, SOFT("Soft", true) {
         @Override
         public Brush createBrush(Tool tool, int radius) {
             return new ImageDabsBrush(radius, ImageBrushType.SOFT, 0.25, NOT_ANGLE_AWARE);
@@ -74,17 +61,25 @@ public enum BrushType {
             return new ImageDabsBrush(radius, ImageBrushType.HAIR, 0.02, NOT_ANGLE_AWARE);
         }
     }, SHAPE("Shape", true) {
-        // The settings must be shared between the symmetry-brushes of a tool, but
-        // they must be different between the different tools
-        private final Map<Tool, ShapeDabsBrushSettings> settingsByTool = new IdentityHashMap<>();
-        private final Map<Tool, JPanel> settingPanelsByTool = new IdentityHashMap<>();
-
         @Override
         public Brush createBrush(Tool tool, int radius) {
-            ShapeDabsBrushSettings settings = settingsByTool.get(tool);
-            if(settings == null) {
-                ShapeType shapeType = ShapeBrushSettingsPanel.SHAPE_SELECTED_BY_DEFAULT;
-                double spacingRatio = ShapeBrushSettingsPanel.DEFAULT_SPACING_RATIO;
+            boolean noSettingsForThisTool = false;
+            ShapeDabsBrushSettings settings = null;
+            if (settingsByTool == null) {
+                settingsByTool = new IdentityHashMap<>();
+                noSettingsForThisTool = true;
+            } else {
+                settings = (ShapeDabsBrushSettings) settingsByTool.get(tool);
+                if (settings == null) {
+                    noSettingsForThisTool = true;
+                }
+            }
+
+            if (noSettingsForThisTool) {
+                assert settings == null;
+
+                ShapeType shapeType = BrushSettingsPanel.SHAPE_SELECTED_BY_DEFAULT;
+                double spacingRatio = BrushSettingsPanel.DEFAULT_SPACING_RATIO;
                 AngleSettings angleSettings = ANGLE_AWARE_NO_JITTER;
                 RadiusRatioSpacing spacing = new RadiusRatioSpacing(spacingRatio);
 
@@ -93,20 +88,11 @@ public enum BrushType {
                 settingsByTool.put(tool, settings);
                 return shapeDabsBrush;
             } else {
-                Brush shapeDabsBrush = new ShapeDabsBrush(radius, settings);
-                return  shapeDabsBrush;
-            }
-        }
+                assert settings != null;
 
-        @Override
-        public JPanel getSettingsPanel(Tool tool) {
-            JPanel settingsPanel = settingPanelsByTool.get(tool);
-            if (settingsPanel == null) {
-                ShapeDabsBrushSettings settings = settingsByTool.get(tool);
-                settingsPanel = new ShapeBrushSettingsPanel(settings);
-                settingPanelsByTool.put(tool, settingsPanel);
+                Brush shapeDabsBrush = new ShapeDabsBrush(radius, settings);
+                return shapeDabsBrush;
             }
-            return settingsPanel;
         }
 
         //    }, ARROW("Image-Based Arrow") {
@@ -144,6 +130,11 @@ public enum BrushType {
     private final String guiName;
     private final boolean hasSettings;
 
+    // The settings must be shared between the symmetry-brushes of a tool, but
+    // they must be different between the different tools
+    protected Map<Tool, DabsBrushSettings> settingsByTool;
+
+
     BrushType(String guiName, boolean hasSettings) {
         this.guiName = guiName;
         this.hasSettings = hasSettings;
@@ -165,7 +156,13 @@ public enum BrushType {
     }
 
     public JPanel getSettingsPanel(Tool tool) {
-        assert hasSettings;
-        return null; // intended to be overridden if necessary
+        assert hasSettings; // otherwise the button is not enabled
+        assert settingsByTool != null; // already initialized
+
+        DabsBrushSettings settings = settingsByTool.get(tool);
+
+        assert settings != null; // already initialized
+
+        return settings.getGUI();
     }
 }

@@ -173,6 +173,6 @@ public class CloneTool extends TmpLayerBrushTool {
 
     @Override
     protected Symmetry getSymmetry() {
-        return Symmetry.NONE;
+        throw new UnsupportedOperationException("no symmetry");
     }
 }

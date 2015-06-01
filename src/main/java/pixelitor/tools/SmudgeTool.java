@@ -85,4 +85,9 @@ public class SmudgeTool extends DirectBrushTool {
         }
         super.mousePressed(e, ic);
     }
+
+    @Override
+    protected Symmetry getSymmetry() {
+        throw new UnsupportedOperationException("no symmetry");
+    }
 }

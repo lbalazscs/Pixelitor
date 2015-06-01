@@ -38,6 +38,7 @@ public class OKDialog extends JDialog {
         super(owner, title);
         this.okButtonText = okButtonText;
 
+        assert form != null;
         setupGUI(form, true);
     }
 

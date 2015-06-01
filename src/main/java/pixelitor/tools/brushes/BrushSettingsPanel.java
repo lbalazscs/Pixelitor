@@ -28,18 +28,42 @@ import java.awt.GridBagLayout;
 
 import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
 
-public class ShapeBrushSettingsPanel extends JPanel {
+public class BrushSettingsPanel extends JPanel {
     public static final ShapeType SHAPE_SELECTED_BY_DEFAULT = ShapeType.ARROW;
     public static final double DEFAULT_SPACING_RATIO = 2.3;
     private final ShapeDabsBrushSettings settings;
-    private final BooleanParam angleAware;
-    private final RangeParam angleJitter;
+    private BooleanParam angleAware;
+    private RangeParam angleJitter;
+    private final GridBagHelper gbh;
 
-    public ShapeBrushSettingsPanel(ShapeDabsBrushSettings settings) {
+    public BrushSettingsPanel(ShapeDabsBrushSettings settings) {
         super(new GridBagLayout());
         this.settings = settings;
 
-        GridBagHelper gbh = new GridBagHelper(this);
+        gbh = new GridBagHelper(this);
+        addShapeTypeSelector(settings);
+        addSpacingSelector(settings);
+        addAngleSettingsSelector();
+    }
+
+    protected void addAngleSettingsSelector() {
+        angleJitter = new RangeParam("", 0, 180, 0, true, NONE);
+        gbh.addLabelWithControlNoFill("  Angle Jitter (degrees):", angleJitter.createGUI());
+        angleJitter.setAdjustmentListener(this::changeAngleSettings);
+
+        angleAware = new BooleanParam("", true);
+        gbh.addLabelWithControlNoFill("Angle Follows Movement:", angleAware.createGUI());
+        angleAware.setAdjustmentListener(this::changeAngleSettings);
+    }
+
+    protected void addSpacingSelector(DabsBrushSettings settings) {
+        RangeParam spacingSelector = new RangeParam("", 1, 1000, (int) Math.round(DEFAULT_SPACING_RATIO * 100), true, NONE);
+        gbh.addLabelWithControlNoFill("Spacing (radius %):", spacingSelector.createGUI());
+        spacingSelector.setAdjustmentListener(
+                () -> settings.changeSpacing(new RadiusRatioSpacing(spacingSelector.getValueAsPercentage())));
+    }
+
+    protected void addShapeTypeSelector(ShapeDabsBrushSettings settings) {
         EnumComboBoxModel<ShapeType> typeModel = new EnumComboBoxModel<>(ShapeType.class);
         JComboBox shapeTypeCB = new JComboBox(typeModel);
         shapeTypeCB.setSelectedItem(SHAPE_SELECTED_BY_DEFAULT);
@@ -50,19 +74,6 @@ public class ShapeBrushSettingsPanel extends JPanel {
                 });
 
         gbh.addLabelWithControlNoFill("Shape:", shapeTypeCB);
-
-        RangeParam spacingSelector = new RangeParam("", 1, 1000, (int) Math.round(DEFAULT_SPACING_RATIO * 100), true, NONE);
-        gbh.addLabelWithControlNoFill("Spacing (radius %):", spacingSelector.createGUI());
-        spacingSelector.setAdjustmentListener(
-                () -> settings.changeSpacing(new RadiusRatioSpacing(spacingSelector.getValueAsPercentage())));
-
-        angleJitter = new RangeParam("", 0, 180, 0, true, NONE);
-        gbh.addLabelWithControlNoFill("  Angle Jitter (degrees):", angleJitter.createGUI());
-        angleJitter.setAdjustmentListener(this::changeAngleSettings);
-
-        angleAware = new BooleanParam("", true);
-        gbh.addLabelWithControlNoFill("Angle Follows Movement:", angleAware.createGUI());
-        angleAware.setAdjustmentListener(this::changeAngleSettings);
     }
 
     private void changeAngleSettings() {
