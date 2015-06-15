@@ -35,7 +35,7 @@ public enum BrushType {
         public Brush createBrush(Tool tool, int radius) {
             return new IdealBrush(radius);
         }
-    }, SOFT("Soft", true) {
+    }, SOFT("Soft", false) {
         @Override
         public Brush createBrush(Tool tool, int radius) {
             return new ImageDabsBrush(radius, ImageBrushType.SOFT, 0.25, NOT_ANGLE_AWARE);
@@ -63,21 +63,8 @@ public enum BrushType {
     }, SHAPE("Shape", true) {
         @Override
         public Brush createBrush(Tool tool, int radius) {
-            boolean noSettingsForThisTool = false;
-            ShapeDabsBrushSettings settings = null;
-            if (settingsByTool == null) {
-                settingsByTool = new IdentityHashMap<>();
-                noSettingsForThisTool = true;
-            } else {
-                settings = (ShapeDabsBrushSettings) settingsByTool.get(tool);
-                if (settings == null) {
-                    noSettingsForThisTool = true;
-                }
-            }
-
-            if (noSettingsForThisTool) {
-                assert settings == null;
-
+            ShapeDabsBrushSettings settings = (ShapeDabsBrushSettings) findSettings(tool);
+            if (settings == null) {
                 ShapeType shapeType = BrushSettingsPanel.SHAPE_SELECTED_BY_DEFAULT;
                 double spacingRatio = BrushSettingsPanel.DEFAULT_SPACING_RATIO;
                 AngleSettings angleSettings = ANGLE_AWARE_NO_JITTER;
@@ -88,8 +75,6 @@ public enum BrushType {
                 settingsByTool.put(tool, settings);
                 return shapeDabsBrush;
             } else {
-                assert settings != null;
-
                 Brush shapeDabsBrush = new ShapeDabsBrush(radius, settings);
                 return shapeDabsBrush;
             }
@@ -115,10 +100,19 @@ public enum BrushType {
         public Brush createBrush(Tool tool, int radius) {
             return new OutlineSquareBrush(radius);
         }
-    }, ONE_PIXEL("One Pixel", false) {
+    }, ONE_PIXEL("One Pixel", true) {
         @Override
         public Brush createBrush(Tool tool, int radius) {
-            return new OnePixelBrush();
+            OnePixelBrushSettings settings = (OnePixelBrushSettings) findSettings(tool);
+            if (settings == null) {
+                settings = new OnePixelBrushSettings();
+                settingsByTool.put(tool, settings);
+                return new OnePixelBrush(settings);
+            } else {
+                return new OnePixelBrush(settings);
+            }
+
+
         }
 
         @Override
@@ -132,7 +126,7 @@ public enum BrushType {
 
     // The settings must be shared between the symmetry-brushes of a tool, but
     // they must be different between the different tools
-    protected Map<Tool, DabsBrushSettings> settingsByTool;
+    protected Map<Tool, BrushSettings> settingsByTool;
 
 
     BrushType(String guiName, boolean hasSettings) {
@@ -159,10 +153,20 @@ public enum BrushType {
         assert hasSettings; // otherwise the button is not enabled
         assert settingsByTool != null; // already initialized
 
-        DabsBrushSettings settings = settingsByTool.get(tool);
+        BrushSettings settings = settingsByTool.get(tool);
 
         assert settings != null; // already initialized
 
-        return settings.getGUI();
+        return settings.getConfigurationPanel();
+    }
+
+    protected BrushSettings findSettings(Tool tool) {
+        BrushSettings settings = null;
+        if (settingsByTool == null) {
+            settingsByTool = new IdentityHashMap<>();
+            return null;
+        } else {
+            return settingsByTool.get(tool);
+        }
     }
 }

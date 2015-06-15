@@ -23,11 +23,8 @@ import java.util.List;
 
 /**
  * The settings of a dabs brush.
- * This must be a separate class from the main dabs brush class
- * because the settings are shared between different symmetry-instances
- * of the same brush type
  */
-public class DabsBrushSettings {
+public class DabsBrushSettings implements BrushSettings {
     private AngleSettings angleSettings;
     private SpacingStrategy spacingStrategy;
     private final List<DabsBrush> brushes = new ArrayList<>(4);
@@ -76,7 +73,8 @@ public class DabsBrushSettings {
         brushes.remove(brush);
     }
 
-    public JPanel getGUI() {
+    @Override
+    public JPanel getConfigurationPanel() {
         if (settingsPanel == null) {
             settingsPanel = createSettingsPanel();
         }

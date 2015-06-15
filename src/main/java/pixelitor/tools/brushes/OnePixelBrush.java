@@ -17,12 +17,28 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.Composition;
+
+import java.awt.Graphics2D;
+
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_OFF;
+
 /**
  * A brush that edits one pixel at a time
  */
 public class OnePixelBrush extends AbstractBrush {
-    public OnePixelBrush() {
+    private final OnePixelBrushSettings settings;
+
+    public OnePixelBrush(OnePixelBrushSettings settings) {
         super(1); // this radius value is not used by this brush
+        this.settings = settings;
+    }
+
+
+    @Override
+    public void setTarget(Composition comp, Graphics2D g) {
+        super.setTarget(comp, g);
     }
 
     @Override
@@ -33,6 +49,10 @@ public class OnePixelBrush extends AbstractBrush {
 
     @Override
     public void onNewMousePoint(int x, int y) {
+        if (!settings.hasAA()) {
+            targetG.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_OFF);
+        }
+
         targetG.drawLine(previousX, previousY, x, y);
         updateComp(x, y);
         setPrevious(x, y);

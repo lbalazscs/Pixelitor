@@ -20,12 +20,19 @@ package pixelitor.menus;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
+import pixelitor.PixelitorWindow;
+import pixelitor.filters.gui.EnumParam;
+import pixelitor.filters.gui.RangeParam;
 import pixelitor.layers.Layers;
+import pixelitor.selection.Selection;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Dialogs;
+import pixelitor.utils.GridBagHelper;
+import pixelitor.utils.OKCancelDialog;
 
 import javax.swing.*;
+import java.awt.GridBagLayout;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
 
@@ -43,22 +50,45 @@ public final class SelectionActions {
         }
     };
 
-    private static final Action deselectAction = new AbstractAction("Deselect") {
+    private static final Action deselectAction = new MenuAction("Deselect") {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void onClick() {
             getActiveComp().get().deselect(true);
         }
     };
 
-    private static final Action invertSelectionAction = new AbstractAction("Invert Selection") {
+    private static final Action invertSelectionAction = new MenuAction("Invert Selection") {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void onClick() {
             getActiveComp().get().invertSelection();
         }
     };
 
     private static final Action traceWithBrush = new TraceAction("Stroke with Current Brush", Tools.BRUSH);
     private static final Action traceWithEraser = new TraceAction("Stroke with Current Eraser", Tools.ERASER);
+
+    private static final Action modifyAction = new MenuAction("Modify...") {
+        @Override
+        void onClick() {
+            JPanel p = new JPanel(new GridBagLayout());
+            GridBagHelper gbh = new GridBagHelper(p);
+            RangeParam amount = new RangeParam("Amount (pixels)", 1, 100, 10);
+            EnumParam<SelectionModifyType> type = new EnumParam<>("Type", SelectionModifyType.class);
+            gbh.addLabelWithControl("Amount", amount.createGUI());
+            gbh.addLabelWithControl("Type", type.createGUI());
+
+            OKCancelDialog d = new OKCancelDialog(p, PixelitorWindow.getInstance(),
+                    "Modify Selection", "Change!", "Close") {
+                @Override
+                protected void dialogAccepted() {
+                    Selection selection = getActiveComp().get().getSelection().get();
+                    SelectionModifyType selectionModifyType = (SelectionModifyType) type.getSelectedItem();
+                    selection.modify(selectionModifyType, amount.getValue());
+                }
+            };
+            d.setVisible(true);
+        }
+    };
 
     static {
         setEnabled(false, null);
@@ -86,6 +116,7 @@ public final class SelectionActions {
         traceWithEraser.setEnabled(b);
         deselectAction.setEnabled(b);
         invertSelectionAction.setEnabled(b);
+        modifyAction.setEnabled(b);
     }
 
     public static boolean areEnabled() {
@@ -112,7 +143,11 @@ public final class SelectionActions {
         return invertSelectionAction;
     }
 
-    private static class TraceAction extends AbstractAction {
+    public static Action getModifyAction() {
+        return modifyAction;
+    }
+
+    private static class TraceAction extends MenuAction {
         private final AbstractBrushTool brushTool;
 
         private TraceAction(String name, AbstractBrushTool brushTool) {
@@ -121,7 +156,7 @@ public final class SelectionActions {
         }
 
         @Override
-        public void actionPerformed(ActionEvent e) {
+        void onClick() {
             if (!Layers.activeIsImageLayer()) {
                 Dialogs.showNotImageLayerDialog();
                 return;

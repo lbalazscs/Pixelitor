@@ -21,6 +21,9 @@ import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.ImageDisplay;
+import pixelitor.history.History;
+import pixelitor.history.SelectionChangeEdit;
+import pixelitor.menus.SelectionModifyType;
 import pixelitor.tools.UserDrag;
 import pixelitor.utils.Dialogs;
 
@@ -375,6 +378,20 @@ public class Selection {
      */
     public Rectangle getShapeBounds() {
         return state.getShapeBounds(currentSelectionShape);
+    }
+
+    public void modify(SelectionModifyType type, float amount) {
+        BasicStroke outlineStroke = new BasicStroke(amount);
+        Shape outlineShape = outlineStroke.createStrokedShape(currentSelectionShape);
+
+        Area oldArea = new Area(currentSelectionShape);
+        Area outlineArea = new Area(outlineShape);
+
+        Shape backupShape = currentSelectionShape;
+        currentSelectionShape = type.createModifiedShape(oldArea, outlineArea);
+
+        SelectionChangeEdit edit = new SelectionChangeEdit(ic.getComp(), backupShape, "Modify Selection");
+        History.addEdit(edit);
     }
 
     public State getState() {

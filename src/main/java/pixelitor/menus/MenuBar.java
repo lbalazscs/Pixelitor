@@ -86,7 +86,6 @@ import pixelitor.utils.test.ToolTests;
 import javax.swing.*;
 import java.awt.Composite;
 import java.awt.Graphics2D;
-import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
@@ -149,7 +148,7 @@ public class MenuBar extends JMenuBar {
         initFileMenu(pixelitorWindow);
         initEditMenu();
         initLayerMenu();
-        initSelectMenu();
+        initSelectionMenu();
         initColorsMenu();
         initFilterMenu();
         initViewMenu(pixelitorWindow);
@@ -450,12 +449,13 @@ public class MenuBar extends JMenuBar {
         createMenuItem(new JHDither(), reduceColorsSubmenu);
     }
 
-    private void initSelectMenu() {
+    private void initSelectionMenu() {
         JMenu selectMenu = createMenu("Selection", 'S');
 
         createMenuItem(SelectionActions.getDeselectAction(), selectMenu, EnabledIf.ACTION_ENABLED, CTRL_D);
 
         createMenuItem(SelectionActions.getInvertSelectionAction(), selectMenu, EnabledIf.ACTION_ENABLED, CTRL_SHIFT_I);
+        createMenuItem(SelectionActions.getModifyAction(), selectMenu, EnabledIf.ACTION_ENABLED);
 
         selectMenu.addSeparator();
         createMenuItem(SelectionActions.getTraceWithBrush(), selectMenu, EnabledIf.ACTION_ENABLED);
@@ -1212,20 +1212,4 @@ public class MenuBar extends JMenuBar {
         createMenuItem(action, parent, EnabledIf.THERE_IS_OPEN_IMAGE, null);
     }
 
-    private static abstract class MenuAction extends AbstractAction {
-        public MenuAction(String name) {
-            super(name);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            try {
-                onClick();
-            } catch (Exception ex) {
-                Dialogs.showExceptionDialog(ex);
-            }
-        }
-
-        abstract void onClick();
-    }
 }
