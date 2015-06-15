@@ -24,17 +24,15 @@ import pixelitor.utils.Dialogs;
 import javax.swing.*;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.List;
 
 public final class RecentFilesMenu extends JMenu {
-    private static final int DEFAULT_MAX_RECENT_FILES = 10;
 
     private static RecentFilesMenu singleInstance;
 
     private final int maxRecentFiles;
     private final JMenuItem clearMenuItem;
 
-    private List<RecentFileInfo> recentFileInfos;
+    private RecentFileInfos recentFileInfos;
 
     private final ActionListener fileOpener = e -> {
         try {
@@ -54,7 +52,7 @@ public final class RecentFilesMenu extends JMenu {
 
     private RecentFilesMenu() {
         super("Recent Files");
-        maxRecentFiles = DEFAULT_MAX_RECENT_FILES;
+        maxRecentFiles = RecentFileInfos.MAX_RECENT_FILES;
         clearMenuItem = new JMenuItem("Clear Recent Files");
         ActionListener clearer = e -> {
             try {
@@ -87,32 +85,20 @@ public final class RecentFilesMenu extends JMenu {
     public void addFile(File f) {
         if (f.exists()) {
             RecentFileInfo fileInfo = new RecentFileInfo(f);
-            if (recentFileInfos.contains(fileInfo)) {
-                recentFileInfos.remove(fileInfo);
-            }
-            recentFileInfos.add(0, fileInfo); // add to the front
-
-            if (recentFileInfos.size() > maxRecentFiles) { // it is now too large
-                recentFileInfos.remove(maxRecentFiles);
-            }
-
+            recentFileInfos.addToFront(fileInfo);
             rebuildGUI();
         }
     }
 
     private void load() {
-        recentFileInfos = AppPreferences.loadRecentFiles(maxRecentFiles);
+        recentFileInfos = AppPreferences.loadRecentFiles();
     }
 
     private void clearGUI() {
         removeAll();
     }
 
-    public List<RecentFileInfo> getRecentFileNamesForSaving() {
-        if (recentFileInfos.size() > maxRecentFiles) {
-            return recentFileInfos.subList(0, maxRecentFiles);
-        }
-
+    public RecentFileInfos getRecentFileInfosForSaving() {
         return recentFileInfos;
     }
 

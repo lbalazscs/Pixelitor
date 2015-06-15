@@ -24,6 +24,7 @@ import pixelitor.TipsOfTheDay;
 import pixelitor.history.History;
 import pixelitor.io.FileChoosers;
 import pixelitor.menus.file.RecentFileInfo;
+import pixelitor.menus.file.RecentFileInfos;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.tools.FgBgColorSelector;
 
@@ -37,8 +38,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.prefs.Preferences;
 
 /**
@@ -146,29 +145,28 @@ public final class AppPreferences {
         window.setSize(width, height);
     }
 
-    public static List<RecentFileInfo> loadRecentFiles(int maxNum) {
-        List<RecentFileInfo> recentFileInfos = new ArrayList<>();
-        for (int i = 0; i < maxNum; i++) {
+    public static RecentFileInfos loadRecentFiles() {
+        RecentFileInfos recentFileInfos = new RecentFileInfos();
+        for (int i = 0; i < RecentFileInfos.MAX_RECENT_FILES; i++) {
             String key = RECENT_FILE_PREFS_KEY + i;
             String fileName = recentFilesUserNode.get(key, null);
             if (fileName == null) {
                 break;
             }
             File file = new File(fileName);
+
             if (file.exists()) {
                 RecentFileInfo fileInfo = new RecentFileInfo(file);
-                if (!recentFileInfos.contains(fileInfo)) {
-                    recentFileInfos.add(fileInfo);
-                }
+                recentFileInfos.addIfNotPresent(fileInfo);
             }
         }
         return recentFileInfos;
     }
 
-    private static void saveRecentFiles(List<RecentFileInfo> fileNames) {
-        for (int i = 0; i < fileNames.size(); i++) {
+    private static void saveRecentFiles(RecentFileInfos fileInfos) {
+        for (int i = 0; i < fileInfos.size(); i++) {
             String key = RECENT_FILE_PREFS_KEY + i;
-            String value = fileNames.get(i).getSavedName();
+            String value = fileInfos.get(i).getSavedName();
             recentFilesUserNode.put(key, value);
         }
     }
@@ -237,7 +235,7 @@ public final class AppPreferences {
     }
 
     private static void savePreferencesBeforeExit() {
-        saveRecentFiles(RecentFilesMenu.getInstance().getRecentFileNamesForSaving());
+        saveRecentFiles(RecentFilesMenu.getInstance().getRecentFileInfosForSaving());
         saveFramePosition(PixelitorWindow.getInstance());
         saveLastOpenDir();
         saveLastSaveDir();

@@ -39,9 +39,13 @@ public class AboutDialog extends OKDialog {
         createAboutBox();
 
         JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.add("About", new JScrollPane(box));
-        tabbedPane.add("Credits", new JScrollPane(createCreditsPanel()));
-        tabbedPane.add("System Info", new JScrollPane(new SystemInfoPanel()));
+//        tabbedPane.add("About", new JScrollPane(box));
+//        tabbedPane.add("Credits", new JScrollPane(createCreditsPanel()));
+//        tabbedPane.add("System Info", new JScrollPane(new SystemInfoPanel()));
+
+        tabbedPane.add("About", box);
+        tabbedPane.add("Credits", createCreditsPanel());
+        tabbedPane.add("System Info", new SystemInfoPanel());
 
         new AboutDialog(pixelitorWindow, tabbedPane);
     }

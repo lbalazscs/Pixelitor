@@ -30,6 +30,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+/**
+ * A dialog with OK and Cancel buttons at the bottom
+ */
 public abstract class OKCancelDialog extends JDialog {
     protected JComponent formPanel;
     private JLabel messageLabel;
