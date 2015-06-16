@@ -67,6 +67,8 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
 
     private final JCheckBox watermarkCB;
 
+    private static String lastText = "";
+
     public TextFilterAdjustments(TextFilter textFilter) {
         super(textFilter);
 
@@ -121,7 +123,7 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
     }
 
     private void createTextTF() {
-        textTF = new JTextField(20);
+        textTF = new JTextField(lastText, 20);
         textTF.setName("textTF");
 
         textTF.getDocument().addDocumentListener(new DocumentListener() {
@@ -225,7 +227,9 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
     @Override
     public void paramAdjusted() {
         TextFilter textFilter = (TextFilter) op;
-        textFilter.setText(textTF.getText());
+        String text = textTF.getText();
+        lastText = text;
+        textFilter.setText(text);
         textFilter.setFont(getSelectedFont());
 
         if (effectsPanel != null) {
