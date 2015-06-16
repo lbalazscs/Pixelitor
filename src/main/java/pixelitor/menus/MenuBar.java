@@ -491,6 +491,7 @@ public class MenuBar extends JMenuBar {
         createMenuItem(new JHWood(), renderSubmenu);
         createMenuItem(new JHCells(), renderSubmenu);
         createMenuItem(new JHBrushedMetal(), renderSubmenu);
+        createMenuItem(new Voronoi(), renderSubmenu);
 
         filterMenu.add(renderSubmenu);
     }

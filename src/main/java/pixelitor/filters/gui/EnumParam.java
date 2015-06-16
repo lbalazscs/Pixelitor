@@ -27,9 +27,6 @@ import java.util.Random;
 /**
  * Similar to IntChoiceParam, this is a model for a JComboBox,
  * but the values are coming from an enum
- * <p>
- * TODO this is not yet ready to be used in filters,
- * the triggerAction behavior is not implemented
  */
 public class EnumParam<E extends Enum<E>> extends AbstractFilterParam implements ComboBoxModel<E> {
     private final EnumComboBoxModel<E> delegateModel;
@@ -56,7 +53,7 @@ public class EnumParam<E extends Enum<E>> extends AbstractFilterParam implements
         Random rnd = new Random();
 
         int randomIndex = rnd.nextInt(enumConstants.length);
-        setSelectedItem(enumConstants[randomIndex]);
+        setSelectedItem(enumConstants[randomIndex], false);
     }
 
     @Override
@@ -90,8 +87,23 @@ public class EnumParam<E extends Enum<E>> extends AbstractFilterParam implements
     }
 
     @Override
-    public void reset(boolean triggerAction) {
-        setSelectedItem(defaultValue);
+    public void reset(boolean trigger) {
+        setSelectedItem(defaultValue, trigger);
+    }
+
+    @Override
+    public void setSelectedItem(Object anItem) {
+        setSelectedItem((E) anItem, true);
+    }
+
+    private void setSelectedItem(E value, boolean trigger) {
+        delegateModel.setSelectedItem(value);
+
+        if (trigger) {
+            if (adjustmentListener != null) {
+                adjustmentListener.paramAdjusted();
+            }
+        }
     }
 
     @Override
@@ -112,11 +124,6 @@ public class EnumParam<E extends Enum<E>> extends AbstractFilterParam implements
     @Override
     public void removeListDataListener(ListDataListener l) {
         delegateModel.removeListDataListener(l);
-    }
-
-    @Override
-    public void setSelectedItem(Object anItem) {
-        delegateModel.setSelectedItem(anItem);
     }
 
     @Override

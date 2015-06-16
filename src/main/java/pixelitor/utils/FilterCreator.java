@@ -138,7 +138,7 @@ public class FilterCreator extends JPanel {
         OKCancelDialog d = new OKCancelDialog(filterCreator, owner, "Filter Creator", "Show Source", "Close") {
             @Override
             protected void dialogAccepted() {
-                close();
+//                close();
                 String s = filterCreator.createFilterSource();
                 JTextArea ta = new JTextArea(s);
                 JScrollPane sp = new JScrollPane(ta);
