@@ -315,4 +315,8 @@ public abstract class Tool {
     public void setClip(Graphics2D g) {
         clipStrategy.setClip(g);
     }
+
+    public void arrowKeyPressed(ArrowKey key) {
+        // empty for the convenience of subclasses
+    }
 }

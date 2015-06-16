@@ -18,6 +18,8 @@
 package pixelitor.tools;
 
 import pixelitor.Composition;
+import pixelitor.ImageComponent;
+import pixelitor.ImageComponents;
 import pixelitor.ImageDisplay;
 import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;
@@ -236,4 +238,15 @@ public class SelectionTool extends Tool {
         return backupShape == null;
     }
 
+    @Override
+    public void arrowKeyPressed(ArrowKey key) {
+        ImageComponent ic = ImageComponents.getActiveImageComponent();
+        if (ic != null) {
+            Composition comp = ic.getComp();
+            Optional<Selection> selection = comp.getSelection();
+            if (selection.isPresent()) {
+                selection.get().transform(key.getTransform());
+            }
+        }
+    }
 }

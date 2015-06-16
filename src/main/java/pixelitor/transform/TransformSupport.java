@@ -17,7 +17,9 @@
 
 package pixelitor.transform;
 
+import pixelitor.ImageComponent;
 import pixelitor.ImageDisplay;
+import pixelitor.tools.ArrowKey;
 import pixelitor.utils.Utils;
 
 import java.awt.Cursor;
@@ -31,7 +33,7 @@ import java.awt.event.MouseEvent;
 public class TransformSupport {
     private final Handles handles;
     private Rectangle compSpaceRect;
-    private Rectangle imageSpaceRect; // used only while the image component is resized
+    private Rectangle imageSpaceRect;
     private int dragStartX;
     private int dragStartY;
     private int dragStartRectWidth;
@@ -108,7 +110,7 @@ public class TransformSupport {
 
     public Rectangle getImageSpaceRectangle(ImageDisplay ic) {
         if(adjusting) {
-            imageSpaceRect = Utils.toPositiveRectangle(ic.fromComponentToImageSpace(compSpaceRect));
+            recalculateImageSpaceRect(ic);
         }
         return imageSpaceRect;
     }
@@ -134,5 +136,15 @@ public class TransformSupport {
         handles.updateRect(compSpaceRect);
     }
 
+    private void recalculateImageSpaceRect(ImageDisplay ic) {
+        imageSpaceRect = Utils.toPositiveRectangle(ic.fromComponentToImageSpace(compSpaceRect));
+    }
+
+    public void arrowKeyPressed(ArrowKey key, ImageComponent ic) {
+        compSpaceRect.translate(key.getMoveX(), key.getMoveY());
+        handles.updateRect(compSpaceRect);
+        recalculateImageSpaceRect(ic);
+        ic.repaint();
+    }
 }
 

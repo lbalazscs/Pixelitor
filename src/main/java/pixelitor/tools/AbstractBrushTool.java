@@ -90,6 +90,8 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         typeSelector = new JComboBox<>(BrushType.values());
         settingsPanel.addWithLabel("Type:", typeSelector, "brushTypeSelector");
         typeSelector.addActionListener(e -> {
+            closeToolDialog();
+
             BrushType brushType = (BrushType) typeSelector.getSelectedItem();
             symmetryBrush.brushTypeChanged(brushType, getRadius());
 

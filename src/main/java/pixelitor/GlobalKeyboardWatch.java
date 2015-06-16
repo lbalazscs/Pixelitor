@@ -18,6 +18,7 @@
 package pixelitor;
 
 import pixelitor.menus.view.ShowHideAllAction;
+import pixelitor.tools.ArrowKey;
 import pixelitor.tools.Tools;
 
 import javax.swing.*;
@@ -54,11 +55,35 @@ public class GlobalKeyboardWatch {
 
     private static void keyPressed(KeyEvent e) {
         int keyCode = e.getKeyCode();
-        if (showHideAllForTab && keyCode == KeyEvent.VK_TAB) {
-            ShowHideAllAction.INSTANCE.actionPerformed(null);
-        } else if (keyCode == KeyEvent.VK_SPACE) {
-            Tools.getCurrentTool().spacePressed();
-            spaceDown = true;
+        switch (keyCode) {
+            case KeyEvent.VK_TAB:
+                if (showHideAllForTab) {
+                    ShowHideAllAction.INSTANCE.actionPerformed(null);
+                }
+                break;
+            case KeyEvent.VK_SPACE:
+                Tools.getCurrentTool().spacePressed();
+                spaceDown = true;
+                break;
+            case KeyEvent.VK_RIGHT:
+            case KeyEvent.VK_KP_RIGHT:
+                // checking for VK_KP_RIGHT and other KP keys does not seem to be necessary
+                // because at least on windows actually VK_RIGHT is sent
+                // but let's check them in order to be on the safe side
+                Tools.getCurrentTool().arrowKeyPressed(new ArrowKey.RIGHT(e.isShiftDown()));
+                break;
+            case KeyEvent.VK_LEFT:
+            case KeyEvent.VK_KP_LEFT:
+                Tools.getCurrentTool().arrowKeyPressed(new ArrowKey.LEFT(e.isShiftDown()));
+                break;
+            case KeyEvent.VK_UP:
+            case KeyEvent.VK_KP_UP:
+                Tools.getCurrentTool().arrowKeyPressed(new ArrowKey.UP(e.isShiftDown()));
+                break;
+            case KeyEvent.VK_DOWN:
+            case KeyEvent.VK_KP_DOWN:
+                Tools.getCurrentTool().arrowKeyPressed(new ArrowKey.DOWN(e.isShiftDown()));
+                break;
         }
     }
 

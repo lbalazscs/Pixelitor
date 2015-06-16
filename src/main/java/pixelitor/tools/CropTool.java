@@ -135,10 +135,10 @@ public class CropTool extends Tool implements ImageSwitchListener {
 
     @Override
     public void mouseDragged(MouseEvent e, ImageDisplay ic) {
-        ic.repaint();
         if (state == TRANSFORM) {
             transformSupport.mouseDragged(e, ic);
         }
+        ic.repaint();
     }
 
     // TODO: this is done directly with the dispatch mechanism
@@ -294,5 +294,15 @@ public class CropTool extends Tool implements ImageSwitchListener {
             transformSupport.setComponentSpaceRect(ic.fromImageToComponentSpace(lastCropRectangle));
         }
         ic.repaint();
+    }
+
+    @Override
+    public void arrowKeyPressed(ArrowKey key) {
+        if (state == TRANSFORM) {
+            ImageComponent ic = ImageComponents.getActiveImageComponent();
+            if (ic != null) {
+                transformSupport.arrowKeyPressed(key, ic);
+            }
+        }
     }
 }

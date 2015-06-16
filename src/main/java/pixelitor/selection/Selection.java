@@ -34,6 +34,7 @@ import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.Stroke;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 
 import static java.awt.BasicStroke.CAP_BUTT;
@@ -391,6 +392,13 @@ public class Selection {
         currentSelectionShape = type.createModifiedShape(oldArea, outlineArea);
 
         SelectionChangeEdit edit = new SelectionChangeEdit(ic.getComp(), backupShape, "Modify Selection");
+        History.addEdit(edit);
+    }
+
+    public void transform(AffineTransform at) {
+        Shape backupShape = currentSelectionShape;
+        currentSelectionShape = at.createTransformedShape(currentSelectionShape);
+        SelectionChangeEdit edit = new SelectionChangeEdit(ic.getComp(), backupShape, "Nudge Selection");
         History.addEdit(edit);
     }
 
