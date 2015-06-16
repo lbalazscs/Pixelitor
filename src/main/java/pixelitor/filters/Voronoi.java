@@ -31,7 +31,7 @@ import java.awt.image.BufferedImage;
  * Voronoi based on VoronoiFilter
  */
 public class Voronoi extends FilterWithParametrizedGUI {
-    private RangeParam numberOfPoints = new RangeParam("Number of Points", 1, 100, 10);
+    private RangeParam numberOfPoints = new RangeParam("Number of Points", 1, 200, 10);
     private EnumParam<Metric> distance = new EnumParam<>("Distance", Metric.class);
     private BooleanParam showPoints = new BooleanParam("Show Points", false, true);
     private BooleanParam useImageColors = new BooleanParam("Use Image Colors", false, true);

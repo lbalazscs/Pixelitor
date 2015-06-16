@@ -75,11 +75,14 @@ public class VoronoiFilter extends PointFilter {
 
         BufferedImage result = super.filter(src, dst);
         if (showPoints) {
-            double radius = (src.getWidth() + src.getHeight()) / 200.0;
+            double radius = (src.getWidth() + src.getHeight()) / 300.0;
             double diameter = 2 * radius;
             Graphics2D g = result.createGraphics();
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g.setColor(Color.BLACK);
+            if (useImageColors) {
+                g.setXORMode(Color.WHITE);
+            }
             for (int i = 0; i < numPoints; i++) {
                 g.fill(new Ellipse2D.Double(xCoords[i] - radius, yCoords[i] - radius, diameter, diameter));
             }
@@ -97,12 +100,10 @@ public class VoronoiFilter extends PointFilter {
             double fromHereToPointI = metric.distance(xCoords[i], x, yCoords[i], y);
             if (fromHereToPointI < fromHereToClosestSoFar) {
                 closestPointIndex = i;
-//                fromHereToClosestSoFar = metric.distance(xCoords[closestPointIndex], x, yCoords[closestPointIndex], y);
                 fromHereToClosestSoFar = fromHereToPointI;
             }
         }
 
         return colors[closestPointIndex];
     }
-
 }

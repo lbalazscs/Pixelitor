@@ -21,12 +21,14 @@ package pixelitor.utils;
  * https://en.wikipedia.org/wiki/Metric_%28mathematics%29
  */
 public enum Metric {
-    EUCLIDEAN("Euclidean") {
+    EUCLIDEAN_SQUARED("Euclidean") {
         @Override
         public double distance(int x1, int x2, int y1, int y2) {
             int dx = x1 - x2;
             int dy = y1 - y2;
-            return Math.sqrt(dx * dx + dy * dy);
+//            return FastMath.sqrt(dx * dx + dy * dy);
+
+            return dx * dx + dy * dy; // much faster without square root
         }
     }, TAXICAB("Taxicab (Manhattan)") {
         @Override
