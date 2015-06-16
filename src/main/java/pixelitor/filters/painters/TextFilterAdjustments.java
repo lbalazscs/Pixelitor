@@ -17,7 +17,6 @@
 
 package pixelitor.filters.painters;
 
-import com.bric.util.JVM;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.jdesktop.swingx.painter.effects.AreaEffect;
@@ -78,12 +77,12 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
 
         verticalBox.add(createFontPanel());
 
-        if (!JVM.isLinux) { // TODO
+//        if (!JVM.isLinux) { // TODO
             effectsPanel = new EffectsPanel(this);
             effectsPanel.setBorder(BorderFactory.createTitledBorder("Effects"));
 
             verticalBox.add(effectsPanel);
-        }
+//        }
 
         watermarkCB = new JCheckBox("Use Text for Watermarking");
         watermarkCB.addActionListener(this);
