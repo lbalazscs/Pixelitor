@@ -23,21 +23,36 @@ package pixelitor.utils;
 public enum Metric {
     EUCLIDEAN_SQUARED("Euclidean") {
         @Override
-        public double distance(int x1, int x2, int y1, int y2) {
+        public double distanceInt(int x1, int x2, int y1, int y2) {
             int dx = x1 - x2;
             int dy = y1 - y2;
-//            return FastMath.sqrt(dx * dx + dy * dy);
+            return dx * dx + dy * dy; // much faster without square root
+        }
 
+        @Override
+        public double distanceDouble(double x1, double x2, double y1, double y2) {
+            double dx = x1 - x2;
+            double dy = y1 - y2;
             return dx * dx + dy * dy; // much faster without square root
         }
     }, TAXICAB("Taxicab (Manhattan)") {
         @Override
-        public double distance(int x1, int x2, int y1, int y2) {
+        public double distanceInt(int x1, int x2, int y1, int y2) {
+            return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+        }
+
+        @Override
+        public double distanceDouble(double x1, double x2, double y1, double y2) {
             return Math.abs(x1 - x2) + Math.abs(y1 - y2);
         }
     }, MAX("Chessboard (Chebyshev)") {
         @Override
-        public double distance(int x1, int x2, int y1, int y2) {
+        public double distanceInt(int x1, int x2, int y1, int y2) {
+            return Math.max(Math.abs(x1 - x2), Math.abs(y1 - y2));
+        }
+
+        @Override
+        public double distanceDouble(double x1, double x2, double y1, double y2) {
             return Math.max(Math.abs(x1 - x2), Math.abs(y1 - y2));
         }
     };
@@ -53,5 +68,8 @@ public enum Metric {
         return guiName;
     }
 
-    public abstract double distance(int x1, int x2, int y1, int y2);
+    public abstract double distanceInt(int x1, int x2, int y1, int y2);
+
+    // a slower version with double arguments
+    public abstract double distanceDouble(double x1, double x2, double y1, double y2);
 }

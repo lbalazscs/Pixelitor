@@ -19,6 +19,7 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.EnumParam;
+import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.impl.VoronoiFilter;
@@ -35,6 +36,12 @@ public class Voronoi extends FilterWithParametrizedGUI {
     private EnumParam<Metric> distance = new EnumParam<>("Distance", Metric.class);
     private BooleanParam showPoints = new BooleanParam("Show Points", false, true);
     private BooleanParam useImageColors = new BooleanParam("Use Image Colors", false, true);
+    private IntChoiceParam antiAliasing = new IntChoiceParam("Anti-aliasing",
+            new IntChoiceParam.Value[]{
+                    new IntChoiceParam.Value("None (Faster)", 0),
+                    new IntChoiceParam.Value("2x2 (Better, slower)", 2),
+                    new IntChoiceParam.Value("4x4 (Best, slowest)", 4),
+            }, true);
 
     private VoronoiFilter filter;
 
@@ -44,7 +51,8 @@ public class Voronoi extends FilterWithParametrizedGUI {
                 numberOfPoints,
                 distance,
                 showPoints,
-                useImageColors
+                useImageColors,
+                antiAliasing
         ).withAction(ReseedSupport.createAction()));
     }
 
@@ -56,10 +64,21 @@ public class Voronoi extends FilterWithParametrizedGUI {
 
         filter.setNumPoints(numberOfPoints.getValue());
         filter.setMetric((Metric) distance.getSelectedItem());
-        filter.setShowPoints(showPoints.isChecked());
         filter.setUseImageColors(useImageColors.isChecked());
 
         dest = filter.filter(src, dest);
+
+        int aaRes = antiAliasing.getValue();
+
+        if (aaRes != 0) {
+            filter.setAaRes(aaRes);
+            filter.antiAlias(dest);
+        }
+
+        if (showPoints.isChecked()) {
+            filter.showPoints(dest);
+        }
+
         return dest;
     }
 }
