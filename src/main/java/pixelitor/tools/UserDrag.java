@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -136,7 +136,7 @@ public class UserDrag {
         return Math.atan2(endX - startX, endY - startY); //  between -PI and PI
     }
 
-    public double getAngleFromStartTo(int x, int y) {
+    public double getAngleFromStartTo(double x, double y) {
         return Math.atan2(x - startX, y - startY);
     }
 
@@ -297,5 +297,23 @@ public class UserDrag {
                 ", endX=" + endX +
                 ", endY=" + endY +
                 '}';
+    }
+
+    // a quick estimate about our distance from the start
+    public boolean isFar(int x, int y, int threshold) {
+        if (startX - x > threshold) {
+            return true;
+        } else if (x - startX > threshold) {
+            return true;
+        } else if (startY - y > threshold) {
+            return true;
+        } else if (y - startY > threshold) {
+            return true;
+        }
+        return false;
+    }
+
+    public int taxiCabMetric(int x, int y) {
+        return Math.abs(x - startX) + Math.abs(y - startY);
     }
 }

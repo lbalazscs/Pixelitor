@@ -22,6 +22,7 @@ import pixelitor.Composition;
 import pixelitor.ImageDisplay;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.TmpDrawingLayer;
+import pixelitor.menus.view.ZoomLevel;
 import pixelitor.utils.BlendingModePanel;
 
 import javax.swing.*;
@@ -34,7 +35,6 @@ import java.awt.Paint;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 
-import static java.awt.Color.BLACK;
 import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
 import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
 import static java.awt.MultipleGradientPaint.CycleMethod.REPEAT;
@@ -154,9 +154,19 @@ public class GradientTool extends Tool {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageDisplay callingIC, AffineTransform unscaledTransform) {
+    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageDisplay ic, AffineTransform unscaledTransform) {
         if (thereWasDragging) {
-            g2.setXORMode(BLACK);
+            g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+
+            ZoomLevel zoomLevel = ic.getZoomLevel();
+
+            g2.setColor(Color.BLACK);
+            g2.setStroke(zoomLevel.getOuterGeometryStroke());
+//            g2.setXORMode(BLACK);
+            userDrag.drawLine(g2);
+
+            g2.setColor(Color.WHITE);
+            g2.setStroke(zoomLevel.getInnerGeometryStroke());
             userDrag.drawLine(g2);
         }
     }

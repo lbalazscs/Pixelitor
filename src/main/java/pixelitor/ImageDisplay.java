@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor;
 
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
+import pixelitor.menus.view.ZoomLevel;
 
 import java.awt.Container;
 import java.awt.Cursor;
@@ -30,6 +31,8 @@ import java.awt.Rectangle;
  */
 public interface ImageDisplay {
     double getViewScale();
+
+    ZoomLevel getZoomLevel();
 
     void deleteLayerButton(LayerButton button);
 

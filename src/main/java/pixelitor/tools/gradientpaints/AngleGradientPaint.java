@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools.gradientpaints;
 
 import pixelitor.tools.UserDrag;
@@ -107,49 +108,108 @@ public class AngleGradientPaint implements Paint {
         }
 
         @Override
-        public Raster getRaster(int x, int y, int w, int h) {
-            WritableRaster raster = cm.createCompatibleWritableRaster(w, h);
-            int[] rasterData = new int[w * h * 4];
+        public Raster getRaster(int startX, int startY, int width, int height) {
 
-            for (int j = 0; j < h; j++) {
-                for (int i = 0; i < w; i++) {
-                    int base = (j * w + i) * 4;
+            WritableRaster raster = cm.createCompatibleWritableRaster(width, height);
+            int[] rasterData = new int[width * height * 4];
 
-                    double relativeAngle = userDrag.getAngleFromStartTo(x + i, y + j) - drawAngle;
+            for (int j = 0; j < height; j++) {
+                int y = startY + j;
+                for (int i = 0; i < width; i++) {
+                    int base = (j * width + i) * 4;
+                    int x = startX + i;
+                    double interpolationValue = getInterpolationValue(y, x);
 
-                    // relativeAngle is now between -2*PI and 2*PI, and the -2*PI..0 range is the same as 0..2*PI
-
-                    double interpolationValue = (relativeAngle / (Math.PI * 2)) + 1.0; // between 0..2
-                    interpolationValue %= 1.0f; // between 0..1
-
-                    if (cycleMethod == REFLECT) {
-                        if (interpolationValue < 0.5) {
-                            interpolationValue = 2.0f * interpolationValue;
-                        } else {
-                            interpolationValue = 2.0f * (1 - interpolationValue);
-                        }
-                    } else if (cycleMethod == REPEAT) {
-                        if (interpolationValue < 0.5) {
-                            interpolationValue = 2.0f * interpolationValue;
-                        } else {
-                            interpolationValue = 2.0f * (interpolationValue - 0.5);
-                        }
+                    boolean needsAA = false;
+                    if (cycleMethod != REFLECT) {
+//                        if(userDrag.isFar(x, y, 40)) {
+//                            needsAA = interpolationValue > 0.999 || interpolationValue < 0.001;
+//                        } else {
+//                            needsAA = interpolationValue > 0.99 || interpolationValue < 0.01;
+//                        }
+                        int distance = userDrag.taxiCabMetric(x, y);
+                        double threshold = 0.2 / distance;
+                        needsAA = interpolationValue > (1.0 - threshold) || interpolationValue < threshold;
                     }
 
-                    int a = (int) (startAlpha + interpolationValue * (endAlpha - startAlpha));
-                    int r = (int) (startRed + interpolationValue * (endRed - startRed));
-                    int g = (int) (startGreen + interpolationValue * (endGreen - startGreen));
-                    int b = (int) (startBlue + interpolationValue * (endBlue - startBlue));
+                    boolean debugAARegion = false;
+                    if (needsAA) {
+                        if (debugAARegion) {
+                            rasterData[base] = 255;
+                            rasterData[base + 1] = 255;
+                            rasterData[base + 2] = 255;
+                            rasterData[base + 3] = 255;
+                        } else {
+                            int aaRes = 4;
+                            int aaRes2 = aaRes * aaRes;
+                            int a = 0;
+                            int r = 0;
+                            int g = 0;
+                            int b = 0;
 
-                    rasterData[base] = r;
-                    rasterData[base + 1] = g;
-                    rasterData[base + 2] = b;
-                    rasterData[base + 3] = a;
+                            for (int m = 0; m < aaRes; m++) {
+                                double yy = y + 1.0 / aaRes * m - 0.5;
+                                for (int n = 0; n < aaRes; n++) {
+                                    double xx = x + 1.0 / aaRes * n - 0.5;
+
+                                    double interpolationValueAA = getInterpolationValue(yy, xx);
+
+                                    a += (int) (startAlpha + interpolationValueAA * (endAlpha - startAlpha));
+                                    r += (int) (startRed + interpolationValueAA * (endRed - startRed));
+                                    g += (int) (startGreen + interpolationValueAA * (endGreen - startGreen));
+                                    b += (int) (startBlue + interpolationValueAA * (endBlue - startBlue));
+                                }
+                            }
+                            a /= aaRes2;
+                            r /= aaRes2;
+                            g /= aaRes2;
+                            b /= aaRes2;
+
+                            rasterData[base] = r;
+                            rasterData[base + 1] = g;
+                            rasterData[base + 2] = b;
+                            rasterData[base + 3] = a;
+                        }
+                    } else {
+                        int a = (int) (startAlpha + interpolationValue * (endAlpha - startAlpha));
+                        int r = (int) (startRed + interpolationValue * (endRed - startRed));
+                        int g = (int) (startGreen + interpolationValue * (endGreen - startGreen));
+                        int b = (int) (startBlue + interpolationValue * (endBlue - startBlue));
+
+                        rasterData[base] = r;
+                        rasterData[base + 1] = g;
+                        rasterData[base + 2] = b;
+                        rasterData[base + 3] = a;
+                    }
                 }
             }
 
-            raster.setPixels(0, 0, w, h, rasterData);
+            raster.setPixels(0, 0, width, height, rasterData);
             return raster;
+        }
+
+        public double getInterpolationValue(double y, double x) {
+            double relativeAngle = userDrag.getAngleFromStartTo(x, y) - drawAngle;
+
+            // relativeAngle is now between -2*PI and 2*PI, and the -2*PI..0 range is the same as 0..2*PI
+
+            double interpolationValue = (relativeAngle / (Math.PI * 2)) + 1.0; // between 0..2
+            interpolationValue %= 1.0f; // between 0..1
+
+            if (cycleMethod == REFLECT) {
+                if (interpolationValue < 0.5) {
+                    interpolationValue = 2.0f * interpolationValue;
+                } else {
+                    interpolationValue = 2.0f * (1 - interpolationValue);
+                }
+            } else if (cycleMethod == REPEAT) {
+                if (interpolationValue < 0.5) {
+                    interpolationValue = 2.0f * interpolationValue;
+                } else {
+                    interpolationValue = 2.0f * (interpolationValue - 0.5);
+                }
+            }
+            return interpolationValue;
         }
     }
 }

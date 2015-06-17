@@ -122,6 +122,11 @@ public class Pixelitor {
             return;
         }
 
+//        NewImage.addNewImage(FillType.WHITE, 500, 500, "Test");
+//        ImageComponents.getActiveImageComponent().setZoom(ZoomLevel.Z100, false);
+//        Tools.GRADIENT.getButton().doClick();
+//        new Voronoi().actionPerformed(null);
+
 //        new ChannelToTransparency().actionPerformed(null);
 
 //        Tools.SELECTION.getButton().doClick();
@@ -144,12 +149,8 @@ public class Pixelitor {
 //        }
 
 //        pw.dispatchEvent(new KeyEvent(pw, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), KeyEvent.CTRL_MASK, KeyEvent.VK_T, 'T'));
-//        NewImage.addNewImage(NewImage.BgFill.WHITE, 10, 10, "Test");
-//        NewImage.addNewImage(NewImage.BgFill.WHITE, 600, 400, "Test 2");
 
 //        History.showHistory();
-
-//        AppLogic.getActiveImageComponent().setZoom(ZoomLevel.Z6400);
 
 //        Tools.SHAPES.getButton().doClick();
 //        Tools.SHAPES.setAction(ShapesAction.STROKE);

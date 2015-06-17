@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2015 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor;
 
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
+import pixelitor.menus.view.ZoomLevel;
 
 import javax.swing.*;
 import java.awt.Container;
@@ -33,6 +34,11 @@ public class ImageDisplayStub implements ImageDisplay {
     @Override
     public double getViewScale() {
         return 1.0;
+    }
+
+    @Override
+    public ZoomLevel getZoomLevel() {
+        return ZoomLevel.Z100;
     }
 
     @Override
