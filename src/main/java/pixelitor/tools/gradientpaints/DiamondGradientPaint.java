@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools.gradientpaints;
 
 import pixelitor.tools.UserDrag;
@@ -42,6 +43,9 @@ public class DiamondGradientPaint implements Paint {
     private final Color startColor;
     private final Color endColor;
     private final MultipleGradientPaint.CycleMethod cycleMethod;
+
+    private static final int AA_RES = 4; // the resolution of AA supersampling
+    private static final int AA_RES2 = AA_RES * AA_RES;
 
     public DiamondGradientPaint(UserDrag userDrag, Color startColor, Color endColor, MultipleGradientPaint.CycleMethod cycleMethod) {
         this.userDrag = userDrag;
@@ -78,8 +82,9 @@ public class DiamondGradientPaint implements Paint {
 
         private final ColorModel cm;
 
-        private final float proportionalXDiff;
-        private final float proportionalYDiff;
+        private final float dragRelDX;
+        private final float dragRelDY;
+        private final double dragDist;
 
         private DiamondGradientPaintContext(UserDrag userDrag, Color startColor, Color endColor, ColorModel cm, MultipleGradientPaint.CycleMethod cycleMethod) {
             this.userDrag = userDrag;
@@ -97,10 +102,10 @@ public class DiamondGradientPaint implements Paint {
 
             this.cm = cm;
 
-            double distance = userDrag.getDistance();
-            double distanceSqr = distance * distance;
-            proportionalXDiff = (float) (userDrag.getHorizontalDifference() / distanceSqr);
-            proportionalYDiff = (float) (userDrag.getVerticalDifference() / distanceSqr);
+            dragDist = userDrag.getDistance();
+            double dragDistSqr = dragDist * dragDist;
+            dragRelDX = (float) (userDrag.getDX() / dragDistSqr);
+            dragRelDY = (float) (userDrag.getDY() / dragDistSqr);
         }
 
         @Override
@@ -114,56 +119,107 @@ public class DiamondGradientPaint implements Paint {
         }
 
         @Override
-        public Raster getRaster(int x, int y, int w, int h) {
-            WritableRaster raster = cm.createCompatibleWritableRaster(w, h);
-            int[] rasterData = new int[w * h * 4];
+        public Raster getRaster(int startX, int startY, int width, int height) {
+            WritableRaster raster = cm.createCompatibleWritableRaster(width, height);
+            int[] rasterData = new int[width * height * 4];
 
-            for (int j = 0; j < h; j++) {
-                for (int i = 0; i < w; i++) {
-                    int base = (j * w + i) * 4;
+            for (int j = 0; j < height; j++) {
+                int y = startY + j;
+                for (int i = 0; i < width; i++) {
+                    int base = (j * width + i) * 4;
+                    int x = startX + i;
 
-                    float relativeRenderX = x + i - userDrag.getStartX();
-                    float relativeRenderY = y + j - userDrag.getStartY();
+                    float interpolationValue = getInterpolationValue(x, y);
 
-                    float v1 = Math.abs((relativeRenderX * this.proportionalXDiff) + (relativeRenderY * this.proportionalYDiff));
-                    float v2 = Math.abs((relativeRenderX * this.proportionalYDiff) - (relativeRenderY * this.proportionalXDiff));
-
-                    float interpolationValue = v1 + v2;
-
-                    if (cycleMethod == NO_CYCLE) {
-                        if (interpolationValue > 1.0) {
-                            interpolationValue = 1.0f;
-                        }
-                    } else if (cycleMethod == REFLECT) {
-                        interpolationValue %= 1.0;
-                        if (interpolationValue < 0.5) {
-                            interpolationValue = 2.0f * interpolationValue;
-                        } else {
-                            interpolationValue = 2.0f * (1 - interpolationValue);
-                        }
-                    } else if (cycleMethod == REPEAT) {
-                        interpolationValue %= 1.0;
-                        if (interpolationValue < 0.5) {
-                            interpolationValue = 2.0f * interpolationValue;
-                        } else {
-                            interpolationValue = 2.0f * (interpolationValue - 0.5f);
-                        }
+                    boolean needsAA = false;
+                    if (cycleMethod == REPEAT) {
+                        double threshold = 1.0 / dragDist;
+                        needsAA = interpolationValue > (1.0 - threshold) || interpolationValue < threshold;
                     }
 
-                    int a = (int) (startAlpha + interpolationValue * (endAlpha - startAlpha));
-                    int r = (int) (startRed + interpolationValue * (endRed - startRed));
-                    int g = (int) (startGreen + interpolationValue * (endGreen - startGreen));
-                    int b = (int) (startBlue + interpolationValue * (endBlue - startBlue));
+                    final boolean debugAARegion = false;
+                    if (needsAA) {
+                        if (debugAARegion) {
+                            rasterData[base] = 255;
+                            rasterData[base + 1] = 255;
+                            rasterData[base + 2] = 255;
+                            rasterData[base + 3] = 255;
+                        } else {
+                            int a = 0;
+                            int r = 0;
+                            int g = 0;
+                            int b = 0;
 
-                    rasterData[base] = r;
-                    rasterData[base + 1] = g;
-                    rasterData[base + 2] = b;
-                    rasterData[base + 3] = a;
+                            for (int m = 0; m < AA_RES; m++) {
+                                float yy = (y + 1.0f / AA_RES * m - 0.5f);
+                                for (int n = 0; n < AA_RES; n++) {
+                                    float xx = x + 1.0f / AA_RES * n - 0.5f;
+
+                                    double interpolationValueAA = getInterpolationValue(xx, yy);
+
+                                    a += (int) (startAlpha + interpolationValueAA * (endAlpha - startAlpha));
+                                    r += (int) (startRed + interpolationValueAA * (endRed - startRed));
+                                    g += (int) (startGreen + interpolationValueAA * (endGreen - startGreen));
+                                    b += (int) (startBlue + interpolationValueAA * (endBlue - startBlue));
+                                }
+                            }
+                            a /= AA_RES2;
+                            r /= AA_RES2;
+                            g /= AA_RES2;
+                            b /= AA_RES2;
+
+                            rasterData[base] = r;
+                            rasterData[base + 1] = g;
+                            rasterData[base + 2] = b;
+                            rasterData[base + 3] = a;
+                        }
+                    } else { // no AA
+                        int a = (int) (startAlpha + interpolationValue * (endAlpha - startAlpha));
+                        int r = (int) (startRed + interpolationValue * (endRed - startRed));
+                        int g = (int) (startGreen + interpolationValue * (endGreen - startGreen));
+                        int b = (int) (startBlue + interpolationValue * (endBlue - startBlue));
+
+                        rasterData[base] = r;
+                        rasterData[base + 1] = g;
+                        rasterData[base + 2] = b;
+                        rasterData[base + 3] = a;
+                    }
                 }
             }
 
-            raster.setPixels(0, 0, w, h, rasterData);
+            raster.setPixels(0, 0, width, height, rasterData);
             return raster;
+        }
+
+        public float getInterpolationValue(float x, float y) {
+            float dx = x - userDrag.getStartX();
+            float dy = y - userDrag.getStartY();
+
+            float v1 = Math.abs((dx * this.dragRelDX) + (dy * this.dragRelDY));
+            float v2 = Math.abs((dx * this.dragRelDY) - (dy * this.dragRelDX));
+
+            float interpolationValue = v1 + v2;
+
+            if (cycleMethod == NO_CYCLE) {
+                if (interpolationValue > 1.0) {
+                    interpolationValue = 1.0f;
+                }
+            } else if (cycleMethod == REFLECT) {
+                interpolationValue %= 1.0;
+                if (interpolationValue < 0.5) {
+                    interpolationValue = 2.0f * interpolationValue;
+                } else {
+                    interpolationValue = 2.0f * (1 - interpolationValue);
+                }
+            } else if (cycleMethod == REPEAT) {
+                interpolationValue %= 1.0;
+                if (interpolationValue < 0.5) {
+                    interpolationValue = 2.0f * interpolationValue;
+                } else {
+                    interpolationValue = 2.0f * (interpolationValue - 0.5f);
+                }
+            }
+            return interpolationValue;
         }
     }
 }

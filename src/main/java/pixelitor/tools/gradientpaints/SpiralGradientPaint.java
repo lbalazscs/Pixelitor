@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools.gradientpaints;
 
 import pixelitor.tools.UserDrag;
@@ -30,6 +31,7 @@ import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 
+import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
 import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
 import static java.awt.MultipleGradientPaint.CycleMethod.REPEAT;
 
@@ -42,6 +44,9 @@ public class SpiralGradientPaint implements Paint {
     private final Color startColor;
     private final Color endColor;
     private final MultipleGradientPaint.CycleMethod cycleMethod;
+
+    private static final int AA_RES = 4; // the resolution of AA supersampling
+    private static final int AA_RES2 = AA_RES * AA_RES;
 
     public SpiralGradientPaint(boolean clockwise, UserDrag userDrag, Color startColor, Color endColor, MultipleGradientPaint.CycleMethod cycleMethod) {
         this.clockwise = clockwise;
@@ -80,7 +85,7 @@ public class SpiralGradientPaint implements Paint {
 
         private final ColorModel cm;
         private final double drawAngle;
-        private final double drawDistance;
+        private final double dragDistance;
 
         private SpiralGradientPaintContext(boolean clockwise, UserDrag userDrag, Color startColor, Color endColor, ColorModel cm, MultipleGradientPaint.CycleMethod cycleMethod) {
             this.clockwise = clockwise;
@@ -100,8 +105,7 @@ public class SpiralGradientPaint implements Paint {
             this.cm = cm;
             drawAngle = userDrag.getDrawAngle() + Math.PI;  // between 0 and 2*PI
 
-
-            drawDistance = userDrag.getDistance();
+            dragDistance = userDrag.getDistance();
         }
 
         @Override
@@ -115,71 +119,122 @@ public class SpiralGradientPaint implements Paint {
         }
 
         @Override
-        public Raster getRaster(int x, int y, int w, int h) {
-            WritableRaster raster = cm.createCompatibleWritableRaster(w, h);
-            int[] rasterData = new int[w * h * 4];
+        public Raster getRaster(int startX, int startY, int width, int height) {
+            WritableRaster raster = cm.createCompatibleWritableRaster(width, height);
+            int[] rasterData = new int[width * height * 4];
 
-            for (int j = 0; j < h; j++) {
-                for (int i = 0; i < w; i++) {
-                    int base = (j * w + i) * 4;
+            for (int j = 0; j < height; j++) {
+                for (int i = 0; i < width; i++) {
+                    int base = (j * width + i) * 4;
 
-                    int renderX = x + i;
-                    int renderY = y + j;
-//                    double renderAngle = Math.atan2(renderRelativeX, renderRelativeY) + Math.PI;
+                    int x = startX + i;
+                    int y = startY + j;
 
-                    double renderAngle = userDrag.getAngleFromStartTo(renderX, renderY) + Math.PI;
+                    double interpolationValue = getInterpolationValue(x, y);
 
-
-                    double relativeAngle;
-                    if (clockwise) {
-                        relativeAngle = renderAngle - drawAngle;
-                    } else {
-                        relativeAngle = drawAngle - renderAngle;
-                    }
-                    if (relativeAngle < 0) {
-                        relativeAngle += (2 * Math.PI);
-                    }
-                    relativeAngle /= (2.0 * Math.PI);
-
-//                    double renderDist = Math.sqrt(renderRelativeX*renderRelativeX + renderRelativeY*renderRelativeY);
-                    double renderDist = userDrag.getStartDistanceFrom(renderX, renderY);
-
-                    double relativeDist = renderDist / drawDistance;
-
-                    // relativeAngle alone would be a kind of angle gradient, and relativeDist alone would ne a kind of radial gradient
-                    // but together...
-                    double interpolationValue = relativeAngle + relativeDist;
-
-                    interpolationValue %= 1.0f; // between 0..1
-
-                    if (cycleMethod == REFLECT) {
-                        if (interpolationValue < 0.5) {
-                            interpolationValue = 2.0f * interpolationValue;
-                        } else {
-                            interpolationValue = 2.0f * (1 - interpolationValue);
+                    boolean needsAA = false;
+                    if (cycleMethod != REFLECT) {
+                        double threshold;
+                        if (cycleMethod == NO_CYCLE) {
+                            threshold = 0.5 / dragDistance;
+                        } else { // REPEAT
+                            threshold = 1.0 / dragDistance;
                         }
-                    } else if (cycleMethod == REPEAT) {
-                        if (interpolationValue < 0.5) {
-                            interpolationValue = 2.0f * interpolationValue;
-                        } else {
-                            interpolationValue = 2.0f * (interpolationValue - 0.5);
-                        }
+                        needsAA = interpolationValue > (1.0 - threshold) || interpolationValue < threshold;
                     }
 
-                    int a = (int) (startAlpha + interpolationValue * (endAlpha - startAlpha));
-                    int r = (int) (startRed + interpolationValue * (endRed - startRed));
-                    int g = (int) (startGreen + interpolationValue * (endGreen - startGreen));
-                    int b = (int) (startBlue + interpolationValue * (endBlue - startBlue));
+                    final boolean debugAARegion = false;
+                    if (needsAA) {
+                        if (debugAARegion) {
+                            rasterData[base] = 255;
+                            rasterData[base + 1] = 255;
+                            rasterData[base + 2] = 255;
+                            rasterData[base + 3] = 255;
+                        } else {
+                            int a = 0;
+                            int r = 0;
+                            int g = 0;
+                            int b = 0;
 
-                    rasterData[base] = r;
-                    rasterData[base + 1] = g;
-                    rasterData[base + 2] = b;
-                    rasterData[base + 3] = a;
+                            for (int m = 0; m < AA_RES; m++) {
+                                double yy = y + 1.0 / AA_RES * m - 0.5;
+                                for (int n = 0; n < AA_RES; n++) {
+                                    double xx = x + 1.0 / AA_RES * n - 0.5;
+
+                                    double interpolationValueAA = getInterpolationValue(xx, yy);
+
+                                    a += (int) (startAlpha + interpolationValueAA * (endAlpha - startAlpha));
+                                    r += (int) (startRed + interpolationValueAA * (endRed - startRed));
+                                    g += (int) (startGreen + interpolationValueAA * (endGreen - startGreen));
+                                    b += (int) (startBlue + interpolationValueAA * (endBlue - startBlue));
+                                }
+                            }
+                            a /= AA_RES2;
+                            r /= AA_RES2;
+                            g /= AA_RES2;
+                            b /= AA_RES2;
+
+                            rasterData[base] = r;
+                            rasterData[base + 1] = g;
+                            rasterData[base + 2] = b;
+                            rasterData[base + 3] = a;
+                        }
+                    } else { // no AA
+                        int a = (int) (startAlpha + interpolationValue * (endAlpha - startAlpha));
+                        int r = (int) (startRed + interpolationValue * (endRed - startRed));
+                        int g = (int) (startGreen + interpolationValue * (endGreen - startGreen));
+                        int b = (int) (startBlue + interpolationValue * (endBlue - startBlue));
+
+                        rasterData[base] = r;
+                        rasterData[base + 1] = g;
+                        rasterData[base + 2] = b;
+                        rasterData[base + 3] = a;
+                    }
                 }
             }
 
-            raster.setPixels(0, 0, w, h, rasterData);
+            raster.setPixels(0, 0, width, height, rasterData);
             return raster;
+        }
+
+        public double getInterpolationValue(double x, double y) {
+            double renderAngle = userDrag.getAngleFromStartTo(x, y) + Math.PI;
+            double relativeAngle;
+            if (clockwise) {
+                relativeAngle = renderAngle - drawAngle;
+            } else {
+                relativeAngle = drawAngle - renderAngle;
+            }
+            if (relativeAngle < 0) {
+                relativeAngle += (2 * Math.PI);
+            }
+            relativeAngle /= (2.0 * Math.PI);
+
+//                    double renderDist = Math.sqrt(renderRelativeX*renderRelativeX + renderRelativeY*renderRelativeY);
+            double renderDist = userDrag.getStartDistanceFrom(x, y);
+
+            double relativeDist = renderDist / dragDistance;
+
+            // relativeAngle alone would be a kind of angle gradient, and relativeDist alone would ne a kind of radial gradient
+            // but together...
+            double interpolationValue = relativeAngle + relativeDist;
+
+            interpolationValue %= 1.0f; // between 0..1
+
+            if (cycleMethod == REFLECT) {
+                if (interpolationValue < 0.5) {
+                    interpolationValue = 2.0f * interpolationValue;
+                } else {
+                    interpolationValue = 2.0f * (1 - interpolationValue);
+                }
+            } else if (cycleMethod == REPEAT) {
+                if (interpolationValue < 0.5) {
+                    interpolationValue = 2.0f * interpolationValue;
+                } else {
+                    interpolationValue = 2.0f * (interpolationValue - 0.5);
+                }
+            }
+            return interpolationValue;
         }
     }
 }

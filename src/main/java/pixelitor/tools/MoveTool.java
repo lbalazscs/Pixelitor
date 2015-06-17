@@ -48,8 +48,8 @@ public class MoveTool extends Tool {
     @Override
     public void mouseDragged(MouseEvent e, ImageDisplay ic) {
         Composition c = ic.getComp();
-        int relativeX = userDrag.getHorizontalDifference();
-        int relativeY = userDrag.getVerticalDifference();
+        int relativeX = userDrag.getDX();
+        int relativeY = userDrag.getDY();
         c.moveActiveContentRelative(relativeX, relativeY);
     }
 

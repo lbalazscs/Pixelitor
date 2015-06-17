@@ -64,7 +64,7 @@ public class GradientTool extends Tool {
     private BlendingModePanel blendingModePanel;
 
     GradientTool() {
-        super('g', "Gradient", "gradient_tool_icon.png", "click and drag to draw a gradient",
+        super('g', "Gradient", "gradient_tool_icon.png", "click and drag to draw a gradient. Shift-drag to constraint the direction.",
                 Cursor.getDefaultCursor(), true, true, true, ClipStrategy.IMAGE_ONLY);
     }
 

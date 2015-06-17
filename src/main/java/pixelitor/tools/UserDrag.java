@@ -125,9 +125,9 @@ public class UserDrag {
         return (float) Math.sqrt(dx * dx + dy * dy);
     }
 
-    public double getStartDistanceFrom(int x, int y) {
-        int dx = startX - x;
-        int dy = startY - y;
+    public double getStartDistanceFrom(double x, double y) {
+        double dx = startX - x;
+        double dy = startY - y;
         return Math.sqrt(dx * dx + dy * dy);
     }
 
@@ -161,11 +161,11 @@ public class UserDrag {
         startY += dy;
     }
 
-    public int getHorizontalDifference() {
+    public int getDX() {
         return endX - startX;
     }
 
-    public int getVerticalDifference() {
+    public int getDY() {
         return endY - startY;
     }
 
@@ -297,20 +297,6 @@ public class UserDrag {
                 ", endX=" + endX +
                 ", endY=" + endY +
                 '}';
-    }
-
-    // a quick estimate about our distance from the start
-    public boolean isFar(int x, int y, int threshold) {
-        if (startX - x > threshold) {
-            return true;
-        } else if (x - startX > threshold) {
-            return true;
-        } else if (startY - y > threshold) {
-            return true;
-        } else if (y - startY > threshold) {
-            return true;
-        }
-        return false;
     }
 
     public int taxiCabMetric(int x, int y) {
