@@ -59,12 +59,11 @@ public class GradientTool extends Tool {
     private JComboBox<GradientColorType> colorTypeSelector;
     private JComboBox<GradientType> typeSelector;
     private JComboBox<String> cycleMethodSelector;
-    //    private RangeParam opacityParam;
     private JCheckBox invertCheckBox;
     private BlendingModePanel blendingModePanel;
 
     GradientTool() {
-        super('g', "Gradient", "gradient_tool_icon.png", "click and drag to draw a gradient. Shift-drag to constraint the direction.",
+        super('g', "Gradient", "gradient_tool_icon.png", "click and drag to draw a gradient, Shift-drag to constrain the direction.",
                 Cursor.getDefaultCursor(), true, true, true, ClipStrategy.IMAGE_ONLY);
     }
 
@@ -162,7 +161,6 @@ public class GradientTool extends Tool {
 
             g2.setColor(Color.BLACK);
             g2.setStroke(zoomLevel.getOuterGeometryStroke());
-//            g2.setXORMode(BLACK);
             userDrag.drawLine(g2);
 
             g2.setColor(Color.WHITE);

@@ -608,6 +608,7 @@ public class MenuBar extends JMenuBar {
         filterMenu.add(dislocateSubmenu);
 
         createMenuItem(new JHKaleidoscope(), dislocateSubmenu);
+        createMenuItem(new DrunkVision(), dislocateSubmenu);
         createMenuItem(new JHVideoFeedback(), dislocateSubmenu);
         createMenuItem(new JHOffset(), dislocateSubmenu);
         createMenuItem(new Slice(), dislocateSubmenu);

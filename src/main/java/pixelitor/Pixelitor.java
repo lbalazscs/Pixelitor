@@ -124,6 +124,7 @@ public class Pixelitor {
 
 //        NewImage.addNewImage(FillType.WHITE, 500, 500, "Test");
 //        ImageComponents.getActiveImageComponent().setZoom(ZoomLevel.Z100, false);
+//        new DrunkVision().actionPerformed(null);
 //        Tools.GRADIENT.getButton().doClick();
 //        new Voronoi().actionPerformed(null);
 

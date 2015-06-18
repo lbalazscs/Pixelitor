@@ -38,7 +38,7 @@ public class JHPixelate extends FilterWithParametrizedGUI {
     private static final int STYLE_FLAT = 0;
     private static final int STYLE_3D = 1;
     private static final int STYLE_EMBEDDED = 2;
-    private static final int STYLE_GRID_ONLY = 3;
+//    private static final int STYLE_GRID_ONLY = 3;
 
     private static final int TYPE_SQUARE = 0;
     private static final int TYPE_BRICK = 1;
@@ -52,7 +52,7 @@ public class JHPixelate extends FilterWithParametrizedGUI {
             new IntChoiceParam.Value("Flat", STYLE_FLAT),
             new IntChoiceParam.Value("3D", STYLE_3D),
             new IntChoiceParam.Value("Embedded", STYLE_EMBEDDED),
-            new IntChoiceParam.Value("Grid", STYLE_GRID_ONLY)
+//            new IntChoiceParam.Value("Grid", STYLE_GRID_ONLY)
     });
 
     private final RangeParam cellSizeParam = new RangeParam("Cell Size", 3, 200, 20);
@@ -94,7 +94,8 @@ public class JHPixelate extends FilterWithParametrizedGUI {
             }
         }
 
-        if ((style == STYLE_3D) || (style == STYLE_GRID_ONLY || (style == STYLE_EMBEDDED))) {
+//        if ((style == STYLE_3D) || (style == STYLE_GRID_ONLY || (style == STYLE_EMBEDDED))) {
+        if ((style == STYLE_3D) || (style == STYLE_EMBEDDED)) {
             int width = dest.getWidth();
             int height = dest.getHeight();
             int srcType = src.getType();
@@ -108,8 +109,8 @@ public class JHPixelate extends FilterWithParametrizedGUI {
 
             if (style == STYLE_3D || style == STYLE_EMBEDDED) {
                 dest = ImageUtils.bumpMap(dest, bumpSource);
-            } else if (style == STYLE_GRID_ONLY) {
-                dest = ImageUtils.bumpMap(src, bumpSource);
+//            } else if (style == STYLE_GRID_ONLY) {
+//                dest = ImageUtils.bumpMap(src, bumpSource);
             } else {
                 throw new IllegalStateException("style = " + style);
             }
