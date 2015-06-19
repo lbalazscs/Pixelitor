@@ -535,6 +535,7 @@ public class MenuBar extends JMenuBar {
 
         createMenuItem(new Orton(), artisticFiltersSubmenu);
         createMenuItem(new PhotoCollage(), artisticFiltersSubmenu);
+        createMenuItem(new JHWeave(), artisticFiltersSubmenu);
 
         filterMenu.add(artisticFiltersSubmenu);
     }
