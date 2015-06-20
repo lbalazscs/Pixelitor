@@ -36,8 +36,8 @@ import static java.lang.Math.PI;
  * "Drunk Vision" filter inspired by "Fragment Blur" in paint.net
  */
 public class DrunkVision extends FilterWithParametrizedGUI {
-    private RangeParam drunkenness = new RangeParam("Drunkenness", 0, 100, 20);
-    private RangeParam numEyes = new RangeParam("Number of Eyes", 2, 42, 5);
+    private final RangeParam drunkenness = new RangeParam("Drunkenness", 0, 100, 20);
+    private final RangeParam numEyes = new RangeParam("Number of Eyes", 2, 42, 5);
 
     public DrunkVision() {
         super("Drunk Vision", true, false);

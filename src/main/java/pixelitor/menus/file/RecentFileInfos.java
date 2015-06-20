@@ -26,7 +26,7 @@ import java.util.List;
 public class RecentFileInfos {
     public static final int MAX_RECENT_FILES = 10;
 
-    private List<RecentFileInfo> fileInfos = new ArrayList<>(MAX_RECENT_FILES);
+    private final List<RecentFileInfo> fileInfos = new ArrayList<>(MAX_RECENT_FILES);
 
     public void addToFront(RecentFileInfo fileInfo) {
         if (fileInfos.contains(fileInfo)) {

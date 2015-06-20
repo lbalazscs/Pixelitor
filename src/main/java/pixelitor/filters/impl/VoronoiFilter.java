@@ -37,8 +37,8 @@ public class VoronoiFilter extends PointFilter {
     private Metric metric;
     private boolean useImageColors;
 
-    public int aaRes = 2;
-    public int aaRes2 = aaRes * aaRes;
+    private int aaRes = 2;
+    private int aaRes2 = aaRes * aaRes;
 
     public void setNumPoints(int numPoints) {
         this.numPoints = numPoints;
@@ -135,7 +135,7 @@ public class VoronoiFilter extends PointFilter {
      * Check whether the pixel is different from its neighbours.
      * It is enough to check in the horizontal direction
      */
-    private boolean isEdge(int[] allPixels, int pixelIndex, int width) {
+    private static boolean isEdge(int[] allPixels, int pixelIndex, int width) {
         int color = allPixels[pixelIndex];
         int colorLeft = allPixels[pixelIndex - 1];
         int colorRight = allPixels[pixelIndex + 1];

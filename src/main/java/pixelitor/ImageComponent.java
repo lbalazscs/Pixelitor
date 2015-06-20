@@ -211,6 +211,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         return comp.getName() + " - " + zoomLevel.toString();
     }
 
+    @Override
     public ZoomLevel getZoomLevel() {
         return zoomLevel;
     }

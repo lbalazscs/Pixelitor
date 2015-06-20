@@ -22,7 +22,7 @@ import java.awt.geom.AffineTransform;
 public abstract class ArrowKey {
     private static final int SHIFT_MULTIPLIER = 10;
 
-    private boolean shiftDown;
+    private final boolean shiftDown;
 
     public ArrowKey(boolean shiftDown) {
         this.shiftDown = shiftDown;

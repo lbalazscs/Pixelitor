@@ -58,6 +58,7 @@ public class DabsBrushSettings implements BrushSettings {
     }
 
     private void notifyBrushes() {
+        //noinspection Convert2streamapi
         for (DabsBrush brush : brushes) {
             brush.settingsChanged();
         }

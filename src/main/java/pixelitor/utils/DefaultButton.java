@@ -24,7 +24,7 @@ import java.awt.Dimension;
 
 /**
  * A button that resets a Resettable, and displays and arrow when the
- * Resettable is not set to the default value
+ * Resettable is not set to its default value
  */
 public class DefaultButton extends JButton {
     private static final Icon WEST_ARROW_ICON = IconUtils.getWestArrowIcon();
@@ -34,9 +34,7 @@ public class DefaultButton extends JButton {
     public DefaultButton(Resettable resettable) {
         this.resettable = resettable;
         setPreferredSize(PREFERRED_SIZE);
-        addActionListener(e -> {
-            resettable.reset(true);
-        });
+        addActionListener(e -> resettable.reset(true));
         setToolTipText("Reset the default setting");
         updateState();
     }

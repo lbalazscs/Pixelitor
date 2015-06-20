@@ -32,11 +32,11 @@ import java.awt.image.BufferedImage;
  * Voronoi based on VoronoiFilter
  */
 public class Voronoi extends FilterWithParametrizedGUI {
-    private RangeParam numberOfPoints = new RangeParam("Number of Points", 1, 200, 10);
-    private EnumParam<Metric> distance = new EnumParam<>("Distance", Metric.class);
-    private BooleanParam showPoints = new BooleanParam("Show Points", false, true);
-    private BooleanParam useImageColors = new BooleanParam("Use Image Colors", false, true);
-    private IntChoiceParam antiAliasing = new IntChoiceParam("Anti-aliasing",
+    private final RangeParam numberOfPoints = new RangeParam("Number of Points", 1, 200, 10);
+    private final EnumParam<Metric> distance = new EnumParam<>("Distance", Metric.class);
+    private final BooleanParam showPoints = new BooleanParam("Show Points", false, true);
+    private final BooleanParam useImageColors = new BooleanParam("Use Image Colors", false, true);
+    private final IntChoiceParam antiAliasing = new IntChoiceParam("Anti-aliasing",
             new IntChoiceParam.Value[]{
                     new IntChoiceParam.Value("None (Faster)", 0),
                     new IntChoiceParam.Value("2x2 (Better, slower)", 2),

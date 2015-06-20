@@ -27,7 +27,7 @@ import pixelitor.filters.gui.ParamSet;
 import java.awt.image.BufferedImage;
 
 /**
- * Weave based on WeaveFilter
+ * Weave based on the JHLabs WeaveFilter
  */
 public class JHWeave extends FilterWithParametrizedGUI {
 
