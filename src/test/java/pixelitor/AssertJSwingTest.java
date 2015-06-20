@@ -61,12 +61,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import static java.awt.event.KeyEvent.VK_0;
 import static java.awt.event.KeyEvent.VK_ADD;
 import static java.awt.event.KeyEvent.VK_ALT;
 import static java.awt.event.KeyEvent.VK_CONTROL;
 import static java.awt.event.KeyEvent.VK_D;
 import static java.awt.event.KeyEvent.VK_I;
 import static java.awt.event.KeyEvent.VK_MINUS;
+import static java.awt.event.KeyEvent.VK_RIGHT;
 import static java.awt.event.KeyEvent.VK_SHIFT;
 import static java.awt.event.KeyEvent.VK_Z;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -139,11 +141,11 @@ public class AssertJSwingTest {
 
     private void testTools() {
         // make sure we have a big internal frame for the tool tests
-        runMenuCommand("Actual Pixels");
+        keyboardActualPixels();
 
         testMoveTool();
         testCropTool();
-        testSelectionTool();
+        testSelectionToolAndMenus();
         testBrushTool();
         testCloneTool();
         testEraserTool();
@@ -625,6 +627,7 @@ public class AssertJSwingTest {
         testFilterWithDialog("Wood...", Randomize.YES, ShowOriginal.NO);
         testFilterWithDialog("Cells...", Randomize.YES, ShowOriginal.NO);
         testFilterWithDialog("Brushed Metal...", Randomize.YES, ShowOriginal.NO);
+        testFilterWithDialog("Voronoi Diagram...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Crystallize...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Pointillize...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Stamp...", Randomize.YES, ShowOriginal.YES);
@@ -634,6 +637,7 @@ public class AssertJSwingTest {
         testFilterWithDialog("Emboss...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Orton Effect...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Photo Collage...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Weave...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Convolution Edge Detection...", Randomize.YES, ShowOriginal.YES);
         testNoDialogFilter("Laplacian");
         testFilterWithDialog("Difference of Gaussians...", Randomize.YES, ShowOriginal.YES);
@@ -926,12 +930,14 @@ public class AssertJSwingTest {
         keyboardUndoRedo();
     }
 
-    private void testSelectionTool() {
+    private void testSelectionToolAndMenus() {
         window.toggleButton("Selection Tool Button").click();
         randomAltClick();
 
         move(200, 200);
         drag(400, 400);
+        keyboardNudge();
+        keyboardUndo();
 
         //window.button("brushTraceButton").click();
         findButtonByText(window, "Stroke with Current Brush").click();
@@ -957,15 +963,34 @@ public class AssertJSwingTest {
         runMenuCommand("Crop");
         keyboardUndo();
 
+        testSelectionModifyMenu();
+
         runMenuCommand("Invert Selection");
         runMenuCommand("Stroke with Current Brush");
         runMenuCommand("Stroke with Current Eraser");
         runMenuCommand("Deselect");
     }
 
+    private void testSelectionModifyMenu() {
+        window.toggleButton("Selection Tool Button").click();
+        randomAltClick();
+
+        move(200, 200);
+        drag(400, 400);
+
+        runMenuCommand("Modify...");
+        DialogFixture dialog = findDialogByTitle("Modify Selection");
+
+        findButtonByText(dialog, "Change!").click();
+        findButtonByText(dialog, "Change!").click();
+        findButtonByText(dialog, "Close").click();
+
+        keyboardUndoRedo();
+        keyboardUndo();
+    }
+
     private void testCropTool() {
         window.toggleButton("Crop Tool Button").click();
-        randomAltClick();
         move(200, 200);
         drag(400, 400);
         drag(450, 450);
@@ -973,7 +998,11 @@ public class AssertJSwingTest {
         drag(150, 150);
         sleep(1, SECONDS);
 
-//        window.button("cropButton").click();
+        keyboardNudge();
+        keyboardUndo();
+
+        randomAltClick(); // must be at the end, otherwise it tries to start a rectangle
+
         findButtonByText(window, "Crop").click();
 
         keyboardUndoRedo();
@@ -984,6 +1013,9 @@ public class AssertJSwingTest {
         window.toggleButton("Move Tool Button").click();
         testMoveToolImpl(false);
         testMoveToolImpl(true);
+
+        keyboardNudge();
+        keyboardUndo();
     }
 
     private void testMoveToolImpl(boolean altDrag) {
@@ -1061,6 +1093,16 @@ public class AssertJSwingTest {
     private void keyboardDeselect() {
         // press Ctrl-D
         window.pressKey(VK_CONTROL).pressKey(VK_D).releaseKey(VK_D).releaseKey(VK_CONTROL);
+    }
+
+    private void keyboardActualPixels() {
+        // press Ctrl-0
+        window.pressKey(VK_CONTROL).pressKey(VK_0).releaseKey(VK_0).releaseKey(VK_CONTROL);
+    }
+
+    private void keyboardNudge() {
+        // TODO for some reason the shift is not detected
+        window.pressKey(VK_SHIFT).pressKey(VK_RIGHT).releaseKey(VK_RIGHT).releaseKey(VK_SHIFT);
     }
 
     private void move(int x, int y) {
