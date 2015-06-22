@@ -32,13 +32,16 @@ import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
 /**
- * A layer with a content (text or image layer)
+ * A layer with a content (text or image layer) that
+ * can be moved/rotated.
  */
 public abstract class ContentLayer extends Layer {
     private static final long serialVersionUID = 2L;
 
-    private transient int temporaryTranslationX = 0;
-    private transient int temporaryTranslationY = 0;
+    // used only while dragging
+    private transient int tmpTranslationX = 0;
+    private transient int tmpTranslationY = 0;
+
     int translationX = 0;
     int translationY = 0;
 
@@ -46,41 +49,34 @@ public abstract class ContentLayer extends Layer {
         super(comp, name);
     }
 
-    /**
-     * startTranslation(), endTranslation(), and moveLayerRelative(int, int) are used by the Move tool
-     */
-    public void moveLayerRelative(int x, int y) {
-        temporaryTranslationX = x;
-        temporaryTranslationY = y;
-    }
-
     public int getTranslationX() {
-        return translationX + temporaryTranslationX;
+        return translationX + tmpTranslationX;
     }
 
     public int getTranslationY() {
-        return translationY + temporaryTranslationY;
+        return translationY + tmpTranslationY;
     }
 
-    /**
-     * startTranslation(), endTranslation(), and moveLayerRelative(int, int) are used by the Move tool
-     */
-    public void startTranslation() {
-        temporaryTranslationX = 0;
-        temporaryTranslationY = 0;
+    public void startMovement() {
+        tmpTranslationX = 0;
+        tmpTranslationY = 0;
     }
 
-    /**
-     * startTranslation(), endTranslation(), and moveLayerRelative(int, int) are used by the Move tool
-     */
-    public void endTranslation() {
+    public void moveWhileDragging(int x, int y) {
+        tmpTranslationX = x;
+        tmpTranslationY = y;
+    }
+
+    public void endMovement() {
         int oldTranslationX = translationX;
         int oldTranslationY = translationY;
 
-        translationX += temporaryTranslationX;
-        translationY += temporaryTranslationY;
-        temporaryTranslationX = 0;
-        temporaryTranslationY = 0;
+        // while dragging only the temporary values were updated
+        // and now they can be committed to the final value
+        translationX += tmpTranslationX;
+        translationY += tmpTranslationY;
+        tmpTranslationX = 0;
+        tmpTranslationY = 0;
 
         TranslateEdit edit = createTranslateEdit(oldTranslationX, oldTranslationY);
         History.addEdit(edit);
@@ -170,5 +166,4 @@ public abstract class ContentLayer extends Layer {
 
         g.dispose();
     }
-
 }

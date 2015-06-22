@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.layers;
 
 import org.jdesktop.swingx.painter.TranslatedTextPainter;
@@ -65,8 +66,8 @@ public class TextLayer extends ShapeLayer {
     }
 
     @Override
-    public void moveLayerRelative(int x, int y) {
-        super.moveLayerRelative(x, y);
+    public void moveWhileDragging(int x, int y) {
+        super.moveWhileDragging(x, y);
         painter.setTranslationX(getTranslationX());
         painter.setTranslationY(getTranslationY());
     }

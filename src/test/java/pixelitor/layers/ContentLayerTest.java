@@ -47,34 +47,34 @@ public class ContentLayerTest {
         assertEquals(0, layer.getTranslationX());
         assertEquals(0, layer.getTranslationY());
 
-        layer.startTranslation();
+        layer.startMovement();
 
         assertEquals(0, layer.getTranslationX());
         assertEquals(0, layer.getTranslationY());
 
-        layer.moveLayerRelative(2, 2);
+        layer.moveWhileDragging(2, 2);
 
         assertEquals(2, layer.getTranslationX());
         assertEquals(2, layer.getTranslationY());
 
-        layer.moveLayerRelative(3, 3);
+        layer.moveWhileDragging(3, 3);
 
         assertEquals(3, layer.getTranslationX());
         assertEquals(3, layer.getTranslationY());
 
-        layer.endTranslation();
+        layer.endMovement();
 
-        // the layer was enlarged in endTranslation, and the translation reset to 0, 0
+        // the layer was enlarged in endMovement, and the translation reset to 0, 0
         assertEquals(0, layer.getTranslationX());
         assertEquals(0, layer.getTranslationY());
 
-        layer.startTranslation();
-        layer.moveLayerRelative(-1, -2);
+        layer.startMovement();
+        layer.moveWhileDragging(-1, -2);
 
         assertEquals(-1, layer.getTranslationX());
         assertEquals(-2, layer.getTranslationY());
 
-        layer.endTranslation();
+        layer.endMovement();
 
         // this time the layer was not enlarged
         assertEquals(-1, layer.getTranslationX());

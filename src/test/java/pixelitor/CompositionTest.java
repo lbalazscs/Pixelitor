@@ -160,14 +160,14 @@ public class CompositionTest {
 
     @Test
     public void testStartTranslation() {
-        comp.startTranslation(true);
-        comp.startTranslation(false);
+        comp.startMovement(true);
+        comp.startMovement(false);
         comp.checkInvariant();
     }
 
     @Test
     public void testEndTranslation() {
-        comp.endTranslation();
+        comp.endMovement();
     }
 
     @Test

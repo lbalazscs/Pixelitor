@@ -282,7 +282,7 @@ public class Composition implements Serializable {
         return name;
     }
 
-    public void startTranslation(boolean makeDuplicateLayer) {
+    public void startMovement(boolean makeDuplicateLayer) {
         if (!(activeLayer instanceof ContentLayer)) {
             return;
         }
@@ -291,15 +291,15 @@ public class Composition implements Serializable {
             duplicateLayer();
         }
 
-        ((ContentLayer) activeLayer).startTranslation();
+        ((ContentLayer) activeLayer).startMovement();
     }
 
-    public void endTranslation() {
+    public void endMovement() {
         if (!(activeLayer instanceof ContentLayer)) {
             return;
         }
 
-        ((ContentLayer) activeLayer).endTranslation();
+        ((ContentLayer) activeLayer).endMovement();
         imageChanged(FULL);
     }
 
@@ -653,7 +653,7 @@ public class Composition implements Serializable {
     public void moveActiveContentRelative(int relativeX, int relativeY) {
         if (activeLayer instanceof ContentLayer) {
             ContentLayer contentLayer = (ContentLayer) activeLayer;
-            contentLayer.moveLayerRelative(relativeX, relativeY);
+            contentLayer.moveWhileDragging(relativeX, relativeY);
             imageChanged(FULL);
         }
     }

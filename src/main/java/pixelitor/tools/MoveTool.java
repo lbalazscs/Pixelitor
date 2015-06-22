@@ -42,7 +42,7 @@ public class MoveTool extends Tool {
 
     @Override
     public void mousePressed(MouseEvent e, ImageDisplay ic) {
-        ic.getComp().startTranslation(e.isAltDown());
+        ic.getComp().startMovement(e.isAltDown());
     }
 
     @Override
@@ -55,16 +55,16 @@ public class MoveTool extends Tool {
 
     @Override
     public void mouseReleased(MouseEvent e, ImageDisplay ic) {
-        ic.getComp().endTranslation();
+        ic.getComp().endMovement();
     }
 
     /**
      * Moves the active layer programmatically.
      */
     public static void move(Composition comp, int relativeX, int relativeY) {
-        comp.startTranslation(false);
+        comp.startMovement(false);
         comp.moveActiveContentRelative(relativeX, relativeY);
-        comp.endTranslation();
+        comp.endMovement();
     }
 
     @Override
