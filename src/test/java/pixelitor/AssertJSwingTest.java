@@ -42,6 +42,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.io.FileChoosers;
+import pixelitor.layers.ImageLayer;
 import pixelitor.layers.LayerButton;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.tools.BrushType;
@@ -1019,11 +1020,25 @@ public class AssertJSwingTest {
     }
 
     private void testMoveToolImpl(boolean altDrag) {
-        move(300, 300);
+        move(400, 400);
+        click();
         if (altDrag) {
-            altDrag(400, 400);
+            altDrag(300, 300);
         } else {
-            drag(400, 400);
+            ImageLayer layer = ImageComponents.getActiveImageComponent().getComp().getActiveImageLayer();
+            int txx = layer.getTranslationX();
+            int txy = layer.getTranslationY();
+            assert txx == 0;
+            assert txy == 0;
+
+            drag(200, 300);
+
+            txx = layer.getTranslationX();
+            txy = layer.getTranslationY();
+
+            // This will be true only if we are at 100% zoom!
+            assert txx == -200 : "txx = " + txx;
+            assert txy == -100 : "txy = " + txx;
         }
         keyboardUndoRedo();
         keyboardUndo();
