@@ -21,6 +21,7 @@ import pixelitor.Composition;
 import pixelitor.ImageComponents;
 import pixelitor.ImageDisplay;
 
+import javax.swing.*;
 import java.awt.Cursor;
 import java.awt.event.MouseEvent;
 import java.util.Optional;
@@ -31,7 +32,7 @@ import java.util.Optional;
 public class MoveTool extends Tool {
     public MoveTool() {
         super('v', "Move", "move_tool_icon.png",
-                "drag to move the active layer, Alt-drag to move a duplicate of the active layer",
+                "drag to move the active layer, Alt-drag (or right-mouse-drag) to move a duplicate of the active layer. Shift-drag to constrain the movement.",
                 Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR), false, true, true, ClipStrategy.IMAGE_ONLY);
     }
 
@@ -42,7 +43,7 @@ public class MoveTool extends Tool {
 
     @Override
     public void mousePressed(MouseEvent e, ImageDisplay ic) {
-        ic.getComp().startMovement(e.isAltDown());
+        ic.getComp().startMovement(e.isAltDown() || SwingUtilities.isRightMouseButton(e));
     }
 
     @Override

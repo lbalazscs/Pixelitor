@@ -36,7 +36,7 @@ public class ColorPickerTool extends Tool {
 
     public ColorPickerTool() {
         super('i', "Color Picker", "color_picker_tool_icon.png",
-                "click to pick the foreground color, Alt-click to pick the background color",
+                "click to pick the foreground color, Alt-click (or right-click) to pick the background color",
                 Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR), false, true, false, ClipStrategy.IMAGE_ONLY);
     }
 
@@ -48,13 +48,13 @@ public class ColorPickerTool extends Tool {
 
     @Override
     public void mousePressed(MouseEvent e, ImageDisplay ic) {
-        sampleColor(e, ic, e.isAltDown());
+        sampleColor(e, ic, e.isAltDown() || SwingUtilities.isRightMouseButton(e));
     }
 
 
     @Override
     public void mouseDragged(MouseEvent e, ImageDisplay ic) {
-        sampleColor(e, ic, e.isAltDown());
+        sampleColor(e, ic, e.isAltDown() || SwingUtilities.isRightMouseButton(e));
     }
 
     @Override

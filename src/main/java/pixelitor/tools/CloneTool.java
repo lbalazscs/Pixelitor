@@ -63,7 +63,7 @@ public class CloneTool extends TmpLayerBrushTool {
 
     protected CloneTool() {
         super('s', "Clone Stamp", "clone_tool_icon.png",
-                "Alt-click to select source, then paint with the copied pixels",
+                "Alt-click (or right-click) to select the source, then paint with the copied pixels",
                 Cursor.getDefaultCursor());
     }
 
@@ -110,7 +110,7 @@ public class CloneTool extends TmpLayerBrushTool {
         int x = userDrag.getStartX();
         int y = userDrag.getStartY();
 
-        if (e.isAltDown()) {
+        if (e.isAltDown() || SwingUtilities.isRightMouseButton(e)) {
             setCloningSource(ic, x, y);
         } else {
             if (state == NO_SOURCE) {

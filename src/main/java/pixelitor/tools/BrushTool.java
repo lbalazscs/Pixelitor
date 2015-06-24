@@ -22,6 +22,7 @@ import pixelitor.ImageDisplay;
 import pixelitor.layers.ImageLayer;
 import pixelitor.utils.ImageUtils;
 
+import javax.swing.*;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Point;
@@ -82,9 +83,9 @@ public class BrushTool extends TmpLayerBrushTool {
     private void setupDrawingColor(MouseEvent e) {
         int button = e.getButton();
 
-        if(button == MouseEvent.BUTTON3) {
+        if (SwingUtilities.isRightMouseButton(e)) {
             drawingColor = FgBgColorSelector.getBG();
-        } else if(button == MouseEvent.BUTTON2) {
+        } else if (SwingUtilities.isMiddleMouseButton(e)) {
             // TODO we never get here because isAltDown is always true for middle-button events, even if Alt is not pressed?
             Color fg = FgBgColorSelector.getFG();
             Color bg = FgBgColorSelector.getBG();
