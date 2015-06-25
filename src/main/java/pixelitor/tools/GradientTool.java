@@ -107,7 +107,7 @@ public class GradientTool extends Tool {
             Composition comp = ic.getComp();
 
             saveFullImageForUndo(comp);
-            drawGradient((ImageLayer) comp.getActiveLayer(),
+            drawGradient(comp.getActiveImageLayer(),
                     (GradientType) typeSelector.getSelectedItem(),
                     (GradientColorType) colorTypeSelector.getSelectedItem(),
                     getCycleMethodFromString((String) cycleMethodSelector.getSelectedItem()),

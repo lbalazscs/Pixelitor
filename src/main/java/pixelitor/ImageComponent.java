@@ -20,6 +20,7 @@ package pixelitor;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
+import pixelitor.layers.LayerMask;
 import pixelitor.layers.LayersContainer;
 import pixelitor.layers.LayersPanel;
 import pixelitor.menus.view.ZoomLevel;
@@ -66,7 +67,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
     private final Composition comp;
 
-    private boolean layerMaskEditing = false;
+    private boolean showLayerMask = false;
 
     // the start of the image if the ImageComponent is resized to bigger
     // than the canvas, and the image needs to be centralized
@@ -262,21 +263,19 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
         g2.translate(drawStartX, drawStartY);
 
-        if (!layerMaskEditing) {
+        if (!showLayerMask) {
             checkerBoardPainter.paint(g2, this, zoomedWidth, zoomedHeight);
         }
 
         g2.scale(viewScale, viewScale);
 
-        BufferedImage drawnImage;
-        if (layerMaskEditing) {
-            drawnImage = comp.getActiveLayer().getLayerMask().getBwImage();
+        if (showLayerMask) {
+            LayerMask layerMask = comp.getActiveLayer().getLayerMask();
+            layerMask.paintLayerOnGraphics(g2, true);
         } else {
-            drawnImage = comp.getCompositeImage();
+            BufferedImage drawnImage = comp.getCompositeImage();
+            ImageUtils.drawImageWithClipping(g2, drawnImage);
         }
-
-//        g2.drawImage(compositeImage, 0, 0, null);
-        ImageUtils.drawImageWithClipping(g2, drawnImage);
 
         // possibly allow a larger clip for the selections and tools
         Tool currentTool = Tools.getCurrentTool();
@@ -386,8 +385,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         }
     }
 
-    public void setLayerMaskEditing(boolean layerMaskEditing) {
-        this.layerMaskEditing = layerMaskEditing;
+    public void setShowLayerMask(boolean showLayerMask) {
+        this.showLayerMask = showLayerMask;
         repaint();
     }
 
@@ -633,4 +632,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         }
     }
 
+    @Override
+    public boolean isMaskEditing() {
+        return showLayerMask;
+    }
 }

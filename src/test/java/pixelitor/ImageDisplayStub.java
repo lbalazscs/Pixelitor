@@ -125,4 +125,9 @@ public class ImageDisplayStub implements ImageDisplay {
     public void setComp(Composition comp) {
         this.comp = comp;
     }
+
+    @Override
+    public boolean isMaskEditing() {
+        return false;
+    }
 }

@@ -54,6 +54,8 @@ import pixelitor.layers.DeleteActiveLayerAction;
 import pixelitor.layers.DuplicateLayerAction;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
+import pixelitor.layers.LayerMask;
+import pixelitor.layers.LayerMaskAddType;
 import pixelitor.layers.LayerMoveAction;
 import pixelitor.layers.TextLayer;
 import pixelitor.menus.edit.CopyAction;
@@ -72,11 +74,13 @@ import pixelitor.menus.view.ShowHideLayersAction;
 import pixelitor.menus.view.ShowHideStatusBarAction;
 import pixelitor.menus.view.ShowHideToolsAction;
 import pixelitor.menus.view.ZoomMenu;
+import pixelitor.tools.FgBgColorSelector;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.FilterCreator;
 import pixelitor.utils.HistogramsPanel;
 import pixelitor.utils.PerformanceTestingDialog;
+import pixelitor.utils.Utils;
 import pixelitor.utils.test.DebugEventQueue;
 import pixelitor.utils.test.ImageTests;
 import pixelitor.utils.test.OpTests;
@@ -518,7 +522,6 @@ public class MenuBar extends JMenuBar {
         createMenuItem(new ChannelToTransparency(), otherFiltersSubmenu);
 
 
-
         filterMenu.add(otherFiltersSubmenu);
     }
 
@@ -668,7 +671,93 @@ public class MenuBar extends JMenuBar {
         createMenuItem(layerToCanvasSizeAction, layersMenu);
 
         initLayerStackSubmenu(layersMenu);
+
+        if ("true".equals(System.getProperty("advanced.layers"))) {
+            initLayerMaskSubmenu(layersMenu);
+        }
+
         this.add(layersMenu);
+    }
+
+    private static void initLayerMaskSubmenu(JMenu layerMenu) {
+        JMenu layerMaskSubMenu = new JMenu("Layer Mask");
+
+        Action addAllWhiteMask = new MenuAction("Add White (Reveal All)") {
+            @Override
+            void onClick() {
+                Layer layer = ImageComponents.getActiveLayer().get();
+                layer.addLayerMask(LayerMaskAddType.REVEAL_ALL);
+            }
+        };
+        createMenuItem(addAllWhiteMask, layerMaskSubMenu);
+
+        Action addAllBlackMask = new MenuAction("Add Black (Hide All)") {
+            @Override
+            void onClick() {
+                Layer layer = ImageComponents.getActiveLayer().get();
+                layer.addLayerMask(LayerMaskAddType.HIDE_ALL);
+            }
+        };
+        createMenuItem(addAllBlackMask, layerMaskSubMenu);
+
+        Action deleteLayerMask = new LayerMaskMenuAction("Delete") {
+            @Override
+            void onClick() {
+                ImageComponent ic = ImageComponents.getActiveImageComponent();
+                Layer layer = ic.getComp().getActiveLayer();
+
+                layer.deleteLayerMask();
+
+                ic.setShowLayerMask(false);
+                FgBgColorSelector.INSTANCE.setLayerMaskEditing(false);
+
+                layer.getComposition().imageChanged(FULL);
+            }
+        };
+        createMenuItem(deleteLayerMask, layerMaskSubMenu);
+
+        layerMaskSubMenu.addSeparator();
+
+        ButtonGroup radioGroup = new ButtonGroup();
+
+        Action editLayerMask = new LayerMaskMenuAction("Show and Edit Mask") {
+            @Override
+            void onClick() {
+                ImageComponent ic = ImageComponents.getActiveImageComponent();
+                Layer activeLayer = ic.getComp().getActiveLayer();
+                ic.setShowLayerMask(true);
+                FgBgColorSelector.INSTANCE.setLayerMaskEditing(true);
+                activeLayer.setLayerMaskEditing(true);
+            }
+        };
+        createMenuItem(editLayerMask, layerMaskSubMenu);
+
+        Action showAndEditComposition = new LayerMaskMenuAction("Show and Edit Composition") {
+            @Override
+            void onClick() {
+                ImageComponent ic = ImageComponents.getActiveImageComponent();
+                Layer activeLayer = ic.getComp().getActiveLayer();
+                ic.setShowLayerMask(false);
+                FgBgColorSelector.INSTANCE.setLayerMaskEditing(false);
+                activeLayer.setLayerMaskEditing(false);
+            }
+        };
+
+        createMenuItem(showAndEditComposition, layerMaskSubMenu);
+
+        Action showCompositionEditMask = new LayerMaskMenuAction("Show Composition but Edit Mask") {
+            @Override
+            void onClick() {
+                ImageComponent ic = ImageComponents.getActiveImageComponent();
+                Layer activeLayer = ic.getComp().getActiveLayer();
+                ic.setShowLayerMask(false);
+                FgBgColorSelector.INSTANCE.setLayerMaskEditing(true);
+                activeLayer.setLayerMaskEditing(true);
+            }
+        };
+        createMenuItem(showCompositionEditMask, layerMaskSubMenu);
+
+        layerMenu.add(layerMaskSubMenu);
     }
 
     private static void initLayerStackSubmenu(JMenu layersMenu) {
@@ -842,15 +931,6 @@ public class MenuBar extends JMenuBar {
         };
         createMenuItem(debugSpecialAction, developMenu, EnabledIf.ACTION_ENABLED);
 
-        Action addLayerMask = new MenuAction("Add Layer Mask") {
-            @Override
-            void onClick() {
-                Layer layer = ImageComponents.getActiveLayer().get();
-                layer.addTestLayerMask();
-            }
-        };
-        createMenuItem(addLayerMask, developMenu);
-
         Action dumpEvents = new MenuAction("Dump Event Queue") {
             @Override
             void onClick() {
@@ -858,8 +938,6 @@ public class MenuBar extends JMenuBar {
             }
         };
         createMenuItem(dumpEvents, developMenu);
-
-        initLayerMaskSubmenu(developMenu);
 
         Action dumpPID = new MenuAction("Debug PID") {
             @Override
@@ -869,6 +947,37 @@ public class MenuBar extends JMenuBar {
             }
         };
         createMenuItem(dumpPID, developMenu);
+
+        Action debugMask = new MenuAction("Debug Layer Mask") {
+            @Override
+            void onClick() {
+                ImageLayer imageLayer = (ImageLayer) ImageComponents.getActiveLayer().get();
+                Utils.debugImage(imageLayer.getImage(), "layer image");
+
+                if (imageLayer.hasLayerMask()) {
+                    LayerMask layerMask = imageLayer.getLayerMask();
+                    BufferedImage maskImage = layerMask.getImage();
+                    Utils.debugImage(maskImage, "mask image");
+
+                    BufferedImage transparencyImage = layerMask.getTransparencyImage();
+                    Utils.debugImage(transparencyImage, "transparency image");
+                }
+            }
+        };
+        createMenuItem(debugMask, developMenu);
+
+        Action updateFromMask = new MenuAction("Update from Mask") {
+            @Override
+            void onClick() {
+                ImageLayer imageLayer = (ImageLayer) ImageComponents.getActiveLayer().get();
+                if (imageLayer.hasLayerMask()) {
+                    imageLayer.getLayerMask().updateFromBWImage();
+                } else {
+                    Dialogs.showInfoDialog("No Mask in Current image", "Error");
+                }
+            }
+        };
+        createMenuItem(updateFromMask, developMenu);
 
         this.add(developMenu);
     }
@@ -892,37 +1001,6 @@ public class MenuBar extends JMenuBar {
         };
         createMenuItem(manySplashScreensAction, splashMenu, EnabledIf.ACTION_ENABLED);
         developMenu.add(splashMenu);
-    }
-
-    private static void initLayerMaskSubmenu(JMenu developMenu) {
-        JMenu layerMaskSubMenu = new JMenu("Layer Mask");
-
-        Action editLayerMask = new MenuAction("Edit Layer Mask") {
-            @Override
-            void onClick() {
-                ImageComponent ic = ImageComponents.getActiveImageComponent();
-                if (ic.getComp().getActiveLayer().hasLayerMask()) {
-                    ic.setLayerMaskEditing(true);
-                } else {
-                    Dialogs.showInfoDialog("No Layer mask", "The active layer has no layer mask");
-                }
-            }
-        };
-        createMenuItem(editLayerMask, layerMaskSubMenu);
-
-        Action editComposition = new MenuAction("Edit Composition") {
-            @Override
-            void onClick() {
-                ImageComponent ic = ImageComponents.getActiveImageComponent();
-                if (ic != null) {
-                    ic.setLayerMaskEditing(false);
-                }
-            }
-        };
-
-        createMenuItem(editComposition, layerMaskSubMenu);
-
-        developMenu.add(layerMaskSubMenu);
     }
 
     private static void initExperimentalSubmenu(JMenu developMenu) {

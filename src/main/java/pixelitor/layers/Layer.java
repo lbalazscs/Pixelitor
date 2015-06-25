@@ -27,19 +27,13 @@ import pixelitor.history.LayerRenameEdit;
 import pixelitor.history.LayerVisibilityChangeEdit;
 import pixelitor.utils.HistogramsPanel;
 
-import java.awt.Color;
-import java.awt.GradientPaint;
 import java.awt.Graphics2D;
-import java.awt.Paint;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 
-import static java.awt.Color.BLACK;
-import static java.awt.Color.WHITE;
-import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 
 /**
@@ -58,6 +52,14 @@ public abstract class Layer implements Serializable {
 
     float opacity = 1.0f;
     BlendingMode blendingMode = BlendingMode.NORMAL;
+
+    /**
+     * Whether the edited image is the layer image or
+     * the layer mask image.
+     * This flag is logically independent from the showLayerMask
+     * flag in the image component.
+     */
+    protected boolean layerMaskEditing = false;
 
     Layer(Composition comp, String name) {
         this.comp = comp;
@@ -217,26 +219,12 @@ public abstract class Layer implements Serializable {
         return layerMask != null;
     }
 
-    public void addTestLayerMask() {
-//        Canvas canvas = comp.getCanvas();
+    public void addLayerMask(LayerMaskAddType addType) {
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
 
-        BufferedImage bwLayerMask = new BufferedImage(canvasWidth, canvasHeight, TYPE_BYTE_GRAY);
-        Graphics2D g = bwLayerMask.createGraphics();
-
-//        Color showColor = new Color(255, 255, 255, 255);
-//        Color hideColor = new Color(255, 255, 255, 0);
-        Color showColor = WHITE;
-        Color hideColor = BLACK;
-        Paint mask = new GradientPaint(0, 0,
-                showColor,
-                0, canvasHeight, hideColor);
-        g.setPaint(mask);
-        g.fillRect(0, 0, canvasWidth, canvasHeight);
-        g.dispose();
-
-        layerMask = new LayerMask(bwLayerMask);
+        BufferedImage bwLayerMask = addType.getBWImage(canvasWidth, canvasHeight);
+        layerMask = new LayerMask(comp, bwLayerMask);
 
         comp.imageChanged(FULL);
     }
@@ -244,7 +232,8 @@ public abstract class Layer implements Serializable {
     /**
      * A layer can choose to draw on the Graphics2D or change the given BufferedImage.
      * If the BufferedImage is changed, the method returns the new image and null otherwise.
-     * The reason is that adjustment layers change a BufferedImage, while
+     * The reason is that adjustment layers change a BufferedImage, while other layers
+     * just change the graphics
      */
     public abstract BufferedImage paintLayer(Graphics2D g, boolean firstVisibleLayer, BufferedImage imageSoFar);
 
@@ -266,5 +255,21 @@ public abstract class Layer implements Serializable {
 
     public void dragFinished(int newIndex) {
         comp.dragFinished(this, newIndex);
+    }
+
+    public void deleteLayerMask() {
+        layerMask = null;
+        layerMaskEditing = false;
+    }
+
+    public void setLayerMaskEditing(boolean b) {
+        this.layerMaskEditing = b;
+    }
+
+    public boolean isLayerMaskEditing() {
+        if (layerMaskEditing) {
+            assert layerMask != null;
+        }
+        return layerMaskEditing;
     }
 }

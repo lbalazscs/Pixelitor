@@ -272,7 +272,7 @@ public class ShapesTool extends Tool {
      * The start and end point points are given relative to the Composition (not Layer)
      */
     public void paintShapeOnIC(Composition comp, UserDrag userDrag) {
-        ImageLayer layer = (ImageLayer) comp.getActiveLayer();
+        ImageLayer layer = comp.getActiveImageLayer();
         int translationX = -layer.getTranslationX();
         int translationY = -layer.getTranslationY();
 

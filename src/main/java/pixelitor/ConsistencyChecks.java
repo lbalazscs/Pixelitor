@@ -41,7 +41,8 @@ public final class ConsistencyChecks {
     public static void checkAll() {
         getActiveComp().ifPresent(comp -> {
             selectionCheck(comp);
-            fadeCheck(comp);
+// TODO commented out because of layer mask problems
+//            fadeCheck(comp);
             translationCheck(comp);
             layerDeleteActionEnabledCheck();
         });

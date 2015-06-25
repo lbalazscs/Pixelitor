@@ -37,6 +37,11 @@ public abstract class TmpLayerBrushTool extends AbstractBrushTool {
 
     @Override
     protected void createGraphicsForNewBrushStroke(Composition comp, ImageLayer layer) {
+//        System.out.println("TmpLayerBrushTool::createGraphicsForNewBrushStroke: layer class = " + layer.getClass().getName());
+//        if(!(layer instanceof LayerMask)) {
+//            Thread.dumpStack();
+//        }
+
         graphics = layer.createTmpDrawingLayer(blendingModePanel.getComposite(), respectSelection).getGraphics();
         brush.setTarget(comp, graphics);
     }

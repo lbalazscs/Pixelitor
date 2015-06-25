@@ -222,19 +222,19 @@ public class Composition implements Serializable {
     }
 
     public void okPressedInDialog(String filterName) {
-        ((ImageLayer) activeLayer).okPressedInDialog(filterName);
+        getActiveImageLayer().okPressedInDialog(filterName);
     }
 
     public void filterWithoutDialogFinished(BufferedImage img, ChangeReason changeReason, String opName) {
         setDirty(true);
 
-        ((ImageLayer) activeLayer).filterWithoutDialogFinished(img, changeReason, opName);
+        getActiveImageLayer().filterWithoutDialogFinished(img, changeReason, opName);
 
         imageChanged(FULL);
     }
 
     public void changePreviewImage(BufferedImage img, String filterName, ChangeReason changeReason) {
-        ImageLayer layer = (ImageLayer) activeLayer;
+        ImageLayer layer = getActiveImageLayer();
         layer.changePreviewImage(img, filterName, changeReason);
     }
 
@@ -243,6 +243,9 @@ public class Composition implements Serializable {
      */
     public ImageLayer getActiveImageLayer() {
         checkInvariant();
+        if (activeLayer.isLayerMaskEditing()) {
+            return activeLayer.getLayerMask();
+        }
         if (activeLayer instanceof ImageLayer) {
             ImageLayer imageLayer = (ImageLayer) activeLayer;
             return imageLayer;
@@ -254,6 +257,9 @@ public class Composition implements Serializable {
      * This should be called if the active layer might not be an image layer
      */
     public Optional<ImageLayer> getActiveImageLayerOpt() {
+        if (activeLayer.isLayerMaskEditing()) {
+            return Optional.of(activeLayer.getLayerMask());
+        }
         if (activeLayer instanceof ImageLayer) {
             ImageLayer imageLayer = (ImageLayer) activeLayer;
             return Optional.of(imageLayer);
@@ -813,6 +819,13 @@ public class Composition implements Serializable {
 
     public void setShowOriginal(boolean b) {
         getActiveImageLayer().setShowOriginal(b);
+    }
+
+    public boolean isMaskEditing() {
+        if (ic == null) {
+            return false;
+        }
+        return ic.isMaskEditing();
     }
 
     public enum ImageChangeActions {

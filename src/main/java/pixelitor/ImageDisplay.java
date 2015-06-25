@@ -72,4 +72,6 @@ public interface ImageDisplay {
     void increaseZoom(int mouseX, int mouseY);
 
     void decreaseZoom(int mouseX, int mouseY);
+
+    boolean isMaskEditing();
 }

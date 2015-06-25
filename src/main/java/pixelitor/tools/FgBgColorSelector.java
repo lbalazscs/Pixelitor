@@ -51,7 +51,7 @@ public class FgBgColorSelector extends JLayeredPane {
     private Action resetToDefaultAction;
     private Action swapColorsAction;
 
-    private final boolean layerMaskEditing = false;
+    private boolean layerMaskEditing = false;
 
     private FgBgColorSelector() {
         setLayout(null);
@@ -155,7 +155,7 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private Color getBgColor() {
-        return getUsedColor(bgColor);
+        return getPossiblyGrayedColor(bgColor);
     }
 
     public static Color colorToGray(Color c) {
@@ -165,15 +165,16 @@ public class FgBgColorSelector extends JLayeredPane {
         int g = (rgb >>> 8) & 0xFF;
         int b = rgb & 0xFF;
 
-        int average = r + g + b / 3;
-        return new Color((0xFF << 24) | (average << 16) | (average << 8) | average);
+        int average = (r + g + b) / 3;
+
+        return new Color(0xFF_00_00_00 | (average << 16) | (average << 8) | average);
     }
 
     private Color getFgColor() {
-        return getUsedColor(fgColor);
+        return getPossiblyGrayedColor(fgColor);
     }
 
-    private Color getUsedColor(Color c) {
+    private Color getPossiblyGrayedColor(Color c) {
         if (layerMaskEditing) {
             return colorToGray(c);
         }
@@ -204,29 +205,37 @@ public class FgBgColorSelector extends JLayeredPane {
         Color old = fgColor;
         fgColor = c;
 
-        Color usedColor = getUsedColor(fgColor);
+        Color usedColor = getPossiblyGrayedColor(fgColor);
 
         fgButton.setBackground(usedColor);
-        if (old != null) {
-            firePropertyChange("FG", old, fgColor);
-        }
+//        if (old != null) {
+//            firePropertyChange("FG", old, fgColor);
+//        }
     }
 
     public void setBgColor(Color c) {
         Color old = bgColor;
         bgColor = c;
 
-        Color usedColor = getUsedColor(bgColor);
+        Color usedColor = getPossiblyGrayedColor(bgColor);
 
         bgButton.setBackground(usedColor);
-        if (old != null) {
-            firePropertyChange("BG", old, bgColor);
-        }
+//        if (old != null) {
+//            firePropertyChange("BG", old, bgColor);
+//        }
     }
 
     private void setupKeyboardShortcuts() {
         GlobalKeyboardWatch.addKeyboardShortCut('d', true, "reset", resetToDefaultAction);
         GlobalKeyboardWatch.addKeyboardShortCut('x', true, "switch", swapColorsAction);
         GlobalKeyboardWatch.addKeyboardShortCut('r', true, "randomize", randomizeColorsAction);
+    }
+
+    public void setLayerMaskEditing(boolean layerMaskEditing) {
+        this.layerMaskEditing = layerMaskEditing;
+
+        // force the redrawing of colors
+        setFgColor(fgColor);
+        setBgColor(bgColor);
     }
 }

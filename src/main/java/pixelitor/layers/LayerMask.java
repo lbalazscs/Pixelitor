@@ -17,6 +17,7 @@
 
 package pixelitor.layers;
 
+import pixelitor.Composition;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -27,12 +28,10 @@ import java.awt.image.WritableRaster;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 
 /**
- *
+ * A layer mask.
  */
-public class LayerMask {
-    private BufferedImage transparentImage;
-    @SuppressWarnings("FieldMayBeFinal")
-    private BufferedImage bwImage;
+public class LayerMask extends ImageLayer {
+    private BufferedImage transparencyImage;
 
     private static final ColorModel transparencyColorModel;
 
@@ -44,27 +43,27 @@ public class LayerMask {
         transparencyColorModel = new IndexColorModel(8, 256, lookupFromIndex, lookupFromIndex, lookupFromIndex, lookupFromIndex);
     }
 
-    public LayerMask(BufferedImage bwImage) {
-        this.bwImage = bwImage;
-        initFromBWImage(bwImage);
+
+    public LayerMask(Composition comp, BufferedImage bwImage) {
+        super(comp, bwImage, "");
+        updateFromBWImage();
     }
 
-    private void initFromBWImage(BufferedImage bwImage) {
-        assert bwImage.getColorModel() != transparencyColorModel;
+    public BufferedImage getTransparencyImage() {
+        return transparencyImage;
+    }
 
+    public void updateFromBWImage() {
+        assert image.getColorModel() != transparencyColorModel;
+
+        BufferedImage bwImage = image;
+
+        // TODO
         if (bwImage.getType() != TYPE_BYTE_GRAY) {
             bwImage = ImageUtils.convertToGrayScaleImage(bwImage);
         }
 
         WritableRaster raster = bwImage.getRaster();
-        this.transparentImage = new BufferedImage(transparencyColorModel, raster, false, null);
-    }
-
-    public BufferedImage getTransparentImage() {
-        return transparentImage;
-    }
-
-    public BufferedImage getBwImage() {
-        return bwImage;
+        this.transparencyImage = new BufferedImage(transparencyColorModel, raster, false, null);
     }
 }

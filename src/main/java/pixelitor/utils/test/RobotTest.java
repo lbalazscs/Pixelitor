@@ -812,7 +812,8 @@ public class RobotTest {
     private static void randomLayerMask() {
         logRobotEvent("random layer mask");
 
-        ImageComponents.getActiveLayer().get().addTestLayerMask();
+        // TODO
+//        ImageComponents.getActiveLayer().get().addLayerMask();
     }
 
     private static void setupWeightedCaller(Robot r) {

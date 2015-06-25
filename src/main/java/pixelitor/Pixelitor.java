@@ -122,6 +122,18 @@ public class Pixelitor {
             return;
         }
 
+//        // add layer mask
+//        Layer layer = ImageComponents.getActiveLayer().get();
+//        layer.addLayerMask(LayerMaskAddType.REVEAL_ALL);
+//        // show and edit layer mask
+//        ImageComponent ic = ImageComponents.getActiveImageComponent();
+//        Layer activeLayer = ic.getComp().getActiveLayer();
+//        ic.setShowLayerMask(true);
+//        FgBgColorSelector.INSTANCE.setLayerMaskEditing(true);
+//        activeLayer.setLayerMaskEditing(true);
+
+
+
 //        NewImage.addNewImage(FillType.WHITE, 500, 500, "Test");
 //        ImageComponents.getActiveImageComponent().setZoom(ZoomLevel.Z100, false);
 //        new DrunkVision().actionPerformed(null);

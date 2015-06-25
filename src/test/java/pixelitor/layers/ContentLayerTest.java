@@ -138,7 +138,7 @@ public class ContentLayerTest {
     @Test
     public void testGetMaskedImage_OK() {
         // setup a layer mask
-        layer.addTestLayerMask();
+        layer.addLayerMask(LayerMaskAddType.REVEAL_ALL);
 
         BufferedImage maskedImage = layer.getMaskedImage(true);
         assertNotNull(maskedImage);

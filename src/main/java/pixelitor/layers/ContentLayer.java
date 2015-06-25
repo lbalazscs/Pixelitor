@@ -132,7 +132,7 @@ public abstract class ContentLayer extends Layer {
         Graphics2D mig = maskedImage.createGraphics();
         paintLayerOnGraphics(mig, firstVisibleLayer);
         mig.setComposite(DstIn);
-        mig.drawImage(layerMask.getTransparentImage(), 0, 0, null);
+        mig.drawImage(layerMask.getTransparencyImage(), 0, 0, null);
         mig.dispose();
         return maskedImage;
     }

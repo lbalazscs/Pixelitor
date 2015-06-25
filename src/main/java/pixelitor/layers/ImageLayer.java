@@ -116,7 +116,7 @@ public class ImageLayer extends ContentLayer {
     /**
      * The image content of this image layer
      */
-    private transient BufferedImage image = null;
+    protected transient BufferedImage image = null;
 
     /**
      * The image shown during previews
@@ -269,6 +269,11 @@ public class ImageLayer extends ContentLayer {
      * Initializes a preview session
      */
     public void startPreviewing() {
+//        System.out.println("ImageLayer::startPreviewing: this class = " + this.getClass().getName());
+//        if(!(this instanceof LayerMask)) {
+//            Thread.dumpStack();
+//        }
+
         if(comp.hasSelection()) {
             // if we have a selection, then the preview image reference cannot be simply
             // the image reference, because when we draw into the preview image, we would
@@ -309,6 +314,8 @@ public class ImageLayer extends ContentLayer {
     }
 
     public void stopPreviewing() {
+//        System.out.println("ImageLayer::stopPreviewing: this class = " + this.getClass().getName());
+
         assert state == PREVIEW || state == SHOW_ORIGINAL;
         assert previewImage != null;
 
@@ -341,13 +348,13 @@ public class ImageLayer extends ContentLayer {
             // this is OK, something was adjusted while in show original mode
         } else if (state == NORMAL) {
             throw new IllegalStateException(String.format(
-                    "change preview in normal state, filter = %s, changeReason = %s)",
-                    filterName, changeReason));
+                    "change preview in normal state, filter = %s, changeReason = %s, class = %s)",
+                    filterName, changeReason, this.getClass().getSimpleName()));
         }
 
         assert previewImage != null :
-                String.format("previewImage was null with %s, changeReason = %s",
-                        filterName, changeReason);
+                String.format("previewImage was null with %s, changeReason = %s, class = %s",
+                        filterName, changeReason, this.getClass().getSimpleName());
         assert img != null;
 
         if(img == image) {
