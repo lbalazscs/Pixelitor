@@ -134,7 +134,6 @@ public class ImageLayer extends ContentLayer {
      */
     public ImageLayer(Composition comp, BufferedImage image, String name) {
         super(comp, name == null ? comp.generateNewLayerName() : name);
-        canvas = comp.getCanvas();
 
         requireNonNull(image);
 
@@ -147,7 +146,6 @@ public class ImageLayer extends ContentLayer {
      */
     public ImageLayer(Composition comp, BufferedImage pastedImage, String name, int width, int height) {
         super(comp, name);
-        canvas = comp.getCanvas();
 
         requireNonNull(pastedImage);
 
@@ -194,7 +192,6 @@ public class ImageLayer extends ContentLayer {
      */
     public ImageLayer(Composition comp, String name) {
         super(comp, name == null ? comp.generateNewLayerName() : name);
-        canvas = comp.getCanvas();
 
         setImage(new BufferedImage(canvas.getWidth(), canvas.getHeight(), TYPE_INT_ARGB_PRE));
         checkConstructorPostConditions();

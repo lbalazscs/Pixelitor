@@ -18,29 +18,35 @@
 package pixelitor.filters.painters;
 
 import org.jdesktop.swingx.painter.AbstractLayoutPainter;
-import org.jdesktop.swingx.painter.effects.AreaEffect;
+import org.jdesktop.swingx.painter.TextPainter;
+import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.Serializable;
 import java.util.Random;
 
 import static java.awt.Color.BLACK;
-import static java.awt.Font.BOLD;
-import static java.awt.Font.SANS_SERIF;
+import static java.awt.Color.WHITE;
+import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 
 /**
  * Text settings for the text filter and text layers
  */
-public class TextSettings {
-    private String text = "Pixelitor";
-    private Font font = new Font(SANS_SERIF, BOLD, 50);
-    private AreaEffect[] areaEffects;
-    private Color color = BLACK;
+public class TextSettings implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    private String text;
+    private Font font;
+    private AreaEffects areaEffects;
+    private Color color;
     private AbstractLayoutPainter.VerticalAlignment verticalAlignment;
     private AbstractLayoutPainter.HorizontalAlignment horizontalAlignment;
     private boolean watermark;
 
-    public TextSettings(String text, Font font, Color color, AreaEffect[] areaEffects, AbstractLayoutPainter.HorizontalAlignment horizontalAlignment, AbstractLayoutPainter.VerticalAlignment verticalAlignment, boolean watermark) {
+    public TextSettings(String text, Font font, Color color, AreaEffects areaEffects, AbstractLayoutPainter.HorizontalAlignment horizontalAlignment, AbstractLayoutPainter.VerticalAlignment verticalAlignment, boolean watermark) {
         this.areaEffects = areaEffects;
         this.color = color;
         this.font = font;
@@ -50,7 +56,20 @@ public class TextSettings {
         this.watermark = watermark;
     }
 
-    public AreaEffect[] getAreaEffects() {
+    // copy constructor
+    public TextSettings(TextSettings other) {
+        text = other.text;
+        font = other.font;
+        // we can share even mutable objects, since they are re-created
+        // after every editing
+        areaEffects = other.areaEffects;
+        color = other.color;
+        verticalAlignment = other.verticalAlignment;
+        horizontalAlignment = other.horizontalAlignment;
+        watermark = other.watermark;
+    }
+
+    public AreaEffects getAreaEffects() {
         return areaEffects;
     }
 
@@ -81,5 +100,34 @@ public class TextSettings {
     public void randomizeText() {
         Random random = new Random();
         text = Long.toHexString(random.nextLong());
+    }
+
+    public void configurePainter(TextPainter painter) {
+        painter.setAntialiasing(true);
+        painter.setText(getText());
+        painter.setFont(getFont());
+        AreaEffects areaEffects = getAreaEffects();
+        if (areaEffects != null) {
+            painter.setAreaEffects(areaEffects.asArray());
+        }
+        painter.setHorizontalAlignment(getHorizontalAlignment());
+        painter.setVerticalAlignment(getVerticalAlignment());
+    }
+
+    public BufferedImage watermarkImage(BufferedImage src, TextPainter textPainter) {
+        BufferedImage dest;
+        int width = src.getWidth();
+        int height = src.getHeight();
+        // the text is with white on black background on the bump map image
+        BufferedImage bumpImage = new BufferedImage(width, height, TYPE_INT_RGB);
+        Graphics2D g = bumpImage.createGraphics();
+        g.setColor(BLACK);
+        g.fillRect(0, 0, width, height);
+        textPainter.setFillPaint(WHITE);
+        textPainter.paint(g, this, width, height);
+        g.dispose();
+
+        dest = ImageUtils.bumpMap(src, bumpImage);
+        return dest;
     }
 }

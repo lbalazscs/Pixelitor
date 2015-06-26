@@ -60,7 +60,7 @@ public class SelectionChangeEdit extends PixelitorEdit {
         selection.setShape(backupShape);
 
         backupShape = tmp;
-        History.postEdit(this);
+        History.notifyMenus(this);
     }
 
     @Override

@@ -39,14 +39,14 @@ public final class CompositionUtils {
     }
 
     public static void cropImage(Composition comp, Rectangle selectionBounds, boolean selection, boolean allowGrowing) {
-        if (selectionBounds.width == 0 || selectionBounds.height == 0) {
-            // empty selection, can't do anything useful
-            return;
-        }
-
         Canvas canvas = comp.getCanvas();
         if(!allowGrowing) {
             selectionBounds = selectionBounds.intersection(canvas.getBounds());
+        }
+
+        if (selectionBounds.isEmpty()) {
+            // empty selection, can't do anything useful
+            return;
         }
 
         OneLayerUndoableEdit.createAndAddToHistory(comp, "Crop", false, true);

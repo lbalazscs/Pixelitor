@@ -21,6 +21,7 @@ import pixelitor.history.FadeableEdit;
 import pixelitor.history.History;
 import pixelitor.layers.DeleteActiveLayerAction;
 import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Layer;
 import pixelitor.menus.SelectionActions;
 import pixelitor.utils.Utils;
 
@@ -111,17 +112,22 @@ public final class ConsistencyChecks {
     }
 
     public static boolean translationCheck(Composition comp) {
-        ImageLayer layer = comp.getActiveImageLayer();
-        BufferedImage bufferedImage = layer.getImage();
+        Layer layer = comp.getActiveLayer();
+        if(!(layer instanceof ImageLayer)) {
+            return true;
+        }
+        ImageLayer imageLayer = (ImageLayer) layer;
 
-        int x = -layer.getTranslationX();
+        BufferedImage bufferedImage = imageLayer.getImage();
+
+        int x = -imageLayer.getTranslationX();
         int canvasWidth = comp.getCanvasWidth();
         int imageWidth = bufferedImage.getWidth();
         if (x + canvasWidth > imageWidth + 1) { // allow one pixel difference for rounding effects
             throw new IllegalStateException("x = " + x + ", canvasWidth = " + canvasWidth + ", imageWidth = " + imageWidth + ", comp = " + comp.getName());
         }
 
-        int y = -layer.getTranslationY();
+        int y = -imageLayer.getTranslationY();
         int canvasHeight = comp.getCanvasHeight();
         int imageHeight = bufferedImage.getHeight();
 

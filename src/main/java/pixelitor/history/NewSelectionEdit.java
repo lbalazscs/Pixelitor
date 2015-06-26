@@ -39,7 +39,7 @@ public class NewSelectionEdit extends PixelitorEdit {
 
         comp.deselect(false);
 
-        History.postEdit(this);
+        History.notifyMenus(this);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class NewSelectionEdit extends PixelitorEdit {
 
         comp.createSelectionFromShape(newShape);
 
-        History.postEdit(this);
+        History.notifyMenus(this);
     }
 
     @Override

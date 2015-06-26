@@ -37,18 +37,20 @@ public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
     private final RangeParam distanceParam;
     private final RangeParam spreadParam;
 
-    DropShadowEffectConfiguratorPanel(boolean defaultSelected, Color defaultColor) {
-        super("Drop Shadow", defaultSelected, defaultColor);
+    DropShadowEffectConfiguratorPanel(boolean defaultEnabled, Color defaultColor,
+                                      int defaultDistance, double defaultAngle,
+                                      int defaultSpread) {
+        super("Drop Shadow", defaultEnabled, defaultColor);
 
-        distanceParam = new RangeParam("Distance:", 1, 100, 10);
+        distanceParam = new RangeParam("Distance:", 1, 100, defaultDistance);
         SliderSpinner distanceSlider = new SliderSpinner(distanceParam, NONE, false);
         gbHelper.addLabelWithControl("Distance:", distanceSlider);
 
-        angleParam = new AngleParam("Angle", 0.7);
+        angleParam = new AngleParam("Angle", defaultAngle);
         AngleSelectorComponent angleSelectorComponent = new AngleSelectorComponent(angleParam);
         gbHelper.addLabelWithControl("Angle:", angleSelectorComponent);
 
-        spreadParam = new RangeParam("Spread:", 1, 100, 10);
+        spreadParam = new RangeParam("Spread:", 1, 100, defaultSpread);
         SliderSpinner spreadSlider = new SliderSpinner(spreadParam, NONE, false);
         gbHelper.addLabelWithControl("Spread:", spreadSlider);
     }

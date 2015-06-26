@@ -529,21 +529,21 @@ public class Composition implements Serializable {
 
     private void removeLayer(int layerIndex) {
         Layer layer = layerList.get(layerIndex);
-        removeLayer(layer, false);
+        removeLayer(layer, AddToHistory.YES);
     }
 
     public void removeActiveLayer() {
-        removeLayer(activeLayer, false);
+        removeLayer(activeLayer, AddToHistory.YES);
     }
 
-    public void removeLayer(Layer layerToBeRemoved, boolean isUndoRedo) {
+    public void removeLayer(Layer layerToBeRemoved, AddToHistory addToHistory) {
         if (layerList.size() < 2) {
             throw new IllegalStateException("there are " + layerList.size() + " layers");
         }
 
         int layerIndex = layerList.indexOf(layerToBeRemoved);
 
-        if (!isUndoRedo) {
+        if (addToHistory == AddToHistory.YES) {
             DeleteLayerEdit newLayerEdit = new DeleteLayerEdit(this, layerToBeRemoved, layerIndex);
             History.addEdit(newLayerEdit);
         }

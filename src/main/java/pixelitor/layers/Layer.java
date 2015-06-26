@@ -66,6 +66,7 @@ public abstract class Layer implements Serializable {
         this.name = name;
         this.opacity = 1.0f;
 
+        canvas = comp.getCanvas();
         layerButton = new LayerButton(this);
     }
 
@@ -183,7 +184,7 @@ public abstract class Layer implements Serializable {
             return;
         }
 
-        layerButton.setName(newName);
+        layerButton.changeNameProgrammatically(newName);
 
         if (addToHistory == AddToHistory.YES) {
             LayerRenameEdit edit = new LayerRenameEdit(this, previousName, name);
@@ -232,8 +233,8 @@ public abstract class Layer implements Serializable {
     /**
      * A layer can choose to draw on the Graphics2D or change the given BufferedImage.
      * If the BufferedImage is changed, the method returns the new image and null otherwise.
-     * The reason is that adjustment layers change a BufferedImage, while other layers
-     * just change the graphics
+     * The reason is that adjustment layers and watermarked text layers change a BufferedImage,
+     * while other layers just paint on the graphics
      */
     public abstract BufferedImage paintLayer(Graphics2D g, boolean firstVisibleLayer, BufferedImage imageSoFar);
 

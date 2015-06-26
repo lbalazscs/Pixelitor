@@ -93,7 +93,7 @@ public class ImageEdit extends FadeableEdit {
 
         // create new backup image from tmp
         imgRef = new SoftReference<>(tmp);
-        History.postEdit(this);
+        History.notifyMenus(this);
 
         sanityCheck();
         return true;

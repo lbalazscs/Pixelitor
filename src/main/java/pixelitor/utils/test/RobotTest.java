@@ -795,7 +795,9 @@ public class RobotTest {
             logRobotEvent("random text layer");
             String layerName = "text layer";
             String layerText = "text layer text";
-            newLayer = new TextLayer(comp, layerName, layerText);
+
+            // TODO
+            newLayer = new TextLayer(comp);
         } else if (r == 1) {
             logRobotEvent("random shape layer");
             String layerName = "shape layer";

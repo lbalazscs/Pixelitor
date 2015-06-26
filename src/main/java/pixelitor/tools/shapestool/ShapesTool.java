@@ -123,7 +123,7 @@ public class ShapesTool extends Tool {
 
     private void showEffectsDialog() {
         if (effectsPanel == null) {
-            effectsPanel = new EffectsPanel(null);
+            effectsPanel = new EffectsPanel(null, null);
         }
 
         effectsDialog = new OKCancelDialog(effectsPanel, "Effects") {
@@ -333,7 +333,7 @@ public class ShapesTool extends Tool {
 
         if (action.drawEffects()) {
             if (effectsPanel != null) {
-                AreaEffect[] areaEffects = effectsPanel.getEffectsAsArray();
+                AreaEffect[] areaEffects = effectsPanel.getEffects().asArray();
                 for (AreaEffect effect : areaEffects) {
                     if (action.hasFill()) {
                         effect.apply(g, currentShape, 0, 0);

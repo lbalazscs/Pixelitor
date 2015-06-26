@@ -221,6 +221,7 @@ public class TextPainter extends AbstractAreaPainter<Object> {
     protected Shape provideShape(Graphics2D g2, Object comp, int width, int height) {
         Font font = calculateFont(comp);
         String text = calculateText(comp);
+        assert font != null; // lbalazscs
         FontMetrics metrics = g2.getFontMetrics(font);
         GlyphVector vect = font.createGlyphVector(g2.getFontRenderContext(), text);
         return vect.getOutline(0f, 0f + metrics.getAscent());

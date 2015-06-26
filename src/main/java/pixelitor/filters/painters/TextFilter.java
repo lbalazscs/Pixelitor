@@ -20,14 +20,9 @@ package pixelitor.filters.painters;
 import org.jdesktop.swingx.painter.TextPainter;
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.FilterWithGUI;
-import pixelitor.utils.ImageUtils;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-
-import static java.awt.Color.BLACK;
-import static java.awt.Color.WHITE;
-import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 
 /**
  * Adds a centered text to the current layer
@@ -47,30 +42,16 @@ public class TextFilter extends FilterWithGUI {
             return src;
         }
 
-        int width = dest.getWidth();
-        int height = dest.getHeight();
 
         TextPainter textPainter = new TextPainter();
-        textPainter.setAntialiasing(true);
-        textPainter.setText(settings.getText());
-        textPainter.setFont(settings.getFont());
-        textPainter.setAreaEffects(settings.getAreaEffects());
-
-        textPainter.setHorizontalAlignment(settings.getHorizontalAlignment());
-        textPainter.setVerticalAlignment(settings.getVerticalAlignment());
+        settings.configurePainter(textPainter);
 
         if (settings.isWatermark()) {
-            // the text is with white on black background on the bump map image
-            BufferedImage bumpImage = new BufferedImage(width, height, TYPE_INT_RGB);
-            Graphics2D g = bumpImage.createGraphics();
-            g.setColor(BLACK);
-            g.fillRect(0, 0, width, height);
-            textPainter.setFillPaint(WHITE);
-            textPainter.paint(g, this, width, height);
-            g.dispose();
-
-            dest = ImageUtils.bumpMap(src, bumpImage);
+            dest = settings.watermarkImage(src, textPainter);
         } else {
+            int width = dest.getWidth();
+            int height = dest.getHeight();
+
             textPainter.setFillPaint(settings.getColor());
 
             Graphics2D g = dest.createGraphics();
@@ -83,7 +64,7 @@ public class TextFilter extends FilterWithGUI {
 
     @Override
     public AdjustPanel createAdjustPanel() {
-        return new TextFilterAdjustments(this);
+        return new TextAdjustmentsPanel(this);
     }
 
     @Override

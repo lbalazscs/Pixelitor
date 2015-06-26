@@ -30,6 +30,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
+import java.io.Serializable;
 import java.lang.ref.SoftReference;
 
 /**
@@ -56,7 +57,9 @@ import java.lang.ref.SoftReference;
  *
  * @author rbair
  */
-public abstract class AbstractPainter<T> extends AbstractBean implements Painter<T> {
+public abstract class AbstractPainter<T> extends AbstractBean implements Painter<T>, Serializable {
+    private static final long serialVersionUID = 1L;
+
     /**
      * An enum representing the possible interpolation values of Bicubic, Bilinear, and
      * Nearest Neighbor. These map to the underlying RenderingHints,

@@ -22,13 +22,14 @@ package org.jdesktop.swingx.painter.effects;
 
 import java.awt.Graphics2D;
 import java.awt.Shape;
+import java.io.Serializable;
 
 /**
  * An effect which works on AbstractPathPainters or any thing else which can provide a shape to be drawn.
  *
  * @author joshy
  */
-public interface AreaEffect {
+public interface AreaEffect extends Serializable {
     /*
      * Applies the shape effect. This effect will be drawn on top of the graphics context.
      */

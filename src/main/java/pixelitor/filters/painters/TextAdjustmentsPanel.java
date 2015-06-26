@@ -19,18 +19,20 @@ package pixelitor.filters.painters;
 
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
-import org.jdesktop.swingx.painter.effects.AreaEffect;
+import pixelitor.Composition;
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ColorSelector;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.layers.TextLayer;
 import pixelitor.utils.GridBagHelper;
 import pixelitor.utils.SliderSpinner;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridBagLayout;
@@ -45,9 +47,11 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
 import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
 
 /**
- * Customization Panel for the Centered Text
+ * Customization panel for the text filters and text layers
  */
-public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmentListener, ActionListener {
+public class TextAdjustmentsPanel extends AdjustPanel implements ParamAdjustmentListener, ActionListener {
+    private TextLayer textLayer;
+
     private JTextField textTF;
     private JComboBox<String> fontFamilyChooserCB;
     private SliderSpinner fontSizeSlider;
@@ -58,31 +62,46 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
     private JCheckBox strikeThroughCB;
 //    private JCheckBox kerningCB;
 
-    private final ColorParam color = new ColorParam("Color", BLACK, USER_ONLY_OPACITY);
+    private ColorParam color;
 
     private EffectsPanel effectsPanel;
     private JComboBox<VerticalAlignment> verticalAlignmentCombo;
     private JComboBox<HorizontalAlignment> horizontalAlignmentCombo;
 
-    private final JCheckBox watermarkCB;
+    private JCheckBox watermarkCB;
 
     private static String lastText = "";
 
-    public TextFilterAdjustments(TextFilter textFilter) {
+    public TextAdjustmentsPanel(TextFilter textFilter) {
         super(textFilter);
+        createGUI(null);
+    }
 
+    public TextAdjustmentsPanel(TextLayer textLayer) {
+        super(null);
+        this.textLayer = textLayer;
+        createGUI(textLayer.getSettings());
+    }
+
+    public void createGUI(TextSettings settings) {
         Box verticalBox = Box.createVerticalBox();
 
-        verticalBox.add(createTextPanel());
+        verticalBox.add(createTextPanel(settings));
 
-        verticalBox.add(createFontPanel());
+        verticalBox.add(createFontPanel(settings));
 
-        effectsPanel = new EffectsPanel(this);
+        AreaEffects areaEffects = null;
+        boolean hasWatermark = false;
+        if (settings != null) {
+            areaEffects = settings.getAreaEffects();
+            hasWatermark = settings.isWatermark();
+        }
+        effectsPanel = new EffectsPanel(this, areaEffects);
         effectsPanel.setBorder(BorderFactory.createTitledBorder("Effects"));
 
         verticalBox.add(effectsPanel);
 
-        watermarkCB = new JCheckBox("Use Text for Watermarking");
+        watermarkCB = new JCheckBox("Use Text for Watermarking", hasWatermark);
         watermarkCB.addActionListener(this);
 
         verticalBox.add(watermarkCB);
@@ -90,36 +109,54 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
         add(verticalBox);
     }
 
-    private JPanel createTextPanel() {
+    private JPanel createTextPanel(TextSettings settings) {
         JPanel textPanel = new JPanel();
         textPanel.setLayout(new GridBagLayout());
 
         GridBagHelper gbh = new GridBagHelper(textPanel);
 
         gbh.addLabel("Text:", 0, 0);
-        createTextTF();
+        createTextTF(settings);
         gbh.addLastControl(textTF);
 
         gbh.addLabel("Color", 0, 1);
+        Color defaultColor = settings == null ? BLACK : settings.getColor();
+        color = new ColorParam("Color", defaultColor, USER_ONLY_OPACITY);
         ColorSelector colorSelector = new ColorSelector(color);
         gbh.addLastControl(colorSelector);
         color.setAdjustmentListener(this);
 
-        gbh.addLabel("Vertical Alignment", 0, 2);
         verticalAlignmentCombo = new JComboBox(VerticalAlignment.values());
+        horizontalAlignmentCombo = new JComboBox(HorizontalAlignment.values());
+        if (settings != null) {
+            verticalAlignmentCombo.setSelectedItem(settings.getVerticalAlignment());
+            horizontalAlignmentCombo.setSelectedItem(settings.getHorizontalAlignment());
+        }
+
+        gbh.addLabel("Vertical Alignment", 0, 2);
         verticalAlignmentCombo.addActionListener(this);
         gbh.addControl(verticalAlignmentCombo);
 
         gbh.addLabel("Horizontal Alignment", 2, 2);
-        horizontalAlignmentCombo = new JComboBox(HorizontalAlignment.values());
         horizontalAlignmentCombo.addActionListener(this);
         gbh.addControl(horizontalAlignmentCombo);
 
         return textPanel;
     }
 
-    private void createTextTF() {
-        textTF = new JTextField(lastText, 20);
+    private void createTextTF(TextSettings settings) {
+        String defaultText;
+        if (settings == null) {
+            if (op == null) { // layer mode
+                defaultText = ""; // no last text remembering when creating new text layers
+            } else {
+                defaultText = lastText;
+            }
+        } else {
+            defaultText = settings.getText();
+        }
+
+        textTF = new JTextField(defaultText, 20);
         textTF.setName("textTF");
 
         textTF.getDocument().addDocumentListener(new DocumentListener() {
@@ -140,7 +177,7 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
         });
     }
 
-    private JPanel createFontPanel() {
+    private JPanel createFontPanel(TextSettings settings) {
         JPanel fontPanel = new JPanel();
         fontPanel.setBorder(BorderFactory.createTitledBorder("Font"));
         fontPanel.setLayout(new GridBagLayout());
@@ -148,7 +185,8 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
         GridBagHelper gbh = new GridBagHelper(fontPanel);
 
         gbh.addLabel("Font Size:", 0, 0);
-        RangeParam fontSizeParam = new RangeParam("", 1, 1000, 100);
+        int defaultFontSize = settings == null ? 100 : settings.getFont().getSize();
+        RangeParam fontSizeParam = new RangeParam("", 1, 1000, defaultFontSize);
         fontSizeSlider = new SliderSpinner(fontSizeParam, NONE, false);
         fontSizeSlider.setSliderName("fontSize");
         fontSizeParam.setAdjustmentListener(this);
@@ -158,35 +196,54 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
         GraphicsEnvironment localGE = GraphicsEnvironment.getLocalGraphicsEnvironment();
         String[] availableFonts = localGE.getAvailableFontFamilyNames();
         fontFamilyChooserCB = new JComboBox(availableFonts);
+        if (settings != null) {
+            String fontName = settings.getFont().getFontName();
+            fontFamilyChooserCB.setSelectedItem(fontName);
+        }
         fontFamilyChooserCB.addActionListener(this);
         gbh.addLastControl(fontFamilyChooserCB);
 
+        boolean defaultBold = false;
+        boolean defaultItalic = false;
+        boolean defaultUnderline = false;
+        boolean defaultStrikethrough = false;
+        if (settings != null) {
+            Font font = settings.getFont();
+            defaultBold = font.isBold();
+            defaultItalic = font.isItalic();
+            if (font.hasLayoutAttributes()) {
+                Map<TextAttribute, ?> attributes = font.getAttributes();
+                if (TextAttribute.UNDERLINE_ON.equals(attributes.get(TextAttribute.UNDERLINE))) {
+                    defaultUnderline = true;
+                }
+                if (TextAttribute.STRIKETHROUGH_ON.equals(attributes.get(TextAttribute.STRIKETHROUGH))) {
+                    defaultUnderline = true;
+                }
+            }
+        }
+
         gbh.addLabel("Bold:", 0, 2);
-        boldCB = createAndAddEmphasisCheckBox("boldCB", gbh);
+        boldCB = createAndAddEmphasisCheckBox("boldCB", gbh, defaultBold);
 
-        gbh.addLabel("Italic:", 2, 2);
-        italicCB = createAndAddEmphasisCheckBox("italicCB", gbh);
+        gbh.addLabel("   Italic:", 2, 2);
+        italicCB = createAndAddEmphasisCheckBox("italicCB", gbh, defaultItalic);
 
-        gbh.addLabel("Underline:", 4, 2);
-        underlineCB = createAndAddEmphasisCheckBox("underlineCB", gbh);
+        gbh.addLabel("   Underline:", 4, 2);
+        underlineCB = createAndAddEmphasisCheckBox("underlineCB", gbh, defaultUnderline);
 
-        gbh.addLabel("Strikethrough:", 6, 2);
-        strikeThroughCB = createAndAddEmphasisCheckBox("strikeThroughCB", gbh);
-
-//        gbHelper.addLabel("Kerning:", 8, 2);
-//        kerningCB = createAndAddEmphasisCheckBox("kerningCB");
+        gbh.addLabel("   Strikethrough:", 6, 2);
+        strikeThroughCB = createAndAddEmphasisCheckBox("strikeThroughCB", gbh, defaultStrikethrough);
 
         return fontPanel;
     }
 
-    private JCheckBox createAndAddEmphasisCheckBox(String name, GridBagHelper gbh) {
-        JCheckBox cb = new JCheckBox();
+    private JCheckBox createAndAddEmphasisCheckBox(String name, GridBagHelper gbh, boolean selected) {
+        JCheckBox cb = new JCheckBox("", selected);
         cb.setName(name);
         cb.addActionListener(this);
         gbh.addControl(cb);
         return cb;
     }
-
 
     private Font getSelectedFont() {
         String fontFamily = (String) fontFamilyChooserCB.getSelectedItem();
@@ -226,10 +283,10 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
         String text = textTF.getText();
         lastText = text;
 
-        AreaEffect[] areaEffects = null;
+        AreaEffects areaEffects = null;
         if (effectsPanel != null) {
             effectsPanel.updateEffectsFromGUI();
-            areaEffects = effectsPanel.getEffectsAsArray();
+            areaEffects = effectsPanel.getEffects();
         }
 
         TextSettings settings = new TextSettings(
@@ -238,7 +295,13 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
                 (VerticalAlignment) verticalAlignmentCombo.getSelectedItem(),
                 watermarkCB.isSelected());
 
-        textFilter.setSettings(settings);
-        super.executeFilterPreview();
+        if (textFilter != null) { // filter mode
+            textFilter.setSettings(settings);
+            super.executeFilterPreview();
+        } else {
+            assert textLayer != null;
+            textLayer.setSettings(settings);
+            textLayer.getComposition().imageChanged(Composition.ImageChangeActions.FULL);
+        }
     }
 }

@@ -19,6 +19,7 @@ package pixelitor.utils.debug;
 import pixelitor.Composition;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
+import pixelitor.layers.TextLayer;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -43,6 +44,10 @@ public class CompositionNode extends DebugNode {
                 } else {
                     node = new ImageLayerNode("Layer - " + layer.getName(), imageLayer);
                 }
+                add(node);
+            } else if (layer instanceof TextLayer) {
+                TextLayer textLayer = (TextLayer) layer;
+                TextLayerNode node = new TextLayerNode("Text Layer - " + layer.getName(), textLayer);
                 add(node);
             } else {
                 addQuotedStringChild("Layer of class", layer.getClass().getName());

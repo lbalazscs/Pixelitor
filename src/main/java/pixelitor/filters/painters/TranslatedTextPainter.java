@@ -14,29 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.painters;
 
 import org.jdesktop.swingx.painter.TextPainter;
 
 import java.awt.Font;
-import java.awt.Paint;
 import java.awt.Rectangle;
 
 /**
- * A TextPainter for the text layers.
+ * A TextPainter that can have an extra translation (so that text
+ * layers can be moved with the move tool)
  */
 public class TranslatedTextPainter extends TextPainter {
     private int translationX = 0;
     private int translationY = 0;
 
-    public TranslatedTextPainter(String text, Font font, Paint paint) {
-        super(text, font, paint);
-    }
+    private transient Rectangle lastTextBounds;
 
     @Override
     protected Rectangle calculateLayout(int contentWidth, int contentHeight, int width, int height) {
         Rectangle rectangle = super.calculateLayout(contentWidth, contentHeight, width, height);
         rectangle.translate(translationX, translationY);
+        lastTextBounds = rectangle;
         return rectangle;
     }
 
@@ -56,5 +56,17 @@ public class TranslatedTextPainter extends TextPainter {
 
     public void setTranslationY(int translationY) {
         this.translationY = translationY;
+    }
+
+    public int getTranslationX() {
+        return translationX;
+    }
+
+    public int getTranslationY() {
+        return translationY;
+    }
+
+    public Rectangle getTextBounds() {
+        return lastTextBounds;
     }
 }

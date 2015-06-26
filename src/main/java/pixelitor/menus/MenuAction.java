@@ -17,20 +17,92 @@
 
 package pixelitor.menus;
 
+import pixelitor.ImageComponent;
+import pixelitor.ImageComponents;
+import pixelitor.layers.Layer;
+import pixelitor.layers.TextLayer;
 import pixelitor.utils.Dialogs;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 abstract class MenuAction extends AbstractAction {
+    public enum AllowedLayerType {
+        ANY(null) {
+            @Override
+            boolean isAllowed(Layer layer) {
+                return true;
+            }
+
+            @Override
+            public String getErrorMessage(Layer layer) {
+                return null;
+            }
+        }, HAS_LAYER_MASK("No layer mask") {
+            @Override
+            boolean isAllowed(Layer layer) {
+                return layer.hasLayerMask();
+            }
+
+            @Override
+            public String getErrorMessage(Layer layer) {
+                return String.format("The layer \"%s\" has no layer mask.", layer.getName());
+            }
+        }, IS_TEXT_LAYER("Not text layer") {
+            @Override
+            boolean isAllowed(Layer layer) {
+                return (layer instanceof TextLayer);
+            }
+
+            @Override
+            public String getErrorMessage(Layer layer) {
+                return String.format("The layer \"%s\" is not a text layer.", layer.getName());
+            }
+        };
+
+        private String errorTitle;
+
+        AllowedLayerType(String errorTitle) {
+            this.errorTitle = errorTitle;
+        }
+
+        abstract boolean isAllowed(Layer layer);
+
+        public abstract String getErrorMessage(Layer layer);
+
+        public String getErrorTitle() {
+            return errorTitle;
+        }
+    }
+
+    private AllowedLayerType layerType;
+
     public MenuAction(String name) {
         super(name);
+        layerType = AllowedLayerType.ANY;
+    }
+
+    public MenuAction(String name, AllowedLayerType layerType) {
+        super(name);
+        this.layerType = layerType;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
-            onClick();
+            if (layerType == AllowedLayerType.ANY) {
+                onClick();
+            } else {
+                ImageComponent ic = ImageComponents.getActiveImageComponent();
+                Layer activeLayer = ic.getComp().getActiveLayer();
+                if (layerType.isAllowed(activeLayer)) {
+                    onClick();
+                } else {
+                    String errorTitle = layerType.getErrorTitle();
+                    String errorMessage = layerType.getErrorMessage(activeLayer);
+                    Dialogs.showInfoDialog(errorTitle, errorMessage);
+                }
+            }
         } catch (Exception ex) {
             Dialogs.showExceptionDialog(ex);
         }

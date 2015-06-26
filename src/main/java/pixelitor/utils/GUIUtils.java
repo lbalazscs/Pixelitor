@@ -110,7 +110,6 @@ public final class GUIUtils {
                 "Copy as Text to the Clipboard", "Close") {
             @Override
             protected void dialogAccepted() {   // "Copy as Text to Clipboard"
-                close();
                 Utils.copyStringToClipboard(text);
             }
         };

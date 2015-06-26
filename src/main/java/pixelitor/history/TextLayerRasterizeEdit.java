@@ -14,33 +14,36 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.history;
 
 import pixelitor.Composition;
-import pixelitor.layers.Layer;
+import pixelitor.layers.ImageLayer;
+import pixelitor.layers.TextLayer;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 /**
- * A PixelitorEdit that represents the hiding or showing of a layer
+ * A PixelitorEdit that represents the rasterization of a text layer
  */
-public class LayerVisibilityChangeEdit extends PixelitorEdit {
-    private Layer layer;
-    private final boolean newVisibility;
+public class TextLayerRasterizeEdit extends PixelitorEdit {
+    private TextLayer before;
+    private ImageLayer after;
 
-    public LayerVisibilityChangeEdit(Composition comp, Layer layer, boolean newVisibility) {
-        super(comp, newVisibility ? "Show Layer" : "Hide Layer");
-        this.newVisibility = newVisibility;
-        this.layer = layer;
+    public TextLayerRasterizeEdit(Composition comp, TextLayer before, ImageLayer after) {
+        super(comp, "Text Layer Rasterize");
+        this.before = before;
+        this.after = after;
+        comp.setDirty(true);
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
-        layer.setVisible(!newVisibility, AddToHistory.NO);
-
+        comp.addLayer(before, AddToHistory.NO, false, false);
+        comp.removeLayer(after, AddToHistory.NO);
         History.notifyMenus(this);
     }
 
@@ -48,8 +51,8 @@ public class LayerVisibilityChangeEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        layer.setVisible(newVisibility, AddToHistory.NO);
-
+        comp.addLayer(after, AddToHistory.NO, false, false);
+        comp.removeLayer(before, AddToHistory.NO);
         History.notifyMenus(this);
     }
 
@@ -57,7 +60,9 @@ public class LayerVisibilityChangeEdit extends PixelitorEdit {
     public void die() {
         super.die();
 
-        layer = null;
+        before = null;
+        after = null;
+        comp = null;
     }
 
     @Override

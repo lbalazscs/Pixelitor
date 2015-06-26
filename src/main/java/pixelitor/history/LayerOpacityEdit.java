@@ -54,7 +54,7 @@ public class LayerOpacityEdit extends PixelitorEdit {
         float tmp = layer.getOpacity();
         layer.setOpacity(backupOpacity, true, AddToHistory.NO, true);
         backupOpacity = tmp;
-        History.postEdit(this);
+        History.notifyMenus(this);
     }
 
     @Override

@@ -48,7 +48,7 @@ public abstract class EffectConfiguratorPanel extends JPanel {
 
     protected final GridBagHelper gbHelper;
 
-    EffectConfiguratorPanel(String effectName, boolean defaultSelected, Color defaultColor) {
+    EffectConfiguratorPanel(String effectName, boolean defaultEnabled, Color defaultColor) {
         setBorder(BorderFactory.createTitledBorder('"' + effectName + "\" Configuration"));
 
         opacityRange = new RangeParam("Width:", 1, 100, 100);
@@ -56,7 +56,7 @@ public abstract class EffectConfiguratorPanel extends JPanel {
 
         enabledCB = new JCheckBox();
         enabledCB.setName("enabledCB");
-        enabledCB.setSelected(defaultSelected);
+        enabledCB.setSelected(defaultEnabled);
 
         colorSwatch = new ColorSwatch(defaultColor, BUTTON_SIZE);
         color = defaultColor;

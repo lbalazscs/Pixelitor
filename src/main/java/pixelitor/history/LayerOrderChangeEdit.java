@@ -40,7 +40,7 @@ public class LayerOrderChangeEdit extends PixelitorEdit {
         super.undo();
 
         comp.swapLayers(newLayerIndex, oldLayerIndex, true);
-        History.postEdit(this);
+        History.notifyMenus(this);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class LayerOrderChangeEdit extends PixelitorEdit {
         super.redo();
 
         comp.swapLayers(oldLayerIndex, newLayerIndex, true);
-        History.postEdit(this);
+        History.notifyMenus(this);
     }
 
     @Override

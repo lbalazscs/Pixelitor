@@ -72,7 +72,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
     CropTool() {
         super('c', "Crop", "crop_tool_icon.png",
                 "Click and drag to define the crop area. Hold SPACE down to move the entire region.",
-                Cursor.getDefaultCursor(), true, true, true, ClipStrategy.FULL_AREA);
+                Cursor.getDefaultCursor(), false, true, true, ClipStrategy.FULL_AREA);
         spaceDragBehavior = true;
         maskOpacityParam.addChangeListener(new ChangeListener() {
             @Override

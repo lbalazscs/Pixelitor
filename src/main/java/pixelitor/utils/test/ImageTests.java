@@ -18,7 +18,6 @@
 package pixelitor.utils.test;
 
 import org.jdesktop.swingx.painter.AbstractLayoutPainter;
-import org.jdesktop.swingx.painter.effects.AreaEffect;
 import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
 import pixelitor.Build;
 import pixelitor.Composition;
@@ -32,6 +31,7 @@ import pixelitor.filters.ColorWheel;
 import pixelitor.filters.ValueNoise;
 import pixelitor.filters.jhlabsproxies.JHDropShadow;
 import pixelitor.filters.jhlabsproxies.JHGaussianBlur;
+import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.TextFilter;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.history.AddToHistory;
@@ -235,9 +235,10 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
         addNewLayer(text);
         TextFilter textFilter = TextFilter.INSTANCE;
 
-        AreaEffect[] effects = null;
+        AreaEffects effects = null;
         if (dropShadow) {
-            effects = new AreaEffect[]{new ShadowPathEffect(1.0f)};
+            effects = new AreaEffects();
+            effects.setDropShadowEffect(new ShadowPathEffect(1.0f));
         }
 
         TextSettings settings = new TextSettings(text, font, textColor, effects,

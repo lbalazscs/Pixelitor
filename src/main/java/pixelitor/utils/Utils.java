@@ -254,11 +254,6 @@ public final class Utils {
     }
 
     public static Point2D calculateOffset(double distance, double angle) {
-//        int offsetX = (int) (distance * Math.cos(angle));
-//        int offsetY = (int) (distance * Math.sin(angle));
-//
-//        return new Point(offsetX, offsetY);
-
         double offsetX = distance * Math.cos(angle);
         double offsetY = distance * Math.sin(angle);
 

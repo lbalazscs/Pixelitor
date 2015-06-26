@@ -42,15 +42,15 @@ public class DeleteLayerEdit extends PixelitorEdit {
 
         comp.addLayer(layer, AddToHistory.NO, true, layerIndex);
 
-        History.postEdit(this);
+        History.notifyMenus(this);
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        comp.removeLayer(layer, true);
-        History.postEdit(this);
+        comp.removeLayer(layer, AddToHistory.NO);
+        History.notifyMenus(this);
     }
 
     @Override

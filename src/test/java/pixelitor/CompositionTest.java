@@ -286,7 +286,7 @@ public class CompositionTest {
     public void testRemoveLayer() {
         checkNumLayers(2);
         Layer layer2 = comp.getLayer(0);
-        comp.removeLayer(layer2, true);
+        comp.removeLayer(layer2, AddToHistory.NO);
         checkNumLayers(1);
     }
 

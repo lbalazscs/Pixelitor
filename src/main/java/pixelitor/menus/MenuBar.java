@@ -104,6 +104,8 @@ import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
 import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.MOTION_BLUR;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
+import static pixelitor.menus.MenuAction.AllowedLayerType.HAS_LAYER_MASK;
+import static pixelitor.menus.MenuAction.AllowedLayerType.IS_TEXT_LAYER;
 
 /**
  * The menu bar of the app
@@ -133,6 +135,7 @@ public class MenuBar extends JMenuBar {
     private static final KeyStroke CTRL_D = KeyStroke.getKeyStroke('D', InputEvent.CTRL_MASK);
     private static final KeyStroke CTRL_SHIFT_I = KeyStroke.getKeyStroke('I', InputEvent.CTRL_MASK + InputEvent.SHIFT_MASK);
     private static final KeyStroke T = KeyStroke.getKeyStroke('T');
+    private static final KeyStroke CTRL_T = KeyStroke.getKeyStroke('T', InputEvent.CTRL_MASK);
     private static final KeyStroke CTRL_E = KeyStroke.getKeyStroke('E', InputEvent.CTRL_MASK);
     private static final KeyStroke CTRL_J = KeyStroke.getKeyStroke('J', InputEvent.CTRL_MASK);
     private static final KeyStroke CTRL_SHIFT_ALT_E = KeyStroke.getKeyStroke('E', InputEvent.CTRL_MASK + InputEvent.ALT_MASK + InputEvent.SHIFT_MASK);
@@ -153,20 +156,20 @@ public class MenuBar extends JMenuBar {
     private static final KeyStroke CTRL_3 = KeyStroke.getKeyStroke('3', InputEvent.CTRL_MASK);
 
 
-    public MenuBar(PixelitorWindow pixelitorWindow) {
-        initFileMenu(pixelitorWindow);
+    public MenuBar(PixelitorWindow pw) {
+        initFileMenu(pw);
         initEditMenu();
-        initLayerMenu();
+        initLayerMenu(pw);
         initSelectionMenu();
         initColorsMenu();
         initFilterMenu();
-        initViewMenu(pixelitorWindow);
+        initViewMenu(pw);
 
         if (Build.CURRENT != Build.FINAL) {
-            initDevelopMenu(pixelitorWindow);
+            initDevelopMenu(pw);
         }
 
-        initHelpMenu(pixelitorWindow);
+        initHelpMenu(pw);
     }
 
     private void initFileMenu(PixelitorWindow pixelitorWindow) {
@@ -486,7 +489,11 @@ public class MenuBar extends JMenuBar {
         initFindEdgesSubmenu(filterMenu);
         initOtherSubmenu(filterMenu);
 
-        createMenuItem(TextFilter.INSTANCE, filterMenu, T);
+        KeyStroke keyStroke = T;
+        if ("true".equals(System.getProperty("advanced.layers"))) {
+            keyStroke = null;
+        }
+        createMenuItem(TextFilter.INSTANCE, filterMenu, keyStroke);
 
         this.add(filterMenu);
     }
@@ -624,7 +631,7 @@ public class MenuBar extends JMenuBar {
         createMenuItem(new Mirror(), dislocateSubmenu);
     }
 
-    private void initLayerMenu() {
+    private void initLayerMenu(PixelitorWindow pw) {
         JMenu layersMenu = createMenu("Layer", 'L');
 
         layersMenu.add(AddNewLayerAction.INSTANCE);
@@ -679,6 +686,7 @@ public class MenuBar extends JMenuBar {
 
         if ("true".equals(System.getProperty("advanced.layers"))) {
             initLayerMaskSubmenu(layersMenu);
+            initTextLayerSubmenu(layersMenu, pw);
         }
 
         this.add(layersMenu);
@@ -711,7 +719,7 @@ public class MenuBar extends JMenuBar {
             }
         }, layerMaskSubMenu);
 
-        Action deleteLayerMask = new LayerMaskMenuAction("Delete") {
+        Action deleteLayerMask = new MenuAction("Delete", HAS_LAYER_MASK) {
             @Override
             void onClick() {
                 ImageComponent ic = ImageComponents.getActiveImageComponent();
@@ -729,7 +737,7 @@ public class MenuBar extends JMenuBar {
 
         layerMaskSubMenu.addSeparator();
 
-        createMenuItem(new LayerMaskMenuAction("Show and Edit Composition") {
+        createMenuItem(new MenuAction("Show and Edit Composition") {
             @Override
             void onClick() {
                 ImageComponent ic = ImageComponents.getActiveImageComponent();
@@ -740,7 +748,7 @@ public class MenuBar extends JMenuBar {
             }
         }, layerMaskSubMenu, CTRL_1);
 
-        createMenuItem(new LayerMaskMenuAction("Show and Edit Mask") {
+        createMenuItem(new MenuAction("Show and Edit Mask", HAS_LAYER_MASK) {
             @Override
             void onClick() {
                 ImageComponent ic = ImageComponents.getActiveImageComponent();
@@ -751,7 +759,7 @@ public class MenuBar extends JMenuBar {
             }
         }, layerMaskSubMenu, CTRL_2);
 
-        createMenuItem(new LayerMaskMenuAction("Show Composition but Edit Mask") {
+        createMenuItem(new MenuAction("Show Composition, but Edit Mask", HAS_LAYER_MASK) {
             @Override
             void onClick() {
                 ImageComponent ic = ImageComponents.getActiveImageComponent();
@@ -870,25 +878,13 @@ public class MenuBar extends JMenuBar {
         viewMenu.add(arrangeWindowsSubmenu);
     }
 
-    private void initDevelopMenu(PixelitorWindow pixelitorWindow) {
+    private void initDevelopMenu(PixelitorWindow pw) {
         JMenu developMenu = createMenu("Develop", 'D');
 
-        initDebugSubmenu(developMenu, pixelitorWindow);
-        initTestSubmenu(developMenu, pixelitorWindow);
+        initDebugSubmenu(developMenu, pw);
+        initTestSubmenu(developMenu, pw);
         initSplashSubmenu(developMenu);
         initExperimentalSubmenu(developMenu);
-
-        Action newTextLayer = new MenuAction("New Text Layer...") {
-            @Override
-            void onClick() {
-                String s = JOptionPane.showInputDialog(pixelitorWindow, "Text:", "Text Layer Text", JOptionPane.QUESTION_MESSAGE);
-                Composition comp = ImageComponents.getActiveComp().get();
-                TextLayer textLayer = new TextLayer(comp, "text layer", s);
-
-                comp.addLayer(textLayer, AddToHistory.YES, true, false);
-            }
-        };
-        createMenuItem(newTextLayer, developMenu);
 
         Action newAdjustmentLayer = new MenuAction("New Global Adjustment Layer...") {
             @Override
@@ -905,7 +901,7 @@ public class MenuBar extends JMenuBar {
         Action filterCreatorAction = new MenuAction("Filter Creator...") {
             @Override
             void onClick() {
-                FilterCreator.showInDialog(pixelitorWindow);
+                FilterCreator.showInDialog(pw);
             }
         };
         createMenuItem(filterCreatorAction, developMenu, EnabledIf.ACTION_ENABLED);
@@ -985,6 +981,33 @@ public class MenuBar extends JMenuBar {
         createMenuItem(updateFromMask, developMenu);
 
         this.add(developMenu);
+    }
+
+    private void initTextLayerSubmenu(JMenu parentMenu, PixelitorWindow pw) {
+        JMenu textLayerMenu = new JMenu("Text Layer");
+
+        createMenuItem(new MenuAction("New...") {
+            @Override
+            void onClick() {
+                TextLayer.createNew(pw);
+            }
+        }, textLayerMenu, T);
+
+        createMenuItem(new MenuAction("Edit...", IS_TEXT_LAYER) {
+            @Override
+            void onClick() {
+                TextLayer.editActive(pw);
+            }
+        }, textLayerMenu, CTRL_T);
+
+        createMenuItem(new MenuAction("Rasterize", IS_TEXT_LAYER) {
+            @Override
+            void onClick() {
+                TextLayer.replaceWithRasterized();
+            }
+        }, textLayerMenu);
+
+        parentMenu.add(textLayerMenu);
     }
 
     private static void initSplashSubmenu(JMenu developMenu) {

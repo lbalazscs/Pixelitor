@@ -35,7 +35,7 @@ public class LayerButton extends JToggleButton {
     private JCheckBox visibilityCB;
 
     private boolean userInteraction = true;
-    private JTextField nameEditor;
+    private JTextField nameEditor; // actually, a LayerNameEditor subclass
 
     /**
      * The Y coordinate in the parent when it is not dragging
@@ -130,6 +130,10 @@ public class LayerButton extends JToggleButton {
 
     public boolean isVisibilityChecked() {
         return visibilityCB.isSelected();
+    }
+
+    public void changeNameProgrammatically(String newName) {
+        nameEditor.setText(newName);
     }
 
     @Override

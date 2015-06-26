@@ -117,14 +117,29 @@ public class Pixelitor {
      * A possibility for automatic debugging or testing
      */
     private static void afterStartTestActions(PixelitorWindow pw) {
-        if(Build.CURRENT == Build.FINAL) {
+        if (Build.CURRENT == Build.FINAL) {
             // in the final builds nothing should run
             return;
         }
 
-//        // add layer mask
-//        Layer layer = ImageComponents.getActiveLayer().get();
-//        layer.addLayerMask(LayerMaskAddType.REVEAL_ALL);
+//        Tools.CROP.getButton().doClick();
+//
+//        NewImage.addNewImage(FillType.WHITE, 600, 400, "Test");
+//
+//        TextLayer.createNew(pw);
+
+//        ImageComponents.getActiveLayer().get()
+//                .addLayerMask(LayerMaskAddType.REVEAL_ALL_BYTE_GRAY);
+
+//        NewImage.addNewImage(FillType.WHITE, 600, 400, "Test INT_ARGB");
+//        ImageComponents.getActiveLayer().get()
+//                .addLayerMask(LayerMaskAddType.REVEAL_ALL_INT_ARGB);
+//
+//        NewImage.addNewImage(FillType.WHITE, 600, 400, "Test INT_RGB");
+//        ImageComponents.getActiveLayer().get()
+//                .addLayerMask(LayerMaskAddType.REVEAL_ALL_INT_RGB);
+
+
 //        // show and edit layer mask
 //        ImageComponent ic = ImageComponents.getActiveImageComponent();
 //        Layer activeLayer = ic.getComp().getActiveLayer();
@@ -132,13 +147,7 @@ public class Pixelitor {
 //        FgBgColorSelector.INSTANCE.setLayerMaskEditing(true);
 //        activeLayer.setLayerMaskEditing(true);
 
-
-
-//        NewImage.addNewImage(FillType.WHITE, 500, 500, "Test");
-//        ImageComponents.getActiveImageComponent().setZoom(ZoomLevel.Z100, false);
 //        new DrunkVision().actionPerformed(null);
-//        Tools.GRADIENT.getButton().doClick();
-//        new Voronoi().actionPerformed(null);
 
 //        new ChannelToTransparency().actionPerformed(null);
 
@@ -165,7 +174,6 @@ public class Pixelitor {
 
 //        History.showHistory();
 
-//        Tools.SHAPES.getButton().doClick();
 //        Tools.SHAPES.setAction(ShapesAction.STROKE);
 //        Tools.SHAPES.setStrokeType(StrokeType.WOBBLE);
 

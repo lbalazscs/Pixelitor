@@ -171,6 +171,6 @@ public class OneLayerUndoableEdit extends PixelitorEdit {
         backupCanvasWidth = tmpCanvasWidth;
         backupCanvasHeight = tmpCanvasHeight;
 
-        History.postEdit(this);
+        History.notifyMenus(this);
     }
 }

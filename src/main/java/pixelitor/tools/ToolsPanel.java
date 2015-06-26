@@ -18,7 +18,9 @@
 package pixelitor.tools;
 
 import pixelitor.GlobalKeyboardWatch;
+import pixelitor.PixelitorWindow;
 import pixelitor.filters.painters.TextFilter;
+import pixelitor.layers.TextLayer;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -47,7 +49,11 @@ public class ToolsPanel extends JPanel {
         Action textToolAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                TextFilter.INSTANCE.actionPerformed(e);
+                if ("true".equals(System.getProperty("advanced.layers"))) {
+                    TextLayer.createNew(PixelitorWindow.getInstance());
+                } else {
+                    TextFilter.INSTANCE.actionPerformed(e);
+                }
             }
         };
         GlobalKeyboardWatch.addKeyboardShortCut('t', true, "text", textToolAction);

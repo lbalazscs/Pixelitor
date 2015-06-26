@@ -39,8 +39,8 @@ public class NewLayerEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        comp.removeLayer(layer, true);
-        History.postEdit(this);
+        comp.removeLayer(layer, AddToHistory.NO);
+        History.notifyMenus(this);
     }
 
     @Override
@@ -49,7 +49,7 @@ public class NewLayerEdit extends PixelitorEdit {
 
         comp.addLayer(layer, AddToHistory.NO, true, false);
 
-        History.postEdit(this);
+        History.notifyMenus(this);
     }
 
     @Override

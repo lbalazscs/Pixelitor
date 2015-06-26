@@ -50,7 +50,7 @@ public class History {
     /**
      * This is used to notify the menu items
      */
-    public static void postEdit(PixelitorEdit edit) {
+    public static void notifyMenus(PixelitorEdit edit) {
         undoableEditSupport.postEdit(edit);
     }
 
@@ -63,7 +63,7 @@ public class History {
             undoManager.discardAllEdits();
         }
 
-        numUndoneEdits = 0; // reset BEFORE calling postEdit, so that the fade menu item can become enabled
+        numUndoneEdits = 0; // reset BEFORE posting, so that the fade menu item can become enabled
         undoableEditSupport.postEdit(edit);
 
         if (Build.CURRENT != Build.FINAL) {

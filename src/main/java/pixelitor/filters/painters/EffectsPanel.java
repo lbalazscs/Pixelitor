@@ -17,7 +17,6 @@
 
 package pixelitor.filters.painters;
 
-import org.jdesktop.swingx.painter.effects.AreaEffect;
 import org.jdesktop.swingx.painter.effects.GlowPathEffect;
 import org.jdesktop.swingx.painter.effects.InnerGlowPathEffect;
 import org.jdesktop.swingx.painter.effects.NeonBorderEffect;
@@ -30,8 +29,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
-import java.util.List;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.GREEN;
@@ -46,25 +43,24 @@ public class EffectsPanel extends JPanel {
     public static final String NEON_BORDER_TAB_NAME = "Neon Border ";
     public static final String DROP_SHADOW_TAB_NAME = "Drop Shadow";
 
-    private final EffectConfiguratorPanel glowConfigurator;
-    private final EffectConfiguratorPanel innerGlowConfigurator;
-    private final NeonBorderEffectConfiguratorPanel neonBorderConfigurator;
-    private final DropShadowEffectConfiguratorPanel dropShadowConfigurator;
-
-    private GlowPathEffect glowEffect;
-    private InnerGlowPathEffect innerGlowEffect;
-    private NeonBorderEffect neonBorderEffect;
-    private ShadowPathEffect dropShadowEffect;
+    private EffectConfiguratorPanel glowConfigurator;
+    private EffectConfiguratorPanel innerGlowConfigurator;
+    private NeonBorderEffectConfiguratorPanel neonBorderConfigurator;
+    private DropShadowEffectConfiguratorPanel dropShadowConfigurator;
 
     private final JTabbedPane tabs;
 
-    public EffectsPanel(ParamAdjustmentListener listener) {
+    AreaEffects returnedEffects;
+
+    public EffectsPanel(ParamAdjustmentListener listener, AreaEffects givenEffects) {
+        this.returnedEffects = new AreaEffects();
+
         setLayout(new BorderLayout());
 
-        glowConfigurator = new SimpleEffectConfiguratorPanel("Glow", false, WHITE, 10);
-        innerGlowConfigurator = new SimpleEffectConfiguratorPanel("Inner Glow", false, WHITE, 10);
-        neonBorderConfigurator = new NeonBorderEffectConfiguratorPanel(false, GREEN, WHITE, 10);
-        dropShadowConfigurator = new DropShadowEffectConfiguratorPanel(false, BLACK);
+        initGlowConfigurator(givenEffects);
+        initInnerGlowConfigurator(givenEffects);
+        initNeonBorderConfigurator(givenEffects);
+        initDropShadowConfigurator(givenEffects);
 
         if (listener != null) {
             glowConfigurator.setAdjustmentListener(listener);
@@ -87,6 +83,82 @@ public class EffectsPanel extends JPanel {
         add(tabs, BorderLayout.CENTER);
     }
 
+    private void initGlowConfigurator(AreaEffects effects) {
+        boolean defaultEnabled = false;
+        Color defaultColor = WHITE;
+        int defaultWidth = 10;
+        if (effects != null) {
+            GlowPathEffect effect = effects.getGlowEffect();
+            if (effect != null) {
+                defaultEnabled = true;
+                defaultColor = effect.getBrushColor();
+                defaultWidth = effect.getEffectWidth();
+            }
+
+        }
+        glowConfigurator = new SimpleEffectConfiguratorPanel(
+                "Glow", defaultEnabled, defaultColor, defaultWidth);
+    }
+
+    private void initInnerGlowConfigurator(AreaEffects effects) {
+        boolean defaultEnabled = false;
+        Color defaultColor = WHITE;
+        int defaultWidth = 10;
+        if (effects != null) {
+            InnerGlowPathEffect effect = effects.getInnerGlowEffect();
+            if (effect != null) {
+                defaultEnabled = true;
+                defaultColor = effect.getBrushColor();
+                defaultWidth = effect.getEffectWidth();
+            }
+        }
+        innerGlowConfigurator = new SimpleEffectConfiguratorPanel(
+                "Inner Glow", defaultEnabled, defaultColor, defaultWidth);
+    }
+
+    private void initNeonBorderConfigurator(AreaEffects effects) {
+        boolean defaultEnabled = false;
+        Color defaultColor = GREEN;
+        Color defaultInnerColor = WHITE;
+        int defaultWidth = 10;
+        if (effects != null) {
+            NeonBorderEffect effect = effects.getNeonBorderEffect();
+            if (effect != null) {
+                defaultEnabled = true;
+                defaultColor = effect.getEdgeColor();
+                defaultInnerColor = effect.getCenterColor();
+                defaultWidth = effect.getEffectWidth();
+            }
+        }
+        neonBorderConfigurator = new NeonBorderEffectConfiguratorPanel(
+                defaultEnabled, defaultColor, defaultInnerColor, defaultWidth);
+    }
+
+    private void initDropShadowConfigurator(AreaEffects effects) {
+        boolean defaultEnabled = false;
+        Color defaultColor = BLACK;
+        int defaultDistance = 10;
+        double defaultAngle = 0.7;
+        int defaultSpread = 10;
+        if (effects != null) {
+            ShadowPathEffect effect = effects.getDropShadowEffect();
+            if (effect != null) {
+                defaultEnabled = true;
+                defaultColor = effect.getBrushColor();
+
+                Point2D offset = effect.getOffset();
+                double x = offset.getX();
+                double y = offset.getY();
+                defaultDistance = (int) Math.sqrt(x * x + y * y);
+                defaultAngle = Math.atan2(y, x);
+
+                defaultSpread = effect.getEffectWidth();
+            }
+        }
+        dropShadowConfigurator = new DropShadowEffectConfiguratorPanel(
+                defaultEnabled, defaultColor, defaultDistance, defaultAngle, defaultSpread);
+    }
+
     public void updateEffectsFromGUI() {
         updateGlowFromGUI();
         updateInnerGlowFromGUI();
@@ -95,24 +167,25 @@ public class EffectsPanel extends JPanel {
     }
 
     private void updateGlowFromGUI() {
+        GlowPathEffect glowEffect = null;
         if (glowConfigurator.isSelected()) {
             glowEffect = new GlowPathEffect(glowConfigurator.getOpacity());
             glowConfigurator.updateEffectColorAndBrush(glowEffect);
-        } else {
-            glowEffect = null;
         }
+        returnedEffects.setGlowEffect(glowEffect);
     }
 
     private void updateInnerGlowFromGUI() {
+        InnerGlowPathEffect innerGlowEffect = null;
         if (innerGlowConfigurator.isSelected()) {
             innerGlowEffect = new InnerGlowPathEffect(innerGlowConfigurator.getOpacity());
             innerGlowConfigurator.updateEffectColorAndBrush(innerGlowEffect);
-        } else {
-            innerGlowEffect = null;
         }
+        returnedEffects.setInnerGlowEffect(innerGlowEffect);
     }
 
     private void updateNeonBorderFromGUI() {
+        NeonBorderEffect neonBorderEffect = null;
         if (neonBorderConfigurator.isSelected()) {
             Color edgeColor = neonBorderConfigurator.getColor();
             Color centerColor = neonBorderConfigurator.getInnerColor();
@@ -120,19 +193,18 @@ public class EffectsPanel extends JPanel {
 
             neonBorderEffect = new NeonBorderEffect(edgeColor, centerColor, effectWidth,
                     neonBorderConfigurator.getOpacity());
-        } else {
-            neonBorderEffect = null;
         }
+        returnedEffects.setNeonBorderEffect(neonBorderEffect);
     }
 
     private void updateDropShadowFromGUI() {
+        ShadowPathEffect dropShadowEffect = null;
         if (dropShadowConfigurator.isSelected()) {
             dropShadowEffect = new ShadowPathEffect(dropShadowConfigurator.getOpacity());
             dropShadowConfigurator.updateEffectColorAndBrush(dropShadowEffect);
             dropShadowEffect.setOffset(dropShadowConfigurator.getOffset());
-        } else {
-            dropShadowEffect = null;
         }
+        returnedEffects.setDropShadowEffect(dropShadowEffect);
     }
 
     private void addTab(String name, EffectConfiguratorPanel configurator) {
@@ -148,57 +220,12 @@ public class EffectsPanel extends JPanel {
         tabs.setTabComponentAt(tabs.getTabCount() - 1, tabPanel);
     }
 
-    public AreaEffect[] getEffectsAsArray() {
-        List<AreaEffect> effects = new ArrayList<>(2);
-        // draw the drop shadow first so that it doesn't get painted over other effects
-        if (dropShadowEffect != null) {
-            effects.add(dropShadowEffect);
-        }
-        if (glowEffect != null) {
-            effects.add(glowEffect);
-        }
-        if (innerGlowEffect != null) {
-            effects.add(innerGlowEffect);
-        }
-        if (neonBorderEffect != null) {
-            effects.add(neonBorderEffect);
-        }
-        AreaEffect[] retVal = effects.toArray(new AreaEffect[effects.size()]);
-        return retVal;
+    public AreaEffects getEffects() {
+        return returnedEffects;
     }
 
     public int getMaxEffectThickness() {
-        // TODO what about the inner glow?
-        int max = 0;
-        if (glowEffect != null) {
-            int effectWidth = glowEffect.getEffectWidth();
-            if (effectWidth > max) {
-                max = effectWidth;
-            }
-        }
-        if (neonBorderEffect != null) {
-            int effectWidth = neonBorderEffect.getEffectWidth();
-            if (effectWidth > max) {
-                max = effectWidth;
-            }
-        }
-        if (dropShadowEffect != null) {
-            double safetyFactor = 2.0;
-            int effectWidth = 3 + (int) (dropShadowEffect.getEffectWidth() * safetyFactor);
-
-            Point2D offset = dropShadowEffect.getOffset();
-
-            int xGap = effectWidth + (int) Math.abs(offset.getX() * safetyFactor);
-            if (xGap > max) {
-                max = xGap;
-            }
-            int yGap = effectWidth + (int) Math.abs(offset.getY() * safetyFactor);
-            if (yGap > max) {
-                max = yGap;
-            }
-        }
-
-        return max;
+        return returnedEffects.getMaxEffectThickness();
     }
 }
 

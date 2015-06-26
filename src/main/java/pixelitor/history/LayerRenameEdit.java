@@ -44,7 +44,7 @@ public class LayerRenameEdit extends PixelitorEdit {
 
         layer.setName(nameBefore, AddToHistory.NO);
 
-        History.postEdit(this);
+        History.notifyMenus(this);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class LayerRenameEdit extends PixelitorEdit {
 
         layer.setName(nameAfter, AddToHistory.NO);
 
-        History.postEdit(this);
+        History.notifyMenus(this);
     }
 
 

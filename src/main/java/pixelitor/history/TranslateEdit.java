@@ -80,7 +80,7 @@ public class TranslateEdit extends PixelitorEdit {
         backupTranslationY = tmpY;
         backupImage = tmpBI;
         layer.getComposition().imageChanged(FULL);
-        History.postEdit(this);
+        History.notifyMenus(this);
     }
 
     @Override

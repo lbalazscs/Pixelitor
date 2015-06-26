@@ -32,19 +32,19 @@ public class NeonBorderEffectConfiguratorPanel extends SimpleEffectConfiguratorP
     private Color innerColor;
     private final ColorSwatch innerColorSwatch;
 
-    NeonBorderEffectConfiguratorPanel(boolean defaultSelected, Color defaultColor, Color innerColorParam, int defaultWidth) {
+    NeonBorderEffectConfiguratorPanel(boolean defaultSelected, Color defaultColor, Color innerColor, int defaultWidth) {
         super("Neon Border", defaultSelected, defaultColor, defaultWidth);
 
-        this.innerColor = innerColorParam;
-        innerColorSwatch = new ColorSwatch(innerColor, BUTTON_SIZE);
+        this.innerColor = innerColor;
+        innerColorSwatch = new ColorSwatch(this.innerColor, BUTTON_SIZE);
 
         innerColorSwatch.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                Color selectedColor = ColorPicker.showDialog(PixelitorWindow.getInstance(), "Select Color", innerColor, true);
+                Color selectedColor = ColorPicker.showDialog(PixelitorWindow.getInstance(), "Select Color", NeonBorderEffectConfiguratorPanel.this.innerColor, true);
                 if (selectedColor != null) { // ok was pressed
-                    innerColor = selectedColor;
-                    innerColorSwatch.setForeground(innerColor);
+                    NeonBorderEffectConfiguratorPanel.this.innerColor = selectedColor;
+                    innerColorSwatch.setForeground(NeonBorderEffectConfiguratorPanel.this.innerColor);
                     innerColorSwatch.paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
 
                     if (adjustmentListener != null) {

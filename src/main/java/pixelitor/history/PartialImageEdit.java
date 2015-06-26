@@ -92,7 +92,7 @@ public class PartialImageEdit extends FadeableEdit {
 
         comp.imageChanged(FULL);
 
-        History.postEdit(this);
+        History.notifyMenus(this);
     }
 
     private void debugRaster(String name, Raster raster) {

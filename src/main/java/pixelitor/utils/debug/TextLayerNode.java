@@ -16,22 +16,21 @@
  */
 package pixelitor.utils.debug;
 
-import pixelitor.layers.ImageLayer;
-
-import java.awt.image.BufferedImage;
+import pixelitor.filters.painters.TextSettings;
+import pixelitor.layers.TextLayer;
 
 /**
  * A debugging node for a Layer
  */
-public class ImageLayerNode extends ContentLayerNode {
-    public ImageLayerNode(ImageLayer layer) {
+public class TextLayerNode extends ContentLayerNode {
+    public TextLayerNode(TextLayer layer) {
         this("Layer", layer);
     }
 
-    public ImageLayerNode(String name, ImageLayer layer) {
+    public TextLayerNode(String name, TextLayer layer) {
         super(name, layer);
 
-        BufferedImage image = layer.getImage();
-        add(new BufferedImageNode(image));
+        TextSettings settings = layer.getSettings();
+        addStringChild("text", settings == null ? "NO TEXT SETTINGS!" : settings.getText());
     }
 }
