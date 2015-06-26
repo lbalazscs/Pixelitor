@@ -148,6 +148,11 @@ public class MenuBar extends JMenuBar {
     private static final KeyStroke CTRL_R = KeyStroke.getKeyStroke('R', InputEvent.CTRL_MASK);
     private static final KeyStroke CTRL_ALT_R = KeyStroke.getKeyStroke('R', InputEvent.CTRL_MASK + InputEvent.ALT_MASK);
 
+    private static final KeyStroke CTRL_1 = KeyStroke.getKeyStroke('1', InputEvent.CTRL_MASK);
+    private static final KeyStroke CTRL_2 = KeyStroke.getKeyStroke('2', InputEvent.CTRL_MASK);
+    private static final KeyStroke CTRL_3 = KeyStroke.getKeyStroke('3', InputEvent.CTRL_MASK);
+
+
     public MenuBar(PixelitorWindow pixelitorWindow) {
         initFileMenu(pixelitorWindow);
         initEditMenu();
@@ -682,23 +687,29 @@ public class MenuBar extends JMenuBar {
     private static void initLayerMaskSubmenu(JMenu layerMenu) {
         JMenu layerMaskSubMenu = new JMenu("Layer Mask");
 
-        Action addAllWhiteMask = new MenuAction("Add White (Reveal All)") {
+        createMenuItem(new MenuAction("Add White BYTE_GRAY") {
             @Override
             void onClick() {
                 Layer layer = ImageComponents.getActiveLayer().get();
-                layer.addLayerMask(LayerMaskAddType.REVEAL_ALL);
+                layer.addLayerMask(LayerMaskAddType.REVEAL_ALL_BYTE_GRAY);
             }
-        };
-        createMenuItem(addAllWhiteMask, layerMaskSubMenu);
+        }, layerMaskSubMenu);
 
-        Action addAllBlackMask = new MenuAction("Add Black (Hide All)") {
+        createMenuItem(new MenuAction("Add White INT_ARGB") {
             @Override
             void onClick() {
                 Layer layer = ImageComponents.getActiveLayer().get();
-                layer.addLayerMask(LayerMaskAddType.HIDE_ALL);
+                layer.addLayerMask(LayerMaskAddType.REVEAL_ALL_INT_ARGB);
             }
-        };
-        createMenuItem(addAllBlackMask, layerMaskSubMenu);
+        }, layerMaskSubMenu);
+
+        createMenuItem(new MenuAction("Add White INT_RGB") {
+            @Override
+            void onClick() {
+                Layer layer = ImageComponents.getActiveLayer().get();
+                layer.addLayerMask(LayerMaskAddType.REVEAL_ALL_INT_RGB);
+            }
+        }, layerMaskSubMenu);
 
         Action deleteLayerMask = new LayerMaskMenuAction("Delete") {
             @Override
@@ -718,21 +729,7 @@ public class MenuBar extends JMenuBar {
 
         layerMaskSubMenu.addSeparator();
 
-        ButtonGroup radioGroup = new ButtonGroup();
-
-        Action editLayerMask = new LayerMaskMenuAction("Show and Edit Mask") {
-            @Override
-            void onClick() {
-                ImageComponent ic = ImageComponents.getActiveImageComponent();
-                Layer activeLayer = ic.getComp().getActiveLayer();
-                ic.setShowLayerMask(true);
-                FgBgColorSelector.INSTANCE.setLayerMaskEditing(true);
-                activeLayer.setLayerMaskEditing(true);
-            }
-        };
-        createMenuItem(editLayerMask, layerMaskSubMenu);
-
-        Action showAndEditComposition = new LayerMaskMenuAction("Show and Edit Composition") {
+        createMenuItem(new LayerMaskMenuAction("Show and Edit Composition") {
             @Override
             void onClick() {
                 ImageComponent ic = ImageComponents.getActiveImageComponent();
@@ -741,11 +738,20 @@ public class MenuBar extends JMenuBar {
                 FgBgColorSelector.INSTANCE.setLayerMaskEditing(false);
                 activeLayer.setLayerMaskEditing(false);
             }
-        };
+        }, layerMaskSubMenu, CTRL_1);
 
-        createMenuItem(showAndEditComposition, layerMaskSubMenu);
+        createMenuItem(new LayerMaskMenuAction("Show and Edit Mask") {
+            @Override
+            void onClick() {
+                ImageComponent ic = ImageComponents.getActiveImageComponent();
+                Layer activeLayer = ic.getComp().getActiveLayer();
+                ic.setShowLayerMask(true);
+                FgBgColorSelector.INSTANCE.setLayerMaskEditing(true);
+                activeLayer.setLayerMaskEditing(true);
+            }
+        }, layerMaskSubMenu, CTRL_2);
 
-        Action showCompositionEditMask = new LayerMaskMenuAction("Show Composition but Edit Mask") {
+        createMenuItem(new LayerMaskMenuAction("Show Composition but Edit Mask") {
             @Override
             void onClick() {
                 ImageComponent ic = ImageComponents.getActiveImageComponent();
@@ -754,8 +760,7 @@ public class MenuBar extends JMenuBar {
                 FgBgColorSelector.INSTANCE.setLayerMaskEditing(true);
                 activeLayer.setLayerMaskEditing(true);
             }
-        };
-        createMenuItem(showCompositionEditMask, layerMaskSubMenu);
+        }, layerMaskSubMenu, CTRL_3);
 
         layerMenu.add(layerMaskSubMenu);
     }

@@ -21,7 +21,6 @@ import pixelitor.Composition;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
 import pixelitor.NewImage;
-import pixelitor.layers.ImageLayer;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.FgBgColorSelector;
 import pixelitor.tools.GradientTool;
@@ -137,7 +136,7 @@ public class ToolTests {
             gradientType = GradientType.SPIRAL_CW;
         }
 
-        GradientTool.drawGradient((ImageLayer) comp.getActiveLayer(),
+        GradientTool.drawGradient(comp.getActiveImageLayer(),
                 gradientType,
                 BLACK_TO_WHITE,
                 REFLECT,

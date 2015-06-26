@@ -21,11 +21,13 @@ import pixelitor.Composition;
 import pixelitor.layers.ImageLayer;
 import pixelitor.selection.Selection;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.debug.DataBufferNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
 import java.util.Optional;
 
@@ -47,7 +49,7 @@ public class PartialImageEdit extends FadeableEdit {
 
         this.canRepeat = canRepeat;
         comp.setDirty(true);
-        this.layer = (ImageLayer) comp.getActiveLayer();
+        this.layer = comp.getActiveImageLayer();
 
         saveRectangle = saveRectangleParam;
         backupRaster = image.getData(saveRectangle);
@@ -70,24 +72,43 @@ public class PartialImageEdit extends FadeableEdit {
     private void swapRasters() {
         BufferedImage image = layer.getImage();
 
-        Raster tmpRaster;
+        Raster tmpRaster = null;
         try {
             tmpRaster = image.getData(saveRectangle);
+            image.setData(backupRaster);
         } catch (ArrayIndexOutOfBoundsException e) {
             System.out.println("PartialImageEdit.swapRasters saveRectangle = " + saveRectangle);
             int width = image.getWidth();
             int height = image.getHeight();
             System.out.println("PartialImageEdit.swapRasters width = " + width + ", height = " + height);
 
+            debugRaster("tmpRaster", tmpRaster);
+            debugRaster("backupRaster", backupRaster);
+
             throw e;
         }
 
-        image.setData(backupRaster);
         backupRaster = tmpRaster;
 
         comp.imageChanged(FULL);
 
         History.postEdit(this);
+    }
+
+    private void debugRaster(String name, Raster raster) {
+        Rectangle rasterBounds = raster.getBounds();
+        String className = raster.getClass().getSimpleName();
+        DataBuffer dataBuffer = raster.getDataBuffer();
+        int dataType = dataBuffer.getDataType();
+        String typeAsString = DataBufferNode.getDataBufferTypeDescription(dataType);
+        int numBanks = dataBuffer.getNumBanks();
+        int numBands = raster.getNumBands();
+        int numDataElements = raster.getNumDataElements();
+
+        String msg = String.format("className = %s, rasterBounds = %s, dataType = %d, typeAsString=%s, numBanks = %d, numBands = %d, numDataElements = %d",
+                className, rasterBounds, dataType, typeAsString, numBanks, numBands, numDataElements);
+
+        System.out.println("PartialImageEdit::debugRaster debugging raster: " + name + ": " + msg);
     }
 
     @Override

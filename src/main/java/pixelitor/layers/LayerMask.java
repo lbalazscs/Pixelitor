@@ -25,8 +25,6 @@ import java.awt.image.ColorModel;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
 
-import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
-
 /**
  * A layer mask.
  */
@@ -59,11 +57,12 @@ public class LayerMask extends ImageLayer {
         BufferedImage bwImage = image;
 
         // TODO
-        if (bwImage.getType() != TYPE_BYTE_GRAY) {
+        if (bwImage.getType() != BufferedImage.TYPE_BYTE_GRAY) {
             bwImage = ImageUtils.convertToGrayScaleImage(bwImage);
         }
 
         WritableRaster raster = bwImage.getRaster();
         this.transparencyImage = new BufferedImage(transparencyColorModel, raster, false, null);
+//        this.transparencyImage = new BufferedImage(bwImage.getColorModel(), raster, false, null);
     }
 }

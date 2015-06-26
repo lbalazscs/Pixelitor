@@ -65,7 +65,10 @@ public class OneLayerUndoableEdit extends PixelitorEdit {
             if (nrLayers != 1) { // make backups only if there is only one layer
                 throw new IllegalArgumentException("(backupImage != null, nrLayers = " + nrLayers);
             }
+
+            // TODO this will never return the layer mask
             ImageLayer layer = (ImageLayer) comp.getActiveLayer();
+
             backupTranslationX = layer.getTranslationX();
             backupTranslationY = layer.getTranslationY();
 
@@ -144,6 +147,7 @@ public class OneLayerUndoableEdit extends PixelitorEdit {
             throw new IllegalStateException("nr of layers = " + comp.getNrLayers());
         }
 
+        // TODO this will never return the layer mask
         ImageLayer layer = (ImageLayer) comp.getActiveLayer();
         BufferedImage tmp = layer.getImageOrSubImageIfSelected(false, true);
 
