@@ -17,8 +17,8 @@
 
 package pixelitor.layers;
 
-import org.jdesktop.swingx.painter.TranslatedTextPainter;
 import pixelitor.Composition;
+import pixelitor.filters.painters.TranslatedTextPainter;
 import pixelitor.history.TranslateEdit;
 
 import java.awt.Font;

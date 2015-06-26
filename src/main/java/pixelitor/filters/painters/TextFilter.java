@@ -17,40 +17,24 @@
 
 package pixelitor.filters.painters;
 
-import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
-import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.jdesktop.swingx.painter.TextPainter;
-import org.jdesktop.swingx.painter.effects.AreaEffect;
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.utils.ImageUtils;
 
-import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.util.Random;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
-import static java.awt.Font.BOLD;
-import static java.awt.Font.SANS_SERIF;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 
 /**
  * Adds a centered text to the current layer
  */
 public class TextFilter extends FilterWithGUI {
-    private String text = "Pixelitor";
-    private Font font = new Font(SANS_SERIF, BOLD, 50);
-    private AreaEffect[] areaEffects;
-    private Color color = BLACK;
-
-    private VerticalAlignment verticalAlignment;
-    private HorizontalAlignment horizontalAlignment;
-
+    private TextSettings settings;
     public static final TextFilter INSTANCE = new TextFilter();
-    private boolean watermark;
 
     private TextFilter() {
         super("Text");
@@ -59,7 +43,7 @@ public class TextFilter extends FilterWithGUI {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (text.isEmpty()) {
+        if (settings.getText().isEmpty()) {
             return src;
         }
 
@@ -68,14 +52,14 @@ public class TextFilter extends FilterWithGUI {
 
         TextPainter textPainter = new TextPainter();
         textPainter.setAntialiasing(true);
-        textPainter.setText(text);
-        textPainter.setFont(font);
-        textPainter.setAreaEffects(areaEffects);
+        textPainter.setText(settings.getText());
+        textPainter.setFont(settings.getFont());
+        textPainter.setAreaEffects(settings.getAreaEffects());
 
-        textPainter.setHorizontalAlignment(horizontalAlignment);
-        textPainter.setVerticalAlignment(verticalAlignment);
+        textPainter.setHorizontalAlignment(settings.getHorizontalAlignment());
+        textPainter.setVerticalAlignment(settings.getVerticalAlignment());
 
-        if (watermark) {
+        if (settings.isWatermark()) {
             // the text is with white on black background on the bump map image
             BufferedImage bumpImage = new BufferedImage(width, height, TYPE_INT_RGB);
             Graphics2D g = bumpImage.createGraphics();
@@ -87,7 +71,7 @@ public class TextFilter extends FilterWithGUI {
 
             dest = ImageUtils.bumpMap(src, bumpImage);
         } else {
-            textPainter.setFillPaint(color);
+            textPainter.setFillPaint(settings.getColor());
 
             Graphics2D g = dest.createGraphics();
             textPainter.paint(g, this, width, height);
@@ -97,43 +81,17 @@ public class TextFilter extends FilterWithGUI {
         return dest;
     }
 
-    public void setFont(Font font) {
-        this.font = font;
-    }
-
-    public void setText(String s) {
-        text = s;
-    }
-
-    public void setAreaEffects(AreaEffect[] areaEffects) {
-        this.areaEffects = areaEffects;
-    }
-
-
     @Override
     public AdjustPanel createAdjustPanel() {
         return new TextFilterAdjustments(this);
     }
 
-    public void setWatermark(boolean watermark) {
-        this.watermark = watermark;
-    }
-
-    public void setVerticalAlignment(VerticalAlignment verticalAlignment) {
-        this.verticalAlignment = verticalAlignment;
-    }
-
-    public void setHorizontalAlignment(HorizontalAlignment horizontalAlignment) {
-        this.horizontalAlignment = horizontalAlignment;
-    }
-
-    public void setColor(Color color) {
-        this.color = color;
-    }
-
     @Override
     public void randomizeSettings() {
-        Random random = new Random();
-        text = Long.toHexString(random.nextLong());
+        settings.randomizeText();
+    }
+
+    public void setSettings(TextSettings settings) {
+        this.settings = settings;
     }
 }

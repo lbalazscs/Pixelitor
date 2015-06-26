@@ -33,6 +33,7 @@ import pixelitor.filters.ValueNoise;
 import pixelitor.filters.jhlabsproxies.JHDropShadow;
 import pixelitor.filters.jhlabsproxies.JHGaussianBlur;
 import pixelitor.filters.painters.TextFilter;
+import pixelitor.filters.painters.TextSettings;
 import pixelitor.history.AddToHistory;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.OutputFormat;
@@ -149,19 +150,19 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
 
         FgBgColorSelector.INSTANCE.setFgColor(WHITE);
         Font font = new Font(SPLASH_SCREEN_FONT, Font.BOLD, 48);
-        addTextLayer(ic, "Pixelitor", WHITE, font, -17, BlendingMode.NORMAL, 0.9f, false);
+        addRasterizedTextLayer(ic, "Pixelitor", WHITE, font, -17, BlendingMode.NORMAL, 0.9f, false);
         addDropShadow();
 
         font = new Font(SPLASH_SCREEN_FONT, Font.BOLD, 22);
-        addTextLayer(ic, "Loading...", WHITE, font, -70, BlendingMode.NORMAL, 0.9f, false);
+        addRasterizedTextLayer(ic, "Loading...", WHITE, font, -70, BlendingMode.NORMAL, 0.9f, false);
         addDropShadow();
 
         font = new Font(SPLASH_SCREEN_FONT, Font.PLAIN, 20);
-        addTextLayer(ic, "version " + Build.VERSION_NUMBER, WHITE, font, 50, BlendingMode.NORMAL, 0.9f, false);
+        addRasterizedTextLayer(ic, "version " + Build.VERSION_NUMBER, WHITE, font, 50, BlendingMode.NORMAL, 0.9f, false);
         addDropShadow();
 
 //        font = new Font(Font.SANS_SERIF, Font.PLAIN, 10);
-//        addTextLayer(ic, new Date().toString(), font, 0.8f, 100, false);
+//        addRasterizedTextLayer(ic, new Date().toString(), font, 0.8f, 100, false);
 
     }
 
@@ -200,17 +201,17 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
         NewImage.addNewImage(FillType.TRANSPARENT, 400, 400, "Layer Test");
         Composition comp = ImageComponents.getActiveComp().get();
 
-        addTextLayer(comp, "this should be deleted", 0);
+        addRasterizedTextLayer(comp, "this should be deleted", 0);
 
-        addTextLayer(comp, "this should at the bottom", 100);
+        addRasterizedTextLayer(comp, "this should at the bottom", 100);
         comp.moveActiveLayerToBottom();
 
         comp.moveLayerSelectionUp();
         comp.moveLayerSelectionUp();
         DeleteActiveLayerAction.INSTANCE.actionPerformed(null);
 
-        addTextLayer(comp, "this should at the top", -100);
-        addTextLayer(comp, "this should be selected", 50);
+        addRasterizedTextLayer(comp, "this should at the top", -100);
+        addRasterizedTextLayer(comp, "this should be selected", 50);
         comp.moveActiveLayer(false);
 
 //        ic.moveActiveLayerDown();
@@ -225,26 +226,25 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
         comp.imageChanged(FULL);
     }
 
-    private static void addTextLayer(Composition ic, String text, int translationY) {
+    private static void addRasterizedTextLayer(Composition ic, String text, int translationY) {
         Font font = new Font(Font.SANS_SERIF, Font.BOLD, 20);
-        addTextLayer(ic, text, WHITE, font, translationY, BlendingMode.NORMAL, 1.0f, false);
+        addRasterizedTextLayer(ic, text, WHITE, font, translationY, BlendingMode.NORMAL, 1.0f, false);
     }
 
-    private static void addTextLayer(Composition ic, String text, Color textColor, Font font, int translationY, BlendingMode blendingMode, float opacity, boolean dropShadow) {
+    private static void addRasterizedTextLayer(Composition ic, String text, Color textColor, Font font, int translationY, BlendingMode blendingMode, float opacity, boolean dropShadow) {
         addNewLayer(text);
         TextFilter textFilter = TextFilter.INSTANCE;
-        textFilter.setText(text);
-        textFilter.setFont(font);
-        textFilter.setColor(textColor);
 
-        textFilter.setAreaEffects(null);
-        textFilter.setWatermark(false);
-        textFilter.setHorizontalAlignment(AbstractLayoutPainter.HorizontalAlignment.CENTER);
-        textFilter.setVerticalAlignment(AbstractLayoutPainter.VerticalAlignment.CENTER);
-
+        AreaEffect[] effects = null;
         if (dropShadow) {
-            textFilter.setAreaEffects(new AreaEffect[]{new ShadowPathEffect(1.0f)});
+            effects = new AreaEffect[]{new ShadowPathEffect(1.0f)};
         }
+
+        TextSettings settings = new TextSettings(text, font, textColor, effects,
+                AbstractLayoutPainter.HorizontalAlignment.CENTER,
+                AbstractLayoutPainter.VerticalAlignment.CENTER, false);
+
+        textFilter.setSettings(settings);
         textFilter.execute(OP_WITHOUT_DIALOG);
         ImageLayer layer = (ImageLayer) ic.getActiveLayer();
         layer.setTranslationY(translationY);

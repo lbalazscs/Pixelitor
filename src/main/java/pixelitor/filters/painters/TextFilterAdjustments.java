@@ -77,18 +77,15 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
 
         verticalBox.add(createFontPanel());
 
-//        if (!JVM.isLinux) { // TODO
-            effectsPanel = new EffectsPanel(this);
-            effectsPanel.setBorder(BorderFactory.createTitledBorder("Effects"));
+        effectsPanel = new EffectsPanel(this);
+        effectsPanel.setBorder(BorderFactory.createTitledBorder("Effects"));
 
-            verticalBox.add(effectsPanel);
-//        }
+        verticalBox.add(effectsPanel);
 
         watermarkCB = new JCheckBox("Use Text for Watermarking");
         watermarkCB.addActionListener(this);
 
         verticalBox.add(watermarkCB);
-
 
         add(verticalBox);
     }
@@ -228,21 +225,20 @@ public class TextFilterAdjustments extends AdjustPanel implements ParamAdjustmen
         TextFilter textFilter = (TextFilter) op;
         String text = textTF.getText();
         lastText = text;
-        textFilter.setText(text);
-        textFilter.setFont(getSelectedFont());
 
+        AreaEffect[] areaEffects = null;
         if (effectsPanel != null) {
             effectsPanel.updateEffectsFromGUI();
-            AreaEffect[] areaEffects = effectsPanel.getEffectsAsArray();
-            textFilter.setAreaEffects(areaEffects);
+            areaEffects = effectsPanel.getEffectsAsArray();
         }
-        textFilter.setWatermark(watermarkCB.isSelected());
 
-        textFilter.setVerticalAlignment((VerticalAlignment) verticalAlignmentCombo.getSelectedItem());
-        textFilter.setHorizontalAlignment((HorizontalAlignment) horizontalAlignmentCombo.getSelectedItem());
-        textFilter.setColor(color.getColor());
+        TextSettings settings = new TextSettings(
+                text, getSelectedFont(), color.getColor(), areaEffects,
+                (HorizontalAlignment) horizontalAlignmentCombo.getSelectedItem(),
+                (VerticalAlignment) verticalAlignmentCombo.getSelectedItem(),
+                watermarkCB.isSelected());
 
+        textFilter.setSettings(settings);
         super.executeFilterPreview();
     }
-
 }
