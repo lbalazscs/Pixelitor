@@ -138,7 +138,7 @@ public class AbstractAreaEffect implements AreaEffect {
         g.setComposite(savedComposite);
     }
 
-    BufferedImage _clipImage = null;
+    transient BufferedImage _clipImage = null;
 
     private BufferedImage getClipImage(final Rectangle effectBounds) {
         // set up a temp buffer
