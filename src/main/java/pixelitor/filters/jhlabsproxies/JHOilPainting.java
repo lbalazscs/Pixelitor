@@ -24,26 +24,25 @@ import pixelitor.filters.gui.RangeParam;
 import java.awt.image.BufferedImage;
 
 /**
- * Dry Brush based on the JHLabs OilFilter
+ * Oil Painting based on the JHLabs OilFilter
  */
-public class JHDryBrush extends FilterWithParametrizedGUI {
+public class JHOilPainting extends FilterWithParametrizedGUI {
     private final RangeParam brushSize = new RangeParam("Brush Size", 0, 5, 0);
-    private final RangeParam numberOfLevels = new RangeParam("Coarseness", 1, 255, 128);
+    private final RangeParam coarseness = new RangeParam("Coarseness", 2, 255, 25);
 
     private OilFilter filter;
 
-    public JHDryBrush() {
-        super("Dry Brush", true, false);
+    public JHOilPainting() {
+        super("Oil Painting", true, false);
         setParamSet(new ParamSet(
                 brushSize, // takes forever for large images if this is scaled with the size of image
-                numberOfLevels
+                coarseness
         ));
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        int range = brushSize.getValue();
-        if (range == 0) {
+        if (brushSize.getValue() == 0) {
             return src;
         }
 
@@ -51,8 +50,8 @@ public class JHDryBrush extends FilterWithParametrizedGUI {
             filter = new OilFilter();
         }
 
-        filter.setRange(range);
-        filter.setLevels(numberOfLevels.getValue());
+        filter.setRange(brushSize.getValue());
+        filter.setLevels(coarseness.getValue());
 
         dest = filter.filter(src, dest);
         return dest;

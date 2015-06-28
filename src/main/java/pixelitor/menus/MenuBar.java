@@ -542,7 +542,7 @@ public class MenuBar extends JMenuBar {
         createMenuItem(new JHCrystallize(), artisticFiltersSubmenu);
         createMenuItem(new JHPointillize(), artisticFiltersSubmenu);
         createMenuItem(new JHStamp(), artisticFiltersSubmenu);
-        createMenuItem(new JHDryBrush(), artisticFiltersSubmenu);
+        createMenuItem(new JHOilPainting(), artisticFiltersSubmenu);
 
         createMenuItem(new RandomSpheres(), artisticFiltersSubmenu);
         createMenuItem(new JHSmear(), artisticFiltersSubmenu);
