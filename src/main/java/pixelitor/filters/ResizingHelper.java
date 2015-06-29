@@ -46,7 +46,7 @@ public class ResizingHelper {
         return resizeFactor;
     }
 
-    public BufferedImage invoke(IntChoiceParam detailQuality, BufferedImageOp filter) {
+    public BufferedImage invoke(int quality, BufferedImageOp filter) {
         assert resizeFactor > 1.0;
         BufferedImage dest;
 
@@ -54,7 +54,6 @@ public class ResizingHelper {
 
         BufferedImage smallDest = filter.filter(smallSrc, null);
 
-        int quality = detailQuality.getValue();
         if (quality == BILINEAR_FAST) {
             dest = ImageUtils.createCompatibleDest(src);
             Graphics2D g2 = dest.createGraphics();
@@ -96,6 +95,6 @@ public class ResizingHelper {
         return new IntChoiceParam("Detail Quality", new IntChoiceParam.Value[]{
                 new IntChoiceParam.Value("Faster", ResizingHelper.BILINEAR_FAST),
                 new IntChoiceParam.Value("Better", ResizingHelper.BILINEAR11),
-        });
+        }, true);
     }
 }

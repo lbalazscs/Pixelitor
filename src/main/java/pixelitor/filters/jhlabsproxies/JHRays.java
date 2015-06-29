@@ -16,13 +16,17 @@
  */
 package pixelitor.filters.jhlabsproxies;
 
+import com.jhlabs.composite.MiscComposite;
 import com.jhlabs.image.RaysFilter;
 import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ResizingHelper;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 
+import java.awt.AlphaComposite;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 /**
@@ -31,7 +35,7 @@ import java.awt.image.BufferedImage;
 public class JHRays extends FilterWithParametrizedGUI {
     private final ImagePositionParam center = new ImagePositionParam("Light Source");
     private final RangeParam rotation = new RangeParam("Twirl", -90, 90, 0);
-    private final RangeParam zoom = new RangeParam("Length", 0, 200, 20);
+    private final RangeParam length = new RangeParam("Length", 0, 200, 20);
     private final RangeParam opacity = new RangeParam("Opacity (%)", 0, 100, 80);
     private final RangeParam strength = new RangeParam("Strength", 0, 500, 200);
     private final RangeParam threshold = new RangeParam("Threshold (%)", 0, 100, 25);
@@ -45,7 +49,7 @@ public class JHRays extends FilterWithParametrizedGUI {
         super("Rays", true, false);
         setParamSet(new ParamSet(
                 center,
-                zoom,
+                length,
                 threshold,
                 strength,
                 opacity,
@@ -64,12 +68,38 @@ public class JHRays extends FilterWithParametrizedGUI {
         filter.setCentreY(center.getRelativeY());
         filter.setStrength(strength.getValueAsPercentage());
         filter.setRotation(rotation.getValueInRadians());
-        filter.setZoom(zoom.getValueAsPercentage());
-        filter.setOpacity(opacity.getValueAsPercentage());
+//        filter.setOpacity(opacity.getValueAsPercentage());
         filter.setThreshold(threshold.getValueAsPercentage());
-        filter.setRaysOnly(raysOnly.isChecked());
+//        filter.setRaysOnly(raysOnly.isChecked());
 
-        dest = filter.filter(src, dest);
+        // this value should not be divided by resizeFactor because
+        // this is a scale and not really a length
+        filter.setZoom(length.getValueAsPercentage());
+
+        BufferedImage rays;
+        ResizingHelper r = new ResizingHelper(src);
+        if (r.shouldResize()) {
+            rays = r.invoke(ResizingHelper.BILINEAR_FAST, filter);
+        } else {
+            // normal case, no resizing
+            rays = filter.filter(src, dest);
+        }
+
+
+        if (dest == null) {
+            dest = filter.createCompatibleDestImage(src, null);
+        }
+
+        // according to "rays only" setting return the rays image or an added image
+        Graphics2D g = dest.createGraphics();
+        if (!raysOnly.isChecked()) {
+            g.setComposite(AlphaComposite.SrcOver);
+            g.drawRenderedImage(src, null);
+        }
+        g.setComposite(MiscComposite.getInstance(MiscComposite.ADD, opacity.getValueAsPercentage()));
+        g.drawRenderedImage(rays, null);
+        g.dispose();
+
         return dest;
     }
 }

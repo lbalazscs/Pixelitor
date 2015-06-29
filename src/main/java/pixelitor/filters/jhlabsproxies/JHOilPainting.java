@@ -64,7 +64,7 @@ public class JHOilPainting extends FilterWithParametrizedGUI {
             double resizeFactor = r.getResizeFactor();
             filter.setRangeX((int) (brushX / resizeFactor));
             filter.setRangeY((int) (brushY / resizeFactor));
-            dest = r.invoke(detailQuality, filter);
+            dest = r.invoke(detailQuality.getValue(), filter);
         } else {
             // normal case, no resizing
             filter.setRangeX(brushX);

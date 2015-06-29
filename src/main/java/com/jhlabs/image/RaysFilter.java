@@ -16,10 +16,6 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import com.jhlabs.composite.MiscComposite;
-
-import java.awt.AlphaComposite;
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 /**
@@ -27,34 +23,34 @@ import java.awt.image.BufferedImage;
  */
 public class RaysFilter extends MotionBlurOp {
 
-    private float opacity = 1.0f;
+    //    private float opacity = 1.0f;
     private float threshold = 0.0f;
     private float strength = 0.5f;
-    private boolean raysOnly = false;
+    //    private boolean raysOnly = false;
     private Colormap colormap;
 
     public RaysFilter() {
     }
 
-    /**
-     * Set the opacity of the rays.
-     *
-     * @param opacity the opacity.
-     * @see #getOpacity
-     */
-    public void setOpacity(float opacity) {
-        this.opacity = opacity;
-    }
-
-    /**
-     * Get the opacity of the rays.
-     *
-     * @return the opacity.
-     * @see #setOpacity
-     */
-    public float getOpacity() {
-        return opacity;
-    }
+//    /**
+//     * Set the opacity of the rays.
+//     *
+//     * @param opacity the opacity.
+//     * @see #getOpacity
+//     */
+//    public void setOpacity(float opacity) {
+//        this.opacity = opacity;
+//    }
+//
+//    /**
+//     * Get the opacity of the rays.
+//     *
+//     * @return the opacity.
+//     * @see #setOpacity
+//     */
+//    public float getOpacity() {
+//        return opacity;
+//    }
 
     /**
      * Set the threshold value.
@@ -96,25 +92,25 @@ public class RaysFilter extends MotionBlurOp {
         return strength;
     }
 
-    /**
-     * Set whether to render only the rays.
-     *
-     * @param raysOnly true to render rays only.
-     * @see #getRaysOnly
-     */
-    public void setRaysOnly(boolean raysOnly) {
-        this.raysOnly = raysOnly;
-    }
-
-    /**
-     * Get whether to render only the rays.
-     *
-     * @return true to render rays only.
-     * @see #setRaysOnly
-     */
-    public boolean getRaysOnly() {
-        return raysOnly;
-    }
+//    /**
+//     * Set whether to render only the rays.
+//     *
+//     * @param raysOnly true to render rays only.
+//     * @see #getRaysOnly
+//     */
+//    public void setRaysOnly(boolean raysOnly) {
+//        this.raysOnly = raysOnly;
+//    }
+//
+//    /**
+//     * Get whether to render only the rays.
+//     *
+//     * @return true to render rays only.
+//     * @see #setRaysOnly
+//     */
+//    public boolean getRaysOnly() {
+//        return raysOnly;
+//    }
 
     /**
      * Set the colormap to be used for the filter.
@@ -192,20 +188,7 @@ public class RaysFilter extends MotionBlurOp {
             setRGB(rays, 0, y, width, 1, pixels);
         }
 
-        if (dst == null) {
-            dst = createCompatibleDestImage(src, null);
-        }
-
-        Graphics2D g = dst.createGraphics();
-        if (!raysOnly) {
-            g.setComposite(AlphaComposite.SrcOver);
-            g.drawRenderedImage(src, null);
-        }
-        g.setComposite(MiscComposite.getInstance(MiscComposite.ADD, opacity) );
-		g.drawRenderedImage( rays, null );
-		g.dispose();
-
-        return dst;
+        return rays;
     }
 
 	public String toString() {
