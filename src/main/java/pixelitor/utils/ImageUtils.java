@@ -42,6 +42,7 @@ import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorConvertOp;
+import java.awt.image.ColorModel;
 import java.awt.image.DataBufferInt;
 import java.awt.image.PixelGrabber;
 import java.awt.image.Raster;
@@ -101,6 +102,11 @@ public class ImageUtils {
         GraphicsConfiguration gc = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
         BufferedImage output = gc.createCompatibleImage(width, height, Transparency.TRANSLUCENT);
         return output;
+    }
+
+    public static BufferedImage createCompatibleDest(BufferedImage src) {
+        ColorModel dstCM = src.getColorModel();
+        return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(src.getWidth(), src.getHeight()), dstCM.isAlphaPremultiplied(), null);
     }
 
     // From the Filthy Rich Clients book
@@ -215,6 +221,52 @@ public class ImageUtils {
         }
 
         return ret;
+    }
+
+    /**
+     * Also an iterative approach, but using even smaller steps
+     */
+    public static BufferedImage enlargeSmooth(BufferedImage src, int targetWidth, int targetHeight, Object hint, double step) {
+        int srcWidth = src.getWidth();
+        int srcHeight = src.getHeight();
+        double factorX = targetWidth / (double)srcWidth;
+        double factorY = targetHeight / (double)srcHeight;
+
+        // they should be the same, but rounding errors can cause small problems
+        assert Math.abs(factorX - factorY)  < 0.05;
+
+        double factor = (factorX + factorY) / 2.0;
+        assert factor > 1.0; // this only makes sense for enlarging
+        double progress = 1.0;
+        double lastStep = factor / step;
+        BufferedImage last = src;
+        AffineTransform stepScale = AffineTransform.getScaleInstance(step, step);
+        while(progress < lastStep) {
+            progress = progress * step;
+            int newSrcWidth = (int) (srcWidth * progress);
+            int newSrcHeight = (int) (srcHeight * progress);
+            BufferedImage tmp = new BufferedImage(newSrcWidth, newSrcHeight, src.getType());
+            Graphics2D g = tmp.createGraphics();
+            if(hint != null) {
+                g.setRenderingHint(KEY_INTERPOLATION, hint);
+            }
+            g.drawImage(last, stepScale, null);
+            g.dispose();
+
+            BufferedImage willBeForgotten = last;
+            last = tmp;
+            willBeForgotten.flush();
+        }
+
+        // do the last step: resize exactly to the target values
+        BufferedImage retVal = new BufferedImage(targetWidth, targetHeight, src.getType());
+        Graphics2D g = retVal.createGraphics();
+        if(hint != null) {
+            g.setRenderingHint(KEY_INTERPOLATION, hint);
+        }
+        g.drawImage(last, 0, 0, targetWidth, targetHeight, null);
+        g.dispose();
+        return retVal;
     }
 
     private static BufferedImage simpleResize(BufferedImage img, int targetWidth, int targetHeight, Object hint) {

@@ -16,7 +16,10 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+import pixelitor.ThreadPool;
+
 import java.awt.Rectangle;
+import java.util.concurrent.Future;
 
 /**
  * A filter which produces a "oil-painting" effect.
@@ -28,30 +31,19 @@ import java.awt.Rectangle;
  */
 public class OilFilter extends WholeImageFilter {
 
-    private int range = 3;
+    private int rangeX = 3;
+    private int rangeY = 3;
     private int levels = 256;
 
     public OilFilter() {
     }
 
-    /**
-     * Set the range of the effect in pixels.
-     *
-     * @param range the range
-     * @see #getRange
-     */
-    public void setRange(int range) {
-        this.range = range;
+    public void setRangeX(int rangeX) {
+        this.rangeX = rangeX;
     }
 
-    /**
-     * Get the range of the effect in pixels.
-     *
-     * @return the range
-     * @see #setRange
-     */
-    public int getRange() {
-        return range;
+    public void setRangeY(int rangeY) {
+        this.rangeY = rangeY;
     }
 
     /**
@@ -76,80 +68,93 @@ public class OilFilter extends WholeImageFilter {
 
     @Override
     protected int[] filterPixels(int width, int height, int[] inPixels, Rectangle transformedSpace) {
-        int index = 0;
+        int[] outPixels = new int[width * height];
+
+//        for (int y = 0; y < height; y++) {
+//            calculateLine(width, height, inPixels, outPixels, y);
+//        }
+
+        Future<?>[] futures = new Future[height];
+        for (int y = 0; y < height; y++) {
+            int finalY = y;
+            Runnable calculateLineTask = () -> calculateLine(width, height, inPixels, outPixels, finalY);
+            Future<?> future = ThreadPool.executorService.submit(calculateLineTask);
+            futures[y] = future;
+        }
+
+        ThreadPool.waitForFutures(futures);
+
+        return outPixels;
+    }
+
+    private void calculateLine(int width, int height, int[] inPixels, int[] outPixels, int y) {
+        int index = y * width;
         int[] rTotal = new int[levels];
         int[] gTotal = new int[levels];
         int[] bTotal = new int[levels];
-        int[] outPixels = new int[width * height];
-
         int[] histogram = new int[levels];
+        for (int x = 0; x < width; x++) {
+            // The idea is that for each pixel the most frequently occuring
+            // intensity value in its neighborhood is found, and this will determine
+            // new value of the pixel
+            for (int i = 0; i < levels; i++) {
+                histogram[i] = rTotal[i] = gTotal[i] = bTotal[i] = 0;
+            }
 
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                // The idea is that for each pixel the most frequently occuring
-                // intensity value in its neighborhood is found, and this will determine
-                // new value of the pixel
-                for (int i = 0; i < levels; i++) {
-                    histogram[i] = rTotal[i] = gTotal[i] = bTotal[i] = 0;
-                }
+            // For each pixel, all pixels within the brush size will have to be examined.
+            for (int row = -rangeY; row <= rangeY; row++) {
+                int iy = y + row;
+                int ioffset;
+                if (0 <= iy && iy < height) {
+                    ioffset = iy * width;
+                    for (int col = -rangeX; col <= rangeX; col++) {
+                        int ix = x + col;
+                        if (0 <= ix && ix < width) {
+                            // examining each neighbor pixel which is within brush size
+                            int rgb = inPixels[ioffset + ix];
+                            int r = (rgb >> 16) & 0xff;
+                            int g = (rgb >> 8) & 0xff;
 
-                // For each pixel, all pixels within the brush size will have to be examined.
-                for (int row = -range; row <= range; row++) {
-                    int iy = y + row;
-                    int ioffset;
-                    if (0 <= iy && iy < height) {
-                        ioffset = iy * width;
-                        for (int col = -range; col <= range; col++) {
-                            int ix = x + col;
-                            if (0 <= ix && ix < width) {
-                                // examining each neighbor pixel which is within brush size
-                                int rgb = inPixels[ioffset + ix];
-                                int r = (rgb >> 16) & 0xff;
-                                int g = (rgb >> 8) & 0xff;
-                                int b = rgb & 0xff;
-                                int intensity = (r + g + b) / 3;
-                                // For each sub-pixel, calculate the intensity, and determine
-                                // which intensity bin that intensity number falls into
-                                int intensityI = intensity * levels / 256;
-                                histogram[intensityI]++;
+                            int b = rgb & 0xff;
+                            int intensity = (r + g + b) / 3;
+                            // For each sub-pixel, calculate the intensity, and determine
+                            // which intensity bin that intensity number falls into
+                            int intensityI = intensity * levels / 256;
+                            histogram[intensityI]++;
 
-                                // Also maintain the total red, green, and blue values for each bin,
-                                // later these may be used to determine the final value of the pixel.
-                                rTotal[intensityI] += r;
-                                gTotal[intensityI] += g;
-                                bTotal[intensityI] += b;
-                            }
+                            // Also maintain the total red, green, and blue values for each bin,
+                            // later these may be used to determine the final value of the pixel.
+                            rTotal[intensityI] += r;
+                            gTotal[intensityI] += g;
+                            bTotal[intensityI] += b;
                         }
                     }
                 }
+            }
 
-                // Determine which intensity bin has the most number of pixels in it.
-                int maxIndex = 0;
-                int curMax = 0;
-                for (int i = 0; i < levels; i++) {
-                    if (histogram[i] > curMax) {
-                        curMax = histogram[i];
-                        maxIndex = i;
-                    }
+            // Determine which intensity bin has the most number of pixels in it.
+            int maxIndex = 0;
+            int curMax = 0;
+            for (int i = 0; i < levels; i++) {
+                if (histogram[i] > curMax) {
+                    curMax = histogram[i];
+                    maxIndex = i;
                 }
+            }
 
-                // determine the final color of the pixel by taking the total
-                // red, green, and blue values in that specific bin,
-                // and dividing that by the total number of pixels in that
-                // specific intensity bin.
-                int r = rTotal[maxIndex] / curMax;
-                int g = gTotal[maxIndex] / curMax;
-                int b = bTotal[maxIndex] / curMax;
+            // The final color of the pixel is the average of the colors
+            // in the bin with the highest number of pixels
+            int r = rTotal[maxIndex] / curMax;
+            int g = gTotal[maxIndex] / curMax;
+            int b = bTotal[maxIndex] / curMax;
 
 //                r = PixelUtils.clamp(r);
 //                g = PixelUtils.clamp(g);
 //                b = PixelUtils.clamp(b);
 
-                outPixels[index] = (inPixels[index] & 0xff000000) | (r << 16) | (g << 8) | b;
-                index++;
-            }
+            outPixels[index] = (inPixels[index] & 0xff000000) | (r << 16) | (g << 8) | b;
+            index++;
         }
-        return outPixels;
     }
 
     public String toString() {

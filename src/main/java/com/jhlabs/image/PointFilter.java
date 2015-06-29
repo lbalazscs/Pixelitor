@@ -43,13 +43,10 @@ public abstract class PointFilter extends AbstractBufferedImageOp {
         Future<?>[] futures = new Future[height];
         for (int y = 0; y < height; y++) {
             final int finalY = y;
-            final Runnable calculateLineTask = new Runnable() {
-                @Override
-                public void run() {
-                    for (int x = 0; x < width; x++) {
-                        int index = finalY * width + x;
-                        outPixels[index] = filterRGB(x, finalY, inPixels[index]);
-                    }
+            final Runnable calculateLineTask = () -> {
+                for (int x = 0; x < width; x++) {
+                    int index = finalY * width + x;
+                    outPixels[index] = filterRGB(x, finalY, inPixels[index]);
                 }
             };
             Future<?> future = ThreadPool.executorService.submit(calculateLineTask);

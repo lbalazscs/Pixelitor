@@ -18,6 +18,9 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.OilFilter;
 import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ResizingHelper;
+import pixelitor.filters.gui.GroupedRangeParam;
+import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 
@@ -27,22 +30,26 @@ import java.awt.image.BufferedImage;
  * Oil Painting based on the JHLabs OilFilter
  */
 public class JHOilPainting extends FilterWithParametrizedGUI {
-    private final RangeParam brushSize = new RangeParam("Brush Size", 0, 5, 0);
+    private final GroupedRangeParam brushSize = new GroupedRangeParam("Brush Size", 0, 10, 1, false);
     private final RangeParam coarseness = new RangeParam("Coarseness", 2, 255, 25);
+    private final IntChoiceParam detailQuality = ResizingHelper.createQualityParam();
 
     private OilFilter filter;
 
     public JHOilPainting() {
         super("Oil Painting", true, false);
         setParamSet(new ParamSet(
-                brushSize, // takes forever for large images if this is scaled with the size of image
-                coarseness
+                brushSize.adjustRangeToImageSize(0.04),
+                coarseness,
+                detailQuality
         ));
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        if (brushSize.getValue() == 0) {
+        int brushX = brushSize.getValue(0);
+        int brushY = brushSize.getValue(1);
+        if (brushX == 0 && brushY == 0) {
             return src;
         }
 
@@ -50,10 +57,21 @@ public class JHOilPainting extends FilterWithParametrizedGUI {
             filter = new OilFilter();
         }
 
-        filter.setRange(brushSize.getValue());
         filter.setLevels(coarseness.getValue());
 
-        dest = filter.filter(src, dest);
+        ResizingHelper r = new ResizingHelper(src);
+        if (r.shouldResize()) {
+            double resizeFactor = r.getResizeFactor();
+            filter.setRangeX((int) (brushX / resizeFactor));
+            filter.setRangeY((int) (brushY / resizeFactor));
+            dest = r.invoke(detailQuality, filter);
+        } else {
+            // normal case, no resizing
+            filter.setRangeX(brushX);
+            filter.setRangeY(brushY);
+            dest = filter.filter(src, dest);
+        }
+
         return dest;
     }
 
@@ -61,4 +79,5 @@ public class JHOilPainting extends FilterWithParametrizedGUI {
     public boolean excludeFromAnimation() {
         return true;
     }
+
 }
