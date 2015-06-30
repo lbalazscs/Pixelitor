@@ -632,7 +632,7 @@ public class AssertJSwingTest {
         testFilterWithDialog("Crystallize...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Pointillize...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Stamp...", Randomize.YES, ShowOriginal.YES);
-        testFilterWithDialog("Dry Brush...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Oil Painting...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Random Spheres...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Smear...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Emboss...", Randomize.YES, ShowOriginal.YES);
@@ -673,8 +673,9 @@ public class AssertJSwingTest {
 
         dialog.checkBox("boldCB").check().uncheck();
         dialog.checkBox("italicCB").check();
-        dialog.checkBox("underlineCB").check().uncheck();
-        dialog.checkBox("strikeThroughCB").check().uncheck();
+//        dialog.checkBox("underlineCB").check().uncheck();
+//        dialog.checkBox("strikeThroughCB").check().uncheck();
+// TODO test the advanced settings dialog
 
         findButtonByText(dialog, "OK").click();
         keyboardUndoRedo();

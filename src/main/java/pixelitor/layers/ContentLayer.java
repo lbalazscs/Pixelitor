@@ -118,6 +118,8 @@ public abstract class ContentLayer extends Layer {
         }
 
         // Content layers only use the Graphics2D
+        // TODO not true, TextLayer overrides this with correct behavior,
+        // but then why this method?
         return null;
     }
 

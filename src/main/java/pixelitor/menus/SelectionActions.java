@@ -19,11 +19,11 @@ package pixelitor.menus;
 
 import pixelitor.Build;
 import pixelitor.Composition;
+import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.layers.Layers;
 import pixelitor.selection.Selection;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.Tools;
@@ -157,7 +157,13 @@ public final class SelectionActions {
 
         @Override
         void onClick() {
-            if (!Layers.activeIsImageLayer()) {
+            ImageComponent ic = ImageComponents.getActiveImageComponent();
+            if(ic == null) {
+                return;
+            }
+            Composition comp = ic.getComp();
+
+            if (!comp.activeIsImageLayer()) {
                 Dialogs.showNotImageLayerDialog();
                 return;
             }

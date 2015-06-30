@@ -42,7 +42,6 @@ import java.awt.image.ShortLookupTable;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
-import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
 
 /**
@@ -80,7 +79,7 @@ public class Lightning extends FilterWithParametrizedGUI {
         float gradientDistance = ((float) lightningImageSize) / (numberOfBolts.getValue());
 
         // create image with vertical bars
-        BufferedImage lightningImage = new BufferedImage(lightningImageSize, lightningImageSize, TYPE_INT_ARGB);
+        BufferedImage lightningImage = ImageUtils.createCompatibleImage(lightningImageSize, lightningImageSize);
         Paint gradient = new LinearGradientPaint(0, 0, gradientDistance, 0, ImageUtils.FRACTIONS_2_COLOR_UNIFORM, new Color[]{BLACK, WHITE}, REFLECT);
         Graphics2D g = lightningImage.createGraphics();
         g.setPaint(gradient);
@@ -108,12 +107,12 @@ public class Lightning extends FilterWithParametrizedGUI {
         int xTrans = -xSizeDiff / 2 + (int) (srcWidth * (center.getRelativeX() - 0.5));
         int yTrans = -ySizeDiff / 2 + (int) (srcHeight * (center.getRelativeY() - 0.5));
 
-        BufferedImage croppedLightningImage = new BufferedImage(srcWidth, srcHeight, TYPE_INT_ARGB);
+        BufferedImage croppedLightningImage = ImageUtils.createCompatibleImage(srcWidth, srcHeight);
         Graphics2D gCroppedLightning = croppedLightningImage.createGraphics();
         gCroppedLightning.drawImage(lightningImage, xTrans, yTrans, null);
 
         // apply difference clouds
-        BufferedImage cloudsImage = new BufferedImage(srcWidth, srcHeight, TYPE_INT_ARGB);
+        BufferedImage cloudsImage = ImageUtils.createCompatibleImage(srcWidth, srcHeight);
         Clouds.renderClouds(cloudsImage, 100.0f, 0.5f, BLACK, WHITE);
         gCroppedLightning.setComposite(new DifferenceComposite(1.0f));
         gCroppedLightning.drawImage(cloudsImage, 0, 0, null);
@@ -164,7 +163,7 @@ public class Lightning extends FilterWithParametrizedGUI {
         }
 
 
-        BufferedImage invertedImage = new BufferedImage(srcWidth, srcHeight, TYPE_INT_ARGB);
+        BufferedImage invertedImage = ImageUtils.createCompatibleImage(srcWidth, srcHeight);
         invertedImage = new FastLookupOp(new ShortLookupTable(0, lookupData)).filter(croppedLightningImage, invertedImage);
 
         if (debug) {

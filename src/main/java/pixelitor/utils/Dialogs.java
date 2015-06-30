@@ -97,8 +97,11 @@ public class Dialogs {
 
     public static void showNotImageLayerDialog() {
         if (!Build.CURRENT.isRobotTest()) {
-            showErrorDialog("Error", "The active layer is not an image layer");
+            showErrorDialog("Not an image layer", "The active layer is not an image layer");
         }
+//        if(Build.CURRENT == Build.DEVELOPMENT) {
+//            Thread.dumpStack();
+//        }
     }
 
     public static void showExceptionDialog(Throwable e) {

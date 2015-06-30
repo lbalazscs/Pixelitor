@@ -19,6 +19,7 @@ package pixelitor;
 
 import com.jhlabs.image.CausticsFilter;
 import com.jhlabs.image.TransformFilter;
+import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
@@ -66,7 +67,7 @@ public class PerformanceTests {
 
     private static double testFilter(String what, FilterWrapper filterWrapper, BufferedImage src) {
         System.out.print("    " + what + ": ");
-        BufferedImage dest = new BufferedImage(src.getWidth(), src.getHeight(), src.getType());
+        BufferedImage dest = ImageUtils.createCompatibleDest(src);
 
         BufferedImageOp filter = filterWrapper.getFilter();
 

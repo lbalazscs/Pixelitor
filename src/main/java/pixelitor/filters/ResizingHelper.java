@@ -83,7 +83,7 @@ public class ResizingHelper {
         // in multiple steps, so this is always done the fast way.
         int smallWidth = (int) (srcWidth / resizeFactor);
         int smallHeight = (int) (srcHeight / resizeFactor);
-        BufferedImage smallSrc = new BufferedImage(smallWidth, smallHeight, src.getType());
+        BufferedImage smallSrc = ImageUtils.createCompatibleImage(smallWidth, smallHeight);
         Graphics2D g = smallSrc.createGraphics();
         g.scale(1.0 / resizeFactor, 1.0 / resizeFactor);
         g.drawImage(src, 0, 0, null);

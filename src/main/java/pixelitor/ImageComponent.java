@@ -636,4 +636,9 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     public boolean isMaskEditing() {
         return showLayerMask;
     }
+
+    @Override
+    public boolean activeIsImageLayer() {
+        return comp.activeIsImageLayer();
+    }
 }

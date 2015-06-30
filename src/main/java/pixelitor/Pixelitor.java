@@ -19,7 +19,6 @@ package pixelitor;
 
 import net.jafama.FastMath;
 import pixelitor.io.OpenSaveManager;
-import pixelitor.layers.Layers;
 import pixelitor.tools.FgBgColorSelector;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Dialogs;
@@ -76,7 +75,6 @@ public class Pixelitor {
         assert SwingUtilities.isEventDispatchThread();
 
         setLookAndFeel();
-        Layers.init();
 
         PixelitorWindow pw = PixelitorWindow.getInstance();
         Dialogs.setMainWindowInitialized(true);
@@ -129,7 +127,7 @@ public class Pixelitor {
 //        TextLayer.createNew(pw);
 
 //        ImageComponents.getActiveLayer().get()
-//                .addLayerMask(LayerMaskAddType.REVEAL_ALL_BYTE_GRAY);
+//                .addLayerMask(LayerMaskAddType.REVEAL_ALL);
 
 //        NewImage.addNewImage(FillType.WHITE, 600, 400, "Test INT_ARGB");
 //        ImageComponents.getActiveLayer().get()

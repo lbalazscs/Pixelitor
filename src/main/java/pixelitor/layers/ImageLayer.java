@@ -48,7 +48,6 @@ import java.util.Optional;
 
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
-import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static java.util.Objects.requireNonNull;
 import static pixelitor.ChangeReason.REPEAT_LAST;
 import static pixelitor.Composition.ImageChangeActions.FULL;
@@ -160,7 +159,7 @@ public class ImageLayer extends ContentLayer {
         if(createNewImage) { // if the pasted image is too small, a new image is created
             int newWidth = Math.max(width, pastedWidth);
             int newHeight = Math.max(height, pastedHeight);
-            newImage = new BufferedImage(newWidth, newHeight, TYPE_INT_ARGB_PRE);
+            newImage = createEmptyImageForLayer(newWidth, newHeight);
             Graphics2D g = newImage.createGraphics();
 
             int drawX = Math.max((width - pastedWidth) / 2, 0);
@@ -193,7 +192,8 @@ public class ImageLayer extends ContentLayer {
     public ImageLayer(Composition comp, String name) {
         super(comp, name == null ? comp.generateNewLayerName() : name);
 
-        setImage(new BufferedImage(canvas.getWidth(), canvas.getHeight(), TYPE_INT_ARGB_PRE));
+        BufferedImage emptyImage = createEmptyImageForLayer(canvas.getWidth(), canvas.getHeight());
+        setImage(emptyImage);
         checkConstructorPostConditions();
     }
 
@@ -250,12 +250,15 @@ public class ImageLayer extends ContentLayer {
 
     private void setImageWithSelection(BufferedImage newImage) {
         image = replaceImageWithSelection(image, newImage);
+        imageRefChanged();
+
         comp.imageChanged(INVALIDATE_CACHE);
     }
 
     // sets the image object ignoring the selection
     public void setImage(BufferedImage newImage) {
         image = requireNonNull(newImage);
+        imageRefChanged();
 
         assert Utils.checkRasterMinimum(newImage);
 
@@ -294,6 +297,8 @@ public class ImageLayer extends ContentLayer {
         }
 
         image = previewImage;
+        imageRefChanged();
+
         previewImage = null;
 
         boolean wasShowOriginal = (state == SHOW_ORIGINAL);
@@ -460,10 +465,9 @@ public class ImageLayer extends ContentLayer {
     }
 
     private void enlargeSE() {
-        BufferedImage bi = new BufferedImage(
-                image.getWidth() - translationX,
-                image.getHeight() - translationY,
-                image.getType());
+        int newWidth = image.getWidth() - translationX;
+        int newHeight = image.getHeight() - translationY;
+        BufferedImage bi = createEmptyImageForLayer(newWidth, newHeight);
         Graphics2D g = bi.createGraphics();
         g.drawImage(image, 0, 0, null);
         g.dispose();
@@ -472,10 +476,9 @@ public class ImageLayer extends ContentLayer {
     }
 
     private void enlargeNE() {
-        BufferedImage bi = new BufferedImage(
-                image.getWidth() - translationX,
-                image.getHeight() + translationY,
-                image.getType());
+        int newWidth = image.getWidth() - translationX;
+        int newHeight = image.getHeight() + translationY;
+        BufferedImage bi = createEmptyImageForLayer(newWidth, newHeight);
         Graphics2D g = bi.createGraphics();
         g.drawImage(image, 0, translationY, null);
         g.dispose();
@@ -484,10 +487,9 @@ public class ImageLayer extends ContentLayer {
     }
 
     private void enlargeSW() {
-        BufferedImage bi = new BufferedImage(
-                image.getWidth() + translationX,
-                image.getHeight() - translationY,
-                image.getType());
+        int newWidth = image.getWidth() + translationX;
+        int newHeight = image.getHeight() - translationY;
+        BufferedImage bi = createEmptyImageForLayer(newWidth, newHeight);
         Graphics2D g = bi.createGraphics();
         g.drawImage(image, translationX, 0, null);
         g.dispose();
@@ -496,10 +498,9 @@ public class ImageLayer extends ContentLayer {
     }
 
     private void enlargeNW() {
-        BufferedImage bi = new BufferedImage(
-                image.getWidth() + translationX,
-                image.getHeight() + translationY,
-                image.getType());
+        int newWidth = image.getWidth() + translationX;
+        int newHeight = image.getHeight() + translationY;
+        BufferedImage bi = createEmptyImageForLayer(newWidth, newHeight);
         Graphics2D g = bi.createGraphics();
         g.drawImage(image, translationX, translationY, null);
         g.dispose();
@@ -514,10 +515,12 @@ public class ImageLayer extends ContentLayer {
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+//        System.out.println("ImageLayer::readObject: CALLED , class = " + getClass().getSimpleName());
         in.defaultReadObject();
         setImage(ImageUtils.deserializeImage(in));
         state = NORMAL;
         imageContentChanged = false;
+//        System.out.println("ImageLayer::readObject: ENDED for " + getName() + ", class = " + getClass().getSimpleName());
     }
 
     /**
@@ -547,7 +550,7 @@ public class ImageLayer extends ContentLayer {
         int imageWidth = src.getWidth();
         int imageHeight = src.getHeight();
 
-        BufferedImage dest = new BufferedImage(imageWidth, imageHeight, src.getType());
+        BufferedImage dest = ImageUtils.createCompatibleDest(src);
         Graphics2D g2 = dest.createGraphics();
 
         if(direction == HORIZONTAL) {
@@ -616,7 +619,7 @@ public class ImageLayer extends ContentLayer {
         // TODO implement arbitrary rotation:
         // create a rectangle, then rotate it with the same AffineTransform
 
-        BufferedImage dest = new BufferedImage(newImageWidth, newImageHeight, img.getType());
+        BufferedImage dest = ImageUtils.createCompatibleDest(img, newImageWidth, newImageHeight);
 
         Graphics2D g2 = dest.createGraphics();
         // TODO we should not need bicubic here as long as we have only 90, 180, 270 degrees
@@ -630,6 +633,7 @@ public class ImageLayer extends ContentLayer {
             g2.translate(0, imageWidth);
         }
 
+        // TODO rotate with exact transform
         g2.rotate(Math.toRadians(angleDegree));
         g2.drawImage(img, 0, 0, imageWidth, imageHeight, null);
         g2.dispose();
@@ -679,8 +683,9 @@ public class ImageLayer extends ContentLayer {
     public BufferedImage createCompositionSizedTmpImage() {
         int width = canvas.getWidth();
         int height = canvas.getHeight();
-        int type = image.getType();
-        return new BufferedImage(width, height, type);
+        // it is important that the tmp image has transparency
+        // even for layer masks, otherwise drawing is not possible
+        return ImageUtils.createCompatibleImage(width, height);
     }
 
     public BufferedImage getCompositionSizedSubImage() {
@@ -801,13 +806,15 @@ public class ImageLayer extends ContentLayer {
         int newTranslationX = getTranslationX();
         int newTranslationY = getTranslationY();
 
-        BufferedImage newImage = new BufferedImage(newImageWidth, newImageHeight, image.getType());
+        BufferedImage newImage = ImageUtils.createCompatibleDest(image, newImageWidth, newImageHeight);
+
         Graphics2D g = newImage.createGraphics();
         g.drawImage(image, newImagePaintX, newImagePaintY, null);
         g.dispose();
 
         image.flush();
         image = newImage;
+        imageRefChanged();
 
         setTranslationX(newTranslationX);
         setTranslationY(newTranslationY);
@@ -832,6 +839,8 @@ public class ImageLayer extends ContentLayer {
 
     @Override
     public void resize(int targetWidth, int targetHeight, boolean progressiveBilinear) {
+        resizeMask(targetWidth, targetHeight, progressiveBilinear);
+
         Rectangle canvasBounds = comp.getCanvasBounds();
 
         BufferedImage img = getImage();
@@ -863,6 +872,8 @@ public class ImageLayer extends ContentLayer {
 
     @Override
     public void crop(Rectangle selectionBounds) {
+        cropMask(selectionBounds);
+
         int cropWidth = selectionBounds.width;
         int cropHeight = selectionBounds.height;
 
@@ -983,5 +994,15 @@ public class ImageLayer extends ContentLayer {
 
     State getState() {
         return state;
+    }
+
+    // every image creation in thus class should use this method
+    // which can be overridden by the LayerMask subclass
+    protected BufferedImage createEmptyImageForLayer(int width, int height) {
+        return ImageUtils.createCompatibleImage(width, height);
+    }
+
+    protected void imageRefChanged() {
+        // does something only in the LayerMask subclass
     }
 }

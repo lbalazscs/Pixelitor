@@ -98,13 +98,12 @@ public class JHPixelate extends FilterWithParametrizedGUI {
         if ((style == STYLE_3D) || (style == STYLE_EMBEDDED)) {
             int width = dest.getWidth();
             int height = dest.getHeight();
-            int srcType = src.getType();
 
             BufferedImage bumpSource;
             if (style == STYLE_EMBEDDED) {
                 bumpSource = dest;
             } else {
-                bumpSource = createBumpSource(type, cellSize, width, height, srcType);
+                bumpSource = createBumpSource(type, cellSize, width, height, src);
             }
 
             if (style == STYLE_3D || style == STYLE_EMBEDDED) {
@@ -116,12 +115,11 @@ public class JHPixelate extends FilterWithParametrizedGUI {
             }
         }
 
-
         return dest;
     }
 
-    private static BufferedImage createBumpSource(int type, int cellSize, int width, int height, int srcType) {
-        BufferedImage bumpSource = new BufferedImage(width, height, srcType);
+    private static BufferedImage createBumpSource(int type, int cellSize, int width, int height, BufferedImage src) {
+        BufferedImage bumpSource = ImageUtils.createCompatibleDest(src);
 
         int gapWidth;
         if (cellSize < 15) {

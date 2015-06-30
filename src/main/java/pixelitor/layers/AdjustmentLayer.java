@@ -54,11 +54,11 @@ public class AdjustmentLayer extends Layer {
 
     @Override
     public void resize(int targetWidth, int targetHeight, boolean progressiveBilinear) {
-        // do nothing
+        resizeMask(targetWidth, targetHeight, progressiveBilinear);
     }
 
     @Override
     public void crop(Rectangle selectionBounds) {
-        // do nothing
+        cropMask(selectionBounds);
     }
 }

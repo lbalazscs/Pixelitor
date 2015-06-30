@@ -130,4 +130,9 @@ public class ImageDisplayStub implements ImageDisplay {
     public boolean isMaskEditing() {
         return false;
     }
+
+    @Override
+    public boolean activeIsImageLayer() {
+        return comp.activeIsImageLayer();
+    }
 }

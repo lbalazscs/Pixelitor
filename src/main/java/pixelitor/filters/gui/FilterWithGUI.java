@@ -17,9 +17,10 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
 import pixelitor.filters.Filter;
-import pixelitor.layers.Layers;
+import pixelitor.layers.ImageLayer;
 import pixelitor.utils.Dialogs;
 
 import java.awt.event.ActionEvent;
@@ -53,17 +54,18 @@ public abstract class FilterWithGUI extends Filter {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (!Layers.activeIsImageLayer()) {
-            Dialogs.showNotImageLayerDialog();
-            return;
+        ImageComponent ic = ImageComponents.getActiveImageComponent();
+        if(ic != null) {
+            if (!ic.activeIsImageLayer()) {
+                Dialogs.showNotImageLayerDialog();
+                return;
+            }
+
+            ImageLayer layer = ic.getComp().getActiveImageLayer();
+            layer.startPreviewing();
+
+            AdjustPanel p = createAdjustPanel();
+            AdjustDialog.showDialog(p, this);
         }
-
-        ImageComponents.getActiveImageLayer()
-                .ifPresent(layer -> {
-                    layer.startPreviewing();
-
-                    AdjustPanel p = createAdjustPanel();
-                    AdjustDialog.showDialog(p, this);
-                });
     }
 }

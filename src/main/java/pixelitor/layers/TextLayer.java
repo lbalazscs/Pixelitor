@@ -30,6 +30,7 @@ import pixelitor.history.NewLayerEdit;
 import pixelitor.history.TextLayerChangeEdit;
 import pixelitor.history.TextLayerRasterizeEdit;
 import pixelitor.history.TranslateEdit;
+import pixelitor.utils.ImageUtils;
 import pixelitor.utils.OKCancelDialog;
 
 import java.awt.Graphics2D;
@@ -76,7 +77,7 @@ public class TextLayer extends ShapeLayer {
 
     public BufferedImage createRasterizedImage() {
         Canvas canvas = comp.getCanvas();
-        BufferedImage img = new BufferedImage(canvas.getWidth(), canvas.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        BufferedImage img = ImageUtils.createCompatibleImage(canvas.getWidth(), canvas.getHeight());
         Graphics2D g = img.createGraphics();
         paintLayer(g, true, img);
         g.dispose();
@@ -106,6 +107,8 @@ public class TextLayer extends ShapeLayer {
 
     @Override
     public void crop(Rectangle selectionBounds) {
+        super.crop(selectionBounds);
+
 //        Rectangle textBounds = painter.getTextBounds();
 //        int currentX = textBounds.x;
 //        int currentY = textBounds.y;

@@ -238,6 +238,10 @@ public class Composition implements Serializable {
         layer.changePreviewImage(img, filterName, changeReason);
     }
 
+    public boolean activeIsImageLayer() {
+        return (activeLayer instanceof ImageLayer) || activeLayer.isLayerMaskEditing();
+    }
+
     /**
      * This method assumes that the active layer is an image layer
      */
@@ -725,7 +729,7 @@ public class Composition implements Serializable {
             layer.get().cropToCanvasSize();
             History.addEdit(new NotUndoableEdit(this, "Layer to Canvas Size")); // TODO ImageEdit would be better
         } else {
-            Dialogs.showErrorDialog("Not an image layer", "The active layer is not an image layer");
+            Dialogs.showNotImageLayerDialog();
         }
     }
 

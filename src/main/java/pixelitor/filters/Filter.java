@@ -20,8 +20,9 @@ package pixelitor.filters;
 import pixelitor.Build;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
+import pixelitor.ImageComponent;
+import pixelitor.ImageComponents;
 import pixelitor.PixelitorWindow;
-import pixelitor.layers.Layers;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
@@ -80,12 +81,14 @@ public abstract class Filter extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (!Layers.activeIsImageLayer()) {
-            Dialogs.showNotImageLayerDialog();
-            return;
+        ImageComponent ic = ImageComponents.getActiveImageComponent();
+        if(ic != null) {
+            if (!ic.activeIsImageLayer()) {
+                Dialogs.showNotImageLayerDialog();
+                return;
+            }
+            execute(ChangeReason.OP_WITHOUT_DIALOG);
         }
-
-        execute(ChangeReason.OP_WITHOUT_DIALOG);
     }
 
     @Override
@@ -141,7 +144,7 @@ public abstract class Filter extends AbstractAction {
             if (copyContents()) {
                 dest = ImageUtils.copyImage(src);
             } else {
-                dest = new BufferedImage(src.getWidth(), src.getHeight(), src.getType());
+                dest = ImageUtils.createCompatibleDest(src);
             }
         }
 

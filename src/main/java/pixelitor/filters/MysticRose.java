@@ -63,7 +63,7 @@ public class MysticRose extends FilterWithParametrizedGUI {
         int srcWidth = src.getWidth();
         int srcHeight = src.getHeight();
 
-        dest = new BufferedImage(srcWidth, srcHeight, src.getType());
+        dest = ImageUtils.createCompatibleDest(src);
         Graphics2D g2 = dest.createGraphics();
         g2.setColor(BLACK);
         g2.fillRect(0, 0, srcWidth, srcHeight);

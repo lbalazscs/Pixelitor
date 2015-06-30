@@ -25,6 +25,7 @@ import pixelitor.history.LayerBlendingEdit;
 import pixelitor.history.LayerOpacityEdit;
 import pixelitor.history.LayerRenameEdit;
 import pixelitor.history.LayerVisibilityChangeEdit;
+import pixelitor.utils.Dialogs;
 import pixelitor.utils.HistogramsPanel;
 
 import java.awt.Graphics2D;
@@ -221,11 +222,16 @@ public abstract class Layer implements Serializable {
     }
 
     public void addLayerMask(LayerMaskAddType addType) {
+        if (layerMask != null) {
+            Dialogs.showInfoDialog("Has layer mask",
+                    String.format("The layer \"%s\" already has a layer mask.", getName()));
+            return;
+        }
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
 
         BufferedImage bwLayerMask = addType.getBWImage(canvasWidth, canvasHeight);
-        layerMask = new LayerMask(comp, bwLayerMask);
+        layerMask = new LayerMask(comp, bwLayerMask, getName());
 
         comp.imageChanged(FULL);
     }
@@ -240,7 +246,19 @@ public abstract class Layer implements Serializable {
 
     public abstract void resize(int targetWidth, int targetHeight, boolean progressiveBilinear);
 
+    protected void resizeMask(int targetWidth, int targetHeight, boolean progressiveBilinear) {
+        if (layerMask != null) {
+            layerMask.resize(targetWidth, targetHeight, progressiveBilinear);
+        }
+    }
+
     public abstract void crop(Rectangle selectionBounds);
+
+    protected void cropMask(Rectangle selectionBounds) {
+        if (layerMask != null) {
+            layerMask.crop(selectionBounds);
+        }
+    }
 
     public LayerMask getLayerMask() {
         return layerMask;

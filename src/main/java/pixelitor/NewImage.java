@@ -19,6 +19,7 @@ package pixelitor;
 
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.GridBagHelper;
+import pixelitor.utils.ImageUtils;
 import pixelitor.utils.IntTextField;
 import pixelitor.utils.OKCancelDialog;
 
@@ -30,7 +31,6 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 
-import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static pixelitor.FillType.TRANSPARENT;
 
 /**
@@ -50,7 +50,8 @@ public final class NewImage {
     }
 
     public static Composition createNewComposition(FillType bg, int width, int height, String title) {
-        BufferedImage newImage = new BufferedImage(width, height, TYPE_INT_ARGB_PRE);
+//        BufferedImage newImage = new BufferedImage(width, height, TYPE_INT_ARGB_PRE);
+        BufferedImage newImage = ImageUtils.createCompatibleImage(width, height);
         fillImage(newImage, bg);
         return Composition.fromImage(newImage, null, title);
     }

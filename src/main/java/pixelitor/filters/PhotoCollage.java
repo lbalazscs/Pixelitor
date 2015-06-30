@@ -24,6 +24,7 @@ import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.Utils;
 
@@ -47,7 +48,6 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
-import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
 
 /**
@@ -108,7 +108,11 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
         // the shadow image must be larger than the image size so that there is room for soft shadows
         int shadowSoftness = shadowSoftnessParam.getValue();
         int softShadowRoom = 1 + (int) (2.3 * shadowSoftness);
-        BufferedImage shadowImage = new BufferedImage(xSize + 2 * softShadowRoom, ySize + 2 * softShadowRoom, TYPE_INT_ARGB);
+
+        int shadowImgWidth = xSize + 2 * softShadowRoom;
+        int shadowImgHeight = ySize + 2 * softShadowRoom;
+        BufferedImage shadowImage = ImageUtils.createCompatibleImage(shadowImgWidth, shadowImgHeight);
+
         Graphics2D gShadow = shadowImage.createGraphics();
         gShadow.setColor(BLACK);
         gShadow.fillRect(softShadowRoom, softShadowRoom, xSize, ySize);

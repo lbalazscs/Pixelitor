@@ -109,6 +109,13 @@ public class ImageUtils {
         return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(src.getWidth(), src.getHeight()), dstCM.isAlphaPremultiplied(), null);
     }
 
+    // like the above but instead of src width and height, it uses the arguments
+    public static BufferedImage createCompatibleDest(BufferedImage src, int width, int height) {
+        ColorModel dstCM = src.getColorModel();
+        return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(width, height), dstCM.isAlphaPremultiplied(), null);
+    }
+
+
     // From the Filthy Rich Clients book
 
     /**
@@ -229,11 +236,11 @@ public class ImageUtils {
     public static BufferedImage enlargeSmooth(BufferedImage src, int targetWidth, int targetHeight, Object hint, double step) {
         int srcWidth = src.getWidth();
         int srcHeight = src.getHeight();
-        double factorX = targetWidth / (double)srcWidth;
-        double factorY = targetHeight / (double)srcHeight;
+        double factorX = targetWidth / (double) srcWidth;
+        double factorY = targetHeight / (double) srcHeight;
 
         // they should be the same, but rounding errors can cause small problems
-        assert Math.abs(factorX - factorY)  < 0.05;
+        assert Math.abs(factorX - factorY) < 0.05;
 
         double factor = (factorX + factorY) / 2.0;
         assert factor > 1.0; // this only makes sense for enlarging
@@ -241,13 +248,13 @@ public class ImageUtils {
         double lastStep = factor / step;
         BufferedImage last = src;
         AffineTransform stepScale = AffineTransform.getScaleInstance(step, step);
-        while(progress < lastStep) {
+        while (progress < lastStep) {
             progress = progress * step;
             int newSrcWidth = (int) (srcWidth * progress);
             int newSrcHeight = (int) (srcHeight * progress);
             BufferedImage tmp = new BufferedImage(newSrcWidth, newSrcHeight, src.getType());
             Graphics2D g = tmp.createGraphics();
-            if(hint != null) {
+            if (hint != null) {
                 g.setRenderingHint(KEY_INTERPOLATION, hint);
             }
             g.drawImage(last, stepScale, null);
@@ -261,7 +268,7 @@ public class ImageUtils {
         // do the last step: resize exactly to the target values
         BufferedImage retVal = new BufferedImage(targetWidth, targetHeight, src.getType());
         Graphics2D g = retVal.createGraphics();
-        if(hint != null) {
+        if (hint != null) {
             g.setRenderingHint(KEY_INTERPOLATION, hint);
         }
         g.drawImage(last, 0, 0, targetWidth, targetHeight, null);
@@ -366,6 +373,11 @@ public class ImageUtils {
         if (fastWay) {
             DataBufferInt srcDataBuffer = (DataBufferInt) src.getRaster().getDataBuffer();
             pixels = srcDataBuffer.getData();
+        } else if (src.getType() == BufferedImage.TYPE_BYTE_GRAY) {
+            // TODO this does not seem to work - why?
+            int width = src.getWidth();
+            int height = src.getHeight();
+            pixels = src.getRGB(0, 0, width, height, null, 0, width);
         } else {
             int width = src.getWidth();
             int height = src.getHeight();

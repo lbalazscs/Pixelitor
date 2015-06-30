@@ -48,7 +48,6 @@ import pixelitor.layers.BlendingMode;
 import pixelitor.layers.DeleteActiveLayerAction;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
-import pixelitor.layers.Layers;
 import pixelitor.layers.ShapeLayer;
 import pixelitor.layers.TextLayer;
 import pixelitor.menus.SelectionActions;
@@ -306,7 +305,7 @@ public class RobotTest {
     }
 
     private static void randomOperation() {
-        if (!Layers.activeIsImageLayer()) {
+        if (!ImageComponents.getActiveImageComponent().activeIsImageLayer()) {
             return;
         }
 

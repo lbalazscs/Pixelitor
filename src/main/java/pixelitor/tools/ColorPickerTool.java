@@ -20,7 +20,6 @@ package pixelitor.tools;
 import pixelitor.AppLogic;
 import pixelitor.ImageDisplay;
 import pixelitor.layers.ImageLayer;
-import pixelitor.layers.Layers;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -68,7 +67,7 @@ public class ColorPickerTool extends Tool {
 
         BufferedImage img;
         if (sampleLayerOnly.isSelected()) {
-            if (!Layers.activeIsImageLayer()) {
+            if (!ic.activeIsImageLayer()) {
                 return;
             }
 

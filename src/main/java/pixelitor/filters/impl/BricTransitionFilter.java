@@ -19,6 +19,7 @@ package pixelitor.filters.impl;
 
 import com.bric.image.transition.*;
 import com.jhlabs.image.AbstractBufferedImageOp;
+import pixelitor.utils.ImageUtils;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -75,7 +76,7 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dest) {
         BufferedImage frameA = src;
-        BufferedImage frameB = new BufferedImage(src.getWidth(), src.getHeight(), src.getType());
+        BufferedImage frameB = ImageUtils.createCompatibleDest(src);
 
         Graphics2D g2 = dest.createGraphics();
 

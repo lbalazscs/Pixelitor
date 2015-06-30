@@ -29,21 +29,28 @@ public abstract class PointFilter extends AbstractBufferedImageOp {
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        final int width = src.getWidth();
+        if (src.getType() == BufferedImage.TYPE_BYTE_GRAY) {
+            if (dst == null) {
+                dst = createCompatibleDestImage(src, null);
+            }
+            return grayFilter(src, dst);
+        }
+
+        int width = src.getWidth();
         int height = src.getHeight();
         setDimensions(width, height);
 
-        final int[] inPixels = ImageUtils.getPixelsAsArray(src);
+        int[] inPixels = ImageUtils.getPixelsAsArray(src);
 
         if (dst == null) {
             dst = createCompatibleDestImage(src, null);
         }
-        final int[] outPixels = ImageUtils.getPixelsAsArray(dst);
+        int[] outPixels = ImageUtils.getPixelsAsArray(dst);
 
         Future<?>[] futures = new Future[height];
         for (int y = 0; y < height; y++) {
-            final int finalY = y;
-            final Runnable calculateLineTask = () -> {
+            int finalY = y;
+            Runnable calculateLineTask = () -> {
                 for (int x = 0; x < width; x++) {
                     int index = finalY * width + x;
                     outPixels[index] = filterRGB(x, finalY, inPixels[index]);
@@ -53,6 +60,31 @@ public abstract class PointFilter extends AbstractBufferedImageOp {
             futures[y] = future;
         }
 
+        ThreadPool.waitForFutures(futures);
+
+        return dst;
+    }
+
+    public BufferedImage grayFilter(BufferedImage src, BufferedImage dst) {
+        int width = src.getWidth();
+        int height = src.getHeight();
+
+        setDimensions(width, height);
+
+        Future<?>[] futures = new Future[height];
+        for (int y = 0; y < height; y++) {
+            int finalY = y;
+            Runnable calculateLineTask = () -> {
+                int[] inPixels = new int[width];
+                src.getRGB(0, finalY, width, 1, inPixels, 0, width);
+                for (int x = 0; x < width; x++) {
+                    inPixels[x] = filterRGB(x, finalY, inPixels[x]);
+                }
+                dst.setRGB(0, finalY, width, 1, inPixels, 0, width);
+            };
+            Future<?> future = ThreadPool.executorService.submit(calculateLineTask);
+            futures[y] = future;
+        }
         ThreadPool.waitForFutures(futures);
 
         return dst;

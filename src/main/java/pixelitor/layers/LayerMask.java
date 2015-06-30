@@ -20,8 +20,14 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.utils.ImageUtils;
 
+import java.awt.Transparency;
+import java.awt.color.ColorSpace;
+import java.awt.color.ICC_ColorSpace;
+import java.awt.color.ICC_Profile;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBuffer;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
 
@@ -29,7 +35,7 @@ import java.awt.image.WritableRaster;
  * A layer mask.
  */
 public class LayerMask extends ImageLayer {
-    private BufferedImage transparencyImage;
+    private transient BufferedImage transparencyImage;
 
     private static final ColorModel transparencyColorModel;
 
@@ -41,10 +47,8 @@ public class LayerMask extends ImageLayer {
         transparencyColorModel = new IndexColorModel(8, 256, lookupFromIndex, lookupFromIndex, lookupFromIndex, lookupFromIndex);
     }
 
-
-    public LayerMask(Composition comp, BufferedImage bwImage) {
-        super(comp, bwImage, "");
-        updateFromBWImage();
+    public LayerMask(Composition comp, BufferedImage bwImage, String layerName) {
+        super(comp, bwImage, layerName + " MASK");
     }
 
     public BufferedImage getTransparencyImage() {
@@ -52,6 +56,9 @@ public class LayerMask extends ImageLayer {
     }
 
     public void updateFromBWImage() {
+        System.out.println("LayerMask::updateFromBWImage: CALLED");
+
+        assert image.getType() == BufferedImage.TYPE_BYTE_GRAY;
         assert image.getColorModel() != transparencyColorModel;
 
         BufferedImage bwImage = image;
@@ -59,10 +66,24 @@ public class LayerMask extends ImageLayer {
         // TODO
         if (bwImage.getType() != BufferedImage.TYPE_BYTE_GRAY) {
             bwImage = ImageUtils.convertToGrayScaleImage(bwImage);
+            System.out.println("LayerMask::updateFromBWImage: CONVERTING TO TYPE_BYTE_GRAY");
         }
 
         WritableRaster raster = bwImage.getRaster();
         this.transparencyImage = new BufferedImage(transparencyColorModel, raster, false, null);
 //        this.transparencyImage = new BufferedImage(bwImage.getColorModel(), raster, false, null);
+    }
+
+    @Override
+    protected BufferedImage createEmptyImageForLayer(int width, int height) {
+        ColorSpace graySpace = new ICC_ColorSpace(ICC_Profile.getInstance(ColorSpace.CS_GRAY));
+        ColorModel grayModel = new ComponentColorModel(graySpace, false, false, Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
+        return new BufferedImage(grayModel, grayModel.createCompatibleWritableRaster(width, height), false, null);
+    }
+
+    @Override
+    protected void imageRefChanged() {
+        updateFromBWImage();
+        comp.imageChanged(Composition.ImageChangeActions.FULL);
     }
 }
