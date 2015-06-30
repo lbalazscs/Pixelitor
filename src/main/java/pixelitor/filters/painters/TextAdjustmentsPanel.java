@@ -33,13 +33,14 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.Color;
+import java.awt.Dialog;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.font.TextAttribute;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
 
 import static java.awt.Color.BLACK;
@@ -58,9 +59,6 @@ public class TextAdjustmentsPanel extends AdjustPanel implements ParamAdjustment
 
     private JCheckBox boldCB;
     private JCheckBox italicCB;
-    private JCheckBox underlineCB;
-    private JCheckBox strikeThroughCB;
-//    private JCheckBox kerningCB;
 
     private ColorParam color;
 
@@ -71,6 +69,9 @@ public class TextAdjustmentsPanel extends AdjustPanel implements ParamAdjustment
     private JCheckBox watermarkCB;
 
     private static String lastText = "";
+
+    private Map<TextAttribute, Object> map;
+    private AdvancedTextSettingsDialog advancedSettingsDialog;
 
     public TextAdjustmentsPanel(TextFilter textFilter) {
         super(textFilter);
@@ -186,6 +187,7 @@ public class TextAdjustmentsPanel extends AdjustPanel implements ParamAdjustment
 
         gbh.addLabel("Font Size:", 0, 0);
         int defaultFontSize = settings == null ? 100 : settings.getFont().getSize();
+
         RangeParam fontSizeParam = new RangeParam("", 1, 1000, defaultFontSize);
         fontSizeSlider = new SliderSpinner(fontSizeParam, NONE, false);
         fontSizeSlider.setSliderName("fontSize");
@@ -205,20 +207,13 @@ public class TextAdjustmentsPanel extends AdjustPanel implements ParamAdjustment
 
         boolean defaultBold = false;
         boolean defaultItalic = false;
-        boolean defaultUnderline = false;
-        boolean defaultStrikethrough = false;
         if (settings != null) {
             Font font = settings.getFont();
             defaultBold = font.isBold();
             defaultItalic = font.isItalic();
             if (font.hasLayoutAttributes()) {
                 Map<TextAttribute, ?> attributes = font.getAttributes();
-                if (TextAttribute.UNDERLINE_ON.equals(attributes.get(TextAttribute.UNDERLINE))) {
-                    defaultUnderline = true;
-                }
-                if (TextAttribute.STRIKETHROUGH_ON.equals(attributes.get(TextAttribute.STRIKETHROUGH))) {
-                    defaultUnderline = true;
-                }
+                this.map = (Map<TextAttribute, Object>) attributes;
             }
         }
 
@@ -228,11 +223,17 @@ public class TextAdjustmentsPanel extends AdjustPanel implements ParamAdjustment
         gbh.addLabel("   Italic:", 2, 2);
         italicCB = createAndAddEmphasisCheckBox("italicCB", gbh, defaultItalic);
 
-        gbh.addLabel("   Underline:", 4, 2);
-        underlineCB = createAndAddEmphasisCheckBox("underlineCB", gbh, defaultUnderline);
+        JButton showAdvancedSettingsButton = new JButton("Advanced...");
+        showAdvancedSettingsButton.addActionListener(e -> {
+            if (advancedSettingsDialog == null) {
+                Dialog parentDialog = (Dialog) SwingUtilities.getWindowAncestor(this);
+                advancedSettingsDialog = new AdvancedTextSettingsDialog(parentDialog, this, map);
+            }
+            advancedSettingsDialog.setVisible(true);
+        });
 
-        gbh.addLabel("   Strikethrough:", 6, 2);
-        strikeThroughCB = createAndAddEmphasisCheckBox("strikeThroughCB", gbh, defaultStrikethrough);
+        gbh.addLabel("      ", 4, 2);
+        gbh.addControl(showAdvancedSettingsButton);
 
         return fontPanel;
     }
@@ -257,17 +258,14 @@ public class TextAdjustmentsPanel extends AdjustPanel implements ParamAdjustment
         int size = fontSizeSlider.getCurrentValue();
         Font font = new Font(fontFamily, style, size);
 
-        Map<TextAttribute, Object> map =
-                new Hashtable<>();
-        if (underlineCB.isSelected()) {
-            map.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+        // It is important to create here a new Map, because
+        // the old one stores old values in TextAttribute.SIZE
+        // and other fields which would override the current ones.
+        map = new HashMap<>();
+
+        if (advancedSettingsDialog != null) {
+            advancedSettingsDialog.updateMap(map);
         }
-        if (strikeThroughCB.isSelected()) {
-            map.put(TextAttribute.STRIKETHROUGH, TextAttribute.STRIKETHROUGH_ON);
-        }
-//        if(kerningCB.isSelected()) {
-//            map.put(TextAttribute.KERNING, TextAttribute.KERNING_ON);
-//        }
 
         return font.deriveFont(map);
     }
@@ -289,8 +287,11 @@ public class TextAdjustmentsPanel extends AdjustPanel implements ParamAdjustment
             areaEffects = effectsPanel.getEffects();
         }
 
+        Font selectedFont = getSelectedFont();
+        int size = selectedFont.getSize();
+
         TextSettings settings = new TextSettings(
-                text, getSelectedFont(), color.getColor(), areaEffects,
+                text, selectedFont, color.getColor(), areaEffects,
                 (HorizontalAlignment) horizontalAlignmentCombo.getSelectedItem(),
                 (VerticalAlignment) verticalAlignmentCombo.getSelectedItem(),
                 watermarkCB.isSelected());

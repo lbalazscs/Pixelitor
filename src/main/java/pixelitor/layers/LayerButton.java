@@ -17,10 +17,13 @@
 
 package pixelitor.layers;
 
+import pixelitor.PixelitorWindow;
 import pixelitor.history.AddToHistory;
 import pixelitor.utils.IconUtils;
 
 import javax.swing.*;
+import java.awt.Dimension;
+import java.awt.Insets;
 
 /**
  * A GUI element representing a layer in an image
@@ -54,10 +57,24 @@ public class LayerButton extends JToggleButton {
 
     public LayerButton(Layer layer) {
         this.layer = layer;
+
         setLayout(new LayerButtonLayout(5, 5));
 
         initVisibilityControl(layer);
         initLayerNameEditor(layer);
+
+        if (layer instanceof TextLayer) {
+            Icon textLayerIcon = IconUtils.getTextLayerIcon();
+            JButton layerIcon = new JButton(textLayerIcon);
+            layerIcon.putClientProperty("JComponent.sizeVariant", "mini");
+            layerIcon.setMargin(new Insets(0, 0, 0, 0));
+            layerIcon.setBorderPainted(false);
+            layerIcon.setPreferredSize(new Dimension(textLayerIcon.getIconWidth(), textLayerIcon.getIconHeight()));
+
+            layerIcon.addActionListener(e -> TextLayer.edit(PixelitorWindow.getInstance(), layer.getComposition(), (TextLayer) layer));
+            add(layerIcon, LayerButtonLayout.LAYER_ICON);
+        }
+
         wireSelectionWithLayerActivation(layer);
     }
 

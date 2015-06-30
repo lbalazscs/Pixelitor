@@ -21,6 +21,7 @@ import pixelitor.GlobalKeyboardWatch;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
+import java.awt.Dialog;
 import java.awt.Frame;
 import java.awt.event.KeyEvent;
 
@@ -47,6 +48,12 @@ public class OKDialog extends JDialog {
         super(owner, title);
         this.okButtonText = okButtonText;
     }
+
+    public OKDialog(Dialog owner, String title, String okButtonText) {
+        super(owner, title);
+        this.okButtonText = okButtonText;
+    }
+
 
     public void setupGUI(JComponent form, boolean setVisible) {
         setLayout(new BorderLayout());

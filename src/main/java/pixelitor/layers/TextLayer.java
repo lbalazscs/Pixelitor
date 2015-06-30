@@ -144,6 +144,7 @@ public class TextLayer extends ShapeLayer {
 
     public void setSettings(TextSettings settings) {
         this.settings = settings;
+
         settings.configurePainter(painter);
     }
 
@@ -196,6 +197,10 @@ public class TextLayer extends ShapeLayer {
         Composition comp = ImageComponents.getActiveImageComponent().getComp();
         Layer layer = comp.getActiveLayer();
         TextLayer textLayer = (TextLayer) layer;
+        edit(pw, comp, textLayer);
+    }
+
+    public static void edit(final PixelitorWindow pw, final Composition comp, final TextLayer textLayer) {
         TextSettings oldSettings = textLayer.getSettings();
         TextAdjustmentsPanel p = new TextAdjustmentsPanel(textLayer);
         OKCancelDialog d = new OKCancelDialog(p, pw, "Edit Text Layer") {

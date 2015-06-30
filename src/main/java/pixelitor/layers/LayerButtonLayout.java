@@ -29,9 +29,11 @@ public class LayerButtonLayout implements LayoutManager {
     private final int vGap;
     private Component visibilityButton;
     private Component nameEditor;
+    private Component layerIcon;
 
     public static final String VISIBILITY_BUTTON = "VISIBILITY_BUTTON";
     public static final String NAME_EDITOR = "NAME_EDITOR";
+    public static final String LAYER_ICON = "LAYER_ICON";
 
     public LayerButtonLayout(int hGap, int vGap) {
         this.hGap = hGap;
@@ -45,6 +47,8 @@ public class LayerButtonLayout implements LayoutManager {
                 visibilityButton = comp;
             } else if (NAME_EDITOR.equals(name)) {
                 nameEditor = comp;
+            } else {
+                layerIcon = comp;
             }
         }
     }
@@ -70,11 +74,26 @@ public class LayerButtonLayout implements LayoutManager {
     @Override
     public void layoutContainer(Container parent) {
         synchronized (parent.getTreeLock()) {
-            int buttonWidth = (int) visibilityButton.getPreferredSize().getWidth();
-            int buttonHeight = (int) visibilityButton.getPreferredSize().getHeight();
-            int adjustment = 2; // it is necessary for some reason
-            visibilityButton.setBounds(hGap, vGap + adjustment, buttonWidth, buttonHeight);
-            nameEditor.setBounds(hGap * 2 + buttonWidth, vGap, parent.getWidth() - buttonWidth - 3 * hGap, (int) nameEditor.getPreferredSize().getHeight());
+            Dimension visButtonSize = visibilityButton.getPreferredSize();
+            int visButtonWidth = (int) visButtonSize.getWidth();
+            int visButtonHeight = (int) visButtonSize.getHeight();
+            int adjustment = 2; // it is necessary for some reason, TODO
+            visibilityButton.setBounds(hGap, vGap + adjustment, visButtonWidth, visButtonHeight);
+
+            int editorHeight = (int) nameEditor.getPreferredSize().getHeight();
+            int secondElemStart = hGap * 2 + visButtonWidth;
+            if (layerIcon != null) {
+                int layerIconWidth = (int) layerIcon.getPreferredSize().getWidth();
+                int layerIconHeight = (int) layerIcon.getPreferredSize().getHeight();
+
+                layerIcon.setBounds(secondElemStart, vGap + adjustment, layerIconWidth, layerIconHeight);
+                int layerIconEnd = secondElemStart + layerIconWidth;
+                int remainingWidth = parent.getWidth() - layerIconEnd - 2 * hGap;
+                nameEditor.setBounds(layerIconEnd + hGap - 2, vGap, remainingWidth + 2, editorHeight);
+            } else {
+                int remainingWidth = parent.getWidth() - visButtonWidth - 3 * hGap;
+                nameEditor.setBounds(secondElemStart, vGap, remainingWidth, editorHeight);
+            }
         }
     }
 }
