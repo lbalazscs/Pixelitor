@@ -205,11 +205,11 @@ public class ShapesTool extends Tool {
                 ToolAffectedArea affectedArea = new ToolAffectedArea(comp, shapeBounds, false);
                 saveSubImageForUndo(comp.getActiveImageLayer().getImage(), affectedArea);
             }
-        }
+            paintShapeOnIC(comp, userDrag);
 
-        paintShapeOnIC(comp, userDrag);
-
-        if (selectionMode) {
+            comp.imageChanged(FULL);
+            comp.getActiveImageLayer().updateIconImage();
+        } else { // selection mode
             comp.getSelection().ifPresent((selection) -> {
                 selection.clipToCompSize(comp); // the selection can be too big
 
@@ -225,7 +225,6 @@ public class ShapesTool extends Tool {
 
         drawing = false;
         stroke = null;
-        comp.imageChanged(FULL);
     }
 
     private void updateWhichSettingsAreEnabled() {

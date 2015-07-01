@@ -167,7 +167,7 @@ public class MenuBar extends JMenuBar {
         initSelectionMenu();
         initColorsMenu();
         initFilterMenu();
-        initViewMenu(pw);
+        initViewMenu();
 
         if (Build.CURRENT != Build.FINAL) {
             initDevelopMenu(pw);
@@ -691,6 +691,14 @@ public class MenuBar extends JMenuBar {
         if ("true".equals(System.getProperty("advanced.layers"))) {
             initLayerMaskSubmenu(layersMenu);
             initTextLayerSubmenu(layersMenu, pw);
+
+            Action debugAppAction = new MenuAction("Show Pixelitor Internal State...") {
+                @Override
+                void onClick() {
+                    AppLogic.showDebugAppDialog();
+                }
+            };
+            createMenuItem(debugAppAction, layersMenu, EnabledIf.ACTION_ENABLED);
         }
 
         this.add(layersMenu);
@@ -715,13 +723,21 @@ public class MenuBar extends JMenuBar {
             }
         }, layerMaskSubMenu);
 
+        createMenuItem(new MenuAction("Add from Selection") {
+            @Override
+            void onClick() {
+                Layer layer = ImageComponents.getActiveLayer().get();
+                layer.addLayerMask(LayerMaskAddType.REVEAL_SELECTION);
+            }
+        }, layerMaskSubMenu);
+
         Action deleteLayerMask = new MenuAction("Delete", HAS_LAYER_MASK) {
             @Override
             void onClick() {
                 ImageComponent ic = ImageComponents.getActiveImageComponent();
                 Layer layer = ic.getComp().getActiveLayer();
 
-                layer.deleteLayerMask();
+                layer.deleteLayerMask(AddToHistory.YES);
 
                 ic.setShowLayerMask(false);
                 FgBgColorSelector.INSTANCE.setLayerMaskEditing(false);
@@ -730,6 +746,28 @@ public class MenuBar extends JMenuBar {
             }
         };
         createMenuItem(deleteLayerMask, layerMaskSubMenu);
+
+        Action applyLayerMask = new MenuAction("Apply", HAS_LAYER_MASK) {
+            @Override
+            void onClick() {
+                ImageComponent ic = ImageComponents.getActiveImageComponent();
+                Layer layer = ic.getComp().getActiveLayer();
+
+                if (!(layer instanceof ImageLayer)) {
+                    Dialogs.showNotImageLayerDialog();
+                    return;
+                }
+
+                ((ImageLayer) layer).applyLayerMask(AddToHistory.YES);
+
+                ic.setShowLayerMask(false);
+                FgBgColorSelector.INSTANCE.setLayerMaskEditing(false);
+
+                layer.getComposition().imageChanged(FULL);
+            }
+        };
+        createMenuItem(applyLayerMask, layerMaskSubMenu);
+
 
         layerMaskSubMenu.addSeparator();
 
@@ -817,7 +855,7 @@ public class MenuBar extends JMenuBar {
         layersMenu.add(layerStackSubmenu);
     }
 
-    private void initViewMenu(PixelitorWindow pixelitorWindow) {
+    private void initViewMenu() {
         JMenu viewMenu = createMenu("View", 'V');
 
         viewMenu.add(ZoomMenu.INSTANCE);
@@ -975,6 +1013,14 @@ public class MenuBar extends JMenuBar {
             }
         };
         createMenuItem(updateFromMask, developMenu);
+
+        Action imageChangedActive = new MenuAction("imageChanged(FULL) on the active image") {
+            @Override
+            void onClick() {
+                ImageComponents.getActiveComp().get().imageChanged(FULL);
+            }
+        };
+        createMenuItem(imageChangedActive, developMenu);
 
         this.add(developMenu);
     }
@@ -1169,14 +1215,6 @@ public class MenuBar extends JMenuBar {
     private static void initDebugSubmenu(JMenu develMenu, PixelitorWindow pixelitorWindow) {
         JMenu debugSubmenu = new JMenu("Debug");
 
-        Action debugAppAction = new MenuAction("Debug App...") {
-            @Override
-            void onClick() {
-                AppLogic.showDebugAppDialog();
-            }
-        };
-        createMenuItem(debugAppAction, debugSubmenu, EnabledIf.ACTION_ENABLED);
-
         Action debugHistoryAction = new MenuAction("Debug History...") {
             @Override
             void onClick() {
@@ -1192,14 +1230,6 @@ public class MenuBar extends JMenuBar {
             }
         };
         createMenuItem(repaintActive, debugSubmenu);
-
-        Action imageChangedActive = new MenuAction("imageChanged(FULL) on the active image") {
-            @Override
-            void onClick() {
-                ImageComponents.getActiveComp().get().imageChanged(FULL);
-            }
-        };
-        createMenuItem(imageChangedActive, debugSubmenu);
 
         Action revalidateActive = new MenuAction("revalidate() the main window") {
             @Override

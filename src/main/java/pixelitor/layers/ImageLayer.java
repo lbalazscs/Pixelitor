@@ -22,6 +22,7 @@ import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.filters.comp.Flip;
 import pixelitor.history.AddToHistory;
+import pixelitor.history.ApplyLayerMaskEdit;
 import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.history.TranslateEdit;
@@ -131,8 +132,8 @@ public class ImageLayer extends ContentLayer {
     /**
      * Creates a new layer with the given image
      */
-    public ImageLayer(Composition comp, BufferedImage image, String name) {
-        super(comp, name == null ? comp.generateNewLayerName() : name);
+    public ImageLayer(Composition comp, BufferedImage image, String name, Layer parent) {
+        super(comp, name == null ? comp.generateNewLayerName() : name, parent);
 
         requireNonNull(image);
 
@@ -144,7 +145,7 @@ public class ImageLayer extends ContentLayer {
      * Creates a new layer with the given image and size. Used when an image is pasted into a layer
      */
     public ImageLayer(Composition comp, BufferedImage pastedImage, String name, int width, int height) {
-        super(comp, name);
+        super(comp, name, null);
 
         requireNonNull(pastedImage);
 
@@ -190,7 +191,7 @@ public class ImageLayer extends ContentLayer {
      * Creates a new empty layer
      */
     public ImageLayer(Composition comp, String name) {
-        super(comp, name == null ? comp.generateNewLayerName() : name);
+        super(comp, name == null ? comp.generateNewLayerName() : name, null);
 
         BufferedImage emptyImage = createEmptyImageForLayer(canvas.getWidth(), canvas.getHeight());
         setImage(emptyImage);
@@ -200,7 +201,7 @@ public class ImageLayer extends ContentLayer {
     @Override
     public ImageLayer duplicate() {
         BufferedImage imageCopy = ImageUtils.copyImage(image);
-        ImageLayer d = new ImageLayer(comp, imageCopy, getDuplicateLayerName());
+        ImageLayer d = new ImageLayer(comp, imageCopy, getDuplicateLayerName(), null);
         // TODO why add opacity and blending mode to history
         d.setOpacity(opacity, false, AddToHistory.YES, true);
         d.setTranslationX(translationX);
@@ -678,6 +679,8 @@ public class ImageLayer extends ContentLayer {
 
         tmpDrawingLayer.dispose();
         tmpDrawingLayer = null;
+
+        updateIconImage();
     }
 
     public BufferedImage createCompositionSizedTmpImage() {
@@ -1003,6 +1006,27 @@ public class ImageLayer extends ContentLayer {
     }
 
     protected void imageRefChanged() {
-        // does something only in the LayerMask subclass
+        updateIconImage();
     }
+
+    public void updateIconImage() {
+//        System.out.println("ImageLayer::updateIconImage: CALLED, class = " + getClass().getSimpleName());
+        getLayerButton().updateLayerIconImage(image, false);
+    }
+
+    public void applyLayerMask(AddToHistory addToHistory) {
+        BufferedImage backupImage = ImageUtils.copyImage(image);
+        LayerMask oldMask = layerMask;
+
+        layerMask.applyToImage(image);
+        deleteLayerMask(AddToHistory.NO);
+
+        if (addToHistory == AddToHistory.YES) {
+            ApplyLayerMaskEdit edit = new ApplyLayerMaskEdit(comp, this, oldMask, backupImage);
+            History.addEdit(edit);
+        }
+
+        updateIconImage();
+    }
+
 }

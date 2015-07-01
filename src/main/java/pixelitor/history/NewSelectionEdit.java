@@ -37,7 +37,7 @@ public class NewSelectionEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        comp.deselect(false);
+        comp.deselect(AddToHistory.NO);
 
         History.notifyMenus(this);
     }

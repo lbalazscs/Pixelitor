@@ -19,17 +19,24 @@ package pixelitor.layers;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
+import pixelitor.history.AddLayerMaskEdit;
 import pixelitor.history.AddToHistory;
+import pixelitor.history.CompoundEdit;
+import pixelitor.history.DeleteLayerMaskEdit;
+import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;
 import pixelitor.history.LayerBlendingEdit;
 import pixelitor.history.LayerOpacityEdit;
 import pixelitor.history.LayerRenameEdit;
 import pixelitor.history.LayerVisibilityChangeEdit;
+import pixelitor.history.PixelitorEdit;
+import pixelitor.selection.Selection;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.HistogramsPanel;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -45,6 +52,7 @@ public abstract class Layer implements Serializable {
 
     protected Canvas canvas;
     String name;
+    private boolean isMask = false;
     private boolean visible = true;
     final Composition comp;
     LayerMask layerMask;
@@ -62,13 +70,19 @@ public abstract class Layer implements Serializable {
      */
     protected boolean layerMaskEditing = false;
 
-    Layer(Composition comp, String name) {
+    Layer(Composition comp, String name, Layer parent) {
         this.comp = comp;
         this.name = name;
+        this.isMask = parent != null;
         this.opacity = 1.0f;
 
         canvas = comp.getCanvas();
-        layerButton = new LayerButton(this);
+
+        if (parent != null) { // this is a layer mask
+            layerButton = parent.getLayerButton();
+        } else { // normal layer
+            layerButton = new LayerButton(this);
+        }
     }
 
     public boolean isVisible() {
@@ -91,9 +105,12 @@ public abstract class Layer implements Serializable {
         }
     }
 
-
     public LayerButton getLayerButton() {
         return layerButton;
+    }
+
+    public void setLayerButton(LayerButton layerButton) {
+        this.layerButton = layerButton;
     }
 
     String getDuplicateLayerName() {
@@ -210,7 +227,17 @@ public abstract class Layer implements Serializable {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
 
-        layerButton = new LayerButton(this);
+        // We create a layer button only for real layers.
+        // For layer masks, we share the button of the real layer.
+        if (!isMask) {
+            layerButton = new LayerButton(this);
+
+            if (layerMask != null) {
+                layerMask.setLayerButton(layerButton);
+                layerButton.addMaskIcon();
+                layerMask.updateIconImage();
+            }
+        }
     }
 
     boolean isActiveLayer() {
@@ -227,13 +254,57 @@ public abstract class Layer implements Serializable {
                     String.format("The layer \"%s\" already has a layer mask.", getName()));
             return;
         }
+        Selection selection = comp.getSelectionOrNull();
+        if (addType.missingSelection(selection)) {
+            Dialogs.showInfoDialog("No selection",
+                    String.format("The composition \"%s\" has no selection.", comp.getName()));
+            return;
+        }
+
+        // needs to be added first, because the inherited layer
+        // mask constructor already will try to update the image
+        layerButton.addMaskIcon();
+
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
 
-        BufferedImage bwLayerMask = addType.getBWImage(canvasWidth, canvasHeight);
-        layerMask = new LayerMask(comp, bwLayerMask, getName());
+        BufferedImage bwLayerMask = addType.getBWImage(canvasWidth, canvasHeight, selection);
+        layerMask = new LayerMask(comp, bwLayerMask, this);
 
         comp.imageChanged(FULL);
+
+        PixelitorEdit edit = new AddLayerMaskEdit(comp, this);
+        if (addType.needsSelection()) {
+            Shape backupShape = selection.getShape();
+            comp.deselect(AddToHistory.NO);
+            DeselectEdit deselectEdit = new DeselectEdit(comp, backupShape, "nested deselect");
+            edit = new CompoundEdit(comp, "Layer Mask from Selection", edit, deselectEdit);
+        }
+
+        History.addEdit(edit);
+    }
+
+    // called if the deletion of a layer mask is undone
+    public void addLayerMaskBack(LayerMask layerMask) {
+        this.layerMask = layerMask;
+        comp.imageChanged(FULL);
+        layerButton.addMaskIcon();
+        layerMask.updateIconImage();
+    }
+
+    public void deleteLayerMask(AddToHistory addToHistory) {
+        LayerMask oldLayerMask = layerMask;
+        layerMask = null;
+        layerMaskEditing = false;
+
+        comp.imageChanged(FULL);
+
+        if (addToHistory == AddToHistory.YES) {
+            DeleteLayerMaskEdit edit = new DeleteLayerMaskEdit(comp, this, oldLayerMask);
+            History.addEdit(edit);
+        }
+
+        layerButton.deleteMaskIcon();
     }
 
     /**
@@ -274,11 +345,6 @@ public abstract class Layer implements Serializable {
 
     public void dragFinished(int newIndex) {
         comp.dragFinished(this, newIndex);
-    }
-
-    public void deleteLayerMask() {
-        layerMask = null;
-        layerMaskEditing = false;
     }
 
     public void setLayerMaskEditing(boolean b) {

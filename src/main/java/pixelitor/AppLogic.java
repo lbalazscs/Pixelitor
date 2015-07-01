@@ -19,6 +19,7 @@ package pixelitor;
 
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerChangeListener;
+import pixelitor.tools.FgBgColorSelector;
 import pixelitor.tools.Symmetry;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.GUIUtils;
@@ -61,6 +62,11 @@ public class AppLogic {
         for (LayerChangeListener listener : layerChangeListeners) {
             listener.activeLayerChanged(newActiveLayer);
         }
+
+        if (!newActiveLayer.hasLayerMask()) {
+            newActiveLayer.getComposition().getIC().setShowLayerMask(false);
+            FgBgColorSelector.INSTANCE.setLayerMaskEditing(false);
+        }
     }
 
     public static void layerOrderChanged(Composition comp) {
@@ -71,7 +77,7 @@ public class AppLogic {
 
     public static void showDebugAppDialog() {
         AppNode node = new AppNode();
-        String title = "Pixelitor Debug";
+        String title = "Pixelitor Internal State";
 
         JTree tree = new JTree(node);
         String text = node.toDetailedString();

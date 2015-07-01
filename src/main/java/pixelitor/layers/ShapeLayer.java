@@ -33,7 +33,7 @@ public class ShapeLayer extends ContentLayer {
     private Shape shape;
 
     public ShapeLayer(Composition comp, String name, Shape shape) {
-        super(comp, name);
+        super(comp, name, null);
         this.shape = shape;
     }
 
@@ -42,7 +42,7 @@ public class ShapeLayer extends ContentLayer {
      * because creating a Shape from a text depends on the current Graphics object
      */
     protected ShapeLayer(Composition comp, String name) {
-        super(comp, name);
+        super(comp, name, null);
     }
 
     /**

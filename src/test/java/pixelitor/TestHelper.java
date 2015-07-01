@@ -29,7 +29,7 @@ public class TestHelper {
 
     public static ImageLayer createTestImageLayer(String layerName, Composition comp) {
         BufferedImage image = createTestImage();
-        ImageLayer layer = new ImageLayer(comp, image, layerName);
+        ImageLayer layer = new ImageLayer(comp, image, layerName, null);
         comp.addLayerNoGUI(layer);
         comp.setActiveLayer(layer, AddToHistory.NO);
         return layer;

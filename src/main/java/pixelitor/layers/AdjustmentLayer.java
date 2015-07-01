@@ -32,7 +32,7 @@ public class AdjustmentLayer extends Layer {
     private final Filter filter;
 
     public AdjustmentLayer(Composition comp, String name, Filter filter) {
-        super(comp, name);
+        super(comp, name, null);
         this.filter = filter;
     }
 

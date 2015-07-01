@@ -24,6 +24,7 @@ import pixelitor.ImageComponents;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.history.AddToHistory;
 import pixelitor.selection.Selection;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.Tools;
@@ -53,7 +54,7 @@ public final class SelectionActions {
     private static final Action deselectAction = new MenuAction("Deselect") {
         @Override
         public void onClick() {
-            getActiveComp().get().deselect(true);
+            getActiveComp().get().deselect(AddToHistory.YES);
         }
     };
 

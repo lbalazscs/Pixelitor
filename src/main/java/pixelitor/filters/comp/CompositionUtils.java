@@ -21,6 +21,7 @@ import pixelitor.AppLogic;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.ImageComponent;
+import pixelitor.history.AddToHistory;
 import pixelitor.history.OneLayerUndoableEdit;
 import pixelitor.layers.Layer;
 
@@ -51,7 +52,7 @@ public final class CompositionUtils {
 
         OneLayerUndoableEdit.createAndAddToHistory(comp, "Crop", false, true);
         if(selection) {
-            comp.deselect(false);
+            comp.deselect(AddToHistory.NO);
         }
 
         int nrLayers = comp.getNrLayers();
@@ -110,7 +111,7 @@ public final class CompositionUtils {
         }
 
         OneLayerUndoableEdit.createAndAddToHistory(comp, "Resize", false, true);
-        comp.deselect(false);
+        comp.deselect(AddToHistory.NO);
 
         int nrLayers = comp.getNrLayers();
         for (int i = 0; i < nrLayers; i++) {

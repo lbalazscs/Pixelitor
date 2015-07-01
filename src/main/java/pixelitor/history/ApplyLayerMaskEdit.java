@@ -17,33 +17,37 @@
 package pixelitor.history;
 
 import pixelitor.Composition;
+import pixelitor.layers.ImageLayer;
+import pixelitor.layers.LayerMask;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
-import java.awt.Shape;
-import java.util.Objects;
+import java.awt.image.BufferedImage;
 
 /**
- * Represents a deselect
+ * A PixelitorEdit that represents the application of a layer mask
+ * (The layer mask is deleted, but its effect is transferred
+ * to the transparency of the layer)
  */
-public class DeselectEdit extends PixelitorEdit {
-    private final Shape backupShape;
-    private final String reason;
+public class ApplyLayerMaskEdit extends PixelitorEdit {
+    private final LayerMask oldMask;
+    private final BufferedImage oldImage;
+    private ImageLayer layer;
 
-    public DeselectEdit(Composition comp, Shape backupShape, String reason) {
-        super(comp, "Deselect");
-        this.reason = reason;
-
-        this.backupShape = Objects.requireNonNull(backupShape);
+    public ApplyLayerMaskEdit(Composition comp, ImageLayer layer, LayerMask oldMask, BufferedImage oldImage) {
+        super(comp, "Apply Layer Mask");
+        comp.setDirty(true);
+        this.oldImage = oldImage;
+        this.layer = layer;
+        this.oldMask = oldMask;
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
-        assert !comp.hasSelection();
-
-        comp.createSelectionFromShape(backupShape);
+        layer.setImage(oldImage);
+        layer.addLayerMaskBack(oldMask);
 
         History.notifyMenus(this);
     }
@@ -52,18 +56,20 @@ public class DeselectEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        comp.deselect(AddToHistory.NO);
+        layer.applyLayerMask(AddToHistory.NO);
 
         History.notifyMenus(this);
     }
 
     @Override
-    public boolean canRepeat() {
-        return false;
+    public void die() {
+        super.die();
+
+        layer = null;
     }
 
     @Override
-    public String getDebugName() {
-        return super.getDebugName() + " (reason = \"" + reason + "\")";
+    public boolean canRepeat() {
+        return false;
     }
 }

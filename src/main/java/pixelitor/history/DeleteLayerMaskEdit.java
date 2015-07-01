@@ -17,33 +17,31 @@
 package pixelitor.history;
 
 import pixelitor.Composition;
+import pixelitor.layers.Layer;
+import pixelitor.layers.LayerMask;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
-import java.awt.Shape;
-import java.util.Objects;
 
 /**
- * Represents a deselect
+ * A PixelitorEdit that represents the deletion of a layer mask
  */
-public class DeselectEdit extends PixelitorEdit {
-    private final Shape backupShape;
-    private final String reason;
+public class DeleteLayerMaskEdit extends PixelitorEdit {
+    private final LayerMask oldMask;
+    private Layer layer;
 
-    public DeselectEdit(Composition comp, Shape backupShape, String reason) {
-        super(comp, "Deselect");
-        this.reason = reason;
-
-        this.backupShape = Objects.requireNonNull(backupShape);
+    public DeleteLayerMaskEdit(Composition comp, Layer layer, LayerMask oldMask) {
+        super(comp, "Delete Layer Mask");
+        comp.setDirty(true);
+        this.layer = layer;
+        this.oldMask = oldMask;
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
-        assert !comp.hasSelection();
-
-        comp.createSelectionFromShape(backupShape);
+        layer.addLayerMaskBack(oldMask);
 
         History.notifyMenus(this);
     }
@@ -52,18 +50,20 @@ public class DeselectEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        comp.deselect(AddToHistory.NO);
+        layer.deleteLayerMask(AddToHistory.NO);
 
         History.notifyMenus(this);
     }
 
     @Override
-    public boolean canRepeat() {
-        return false;
+    public void die() {
+        super.die();
+
+        layer = null;
     }
 
     @Override
-    public String getDebugName() {
-        return super.getDebugName() + " (reason = \"" + reason + "\")";
+    public boolean canRepeat() {
+        return false;
     }
 }

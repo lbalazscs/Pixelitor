@@ -45,8 +45,8 @@ public abstract class ContentLayer extends Layer {
     int translationX = 0;
     int translationY = 0;
 
-    protected ContentLayer(Composition comp, String name) {
-        super(comp, name);
+    protected ContentLayer(Composition comp, String name, Layer parent) {
+        super(comp, name, parent);
     }
 
     public int getTranslationX() {

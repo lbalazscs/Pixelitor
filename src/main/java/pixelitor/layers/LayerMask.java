@@ -20,6 +20,7 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.utils.ImageUtils;
 
+import java.awt.Graphics2D;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
 import java.awt.color.ICC_ColorSpace;
@@ -30,6 +31,8 @@ import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
+
+import static java.awt.AlphaComposite.DstIn;
 
 /**
  * A layer mask.
@@ -47,16 +50,23 @@ public class LayerMask extends ImageLayer {
         transparencyColorModel = new IndexColorModel(8, 256, lookupFromIndex, lookupFromIndex, lookupFromIndex, lookupFromIndex);
     }
 
-    public LayerMask(Composition comp, BufferedImage bwImage, String layerName) {
-        super(comp, bwImage, layerName + " MASK");
+    public LayerMask(Composition comp, BufferedImage bwImage, Layer layer) {
+        super(comp, bwImage, layer.getName() + " MASK", layer);
     }
 
     public BufferedImage getTransparencyImage() {
         return transparencyImage;
     }
 
+    public void applyToImage(BufferedImage in) {
+        Graphics2D g = in.createGraphics();
+        g.setComposite(DstIn);
+        g.drawImage(getTransparencyImage(), 0, 0, null);
+        g.dispose();
+    }
+
     public void updateFromBWImage() {
-        System.out.println("LayerMask::updateFromBWImage: CALLED");
+//        System.out.println("LayerMask::updateFromBWImage: CALLED");
 
         assert image.getType() == BufferedImage.TYPE_BYTE_GRAY;
         assert image.getColorModel() != transparencyColorModel;
@@ -85,5 +95,13 @@ public class LayerMask extends ImageLayer {
     protected void imageRefChanged() {
         updateFromBWImage();
         comp.imageChanged(Composition.ImageChangeActions.FULL);
+        updateIconImage();
+    }
+
+    public void updateIconImage() {
+        LayerButton button = getLayerButton();
+        if(button != null) { // can be null while deserializing
+            button.updateLayerIconImage(image, true);
+        }
     }
 }

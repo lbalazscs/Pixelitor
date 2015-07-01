@@ -137,7 +137,7 @@ public class OneLayerUndoableEdit extends PixelitorEdit {
         super.redo();
 
         if (saveSelection) {
-            comp.deselect(false);
+            comp.deselect(AddToHistory.NO);
         }
         swapImages();
     }

@@ -199,7 +199,7 @@ public class OpenRaster {
             }
             boolean visibility = layerVisibility == null ? true : layerVisibility.equals("visible");
 
-            ImageLayer layer = new ImageLayer(comp, image, layerName);
+            ImageLayer layer = new ImageLayer(comp, image, layerName, null);
             layer.setVisible(visibility, AddToHistory.NO);
             BlendingMode blendingMode = BlendingMode.fromSVGName(layerBlendingMode);
 

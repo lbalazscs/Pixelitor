@@ -128,7 +128,7 @@ public class Composition implements Serializable {
     }
 
     private void addBaseLayer(BufferedImage baseLayerImage) {
-        ImageLayer newLayer = new ImageLayer(this, baseLayerImage, null);
+        ImageLayer newLayer = new ImageLayer(this, baseLayerImage, null, null);
 
         addLayerNoGUI(newLayer);
         activeLayer = newLayer;
@@ -329,7 +329,7 @@ public class Composition implements Serializable {
         int nrLayers = getNrLayers();
         BufferedImage bi = getCompositeImage();
 
-        Layer flattenedLayer = new ImageLayer(this, bi, "flattened");
+        Layer flattenedLayer = new ImageLayer(this, bi, "flattened", null);
         addLayer(flattenedLayer, AddToHistory.NO, false, nrLayers); // add to the top
 
         for (int i = nrLayers - 1; i >= 0; i--) { // remove the rest
@@ -580,7 +580,7 @@ public class Composition implements Serializable {
     }
 
     public void addNewLayerFromComposite(String newLayerName) {
-        ImageLayer newLayer = new ImageLayer(this, getCompositeImage(), newLayerName);
+        ImageLayer newLayer = new ImageLayer(this, getCompositeImage(), newLayerName, null);
         addLayer(newLayer, AddToHistory.YES, false, false);
     }
 
@@ -594,9 +594,9 @@ public class Composition implements Serializable {
         }
     }
 
-    public void deselect(boolean sendDeselectEdit) {
+    public void deselect(AddToHistory addToHistory) {
         if (selection != null) {
-            if (sendDeselectEdit) {
+            if (addToHistory == AddToHistory.YES) {
                 Shape shape = selection.getShape();
                 if (shape != null) { // for a simple click without a previous selection this is null
                     DeselectEdit edit = new DeselectEdit(this, shape, "Composition.deselect");
@@ -617,6 +617,10 @@ public class Composition implements Serializable {
 
     public Optional<Selection> getSelection() {
         return Optional.ofNullable(selection);
+    }
+
+    public Selection getSelectionOrNull() {
+        return selection;
     }
 
     public boolean hasSelection() {

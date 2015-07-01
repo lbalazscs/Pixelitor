@@ -21,6 +21,7 @@ import pixelitor.Composition;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
 import pixelitor.ImageDisplay;
+import pixelitor.history.AddToHistory;
 import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;
 import pixelitor.history.NewSelectionEdit;
@@ -176,7 +177,7 @@ public class SelectionTool extends Tool {
                     edit = new SelectionChangeEdit(comp, backupShape, selectionInteraction.getNameForUndo());
                 }
             } else { // the selection is outside the composition bounds
-                deselect(ic, false); // don't create a DeselectEdit because the backup shape could be null
+                deselect(ic, AddToHistory.NO); // don't create a DeselectEdit because the backup shape could be null
                 if (!newSelectionStarted()) { // backupShape != null
                     // create a special DeselectEdit with the backupShape
                     edit = new DeselectEdit(ic.getComp(), backupShape, "SelectionTool.mouseReleased 1");
@@ -186,7 +187,7 @@ public class SelectionTool extends Tool {
         } else {
             // special case: it started like a selection change but nothing is selected now
             // we also get here if the selection is a single line (area = 0), but then backupShape is null
-            deselect(ic, false); // don't create a DeselectEdit because the backup shape could be null
+            deselect(ic, AddToHistory.NO); // don't create a DeselectEdit because the backup shape could be null
             if (!newSelectionStarted()) { // backupShape != null
                 // create a special DeselectEdit with the backupShape
                 edit = new DeselectEdit(ic.getComp(), backupShape, "SelectionTool.mouseReleased 2");
@@ -211,7 +212,7 @@ public class SelectionTool extends Tool {
 //            return false;
 //        }
 
-        deselect(ic, true);
+        deselect(ic, AddToHistory.YES);
 
         altMeansSubtract = false;
 
@@ -226,11 +227,11 @@ public class SelectionTool extends Tool {
         }
     }
 
-    private static void deselect(ImageDisplay ic, boolean sendDeselectEdit) {
+    private static void deselect(ImageDisplay ic, AddToHistory addToHistory) {
         Composition comp = ic.getComp();
 
         if (comp.hasSelection()) {
-            comp.deselect(sendDeselectEdit);
+            comp.deselect(addToHistory);
         }
     }
 

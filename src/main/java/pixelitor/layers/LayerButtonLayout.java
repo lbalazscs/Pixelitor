@@ -20,49 +20,50 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.LayoutManager;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A layout manager for a layout button
  */
 public class LayerButtonLayout implements LayoutManager {
-    private final int hGap;
-    private final int vGap;
-    private Component visibilityButton;
+    //    private Component visibilityButton;
     private Component nameEditor;
-    private Component layerIcon;
+    //    private Component layerIcon;
+    private List<Component> icons = new ArrayList<>(3);
 
-    public static final String VISIBILITY_BUTTON = "VISIBILITY_BUTTON";
+    public static final String ICON = "ICON";
     public static final String NAME_EDITOR = "NAME_EDITOR";
-    public static final String LAYER_ICON = "LAYER_ICON";
 
-    public LayerButtonLayout(int hGap, int vGap) {
-        this.hGap = hGap;
-        this.vGap = vGap;
+    private static final int GAP = 7;
+    public static final int ICON_SIZE = 24;
+    private static final int HEIGHT = ICON_SIZE + 2 * GAP;
+
+    public LayerButtonLayout() {
     }
 
     @Override
     public void addLayoutComponent(String name, Component comp) {
         synchronized (comp.getTreeLock()) {
-            if (VISIBILITY_BUTTON.equals(name)) {
-                visibilityButton = comp;
+            if (ICON.equals(name)) {
+                icons.add(comp);
             } else if (NAME_EDITOR.equals(name)) {
                 nameEditor = comp;
             } else {
-                layerIcon = comp;
+                throw new IllegalStateException();
             }
         }
     }
 
     @Override
     public void removeLayoutComponent(Component comp) {
+        icons.remove(comp);
     }
 
     @Override
     public Dimension preferredLayoutSize(Container parent) {
         synchronized (parent.getTreeLock()) {
-            int preferredHeight = Math.max((int) visibilityButton.getPreferredSize().getHeight(), (int) nameEditor.getPreferredSize().getHeight());
-            preferredHeight += 2 * vGap;
-            return new Dimension(100, preferredHeight);
+            return new Dimension(100, HEIGHT);
         }
     }
 
@@ -74,26 +75,19 @@ public class LayerButtonLayout implements LayoutManager {
     @Override
     public void layoutContainer(Container parent) {
         synchronized (parent.getTreeLock()) {
-            Dimension visButtonSize = visibilityButton.getPreferredSize();
-            int visButtonWidth = (int) visButtonSize.getWidth();
-            int visButtonHeight = (int) visButtonSize.getHeight();
-            int adjustment = 2; // it is necessary for some reason, TODO
-            visibilityButton.setBounds(hGap, vGap + adjustment, visButtonWidth, visButtonHeight);
+
+            int startX = GAP;
+            for (Component icon : icons) {
+                icon.setBounds(startX, GAP, ICON_SIZE, ICON_SIZE);
+                startX += ICON_SIZE;
+                startX += GAP;
+            }
 
             int editorHeight = (int) nameEditor.getPreferredSize().getHeight();
-            int secondElemStart = hGap * 2 + visButtonWidth;
-            if (layerIcon != null) {
-                int layerIconWidth = (int) layerIcon.getPreferredSize().getWidth();
-                int layerIconHeight = (int) layerIcon.getPreferredSize().getHeight();
 
-                layerIcon.setBounds(secondElemStart, vGap + adjustment, layerIconWidth, layerIconHeight);
-                int layerIconEnd = secondElemStart + layerIconWidth;
-                int remainingWidth = parent.getWidth() - layerIconEnd - 2 * hGap;
-                nameEditor.setBounds(layerIconEnd + hGap - 2, vGap, remainingWidth + 2, editorHeight);
-            } else {
-                int remainingWidth = parent.getWidth() - visButtonWidth - 3 * hGap;
-                nameEditor.setBounds(secondElemStart, vGap, remainingWidth, editorHeight);
-            }
+            int remainingWidth = parent.getWidth() - startX;
+            int adjustment = 2; // seems that the textfield has two invisible pixels around it
+            nameEditor.setBounds(startX - adjustment, GAP - adjustment, remainingWidth - 3, editorHeight);
         }
     }
 }

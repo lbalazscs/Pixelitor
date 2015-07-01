@@ -20,15 +20,18 @@ package pixelitor.layers;
 import pixelitor.PixelitorWindow;
 import pixelitor.history.AddToHistory;
 import pixelitor.utils.IconUtils;
+import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.Insets;
+import java.awt.image.BufferedImage;
 
 /**
  * A GUI element representing a layer in an image
  */
 public class LayerButton extends JToggleButton {
+    //    public static final EmptyBorder BORDER = new EmptyBorder(5, 5, 5, 5);
     private final Layer layer;
 
     private static final Icon OPEN_EYE_ICON = IconUtils.loadIcon("eye_open.png");
@@ -40,10 +43,14 @@ public class LayerButton extends JToggleButton {
     private boolean userInteraction = true;
     private JTextField nameEditor; // actually, a LayerNameEditor subclass
 
+    private JComponent layerIcon;
+    private JLabel maskIcon;
+
     /**
      * The Y coordinate in the parent when it is not dragging
      */
     private int staticY;
+//    private final JPanel iconsPanel;
 
     @Override
     public String getUIClassID() {
@@ -58,24 +65,35 @@ public class LayerButton extends JToggleButton {
     public LayerButton(Layer layer) {
         this.layer = layer;
 
-        setLayout(new LayerButtonLayout(5, 5));
+        setLayout(new LayerButtonLayout());
 
         initVisibilityControl(layer);
         initLayerNameEditor(layer);
 
         if (layer instanceof TextLayer) {
             Icon textLayerIcon = IconUtils.getTextLayerIcon();
-            JButton layerIcon = new JButton(textLayerIcon);
-            layerIcon.putClientProperty("JComponent.sizeVariant", "mini");
-            layerIcon.setMargin(new Insets(0, 0, 0, 0));
-            layerIcon.setBorderPainted(false);
-            layerIcon.setPreferredSize(new Dimension(textLayerIcon.getIconWidth(), textLayerIcon.getIconHeight()));
+            layerIcon = new JButton(textLayerIcon);
 
-            layerIcon.addActionListener(e -> TextLayer.edit(PixelitorWindow.getInstance(), layer.getComposition(), (TextLayer) layer));
-            add(layerIcon, LayerButtonLayout.LAYER_ICON);
+            ((JButton) layerIcon).addActionListener(e -> TextLayer.edit(PixelitorWindow.getInstance(), layer.getComposition(), (TextLayer) layer));
+        } else {
+            layerIcon = new JLabel();
         }
 
+        configureLayerIcon(layerIcon);
+        add(layerIcon, LayerButtonLayout.ICON);
+
         wireSelectionWithLayerActivation(layer);
+    }
+
+    private void configureLayerIcon(JComponent layerIcon) {
+        layerIcon.putClientProperty("JComponent.sizeVariant", "mini");
+
+        if (layerIcon instanceof JButton) {
+            JButton layerButton = (JButton) layerIcon;
+            layerButton.setMargin(new Insets(0, 0, 0, 0));
+            layerButton.setBorderPainted(false);
+        }
+        layerIcon.setPreferredSize(new Dimension(LayerButtonLayout.ICON_SIZE, LayerButtonLayout.ICON_SIZE));
     }
 
     private void initVisibilityControl(Layer layer) {
@@ -85,13 +103,15 @@ public class LayerButton extends JToggleButton {
         visibilityCB.setSelected(true);
         visibilityCB.setToolTipText("Layer Visibility");
         visibilityCB.setSelectedIcon(OPEN_EYE_ICON);
-        add(visibilityCB, LayerButtonLayout.VISIBILITY_BUTTON);
+        add(visibilityCB, LayerButtonLayout.ICON);
+//        iconsPanel.add(visibilityCB);
         visibilityCB.addItemListener(e -> layer.setVisible(visibilityCB.isSelected(), AddToHistory.YES));
     }
 
     private void initLayerNameEditor(Layer layer) {
         nameEditor = new LayerNameEditor(this, layer);
         add(nameEditor, LayerButtonLayout.NAME_EDITOR);
+//        add(nameEditor, BorderLayout.CENTER);
         addPropertyChangeListener("name", evt -> nameEditor.setText(getName()));
     }
 
@@ -151,6 +171,39 @@ public class LayerButton extends JToggleButton {
 
     public void changeNameProgrammatically(String newName) {
         nameEditor.setText(newName);
+    }
+
+    public void updateLayerIconImage(BufferedImage img, boolean updateMask) {
+        Runnable notEDT = () -> {
+            BufferedImage thumb = ImageUtils.createThumbnail(img, LayerButtonLayout.ICON_SIZE);
+            Runnable edt = () -> {
+                if (updateMask) {
+                    if (maskIcon == null) {
+                        return;
+                    }
+                    maskIcon.setIcon(new ImageIcon(thumb));
+                    maskIcon.paintImmediately(maskIcon.getBounds());
+                } else {
+                    ((JLabel) layerIcon).setIcon(new ImageIcon(thumb));
+                    layerIcon.paintImmediately(layerIcon.getBounds());
+                }
+            };
+            SwingUtilities.invokeLater(edt);
+        };
+        new Thread(notEDT).start();
+    }
+
+    public void addMaskIcon() {
+        maskIcon = new JLabel();
+        configureLayerIcon(maskIcon);
+        add(maskIcon, LayerButtonLayout.ICON);
+        revalidate();
+    }
+
+    public void deleteMaskIcon() {
+        remove(maskIcon);
+        revalidate();
+        maskIcon = null;
     }
 
     @Override

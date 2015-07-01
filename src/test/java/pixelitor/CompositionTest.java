@@ -312,9 +312,7 @@ public class CompositionTest {
 
     @Test
     public void testDeselect() {
-        comp.deselect(false);
-        comp.checkInvariant();
-        comp.deselect(true);
+        comp.deselect(AddToHistory.YES);
         comp.checkInvariant();
     }
 

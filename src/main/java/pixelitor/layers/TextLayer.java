@@ -237,7 +237,7 @@ public class TextLayer extends ShapeLayer {
         TextLayer textLayer = (TextLayer) layer;
         BufferedImage rasterizedImage = textLayer.createRasterizedImage();
 
-        ImageLayer newLayer = new ImageLayer(comp, rasterizedImage, layer.getName());
+        ImageLayer newLayer = new ImageLayer(comp, rasterizedImage, layer.getName(), null);
         comp.addLayer(newLayer, AddToHistory.NO, false, false);
         comp.removeLayer(textLayer, AddToHistory.NO);
 
