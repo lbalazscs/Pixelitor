@@ -302,7 +302,7 @@ public class TextAdjustmentsPanel extends AdjustPanel implements ParamAdjustment
         } else {
             assert textLayer != null;
             textLayer.setSettings(settings);
-            textLayer.getComposition().imageChanged(Composition.ImageChangeActions.FULL);
+            textLayer.getComp().imageChanged(Composition.ImageChangeActions.FULL);
         }
     }
 }

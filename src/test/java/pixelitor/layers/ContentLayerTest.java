@@ -21,7 +21,8 @@ import org.junit.Before;
 import org.junit.Test;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
-import pixelitor.history.TranslateEdit;
+import pixelitor.history.AddToHistory;
+import pixelitor.history.ContentLayerMoveEdit;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -62,7 +63,7 @@ public class ContentLayerTest {
         assertEquals(3, layer.getTranslationX());
         assertEquals(3, layer.getTranslationY());
 
-        layer.endMovement();
+        layer.endMovement(AddToHistory.YES);
 
         // the layer was enlarged in endMovement, and the translation reset to 0, 0
         assertEquals(0, layer.getTranslationX());
@@ -74,7 +75,7 @@ public class ContentLayerTest {
         assertEquals(-1, layer.getTranslationX());
         assertEquals(-2, layer.getTranslationY());
 
-        layer.endMovement();
+        layer.endMovement(AddToHistory.YES);
 
         // this time the layer was not enlarged
         assertEquals(-1, layer.getTranslationX());
@@ -84,7 +85,7 @@ public class ContentLayerTest {
     @Test
     // this method is abstract in ImageLayer, test separately for subclasses
     public void testCreateTranslateEdit() {
-        TranslateEdit edit = layer.createTranslateEdit(5, 5);
+        ContentLayerMoveEdit edit = layer.createMovementEdit(5, 5);
         assertNotNull(edit);
     }
 
@@ -138,7 +139,7 @@ public class ContentLayerTest {
     @Test
     public void testGetMaskedImage_OK() {
         // setup a layer mask
-        layer.addLayerMask(LayerMaskAddType.REVEAL_ALL);
+        layer.addMask(LayerMaskAddType.REVEAL_ALL);
 
         BufferedImage maskedImage = layer.getMaskedImage(true);
         assertNotNull(maskedImage);

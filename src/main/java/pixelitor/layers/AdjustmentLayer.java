@@ -26,7 +26,7 @@ import java.awt.image.BufferedImage;
 /**
  * A global adjustment to all the layers that are bellow this layer
  */
-public class AdjustmentLayer extends Layer {
+public class AdjustmentLayer extends Layer implements ImageAdjustmentEffect {
     private static final long serialVersionUID = 2L;
 
     private final Filter filter;
@@ -39,7 +39,13 @@ public class AdjustmentLayer extends Layer {
     @Override
     public Layer duplicate() {
         // TODO operation  should be copied so that it can be adjusted independently
-        return new AdjustmentLayer(comp, name, filter);
+        AdjustmentLayer d = new AdjustmentLayer(comp, name, filter);
+
+        if (hasMask()) {
+            d.addMaskBack(mask.duplicate(d));
+        }
+
+        return d;
     }
 
     @Override
@@ -49,7 +55,7 @@ public class AdjustmentLayer extends Layer {
 
     @Override
     public BufferedImage paintLayer(Graphics2D g, boolean firstVisibleLayer, BufferedImage imageSoFar) {
-        return filter.executeForOneLayer(imageSoFar);
+        return adjustImageWithMasksAndBlending(imageSoFar, firstVisibleLayer);
     }
 
     @Override
@@ -60,5 +66,10 @@ public class AdjustmentLayer extends Layer {
     @Override
     public void crop(Rectangle selectionBounds) {
         cropMask(selectionBounds);
+    }
+
+    @Override
+    public BufferedImage adjustImage(BufferedImage src) {
+        return filter.executeForOneLayer(src);
     }
 }

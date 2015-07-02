@@ -270,7 +270,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         g2.scale(viewScale, viewScale);
 
         if (showLayerMask) {
-            LayerMask layerMask = comp.getActiveLayer().getLayerMask();
+            LayerMask layerMask = comp.getActiveLayer().getMask();
             layerMask.paintLayerOnGraphics(g2, true);
         } else {
             BufferedImage drawnImage = comp.getCompositeImage();

@@ -11,8 +11,8 @@ public class ContentLayerNode extends DebugNode {
     public ContentLayerNode(String name, ContentLayer layer) {
         super(name, layer);
 
-        if (layer.hasLayerMask()) {
-            LayerMask mask = layer.getLayerMask();
+        if (layer.hasMask()) {
+            LayerMask mask = layer.getMask();
             add(new ImageLayerNode("layer mask", mask));
         }
 

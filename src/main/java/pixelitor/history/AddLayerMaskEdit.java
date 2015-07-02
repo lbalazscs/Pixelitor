@@ -34,14 +34,14 @@ public class AddLayerMaskEdit extends PixelitorEdit {
         super(comp, "Add Layer Mask");
         comp.setDirty(true);
         this.layer = layer;
-        this.layerMask = layer.getLayerMask();
+        this.layerMask = layer.getMask();
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
-        layer.deleteLayerMask(AddToHistory.NO);
+        layer.deleteMask(AddToHistory.NO);
 
         History.notifyMenus(this);
     }
@@ -50,7 +50,7 @@ public class AddLayerMaskEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        layer.addLayerMaskBack(layerMask);
+        layer.addMaskBack(layerMask);
 
         History.notifyMenus(this);
     }

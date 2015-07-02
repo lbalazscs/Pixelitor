@@ -27,6 +27,7 @@ public final class IconUtils {
     private static final Icon northArrowIcon = loadIcon("north_arrow.gif");
     private static final Icon southArrowIcon = loadIcon("south_arrow.gif");
     private static final Icon textLayerIcon = loadIcon("text_layer_icon.png");
+    private static final Icon adjLayerIcon = loadIcon("adj_layer_icon.png");
 
     /**
      * Utility class with static methods
@@ -56,5 +57,9 @@ public final class IconUtils {
 
     public static Icon getTextLayerIcon() {
         return textLayerIcon;
+    }
+
+    public static Icon getAdjLayerIcon() {
+        return adjLayerIcon;
     }
 }

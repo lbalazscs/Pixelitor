@@ -41,7 +41,7 @@ abstract class MenuAction extends AbstractAction {
         }, HAS_LAYER_MASK("No layer mask") {
             @Override
             boolean isAllowed(Layer layer) {
-                return layer.hasLayerMask();
+                return layer.hasMask();
             }
 
             @Override

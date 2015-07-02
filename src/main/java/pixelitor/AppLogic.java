@@ -63,8 +63,8 @@ public class AppLogic {
             listener.activeLayerChanged(newActiveLayer);
         }
 
-        if (!newActiveLayer.hasLayerMask()) {
-            newActiveLayer.getComposition().getIC().setShowLayerMask(false);
+        if (!newActiveLayer.hasMask()) {
+            newActiveLayer.getComp().getIC().setShowLayerMask(false);
             FgBgColorSelector.INSTANCE.setLayerMaskEditing(false);
         }
     }

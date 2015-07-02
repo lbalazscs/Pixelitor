@@ -23,9 +23,9 @@ import pixelitor.ConsistencyChecks;
 import pixelitor.filters.comp.Flip;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.ApplyLayerMaskEdit;
+import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
-import pixelitor.history.TranslateEdit;
 import pixelitor.selection.Selection;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Dialogs;
@@ -202,11 +202,14 @@ public class ImageLayer extends ContentLayer {
     public ImageLayer duplicate() {
         BufferedImage imageCopy = ImageUtils.copyImage(image);
         ImageLayer d = new ImageLayer(comp, imageCopy, getDuplicateLayerName(), null);
-        // TODO why add opacity and blending mode to history
-        d.setOpacity(opacity, false, AddToHistory.YES, true);
+        d.setOpacity(opacity, false, AddToHistory.NO, true);
         d.setTranslationX(translationX);
         d.setTranslationY(translationY);
-        d.setBlendingMode(blendingMode, false, AddToHistory.YES, true);
+        d.setBlendingMode(blendingMode, false, AddToHistory.NO, true);
+
+        if (hasMask()) {
+            d.addMaskBack(mask.duplicate(d));
+        }
 
         return d;
     }
@@ -258,12 +261,17 @@ public class ImageLayer extends ContentLayer {
 
     // sets the image object ignoring the selection
     public void setImage(BufferedImage newImage) {
+        BufferedImage oldRef = image;
         image = requireNonNull(newImage);
         imageRefChanged();
 
         assert Utils.checkRasterMinimum(newImage);
 
         comp.imageChanged(INVALIDATE_CACHE);
+
+        if (oldRef != null && oldRef != image) {
+            oldRef.flush();
+        }
     }
 
     /**
@@ -438,7 +446,7 @@ public class ImageLayer extends ContentLayer {
         return new Rectangle(translationX, translationY, image.getWidth(), image.getHeight());
     }
 
-    public boolean checkForLayerEnlargement() {
+    public boolean checkImageDoesNotCoverCanvas() {
         Rectangle canvasBounds = comp.getCanvasBounds();
         Rectangle layerBounds = getBounds();
         boolean needsEnlarging = !(layerBounds.contains(canvasBounds));
@@ -824,13 +832,18 @@ public class ImageLayer extends ContentLayer {
     }
 
     @Override
-    TranslateEdit createTranslateEdit(int oldTranslationX, int oldTranslationY) {
-        TranslateEdit edit;
-        boolean needsEnlarging = checkForLayerEnlargement();
+    ContentLayerMoveEdit createMovementEdit(int oldTranslationX, int oldTranslationY) {
+        ContentLayerMoveEdit edit;
+        boolean needsEnlarging = checkImageDoesNotCoverCanvas();
+        boolean moveMask = hasMask() && mask.isLinked();
         if(needsEnlarging) {
-            edit = new TranslateEdit(this, getImage(), oldTranslationX, oldTranslationY);
+            BufferedImage oldMask = null;
+            if (moveMask) {
+                oldMask = mask.getImage();
+            }
+            edit = new ContentLayerMoveEdit(this, getImage(), oldMask, oldTranslationX, oldTranslationY);
         } else {
-            edit = new TranslateEdit(this, null, oldTranslationX, oldTranslationY);
+            edit = new ContentLayerMoveEdit(this, null, null, oldTranslationX, oldTranslationY);
         }
 
         if(needsEnlarging) {
@@ -923,7 +936,7 @@ public class ImageLayer extends ContentLayer {
         }
 
         if(tmpDrawingLayer == null) {
-            if(Tools.isShapesDrawing() && isActiveLayer()) {
+            if(Tools.isShapesDrawing() && isActive()) {
                 // we need to draw inside the layer, but only temporarily
                 BufferedImage tmp = createCompositionSizedTmpImage();
                 Graphics2D tmpG = tmp.createGraphics();
@@ -941,7 +954,7 @@ public class ImageLayer extends ContentLayer {
             }
         } else { // we are in the middle of a brush draw
 
-            if(blendingMode == BlendingMode.NORMAL && opacity > 0.999f) {  // layer in normal mode, opacity  = 100%
+            if(isNormalAndOpaque()) {
                 g.drawImage(visibleImage, getTranslationX(), getTranslationY(), null);
                 tmpDrawingLayer.paintLayer(g, 0, 0);
             } else { // layer is not in normal mode
@@ -1016,10 +1029,10 @@ public class ImageLayer extends ContentLayer {
 
     public void applyLayerMask(AddToHistory addToHistory) {
         BufferedImage backupImage = ImageUtils.copyImage(image);
-        LayerMask oldMask = layerMask;
+        LayerMask oldMask = mask;
 
-        layerMask.applyToImage(image);
-        deleteLayerMask(AddToHistory.NO);
+        mask.applyToImage(image);
+        deleteMask(AddToHistory.NO);
 
         if (addToHistory == AddToHistory.YES) {
             ApplyLayerMaskEdit edit = new ApplyLayerMaskEdit(comp, this, oldMask, backupImage);

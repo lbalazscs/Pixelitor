@@ -132,7 +132,7 @@ public class PartialImageEdit extends FadeableEdit {
         BufferedImage previousImage = ImageUtils.copyImage(fullImage);
         previousImage.setData(backupRaster);
 
-        Optional<Selection> selection = layer.getComposition().getSelection();
+        Optional<Selection> selection = layer.getComp().getSelection();
         if (selection.isPresent()) {
             // backupRaster is relative to the full image, but we need to return a selection-sized image
             // TODO this is another ugly hack

@@ -41,7 +41,7 @@ public class DeleteLayerMaskEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        layer.addLayerMaskBack(oldMask);
+        layer.addMaskBack(oldMask);
 
         History.notifyMenus(this);
     }
@@ -50,7 +50,7 @@ public class DeleteLayerMaskEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        layer.deleteLayerMask(AddToHistory.NO);
+        layer.deleteMask(AddToHistory.NO);
 
         History.notifyMenus(this);
     }

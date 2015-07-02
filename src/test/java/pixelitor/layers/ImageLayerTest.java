@@ -42,7 +42,7 @@ public class ImageLayerTest {
         comp = TestHelper.createEmptyTestComposition();
         layer = TestHelper.createTestImageLayer("layer 1", comp);
 
-        assert layer.getComposition().checkInvariant();
+        assert layer.getComp().checkInvariant();
     }
 
     @After
@@ -144,8 +144,8 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void testCheckForLayerEnlargement() {
-        boolean b = layer.checkForLayerEnlargement();
+    public void testCheckImageDoesNotCoverCanvas() {
+        boolean b = layer.checkImageDoesNotCoverCanvas();
     }
 
     @Test
@@ -207,8 +207,8 @@ public class ImageLayerTest {
 
     @Test
     public void testGetSelectionSizedPartFrom() {
-        layer.getComposition().createSelectionFromShape(new Rectangle(2, 2, 10, 10));
-        Selection selection = layer.getComposition().getSelection().get();
+        layer.getComp().createSelectionFromShape(new Rectangle(2, 2, 10, 10));
+        Selection selection = layer.getComp().getSelection().get();
 
         BufferedImage imageT = layer.getSelectionSizedPartFrom(TestHelper.createTestImage(), selection, true);
         assertNotNull(imageT);

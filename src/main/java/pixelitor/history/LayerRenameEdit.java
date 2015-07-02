@@ -30,12 +30,12 @@ public class LayerRenameEdit extends PixelitorEdit {
     private final String nameAfter;
 
     public LayerRenameEdit(Layer layer, String nameBefore, String nameAfter) {
-        super(layer.getComposition(), "Rename Layer to " + nameAfter);
+        super(layer.getComp(), "Rename Layer to " + nameAfter);
         this.layer = layer;
         this.nameBefore = nameBefore;
         this.nameAfter = nameAfter;
 
-        layer.getComposition().setDirty(true);
+        layer.getComp().setDirty(true);
     }
 
     @Override

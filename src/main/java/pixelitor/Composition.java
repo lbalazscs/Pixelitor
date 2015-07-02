@@ -239,7 +239,7 @@ public class Composition implements Serializable {
     }
 
     public boolean activeIsImageLayer() {
-        return (activeLayer instanceof ImageLayer) || activeLayer.isLayerMaskEditing();
+        return (activeLayer instanceof ImageLayer) || activeLayer.isMaskEditing();
     }
 
     /**
@@ -247,8 +247,8 @@ public class Composition implements Serializable {
      */
     public ImageLayer getActiveImageLayer() {
         checkInvariant();
-        if (activeLayer.isLayerMaskEditing()) {
-            return activeLayer.getLayerMask();
+        if (activeLayer.isMaskEditing()) {
+            return activeLayer.getMask();
         }
         if (activeLayer instanceof ImageLayer) {
             ImageLayer imageLayer = (ImageLayer) activeLayer;
@@ -261,8 +261,8 @@ public class Composition implements Serializable {
      * This should be called if the active layer might not be an image layer
      */
     public Optional<ImageLayer> getActiveImageLayerOpt() {
-        if (activeLayer.isLayerMaskEditing()) {
-            return Optional.of(activeLayer.getLayerMask());
+        if (activeLayer.isMaskEditing()) {
+            return Optional.of(activeLayer.getMask());
         }
         if (activeLayer instanceof ImageLayer) {
             ImageLayer imageLayer = (ImageLayer) activeLayer;
@@ -309,7 +309,19 @@ public class Composition implements Serializable {
             return;
         }
 
-        ((ContentLayer) activeLayer).endMovement();
+        ContentLayer contentLayer = (ContentLayer) this.activeLayer;
+        contentLayer.endMovement(AddToHistory.YES);
+
+//        int tx = contentLayer.getTranslationX();
+//        int ty = contentLayer.getTranslationY();
+//        System.out.println("Composition::endMovement: tx = " + tx + ", ty = " + ty);
+//        if(contentLayer.hasMask()) {
+//            LayerMask mask = contentLayer.getMask();
+//            int mtx = mask.getTranslationX();
+//            int mty = mask.getTranslationY();
+//            System.out.println("Composition::endMovement: mtx = " + mtx + ", mty = " + mty);
+//        }
+
         imageChanged(FULL);
     }
 

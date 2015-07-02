@@ -18,6 +18,7 @@ package pixelitor.history;
 
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
+import pixelitor.layers.LayerMask;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -26,11 +27,12 @@ import java.awt.image.BufferedImage;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 
 /**
- * A PixelitorEdit hat represents the translation of a layer.
+ * A PixelitorEdit hat represents the movement of a content layer.
  */
-public class TranslateEdit extends PixelitorEdit {
+public class ContentLayerMoveEdit extends PixelitorEdit {
     private BufferedImage backupImage;
     private ContentLayer layer;
+    private BufferedImage backupMaskImage;
     private int backupTranslationX = 0;
     private int backupTranslationY = 0;
 
@@ -40,15 +42,16 @@ public class TranslateEdit extends PixelitorEdit {
      * @param oldTranslationX
      * @param oldTranslationY
      */
-    public TranslateEdit(ContentLayer layer, BufferedImage backupImage, int oldTranslationX, int oldTranslationY) {
-        super(layer.getComposition(), "Layer Movement");
+    public ContentLayerMoveEdit(ContentLayer layer, BufferedImage backupImage, BufferedImage backupMaskImage, int oldTranslationX, int oldTranslationY) {
+        super(layer.getComp(), "Layer Movement");
 
         this.layer = layer;
         this.backupImage = backupImage;
+        this.backupMaskImage = backupMaskImage;
         this.backupTranslationX = oldTranslationX;
         this.backupTranslationY = oldTranslationY;
 
-        layer.getComposition().setDirty(true);
+        layer.getComp().setDirty(true);
     }
 
     @Override
@@ -69,17 +72,27 @@ public class TranslateEdit extends PixelitorEdit {
         int tmpX = layer.getTranslationX();
         int tmpY = layer.getTranslationY();
         BufferedImage tmpBI = null;
+        BufferedImage tmpBIMask = null;
         if (backupImage != null) {
             ImageLayer imageLayer = (ImageLayer) layer;
             tmpBI = imageLayer.getImage();
             imageLayer.setImage(backupImage);
         }
+        if (backupMaskImage != null) {
+            LayerMask layerMask = layer.getMask();
+            tmpBIMask = layerMask.getImage();
+            layerMask.setImage(backupMaskImage);
+        }
+
         layer.setTranslationX(backupTranslationX);
         layer.setTranslationY(backupTranslationY);
         backupTranslationX = tmpX;
         backupTranslationY = tmpY;
+
         backupImage = tmpBI;
-        layer.getComposition().imageChanged(FULL);
+        backupMaskImage = tmpBIMask;
+
+        layer.getComp().imageChanged(FULL);
         History.notifyMenus(this);
     }
 

@@ -18,7 +18,7 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.filters.comp.Flip;
-import pixelitor.history.TranslateEdit;
+import pixelitor.history.ContentLayerMoveEdit;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -56,11 +56,15 @@ public class ShapeLayer extends ContentLayer {
     @Override
     public Layer duplicate() {
         // Only immutable Shape objects can be shared this way
-        return new ShapeLayer(comp, getDuplicateLayerName(), shape);
+        ShapeLayer d = new ShapeLayer(comp, getDuplicateLayerName(), shape);
+        if (hasMask()) {
+            d.addMaskBack(mask.duplicate(d));
+        }
+        return d;
     }
 
     @Override
-    TranslateEdit createTranslateEdit(int oldTranslationX, int oldTranslationY) {
+    ContentLayerMoveEdit createMovementEdit(int oldTranslationX, int oldTranslationY) {
         // TODO
         return null;
     }

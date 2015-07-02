@@ -34,6 +34,8 @@ import pixelitor.selection.Selection;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.HistogramsPanel;
 
+import java.awt.AlphaComposite;
+import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -42,6 +44,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 
+import static java.awt.AlphaComposite.SRC_OVER;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 
 /**
@@ -55,7 +58,7 @@ public abstract class Layer implements Serializable {
     private boolean isMask = false;
     private boolean visible = true;
     final Composition comp;
-    LayerMask layerMask;
+    protected LayerMask mask;
 
     private transient LayerButton layerButton;
 
@@ -68,7 +71,7 @@ public abstract class Layer implements Serializable {
      * This flag is logically independent from the showLayerMask
      * flag in the image component.
      */
-    protected boolean layerMaskEditing = false;
+    protected boolean maskEditing = false;
 
     Layer(Composition comp, String name, Layer parent) {
         this.comp = comp;
@@ -214,7 +217,7 @@ public abstract class Layer implements Serializable {
         return name;
     }
 
-    public Composition getComposition() {
+    public Composition getComp() {
         return comp;
     }
 
@@ -232,24 +235,24 @@ public abstract class Layer implements Serializable {
         if (!isMask) {
             layerButton = new LayerButton(this);
 
-            if (layerMask != null) {
-                layerMask.setLayerButton(layerButton);
+            if (mask != null) {
+                mask.setLayerButton(layerButton);
                 layerButton.addMaskIcon();
-                layerMask.updateIconImage();
+                mask.updateIconImage();
             }
         }
     }
 
-    boolean isActiveLayer() {
+    boolean isActive() {
         return comp.isActiveLayer(this);
     }
 
-    public boolean hasLayerMask() {
-        return layerMask != null;
+    public boolean hasMask() {
+        return mask != null;
     }
 
-    public void addLayerMask(LayerMaskAddType addType) {
-        if (layerMask != null) {
+    public void addMask(LayerMaskAddType addType) {
+        if (mask != null) {
             Dialogs.showInfoDialog("Has layer mask",
                     String.format("The layer \"%s\" already has a layer mask.", getName()));
             return;
@@ -268,8 +271,8 @@ public abstract class Layer implements Serializable {
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
 
-        BufferedImage bwLayerMask = addType.getBWImage(canvasWidth, canvasHeight, selection);
-        layerMask = new LayerMask(comp, bwLayerMask, this);
+        BufferedImage bwMask = addType.getBWImage(canvasWidth, canvasHeight, selection);
+        mask = new LayerMask(comp, bwMask, this);
 
         comp.imageChanged(FULL);
 
@@ -285,22 +288,22 @@ public abstract class Layer implements Serializable {
     }
 
     // called if the deletion of a layer mask is undone
-    public void addLayerMaskBack(LayerMask layerMask) {
-        this.layerMask = layerMask;
+    public void addMaskBack(LayerMask mask) {
+        this.mask = mask;
         comp.imageChanged(FULL);
         layerButton.addMaskIcon();
-        layerMask.updateIconImage();
+        mask.updateIconImage();
     }
 
-    public void deleteLayerMask(AddToHistory addToHistory) {
-        LayerMask oldLayerMask = layerMask;
-        layerMask = null;
-        layerMaskEditing = false;
+    public void deleteMask(AddToHistory addToHistory) {
+        LayerMask oldMask = mask;
+        mask = null;
+        maskEditing = false;
 
         comp.imageChanged(FULL);
 
         if (addToHistory == AddToHistory.YES) {
-            DeleteLayerMaskEdit edit = new DeleteLayerMaskEdit(comp, this, oldLayerMask);
+            DeleteLayerMaskEdit edit = new DeleteLayerMaskEdit(comp, this, oldMask);
             History.addEdit(edit);
         }
 
@@ -318,21 +321,21 @@ public abstract class Layer implements Serializable {
     public abstract void resize(int targetWidth, int targetHeight, boolean progressiveBilinear);
 
     protected void resizeMask(int targetWidth, int targetHeight, boolean progressiveBilinear) {
-        if (layerMask != null) {
-            layerMask.resize(targetWidth, targetHeight, progressiveBilinear);
+        if (mask != null) {
+            mask.resize(targetWidth, targetHeight, progressiveBilinear);
         }
     }
 
     public abstract void crop(Rectangle selectionBounds);
 
     protected void cropMask(Rectangle selectionBounds) {
-        if (layerMask != null) {
-            layerMask.crop(selectionBounds);
+        if (mask != null) {
+            mask.crop(selectionBounds);
         }
     }
 
-    public LayerMask getLayerMask() {
-        return layerMask;
+    public LayerMask getMask() {
+        return mask;
     }
 
     public void setCanvas(Canvas canvas) {
@@ -347,14 +350,34 @@ public abstract class Layer implements Serializable {
         comp.dragFinished(this, newIndex);
     }
 
-    public void setLayerMaskEditing(boolean b) {
-        this.layerMaskEditing = b;
+    public void setMaskEditing(boolean b) {
+        this.maskEditing = b;
     }
 
-    public boolean isLayerMaskEditing() {
-        if (layerMaskEditing) {
-            assert layerMask != null;
+    public boolean isMaskEditing() {
+        if (maskEditing) {
+            assert mask != null;
         }
-        return layerMaskEditing;
+        return maskEditing;
+    }
+
+    /**
+     * Returns true if the layer is in normal mode and the opacity is 100%
+     */
+    public boolean isNormalAndOpaque() {
+        return blendingMode == BlendingMode.NORMAL && opacity > 0.999f;
+    }
+
+    /**
+     * Configures tha composite of the given Graphics,
+     * according to the blending mode and opacity of the layer
+     */
+    public void setupDrawingComposite(Graphics2D g, boolean isFirstVisibleLayer) {
+        if (isFirstVisibleLayer) {  // the first visible layer is always painted with normal mode
+            g.setComposite(AlphaComposite.getInstance(SRC_OVER, opacity));
+        } else {
+            Composite composite = blendingMode.getComposite(opacity);
+            g.setComposite(composite);
+        }
     }
 }

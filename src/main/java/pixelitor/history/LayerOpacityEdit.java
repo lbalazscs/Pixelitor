@@ -29,11 +29,11 @@ public class LayerOpacityEdit extends PixelitorEdit {
     private float backupOpacity;
 
     public LayerOpacityEdit(Layer layer, float backupOpacity) {
-        super(layer.getComposition(), "Layer Opacity Change");
+        super(layer.getComp(), "Layer Opacity Change");
         this.layer = layer;
         this.backupOpacity = backupOpacity;
 
-        layer.getComposition().setDirty(true);
+        layer.getComp().setDirty(true);
     }
 
     @Override

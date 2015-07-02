@@ -120,30 +120,32 @@ public class Pixelitor {
             return;
         }
 
+//        ImageComponents.getActiveLayer().get()
+//                .addMask(LayerMaskAddType.REVEAL_ALL);
+
+
 //        Tools.CROP.getButton().doClick();
 //
 //        NewImage.addNewImage(FillType.WHITE, 600, 400, "Test");
 //
 //        TextLayer.createNew(pw);
 
-//        ImageComponents.getActiveLayer().get()
-//                .addLayerMask(LayerMaskAddType.REVEAL_ALL);
 
 //        NewImage.addNewImage(FillType.WHITE, 600, 400, "Test INT_ARGB");
 //        ImageComponents.getActiveLayer().get()
-//                .addLayerMask(LayerMaskAddType.REVEAL_ALL_INT_ARGB);
+//                .addMask(LayerMaskAddType.REVEAL_ALL_INT_ARGB);
 //
 //        NewImage.addNewImage(FillType.WHITE, 600, 400, "Test INT_RGB");
 //        ImageComponents.getActiveLayer().get()
-//                .addLayerMask(LayerMaskAddType.REVEAL_ALL_INT_RGB);
+//                .addMask(LayerMaskAddType.REVEAL_ALL_INT_RGB);
 
 
 //        // show and edit layer mask
 //        ImageComponent ic = ImageComponents.getActiveImageComponent();
 //        Layer activeLayer = ic.getComp().getActiveLayer();
 //        ic.setShowLayerMask(true);
-//        FgBgColorSelector.INSTANCE.setLayerMaskEditing(true);
-//        activeLayer.setLayerMaskEditing(true);
+//        FgBgColorSelector.INSTANCE.setMaskEditing(true);
+//        activeLayer.setMaskEditing(true);
 
 //        new DrunkVision().actionPerformed(null);
 

@@ -25,11 +25,11 @@ import pixelitor.filters.painters.TextAdjustmentsPanel;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.filters.painters.TranslatedTextPainter;
 import pixelitor.history.AddToHistory;
+import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
 import pixelitor.history.NewLayerEdit;
 import pixelitor.history.TextLayerChangeEdit;
 import pixelitor.history.TextLayerRasterizeEdit;
-import pixelitor.history.TranslateEdit;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.OKCancelDialog;
 
@@ -44,7 +44,7 @@ import java.util.Optional;
 /**
  * A text layer
  */
-public class TextLayer extends ShapeLayer {
+public class TextLayer extends ShapeLayer implements ImageAdjustmentEffect {
     private static final long serialVersionUID = 2L;
     private final TranslatedTextPainter painter;
     private TextSettings settings;
@@ -69,10 +69,17 @@ public class TextLayer extends ShapeLayer {
             // the layer was just created, nothing to paint yet
             return imageSoFar;
         } else if (settings.isWatermark()) {
-            return settings.watermarkImage(imageSoFar, painter);
+            return adjustImageWithMasksAndBlending(imageSoFar, firstVisibleLayer);
         }
 
+        // normal case: the text will be painted in paintLayerOnGraphics
         return super.paintLayer(g, firstVisibleLayer, imageSoFar);
+    }
+
+    @Override
+    public BufferedImage adjustImage(BufferedImage src) {
+        assert settings.isWatermark(); // should be called only in this case
+        return settings.watermarkImage(src, painter);
     }
 
     public BufferedImage createRasterizedImage() {
@@ -93,16 +100,21 @@ public class TextLayer extends ShapeLayer {
 
     @Override
     public Layer duplicate() {
-        TextLayer duplicate = new TextLayer(comp);
+        TextLayer d = new TextLayer(comp);
 
-        duplicate.translationX = translationX;
-        duplicate.translationY = translationY;
-        duplicate.painter.setTranslationX(painter.getTranslationX());
-        duplicate.painter.setTranslationY(painter.getTranslationY());
+        d.translationX = translationX;
+        d.translationY = translationY;
+        d.painter.setTranslationX(painter.getTranslationX());
+        d.painter.setTranslationY(painter.getTranslationY());
 
-        duplicate.setSettings(new TextSettings(settings));
-        duplicate.setName(getName() + " Copy", AddToHistory.NO);
-        return duplicate;
+        d.setSettings(new TextSettings(settings));
+        d.setName(getName() + " Copy", AddToHistory.NO);
+
+        if (hasMask()) {
+            d.addMaskBack(mask.duplicate(d));
+        }
+
+        return d;
     }
 
     @Override
@@ -129,20 +141,28 @@ public class TextLayer extends ShapeLayer {
     }
 
     @Override
-    TranslateEdit createTranslateEdit(int oldTranslationX, int oldTranslationY) {
-        return new TranslateEdit(this, null, oldTranslationX, oldTranslationY);
+    ContentLayerMoveEdit createMovementEdit(int oldTranslationX, int oldTranslationY) {
+        boolean moveMask = hasMask() && mask.isLinked();
+        BufferedImage oldMask = null;
+        if (moveMask) {
+            boolean needsEnlarging = mask.checkImageDoesNotCoverCanvas();
+            if (needsEnlarging) {
+                oldMask = mask.getImage();
+            }
+        }
+        return new ContentLayerMoveEdit(this, null, oldMask, oldTranslationX, oldTranslationY);
     }
 
     @Override
-    public void setTranslationX(int translationX) {
-        super.setTranslationX(translationX);
-        painter.setTranslationX(translationX);
+    public void setTranslationX(int x) {
+        super.setTranslationX(x);
+        painter.setTranslationX(x);
     }
 
     @Override
-    public void setTranslationY(int translationY) {
-        super.setTranslationY(translationY);
-        painter.setTranslationY(translationY);
+    public void setTranslationY(int y) {
+        super.setTranslationY(y);
+        painter.setTranslationY(y);
     }
 
     public void setSettings(TextSettings settings) {
@@ -213,7 +233,7 @@ public class TextLayer extends ShapeLayer {
 
                 textLayer.updateLayerName();
                 TextLayerChangeEdit edit = new TextLayerChangeEdit(
-                        textLayer.getComposition(),
+                        textLayer.getComp(),
                         textLayer,
                         oldSettings
                 );
@@ -244,4 +264,5 @@ public class TextLayer extends ShapeLayer {
         TextLayerRasterizeEdit edit = new TextLayerRasterizeEdit(comp, textLayer, newLayer);
         History.addEdit(edit);
     }
+
 }

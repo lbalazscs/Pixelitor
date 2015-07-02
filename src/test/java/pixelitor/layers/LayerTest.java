@@ -106,7 +106,7 @@ public class LayerTest {
     @Test
     public void testMakeActive() {
         layer.makeActive(AddToHistory.YES);
-        assertTrue(layer.isActiveLayer());
+        assertTrue(layer.isActive());
     }
 
     @Test

@@ -691,6 +691,7 @@ public class MenuBar extends JMenuBar {
         if ("true".equals(System.getProperty("advanced.layers"))) {
             initLayerMaskSubmenu(layersMenu);
             initTextLayerSubmenu(layersMenu, pw);
+            initAdjustmentLayersSubmenu(layersMenu);
 
             Action debugAppAction = new MenuAction("Show Pixelitor Internal State...") {
                 @Override
@@ -704,6 +705,21 @@ public class MenuBar extends JMenuBar {
         this.add(layersMenu);
     }
 
+    private void initAdjustmentLayersSubmenu(JMenu parentMenu) {
+        JMenu adjustmentLayersSubMenu = new JMenu("New Adjustment Layer");
+
+        createMenuItem(new MenuAction("Invert") {
+            @Override
+            void onClick() {
+                Composition comp = ImageComponents.getActiveComp().get();
+                AdjustmentLayer adjustmentLayer = new AdjustmentLayer(comp, "Invert", new Invert());
+                comp.addLayer(adjustmentLayer, AddToHistory.YES, true, false);
+            }
+        }, adjustmentLayersSubMenu);
+
+        parentMenu.add(adjustmentLayersSubMenu);
+    }
+
     private static void initLayerMaskSubmenu(JMenu layerMenu) {
         JMenu layerMaskSubMenu = new JMenu("Layer Mask");
 
@@ -711,7 +727,7 @@ public class MenuBar extends JMenuBar {
             @Override
             void onClick() {
                 Layer layer = ImageComponents.getActiveLayer().get();
-                layer.addLayerMask(LayerMaskAddType.REVEAL_ALL);
+                layer.addMask(LayerMaskAddType.REVEAL_ALL);
             }
         }, layerMaskSubMenu, CTRL_G);
 
@@ -719,7 +735,7 @@ public class MenuBar extends JMenuBar {
             @Override
             void onClick() {
                 Layer layer = ImageComponents.getActiveLayer().get();
-                layer.addLayerMask(LayerMaskAddType.HIDE_ALL);
+                layer.addMask(LayerMaskAddType.HIDE_ALL);
             }
         }, layerMaskSubMenu);
 
@@ -727,7 +743,7 @@ public class MenuBar extends JMenuBar {
             @Override
             void onClick() {
                 Layer layer = ImageComponents.getActiveLayer().get();
-                layer.addLayerMask(LayerMaskAddType.REVEAL_SELECTION);
+                layer.addMask(LayerMaskAddType.REVEAL_SELECTION);
             }
         }, layerMaskSubMenu);
 
@@ -737,12 +753,12 @@ public class MenuBar extends JMenuBar {
                 ImageComponent ic = ImageComponents.getActiveImageComponent();
                 Layer layer = ic.getComp().getActiveLayer();
 
-                layer.deleteLayerMask(AddToHistory.YES);
+                layer.deleteMask(AddToHistory.YES);
 
                 ic.setShowLayerMask(false);
                 FgBgColorSelector.INSTANCE.setLayerMaskEditing(false);
 
-                layer.getComposition().imageChanged(FULL);
+                layer.getComp().imageChanged(FULL);
             }
         };
         createMenuItem(deleteLayerMask, layerMaskSubMenu);
@@ -763,11 +779,10 @@ public class MenuBar extends JMenuBar {
                 ic.setShowLayerMask(false);
                 FgBgColorSelector.INSTANCE.setLayerMaskEditing(false);
 
-                layer.getComposition().imageChanged(FULL);
+                layer.getComp().imageChanged(FULL);
             }
         };
         createMenuItem(applyLayerMask, layerMaskSubMenu);
-
 
         layerMaskSubMenu.addSeparator();
 
@@ -778,7 +793,7 @@ public class MenuBar extends JMenuBar {
                 Layer activeLayer = ic.getComp().getActiveLayer();
                 ic.setShowLayerMask(false);
                 FgBgColorSelector.INSTANCE.setLayerMaskEditing(false);
-                activeLayer.setLayerMaskEditing(false);
+                activeLayer.setMaskEditing(false);
             }
         }, layerMaskSubMenu, CTRL_1);
 
@@ -789,7 +804,7 @@ public class MenuBar extends JMenuBar {
                 Layer activeLayer = ic.getComp().getActiveLayer();
                 ic.setShowLayerMask(true);
                 FgBgColorSelector.INSTANCE.setLayerMaskEditing(true);
-                activeLayer.setLayerMaskEditing(true);
+                activeLayer.setMaskEditing(true);
             }
         }, layerMaskSubMenu, CTRL_2);
 
@@ -800,7 +815,7 @@ public class MenuBar extends JMenuBar {
                 Layer activeLayer = ic.getComp().getActiveLayer();
                 ic.setShowLayerMask(false);
                 FgBgColorSelector.INSTANCE.setLayerMaskEditing(true);
-                activeLayer.setLayerMaskEditing(true);
+                activeLayer.setMaskEditing(true);
             }
         }, layerMaskSubMenu, CTRL_3);
 
@@ -920,18 +935,6 @@ public class MenuBar extends JMenuBar {
         initSplashSubmenu(developMenu);
         initExperimentalSubmenu(developMenu);
 
-        Action newAdjustmentLayer = new MenuAction("New Global Adjustment Layer...") {
-            @Override
-            void onClick() {
-                Composition comp = ImageComponents.getActiveComp().get();
-                AdjustmentLayer adjustmentLayer = new AdjustmentLayer(comp, "invert adjustment", new Invert());
-
-                comp.addLayer(adjustmentLayer, AddToHistory.YES, true, false);
-            }
-        };
-        createMenuItem(newAdjustmentLayer, developMenu);
-
-
         Action filterCreatorAction = new MenuAction("Filter Creator...") {
             @Override
             void onClick() {
@@ -989,8 +992,8 @@ public class MenuBar extends JMenuBar {
                 ImageLayer imageLayer = (ImageLayer) ImageComponents.getActiveLayer().get();
                 Utils.debugImage(imageLayer.getImage(), "layer image");
 
-                if (imageLayer.hasLayerMask()) {
-                    LayerMask layerMask = imageLayer.getLayerMask();
+                if (imageLayer.hasMask()) {
+                    LayerMask layerMask = imageLayer.getMask();
                     BufferedImage maskImage = layerMask.getImage();
                     Utils.debugImage(maskImage, "mask image");
 
@@ -1005,8 +1008,8 @@ public class MenuBar extends JMenuBar {
             @Override
             void onClick() {
                 ImageLayer imageLayer = (ImageLayer) ImageComponents.getActiveLayer().get();
-                if (imageLayer.hasLayerMask()) {
-                    imageLayer.getLayerMask().updateFromBWImage();
+                if (imageLayer.hasMask()) {
+                    imageLayer.getMask().updateFromBWImage();
                 } else {
                     Dialogs.showInfoDialog("No Mask in Current image", "Error");
                 }

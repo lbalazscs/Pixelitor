@@ -59,7 +59,7 @@ public class TextLayerChangeEdit extends PixelitorEdit {
         layer.setSettings(backupTextSettings);
         backupTextSettings = tmp;
 
-        layer.getComposition().imageChanged(FULL);
+        layer.getComp().imageChanged(FULL);
         History.notifyMenus(this);
     }
 

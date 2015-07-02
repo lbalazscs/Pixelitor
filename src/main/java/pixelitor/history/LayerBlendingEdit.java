@@ -30,11 +30,11 @@ public class LayerBlendingEdit extends PixelitorEdit {
     private BlendingMode backupBlendingMode;
 
     public LayerBlendingEdit(Layer layer, BlendingMode backupBlendingMode) {
-        super(layer.getComposition(), "Blending Mode Change");
+        super(layer.getComp(), "Blending Mode Change");
         this.layer = layer;
         this.backupBlendingMode = backupBlendingMode;
 
-        layer.getComposition().setDirty(true);
+        layer.getComp().setDirty(true);
     }
 
     @Override

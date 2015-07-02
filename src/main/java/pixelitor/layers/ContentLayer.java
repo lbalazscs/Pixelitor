@@ -19,16 +19,14 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.filters.comp.Flip;
+import pixelitor.history.AddToHistory;
+import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
-import pixelitor.history.TranslateEdit;
 
-import java.awt.AlphaComposite;
-import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import static java.awt.AlphaComposite.DstIn;
-import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
 /**
@@ -60,14 +58,20 @@ public abstract class ContentLayer extends Layer {
     public void startMovement() {
         tmpTranslationX = 0;
         tmpTranslationY = 0;
+        if (hasMask() && mask.isLinked()) {
+            mask.startMovement();
+        }
     }
 
     public void moveWhileDragging(int x, int y) {
         tmpTranslationX = x;
         tmpTranslationY = y;
+        if (hasMask() && mask.isLinked()) {
+            mask.moveWhileDragging(x, y);
+        }
     }
 
-    public void endMovement() {
+    public void endMovement(AddToHistory addToHistory) {
         int oldTranslationX = translationX;
         int oldTranslationY = translationY;
 
@@ -78,26 +82,38 @@ public abstract class ContentLayer extends Layer {
         tmpTranslationX = 0;
         tmpTranslationY = 0;
 
-        TranslateEdit edit = createTranslateEdit(oldTranslationX, oldTranslationY);
-        History.addEdit(edit);
+        if (hasMask() && mask.isLinked()) {
+            mask.endMovement(AddToHistory.NO);
+        }
+
+        if (addToHistory == AddToHistory.YES) {
+            ContentLayerMoveEdit edit = createMovementEdit(oldTranslationX, oldTranslationY);
+            History.addEdit(edit);
+        }
     }
 
-    abstract TranslateEdit createTranslateEdit(int oldTranslationX, int oldTranslationY);
+    abstract ContentLayerMoveEdit createMovementEdit(int oldTranslationX, int oldTranslationY);
 
     /**
      * setTranslationX and setTranslationY programmatically set the translation
      * There is no check for layer enlargement
      */
-    public void setTranslationX(int translationX) {
-        this.translationX = translationX;
+    public void setTranslationX(int x) {
+        this.translationX = x;
+        if (hasMask() && mask.isLinked()) {
+            mask.setTranslationX(x);
+        }
     }
 
     /**
      * setTranslationX and setTranslationY programmatically set the translation
      * There is no check for layer enlargement
      */
-    public void setTranslationY(int translationY) {
-        this.translationY = translationY;
+    public void setTranslationY(int y) {
+        this.translationY = y;
+        if (hasMask() && mask.isLinked()) {
+            mask.setTranslationY(y);
+        }
     }
 
     public abstract void flip(Flip.Direction direction);
@@ -108,7 +124,7 @@ public abstract class ContentLayer extends Layer {
 
     @Override
     public BufferedImage paintLayer(Graphics2D g, boolean firstVisibleLayer, BufferedImage imageSoFar) {
-        if (layerMask == null) {
+        if (mask == null) {
             paintLayerOnGraphics(g, firstVisibleLayer);
         } else {
             BufferedImage maskedImage = getMaskedImage(firstVisibleLayer);
@@ -125,7 +141,7 @@ public abstract class ContentLayer extends Layer {
 
     /**
      * Returns an image that is canvas-sized, and the masks and the translations are taken into account
-     * Can be overridden if the masked image is cached
+     * TODO Can be overridden if the masked image is cached
      */
     BufferedImage getMaskedImage(boolean firstVisibleLayer) {
 //        Canvas canvas = comp.getCanvas();
@@ -134,18 +150,9 @@ public abstract class ContentLayer extends Layer {
         Graphics2D mig = maskedImage.createGraphics();
         paintLayerOnGraphics(mig, firstVisibleLayer);
         mig.setComposite(DstIn);
-        mig.drawImage(layerMask.getTransparencyImage(), 0, 0, null);
+        mig.drawImage(mask.getTransparencyImage(), mask.getTranslationX(), mask.getTranslationY(), null);
         mig.dispose();
         return maskedImage;
-    }
-
-    protected void setupDrawingComposite(Graphics2D g, boolean isFirstVisibleLayer) {
-        if (isFirstVisibleLayer) {  // the first visible layer is always painted with normal mode
-            g.setComposite(AlphaComposite.getInstance(SRC_OVER, opacity));
-        } else {
-            Composite composite = blendingMode.getComposite(opacity);
-            g.setComposite(composite);
-        }
     }
 
     public abstract void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer);

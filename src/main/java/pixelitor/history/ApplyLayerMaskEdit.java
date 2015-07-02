@@ -47,7 +47,7 @@ public class ApplyLayerMaskEdit extends PixelitorEdit {
         super.undo();
 
         layer.setImage(oldImage);
-        layer.addLayerMaskBack(oldMask);
+        layer.addMaskBack(oldMask);
 
         History.notifyMenus(this);
     }

@@ -74,7 +74,14 @@ public class LayerButton extends JToggleButton {
             Icon textLayerIcon = IconUtils.getTextLayerIcon();
             layerIcon = new JButton(textLayerIcon);
 
-            ((JButton) layerIcon).addActionListener(e -> TextLayer.edit(PixelitorWindow.getInstance(), layer.getComposition(), (TextLayer) layer));
+            ((JButton) layerIcon).addActionListener(e -> TextLayer.edit(PixelitorWindow.getInstance(), layer.getComp(), (TextLayer) layer));
+        } else if(layer instanceof AdjustmentLayer) {
+            Icon adjLayerIcon = IconUtils.getAdjLayerIcon();
+            layerIcon = new JButton(adjLayerIcon);
+
+            ((JButton) layerIcon).addActionListener(e -> {
+                System.out.println("LayerButton::LayerButton: adjustment layer icon clicked");
+            });
         } else {
             layerIcon = new JLabel();
         }
@@ -157,6 +164,10 @@ public class LayerButton extends JToggleButton {
         layer.dragFinished(newLayerIndex);
     }
 
+    public Layer getLayer() {
+        return layer;
+    }
+
     public String getLayerName() {
         return layer.getName();
     }
@@ -195,6 +206,7 @@ public class LayerButton extends JToggleButton {
 
     public void addMaskIcon() {
         maskIcon = new JLabel();
+        LayerMaskActions.configureWithPopupMenu(maskIcon);
         configureLayerIcon(maskIcon);
         add(maskIcon, LayerButtonLayout.ICON);
         revalidate();

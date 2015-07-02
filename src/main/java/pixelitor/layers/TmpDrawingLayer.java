@@ -34,7 +34,7 @@ public class TmpDrawingLayer {
     public TmpDrawingLayer(ImageLayer imageLayer, Composite composite, boolean respectSelection) {
         this.composite = composite;
 
-        Composition comp = imageLayer.getComposition();
+        Composition comp = imageLayer.getComp();
 
         // the image is never translated, the coordinates are relative to the canvas
         image = imageLayer.createCompositionSizedTmpImage();

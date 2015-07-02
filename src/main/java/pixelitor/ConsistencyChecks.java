@@ -44,7 +44,9 @@ public final class ConsistencyChecks {
             selectionCheck(comp);
 // TODO commented out because of layer mask problems
 //            fadeCheck(comp);
-            translationCheck(comp);
+
+// TODO commented out because of layer mask problems
+//            translationCheck(comp);
             layerDeleteActionEnabledCheck();
         });
     }
