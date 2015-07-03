@@ -26,6 +26,7 @@ import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.EventQueue;
+import java.awt.GraphicsEnvironment;
 import java.io.File;
 
 /**
@@ -52,6 +53,11 @@ public class Pixelitor {
         EventQueue.invokeLater(() -> {
             try {
                 createAndShowGUI(args);
+
+                // this will run on a different thread, but call it
+                // here because it is IO-intensive and it should not
+                // slow down the loading of the GUI
+                preloadFontNames();
             } catch (Exception e) {
                 Dialogs.showExceptionDialog(e);
             }
@@ -61,6 +67,17 @@ public class Pixelitor {
         // so that later no unexpected delays happen.
         // This is OK because static initializers are thread safe.
         FastMath.cos(0.1);
+    }
+
+    private static void preloadFontNames() {
+        // The initial loading of font names can take some noticeable time.
+        // Preload them to speed up the first start of the text creation dialog
+        Runnable loadFontsTask = () -> {
+            GraphicsEnvironment localGE = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            // the results are cached, no need to cached them here
+            localGE.getAvailableFontFamilyNames();
+        };
+        new Thread(loadFontsTask).start();
     }
 
     private static void setupForMacintosh() {
