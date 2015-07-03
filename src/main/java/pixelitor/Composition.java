@@ -600,6 +600,11 @@ public class Composition implements Serializable {
         return (ImageComponent) ic;
     }
 
+    // we are not in a test, see method above
+    public boolean hasRealIC() {
+        return ic instanceof ImageComponent;
+    }
+
     public void paintSelection(Graphics2D g) {
         if (selection != null) {
             selection.paintMarchingAnts(g);

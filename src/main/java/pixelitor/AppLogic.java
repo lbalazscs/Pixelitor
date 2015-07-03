@@ -64,8 +64,11 @@ public class AppLogic {
         }
 
         if (!newActiveLayer.hasMask()) {
-            newActiveLayer.getComp().getIC().setShowLayerMask(false);
-            FgBgColorSelector.INSTANCE.setLayerMaskEditing(false);
+            Composition comp = newActiveLayer.getComp();
+            if (comp.hasRealIC()) {
+                comp.getIC().setShowLayerMask(false);
+                FgBgColorSelector.INSTANCE.setLayerMaskEditing(false);
+            }
         }
     }
 
