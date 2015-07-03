@@ -104,7 +104,7 @@ public class ImageComponents {
     }
 
     public static Optional<ImageLayer> getActiveImageLayer() {
-        return getActiveComp().flatMap(Composition::getActiveImageLayerOpt);
+        return getActiveComp().flatMap(Composition::getActiveImageLayerOrMaskOpt);
     }
 
     public static int getNrOfOpenImages() {

@@ -263,9 +263,9 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
         g2.translate(drawStartX, drawStartY);
 
-        if (!showLayerMask) {
+//        if (!showLayerMask) {
             checkerBoardPainter.paint(g2, this, zoomedWidth, zoomedHeight);
-        }
+//        }
 
         g2.scale(viewScale, viewScale);
 
@@ -633,7 +633,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     }
 
     @Override
-    public boolean isMaskEditing() {
+    public boolean isMaskShowing() {
         return showLayerMask;
     }
 

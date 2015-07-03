@@ -120,7 +120,7 @@ public class CompositionTest {
 
     @Test
     public void testGetActiveImageLayer() {
-        assertTrue(comp.getActiveImageLayerOpt().isPresent());
+        assertTrue(comp.getActiveImageLayerOrMaskOpt().isPresent());
         comp.checkInvariant();
     }
 

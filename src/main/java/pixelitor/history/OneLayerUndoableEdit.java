@@ -157,7 +157,7 @@ public class OneLayerUndoableEdit extends PixelitorEdit {
         int tmpCanvasWidth = comp.getCanvasWidth();
         int tmpCanvasHeight = comp.getCanvasHeight();
 
-        comp.getActiveImageLayer().changeImageUndoRedo(backupImage);
+        comp.getActiveImageLayerOrMask().changeImageUndoRedo(backupImage);
 
         if (!comp.hasSelection()) {
             layer.setTranslationX(backupTranslationX);

@@ -1026,7 +1026,7 @@ public class AssertJSwingTest {
         if (altDrag) {
             altDrag(300, 300);
         } else {
-            ImageLayer layer = ImageComponents.getActiveImageComponent().getComp().getActiveImageLayer();
+            ImageLayer layer = ImageComponents.getActiveImageComponent().getComp().getActiveImageLayerOrMask();
             int txx = layer.getTranslationX();
             int txy = layer.getTranslationY();
             assert txx == 0;

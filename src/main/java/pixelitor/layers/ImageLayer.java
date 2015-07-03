@@ -381,6 +381,7 @@ public class ImageLayer extends ContentLayer {
             previewImage = image;
 
             if (shouldRefresh) {
+                visibleImageChanged(); // so that layer mask previews work
                 comp.imageChanged(FULL);
             }
         } else {
@@ -388,6 +389,7 @@ public class ImageLayer extends ContentLayer {
 
             setPreviewWithSelection(img);
             setState(PREVIEW);
+            visibleImageChanged(); // so that layer mask previews work
             comp.imageChanged(FULL);
         }
     }
@@ -917,23 +919,7 @@ public class ImageLayer extends ContentLayer {
     public void paintLayerOnGraphics(Graphics2D g, boolean isFirstVisibleLayer) {
         setupDrawingComposite(g, isFirstVisibleLayer);
 
-        BufferedImage visibleImage;
-
-        switch(state) {
-            case NORMAL:
-                visibleImage = image;
-                break;
-            case PREVIEW:
-                assert previewImage != null : "no preview image in state " + state;
-                visibleImage = previewImage;
-                break;
-            case SHOW_ORIGINAL:
-                assert previewImage != null : "no preview image in state " + state;
-                visibleImage = image;
-                break;
-            default:
-                throw new IllegalStateException("state = " + state);
-        }
+        BufferedImage visibleImage = getVisibleImage();
 
         if(tmpDrawingLayer == null) {
             if(Tools.isShapesDrawing() && isActive()) {
@@ -969,6 +955,30 @@ public class ImageLayer extends ContentLayer {
                 g.drawImage(mergedLayerBrushImg, getTranslationX(), getTranslationY(), null);
             }
         }
+    }
+
+    /**
+     * Returns the image that should be shown by this layer.
+     */
+    protected BufferedImage getVisibleImage() {
+        BufferedImage visibleImage;
+
+        switch (state) {
+            case NORMAL:
+                visibleImage = image;
+                break;
+            case PREVIEW:
+                assert previewImage != null : "no preview image in state " + state;
+                visibleImage = previewImage;
+                break;
+            case SHOW_ORIGINAL:
+                assert previewImage != null : "no preview image in state " + state;
+                visibleImage = image;
+                break;
+            default:
+                throw new IllegalStateException("state = " + state);
+        }
+        return visibleImage;
     }
 
     public void setShowOriginal(boolean b) {
@@ -1020,6 +1030,10 @@ public class ImageLayer extends ContentLayer {
 
     protected void imageRefChanged() {
         updateIconImage();
+    }
+
+    protected void visibleImageChanged() {
+        // does something only in the LayerMask subclass
     }
 
     public void updateIconImage() {

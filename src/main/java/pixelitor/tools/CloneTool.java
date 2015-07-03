@@ -160,7 +160,7 @@ public class CloneTool extends TmpLayerBrushTool {
         if (sampleAllLayers) {
             sourceImage = ic.getComp().getCompositeImage();
         } else {
-            sourceImage = ic.getComp().getActiveImageLayer().getImage();
+            sourceImage = ic.getComp().getActiveImageLayerOrMask().getImage();
         }
         cloneBrush.setSource(sourceImage, x, y);
         state = SOURCE_DEFINED_FIRST_STROKE;

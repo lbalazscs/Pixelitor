@@ -50,7 +50,7 @@ public class AdjustDialog extends OKCancelDialog {
     @Override
     public void dialogCanceled() {
         Composition comp = ImageComponents.getActiveComp().get();
-        comp.getActiveImageLayer().cancelPressedInDialog();
+        comp.getActiveImageLayerOrMask().cancelPressedInDialog();
 
         close();
     }

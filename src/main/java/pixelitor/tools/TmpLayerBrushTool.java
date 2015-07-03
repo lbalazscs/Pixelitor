@@ -54,7 +54,7 @@ public abstract class TmpLayerBrushTool extends AbstractBrushTool {
     @Override
     void mergeTmpLayer(Composition comp) {
         if (graphics != null) {
-            ImageLayer imageLayer = comp.getActiveImageLayer();
+            ImageLayer imageLayer = comp.getActiveImageLayerOrMask();
             imageLayer.mergeTmpDrawingImageDown();
         }
     }
@@ -64,6 +64,6 @@ public abstract class TmpLayerBrushTool extends AbstractBrushTool {
     BufferedImage getOriginalImage(Composition comp) {
         // it can simply return the layer image because
         // the drawing was on the temporary layer
-        return comp.getActiveImageLayer().getImage();
+        return comp.getActiveImageLayerOrMask().getImage();
     }
 }

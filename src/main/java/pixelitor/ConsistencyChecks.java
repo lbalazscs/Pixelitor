@@ -60,7 +60,7 @@ public final class ConsistencyChecks {
         }
         Optional<FadeableEdit> edit = History.getPreviousEditForFade(comp);
         if (edit.isPresent()) {
-            Optional<ImageLayer> opt = comp.getActiveImageLayerOpt();
+            Optional<ImageLayer> opt = comp.getActiveImageLayerOrMaskOpt();
             if (opt.isPresent()) {
                 ImageLayer layer = opt.get();
                 BufferedImage current = layer.getImageOrSubImageIfSelected(false, true);

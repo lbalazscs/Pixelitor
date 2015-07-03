@@ -127,7 +127,7 @@ public class ImageDisplayStub implements ImageDisplay {
     }
 
     @Override
-    public boolean isMaskEditing() {
+    public boolean isMaskShowing() {
         return false;
     }
 

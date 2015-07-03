@@ -38,7 +38,7 @@ public class ToolAffectedArea {
         this.rectangle = rectangle;
 
         if (!relativeToImage) {
-            ContentLayer layer = comp.getActiveImageLayer();
+            ContentLayer layer = comp.getActiveImageLayerOrMask();
             int dx = -layer.getTranslationX();
             int dy = -layer.getTranslationY();
             this.rectangle.translate(dx, dy);

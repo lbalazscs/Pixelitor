@@ -222,19 +222,19 @@ public class Composition implements Serializable {
     }
 
     public void okPressedInDialog(String filterName) {
-        getActiveImageLayer().okPressedInDialog(filterName);
+        getActiveImageLayerOrMask().okPressedInDialog(filterName);
     }
 
     public void filterWithoutDialogFinished(BufferedImage img, ChangeReason changeReason, String opName) {
         setDirty(true);
 
-        getActiveImageLayer().filterWithoutDialogFinished(img, changeReason, opName);
+        getActiveImageLayerOrMask().filterWithoutDialogFinished(img, changeReason, opName);
 
         imageChanged(FULL);
     }
 
     public void changePreviewImage(BufferedImage img, String filterName, ChangeReason changeReason) {
-        ImageLayer layer = getActiveImageLayer();
+        ImageLayer layer = getActiveImageLayerOrMask();
         layer.changePreviewImage(img, filterName, changeReason);
     }
 
@@ -245,7 +245,7 @@ public class Composition implements Serializable {
     /**
      * This method assumes that the active layer is an image layer
      */
-    public ImageLayer getActiveImageLayer() {
+    public ImageLayer getActiveImageLayerOrMask() {
         checkInvariant();
         if (activeLayer.isMaskEditing()) {
             return activeLayer.getMask();
@@ -260,7 +260,7 @@ public class Composition implements Serializable {
     /**
      * This should be called if the active layer might not be an image layer
      */
-    public Optional<ImageLayer> getActiveImageLayerOpt() {
+    public Optional<ImageLayer> getActiveImageLayerOrMaskOpt() {
         if (activeLayer.isMaskEditing()) {
             return Optional.of(activeLayer.getMask());
         }
@@ -272,12 +272,12 @@ public class Composition implements Serializable {
     }
 
     public BufferedImage getImageOrSubImageIfSelectedForActiveLayer(boolean copyIfFull, boolean copyAndTranslateIfSelected) {
-        return getActiveImageLayer()
+        return getActiveImageLayerOrMask()
                 .getImageOrSubImageIfSelected(copyIfFull, copyAndTranslateIfSelected);
     }
 
     public BufferedImage getFilterSource() {
-        return getActiveImageLayer().getFilterSourceImage();
+        return getActiveImageLayerOrMask().getFilterSourceImage();
     }
 
     public Canvas getCanvas() {
@@ -745,7 +745,7 @@ public class Composition implements Serializable {
     }
 
     public void layerToCanvasSize() {
-        Optional<ImageLayer> layer = getActiveImageLayerOpt();
+        Optional<ImageLayer> layer = getActiveImageLayerOrMaskOpt();
         if (layer.isPresent()) {
             layer.get().cropToCanvasSize();
             History.addEdit(new NotUndoableEdit(this, "Layer to Canvas Size")); // TODO ImageEdit would be better
@@ -843,14 +843,7 @@ public class Composition implements Serializable {
     }
 
     public void setShowOriginal(boolean b) {
-        getActiveImageLayer().setShowOriginal(b);
-    }
-
-    public boolean isMaskEditing() {
-        if (ic == null) {
-            return false;
-        }
-        return ic.isMaskEditing();
+        getActiveImageLayerOrMask().setShowOriginal(b);
     }
 
     public enum ImageChangeActions {

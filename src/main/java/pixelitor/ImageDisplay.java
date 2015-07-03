@@ -73,7 +73,7 @@ public interface ImageDisplay {
 
     void decreaseZoom(int mouseX, int mouseY);
 
-    boolean isMaskEditing();
+    boolean isMaskShowing();
 
     boolean activeIsImageLayer();
 }

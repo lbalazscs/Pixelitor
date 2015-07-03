@@ -203,12 +203,12 @@ public class ShapesTool extends Tool {
 
             if (!shapeBounds.isEmpty()) {
                 ToolAffectedArea affectedArea = new ToolAffectedArea(comp, shapeBounds, false);
-                saveSubImageForUndo(comp.getActiveImageLayer().getImage(), affectedArea);
+                saveSubImageForUndo(comp.getActiveImageLayerOrMask().getImage(), affectedArea);
             }
             paintShapeOnIC(comp, userDrag);
 
             comp.imageChanged(FULL);
-            comp.getActiveImageLayer().updateIconImage();
+            comp.getActiveImageLayerOrMask().updateIconImage();
         } else { // selection mode
             comp.getSelection().ifPresent((selection) -> {
                 selection.clipToCompSize(comp); // the selection can be too big
@@ -271,7 +271,7 @@ public class ShapesTool extends Tool {
      * The start and end point points are given relative to the Composition (not Layer)
      */
     public void paintShapeOnIC(Composition comp, UserDrag userDrag) {
-        ImageLayer layer = comp.getActiveImageLayer();
+        ImageLayer layer = comp.getActiveImageLayerOrMask();
         int translationX = -layer.getTranslationX();
         int translationY = -layer.getTranslationY();
 

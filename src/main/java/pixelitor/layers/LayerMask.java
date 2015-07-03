@@ -72,8 +72,8 @@ public class LayerMask extends ImageLayer {
         // The transparency image shares the raster data with the BW image,
         // but interprets the bytes differently.
         // Therefore this method needs to be called only when
-        // the image reference changes.
-        WritableRaster raster = image.getRaster();
+        // the visible image reference changes.
+        WritableRaster raster = getVisibleImage().getRaster();
         this.transparencyImage = new BufferedImage(transparencyColorModel, raster, false, null);
     }
 
@@ -96,6 +96,11 @@ public class LayerMask extends ImageLayer {
         updateFromBWImage();
         comp.imageChanged(Composition.ImageChangeActions.FULL);
         updateIconImage();
+    }
+
+    protected void visibleImageChanged() {
+        // so that we have previews in Ctrl-3 mode
+        updateFromBWImage();
     }
 
     @Override
