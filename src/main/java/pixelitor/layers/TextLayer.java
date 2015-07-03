@@ -17,7 +17,6 @@
 
 package pixelitor.layers;
 
-import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
 import pixelitor.PixelitorWindow;
@@ -83,7 +82,6 @@ public class TextLayer extends ShapeLayer implements ImageAdjustmentEffect {
     }
 
     public BufferedImage createRasterizedImage() {
-        Canvas canvas = comp.getCanvas();
         BufferedImage img = ImageUtils.createCompatibleImage(canvas.getWidth(), canvas.getHeight());
         Graphics2D g = img.createGraphics();
         paintLayer(g, true, img);
@@ -223,7 +221,7 @@ public class TextLayer extends ShapeLayer implements ImageAdjustmentEffect {
         edit(pw, comp, textLayer);
     }
 
-    public static void edit(final PixelitorWindow pw, final Composition comp, final TextLayer textLayer) {
+    public static void edit(PixelitorWindow pw, Composition comp, TextLayer textLayer) {
         TextSettings oldSettings = textLayer.getSettings();
         TextAdjustmentsPanel p = new TextAdjustmentsPanel(textLayer);
         OKCancelDialog d = new OKCancelDialog(p, pw, "Edit Text Layer") {

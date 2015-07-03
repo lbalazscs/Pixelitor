@@ -30,7 +30,7 @@ public class LayerButtonLayout implements LayoutManager {
     //    private Component visibilityButton;
     private Component nameEditor;
     //    private Component layerIcon;
-    private List<Component> icons = new ArrayList<>(3);
+    private final List<Component> icons = new ArrayList<>(3);
 
     public static final String ICON = "ICON";
     public static final String NAME_EDITOR = "NAME_EDITOR";

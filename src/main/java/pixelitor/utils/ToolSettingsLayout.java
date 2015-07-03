@@ -29,7 +29,7 @@ import java.awt.LayoutManager;
 public class ToolSettingsLayout implements LayoutManager {
     private static final int HEIGHT = 38;
     private static final Dimension size = new Dimension(100, HEIGHT);
-    public static final int HORIZONTAL_GAP = 5;
+    private static final int HORIZONTAL_GAP = 5;
 
     @Override
     public void addLayoutComponent(String name, Component comp) {

@@ -12,11 +12,11 @@ import java.awt.font.TextAttribute;
 import java.util.Map;
 
 public class AdvancedTextSettingsDialog extends OKDialog {
-    private JCheckBox underlineCB;
-    private JCheckBox strikeThroughCB;
-    private JCheckBox kerningCB;
-    private JCheckBox ligaturesCB;
-    private RangeParam trackingParam;
+    private final JCheckBox underlineCB;
+    private final JCheckBox strikeThroughCB;
+    private final JCheckBox kerningCB;
+    private final JCheckBox ligaturesCB;
+    private final RangeParam trackingParam;
 
     public AdvancedTextSettingsDialog(Dialog owner, ActionListener actionListener, Map<TextAttribute, Object> map) {
         super(owner, "Advanced Text Settings", "Close");

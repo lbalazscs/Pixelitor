@@ -17,7 +17,7 @@ public class ResizingHelper {
     public static final int BILINEAR12 = 1;
     public static final int BILINEAR11 = 2;
 
-    private BufferedImage src;
+    private final BufferedImage src;
     private final int srcWidth;
     private final int srcHeight;
     private double resizeFactor = 1.0;

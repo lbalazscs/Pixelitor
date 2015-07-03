@@ -39,12 +39,12 @@ public class TextSettings implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String text;
-    private Font font;
-    private AreaEffects areaEffects;
-    private Color color;
-    private AbstractLayoutPainter.VerticalAlignment verticalAlignment;
-    private AbstractLayoutPainter.HorizontalAlignment horizontalAlignment;
-    private boolean watermark;
+    private final Font font;
+    private final AreaEffects areaEffects;
+    private final Color color;
+    private final AbstractLayoutPainter.VerticalAlignment verticalAlignment;
+    private final AbstractLayoutPainter.HorizontalAlignment horizontalAlignment;
+    private final boolean watermark;
 
     public TextSettings(String text, Font font, Color color, AreaEffects areaEffects, AbstractLayoutPainter.HorizontalAlignment horizontalAlignment, AbstractLayoutPainter.VerticalAlignment verticalAlignment, boolean watermark) {
         this.areaEffects = areaEffects;
@@ -104,14 +104,13 @@ public class TextSettings implements Serializable {
 
     public void configurePainter(TextPainter painter) {
         painter.setAntialiasing(true);
-        painter.setText(getText());
-        painter.setFont(getFont());
-        AreaEffects areaEffects = getAreaEffects();
+        painter.setText(text);
+        painter.setFont(font);
         if (areaEffects != null) {
             painter.setAreaEffects(areaEffects.asArray());
         }
-        painter.setHorizontalAlignment(getHorizontalAlignment());
-        painter.setVerticalAlignment(getVerticalAlignment());
+        painter.setHorizontalAlignment(horizontalAlignment);
+        painter.setVerticalAlignment(verticalAlignment);
     }
 
     public BufferedImage watermarkImage(BufferedImage src, TextPainter textPainter) {

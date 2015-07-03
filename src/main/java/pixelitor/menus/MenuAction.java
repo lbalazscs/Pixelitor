@@ -60,7 +60,7 @@ abstract class MenuAction extends AbstractAction {
             }
         };
 
-        private String errorTitle;
+        private final String errorTitle;
 
         AllowedLayerType(String errorTitle) {
             this.errorTitle = errorTitle;
@@ -75,7 +75,7 @@ abstract class MenuAction extends AbstractAction {
         }
     }
 
-    private AllowedLayerType layerType;
+    private final AllowedLayerType layerType;
 
     public MenuAction(String name) {
         super(name);

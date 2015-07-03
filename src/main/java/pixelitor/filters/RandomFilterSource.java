@@ -27,10 +27,10 @@ public class RandomFilterSource {
     private List<Filter> history = new ArrayList<>();
 
     // the index of the previous filter in history, or -1 if there isn't one
-    int previousIndex = -1;
+    private int previousIndex = -1;
 
     // the index of the next filter in history, or the size of the history if there isn't one
-    int nextIndex = 0;
+    private int nextIndex = 0;
 
     private Filter lastFilter;
 

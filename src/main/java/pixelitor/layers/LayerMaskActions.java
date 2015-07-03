@@ -13,6 +13,9 @@ import java.awt.event.MouseEvent;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 
 public class LayerMaskActions {
+    private LayerMaskActions() {
+    }
+
     public static void configureWithPopupMenu(JComponent c) {
         c.addMouseListener(new PopupMouseListener());
     }
@@ -58,7 +61,7 @@ public class LayerMaskActions {
      * not with just the mask of the active layer
      */
     private static abstract class AnyMaskAction extends AbstractAction {
-        private JPopupMenu menu;
+        private final JPopupMenu menu;
 
         protected AnyMaskAction(String name, JPopupMenu menu) {
             super(name);

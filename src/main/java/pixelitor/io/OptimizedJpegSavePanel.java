@@ -146,7 +146,7 @@ public class OptimizedJpegSavePanel extends JPanel {
     static class ImagePanel extends JPanel {
         private BufferedImage image;
 
-        ImagePanel() {
+        private ImagePanel() {
         }
 
         // used for the original

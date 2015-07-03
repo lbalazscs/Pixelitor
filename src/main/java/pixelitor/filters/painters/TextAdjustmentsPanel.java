@@ -84,7 +84,7 @@ public class TextAdjustmentsPanel extends AdjustPanel implements ParamAdjustment
         createGUI(textLayer.getSettings());
     }
 
-    public void createGUI(TextSettings settings) {
+    private void createGUI(TextSettings settings) {
         Box verticalBox = Box.createVerticalBox();
 
         verticalBox.add(createTextPanel(settings));

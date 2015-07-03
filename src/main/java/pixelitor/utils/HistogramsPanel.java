@@ -36,7 +36,7 @@ public class HistogramsPanel extends JPanel implements ImageSwitchListener {
     private final HistogramPainter red;
     private final HistogramPainter green;
     private final HistogramPainter blue;
-    public static final int HISTOGRAM_RESOLUTION = 256;
+    private static final int HISTOGRAM_RESOLUTION = 256;
 
     private HistogramsPanel() {
         setLayout(new BorderLayout());

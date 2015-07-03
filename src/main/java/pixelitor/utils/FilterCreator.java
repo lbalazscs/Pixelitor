@@ -435,15 +435,15 @@ public class FilterCreator extends JPanel {
             this.params = params;
         }
 
-        public boolean isParametrizedGui() {
+        private boolean isParametrizedGui() {
             return parametrizedGui;
         }
 
-        public boolean isGui() {
+        private boolean isGui() {
             return gui;
         }
 
-        public boolean copySrc() {
+        private boolean copySrc() {
             return copySrc;
         }
 
@@ -451,47 +451,47 @@ public class FilterCreator extends JPanel {
             return name;
         }
 
-        public boolean hasPixelLoop() {
+        private boolean hasPixelLoop() {
             return pixelLoop;
         }
 
-        public boolean isProxy() {
+        private boolean isProxy() {
             return proxy;
         }
 
-        public String getProxyName() {
+        private String getProxyName() {
             return proxyName;
         }
 
-        public boolean hasAngleParam() {
+        private boolean hasAngleParam() {
             return angleParam;
         }
 
-        public boolean hasCenter() {
+        private boolean hasCenter() {
             return center;
         }
 
-        public boolean hasEdgeAction() {
+        private boolean hasEdgeAction() {
             return edge;
         }
 
-        public boolean hasColor() {
+        private boolean hasColor() {
             return color;
         }
 
-        public boolean hasGradient() {
+        private boolean hasGradient() {
             return gradient;
         }
 
-        public boolean hasInterpolation() {
+        private boolean hasInterpolation() {
             return interpolation;
         }
 
-        public ParameterInfo[] getParams() {
+        private ParameterInfo[] getParams() {
             return params;
         }
 
-        public String getClassName() {
+        private String getClassName() {
             return getName().replaceAll(" ", "");
         }
     }

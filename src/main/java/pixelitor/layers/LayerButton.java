@@ -43,7 +43,7 @@ public class LayerButton extends JToggleButton {
     private boolean userInteraction = true;
     private JTextField nameEditor; // actually, a LayerNameEditor subclass
 
-    private JComponent layerIcon;
+    private final JComponent layerIcon;
     private JLabel maskIcon;
 
     /**

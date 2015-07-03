@@ -244,7 +244,7 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
                         paramSet.randomize();
                         normalizeAction.actionPerformed(null);
                     }
-                }, "Randomizes settings and normalizes brightness");
+                }, "Randomizes settings and normalizes the brightness");
         // insert it right after "Randomize Settings"
         paramSet.insertAction(randomizeAndNormalize, 2);
     }
@@ -263,21 +263,21 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        float redFromRed = this.redFromRed.getValueAsPercentage();
-        float redFromGreen = this.redFromGreen.getValueAsPercentage();
-        float redFromBlue = this.redFromBlue.getValueAsPercentage();
+        float rfr = redFromRed.getValueAsPercentage();
+        float rfg = redFromGreen.getValueAsPercentage();
+        float rfb = redFromBlue.getValueAsPercentage();
 
-        float greenFromRed = this.greenFromRed.getValueAsPercentage();
-        float greenFromGreen = this.greenFromGreen.getValueAsPercentage();
-        float greenFromBlue = this.greenFromBlue.getValueAsPercentage();
+        float gfr = greenFromRed.getValueAsPercentage();
+        float gfg = greenFromGreen.getValueAsPercentage();
+        float gfb = greenFromBlue.getValueAsPercentage();
 
-        float blueFromRed = this.blueFromRed.getValueAsPercentage();
-        float blueFromGreen = this.blueFromGreen.getValueAsPercentage();
-        float blueFromBlue = this.blueFromBlue.getValueAsPercentage();
+        float bfr = blueFromRed.getValueAsPercentage();
+        float bfg = blueFromGreen.getValueAsPercentage();
+        float bfb = blueFromBlue.getValueAsPercentage();
 
-        if ((redFromRed == 1.0f) && (redFromGreen == 0.0f) && (redFromBlue == 0.0f)) {
-            if ((greenFromRed == 0.0f) && (greenFromGreen == 1.0f) && (greenFromBlue == 0.0f)) {
-                if ((blueFromRed == 0.0f) && (blueFromGreen == 0.0f) && (blueFromBlue == 1.0f)) {
+        if ((rfr == 1.0f) && (rfg == 0.0f) && (rfb == 0.0f)) {
+            if ((gfr == 0.0f) && (gfg == 1.0f) && (gfb == 0.0f)) {
+                if ((bfr == 0.0f) && (bfg == 0.0f) && (bfb == 1.0f)) {
                     return src;
                 }
             }
@@ -302,9 +302,9 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
                 int g = (rgb >>> 8) & 0xFF;
                 int b = (rgb) & 0xFF;
 
-                int newRed = (int) (redFromRed * r + redFromGreen * g + redFromBlue * b);
-                int newGreen = (int) (greenFromRed * r + greenFromGreen * g + greenFromBlue * b);
-                int newBlue = (int) (blueFromRed * r + blueFromGreen * g + blueFromBlue * b);
+                int newRed = (int) (rfr * r + rfg * g + rfb * b);
+                int newGreen = (int) (gfr * r + gfg * g + gfb * b);
+                int newBlue = (int) (bfr * r + bfg * g + bfb * b);
 
                 newRed = PixelUtils.clamp(newRed);
                 newGreen = PixelUtils.clamp(newGreen);
@@ -314,9 +314,9 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
             }
         } else { // not packed int
             BandCombineOp bandCombineOp = new BandCombineOp(new float[][]{
-                    {redFromRed, redFromGreen, redFromBlue},
-                    {greenFromRed, greenFromGreen, greenFromBlue},
-                    {blueFromRed, blueFromGreen, blueFromBlue}
+                    {rfr, rfg, rfb},
+                    {gfr, gfg, gfb},
+                    {bfr, bfg, bfb}
             }, null);
             Raster srcRaster = src.getRaster();
             Raster destRaster = dest.getRaster();

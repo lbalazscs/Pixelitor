@@ -168,8 +168,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         Enumeration<Integer> keys = labelsDict.keys();
         while (keys.hasMoreElements()) {
             Integer i = keys.nextElement();
-            JLabel label = labelsDict.get(i);
-            label.setText(String.valueOf(i / 100.0f));
+            labelsDict.get(i).setText(String.valueOf(i / 100.0f));
         }
     }
 

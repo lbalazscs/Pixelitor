@@ -71,7 +71,7 @@ public abstract class Layer implements Serializable {
      * This flag is logically independent from the showLayerMask
      * flag in the image component.
      */
-    protected boolean maskEditing = false;
+    private boolean maskEditing = false;
 
     Layer(Composition comp, String name, Layer parent) {
         this.comp = comp;

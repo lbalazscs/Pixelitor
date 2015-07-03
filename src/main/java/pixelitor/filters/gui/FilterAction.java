@@ -30,7 +30,7 @@ public class FilterAction implements FilterGUIComponent {
     private boolean finalAnimationSettingMode = false;
 
     private final String name;
-    protected ParamAdjustmentListener adjustmentListener;
+    private ParamAdjustmentListener adjustmentListener;
 
     // most actions should be available in the final animation settings
     private boolean ignoreFinalAnimationSettingMode = true;

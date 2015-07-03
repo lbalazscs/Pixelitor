@@ -98,6 +98,7 @@ public class LayerMask extends ImageLayer {
         updateIconImage();
     }
 
+    @Override
     public void updateIconImage() {
         LayerButton button = getLayerButton();
         if(button != null) { // can be null while deserializing
