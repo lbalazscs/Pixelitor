@@ -58,7 +58,7 @@ public class LayerNameEditor extends JTextField {
         getCaret().setVisible(true);
     }
 
-    private void disableEditing() {
+    public void disableEditing() {
         setEnabled(false);
         setEditable(false);
     }

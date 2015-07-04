@@ -41,7 +41,7 @@ public class LayerButton extends JToggleButton {
     private JCheckBox visibilityCB;
 
     private boolean userInteraction = true;
-    private JTextField nameEditor; // actually, a LayerNameEditor subclass
+    private LayerNameEditor nameEditor;
 
     private final JComponent layerIcon;
     private JLabel maskIcon;
@@ -126,6 +126,8 @@ public class LayerButton extends JToggleButton {
         addItemListener(e -> {
             if (isSelected()) {
                 layer.makeActive(userInteraction ? AddToHistory.YES : AddToHistory.NO);
+            } else {
+                nameEditor.disableEditing();
             }
         });
     }
