@@ -307,14 +307,18 @@ public class ShapesTool extends Tool {
         if (action.hasFill()) {
             TwoPointBasedPaint fillType = fillModel.getSelectedItem();
             if (shapeType.isClosed()) {
-                g.setPaint(fillType.getPaint(userDrag));
+                //g.setPaint(fillType.getPaint(userDrag));
+                fillType.setupPaint(g, userDrag);
                 g.fill(currentShape);
+                fillType.restorePaint(g);
             } else if (!action.hasStroke()) {
                 // special case: a shape that is not closed can be only stroked, even if stroke is disabled
                 // stroke it with the basic stroke
                 g.setStroke(basicStrokeForOpenShapes);
-                g.setPaint(fillType.getPaint(userDrag));
+//                g.setPaint(fillType.getPaint(userDrag));
+                fillType.setupPaint(g, userDrag);
                 g.draw(currentShape);
+                fillType.restorePaint(g);
             }
         }
 
@@ -326,8 +330,10 @@ public class ShapesTool extends Tool {
                 stroke = createStroke();
             }
             g.setStroke(stroke);
-            g.setPaint(strokeFill.getPaint(userDrag));
+//            g.setPaint(strokeFill.getPaint(userDrag));
+            strokeFill.setupPaint(g, userDrag);
             g.draw(currentShape);
+            strokeFill.restorePaint(g);
         }
 
         if (action.drawEffects()) {

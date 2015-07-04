@@ -19,13 +19,18 @@ package pixelitor.tools.shapestool;
 import pixelitor.tools.FgBgColorSelector;
 import pixelitor.tools.UserDrag;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.GradientPaint;
+import java.awt.Graphics2D;
 import java.awt.MultipleGradientPaint;
 import java.awt.Paint;
 import java.awt.RadialGradientPaint;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
+
+import static java.awt.AlphaComposite.DST_OUT;
+import static java.awt.AlphaComposite.SRC_OVER;
 
 /**
  * A Paint type based on two endpoints of a UserDrag.
@@ -34,7 +39,7 @@ import java.awt.geom.Point2D;
 enum TwoPointBasedPaint {
     LINEAR_GRADIENT {
         @Override
-        public Paint getPaint(UserDrag ud) {
+        protected Paint getPaint(UserDrag ud) {
             Color fgColor = FgBgColorSelector.getFG();
             Color bgColor = FgBgColorSelector.getBG();
 
@@ -50,7 +55,7 @@ enum TwoPointBasedPaint {
         private final AffineTransform gradientTransform = new AffineTransform();
 
         @Override
-        public Paint getPaint(UserDrag userDrag) {
+        protected Paint getPaint(UserDrag userDrag) {
             Color fgColor = FgBgColorSelector.getFG();
             Color bgColor = FgBgColorSelector.getBG();
 
@@ -67,7 +72,7 @@ enum TwoPointBasedPaint {
         }
     }, FOREGROUND {
         @Override
-        public Paint getPaint(UserDrag userDrag) {
+        protected Paint getPaint(UserDrag userDrag) {
             Color fgColor = FgBgColorSelector.getFG();
             return fgColor;
         }
@@ -78,7 +83,7 @@ enum TwoPointBasedPaint {
         }
     }, BACKGROUND {
         @Override
-        public Paint getPaint(UserDrag userDrag) {
+        protected Paint getPaint(UserDrag userDrag) {
             Color bgColor = FgBgColorSelector.getBG();
             return bgColor;
         }
@@ -87,7 +92,34 @@ enum TwoPointBasedPaint {
         public String toString() {
             return "Background";
         }
+    }, TRANSPARENT {
+        @Override
+        protected Paint getPaint(UserDrag userDrag) {
+            return Color.WHITE; // does not matter
+        }
+
+        @Override
+        public void setupPaint(Graphics2D g, UserDrag userDrag) {
+            g.setComposite(AlphaComposite.getInstance(DST_OUT));
+        }
+
+        @Override
+        public void restorePaint(Graphics2D g) {
+            g.setComposite(AlphaComposite.getInstance(SRC_OVER));
+        }
+
+        @Override
+        public String toString() {
+            return "Transparent";
+        }
     };
 
-    public abstract Paint getPaint(UserDrag userDrag);
+    protected abstract Paint getPaint(UserDrag userDrag);
+
+    public void setupPaint(Graphics2D g, UserDrag userDrag) {
+        g.setPaint(getPaint(userDrag));
+    }
+
+    public void restorePaint(Graphics2D g) {
+    }
 }
