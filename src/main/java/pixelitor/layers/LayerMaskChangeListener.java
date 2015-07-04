@@ -14,25 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
  */
+package pixelitor.layers;
 
-package pixelitor.utils;
-
-import pixelitor.Composition;
-import pixelitor.ImageComponent;
-
-public interface ImageSwitchListener {
-    /**
-     * Called when the user has closed all the images
-     */
-    void noOpenImageAnymore();
-
-    /**
-     * Called when the user has opened a new image
-     */
-    void newImageOpened(Composition comp);
-
-    /**
-     * Called when the used switches to another image
-     */
-    void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC);
+/**
+ * A listener interface for changes in layer mask state
+ */
+public interface LayerMaskChangeListener {
+    void maskAddedOrRemoved(Layer affectedLayer);
 }

@@ -243,7 +243,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     }
 
     @Override
-    public void newImageOpened() {
+    public void newImageOpened(Composition comp) {
         resetState();
     }
 

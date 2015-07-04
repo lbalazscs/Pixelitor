@@ -54,8 +54,7 @@ public class LayerMoveAction extends AbstractAction implements ImageSwitchListen
     }
 
     @Override
-    public void newImageOpened() {
-        Composition comp = ImageComponents.getActiveComp().get();
+    public void newImageOpened(Composition comp) {
         enableDisable(comp);
     }
 

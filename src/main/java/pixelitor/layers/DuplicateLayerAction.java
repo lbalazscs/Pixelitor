@@ -49,7 +49,7 @@ public class DuplicateLayerAction extends AbstractAction implements ImageSwitchL
     }
 
     @Override
-    public void newImageOpened() {
+    public void newImageOpened(Composition comp) {
         setEnabled(true);
     }
 

@@ -16,6 +16,7 @@
  */
 package pixelitor.menus;
 
+import pixelitor.Composition;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
 import pixelitor.utils.ImageSwitchListener;
@@ -47,7 +48,7 @@ public class NewWindowForAction extends AbstractAction implements ImageSwitchLis
     }
 
     @Override
-    public void newImageOpened() {
+    public void newImageOpened(Composition comp) {
         // handled in activeCompositionHasChanged
     }
 

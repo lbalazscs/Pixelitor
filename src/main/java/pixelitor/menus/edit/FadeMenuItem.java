@@ -17,6 +17,7 @@
 
 package pixelitor.menus.edit;
 
+import pixelitor.Composition;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
 import pixelitor.history.History;
@@ -51,7 +52,7 @@ public class FadeMenuItem extends JMenuItem implements UndoableEditListener, Ima
     }
 
     @Override
-    public void newImageOpened() {
+    public void newImageOpened(Composition comp) {
         setEnabled(false);
     }
 

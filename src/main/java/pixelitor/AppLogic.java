@@ -19,6 +19,7 @@ package pixelitor;
 
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerChangeListener;
+import pixelitor.layers.LayerMaskChangeListener;
 import pixelitor.tools.FgBgColorSelector;
 import pixelitor.tools.Symmetry;
 import pixelitor.utils.AppPreferences;
@@ -35,6 +36,7 @@ import java.util.Collection;
  */
 public class AppLogic {
     private static final Collection<LayerChangeListener> layerChangeListeners = new ArrayList<>();
+    private static final Collection<LayerMaskChangeListener> layerMaskChangeListeners = new ArrayList<>();
 
     private AppLogic() {
     }
@@ -49,6 +51,16 @@ public class AppLogic {
 
     public static void addLayerChangeListener(LayerChangeListener listener) {
         layerChangeListeners.add(listener);
+    }
+
+    public static void addLayerMaskChangeListener(LayerMaskChangeListener listener) {
+        layerMaskChangeListeners.add(listener);
+    }
+
+    public static void maskChanged(Layer affectedLayer) {
+        for (LayerMaskChangeListener listener : layerMaskChangeListeners) {
+            listener.maskAddedOrRemoved(affectedLayer);
+        }
     }
 
     public static void activeCompLayerCountChanged(Composition comp, int newLayerCount) {

@@ -145,7 +145,7 @@ public class Desktop {
         try {
             internalFrame.setSelected(true);
             desktopPane.getDesktopManager().activateFrame(internalFrame);
-            ImageComponents.newImageOpened();
+            ImageComponents.newImageOpened(ic.getComp());
         } catch (PropertyVetoException e) {
             Dialogs.showExceptionDialog(e);
         }

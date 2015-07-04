@@ -42,11 +42,11 @@ public enum LayerMaskAddType {
         BufferedImage getBWImage(int width, int height, Selection selection) {
             return createFullImage(width, height, Color.BLACK, Color.WHITE, selection.getShape());
         }
-//    }, HIDE_SELECTION("Hide Selection", true) {
-//        @Override
-//        BufferedImage getBWImage(int width, int height) {
-//            return null;
-//        }
+    }, HIDE_SELECTION("Hide Selection", true) {
+        @Override
+        BufferedImage getBWImage(int width, int height, Selection selection) {
+            return createFullImage(width, height, Color.WHITE, Color.BLACK, selection.getShape());
+        }
     };
 
     private static BufferedImage createFullImage(int width, int height, Color bg, Color fg, Shape shape) {

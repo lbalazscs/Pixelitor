@@ -269,7 +269,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
     }
 
     @Override
-    public void newImageOpened() {
+    public void newImageOpened(Composition comp) {
         resetStateToInitial();
     }
 

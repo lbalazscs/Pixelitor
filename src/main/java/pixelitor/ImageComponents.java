@@ -208,9 +208,9 @@ public class ImageComponents {
         PixelitorWindow.getInstance().setTitle(ic.getComp().getName() + " - " + Build.getPixelitorWindowFixTitle());
     }
 
-    public static void newImageOpened() {
+    public static void newImageOpened(Composition comp) {
 //        numFramesOpen++;
-        imageSwitchListeners.forEach(ImageSwitchListener::newImageOpened);
+        imageSwitchListeners.forEach((imageSwitchListener) -> imageSwitchListener.newImageOpened(comp));
     }
 
     public static void repaintActive() {

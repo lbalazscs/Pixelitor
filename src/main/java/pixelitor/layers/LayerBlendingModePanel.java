@@ -76,7 +76,7 @@ public class LayerBlendingModePanel extends BlendingModePanel implements ImageSw
     }
 
     @Override
-    public void newImageOpened() {
+    public void newImageOpened(Composition comp) {
         setEnabled(true);
     }
 

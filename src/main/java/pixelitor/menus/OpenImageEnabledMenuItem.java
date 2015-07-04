@@ -16,6 +16,7 @@
  */
 package pixelitor.menus;
 
+import pixelitor.Composition;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
 import pixelitor.utils.ImageSwitchListener;
@@ -38,7 +39,7 @@ public class OpenImageEnabledMenuItem extends JMenuItem implements ImageSwitchLi
     }
 
     @Override
-    public void newImageOpened() {
+    public void newImageOpened(Composition comp) {
         setEnabled(true);
     }
 

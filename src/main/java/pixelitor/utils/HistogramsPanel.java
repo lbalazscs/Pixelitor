@@ -73,7 +73,7 @@ public class HistogramsPanel extends JPanel implements ImageSwitchListener {
     }
 
     @Override
-    public void newImageOpened() {
+    public void newImageOpened(Composition comp) {
     }
 
     @Override

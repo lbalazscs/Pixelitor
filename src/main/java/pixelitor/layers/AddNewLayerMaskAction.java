@@ -16,6 +16,7 @@
  */
 package pixelitor.layers;
 
+import pixelitor.AppLogic;
 import pixelitor.Composition;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
@@ -26,22 +27,37 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /**
- * An Action that adds a new layer
+ * An Action that adds a new layer mask.
  */
-public class AddNewLayerAction extends AbstractAction implements ImageSwitchListener {
-    public static final AddNewLayerAction INSTANCE = new AddNewLayerAction();
+public class AddNewLayerMaskAction extends AbstractAction implements ImageSwitchListener, LayerMaskChangeListener {
+    public static final AddNewLayerMaskAction INSTANCE = new AddNewLayerMaskAction();
 
-    private AddNewLayerAction() {
-        super("Add New Layer", IconUtils.loadIcon("add_layer.gif"));
+    private AddNewLayerMaskAction() {
+        super("Add New Layer Mask", IconUtils.loadIcon("add_layer_mask.png"));
         setEnabled(false);
         ImageComponents.addImageSwitchListener(this);
+        AppLogic.addLayerMaskChangeListener(this);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         Composition comp = ImageComponents.getActiveComp().get();
-        boolean addBellowActive = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
-        comp.addNewEmptyLayer(null, addBellowActive);
+        Layer layer = comp.getActiveLayer();
+        assert !layer.hasMask();
+        boolean ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
+        if (comp.hasSelection()) {
+            if (ctrlPressed) {
+                layer.addMask(LayerMaskAddType.HIDE_SELECTION);
+            } else {
+                layer.addMask(LayerMaskAddType.REVEAL_SELECTION);
+            }
+        } else { // there is no selection
+            if (ctrlPressed) {
+                layer.addMask(LayerMaskAddType.HIDE_ALL);
+            } else {
+                layer.addMask(LayerMaskAddType.REVEAL_ALL);
+            }
+        }
     }
 
     @Override
@@ -51,11 +67,17 @@ public class AddNewLayerAction extends AbstractAction implements ImageSwitchList
 
     @Override
     public void newImageOpened(Composition comp) {
-        setEnabled(true);
+        setEnabled(!comp.getActiveLayer().hasMask());
     }
 
     @Override
     public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
-        setEnabled(true);
+        boolean hasMask = newIC.getComp().getActiveLayer().hasMask();
+        setEnabled(!hasMask);
+    }
+
+    @Override
+    public void maskAddedOrRemoved(Layer affectedLayer) {
+        setEnabled(!affectedLayer.hasMask());
     }
 }

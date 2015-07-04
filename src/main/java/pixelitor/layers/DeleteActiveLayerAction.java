@@ -52,8 +52,8 @@ public class DeleteActiveLayerAction extends AbstractAction implements ImageSwit
     }
 
     @Override
-    public void newImageOpened() {
-        int nrLayers = ImageComponents.getActiveComp().get().getNrLayers();
+    public void newImageOpened(Composition comp) {
+        int nrLayers = comp.getNrLayers();
         if (nrLayers <= 1) {
             setEnabled(false);
         } else {

@@ -17,6 +17,7 @@
 
 package pixelitor.layers;
 
+import pixelitor.AppLogic;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.history.AddLayerMaskEdit;
@@ -276,6 +277,8 @@ public abstract class Layer implements Serializable {
 
         comp.imageChanged(FULL);
 
+        AppLogic.maskChanged(this);
+
         PixelitorEdit edit = new AddLayerMaskEdit(comp, this);
         if (addType.needsSelection()) {
             Shape backupShape = selection.getShape();
@@ -292,6 +295,7 @@ public abstract class Layer implements Serializable {
         this.mask = mask;
         comp.imageChanged(FULL);
         layerButton.addMaskIcon();
+        AppLogic.maskChanged(this);
         mask.updateIconImage();
     }
 
@@ -307,6 +311,7 @@ public abstract class Layer implements Serializable {
             History.addEdit(edit);
         }
 
+        AppLogic.maskChanged(this);
         layerButton.deleteMaskIcon();
     }
 
