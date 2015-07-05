@@ -28,11 +28,13 @@ import pixelitor.history.LayerOrderChangeEdit;
 import pixelitor.history.LayerSelectionChangeEdit;
 import pixelitor.history.NewLayerEdit;
 import pixelitor.history.NotUndoableEdit;
+import pixelitor.history.PixelitorEdit;
 import pixelitor.history.SelectionChangeEdit;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
+import pixelitor.layers.LayerMask;
 import pixelitor.menus.SelectionActions;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionInteraction;
@@ -242,6 +244,13 @@ public class Composition implements Serializable {
         return (activeLayer instanceof ImageLayer) || activeLayer.isMaskEditing();
     }
 
+    public Layer getActiveLayerOrMask() {
+        if (activeLayer.isMaskEditing()) {
+            return activeLayer.getMask();
+        }
+        return activeLayer;
+    }
+
     /**
      * This method assumes that the active layer is an image layer
      */
@@ -293,36 +302,27 @@ public class Composition implements Serializable {
     }
 
     public void startMovement(boolean makeDuplicateLayer) {
-        if (!(activeLayer instanceof ContentLayer)) {
-            return;
-        }
-
         if (makeDuplicateLayer) {
             duplicateLayer();
         }
 
-        ((ContentLayer) activeLayer).startMovement();
+        getActiveLayerOrMask().startMovement();
+    }
+
+    public void moveActiveContentRelative(int relativeX, int relativeY) {
+        getActiveLayerOrMask().moveWhileDragging(relativeX, relativeY);
+        imageChanged(FULL);
     }
 
     public void endMovement() {
-        if (!(activeLayer instanceof ContentLayer)) {
-            return;
+        PixelitorEdit edit = getActiveLayerOrMask().endMovement();
+        if (edit != null) {
+            // The layer, the mask, or both moved.
+            // We always should get here except if an adjustment
+            // layer without a mask was moved.
+            History.addEdit(edit);
+            imageChanged(FULL);
         }
-
-        ContentLayer contentLayer = (ContentLayer) this.activeLayer;
-        contentLayer.endMovement(AddToHistory.YES);
-
-//        int tx = contentLayer.getTranslationX();
-//        int ty = contentLayer.getTranslationY();
-//        System.out.println("Composition::endMovement: tx = " + tx + ", ty = " + ty);
-//        if(contentLayer.hasMask()) {
-//            LayerMask mask = contentLayer.getMask();
-//            int mtx = mask.getTranslationX();
-//            int mty = mask.getTranslationY();
-//            System.out.println("Composition::endMovement: mtx = " + mtx + ", mty = " + mty);
-//        }
-
-        imageChanged(FULL);
     }
 
     public Layer getLayer(int i) {
@@ -681,14 +681,6 @@ public class Composition implements Serializable {
         this.dirty = dirty;
     }
 
-    public void moveActiveContentRelative(int relativeX, int relativeY) {
-        if (activeLayer instanceof ContentLayer) {
-            ContentLayer contentLayer = (ContentLayer) activeLayer;
-            contentLayer.moveWhileDragging(relativeX, relativeY);
-            imageChanged(FULL);
-        }
-    }
-
     public boolean isActiveLayer(Layer layer) {
         return layer == activeLayer;
     }
@@ -745,22 +737,32 @@ public class Composition implements Serializable {
     }
 
     public void layerToCanvasSize() {
-        Optional<ImageLayer> layer = getActiveImageLayerOrMaskOpt();
-        if (layer.isPresent()) {
-            layer.get().cropToCanvasSize();
-            History.addEdit(new NotUndoableEdit(this, "Layer to Canvas Size")); // TODO ImageEdit would be better
+        // TODO actually this should work with any layer
+        if (activeLayer instanceof ImageLayer) {
+            ((ImageLayer) activeLayer).cropToCanvasSize();
+            if (activeLayer.hasMask()) {
+                LayerMask mask = activeLayer.getMask();
+                mask.cropToCanvasSize();
+            }
+
+            // TODO A CompoundEdit from two ImageEdits (layer, mask) could be used
+            History.addEdit(new NotUndoableEdit(this, "Layer to Canvas Size"));
         } else {
             Dialogs.showNotImageLayerDialog();
         }
     }
 
     public void enlargeCanvas(int north, int east, int south, int west) {
-        layerList.stream()
-                .filter(layer -> layer instanceof ContentLayer)
-                .forEach(layer -> {
-                    ContentLayer contentLayer = (ContentLayer) layer;
-                    contentLayer.enlargeCanvas(north, east, south, west);
-                });
+        for (Layer layer : layerList) {
+            if (layer instanceof ContentLayer) {
+                ContentLayer contentLayer = (ContentLayer) layer;
+                contentLayer.enlargeCanvas(north, east, south, west);
+            }
+            if (layer.hasMask()) {
+                LayerMask mask = layer.getMask();
+                mask.enlargeCanvas(north, east, south, west);
+            }
+        }
 
         canvas.updateSize(canvas.getWidth() + east + west, canvas.getHeight() + north + south);
 

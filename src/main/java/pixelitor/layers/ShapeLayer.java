@@ -91,13 +91,11 @@ public class ShapeLayer extends ContentLayer {
 
     @Override
     public void resize(int targetWidth, int targetHeight, boolean progressiveBilinear) {
-        resizeMask(targetWidth, targetHeight, progressiveBilinear);
         // TODO
     }
 
     @Override
     public void crop(Rectangle selectionBounds) {
-        cropMask(selectionBounds);
         // TODO
     }
 }

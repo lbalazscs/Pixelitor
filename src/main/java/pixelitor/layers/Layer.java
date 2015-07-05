@@ -56,7 +56,7 @@ public abstract class Layer implements Serializable {
 
     protected Canvas canvas;
     String name;
-    private boolean isMask = false;
+    private final Layer parent;
     private boolean visible = true;
     final Composition comp;
     protected LayerMask mask;
@@ -77,7 +77,7 @@ public abstract class Layer implements Serializable {
     Layer(Composition comp, String name, Layer parent) {
         this.comp = comp;
         this.name = name;
-        this.isMask = parent != null;
+        this.parent = parent;
         this.opacity = 1.0f;
 
         canvas = comp.getCanvas();
@@ -233,7 +233,7 @@ public abstract class Layer implements Serializable {
 
         // We create a layer button only for real layers.
         // For layer masks, we share the button of the real layer.
-        if (!isMask) {
+        if (parent == null) { // not mask
             layerButton = new LayerButton(this);
 
             if (mask != null) {
@@ -325,19 +325,7 @@ public abstract class Layer implements Serializable {
 
     public abstract void resize(int targetWidth, int targetHeight, boolean progressiveBilinear);
 
-    protected void resizeMask(int targetWidth, int targetHeight, boolean progressiveBilinear) {
-        if (mask != null) {
-            mask.resize(targetWidth, targetHeight, progressiveBilinear);
-        }
-    }
-
     public abstract void crop(Rectangle selectionBounds);
-
-    protected void cropMask(Rectangle selectionBounds) {
-        if (mask != null) {
-            mask.crop(selectionBounds);
-        }
-    }
 
     public LayerMask getMask() {
         return mask;
@@ -384,5 +372,55 @@ public abstract class Layer implements Serializable {
             Composite composite = blendingMode.getComposite(opacity);
             g.setComposite(composite);
         }
+    }
+
+    // On this level startMovement, moveWhileDragging and
+    // endMovement only care about the movement of the
+    // mask or parent. Our own movement is handled in
+    // ContentLayer.
+    public void startMovement() {
+        Layer linked = getLinked();
+        if (linked != null) {
+            linked.startMovement();
+        }
+    }
+
+    public void moveWhileDragging(int x, int y) {
+        Layer linked = getLinked();
+        if (linked != null) {
+            linked.moveWhileDragging(x, y);
+        }
+    }
+
+    public PixelitorEdit endMovement() {
+        Layer linked = getLinked();
+        if (linked != null) {
+            //noinspection TailRecursion
+            return linked.endMovement();
+        }
+        return null;
+    }
+
+    /**
+     * Returns the layer that should move together with the current one,
+     * (Assuming that we are in the edited layer)
+     * or null if this layer should move alone
+     */
+    protected Layer getLinked() {
+        if (mask != null) {
+            if (!maskEditing) { // we are in the edited layer
+                if (mask.isLinked()) {
+                    return mask;
+                }
+            }
+        }
+        if (parent != null) { // we are in a mask
+            if (parent.isMaskEditing()) { // we are in the edited layer
+                if (((LayerMask) this).isLinked()) {
+                    return parent;
+                }
+            }
+        }
+        return null;
     }
 }

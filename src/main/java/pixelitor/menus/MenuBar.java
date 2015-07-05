@@ -1249,10 +1249,12 @@ public class MenuBar extends JMenuBar {
                 Layer layer = comp.getActiveLayer();
                 if (layer instanceof ContentLayer) {
                     ContentLayer contentLayer = (ContentLayer) layer;
-                    contentLayer.setTranslationX(0);
-                    contentLayer.setTranslationY(0);
-                    comp.imageChanged(FULL);
+                    contentLayer.setTranslation(0, 0);
                 }
+                if (layer.hasMask()) {
+                    layer.getMask().setTranslation(0, 0);
+                }
+                comp.imageChanged(FULL);
             }
         };
         createMenuItem(resetLayerTranslation, debugSubmenu);

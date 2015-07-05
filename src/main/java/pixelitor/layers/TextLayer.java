@@ -102,8 +102,9 @@ public class TextLayer extends ShapeLayer implements ImageAdjustmentEffect {
 
         d.translationX = translationX;
         d.translationY = translationY;
-        d.painter.setTranslationX(painter.getTranslationX());
-        d.painter.setTranslationY(painter.getTranslationY());
+        d.painter.setTranslation(
+                painter.getTranslationX(),
+                painter.getTranslationY());
 
         d.setSettings(new TextSettings(settings));
         d.setName(getName() + " Copy", AddToHistory.NO);
@@ -134,33 +135,18 @@ public class TextLayer extends ShapeLayer implements ImageAdjustmentEffect {
     @Override
     public void moveWhileDragging(int x, int y) {
         super.moveWhileDragging(x, y);
-        painter.setTranslationX(getTranslationX());
-        painter.setTranslationY(getTranslationY());
+        painter.setTranslation(getTranslationX(), getTranslationY());
     }
 
     @Override
     ContentLayerMoveEdit createMovementEdit(int oldTranslationX, int oldTranslationY) {
-        boolean moveMask = hasMask() && mask.isLinked();
-        BufferedImage oldMask = null;
-        if (moveMask) {
-            boolean needsEnlarging = mask.checkImageDoesNotCoverCanvas();
-            if (needsEnlarging) {
-                oldMask = mask.getImage();
-            }
-        }
-        return new ContentLayerMoveEdit(this, null, oldMask, oldTranslationX, oldTranslationY);
+        return new ContentLayerMoveEdit(this, null, oldTranslationX, oldTranslationY);
     }
 
     @Override
-    public void setTranslationX(int x) {
-        super.setTranslationX(x);
-        painter.setTranslationX(x);
-    }
-
-    @Override
-    public void setTranslationY(int y) {
-        super.setTranslationY(y);
-        painter.setTranslationY(y);
+    public void setTranslation(int x, int y) {
+        super.setTranslation(x, y);
+        painter.setTranslation(x, y);
     }
 
     public void setSettings(TextSettings settings) {

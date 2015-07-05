@@ -20,8 +20,10 @@ package pixelitor;
 import net.jafama.FastMath;
 import pixelitor.io.OpenSaveManager;
 import pixelitor.tools.FgBgColorSelector;
+import pixelitor.tools.Tools;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Dialogs;
+import pixelitor.utils.Tests3x3;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -137,13 +139,13 @@ public class Pixelitor {
             return;
         }
 
-//        ImageComponents.getActiveLayer().get()
-//                .addMask(LayerMaskAddType.REVEAL_ALL);
+        Tests3x3.addStandardImageWithMask();
 
-
-//        Tools.CROP.getButton().doClick();
+        Tools.MOVE.getButton().doClick();
 //
 //        NewImage.addNewImage(FillType.WHITE, 600, 400, "Test");
+//        ImageComponents.getActiveLayer().get()
+//                .addMask(LayerMaskAddType.PATTERN);
 //
 //        TextLayer.createNew(pw);
 

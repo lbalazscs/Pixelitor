@@ -21,6 +21,7 @@ import pixelitor.Composition;
 import pixelitor.history.OneLayerUndoableEdit;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Layer;
+import pixelitor.layers.LayerMask;
 
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
 import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
@@ -59,8 +60,11 @@ public class Flip extends CompAction {
             Layer layer = comp.getLayer(i);
             if (layer instanceof ContentLayer) {
                 ContentLayer contentLayer = (ContentLayer) layer;
-
                 contentLayer.flip(direction);
+            }
+            if (layer.hasMask()) {
+                LayerMask mask = layer.getMask();
+                mask.flip(direction);
             }
         }
 

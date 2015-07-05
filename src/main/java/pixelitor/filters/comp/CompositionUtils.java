@@ -117,6 +117,9 @@ public final class CompositionUtils {
         for (int i = 0; i < nrLayers; i++) {
             Layer layer = comp.getLayer(i);
             layer.resize(targetWidth, targetHeight, progressiveBilinear);
+            if (layer.hasMask()) {
+                layer.getMask().resize(targetWidth, targetHeight, progressiveBilinear);
+            }
         }
 
         comp.getCanvas().updateSize(targetWidth, targetHeight);

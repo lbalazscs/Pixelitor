@@ -211,9 +211,9 @@ public class OpenRaster {
             float opacity = Utils.parseFloat(layerOpacity, 1.0f);
             layer.setOpacity(opacity, false, AddToHistory.NO, false);
             int translationX = Utils.parseInt(layerX, 0);
-            layer.setTranslationX(translationX);
             int translationY = Utils.parseInt(layerY, 0);
-            layer.setTranslationY(translationY);
+            // TODO assuming that there is no layer mask
+            layer.setTranslation(translationX, translationY);
 
             if(DEBUG) {
                 System.out.println(String.format("OpenRaster::readOpenRaster: opacity = %.2f, translationX = %d, translationY = %d", opacity, translationX, translationY));

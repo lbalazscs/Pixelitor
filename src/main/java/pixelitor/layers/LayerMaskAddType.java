@@ -21,6 +21,8 @@ import pixelitor.selection.Selection;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Paint;
+import java.awt.RadialGradientPaint;
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
 
@@ -46,6 +48,23 @@ public enum LayerMaskAddType {
         @Override
         BufferedImage getBWImage(int width, int height, Selection selection) {
             return createFullImage(width, height, Color.WHITE, Color.BLACK, selection.getShape());
+        }
+    }, PATTERN ("Pattern", false) { // only for debugging
+        @Override
+        BufferedImage getBWImage(int width, int height, Selection selection) {
+            BufferedImage bi = createFullImage(width, height, Color.WHITE, null, null);
+            Graphics2D g = bi.createGraphics();
+            float cx = width / 2.0f;
+            float cy = height / 2.0f;
+            float radius = Math.min(cx, cy);
+            float[] fractions = {0.5f, 1.0f};
+            Paint gradient = new RadialGradientPaint(cx, cy, radius, fractions, new Color[]{
+                    Color.WHITE, Color.BLACK
+            });
+            g.setPaint(gradient);
+            g.fillRect(0, 0, width, height);
+            g.dispose();
+            return bi;
         }
     };
 

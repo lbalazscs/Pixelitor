@@ -60,12 +60,12 @@ public class AdjustmentLayer extends Layer implements ImageAdjustmentEffect {
 
     @Override
     public void resize(int targetWidth, int targetHeight, boolean progressiveBilinear) {
-        resizeMask(targetWidth, targetHeight, progressiveBilinear);
+        // do nothing
     }
 
     @Override
     public void crop(Rectangle selectionBounds) {
-        cropMask(selectionBounds);
+        // do nothing
     }
 
     @Override

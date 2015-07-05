@@ -54,6 +54,9 @@ public class Rotate extends CompAction {
                 ContentLayer contentLayer = (ContentLayer) layer;
                 contentLayer.rotate(angleDegree);
             }
+            if (layer.hasMask()) {
+                layer.getMask().rotate(angleDegree);
+            }
         }
 
         if (!comp.hasSelection()) {

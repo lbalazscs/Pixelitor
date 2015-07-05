@@ -50,11 +50,8 @@ public class TranslatedTextPainter extends TextPainter {
         return getFont();
     }
 
-    public void setTranslationX(int translationX) {
+    public void setTranslation(int translationX, int translationY) {
         this.translationX = translationX;
-    }
-
-    public void setTranslationY(int translationY) {
         this.translationY = translationY;
     }
 

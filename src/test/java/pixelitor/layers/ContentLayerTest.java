@@ -21,7 +21,6 @@ import org.junit.Before;
 import org.junit.Test;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
-import pixelitor.history.AddToHistory;
 import pixelitor.history.ContentLayerMoveEdit;
 
 import java.awt.Graphics2D;
@@ -63,7 +62,7 @@ public class ContentLayerTest {
         assertEquals(3, layer.getTranslationX());
         assertEquals(3, layer.getTranslationY());
 
-        layer.endMovement(AddToHistory.YES);
+        layer.endMovement();
 
         // the layer was enlarged in endMovement, and the translation reset to 0, 0
         assertEquals(0, layer.getTranslationX());
@@ -75,7 +74,7 @@ public class ContentLayerTest {
         assertEquals(-1, layer.getTranslationX());
         assertEquals(-2, layer.getTranslationY());
 
-        layer.endMovement(AddToHistory.YES);
+        layer.endMovement();
 
         // this time the layer was not enlarged
         assertEquals(-1, layer.getTranslationX());

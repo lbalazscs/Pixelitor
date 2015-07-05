@@ -19,9 +19,9 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.filters.comp.Flip;
-import pixelitor.history.AddToHistory;
+import pixelitor.history.CompoundEdit;
 import pixelitor.history.ContentLayerMoveEdit;
-import pixelitor.history.History;
+import pixelitor.history.PixelitorEdit;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -58,20 +58,17 @@ public abstract class ContentLayer extends Layer {
     public void startMovement() {
         tmpTranslationX = 0;
         tmpTranslationY = 0;
-        if (hasMask() && mask.isLinked()) {
-            mask.startMovement();
-        }
+        super.startMovement();
     }
 
     public void moveWhileDragging(int x, int y) {
         tmpTranslationX = x;
         tmpTranslationY = y;
-        if (hasMask() && mask.isLinked()) {
-            mask.moveWhileDragging(x, y);
-        }
+        super.moveWhileDragging(x, y);
     }
 
-    public void endMovement(AddToHistory addToHistory) {
+    public PixelitorEdit endMovement() {
+
         int oldTranslationX = translationX;
         int oldTranslationY = translationY;
 
@@ -82,38 +79,26 @@ public abstract class ContentLayer extends Layer {
         tmpTranslationX = 0;
         tmpTranslationY = 0;
 
-        if (hasMask() && mask.isLinked()) {
-            mask.endMovement(AddToHistory.NO);
-        }
+        PixelitorEdit linkedEdit = super.endMovement();
 
-        if (addToHistory == AddToHistory.YES) {
-            ContentLayerMoveEdit edit = createMovementEdit(oldTranslationX, oldTranslationY);
-            History.addEdit(edit);
+        ContentLayerMoveEdit ownEdit = createMovementEdit(oldTranslationX, oldTranslationY);
+        if (linkedEdit == null) {
+            return ownEdit;
+        } else {
+            return new CompoundEdit(comp, ContentLayerMoveEdit.NAME, ownEdit, linkedEdit);
         }
     }
 
     abstract ContentLayerMoveEdit createMovementEdit(int oldTranslationX, int oldTranslationY);
 
     /**
-     * setTranslationX and setTranslationY programmatically set the translation
-     * There is no check for layer enlargement
+     * Programmatically set the translation.
+     * There is no check for layer enlargement.
+     * Also the linked layer is NOT translated.
      */
-    public void setTranslationX(int x) {
+    public void setTranslation(int x, int y) {
         this.translationX = x;
-        if (hasMask() && mask.isLinked()) {
-            mask.setTranslationX(x);
-        }
-    }
-
-    /**
-     * setTranslationX and setTranslationY programmatically set the translation
-     * There is no check for layer enlargement
-     */
-    public void setTranslationY(int y) {
         this.translationY = y;
-        if (hasMask() && mask.isLinked()) {
-            mask.setTranslationY(y);
-        }
     }
 
     public abstract void flip(Flip.Direction direction);

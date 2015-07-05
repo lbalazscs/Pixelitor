@@ -111,8 +111,15 @@ public class LayerMask extends ImageLayer {
         }
     }
 
-    public LayerMask duplicate(Layer duplicatedLayer) {
-        LayerMask d = new LayerMask(comp, ImageUtils.copyImage(image), duplicatedLayer);
+    public LayerMask duplicate(Layer original) {
+        LayerMask d = new LayerMask(comp, ImageUtils.copyImage(image), original);
+        if (original instanceof ContentLayer) {
+            ContentLayer originalContent = (ContentLayer) original;
+            int otx = originalContent.getTranslationX();
+            int oty = originalContent.getTranslationY();
+            d.setTranslation(otx, oty);
+        }
+
         return d;
     }
 

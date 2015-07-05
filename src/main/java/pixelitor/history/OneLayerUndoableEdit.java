@@ -160,8 +160,8 @@ public class OneLayerUndoableEdit extends PixelitorEdit {
         comp.getActiveImageLayerOrMask().changeImageUndoRedo(backupImage);
 
         if (!comp.hasSelection()) {
-            layer.setTranslationX(backupTranslationX);
-            layer.setTranslationY(backupTranslationY);
+            // TODO think about the translation of the mask
+            layer.setTranslation(backupTranslationX, backupTranslationY);
             comp.getCanvas().updateSize(backupCanvasWidth, backupCanvasHeight);
         }
 

@@ -152,12 +152,11 @@ public class ImageLayer extends ContentLayer {
         int pastedWidth = pastedImage.getWidth();
         int pastedHeight = pastedImage.getHeight();
 
-        boolean createNewImage = pastedWidth < width || pastedHeight < height;
-        boolean addXTranslation = pastedWidth > width;
-        boolean addYTranslation = pastedHeight > height;
+        boolean pastedImageTooSmall = pastedWidth < width || pastedHeight < height;
 
         BufferedImage newImage = pastedImage;
-        if(createNewImage) { // if the pasted image is too small, a new image is created
+        if(pastedImageTooSmall) {
+            // a new image is created
             int newWidth = Math.max(width, pastedWidth);
             int newHeight = Math.max(height, pastedHeight);
             newImage = createEmptyImageForLayer(newWidth, newHeight);
@@ -170,19 +169,19 @@ public class ImageLayer extends ContentLayer {
             g.dispose();
         }
 
-        // TODO called with the ignoreSelection=true, because otherwise setImage assumes that there is already
-        // a bufferedImage for this layer
-        // the right thing to do would be respecting the selection
         setImage(newImage);
 
+        boolean addXTranslation = pastedWidth > width;
+        boolean addYTranslation = pastedHeight > height;
+        int newXTrans = 0;
+        int newYTrans = 0;
         if(addXTranslation) {
-            int newXTrans = -(pastedWidth - width) / 2;
-            setTranslationX(newXTrans);
+            newXTrans = -(pastedWidth - width) / 2;
         }
         if(addYTranslation) {
-            int newYTrans = -(pastedHeight - height) / 2;
-            setTranslationY(newYTrans);
+            newYTrans = -(pastedHeight - height) / 2;
         }
+        setTranslation(newXTrans, newYTrans);
 
         checkConstructorPostConditions();
     }
@@ -203,8 +202,7 @@ public class ImageLayer extends ContentLayer {
         BufferedImage imageCopy = ImageUtils.copyImage(image);
         ImageLayer d = new ImageLayer(comp, imageCopy, getDuplicateLayerName(), null);
         d.setOpacity(opacity, false, AddToHistory.NO, true);
-        d.setTranslationX(translationX);
-        d.setTranslationY(translationY);
+        d.setTranslation(translationX, translationY);
         d.setBlendingMode(blendingMode, false, AddToHistory.NO, true);
 
         if (hasMask()) {
@@ -582,8 +580,7 @@ public class ImageLayer extends ContentLayer {
         g2.dispose();
 
         if(!comp.hasSelection()) {
-            setTranslationX(-newTranslationXAbs);
-            setTranslationY(-newTranslationYAbs);
+            setTranslation(-newTranslationXAbs, -newTranslationYAbs);
         }
 
         setImageWithSelection(dest);
@@ -650,8 +647,7 @@ public class ImageLayer extends ContentLayer {
         g2.dispose();
 
         if(!comp.hasSelection()) {
-            setTranslationX(-newTranslationXAbs);
-            setTranslationY(-newTranslationYAbs);
+            setTranslation(-newTranslationXAbs, -newTranslationYAbs);
         }
         setImageWithSelection(dest);
     }
@@ -798,8 +794,7 @@ public class ImageLayer extends ContentLayer {
             setImage(newImage);
             tmp.flush();
 
-            setTranslationX(0);
-            setTranslationY(0);
+            setTranslation(0, 0);
         }
     }
 
@@ -829,23 +824,17 @@ public class ImageLayer extends ContentLayer {
         image = newImage;
         imageRefChanged();
 
-        setTranslationX(newTranslationX);
-        setTranslationY(newTranslationY);
+        setTranslation(newTranslationX, newTranslationY);
     }
 
     @Override
     ContentLayerMoveEdit createMovementEdit(int oldTranslationX, int oldTranslationY) {
         ContentLayerMoveEdit edit;
         boolean needsEnlarging = checkImageDoesNotCoverCanvas();
-        boolean moveMask = hasMask() && mask.isLinked();
         if(needsEnlarging) {
-            BufferedImage oldMask = null;
-            if (moveMask) {
-                oldMask = mask.getImage();
-            }
-            edit = new ContentLayerMoveEdit(this, getImage(), oldMask, oldTranslationX, oldTranslationY);
+            edit = new ContentLayerMoveEdit(this, getImage(), oldTranslationX, oldTranslationY);
         } else {
-            edit = new ContentLayerMoveEdit(this, null, null, oldTranslationX, oldTranslationY);
+            edit = new ContentLayerMoveEdit(this, null, oldTranslationX, oldTranslationY);
         }
 
         if(needsEnlarging) {
@@ -857,8 +846,6 @@ public class ImageLayer extends ContentLayer {
 
     @Override
     public void resize(int targetWidth, int targetHeight, boolean progressiveBilinear) {
-        resizeMask(targetWidth, targetHeight, progressiveBilinear);
-
         Rectangle canvasBounds = comp.getCanvasBounds();
 
         BufferedImage img = getImage();
@@ -883,15 +870,15 @@ public class ImageLayer extends ContentLayer {
         setImage(resizedImg);
 
         if(bigLayer) {
-            setTranslationX((int) (getTranslationX() * horizontalResizeRatio));
-            setTranslationY((int) (getTranslationY() * verticalResizeRatio));
+            setTranslation(
+                    (int) (getTranslationX() * horizontalResizeRatio),
+                    (int) (getTranslationY() * verticalResizeRatio)
+            );
         }
     }
 
     @Override
     public void crop(Rectangle selectionBounds) {
-        cropMask(selectionBounds);
-
         int cropWidth = selectionBounds.width;
         int cropHeight = selectionBounds.height;
 
@@ -906,8 +893,7 @@ public class ImageLayer extends ContentLayer {
 
         BufferedImage dest = ImageUtils.crop(img, cropX, cropY, cropWidth, cropHeight);
         setImage(dest);
-        setTranslationX(0);
-        setTranslationY(0);
+        setTranslation(0, 0);
     }
 
     private void checkConstructorPostConditions() {
