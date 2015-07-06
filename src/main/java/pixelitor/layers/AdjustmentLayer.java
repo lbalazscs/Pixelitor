@@ -26,7 +26,7 @@ import java.awt.image.BufferedImage;
 /**
  * A global adjustment to all the layers that are bellow this layer
  */
-public class AdjustmentLayer extends Layer implements ImageAdjustmentEffect {
+public class AdjustmentLayer extends Layer {
     private static final long serialVersionUID = 2L;
 
     private final Filter filter;
@@ -34,6 +34,7 @@ public class AdjustmentLayer extends Layer implements ImageAdjustmentEffect {
     public AdjustmentLayer(Composition comp, String name, Filter filter) {
         super(comp, name, null);
         this.filter = filter;
+        isAdjustment = true;
     }
 
     @Override
@@ -49,16 +50,6 @@ public class AdjustmentLayer extends Layer implements ImageAdjustmentEffect {
     }
 
     @Override
-    public void mergeDownOn(ImageLayer bellow) {
-        // TODO
-    }
-
-    @Override
-    public BufferedImage paintLayer(Graphics2D g, boolean firstVisibleLayer, BufferedImage imageSoFar) {
-        return adjustImageWithMasksAndBlending(imageSoFar, firstVisibleLayer);
-    }
-
-    @Override
     public void resize(int targetWidth, int targetHeight, boolean progressiveBilinear) {
         // do nothing
     }
@@ -71,5 +62,10 @@ public class AdjustmentLayer extends Layer implements ImageAdjustmentEffect {
     @Override
     public BufferedImage adjustImage(BufferedImage src) {
         return filter.executeForOneLayer(src);
+    }
+
+    @Override
+    public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
+        throw new UnsupportedOperationException();
     }
 }

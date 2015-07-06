@@ -21,9 +21,11 @@ import pixelitor.filters.Filter;
 import pixelitor.filters.FilterUtils;
 import pixelitor.filters.RepeatLast;
 import pixelitor.history.AddToHistory;
+import pixelitor.history.CompoundEdit;
 import pixelitor.history.DeleteLayerEdit;
 import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;
+import pixelitor.history.ImageEdit;
 import pixelitor.history.LayerOrderChangeEdit;
 import pixelitor.history.LayerSelectionChangeEdit;
 import pixelitor.history.NewLayerEdit;
@@ -362,10 +364,19 @@ public class Composition implements Serializable {
             if (bellow instanceof ImageLayer) {
                 ImageLayer imageLayerBellow = (ImageLayer) bellow;
                 if (imageLayerBellow.isVisible()) {
+                    // TODO for adjustment effects it is not necessary to copy
+                    BufferedImage backupImage = ImageUtils.copyImage(imageLayerBellow.getImage());
+
                     activeLayer.mergeDownOn(imageLayerBellow);
+                    Layer mergedLayer = activeLayer;
                     removeActiveLayer();
 
-                    History.addEdit(new NotUndoableEdit(this, "Merge Down"));
+                    PixelitorEdit edit = new CompoundEdit(this, "Merge Down",
+                            new ImageEdit("", this, imageLayerBellow, backupImage, false),
+                            new DeleteLayerEdit(this, mergedLayer, activeIndex)
+                    );
+
+                    History.addEdit(edit);
                 }
             }
         }
@@ -458,7 +469,7 @@ public class Composition implements Serializable {
         boolean firstVisibleLayer = true;
         for (Layer layer : layerList) {
             if (layer.isVisible()) {
-                BufferedImage result = layer.paintLayer(g, firstVisibleLayer, imageSoFar);
+                BufferedImage result = layer.applyLayer(g, firstVisibleLayer, imageSoFar);
                 if (result != null) { // this was an adjustment layer
                     imageSoFar = result;
                     if (g != null) {

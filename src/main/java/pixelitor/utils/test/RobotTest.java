@@ -48,7 +48,6 @@ import pixelitor.layers.BlendingMode;
 import pixelitor.layers.DeleteActiveLayerAction;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
-import pixelitor.layers.ShapeLayer;
 import pixelitor.layers.TextLayer;
 import pixelitor.menus.SelectionActions;
 import pixelitor.menus.edit.CopyAction;
@@ -78,12 +77,10 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Point;
 import java.awt.Robot;
-import java.awt.Shape;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
@@ -786,7 +783,7 @@ public class RobotTest {
     }
 
     private static void randomSpecialLayer() {
-        int r = rand.nextInt(3);
+        int r = rand.nextInt(2);
         Composition comp = ImageComponents.getActiveComp().get();
         Layer newLayer = null;
 
@@ -798,11 +795,6 @@ public class RobotTest {
             // TODO
             newLayer = new TextLayer(comp);
         } else if (r == 1) {
-            logRobotEvent("random shape layer");
-            String layerName = "shape layer";
-            Shape shape = new RoundRectangle2D.Float(10, 10, 100, 100, 20, 20);
-            newLayer = new ShapeLayer(comp, layerName, shape);
-        } else if (r == 2) {
             logRobotEvent("random adjustment layer");
             newLayer = new AdjustmentLayer(comp, "invert adjustment", new Invert());
         }

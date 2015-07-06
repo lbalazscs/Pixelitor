@@ -114,10 +114,10 @@ public class ContentLayerTest {
         Graphics2D g2 = TestHelper.createGraphics();
         BufferedImage image = TestHelper.createTestImage();
 
-        BufferedImage resultImage = layer.paintLayer(g2, true, image);
+        BufferedImage resultImage = layer.applyLayer(g2, true, image);
         assertNull(resultImage); // content layers return null
 
-        resultImage = layer.paintLayer(g2, false, image);
+        resultImage = layer.applyLayer(g2, false, image);
         assertNull(resultImage); // content layers return null
     }
 
@@ -128,24 +128,6 @@ public class ContentLayerTest {
         layer.paintLayerOnGraphics(g2, true);
         layer.paintLayerOnGraphics(g2, false);
     }
-
-    @Test(expected = NullPointerException.class)
-    public void testGetMaskedImage_Fail() {
-        BufferedImage maskedImage = layer.getMaskedImage(true);
-        assertNotNull(maskedImage);
-    }
-
-    @Test
-    public void testGetMaskedImage_OK() {
-        // setup a layer mask
-        layer.addMask(LayerMaskAddType.REVEAL_ALL);
-
-        BufferedImage maskedImage = layer.getMaskedImage(true);
-        assertNotNull(maskedImage);
-        maskedImage = layer.getMaskedImage(false);
-        assertNotNull(maskedImage);
-    }
-
 
     @Test
     public void testSetupDrawingComposite() {

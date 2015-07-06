@@ -20,6 +20,7 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
 import pixelitor.PixelitorWindow;
+import pixelitor.filters.comp.Flip;
 import pixelitor.filters.painters.TextAdjustmentsPanel;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.filters.painters.TranslatedTextPainter;
@@ -34,45 +35,38 @@ import pixelitor.utils.OKCancelDialog;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.font.FontRenderContext;
-import java.awt.font.TextLayout;
 import java.awt.image.BufferedImage;
 import java.util.Optional;
 
 /**
  * A text layer
  */
-public class TextLayer extends ShapeLayer implements ImageAdjustmentEffect {
+public class TextLayer extends ContentLayer {
     private static final long serialVersionUID = 2L;
     private final TranslatedTextPainter painter;
     private TextSettings settings;
 
     public TextLayer(Composition comp) {
-        super(comp, "");
+        super(comp, "", null);
 
         painter = new TranslatedTextPainter();
     }
 
     @Override
     public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
-        setupDrawingComposite(g, firstVisibleLayer);
-
         painter.setFillPaint(settings.getColor());
         painter.paint(g, null, comp.getCanvasWidth(), comp.getCanvasHeight());
     }
 
     @Override
-    public BufferedImage paintLayer(Graphics2D g, boolean firstVisibleLayer, BufferedImage imageSoFar) {
+    public BufferedImage applyLayer(Graphics2D g, boolean firstVisibleLayer, BufferedImage imageSoFar) {
         if (settings == null) {
             // the layer was just created, nothing to paint yet
             return imageSoFar;
-        } else if (settings.isWatermark()) {
-            return adjustImageWithMasksAndBlending(imageSoFar, firstVisibleLayer);
         }
 
         // normal case: the text will be painted in paintLayerOnGraphics
-        return super.paintLayer(g, firstVisibleLayer, imageSoFar);
+        return super.applyLayer(g, firstVisibleLayer, imageSoFar);
     }
 
     @Override
@@ -84,16 +78,9 @@ public class TextLayer extends ShapeLayer implements ImageAdjustmentEffect {
     public BufferedImage createRasterizedImage() {
         BufferedImage img = ImageUtils.createCompatibleImage(canvas.getWidth(), canvas.getHeight());
         Graphics2D g = img.createGraphics();
-        paintLayer(g, true, img);
+        applyLayer(g, true, img);
         g.dispose();
         return img;
-    }
-
-    @Override
-    public Shape getShape(Graphics2D g) {
-        FontRenderContext frc = g.getFontRenderContext();
-        TextLayout textLayout = new TextLayout(settings.getText(), settings.getFont(), frc);
-        return textLayout.getOutline(null);
     }
 
     @Override
@@ -114,22 +101,6 @@ public class TextLayer extends ShapeLayer implements ImageAdjustmentEffect {
         }
 
         return d;
-    }
-
-    @Override
-    public void crop(Rectangle selectionBounds) {
-        super.crop(selectionBounds);
-
-//        Rectangle textBounds = painter.getTextBounds();
-//        int currentX = textBounds.x;
-//        int currentY = textBounds.y;
-//        int newX = currentX - selectionBounds.x;
-//        int newY = currentY - selectionBounds.y;
-
-        // TODO this still doesn't work probably because
-        // the alignment has not been taken into account
-//        setTranslationX(getTranslationX() - selectionBounds.x);
-//        setTranslationY(getTranslationY() - selectionBounds.y);
     }
 
     @Override
@@ -249,4 +220,37 @@ public class TextLayer extends ShapeLayer implements ImageAdjustmentEffect {
         History.addEdit(edit);
     }
 
+    @Override
+    public void enlargeCanvas(int north, int east, int south, int west) {
+        // TODO
+    }
+
+    @Override
+    public void flip(Flip.Direction direction) {
+        // TODO
+    }
+
+    @Override
+    public void rotate(int angleDegree) {
+        // TODO
+    }
+
+    @Override
+    public void resize(int targetWidth, int targetHeight, boolean progressiveBilinear) {
+        // TODO
+    }
+
+    @Override
+    public void crop(Rectangle selectionBounds) {
+//        Rectangle textBounds = painter.getTextBounds();
+//        int currentX = textBounds.x;
+//        int currentY = textBounds.y;
+//        int newX = currentX - selectionBounds.x;
+//        int newY = currentY - selectionBounds.y;
+
+        // TODO this still doesn't work probably because
+        // the alignment has not been taken into account
+//        setTranslationX(getTranslationX() - selectionBounds.x);
+//        setTranslationY(getTranslationY() - selectionBounds.y);
+    }
 }

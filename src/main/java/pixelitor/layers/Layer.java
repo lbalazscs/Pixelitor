@@ -45,7 +45,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 
+import static java.awt.AlphaComposite.DstIn;
 import static java.awt.AlphaComposite.SRC_OVER;
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 
 /**
@@ -62,6 +64,7 @@ public abstract class Layer implements Serializable {
     protected LayerMask mask;
 
     private transient LayerButton layerButton;
+    protected transient boolean isAdjustment = false;
 
     float opacity = 1.0f;
     BlendingMode blendingMode = BlendingMode.NORMAL;
@@ -222,7 +225,17 @@ public abstract class Layer implements Serializable {
         return comp;
     }
 
-    public abstract void mergeDownOn(ImageLayer bellow);
+    public void mergeDownOn(ImageLayer bellow) {
+        // TODO what about translations of the bellow layer
+
+        BufferedImage bellowImage = bellow.getImage();
+        Graphics2D g = bellowImage.createGraphics();
+        BufferedImage result = applyLayer(g, false, bellowImage);
+        if(result != null) {  // this was an adjustment
+            bellow.setImage(result);
+        }
+        g.dispose();
+    }
 
     public void makeActive(AddToHistory addToHistory) {
         comp.setActiveLayer(this, addToHistory);
@@ -316,12 +329,79 @@ public abstract class Layer implements Serializable {
     }
 
     /**
-     * A layer can choose to draw on the Graphics2D or change the given BufferedImage.
+     * Applies the effect of this layer on the given Graphics2D or on the given BufferedImage.
+     * Adjustment layers and watermarked text layers change a BufferedImage, while other layers
+     * just paint on the graphics.
      * If the BufferedImage is changed, the method returns the new image and null otherwise.
-     * The reason is that adjustment layers and watermarked text layers change a BufferedImage,
-     * while other layers just paint on the graphics
      */
-    public abstract BufferedImage paintLayer(Graphics2D g, boolean firstVisibleLayer, BufferedImage imageSoFar);
+    public BufferedImage applyLayer(Graphics2D g, boolean firstVisibleLayer, BufferedImage imageSoFar) {
+        if (isAdjustment) { // adjustment layer or watermarked text layers
+            return adjustImageWithMasksAndBlending(imageSoFar, firstVisibleLayer);
+        } else {
+            if (mask == null) {
+                setupDrawingComposite(g, firstVisibleLayer);
+                paintLayerOnGraphics(g, firstVisibleLayer);
+            } else {
+                paintLayerOnGraphicsWithMask(firstVisibleLayer, g);
+            }
+        }
+        return null;
+    }
+
+    // used by the non-adjustment stuff
+    // This method assumes that the composite of the graphics is already
+    // set up according to the transparency and blending mode
+    public abstract void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer);
+
+    /**
+     * Returns the masked image for the non-adjustment case.
+     * The returned image is canvas-sized, and the masks and the
+     * translations are taken into account
+     */
+    void paintLayerOnGraphicsWithMask(boolean firstVisibleLayer, Graphics2D g) {
+//        Canvas canvas = comp.getCanvas();
+
+        // 1. create the masked image
+        // TODO the masked image should be cached
+        BufferedImage maskedImage = new BufferedImage(canvas.getWidth(), canvas.getHeight(), TYPE_INT_ARGB);
+        Graphics2D mig = maskedImage.createGraphics();
+        paintLayerOnGraphics(mig, firstVisibleLayer);
+        mig.setComposite(DstIn);
+        mig.drawImage(mask.getTransparencyImage(), mask.getTranslationX(), mask.getTranslationY(), null);
+        mig.dispose();
+
+        // 2. paint the masked image onto the graphics
+//            g.drawImage(maskedImage, getTranslationX(), getTranslationY(), null);
+        setupDrawingComposite(g, firstVisibleLayer);
+        g.drawImage(maskedImage, 0, 0, null);
+    }
+
+    /**
+     * Used by adjustment layers and watermarked text layers
+     */
+    protected BufferedImage adjustImageWithMasksAndBlending(BufferedImage imgSoFar, boolean isFirstVisibleLayer) {
+        if (isFirstVisibleLayer) {
+            return imgSoFar; // there's nothing we can do
+        }
+        BufferedImage transformed = adjustImage(imgSoFar);
+        if (mask != null) {
+            mask.applyToImage(transformed);
+        }
+        if (mask == null && isNormalAndOpaque()) {
+            return transformed;
+        } else {
+            Graphics2D g = imgSoFar.createGraphics();
+            setupDrawingComposite(g, isFirstVisibleLayer);
+            g.drawImage(transformed, 0, 0, null);
+            g.dispose();
+            return imgSoFar;
+        }
+    }
+
+    /**
+     * Used by adjustment layers and watermarked text layers
+     */
+    protected abstract BufferedImage adjustImage(BufferedImage src);
 
     public abstract void resize(int targetWidth, int targetHeight, boolean progressiveBilinear);
 
@@ -362,7 +442,7 @@ public abstract class Layer implements Serializable {
     }
 
     /**
-     * Configures tha composite of the given Graphics,
+     * Configures the composite of the given Graphics,
      * according to the blending mode and opacity of the layer
      */
     public void setupDrawingComposite(Graphics2D g, boolean isFirstVisibleLayer) {

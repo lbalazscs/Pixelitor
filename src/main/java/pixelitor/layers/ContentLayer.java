@@ -23,12 +23,6 @@ import pixelitor.history.CompoundEdit;
 import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.PixelitorEdit;
 
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-
-import static java.awt.AlphaComposite.DstIn;
-import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
-
 /**
  * A layer with a content (text or image layer) that
  * can be moved/rotated.
@@ -106,58 +100,4 @@ public abstract class ContentLayer extends Layer {
     public abstract void rotate(int angleDegree);
 
     public abstract void enlargeCanvas(int north, int east, int south, int west);
-
-    @Override
-    public BufferedImage paintLayer(Graphics2D g, boolean firstVisibleLayer, BufferedImage imageSoFar) {
-        if (mask == null) {
-            paintLayerOnGraphics(g, firstVisibleLayer);
-        } else {
-            BufferedImage maskedImage = getMaskedImage(firstVisibleLayer);
-
-//            g.drawImage(maskedImage, getTranslationX(), getTranslationY(), null);
-            g.drawImage(maskedImage, 0, 0, null);
-        }
-
-        // Content layers only use the Graphics2D
-        // TODO not true, TextLayer overrides this with correct behavior,
-        // but then why this method?
-        return null;
-    }
-
-    /**
-     * Returns an image that is canvas-sized, and the masks and the translations are taken into account
-     * TODO Can be overridden if the masked image is cached
-     */
-    BufferedImage getMaskedImage(boolean firstVisibleLayer) {
-//        Canvas canvas = comp.getCanvas();
-
-        BufferedImage maskedImage = new BufferedImage(canvas.getWidth(), canvas.getHeight(), TYPE_INT_ARGB);
-        Graphics2D mig = maskedImage.createGraphics();
-        paintLayerOnGraphics(mig, firstVisibleLayer);
-        mig.setComposite(DstIn);
-        mig.drawImage(mask.getTransparencyImage(), mask.getTranslationX(), mask.getTranslationY(), null);
-        mig.dispose();
-        return maskedImage;
-    }
-
-    public abstract void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer);
-
-    @Override
-    public void mergeDownOn(ImageLayer bellowImageLayer) {
-
-//        int aX = getTranslationX();
-//        int aY = getTranslationY();
-        BufferedImage bellowImage = bellowImageLayer.getImage();
-//        int bX = bellowImageLayer.getTranslationX();
-//        int bY = bellowImageLayer.getTranslationY();
-
-        Graphics2D g = bellowImage.createGraphics();
-//        int x = aX - bX;
-//        int y = aY - bY;
-
-        // TODO use x,y
-        paintLayerOnGraphics(g, false);
-
-        g.dispose();
-    }
 }

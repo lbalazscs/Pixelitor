@@ -903,8 +903,6 @@ public class ImageLayer extends ContentLayer {
 
     @Override
     public void paintLayerOnGraphics(Graphics2D g, boolean isFirstVisibleLayer) {
-        setupDrawingComposite(g, isFirstVisibleLayer);
-
         BufferedImage visibleImage = getVisibleImage();
 
         if(tmpDrawingLayer == null) {
@@ -1042,4 +1040,8 @@ public class ImageLayer extends ContentLayer {
         updateIconImage();
     }
 
+    @Override
+    public BufferedImage adjustImage(BufferedImage src) {
+        throw new UnsupportedOperationException();
+    }
 }
