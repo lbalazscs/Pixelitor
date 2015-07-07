@@ -75,6 +75,8 @@ public class AppLogic {
             listener.activeLayerChanged(newActiveLayer);
         }
 
+        // if the new active layer has no layer mask, then
+        // disable all mask-editing modes
         if (!newActiveLayer.hasMask()) {
             Composition comp = newActiveLayer.getComp();
             if (comp.hasRealIC()) {

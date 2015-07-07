@@ -25,6 +25,7 @@ import pixelitor.history.AddToHistory;
 import pixelitor.history.CompoundEdit;
 import pixelitor.history.DeleteLayerMaskEdit;
 import pixelitor.history.DeselectEdit;
+import pixelitor.history.EnableLayerMaskEdit;
 import pixelitor.history.History;
 import pixelitor.history.LayerBlendingEdit;
 import pixelitor.history.LayerOpacityEdit;
@@ -63,6 +64,7 @@ public abstract class Layer implements Serializable {
     private boolean visible = true;
     final Composition comp;
     protected LayerMask mask;
+    private boolean maskEnabled = true;
 
     private transient LayerButton layerButton;
     protected transient boolean isAdjustment = false;
@@ -252,7 +254,7 @@ public abstract class Layer implements Serializable {
 
             if (mask != null) {
                 mask.setLayerButton(layerButton);
-                layerButton.addMaskIcon();
+                layerButton.addMaskIconLabel();
                 mask.updateIconImage();
             }
         }
@@ -279,15 +281,15 @@ public abstract class Layer implements Serializable {
             return;
         }
 
-        // needs to be added first, because the inherited layer
-        // mask constructor already will try to update the image
-        layerButton.addMaskIcon();
-
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
 
         BufferedImage bwMask = addType.getBWImage(canvasWidth, canvasHeight, selection);
         mask = new LayerMask(comp, bwMask, this);
+
+        // needs to be added first, because the inherited layer
+        // mask constructor already will try to update the image
+        layerButton.addMaskIconLabel();
 
         comp.imageChanged(FULL);
 
@@ -308,7 +310,7 @@ public abstract class Layer implements Serializable {
     public void addMaskBack(LayerMask mask) {
         this.mask = mask;
         comp.imageChanged(FULL);
-        layerButton.addMaskIcon();
+        layerButton.addMaskIconLabel();
         AppLogic.maskChanged(this);
         mask.updateIconImage();
     }
@@ -326,7 +328,7 @@ public abstract class Layer implements Serializable {
         }
 
         AppLogic.maskChanged(this);
-        layerButton.deleteMaskIcon();
+        layerButton.deleteMaskIconLabel();
 
         if (switchActiveToNormalView) {
             if (isActive()) {
@@ -346,7 +348,7 @@ public abstract class Layer implements Serializable {
         if (isAdjustment) { // adjustment layer or watermarked text layers
             return adjustImageWithMasksAndBlending(imageSoFar, firstVisibleLayer);
         } else {
-            if (mask == null) {
+            if (!useMask()) {
                 setupDrawingComposite(g, firstVisibleLayer);
                 paintLayerOnGraphics(g, firstVisibleLayer);
             } else {
@@ -392,10 +394,10 @@ public abstract class Layer implements Serializable {
             return imgSoFar; // there's nothing we can do
         }
         BufferedImage transformed = adjustImage(imgSoFar);
-        if (mask != null) {
+        if (useMask()) {
             mask.applyToImage(transformed);
         }
-        if (mask == null && isNormalAndOpaque()) {
+        if (!useMask() && isNormalAndOpaque()) {
             return transformed;
         } else {
             Graphics2D g = imgSoFar.createGraphics();
@@ -510,5 +512,25 @@ public abstract class Layer implements Serializable {
             }
         }
         return null;
+    }
+
+    public boolean isMaskEnabled() {
+        return maskEnabled;
+    }
+
+    public void setMaskEnabled(boolean maskEnabled, AddToHistory addToHistory) {
+        assert mask != null;
+        this.maskEnabled = maskEnabled;
+        comp.imageChanged(FULL);
+        mask.updateIconImage();
+
+        if (addToHistory == AddToHistory.YES) {
+            PixelitorEdit edit = new EnableLayerMaskEdit(comp, this);
+            History.addEdit(edit);
+        }
+    }
+
+    public boolean useMask() {
+        return mask != null && maskEnabled;
     }
 }

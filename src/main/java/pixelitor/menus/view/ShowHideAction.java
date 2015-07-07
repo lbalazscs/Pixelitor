@@ -17,13 +17,15 @@
 
 package pixelitor.menus.view;
 
+import pixelitor.menus.NamedAction;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /**
  * An abstract action that either shows or hides something, depending on the current visibility
  */
-public abstract class ShowHideAction extends AbstractAction {
+public abstract class ShowHideAction extends NamedAction {
     private final String showName;
     private final String hideName;
 
@@ -32,18 +34,14 @@ public abstract class ShowHideAction extends AbstractAction {
         this.hideName = hideName;
         //noinspection AbstractMethodCallInConstructor
         if (getVisibilityAtStartUp()) {
-            this.putValue(AbstractAction.NAME, hideName);
+            setName(hideName);
         } else {
-            this.putValue(AbstractAction.NAME, showName);
+            setName(showName);
         }
     }
 
     public String getName() {
         return (String) getValue(AbstractAction.NAME);
-    }
-
-    private void setName(String newName) {
-        this.putValue(AbstractAction.NAME, newName);
     }
 
     @Override

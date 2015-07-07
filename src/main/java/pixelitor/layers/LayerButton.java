@@ -23,8 +23,12 @@ import pixelitor.utils.IconUtils;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 
 /**
@@ -44,7 +48,7 @@ public class LayerButton extends JToggleButton {
     private LayerNameEditor nameEditor;
 
     private final JComponent layerIcon;
-    private JLabel maskIcon;
+    private JLabel maskIconLabel;
 
     /**
      * The Y coordinate in the parent when it is not dragging
@@ -191,11 +195,27 @@ public class LayerButton extends JToggleButton {
             BufferedImage thumb = ImageUtils.createThumbnail(img, LayerButtonLayout.ICON_SIZE);
             Runnable edt = () -> {
                 if (updateMask) {
-                    if (maskIcon == null) {
+                    if (maskIconLabel == null) {
                         return;
                     }
-                    maskIcon.setIcon(new ImageIcon(thumb));
-                    maskIcon.paintImmediately(maskIcon.getBounds());
+                    BufferedImage iconImage = thumb;
+                    if (!layer.isMaskEnabled()) {
+                        int thumbWidth = thumb.getWidth();
+                        int thumbHeight = thumb.getHeight();
+                        // thumb is GRAY image, this one needs colors
+                        // TODO is is faster if thumb is created this way in createThumbnail?
+                        iconImage = ImageUtils.createCompatibleImage(thumbWidth, thumbHeight);
+                        Graphics2D g = iconImage.createGraphics();
+                        g.drawImage(thumb, 0, 0, null);
+                        g.setColor(new Color(200, 0, 0));
+                        g.setStroke(new BasicStroke(2.5f));
+                        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        g.drawLine(0, 0, thumbWidth, thumbHeight);
+                        g.drawLine(thumbWidth - 1, 0, 0, thumbHeight - 1);
+                        g.dispose();
+                    }
+                    maskIconLabel.setIcon(new ImageIcon(iconImage));
+                    maskIconLabel.paintImmediately(maskIconLabel.getBounds());
                 } else {
                     ((JLabel) layerIcon).setIcon(new ImageIcon(thumb));
                     layerIcon.paintImmediately(layerIcon.getBounds());
@@ -206,18 +226,18 @@ public class LayerButton extends JToggleButton {
         new Thread(notEDT).start();
     }
 
-    public void addMaskIcon() {
-        maskIcon = new JLabel();
-        LayerMaskActions.configureWithPopupMenu(maskIcon);
-        configureLayerIcon(maskIcon);
-        add(maskIcon, LayerButtonLayout.ICON);
+    public void addMaskIconLabel() {
+        maskIconLabel = new JLabel();
+        LayerMaskActions.addPopupMenu(maskIconLabel, layer);
+        configureLayerIcon(maskIconLabel);
+        add(maskIconLabel, LayerButtonLayout.ICON);
         revalidate();
     }
 
-    public void deleteMaskIcon() {
-        remove(maskIcon);
+    public void deleteMaskIconLabel() {
+        remove(maskIconLabel);
         revalidate();
-        maskIcon = null;
+        maskIconLabel = null;
     }
 
     @Override

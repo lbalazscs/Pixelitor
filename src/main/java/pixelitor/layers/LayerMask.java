@@ -18,6 +18,10 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
+import pixelitor.history.AddToHistory;
+import pixelitor.history.History;
+import pixelitor.history.LinkLayerMaskEdit;
+import pixelitor.history.PixelitorEdit;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
@@ -127,7 +131,11 @@ public class LayerMask extends ImageLayer {
         return linked;
     }
 
-    public void setLinked(boolean linked) {
+    public void setLinked(boolean linked, AddToHistory addToHistory) {
         this.linked = linked;
+        if (addToHistory == AddToHistory.YES) {
+            PixelitorEdit edit = new LinkLayerMaskEdit(comp, this);
+            History.addEdit(edit);
+        }
     }
 }
