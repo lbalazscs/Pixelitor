@@ -57,7 +57,7 @@ public class ToolTests {
     public static void testTools() {
         NewImage.addNewImage(WHITE, 400, 400, "Tool Tests");
 
-        ImageComponent ic = ImageComponents.getActiveImageComponent();
+        ImageComponent ic = ImageComponents.getActiveIC();
         Composition comp = ic.getComp();
 
         addRadialBWGradientToActiveLayer(comp, true);

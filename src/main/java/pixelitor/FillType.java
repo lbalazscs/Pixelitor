@@ -20,7 +20,7 @@ import pixelitor.tools.FgBgColorSelector;
 
 import java.awt.Color;
 
-import static pixelitor.utils.Utils.TRANSPARENT_COLOR;
+import static pixelitor.utils.ColorUtils.TRANSPARENT_COLOR;
 
 /**
  * A fill color with a string description

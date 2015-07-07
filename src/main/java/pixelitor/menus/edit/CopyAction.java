@@ -17,6 +17,8 @@
 
 package pixelitor.menus.edit;
 
+import pixelitor.Build;
+import pixelitor.ImageComponents;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.debug.BufferedImageNode;
 
@@ -42,6 +44,15 @@ public class CopyAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
+            if(!ImageComponents.isActiveLayerImageLayer()) {
+                // TODO we could try to rasterize text layers
+
+                if(!Build.CURRENT.isRobotTest()) {
+                    Dialogs.showNotImageLayerDialog();
+                }
+                return;
+            }
+
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             BufferedImage activeImage = source.getImage();
             Transferable imageTransferable = new ImageTransferable(activeImage);

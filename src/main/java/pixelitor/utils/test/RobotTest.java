@@ -40,9 +40,11 @@ import pixelitor.filters.comp.Rotate;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ParamSetState;
+import pixelitor.filters.painters.TextSettings;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.layers.AddNewLayerAction;
+import pixelitor.layers.AddNewLayerMaskAction;
 import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.DeleteActiveLayerAction;
@@ -302,7 +304,7 @@ public class RobotTest {
     }
 
     private static void randomOperation() {
-        if (!ImageComponents.getActiveImageComponent().activeIsImageLayer()) {
+        if (!ImageComponents.getActiveIC().activeIsImageLayer()) {
             return;
         }
 
@@ -397,22 +399,28 @@ public class RobotTest {
 //                filterName, randomTime, randomInterpolation.toString()));
 
         // execute everything without showing a modal dialog
-        ImageLayer layer = ImageComponents.getActiveImageLayer().get();
-        layer.tweenCalculatingStarted();
+
+        Layer layer = ImageComponents.getActiveComp().get().getActiveLayer();
+        if (!(layer instanceof ImageLayer)) {
+            return;
+        }
+
+        ImageLayer imageLayer = (ImageLayer) layer;
+        imageLayer.tweenCalculatingStarted();
 
         PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
 
         try {
             Utils.executeFilterWithBusyCursor(filter, ChangeReason.OP_PREVIEW, busyCursorParent);
         } catch (Throwable e) {
-            BufferedImage src = layer.getFilterSourceImage();
+            BufferedImage src = imageLayer.getFilterSourceImage();
             System.out.println(String.format(
                     "RobotTest::randomTweenOperation: name = %s, width = %d, height = %d, params = %s",
                     filterName, src.getWidth(), src.getHeight(), paramSet.toString()));
             throw e;
         }
 
-        layer.tweenCalculatingEnded();
+        imageLayer.tweenCalculatingEnded();
 
         long runCountAfter = Filter.runCount;
         if (runCountAfter != (runCountBefore + 1)) {
@@ -456,8 +464,8 @@ public class RobotTest {
         r.keyRelease(keyEvent);
     }
 
-    private static void randomZoom(Random rand) {
-        ImageComponent ic = ImageComponents.getActiveImageComponent();
+    private static void randomZoom() {
+        ImageComponent ic = ImageComponents.getActiveIC();
         if (ic != null) {
             ZoomLevel randomZoomLevel = null;
 
@@ -475,7 +483,7 @@ public class RobotTest {
     private static void randomZoomOut() {
         logRobotEvent("randomZoomOut");
 
-        ImageComponent ic = ImageComponents.getActiveImageComponent();
+        ImageComponent ic = ImageComponents.getActiveIC();
         if (ic != null) {
             ZoomLevel previous = ic.getZoomLevel().zoomOut();
             ic.setZoom(previous, false);
@@ -782,32 +790,6 @@ public class RobotTest {
 //        throw new IllegalStateException("test");
     }
 
-    private static void randomSpecialLayer() {
-        int r = rand.nextInt(2);
-        Composition comp = ImageComponents.getActiveComp().get();
-        Layer newLayer = null;
-
-        if (r == 0) {
-            logRobotEvent("random text layer");
-            String layerName = "text layer";
-            String layerText = "text layer text";
-
-            // TODO
-            newLayer = new TextLayer(comp);
-        } else if (r == 1) {
-            logRobotEvent("random adjustment layer");
-            newLayer = new AdjustmentLayer(comp, "invert adjustment", new Invert());
-        }
-
-        comp.addLayer(newLayer, AddToHistory.YES, true, false);
-    }
-
-    private static void randomLayerMask() {
-        logRobotEvent("random layer mask");
-
-        // TODO
-//        ImageComponents.getActiveLayer().get().addMask();
-    }
 
     private static void setupWeightedCaller(Robot r) {
         // random move
@@ -843,7 +825,7 @@ public class RobotTest {
 
         weightedCaller.registerCallback(3, () -> randomKey(r));
 
-        weightedCaller.registerCallback(1, () -> randomZoom(rand));
+        weightedCaller.registerCallback(1, RobotTest::randomZoom);
 
         weightedCaller.registerCallback(1, RobotTest::randomZoomOut);
 
@@ -861,7 +843,11 @@ public class RobotTest {
 
         weightedCaller.registerCallback(1, RobotTest::layerOrderChange);
 
-        weightedCaller.registerCallback(3, RobotTest::layerMerge);
+        if (Build.advancedLayersEnabled()) {
+            weightedCaller.registerCallback(20, RobotTest::layerMerge);
+        } else {
+            weightedCaller.registerCallback(3, RobotTest::layerMerge);
+        }
 
         weightedCaller.registerCallback(3, RobotTest::layerAddDelete);
 
@@ -877,13 +863,81 @@ public class RobotTest {
 
         weightedCaller.registerCallback(3, RobotTest::randomTool);
 
+        if (Build.advancedLayersEnabled()) {
+            weightedCaller.registerCallback(7, RobotTest::randomNewTextLayer);
+            weightedCaller.registerCallback(7, RobotTest::randomTextLayerRasterize);
+            weightedCaller.registerCallback(2, RobotTest::randomNewAdjustmentLayer);
+            weightedCaller.registerCallback(7, RobotTest::randomSetLayerMaskEditMode);
+            weightedCaller.registerCallback(20, RobotTest::randomLayerMaskAction);
+        }
+
         // Not called now:
 //        randomCloseImageWOSaving();
 //        randomLoadImage();
 //        randomSaveInAllFormats();
 //        randomException();
-//        randomSpecialLayer();
-//        randomLayerMask();
+    }
+
+    private static void randomNewTextLayer() {
+        Composition comp = ImageComponents.getActiveComp().get();
+        TextLayer textLayer = new TextLayer(comp);
+        textLayer.setSettings(TextSettings.createRandomSettings(rand));
+        comp.addLayer(textLayer, AddToHistory.NO, true, false);
+    }
+
+    private static void randomTextLayerRasterize() {
+        Layer layer = ImageComponents.getActiveLayer().get();
+        if (layer instanceof TextLayer) {
+            TextLayer.replaceWithRasterized();
+        }
+    }
+
+    private static void randomNewAdjustmentLayer() {
+        Composition comp = ImageComponents.getActiveComp().get();
+        AdjustmentLayer adjustmentLayer = new AdjustmentLayer(comp, "Invert", new Invert());
+        comp.addLayer(adjustmentLayer, AddToHistory.YES, true, false);
+    }
+
+    private static void randomSetLayerMaskEditMode() {
+        Layer layer = ImageComponents.getActiveLayer().get();
+        if (!layer.hasMask()) {
+            return;
+        }
+        PixelitorWindow pw = PixelitorWindow.getInstance();
+        double d = rand.nextDouble();
+        int keyCode;
+        char keyChar;
+        if (d < 0.33) {
+            keyCode = KeyEvent.VK_1;
+            keyChar = '1';
+        } else if (d < 0.66) {
+            keyCode = KeyEvent.VK_2;
+            keyChar = '2';
+        } else {
+            keyCode = KeyEvent.VK_3;
+            keyChar = '3';
+        }
+
+        pw.dispatchEvent(new KeyEvent(pw, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), KeyEvent.CTRL_MASK, keyCode, keyChar));
+    }
+
+    // (add, delete, apply)
+    private static void randomLayerMaskAction() {
+        Layer layer = ImageComponents.getActiveLayer().get();
+        if (!layer.hasMask()) {
+            AddNewLayerMaskAction.INSTANCE.actionPerformed(null);
+        } else {
+            if (layer instanceof ImageLayer) {
+                double d = rand.nextDouble();
+                if (d > 0.5) {
+                    ((ImageLayer) layer).applyLayerMask(AddToHistory.YES);
+                } else {
+                    layer.deleteMask(AddToHistory.YES, true);
+                }
+            } else {
+                layer.deleteMask(AddToHistory.YES, true);
+            }
+        }
     }
 
     private static FilterWithParametrizedGUI getRandomTweenFilter() {

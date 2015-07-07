@@ -93,7 +93,7 @@ abstract class MenuAction extends AbstractAction {
             if (layerType == AllowedLayerType.ANY) {
                 onClick();
             } else {
-                ImageComponent ic = ImageComponents.getActiveImageComponent();
+                ImageComponent ic = ImageComponents.getActiveIC();
                 Layer activeLayer = ic.getComp().getActiveLayer();
                 if (layerType.isAllowed(activeLayer)) {
                     onClick();

@@ -41,7 +41,7 @@ public class AddLayerMaskEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        layer.deleteMask(AddToHistory.NO);
+        layer.deleteMask(AddToHistory.NO, false);
 
         History.notifyMenus(this);
     }

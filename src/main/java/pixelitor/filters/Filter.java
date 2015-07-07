@@ -81,7 +81,7 @@ public abstract class Filter extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        ImageComponent ic = ImageComponents.getActiveImageComponent();
+        ImageComponent ic = ImageComponents.getActiveIC();
         if(ic != null) {
             if (!ic.activeIsImageLayer()) {
                 Dialogs.showNotImageLayerDialog();

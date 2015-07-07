@@ -20,7 +20,7 @@ package pixelitor.tools;
 import pixelitor.Composition;
 import pixelitor.ImageDisplay;
 import pixelitor.layers.ImageLayer;
-import pixelitor.utils.ImageUtils;
+import pixelitor.utils.ColorUtils;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -90,9 +90,9 @@ public class BrushTool extends TmpLayerBrushTool {
             Color fg = FgBgColorSelector.getFG();
             Color bg = FgBgColorSelector.getBG();
             if(e.isControlDown()) {
-                drawingColor = ImageUtils.getHSBAverageColor(fg, bg);
+                drawingColor = ColorUtils.getHSBAverageColor(fg, bg);
             } else {
-                drawingColor = ImageUtils.getRGBAverageColor(fg, bg);
+                drawingColor = ColorUtils.getRGBAverageColor(fg, bg);
             }
         } else {
             drawingColor = FgBgColorSelector.getFG();

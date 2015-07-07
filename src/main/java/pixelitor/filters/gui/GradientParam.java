@@ -20,8 +20,7 @@ package pixelitor.filters.gui;
 import com.bric.swing.GradientSlider;
 import com.jhlabs.image.Colormap;
 import com.jhlabs.image.ImageMath;
-import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Utils;
+import pixelitor.utils.ColorUtils;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -110,7 +109,7 @@ public class GradientParam extends AbstractFilterParam {
     public void randomize() {
         Color[] randomColors = new Color[defaultThumbPositions.length];
         for (int i = 0; i < randomColors.length; i++) {
-            randomColors[i] = ImageUtils.getRandomColor(false);
+            randomColors[i] = ColorUtils.getRandomColor(false);
         }
 
         trigger = false;
@@ -236,7 +235,7 @@ public class GradientParam extends AbstractFilterParam {
             for (int i = 0; i < colors.length; i++) {
                 Color initial = colors[i];
                 Color end = grEndState.colors[i];
-                Color interpolated = Utils.interpolateColor(initial, end, progress);
+                Color interpolated = ColorUtils.interpolateColor(initial, end, progress);
                 interpolatedColors[i] = interpolated;
             }
             return interpolatedColors;

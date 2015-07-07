@@ -44,7 +44,11 @@ public class AddNewLayerMaskAction extends AbstractAction implements ImageSwitch
         Composition comp = ImageComponents.getActiveComp().get();
         Layer layer = comp.getActiveLayer();
         assert !layer.hasMask();
-        boolean ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
+        boolean ctrlPressed = false;
+        if(e != null) { // could be null in tests
+            ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
+        }
+
         if (comp.hasSelection()) {
             if (ctrlPressed) {
                 layer.addMask(LayerMaskAddType.HIDE_SELECTION);

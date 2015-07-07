@@ -158,7 +158,7 @@ public final class SelectionActions {
 
         @Override
         void onClick() {
-            ImageComponent ic = ImageComponents.getActiveImageComponent();
+            ImageComponent ic = ImageComponents.getActiveIC();
             if(ic == null) {
                 return;
             }

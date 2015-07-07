@@ -23,7 +23,7 @@ import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.utils.ImageUtils;
+import pixelitor.utils.ColorUtils;
 import pixelitor.utils.ReseedSupport;
 
 import java.awt.Graphics2D;
@@ -108,7 +108,7 @@ public class Starburst extends FilterWithParametrizedGUI {
             triangle.closePath();
 
             if (useRandomColors) {
-                g.setColor(ImageUtils.getRandomColor(rand, false));
+                g.setColor(ColorUtils.getRandomColor(rand, false));
             }
 
             g.fill(triangle);

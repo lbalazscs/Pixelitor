@@ -17,7 +17,6 @@
 
 package pixelitor.utils;
 
-import com.jhlabs.image.ImageMath;
 import pixelitor.Build;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
@@ -26,7 +25,6 @@ import pixelitor.PixelitorWindow;
 import pixelitor.filters.Filter;
 
 import javax.swing.*;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Desktop;
@@ -63,7 +61,6 @@ public final class Utils {
     private static final Cursor BUSY_CURSOR = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR);
     private static final Cursor DEFAULT_CURSOR = Cursor.getDefaultCursor();
     private static final int WAIT_CURSOR_DELAY = 300; // in milliseconds
-    public static final Color TRANSPARENT_COLOR = new Color(0, true);
 
     /**
      * Utility class with static methods
@@ -401,16 +398,6 @@ public final class Utils {
         return output;
     }
 
-    public static Color interpolateColor(Color startColor, Color endColor, float progress) {
-        int initialRGB = startColor.getRGB();
-        int finalRGB = endColor.getRGB();
-
-        // linear interpolation in the RGB space
-        // possibly interpolating in HSB space would be better
-        int interpolatedRGB = ImageMath.mixColors(progress, initialRGB, finalRGB);
-        return new Color(interpolatedRGB);
-    }
-
     public static void checkThatAssertionsAreEnabled() {
         boolean assertsEnabled = false;
         //noinspection AssertWithSideEffects
@@ -419,4 +406,5 @@ public final class Utils {
             throw new IllegalStateException("assertions not enabled");
         }
     }
+
 }

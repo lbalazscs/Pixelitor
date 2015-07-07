@@ -107,7 +107,7 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
 
                         outputFormat.saveComposition(comp, f, false);
 
-                        ImageComponents.getActiveImageComponent().close();
+                        ImageComponents.getActiveIC().close();
                         ValueNoise.reseed();
                     };
                     try {

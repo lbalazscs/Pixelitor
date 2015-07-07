@@ -246,6 +246,13 @@ public class Composition implements Serializable {
         return (activeLayer instanceof ImageLayer) || activeLayer.isMaskEditing();
     }
 
+    public boolean hasActiveImageLayerOrMask() {
+        if (activeLayer instanceof ImageLayer) {
+            return true;
+        }
+        return activeLayer.hasMask();
+    }
+
     public Layer getActiveLayerOrMask() {
         if (activeLayer.isMaskEditing()) {
             return activeLayer.getMask();

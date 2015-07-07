@@ -17,6 +17,7 @@
 
 package pixelitor.layers;
 
+import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
@@ -62,7 +63,7 @@ public class LayersContainer extends JPanel implements ImageSwitchListener {
         southPanel.add(deleteButton);
         southPanel.add(duplicateButton);
 
-        if ("true".equals(System.getProperty("advanced.layers"))) {
+        if (Build.advancedLayersEnabled()) {
             JButton addLayerMaskButton = createButtonFromAction(AddNewLayerMaskAction.INSTANCE);
             southPanel.add(addLayerMaskButton);
         }

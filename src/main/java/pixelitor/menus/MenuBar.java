@@ -257,7 +257,7 @@ public class MenuBar extends JMenuBar {
         Action closeAction = new MenuAction("Close") {
             @Override
             void onClick() {
-                OpenSaveManager.warnAndCloseImage(ImageComponents.getActiveImageComponent());
+                OpenSaveManager.warnAndCloseImage(ImageComponents.getActiveIC());
             }
         };
         createMenuItem(closeAction, fileMenu, CTRL_W);
@@ -494,7 +494,7 @@ public class MenuBar extends JMenuBar {
         initOtherSubmenu(filterMenu);
 
         KeyStroke keyStroke = T;
-        if ("true".equals(System.getProperty("advanced.layers"))) {
+        if (Build.advancedLayersEnabled()) {
             keyStroke = null;
         }
         createMenuItem(TextFilter.INSTANCE, filterMenu, keyStroke);
@@ -688,7 +688,7 @@ public class MenuBar extends JMenuBar {
 
         initLayerStackSubmenu(layersMenu);
 
-        if ("true".equals(System.getProperty("advanced.layers"))) {
+        if (Build.advancedLayersEnabled()) {
             initLayerMaskSubmenu(layersMenu);
             initTextLayerSubmenu(layersMenu, pw);
             initAdjustmentLayersSubmenu(layersMenu);
@@ -750,13 +750,10 @@ public class MenuBar extends JMenuBar {
         Action deleteLayerMask = new MenuAction("Delete", HAS_LAYER_MASK) {
             @Override
             void onClick() {
-                ImageComponent ic = ImageComponents.getActiveImageComponent();
+                ImageComponent ic = ImageComponents.getActiveIC();
                 Layer layer = ic.getComp().getActiveLayer();
 
-                layer.deleteMask(AddToHistory.YES);
-
-                ic.setShowLayerMask(false);
-                FgBgColorSelector.INSTANCE.setLayerMaskEditing(false);
+                layer.deleteMask(AddToHistory.YES, true);
 
                 layer.getComp().imageChanged(FULL);
             }
@@ -766,7 +763,7 @@ public class MenuBar extends JMenuBar {
         Action applyLayerMask = new MenuAction("Apply", HAS_LAYER_MASK) {
             @Override
             void onClick() {
-                ImageComponent ic = ImageComponents.getActiveImageComponent();
+                ImageComponent ic = ImageComponents.getActiveIC();
                 Layer layer = ic.getComp().getActiveLayer();
 
                 if (!(layer instanceof ImageLayer)) {
@@ -789,7 +786,7 @@ public class MenuBar extends JMenuBar {
         createMenuItem(new MenuAction("Show and Edit Composition") {
             @Override
             void onClick() {
-                ImageComponent ic = ImageComponents.getActiveImageComponent();
+                ImageComponent ic = ImageComponents.getActiveIC();
                 Layer activeLayer = ic.getComp().getActiveLayer();
                 ic.setShowLayerMask(false);
                 FgBgColorSelector.INSTANCE.setLayerMaskEditing(false);
@@ -800,7 +797,7 @@ public class MenuBar extends JMenuBar {
         createMenuItem(new MenuAction("Show and Edit Mask", HAS_LAYER_MASK) {
             @Override
             void onClick() {
-                ImageComponent ic = ImageComponents.getActiveImageComponent();
+                ImageComponent ic = ImageComponents.getActiveIC();
                 Layer activeLayer = ic.getComp().getActiveLayer();
                 ic.setShowLayerMask(true);
                 FgBgColorSelector.INSTANCE.setLayerMaskEditing(true);
@@ -811,7 +808,7 @@ public class MenuBar extends JMenuBar {
         createMenuItem(new MenuAction("Show Composition, but Edit Mask", HAS_LAYER_MASK) {
             @Override
             void onClick() {
-                ImageComponent ic = ImageComponents.getActiveImageComponent();
+                ImageComponent ic = ImageComponents.getActiveIC();
                 Layer activeLayer = ic.getComp().getActiveLayer();
                 ic.setShowLayerMask(false);
                 FgBgColorSelector.INSTANCE.setLayerMaskEditing(true);

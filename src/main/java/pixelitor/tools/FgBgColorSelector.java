@@ -21,7 +21,7 @@ import com.bric.swing.ColorPicker;
 import pixelitor.GlobalKeyboardWatch;
 import pixelitor.PixelitorWindow;
 import pixelitor.utils.AppPreferences;
-import pixelitor.utils.ImageUtils;
+import pixelitor.utils.ColorUtils;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -116,8 +116,8 @@ public class FgBgColorSelector extends JLayeredPane {
         randomizeColorsAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                setFgColor(ImageUtils.getRandomColor(false));
-                setBgColor(ImageUtils.getRandomColor(false));
+                setFgColor(ColorUtils.getRandomColor(false));
+                setBgColor(ColorUtils.getRandomColor(false));
             }
         };
         randomizeButton.addActionListener(randomizeColorsAction);

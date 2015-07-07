@@ -17,6 +17,7 @@
 
 package pixelitor.tools;
 
+import pixelitor.Build;
 import pixelitor.GlobalKeyboardWatch;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.painters.TextFilter;
@@ -49,7 +50,7 @@ public class ToolsPanel extends JPanel {
         Action textToolAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if ("true".equals(System.getProperty("advanced.layers"))) {
+                if (Build.advancedLayersEnabled()) {
                     TextLayer.createNew(PixelitorWindow.getInstance());
                 } else {
                     TextFilter.INSTANCE.actionPerformed(e);

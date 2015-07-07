@@ -27,6 +27,7 @@ import java.awt.geom.Point2D;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class AreaEffects implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -118,5 +119,20 @@ public class AreaEffects implements Serializable {
 
     public NeonBorderEffect getNeonBorderEffect() {
         return neonBorderEffect;
+    }
+
+    public static AreaEffects createRandom(Random rand) {
+        AreaEffects ae = new AreaEffects();
+        float f = rand.nextFloat();
+        if(f < 0.25f) {
+            ae.setNeonBorderEffect(new NeonBorderEffect());
+        } else if(f < 0.5f) {
+            ae.setDropShadowEffect(new ShadowPathEffect(1.0f));
+        } else if(f < 0.75f) {
+            ae.setInnerGlowEffect(new InnerGlowPathEffect(1.0f));
+        } else {
+            ae.setGlowEffect(new GlowPathEffect(1.0f));
+        }
+        return ae;
     }
 }

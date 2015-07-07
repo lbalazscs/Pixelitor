@@ -59,7 +59,7 @@ public class AppNode extends DebugNode {
         int nrOpenImages = images.size();
         addIntChild("Number of Open Images", nrOpenImages);
 
-        ImageComponent activeIC = ImageComponents.getActiveImageComponent();
+        ImageComponent activeIC = ImageComponents.getActiveIC();
         for (ImageComponent ic : images) {
             ImageComponentNode node;
             if (ic == activeIC) {

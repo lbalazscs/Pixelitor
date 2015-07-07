@@ -180,6 +180,9 @@ public class History {
             return false;
         }
         Composition comp = optComp.get();
+        if(!comp.hasActiveImageLayerOrMask()) {
+            return false;
+        }
         return getPreviousEditForFade(comp).isPresent();
     }
 

@@ -20,7 +20,7 @@ package pixelitor.filters;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.utils.ImageUtils;
+import pixelitor.utils.ColorUtils;
 
 import java.awt.image.BufferedImage;
 
@@ -122,7 +122,7 @@ public class Threshold extends FilterWithParametrizedGUI {
                     final float satThreshold = (float) (threshold / 255.0f);
                     @Override
                     public int changeRGB(int a, int r, int g, int b) {
-                        float sat = ImageUtils.calcSaturation(r, g, b);
+                        float sat = ColorUtils.calcSaturation(r, g, b);
                         if (sat > satThreshold) {
                             r = 255;
                             g = 255;

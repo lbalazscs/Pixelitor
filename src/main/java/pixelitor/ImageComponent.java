@@ -392,7 +392,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
     @Override
     public void canvasSizeChanged() {
-        assert ConsistencyChecks.translationCheck(comp);
+        assert ConsistencyChecks.imageCoversCanvasCheck(comp);
 
         if (internalFrame != null) {
             internalFrame.setSize(canvas.getZoomedWidth(), canvas.getZoomedHeight(), -1, -1);

@@ -493,7 +493,7 @@ public class AssertJSwingTest {
     }
 
     private void testScreenCapture() {
-        ImageComponent activeIC = ImageComponents.getActiveImageComponent();
+        ImageComponent activeIC = ImageComponents.getActiveIC();
         testScreenCapture(true);
         testScreenCapture(false);
         try {
@@ -1026,7 +1026,7 @@ public class AssertJSwingTest {
         if (altDrag) {
             altDrag(300, 300);
         } else {
-            ImageLayer layer = ImageComponents.getActiveImageComponent().getComp().getActiveImageLayerOrMask();
+            ImageLayer layer = ImageComponents.getActiveIC().getComp().getActiveImageLayerOrMask();
             int txx = layer.getTranslationX();
             int txy = layer.getTranslationY();
             assert txx == 0;
@@ -1078,7 +1078,7 @@ public class AssertJSwingTest {
 
     private void testMouseWheelZooming() {
         window.pressKey(VK_CONTROL);
-        ImageComponent c = ImageComponents.getActiveImageComponent();
+        ImageComponent c = ImageComponents.getActiveIC();
         robot.rotateMouseWheel(c, 2);
         robot.rotateMouseWheel(c, -2);
         window.releaseKey(VK_CONTROL);

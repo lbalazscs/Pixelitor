@@ -137,9 +137,9 @@ public class Desktop {
         int maxHeight = desktopPane.getHeight() - CASCADE_VERTICAL_SHIFT;
         locationY %= maxHeight;
 
-        InternalImageFrame internalFrame = new InternalImageFrame(ImageComponents.getActiveImageComponent(), locationX, locationY);
+        InternalImageFrame internalFrame = new InternalImageFrame(ImageComponents.getActiveIC(), locationX, locationY);
 
-        ImageComponents.getActiveImageComponent().setInternalFrame(internalFrame);
+        ImageComponents.getActiveIC().setInternalFrame(internalFrame);
 
         desktopPane.add(internalFrame);
         try {

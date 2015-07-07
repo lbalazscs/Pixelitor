@@ -121,7 +121,7 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         long runCountAfter = Filter.runCount;
         assert runCountAfter == runCountBefore + 1;
 
-        ImageComponent ic = ImageComponents.getActiveImageComponent();
+        ImageComponent ic = ImageComponents.getActiveIC();
         ic.repaint();
 
         return ImageComponents.getActiveCompositeImage().get();

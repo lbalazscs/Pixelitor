@@ -160,7 +160,7 @@ public class Pixelitor {
 
 
 //        // show and edit layer mask
-//        ImageComponent ic = ImageComponents.getActiveImageComponent();
+//        ImageComponent ic = ImageComponents.getActiveIC();
 //        Layer activeLayer = ic.getComp().getActiveLayer();
 //        ic.setShowLayerMask(true);
 //        FgBgColorSelector.INSTANCE.setMaskEditing(true);

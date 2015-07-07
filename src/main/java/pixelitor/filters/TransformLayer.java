@@ -34,7 +34,7 @@ import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
-import static pixelitor.utils.Utils.TRANSPARENT_COLOR;
+import static pixelitor.utils.ColorUtils.TRANSPARENT_COLOR;
 
 /**
  * Arbitrary Rotate

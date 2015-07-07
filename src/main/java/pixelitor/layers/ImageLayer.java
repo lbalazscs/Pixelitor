@@ -708,7 +708,7 @@ public class ImageLayer extends ContentLayer {
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
 
-        assert ConsistencyChecks.translationCheck(comp);
+        assert ConsistencyChecks.imageCoversCanvasCheck(comp);
 
         BufferedImage subImage;
         try {
@@ -1030,7 +1030,7 @@ public class ImageLayer extends ContentLayer {
         LayerMask oldMask = mask;
 
         mask.applyToImage(image);
-        deleteMask(AddToHistory.NO);
+        deleteMask(AddToHistory.NO, true);
 
         if (addToHistory == AddToHistory.YES) {
             ApplyLayerMaskEdit edit = new ApplyLayerMaskEdit(comp, this, oldMask, backupImage);

@@ -241,7 +241,7 @@ public class SelectionTool extends Tool {
 
     @Override
     public void arrowKeyPressed(ArrowKey key) {
-        ImageComponent ic = ImageComponents.getActiveImageComponent();
+        ImageComponent ic = ImageComponents.getActiveIC();
         if (ic != null) {
             Composition comp = ic.getComp();
             Optional<Selection> selection = comp.getSelection();

@@ -183,7 +183,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
         if (ended) {
             return;
         }
-        if (callingIC != ImageComponents.getActiveImageComponent()) {
+        if (callingIC != ImageComponents.getActiveIC()) {
             return;
         }
         Rectangle cropRectangle = getCropRectangle(callingIC);
@@ -299,7 +299,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
     @Override
     public void arrowKeyPressed(ArrowKey key) {
         if (state == TRANSFORM) {
-            ImageComponent ic = ImageComponents.getActiveImageComponent();
+            ImageComponent ic = ImageComponents.getActiveIC();
             if (ic != null) {
                 transformSupport.arrowKeyPressed(key, ic);
             }

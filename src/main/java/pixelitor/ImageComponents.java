@@ -80,7 +80,7 @@ public class ImageComponents {
         }
     }
 
-    public static ImageComponent getActiveImageComponent() {
+    public static ImageComponent getActiveIC() {
         return activeImageComponent;
     }
 
@@ -257,5 +257,10 @@ public class ImageComponents {
 
     public static boolean isActive(ImageComponent imageComponent) {
         return imageComponent == activeImageComponent;
+    }
+
+    public static boolean isActiveLayerImageLayer() {
+        Layer activeLayer = activeImageComponent.getComp().getActiveLayer();
+        return activeLayer instanceof ImageLayer;
     }
 }

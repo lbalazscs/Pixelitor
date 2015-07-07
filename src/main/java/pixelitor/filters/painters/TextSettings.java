@@ -19,7 +19,9 @@ package pixelitor.filters.painters;
 
 import org.jdesktop.swingx.painter.AbstractLayoutPainter;
 import org.jdesktop.swingx.painter.TextPainter;
+import pixelitor.utils.ColorUtils;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Utils;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -128,5 +130,16 @@ public class TextSettings implements Serializable {
 
         dest = ImageUtils.bumpMap(src, bumpImage);
         return dest;
+    }
+
+    public static TextSettings createRandomSettings(Random rand) {
+        TextSettings ts = new TextSettings(Utils.getRandomString(10),
+                new Font(Font.SANS_SERIF, Font.BOLD, 100),
+                ColorUtils.getRandomColor(false),
+                AreaEffects.createRandom(rand),
+                AbstractLayoutPainter.HorizontalAlignment.CENTER,
+                AbstractLayoutPainter.VerticalAlignment.CENTER,
+                rand.nextBoolean());
+        return ts;
     }
 }

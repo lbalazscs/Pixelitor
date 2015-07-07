@@ -17,8 +17,7 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Utils;
+import pixelitor.utils.ColorUtils;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -67,7 +66,7 @@ public class ColorParam extends AbstractFilterParam {
 
     @Override
     public void randomize() {
-        Color c = ImageUtils.getRandomColor(opacitySetting.allowOpacityAtRandomize);
+        Color c = ColorUtils.getRandomColor(opacitySetting.allowOpacityAtRandomize);
         setColor(c, false);
     }
 
@@ -124,7 +123,7 @@ public class ColorParam extends AbstractFilterParam {
         @Override
         public ParamState interpolate(ParamState endState, double progress) {
             Color endColor = ((CState) endState).color;
-            return new CState(Utils.interpolateColor(color, endColor, (float) progress));
+            return new CState(ColorUtils.interpolateColor(color, endColor, (float) progress));
         }
     }
 

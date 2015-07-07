@@ -54,7 +54,7 @@ public abstract class FilterWithGUI extends Filter {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        ImageComponent ic = ImageComponents.getActiveImageComponent();
+        ImageComponent ic = ImageComponents.getActiveIC();
         if(ic != null) {
             if (!ic.activeIsImageLayer()) {
                 Dialogs.showNotImageLayerDialog();

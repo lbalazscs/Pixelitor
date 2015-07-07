@@ -84,11 +84,7 @@ public class LayerMaskActions {
         @Override
         public void actionPerformed(ActionEvent e) {
             Layer layer = getLayer();
-            layer.deleteMask(AddToHistory.YES);
-            if (layer.isActive()) {
-                layer.getComp().getIC().setShowLayerMask(false);
-                FgBgColorSelector.INSTANCE.setLayerMaskEditing(false);
-            }
+            layer.deleteMask(AddToHistory.YES, true);
         }
     }
 

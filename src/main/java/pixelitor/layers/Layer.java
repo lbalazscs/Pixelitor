@@ -32,6 +32,7 @@ import pixelitor.history.LayerRenameEdit;
 import pixelitor.history.LayerVisibilityChangeEdit;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.selection.Selection;
+import pixelitor.tools.FgBgColorSelector;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.HistogramsPanel;
 
@@ -312,7 +313,7 @@ public abstract class Layer implements Serializable {
         mask.updateIconImage();
     }
 
-    public void deleteMask(AddToHistory addToHistory) {
+    public void deleteMask(AddToHistory addToHistory, boolean switchActiveToNormalView) {
         LayerMask oldMask = mask;
         mask = null;
         maskEditing = false;
@@ -326,6 +327,13 @@ public abstract class Layer implements Serializable {
 
         AppLogic.maskChanged(this);
         layerButton.deleteMaskIcon();
+
+        if (switchActiveToNormalView) {
+            if (isActive()) {
+                comp.getIC().setShowLayerMask(false);
+                FgBgColorSelector.INSTANCE.setLayerMaskEditing(false);
+            }
+        }
     }
 
     /**

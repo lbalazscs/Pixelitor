@@ -17,6 +17,7 @@
 
 package pixelitor.layers;
 
+import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
 import pixelitor.PixelitorWindow;
@@ -65,7 +66,7 @@ public class TextLayer extends ContentLayer {
             return imageSoFar;
         }
 
-        // normal case: the text will be painted in paintLayerOnGraphics
+        // the text will be painted normally
         return super.applyLayer(g, firstVisibleLayer, imageSoFar);
     }
 
@@ -172,13 +173,17 @@ public class TextLayer extends ContentLayer {
     }
 
     public static void editActive(PixelitorWindow pw) {
-        Composition comp = ImageComponents.getActiveImageComponent().getComp();
+        Composition comp = ImageComponents.getActiveIC().getComp();
         Layer layer = comp.getActiveLayer();
         TextLayer textLayer = (TextLayer) layer;
         edit(pw, comp, textLayer);
     }
 
     public static void edit(PixelitorWindow pw, Composition comp, TextLayer textLayer) {
+        if (Build.CURRENT.isRobotTest()) {
+            return; // avoid dialogs
+        }
+
         TextSettings oldSettings = textLayer.getSettings();
         TextAdjustmentsPanel p = new TextAdjustmentsPanel(textLayer);
         OKCancelDialog d = new OKCancelDialog(p, pw, "Edit Text Layer") {
@@ -207,7 +212,7 @@ public class TextLayer extends ContentLayer {
     }
 
     public static void replaceWithRasterized() {
-        Composition comp = ImageComponents.getActiveImageComponent().getComp();
+        Composition comp = ImageComponents.getActiveIC().getComp();
         Layer layer = comp.getActiveLayer();
         TextLayer textLayer = (TextLayer) layer;
         BufferedImage rasterizedImage = textLayer.createRasterizedImage();

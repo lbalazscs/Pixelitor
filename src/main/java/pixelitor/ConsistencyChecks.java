@@ -43,7 +43,7 @@ public final class ConsistencyChecks {
         getActiveComp().ifPresent(comp -> {
             selectionCheck(comp);
             fadeCheck(comp);
-            translationCheck(comp);
+            imageCoversCanvasCheck(comp);
             layerDeleteActionEnabledCheck();
         });
     }
@@ -110,7 +110,7 @@ public final class ConsistencyChecks {
         }
     }
 
-    public static boolean translationCheck(Composition comp) {
+    public static boolean imageCoversCanvasCheck(Composition comp) {
         Layer layer = comp.getActiveLayer();
         if(!(layer instanceof ImageLayer)) {
             return true;
