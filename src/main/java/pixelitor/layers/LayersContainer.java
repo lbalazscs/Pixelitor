@@ -74,7 +74,7 @@ public class LayersContainer extends JPanel implements ImageSwitchListener {
     private static JButton createButtonFromAction(Action a) {
         JButton button = new JButton(a);
         button.setHideActionText(true);
-        button.setToolTipText((String) a.getValue(Action.NAME));
+//        button.setToolTipText((String) a.getValue(Action.NAME));
         return button;
     }
 

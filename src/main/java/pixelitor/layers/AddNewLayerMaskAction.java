@@ -29,13 +29,15 @@ import java.awt.event.ActionEvent;
 /**
  * An Action that adds a new layer mask.
  */
-public class AddNewLayerMaskAction extends AbstractAction implements ImageSwitchListener, LayerMaskChangeListener {
+public class AddNewLayerMaskAction extends AbstractAction implements ImageSwitchListener, LayerMaskChangeListener, LayerChangeListener {
     public static final AddNewLayerMaskAction INSTANCE = new AddNewLayerMaskAction();
 
     private AddNewLayerMaskAction() {
         super("Add New Layer Mask", IconUtils.loadIcon("add_layer_mask.png"));
+        putValue(Action.SHORT_DESCRIPTION, "<html>Adds a layer mask to the active layer. <br>Ctrl-click to add an inverted layer mask.");
         setEnabled(false);
         ImageComponents.addImageSwitchListener(this);
+        AppLogic.addLayerChangeListener(this);
         AppLogic.addLayerMaskChangeListener(this);
     }
 
@@ -83,5 +85,18 @@ public class AddNewLayerMaskAction extends AbstractAction implements ImageSwitch
     @Override
     public void maskAddedOrRemoved(Layer affectedLayer) {
         setEnabled(!affectedLayer.hasMask());
+    }
+
+    @Override
+    public void activeCompLayerCountChanged(Composition comp, int newLayerCount) {
+    }
+
+    @Override
+    public void activeLayerChanged(Layer newActiveLayer) {
+        setEnabled(!newActiveLayer.hasMask());
+    }
+
+    @Override
+    public void layerOrderChanged(Composition comp) {
     }
 }

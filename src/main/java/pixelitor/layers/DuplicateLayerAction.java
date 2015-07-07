@@ -33,6 +33,7 @@ public class DuplicateLayerAction extends AbstractAction implements ImageSwitchL
 
     private DuplicateLayerAction() {
         super("Duplicate Layer", IconUtils.loadIcon("duplicate_layer.png"));
+        putValue(Action.SHORT_DESCRIPTION, "Duplicates the active layer.");
         setEnabled(false);
         ImageComponents.addImageSwitchListener(this);
     }

@@ -16,6 +16,7 @@
  */
 package pixelitor.layers;
 
+import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
@@ -33,6 +34,11 @@ public class AddNewLayerAction extends AbstractAction implements ImageSwitchList
 
     private AddNewLayerAction() {
         super("Add New Layer", IconUtils.loadIcon("add_layer.gif"));
+        if (Build.advancedLayersEnabled()) {
+            putValue(Action.SHORT_DESCRIPTION, "<html>Adds a new empty image layer.<br>Ctrl-click to add the new layer bellow the active one.");
+        } else {
+            putValue(Action.SHORT_DESCRIPTION, "<html>Adds a new empty layer.<br>Ctrl-click to add the new layer bellow the active one.");
+        }
         setEnabled(false);
         ImageComponents.addImageSwitchListener(this);
     }

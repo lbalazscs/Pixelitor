@@ -63,7 +63,9 @@ public class OpenSaveManager {
         assert SwingUtilities.isEventDispatchThread();
         Runnable r = () -> {
             Composition comp = createCompositionFromFile(file);
-            PixelitorWindow.getInstance().addComposition(comp);
+            if(comp != null) { // there was no decoding problem
+                PixelitorWindow.getInstance().addComposition(comp);
+            }
         };
         Utils.executeWithBusyCursor(r);
 

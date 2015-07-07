@@ -35,6 +35,7 @@ public class DeleteActiveLayerAction extends AbstractAction implements ImageSwit
 
     private DeleteActiveLayerAction() {
         super("Delete Layer", IconUtils.loadIcon("delete_layer.gif"));
+        putValue(Action.SHORT_DESCRIPTION, "Deletes the active layer.");
         setEnabled(false);
         ImageComponents.addImageSwitchListener(this);
         AppLogic.addLayerChangeListener(this);
