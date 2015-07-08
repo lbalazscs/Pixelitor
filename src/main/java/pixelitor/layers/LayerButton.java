@@ -191,6 +191,8 @@ public class LayerButton extends JToggleButton {
     }
 
     public void updateLayerIconImage(ImageLayer layer) {
+        System.out.println("LayerButton::updateLayerIconImage: CALLED");
+
         boolean updateMask = layer instanceof LayerMask;
         BufferedImage img = layer.getCompositionSizedSubImage();
 

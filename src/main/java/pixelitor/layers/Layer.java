@@ -533,4 +533,8 @@ public abstract class Layer implements Serializable {
     public boolean useMask() {
         return mask != null && maskEnabled;
     }
+
+    public Layer getParent() {
+        return parent;
+    }
 }

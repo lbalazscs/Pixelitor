@@ -13,7 +13,7 @@ public class ContentLayerNode extends DebugNode {
 
         if (layer.hasMask()) {
             LayerMask mask = layer.getMask();
-            add(new ImageLayerNode("layer mask", mask));
+            add(new LayerMaskNode(mask));
         }
 
         addFloatChild("opacity", layer.getOpacity());

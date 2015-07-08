@@ -37,6 +37,8 @@ import static java.awt.AlphaComposite.DstIn;
  * A layer mask.
  */
 public class LayerMask extends ImageLayer {
+    private static final long serialVersionUID = 1L;
+
     private transient BufferedImage transparencyImage;
     private static final ColorModel transparencyColorModel;
     private boolean linked = true; // whether it moves together with its parent layer
@@ -78,6 +80,7 @@ public class LayerMask extends ImageLayer {
         // Therefore this method needs to be called only when
         // the visible image reference changes.
         WritableRaster raster = getVisibleImage().getRaster();
+//        WritableRaster raster = image.getRaster();
         this.transparencyImage = new BufferedImage(transparencyColorModel, raster, false, null);
     }
 

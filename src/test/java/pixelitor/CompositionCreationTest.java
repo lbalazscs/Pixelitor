@@ -20,11 +20,17 @@ package pixelitor;
 import org.junit.Test;
 import pixelitor.io.OpenRaster;
 import pixelitor.io.OpenSaveManager;
+import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.BlendingMode;
+import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
+import pixelitor.layers.TextLayer;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -51,17 +57,16 @@ public class CompositionCreationTest {
         assertNotNull(comp.getCompositeImage());
     }
 
-    private static Composition testMultiLayerRead(File f) {
+    private static Composition testMultiLayerRead(File f, Consumer<Layer> checkSecondLayer) {
         Composition comp = OpenSaveManager.createCompositionFromFile(f);
         comp.checkInvariant();
         assertEquals(2, comp.getNrLayers());
         assertEquals(10, comp.getCanvasWidth());
         assertEquals(10, comp.getCanvasHeight());
         assertNotNull(comp.getCompositeImage());
-        Layer secondLayer = comp.getLayer(1);
 
-        assertSame(BlendingMode.MULTIPLY, secondLayer.getBlendingMode());
-        assertEquals(0.75, secondLayer.getOpacity(), 0.0001);
+        Layer secondLayer = comp.getLayer(1);
+        checkSecondLayer.accept(secondLayer);
 
         return comp;
     }
@@ -95,30 +100,72 @@ public class CompositionCreationTest {
     @Test
     public void testReadWritePXC() throws IOException {
         // read and test
-        File f = new File("src/test/resources/pxc_test_input.pxc");
-        Composition comp = testMultiLayerRead(f);
+        String[] fileNames = {
+                "src/test/resources/pxc_test_input.pxc",
+                "src/test/resources/pxc_file_w_layer_mask.pxc",
+                "src/test/resources/pxc_file_w_text_layer.pxc",
+                "src/test/resources/pxc_file_w_adj_layer.pxc",
+        };
 
-        // write to tmp file
-        File tmp = File.createTempFile("pix_tmp", ".pxc");
-        OpenSaveManager.serializePXC(comp, tmp);
+        List<Consumer<Layer>> extraChecks = new ArrayList<>();
+        // extra check for simple pxc file
+        extraChecks.add(secondLayer -> {
+            assert secondLayer instanceof ImageLayer;
+            assertSame(BlendingMode.MULTIPLY, secondLayer.getBlendingMode());
+            assertEquals(0.75, secondLayer.getOpacity(), 0.0001);
+        });
+        // extra check for pxc with layer mask
+        extraChecks.add(secondLayer -> {
+            assert secondLayer instanceof ImageLayer;
+            assert secondLayer.hasMask();
+            assert secondLayer.getMask().isLinked();
+            assert secondLayer.isMaskEnabled();
+        });
+        // extra check for pxc with text layer
+        extraChecks.add(secondLayer -> {
+            assert !secondLayer.hasMask();
+            assert secondLayer instanceof TextLayer;
+            assertEquals("T", ((TextLayer) secondLayer).getSettings().getText());
+        });
+        // extra check for pxc with adjustment layer
+        extraChecks.add(secondLayer -> {
+            assert !secondLayer.hasMask();
+            assert secondLayer instanceof AdjustmentLayer;
+        });
 
-        // read back and test
-        testMultiLayerRead(tmp);
+        for (int i = 0; i < fileNames.length; i++) {
+            String fileName = fileNames[i];
+            File f = new File(fileName);
+            Composition comp = testMultiLayerRead(f, extraChecks.get(i));
 
-        tmp.delete();
+            // write to tmp file
+            File tmp = File.createTempFile("pix_tmp", ".pxc");
+            OpenSaveManager.serializePXC(comp, tmp);
+
+            // read back and test
+            testMultiLayerRead(tmp, extraChecks.get(i));
+
+            tmp.delete();
+        }
     }
 
     @Test
     public void testReadWriteORA() throws IOException {
+        Consumer<Layer> extraCheck = secondLayer -> {
+            assert secondLayer instanceof ImageLayer;
+            assertSame(BlendingMode.MULTIPLY, secondLayer.getBlendingMode());
+            assertEquals(0.75, secondLayer.getOpacity(), 0.0001);
+        };
+
         // read and test
         File f = new File("src/test/resources/gimp_ora_test_input.ora");
-        Composition comp = testMultiLayerRead(f);
+        Composition comp = testMultiLayerRead(f, extraCheck);
 
         File tmp = File.createTempFile("pix_tmp", ".ora");
         OpenRaster.writeOpenRaster(comp, tmp, true);
 
         // read back and test
-        testMultiLayerRead(tmp);
+        testMultiLayerRead(tmp, extraCheck);
 
         tmp.delete();
     }

@@ -37,6 +37,8 @@ import pixelitor.utils.OKCancelDialog;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.Optional;
 
 /**
@@ -51,6 +53,11 @@ public class TextLayer extends ContentLayer {
         super(comp, "", null);
 
         painter = new TranslatedTextPainter();
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        isAdjustment = settings.isWatermark();
     }
 
     @Override
@@ -124,6 +131,7 @@ public class TextLayer extends ContentLayer {
     public void setSettings(TextSettings settings) {
         this.settings = settings;
 
+        isAdjustment = settings.isWatermark();
         settings.configurePainter(painter);
     }
 

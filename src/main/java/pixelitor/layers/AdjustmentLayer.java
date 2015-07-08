@@ -22,6 +22,8 @@ import pixelitor.filters.Filter;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 
 /**
  * A global adjustment to all the layers that are bellow this layer
@@ -34,6 +36,11 @@ public class AdjustmentLayer extends Layer {
     public AdjustmentLayer(Composition comp, String name, Filter filter) {
         super(comp, name, null);
         this.filter = filter;
+        isAdjustment = true;
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
         isAdjustment = true;
     }
 

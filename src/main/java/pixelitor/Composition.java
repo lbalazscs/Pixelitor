@@ -523,6 +523,11 @@ public class Composition implements Serializable {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
 
+        for (Layer layer : layerList) {
+            if (layer instanceof ImageLayer) {
+                ((ImageLayer) layer).updateIconImage();
+            }
+        }
     }
 
     public void addLayersToGUI() {

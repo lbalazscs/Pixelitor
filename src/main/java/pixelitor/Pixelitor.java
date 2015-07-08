@@ -19,6 +19,7 @@ package pixelitor;
 
 import net.jafama.FastMath;
 import pixelitor.io.OpenSaveManager;
+import pixelitor.menus.view.ZoomLevel;
 import pixelitor.tools.FgBgColorSelector;
 import pixelitor.tools.Tools;
 import pixelitor.utils.AppPreferences;
@@ -138,7 +139,9 @@ public class Pixelitor {
             return;
         }
 
-//        Tests3x3.addStandardImageWithMask();
+//        Tests3x3.addStandardImage(false);
+
+        ImageComponents.getActiveIC().setZoom(ZoomLevel.Z6400, true);
 //
         Tools.MOVE.getButton().doClick();
 //

@@ -528,12 +528,10 @@ public class ImageLayer extends ContentLayer {
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-//        System.out.println("ImageLayer::readObject: CALLED , class = " + getClass().getSimpleName());
+        state = NORMAL;
         in.defaultReadObject();
         setImage(ImageUtils.deserializeImage(in));
-        state = NORMAL;
         imageContentChanged = false;
-//        System.out.println("ImageLayer::readObject: ENDED for " + getName() + ", class = " + getClass().getSimpleName());
     }
 
     /**
@@ -880,7 +878,7 @@ public class ImageLayer extends ContentLayer {
     }
 
     public boolean isBigLayer() {
-        Rectangle canvasBounds = comp.getCanvasBounds();
+        Rectangle canvasBounds = canvas.getBounds();
         Rectangle layerBounds = getBounds();
         return !canvasBounds.contains(layerBounds);
     }

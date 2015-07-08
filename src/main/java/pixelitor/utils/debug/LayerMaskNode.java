@@ -16,22 +16,23 @@
  */
 package pixelitor.utils.debug;
 
-import pixelitor.layers.ImageLayer;
-
-import java.awt.image.BufferedImage;
+import pixelitor.layers.LayerMask;
 
 /**
- * A debugging node for an ImageLayer
+ * A debugging node for a LayerMask
  */
-public class ImageLayerNode extends ContentLayerNode {
-    public ImageLayerNode(ImageLayer layer) {
-        this("Layer", layer);
+public class LayerMaskNode extends ImageLayerNode {
+    public LayerMaskNode(LayerMask mask) {
+        this("layer mask", mask);
     }
 
-    public ImageLayerNode(String name, ImageLayer layer) {
-        super(name, layer);
+    public LayerMaskNode(String name, LayerMask mask) {
+        super(name, mask);
 
-        BufferedImage image = layer.getImage();
-        add(new BufferedImageNode(image));
+        boolean enabled = mask.getParent().isMaskEnabled();
+        addBooleanChild("enabled", enabled);
+
+        boolean linked = mask.isLinked();
+        addBooleanChild("linked", linked);
     }
 }

@@ -133,4 +133,12 @@ public class ColorUtils {
         }
         return sat;
     }
+
+    public static String colorIntToString(int rgb) {
+        int a = (rgb >>> 24) & 0xFF;
+        int r = (rgb >>> 16) & 0xFF;
+        int g = (rgb >>> 8) & 0xFF;
+        int b = rgb & 0xFF;
+        return String.format("(%d, %d, %d, %d)", a, r, g, b);
+    }
 }

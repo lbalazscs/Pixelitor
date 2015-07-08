@@ -963,4 +963,46 @@ public class ImageUtils {
         g.fillRect(0, 0, size, size);
         g.setComposite(AlphaComposite.SrcOver);
     }
+
+    public static boolean compareSmallImages(BufferedImage img1, BufferedImage img2) {
+        assert img1.getWidth() == img2.getWidth();
+        assert img1.getHeight() == img2.getHeight();
+
+        int width = img1.getWidth();
+        int height = img1.getHeight();
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int rgb1 = img1.getRGB(x, y);
+                int rgb2 = img2.getRGB(x, y);
+                if (rgb1 != rgb2) {
+                    String msg = String.format("at (%d, %d) rgb1 is %s and rgb2 is %s",
+                            x, y, ColorUtils.intColorToString(rgb1), ColorUtils.intColorToString(rgb2));
+                    System.out.println(String.format("ImageUtils::compareSmallImages: %s", msg));
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public static String debugSmallImage(BufferedImage im) {
+        int width = im.getWidth();
+        int height = im.getHeight();
+        StringBuilder s = new StringBuilder();
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int rgb = im.getRGB(x, y);
+                String asString = ColorUtils.intColorToString(rgb);
+                s.append(asString);
+                if(x == width - 1) {
+                    s.append("\n");
+                } else {
+                    s.append(" ");
+                }
+            }
+        }
+        return s.toString();
+    }
 }
