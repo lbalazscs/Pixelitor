@@ -543,13 +543,10 @@ public class ImageUtils {
 
         BufferedImage thumb = new BufferedImage(thumbWidth, thumbHeight, src.getType());
         Graphics2D g = thumb.createGraphics();
-        try {
-            g.setRenderingHint(KEY_INTERPOLATION,
-                    VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-            g.drawImage(src, 0, 0, thumbWidth, thumbHeight, null);
-        } finally {
-            g.dispose();
-        }
+        g.setRenderingHint(KEY_INTERPOLATION,
+                VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+        g.drawImage(src, 0, 0, thumbWidth, thumbHeight, null);
+        g.dispose();
         return thumb;
     }
 

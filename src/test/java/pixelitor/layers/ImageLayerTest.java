@@ -20,6 +20,7 @@ package pixelitor.layers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import pixelitor.Canvas;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
@@ -180,8 +181,12 @@ public class ImageLayerTest {
 
     @Test
     public void testCreateCompositionSizedSubImage() {
+        // TODO would be better with translation
         BufferedImage image = layer.getCompositionSizedSubImage();
         assertNotNull(image);
+        Canvas canvas = layer.getComp().getCanvas();
+        assert image.getWidth() == canvas.getWidth();
+        assert image.getHeight() == canvas.getHeight();
     }
 
     @Test

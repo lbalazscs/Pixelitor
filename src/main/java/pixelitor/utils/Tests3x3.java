@@ -1,6 +1,7 @@
 package pixelitor.utils;
 
 import pixelitor.Composition;
+import pixelitor.ImageComponents;
 import pixelitor.PixelitorWindow;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
@@ -99,5 +100,11 @@ public class Tests3x3 {
 
         s += "    return img;\n}\n";
         return s;
+    }
+
+    public static void dumpCompositeOfActive() {
+        BufferedImage img = ImageComponents.getActiveComp().get().calculateCompositeImage();
+        String actual = getExpectedFromActual(img);
+        System.out.println(String.format("Tests3x3::dumpCompositeOfActive: actual = '%s'", actual));
     }
 }

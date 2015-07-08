@@ -23,7 +23,6 @@ import pixelitor.tools.FgBgColorSelector;
 import pixelitor.tools.Tools;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Dialogs;
-import pixelitor.utils.Tests3x3;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -139,8 +138,8 @@ public class Pixelitor {
             return;
         }
 
-        Tests3x3.addStandardImageWithMask();
-
+//        Tests3x3.addStandardImageWithMask();
+//
         Tools.MOVE.getButton().doClick();
 //
 //        NewImage.addNewImage(FillType.WHITE, 600, 400, "Test");

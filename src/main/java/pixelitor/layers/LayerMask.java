@@ -99,7 +99,9 @@ public class LayerMask extends ImageLayer {
     protected void imageRefChanged() {
         updateFromBWImage();
         comp.imageChanged(Composition.ImageChangeActions.FULL);
-        updateIconImage();
+
+        // can't update the icon image here, this is low-level, and would be called too many times
+//        updateIconImage();
     }
 
     protected void visibleImageChanged() {
@@ -111,7 +113,7 @@ public class LayerMask extends ImageLayer {
     public void updateIconImage() {
         LayerButton button = getLayerButton();
         if(button != null) { // can be null while deserializing
-            button.updateLayerIconImage(image, true);
+            button.updateLayerIconImage(this);
         }
     }
 

@@ -87,7 +87,7 @@ public class LayerButton extends JToggleButton {
                 System.out.println("LayerButton::LayerButton: adjustment layer icon clicked");
             });
         } else {
-            layerIcon = new JLabel();
+            layerIcon = new JLabel("", null, CENTER);
         }
 
         configureLayerIcon(layerIcon);
@@ -190,7 +190,10 @@ public class LayerButton extends JToggleButton {
         nameEditor.setText(newName);
     }
 
-    public void updateLayerIconImage(BufferedImage img, boolean updateMask) {
+    public void updateLayerIconImage(ImageLayer layer) {
+        boolean updateMask = layer instanceof LayerMask;
+        BufferedImage img = layer.getCompositionSizedSubImage();
+
         Runnable notEDT = () -> {
             BufferedImage thumb = ImageUtils.createThumbnail(img, LayerButtonLayout.ICON_SIZE);
             Runnable edt = () -> {
@@ -227,7 +230,7 @@ public class LayerButton extends JToggleButton {
     }
 
     public void addMaskIconLabel() {
-        maskIconLabel = new JLabel();
+        maskIconLabel = new JLabel("", null, CENTER);
         LayerMaskActions.addPopupMenu(maskIconLabel, layer);
         configureLayerIcon(maskIconLabel);
         add(maskIconLabel, LayerButtonLayout.ICON);

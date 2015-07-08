@@ -26,6 +26,7 @@ import pixelitor.history.ApplyLayerMaskEdit;
 import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
+import pixelitor.history.PixelitorEdit;
 import pixelitor.selection.Selection;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Dialogs;
@@ -139,6 +140,7 @@ public class ImageLayer extends ContentLayer {
 
         setImage(image);
         checkConstructorPostConditions();
+        updateIconImage();
     }
 
     /**
@@ -184,6 +186,7 @@ public class ImageLayer extends ContentLayer {
         setTranslation(newXTrans, newYTrans);
 
         checkConstructorPostConditions();
+        updateIconImage();
     }
 
     /**
@@ -427,6 +430,7 @@ public class ImageLayer extends ContentLayer {
         // otherwise the next filter run will take the old image source,
         // not the actual one
         filterSourceImage = null;
+        updateIconImage();
     }
 
     public void changeImageUndoRedo(BufferedImage img) {
@@ -491,8 +495,8 @@ public class ImageLayer extends ContentLayer {
         Graphics2D g = bi.createGraphics();
         g.drawImage(image, 0, translationY, null);
         g.dispose();
-        setImage(bi);
         translationY = 0;
+        setImage(bi);
     }
 
     private void enlargeSW() {
@@ -502,8 +506,8 @@ public class ImageLayer extends ContentLayer {
         Graphics2D g = bi.createGraphics();
         g.drawImage(image, translationX, 0, null);
         g.dispose();
-        setImage(bi);
         translationX = 0;
+        setImage(bi);
     }
 
     private void enlargeNW() {
@@ -513,9 +517,9 @@ public class ImageLayer extends ContentLayer {
         Graphics2D g = bi.createGraphics();
         g.drawImage(image, translationX, translationY, null);
         g.dispose();
-        setImage(bi);
         translationX = 0;
         translationY = 0;
+        setImage(bi);
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {
@@ -533,7 +537,8 @@ public class ImageLayer extends ContentLayer {
     }
 
     /**
-     * Returns the image shown in the image selector in filter dialogs
+     * Returns the image shown in the image selector in filter dialogs.
+     * The canvas size is not considered, only the selection.
      */
     public BufferedImage getImageForFilterDialogs() {
         Optional<Selection> selection = comp.getSelection();
@@ -701,12 +706,12 @@ public class ImageLayer extends ContentLayer {
         int x = -getTranslationX();
         int y = -getTranslationY();
 
-        if (x == 0 && y == 0) {
-            return image;
-        }
-
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
+
+        if (!isBigLayer()) {
+            return image;
+        }
 
         assert ConsistencyChecks.imageCoversCanvasCheck(comp);
 
@@ -723,6 +728,8 @@ public class ImageLayer extends ContentLayer {
             throw e;
         }
 
+        assert subImage.getWidth() == canvasWidth;
+        assert subImage.getHeight() == canvasHeight;
         return subImage;
     }
 
@@ -846,14 +853,9 @@ public class ImageLayer extends ContentLayer {
 
     @Override
     public void resize(int targetWidth, int targetHeight, boolean progressiveBilinear) {
-        Rectangle canvasBounds = comp.getCanvasBounds();
-
-        BufferedImage img = getImage();
-
-        Rectangle layerBounds = getBounds();
         // the layer size can be bigger than the canvas size, and it can have a negative
         // translation value
-        boolean bigLayer = !canvasBounds.contains(layerBounds);
+        boolean bigLayer = isBigLayer();
         int resizeWidth = targetWidth;
         int resizeHeight = targetHeight;
 
@@ -862,11 +864,11 @@ public class ImageLayer extends ContentLayer {
         if(bigLayer) {
             horizontalResizeRatio = ((double) targetWidth) / canvas.getWidth();
             verticalResizeRatio = ((double) targetHeight) / canvas.getHeight();
-            resizeWidth = (int) (img.getWidth() * horizontalResizeRatio);
-            resizeHeight = (int) (img.getHeight() * verticalResizeRatio);
+            resizeWidth = (int) (image.getWidth() * horizontalResizeRatio);
+            resizeHeight = (int) (image.getHeight() * verticalResizeRatio);
         }
 
-        BufferedImage resizedImg = ImageUtils.getFasterScaledInstance(img, resizeWidth, resizeHeight, VALUE_INTERPOLATION_BICUBIC, progressiveBilinear);
+        BufferedImage resizedImg = ImageUtils.getFasterScaledInstance(image, resizeWidth, resizeHeight, VALUE_INTERPOLATION_BICUBIC, progressiveBilinear);
         setImage(resizedImg);
 
         if(bigLayer) {
@@ -875,6 +877,12 @@ public class ImageLayer extends ContentLayer {
                     (int) (getTranslationY() * verticalResizeRatio)
             );
         }
+    }
+
+    public boolean isBigLayer() {
+        Rectangle canvasBounds = comp.getCanvasBounds();
+        Rectangle layerBounds = getBounds();
+        return !canvasBounds.contains(layerBounds);
     }
 
     @Override
@@ -1013,7 +1021,7 @@ public class ImageLayer extends ContentLayer {
     }
 
     protected void imageRefChanged() {
-        updateIconImage();
+//        updateIconImage();
     }
 
     protected void visibleImageChanged() {
@@ -1021,8 +1029,7 @@ public class ImageLayer extends ContentLayer {
     }
 
     public void updateIconImage() {
-//        System.out.println("ImageLayer::updateIconImage: CALLED, class = " + getClass().getSimpleName());
-        getLayerButton().updateLayerIconImage(image, false);
+        getLayerButton().updateLayerIconImage(this);
     }
 
     public void applyLayerMask(AddToHistory addToHistory) {
@@ -1043,5 +1050,12 @@ public class ImageLayer extends ContentLayer {
     @Override
     public BufferedImage adjustImage(BufferedImage src) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public PixelitorEdit endMovement() {
+        PixelitorEdit edit = super.endMovement();
+        updateIconImage();
+        return edit;
     }
 }

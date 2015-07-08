@@ -80,6 +80,7 @@ import pixelitor.utils.Dialogs;
 import pixelitor.utils.FilterCreator;
 import pixelitor.utils.HistogramsPanel;
 import pixelitor.utils.PerformanceTestingDialog;
+import pixelitor.utils.Tests3x3;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.DebugEventQueue;
 import pixelitor.utils.test.ImageTests;
@@ -1021,6 +1022,22 @@ public class MenuBar extends JMenuBar {
             }
         };
         createMenuItem(imageChangedActive, developMenu);
+
+        createMenuItem(new MenuAction("Debug getCompositionSizedSubImage") {
+            @Override
+            void onClick() {
+                BufferedImage bi = ImageComponents.getActiveImageLayer().get().getCompositionSizedSubImage();
+                Utils.debugImage(bi);
+            }
+        }, developMenu);
+
+        createMenuItem(new MenuAction("Tests3x3.dumpCompositeOfActive()") {
+            @Override
+            void onClick() {
+                Tests3x3.dumpCompositeOfActive();
+            }
+        }, developMenu);
+
 
         this.add(developMenu);
     }
