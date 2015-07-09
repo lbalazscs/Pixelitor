@@ -908,7 +908,7 @@ public class ImageLayer extends ContentLayer {
     }
 
     @Override
-    public void paintLayerOnGraphics(Graphics2D g, boolean isFirstVisibleLayer) {
+    public void paintLayerOnGraphics(Graphics2D g) {
         BufferedImage visibleImage = getVisibleImage();
 
         if(tmpDrawingLayer == null) {

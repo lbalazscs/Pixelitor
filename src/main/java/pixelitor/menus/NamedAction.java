@@ -6,11 +6,11 @@ import javax.swing.*;
  * An action that can be simply renamed
  */
 public abstract class NamedAction extends AbstractAction {
-    public NamedAction() {
+    protected NamedAction() {
         super();
     }
 
-    public NamedAction(String name) {
+    protected NamedAction(String name) {
         super(name);
     }
 

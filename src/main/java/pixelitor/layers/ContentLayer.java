@@ -49,18 +49,21 @@ public abstract class ContentLayer extends Layer {
         return translationY + tmpTranslationY;
     }
 
+    @Override
     public void startMovement() {
         tmpTranslationX = 0;
         tmpTranslationY = 0;
         super.startMovement();
     }
 
+    @Override
     public void moveWhileDragging(int x, int y) {
         tmpTranslationX = x;
         tmpTranslationY = y;
         super.moveWhileDragging(x, y);
     }
 
+    @Override
     public PixelitorEdit endMovement() {
 
         int oldTranslationX = translationX;

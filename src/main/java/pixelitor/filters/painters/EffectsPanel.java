@@ -50,7 +50,7 @@ public class EffectsPanel extends JPanel {
 
     private final JTabbedPane tabs;
 
-    AreaEffects returnedEffects;
+    private final AreaEffects returnedEffects;
 
     public EffectsPanel(ParamAdjustmentListener listener, AreaEffects givenEffects) {
         this.returnedEffects = new AreaEffects();

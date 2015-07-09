@@ -32,6 +32,9 @@ public class Tests3x3 {
     public static final int SEMI_TRANSPARENT_GRAY = rgbToPackedInt(128, 0, 255, 0);
     public static final int SEMI_TRANSPARENT_BLACK = rgbToPackedInt(128, 0, 0, 255);
 
+    private Tests3x3() {
+    }
+
     public static BufferedImage getStandardImage1() {
         BufferedImage img = ImageUtils.createCompatibleImage(3, 3);
         img.setRGB(0, 0, rgbToPackedInt(255, 223, 235, 120));

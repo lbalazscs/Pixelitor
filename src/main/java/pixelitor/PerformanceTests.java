@@ -45,6 +45,9 @@ public class PerformanceTests {
 //            new FilterWrapper(new WaterFilter())
     };
 
+    private PerformanceTests() {
+    }
+
     private static void testTransformFilter(BufferedImage image, FilterWrapper filterWrapper) {
         filterWrapper.setInterpolation(TransformFilter.NEAREST_NEIGHBOUR);
         double timeNN = testFilter("NEAREST_NEIGHBOUR", filterWrapper, image);

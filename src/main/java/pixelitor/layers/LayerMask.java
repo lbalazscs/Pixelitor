@@ -107,6 +107,7 @@ public class LayerMask extends ImageLayer {
 //        updateIconImage();
     }
 
+    @Override
     protected void visibleImageChanged() {
         // so that we have previews in Ctrl-3 mode
         updateFromBWImage();

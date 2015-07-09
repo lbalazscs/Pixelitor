@@ -125,8 +125,7 @@ public class ContentLayerTest {
     // this method is abstract in ImageLayer, test separately for subclasses
     public void testPaintLayerOnGraphics() {
         Graphics2D g2 = TestHelper.createGraphics();
-        layer.paintLayerOnGraphics(g2, true);
-        layer.paintLayerOnGraphics(g2, false);
+        layer.paintLayerOnGraphics(g2);
     }
 
     @Test

@@ -61,7 +61,7 @@ public class TextLayer extends ContentLayer {
     }
 
     @Override
-    public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
+    public void paintLayerOnGraphics(Graphics2D g) {
         painter.setFillPaint(settings.getColor());
         painter.paint(g, null, comp.getCanvasWidth(), comp.getCanvasHeight());
     }

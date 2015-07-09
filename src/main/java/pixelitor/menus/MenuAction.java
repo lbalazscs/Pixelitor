@@ -77,12 +77,12 @@ abstract class MenuAction extends AbstractAction {
 
     private final AllowedLayerType layerType;
 
-    public MenuAction(String name) {
+    protected MenuAction(String name) {
         super(name);
         layerType = AllowedLayerType.ANY;
     }
 
-    public MenuAction(String name, AllowedLayerType layerType) {
+    protected MenuAction(String name, AllowedLayerType layerType) {
         super(name);
         this.layerType = layerType;
     }

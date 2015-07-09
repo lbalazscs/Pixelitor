@@ -100,6 +100,9 @@ public class Tools {
     }
 
     public static class EventDispatcher {
+        private EventDispatcher() {
+        }
+
         public static void mouseClicked(MouseEvent e, ImageDisplay ic) {
             currentTool.dispatchMouseClicked(e, ic);
         }

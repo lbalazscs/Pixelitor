@@ -21,7 +21,7 @@ import javax.swing.*;
 import java.awt.FlowLayout;
 
 public class OnePixelBrushSettings implements BrushSettings {
-    private JCheckBox aa = new JCheckBox();
+    private final JCheckBox aa = new JCheckBox();
 
     @Override
     public JPanel getConfigurationPanel() {
