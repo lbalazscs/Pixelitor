@@ -19,6 +19,7 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.ShadowFilter;
 import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ResizingHelper;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
@@ -65,13 +66,23 @@ public class JHDropShadow extends FilterWithParametrizedGUI {
 
         filter.setAddMargins(false);
         filter.setAngle((float) angle.getValueInIntuitiveRadians());
-        filter.setDistance(distance.getValueAsFloat());
-        filter.setRadius(softness.getValueAsFloat());
         filter.setOpacity(opacity.getValueAsPercentage());
         filter.setShadowColor(color.getColor().getRGB());
         filter.setShadowOnly(shadowOnly.isChecked());
 
-        dest = filter.filter(src, dest);
+        ResizingHelper r = new ResizingHelper(src);
+        if (r.shouldResize()) {
+            double resizeFactor = r.getResizeFactor();
+            filter.setDistance((float) (distance.getValueAsFloat() / resizeFactor));
+            filter.setRadius((float) (softness.getValueAsFloat() / resizeFactor));
+            dest = r.invoke(ResizingHelper.BILINEAR_FAST, filter);
+        } else {
+            // normal case, no resizing
+            filter.setDistance(distance.getValueAsFloat());
+            filter.setRadius(softness.getValueAsFloat());
+            dest = filter.filter(src, dest);
+        }
+
         return dest;
     }
 
