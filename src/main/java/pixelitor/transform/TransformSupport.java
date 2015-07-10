@@ -141,7 +141,8 @@ public class TransformSupport {
     }
 
     public void arrowKeyPressed(ArrowKey key, ImageComponent ic) {
-        compSpaceRect.translate(key.getMoveX(), key.getMoveY());
+        double viewScale = ic.getZoomLevel().getViewScale();
+        compSpaceRect.translate((int) (key.getMoveX() * viewScale), (int) (key.getMoveY() * viewScale));
         handles.updateRect(compSpaceRect);
         recalculateImageSpaceRect(ic);
         ic.repaint();

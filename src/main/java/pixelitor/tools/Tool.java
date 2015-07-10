@@ -316,7 +316,8 @@ public abstract class Tool {
         clipStrategy.setClip(g);
     }
 
-    public void arrowKeyPressed(ArrowKey key) {
+    public boolean arrowKeyPressed(ArrowKey key) {
         // empty for the convenience of subclasses
+        return false; // not consumed
     }
 }

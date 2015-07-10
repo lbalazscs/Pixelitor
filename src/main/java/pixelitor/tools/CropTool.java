@@ -297,12 +297,14 @@ public class CropTool extends Tool implements ImageSwitchListener {
     }
 
     @Override
-    public void arrowKeyPressed(ArrowKey key) {
+    public boolean arrowKeyPressed(ArrowKey key) {
         if (state == TRANSFORM) {
             ImageComponent ic = ImageComponents.getActiveIC();
             if (ic != null) {
                 transformSupport.arrowKeyPressed(key, ic);
+                return true;
             }
         }
+        return false;
     }
 }

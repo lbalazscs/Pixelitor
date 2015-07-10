@@ -68,21 +68,29 @@ public class GlobalKeyboardWatch {
             case KeyEvent.VK_RIGHT:
             case KeyEvent.VK_KP_RIGHT:
                 // checking for VK_KP_RIGHT and other KP keys does not seem to be necessary
-                // because at least on windows actually VK_RIGHT is sent
+                // because at least on windows actually VK_RIGHT is sent by the keypad keys
                 // but let's check them in order to be on the safe side
-                Tools.getCurrentTool().arrowKeyPressed(new ArrowKey.RIGHT(e.isShiftDown()));
+                if (Tools.getCurrentTool().arrowKeyPressed(new ArrowKey.RIGHT(e.isShiftDown()))) {
+                    e.consume();
+                }
                 break;
             case KeyEvent.VK_LEFT:
             case KeyEvent.VK_KP_LEFT:
-                Tools.getCurrentTool().arrowKeyPressed(new ArrowKey.LEFT(e.isShiftDown()));
+                if (Tools.getCurrentTool().arrowKeyPressed(new ArrowKey.LEFT(e.isShiftDown()))) {
+                    e.consume();
+                }
                 break;
             case KeyEvent.VK_UP:
             case KeyEvent.VK_KP_UP:
-                Tools.getCurrentTool().arrowKeyPressed(new ArrowKey.UP(e.isShiftDown()));
+                if (Tools.getCurrentTool().arrowKeyPressed(new ArrowKey.UP(e.isShiftDown()))) {
+                    e.consume();
+                }
                 break;
             case KeyEvent.VK_DOWN:
             case KeyEvent.VK_KP_DOWN:
-                Tools.getCurrentTool().arrowKeyPressed(new ArrowKey.DOWN(e.isShiftDown()));
+                if (Tools.getCurrentTool().arrowKeyPressed(new ArrowKey.DOWN(e.isShiftDown()))) {
+                    e.consume();
+                }
                 break;
         }
     }

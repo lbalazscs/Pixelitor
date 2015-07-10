@@ -69,11 +69,13 @@ public class MoveTool extends Tool {
     }
 
     @Override
-    public void arrowKeyPressed(ArrowKey key) {
+    public boolean arrowKeyPressed(ArrowKey key) {
         Optional<Composition> optComp = ImageComponents.getActiveComp();
         if (optComp.isPresent()) {
             Composition comp = optComp.get();
             move(comp, key.getMoveX(), key.getMoveY());
+            return true;
         }
+        return false;
     }
 }

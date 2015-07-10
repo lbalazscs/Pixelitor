@@ -1102,13 +1102,13 @@ public class MenuBar extends JMenuBar {
 
         createMenuItem(EnlargeCanvas.getAction(), experimentalSubmenu);
 
-
         createMenuItem(new Brick(), experimentalSubmenu);
 
         createMenuItem(new RenderGrid(), experimentalSubmenu);
         createMenuItem(new Lightning(), experimentalSubmenu);
 
         createMenuItem(new EmptyPolar(), experimentalSubmenu);
+        createMenuItem(new JHCheckerFilter(), experimentalSubmenu);
 
     }
 

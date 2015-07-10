@@ -54,7 +54,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     private ChangeEvent changeEvent = null;
     private final EventListenerList listenerList = new EventListenerList();
-    private final boolean ignoreRandomize;
+    private boolean ignoreRandomize;
     private boolean adjustMaxAccordingToImage = false;
     private double maxToImageSizeRatio;
 
@@ -316,6 +316,11 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     public void setState(ParamState state) {
         double doubleValue = ((RPState) state).getValue();
         value = doubleValue;
+    }
+
+    public RangeParam setIgnoreRandomize(boolean ignoreRandomize) {
+        this.ignoreRandomize = ignoreRandomize;
+        return this;
     }
 
     private static class RPState implements ParamState {
