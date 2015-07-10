@@ -863,6 +863,8 @@ public class RobotTest {
 
         weightedCaller.registerCallback(3, RobotTest::randomTool);
 
+        weightedCaller.registerCallback(1, RobotTest::randomEnlargeLayer);
+
         if (Build.advancedLayersEnabled()) {
             weightedCaller.registerCallback(7, RobotTest::randomNewTextLayer);
             weightedCaller.registerCallback(7, RobotTest::randomTextLayerRasterize);
@@ -943,6 +945,14 @@ public class RobotTest {
     private static FilterWithParametrizedGUI getRandomTweenFilter() {
         FilterWithParametrizedGUI[] filters = FilterUtils.getAnimationFiltersSorted();
         return filters[(int) (Math.random() * filters.length)];
+    }
+
+    private static void randomEnlargeLayer() {
+        int north = rand.nextInt(3);
+        int east = rand.nextInt(3);
+        int south = rand.nextInt(3);
+        int west = rand.nextInt(3);
+        ImageComponents.getActiveComp().get().enlargeCanvas(north, east, south, west);
     }
 }
 

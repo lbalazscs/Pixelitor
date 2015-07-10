@@ -88,7 +88,7 @@ public class ImageEdit extends FadeableEdit {
         }
 
         BufferedImage tmp = layer.getImageOrSubImageIfSelected(false, true);
-        layer.changeImageUndoRedo(backupImage);
+        layer.changeImageUndoRedo(backupImage, true);
         comp.imageChanged(FULL);
         layer.updateIconImage();
 

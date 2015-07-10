@@ -21,6 +21,7 @@ import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.ImageDisplay;
+import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.history.SelectionChangeEdit;
 import pixelitor.menus.SelectionModifyType;
@@ -70,6 +71,7 @@ public class Selection {
 
     public enum State {
         NO_SHAPE_YET { // we had a mouse press, but no drag or mouse up
+
             @Override
             Rectangle getShapeBounds(Shape currentSelectionShape) {
 //                throw new IllegalStateException("no shape yet");
@@ -83,6 +85,7 @@ public class Selection {
                 return currentSelectionShape;
             }
         }, HAS_SHAPE { // the normal state with marching ants
+
             @Override
             Rectangle getShapeBounds(Shape currentSelectionShape) {
                 return currentSelectionShape.getBounds(); // bounds are cached in Area;
@@ -96,6 +99,7 @@ public class Selection {
                 return currentSelectionShape;
             }
         }, DIED { // the selection is no longer there
+
             @Override
             Rectangle getShapeBounds(Shape currentSelectionShape) {
                 throw new IllegalStateException("died");
@@ -160,7 +164,7 @@ public class Selection {
     public void updateSelection(UserDrag userDrag) {
         currentSelectionShape = selectionType.updateShape(userDrag, currentSelectionShape);
 
-        if(state == NO_SHAPE_YET) {
+        if (state == NO_SHAPE_YET) {
             startMarching();
             state = HAS_SHAPE;
         }
@@ -170,7 +174,7 @@ public class Selection {
      * We get here if there is already a selection when the user starts a new selection shape
      */
     public void startNewShape(SelectionType selectionType, SelectionInteraction selectionInteraction) {
-        if(state != HAS_SHAPE) {
+        if (state != HAS_SHAPE) {
             throw new IllegalStateException("state = " + state);
         }
 
@@ -395,11 +399,13 @@ public class Selection {
         History.addEdit(edit);
     }
 
-    public void transform(AffineTransform at) {
+    public void transform(AffineTransform at, AddToHistory addToHistory) {
         Shape backupShape = currentSelectionShape;
         currentSelectionShape = at.createTransformedShape(currentSelectionShape);
-        SelectionChangeEdit edit = new SelectionChangeEdit(ic.getComp(), backupShape, "Nudge Selection");
-        History.addEdit(edit);
+        if (addToHistory.isYes()) {
+            SelectionChangeEdit edit = new SelectionChangeEdit(ic.getComp(), backupShape, "Nudge Selection");
+            History.addEdit(edit);
+        }
     }
 
     public State getState() {

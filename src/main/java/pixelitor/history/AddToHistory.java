@@ -21,5 +21,15 @@ package pixelitor.history;
  * Determines whether some change should be added to the undo history
  */
 public enum AddToHistory {
-    YES, NO
+    YES(true), NO(false);
+
+    private final boolean yes;
+
+    AddToHistory(boolean yes) {
+        this.yes = yes;
+    }
+
+    public boolean isYes() {
+        return yes;
+    }
 }

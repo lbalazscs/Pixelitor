@@ -30,6 +30,7 @@ import pixelitor.history.LayerOrderChangeEdit;
 import pixelitor.history.LayerSelectionChangeEdit;
 import pixelitor.history.NewLayerEdit;
 import pixelitor.history.NotUndoableEdit;
+import pixelitor.history.OneLayerUndoableEdit;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.history.SelectionChangeEdit;
 import pixelitor.layers.ContentLayer;
@@ -153,7 +154,7 @@ public class Composition implements Serializable {
 
             AppLogic.activeLayerChanged(newActiveLayer);
 
-            if (addToHistory == AddToHistory.YES) {
+            if (addToHistory.isYes()) {
                 LayerSelectionChangeEdit edit = new LayerSelectionChangeEdit(this, oldLayer, newActiveLayer);
                 History.addEdit(edit);
             }
@@ -198,7 +199,7 @@ public class Composition implements Serializable {
         setActiveLayer(newLayer, AddToHistory.NO);
         ic.addLayerToGUI(newLayer, newLayerIndex);
 
-        if (addToHistory == AddToHistory.YES) {
+        if (addToHistory.isYes()) {
             NewLayerEdit newLayerEdit = new NewLayerEdit(this, newLayer);
             History.addEdit(newLayerEdit);
         }
@@ -582,7 +583,7 @@ public class Composition implements Serializable {
 
         int layerIndex = layerList.indexOf(layerToBeRemoved);
 
-        if (addToHistory == AddToHistory.YES) {
+        if (addToHistory.isYes()) {
             DeleteLayerEdit newLayerEdit = new DeleteLayerEdit(this, layerToBeRemoved, layerIndex);
             History.addEdit(newLayerEdit);
         }
@@ -636,7 +637,7 @@ public class Composition implements Serializable {
 
     public void deselect(AddToHistory addToHistory) {
         if (selection != null) {
-            if (addToHistory == AddToHistory.YES) {
+            if (addToHistory.isYes()) {
                 Shape shape = selection.getShape();
                 if (shape != null) { // for a simple click without a previous selection this is null
                     DeselectEdit edit = new DeselectEdit(this, shape, "Composition.deselect");
@@ -776,6 +777,7 @@ public class Composition implements Serializable {
     }
 
     public void enlargeCanvas(int north, int east, int south, int west) {
+        OneLayerUndoableEdit.createAndAddToHistory(this, "Enlarge Canvas", false, true, false);
         for (Layer layer : layerList) {
             if (layer instanceof ContentLayer) {
                 ContentLayer contentLayer = (ContentLayer) layer;
@@ -785,6 +787,12 @@ public class Composition implements Serializable {
                 LayerMask mask = layer.getMask();
                 mask.enlargeCanvas(north, east, south, west);
             }
+        }
+
+        if (selection != null && north > 0 || west > 0) {
+            selection.transform(
+                    AffineTransform.getTranslateInstance(west, north),
+                    AddToHistory.NO);
         }
 
         canvas.updateSize(canvas.getWidth() + east + west, canvas.getHeight() + north + south);

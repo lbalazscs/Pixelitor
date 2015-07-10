@@ -37,6 +37,7 @@ import java.util.Optional;
 public class OneLayerUndoableEdit extends PixelitorEdit {
     private BufferedImage backupImage;
     private final boolean saveSelection;
+    private final boolean considerSelectionWhenUndo;
     private int backupTranslationX;
     private int backupTranslationY;
 
@@ -48,10 +49,11 @@ public class OneLayerUndoableEdit extends PixelitorEdit {
     /**
      * Private constructor, use the static createAndAddToHistory method from outside
      */
-    private OneLayerUndoableEdit(String presentationName, BufferedImage backupImage, Composition comp, boolean saveSelection) {
+    private OneLayerUndoableEdit(String presentationName, BufferedImage backupImage, Composition comp, boolean saveSelection, boolean considerSelectionWhenUndo) {
         super(comp, presentationName);
         this.backupImage = backupImage;
         this.saveSelection = saveSelection;
+        this.considerSelectionWhenUndo = considerSelectionWhenUndo;
 
         if (saveSelection) {
             Optional<Selection> selection = comp.getSelection();
@@ -77,10 +79,10 @@ public class OneLayerUndoableEdit extends PixelitorEdit {
         }
     }
 
-    public static void createAndAddToHistory(Composition comp, String presentationName, boolean saveSubImageOnly, boolean saveSelection) {
+    public static void createAndAddToHistory(Composition comp, String presentationName, boolean saveSubImageOnly, boolean saveSelection, boolean considerSelectionWhenUndo) {
         int nrLayers = comp.getNrLayers();
         if (nrLayers > 1) {
-            History.addEdit(new OneLayerUndoableEdit(presentationName, null, comp, saveSelection));
+            History.addEdit(new OneLayerUndoableEdit(presentationName, null, comp, saveSelection, considerSelectionWhenUndo));
         } else {
             BufferedImage backup = null;
             Layer layer = comp.getLayer(0);
@@ -93,7 +95,7 @@ public class OneLayerUndoableEdit extends PixelitorEdit {
                 }
             }
 
-            History.addEdit(new OneLayerUndoableEdit(presentationName, backup, comp, saveSelection));
+            History.addEdit(new OneLayerUndoableEdit(presentationName, backup, comp, saveSelection, considerSelectionWhenUndo));
         }
     }
 
@@ -126,19 +128,15 @@ public class OneLayerUndoableEdit extends PixelitorEdit {
 //        AppLogic.debugImage(backupImage, "backup before undo");
 
         swapImages();
-
-        if (saveSelection && (backupShape != null)) {
-            comp.createSelectionFromShape(backupShape);
-        }
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        if (saveSelection) {
-            comp.deselect(AddToHistory.NO);
-        }
+//        if (saveSelection) {
+//            comp.deselect(AddToHistory.NO);
+//        }
         swapImages();
     }
 
@@ -149,7 +147,18 @@ public class OneLayerUndoableEdit extends PixelitorEdit {
 
         // TODO this will never return the layer mask
         ImageLayer layer = (ImageLayer) comp.getActiveLayer();
-        BufferedImage tmp = layer.getImageOrSubImageIfSelected(false, true);
+
+        BufferedImage tmp;
+        if (considerSelectionWhenUndo) {
+            tmp = layer.getImageOrSubImageIfSelected(false, true);
+        } else {
+            tmp = layer.getImage();
+        }
+
+        Shape tmpShape = null;
+        if (comp.hasSelection()) {
+            tmpShape = comp.getSelectionOrNull().getShape();
+        }
 
         int tmpTranslationX = layer.getTranslationX();
         int tmpTranslationY = layer.getTranslationY();
@@ -157,13 +166,22 @@ public class OneLayerUndoableEdit extends PixelitorEdit {
         int tmpCanvasWidth = comp.getCanvasWidth();
         int tmpCanvasHeight = comp.getCanvasHeight();
 
-        comp.getActiveImageLayerOrMask().changeImageUndoRedo(backupImage);
+        comp.getActiveImageLayerOrMask().changeImageUndoRedo(backupImage, considerSelectionWhenUndo);
 
-        if (!comp.hasSelection()) {
+        if (!comp.hasSelection() || !considerSelectionWhenUndo) { // TODO second check is so that enlarge layer works
             // TODO think about the translation of the mask
             layer.setTranslation(backupTranslationX, backupTranslationY);
             comp.getCanvas().updateSize(backupCanvasWidth, backupCanvasHeight);
         }
+
+        if (saveSelection && (backupShape != null)) {
+            if (comp.hasSelection()) { // enlarge layer
+                comp.getSelectionOrNull().setShape(backupShape);
+            } else {
+                comp.createSelectionFromShape(backupShape);
+            }
+        }
+        backupShape = tmpShape;
 
         comp.updateAllIconImages();
 

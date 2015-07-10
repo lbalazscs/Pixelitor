@@ -135,7 +135,7 @@ public class ImageLayerTest {
 
     @Test
     public void testChangeImageUndoRedo() {
-        layer.changeImageUndoRedo(TestHelper.createTestImage());
+        layer.changeImageUndoRedo(TestHelper.createTestImage(), true);
     }
 
     @Test
@@ -180,9 +180,9 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void testCreateCompositionSizedSubImage() {
+    public void testGetCanvasSizedSubImage() {
         // TODO would be better with translation
-        BufferedImage image = layer.getCompositionSizedSubImage();
+        BufferedImage image = layer.getCanvasSizedSubImage();
         assertNotNull(image);
         Canvas canvas = layer.getComp().getCanvas();
         assert image.getWidth() == canvas.getWidth();

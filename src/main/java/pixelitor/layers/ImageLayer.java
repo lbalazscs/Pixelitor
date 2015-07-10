@@ -438,11 +438,15 @@ public class ImageLayer extends ContentLayer {
         updateIconImage();
     }
 
-    public void changeImageUndoRedo(BufferedImage img) {
+    public void changeImageUndoRedo(BufferedImage img, boolean considerSelection) {
         requireNonNull(img);
         assert img != image; // simple filters always change something
         assert state == NORMAL;
-        setImageWithSelection(img);
+        if (considerSelection) {
+            setImageWithSelection(img);
+        } else {
+            setImage(img);
+        }
     }
 
     @Override
@@ -705,7 +709,7 @@ public class ImageLayer extends ContentLayer {
         return ImageUtils.createCompatibleImage(width, height);
     }
 
-    public BufferedImage getCompositionSizedSubImage() {
+    public BufferedImage getCanvasSizedSubImage() {
         int x = -getTranslationX();
         int y = -getTranslationY();
 
@@ -722,11 +726,11 @@ public class ImageLayer extends ContentLayer {
         try {
             subImage = image.getSubimage(x, y, canvasWidth, canvasHeight);
         } catch(RasterFormatException e) {
-            System.out.println("ImageLayer.getCompositionSizedSubImage x = " + x + ", y = " + y + ", canvasWidth = " + canvasWidth + ", canvasHeight = " + canvasHeight);
+            System.out.println("ImageLayer.getCanvasSizedSubImage x = " + x + ", y = " + y + ", canvasWidth = " + canvasWidth + ", canvasHeight = " + canvasHeight);
             WritableRaster raster = image.getRaster();
             int minX = raster.getMinX();
             int minY = raster.getMinY();
-            System.out.println("ImageLayer.getCompositionSizedSubImage minX = " + minX + ", minY = " + minY);
+            System.out.println("ImageLayer.getCanvasSizedSubImage minX = " + minX + ", minY = " + minY);
 
             throw e;
         }
@@ -835,8 +839,6 @@ public class ImageLayer extends ContentLayer {
         imageRefChanged();
 
         setTranslation(newTranslationX, newTranslationY);
-
-        System.out.println("ImageLayer::enlargeCanvas: FINITO");
     }
 
     @Override
@@ -1039,7 +1041,7 @@ public class ImageLayer extends ContentLayer {
         mask.applyToImage(image);
         deleteMask(AddToHistory.NO, true);
 
-        if (addToHistory == AddToHistory.YES) {
+        if (addToHistory.isYes()) {
             ApplyLayerMaskEdit edit = new ApplyLayerMaskEdit(comp, this, oldMask, backupImage);
             History.addEdit(edit);
         }

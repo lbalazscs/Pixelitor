@@ -58,7 +58,7 @@ public abstract class DirectBrushTool extends AbstractBrushTool {
     @Override
     void createGraphicsForNewBrushStroke(Composition comp, ImageLayer layer) {
         // uses the graphics of the buffered image contained in the layer
-        BufferedImage drawImage = layer.getCompositionSizedSubImage();
+        BufferedImage drawImage = layer.getCanvasSizedSubImage();
         graphics = drawImage.createGraphics();
         if (respectSelection) {
             comp.setSelectionClipping(graphics, null);

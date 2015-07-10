@@ -53,7 +53,7 @@ public class LayerAnimationFrames {
         Layer layer = comp.getLayer(layerIndex);
         if (layer instanceof ImageLayer) {
             ImageLayer imageLayer = (ImageLayer) layer;
-            BufferedImage image = imageLayer.getCompositionSizedSubImage();
+            BufferedImage image = imageLayer.getCanvasSizedSubImage();
             images.add(image);
         }
     }

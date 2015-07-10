@@ -50,7 +50,7 @@ public final class CompositionUtils {
             return;
         }
 
-        OneLayerUndoableEdit.createAndAddToHistory(comp, "Crop", false, true);
+        OneLayerUndoableEdit.createAndAddToHistory(comp, "Crop", false, true, true);
         if(selection) {
             comp.deselect(AddToHistory.NO);
         }
@@ -111,7 +111,7 @@ public final class CompositionUtils {
             progressiveBilinear = true;
         }
 
-        OneLayerUndoableEdit.createAndAddToHistory(comp, "Resize", false, true);
+        OneLayerUndoableEdit.createAndAddToHistory(comp, "Resize", false, true, true);
         comp.deselect(AddToHistory.NO);
 
         int nrLayers = comp.getNrLayers();

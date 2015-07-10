@@ -246,7 +246,7 @@ public class SelectionTool extends Tool {
             Composition comp = ic.getComp();
             Optional<Selection> selection = comp.getSelection();
             if (selection.isPresent()) {
-                selection.get().transform(key.getTransform());
+                selection.get().transform(key.getTransform(), AddToHistory.YES);
                 return true;
             }
         }

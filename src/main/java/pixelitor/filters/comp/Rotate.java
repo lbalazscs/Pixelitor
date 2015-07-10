@@ -42,7 +42,7 @@ public class Rotate extends CompAction {
     @Override
     public void transform(Composition comp) {
 
-        OneLayerUndoableEdit.createAndAddToHistory(comp, "Rotate", true, false);
+        OneLayerUndoableEdit.createAndAddToHistory(comp, "Rotate", true, false, true);
         int nrLayers = comp.getNrLayers();
 
         int canvasWidth = comp.getCanvasWidth();

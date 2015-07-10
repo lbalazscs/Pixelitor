@@ -172,9 +172,9 @@ public class AssertJSwingTest {
         LayerButtonFixture layer1Button = findLayerButton("layer 1");
         layer1Button.requireSelected();
 
-        JButtonFixture addEmptyLayerButton = findButtonByToolTip(window, "Add New Layer");
-        JButtonFixture deleteLayerButton = findButtonByToolTip(window, "Delete Layer");
-        JButtonFixture duplicateLayerButton = findButtonByToolTip(window, "Duplicate Layer");
+        JButtonFixture addEmptyLayerButton = findButtonByActionName(window, "Add New Layer");
+        JButtonFixture deleteLayerButton = findButtonByActionName(window, "Delete Layer");
+        JButtonFixture duplicateLayerButton = findButtonByActionName(window, "Duplicate Layer");
 
         addEmptyLayerButton.click();
         LayerButtonFixture layer2Button = findLayerButton("layer 2");
@@ -1206,6 +1206,31 @@ public class AssertJSwingTest {
 
         return button;
     }
+
+    private static JButtonFixture findButtonByActionName(ComponentContainerFixture container, String actionName) {
+        JButtonFixture button = container.button(new GenericTypeMatcher<JButton>(JButton.class) {
+            @Override
+            protected boolean isMatching(JButton button) {
+                if (!button.isShowing()) {
+                    return false; // not interested in buttons that are not currently displayed
+                }
+                Action action = button.getAction();
+                if (action == null) {
+                    return false;
+                }
+                String buttonActionName = (String) action.getValue(Action.NAME);
+                return actionName.equals(buttonActionName);
+            }
+
+            @Override
+            public String toString() {
+                return "[Button Action Name Matcher, action name = " + actionName + "]";
+            }
+        });
+
+        return button;
+    }
+
 
     private static JButtonFixture findButtonByToolTip(ComponentContainerFixture container, String toolTip) {
         JButtonFixture button = container.button(new GenericTypeMatcher<JButton>(JButton.class) {

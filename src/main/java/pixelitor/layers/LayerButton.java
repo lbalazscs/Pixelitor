@@ -193,9 +193,9 @@ public class LayerButton extends JToggleButton {
     public void updateLayerIconImage(ImageLayer layer) {
         boolean updateMask = layer instanceof LayerMask;
 
-        System.out.println("LayerButton::updateLayerIconImage: CALLED, updateMask = " + updateMask);
+//        System.out.println("LayerButton::updateLayerIconImage: CALLED, updateMask = " + updateMask);
 
-        BufferedImage img = layer.getCompositionSizedSubImage();
+        BufferedImage img = layer.getCanvasSizedSubImage();
 
         Runnable notEDT = () -> {
             BufferedImage thumb = ImageUtils.createThumbnail(img, LayerButtonLayout.ICON_SIZE);

@@ -109,7 +109,7 @@ public abstract class Layer implements Serializable {
         comp.setDirty(true);
         layerButton.setOpenEye(newVisibility);
 
-        if (addToHistory == AddToHistory.YES) {
+        if (addToHistory.isYes()) {
             LayerVisibilityChangeEdit edit = new LayerVisibilityChangeEdit(comp, this, newVisibility);
             History.addEdit(edit);
         }
@@ -173,7 +173,7 @@ public abstract class Layer implements Serializable {
         assert newOpacity <= 1.0f : "newOpacity = " + newOpacity;
         assert newOpacity >= 0.0f : "newOpacity = " + newOpacity;
 
-        if (addToHistory == AddToHistory.YES) {
+        if (addToHistory.isYes()) {
             LayerOpacityEdit edit = new LayerOpacityEdit(this, opacity);
             History.addEdit(edit);
         }
@@ -189,7 +189,7 @@ public abstract class Layer implements Serializable {
     }
 
     public void setBlendingMode(BlendingMode mode, boolean updateGUI, AddToHistory addToHistory, boolean updateImage) {
-        if (addToHistory == AddToHistory.YES) {
+        if (addToHistory.isYes()) {
             LayerBlendingEdit edit = new LayerBlendingEdit(this, blendingMode);
             History.addEdit(edit);
         }
@@ -214,7 +214,7 @@ public abstract class Layer implements Serializable {
 
         layerButton.changeNameProgrammatically(newName);
 
-        if (addToHistory == AddToHistory.YES) {
+        if (addToHistory.isYes()) {
             LayerRenameEdit edit = new LayerRenameEdit(this, previousName, name);
             History.addEdit(edit);
         }
@@ -322,7 +322,7 @@ public abstract class Layer implements Serializable {
 
         comp.imageChanged(FULL);
 
-        if (addToHistory == AddToHistory.YES) {
+        if (addToHistory.isYes()) {
             DeleteLayerMaskEdit edit = new DeleteLayerMaskEdit(comp, this, oldMask);
             History.addEdit(edit);
         }
@@ -524,7 +524,7 @@ public abstract class Layer implements Serializable {
         comp.imageChanged(FULL);
         mask.updateIconImage();
 
-        if (addToHistory == AddToHistory.YES) {
+        if (addToHistory.isYes()) {
             PixelitorEdit edit = new EnableLayerMaskEdit(comp, this);
             History.addEdit(edit);
         }

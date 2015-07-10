@@ -351,9 +351,6 @@ public class MenuBar extends JMenuBar {
         // fade
         createMenuItem(new Fade(), editMenu, EnabledIf.FADING_POSSIBLE, CTRL_SHIFT_F);
 
-        // crop
-        createMenuItem(SelectionActions.getCropAction(), editMenu, EnabledIf.ACTION_ENABLED);
-
         editMenu.addSeparator();
 
         // copy
@@ -374,18 +371,9 @@ public class MenuBar extends JMenuBar {
         };
         createMenuItem(resizeAction, editMenu, CTRL_ALT_I);
 
-        JMenu rotateSubmenu = new JMenu("Rotate/Flip");
-        editMenu.add(rotateSubmenu);
-        // rotate
-        createMenuItem(new Rotate(90, "Rotate 90\u00B0 CW"), rotateSubmenu);
-        createMenuItem(new Rotate(180, "Rotate 180\u00B0"), rotateSubmenu);
-        createMenuItem(new Rotate(270, "Rotate 90\u00B0 CCW"), rotateSubmenu);
-        rotateSubmenu.addSeparator();
-        // flip
-        createMenuItem(Flip.createFlip(HORIZONTAL), rotateSubmenu);
-        createMenuItem(Flip.createFlip(VERTICAL), rotateSubmenu);
-
+        createMenuItem(SelectionActions.getCropAction(), editMenu, EnabledIf.ACTION_ENABLED);
         createMenuItem(EnlargeCanvas.getAction(), editMenu);
+        createRotateFlipSubmenu(editMenu);
 
         editMenu.addSeparator();
 
@@ -399,6 +387,19 @@ public class MenuBar extends JMenuBar {
         editMenu.add(preferencesAction);
 
         this.add(editMenu);
+    }
+
+    private void createRotateFlipSubmenu(JMenu editMenu) {
+        JMenu rotateSubmenu = new JMenu("Rotate/Flip");
+        editMenu.add(rotateSubmenu);
+        // rotate
+        createMenuItem(new Rotate(90, "Rotate 90\u00B0 CW"), rotateSubmenu);
+        createMenuItem(new Rotate(180, "Rotate 180\u00B0"), rotateSubmenu);
+        createMenuItem(new Rotate(270, "Rotate 90\u00B0 CCW"), rotateSubmenu);
+        rotateSubmenu.addSeparator();
+        // flip
+        createMenuItem(Flip.createFlip(HORIZONTAL), rotateSubmenu);
+        createMenuItem(Flip.createFlip(VERTICAL), rotateSubmenu);
     }
 
     private void initColorsMenu() {
@@ -1025,10 +1026,10 @@ public class MenuBar extends JMenuBar {
         };
         createMenuItem(imageChangedActive, developMenu);
 
-        createMenuItem(new MenuAction("Debug getCompositionSizedSubImage") {
+        createMenuItem(new MenuAction("Debug getCanvasSizedSubImage") {
             @Override
             void onClick() {
-                BufferedImage bi = ImageComponents.getActiveImageLayer().get().getCompositionSizedSubImage();
+                BufferedImage bi = ImageComponents.getActiveImageLayer().get().getCanvasSizedSubImage();
                 Utils.debugImage(bi);
             }
         }, developMenu);

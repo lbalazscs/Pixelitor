@@ -53,7 +53,7 @@ public class Flip extends CompAction {
 
     @Override
     public void transform(Composition comp) {
-        OneLayerUndoableEdit.createAndAddToHistory(comp, "Flip", true, false);
+        OneLayerUndoableEdit.createAndAddToHistory(comp, "Flip", true, false, true);
         int nrLayers = comp.getNrLayers();
 
         for (int i = 0; i < nrLayers; i++) {
