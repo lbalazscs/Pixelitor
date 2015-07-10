@@ -90,6 +90,7 @@ public class ImageEdit extends FadeableEdit {
         BufferedImage tmp = layer.getImageOrSubImageIfSelected(false, true);
         layer.changeImageUndoRedo(backupImage);
         comp.imageChanged(FULL);
+        layer.updateIconImage();
 
         // create new backup image from tmp
         imgRef = new SoftReference<>(tmp);

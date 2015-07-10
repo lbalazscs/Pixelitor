@@ -117,6 +117,7 @@ public class PaintBucketTool extends Tool {
             g.dispose();
 
             comp.imageChanged(FULL);
+            layer.updateIconImage();
         }
 
         workingCopy.flush();

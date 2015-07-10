@@ -64,6 +64,9 @@ public class Rotate extends CompAction {
             comp.getCanvas().updateSize(newCanvasWidth, newCanvasHeight);
         }
 
+        // Only after the shared canvas size was updated
+        comp.updateAllIconImages();
+
         comp.setDirty(true);
         comp.imageChanged(REPAINT);
 

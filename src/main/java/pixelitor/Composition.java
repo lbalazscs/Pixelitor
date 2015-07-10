@@ -203,7 +203,7 @@ public class Composition implements Serializable {
             History.addEdit(newLayerEdit);
         }
 
-        if(updateHistogram) {
+        if (updateHistogram) {
             imageChanged(FULL); // if the histogram is updated, a repaint is also necessary
         } else {
             imageChanged(INVALIDATE_CACHE);
@@ -689,13 +689,13 @@ public class Composition implements Serializable {
     public void imageChanged(ImageChangeActions actions) {
         compositeImageUpToDate = false;
 
-        if(actions.isRepaint()) {
+        if (actions.isRepaint()) {
             if (ic != null) {
                 ic.repaint();
             }
         }
 
-        if(actions.isUpdateHistogram()) {
+        if (actions.isUpdateHistogram()) {
             HistogramsPanel.INSTANCE.updateFromCompIfShown(this);
         }
     }
@@ -789,8 +789,24 @@ public class Composition implements Serializable {
 
         canvas.updateSize(canvas.getWidth() + east + west, canvas.getHeight() + north + south);
 
+        // update the icon images only after the shared canvas size was
+        // enlarged, because they are based on the canvas-sized subimage
+        updateAllIconImages();
+
         imageChanged(REPAINT);
         setDirty(true);
+    }
+
+    public void updateAllIconImages() {
+        for (Layer layer : layerList) {
+            if (layer instanceof ImageLayer) {
+                ((ImageLayer) layer).updateIconImage();
+            }
+            if (layer.hasMask()) {
+                LayerMask mask = layer.getMask();
+                mask.updateIconImage();
+            }
+        }
     }
 
     public int getCanvasWidth() {

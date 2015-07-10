@@ -34,7 +34,7 @@ import java.awt.event.MouseEvent;
  */
 public class GlobalKeyboardWatch {
     private static boolean spaceDown = false;
-    private static boolean showHideAllForTab = true;
+    private static boolean dialogActive = false;
     private static JComponent alwaysVisibleComponent;
 
     private GlobalKeyboardWatch() {
@@ -57,7 +57,7 @@ public class GlobalKeyboardWatch {
         int keyCode = e.getKeyCode();
         switch (keyCode) {
             case KeyEvent.VK_TAB:
-                if (showHideAllForTab) {
+                if (!dialogActive) {
                     ShowHideAllAction.INSTANCE.actionPerformed(null);
                 }
                 break;
@@ -70,25 +70,25 @@ public class GlobalKeyboardWatch {
                 // checking for VK_KP_RIGHT and other KP keys does not seem to be necessary
                 // because at least on windows actually VK_RIGHT is sent by the keypad keys
                 // but let's check them in order to be on the safe side
-                if (Tools.getCurrentTool().arrowKeyPressed(new ArrowKey.RIGHT(e.isShiftDown()))) {
+                if (!dialogActive && Tools.getCurrentTool().arrowKeyPressed(new ArrowKey.RIGHT(e.isShiftDown()))) {
                     e.consume();
                 }
                 break;
             case KeyEvent.VK_LEFT:
             case KeyEvent.VK_KP_LEFT:
-                if (Tools.getCurrentTool().arrowKeyPressed(new ArrowKey.LEFT(e.isShiftDown()))) {
+                if (!dialogActive && Tools.getCurrentTool().arrowKeyPressed(new ArrowKey.LEFT(e.isShiftDown()))) {
                     e.consume();
                 }
                 break;
             case KeyEvent.VK_UP:
             case KeyEvent.VK_KP_UP:
-                if (Tools.getCurrentTool().arrowKeyPressed(new ArrowKey.UP(e.isShiftDown()))) {
+                if (!dialogActive && Tools.getCurrentTool().arrowKeyPressed(new ArrowKey.UP(e.isShiftDown()))) {
                     e.consume();
                 }
                 break;
             case KeyEvent.VK_DOWN:
             case KeyEvent.VK_KP_DOWN:
-                if (Tools.getCurrentTool().arrowKeyPressed(new ArrowKey.DOWN(e.isShiftDown()))) {
+                if (!dialogActive && Tools.getCurrentTool().arrowKeyPressed(new ArrowKey.DOWN(e.isShiftDown()))) {
                     e.consume();
                 }
                 break;
@@ -111,8 +111,8 @@ public class GlobalKeyboardWatch {
      * The idea is that when we are in a dialog, we want to use the Tab
      * key for navigating the UI, and not for "Hide All"
      */
-    public static void setShowHideAllForTab(boolean showHideAllForTab) {
-        GlobalKeyboardWatch.showHideAllForTab = showHideAllForTab;
+    public static void setDialogActive(boolean dialogActive) {
+        GlobalKeyboardWatch.dialogActive = dialogActive;
     }
 
     public static void setAlwaysVisibleComponent(JComponent alwaysVisibleComponent) {

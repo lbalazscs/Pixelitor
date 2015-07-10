@@ -91,6 +91,7 @@ public class PartialImageEdit extends FadeableEdit {
         backupRaster = tmpRaster;
 
         comp.imageChanged(FULL);
+        layer.updateIconImage();
 
         History.notifyMenus(this);
     }

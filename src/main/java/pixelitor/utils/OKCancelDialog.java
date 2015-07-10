@@ -65,7 +65,7 @@ public abstract class OKCancelDialog extends JDialog {
         JButton cancelButton = new JButton(cancelText);
         cancelButton.setName("cancel");
 
-        GlobalKeyboardWatch.setShowHideAllForTab(false);
+        GlobalKeyboardWatch.setDialogActive(true);
 
         if (JVM.isMac) {
 //        if(2 > 1) {
@@ -124,7 +124,7 @@ public abstract class OKCancelDialog extends JDialog {
 
     public void close() {
         setVisible(false);
-        GlobalKeyboardWatch.setShowHideAllForTab(true);
+        GlobalKeyboardWatch.setDialogActive(false);
         dispose();
     }
 

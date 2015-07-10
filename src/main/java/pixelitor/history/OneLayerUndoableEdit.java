@@ -165,6 +165,8 @@ public class OneLayerUndoableEdit extends PixelitorEdit {
             comp.getCanvas().updateSize(backupCanvasWidth, backupCanvasHeight);
         }
 
+        comp.updateAllIconImages();
+
         backupImage = tmp;
         backupTranslationX = tmpTranslationX;
         backupTranslationY = tmpTranslationY;

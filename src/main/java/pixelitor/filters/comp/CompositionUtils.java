@@ -63,6 +63,7 @@ public final class CompositionUtils {
         }
 
         canvas.updateSize(selectionBounds.width, selectionBounds.height);
+        comp.updateAllIconImages();
         comp.setDirty(true);
 
         ImageComponent ic = comp.getIC();
@@ -123,6 +124,12 @@ public final class CompositionUtils {
         }
 
         comp.getCanvas().updateSize(targetWidth, targetHeight);
+
+        // Only after the shared canvas size was updated
+        // The icon image should change if the proportions were
+        // changed or if it was resized to a very small size
+        comp.updateAllIconImages();
+
         comp.imageChanged(INVALIDATE_CACHE);
 
         AppLogic.activeCompositionDimensionsChanged(comp);

@@ -301,13 +301,18 @@ public class ImageLayer extends ContentLayer {
         assert (state == PREVIEW) || (state == SHOW_ORIGINAL);
         assert previewImage != null;
 
-        if(isImageContentChanged()) {
+        assert state == PREVIEW || state == SHOW_ORIGINAL;
+        if (imageContentChanged) {
             ImageEdit edit = new ImageEdit(filterName, comp, this, getImageOrSubImageIfSelected(true, true), true);
             History.addEdit(edit);
         }
 
         image = previewImage;
         imageRefChanged();
+
+        if (imageContentChanged) {
+            updateIconImage();
+        }
 
         previewImage = null;
 
@@ -830,6 +835,8 @@ public class ImageLayer extends ContentLayer {
         imageRefChanged();
 
         setTranslation(newTranslationX, newTranslationY);
+
+        System.out.println("ImageLayer::enlargeCanvas: FINITO");
     }
 
     @Override
@@ -1001,11 +1008,6 @@ public class ImageLayer extends ContentLayer {
         } else {
             Dialogs.showInfoDialog("null", "previewImage is null");
         }
-    }
-
-    private boolean isImageContentChanged() {
-        assert state == PREVIEW || state == SHOW_ORIGINAL;
-        return imageContentChanged;
     }
 
     State getState() {

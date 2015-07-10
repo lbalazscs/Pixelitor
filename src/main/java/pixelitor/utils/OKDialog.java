@@ -91,9 +91,9 @@ public class OKDialog extends JDialog {
     public void setVisible(boolean b) {
         super.setVisible(b);
         if (b) {
-            GlobalKeyboardWatch.setShowHideAllForTab(false);
+            GlobalKeyboardWatch.setDialogActive(true);
         } else {
-            GlobalKeyboardWatch.setShowHideAllForTab(true);
+            GlobalKeyboardWatch.setDialogActive(false);
         }
     }
 
