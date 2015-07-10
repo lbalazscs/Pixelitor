@@ -385,9 +385,10 @@ public class MenuBar extends JMenuBar {
         createMenuItem(Flip.createFlip(HORIZONTAL), rotateSubmenu);
         createMenuItem(Flip.createFlip(VERTICAL), rotateSubmenu);
 
-        createMenuItem(new TransformLayer(), editMenu);
+        createMenuItem(EnlargeCanvas.getAction(), editMenu);
 
         editMenu.addSeparator();
+
         // preferences
         Action preferencesAction = new MenuAction("Preferences...") {
             @Override
@@ -529,6 +530,7 @@ public class MenuBar extends JMenuBar {
     private static void initOtherSubmenu(JMenu filterMenu) {
         JMenu otherFiltersSubmenu = new JMenu("Other");
         createMenuItem(new RandomFilter(), otherFiltersSubmenu);
+        createMenuItem(new TransformLayer(), otherFiltersSubmenu);
 
         createMenuItem(new Convolve(3), otherFiltersSubmenu);
         createMenuItem(new Convolve(5), otherFiltersSubmenu);
@@ -1099,8 +1101,6 @@ public class MenuBar extends JMenuBar {
         createMenuItem(new Droste(), experimentalSubmenu);
 
         createMenuItem(new Sphere3D(), experimentalSubmenu);
-
-        createMenuItem(EnlargeCanvas.getAction(), experimentalSubmenu);
 
         createMenuItem(new Brick(), experimentalSubmenu);
 
