@@ -789,7 +789,7 @@ public class Composition implements Serializable {
             }
         }
 
-        if (selection != null && north > 0 || west > 0) {
+        if (selection != null && (north > 0 || west > 0)) {
             selection.transform(
                     AffineTransform.getTranslateInstance(west, north),
                     AddToHistory.NO);
