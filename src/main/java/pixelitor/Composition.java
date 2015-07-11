@@ -376,6 +376,7 @@ public class Composition implements Serializable {
                     BufferedImage backupImage = ImageUtils.copyImage(imageLayerBellow.getImage());
 
                     activeLayer.mergeDownOn(imageLayerBellow);
+                    imageLayerBellow.updateIconImage();
                     Layer mergedLayer = activeLayer;
                     removeActiveLayer();
 

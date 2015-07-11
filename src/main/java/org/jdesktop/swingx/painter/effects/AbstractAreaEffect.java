@@ -81,7 +81,10 @@ public class AbstractAreaEffect implements AreaEffect {
                 height + getEffectWidth() * 2 + 1);
 
 
-        assert !effectBounds.isEmpty();
+        assert !effectBounds.isEmpty() :
+                "width = " + width + ", height = " + height
+                + ", getEffectWidth() = " + getEffectWidth()
+                + ", clipShapeBounds = " + clipShapeBounds;
 
         // Apply the border glow effect
         if (isShapeMasked()) {

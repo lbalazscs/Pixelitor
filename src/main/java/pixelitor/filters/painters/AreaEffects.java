@@ -135,4 +135,11 @@ public class AreaEffects implements Serializable {
         }
         return ae;
     }
+
+    /**
+     * Returns true if at least one effect is enabled
+     */
+    public boolean hasAny() {
+        return asArray().length > 0;
+    }
 }

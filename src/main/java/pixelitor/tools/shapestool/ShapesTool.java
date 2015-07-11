@@ -22,6 +22,7 @@ import org.jdesktop.swingx.painter.effects.AreaEffect;
 import pixelitor.Composition;
 import pixelitor.ImageDisplay;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.history.History;
 import pixelitor.history.NewSelectionEdit;
@@ -155,6 +156,23 @@ public class ShapesTool extends Tool {
 
     @Override
     public void mouseDragged(MouseEvent e, ImageDisplay ic) {
+        // hack to prevent AssertionError when dragging started
+        // from negative coordinates bug
+        // TODO investigate
+        ShapesAction action = actionModel.getSelectedItem();
+        if(action.drawEffects() && effectsPanel != null) {
+            AreaEffects effects = effectsPanel.getEffects();
+            if(effects.hasAny()) {
+                if (userDrag.getStartX() < 0) {
+                    return;
+                }
+                if (userDrag.getStartY() < 0) {
+                    return;
+                }
+            }
+        }
+        // end hack
+
         drawing = true;
         userDrag.setStartFromCenter(e.isAltDown());
 

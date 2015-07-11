@@ -76,6 +76,11 @@ public class TextAdjustmentsPanel extends AdjustPanel implements ParamAdjustment
     public TextAdjustmentsPanel(TextFilter textFilter) {
         super(textFilter);
         createGUI(null);
+
+        if(!textTF.getText().isEmpty()) {
+            // a "last text" was set
+            paramAdjusted();
+        }
     }
 
     public TextAdjustmentsPanel(TextLayer textLayer) {
