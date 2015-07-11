@@ -73,7 +73,7 @@ public enum Build {
 
     public static Build CURRENT = FINAL;
 
-    public static final String VERSION_NUMBER = "3.1.3";
+    public static final String VERSION_NUMBER = "3.1.4";
 
     private static String fixTitle = null;
 
