@@ -196,9 +196,9 @@ public class CompositionTest {
     @Test
     public void testMoveActiveLayer() {
         checkActiveLayerIndex(0);
-        comp.moveActiveLayer(true);
+        comp.moveActiveLayerUp();
         checkActiveLayerIndex(1);
-        comp.moveActiveLayer(false);
+        comp.moveActiveLayerDown();
         checkActiveLayerIndex(0);
     }
 
@@ -219,10 +219,8 @@ public class CompositionTest {
     @Test
     public void testSwapLayers() {
         checkActiveLayerIndex(0);
-        comp.swapLayers(0, 1, false);
+        comp.swapLayers(0, 1, AddToHistory.YES);
         checkActiveLayerIndex(1);
-        comp.swapLayers(0, 1, true);
-        checkActiveLayerIndex(0);
     }
 
     @Test

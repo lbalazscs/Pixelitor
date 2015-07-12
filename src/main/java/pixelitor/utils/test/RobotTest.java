@@ -641,11 +641,11 @@ public class RobotTest {
                 break;
             case 4:
                 logRobotEvent("layer order change: active up");
-                comp.moveActiveLayer(true);
+                comp.moveActiveLayerUp();
                 break;
             case 5:
                 logRobotEvent("layer order change: active down");
-                comp.moveActiveLayer(false);
+                comp.moveActiveLayerDown();
                 break;
         }
     }

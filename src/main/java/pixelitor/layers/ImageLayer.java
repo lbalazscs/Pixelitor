@@ -302,7 +302,6 @@ public class ImageLayer extends ContentLayer {
         assert (state == PREVIEW) || (state == SHOW_ORIGINAL);
         assert previewImage != null;
 
-        assert state == PREVIEW || state == SHOW_ORIGINAL;
         if (imageContentChanged) {
             ImageEdit edit = new ImageEdit(filterName, comp, this, getImageOrSubImageIfSelected(true, true), true);
             History.addEdit(edit);

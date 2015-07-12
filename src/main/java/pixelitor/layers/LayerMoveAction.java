@@ -45,7 +45,11 @@ public class LayerMoveAction extends AbstractAction implements ImageSwitchListen
     @Override
     public void actionPerformed(ActionEvent e) {
         Composition comp = ImageComponents.getActiveComp().get();
-        comp.moveActiveLayer(up);
+        if(up) {
+            comp.moveActiveLayerUp();
+        } else {
+            comp.moveActiveLayerDown();
+        }
     }
 
     @Override

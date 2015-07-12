@@ -213,7 +213,7 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
 
         addRasterizedTextLayer(comp, "this should at the top", -100);
         addRasterizedTextLayer(comp, "this should be selected", 50);
-        comp.moveActiveLayer(false);
+        comp.moveActiveLayerDown();
 
 //        ic.moveActiveLayerDown();
 //        ic.flattenImage();

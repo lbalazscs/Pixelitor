@@ -62,7 +62,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.IntSupplier;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static pixelitor.Composition.ImageChangeActions.FULL;
@@ -361,6 +360,8 @@ public class Composition implements Serializable {
         }
         if (updateGUI.isYes()) {
             AppLogic.activeCompLayerCountChanged(this, 1);
+
+            // TODO should have add to history argument?
             History.addEdit(new NotUndoableEdit(this, "Flatten Image"));
         }
     }
@@ -394,28 +395,36 @@ public class Composition implements Serializable {
         }
     }
 
-    public void moveActiveLayer(boolean up) {
-        int oldIndex = layerList.indexOf(activeLayer);
-        moveActiveLayerImpl(() -> up ? oldIndex + 1 : oldIndex - 1);
-    }
-
-    public void moveActiveLayerToTop() {
-        moveActiveLayerImpl(() -> layerList.size() - 1);
-    }
-
-    public void moveActiveLayerToBottom() {
-        moveActiveLayerImpl(() -> 0);
-    }
-
-    private void moveActiveLayerImpl(IntSupplier newIndexSupplier) {
+    public void moveActiveLayerUp() {
         assert checkInvariant();
 
         int oldIndex = layerList.indexOf(activeLayer);
-        int newIndex = newIndexSupplier.getAsInt();
-        swapLayers(oldIndex, newIndex, false);
+        swapLayers(oldIndex, oldIndex + 1, AddToHistory.YES);
     }
 
-    public void swapLayers(int oldIndex, int newIndex, boolean isUndoRedo) {
+    public void moveActiveLayerDown() {
+        assert checkInvariant();
+
+        int oldIndex = layerList.indexOf(activeLayer);
+        swapLayers(oldIndex, oldIndex - 1, AddToHistory.YES);
+    }
+
+    public void moveActiveLayerToTop() {
+        assert checkInvariant();
+
+        int oldIndex = layerList.indexOf(activeLayer);
+        int newIndex = layerList.size() - 1;
+        swapLayers(oldIndex, newIndex, AddToHistory.YES);
+    }
+
+    public void moveActiveLayerToBottom() {
+        assert checkInvariant();
+
+        int oldIndex = layerList.indexOf(activeLayer);
+        swapLayers(oldIndex, 0, AddToHistory.YES);
+    }
+
+    public void swapLayers(int oldIndex, int newIndex, AddToHistory addHistory) {
         if (newIndex < 0) {
             return;
         }
@@ -434,7 +443,7 @@ public class Composition implements Serializable {
         imageChanged(FULL);
         AppLogic.layerOrderChanged(this);
 
-        if (!isUndoRedo) {
+        if (addHistory.isYes()) {
             LayerOrderChangeEdit edit = new LayerOrderChangeEdit(this, oldIndex, newIndex);
             History.addEdit(edit);
         }
