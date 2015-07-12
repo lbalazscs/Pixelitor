@@ -44,6 +44,7 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.tools.FgBgColorSelector;
 import pixelitor.utils.CompositionAction;
 import pixelitor.utils.Dialogs;
+import pixelitor.utils.UpdateGUI;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -139,14 +140,14 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
         valueNoise.setDetails(7);
         valueNoise.execute(OP_WITHOUT_DIALOG);
         ImageLayer layer = (ImageLayer) ic.getActiveLayer();
-        layer.setOpacity(0.3f, true, AddToHistory.YES, true);
-        layer.setBlendingMode(BlendingMode.SCREEN, true, AddToHistory.YES, true);
+        layer.setOpacity(0.3f, UpdateGUI.YES, AddToHistory.YES, true);
+        layer.setBlendingMode(BlendingMode.SCREEN, UpdateGUI.YES, AddToHistory.YES, true);
 
         addNewLayer("Gradient");
         ToolTests.addRadialBWGradientToActiveLayer(ic, true);
         layer = (ImageLayer) ic.getActiveLayer();
-        layer.setOpacity(0.4f, true, AddToHistory.YES, true);
-        layer.setBlendingMode(BlendingMode.LUMINOSITY, true, AddToHistory.YES, true);
+        layer.setOpacity(0.4f, UpdateGUI.YES, AddToHistory.YES, true);
+        layer.setBlendingMode(BlendingMode.LUMINOSITY, UpdateGUI.YES, AddToHistory.YES, true);
 
         FgBgColorSelector.INSTANCE.setFgColor(WHITE);
         Font font = new Font(SPLASH_SCREEN_FONT, Font.BOLD, 48);
@@ -174,7 +175,7 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
 
         CompositionAction ca = comp -> {
             comp.addNewLayerFromComposite("Overlay Blur");
-            comp.getActiveLayer().setBlendingMode(BlendingMode.OVERLAY, true, AddToHistory.YES, true);
+            comp.getActiveLayer().setBlendingMode(BlendingMode.OVERLAY, UpdateGUI.YES, AddToHistory.YES, true);
             JHGaussianBlur blur = new JHGaussianBlur();
             blur.setRadius(5);
             blur.execute(OP_WITHOUT_DIALOG);
@@ -252,7 +253,7 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
 
         layer.enlargeLayer();
 
-        layer.setOpacity(opacity, true, AddToHistory.YES, true);
-        layer.setBlendingMode(blendingMode, true, AddToHistory.YES, true);
+        layer.setOpacity(opacity, UpdateGUI.YES, AddToHistory.YES, true);
+        layer.setBlendingMode(blendingMode, UpdateGUI.YES, AddToHistory.YES, true);
     }
 }

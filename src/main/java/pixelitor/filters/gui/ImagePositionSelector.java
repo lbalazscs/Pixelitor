@@ -20,6 +20,7 @@ package pixelitor.filters.gui;
 import pixelitor.ImageComponents;
 import pixelitor.layers.ImageLayer;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.UpdateGUI;
 
 import javax.swing.*;
 import java.awt.Dimension;
@@ -113,7 +114,7 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
 
         float relativeX = ((float) mouseX) / thumb.getWidth();
         float relativeY = ((float) mouseY) / thumb.getHeight();
-        model.setRelativeValues(relativeX, relativeY, false, isAdjusting, true);
+        model.setRelativeValues(relativeX, relativeY, UpdateGUI.NO, isAdjusting, true);
 
         parentGUI.updateSlidersFromModel();
 

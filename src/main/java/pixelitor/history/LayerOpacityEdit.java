@@ -17,6 +17,7 @@
 package pixelitor.history;
 
 import pixelitor.layers.Layer;
+import pixelitor.utils.UpdateGUI;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -52,7 +53,7 @@ public class LayerOpacityEdit extends PixelitorEdit {
 
     private void swapOpacity() {
         float tmp = layer.getOpacity();
-        layer.setOpacity(backupOpacity, true, AddToHistory.NO, true);
+        layer.setOpacity(backupOpacity, UpdateGUI.YES, AddToHistory.NO, true);
         backupOpacity = tmp;
         History.notifyMenus(this);
     }

@@ -17,6 +17,8 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.utils.UpdateGUI;
+
 import javax.swing.*;
 import java.awt.Rectangle;
 
@@ -65,7 +67,7 @@ public class BooleanParam extends AbstractFilterParam {
 
     @Override
     public void reset(boolean triggerAction) {
-        setValue(defaultValue, true, triggerAction);
+        setValue(defaultValue, UpdateGUI.YES, triggerAction);
     }
 
     @Override
@@ -76,7 +78,7 @@ public class BooleanParam extends AbstractFilterParam {
     @Override
     public void randomize() {
         if (!ignoreRandomize) {
-            setValue(Math.random() > 0.5, true, false);
+            setValue(Math.random() > 0.5, UpdateGUI.YES, false);
         }
     }
 
@@ -84,14 +86,14 @@ public class BooleanParam extends AbstractFilterParam {
         return currentValue;
     }
 
-    public void setValue(boolean newValue, boolean updateGUI, boolean trigger) {
+    public void setValue(boolean newValue, UpdateGUI updateGUI, boolean trigger) {
         if (currentValue != newValue) {
             currentValue = newValue;
             if (trigger) {
                 adjustmentListener.paramAdjusted();
             }
         }
-        if (updateGUI && (paramGUI != null)) {
+        if (updateGUI.isYes() && (paramGUI != null)) {
             paramGUI.updateGUI();
         }
     }

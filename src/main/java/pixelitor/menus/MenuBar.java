@@ -81,6 +81,7 @@ import pixelitor.utils.FilterCreator;
 import pixelitor.utils.HistogramsPanel;
 import pixelitor.utils.PerformanceTestingDialog;
 import pixelitor.utils.Tests3x3;
+import pixelitor.utils.UpdateGUI;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.DebugEventQueue;
 import pixelitor.utils.test.ImageTests;
@@ -649,7 +650,7 @@ public class MenuBar extends JMenuBar {
             @Override
             void onClick() {
                 Composition comp = ImageComponents.getActiveComp().get();
-                comp.flattenImage(true);
+                comp.flattenImage(UpdateGUI.YES);
             }
         };
         createMenuItem(flattenImageAction, layersMenu);
@@ -658,7 +659,7 @@ public class MenuBar extends JMenuBar {
             @Override
             void onClick() {
                 Composition comp = ImageComponents.getActiveComp().get();
-                comp.mergeDown();
+                comp.mergeDown(UpdateGUI.YES);
             }
         };
         createMenuItem(mergeDownAction, layersMenu, CTRL_E);

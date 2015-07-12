@@ -25,6 +25,7 @@ import pixelitor.layers.Layer;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionInteraction;
 import pixelitor.selection.SelectionType;
+import pixelitor.utils.UpdateGUI;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -180,7 +181,7 @@ public class CompositionTest {
     @Test
     public void testFlattenImage() {
         checkNumLayers(2);
-        comp.flattenImage(false);
+        comp.flattenImage(UpdateGUI.NO);
         checkNumLayers(1);
     }
 
@@ -188,7 +189,7 @@ public class CompositionTest {
     public void testMergeDown() {
         checkNumLayers(2);
         comp.setActiveLayer(comp.getLayer(1), AddToHistory.NO);
-        comp.mergeDown();
+        comp.mergeDown(UpdateGUI.NO);
         checkNumLayers(1);
     }
 
@@ -278,7 +279,7 @@ public class CompositionTest {
     @Test
     public void testRemoveActiveLayer() {
         checkNumLayers(2);
-        comp.removeActiveLayer();
+        comp.removeActiveLayer(UpdateGUI.NO);
         checkNumLayers(1);
     }
 
@@ -286,7 +287,7 @@ public class CompositionTest {
     public void testRemoveLayer() {
         checkNumLayers(2);
         Layer layer2 = comp.getLayer(0);
-        comp.removeLayer(layer2, AddToHistory.NO);
+        comp.removeLayer(layer2, AddToHistory.NO, UpdateGUI.NO);
         checkNumLayers(1);
     }
 

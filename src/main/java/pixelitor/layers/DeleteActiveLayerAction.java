@@ -23,6 +23,7 @@ import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
 import pixelitor.utils.IconUtils;
 import pixelitor.utils.ImageSwitchListener;
+import pixelitor.utils.UpdateGUI;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -44,7 +45,7 @@ public class DeleteActiveLayerAction extends AbstractAction implements ImageSwit
     @Override
     public void actionPerformed(ActionEvent e) {
         Composition comp = ImageComponents.getActiveComp().get();
-        comp.removeActiveLayer();
+        comp.removeActiveLayer(UpdateGUI.YES);
     }
 
     @Override

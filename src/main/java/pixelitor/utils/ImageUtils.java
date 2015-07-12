@@ -1005,4 +1005,14 @@ public class ImageUtils {
         }
         return s.toString();
     }
+
+    public static BufferedImage create1x1Image(Color c) {
+        return create1x1Image(c.getAlpha(), c.getRed(), c.getGreen(), c.getBlue());
+    }
+
+    public static BufferedImage create1x1Image(int a, int r, int g, int b) {
+        BufferedImage img = createCompatibleImage(1, 1);
+        img.setRGB(0, 0, ColorUtils.toPackedInt(a, r, g, b));
+        return img;
+    }
 }

@@ -18,6 +18,7 @@ package pixelitor.history;
 
 import pixelitor.Composition;
 import pixelitor.layers.Layer;
+import pixelitor.utils.UpdateGUI;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -49,7 +50,7 @@ public class DeleteLayerEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        comp.removeLayer(layer, AddToHistory.NO);
+        comp.removeLayer(layer, AddToHistory.NO, UpdateGUI.YES);
         History.notifyMenus(this);
     }
 

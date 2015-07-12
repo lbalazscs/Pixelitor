@@ -31,6 +31,7 @@ import pixelitor.selection.Selection;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.UpdateGUI;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.ImageLayerNode;
 
@@ -204,9 +205,9 @@ public class ImageLayer extends ContentLayer {
     public ImageLayer duplicate() {
         BufferedImage imageCopy = ImageUtils.copyImage(image);
         ImageLayer d = new ImageLayer(comp, imageCopy, getDuplicateLayerName(), null);
-        d.setOpacity(opacity, false, AddToHistory.NO, true);
+        d.setOpacity(opacity, UpdateGUI.NO, AddToHistory.NO, true);
         d.setTranslation(translationX, translationY);
-        d.setBlendingMode(blendingMode, false, AddToHistory.NO, true);
+        d.setBlendingMode(blendingMode, UpdateGUI.NO, AddToHistory.NO, true);
 
         if (hasMask()) {
             d.addMaskBack(mask.duplicate(d));

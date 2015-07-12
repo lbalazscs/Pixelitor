@@ -20,6 +20,7 @@ package pixelitor.history;
 import pixelitor.Composition;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.TextLayer;
+import pixelitor.utils.UpdateGUI;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -43,7 +44,7 @@ public class TextLayerRasterizeEdit extends PixelitorEdit {
         super.undo();
 
         comp.addLayer(before, AddToHistory.NO, false, false);
-        comp.removeLayer(after, AddToHistory.NO);
+        comp.removeLayer(after, AddToHistory.NO, UpdateGUI.YES);
         History.notifyMenus(this);
     }
 
@@ -52,7 +53,7 @@ public class TextLayerRasterizeEdit extends PixelitorEdit {
         super.redo();
 
         comp.addLayer(after, AddToHistory.NO, false, false);
-        comp.removeLayer(before, AddToHistory.NO);
+        comp.removeLayer(before, AddToHistory.NO, UpdateGUI.YES);
         History.notifyMenus(this);
     }
 

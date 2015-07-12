@@ -18,6 +18,7 @@
 package pixelitor.filters.gui;
 
 import com.jhlabs.image.ImageMath;
+import pixelitor.utils.UpdateGUI;
 
 import javax.swing.*;
 import java.awt.Rectangle;
@@ -63,7 +64,7 @@ public class ImagePositionParam extends AbstractFilterParam {
 
     @Override
     public void reset(boolean triggerAction) {
-        setRelativeValues(defaultRelativeX, defaultRelativeY, true, false, triggerAction);
+        setRelativeValues(defaultRelativeX, defaultRelativeY, UpdateGUI.YES, false, triggerAction);
     }
 
     @Override
@@ -76,7 +77,7 @@ public class ImagePositionParam extends AbstractFilterParam {
         float rx = (float) Math.random();
         float ry = (float) Math.random();
 
-        setRelativeValues(rx, ry, true, false, false);
+        setRelativeValues(rx, ry, UpdateGUI.YES, false, false);
     }
 
     public float getRelativeX() {
@@ -87,10 +88,10 @@ public class ImagePositionParam extends AbstractFilterParam {
         return relativeY;
     }
 
-    public void setRelativeValues(float relativeX, float relativeY, boolean updateGUI, boolean isAdjusting, boolean trigger) {
+    public void setRelativeValues(float relativeX, float relativeY, UpdateGUI updateGUI, boolean isAdjusting, boolean trigger) {
         this.relativeX = relativeX;
         this.relativeY = relativeY;
-        if (updateGUI && (paramGUI != null)) {
+        if (updateGUI.isYes() && (paramGUI != null)) {
             paramGUI.updateGUI();
         }
         if (trigger && !isAdjusting) {
@@ -99,11 +100,11 @@ public class ImagePositionParam extends AbstractFilterParam {
     }
 
     public void setRelativeX(float newRelativeX, boolean isAdjusting) {
-        setRelativeValues(newRelativeX, relativeY, false, isAdjusting, true);
+        setRelativeValues(newRelativeX, relativeY, UpdateGUI.NO, isAdjusting, true);
     }
 
     public void setRelativeY(float newRelativeY, boolean isAdjusting) {
-        setRelativeValues(relativeX, newRelativeY, false, isAdjusting, true);
+        setRelativeValues(relativeX, newRelativeY, UpdateGUI.NO, isAdjusting, true);
     }
 
     @Override

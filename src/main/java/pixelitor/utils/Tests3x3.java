@@ -28,38 +28,38 @@ public class Tests3x3 {
     public static final int MAGENTA = Color.MAGENTA.getRGB();
     public static final int CYAN = Color.CYAN.getRGB();
 
-    public static final int SEMI_TRANSPARENT_WHITE = rgbToPackedInt(128, 255, 0, 0);
-    public static final int SEMI_TRANSPARENT_GRAY = rgbToPackedInt(128, 0, 255, 0);
-    public static final int SEMI_TRANSPARENT_BLACK = rgbToPackedInt(128, 0, 0, 255);
+    public static final int SEMI_TRANSPARENT_WHITE = ColorUtils.toPackedInt(128, 255, 0, 0);
+    public static final int SEMI_TRANSPARENT_GRAY = ColorUtils.toPackedInt(128, 0, 255, 0);
+    public static final int SEMI_TRANSPARENT_BLACK = ColorUtils.toPackedInt(128, 0, 0, 255);
 
     private Tests3x3() {
     }
 
     public static BufferedImage getStandardImage1() {
         BufferedImage img = ImageUtils.createCompatibleImage(3, 3);
-        img.setRGB(0, 0, rgbToPackedInt(255, 223, 235, 120));
-        img.setRGB(0, 1, rgbToPackedInt(255, 35, 125, 43));
-        img.setRGB(0, 2, rgbToPackedInt(255, 89, 28, 207));
-        img.setRGB(1, 0, rgbToPackedInt(255, 101, 224, 114));
-        img.setRGB(1, 1, rgbToPackedInt(255, 92, 49, 135));
-        img.setRGB(1, 2, rgbToPackedInt(255, 27, 238, 72));
-        img.setRGB(2, 0, rgbToPackedInt(255, 255, 91, 179));
-        img.setRGB(2, 1, rgbToPackedInt(255, 88, 190, 199));
-        img.setRGB(2, 2, rgbToPackedInt(255, 128, 128, 128));
+        img.setRGB(0, 0, ColorUtils.toPackedInt(255, 223, 235, 120));
+        img.setRGB(0, 1, ColorUtils.toPackedInt(255, 35, 125, 43));
+        img.setRGB(0, 2, ColorUtils.toPackedInt(255, 89, 28, 207));
+        img.setRGB(1, 0, ColorUtils.toPackedInt(255, 101, 224, 114));
+        img.setRGB(1, 1, ColorUtils.toPackedInt(255, 92, 49, 135));
+        img.setRGB(1, 2, ColorUtils.toPackedInt(255, 27, 238, 72));
+        img.setRGB(2, 0, ColorUtils.toPackedInt(255, 255, 91, 179));
+        img.setRGB(2, 1, ColorUtils.toPackedInt(255, 88, 190, 199));
+        img.setRGB(2, 2, ColorUtils.toPackedInt(255, 128, 128, 128));
         return img;
     }
 
     public static BufferedImage getStandardImage2() {
         BufferedImage img = ImageUtils.createCompatibleImage(3, 3);
-        img.setRGB(0, 0, rgbToPackedInt(255, 190, 149, 66));
-        img.setRGB(0, 1, rgbToPackedInt(255, 37, 159, 8));
-        img.setRGB(0, 2, rgbToPackedInt(255, 63, 107, 198));
-        img.setRGB(1, 0, rgbToPackedInt(255, 174, 25, 53));
-        img.setRGB(1, 1, rgbToPackedInt(255, 146, 58, 135));
-        img.setRGB(1, 2, rgbToPackedInt(255, 61, 71, 82));
-        img.setRGB(2, 0, rgbToPackedInt(255, 143, 125, 211));
-        img.setRGB(2, 1, rgbToPackedInt(255, 208, 84, 44));
-        img.setRGB(2, 2, rgbToPackedInt(255, 209, 72, 111));
+        img.setRGB(0, 0, ColorUtils.toPackedInt(255, 190, 149, 66));
+        img.setRGB(0, 1, ColorUtils.toPackedInt(255, 37, 159, 8));
+        img.setRGB(0, 2, ColorUtils.toPackedInt(255, 63, 107, 198));
+        img.setRGB(1, 0, ColorUtils.toPackedInt(255, 174, 25, 53));
+        img.setRGB(1, 1, ColorUtils.toPackedInt(255, 146, 58, 135));
+        img.setRGB(1, 2, ColorUtils.toPackedInt(255, 61, 71, 82));
+        img.setRGB(2, 0, ColorUtils.toPackedInt(255, 143, 125, 211));
+        img.setRGB(2, 1, ColorUtils.toPackedInt(255, 208, 84, 44));
+        img.setRGB(2, 2, ColorUtils.toPackedInt(255, 209, 72, 111));
         return img;
     }
 
@@ -78,7 +78,7 @@ public class Tests3x3 {
                 int r = rand.nextInt(256);
                 int g = rand.nextInt(256);
                 int b = rand.nextInt(256);
-                img.setRGB(x, y, rgbToPackedInt(a, r, g, b));
+                img.setRGB(x, y, ColorUtils.toPackedInt(a, r, g, b));
             }
         }
         return img;
@@ -99,10 +99,6 @@ public class Tests3x3 {
         img.setRGB(2, 2, BLACK);
 
         return img;
-    }
-
-    public static int rgbToPackedInt(int a, int r, int g, int b) {
-        return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
     public static void addStandardImage(boolean withMask) {
@@ -136,7 +132,7 @@ public class Tests3x3 {
                 int g = (rgb >>> 8) & 0xFF;
                 int b = rgb & 0xFF;
 
-                s += String.format("    img.setRGB(%d, %d, rgbToPackedInt(%d, %d, %d, %d));\n",
+                s += String.format("    img.setRGB(%d, %d, toPackedInt(%d, %d, %d, %d));\n",
                         x, y, a, r, g, b);
             }
         }

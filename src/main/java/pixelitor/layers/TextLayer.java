@@ -33,6 +33,7 @@ import pixelitor.history.TextLayerChangeEdit;
 import pixelitor.history.TextLayerRasterizeEdit;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.OKCancelDialog;
+import pixelitor.utils.UpdateGUI;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -174,7 +175,7 @@ public class TextLayer extends ContentLayer {
             @Override
             protected void dialogCanceled() {
                 close();
-                comp.removeLayer(textLayer, AddToHistory.NO);
+                comp.removeLayer(textLayer, AddToHistory.NO, UpdateGUI.YES);
             }
         };
         d.setVisible(true);
@@ -227,7 +228,7 @@ public class TextLayer extends ContentLayer {
 
         ImageLayer newLayer = new ImageLayer(comp, rasterizedImage, layer.getName(), null);
         comp.addLayer(newLayer, AddToHistory.NO, false, false);
-        comp.removeLayer(textLayer, AddToHistory.NO);
+        comp.removeLayer(textLayer, AddToHistory.NO, UpdateGUI.YES);
 
         TextLayerRasterizeEdit edit = new TextLayerRasterizeEdit(comp, textLayer, newLayer);
         History.addEdit(edit);

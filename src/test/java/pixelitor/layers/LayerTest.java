@@ -22,6 +22,7 @@ import org.junit.Test;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.history.AddToHistory;
+import pixelitor.utils.UpdateGUI;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -81,13 +82,13 @@ public class LayerTest {
 
     @Test
     public void testSetOpacity() {
-        layer.setOpacity(0.7f, true, AddToHistory.YES, true);
+        layer.setOpacity(0.7f, UpdateGUI.YES, AddToHistory.YES, true);
         assertThat(layer.getOpacity(), is(0.7f));
     }
 
     @Test
     public void testSetBlendingMode() {
-        layer.setBlendingMode(BlendingMode.DIFFERENCE, true, AddToHistory.YES, true);
+        layer.setBlendingMode(BlendingMode.DIFFERENCE, UpdateGUI.YES, AddToHistory.YES, true);
         assertSame(BlendingMode.DIFFERENCE, layer.getBlendingMode());
     }
 

@@ -24,6 +24,7 @@ import pixelitor.ImageComponents;
 import pixelitor.history.AddToHistory;
 import pixelitor.utils.BlendingModePanel;
 import pixelitor.utils.ImageSwitchListener;
+import pixelitor.utils.UpdateGUI;
 
 import static pixelitor.ImageComponents.getActiveLayer;
 
@@ -59,14 +60,14 @@ public class LayerBlendingModePanel extends BlendingModePanel implements ImageSw
     private void opacityChanged() {
         getActiveLayer().ifPresent(layer -> {
             float floatValue = getOpacity();
-            layer.setOpacity(floatValue, false, AddToHistory.YES, true);
+            layer.setOpacity(floatValue, UpdateGUI.NO, AddToHistory.YES, true);
         });
     }
 
     private void blendingModeChanged() {
         getActiveLayer().ifPresent(layer -> {
             BlendingMode blendingMode = getBlendingMode();
-            layer.setBlendingMode(blendingMode, false, AddToHistory.YES, true);
+            layer.setBlendingMode(blendingMode, UpdateGUI.NO, AddToHistory.YES, true);
         });
     }
 

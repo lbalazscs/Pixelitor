@@ -29,6 +29,7 @@ import pixelitor.layers.BlendingMode;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.UpdateGUI;
 import pixelitor.utils.Utils;
 
 import javax.imageio.ImageIO;
@@ -207,9 +208,9 @@ public class OpenRaster {
                 System.out.println("OpenRaster::readOpenRaster: blendingMode = " + blendingMode);
             }
 
-            layer.setBlendingMode(blendingMode, false, AddToHistory.NO, false);
+            layer.setBlendingMode(blendingMode, UpdateGUI.NO, AddToHistory.NO, false);
             float opacity = Utils.parseFloat(layerOpacity, 1.0f);
-            layer.setOpacity(opacity, false, AddToHistory.NO, false);
+            layer.setOpacity(opacity, UpdateGUI.NO, AddToHistory.NO, false);
             int translationX = Utils.parseInt(layerX, 0);
             int translationY = Utils.parseInt(layerY, 0);
             // TODO assuming that there is no layer mask

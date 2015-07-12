@@ -36,6 +36,7 @@ import pixelitor.selection.Selection;
 import pixelitor.tools.FgBgColorSelector;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.HistogramsPanel;
+import pixelitor.utils.UpdateGUI;
 
 import java.awt.AlphaComposite;
 import java.awt.Composite;
@@ -169,7 +170,7 @@ public abstract class Layer implements Serializable {
         }
     }
 
-    public void setOpacity(float newOpacity, boolean updateGUI, AddToHistory addToHistory, boolean updateImage) {
+    public void setOpacity(float newOpacity, UpdateGUI updateGUI, AddToHistory addToHistory, boolean updateImage) {
         assert newOpacity <= 1.0f : "newOpacity = " + newOpacity;
         assert newOpacity >= 0.0f : "newOpacity = " + newOpacity;
 
@@ -180,7 +181,7 @@ public abstract class Layer implements Serializable {
 
         this.opacity = newOpacity;
 
-        if (updateGUI) {
+        if (updateGUI.isYes()) {
             LayerBlendingModePanel.INSTANCE.setOpacity(newOpacity);
         }
         if(updateImage) {
@@ -188,14 +189,14 @@ public abstract class Layer implements Serializable {
         }
     }
 
-    public void setBlendingMode(BlendingMode mode, boolean updateGUI, AddToHistory addToHistory, boolean updateImage) {
+    public void setBlendingMode(BlendingMode mode, UpdateGUI updateGUI, AddToHistory addToHistory, boolean updateImage) {
         if (addToHistory.isYes()) {
             LayerBlendingEdit edit = new LayerBlendingEdit(this, blendingMode);
             History.addEdit(edit);
         }
 
         this.blendingMode = mode;
-        if (updateGUI) {
+        if (updateGUI.isYes()) {
             LayerBlendingModePanel.INSTANCE.setBlendingModeNotUI(mode);
         }
 

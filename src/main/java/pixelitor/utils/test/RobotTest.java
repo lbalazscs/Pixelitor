@@ -70,6 +70,7 @@ import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.GUIUtils;
 import pixelitor.utils.MemoryInfo;
+import pixelitor.utils.UpdateGUI;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -654,10 +655,10 @@ public class RobotTest {
 
         if (rand.nextBoolean()) {
             logRobotEvent("layer merge down");
-            comp.mergeDown();
+            comp.mergeDown(UpdateGUI.YES);
         } else {
             logRobotEvent("layer flatten image");
-            comp.flattenImage(true);
+            comp.flattenImage(UpdateGUI.YES);
         }
     }
 
@@ -737,16 +738,16 @@ public class RobotTest {
             if (f > opacity) {
                 // always increase
                 logRobotEvent("random increase opacity");
-                layer.setOpacity(f, true, AddToHistory.YES, true);
+                layer.setOpacity(f, UpdateGUI.YES, AddToHistory.YES, true);
             } else if (rand.nextFloat() > 0.75) { // sometimes decrease
                 logRobotEvent("random decrease opacity");
-                layer.setOpacity(f, true, AddToHistory.YES, true);
+                layer.setOpacity(f, UpdateGUI.YES, AddToHistory.YES, true);
             }
         } else {
             logRobotEvent("random change layer blending mode");
             BlendingMode[] blendingModes = BlendingMode.values();
             BlendingMode randomBlendingMode = blendingModes[rand.nextInt(blendingModes.length)];
-            layer.setBlendingMode(randomBlendingMode, true, AddToHistory.YES, true);
+            layer.setBlendingMode(randomBlendingMode, UpdateGUI.YES, AddToHistory.YES, true);
         }
     }
 

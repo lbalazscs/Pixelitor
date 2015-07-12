@@ -18,6 +18,7 @@
 package pixelitor.filters.gui;
 
 import pixelitor.utils.DefaultButton;
+import pixelitor.utils.UpdateGUI;
 
 import javax.swing.*;
 import java.awt.FlowLayout;
@@ -37,7 +38,7 @@ public class BooleanSelector extends JPanel implements ParamGUI {
         checkBox.setSelected(model.isChecked());
         add(checkBox);
 
-        checkBox.addActionListener(e -> model.setValue(checkBox.isSelected(), false, true));
+        checkBox.addActionListener(e -> model.setValue(checkBox.isSelected(), UpdateGUI.NO, true));
 
         if (addDefaultButton) {
             add(Box.createHorizontalStrut(50));

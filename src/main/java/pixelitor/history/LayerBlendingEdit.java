@@ -18,6 +18,7 @@ package pixelitor.history;
 
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.Layer;
+import pixelitor.utils.UpdateGUI;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -61,7 +62,7 @@ public class LayerBlendingEdit extends PixelitorEdit {
 
     private void swapBlendingModes() {
         BlendingMode tmp = layer.getBlendingMode();
-        layer.setBlendingMode(backupBlendingMode, true, AddToHistory.NO, true);
+        layer.setBlendingMode(backupBlendingMode, UpdateGUI.YES, AddToHistory.NO, true);
         backupBlendingMode = tmp;
         History.notifyMenus(this);
     }

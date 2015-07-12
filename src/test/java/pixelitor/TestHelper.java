@@ -19,7 +19,6 @@ package pixelitor;
 
 import pixelitor.history.AddToHistory;
 import pixelitor.layers.ImageLayer;
-import pixelitor.utils.Tests3x3;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -32,7 +31,7 @@ public class TestHelper {
         BufferedImage image = createTestImage();
         ImageLayer layer = new ImageLayer(comp, image, layerName, null);
         comp.addLayerNoGUI(layer);
-        comp.setActiveLayer(layer, AddToHistory.NO);
+
         return layer;
     }
 
@@ -70,15 +69,4 @@ public class TestHelper {
         return createTestImage().createGraphics();
     }
 
-    public static Composition createTwoLayer3x3Comp() {
-        BufferedImage img1 = Tests3x3.getStandardImage1();
-        Composition comp = Composition.fromImage(img1, null, "Test");
-
-        BufferedImage img2 = Tests3x3.getStandardImage2();
-        ImageLayer layer2 = new ImageLayer(comp, img2, "Layer 2", null);
-        comp.addLayerNoGUI(layer2);
-        comp.setActiveLayer(layer2, AddToHistory.NO);
-
-        return comp;
-    }
 }

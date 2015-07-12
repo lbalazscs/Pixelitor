@@ -45,6 +45,7 @@ import pixelitor.selection.SelectionType;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.HistogramsPanel;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.UpdateGUI;
 import pixelitor.utils.Utils;
 
 import java.awt.Component;
@@ -170,7 +171,8 @@ public class Composition implements Serializable {
      * Adds a layer to the top without updating any GUI
      */
     public void addLayerNoGUI(Layer newLayer) {
-        layerList.add(newLayer);
+        layerList.add(newLayer); // adds it to top, ignoring the active layer position
+        setActiveLayer(newLayer, AddToHistory.NO);
     }
 
     public void addLayer(Layer newLayer, AddToHistory addToHistory, boolean updateHistogram, boolean bellowActive) {
@@ -339,8 +341,8 @@ public class Composition implements Serializable {
         return layerList.get(i);
     }
 
-    public void flattenImage(boolean updateGUI) {
-        if (updateGUI) {
+    public void flattenImage(UpdateGUI updateGUI) {
+        if (updateGUI.isYes()) {
             assert isActiveComp();
         }
 
@@ -357,13 +359,13 @@ public class Composition implements Serializable {
         for (int i = nrLayers - 1; i >= 0; i--) { // remove the rest
             removeLayer(i);
         }
-        if (updateGUI) {
+        if (updateGUI.isYes()) {
             AppLogic.activeCompLayerCountChanged(this, 1);
             History.addEdit(new NotUndoableEdit(this, "Flatten Image"));
         }
     }
 
-    public void mergeDown() {
+    public void mergeDown(UpdateGUI updateGUI) {
         assert checkInvariant();
 
         int activeIndex = layerList.indexOf(activeLayer);
@@ -378,7 +380,8 @@ public class Composition implements Serializable {
                     activeLayer.mergeDownOn(imageLayerBellow);
                     imageLayerBellow.updateIconImage();
                     Layer mergedLayer = activeLayer;
-                    removeActiveLayer();
+
+                    removeActiveLayer(updateGUI);
 
                     PixelitorEdit edit = new CompoundEdit(this, "Merge Down",
                             new ImageEdit("", this, imageLayerBellow, backupImage, false),
@@ -570,14 +573,14 @@ public class Composition implements Serializable {
 
     private void removeLayer(int layerIndex) {
         Layer layer = layerList.get(layerIndex);
-        removeLayer(layer, AddToHistory.YES);
+        removeLayer(layer, AddToHistory.YES, UpdateGUI.YES);
     }
 
-    public void removeActiveLayer() {
-        removeLayer(activeLayer, AddToHistory.YES);
+    public void removeActiveLayer(UpdateGUI updateGUI) {
+        removeLayer(activeLayer, AddToHistory.YES, updateGUI);
     }
 
-    public void removeLayer(Layer layerToBeRemoved, AddToHistory addToHistory) {
+    public void removeLayer(Layer layerToBeRemoved, AddToHistory addToHistory, UpdateGUI updateGUI) {
         if (layerList.size() < 2) {
             throw new IllegalStateException("there are " + layerList.size() + " layers");
         }
@@ -599,14 +602,16 @@ public class Composition implements Serializable {
             }
         }
 
-        LayerButton button = layerToBeRemoved.getLayerButton();
-        ic.deleteLayerButton(button);
+        if(updateGUI.isYes()) {
+            LayerButton button = layerToBeRemoved.getLayerButton();
+            ic.deleteLayerButton(button);
 
-        if (isActiveComp()) {
-            AppLogic.activeCompLayerCountChanged(this, layerList.size());
+            if (isActiveComp()) {
+                AppLogic.activeCompLayerCountChanged(this, layerList.size());
+            }
+
+            imageChanged(FULL);
         }
-
-        imageChanged(FULL);
     }
 
     public void dispose() {
