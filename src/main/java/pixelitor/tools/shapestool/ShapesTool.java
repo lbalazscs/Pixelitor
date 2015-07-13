@@ -296,7 +296,7 @@ public class ShapesTool extends Tool {
         BufferedImage bi = layer.getImage();
         Graphics2D g2 = bi.createGraphics();
         g2.translate(translationX, translationY);
-        comp.setSelectionClipping(g2, null);
+        comp.applySelectionClipping(g2, null);
 
         paintShape(g2, userDrag, comp);
         g2.dispose();

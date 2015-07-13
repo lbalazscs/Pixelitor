@@ -22,9 +22,11 @@ import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.history.LinkLayerMaskEdit;
 import pixelitor.history.PixelitorEdit;
+import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
@@ -56,10 +58,6 @@ public class LayerMask extends ImageLayer {
 
     public LayerMask(Composition comp, BufferedImage bwImage, Layer layer) {
         super(comp, bwImage, layer.getName() + " MASK", layer);
-    }
-
-    public BufferedImage getTransparencyImage() {
-        return transparencyImage;
     }
 
     public void applyToImage(BufferedImage in) {
@@ -142,6 +140,53 @@ public class LayerMask extends ImageLayer {
         if (addToHistory.isYes()) {
             PixelitorEdit edit = new LinkLayerMaskEdit(comp, this);
             History.addEdit(edit);
+        }
+    }
+
+    @Override
+    public TmpDrawingLayer createTmpDrawingLayer(Composite c, boolean respectSelection) {
+        tmpDrawingLayer = new FakeTmpDrawingLayer(this, respectSelection);
+        return tmpDrawingLayer;
+    }
+
+    @Override
+    public void mergeTmpDrawingLayerDown() {
+        updateIconImage();
+    }
+
+    @Override
+    protected void paintLayerOnGraphicsWOTmpLayer(Graphics2D g, boolean firstVisibleLayer, BufferedImage visibleImage) {
+        if (Tools.isShapesDrawing()) {
+            paintDraggedShapesIntoActiveLayer(g, visibleImage, firstVisibleLayer);
+        } else { // the simple case
+            g.drawImage(visibleImage, getTranslationX(), getTranslationY(), null);
+        }
+    }
+
+    @Override
+    protected void paintDraggedShapesIntoActiveLayer(Graphics2D g, BufferedImage visibleImage, boolean firstVisibleLayer) {
+        g.drawImage(visibleImage, getTranslationX(), getTranslationY(), null);
+        Tools.SHAPES.paintOverLayer(g, comp);
+    }
+
+    public BufferedImage getTransparencyImage() {
+        if(!parent.isMaskEditing() || !Tools.isShapesDrawing()) {
+            // simple case
+            return transparencyImage;
+        } else { // drawing with the shapes tool while in Ctrl-3 mode
+
+            // Create a temporary image that shows how the image would look like
+            // if the shapes tool would draw directly into the mask image
+            BufferedImage tmp = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
+            Graphics2D tmpG = tmp.createGraphics();
+            tmpG.drawImage(image, 0, 0, null);
+            Tools.SHAPES.paintOverLayer(tmpG, comp);
+            tmpG.dispose();
+
+            // ... and return a transparency image based on it
+            WritableRaster raster = tmp.getRaster();
+            BufferedImage tmpTransparency = new BufferedImage(transparencyColorModel, raster, false, null);
+            return tmpTransparency;
         }
     }
 }

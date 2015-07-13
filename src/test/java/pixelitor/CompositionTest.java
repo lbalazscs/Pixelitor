@@ -380,7 +380,7 @@ public class CompositionTest {
     @Test
     public void testSetSelectionClipping() {
         Graphics2D g2 = TestHelper.createGraphics();
-        comp.setSelectionClipping(g2, AffineTransform.getTranslateInstance(1, 1));
+        comp.applySelectionClipping(g2, AffineTransform.getTranslateInstance(1, 1));
         comp.checkInvariant();
     }
 

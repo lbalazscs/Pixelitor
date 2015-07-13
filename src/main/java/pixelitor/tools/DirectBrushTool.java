@@ -61,7 +61,7 @@ public abstract class DirectBrushTool extends AbstractBrushTool {
         BufferedImage drawImage = layer.getCanvasSizedSubImage();
         graphics = drawImage.createGraphics();
         if (respectSelection) {
-            comp.setSelectionClipping(graphics, null);
+            comp.applySelectionClipping(graphics, null);
         }
         brush.setTarget(comp, graphics);
 

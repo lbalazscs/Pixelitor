@@ -61,7 +61,7 @@ public abstract class Layer implements Serializable {
 
     protected Canvas canvas;
     String name;
-    private final Layer parent;
+    protected final Layer parent;
     private boolean visible = true;
     final Composition comp;
     protected LayerMask mask;
@@ -351,7 +351,7 @@ public abstract class Layer implements Serializable {
         } else {
             if (!useMask()) {
                 setupDrawingComposite(g, firstVisibleLayer);
-                paintLayerOnGraphics(g);
+                paintLayerOnGraphics(g, firstVisibleLayer);
             } else {
                 paintLayerOnGraphicsWithMask(firstVisibleLayer, g);
             }
@@ -362,7 +362,7 @@ public abstract class Layer implements Serializable {
     // used by the non-adjustment stuff
     // This method assumes that the composite of the graphics is already
     // set up according to the transparency and blending mode
-    public abstract void paintLayerOnGraphics(Graphics2D g);
+    public abstract void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer);
 
     /**
      * Returns the masked image for the non-adjustment case.
@@ -376,7 +376,7 @@ public abstract class Layer implements Serializable {
         // TODO the masked image should be cached
         BufferedImage maskedImage = new BufferedImage(canvas.getWidth(), canvas.getHeight(), TYPE_INT_ARGB);
         Graphics2D mig = maskedImage.createGraphics();
-        paintLayerOnGraphics(mig);
+        paintLayerOnGraphics(mig, firstVisibleLayer);
         mig.setComposite(DstIn);
         mig.drawImage(mask.getTransparencyImage(), mask.getTranslationX(), mask.getTranslationY(), null);
         mig.dispose();

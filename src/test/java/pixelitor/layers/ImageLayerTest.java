@@ -162,15 +162,15 @@ public class ImageLayerTest {
 
     @Test
     public void testCreateTmpDrawingLayer() {
-        TmpDrawingLayer drawingLayer1 = layer.createTmpDrawingLayer(AlphaComposite.SrcOver, true);
-        assertNotNull(drawingLayer1);
-        TmpDrawingLayer drawingLayer2 = layer.createTmpDrawingLayer(AlphaComposite.SrcOver, false);
-        assertNotNull(drawingLayer2);
+        TmpDrawingLayer tmpDrawingLayer1 = layer.createTmpDrawingLayer(AlphaComposite.SrcOver, true);
+        assertNotNull(tmpDrawingLayer1);
+        TmpDrawingLayer tmpDrawingLayer2 = layer.createTmpDrawingLayer(AlphaComposite.SrcOver, false);
+        assertNotNull(tmpDrawingLayer2);
     }
 
     @Test
     public void testMergeTmpDrawingImageDown() {
-        layer.mergeTmpDrawingImageDown();
+        layer.mergeTmpDrawingLayerDown();
     }
 
     @Test

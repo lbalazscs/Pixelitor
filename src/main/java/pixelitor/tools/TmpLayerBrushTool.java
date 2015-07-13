@@ -55,7 +55,7 @@ public abstract class TmpLayerBrushTool extends AbstractBrushTool {
     void mergeTmpLayer(Composition comp) {
         if (graphics != null) {
             ImageLayer imageLayer = comp.getActiveImageLayerOrMask();
-            imageLayer.mergeTmpDrawingImageDown();
+            imageLayer.mergeTmpDrawingLayerDown();
         }
     }
 

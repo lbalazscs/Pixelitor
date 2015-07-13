@@ -77,7 +77,7 @@ public class BrushTool extends TmpLayerBrushTool {
 
         super.drawBrushStrokeProgrammatically(comp, startingPoint, endPoint);
 
-        comp.getActiveImageLayerOrMask().mergeTmpDrawingImageDown();
+        comp.getActiveImageLayerOrMask().mergeTmpDrawingLayerDown();
     }
 
     private void setupDrawingColor(MouseEvent e) {

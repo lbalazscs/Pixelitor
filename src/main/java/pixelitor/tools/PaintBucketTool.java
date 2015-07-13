@@ -111,7 +111,7 @@ public class PaintBucketTool extends Tool {
             saveSubImageForUndo(original, affectedArea);
 
             Graphics2D g = image.createGraphics();
-            comp.setSelectionClipping(g, translationTransform);
+            comp.applySelectionClipping(g, translationTransform);
             g.setComposite(AlphaComposite.Src);
             g.drawImage(workingCopy, 0, 0, null);
             g.dispose();
@@ -124,7 +124,8 @@ public class PaintBucketTool extends Tool {
     }
 
     /**
-     * Uses the "Scanline fill" algorithm described at http://en.wikipedia.org/wiki/Flood_fill
+     * Uses the "Scanline fill" algorithm described at
+     * http://en.wikipedia.org/wiki/Flood_fill
      */
     private static Rectangle scanlineFloodFill(BufferedImage img, int x, int y, Color newColor, int tolerance) {
         int minX = x;
@@ -141,7 +142,6 @@ public class PaintBucketTool extends Tool {
 
         int rgbToBeReplaced = img.getRGB(x, y);
         int newRGB = newColor.getRGB();
-//        System.out.println("PaintBucketTool.scanlineFloodFill newRGB = " + newRGB);
 
         if (rgbToBeReplaced == newRGB) {
             return null;
@@ -149,12 +149,12 @@ public class PaintBucketTool extends Tool {
 
         int[] pixels = ImageUtils.getPixelsAsArray(img);
 
-        // Needed because the tolerance: we cannot assume that if the pixel is within the target range, it has been processed
+        // Needed because the tolerance: we cannot assume that
+        // if the pixel is within the target range, it has been processed
         boolean[] checkedPixels = new boolean[pixels.length];
         for (int i = 0; i < checkedPixels.length; i++) {
             checkedPixels[i] = false;
         }
-
 
         Deque<Point> stack = new ArrayDeque<>(); // the double-ended queue is used as a simple LIFO stack
         stack.push(new Point(x, y));

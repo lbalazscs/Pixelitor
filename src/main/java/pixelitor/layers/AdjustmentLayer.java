@@ -72,7 +72,7 @@ public class AdjustmentLayer extends Layer {
     }
 
     @Override
-    public void paintLayerOnGraphics(Graphics2D g) {
+    public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
         throw new UnsupportedOperationException();
     }
 }

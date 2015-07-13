@@ -149,7 +149,7 @@ public class GradientTool extends Tool {
         int height = tmpDrawingLayer.getHeight();
         g.fillRect(0, 0, width, height);
         g.dispose();
-        layer.mergeTmpDrawingImageDown();
+        layer.mergeTmpDrawingLayerDown();
     }
 
     @Override

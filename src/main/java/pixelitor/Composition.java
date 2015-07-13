@@ -724,7 +724,7 @@ public class Composition implements Serializable {
         return layer == activeLayer;
     }
 
-    public void setSelectionClipping(Graphics2D g2, AffineTransform at) {
+    public void applySelectionClipping(Graphics2D g2, AffineTransform at) {
         if (selection != null) {
             Shape shape;
             if (at != null) {
