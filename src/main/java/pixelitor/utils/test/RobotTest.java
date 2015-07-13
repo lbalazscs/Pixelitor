@@ -43,8 +43,8 @@ import pixelitor.filters.gui.ParamSetState;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
+import pixelitor.layers.AddLayerMaskAction;
 import pixelitor.layers.AddNewLayerAction;
-import pixelitor.layers.AddNewLayerMaskAction;
 import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.DeleteActiveLayerAction;
@@ -928,7 +928,7 @@ public class RobotTest {
     private static void randomLayerMaskAction() {
         Layer layer = ImageComponents.getActiveLayer().get();
         if (!layer.hasMask()) {
-            AddNewLayerMaskAction.INSTANCE.actionPerformed(null);
+            AddLayerMaskAction.INSTANCE.actionPerformed(null);
         } else {
             if (layer instanceof ImageLayer) {
                 double d = rand.nextDouble();

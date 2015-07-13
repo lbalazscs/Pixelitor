@@ -47,6 +47,8 @@ public class ToolsPanel extends JPanel {
         setDefaultTool();
 
         // in the menu it was added using T, not t
+        // TODO when moving to 4.0 this action will not be needed, use
+        // AddTextLayerAction.INSTANCE instead
         Action textToolAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {

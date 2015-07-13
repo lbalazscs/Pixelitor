@@ -64,8 +64,9 @@ public class LayersContainer extends JPanel implements ImageSwitchListener {
         southPanel.add(duplicateButton);
 
         if (Build.advancedLayersEnabled()) {
-            JButton addLayerMaskButton = createButtonFromAction(AddNewLayerMaskAction.INSTANCE);
-            southPanel.add(addLayerMaskButton);
+            southPanel.add(createButtonFromAction(AddLayerMaskAction.INSTANCE));
+            southPanel.add(createButtonFromAction(AddTextLayerAction.INSTANCE));
+            southPanel.add(createButtonFromAction(AddAdjLayerAction.INSTANCE));
         }
 
         return southPanel;
