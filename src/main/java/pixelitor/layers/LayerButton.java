@@ -205,7 +205,8 @@ public class LayerButton extends JToggleButton {
                         return;
                     }
                     BufferedImage iconImage = thumb;
-                    if (!layer.isMaskEnabled()) {
+                    boolean disabledMask = !layer.getParent().isMaskEnabled();
+                    if (disabledMask) {
                         int thumbWidth = thumb.getWidth();
                         int thumbHeight = thumb.getHeight();
                         // thumb is GRAY image, this one needs colors

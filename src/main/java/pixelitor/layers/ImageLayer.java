@@ -337,6 +337,11 @@ public class ImageLayer extends ContentLayer {
         assert previewImage != null;
 
         setState(NORMAL);
+
+        // so that layer mask transparency image is regenerated
+        // from the real image after the previews
+        visibleImageChanged();
+
         previewImage = null;
         comp.imageChanged(FULL);
     }
