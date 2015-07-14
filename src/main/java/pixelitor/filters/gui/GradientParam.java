@@ -38,6 +38,7 @@ public class GradientParam extends AbstractFilterParam {
     private GradientSlider gradientSlider;
     private final float[] defaultThumbPositions;
     private final Color[] defaultColors;
+    private final boolean ignoreRandomize;
     private boolean trigger = true; // whether the running of the filter should be triggered
 
     public GradientParam(String name, Color firstColor, Color secondColor) {
@@ -45,9 +46,14 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     public GradientParam(String name, float[] defaultThumbPositions, Color[] defaultColors) {
+        this(name, defaultThumbPositions, defaultColors, false);
+    }
+
+    public GradientParam(String name, float[] defaultThumbPositions, Color[] defaultColors, boolean ignoreRandomize) {
         super(name);
         this.defaultThumbPositions = defaultThumbPositions;
         this.defaultColors = defaultColors;
+        this.ignoreRandomize = ignoreRandomize;
 
         // has to be created in the constructor because getValue() can be called early
         createGradientSlider(defaultThumbPositions, defaultColors);
@@ -107,14 +113,16 @@ public class GradientParam extends AbstractFilterParam {
 
     @Override
     public void randomize() {
-        Color[] randomColors = new Color[defaultThumbPositions.length];
-        for (int i = 0; i < randomColors.length; i++) {
-            randomColors[i] = ColorUtils.getRandomColor(false);
-        }
+        if (!ignoreRandomize) {
+            Color[] randomColors = new Color[defaultThumbPositions.length];
+            for (int i = 0; i < randomColors.length; i++) {
+                randomColors[i] = ColorUtils.getRandomColor(false);
+            }
 
-        trigger = false;
-        gradientSlider.setValues(defaultThumbPositions, randomColors);
-        trigger = true;
+            trigger = false;
+            gradientSlider.setValues(defaultThumbPositions, randomColors);
+            trigger = true;
+        }
     }
 
     @Override

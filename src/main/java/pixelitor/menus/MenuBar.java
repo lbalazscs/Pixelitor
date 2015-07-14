@@ -122,6 +122,7 @@ public class MenuBar extends JMenuBar {
     private static final KeyStroke CTRL_G = KeyStroke.getKeyStroke('G', InputEvent.CTRL_MASK);
     private static final KeyStroke CTRL_I = KeyStroke.getKeyStroke('I', InputEvent.CTRL_MASK);
     private static final KeyStroke CTRL_J = KeyStroke.getKeyStroke('J', InputEvent.CTRL_MASK);
+    private static final KeyStroke CTRL_K = KeyStroke.getKeyStroke('K', InputEvent.CTRL_MASK);
     private static final KeyStroke CTRL_L = KeyStroke.getKeyStroke('L', InputEvent.CTRL_MASK);
     private static final KeyStroke CTRL_N = KeyStroke.getKeyStroke('N', InputEvent.CTRL_MASK);
     private static final KeyStroke CTRL_O = KeyStroke.getKeyStroke('O', InputEvent.CTRL_MASK);
@@ -516,6 +517,7 @@ public class MenuBar extends JMenuBar {
         createMenuItem(new JHCells(), renderSubmenu);
         createMenuItem(new JHBrushedMetal(), renderSubmenu);
         createMenuItem(new Voronoi(), renderSubmenu);
+        createMenuItem(new FractalTree(), renderSubmenu);
 
         filterMenu.add(renderSubmenu);
     }
@@ -1111,7 +1113,6 @@ public class MenuBar extends JMenuBar {
 
         createMenuItem(new EmptyPolar(), experimentalSubmenu);
         createMenuItem(new JHCheckerFilter(), experimentalSubmenu);
-
     }
 
     private static void initTestSubmenu(JMenu developMenu, PixelitorWindow pixelitorWindow) {
