@@ -18,10 +18,14 @@
 package pixelitor.filters.comp;
 
 import pixelitor.Composition;
-import pixelitor.history.OneLayerUndoableEdit;
+import pixelitor.history.History;
+import pixelitor.history.MultiLayerEdit;
 import pixelitor.layers.ContentLayer;
+import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
+
+import java.awt.image.BufferedImage;
 
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
 import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
@@ -53,12 +57,19 @@ public class Flip extends CompAction {
 
     @Override
     public void transform(Composition comp) {
-        OneLayerUndoableEdit.createAndAddToHistory(comp, "Flip", true, false, true);
         int nrLayers = comp.getNrLayers();
+
+        // Saved before the change, but the edit is
+        // created after the change.
+        // This way no image copy is necessary.
+        BufferedImage backupImage = null;
 
         for (int i = 0; i < nrLayers; i++) {
             Layer layer = comp.getLayer(i);
             if (layer instanceof ContentLayer) {
+                if (layer instanceof ImageLayer) {
+                    backupImage = ((ImageLayer) layer).getImage();
+                }
                 ContentLayer contentLayer = (ContentLayer) layer;
                 contentLayer.flip(direction);
             }
@@ -67,6 +78,9 @@ public class Flip extends CompAction {
                 mask.flip(direction);
             }
         }
+
+        MultiLayerEdit edit = new MultiLayerEdit(comp, "Flip", backupImage, null);
+        History.addEdit(edit);
 
         comp.setDirty(true);
         comp.imageChanged(REPAINT);

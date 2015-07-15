@@ -19,9 +19,14 @@ package pixelitor.filters.comp;
 
 import pixelitor.AppLogic;
 import pixelitor.Composition;
-import pixelitor.history.OneLayerUndoableEdit;
+import pixelitor.history.CanvasChangeEdit;
+import pixelitor.history.History;
+import pixelitor.history.MultiLayerEdit;
 import pixelitor.layers.ContentLayer;
+import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
+
+import java.awt.image.BufferedImage;
 
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
 
@@ -42,15 +47,20 @@ public class Rotate extends CompAction {
     @Override
     public void transform(Composition comp) {
 
-        OneLayerUndoableEdit.createAndAddToHistory(comp, "Rotate", true, false, true);
         int nrLayers = comp.getNrLayers();
 
         int canvasWidth = comp.getCanvasWidth();
         int canvasHeight = comp.getCanvasHeight();
 
+        BufferedImage backupImage = null;
+        CanvasChangeEdit canvasChangeEdit = new CanvasChangeEdit("", comp);
+
         for (int i = 0; i < nrLayers; i++) {
             Layer layer = comp.getLayer(i);
             if (layer instanceof ContentLayer) {
+                if (layer instanceof ImageLayer) {
+                    backupImage = ((ImageLayer) layer).getImage();
+                }
                 ContentLayer contentLayer = (ContentLayer) layer;
                 contentLayer.rotate(angleDegree);
             }
@@ -58,6 +68,10 @@ public class Rotate extends CompAction {
                 layer.getMask().rotate(angleDegree);
             }
         }
+
+        MultiLayerEdit edit = new MultiLayerEdit(comp, "Rotate", backupImage,
+                canvasChangeEdit);
+        History.addEdit(edit);
 
         if (!comp.hasSelection()) {
             rotateCanvas(canvasWidth, canvasHeight);

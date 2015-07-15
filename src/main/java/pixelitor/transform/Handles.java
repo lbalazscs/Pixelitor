@@ -47,20 +47,20 @@ public class Handles {
     private final List<Handle> handles = Arrays.asList(upperLeft, upperRight, lowerRight, lowerLeft,
             right, upper, lower, left);
 
-    public Handles(Rectangle compSpaceRectangle) {
-        updateRect(compSpaceRectangle);
+    public Handles(Rectangle compSpaceRect) {
+        updateRect(compSpaceRect);
     }
 
     public void paint(Graphics2D g) {
         Stroke bigStroke = new BasicStroke(3);
         Stroke smallStroke = new BasicStroke(1);
 
-        drawRectangle(g, bigStroke, smallStroke);
+        drawRect(g, bigStroke, smallStroke);
         drawHandles(g, bigStroke, smallStroke);
     }
 
-    private void drawRectangle(Graphics2D g, Stroke bigStroke, Stroke smallStroke) {
-        Rectangle rect = getSelectedRectangleInComponentSpace();
+    private void drawRect(Graphics2D g, Stroke bigStroke, Stroke smallStroke) {
+        Rectangle rect = getSelectedRectInComponentSpace();
 
         g.setColor(BLACK);
         g.setStroke(bigStroke);
@@ -81,13 +81,13 @@ public class Handles {
         }
     }
 
-    private Rectangle getSelectedRectangleInComponentSpace() {
+    private Rectangle getSelectedRectInComponentSpace() {
         int upperLeftX = upperLeft.getX();
         int upperRightX = upperRight.getX();
         int upperLeftY = upperLeft.getY();
         int lowerLeftY = lowerLeft.getY();
 
-        return Utils.toPositiveRectangle(upperLeftX, upperRightX, upperLeftY, lowerLeftY);
+        return Utils.toPositiveRect(upperLeftX, upperRightX, upperLeftY, lowerLeftY);
     }
 
     /**
@@ -109,17 +109,17 @@ public class Handles {
     }
 
     // here rect must be given in component-space ("mouse") coordinates
-    public void updateRect(Rectangle compSpaceRectangle) {
-        int horizontalMidPointX = compSpaceRectangle.x + (compSpaceRectangle.width / 2);
-        int verticalMidPointY = compSpaceRectangle.y + (compSpaceRectangle.height / 2);
-        int horizontalEndPointX = compSpaceRectangle.x + compSpaceRectangle.width;
-        int verticalEndPointY = compSpaceRectangle.y + compSpaceRectangle.height;
-        upperLeft.setPosition(compSpaceRectangle.x, compSpaceRectangle.y);
-        upper.setPosition(horizontalMidPointX, compSpaceRectangle.y);
-        upperRight.setPosition(horizontalEndPointX, compSpaceRectangle.y);
+    public void updateRect(Rectangle compSpaceRect) {
+        int horizontalMidPointX = compSpaceRect.x + (compSpaceRect.width / 2);
+        int verticalMidPointY = compSpaceRect.y + (compSpaceRect.height / 2);
+        int horizontalEndPointX = compSpaceRect.x + compSpaceRect.width;
+        int verticalEndPointY = compSpaceRect.y + compSpaceRect.height;
+        upperLeft.setPosition(compSpaceRect.x, compSpaceRect.y);
+        upper.setPosition(horizontalMidPointX, compSpaceRect.y);
+        upperRight.setPosition(horizontalEndPointX, compSpaceRect.y);
         right.setPosition(horizontalEndPointX, verticalMidPointY);
-        left.setPosition(compSpaceRectangle.x, verticalMidPointY);
-        lowerLeft.setPosition(compSpaceRectangle.x, verticalEndPointY);
+        left.setPosition(compSpaceRect.x, verticalMidPointY);
+        lowerLeft.setPosition(compSpaceRect.x, verticalEndPointY);
         lower.setPosition(horizontalMidPointX, verticalEndPointY);
         lowerRight.setPosition(horizontalEndPointX, verticalEndPointY);
     }

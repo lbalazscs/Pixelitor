@@ -42,10 +42,10 @@ public class TransformSupport {
     // true while the user is adjusting the handles
     private boolean adjusting;
 
-    public TransformSupport(Rectangle compSpaceRectangle, Rectangle imageSpaceRect) {
-        this.compSpaceRect = compSpaceRectangle;
+    public TransformSupport(Rectangle compSpaceRect, Rectangle imageSpaceRect) {
+        this.compSpaceRect = compSpaceRect;
         this.imageSpaceRect = imageSpaceRect;
-        handles = new Handles(compSpaceRectangle);
+        handles = new Handles(compSpaceRect);
     }
 
     public void paintHandles(Graphics2D g) {
@@ -108,7 +108,7 @@ public class TransformSupport {
         handles.setCursorForPoint(e.getX(), e.getY(), ic);
     }
 
-    public Rectangle getImageSpaceRectangle(ImageDisplay ic) {
+    public Rectangle getImageSpaceRect(ImageDisplay ic) {
         if(adjusting) {
             recalculateImageSpaceRect(ic);
         }
@@ -129,7 +129,6 @@ public class TransformSupport {
 
     /**
      * Used only while the image component is resized
-     * @param lastCropRectangle - the last crop rectangle in component space
      */
     public void setComponentSpaceRect(Rectangle compSpaceRect) {
         this.compSpaceRect = compSpaceRect;
@@ -137,7 +136,7 @@ public class TransformSupport {
     }
 
     private void recalculateImageSpaceRect(ImageDisplay ic) {
-        imageSpaceRect = Utils.toPositiveRectangle(ic.fromComponentToImageSpace(compSpaceRect));
+        imageSpaceRect = Utils.toPositiveRect(ic.fromComponentToImageSpace(compSpaceRect));
     }
 
     public void arrowKeyPressed(ArrowKey key, ImageComponent ic) {

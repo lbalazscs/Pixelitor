@@ -122,8 +122,8 @@ public class ImageComponents {
         try {
             Optional<Composition> opt = getActiveComp();
             opt.ifPresent(comp -> {
-                Rectangle cropRectangle = Tools.CROP.getCropRectangle(comp.getIC());
-                CompositionUtils.cropImage(comp, cropRectangle, false, allowGrowing);
+                Rectangle cropRect = Tools.CROP.getCropRect(comp.getIC());
+                CompositionUtils.cropImage(comp, cropRect, false, allowGrowing);
             });
         } catch (Exception ex) {
             Dialogs.showExceptionDialog(ex);

@@ -68,7 +68,7 @@ public class History {
 
         if (Build.CURRENT != Build.FINAL) {
             DebugEventQueue.post(new HistoryEvent(edit));
-            ConsistencyChecks.checkAll();
+            ConsistencyChecks.checkAll(false);
         }
     }
 

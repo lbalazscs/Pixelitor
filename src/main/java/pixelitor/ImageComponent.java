@@ -514,7 +514,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         Point imageSpacePoint = fromComponentToImageSpace(new Point(mouseX, mouseY), oldZoom);
         Point newComponentSpacePoint = fromImageToComponentSpace(imageSpacePoint, newZoom);
 
-        Rectangle viewRect = getViewRectangle();
+        Rectangle viewRect = getViewRect();
 
         Rectangle areaThatShouldBeVisible = new Rectangle(
                 newComponentSpacePoint.x - viewRect.width / 2,
@@ -619,7 +619,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
      * the JScrollPane might show only a part of it
      */
     @Override
-    public Rectangle getViewRectangle() {
+    public Rectangle getViewRect() {
         return internalFrame.getScrollPane().getViewport().getViewRect();
     }
 

@@ -27,6 +27,8 @@ public class FractalTree extends FilterWithParametrizedGUI {
     private RangeParam width = new RangeParam("Width (%)", 100, 300, 100);
     private RangeParam zoom = new RangeParam("Zoom", 1, 20, 10);
     private RangeParam curvedness = new RangeParam("Curvedness", 0, 50, 10);
+    private RangeParam gravityParam = new RangeParam("Gravity", -50, 50, 0);
+    private RangeParam windParam = new RangeParam("Wind", -50, 50, 0);
 
     GradientParam colors = new GradientParam("Colors",
             new float[]{0.25f, 0.75f},
@@ -36,10 +38,12 @@ public class FractalTree extends FilterWithParametrizedGUI {
         super("Fractal Tree", true, false);
         setParamSet(new ParamSet(
                 iterations,
+                zoom,
                 randomnessParam,
                 curvedness,
                 angle,
-                zoom,
+                gravityParam,
+                windParam,
                 width,
                 colors
         ).withAction(ReseedSupport.createAction()));
@@ -57,7 +61,7 @@ public class FractalTree extends FilterWithParametrizedGUI {
         if (rand.nextBoolean()) {
             c = -c;
         }
-        drawTree(g, src.getWidth() / 2, src.getHeight(), -90, iterations.getValue(), rand, c);
+        drawTree(g, src.getWidth() / 2, src.getHeight(), 270, iterations.getValue(), rand, c);
 
         g.dispose();
 
@@ -69,6 +73,8 @@ public class FractalTree extends FilterWithParametrizedGUI {
             return;
         }
         c = -c; // change the direction of the curvature in each iteration
+
+        angle = considerGravityAndWind(angle, depth);
 
         g.setStroke(new BasicStroke(depth * width.getValueAsPercentage(), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
@@ -84,6 +90,42 @@ public class FractalTree extends FilterWithParametrizedGUI {
         int split = this.angle.getValue();
         drawTree(g, x2, y2, angle - split + calcAngleRandomness(rand), depth - 1, rand, c);
         drawTree(g, x2, y2, angle + split + calcAngleRandomness(rand), depth - 1, rand, c);
+    }
+
+    private double considerGravityAndWind(double angle, int depth) {
+        int gravity = gravityParam.getValue();
+        int wind = windParam.getValue();
+
+
+        if (gravity != 0 || wind != 0) {
+            // make sure we have the angle in the range 0-360
+            angle += 720;
+            angle = angle % 360;
+
+            // the lower the depth is (we are towards leaves),
+            // the stronger the gravity and wind effect
+            double effectStrength = (iterations.getValue() - depth) / 500.0;
+            double gravityStrength = effectStrength * gravity;
+            double windStrength = effectStrength * wind;
+
+            if (angle < 90) {
+                angle += (90 - angle) * gravityStrength;
+                angle -= (angle / 90.0) * windStrength;
+            } else if (angle < 180) {
+                angle -= (angle - 90) * gravityStrength;
+                angle -= (180 - angle) * windStrength;
+            } else if (angle < 270) {
+                angle -= (270 - angle) * gravityStrength;
+                angle += (angle - 180) * windStrength;
+            } else if (angle <= 360) {
+                angle += (angle - 270) * gravityStrength;
+                angle += (360 - angle) * windStrength;
+            } else {
+                throw new IllegalStateException("angle = " + angle);
+            }
+        }
+
+        return angle;
     }
 
     private void connectPoints(Graphics2D g, int x1, int y1, int x2, int y2, float c) {

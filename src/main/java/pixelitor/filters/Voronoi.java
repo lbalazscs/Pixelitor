@@ -46,7 +46,7 @@ public class Voronoi extends FilterWithParametrizedGUI {
     private VoronoiFilter filter;
 
     public Voronoi() {
-        super("Voronoi Diagram", true, false);
+        super("Voronoi Diagram", false, false);
         setParamSet(new ParamSet(
                 numberOfPoints,
                 distance,

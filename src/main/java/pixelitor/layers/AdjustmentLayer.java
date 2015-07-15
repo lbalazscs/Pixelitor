@@ -62,7 +62,7 @@ public class AdjustmentLayer extends Layer {
     }
 
     @Override
-    public void crop(Rectangle selectionBounds) {
+    public void crop(Rectangle cropRect) {
         // do nothing
     }
 

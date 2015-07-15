@@ -212,7 +212,7 @@ public class RobotTest {
                             if (!ImageComponents.getActiveComp().isPresent()) {
                                 throw new IllegalStateException("no active composition");
                             }
-                            ConsistencyChecks.checkAll();
+                            ConsistencyChecks.checkAll(true);
                         } catch (Exception e) {
                             Dialogs.showExceptionDialog(e);
                         }

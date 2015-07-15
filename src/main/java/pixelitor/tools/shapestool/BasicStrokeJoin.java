@@ -16,6 +16,8 @@
  */
 package pixelitor.tools.shapestool;
 
+import pixelitor.filters.gui.EnumParam;
+
 import static java.awt.BasicStroke.JOIN_BEVEL;
 import static java.awt.BasicStroke.JOIN_MITER;
 import static java.awt.BasicStroke.JOIN_ROUND;
@@ -23,7 +25,7 @@ import static java.awt.BasicStroke.JOIN_ROUND;
 /**
  * An enum wrapper around the join argument of a BasicStroke constructor
  */
-enum BasicStrokeJoin {
+public enum BasicStrokeJoin {
     ROUND("Round", JOIN_ROUND),
     BEVEL("Bevel", JOIN_BEVEL),
     MITER("Miter", JOIN_MITER);
@@ -43,5 +45,9 @@ enum BasicStrokeJoin {
     @Override
     public String toString() {
         return guiName;
+    }
+
+    public static EnumParam<BasicStrokeJoin> asParam() {
+        return new EnumParam<>("Cap", BasicStrokeJoin.class);
     }
 }

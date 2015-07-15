@@ -38,21 +38,21 @@ import static pixelitor.Composition.ImageChangeActions.FULL;
  * Only the affected pixels are saved in order to reduce overall memory usage
  */
 public class PartialImageEdit extends FadeableEdit {
-    private final Rectangle saveRectangle;
+    private final Rectangle saveRect;
     private final boolean canRepeat;
     private Raster backupRaster;
 
     private final ImageLayer layer;
 
-    public PartialImageEdit(String name, Composition comp, BufferedImage image, Rectangle saveRectangleParam, boolean canRepeat) {
+    public PartialImageEdit(String name, Composition comp, BufferedImage image, Rectangle saveRect, boolean canRepeat) {
         super(comp, name);
 
         this.canRepeat = canRepeat;
         comp.setDirty(true);
         this.layer = comp.getActiveImageLayerOrMask();
 
-        saveRectangle = saveRectangleParam;
-        backupRaster = image.getData(saveRectangle);
+        this.saveRect = saveRect;
+        backupRaster = image.getData(this.saveRect);
     }
 
     @Override
@@ -74,10 +74,10 @@ public class PartialImageEdit extends FadeableEdit {
 
         Raster tmpRaster = null;
         try {
-            tmpRaster = image.getData(saveRectangle);
+            tmpRaster = image.getData(saveRect);
             image.setData(backupRaster);
         } catch (ArrayIndexOutOfBoundsException e) {
-            System.out.println("PartialImageEdit.swapRasters saveRectangle = " + saveRectangle);
+            System.out.println("PartialImageEdit.swapRasters saveRect = " + saveRect);
             int width = image.getWidth();
             int height = image.getHeight();
             System.out.println("PartialImageEdit.swapRasters width = " + width + ", height = " + height);

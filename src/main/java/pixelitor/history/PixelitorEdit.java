@@ -24,8 +24,10 @@ import javax.swing.undo.AbstractUndoableEdit;
  * The abstract superclass for all edits in Pixelitor
  */
 public abstract class PixelitorEdit extends AbstractUndoableEdit {
-    Composition comp;
+    protected Composition comp;
     private final String name;
+
+    protected boolean embedded; // if true, this is not a standalone edit
 
     PixelitorEdit(Composition comp, String name) {
         assert comp != null;
@@ -69,5 +71,10 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
 
     public String getName() {
         return name;
+    }
+
+    public PixelitorEdit setEmbedded(boolean embedded) {
+        this.embedded = embedded;
+        return this;
     }
 }

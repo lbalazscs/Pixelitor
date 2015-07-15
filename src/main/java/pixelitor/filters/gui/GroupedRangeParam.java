@@ -56,13 +56,12 @@ public class GroupedRangeParam extends AbstractFilterParam implements RangeBased
      * Any number of linked params
      */
     public GroupedRangeParam(String name, String[] rangeNames, int minValue, int maxValue, int defaultValue, boolean linked) {
-        super(name);
+        this(name, createParams(rangeNames, minValue, maxValue, defaultValue), linked);
+    }
 
-        rangeParams = new RangeParam[rangeNames.length];
-        for (int i = 0; i < rangeNames.length; i++) {
-            String rangeName = rangeNames[i];
-            rangeParams[i] = new RangeParam(rangeName, minValue, maxValue, defaultValue);
-        }
+    public GroupedRangeParam(String name, RangeParam[] params, boolean linked) {
+        super(name);
+        rangeParams = params;
 
         checkBoxModel = new JToggleButton.ToggleButtonModel();
 
@@ -257,5 +256,14 @@ public class GroupedRangeParam extends AbstractFilterParam implements RangeBased
 
             return new GRState(interpolatedValues);
         }
+    }
+
+    private static RangeParam[] createParams(String[] rangeNames, int minValue, int maxValue, int defaultValue) {
+        RangeParam[] rangeParams = new RangeParam[rangeNames.length];
+        for (int i = 0; i < rangeNames.length; i++) {
+            String rangeName = rangeNames[i];
+            rangeParams[i] = new RangeParam(rangeName, minValue, maxValue, defaultValue);
+        }
+        return rangeParams;
     }
 }

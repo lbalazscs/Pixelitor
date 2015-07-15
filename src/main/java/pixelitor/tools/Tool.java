@@ -25,6 +25,7 @@ import pixelitor.ImageDisplay;
 import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.history.PartialImageEdit;
+import pixelitor.selection.IgnoreSelection;
 import pixelitor.tools.toolhandlers.ColorPickerToolHandler;
 import pixelitor.tools.toolhandlers.CurrentToolHandler;
 import pixelitor.tools.toolhandlers.HandToolHandler;
@@ -212,7 +213,9 @@ public abstract class Tool {
     void saveFullImageForUndo(Composition comp) {
         BufferedImage copy = comp.getImageOrSubImageIfSelectedForActiveLayer(true, true);
 
-        ImageEdit edit = new ImageEdit(getName(), comp, comp.getActiveImageLayerOrMask(), copy, false);
+        ImageEdit edit = new ImageEdit(getName(), comp,
+                comp.getActiveImageLayerOrMask(), copy,
+                IgnoreSelection.NO, false);
         History.addEdit(edit);
     }
 

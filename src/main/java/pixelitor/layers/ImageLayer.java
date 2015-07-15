@@ -27,6 +27,7 @@ import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.history.PixelitorEdit;
+import pixelitor.selection.IgnoreSelection;
 import pixelitor.selection.Selection;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Dialogs;
@@ -303,7 +304,8 @@ public class ImageLayer extends ContentLayer {
         assert previewImage != null;
 
         if (imageContentChanged) {
-            ImageEdit edit = new ImageEdit(filterName, comp, this, getImageOrSubImageIfSelected(true, true), true);
+            ImageEdit edit = new ImageEdit(filterName, comp, this, getImageOrSubImageIfSelected(true, true),
+                    IgnoreSelection.NO, true);
             History.addEdit(edit);
         }
 
@@ -434,7 +436,8 @@ public class ImageLayer extends ContentLayer {
             throw new IllegalStateException("imageForUndo == image");
         }
         assert imageForUndo != null;
-        ImageEdit edit = new ImageEdit(opName, comp, this, imageForUndo, true);
+        ImageEdit edit = new ImageEdit(opName, comp, this,
+                imageForUndo, IgnoreSelection.NO, true);
         History.addEdit(edit);
 
         // otherwise the next filter run will take the old image source,
@@ -443,14 +446,15 @@ public class ImageLayer extends ContentLayer {
         updateIconImage();
     }
 
-    public void changeImageUndoRedo(BufferedImage img, boolean considerSelection) {
+    public void changeImageUndoRedo(BufferedImage img, IgnoreSelection ignoreSelection) {
         requireNonNull(img);
         assert img != image; // simple filters always change something
         assert state == NORMAL;
-        if (considerSelection) {
-            setImageWithSelection(img);
-        } else {
+
+        if(ignoreSelection.isYes()) {
             setImage(img);
+        } else {
+            setImageWithSelection(img);
         }
     }
 
@@ -898,9 +902,9 @@ public class ImageLayer extends ContentLayer {
     }
 
     @Override
-    public void crop(Rectangle selectionBounds) {
-        int cropWidth = selectionBounds.width;
-        int cropHeight = selectionBounds.height;
+    public void crop(Rectangle cropRect) {
+        int cropWidth = cropRect.width;
+        int cropHeight = cropRect.height;
 
         BufferedImage img = getImage();
 
@@ -908,8 +912,8 @@ public class ImageLayer extends ContentLayer {
         int transX = getTranslationX();
         int transY = getTranslationY();
 
-        int cropX = selectionBounds.x - transX;
-        int cropY = selectionBounds.y - transY;
+        int cropX = cropRect.x - transX;
+        int cropY = cropRect.y - transY;
 
         BufferedImage dest = ImageUtils.crop(img, cropX, cropY, cropWidth, cropHeight);
         setImage(dest);

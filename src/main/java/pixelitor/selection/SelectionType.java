@@ -30,13 +30,13 @@ public enum SelectionType {
     RECTANGLE("Rectangle") {
         @Override
         public Shape updateShape(UserDrag userDrag, Shape currentSelectionShape) {
-            Rectangle dragRectangle = userDrag.createPositiveRectangle();
+            Rectangle dragRectangle = userDrag.createPositiveRect();
             return dragRectangle;
         }
     }, ELLIPSE("Ellipse") {
         @Override
         public Shape updateShape(UserDrag userDrag, Shape currentSelectionShape) {
-            Rectangle dr = userDrag.createPositiveRectangle();
+            Rectangle dr = userDrag.createPositiveRect();
             return new Ellipse2D.Float(dr.x, dr.y, dr.width, dr.height);
         }
     }, LASSO("Freehand") {

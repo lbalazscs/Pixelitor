@@ -21,6 +21,7 @@ import pixelitor.filters.Filter;
 import pixelitor.filters.FilterUtils;
 import pixelitor.filters.RepeatLast;
 import pixelitor.history.AddToHistory;
+import pixelitor.history.CanvasChangeEdit;
 import pixelitor.history.CompoundEdit;
 import pixelitor.history.DeleteLayerEdit;
 import pixelitor.history.DeselectEdit;
@@ -28,9 +29,9 @@ import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.history.LayerOrderChangeEdit;
 import pixelitor.history.LayerSelectionChangeEdit;
+import pixelitor.history.MultiLayerEdit;
 import pixelitor.history.NewLayerEdit;
 import pixelitor.history.NotUndoableEdit;
-import pixelitor.history.OneLayerUndoableEdit;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.history.SelectionChangeEdit;
 import pixelitor.layers.ContentLayer;
@@ -39,6 +40,7 @@ import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
 import pixelitor.layers.LayerMask;
 import pixelitor.menus.SelectionActions;
+import pixelitor.selection.IgnoreSelection;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionInteraction;
 import pixelitor.selection.SelectionType;
@@ -166,6 +168,16 @@ public class Composition implements Serializable {
         return layerList.size();
     }
 
+    public int getNrImageLayers() {
+        int sum = 0;
+        for (Layer layer : layerList) {
+            if (layer instanceof ImageLayer) {
+                sum++;
+            }
+        }
+        return sum;
+    }
+
     /**
      * Adds a layer to the top without updating any GUI
      */
@@ -260,6 +272,16 @@ public class Composition implements Serializable {
             return activeLayer.getMask();
         }
         return activeLayer;
+    }
+
+    public ImageLayer getAnyImageLayer() {
+        for (Layer layer : layerList) {
+            if (layer instanceof ImageLayer) {
+                ImageLayer imageLayer = (ImageLayer) layer;
+                return imageLayer;
+            }
+        }
+        throw new IllegalStateException("nothing found");
     }
 
     /**
@@ -385,7 +407,7 @@ public class Composition implements Serializable {
                     removeActiveLayer(updateGUI);
 
                     PixelitorEdit edit = new CompoundEdit(this, "Merge Down",
-                            new ImageEdit("", this, imageLayerBellow, backupImage, false),
+                            new ImageEdit("", this, imageLayerBellow, backupImage, IgnoreSelection.YES, false),
                             new DeleteLayerEdit(this, mergedLayer, activeIndex)
                     );
 
@@ -749,20 +771,16 @@ public class Composition implements Serializable {
     }
 
     public void startSelection(SelectionType selectionType, SelectionInteraction selectionInteraction) {
-        selection = new Selection(ic, selectionType, selectionInteraction);
-        if (isActiveComp()) {
-            SelectionActions.setEnabled(true, this);
-        }
+        setNewSelection(new Selection(ic, selectionType, selectionInteraction));
     }
 
     public void createSelectionFromShape(Shape selectionShape) {
-        if (selection != null) {
-            throw new IllegalStateException("createSelectionFromShape called while there was a selection: " + selection.toString());
-        }
+        setNewSelection(new Selection(selectionShape, ic));
+    }
 
-        selection = new Selection(selectionShape, ic);
-
-        if (isActiveComp()) { // this could be called from the undo on a not-active component
+    private void setNewSelection(Selection selection) {
+        this.selection = selection;
+        if (isActiveComp()) {
             SelectionActions.setEnabled(true, this);
         }
     }
@@ -792,9 +810,13 @@ public class Composition implements Serializable {
     }
 
     public void enlargeCanvas(int north, int east, int south, int west) {
-        OneLayerUndoableEdit.createAndAddToHistory(this, "Enlarge Canvas", false, true, false);
+        BufferedImage backupImage = null;
         for (Layer layer : layerList) {
             if (layer instanceof ContentLayer) {
+                if (layer instanceof ImageLayer) {
+                    backupImage = ((ImageLayer) layer).getImage();
+                }
+
                 ContentLayer contentLayer = (ContentLayer) layer;
                 contentLayer.enlargeCanvas(north, east, south, west);
             }
@@ -804,11 +826,20 @@ public class Composition implements Serializable {
             }
         }
 
+        SelectionChangeEdit selectionChangeEdit = null;
         if (selection != null && (north > 0 || west > 0)) {
+            Shape backupShape = selection.getShape();
             selection.transform(
                     AffineTransform.getTranslateInstance(west, north),
                     AddToHistory.NO);
+            selectionChangeEdit = new SelectionChangeEdit(this, backupShape, "");
+            selectionChangeEdit.setEmbedded(true);
         }
+
+        CanvasChangeEdit canvasChangeEdit = new CanvasChangeEdit("", this);
+        MultiLayerEdit edit = new MultiLayerEdit(this, "Enlarge Canvas", backupImage, canvasChangeEdit);
+        edit.setSelectionChangeEdit(selectionChangeEdit);
+        History.addEdit(edit);
 
         canvas.updateSize(canvas.getWidth() + east + west, canvas.getHeight() + north + south);
 
@@ -908,6 +939,24 @@ public class Composition implements Serializable {
 
     public void setShowOriginal(boolean b) {
         getActiveImageLayerOrMask().setShowOriginal(b);
+    }
+
+    public void cropSelection(Rectangle cropRect) {
+        if (selection != null) {
+            Shape currentShape = selection.getShape();
+            Shape intersection = SelectionInteraction.INTERSECT.combine(currentShape, cropRect);
+            if (intersection.getBounds().isEmpty()) {
+                selection.deselectAndDispose();
+                selection = null;
+            } else {
+                // the intersection needs to be translated
+                // into the coordinate system of the new, cropped image
+                double txx = -cropRect.getX();
+                double txy = -cropRect.getY();
+                AffineTransform tx = AffineTransform.getTranslateInstance(txx, txy);
+                selection.setShape(tx.createTransformedShape(intersection));
+            }
+        }
     }
 
     public enum ImageChangeActions {

@@ -174,7 +174,7 @@ public class UserDrag {
      *
      * @return a Rectangle where the width and height can be < 0
      */
-    public Rectangle createPossiblyEmptyRectangle() {
+    public Rectangle createPossiblyEmptyRect() {
         int x;
         int y;
         int width;
@@ -204,7 +204,7 @@ public class UserDrag {
      *
      * @return a Rectangle where the width and height are >= 0
      */
-    public Rectangle createPositiveRectangle() {
+    public Rectangle createPositiveRect() {
         int x;
         int y;
         int width;
@@ -268,8 +268,8 @@ public class UserDrag {
         this.startFromCenter = startFromCenter;
     }
 
-//    public Rectangle getAffectedStrokedRectangle(int thickness) {
-//        Rectangle r = createPositiveRectangle();
+//    public Rectangle getAffectedStrokedRect(int thickness) {
+//        Rectangle r = createPositiveRect();
 //        if (thickness == 0) {
 //            return r;
 //        }

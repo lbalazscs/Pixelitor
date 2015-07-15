@@ -16,6 +16,8 @@
  */
 package pixelitor.tools.shapestool;
 
+import pixelitor.filters.gui.EnumParam;
+
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.CAP_ROUND;
 import static java.awt.BasicStroke.CAP_SQUARE;
@@ -23,7 +25,7 @@ import static java.awt.BasicStroke.CAP_SQUARE;
 /**
  * An enum wrapper around the cap argument of a BasicStroke constructor
  */
-enum BasicStrokeCap {
+public enum BasicStrokeCap {
     ROUND("Round", CAP_ROUND),
     BUTT("Butt", CAP_BUTT),
     SQUARE("Square", CAP_SQUARE);
@@ -43,5 +45,9 @@ enum BasicStrokeCap {
     @Override
     public String toString() {
         return guiName;
+    }
+
+    public static EnumParam<BasicStrokeCap> asParam() {
+        return new EnumParam<>("Cap", BasicStrokeCap.class);
     }
 }

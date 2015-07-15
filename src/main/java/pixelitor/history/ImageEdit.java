@@ -19,6 +19,7 @@ package pixelitor.history;
 
 import pixelitor.Composition;
 import pixelitor.layers.ImageLayer;
+import pixelitor.selection.IgnoreSelection;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -31,13 +32,17 @@ import static pixelitor.Composition.ImageChangeActions.FULL;
  * A PixelitorEdit that represents the changes made to an image.
  */
 public class ImageEdit extends FadeableEdit {
+    private final IgnoreSelection ignoreSelection;
     private SoftReference<BufferedImage> imgRef;
     private ImageLayer layer;
 
     private final boolean canRepeat;
 
-    public ImageEdit(String name, Composition comp, ImageLayer layer, BufferedImage backupImage, boolean canRepeat) {
+    public ImageEdit(String name, Composition comp, ImageLayer layer,
+                     BufferedImage backupImage,
+                     IgnoreSelection ignoreSelection, boolean canRepeat) {
         super(comp, name);
+        this.ignoreSelection = ignoreSelection;
 
         assert layer != null;
         assert backupImage != null;
@@ -87,14 +92,22 @@ public class ImageEdit extends FadeableEdit {
             return false;
         }
 
-        BufferedImage tmp = layer.getImageOrSubImageIfSelected(false, true);
-        layer.changeImageUndoRedo(backupImage, true);
-        comp.imageChanged(FULL);
-        layer.updateIconImage();
+        BufferedImage tmp;
+        if(ignoreSelection.isYes()) {
+            tmp = layer.getImage();
+        } else {
+            tmp = layer.getImageOrSubImageIfSelected(false, true);
+        }
+        layer.changeImageUndoRedo(backupImage, ignoreSelection);
 
         // create new backup image from tmp
         imgRef = new SoftReference<>(tmp);
-        History.notifyMenus(this);
+
+        if(!embedded) {
+            comp.imageChanged(FULL);
+            layer.updateIconImage();
+            History.notifyMenus(this);
+        }
 
         sanityCheck();
         return true;

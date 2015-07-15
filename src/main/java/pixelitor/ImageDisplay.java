@@ -67,7 +67,7 @@ public interface ImageDisplay {
     // must return a JViewport, because it will be casted
     Container getParent();
 
-    Rectangle getViewRectangle();
+    Rectangle getViewRect();
 
     void increaseZoom(int mouseX, int mouseY);
 

@@ -255,7 +255,7 @@ public enum ShapeType {
      * Update the x, y, width, height coordinates so that width and height are positive
      */
     protected void updateCoordinatesPositive(UserDrag userDrag) {
-        Rectangle r = userDrag.createPositiveRectangle();
+        Rectangle r = userDrag.createPositiveRect();
         x = r.x;
         y = r.y;
         width = r.width;
@@ -266,7 +266,7 @@ public enum ShapeType {
      * Update the x, y, width, height coordinates
      */
     protected void updateCoordinates(UserDrag userDrag) {
-        Rectangle r = userDrag.createPossiblyEmptyRectangle();
+        Rectangle r = userDrag.createPossiblyEmptyRect();
 
         x = r.x;
         y = r.y;

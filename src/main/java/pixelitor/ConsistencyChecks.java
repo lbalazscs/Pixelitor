@@ -39,11 +39,13 @@ public final class ConsistencyChecks {
     private ConsistencyChecks() { // do not instantiate
     }
 
-    public static void checkAll() {
+    public static void checkAll(boolean checkImageCoversCanvas) {
         getActiveComp().ifPresent(comp -> {
             selectionCheck(comp);
             fadeCheck(comp);
-            imageCoversCanvasCheck(comp);
+            if(checkImageCoversCanvas) {
+                imageCoversCanvasCheck(comp);
+            }
             layerDeleteActionEnabledCheck();
         });
     }

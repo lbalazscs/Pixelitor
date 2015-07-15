@@ -66,7 +66,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
 
     // The crop rectangle in image space.
     // This variable is used only while the image component is resized
-    private Rectangle lastCropRectangle;
+    private Rectangle lastCropRect;
     private JCheckBox allowGrowingCB;
 
     CropTool() {
@@ -162,10 +162,10 @@ public class CropTool extends Tool implements ImageSwitchListener {
                 if (transformSupport != null) {
                     throw new IllegalStateException();
                 }
-                Rectangle imageSpaceRectangle = userDrag.createPositiveRectangle();
-                Rectangle compSpaceRectangle = ic.fromImageToComponentSpace(imageSpaceRectangle);
+                Rectangle imageSpaceRect = userDrag.createPositiveRect();
+                Rectangle compSpaceRect = ic.fromImageToComponentSpace(imageSpaceRect);
 
-                transformSupport = new TransformSupport(compSpaceRectangle, imageSpaceRectangle);
+                transformSupport = new TransformSupport(compSpaceRect, imageSpaceRect);
 
                 state = TRANSFORM;
                 break;
@@ -186,8 +186,8 @@ public class CropTool extends Tool implements ImageSwitchListener {
         if (callingIC != ImageComponents.getActiveIC()) {
             return;
         }
-        Rectangle cropRectangle = getCropRectangle(callingIC);
-        if (cropRectangle == null) {
+        Rectangle cropRect = getCropRect(callingIC);
+        if (cropRect == null) {
             return;
         }
 
@@ -200,14 +200,14 @@ public class CropTool extends Tool implements ImageSwitchListener {
         // make sure that we don't paint anything outside the internal frame.
         // canvas.getBounds() is not reliable because the internal frame might be smaller
         // so we have to intersect with the view rectangle...
-        Rectangle componentSpaceViewRectangle = callingIC.getViewRectangle();
+        Rectangle componentSpaceViewRect = callingIC.getViewRect();
         // ...but first get this to image space...
-        Rectangle imageSpaceViewRectangle = callingIC.fromComponentToImageSpace(componentSpaceViewRectangle);
+        Rectangle imageSpaceViewRect = callingIC.fromComponentToImageSpace(componentSpaceViewRect);
         // ... and now we can intersect
-        canvasBounds = canvasBounds.intersection(imageSpaceViewRectangle);
+        canvasBounds = canvasBounds.intersection(imageSpaceViewRect);
         Path2D darkAreaClip = new Path2D.Double(Path2D.WIND_EVEN_ODD);
         darkAreaClip.append(canvasBounds, false);
-        darkAreaClip.append(cropRectangle, false);
+        darkAreaClip.append(cropRect, false);
         g2.setClip(darkAreaClip);
 
         Color previousColor = g2.getColor();
@@ -228,7 +228,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
             g2.setTransform(unscaledTransform);
             // prevents drawing outside the InternalImageFrame/ImageComponent
             // it is important to call this AFTER setting the unscaled transform
-            g2.setClip(componentSpaceViewRectangle);
+            g2.setClip(componentSpaceViewRect);
             transformSupport.paintHandles(g2);
             g2.setTransform(scaledTransform);
         }
@@ -238,23 +238,21 @@ public class CropTool extends Tool implements ImageSwitchListener {
 
     /**
      * Returns the crop rectangle in image space
-     *
-     * @param zoomLevel
      */
-    public Rectangle getCropRectangle(ImageDisplay ic) {
+    public Rectangle getCropRect(ImageDisplay ic) {
         switch (state) {
             case INITIAL:
-                lastCropRectangle = null;
+                lastCropRect = null;
                 break;
             case USER_DRAG:
-                lastCropRectangle = userDrag.createPositiveRectangle();
+                lastCropRect = userDrag.createPositiveRect();
                 break;
             case TRANSFORM:
-                lastCropRectangle = transformSupport.getImageSpaceRectangle(ic);
+                lastCropRect = transformSupport.getImageSpaceRect(ic);
                 break;
         }
 
-        return lastCropRectangle;
+        return lastCropRect;
     }
 
     @Override
@@ -290,8 +288,8 @@ public class CropTool extends Tool implements ImageSwitchListener {
     }
 
     public void imageComponentResized(ImageComponent ic) {
-        if (transformSupport != null && lastCropRectangle != null && state == TRANSFORM) {
-            transformSupport.setComponentSpaceRect(ic.fromImageToComponentSpace(lastCropRectangle));
+        if (transformSupport != null && lastCropRect != null && state == TRANSFORM) {
+            transformSupport.setComponentSpaceRect(ic.fromImageToComponentSpace(lastCropRect));
         }
     }
 

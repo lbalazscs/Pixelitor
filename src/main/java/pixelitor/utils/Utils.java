@@ -26,16 +26,21 @@ import pixelitor.PixelitorWindow;
 import pixelitor.filters.Filter;
 
 import javax.swing.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Desktop;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.Toolkit;
 import java.awt.color.ColorSpace;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
@@ -259,7 +264,7 @@ public final class Utils {
     }
 
     // makes sure that the returned rectangle has positive width, height
-    public static Rectangle toPositiveRectangle(int x1, int x2, int y1, int y2) {
+    public static Rectangle toPositiveRect(int x1, int x2, int y1, int y2) {
         int topX, topY, width, height;
 
         if (x2 >= x1) {
@@ -283,7 +288,7 @@ public final class Utils {
     }
 
     // makes sure that the returned rectangle has positive width, height
-    public static Rectangle toPositiveRectangle(Rectangle input) {
+    public static Rectangle toPositiveRect(Rectangle input) {
         if (input.width >= 0) {
             if (input.height >= 0) {
                 return input; // should be the most common case
@@ -341,6 +346,24 @@ public final class Utils {
         if (savedIC != null) {
             ImageComponents.setActiveImageComponent(savedIC, true);
         }
+    }
+
+    public static void debugShape(Shape shape, String name) {
+        // create a copy
+        Shape shapeCopy = new Path2D.Double(shape);
+
+        Rectangle shapeBounds = shape.getBounds();
+        int imgWidth = shapeBounds.x + shapeBounds.width + 50;
+        int imgHeight = shapeBounds.y + shapeBounds.height + 50;
+        BufferedImage img = ImageUtils.createCompatibleImage(imgWidth, imgHeight);
+        Graphics2D g = img.createGraphics();
+        g.setColor(Color.WHITE);
+        g.fillRect(0, 0, imgWidth, imgHeight);
+        g.setColor(Color.BLACK);
+        g.setStroke(new BasicStroke(3));
+        g.draw(shapeCopy);
+        g.dispose();
+        debugImage(img, name);
     }
 
     public static void debugRaster(Raster raster) {

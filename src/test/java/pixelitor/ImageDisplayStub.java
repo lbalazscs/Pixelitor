@@ -110,7 +110,7 @@ public class ImageDisplayStub implements ImageDisplay {
     }
 
     @Override
-    public Rectangle getViewRectangle() {
+    public Rectangle getViewRect() {
         return comp.getCanvasBounds();
     }
 

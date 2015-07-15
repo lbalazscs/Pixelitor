@@ -323,6 +323,7 @@ public class Selection {
      */
     public void setShape(Shape selectionShape) {
         currentSelectionShape = selectionShape;
+        lastSelectionShape = null;
     }
 
     public SelectionInteraction getSelectionInteraction() {

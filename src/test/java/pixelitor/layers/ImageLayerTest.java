@@ -24,6 +24,7 @@ import pixelitor.Canvas;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
+import pixelitor.selection.IgnoreSelection;
 import pixelitor.selection.Selection;
 
 import java.awt.AlphaComposite;
@@ -135,7 +136,10 @@ public class ImageLayerTest {
 
     @Test
     public void testChangeImageUndoRedo() {
-        layer.changeImageUndoRedo(TestHelper.createTestImage(), true);
+        layer.changeImageUndoRedo(TestHelper.createTestImage(),
+                IgnoreSelection.NO);
+        layer.changeImageUndoRedo(TestHelper.createTestImage(),
+                IgnoreSelection.YES);
     }
 
     @Test

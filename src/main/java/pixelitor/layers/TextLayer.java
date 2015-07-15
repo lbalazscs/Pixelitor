@@ -255,7 +255,7 @@ public class TextLayer extends ContentLayer {
     }
 
     @Override
-    public void crop(Rectangle selectionBounds) {
+    public void crop(Rectangle cropRect) {
 //        Rectangle textBounds = painter.getTextBounds();
 //        int currentX = textBounds.x;
 //        int currentY = textBounds.y;

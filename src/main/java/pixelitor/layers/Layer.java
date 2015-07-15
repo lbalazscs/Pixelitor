@@ -416,7 +416,7 @@ public abstract class Layer implements Serializable {
 
     public abstract void resize(int targetWidth, int targetHeight, boolean progressiveBilinear);
 
-    public abstract void crop(Rectangle selectionBounds);
+    public abstract void crop(Rectangle cropRect);
 
     public LayerMask getMask() {
         return mask;
