@@ -1032,7 +1032,7 @@ public class MenuBar extends JMenuBar {
         createMenuItem(new MenuAction("Debug getCanvasSizedSubImage") {
             @Override
             void onClick() {
-                BufferedImage bi = ImageComponents.getActiveImageLayer().get().getCanvasSizedSubImage();
+                BufferedImage bi = ImageComponents.getActiveImageLayerOrMask().get().getCanvasSizedSubImage();
                 Utils.debugImage(bi);
             }
         }, developMenu);
@@ -1296,7 +1296,7 @@ public class MenuBar extends JMenuBar {
         Action debugImageLayerImages = new MenuAction("Debug ImageLayer Images") {
             @Override
             void onClick() {
-                Optional<ImageLayer> layer = ImageComponents.getActiveImageLayer();
+                Optional<ImageLayer> layer = ImageComponents.getActiveImageLayerOrMask();
                 layer.get().debugImages();
             }
         };

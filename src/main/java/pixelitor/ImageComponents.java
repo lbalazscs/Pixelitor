@@ -40,75 +40,100 @@ import java.util.Optional;
  * Static methods for maintaining the list of open ImageComponent objects
  */
 public class ImageComponents {
-    private static final List<ImageComponent> imageComponents = new ArrayList<>();
-    private static ImageComponent activeImageComponent;
+    private static final List<ImageComponent> icList = new ArrayList<>();
+    private static ImageComponent activeIC;
     private static final Collection<ImageSwitchListener> imageSwitchListeners = new ArrayList<>();
 
     private ImageComponents() {
     }
 
-    public static void addImageComponent(ImageComponent imageComponent) {
-        imageComponents.add(imageComponent);
+    public static void addIC(ImageComponent ic) {
+        icList.add(ic);
     }
 
     public static boolean thereAreUnsavedChanges() {
-        for (ImageComponent p : imageComponents) {
-            if (p.getComp().isDirty()) {
+        for (ImageComponent ic : icList) {
+            if (ic.getComp().isDirty()) {
                 return true;
             }
         }
         return false;
     }
 
-    public static List<ImageComponent> getImageComponents() {
-        return imageComponents;
+    public static List<ImageComponent> getICList() {
+        return icList;
     }
 
     private static void setNewImageAsActiveIfNecessary() {
-        if (!imageComponents.isEmpty()) {
+        if (!icList.isEmpty()) {
             boolean activeFound = false;
 
-            for (ImageComponent component : imageComponents) {
-                if (component == activeImageComponent) {
+            for (ImageComponent ic : icList) {
+                if (ic == activeIC) {
                     activeFound = true;
                     break;
                 }
             }
             if (!activeFound) {
-                setActiveImageComponent(imageComponents.get(0), true);
+                setActiveIC(icList.get(0), true);
             }
         }
     }
 
     public static ImageComponent getActiveIC() {
-        return activeImageComponent;
+        return activeIC;
+    }
+
+    public static Composition getActiveCompOrNull() {
+        if (activeIC != null) {
+            return activeIC.getComp();
+        }
+
+        return null;
     }
 
     public static Optional<Composition> getActiveComp() {
-        if (activeImageComponent != null) {
-            return Optional.of(activeImageComponent.getComp());
+        if (activeIC != null) {
+            return Optional.of(activeIC.getComp());
         }
 
         return Optional.empty();
     }
 
     public static Optional<Composition> findCompositionByName(String name) {
-        return imageComponents.stream()
+        return icList.stream()
                 .map(ImageComponent::getComp)
                 .filter(c -> c.getName().equals(name))
                 .findFirst();
+    }
+
+    public static Layer getActiveLayerOrNull() {
+        if (activeIC != null) {
+            return activeIC.getComp().getActiveLayer();
+        }
+
+        return null;
     }
 
     public static Optional<Layer> getActiveLayer() {
         return getActiveComp().map(Composition::getActiveLayer);
     }
 
-    public static Optional<ImageLayer> getActiveImageLayer() {
+    public static ImageLayer getActiveImageLayerOrMaskOrNull() {
+        if (activeIC != null) {
+            Composition comp = activeIC.getComp();
+            return comp.getActiveImageLayerOrMask();
+        }
+
+        return null;
+    }
+
+    public static Optional<ImageLayer> getActiveImageLayerOrMask() {
         return getActiveComp().flatMap(Composition::getActiveImageLayerOrMaskOpt);
     }
 
     public static int getNrOfOpenImages() {
-        return imageComponents.size();
+        return icList.size();
     }
 
     public static Optional<BufferedImage> getActiveCompositeImage() {
@@ -144,24 +169,23 @@ public class ImageComponents {
         }
     }
 
-    public static void imageClosed(ImageComponent imageComponent) {
-        imageComponents.remove(imageComponent);
-//        numFramesOpen--;
-        if (imageComponents.isEmpty()) {
+    public static void imageClosed(ImageComponent ic) {
+        icList.remove(ic);
+        if (icList.isEmpty()) {
             allImagesAreClosed();
         }
         setNewImageAsActiveIfNecessary();
     }
 
-    public static void setActiveImageComponent(ImageComponent newActiveComponent, boolean activate) {
-        activeImageComponent = newActiveComponent;
+    public static void setActiveIC(ImageComponent newActiveIC, boolean activate) {
+        activeIC = newActiveIC;
         if (activate) {
-            if (newActiveComponent == null) {
+            if (newActiveIC == null) {
                 throw new IllegalStateException("cannot activate null imageComponent");
             }
-            InternalImageFrame internalFrame = activeImageComponent.getInternalFrame();
+            InternalImageFrame internalFrame = activeIC.getInternalFrame();
             Desktop.INSTANCE.activateInternalImageFrame(internalFrame);
-            newActiveComponent.onActivation();
+            newActiveIC.onActivation();
         }
     }
 
@@ -169,7 +193,7 @@ public class ImageComponents {
      * When a new tool is activated, the cursor has to be changed for each image
      */
     public static void setToolCursor(Cursor cursor) {
-        for (ImageComponent ic : imageComponents) {
+        for (ImageComponent ic : icList) {
             ic.setCursor(cursor);
         }
     }
@@ -179,7 +203,7 @@ public class ImageComponents {
     }
 
     private static void allImagesAreClosed() {
-        setActiveImageComponent(null, false);
+        setActiveIC(null, false);
         imageSwitchListeners.forEach(ImageSwitchListener::noOpenImageAnymore);
         History.allImagesAreClosed();
         SelectionActions.setEnabled(false, null);
@@ -191,8 +215,8 @@ public class ImageComponents {
      * Another image became active
      */
     public static void activeImageHasChanged(ImageComponent ic) {
-        ImageComponent oldIC = activeImageComponent;
-        setActiveImageComponent(ic, false);
+        ImageComponent oldIC = activeIC;
+        setActiveIC(ic, false);
         for (ImageSwitchListener listener : imageSwitchListeners) {
             listener.activeImageHasChanged(oldIC, ic);
         }
@@ -214,26 +238,26 @@ public class ImageComponents {
     }
 
     public static void repaintActive() {
-        if (activeImageComponent != null) {
-            activeImageComponent.repaint();
+        if (activeIC != null) {
+            activeIC.repaint();
         }
     }
 
     public static void repaintAll() {
-        for (ImageComponent ic : imageComponents) {
+        for (ImageComponent ic : icList) {
             ic.repaint();
         }
     }
 
     public static void fitActiveToScreen() {
-        if (activeImageComponent != null) {
-            activeImageComponent.setupFitScreenZoomSize();
+        if (activeIC != null) {
+            activeIC.setupFitScreenZoomSize();
         }
     }
 
     public static void fitActiveToActualPixels() {
-        if (activeImageComponent != null) {
-            activeImageComponent.setZoom(ZoomLevel.Z100, false);
+        if (activeIC != null) {
+            activeIC.setZoom(ZoomLevel.Z100, false);
         }
     }
 
@@ -241,26 +265,26 @@ public class ImageComponents {
      * Called by keyboard shortcuts via the menu
      */
     public static void increaseZoomForActiveIC() {
-        ZoomLevel currentZoom = activeImageComponent.getZoomLevel();
+        ZoomLevel currentZoom = activeIC.getZoomLevel();
         ZoomLevel newZoomLevel = currentZoom.zoomIn();
-        activeImageComponent.setZoom(newZoomLevel, false);
+        activeIC.setZoom(newZoomLevel, false);
     }
 
     /**
      * Called by keyboard shortcuts via the menu
      */
     public static void decreaseZoomForActiveIC() {
-        ZoomLevel currentZoom = activeImageComponent.getZoomLevel();
+        ZoomLevel currentZoom = activeIC.getZoomLevel();
         ZoomLevel newZoomLevel = currentZoom.zoomOut();
-        activeImageComponent.setZoom(newZoomLevel, false);
+        activeIC.setZoom(newZoomLevel, false);
     }
 
-    public static boolean isActive(ImageComponent imageComponent) {
-        return imageComponent == activeImageComponent;
+    public static boolean isActive(ImageComponent ic) {
+        return ic == activeIC;
     }
 
     public static boolean isActiveLayerImageLayer() {
-        Layer activeLayer = activeImageComponent.getComp().getActiveLayer();
+        Layer activeLayer = activeIC.getComp().getActiveLayer();
         return activeLayer instanceof ImageLayer;
     }
 }

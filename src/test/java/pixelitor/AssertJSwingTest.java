@@ -55,6 +55,7 @@ import pixelitor.tools.Symmetry;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
+import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
@@ -77,6 +78,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static pixelitor.utils.test.Assertions.canvasSizeIs;
+import static pixelitor.utils.test.Assertions.hasSelection;
+import static pixelitor.utils.test.Assertions.noSelection;
+import static pixelitor.utils.test.Assertions.numLayersIs;
+import static pixelitor.utils.test.Assertions.selectionBoundsAre;
 
 @Ignore
 public class AssertJSwingTest {
@@ -94,6 +100,8 @@ public class AssertJSwingTest {
     enum Randomize {YES, NO}
 
     enum ShowOriginal {YES, NO}
+
+    enum WithSelection {YES, NO}
 
     // TODO create independent tests with static initialization of the window
 
@@ -272,10 +280,7 @@ public class AssertJSwingTest {
 
         testCopyPaste();
 
-        testResize();
-        testRotateFlip();
-
-        testFilterWithDialog("Transform Layer...", Randomize.YES, ShowOriginal.YES);
+        testMultiLayerEdits();
 
         testPreferences();
     }
@@ -286,15 +291,72 @@ public class AssertJSwingTest {
         d.button("ok").click();
     }
 
-    private void testRotateFlip() {
-        runMenuCommand("Rotate 90° CW");
-        runMenuCommand("Rotate 180°");
-        runMenuCommand("Rotate 90° CCW");
-        runMenuCommand("Flip Horizontal");
-        runMenuCommand("Flip Vertical");
+    private void testMultiLayerEdits() {
+        // crop is also a multilayer edit, but it is tested with the crop tool
+
+        testResize(WithSelection.NO);
+        testResize(WithSelection.YES);
+
+        testEnlargeCanvas(WithSelection.NO);
+        testEnlargeCanvas(WithSelection.YES);
+
+        testRotateFlip(WithSelection.NO);
+        testRotateFlip(WithSelection.YES);
     }
 
-    private void testResize() {
+    private void testRotateFlip(WithSelection withSelection) {
+        if (withSelection == WithSelection.YES) {
+            addSelection();
+        } else {
+            keyboardDeselect();
+        }
+
+        runMenuCommand("Rotate 90° CW");
+        keyboardUndoRedo();
+
+        runMenuCommand("Rotate 180°");
+        keyboardUndoRedo();
+
+        runMenuCommand("Rotate 90° CCW");
+        keyboardUndoRedo();
+
+        runMenuCommand("Flip Horizontal");
+        keyboardUndoRedo();
+
+        runMenuCommand("Flip Vertical");
+        keyboardUndoRedo();
+
+        keyboardDeselect();
+    }
+
+    private void testEnlargeCanvas(WithSelection withSelection) {
+        if (withSelection == WithSelection.YES) {
+            addSelection();
+        } else {
+            keyboardDeselect();
+        }
+        runMenuCommand("Enlarge Canvas...");
+        DialogFixture enlargeDialog = findDialogByTitle("Enlarge Canvas");
+
+        enlargeDialog.slider("north").slideTo(100);
+        enlargeDialog.slider("west").slideTo(100);
+        enlargeDialog.slider("east").slideTo(100);
+        enlargeDialog.slider("south").slideTo(100);
+
+        enlargeDialog.button("ok").click();
+
+        keyboardUndoRedo();
+        keyboardUndo();
+        keyboardDeselect();
+    }
+
+    private void testResize(WithSelection withSelection) {
+        if (withSelection == WithSelection.YES) {
+            addSelection();
+        } else {
+            keyboardDeselect();
+        }
+
         runMenuCommand("Resize...");
         DialogFixture resizeDialog = findDialogByTitle("Resize");
 
@@ -305,6 +367,9 @@ public class AssertJSwingTest {
         heightTF.deleteText().enterText("422");
 
         resizeDialog.button("ok").click();
+
+        keyboardUndoRedo();
+        keyboardDeselect();
     }
 
     private void testCopyPaste() {
@@ -371,7 +436,7 @@ public class AssertJSwingTest {
 
     private void testExportOpenRaster() {
         // precondition: the active image has only 1 layer
-        checkNumLayers(1);
+        assert numLayersIs(1);
 
         runMenuCommand("Export OpenRaster...");
         findJOptionPane().noButton().click(); // don't save
@@ -386,7 +451,7 @@ public class AssertJSwingTest {
 
     private void testExportLayerAnimation() {
         // precondition: the active image has only 1 layer
-        checkNumLayers(1);
+        assert numLayersIs(1);
 
         runMenuCommand("Export Layer Animation...");
         findJOptionPane().okButton().click();
@@ -498,7 +563,7 @@ public class AssertJSwingTest {
         testScreenCapture(false);
         try {
             SwingUtilities.invokeAndWait(() -> {
-                ImageComponents.setActiveImageComponent(activeIC, true);
+                ImageComponents.setActiveIC(activeIC, true);
             });
         } catch (InterruptedException | InvocationTargetException e) {
             e.printStackTrace();
@@ -658,6 +723,7 @@ public class AssertJSwingTest {
                 "Do Nothing", "Randomize");
 
         testRandomFilter();
+        testFilterWithDialog("Transform Layer...", Randomize.YES, ShowOriginal.YES);
 
         testFilterWithDialog("Channel to Transparency...", Randomize.YES, ShowOriginal.YES);
 
@@ -934,6 +1000,9 @@ public class AssertJSwingTest {
     }
 
     private void testSelectionToolAndMenus() {
+        // make sure we are at 100%
+        keyboardActualPixels();
+
         window.toggleButton("Selection Tool Button").click();
         randomAltClick();
 
@@ -955,23 +1024,45 @@ public class AssertJSwingTest {
         move(400, 200);
         drag(500, 300);
 
+        int origCanvasWidth = 1250;
+        int origCanvasHeight = 830;
+        assert canvasSizeIs(origCanvasWidth, origCanvasHeight);
+
+        int selectionWidth = 300;
+        int selectionHeight = 200;
+
+        assert hasSelection();
+        assert selectionBoundsAre(129, 80, selectionWidth, selectionHeight);
+
         //window.button("eraserTraceButton").click();
         findButtonByText(window, "Stroke with Current Eraser").click();
 
         // crop from this selection tool
+        assert hasSelection();
         findButtonByText(window, "Crop").click();
+        assert canvasSizeIs(selectionWidth, selectionHeight);
+        assert noSelection();
         keyboardUndo();
+        assert hasSelection();
+        assert canvasSizeIs(origCanvasWidth, origCanvasHeight);
 
         // crop from the menu
         runMenuCommand("Crop");
+        assert noSelection();
+        assert canvasSizeIs(selectionWidth, selectionHeight);
         keyboardUndo();
+        assert hasSelection();
+        assert canvasSizeIs(origCanvasWidth, origCanvasHeight);
 
         testSelectionModifyMenu();
+        assert hasSelection();
 
         runMenuCommand("Invert Selection");
         runMenuCommand("Stroke with Current Brush");
         runMenuCommand("Stroke with Current Eraser");
+        assert hasSelection();
         runMenuCommand("Deselect");
+        assert noSelection();
     }
 
     private void testSelectionModifyMenu() {
@@ -1274,11 +1365,6 @@ public class AssertJSwingTest {
         optionPane.yesButton().click();
     }
 
-    private static void checkNumLayers(int num) {
-        int nrLayers = ImageComponents.getActiveComp().get().getNrLayers();
-        assertEquals(nrLayers, num);
-    }
-
     private void waitForProgressMonitorEnd() {
         sleep(2, SECONDS); // wait until progress monitor comes up
 
@@ -1296,7 +1382,7 @@ public class AssertJSwingTest {
     private void addNewLayer() {
         int nrLayers = ImageComponents.getActiveComp().get().getNrLayers();
         runMenuCommand("Duplicate Layer");
-        checkNumLayers(nrLayers + 1);
+        assert numLayersIs(nrLayers + 1);
         keyboardInvert();
     }
 
@@ -1340,5 +1426,18 @@ public class AssertJSwingTest {
     private void randomAltClick() {
         moveRandom();
         altClick();
+    }
+
+    private void addSelection() {
+        Runnable task = () -> {
+            Composition comp = ImageComponents.getActiveIC().getComp();
+            comp.createSelectionFromShape(new Rectangle(10, 10, 100, 100));
+        };
+        try {
+            SwingUtilities.invokeAndWait(task);
+        } catch (InterruptedException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        sleep(1, SECONDS);
     }
 }

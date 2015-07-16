@@ -160,7 +160,7 @@ public class PixelitorWindow extends JFrame {
         try {
             ImageComponent ic = new ImageComponent(comp);
             ic.setCursor(Tools.getCurrentTool().getCursor());
-            ImageComponents.setActiveImageComponent(ic, false);
+            ImageComponents.setActiveIC(ic, false);
             comp.addLayersToGUI();
 
             Desktop.INSTANCE.addNewImageComponent(ic);

@@ -29,8 +29,6 @@ import java.awt.image.BufferedImage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
-import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
 
 public class ContentLayerTest {
     private Composition comp;
@@ -86,13 +84,6 @@ public class ContentLayerTest {
     public void testCreateTranslateEdit() {
         ContentLayerMoveEdit edit = layer.createMovementEdit(5, 5);
         assertNotNull(edit);
-    }
-
-    @Test
-    // this method is abstract in ImageLayer, test separately for subclasses
-    public void testFlip() {
-        layer.flip(HORIZONTAL);
-        layer.flip(VERTICAL);
     }
 
     @Test

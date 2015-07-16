@@ -321,7 +321,7 @@ public class RobotTest {
 
         op.randomizeSettings();
 
-        ImageLayer layer = ImageComponents.getActiveImageLayer().get();
+        ImageLayer layer = ImageComponents.getActiveImageLayerOrMask().get();
         if (op instanceof FilterWithGUI) {
             FilterWithGUI fg = (FilterWithGUI) op;
 

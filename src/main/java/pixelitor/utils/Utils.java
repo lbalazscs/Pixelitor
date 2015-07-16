@@ -344,7 +344,7 @@ public final class Utils {
         }
 
         if (savedIC != null) {
-            ImageComponents.setActiveImageComponent(savedIC, true);
+            ImageComponents.setActiveIC(savedIC, true);
         }
     }
 

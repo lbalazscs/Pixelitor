@@ -69,14 +69,13 @@ public class Rotate extends CompAction {
             }
         }
 
+        assert backupImage != comp.getAnyImageLayer().getImage();
         MultiLayerEdit edit = new MultiLayerEdit(comp, "Rotate", backupImage,
                 canvasChangeEdit);
         History.addEdit(edit);
 
-        if (!comp.hasSelection()) {
-            rotateCanvas(canvasWidth, canvasHeight);
-            comp.getCanvas().updateSize(newCanvasWidth, newCanvasHeight);
-        }
+        rotateCanvas(canvasWidth, canvasHeight);
+        comp.getCanvas().updateSize(newCanvasWidth, newCanvasHeight);
 
         // Only after the shared canvas size was updated
         comp.updateAllIconImages();

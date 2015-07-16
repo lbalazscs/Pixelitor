@@ -58,7 +58,7 @@ public class Desktop {
     }
 
     public void cascadeWindows() {
-        List<ImageComponent> imageComponents = ImageComponents.getImageComponents();
+        List<ImageComponent> imageComponents = ImageComponents.getICList();
         int locationX = 0;
         int locationY = 0;
         for (ImageComponent ic : imageComponents) {
@@ -89,7 +89,7 @@ public class Desktop {
     }
 
     public void tileWindows() {
-        List<ImageComponent> imageComponents = ImageComponents.getImageComponents();
+        List<ImageComponent> imageComponents = ImageComponents.getICList();
         int numComponents = imageComponents.size();
 
         int rows = (int) Math.sqrt(numComponents);
@@ -126,7 +126,7 @@ public class Desktop {
         int nrOfOpenImages = ImageComponents.getNrOfOpenImages();
 
         // called deliberately after nrOfOpenImages is set
-        ImageComponents.addImageComponent(ic);
+        ImageComponents.addIC(ic);
 
         int locationX = CASCADE_HORIZONTAL_SHIFT * nrOfOpenImages;
         int locationY = CASCADE_VERTICAL_SHIFT * nrOfOpenImages;

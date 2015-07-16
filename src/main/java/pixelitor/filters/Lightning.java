@@ -168,7 +168,7 @@ public class Lightning extends FilterWithParametrizedGUI {
 
         if (debug) {
 //            AppLogic.debugImage(lightningImage, "after polar");
-            ImageComponents.setActiveImageComponent(composition.getIC(), true);
+            ImageComponents.setActiveIC(composition.getIC(), true);
         }
 
         dest = ImageUtils.copyImage(src);

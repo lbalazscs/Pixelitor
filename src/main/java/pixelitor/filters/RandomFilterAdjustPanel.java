@@ -82,7 +82,7 @@ public class RandomFilterAdjustPanel extends AdjustPanel {
             if (filterSource.getLastFilter() != null) { // there was a filter before
                 // need to clear the preview of the previous filters
                 // so that the image position selectors show the original image
-                ImageLayer imageLayer = ImageComponents.getActiveImageLayer().get();
+                ImageLayer imageLayer = ImageComponents.getActiveImageLayerOrMask().get();
                 imageLayer.stopPreviewing(); // stop the last one
                 imageLayer.startPreviewing(); // start the new one
             }

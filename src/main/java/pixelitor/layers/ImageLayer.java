@@ -42,6 +42,7 @@ import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.RasterFormatException;
 import java.awt.image.WritableRaster;
@@ -567,44 +568,35 @@ public class ImageLayer extends ContentLayer {
     }
 
     @Override
-    public void flip(Flip.Direction direction) {
+    public void flip(Flip.Direction direction, AffineTransform flipTx) {
         int translationXAbs = -getTranslationX();
         int translationYAbs = -getTranslationY();
         int newTranslationXAbs;
         int newTranslationYAbs;
 
-        BufferedImage src = getImageOrSubImageIfSelected(false, false);
-
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
-        int imageWidth = src.getWidth();
-        int imageHeight = src.getHeight();
+        int imageWidth = image.getWidth();
+        int imageHeight = image.getHeight();
 
-        BufferedImage dest = ImageUtils.createCompatibleDest(src);
+        BufferedImage dest = ImageUtils.createCompatibleDest(image);
         Graphics2D g2 = dest.createGraphics();
 
         if (direction == HORIZONTAL) {
-            g2.translate(imageWidth, 0);
-            g2.scale(-1, 1);
-
             newTranslationXAbs = imageWidth - canvasWidth - translationXAbs;
             newTranslationYAbs = translationYAbs;
         } else {
-            g2.translate(0, imageHeight);
-            g2.scale(1, -1);
-
             newTranslationXAbs = translationXAbs;
             newTranslationYAbs = imageHeight - canvasHeight - translationYAbs;
         }
 
-        g2.drawImage(src, 0, 0, imageWidth, imageHeight, null);
+        g2.setTransform(flipTx);
+        g2.drawImage(image, 0, 0, imageWidth, imageHeight, null);
         g2.dispose();
 
-        if (!comp.hasSelection()) {
-            setTranslation(-newTranslationXAbs, -newTranslationYAbs);
-        }
+        setTranslation(-newTranslationXAbs, -newTranslationYAbs);
 
-        setImageWithSelection(dest);
+        setImage(dest);
     }
 
     @SuppressWarnings("SuspiciousNameCombination")
@@ -615,10 +607,10 @@ public class ImageLayer extends ContentLayer {
         int newTranslationXAbs = 0;
         int newTranslationYAbs = 0;
 
-        BufferedImage img = getImageOrSubImageIfSelected(false, false);
+//        BufferedImage img = getImageOrSubImageIfSelected(false, false);
 
-        int imageWidth = img.getWidth();
-        int imageHeight = img.getHeight();
+        int imageWidth = image.getWidth();
+        int imageHeight = image.getHeight();
 
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
@@ -648,7 +640,7 @@ public class ImageLayer extends ContentLayer {
         // TODO implement arbitrary rotation:
         // create a rectangle, then rotate it with the same AffineTransform
 
-        BufferedImage dest = ImageUtils.createCompatibleDest(img, newImageWidth, newImageHeight);
+        BufferedImage dest = ImageUtils.createCompatibleDest(image, newImageWidth, newImageHeight);
 
         Graphics2D g2 = dest.createGraphics();
         // TODO we should not need bicubic here as long as we have only 90, 180, 270 degrees
@@ -664,13 +656,14 @@ public class ImageLayer extends ContentLayer {
 
         // TODO rotate with exact transform
         g2.rotate(Math.toRadians(angleDegree));
-        g2.drawImage(img, 0, 0, imageWidth, imageHeight, null);
+        g2.drawImage(image, 0, 0, imageWidth, imageHeight, null);
         g2.dispose();
 
-        if (!comp.hasSelection()) {
-            setTranslation(-newTranslationXAbs, -newTranslationYAbs);
-        }
-        setImageWithSelection(dest);
+
+        setTranslation(-newTranslationXAbs, -newTranslationYAbs);
+
+//        setImageWithSelection(dest);
+        setImage(dest);
     }
 
     @Override

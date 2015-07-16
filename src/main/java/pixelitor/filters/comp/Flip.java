@@ -17,14 +17,20 @@
 
 package pixelitor.filters.comp;
 
+import pixelitor.Canvas;
 import pixelitor.Composition;
+import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.history.MultiLayerEdit;
+import pixelitor.history.SelectionChangeEdit;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
+import pixelitor.selection.Selection;
 
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
@@ -64,6 +70,25 @@ public class Flip extends CompAction {
         // This way no image copy is necessary.
         BufferedImage backupImage = null;
 
+        AffineTransform flipTx = new AffineTransform();
+
+        Canvas canvas = comp.getCanvas();
+        if (direction == HORIZONTAL) {
+            flipTx.translate(canvas.getWidth(), 0);
+            flipTx.scale(-1, 1);
+        } else {
+            flipTx.translate(0, canvas.getHeight());
+            flipTx.scale(1, -1);
+        }
+
+        Shape backupShape = null;
+        if (comp.hasSelection()) {
+            Selection selection = comp.getSelectionOrNull();
+            backupShape = selection.getShape();
+
+            selection.transform(flipTx, AddToHistory.NO);
+        }
+
         for (int i = 0; i < nrLayers; i++) {
             Layer layer = comp.getLayer(i);
             if (layer instanceof ContentLayer) {
@@ -71,15 +96,19 @@ public class Flip extends CompAction {
                     backupImage = ((ImageLayer) layer).getImage();
                 }
                 ContentLayer contentLayer = (ContentLayer) layer;
-                contentLayer.flip(direction);
+                contentLayer.flip(direction, flipTx);
             }
             if (layer.hasMask()) {
                 LayerMask mask = layer.getMask();
-                mask.flip(direction);
+                mask.flip(direction, flipTx);
             }
         }
 
         MultiLayerEdit edit = new MultiLayerEdit(comp, "Flip", backupImage, null);
+        if (backupShape != null) {
+            SelectionChangeEdit selectionChangeEdit = new SelectionChangeEdit(comp, backupShape, "");
+            edit.setSelectionChangeEdit(selectionChangeEdit);
+        }
         History.addEdit(edit);
 
         comp.setDirty(true);

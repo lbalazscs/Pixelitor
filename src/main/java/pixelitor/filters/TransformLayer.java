@@ -69,7 +69,7 @@ public class TransformLayer extends FilterWithParametrizedGUI {
 
         double theta = angleParam.getValueInRadians();
 
-        ImageLayer layer = ImageComponents.getActiveImageLayer().get();
+        ImageLayer layer = ImageComponents.getActiveImageLayerOrMask().get();
 
         float relativeX = centerParam.getRelativeX();
         float relativeY = centerParam.getRelativeY();

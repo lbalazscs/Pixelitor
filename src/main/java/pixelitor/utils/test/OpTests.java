@@ -68,7 +68,7 @@ public class OpTests {
         ParametrizedAdjustPanel.setResetParams(false);
         ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("Saving the Results of Each Operation");
 
-        ImageLayer imageLayer = ImageComponents.getActiveImageLayer().get();
+        ImageLayer imageLayer = ImageComponents.getActiveImageLayerOrMask().get();
         imageLayer.startPreviewing();
 
         SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
@@ -202,7 +202,7 @@ public class OpTests {
 
         Map<String, Double> results = new HashMap<>();
 
-        ImageLayer imageLayer = ImageComponents.getActiveImageLayer().get();
+        ImageLayer imageLayer = ImageComponents.getActiveImageLayerOrMask().get();
         imageLayer.startPreviewing();
 
         // warmup

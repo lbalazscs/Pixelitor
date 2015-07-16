@@ -65,7 +65,7 @@ public abstract class DirectBrushTool extends AbstractBrushTool {
         }
         brush.setTarget(comp, graphics);
 
-        BufferedImage image = ImageComponents.getActiveImageLayer().get().getImage();
+        BufferedImage image = ImageComponents.getActiveImageLayerOrMask().get().getImage();
 
         assert Utils.checkRasterMinimum(image);
 

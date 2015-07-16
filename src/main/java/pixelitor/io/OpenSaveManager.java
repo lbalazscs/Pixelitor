@@ -191,7 +191,7 @@ public class OpenSaveManager {
     }
 
     public static void warnAndCloseAllImages() {
-        List<ImageComponent> imageComponents = ImageComponents.getImageComponents();
+        List<ImageComponent> imageComponents = ImageComponents.getICList();
         // make a copy because items will be removed from the original while iterating
         Iterable<ImageComponent> tmpCopy = new ArrayList<>(imageComponents);
         for (ImageComponent component : tmpCopy) {
@@ -312,7 +312,7 @@ public class OpenSaveManager {
 
         OutputFormat outputFormat = OutputFormat.getLastOutputFormat();
         File saveDir = FileChoosers.getLastSaveDir();
-        List<ImageComponent> imageComponents = ImageComponents.getImageComponents();
+        List<ImageComponent> imageComponents = ImageComponents.getICList();
 
         ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("Saving All Images to Folder");
 

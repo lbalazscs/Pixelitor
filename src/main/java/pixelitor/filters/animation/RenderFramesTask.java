@@ -58,7 +58,7 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         AnimationWriter animationWriter = animation.createAnimationWriter();
         boolean canceled = false;
 
-        ImageLayer activeImageLayer = ImageComponents.getActiveImageLayer().get();
+        ImageLayer activeImageLayer = ImageComponents.getActiveImageLayerOrMask().get();
         PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
 
         activeImageLayer.tweenCalculatingStarted();

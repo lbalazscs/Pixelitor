@@ -54,7 +54,7 @@ public class AppNode extends DebugNode {
     }
 
     private void addImageNodes() {
-        List<ImageComponent> images = ImageComponents.getImageComponents();
+        List<ImageComponent> images = ImageComponents.getICList();
 
         int nrOpenImages = images.size();
         addIntChild("Number of Open Images", nrOpenImages);

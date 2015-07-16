@@ -70,10 +70,17 @@ public class EnlargeCanvas {
 
         private EnlargeCanvasPanel() {
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-            add(new SliderSpinner(northRange, BORDER, false));
-            add(new SliderSpinner(eastRange, BORDER, false));
-            add(new SliderSpinner(southRange, BORDER, false));
-            add(new SliderSpinner(westRange, BORDER, false));
+
+            addSliderSpinner(northRange, "north");
+            addSliderSpinner(eastRange, "east");
+            addSliderSpinner(southRange, "south");
+            addSliderSpinner(westRange, "west");
+        }
+
+        private void addSliderSpinner(RangeParam range, String sliderName) {
+            SliderSpinner s = new SliderSpinner(range, BORDER, false);
+            s.setSliderName(sliderName);
+            add(s);
         }
 
         public int getNorth() {

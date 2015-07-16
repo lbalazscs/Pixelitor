@@ -78,7 +78,7 @@ public enum TweenWizardPage implements WizardPage {
         @Override
         public JComponent getPanel(Wizard wizard) {
             FilterWithParametrizedGUI filter = getAnimation(wizard).getFilter();
-            ImageComponents.getActiveImageLayer().get().startPreviewing();
+            ImageComponents.getActiveImageLayerOrMask().get().startPreviewing();
             AdjustPanel adjustPanel = filter.createAdjustPanel();
 
             return adjustPanel;
@@ -87,7 +87,7 @@ public enum TweenWizardPage implements WizardPage {
         @Override
         public void onWizardCancelled(Wizard wizard) {
             FilterWithParametrizedGUI filter = getAnimation(wizard).getFilter();
-            ImageComponents.getActiveImageLayer().get().cancelPressedInDialog();
+            ImageComponents.getActiveImageLayerOrMask().get().cancelPressedInDialog();
         }
 
         @Override
@@ -117,7 +117,7 @@ public enum TweenWizardPage implements WizardPage {
         public JComponent getPanel(Wizard wizard) {
             // the following 3 lines are necessary because otherwise the image position
             // selectors will show the result of the initial filter and not the original image
-            ImageLayer imageLayer = ImageComponents.getActiveImageLayer().get();
+            ImageLayer imageLayer = ImageComponents.getActiveImageLayerOrMask().get();
             imageLayer.stopPreviewing(); // stop the initial one
             imageLayer.startPreviewing(); // start the final one
 
@@ -130,7 +130,7 @@ public enum TweenWizardPage implements WizardPage {
         @Override
         public void onWizardCancelled(Wizard wizard) {
             FilterWithParametrizedGUI filter = getAnimation(wizard).getFilter();
-            ImageComponents.getActiveImageLayer().get().cancelPressedInDialog();
+            ImageComponents.getActiveImageLayerOrMask().get().cancelPressedInDialog();
         }
 
         @Override
