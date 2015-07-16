@@ -30,13 +30,13 @@ import static pixelitor.Composition.ImageChangeActions.FULL;
 /**
  * A PixelitorEdit representing an operation that can affect multiple layers,
  * such as resize, a crop, flip, or image rotation.
- * These are undoable only if the composition consists of a single layer
+ * These are undoable only if the composition has a single image layer
  */
 public class MultiLayerEdit extends PixelitorEdit {
-    private final ImageEdit imageEdit;
-    private final CanvasChangeEdit canvasChangeEdit;
     private ImageLayer layer;
 
+    private final ImageEdit imageEdit;
+    private final CanvasChangeEdit canvasChangeEdit;
     private SelectionChangeEdit selectionChangeEdit;
     private DeselectEdit deselectEdit;
 

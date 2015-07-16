@@ -153,9 +153,10 @@ public final class CompositionUtils {
 
         CanvasChangeEdit canvasChangeEdit = new CanvasChangeEdit("", comp);
         MultiLayerEdit edit = new MultiLayerEdit(comp, "Resize", backupImage, canvasChangeEdit);
-
-        SelectionChangeEdit selectionChangeEdit = new SelectionChangeEdit(comp, backupShape, "");
-        edit.setSelectionChangeEdit(selectionChangeEdit);
+        if (backupShape != null) {
+            SelectionChangeEdit selectionChangeEdit = new SelectionChangeEdit(comp, backupShape, "");
+            edit.setSelectionChangeEdit(selectionChangeEdit);
+        }
         History.addEdit(edit);
 
         comp.getCanvas().updateSize(targetWidth, targetHeight);

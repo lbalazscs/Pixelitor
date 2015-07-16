@@ -34,16 +34,18 @@ public class CanvasChangeEdit extends PixelitorEdit {
 
     private int backupCanvasWidth;
     private int backupCanvasHeight;
+    private final ImageLayer layer;
 
     public CanvasChangeEdit(String name,
                             Composition comp) {
         super(comp, name);
         embedded = true;
 
-        ImageLayer layer = comp.getAnyImageLayer();
-
-        backupTranslationX = layer.getTranslationX();
-        backupTranslationY = layer.getTranslationY();
+        layer = comp.getAnyImageLayer();
+        if (layer != null) { // could be null, if there are only text layers
+            backupTranslationX = layer.getTranslationX();
+            backupTranslationY = layer.getTranslationY();
+        }
 
         backupCanvasWidth = comp.getCanvasWidth();
         backupCanvasHeight = comp.getCanvasHeight();
@@ -77,20 +79,20 @@ public class CanvasChangeEdit extends PixelitorEdit {
     }
 
     private void swapCanvasDimensions() {
-        ImageLayer layer = comp.getAnyImageLayer();
-
-        int tmpTranslationX = layer.getTranslationX();
-        int tmpTranslationY = layer.getTranslationY();
+        if (layer != null) {
+            int tmpTranslationX = layer.getTranslationX();
+            int tmpTranslationY = layer.getTranslationY();
+            layer.setTranslation(backupTranslationX, backupTranslationY);
+            backupTranslationX = tmpTranslationX;
+            backupTranslationY = tmpTranslationY;
+        }
 
         int tmpCanvasWidth = comp.getCanvasWidth();
         int tmpCanvasHeight = comp.getCanvasHeight();
 
         // TODO think about the translation of the mask
-        layer.setTranslation(backupTranslationX, backupTranslationY);
         comp.getCanvas().updateSize(backupCanvasWidth, backupCanvasHeight);
 
-        backupTranslationX = tmpTranslationX;
-        backupTranslationY = tmpTranslationY;
         backupCanvasWidth = tmpCanvasWidth;
         backupCanvasHeight = tmpCanvasHeight;
 

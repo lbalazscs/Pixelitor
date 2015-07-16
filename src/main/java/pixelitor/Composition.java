@@ -281,7 +281,7 @@ public class Composition implements Serializable {
                 return imageLayer;
             }
         }
-        throw new IllegalStateException("nothing found");
+        return null;
     }
 
     /**
@@ -775,6 +775,9 @@ public class Composition implements Serializable {
     }
 
     public void createSelectionFromShape(Shape selectionShape) {
+        if (selection != null) {
+            throw new IllegalStateException("createSelectionFromShape called while there was a selection: " + selection.toString());
+        }
         setNewSelection(new Selection(selectionShape, ic));
     }
 
