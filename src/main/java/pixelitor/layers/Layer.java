@@ -484,6 +484,11 @@ public abstract class Layer implements Serializable {
     }
 
     public PixelitorEdit endMovement() {
+        // Returns the edit of the linked layer.
+        // Handles the case when we are in an adjustment
+        // layer and the layer mask needs to be moved.
+        // Otherwise the ContentLayer will override this,
+        // and call super for the linked edit.
         Layer linked = getLinked();
         if (linked != null) {
             //noinspection TailRecursion
@@ -537,5 +542,18 @@ public abstract class Layer implements Serializable {
 
     public Layer getParent() {
         return parent;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("{");
+        sb.append("name='").append(name).append('\'');
+        sb.append(", visible=").append(visible);
+        sb.append(", mask=").append(mask);
+        sb.append(", maskEditing=").append(maskEditing);
+        sb.append(", maskEnabled=").append(maskEnabled);
+        sb.append(", isAdjustment=").append(isAdjustment);
+        sb.append('}');
+        return sb.toString();
     }
 }

@@ -26,8 +26,8 @@ import javax.swing.undo.CannotUndoException;
  * A PixelitorEdit that uis created when a new layer is selected
  */
 public class LayerSelectionChangeEdit extends PixelitorEdit {
-    private final Layer oldLayer;
-    private final Layer newLayer;
+    private Layer oldLayer;
+    private Layer newLayer;
 
     public LayerSelectionChangeEdit(Composition comp, Layer oldLayer, Layer newLayer) {
         super(comp, "Layer Selection Change");
@@ -56,5 +56,13 @@ public class LayerSelectionChangeEdit extends PixelitorEdit {
         comp.setActiveLayer(newLayer, AddToHistory.NO);
 
         History.notifyMenus(this);
+    }
+
+    @Override
+    public void die() {
+        super.die();
+
+        oldLayer = null;
+        newLayer = null;
     }
 }

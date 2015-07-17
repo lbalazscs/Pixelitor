@@ -102,7 +102,17 @@ public abstract class ContentLayer extends Layer {
 
     public abstract void flip(Flip.Direction direction, AffineTransform flipTx);
 
-    public abstract void rotate(int angleDegree);
+    public abstract void rotate(int angleDegree, AffineTransform rotTx);
 
     public abstract void enlargeCanvas(int north, int east, int south, int west);
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("{");
+        sb.append("tx=").append(translationX);
+        sb.append(", ty=").append(translationY);
+        sb.append(", super=").append(super.toString());
+        sb.append('}');
+        return sb.toString();
+    }
 }

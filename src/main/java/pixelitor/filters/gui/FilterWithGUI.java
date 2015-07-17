@@ -61,7 +61,7 @@ public abstract class FilterWithGUI extends Filter {
                 return;
             }
 
-            ImageLayer layer = ic.getComp().getActiveImageLayerOrMask();
+            ImageLayer layer = ic.getComp().getActiveMaskOrImageLayer();
             layer.startPreviewing();
 
             AdjustPanel p = createAdjustPanel();

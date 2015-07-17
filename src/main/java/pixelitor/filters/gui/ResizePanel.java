@@ -19,7 +19,7 @@ package pixelitor.filters.gui;
 
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
-import pixelitor.filters.comp.CompositionUtils;
+import pixelitor.filters.comp.Resize;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.GridBagHelper;
 import pixelitor.utils.OKCancelDialog;
@@ -258,7 +258,7 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
                     Dialogs.showErrorDialog(this, "Error", p.getErrorMessage());
                     return;
                 }
-                CompositionUtils.resize(comp, p.getNewWidth(), p.getNewHeight(), false);
+                new Resize(comp, p.getNewWidth(), p.getNewHeight(), false).actionPerformed(null);
                 close();
             }
         };

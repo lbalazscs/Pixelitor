@@ -49,7 +49,7 @@ public class PartialImageEdit extends FadeableEdit {
 
         this.canRepeat = canRepeat;
         comp.setDirty(true);
-        this.layer = comp.getActiveImageLayerOrMask();
+        this.layer = comp.getActiveMaskOrImageLayer();
 
         this.saveRect = saveRect;
         backupRaster = image.getData(this.saveRect);

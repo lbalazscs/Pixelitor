@@ -17,18 +17,11 @@
 
 package pixelitor.filters.comp;
 
-import pixelitor.AppLogic;
+import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.history.CanvasChangeEdit;
-import pixelitor.history.History;
-import pixelitor.history.MultiLayerEdit;
 import pixelitor.layers.ContentLayer;
-import pixelitor.layers.ImageLayer;
-import pixelitor.layers.Layer;
 
-import java.awt.image.BufferedImage;
-
-import static pixelitor.Composition.ImageChangeActions.REPAINT;
+import java.awt.geom.AffineTransform;
 
 /**
  * Rotates an image
@@ -40,54 +33,49 @@ public class Rotate extends CompAction {
     private int newCanvasHeight;
 
     public Rotate(int angleDegree, String name) {
-        super(name);
+        super(name, true);
         this.angleDegree = angleDegree;
     }
 
     @Override
-    public void transform(Composition comp) {
+    protected void changeCanvas(Composition comp) {
+        Canvas canvas = comp.getCanvas();
+        rotateCanvas(canvas);
+        canvas.updateSize(newCanvasWidth, newCanvasHeight);
+    }
 
-        int nrLayers = comp.getNrLayers();
+    @Override
+    protected String getUndoName() {
+        return "Rotate";
+    }
 
-        int canvasWidth = comp.getCanvasWidth();
-        int canvasHeight = comp.getCanvasHeight();
+    @Override
+    protected void applyTx(ContentLayer contentLayer, AffineTransform tx) {
+        contentLayer.rotate(angleDegree, tx);
+    }
 
-        BufferedImage backupImage = null;
-        CanvasChangeEdit canvasChangeEdit = new CanvasChangeEdit("", comp);
+    @Override
+    protected AffineTransform createTransform(Canvas canvas) {
+        int canvasWidth = canvas.getWidth();
+        int canvasHeight = canvas.getHeight();
 
-        for (int i = 0; i < nrLayers; i++) {
-            Layer layer = comp.getLayer(i);
-            if (layer instanceof ContentLayer) {
-                if (layer instanceof ImageLayer) {
-                    backupImage = ((ImageLayer) layer).getImage();
-                }
-                ContentLayer contentLayer = (ContentLayer) layer;
-                contentLayer.rotate(angleDegree);
-            }
-            if (layer.hasMask()) {
-                layer.getMask().rotate(angleDegree);
-            }
+        AffineTransform rotTx = new AffineTransform();
+        if (angleDegree == 90) {
+            rotTx.translate(canvasHeight, 0);
+        } else if (angleDegree == 180) {
+            rotTx.translate(canvasWidth, canvasHeight);
+        } else if (angleDegree == 270) {
+            rotTx.translate(0, canvasWidth);
         }
-
-        assert backupImage != comp.getAnyImageLayer().getImage();
-        MultiLayerEdit edit = new MultiLayerEdit(comp, "Rotate", backupImage,
-                canvasChangeEdit);
-        History.addEdit(edit);
-
-        rotateCanvas(canvasWidth, canvasHeight);
-        comp.getCanvas().updateSize(newCanvasWidth, newCanvasHeight);
-
-        // Only after the shared canvas size was updated
-        comp.updateAllIconImages();
-
-        comp.setDirty(true);
-        comp.imageChanged(REPAINT);
-
-        AppLogic.activeCompositionDimensionsChanged(comp);
+        // TODO rotate with exact transform
+        rotTx.rotate(Math.toRadians(angleDegree));
+        return rotTx;
     }
 
     @SuppressWarnings("SuspiciousNameCombination")
-    private void rotateCanvas(int canvasWidth, int canvasHeight) {
+    private void rotateCanvas(Canvas canvas) {
+        int canvasWidth = canvas.getWidth();
+        int canvasHeight = canvas.getHeight();
         if (angleDegree == 90 || angleDegree == 270) {
             newCanvasWidth = canvasHeight;
             newCanvasHeight = canvasWidth;

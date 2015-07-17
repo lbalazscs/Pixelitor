@@ -210,7 +210,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
      */
     private void drawTo(Composition comp, int x, int y, boolean connectClickWithLine) {
         if (graphics == null) { // a new brush stroke has to be initialized
-            ImageLayer imageLayer = comp.getActiveImageLayerOrMask();
+            ImageLayer imageLayer = comp.getActiveMaskOrImageLayer();
             createGraphicsForNewBrushStroke(comp, imageLayer);
             graphics.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
@@ -265,7 +265,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         try {
             respectSelection = false;
 
-            ImageLayer imageLayer = comp.getActiveImageLayerOrMask();
+            ImageLayer imageLayer = comp.getActiveMaskOrImageLayer();
             createGraphicsForNewBrushStroke(comp, imageLayer);
 
             doTraceAfterSetup(shape);

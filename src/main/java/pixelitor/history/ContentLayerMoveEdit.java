@@ -18,6 +18,7 @@ package pixelitor.history;
 
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
+import pixelitor.selection.IgnoreSelection;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -30,24 +31,25 @@ import static pixelitor.Composition.ImageChangeActions.FULL;
  */
 public class ContentLayerMoveEdit extends PixelitorEdit {
     public static final String NAME = "Layer Movement";
-    private BufferedImage backupImage;
-    private ContentLayer layer;
-    private int backupTranslationX = 0;
-    private int backupTranslationY = 0;
 
-    /**
-     * @param layer
-     * @param backupImage     - can be null, if no image enlargement is taking place
-     * @param oldTranslationX
-     * @param oldTranslationY
-     */
+    // can be null, if no image enlargement is taking place
+    private ImageEdit imageEdit;
+
+    private ContentLayer layer;
+    private TranslationEdit translationEdit;
+
     public ContentLayerMoveEdit(ContentLayer layer, BufferedImage backupImage, int oldTranslationX, int oldTranslationY) {
         super(layer.getComp(), NAME);
 
         this.layer = layer;
-        this.backupImage = backupImage;
-        this.backupTranslationX = oldTranslationX;
-        this.backupTranslationY = oldTranslationY;
+
+        if (backupImage != null) {
+            imageEdit = new ImageEdit("", comp, (ImageLayer) layer,
+                    backupImage, IgnoreSelection.YES, false);
+            imageEdit.setEmbedded(true);
+        }
+
+        this.translationEdit = new TranslationEdit(comp, layer, oldTranslationX, oldTranslationY);
 
         layer.getComp().setDirty(true);
     }
@@ -56,42 +58,38 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        swapTranslation();
+        if (imageEdit != null) {
+            imageEdit.undo();
+        }
+        translationEdit.undo();
+
+        if (!embedded) {
+            layer.getComp().imageChanged(FULL);
+            History.notifyMenus(this);
+        }
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        swapTranslation();
-    }
-
-    private void swapTranslation() {
-        int tmpX = layer.getTranslationX();
-        int tmpY = layer.getTranslationY();
-        BufferedImage tmpBI = null;
-        if (backupImage != null) {
-            ImageLayer imageLayer = (ImageLayer) layer;
-            tmpBI = imageLayer.getImage();
-            imageLayer.setImage(backupImage);
+        if (imageEdit != null) {
+            imageEdit.redo();
         }
+        translationEdit.redo();
 
-        layer.setTranslation(backupTranslationX, backupTranslationY);
-        backupTranslationX = tmpX;
-        backupTranslationY = tmpY;
-
-        backupImage = tmpBI;
-
-        layer.getComp().imageChanged(FULL);
-        History.notifyMenus(this);
+        if (!embedded) {
+            layer.getComp().imageChanged(FULL);
+            History.notifyMenus(this);
+        }
     }
 
     @Override
     public void die() {
         super.die();
-        if (backupImage != null) {
-            backupImage.flush();
-            backupImage = null;
+        translationEdit.die();
+        if (imageEdit != null) {
+            imageEdit.die();
         }
         layer = null;
     }

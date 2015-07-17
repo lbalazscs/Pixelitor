@@ -18,7 +18,7 @@
 package pixelitor.automate;
 
 import pixelitor.PixelitorWindow;
-import pixelitor.filters.comp.CompositionUtils;
+import pixelitor.filters.comp.Resize;
 import pixelitor.utils.CompositionAction;
 import pixelitor.utils.IntTextField;
 import pixelitor.utils.ValidatedDialog;
@@ -45,7 +45,7 @@ public class BatchResize {
         int maxWidth = batchResizePanel.getNewWidth();
         int maxHeight = batchResizePanel.getNewHeight();
 
-        CompositionAction resizeAction = comp -> CompositionUtils.resize(comp, maxWidth, maxHeight, true);
+        CompositionAction resizeAction = comp -> new Resize(comp, maxWidth, maxHeight, true).actionPerformed(null);
         Automate.processEachFile(resizeAction, true, "Batch Resize...");
     }
 

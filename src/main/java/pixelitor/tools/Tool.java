@@ -214,7 +214,7 @@ public abstract class Tool {
         BufferedImage copy = comp.getImageOrSubImageIfSelectedForActiveLayer(true, true);
 
         ImageEdit edit = new ImageEdit(getName(), comp,
-                comp.getActiveImageLayerOrMask(), copy,
+                comp.getActiveMaskOrImageLayer(), copy,
                 IgnoreSelection.NO, false);
         History.addEdit(edit);
     }

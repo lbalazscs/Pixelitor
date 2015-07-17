@@ -52,7 +52,7 @@ public abstract class DirectBrushTool extends AbstractBrushTool {
         copyBeforeStart.flush();
         copyBeforeStart = null;
 
-        ic.getComp().getActiveImageLayerOrMask().updateIconImage();
+        ic.getComp().getActiveMaskOrImageLayer().updateIconImage();
     }
 
     @Override

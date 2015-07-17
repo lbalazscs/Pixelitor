@@ -30,8 +30,8 @@ import java.awt.image.BufferedImage;
  * to the transparency of the layer)
  */
 public class ApplyLayerMaskEdit extends PixelitorEdit {
-    private final LayerMask oldMask;
-    private final BufferedImage oldImage;
+    private LayerMask oldMask;
+    private BufferedImage oldImage;
     private ImageLayer layer;
 
     public ApplyLayerMaskEdit(Composition comp, ImageLayer layer, LayerMask oldMask, BufferedImage oldImage) {
@@ -66,6 +66,11 @@ public class ApplyLayerMaskEdit extends PixelitorEdit {
         super.die();
 
         layer = null;
+        oldMask = null;
+        if(oldImage != null) {
+            oldImage.flush();
+            oldImage = null;
+        }
     }
 
     @Override

@@ -17,7 +17,6 @@
 
 package pixelitor;
 
-import pixelitor.history.AddToHistory;
 import pixelitor.layers.ImageLayer;
 
 import java.awt.Graphics2D;
@@ -40,6 +39,7 @@ public class TestHelper {
 
         Composition comp = Composition.empty(sizeX, sizeY);
         comp.setImageComponent(imageDisplayStub);
+        comp.setName("Test");
 
         imageDisplayStub.setComp(comp);
 
@@ -52,9 +52,9 @@ public class TestHelper {
         ImageLayer layer1 = createTestImageLayer("layer 1", c);
         ImageLayer layer2 = createTestImageLayer("layer 2", c);
 
-        c.setActiveLayer(layer1, AddToHistory.NO);
+//        c.setActiveLayer(layer1, AddToHistory.NO);
 
-        assert layer1 == c.getActiveLayer();
+        assert layer2 == c.getActiveLayer();
         assert layer1 == c.getLayer(0);
         assert layer2 == c.getLayer(1);
 

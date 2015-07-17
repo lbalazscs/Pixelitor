@@ -92,4 +92,13 @@ public class Canvas implements Serializable {
     public void setIc(ImageDisplay ic) {
         this.ic = ic;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Canvas{");
+        sb.append("width=").append(width);
+        sb.append(", height=").append(height);
+        sb.append('}');
+        return sb.toString();
+    }
 }

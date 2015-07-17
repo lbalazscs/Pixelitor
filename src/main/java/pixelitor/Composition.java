@@ -21,7 +21,6 @@ import pixelitor.filters.Filter;
 import pixelitor.filters.FilterUtils;
 import pixelitor.filters.RepeatLast;
 import pixelitor.history.AddToHistory;
-import pixelitor.history.CanvasChangeEdit;
 import pixelitor.history.CompoundEdit;
 import pixelitor.history.DeleteLayerEdit;
 import pixelitor.history.DeselectEdit;
@@ -29,7 +28,6 @@ import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.history.LayerOrderChangeEdit;
 import pixelitor.history.LayerSelectionChangeEdit;
-import pixelitor.history.MultiLayerEdit;
 import pixelitor.history.NewLayerEdit;
 import pixelitor.history.NotUndoableEdit;
 import pixelitor.history.PixelitorEdit;
@@ -68,7 +66,6 @@ import java.util.Optional;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
-import static pixelitor.Composition.ImageChangeActions.REPAINT;
 
 /**
  * An image composition consisting of multiple layers
@@ -240,19 +237,19 @@ public class Composition implements Serializable {
     }
 
     public void okPressedInDialog(String filterName) {
-        getActiveImageLayerOrMask().okPressedInDialog(filterName);
+        getActiveMaskOrImageLayer().okPressedInDialog(filterName);
     }
 
     public void filterWithoutDialogFinished(BufferedImage img, ChangeReason changeReason, String opName) {
         setDirty(true);
 
-        getActiveImageLayerOrMask().filterWithoutDialogFinished(img, changeReason, opName);
+        getActiveMaskOrImageLayer().filterWithoutDialogFinished(img, changeReason, opName);
 
         imageChanged(FULL);
     }
 
     public void changePreviewImage(BufferedImage img, String filterName, ChangeReason changeReason) {
-        ImageLayer layer = getActiveImageLayerOrMask();
+        ImageLayer layer = getActiveMaskOrImageLayer();
         layer.changePreviewImage(img, filterName, changeReason);
     }
 
@@ -284,11 +281,18 @@ public class Composition implements Serializable {
         return null;
     }
 
-    /**
-     * This method assumes that the active layer is an image layer
-     */
-    public ImageLayer getActiveImageLayerOrMask() {
-        checkInvariant();
+    public ContentLayer getAnyContentLayer() {
+        for (Layer layer : layerList) {
+            if (layer instanceof ContentLayer) {
+                ContentLayer contentLayer = (ContentLayer) layer;
+                return contentLayer;
+            }
+        }
+        return null;
+    }
+
+    public ImageLayer getActiveMaskOrImageLayerOrNull() {
+        assert checkInvariant();
         if (activeLayer.isMaskEditing()) {
             return activeLayer.getMask();
         }
@@ -296,30 +300,38 @@ public class Composition implements Serializable {
             ImageLayer imageLayer = (ImageLayer) activeLayer;
             return imageLayer;
         }
-        throw new IllegalStateException("active layer is not image layer");
+        return null;
+    }
+
+    /**
+     * This method assumes that the active layer is an image layer
+     */
+    public ImageLayer getActiveMaskOrImageLayer() {
+        ImageLayer layer = getActiveMaskOrImageLayerOrNull();
+        if (layer == null) {
+            throw new IllegalStateException("active layer is not image layer");
+        }
+        return layer;
     }
 
     /**
      * This should be called if the active layer might not be an image layer
      */
-    public Optional<ImageLayer> getActiveImageLayerOrMaskOpt() {
-        if (activeLayer.isMaskEditing()) {
-            return Optional.of(activeLayer.getMask());
+    public Optional<ImageLayer> getActiveMaskOrImageLayerOpt() {
+        ImageLayer layer = getActiveMaskOrImageLayerOrNull();
+        if (layer == null) {
+            return Optional.empty();
         }
-        if (activeLayer instanceof ImageLayer) {
-            ImageLayer imageLayer = (ImageLayer) activeLayer;
-            return Optional.of(imageLayer);
-        }
-        return Optional.empty();
+        return Optional.of(layer);
     }
 
     public BufferedImage getImageOrSubImageIfSelectedForActiveLayer(boolean copyIfFull, boolean copyAndTranslateIfSelected) {
-        return getActiveImageLayerOrMask()
+        return getActiveMaskOrImageLayer()
                 .getImageOrSubImageIfSelected(copyIfFull, copyAndTranslateIfSelected);
     }
 
     public BufferedImage getFilterSource() {
-        return getActiveImageLayerOrMask().getFilterSourceImage();
+        return getActiveMaskOrImageLayer().getFilterSourceImage();
     }
 
     public Canvas getCanvas() {
@@ -383,7 +395,7 @@ public class Composition implements Serializable {
         if (updateGUI.isYes()) {
             AppLogic.activeCompLayerCountChanged(this, 1);
 
-            // TODO should have add to history argument?
+            // TODO should have a separate add to history argument?
             History.addEdit(new NotUndoableEdit(this, "Flatten Image"));
         }
     }
@@ -595,7 +607,7 @@ public class Composition implements Serializable {
         setName(file.getName());
     }
 
-    private void setName(String name) {
+    public void setName(String name) {
         this.name = name;
         if (ic != null) {
             ic.updateTitle();
@@ -812,48 +824,6 @@ public class Composition implements Serializable {
         }
     }
 
-    public void enlargeCanvas(int north, int east, int south, int west) {
-        BufferedImage backupImage = null;
-        for (Layer layer : layerList) {
-            if (layer instanceof ContentLayer) {
-                if (layer instanceof ImageLayer) {
-                    backupImage = ((ImageLayer) layer).getImage();
-                }
-
-                ContentLayer contentLayer = (ContentLayer) layer;
-                contentLayer.enlargeCanvas(north, east, south, west);
-            }
-            if (layer.hasMask()) {
-                LayerMask mask = layer.getMask();
-                mask.enlargeCanvas(north, east, south, west);
-            }
-        }
-
-        SelectionChangeEdit selectionChangeEdit = null;
-        if (selection != null && (north > 0 || west > 0)) {
-            Shape backupShape = selection.getShape();
-            selection.transform(
-                    AffineTransform.getTranslateInstance(west, north),
-                    AddToHistory.NO);
-            selectionChangeEdit = new SelectionChangeEdit(this, backupShape, "");
-            selectionChangeEdit.setEmbedded(true);
-        }
-
-        CanvasChangeEdit canvasChangeEdit = new CanvasChangeEdit("", this);
-        MultiLayerEdit edit = new MultiLayerEdit(this, "Enlarge Canvas", backupImage, canvasChangeEdit);
-        edit.setSelectionChangeEdit(selectionChangeEdit);
-        History.addEdit(edit);
-
-        canvas.updateSize(canvas.getWidth() + east + west, canvas.getHeight() + north + south);
-
-        // update the icon images only after the shared canvas size was
-        // enlarged, because they are based on the canvas-sized subimage
-        updateAllIconImages();
-
-        imageChanged(REPAINT);
-        setDirty(true);
-    }
-
     public void updateAllIconImages() {
         for (Layer layer : layerList) {
             if (layer instanceof ImageLayer) {
@@ -941,7 +911,7 @@ public class Composition implements Serializable {
     }
 
     public void setShowOriginal(boolean b) {
-        getActiveImageLayerOrMask().setShowOriginal(b);
+        getActiveMaskOrImageLayer().setShowOriginal(b);
     }
 
     public void cropSelection(Rectangle cropRect) {
@@ -984,5 +954,18 @@ public class Composition implements Serializable {
         private boolean isUpdateHistogram() {
             return updateHistogram;
         }
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Composition{");
+        sb.append("name='").append(name).append('\'');
+        sb.append(", activeLayer=").append(activeLayer.getName());
+        sb.append(", layerList=").append(layerList);
+        sb.append(", canvas=").append(canvas);
+        sb.append(", selection=").append(selection);
+        sb.append(", dirty=").append(dirty);
+        sb.append('}');
+        return sb.toString();
     }
 }

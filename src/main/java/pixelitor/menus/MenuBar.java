@@ -21,9 +21,9 @@ import com.bric.util.JVM;
 import com.jhlabs.composite.MultiplyComposite;
 import pixelitor.AppLogic;
 import pixelitor.Build;
+import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.Desktop;
-import pixelitor.EnlargeCanvas;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
 import pixelitor.NewImage;
@@ -33,6 +33,7 @@ import pixelitor.automate.BatchFilterWizard;
 import pixelitor.automate.BatchResize;
 import pixelitor.filters.*;
 import pixelitor.filters.animation.TweenWizard;
+import pixelitor.filters.comp.EnlargeCanvas;
 import pixelitor.filters.comp.Flip;
 import pixelitor.filters.comp.Rotate;
 import pixelitor.filters.convolve.Convolve;
@@ -1275,6 +1276,24 @@ public class MenuBar extends JMenuBar {
             }
         };
         createMenuItem(resetLayerTranslation, debugSubmenu);
+
+        createMenuItem(new MenuAction("Debug Translation") {
+            @Override
+            void onClick() {
+                ImageLayer layer = ImageComponents.getActiveImageLayerOrMaskOrNull();
+                int tx = layer.getTranslationX();
+                int ty = layer.getTranslationY();
+                System.out.println("MenuBar::onClick: tx = " + tx + ", ty = " + ty);
+                Canvas canvas = layer.getComp().getCanvas();
+                int canvasWidth = canvas.getWidth();
+                int canvasHeight = canvas.getHeight();
+                System.out.println("MenuBar::onClick: canvasWidth = " + canvasWidth + ", canvasHeight = " + canvasHeight);
+                BufferedImage image = layer.getImage();
+                int imageWidth = image.getWidth();
+                int imageHeight = image.getHeight();
+                System.out.println("MenuBar::onClick: imageWidth = " + imageWidth + ", imageHeight = " + imageHeight);
+            }
+        }, debugSubmenu, CTRL_K);
 
         Action updateHistogram = new MenuAction("Update Histograms") {
             @Override

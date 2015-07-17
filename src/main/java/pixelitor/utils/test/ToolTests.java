@@ -136,7 +136,7 @@ public class ToolTests {
             gradientType = GradientType.SPIRAL_CW;
         }
 
-        GradientTool.drawGradient(comp.getActiveImageLayerOrMask(),
+        GradientTool.drawGradient(comp.getActiveMaskOrImageLayer(),
                 gradientType,
                 BLACK_TO_WHITE,
                 REFLECT,

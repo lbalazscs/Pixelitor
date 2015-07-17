@@ -35,6 +35,7 @@ import pixelitor.filters.Invert;
 import pixelitor.filters.RandomFilter;
 import pixelitor.filters.animation.Interpolation;
 import pixelitor.filters.animation.TweenAnimation;
+import pixelitor.filters.comp.EnlargeCanvas;
 import pixelitor.filters.comp.Flip;
 import pixelitor.filters.comp.Rotate;
 import pixelitor.filters.gui.FilterWithGUI;
@@ -401,12 +402,11 @@ public class RobotTest {
 
         // execute everything without showing a modal dialog
 
-        Layer layer = ImageComponents.getActiveComp().get().getActiveLayer();
-        if (!(layer instanceof ImageLayer)) {
+        ImageLayer imageLayer = ImageComponents.getActiveImageLayerOrMaskOrNull();
+        if (imageLayer == null) {
             return;
         }
 
-        ImageLayer imageLayer = (ImageLayer) layer;
         imageLayer.tweenCalculatingStarted();
 
         PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
@@ -953,7 +953,7 @@ public class RobotTest {
         int east = rand.nextInt(3);
         int south = rand.nextInt(3);
         int west = rand.nextInt(3);
-        ImageComponents.getActiveComp().get().enlargeCanvas(north, east, south, west);
+        new EnlargeCanvas(ImageComponents.getActiveComp().get(), north, east, south, west).invoke();
     }
 }
 

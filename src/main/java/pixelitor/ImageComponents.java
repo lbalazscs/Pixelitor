@@ -17,7 +17,7 @@
 
 package pixelitor;
 
-import pixelitor.filters.comp.CompositionUtils;
+import pixelitor.filters.comp.Crop;
 import pixelitor.history.History;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
@@ -122,14 +122,14 @@ public class ImageComponents {
     public static ImageLayer getActiveImageLayerOrMaskOrNull() {
         if (activeIC != null) {
             Composition comp = activeIC.getComp();
-            return comp.getActiveImageLayerOrMask();
+            return comp.getActiveMaskOrImageLayerOrNull();
         }
 
         return null;
     }
 
     public static Optional<ImageLayer> getActiveImageLayerOrMask() {
-        return getActiveComp().flatMap(Composition::getActiveImageLayerOrMaskOpt);
+        return getActiveComp().flatMap(Composition::getActiveMaskOrImageLayerOpt);
     }
 
     public static int getNrOfOpenImages() {
@@ -141,14 +141,14 @@ public class ImageComponents {
     }
 
     /**
-     * Crops tha active image based on the crop tool
+     * Crops the active image based on the crop tool
      */
     public static void toolCropActiveImage(boolean allowGrowing) {
         try {
             Optional<Composition> opt = getActiveComp();
             opt.ifPresent(comp -> {
                 Rectangle cropRect = Tools.CROP.getCropRect(comp.getIC());
-                CompositionUtils.cropImage(comp, cropRect, false, allowGrowing);
+                new Crop(comp, cropRect, false, allowGrowing).actionPerformed(null);
             });
         } catch (Exception ex) {
             Dialogs.showExceptionDialog(ex);
@@ -156,13 +156,13 @@ public class ImageComponents {
     }
 
     /**
-     * Crops tha active image based on the selection bounds
+     * Crops the active image based on the selection bounds
      */
     public static void selectionCropActiveImage() {
         try {
             getActiveComp().ifPresent(comp -> comp.getSelection().ifPresent(selection -> {
                 Rectangle selectionBounds = selection.getShapeBounds();
-                CompositionUtils.cropImage(comp, selectionBounds, true, true);
+                new Crop(comp, selectionBounds, true, true).actionPerformed(null);
             }));
         } catch (Exception ex) {
             Dialogs.showExceptionDialog(ex);

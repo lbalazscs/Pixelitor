@@ -19,6 +19,7 @@ package pixelitor;
 
 import org.junit.Before;
 import org.junit.Test;
+import pixelitor.filters.comp.EnlargeCanvas;
 import pixelitor.history.AddToHistory;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
@@ -54,13 +55,24 @@ public class CompositionTest {
     public void setUp() {
         comp = TestHelper.create2LayerTestComposition();
         checkNumLayers(2);
+        assertEquals("Composition{name='Test', activeLayer=layer 2, layerList=[" +
+                "ImageLayer{state=NORMAL, super={tx=0, ty=0, super={name='layer 1', visible=true, mask=null, maskEditing=false, maskEnabled=true, isAdjustment=false}}}, " +
+                "ImageLayer{state=NORMAL, super={tx=0, ty=0, super={name='layer 2', visible=true, mask=null, maskEditing=false, maskEnabled=true, isAdjustment=false}}}], " +
+                "canvas=Canvas{width=20, height=10}, selection=null, dirty=false}", comp.toString());
     }
 
     @Test
     public void testAddNewEmptyLayer() {
-        comp.addNewEmptyLayer("newLayer", true);
-        comp.addNewEmptyLayer("newLayer", false);
+        comp.addNewEmptyLayer("newLayer 1", true);
+        comp.addNewEmptyLayer("newLayer 2", false);
         checkNumLayers(4);
+
+        assertEquals("Composition{name='Test', activeLayer=newLayer 2, layerList=[" +
+                "ImageLayer{state=NORMAL, super={tx=0, ty=0, super={name='layer 1', visible=true, mask=null, maskEditing=false, maskEnabled=true, isAdjustment=false}}}, " +
+                "ImageLayer{state=NORMAL, super={tx=0, ty=0, super={name='newLayer 1', visible=true, mask=null, maskEditing=false, maskEnabled=true, isAdjustment=false}}}, " +
+                "ImageLayer{state=NORMAL, super={tx=0, ty=0, super={name='newLayer 2', visible=true, mask=null, maskEditing=false, maskEnabled=true, isAdjustment=false}}}, " +
+                "ImageLayer{state=NORMAL, super={tx=0, ty=0, super={name='layer 2', visible=true, mask=null, maskEditing=false, maskEnabled=true, isAdjustment=false}}}], " +
+                "canvas=Canvas{width=20, height=10}, selection=null, dirty=true}", comp.toString());
     }
 
     @Test
@@ -121,7 +133,7 @@ public class CompositionTest {
 
     @Test
     public void testGetActiveImageLayer() {
-        assertTrue(comp.getActiveImageLayerOrMaskOpt().isPresent());
+        assertTrue(comp.getActiveMaskOrImageLayerOpt().isPresent());
         comp.checkInvariant();
     }
 
@@ -195,7 +207,7 @@ public class CompositionTest {
 
     @Test
     public void testMoveActiveLayer() {
-        checkActiveLayerIndex(0);
+        checkActiveLayerIndex(1);
         comp.moveActiveLayerUp();
         checkActiveLayerIndex(1);
         comp.moveActiveLayerDown();
@@ -204,23 +216,23 @@ public class CompositionTest {
 
     @Test
     public void testMoveActiveLayerToTop() {
-        checkActiveLayerIndex(0);
+        checkActiveLayerIndex(1);
         comp.moveActiveLayerToTop();
         checkActiveLayerIndex(1);
     }
 
     @Test
     public void testMoveActiveLayerToBottom() {
-        checkActiveLayerIndex(0);
+        checkActiveLayerIndex(1);
         comp.moveActiveLayerToBottom();
         checkActiveLayerIndex(0);
     }
 
     @Test
     public void testSwapLayers() {
-        checkActiveLayerIndex(0);
-        comp.swapLayers(0, 1, AddToHistory.YES);
         checkActiveLayerIndex(1);
+        comp.swapLayers(0, 1, AddToHistory.YES);
+        checkActiveLayerIndex(0);
     }
 
     @Test
@@ -371,7 +383,7 @@ public class CompositionTest {
 
     @Test
     public void testIsActiveLayer() {
-        Layer layer = comp.getLayer(0);
+        Layer layer = comp.getLayer(1);
         boolean b = comp.isActiveLayer(layer);
         assertThat(b, is(true));
         comp.checkInvariant();
@@ -423,7 +435,7 @@ public class CompositionTest {
 
     @Test
     public void testEnlargeCanvas() {
-        comp.enlargeCanvas(3, 4, 5, -2);
+        new EnlargeCanvas(comp, 3, 4, 5, 2).invoke();
         comp.checkInvariant();
     }
 

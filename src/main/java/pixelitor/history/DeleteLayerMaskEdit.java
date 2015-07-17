@@ -27,7 +27,7 @@ import javax.swing.undo.CannotUndoException;
  * A PixelitorEdit that represents the deletion of a layer mask
  */
 public class DeleteLayerMaskEdit extends PixelitorEdit {
-    private final LayerMask oldMask;
+    private LayerMask oldMask;
     private Layer layer;
 
     public DeleteLayerMaskEdit(Composition comp, Layer layer, LayerMask oldMask) {
@@ -60,6 +60,7 @@ public class DeleteLayerMaskEdit extends PixelitorEdit {
         super.die();
 
         layer = null;
+        oldMask = null;
     }
 
     @Override

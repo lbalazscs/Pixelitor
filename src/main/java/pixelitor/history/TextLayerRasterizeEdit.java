@@ -63,7 +63,6 @@ public class TextLayerRasterizeEdit extends PixelitorEdit {
 
         before = null;
         after = null;
-        comp = null;
     }
 
     @Override

@@ -18,7 +18,7 @@
 package pixelitor.history;
 
 import pixelitor.Composition;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.ContentLayer;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -29,22 +29,20 @@ import javax.swing.undo.CannotUndoException;
  * Always part of a MultiLayerEdit.
  */
 public class CanvasChangeEdit extends PixelitorEdit {
-    private int backupTranslationX;
-    private int backupTranslationY;
-
     private int backupCanvasWidth;
     private int backupCanvasHeight;
-    private final ImageLayer layer;
+
+    private TranslationEdit translationEdit;
 
     public CanvasChangeEdit(String name,
                             Composition comp) {
         super(comp, name);
         embedded = true;
 
-        layer = comp.getAnyImageLayer();
+        // TODO think about the translation of the mask
+        ContentLayer layer = comp.getAnyContentLayer();
         if (layer != null) { // could be null, if there are only text layers
-            backupTranslationX = layer.getTranslationX();
-            backupTranslationY = layer.getTranslationY();
+            translationEdit = new TranslationEdit(comp, layer);
         }
 
         backupCanvasWidth = comp.getCanvasWidth();
@@ -70,27 +68,24 @@ public class CanvasChangeEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
         swapCanvasDimensions();
+        if (translationEdit != null) {
+            translationEdit.undo();
+        }
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
         swapCanvasDimensions();
+        if (translationEdit != null) {
+            translationEdit.redo();
+        }
     }
 
     private void swapCanvasDimensions() {
-        if (layer != null) {
-            int tmpTranslationX = layer.getTranslationX();
-            int tmpTranslationY = layer.getTranslationY();
-            layer.setTranslation(backupTranslationX, backupTranslationY);
-            backupTranslationX = tmpTranslationX;
-            backupTranslationY = tmpTranslationY;
-        }
-
         int tmpCanvasWidth = comp.getCanvasWidth();
         int tmpCanvasHeight = comp.getCanvasHeight();
 
-        // TODO think about the translation of the mask
         comp.getCanvas().updateSize(backupCanvasWidth, backupCanvasHeight);
 
         backupCanvasWidth = tmpCanvasWidth;
@@ -100,5 +95,12 @@ public class CanvasChangeEdit extends PixelitorEdit {
             comp.updateAllIconImages();
             History.notifyMenus(this);
         }
+    }
+
+    @Override
+    public void die() {
+        super.die();
+
+        translationEdit.die();
     }
 }

@@ -30,7 +30,7 @@ import pixelitor.filters.FilterUtils;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.Lightning;
 import pixelitor.filters.RandomFilter;
-import pixelitor.filters.comp.CompositionUtils;
+import pixelitor.filters.comp.Resize;
 import pixelitor.filters.gui.ParametrizedAdjustPanel;
 import pixelitor.history.History;
 import pixelitor.io.FileChoosers;
@@ -188,7 +188,7 @@ public class OpTests {
         ImageComponents.getActiveComp().ifPresent(comp -> {
             int targetWidth = 10 + RobotTest.rand.nextInt(1200);
             int targetHeight = 10 + RobotTest.rand.nextInt(800);
-            CompositionUtils.resize(comp, targetWidth, targetHeight, false);
+            new Resize(comp, targetWidth, targetHeight, false).actionPerformed(null);
         });
     }
 

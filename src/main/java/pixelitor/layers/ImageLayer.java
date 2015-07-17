@@ -34,7 +34,6 @@ import pixelitor.utils.Dialogs;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.UpdateGUI;
 import pixelitor.utils.Utils;
-import pixelitor.utils.debug.ImageLayerNode;
 
 import javax.swing.*;
 import java.awt.AlphaComposite;
@@ -459,12 +458,6 @@ public class ImageLayer extends ContentLayer {
         }
     }
 
-    @Override
-    public String toString() {
-        ImageLayerNode node = new ImageLayerNode(this);
-        return node.toDetailedString();
-    }
-
     public Rectangle getBounds() {
         return new Rectangle(translationX, translationY, image.getWidth(), image.getHeight());
     }
@@ -601,7 +594,7 @@ public class ImageLayer extends ContentLayer {
 
     @SuppressWarnings("SuspiciousNameCombination")
     @Override
-    public void rotate(int angleDegree) {
+    public void rotate(int angleDegree, AffineTransform rotTx) {
         int translationXAbs = -getTranslationX();
         int translationYAbs = -getTranslationY();
         int newTranslationXAbs = 0;
@@ -646,16 +639,8 @@ public class ImageLayer extends ContentLayer {
         // TODO we should not need bicubic here as long as we have only 90, 180, 270 degrees
         g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BICUBIC);
 
-        if (angleDegree == 90) {
-            g2.translate(imageHeight, 0);
-        } else if (angleDegree == 180) {
-            g2.translate(imageWidth, imageHeight);
-        } else if (angleDegree == 270) {
-            g2.translate(0, imageWidth);
-        }
+        g2.setTransform(rotTx);
 
-        // TODO rotate with exact transform
-        g2.rotate(Math.toRadians(angleDegree));
         g2.drawImage(image, 0, 0, imageWidth, imageHeight, null);
         g2.dispose();
 
@@ -848,13 +833,11 @@ public class ImageLayer extends ContentLayer {
         ContentLayerMoveEdit edit;
         boolean needsEnlarging = checkImageDoesNotCoverCanvas();
         if (needsEnlarging) {
-            edit = new ContentLayerMoveEdit(this, getImage(), oldTranslationX, oldTranslationY);
+            BufferedImage backupImage = getImage();
+            enlargeLayer();
+            edit = new ContentLayerMoveEdit(this, backupImage, oldTranslationX, oldTranslationY);
         } else {
             edit = new ContentLayerMoveEdit(this, null, oldTranslationX, oldTranslationY);
-        }
-
-        if (needsEnlarging) {
-            enlargeLayer();
         }
 
         return edit;
@@ -1083,5 +1066,14 @@ public class ImageLayer extends ContentLayer {
         PixelitorEdit edit = super.endMovement();
         updateIconImage();
         return edit;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("ImageLayer{");
+        sb.append("state=").append(state);
+        sb.append(", super=").append(super.toString());
+        sb.append('}');
+        return sb.toString();
     }
 }

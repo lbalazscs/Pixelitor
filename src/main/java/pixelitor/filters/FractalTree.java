@@ -62,6 +62,7 @@ public class FractalTree extends FilterWithParametrizedGUI {
     private double defaultLength;
     private double randPercent;
     private double lengthDeviation;
+    private double angleDeviation;
 
     public FractalTree() {
         super("Fractal Tree", false, false);
@@ -88,6 +89,7 @@ public class FractalTree extends FilterWithParametrizedGUI {
         randPercent = randomnessParam.getValue() / 100.0;
         hasRandomness = randomnessParam.getValue() > 0;
         lengthDeviation = defaultLength * randPercent;
+        angleDeviation = 10.0 * randPercent;
 
         Graphics2D g = dest.createGraphics();
         if (quality.getValue() == QUALITY_BETTER) {
@@ -131,7 +133,7 @@ public class FractalTree extends FilterWithParametrizedGUI {
         if (rand.nextBoolean()) {
             c = -c;
         }
-        drawTree(g, src.getWidth() / 2.0, src.getHeight(), 270, maxDepth, rand, c);
+        drawTree(g, src.getWidth() / 2.0, src.getHeight(), 270 + calcAngleRandomness(rand), maxDepth, rand, c);
 
         g.dispose();
 
@@ -241,8 +243,9 @@ public class FractalTree extends FilterWithParametrizedGUI {
             return 0;
         }
 
-        double deviation = (double) 10 * randPercent;
-        return -deviation + rand.nextDouble() * 2 * deviation;
+        double retVal = -angleDeviation + rand.nextDouble() * 2 * angleDeviation;
+//        System.out.println(String.format("FractalTree::calcAngleRandomness: retVal = %.2f", retVal));
+        return retVal;
     }
 
     private double calcRandomLength(Random rand) {

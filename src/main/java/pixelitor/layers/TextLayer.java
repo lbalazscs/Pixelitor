@@ -246,7 +246,7 @@ public class TextLayer extends ContentLayer {
     }
 
     @Override
-    public void rotate(int angleDegree) {
+    public void rotate(int angleDegree, AffineTransform rotTx) {
         // TODO
     }
 

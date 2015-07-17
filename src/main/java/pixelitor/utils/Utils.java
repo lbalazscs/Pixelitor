@@ -336,7 +336,7 @@ public final class Utils {
         if(debugCompOpt.isPresent()) {
             // if we already have a debug composition, simply replace the image
             Composition comp = debugCompOpt.get();
-            comp.getActiveImageLayerOrMask().setImage(copy);
+            comp.getActiveMaskOrImageLayer().setImage(copy);
             comp.repaint();
         } else {
             Composition comp = Composition.fromImage(copy, null, name);

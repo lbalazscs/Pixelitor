@@ -88,14 +88,6 @@ public class ContentLayerTest {
 
     @Test
     // this method is abstract in ImageLayer, test separately for subclasses
-    public void testRotate() {
-        layer.rotate(90);
-        layer.rotate(180);
-        layer.rotate(270);
-    }
-
-    @Test
-    // this method is abstract in ImageLayer, test separately for subclasses
     public void testEnlargeCanvas() {
         layer.enlargeCanvas(5, 5, 5, 10);
     }

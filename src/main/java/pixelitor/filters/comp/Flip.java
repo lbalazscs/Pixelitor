@@ -19,21 +19,10 @@ package pixelitor.filters.comp;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.history.AddToHistory;
-import pixelitor.history.History;
-import pixelitor.history.MultiLayerEdit;
-import pixelitor.history.SelectionChangeEdit;
 import pixelitor.layers.ContentLayer;
-import pixelitor.layers.ImageLayer;
-import pixelitor.layers.Layer;
-import pixelitor.layers.LayerMask;
-import pixelitor.selection.Selection;
 
-import java.awt.Shape;
 import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
 
-import static pixelitor.Composition.ImageChangeActions.REPAINT;
 import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
 import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
 
@@ -57,22 +46,29 @@ public class Flip extends CompAction {
     }
 
     private Flip(Direction dir) {
-        super(dir.getName());
+        super(dir.getName(), false);
         direction = dir;
     }
 
     @Override
-    public void transform(Composition comp) {
-        int nrLayers = comp.getNrLayers();
+    protected void changeCanvas(Composition comp) {
+        throw new IllegalStateException("should not be called");
+    }
 
-        // Saved before the change, but the edit is
-        // created after the change.
-        // This way no image copy is necessary.
-        BufferedImage backupImage = null;
+    @Override
+    protected String getUndoName() {
+        return "Flip";
+    }
 
+    @Override
+    protected void applyTx(ContentLayer contentLayer, AffineTransform tx) {
+        contentLayer.flip(direction, tx);
+    }
+
+    @Override
+    protected AffineTransform createTransform(Canvas canvas) {
         AffineTransform flipTx = new AffineTransform();
 
-        Canvas canvas = comp.getCanvas();
         if (direction == HORIZONTAL) {
             flipTx.translate(canvas.getWidth(), 0);
             flipTx.scale(-1, 1);
@@ -80,39 +76,7 @@ public class Flip extends CompAction {
             flipTx.translate(0, canvas.getHeight());
             flipTx.scale(1, -1);
         }
-
-        Shape backupShape = null;
-        if (comp.hasSelection()) {
-            Selection selection = comp.getSelectionOrNull();
-            backupShape = selection.getShape();
-
-            selection.transform(flipTx, AddToHistory.NO);
-        }
-
-        for (int i = 0; i < nrLayers; i++) {
-            Layer layer = comp.getLayer(i);
-            if (layer instanceof ContentLayer) {
-                if (layer instanceof ImageLayer) {
-                    backupImage = ((ImageLayer) layer).getImage();
-                }
-                ContentLayer contentLayer = (ContentLayer) layer;
-                contentLayer.flip(direction, flipTx);
-            }
-            if (layer.hasMask()) {
-                LayerMask mask = layer.getMask();
-                mask.flip(direction, flipTx);
-            }
-        }
-
-        MultiLayerEdit edit = new MultiLayerEdit(comp, "Flip", backupImage, null);
-        if (backupShape != null) {
-            SelectionChangeEdit selectionChangeEdit = new SelectionChangeEdit(comp, backupShape, "");
-            edit.setSelectionChangeEdit(selectionChangeEdit);
-        }
-        History.addEdit(edit);
-
-        comp.setDirty(true);
-        comp.imageChanged(REPAINT);
+        return flipTx;
     }
 
     /**

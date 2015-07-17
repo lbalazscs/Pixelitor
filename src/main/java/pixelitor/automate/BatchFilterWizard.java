@@ -51,7 +51,7 @@ public class BatchFilterWizard extends Wizard {
         PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
 
         Automate.processEachFile(comp -> {
-//                final ImageLayer layer = comp.getActiveImageLayerOrMask();
+//                final ImageLayer layer = comp.getActiveMaskOrImageLayer();
             comp.executeFilterWithBusyCursor(filter, ChangeReason.BATCH_AUTOMATE, busyCursorParent);
         }, true, "Batch Filter Progress");
     }
