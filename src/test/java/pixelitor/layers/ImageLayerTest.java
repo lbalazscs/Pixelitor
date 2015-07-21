@@ -31,8 +31,12 @@ import java.awt.AlphaComposite;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 import static pixelitor.ChangeReason.OP_PREVIEW;
 
 public class ImageLayerTest {
@@ -43,6 +47,7 @@ public class ImageLayerTest {
     public void setUp() {
         comp = TestHelper.createEmptyTestComposition();
         layer = TestHelper.createTestImageLayer("layer 1", comp);
+        comp.addLayerNoGUI(layer);
 
         assert layer.getComp().checkInvariant();
     }
@@ -143,8 +148,8 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void testGetBounds() {
-        Rectangle bounds = layer.getBounds();
+    public void testGetImageBounds() {
+        Rectangle bounds = layer.getImageBounds();
         assertNotNull(bounds);
     }
 
@@ -230,4 +235,22 @@ public class ImageLayerTest {
     public void testCropToCanvasSize() {
         layer.cropToCanvasSize();
     }
+
+    @Test
+    public void testDuplicate() {
+        ImageLayer duplicate = layer.duplicate();
+        assertNotNull(duplicate);
+
+        BufferedImage image = layer.getImage();
+        BufferedImage duplicateImage = duplicate.getImage();
+
+        assertNotSame(duplicateImage, image);
+        assertEquals(duplicateImage.getWidth(), image.getWidth());
+        assertEquals(duplicateImage.getHeight(), image.getHeight());
+
+        assertEquals(layer.getImageBounds(), duplicate.getImageBounds());
+        assertSame(layer.getBlendingMode(), duplicate.getBlendingMode());
+        assertThat(duplicate.getOpacity(), is(layer.getOpacity()));
+    }
+
 }

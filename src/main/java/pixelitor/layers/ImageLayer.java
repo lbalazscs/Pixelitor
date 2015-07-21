@@ -304,7 +304,7 @@ public class ImageLayer extends ContentLayer {
         assert previewImage != null;
 
         if (imageContentChanged) {
-            ImageEdit edit = new ImageEdit(filterName, comp, this, getImageOrSubImageIfSelected(true, true),
+            ImageEdit edit = new ImageEdit(comp, filterName, this, getImageOrSubImageIfSelected(true, true),
                     IgnoreSelection.NO, true);
             History.addEdit(edit);
         }
@@ -436,7 +436,7 @@ public class ImageLayer extends ContentLayer {
             throw new IllegalStateException("imageForUndo == image");
         }
         assert imageForUndo != null;
-        ImageEdit edit = new ImageEdit(opName, comp, this,
+        ImageEdit edit = new ImageEdit(comp, opName, this,
                 imageForUndo, IgnoreSelection.NO, true);
         History.addEdit(edit);
 
@@ -451,87 +451,49 @@ public class ImageLayer extends ContentLayer {
         assert img != image; // simple filters always change something
         assert state == NORMAL;
 
-        if(ignoreSelection.isYes()) {
+        if (ignoreSelection.isYes()) {
             setImage(img);
         } else {
             setImageWithSelection(img);
         }
     }
 
-    public Rectangle getBounds() {
+    public Rectangle getImageBounds() {
         return new Rectangle(translationX, translationY, image.getWidth(), image.getHeight());
     }
 
     public boolean checkImageDoesNotCoverCanvas() {
         Rectangle canvasBounds = comp.getCanvasBounds();
-        Rectangle layerBounds = getBounds();
-        boolean needsEnlarging = !(layerBounds.contains(canvasBounds));
+        Rectangle imageBounds = getImageBounds();
+        boolean needsEnlarging = !(imageBounds.contains(canvasBounds));
         return needsEnlarging;
     }
 
     public void enlargeLayer() {
         try {
-            if (translationX >= 0) {
-                if (translationY >= 0) {
-                    enlargeNW();
-                } else {
-                    enlargeSW();
-                }
-            } else {
-                if (translationY >= 0) {
-                    enlargeNE();
-                } else {
-                    enlargeSE();
-                }
-            }
+            // the image needs to be enlarged so that it covers
+            // the canvas completely
+            Rectangle canvasBounds = comp.getCanvasBounds();
+            Rectangle imageBounds = getImageBounds();
+            Rectangle targetImageBounds = imageBounds.union(canvasBounds);
+
+            int newWidth = targetImageBounds.width;
+            int newHeight = targetImageBounds.height;
+
+            BufferedImage bi = createEmptyImageForLayer(newWidth, newHeight);
+            Graphics2D g = bi.createGraphics();
+            int drawX = imageBounds.x - targetImageBounds.x;
+            int drawY = imageBounds.y - targetImageBounds.y;
+            g.drawImage(image, drawX, drawY, null);
+            g.dispose();
+
+            translationX = targetImageBounds.x;
+            translationY = targetImageBounds.y;
+
+            setImage(bi);
         } catch (OutOfMemoryError e) {
             Dialogs.showOutOfMemoryDialog(e);
         }
-    }
-
-    private void enlargeSE() {
-        int newWidth = image.getWidth() - translationX;
-        int newHeight = image.getHeight() - translationY;
-        BufferedImage bi = createEmptyImageForLayer(newWidth, newHeight);
-        Graphics2D g = bi.createGraphics();
-        g.drawImage(image, 0, 0, null);
-        g.dispose();
-
-        setImage(bi);
-    }
-
-    private void enlargeNE() {
-        int newWidth = image.getWidth() - translationX;
-        int newHeight = image.getHeight() + translationY;
-        BufferedImage bi = createEmptyImageForLayer(newWidth, newHeight);
-        Graphics2D g = bi.createGraphics();
-        g.drawImage(image, 0, translationY, null);
-        g.dispose();
-        translationY = 0;
-        setImage(bi);
-    }
-
-    private void enlargeSW() {
-        int newWidth = image.getWidth() + translationX;
-        int newHeight = image.getHeight() - translationY;
-        BufferedImage bi = createEmptyImageForLayer(newWidth, newHeight);
-        Graphics2D g = bi.createGraphics();
-        g.drawImage(image, translationX, 0, null);
-        g.dispose();
-        translationX = 0;
-        setImage(bi);
-    }
-
-    private void enlargeNW() {
-        int newWidth = image.getWidth() + translationX;
-        int newHeight = image.getHeight() + translationY;
-        BufferedImage bi = createEmptyImageForLayer(newWidth, newHeight);
-        Graphics2D g = bi.createGraphics();
-        g.drawImage(image, translationX, translationY, null);
-        g.dispose();
-        translationX = 0;
-        translationY = 0;
-        setImage(bi);
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {
@@ -562,6 +524,7 @@ public class ImageLayer extends ContentLayer {
 
     @Override
     public void flip(Flip.Direction direction, AffineTransform flipTx) {
+//        AffineTransform imageTx = direction.getImageTX();
         int translationXAbs = -getTranslationX();
         int translationYAbs = -getTranslationY();
         int newTranslationXAbs;
@@ -707,7 +670,7 @@ public class ImageLayer extends ContentLayer {
             return image;
         }
 
-        assert ConsistencyChecks.imageCoversCanvasCheck(comp);
+        assert ConsistencyChecks.imageCoversCanvasCheck(this);
 
         BufferedImage subImage;
         try {
@@ -782,7 +745,10 @@ public class ImageLayer extends ContentLayer {
         }
     }
 
-    public void cropToCanvasSize() {
+    /**
+     * Returns true if something was changed
+     */
+    public boolean cropToCanvasSize() {
         int imageWidth = image.getWidth();
         int imageHeight = image.getHeight();
         int canvasWidth = canvas.getWidth();
@@ -796,7 +762,9 @@ public class ImageLayer extends ContentLayer {
             tmp.flush();
 
             setTranslation(0, 0);
+            return true;
         }
+        return false;
     }
 
     @Override
@@ -873,7 +841,7 @@ public class ImageLayer extends ContentLayer {
 
     public boolean isBigLayer() {
         Rectangle canvasBounds = canvas.getBounds();
-        Rectangle layerBounds = getBounds();
+        Rectangle layerBounds = getImageBounds();
         return !canvasBounds.contains(layerBounds);
     }
 

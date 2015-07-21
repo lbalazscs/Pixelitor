@@ -5,12 +5,10 @@ import pixelitor.Composition;
 import pixelitor.ImageComponents;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.history.AddToHistory;
-import pixelitor.history.CanvasChangeEdit;
 import pixelitor.history.History;
+import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
-import pixelitor.history.SelectionChangeEdit;
 import pixelitor.layers.ContentLayer;
-import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 import pixelitor.selection.Selection;
@@ -18,10 +16,8 @@ import pixelitor.utils.OKCancelDialog;
 import pixelitor.utils.SliderSpinner;
 
 import javax.swing.*;
-import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
 
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
 import static pixelitor.utils.SliderSpinner.TextPosition.BORDER;
@@ -42,16 +38,13 @@ public class EnlargeCanvas {
     }
 
     public void invoke() {
-        BufferedImage backupImage = null;
+        String editName = "Enlarge Canvas";
+        MultiLayerBackup backup = new MultiLayerBackup(comp, editName, true);
 
         int nrLayers = comp.getNrLayers();
         for (int i = 0; i < nrLayers; i++) {
             Layer layer = comp.getLayer(i);
             if (layer instanceof ContentLayer) {
-                if (layer instanceof ImageLayer) {
-                    backupImage = ((ImageLayer) layer).getImage();
-                }
-
                 ContentLayer contentLayer = (ContentLayer) layer;
                 contentLayer.enlargeCanvas(north, east, south, west);
             }
@@ -61,20 +54,14 @@ public class EnlargeCanvas {
             }
         }
 
-        SelectionChangeEdit selectionChangeEdit = null;
         Selection selection = comp.getSelectionOrNull();
         if (selection != null && (north > 0 || west > 0)) {
-            Shape backupShape = selection.getShape();
             selection.transform(
                     AffineTransform.getTranslateInstance(west, north),
                     AddToHistory.NO);
-            selectionChangeEdit = new SelectionChangeEdit(comp, backupShape, "");
-            selectionChangeEdit.setEmbedded(true);
         }
 
-        CanvasChangeEdit canvasChangeEdit = new CanvasChangeEdit("", comp);
-        MultiLayerEdit edit = new MultiLayerEdit(comp, "Enlarge Canvas", backupImage, canvasChangeEdit);
-        edit.setSelectionChangeEdit(selectionChangeEdit);
+        MultiLayerEdit edit = new MultiLayerEdit(comp, editName, backup);
         History.addEdit(edit);
 
         Canvas canvas = comp.getCanvas();

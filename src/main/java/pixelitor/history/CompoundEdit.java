@@ -26,7 +26,7 @@ public class CompoundEdit extends PixelitorEdit {
         second.undo();
         first.undo();
 
-        History.notifyMenus(this);
+        finish();
     }
 
     @Override
@@ -36,6 +36,21 @@ public class CompoundEdit extends PixelitorEdit {
         first.redo();
         second.redo();
 
+        finish();
+    }
+
+    private void finish() {
+        // cleanup is actually not necessary because
+        // the member edits usually are not embedded
+
+//        comp.imageChanged(FULL);
+//        Layer layer = comp.getActiveLayer();
+//        if(layer instanceof ImageLayer) {
+//            ((ImageLayer) layer).updateIconImage();
+//        }
+//        if(layer.hasMask()) {
+//            layer.getMask().updateIconImage();
+//        }
         History.notifyMenus(this);
     }
 

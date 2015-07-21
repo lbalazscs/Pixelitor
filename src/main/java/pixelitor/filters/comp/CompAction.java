@@ -22,21 +22,17 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
 import pixelitor.history.AddToHistory;
-import pixelitor.history.CanvasChangeEdit;
 import pixelitor.history.History;
+import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
-import pixelitor.history.SelectionChangeEdit;
 import pixelitor.layers.ContentLayer;
-import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 import pixelitor.selection.Selection;
 
 import javax.swing.*;
-import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
 
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
 
@@ -56,34 +52,20 @@ public abstract class CompAction extends AbstractAction {
     public void actionPerformed(ActionEvent e) {
         Composition comp = ImageComponents.getActiveComp().get();
 
-        CanvasChangeEdit canvasChangeEdit = null;
-        if (changesCanvasDimensions) {
-            canvasChangeEdit = new CanvasChangeEdit("", comp);
-        }
+        MultiLayerBackup backup = new MultiLayerBackup(comp, getEditName(), changesCanvasDimensions);
 
         Canvas canvas = comp.getCanvas();
         AffineTransform tx = createTransform(canvas);
 
-        Shape backupShape = null;
         if (comp.hasSelection()) {
             Selection selection = comp.getSelectionOrNull();
-            backupShape = selection.getShape();
-
             selection.transform(tx, AddToHistory.NO);
         }
-
-        // Saved before the change, but the edit is
-        // created after the change.
-        // This way no image copy is necessary.
-        BufferedImage backupImage = null;
 
         int nrLayers = comp.getNrLayers();
         for (int i = 0; i < nrLayers; i++) {
             Layer layer = comp.getLayer(i);
             if (layer instanceof ContentLayer) {
-                if (layer instanceof ImageLayer) {
-                    backupImage = ((ImageLayer) layer).getImage();
-                }
                 ContentLayer contentLayer = (ContentLayer) layer;
                 applyTx(contentLayer, tx);
             }
@@ -92,14 +74,8 @@ public abstract class CompAction extends AbstractAction {
                 applyTx(mask, tx);
             }
         }
-        assert backupImage != comp.getAnyImageLayer().getImage();
 
-        MultiLayerEdit edit = new MultiLayerEdit(comp, getUndoName(), backupImage,
-                canvasChangeEdit);
-        if (backupShape != null) {
-            SelectionChangeEdit selectionChangeEdit = new SelectionChangeEdit(comp, backupShape, "");
-            edit.setSelectionChangeEdit(selectionChangeEdit);
-        }
+        MultiLayerEdit edit = new MultiLayerEdit(comp, getEditName(), backup);
         History.addEdit(edit);
 
         if (changesCanvasDimensions) {
@@ -116,7 +92,7 @@ public abstract class CompAction extends AbstractAction {
 
     protected abstract void changeCanvas(Composition comp);
 
-    protected abstract String getUndoName();
+    protected abstract String getEditName();
 
     protected abstract void applyTx(ContentLayer contentLayer, AffineTransform tx);
 

@@ -689,7 +689,7 @@ public class MenuBar extends JMenuBar {
             @Override
             void onClick() {
                 Composition comp = ImageComponents.getActiveComp().get();
-                comp.layerToCanvasSize();
+                comp.activeLayerToCanvasSize();
             }
         };
         createMenuItem(layerToCanvasSizeAction, layersMenu);

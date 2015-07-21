@@ -34,11 +34,11 @@ import static pixelitor.Composition.ImageChangeActions.FULL;
 public class ImageEdit extends FadeableEdit {
     private final IgnoreSelection ignoreSelection;
     private SoftReference<BufferedImage> imgRef;
-    private ImageLayer layer;
+    protected ImageLayer layer;
 
     private final boolean canRepeat;
 
-    public ImageEdit(String name, Composition comp, ImageLayer layer,
+    public ImageEdit(Composition comp, String name, ImageLayer layer,
                      BufferedImage backupImage,
                      IgnoreSelection ignoreSelection, boolean canRepeat) {
         super(comp, name);

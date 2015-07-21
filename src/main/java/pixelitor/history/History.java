@@ -162,13 +162,18 @@ public class History {
         if (lastEditOpt.isPresent()) {
             PixelitorEdit lastEdit = lastEditOpt.get();
             if (lastEdit instanceof FadeableEdit) {
+                FadeableEdit fadeableEdit = (FadeableEdit) lastEdit;
+                if (!fadeableEdit.isFadeable()) {
+                    return Optional.empty();
+                }
+
                 Composition lastComp = lastEdit.getComp();
                 if (comp != lastComp) {
                     // this happens if the active image has changed
                     // since the last edit
                     return Optional.empty();
                 }
-                return Optional.of((FadeableEdit) lastEdit);
+                return Optional.of(fadeableEdit);
             }
         }
         return Optional.empty();

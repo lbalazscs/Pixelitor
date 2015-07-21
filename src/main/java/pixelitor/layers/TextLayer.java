@@ -158,6 +158,8 @@ public class TextLayer extends ContentLayer {
         Composition comp = compOpt.get();
         TextLayer textLayer = new TextLayer(comp);
 
+        Layer activeLayerBefore = comp.getActiveLayer();
+
         // don't add it yet to history, only after the user chooses to press OK
         comp.addLayer(textLayer, AddToHistory.NO, true, false);
 
@@ -169,7 +171,7 @@ public class TextLayer extends ContentLayer {
                 textLayer.updateLayerName();
 
                 // now it is safe to add it to the history
-                NewLayerEdit newLayerEdit = new NewLayerEdit(comp, textLayer);
+                NewLayerEdit newLayerEdit = new NewLayerEdit(comp, textLayer, activeLayerBefore);
                 History.addEdit(newLayerEdit);
             }
 

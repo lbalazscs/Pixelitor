@@ -28,19 +28,24 @@ import javax.swing.undo.CannotUndoException;
  * (either as a new empty layer or via layer duplication)
  */
 public class NewLayerEdit extends PixelitorEdit {
-    private Layer layer;
+    private Layer activeLayerBefore;
+    private Layer newLayer;
+    private final int newLayerIndex;
 
-    public NewLayerEdit(Composition comp, Layer layer) {
+    public NewLayerEdit(Composition comp, Layer newLayer, Layer activeLayerBefore) {
         super(comp, "New Layer");
+        this.activeLayerBefore = activeLayerBefore;
         comp.setDirty(true);
-        this.layer = layer;
+        this.newLayer = newLayer;
+        this.newLayerIndex = comp.getLayerIndex(newLayer);
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
-        comp.removeLayer(layer, AddToHistory.NO, UpdateGUI.YES);
+        comp.removeLayer(newLayer, AddToHistory.NO, UpdateGUI.YES);
+        comp.setActiveLayer(activeLayerBefore, AddToHistory.NO);
         History.notifyMenus(this);
     }
 
@@ -48,7 +53,7 @@ public class NewLayerEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        comp.addLayer(layer, AddToHistory.NO, true, false);
+        comp.addLayer(newLayer, AddToHistory.NO, true, newLayerIndex);
 
         History.notifyMenus(this);
     }
@@ -57,7 +62,8 @@ public class NewLayerEdit extends PixelitorEdit {
     public void die() {
         super.die();
 
-        layer = null;
+        newLayer = null;
+        activeLayerBefore = null;
     }
 
     @Override

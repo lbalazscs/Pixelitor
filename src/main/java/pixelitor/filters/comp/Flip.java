@@ -56,7 +56,7 @@ public class Flip extends CompAction {
     }
 
     @Override
-    protected String getUndoName() {
+    protected String getEditName() {
         return "Flip";
     }
 

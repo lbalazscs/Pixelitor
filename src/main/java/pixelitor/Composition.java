@@ -25,6 +25,7 @@ import pixelitor.history.CompoundEdit;
 import pixelitor.history.DeleteLayerEdit;
 import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;
+import pixelitor.history.ImageAndMaskEdit;
 import pixelitor.history.ImageEdit;
 import pixelitor.history.LayerOrderChangeEdit;
 import pixelitor.history.LayerSelectionChangeEdit;
@@ -32,6 +33,7 @@ import pixelitor.history.NewLayerEdit;
 import pixelitor.history.NotUndoableEdit;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.history.SelectionChangeEdit;
+import pixelitor.history.TranslationEdit;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
@@ -62,6 +64,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static pixelitor.Composition.ImageChangeActions.FULL;
@@ -181,6 +184,7 @@ public class Composition implements Serializable {
     public void addLayerNoGUI(Layer newLayer) {
         layerList.add(newLayer); // adds it to top, ignoring the active layer position
         setActiveLayer(newLayer, AddToHistory.NO);
+        dirty = true;
     }
 
     public void addLayer(Layer newLayer, AddToHistory addToHistory, boolean updateHistogram, boolean bellowActive) {
@@ -205,12 +209,14 @@ public class Composition implements Serializable {
      * Adds the specified layer at the specified layer position
      */
     public void addLayer(Layer newLayer, AddToHistory addToHistory, boolean updateHistogram, int newLayerIndex) {
+        Layer activeLayerBefore = activeLayer;
+
         layerList.add(newLayerIndex, newLayer);
         setActiveLayer(newLayer, AddToHistory.NO);
         ic.addLayerToGUI(newLayer, newLayerIndex);
 
         if (addToHistory.isYes()) {
-            NewLayerEdit newLayerEdit = new NewLayerEdit(this, newLayer);
+            NewLayerEdit newLayerEdit = new NewLayerEdit(this, newLayer, activeLayerBefore);
             History.addEdit(newLayerEdit);
         }
 
@@ -234,6 +240,10 @@ public class Composition implements Serializable {
 
     public int getActiveLayerIndex() {
         return layerList.indexOf(activeLayer);
+    }
+
+    public int getLayerIndex(Layer layer) {
+        return layerList.indexOf(layer);
     }
 
     public void okPressedInDialog(String filterName) {
@@ -264,7 +274,7 @@ public class Composition implements Serializable {
         return activeLayer.hasMask();
     }
 
-    public Layer getActiveLayerOrMask() {
+    public Layer getActiveMaskOrLayer() {
         if (activeLayer.isMaskEditing()) {
             return activeLayer.getMask();
         }
@@ -351,16 +361,19 @@ public class Composition implements Serializable {
             duplicateLayer();
         }
 
-        getActiveLayerOrMask().startMovement();
+        Layer layer = getActiveMaskOrLayer();
+        layer.startMovement();
     }
 
     public void moveActiveContentRelative(int relativeX, int relativeY) {
-        getActiveLayerOrMask().moveWhileDragging(relativeX, relativeY);
+        Layer layer = getActiveMaskOrLayer();
+        layer.moveWhileDragging(relativeX, relativeY);
         imageChanged(FULL);
     }
 
     public void endMovement() {
-        PixelitorEdit edit = getActiveLayerOrMask().endMovement();
+        Layer layer = getActiveMaskOrLayer();
+        PixelitorEdit edit = layer.endMovement();
         if (edit != null) {
             // The layer, the mask, or both moved.
             // We always should get here except if an adjustment
@@ -419,7 +432,7 @@ public class Composition implements Serializable {
                     removeActiveLayer(updateGUI);
 
                     PixelitorEdit edit = new CompoundEdit(this, "Merge Down",
-                            new ImageEdit("", this, imageLayerBellow, backupImage, IgnoreSelection.YES, false),
+                            new ImageEdit(this, "", imageLayerBellow, backupImage, IgnoreSelection.YES, false),
                             new DeleteLayerEdit(this, mergedLayer, activeIndex)
                     );
 
@@ -808,17 +821,33 @@ public class Composition implements Serializable {
         return (ImageComponents.getActiveComp().get() == this);
     }
 
-    public void layerToCanvasSize() {
+    public void activeLayerToCanvasSize() {
         // TODO actually this should work with any layer
         if (activeLayer instanceof ImageLayer) {
-            ((ImageLayer) activeLayer).cropToCanvasSize();
-            if (activeLayer.hasMask()) {
-                LayerMask mask = activeLayer.getMask();
-                mask.cropToCanvasSize();
-            }
 
-            // TODO A CompoundEdit from two ImageEdits (layer, mask) could be used
-            History.addEdit(new NotUndoableEdit(this, "Layer to Canvas Size"));
+            ImageLayer layer = (ImageLayer) this.activeLayer;
+            BufferedImage backupImage = layer.getImage();
+
+            TranslationEdit translationEdit = new TranslationEdit(this, layer);
+            boolean changed = layer.cropToCanvasSize();
+
+            if (changed) {
+                ImageEdit imageEdit;
+                String editName = "Layer to Canvas Size";
+                if (layer.hasMask()) {
+                    LayerMask mask = layer.getMask();
+                    BufferedImage maskBackupImage = mask.getImage();
+                    boolean maskChanged = mask.cropToCanvasSize();
+                    assert maskChanged;
+
+                    imageEdit = new ImageAndMaskEdit(this, editName, layer, backupImage, maskBackupImage, false);
+                } else {
+                    // no mask, a simple ImageEdit will do
+                    imageEdit = new ImageEdit(this, editName, layer, backupImage, IgnoreSelection.YES, false);
+                    imageEdit.setFadeable(false);
+                }
+                History.addEdit(new CompoundEdit(this, editName, translationEdit, imageEdit));
+            }
         } else {
             Dialogs.showNotImageLayerDialog();
         }
@@ -870,10 +899,6 @@ public class Composition implements Serializable {
             throw new IllegalStateException("active layer (" + activeLayer.getName() + ") not in list (" + layerList.toString() + ")");
         }
         return true;
-    }
-
-    public int getLayerPosition(Layer layer) {
-        return layerList.indexOf(layer);
     }
 
     /**
@@ -967,5 +992,14 @@ public class Composition implements Serializable {
         sb.append(", dirty=").append(dirty);
         sb.append('}');
         return sb.toString();
+    }
+
+    /**
+     * Includes only the layer names and which layer is active
+     */
+    public String toLayerNamesString() {
+        return layerList.stream()
+                .map((layer) -> layer == activeLayer ? "ACTIVE " + layer.getName() : layer.getName())
+                .collect(Collectors.joining(", ", "[", "]"));
     }
 }

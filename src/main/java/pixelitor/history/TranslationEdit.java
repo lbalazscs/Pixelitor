@@ -16,10 +16,16 @@ public class TranslationEdit extends PixelitorEdit {
     private int backupTranslationX = 0;
     private int backupTranslationY = 0;
 
+    /**
+     * This constructor must be called before the change
+     */
     public TranslationEdit(Composition comp, ContentLayer layer) {
         this(comp, layer, layer.getTranslationX(), layer.getTranslationY());
     }
 
+    /**
+     * This constructor can be called after the change
+     */
     public TranslationEdit(Composition comp, ContentLayer layer, int oldTranslationX, int oldTranslationY) {
         super(comp, "");
         this.layer = layer;

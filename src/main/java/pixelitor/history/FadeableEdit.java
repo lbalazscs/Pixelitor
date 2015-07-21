@@ -26,6 +26,9 @@ import java.awt.image.BufferedImage;
 public abstract class FadeableEdit extends PixelitorEdit {
     private boolean died = false;  // the variable "alive" in AbstractUndoableEdit is private...
 
+    // actually some ImageEdits are possibly not fadeable
+    protected boolean fadeable = true;
+
     FadeableEdit(Composition comp, String name) {
         super(comp, name);
     }
@@ -43,4 +46,11 @@ public abstract class FadeableEdit extends PixelitorEdit {
         return !died;
     }
 
+    public boolean isFadeable() {
+        return fadeable;
+    }
+
+    public void setFadeable(boolean fadeable) {
+        this.fadeable = fadeable;
+    }
 }

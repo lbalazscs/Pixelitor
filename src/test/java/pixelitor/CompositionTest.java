@@ -21,6 +21,8 @@ import org.junit.Before;
 import org.junit.Test;
 import pixelitor.filters.comp.EnlargeCanvas;
 import pixelitor.history.AddToHistory;
+import pixelitor.history.History;
+import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.selection.Selection;
@@ -28,9 +30,8 @@ import pixelitor.selection.SelectionInteraction;
 import pixelitor.selection.SelectionType;
 import pixelitor.utils.UpdateGUI;
 
-import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
+import java.awt.Shape;
 import java.awt.image.BufferedImage;
 import java.util.Optional;
 
@@ -46,82 +47,136 @@ import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
 import static pixelitor.selection.SelectionInteraction.ADD;
 import static pixelitor.selection.SelectionType.ELLIPSE;
-import static pixelitor.selection.SelectionType.RECTANGLE;
 
 public class CompositionTest {
     private Composition comp;
 
     @Before
     public void setUp() {
-        comp = TestHelper.create2LayerTestComposition();
-        checkNumLayers(2);
+        comp = TestHelper.create2LayerTestComposition(true);
         assertEquals("Composition{name='Test', activeLayer=layer 2, layerList=[" +
-                "ImageLayer{state=NORMAL, super={tx=0, ty=0, super={name='layer 1', visible=true, mask=null, maskEditing=false, maskEnabled=true, isAdjustment=false}}}, " +
-                "ImageLayer{state=NORMAL, super={tx=0, ty=0, super={name='layer 2', visible=true, mask=null, maskEditing=false, maskEnabled=true, isAdjustment=false}}}], " +
+                "ImageLayer{state=NORMAL, super={tx=0, ty=0, super={name='layer 1', visible=true, " +
+                "mask=ImageLayer{state=NORMAL, super={tx=0, ty=0, super={name='layer 1 MASK', visible=true, mask=null, maskEditing=false, maskEnabled=true, isAdjustment=false}}}, maskEditing=false, maskEnabled=true, isAdjustment=false}}}, " +
+                "ImageLayer{state=NORMAL, super={tx=0, ty=0, super={name='layer 2', visible=true, " +
+                "mask=ImageLayer{state=NORMAL, super={tx=0, ty=0, super={name='layer 2 MASK', visible=true, mask=null, maskEditing=false, maskEnabled=true, isAdjustment=false}}}, maskEditing=false, maskEnabled=true, isAdjustment=false}}}], " +
                 "canvas=Canvas{width=20, height=10}, selection=null, dirty=false}", comp.toString());
+        checkDirty(false);
+        History.setUndoLevels(10);
     }
 
     @Test
     public void testAddNewEmptyLayer() {
-        comp.addNewEmptyLayer("newLayer 1", true);
-        comp.addNewEmptyLayer("newLayer 2", false);
-        checkNumLayers(4);
+        checkLayers("[layer 1, ACTIVE layer 2]");
 
-        assertEquals("Composition{name='Test', activeLayer=newLayer 2, layerList=[" +
-                "ImageLayer{state=NORMAL, super={tx=0, ty=0, super={name='layer 1', visible=true, mask=null, maskEditing=false, maskEnabled=true, isAdjustment=false}}}, " +
-                "ImageLayer{state=NORMAL, super={tx=0, ty=0, super={name='newLayer 1', visible=true, mask=null, maskEditing=false, maskEnabled=true, isAdjustment=false}}}, " +
-                "ImageLayer{state=NORMAL, super={tx=0, ty=0, super={name='newLayer 2', visible=true, mask=null, maskEditing=false, maskEnabled=true, isAdjustment=false}}}, " +
-                "ImageLayer{state=NORMAL, super={tx=0, ty=0, super={name='layer 2', visible=true, mask=null, maskEditing=false, maskEnabled=true, isAdjustment=false}}}], " +
-                "canvas=Canvas{width=20, height=10}, selection=null, dirty=true}", comp.toString());
+        comp.addNewEmptyLayer("newLayer 1", true);
+        checkLayers("[layer 1, ACTIVE newLayer 1, layer 2]");
+
+        comp.addNewEmptyLayer("newLayer 2", false);
+
+        checkLayers("[layer 1, newLayer 1, ACTIVE newLayer 2, layer 2]");
+        checkDirty(true);
+
+        History.undo();
+        checkLayers("[layer 1, ACTIVE newLayer 1, layer 2]");
+
+        History.undo();
+        checkLayers("[layer 1, ACTIVE layer 2]");
+
+        History.redo();
+        checkLayers("[layer 1, ACTIVE newLayer 1, layer 2]");
+
+        History.redo();
+        checkLayers("[layer 1, newLayer 1, ACTIVE newLayer 2, layer 2]");
     }
 
     @Test
     public void testSetActiveLayer() {
+        checkLayers("[layer 1, ACTIVE layer 2]");
+
         Layer layer = comp.getLayer(0);
         comp.setActiveLayer(layer, AddToHistory.YES);
         assertSame(layer, comp.getActiveLayer());
-        comp.setActiveLayer(layer, AddToHistory.NO);
-        assertSame(layer, comp.getActiveLayer());
-        comp.checkInvariant();
+        checkLayers("[ACTIVE layer 1, layer 2]");
+        checkDirty(false);
+
+        History.undo();
+        checkLayers("[layer 1, ACTIVE layer 2]");
+
+        History.redo();
+        checkLayers("[ACTIVE layer 1, layer 2]");
     }
 
     @Test
     public void testAddLayerNoGUI() {
-        ImageLayer newLayer = TestHelper.createTestImageLayer("layer", comp);
+        checkLayers("[layer 1, ACTIVE layer 2]");
+
+        ImageLayer newLayer = TestHelper.createTestImageLayer("layer 3", comp);
         comp.addLayerNoGUI(newLayer);
-        checkNumLayers(4);
+        checkLayers("[layer 1, layer 2, ACTIVE layer 3]");
+        checkDirty(true);
     }
 
     @Test
     public void testAddLayer() {
-        ImageLayer newLayer = TestHelper.createTestImageLayer("layer", comp);
-        comp.addLayer(newLayer, AddToHistory.YES, true, true);
-        comp.addLayer(newLayer, AddToHistory.YES, true, false);
-        comp.addLayer(newLayer, AddToHistory.YES, false, true);
-        comp.addLayer(newLayer, AddToHistory.YES, false, false);
-        comp.addLayer(newLayer, AddToHistory.NO, true, true);
-        comp.addLayer(newLayer, AddToHistory.NO, true, false);
-        comp.addLayer(newLayer, AddToHistory.NO, false, true);
-        comp.addLayer(newLayer, AddToHistory.NO, false, false);
+        // add bellow active
+        comp.addLayer(TestHelper.createTestImageLayer("layer A", comp),
+                AddToHistory.YES, true, true);
+        checkLayers("[layer 1, ACTIVE layer A, layer 2]");
+        checkDirty(true);
 
-        comp.addLayer(newLayer, AddToHistory.YES, true, 0);
-        comp.addLayer(newLayer, AddToHistory.YES, false, 0);
-        comp.addLayer(newLayer, AddToHistory.NO, true, 0);
-        comp.addLayer(newLayer, AddToHistory.NO, false, 0);
+        // add above active
+        comp.addLayer(TestHelper.createTestImageLayer("layer B", comp),
+                AddToHistory.YES, true, false);
+        checkLayers("[layer 1, layer A, ACTIVE layer B, layer 2]");
 
-        comp.addLayer(newLayer, AddToHistory.YES, true, 1);
-        comp.addLayer(newLayer, AddToHistory.YES, false, 1);
-        comp.addLayer(newLayer, AddToHistory.NO, true, 1);
-        comp.addLayer(newLayer, AddToHistory.NO, false, 1);
+        // add to position 0
+        comp.addLayer(TestHelper.createTestImageLayer("layer C", comp),
+                AddToHistory.YES, true, 0);
+        checkLayers("[ACTIVE layer C, layer 1, layer A, layer B, layer 2]");
 
-        checkNumLayers(19);
+        // add to position 2
+        comp.addLayer(TestHelper.createTestImageLayer("layer D", comp),
+                AddToHistory.YES, true, 2);
+        checkLayers("[layer C, layer 1, ACTIVE layer D, layer A, layer B, layer 2]");
+
+        History.undo();
+        checkLayers("[ACTIVE layer C, layer 1, layer A, layer B, layer 2]");
+
+        History.undo();
+        checkLayers("[layer 1, layer A, ACTIVE layer B, layer 2]");
+
+        History.undo();
+        checkLayers("[layer 1, ACTIVE layer A, layer 2]");
+
+        History.undo();
+        checkLayers("[layer 1, ACTIVE layer 2]");
+
+        History.redo();
+        checkLayers("[layer 1, ACTIVE layer A, layer 2]");
+
+        History.redo();
+        checkLayers("[layer 1, layer A, ACTIVE layer B, layer 2]");
+
+        History.redo();
+        checkLayers("[ACTIVE layer C, layer 1, layer A, layer B, layer 2]");
+
+        History.redo();
+        checkLayers("[layer C, layer 1, ACTIVE layer D, layer A, layer B, layer 2]");
     }
 
     @Test
     public void testDuplicateLayer() {
-        checkNumLayers(2);
+        checkLayers("[layer 1, ACTIVE layer 2]");
+
         comp.duplicateLayer();
-        checkNumLayers(3);
+
+        checkLayers("[layer 1, layer 2, ACTIVE layer 2 copy]");
+        checkDirty(true);
+
+        History.undo();
+        checkLayers("[layer 1, ACTIVE layer 2]");
+        History.redo();
+        checkLayers("[layer 1, layer 2, ACTIVE layer 2 copy]");
     }
 
     @Test
@@ -161,6 +216,9 @@ public class CompositionTest {
     public void testGetCanvas() {
         Canvas canvas = comp.getCanvas();
         assertNotNull(canvas);
+
+        assertEquals("Canvas{width=20, height=10}", canvas.toString());
+
         comp.checkInvariant();
     }
 
@@ -172,85 +230,71 @@ public class CompositionTest {
     }
 
     @Test
-    public void testStartTranslation() {
-        comp.startMovement(true);
-        comp.startMovement(false);
-        comp.checkInvariant();
+    public void testTranslationWODuplicating() {
+        testTranslation(false);
     }
 
     @Test
-    public void testEndTranslation() {
-        comp.endMovement();
-    }
-
-    @Test
-    public void testGetLayer() {
-        Layer layer = comp.getLayer(0);
-        assertNotNull(layer);
-        comp.checkInvariant();
+    public void testTranslationWithDuplicating() {
+        testTranslation(true);
     }
 
     @Test
     public void testFlattenImage() {
-        checkNumLayers(2);
+        checkLayers("[layer 1, ACTIVE layer 2]");
         comp.flattenImage(UpdateGUI.NO);
-        checkNumLayers(1);
+        checkLayers("[ACTIVE flattened]");
+        checkDirty(true);
+
+        // there is no undo for flatten image
     }
 
     @Test
     public void testMergeDown() {
-        checkNumLayers(2);
-        comp.setActiveLayer(comp.getLayer(1), AddToHistory.NO);
+        checkLayers("[layer 1, ACTIVE layer 2]");
+        comp.setActiveLayer(comp.getLayer(1), AddToHistory.YES);
         comp.mergeDown(UpdateGUI.NO);
-        checkNumLayers(1);
+        checkLayers("[ACTIVE layer 1]");
+        checkDirty(true);
+
+        History.undo();
+        checkLayers("[layer 1, ACTIVE layer 2]");
+        History.redo();
+        checkLayers("[ACTIVE layer 1]");
     }
 
     @Test
     public void testMoveActiveLayer() {
-        checkActiveLayerIndex(1);
+        checkDirty(false);
+        checkLayers("[layer 1, ACTIVE layer 2]");
         comp.moveActiveLayerUp();
-        checkActiveLayerIndex(1);
+        checkDirty(false);
+        checkLayers("[layer 1, ACTIVE layer 2]");
         comp.moveActiveLayerDown();
-        checkActiveLayerIndex(0);
-    }
+        checkDirty(true);
+        checkLayers("[ACTIVE layer 2, layer 1]");
+        comp.moveActiveLayerUp();
+        checkLayers("[layer 1, ACTIVE layer 2]");
 
-    @Test
-    public void testMoveActiveLayerToTop() {
-        checkActiveLayerIndex(1);
-        comp.moveActiveLayerToTop();
-        checkActiveLayerIndex(1);
-    }
-
-    @Test
-    public void testMoveActiveLayerToBottom() {
-        checkActiveLayerIndex(1);
         comp.moveActiveLayerToBottom();
-        checkActiveLayerIndex(0);
-    }
+        checkLayers("[ACTIVE layer 2, layer 1]");
 
-    @Test
-    public void testSwapLayers() {
-        checkActiveLayerIndex(1);
+        comp.moveActiveLayerToTop();
+        checkLayers("[layer 1, ACTIVE layer 2]");
+
         comp.swapLayers(0, 1, AddToHistory.YES);
-        checkActiveLayerIndex(0);
+        checkLayers("[ACTIVE layer 2, layer 1]");
     }
 
     @Test
-    public void testMoveLayerSelectionUp() {
-        comp.moveLayerSelectionUp();
-        comp.checkInvariant();
-    }
-
-    @Test
-    public void testMoveLayerSelectionDown() {
+    public void testMoveLayerSelection() {
+        checkLayers("[layer 1, ACTIVE layer 2]");
         comp.moveLayerSelectionDown();
-        comp.checkInvariant();
-    }
+        checkLayers("[ACTIVE layer 1, layer 2]");
+        comp.moveLayerSelectionUp();
+        checkLayers("[layer 1, ACTIVE layer 2]");
 
-    @Test
-    public void testSetCanvas() {
-        comp.setCanvas(new Canvas(TestHelper.sizeX, TestHelper.sizeY));
-        comp.checkInvariant();
+        checkDirty(false);
     }
 
     @Test
@@ -261,74 +305,76 @@ public class CompositionTest {
     }
 
     @Test
-    public void testIsDirty() {
-        boolean dirty = comp.isDirty();
-        assertThat(dirty, is(false));
-        comp.checkInvariant();
-    }
-
-    @Test
-    public void testUpdateRegion() {
-        comp.updateRegion(4, 4, 8, 8, 2);
-        comp.checkInvariant();
-    }
-
-    @Test
-    public void testSetImageComponent() {
-        comp.setImageComponent(null);
-        comp.checkInvariant();
-    }
-
-    @Test
     public void testGetCanvasBounds() {
         Rectangle bounds = comp.getCanvasBounds();
         assertNotNull(bounds);
+        assertEquals("java.awt.Rectangle[x=0,y=0,width=20,height=10]", bounds.toString());
         comp.checkInvariant();
     }
 
     @Test
     public void testRemoveActiveLayer() {
-        checkNumLayers(2);
+        checkLayers("[layer 1, ACTIVE layer 2]");
         comp.removeActiveLayer(UpdateGUI.NO);
-        checkNumLayers(1);
+        checkLayers("[ACTIVE layer 1]");
+        checkDirty(true);
+
+        History.undo();
+        checkLayers("[layer 1, ACTIVE layer 2]");
+
+        History.redo();
+        checkLayers("[ACTIVE layer 1]");
     }
 
     @Test
     public void testRemoveLayer() {
-        checkNumLayers(2);
-        Layer layer2 = comp.getLayer(0);
-        comp.removeLayer(layer2, AddToHistory.NO, UpdateGUI.NO);
-        checkNumLayers(1);
-    }
+        checkLayers("[layer 1, ACTIVE layer 2]");
+        Layer layer2 = comp.getLayer(1);
 
-    @Test
-    public void testDispose() {
-        comp.dispose();
-        comp.checkInvariant();
+        comp.removeLayer(layer2, AddToHistory.YES, UpdateGUI.NO);
+        checkLayers("[ACTIVE layer 1]");
+        checkDirty(true);
+
+        History.undo();
+        checkLayers("[layer 1, ACTIVE layer 2]");
+
+        History.redo();
+        checkLayers("[ACTIVE layer 1]");
+
+        History.undo();
+        checkLayers("[layer 1, ACTIVE layer 2]");
+
+        // now remove layer 1
+        Layer layer1 = comp.getLayer(0);
+        comp.setActiveLayer(layer1, AddToHistory.YES);
+        checkLayers("[ACTIVE layer 1, layer 2]");
+
+        comp.removeLayer(layer1, AddToHistory.YES, UpdateGUI.NO);
+        checkLayers("[ACTIVE layer 2]");
+
+        History.undo();
+        checkLayers("[ACTIVE layer 1, layer 2]");
+
+        History.redo();
+        checkLayers("[ACTIVE layer 2]");
     }
 
     @Test
     public void testAddNewLayerFromComposite() {
+        checkLayers("[layer 1, ACTIVE layer 2]");
         comp.addNewLayerFromComposite("composite layer");
-        assertEquals(3, comp.getNrLayers());
-        comp.checkInvariant();
+        checkLayers("[layer 1, layer 2, ACTIVE composite layer]");
+        checkDirty(true);
+
+        History.undo();
+        checkLayers("[layer 1, ACTIVE layer 2]");
+        History.redo();
+        checkLayers("[layer 1, layer 2, ACTIVE composite layer]");
     }
 
     @Test
-    public void testPaintSelection() {
-        Graphics2D g2 = TestHelper.createGraphics();
-        comp.paintSelection(g2);
-        comp.checkInvariant();
-    }
-
-    @Test
-    public void testDeselect() {
-        comp.deselect(AddToHistory.YES);
-        comp.checkInvariant();
-    }
-
-    @Test
-    public void testGetSelection() {
+    public void testSelection() {
+        assertThat(comp.hasSelection(), is(false));
         Optional<Selection> selection = comp.getSelection();
         assertThat(selection.isPresent(), is(false));
 
@@ -337,22 +383,7 @@ public class CompositionTest {
         selection = comp.getSelection();
 
         assertThat(selection.isPresent(), is(true));
-        comp.checkInvariant();
-    }
-
-    @Test
-    public void testHasSelection() {
-        assertThat(comp.hasSelection(), is(false));
-
-        comp.startSelection(RECTANGLE, ADD);
         assertThat(comp.hasSelection(), is(true));
-        comp.checkInvariant();
-    }
-
-    @Test
-    public void testGetCompositeImage() {
-        BufferedImage image = comp.getCompositeImage();
-        assertNotNull(image);
         comp.checkInvariant();
     }
 
@@ -369,30 +400,19 @@ public class CompositionTest {
     }
 
     @Test
-    public void testSetDirty() {
-        comp.setDirty(true);
-        assertThat(comp.isDirty(), is(true));
-        comp.checkInvariant();
-    }
-
-    @Test
-    public void testMoveActiveContentRelative() {
-        comp.moveActiveContentRelative(2, 2);
-        comp.checkInvariant();
-    }
-
-    @Test
     public void testIsActiveLayer() {
-        Layer layer = comp.getLayer(1);
-        boolean b = comp.isActiveLayer(layer);
-        assertThat(b, is(true));
-        comp.checkInvariant();
-    }
+        Layer layer1 = comp.getLayer(0);
+        Layer layer2 = comp.getLayer(1);
 
-    @Test
-    public void testSetSelectionClipping() {
-        Graphics2D g2 = TestHelper.createGraphics();
-        comp.applySelectionClipping(g2, AffineTransform.getTranslateInstance(1, 1));
+        assertThat(comp.isActiveLayer(layer1), is(false));
+        assertThat(comp.isActiveLayer(layer2), is(true));
+
+        comp.checkInvariant();
+
+        comp.setActiveLayer(layer1, AddToHistory.YES);
+        assertThat(comp.isActiveLayer(layer1), is(true));
+        assertThat(comp.isActiveLayer(layer2), is(false));
+
         comp.checkInvariant();
     }
 
@@ -403,9 +423,21 @@ public class CompositionTest {
 
         comp.startSelection(SelectionType.RECTANGLE, SelectionInteraction.ADD);
         comp.getSelection().get().setShape(new Rectangle(3, 3, 4, 4));
+        checkShapeBounds(new Rectangle(3, 3, 4, 4));
 
         comp.invertSelection();
-        comp.checkInvariant();
+        checkShapeBounds(comp.getCanvasBounds());
+
+        History.undo();
+        checkShapeBounds(new Rectangle(3, 3, 4, 4));
+
+        History.redo();
+        checkShapeBounds(comp.getCanvasBounds());
+    }
+
+    private void checkShapeBounds(Rectangle expected) {
+        Rectangle shapeBounds = comp.getSelectionOrNull().getShapeBounds();
+        assertEquals(expected, shapeBounds);
     }
 
     @Test
@@ -425,32 +457,73 @@ public class CompositionTest {
     public void testCreateSelectionFromShape() {
         comp.createSelectionFromShape(new Rectangle(3, 3, 5, 5));
         comp.checkInvariant();
-    }
 
-    @Test
-    public void testLayerToCanvasSize() {
-        comp.layerToCanvasSize();
-        comp.checkInvariant();
+        Shape shape = comp.getSelectionOrNull().getShape();
+        assertEquals(new Rectangle(3, 3, 5, 5), shape);
     }
 
     @Test
     public void testEnlargeCanvas() {
+        // remove one layer so that we have undo
+        comp.removeLayer(comp.getActiveLayer(), AddToHistory.YES, UpdateGUI.NO);
+
+        checkCanvasSize(20, 10);
+        checkActiveLayerAndMaskImageSize(20, 10);
+        checkActiveLayerTranslation(0, 0);
+
         new EnlargeCanvas(comp, 3, 4, 5, 2).invoke();
+
+        checkCanvasSize(26, 18);
+        checkActiveLayerAndMaskImageSize(26, 18);
+        checkActiveLayerTranslation(0, 0);
+
         comp.checkInvariant();
+        checkDirty(true);
+
+        History.undo();
+        checkCanvasSize(20, 10);
+        checkActiveLayerAndMaskImageSize(20, 10);
+        checkActiveLayerTranslation(0, 0);
+
+        History.redo();
+        checkCanvasSize(26, 18);
+        checkActiveLayerAndMaskImageSize(26, 18);
+        checkActiveLayerTranslation(0, 0);
     }
 
     @Test
-    public void testGetCanvasWidth() {
+    public void testResize() {
+        // TODO
+        // 1. test that both layers are resized
+        // 2. test undo with one layer
+    }
+
+    @Test
+    public void testRotate() {
+        // TODO
+        // 1. test that both layers are rotated
+        // 2. test undo with one layer
+    }
+
+    @Test
+    public void testFlip() {
+        // TODO
+        // 1. test that both layers are flipped
+        // 2. test undo with one layer
+    }
+
+    @Test
+    public void testCrop() {
+        // TODO
+        // 1. test that both layers are cropped
+        // 2. test undo with one layer
+    }
+
+    private void checkCanvasSize(int width, int height) {
         int canvasWidth = comp.getCanvasWidth();
-        assertEquals(TestHelper.sizeX, canvasWidth);
-        comp.checkInvariant();
-    }
-
-    @Test
-    public void testGetCanvasHeight() {
         int canvasHeight = comp.getCanvasHeight();
-        assertEquals(TestHelper.sizeY, canvasHeight);
-        comp.checkInvariant();
+        assertEquals(width, canvasWidth);
+        assertEquals(height, canvasHeight);
     }
 
     @Test
@@ -460,14 +533,121 @@ public class CompositionTest {
         comp.checkInvariant();
     }
 
-    private void checkNumLayers(int expected) {
-        assertEquals(expected, comp.getNrLayers());
+    private void testTranslation(boolean makeDuplicateLayer) {
+        checkLayers("[layer 1, ACTIVE layer 2]");
+        // remove one layer so that we have undo
+        comp.removeLayer(comp.getActiveLayer(), AddToHistory.YES, UpdateGUI.NO);
+        checkLayers("[ACTIVE layer 1]");
+
+        checkActiveLayerTranslation(0, 0);
+        checkActiveLayerAndMaskImageSize(20, 10);
+
+        // 1. direction south-east
+        moveLayer(makeDuplicateLayer, 2, 2);
+        checkDirty(true);
+        // no translation because the image was moved south-east, and enlarged
+        checkActiveLayerTranslation(0, 0);
+        checkActiveLayerAndMaskImageSize(22, 12);
+
+        if (makeDuplicateLayer) {
+            checkLayers("[layer 1, ACTIVE layer 1 copy]");
+        } else {
+            // no change in the number of layers
+            checkLayers("[ACTIVE layer 1]");
+        }
+
+        // 2. direction north-west
+        moveLayer(makeDuplicateLayer, -2, -2);
+        // this time we have a non-zero translation
+        checkActiveLayerTranslation(-2, -2);
+        // no need to enlarge the image again
+        checkActiveLayerAndMaskImageSize(22, 12);
+
+        // 3. direction north-west again
+        moveLayer(makeDuplicateLayer, -2, -2);
+        // the translation increases
+        checkActiveLayerTranslation(-4, -4);
+        // the image needs to be enlarged now
+        checkActiveLayerAndMaskImageSize(24, 14);
+
+        // 4. direction north-east
+        moveLayer(makeDuplicateLayer, 2, -2);
+        // the translation increases
+        checkActiveLayerTranslation(-2, -6);
+        // the image needs to be enlarged vertically
+        checkActiveLayerAndMaskImageSize(24, 16);
+
+        // 5. opposite movement: direction south-west
+        moveLayer(makeDuplicateLayer, -2, 2);
+        // translation back to -4, -4
+        checkActiveLayerTranslation(-4, -4);
+        // no need to enlarge the image
+        checkActiveLayerAndMaskImageSize(24, 16);
+
+        if (makeDuplicateLayer) {
+            checkLayers("[layer 1, layer 1 copy, layer 1 copy 2, layer 1 copy 3, layer 1 copy 4, ACTIVE layer 1 copy 5]");
+        } else {
+            // no change in the number of layers
+            checkLayers("[ACTIVE layer 1]");
+        }
+
+        if (!makeDuplicateLayer) { // we should have undo in this case
+            for (int i = 0; i < 5; i++) {
+                History.undo();
+            }
+            checkActiveLayerTranslation(0, 0);
+            checkActiveLayerAndMaskImageSize(20, 10);
+
+            for (int i = 0; i < 5; i++) {
+                History.redo();
+            }
+            checkActiveLayerTranslation(-4, -4);
+            checkActiveLayerAndMaskImageSize(24, 16);
+        }
+
+        // now test "Layer to Canvas Size"
+        comp.activeLayerToCanvasSize();
+        checkActiveLayerTranslation(0, 0);
+        checkActiveLayerAndMaskImageSize(20, 10);
+
+        History.undo();
+        checkActiveLayerTranslation(-4, -4);
+        checkActiveLayerAndMaskImageSize(24, 16);
+
+        History.redo();
+        checkActiveLayerTranslation(0, 0);
+        checkActiveLayerAndMaskImageSize(20, 10);
+    }
+
+    private void moveLayer(boolean makeDuplicateLayer, int relativeX, int relativeY) {
+        comp.startMovement(makeDuplicateLayer);
+        comp.moveActiveContentRelative(relativeX, relativeY);
+        comp.endMovement();
+    }
+
+    private void checkActiveLayerTranslation(int tx, int ty) {
+        ContentLayer layer = (ContentLayer) comp.getActiveLayer();
+        assertEquals(tx, layer.getTranslationX());
+        assertEquals(ty, layer.getTranslationY());
+    }
+
+    private void checkActiveLayerAndMaskImageSize(int w, int h) {
+        ImageLayer layer = (ImageLayer) comp.getActiveLayer();
+        BufferedImage image = layer.getImage();
+        assertEquals(w, image.getWidth());
+        assertEquals(h, image.getHeight());
+
+        BufferedImage maskImage = layer.getMask().getImage();
+        assertEquals(w, maskImage.getWidth());
+        assertEquals(h, maskImage.getHeight());
+    }
+
+    private void checkLayers(String expected) {
+        assertEquals(expected, comp.toLayerNamesString());
         comp.checkInvariant();
     }
 
-    private void checkActiveLayerIndex(int expected) {
-        assertEquals(expected, comp.getActiveLayerIndex());
-        comp.checkInvariant();
+    private void checkDirty(boolean expectedValue) {
+        assertThat(comp.isDirty(), is(expectedValue));
     }
-
 }

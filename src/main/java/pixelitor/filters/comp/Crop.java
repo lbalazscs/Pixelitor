@@ -5,20 +5,15 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.ImageComponent;
 import pixelitor.history.AddToHistory;
-import pixelitor.history.CanvasChangeEdit;
-import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;
+import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
-import pixelitor.history.SelectionChangeEdit;
-import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 
 import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.awt.Shape;
 import java.awt.event.ActionEvent;
-import java.awt.image.BufferedImage;
 
 import static pixelitor.Composition.ImageChangeActions.FULL;
 
@@ -47,10 +42,7 @@ public class Crop extends AbstractAction {
             return;
         }
 
-        Shape backupShape = null;
-        if (comp.hasSelection()) {
-            backupShape = comp.getSelectionOrNull().getShape();
-        }
+        MultiLayerBackup backup = new MultiLayerBackup(comp, "Crop", true);
 
         if (selectionCrop) {
             assert comp.hasSelection();
@@ -62,42 +54,13 @@ public class Crop extends AbstractAction {
             comp.cropSelection(cropRect);
         }
 
-        // needs to be created before the translations or
-        // canvas changes take place
-        CanvasChangeEdit canvasChangeEdit = new CanvasChangeEdit("", comp);
-
         int nrLayers = comp.getNrLayers();
-        BufferedImage backupImage = null;
         for (int i = 0; i < nrLayers; i++) {
             Layer layer = comp.getLayer(i);
-            if (layer instanceof ImageLayer) {
-                backupImage = ((ImageLayer) layer).getImage();
-            }
             layer.crop(cropRect);
         }
 
-        MultiLayerEdit edit = new MultiLayerEdit(comp, "Crop", backupImage, canvasChangeEdit);
-        if (comp.hasSelection()) {
-            // Selection crops always deselect, so this must be a
-            // crop tool crop with cropped selection
-            assert !selectionCrop;
-            assert backupShape != null;
-
-            SelectionChangeEdit selectionChangeEdit = new SelectionChangeEdit(comp, backupShape, "");
-            edit.setSelectionChangeEdit(selectionChangeEdit);
-        } else {
-            // no selection after the crop
-            if (backupShape == null) {
-                // there was no selection then we started
-                assert !selectionCrop;
-            } else {
-                // There was a selection but it disappeared:
-                // either a selection crop or a crop tool crop without
-                // overlap with the existing selection.
-                DeselectEdit deselectEdit = new DeselectEdit(comp, backupShape, "");
-                edit.setDeselectEdit(deselectEdit);
-            }
-        }
+        MultiLayerEdit edit = new MultiLayerEdit(comp, "Crop", backup);
         History.addEdit(edit);
 
         canvas.updateSize(cropRect.width, cropRect.height);

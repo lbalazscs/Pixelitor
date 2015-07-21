@@ -19,11 +19,9 @@ package pixelitor.history;
 
 import pixelitor.Composition;
 import pixelitor.layers.ImageLayer;
-import pixelitor.selection.IgnoreSelection;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
-import java.awt.image.BufferedImage;
 
 import static pixelitor.Composition.ImageChangeActions.FULL;
 
@@ -40,28 +38,38 @@ public class MultiLayerEdit extends PixelitorEdit {
     private SelectionChangeEdit selectionChangeEdit;
     private DeselectEdit deselectEdit;
 
-    public MultiLayerEdit(Composition comp, String name, BufferedImage backupImage, CanvasChangeEdit canvasChangeEdit) {
+    public MultiLayerEdit(Composition comp, String name, MultiLayerBackup backup) {
         super(comp, name);
-        this.canvasChangeEdit = canvasChangeEdit;
+        this.canvasChangeEdit = backup.getCanvasChangeEdit();
 
         int nrLayers = comp.getNrImageLayers();
         if (nrLayers == 1) {
             layer = comp.getAnyImageLayer();
-            imageEdit = new ImageEdit("", comp, layer, backupImage,
-                    IgnoreSelection.YES, false);
-            imageEdit.setEmbedded(true);
+            imageEdit = backup.createImageEdit();
         } else {
             imageEdit = null;
         }
+
+        if (comp.hasSelection()) {
+            assert backup.hasSavedSelection();
+            selectionChangeEdit = backup.createSelectionChangeEdit();
+        } else {
+            if (backup.hasSavedSelection()) {
+                // it was a deselect:
+                // either a selection crop or a crop tool crop without
+                // overlap with the existing selection.
+                deselectEdit = backup.createDeselectEdit();
+            }
+        }
     }
 
-    public void setSelectionChangeEdit(SelectionChangeEdit selectionChangeEdit) {
-        this.selectionChangeEdit = selectionChangeEdit;
-    }
+//    public void setSelectionChangeEdit(SelectionChangeEdit selectionChangeEdit) {
+//        this.selectionChangeEdit = selectionChangeEdit;
+//    }
 
-    public void setDeselectEdit(DeselectEdit deselectEdit) {
-        this.deselectEdit = deselectEdit;
-    }
+//    public void setDeselectEdit(DeselectEdit deselectEdit) {
+//        this.deselectEdit = deselectEdit;
+//    }
 
     @Override
     public boolean canUndo() {
@@ -99,9 +107,7 @@ public class MultiLayerEdit extends PixelitorEdit {
             deselectEdit.undo();
         }
 
-        comp.imageChanged(FULL);
-        layer.updateIconImage();
-        History.notifyMenus(this);
+        updateGUI();
     }
 
     @Override
@@ -119,8 +125,15 @@ public class MultiLayerEdit extends PixelitorEdit {
             deselectEdit.redo();
         }
 
+        updateGUI();
+    }
+
+    private void updateGUI() {
         comp.imageChanged(FULL);
         layer.updateIconImage();
+        if (imageEdit instanceof ImageAndMaskEdit) {
+            layer.getMask().updateIconImage();
+        }
         History.notifyMenus(this);
     }
 

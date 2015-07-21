@@ -18,6 +18,7 @@
 package pixelitor;
 
 import pixelitor.layers.ImageLayer;
+import pixelitor.layers.LayerMaskAddType;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -29,7 +30,7 @@ public class TestHelper {
     public static ImageLayer createTestImageLayer(String layerName, Composition comp) {
         BufferedImage image = createTestImage();
         ImageLayer layer = new ImageLayer(comp, image, layerName, null);
-        comp.addLayerNoGUI(layer);
+//        comp.addLayerNoGUI(layer);
 
         return layer;
     }
@@ -46,17 +47,25 @@ public class TestHelper {
         return comp;
     }
 
-    public static Composition create2LayerTestComposition() {
+    public static Composition create2LayerTestComposition(boolean addMasks) {
         Composition c = createEmptyTestComposition();
 
         ImageLayer layer1 = createTestImageLayer("layer 1", c);
         ImageLayer layer2 = createTestImageLayer("layer 2", c);
 
-//        c.setActiveLayer(layer1, AddToHistory.NO);
+        c.addLayerNoGUI(layer1);
+        c.addLayerNoGUI(layer2);
+
+        if(addMasks) {
+            layer1.addMask(LayerMaskAddType.REVEAL_ALL);
+            layer2.addMask(LayerMaskAddType.REVEAL_ALL);
+        }
 
         assert layer2 == c.getActiveLayer();
         assert layer1 == c.getLayer(0);
         assert layer2 == c.getLayer(1);
+
+        c.setDirty(false);
 
         return c;
     }
@@ -68,5 +77,4 @@ public class TestHelper {
     public static Graphics2D createGraphics() {
         return createTestImage().createGraphics();
     }
-
 }

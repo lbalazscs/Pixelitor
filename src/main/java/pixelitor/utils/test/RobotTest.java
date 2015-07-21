@@ -564,7 +564,7 @@ public class RobotTest {
 
     private static void layerToCanvasSize() {
         logRobotEvent("layer to canvas size");
-        ImageComponents.getActiveComp().get().layerToCanvasSize();
+        ImageComponents.getActiveComp().get().activeLayerToCanvasSize();
     }
 
     private static void invertSelection() {

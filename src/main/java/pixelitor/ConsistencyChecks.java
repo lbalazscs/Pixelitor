@@ -43,7 +43,7 @@ public final class ConsistencyChecks {
         getActiveComp().ifPresent(comp -> {
             selectionCheck(comp);
             fadeCheck(comp);
-            if(checkImageCoversCanvas) {
+            if (checkImageCoversCanvas) {
                 imageCoversCanvasCheck(comp);
             }
             layerDeleteActionEnabledCheck();
@@ -112,19 +112,36 @@ public final class ConsistencyChecks {
     }
 
     public static boolean imageCoversCanvasCheck(Composition comp) {
-        Layer layer = comp.getActiveLayer();
-        if(!(layer instanceof ImageLayer)) {
-            return true;
+        int nrLayers = comp.getNrLayers();
+        for (int i = 0; i < nrLayers; i++) {
+            Layer layer = comp.getLayer(i);
+            if (layer instanceof ImageLayer) {
+                boolean b = imageCoversCanvasCheck((ImageLayer) layer);
+                if (!b) {
+                    return false;
+                }
+            }
+            if (layer.hasMask()) {
+                boolean b = imageCoversCanvasCheck(layer.getMask());
+                if (!b) {
+                    return false;
+                }
+            }
         }
-        ImageLayer imageLayer = (ImageLayer) layer;
+        return true;
+    }
 
+    public static boolean imageCoversCanvasCheck(ImageLayer imageLayer) {
+        Composition comp = imageLayer.getComp();
         BufferedImage bufferedImage = imageLayer.getImage();
 
         int x = -imageLayer.getTranslationX();
         int canvasWidth = comp.getCanvasWidth();
         int imageWidth = bufferedImage.getWidth();
         if (x + canvasWidth > imageWidth + 1) { // allow one pixel difference for rounding effects
-            throw new IllegalStateException("x = " + x + ", canvasWidth = " + canvasWidth + ", imageWidth = " + imageWidth + ", comp = " + comp.getName());
+            throw new IllegalStateException("x = " + x + ", canvasWidth = " + canvasWidth
+                    + ", imageWidth = " + imageWidth + ", comp = " + comp.getName()
+                    + ", class = " + imageLayer.getClass().getSimpleName());
         }
 
         int y = -imageLayer.getTranslationY();
@@ -132,7 +149,9 @@ public final class ConsistencyChecks {
         int imageHeight = bufferedImage.getHeight();
 
         if (y + canvasHeight > imageHeight + 1) {
-            throw new IllegalStateException("y = " + y + ", canvasHeight = " + canvasHeight + ", imageHeight = " + imageHeight + ", comp = " + comp.getName());
+            throw new IllegalStateException("y = " + y + ", canvasHeight = " + canvasHeight
+                    + ", imageHeight = " + imageHeight + ", comp = " + comp.getName()
+                    + ", class = " + imageLayer.getClass().getSimpleName());
         }
 
         return true;

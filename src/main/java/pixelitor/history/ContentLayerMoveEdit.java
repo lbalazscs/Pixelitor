@@ -44,7 +44,7 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
         this.layer = layer;
 
         if (backupImage != null) {
-            imageEdit = new ImageEdit("", comp, (ImageLayer) layer,
+            imageEdit = new ImageEdit(comp, "", (ImageLayer) layer,
                     backupImage, IgnoreSelection.YES, false);
             imageEdit.setEmbedded(true);
         }

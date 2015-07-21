@@ -213,7 +213,7 @@ public abstract class Tool {
     void saveFullImageForUndo(Composition comp) {
         BufferedImage copy = comp.getImageOrSubImageIfSelectedForActiveLayer(true, true);
 
-        ImageEdit edit = new ImageEdit(getName(), comp,
+        ImageEdit edit = new ImageEdit(comp, getName(),
                 comp.getActiveMaskOrImageLayer(), copy,
                 IgnoreSelection.NO, false);
         History.addEdit(edit);

@@ -3,19 +3,15 @@ package pixelitor.filters.comp;
 import pixelitor.AppLogic;
 import pixelitor.Composition;
 import pixelitor.history.AddToHistory;
-import pixelitor.history.CanvasChangeEdit;
 import pixelitor.history.History;
+import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
-import pixelitor.history.SelectionChangeEdit;
-import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.selection.Selection;
 
 import javax.swing.*;
-import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
 
 import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
 
@@ -61,39 +57,28 @@ public class Resize extends AbstractAction {
             progressiveBilinear = true;
         }
 
-        Shape backupShape = null;
+        String editName = "Resize";
+        MultiLayerBackup backup = new MultiLayerBackup(comp, editName, true);
+
         if (comp.hasSelection()) {
             Selection selection = comp.getSelectionOrNull();
-            backupShape = selection.getShape();
 
             double sx = ((double) targetWidth) / actualWidth;
             double sy = ((double) targetHeight) / actualHeight;
             AffineTransform tx = AffineTransform.getScaleInstance(sx, sy);
             selection.transform(tx, AddToHistory.NO);
         }
-        BufferedImage backupImage = null;
-
-        // needs to be created before the translations or
-        // canvas changes take place
-        CanvasChangeEdit canvasChangeEdit = new CanvasChangeEdit("", comp);
 
         int nrLayers = comp.getNrLayers();
         for (int i = 0; i < nrLayers; i++) {
             Layer layer = comp.getLayer(i);
-            if (layer instanceof ImageLayer) {
-                backupImage = ((ImageLayer) layer).getImage();
-            }
             layer.resize(targetWidth, targetHeight, progressiveBilinear);
             if (layer.hasMask()) {
                 layer.getMask().resize(targetWidth, targetHeight, progressiveBilinear);
             }
         }
 
-        MultiLayerEdit edit = new MultiLayerEdit(comp, "Resize", backupImage, canvasChangeEdit);
-        if (backupShape != null) {
-            SelectionChangeEdit selectionChangeEdit = new SelectionChangeEdit(comp, backupShape, "");
-            edit.setSelectionChangeEdit(selectionChangeEdit);
-        }
+        MultiLayerEdit edit = new MultiLayerEdit(comp, editName, backup);
         History.addEdit(edit);
 
         comp.getCanvas().updateSize(targetWidth, targetHeight);

@@ -45,7 +45,7 @@ public class Rotate extends CompAction {
     }
 
     @Override
-    protected String getUndoName() {
+    protected String getEditName() {
         return "Rotate";
     }
 

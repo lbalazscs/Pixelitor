@@ -34,12 +34,15 @@ public class CanvasChangeEdit extends PixelitorEdit {
 
     private TranslationEdit translationEdit;
 
-    public CanvasChangeEdit(String name,
-                            Composition comp) {
+    /**
+     * This constructor must be called before the change
+     */
+    public CanvasChangeEdit(Composition comp, String name) {
         super(comp, name);
         embedded = true;
 
-        // TODO think about the translation of the mask
+        // the translation of the mask should be the same as the
+        // translation of the main image
         ContentLayer layer = comp.getAnyContentLayer();
         if (layer != null) { // could be null, if there are only text layers
             translationEdit = new TranslationEdit(comp, layer);

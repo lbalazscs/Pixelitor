@@ -324,6 +324,10 @@ public class Selection {
     public void setShape(Shape selectionShape) {
         currentSelectionShape = selectionShape;
         lastSelectionShape = null;
+
+        if (state == NO_SHAPE_YET) {
+            state = HAS_SHAPE;
+        }
     }
 
     public SelectionInteraction getSelectionInteraction() {
