@@ -80,10 +80,18 @@ public class Assertions {
 
     public static boolean translationIs(int x, int y) {
         ImageLayer layer = ImageComponents.getActiveImageLayerOrMaskOrNull();
+        return translationIs(layer, x, y);
+    }
+
+    public static boolean translationIs(ImageLayer layer, int x, int y) {
         if (layer == null) {
-            throw new IllegalStateException();
+            throw new IllegalArgumentException();
         }
-        return layer.getTranslationX() == x && layer.getTranslationY() == y;
+        boolean eq1 = layer.getTranslationX() == x;
+        boolean eq2 = layer.getTranslationY() == y;
+        assert eq1 : "expected x = " + x + ", found = " + layer.getTranslationX();
+        assert eq2 : "expected y = " + y + ", found = " + layer.getTranslationY();
+        return eq1 && eq2;
     }
 
     public static boolean cropToolRectangleBoundsAre(int x, int y, int w, int h) {

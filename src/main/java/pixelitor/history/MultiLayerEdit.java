@@ -35,12 +35,14 @@ public class MultiLayerEdit extends PixelitorEdit {
 
     private final ImageEdit imageEdit;
     private final CanvasChangeEdit canvasChangeEdit;
+    private TranslationEdit translationEdit;
     private SelectionChangeEdit selectionChangeEdit;
     private DeselectEdit deselectEdit;
 
     public MultiLayerEdit(Composition comp, String name, MultiLayerBackup backup) {
         super(comp, name);
         this.canvasChangeEdit = backup.getCanvasChangeEdit();
+        this.translationEdit = backup.getTranslationEdit();
 
         int nrLayers = comp.getNrImageLayers();
         if (nrLayers == 1) {
@@ -100,6 +102,9 @@ public class MultiLayerEdit extends PixelitorEdit {
         if (canvasChangeEdit != null) {
             canvasChangeEdit.undo();
         }
+        if (translationEdit != null) {
+            translationEdit.undo();
+        }
         if (selectionChangeEdit != null) {
             selectionChangeEdit.undo();
         }
@@ -117,6 +122,9 @@ public class MultiLayerEdit extends PixelitorEdit {
         imageEdit.redo();
         if (canvasChangeEdit != null) {
             canvasChangeEdit.redo();
+        }
+        if (translationEdit != null) {
+            translationEdit.redo();
         }
         if (selectionChangeEdit != null) {
             selectionChangeEdit.redo();
@@ -144,6 +152,9 @@ public class MultiLayerEdit extends PixelitorEdit {
         imageEdit.die();
         if (canvasChangeEdit != null) {
             canvasChangeEdit.die();
+        }
+        if (translationEdit != null) {
+            translationEdit.die();
         }
         if (selectionChangeEdit != null) {
             selectionChangeEdit.die();

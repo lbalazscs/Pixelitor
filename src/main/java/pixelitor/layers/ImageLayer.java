@@ -21,6 +21,7 @@ import pixelitor.ChangeReason;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.filters.comp.Flip;
+import pixelitor.filters.comp.Rotate;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.ApplyLayerMaskEdit;
 import pixelitor.history.ContentLayerMoveEdit;
@@ -52,6 +53,7 @@ import java.util.Optional;
 
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
+import static java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
 import static java.util.Objects.requireNonNull;
 import static pixelitor.ChangeReason.REPEAT_LAST;
 import static pixelitor.Composition.ImageChangeActions.FULL;
@@ -524,7 +526,7 @@ public class ImageLayer extends ContentLayer {
 
     @Override
     public void flip(Flip.Direction direction, AffineTransform flipTx) {
-//        AffineTransform imageTx = direction.getImageTX();
+        AffineTransform imageTx = direction.getImageTX(this);
         int translationXAbs = -getTranslationX();
         int translationYAbs = -getTranslationY();
         int newTranslationXAbs;
@@ -546,7 +548,7 @@ public class ImageLayer extends ContentLayer {
             newTranslationYAbs = imageHeight - canvasHeight - translationYAbs;
         }
 
-        g2.setTransform(flipTx);
+        g2.setTransform(imageTx);
         g2.drawImage(image, 0, 0, imageWidth, imageHeight, null);
         g2.dispose();
 
@@ -557,13 +559,11 @@ public class ImageLayer extends ContentLayer {
 
     @SuppressWarnings("SuspiciousNameCombination")
     @Override
-    public void rotate(int angleDegree, AffineTransform rotTx) {
+    public void rotate(Rotate.SpecialAngle angle) {
         int translationXAbs = -getTranslationX();
         int translationYAbs = -getTranslationY();
         int newTranslationXAbs = 0;
         int newTranslationYAbs = 0;
-
-//        BufferedImage img = getImageOrSubImageIfSelected(false, false);
 
         int imageWidth = image.getWidth();
         int imageHeight = image.getHeight();
@@ -571,6 +571,7 @@ public class ImageLayer extends ContentLayer {
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
 
+        int angleDegree = angle.getAngleDegree();
         if (angleDegree == 90) {
             newTranslationXAbs = imageHeight - translationYAbs - canvasHeight;
             newTranslationYAbs = translationXAbs;
@@ -582,27 +583,13 @@ public class ImageLayer extends ContentLayer {
             newTranslationYAbs = imageHeight - canvasHeight - translationYAbs;
         }
 
-        int newImageWidth;
-        int newImageHeight;
-
-        if (angleDegree == 90 || angleDegree == 270) {
-            newImageWidth = imageHeight;
-            newImageHeight = imageWidth;
-        } else {
-            newImageWidth = imageWidth;
-            newImageHeight = imageHeight;
-        }
-
-        // TODO implement arbitrary rotation:
-        // create a rectangle, then rotate it with the same AffineTransform
-
-        BufferedImage dest = ImageUtils.createCompatibleDest(image, newImageWidth, newImageHeight);
+        BufferedImage dest = angle.createDestImage(image);
 
         Graphics2D g2 = dest.createGraphics();
-        // TODO we should not need bicubic here as long as we have only 90, 180, 270 degrees
-        g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BICUBIC);
+        // nearest neighbor should be ok for 90, 180, 270 degrees
+        g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
 
-        g2.setTransform(rotTx);
+        g2.setTransform(angle.getCanvasTX(canvas)); // TODO
 
         g2.drawImage(image, 0, 0, imageWidth, imageHeight, null);
         g2.dispose();
@@ -1034,6 +1021,18 @@ public class ImageLayer extends ContentLayer {
         PixelitorEdit edit = super.endMovement();
         updateIconImage();
         return edit;
+    }
+
+    public String toDebugCanvasString() {
+        final StringBuilder sb = new StringBuilder("{");
+        sb.append("canvasWidth=").append(canvas.getWidth());
+        sb.append(", canvasHeight=").append(canvas.getHeight());
+        sb.append(", tx=").append(translationX);
+        sb.append(", ty=").append(translationY);
+        sb.append(", imgWidth=").append(image.getWidth());
+        sb.append(", imgHeight=").append(image.getHeight());
+        sb.append('}');
+        return sb.toString();
     }
 
     @Override

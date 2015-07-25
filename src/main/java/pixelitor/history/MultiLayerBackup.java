@@ -1,6 +1,7 @@
 package pixelitor.history;
 
 import pixelitor.Composition;
+import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.selection.IgnoreSelection;
@@ -17,6 +18,7 @@ public class MultiLayerBackup {
     private final String editName;
     private ImageLayer layer;
     private CanvasChangeEdit canvasChangeEdit;
+    private TranslationEdit translationEdit;
     private Shape backupShape;
 
     // Saved before the change, but the edit is
@@ -35,6 +37,12 @@ public class MultiLayerBackup {
 
         if (changesCanvasDimensions) {
             canvasChangeEdit = new CanvasChangeEdit(comp, editName);
+        }
+        // the translation of the mask should be the same as the
+        // translation of the main image
+        ContentLayer layer = comp.getAnyContentLayer();
+        if (layer != null) { // could be null, if there are only text layers
+            translationEdit = new TranslationEdit(comp, layer);
         }
 
         if (comp.hasSelection()) {
@@ -59,6 +67,10 @@ public class MultiLayerBackup {
 
     public CanvasChangeEdit getCanvasChangeEdit() {
         return canvasChangeEdit;
+    }
+
+    public TranslationEdit getTranslationEdit() {
+        return translationEdit;
     }
 
     public boolean hasSavedSelection() {

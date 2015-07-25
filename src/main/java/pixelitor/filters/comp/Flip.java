@@ -20,32 +20,17 @@ package pixelitor.filters.comp;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.layers.ContentLayer;
+import pixelitor.layers.ImageLayer;
 
 import java.awt.geom.AffineTransform;
-
-import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
-import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
 
 /**
  * Flips a ContentLayer horizontally or vertically
  */
-public class Flip extends CompAction {
+public class Flip extends SimpleCompAction {
     private final Flip.Direction direction;
 
-    private static final Flip horizontalFlip = new Flip(HORIZONTAL);
-    private static final Flip verticalFlip = new Flip(VERTICAL);
-
-    public static Flip createFlip(Direction dir) {
-        if(dir == HORIZONTAL) {
-            return horizontalFlip;
-        }
-        if(dir == VERTICAL) {
-            return verticalFlip;
-        }
-        throw new IllegalStateException("should not get here");
-    }
-
-    private Flip(Direction dir) {
+    public Flip(Direction dir) {
         super(dir.getName(), false);
         direction = dir;
     }
@@ -67,16 +52,7 @@ public class Flip extends CompAction {
 
     @Override
     protected AffineTransform createTransform(Canvas canvas) {
-        AffineTransform flipTx = new AffineTransform();
-
-        if (direction == HORIZONTAL) {
-            flipTx.translate(canvas.getWidth(), 0);
-            flipTx.scale(-1, 1);
-        } else {
-            flipTx.translate(0, canvas.getHeight());
-            flipTx.scale(1, -1);
-        }
-        return flipTx;
+        return direction.getCanvasTX(canvas);
     }
 
     /**
@@ -88,13 +64,56 @@ public class Flip extends CompAction {
             public String getName() {
                 return "Flip Horizontal";
             }
+
+            @Override
+            public AffineTransform getCanvasTX(Canvas canvas) {
+                AffineTransform flipTx = new AffineTransform();
+                flipTx.translate(canvas.getWidth(), 0);
+                flipTx.scale(-1, 1);
+                return flipTx;
+            }
+
+            @Override
+            public AffineTransform getImageTX(ImageLayer layer) {
+                AffineTransform flipTx = new AffineTransform();
+                flipTx.translate(layer.getImage().getWidth(), 0);
+                flipTx.scale(-1, 1);
+                return flipTx;
+            }
         }, VERTICAL {
             @Override
             public String getName() {
                 return "Flip Vertical";
             }
+
+            @Override
+            public AffineTransform getCanvasTX(Canvas canvas) {
+                AffineTransform flipTx = new AffineTransform();
+                flipTx.translate(0, canvas.getHeight());
+                flipTx.scale(1, -1);
+                return flipTx;
+            }
+
+            @Override
+            public AffineTransform getImageTX(ImageLayer layer) {
+                AffineTransform flipTx = new AffineTransform();
+                flipTx.translate(0, layer.getImage().getHeight());
+                flipTx.scale(1, -1);
+                return flipTx;
+            }
         };
 
         public abstract String getName();
+
+        /**
+         * Returns the transformation in canvas space.
+         * Needed for transforming the selection.
+         */
+        public abstract AffineTransform getCanvasTX(Canvas canvas);
+
+        /**
+         * Returns the transformation for the image.
+         */
+        public abstract AffineTransform getImageTX(ImageLayer layer);
     }
 }

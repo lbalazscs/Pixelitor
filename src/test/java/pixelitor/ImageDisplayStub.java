@@ -135,4 +135,13 @@ public class ImageDisplayStub implements ImageDisplay {
     public boolean activeIsImageLayer() {
         return comp.activeIsImageLayer();
     }
+
+    @Override
+    public void setShowLayerMask(boolean b) {
+    }
+
+    @Override
+    public boolean setZoom(ZoomLevel zoomLevel, boolean b) {
+        return false;
+    }
 }

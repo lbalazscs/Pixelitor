@@ -9,14 +9,11 @@ import pixelitor.history.MultiLayerEdit;
 import pixelitor.layers.Layer;
 import pixelitor.selection.Selection;
 
-import javax.swing.*;
-import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 
 import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
 
-public class Resize extends AbstractAction {
-    private Composition comp;
+public class Resize implements CompAction {
     private int targetWidth;
     private int targetHeight;
 
@@ -24,15 +21,14 @@ public class Resize extends AbstractAction {
     // are kept and the result fits into the given dimensions
     private final boolean resizeInBox;
 
-    public Resize(Composition comp, int targetWidth, int targetHeight, boolean resizeInBox) {
-        this.comp = comp;
+    public Resize(int targetWidth, int targetHeight, boolean resizeInBox) {
         this.targetWidth = targetWidth;
         this.targetHeight = targetHeight;
         this.resizeInBox = resizeInBox;
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void process(Composition comp) {
         int actualWidth = comp.getCanvasWidth();
         int actualHeight = comp.getCanvasHeight();
 
@@ -90,6 +86,6 @@ public class Resize extends AbstractAction {
 
         comp.imageChanged(INVALIDATE_CACHE);
 
-        AppLogic.activeCompositionDimensionsChanged(comp);
+        AppLogic.activeCompSizeChanged(comp);
     }
 }

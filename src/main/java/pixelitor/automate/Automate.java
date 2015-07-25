@@ -18,14 +18,15 @@
 package pixelitor.automate;
 
 import pixelitor.Composition;
+import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
 import pixelitor.InternalImageFrame;
 import pixelitor.PixelitorWindow;
+import pixelitor.filters.comp.CompAction;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.FileExtensionUtils;
 import pixelitor.io.OpenSaveManager;
 import pixelitor.io.OutputFormat;
-import pixelitor.utils.CompositionAction;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.Utils;
 import pixelitor.utils.ValidatedDialog;
@@ -53,7 +54,7 @@ public class Automate {
     /**
      * Processes each file in the input directory with the given CompositionAction
      */
-    public static void processEachFile(CompositionAction action,
+    public static void processEachFile(CompAction action,
                                        boolean closeImagesAfterProcessing,
                                        String progressMonitorTitle) {
         File lastOpenDir = FileChoosers.getLastOpenDir();
@@ -115,13 +116,14 @@ public class Automate {
     }
 
     private static void processFile(File file,
-                                    CompositionAction action,
+                                    CompAction action,
                                     File lastSaveDir,
                                     boolean closeImagesAfterProcessing) {
         OpenSaveManager.openFile(file);
         Composition comp = ImageComponents.getActiveComp().get();
 
-        InternalImageFrame frame = comp.getIC().getInternalFrame();
+        ImageComponent ic = (ImageComponent) comp.getIC();
+        InternalImageFrame frame = ic.getInternalFrame();
         frame.paintImmediately(frame.getBounds());
 
         action.process(comp);
@@ -164,7 +166,7 @@ public class Automate {
                     break;
                 case OVERWRITE_CANCEL:
                     if (closeImagesAfterProcessing) {
-                        OpenSaveManager.warnAndCloseImage(comp.getIC());
+                        OpenSaveManager.warnAndCloseImage(ic);
                     }
                     stopProcessing = true;
                     return;
@@ -174,7 +176,7 @@ public class Automate {
             outputFormat.saveComposition(comp, outputFile, false);
         }
         if (closeImagesAfterProcessing) {
-            OpenSaveManager.warnAndCloseImage(comp.getIC());
+            OpenSaveManager.warnAndCloseImage(ic);
         }
         stopProcessing = false;
     }

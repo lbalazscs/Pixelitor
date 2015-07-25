@@ -148,7 +148,7 @@ public class ImageComponents {
             Optional<Composition> opt = getActiveComp();
             opt.ifPresent(comp -> {
                 Rectangle cropRect = Tools.CROP.getCropRect(comp.getIC());
-                new Crop(comp, cropRect, false, allowGrowing).actionPerformed(null);
+                new Crop(cropRect, false, allowGrowing).process(comp);
             });
         } catch (Exception ex) {
             Dialogs.showExceptionDialog(ex);
@@ -162,7 +162,7 @@ public class ImageComponents {
         try {
             getActiveComp().ifPresent(comp -> comp.getSelection().ifPresent(selection -> {
                 Rectangle selectionBounds = selection.getShapeBounds();
-                new Crop(comp, selectionBounds, true, true).actionPerformed(null);
+                new Crop(selectionBounds, true, true).process(comp);
             }));
         } catch (Exception ex) {
             Dialogs.showExceptionDialog(ex);
@@ -228,7 +228,7 @@ public class ImageComponents {
         SelectionActions.setEnabled(newActiveComp.hasSelection(), newActiveComp);
         ZoomMenu.zoomChanged(ic.getZoomLevel());
 
-        AppLogic.activeCompositionDimensionsChanged(newActiveComp);
+        AppLogic.activeCompSizeChanged(newActiveComp);
         PixelitorWindow.getInstance().setTitle(ic.getComp().getName() + " - " + Build.getPixelitorWindowFixTitle());
     }
 

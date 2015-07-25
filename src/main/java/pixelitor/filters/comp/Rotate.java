@@ -20,28 +20,29 @@ package pixelitor.filters.comp;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.layers.ContentLayer;
+import pixelitor.utils.ImageUtils;
 
 import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 
 /**
  * Rotates an image
  */
-public class Rotate extends CompAction {
-    private final int angleDegree;
+public class Rotate extends SimpleCompAction {
+    private final SpecialAngle angle;
 
-    private int newCanvasWidth;
-    private int newCanvasHeight;
-
-    public Rotate(int angleDegree, String name) {
-        super(name, true);
-        this.angleDegree = angleDegree;
+    public Rotate(SpecialAngle angle) {
+        super(angle.getName(), true);
+        this.angle = angle;
     }
 
     @Override
     protected void changeCanvas(Composition comp) {
         Canvas canvas = comp.getCanvas();
-        rotateCanvas(canvas);
-        canvas.updateSize(newCanvasWidth, newCanvasHeight);
+        angle.changeCanvas(canvas);
+//
+//        rotateCanvas(canvas);
+//        canvas.updateSize(newCanvasWidth, newCanvasHeight);
     }
 
     @Override
@@ -51,37 +52,117 @@ public class Rotate extends CompAction {
 
     @Override
     protected void applyTx(ContentLayer contentLayer, AffineTransform tx) {
-        contentLayer.rotate(angleDegree, tx);
+        contentLayer.rotate(angle);
     }
 
     @Override
     protected AffineTransform createTransform(Canvas canvas) {
-        int canvasWidth = canvas.getWidth();
-        int canvasHeight = canvas.getHeight();
-
-        AffineTransform rotTx = new AffineTransform();
-        if (angleDegree == 90) {
-            rotTx.translate(canvasHeight, 0);
-        } else if (angleDegree == 180) {
-            rotTx.translate(canvasWidth, canvasHeight);
-        } else if (angleDegree == 270) {
-            rotTx.translate(0, canvasWidth);
-        }
-        // TODO rotate with exact transform
-        rotTx.rotate(Math.toRadians(angleDegree));
-        return rotTx;
+        return angle.getCanvasTX(canvas);
     }
 
-    @SuppressWarnings("SuspiciousNameCombination")
-    private void rotateCanvas(Canvas canvas) {
-        int canvasWidth = canvas.getWidth();
-        int canvasHeight = canvas.getHeight();
-        if (angleDegree == 90 || angleDegree == 270) {
-            newCanvasWidth = canvasHeight;
-            newCanvasHeight = canvasWidth;
-        } else {
-            newCanvasWidth = canvasWidth;
-            newCanvasHeight = canvasHeight;
+    public enum SpecialAngle {
+        ANGLE_90(90, "Rotate 90\u00B0 CW") {
+            @SuppressWarnings("SuspiciousNameCombination")
+            @Override
+            public void changeCanvas(Canvas canvas) {
+                int canvasWidth = canvas.getWidth();
+                int canvasHeight = canvas.getHeight();
+                int newCanvasWidth = canvasHeight;
+                int newCanvasHeight = canvasWidth;
+                canvas.updateSize(newCanvasWidth, newCanvasHeight);
+            }
+
+            @Override
+            public AffineTransform getCanvasTX(Canvas canvas) {
+                // rotate, then translate to compensate
+                AffineTransform rotTx = AffineTransform.getTranslateInstance(
+                        canvas.getHeight(), 0);
+                rotTx.quadrantRotate(1);
+                return rotTx;
+            }
+
+            @Override
+            public BufferedImage createDestImage(BufferedImage image) {
+                // switch width and height
+                int newImageWidth = image.getHeight();
+                int newImageHeight = image.getWidth();
+
+                return ImageUtils.createCompatibleDest(image, newImageWidth, newImageHeight);
+            }
+        }, ANGLE_180(180, "Rotate 180\u00B0") {
+            @Override
+            public void changeCanvas(Canvas canvas) {
+                // do nothing
+            }
+
+            @Override
+            public AffineTransform getCanvasTX(Canvas canvas) {
+                // rotate, then translate to compensate
+                AffineTransform rotTx = AffineTransform.getTranslateInstance(
+                        canvas.getWidth(), canvas.getHeight());
+                rotTx.quadrantRotate(2);
+                return rotTx;
+            }
+
+            @Override
+            public BufferedImage createDestImage(BufferedImage image) {
+                // no change in width and height
+                int newImageWidth = image.getWidth();
+                int newImageHeight = image.getHeight();
+
+                return ImageUtils.createCompatibleDest(image, newImageWidth, newImageHeight);
+            }
+        }, ANGLE_270(270, "Rotate 90\u00B0 CCW") {
+            @Override
+            public void changeCanvas(Canvas canvas) {
+                // same as for 90
+                ANGLE_90.changeCanvas(canvas);
+            }
+
+            @Override
+            public AffineTransform getCanvasTX(Canvas canvas) {
+                // rotate, then translate to compensate
+                AffineTransform rotTx = AffineTransform.getTranslateInstance(
+                        0, canvas.getWidth());
+                rotTx.quadrantRotate(3);
+                return rotTx;
+            }
+
+            @Override
+            public BufferedImage createDestImage(BufferedImage image) {
+                // switch width and height
+                int newImageWidth = image.getHeight();
+                int newImageHeight = image.getWidth();
+
+                return ImageUtils.createCompatibleDest(image, newImageWidth, newImageHeight);
+            }
+        };
+
+        protected int angleDegree;
+        private String name;
+
+        SpecialAngle(int angleDegree, String name) {
+            this.angleDegree = angleDegree;
+            this.name = name;
         }
+
+        public String getName() {
+            return name;
+        }
+
+        public abstract void changeCanvas(Canvas canvas);
+
+        /**
+         * Returns the transformation in canvas space.
+         * Needed for transforming the selection.
+         */
+        public abstract AffineTransform getCanvasTX(Canvas canvas);
+
+        public int getAngleDegree() {
+            return angleDegree;
+        }
+
+
+        public abstract BufferedImage createDestImage(BufferedImage image);
     }
 }

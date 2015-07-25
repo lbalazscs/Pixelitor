@@ -4,34 +4,30 @@ import pixelitor.AppLogic;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.ImageComponent;
+import pixelitor.ImageDisplay;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
 import pixelitor.layers.Layer;
 
-import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
 
 import static pixelitor.Composition.ImageChangeActions.FULL;
 
-public class Crop extends AbstractAction {
-    private Composition comp;
+public class Crop implements CompAction {
     private Rectangle cropRect;
     private final boolean selectionCrop;
     private final boolean allowGrowing;
 
-    public Crop(Composition comp, Rectangle cropRect, boolean selectionCrop, boolean allowGrowing) {
-        this.comp = comp;
+    public Crop(Rectangle cropRect, boolean selectionCrop, boolean allowGrowing) {
         this.cropRect = cropRect;
         this.selectionCrop = selectionCrop;
         this.allowGrowing = allowGrowing;
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
+    public void process(Composition comp) {
         Canvas canvas = comp.getCanvas();
         if (!allowGrowing) {
             cropRect = cropRect.intersection(canvas.getBounds());
@@ -67,15 +63,18 @@ public class Crop extends AbstractAction {
         comp.updateAllIconImages();
         comp.setDirty(true);
 
-        ImageComponent ic = comp.getIC();
+        ImageDisplay display = comp.getIC();
+        if (display instanceof ImageComponent) { // not in a test
+            ImageComponent ic = (ImageComponent) display;
 
-        ic.setPreferredSize(new Dimension(cropRect.width, cropRect.height));
-        ic.revalidate();
-        ic.makeSureItIsVisible();
+            ic.setPreferredSize(new Dimension(cropRect.width, cropRect.height));
+            ic.revalidate();
+            ic.makeSureItIsVisible();
 
-        ic.updateDrawStart();
+            ic.updateDrawStart();
+        }
         comp.imageChanged(FULL);
 
-        AppLogic.activeCompositionDimensionsChanged(comp);
+        AppLogic.activeCompSizeChanged(comp);
     }
 }

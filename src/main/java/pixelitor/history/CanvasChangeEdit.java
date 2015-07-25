@@ -18,7 +18,6 @@
 package pixelitor.history;
 
 import pixelitor.Composition;
-import pixelitor.layers.ContentLayer;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -32,21 +31,12 @@ public class CanvasChangeEdit extends PixelitorEdit {
     private int backupCanvasWidth;
     private int backupCanvasHeight;
 
-    private TranslationEdit translationEdit;
-
     /**
      * This constructor must be called before the change
      */
     public CanvasChangeEdit(Composition comp, String name) {
         super(comp, name);
         embedded = true;
-
-        // the translation of the mask should be the same as the
-        // translation of the main image
-        ContentLayer layer = comp.getAnyContentLayer();
-        if (layer != null) { // could be null, if there are only text layers
-            translationEdit = new TranslationEdit(comp, layer);
-        }
 
         backupCanvasWidth = comp.getCanvasWidth();
         backupCanvasHeight = comp.getCanvasHeight();
@@ -71,18 +61,12 @@ public class CanvasChangeEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
         swapCanvasDimensions();
-        if (translationEdit != null) {
-            translationEdit.undo();
-        }
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
         swapCanvasDimensions();
-        if (translationEdit != null) {
-            translationEdit.redo();
-        }
     }
 
     private void swapCanvasDimensions() {
@@ -103,7 +87,5 @@ public class CanvasChangeEdit extends PixelitorEdit {
     @Override
     public void die() {
         super.die();
-
-        translationEdit.die();
     }
 }

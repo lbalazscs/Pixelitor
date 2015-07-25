@@ -19,7 +19,11 @@ package pixelitor;
 
 import org.junit.Before;
 import org.junit.Test;
+import pixelitor.filters.comp.Crop;
 import pixelitor.filters.comp.EnlargeCanvas;
+import pixelitor.filters.comp.Flip;
+import pixelitor.filters.comp.Resize;
+import pixelitor.filters.comp.Rotate;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.layers.ContentLayer;
@@ -29,6 +33,7 @@ import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionInteraction;
 import pixelitor.selection.SelectionType;
 import pixelitor.utils.UpdateGUI;
+import pixelitor.utils.test.Assertions;
 
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -45,6 +50,11 @@ import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.Composition.ImageChangeActions.HISTOGRAM;
 import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
+import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
+import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
+import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_180;
+import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_270;
+import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_90;
 import static pixelitor.selection.SelectionInteraction.ADD;
 import static pixelitor.selection.SelectionType.ELLIPSE;
 
@@ -421,21 +431,30 @@ public class CompositionTest {
         comp.invertSelection();
         comp.checkInvariant();
 
-        comp.startSelection(SelectionType.RECTANGLE, SelectionInteraction.ADD);
-        comp.getSelection().get().setShape(new Rectangle(3, 3, 4, 4));
-        checkShapeBounds(new Rectangle(3, 3, 4, 4));
+        addRectangleSelection(3, 3, 4, 4);
+        checkSelectionBounds(new Rectangle(3, 3, 4, 4));
 
         comp.invertSelection();
-        checkShapeBounds(comp.getCanvasBounds());
+        checkSelectionBounds(comp.getCanvasBounds());
 
         History.undo();
-        checkShapeBounds(new Rectangle(3, 3, 4, 4));
+        checkSelectionBounds(new Rectangle(3, 3, 4, 4));
 
         History.redo();
-        checkShapeBounds(comp.getCanvasBounds());
+        checkSelectionBounds(comp.getCanvasBounds());
     }
 
-    private void checkShapeBounds(Rectangle expected) {
+    private void addRectangleSelection(int x, int y, int width, int height) {
+        Rectangle rect = new Rectangle(x, y, width, height);
+        addRectangleSelection(rect);
+    }
+
+    private void addRectangleSelection(Rectangle rect) {
+        comp.startSelection(SelectionType.RECTANGLE, SelectionInteraction.ADD);
+        comp.getSelection().get().setShape(rect);
+    }
+
+    private void checkSelectionBounds(Rectangle expected) {
         Rectangle shapeBounds = comp.getSelectionOrNull().getShapeBounds();
         assertEquals(expected, shapeBounds);
     }
@@ -467,15 +486,26 @@ public class CompositionTest {
         // remove one layer so that we have undo
         comp.removeLayer(comp.getActiveLayer(), AddToHistory.YES, UpdateGUI.NO);
 
+        Rectangle origSelection = new Rectangle(2, 2, 3, 3);
+        addRectangleSelection(origSelection);
+        checkSelectionBounds(origSelection);
+
         checkCanvasSize(20, 10);
         checkActiveLayerAndMaskImageSize(20, 10);
         checkActiveLayerTranslation(0, 0);
 
-        new EnlargeCanvas(comp, 3, 4, 5, 2).invoke();
+        int north = 3;
+        int east = 4;
+        int south = 5;
+        int west = 2;
+        new EnlargeCanvas(north, east, south, west).process(comp);
 
         checkCanvasSize(26, 18);
         checkActiveLayerAndMaskImageSize(26, 18);
         checkActiveLayerTranslation(0, 0);
+        Rectangle newSelection = new Rectangle(origSelection.x + west,
+                origSelection.y + north, origSelection.width, origSelection.height);
+        checkSelectionBounds(newSelection);
 
         comp.checkInvariant();
         checkDirty(true);
@@ -484,39 +514,187 @@ public class CompositionTest {
         checkCanvasSize(20, 10);
         checkActiveLayerAndMaskImageSize(20, 10);
         checkActiveLayerTranslation(0, 0);
+        checkSelectionBounds(origSelection);
 
         History.redo();
         checkCanvasSize(26, 18);
         checkActiveLayerAndMaskImageSize(26, 18);
         checkActiveLayerTranslation(0, 0);
+        checkSelectionBounds(newSelection);
+
+        // TODO test with translation
     }
 
     @Test
     public void testResize() {
+        ImageLayer layer1 = (ImageLayer) comp.getLayer(0);
+        ImageLayer layer2 = (ImageLayer) comp.getLayer(1);
+
+        Rectangle origSelection = new Rectangle(4, 4, 8, 4);
+        addRectangleSelection(origSelection);
+        checkSelectionBounds(origSelection);
+
+        String expectedState = "{canvasWidth=20, canvasHeight=10, tx=0, ty=0, imgWidth=20, imgHeight=10}";
+        assertEquals(expectedState, layer1.toDebugCanvasString());
+        assertEquals(expectedState, layer2.toDebugCanvasString());
+
+        // test that both layers are resized
+        new Resize(10, 5, false).process(comp);
+
+        Rectangle orig2Selection = new Rectangle(2, 2, 4, 2); // also scaled down by 2
+        checkSelectionBounds(orig2Selection);
+
+        expectedState = "{canvasWidth=10, canvasHeight=5, tx=0, ty=0, imgWidth=10, imgHeight=5}";
+        assertEquals(expectedState, layer1.toDebugCanvasString());
+        assertEquals(expectedState, layer2.toDebugCanvasString());
+
+        // test undo with one layer
+        comp.removeLayer(layer2, AddToHistory.YES, UpdateGUI.NO);
+        new Resize(5, 10, false).process(comp);
+        expectedState = "{canvasWidth=5, canvasHeight=10, tx=0, ty=0, imgWidth=5, imgHeight=10}";
+        assertEquals(expectedState, layer1.toDebugCanvasString());
+
+        Rectangle newSelection = new Rectangle(1, 4, 2, 4); // x scaled down by 2, y scaled up by 2
+        checkSelectionBounds(newSelection);
+
+        History.undo();
+        expectedState = "{canvasWidth=10, canvasHeight=5, tx=0, ty=0, imgWidth=10, imgHeight=5}";
+        assertEquals(expectedState, layer1.toDebugCanvasString());
+        checkSelectionBounds(orig2Selection);
+
+        History.redo();
+        expectedState = "{canvasWidth=5, canvasHeight=10, tx=0, ty=0, imgWidth=5, imgHeight=10}";
+        assertEquals(expectedState, layer1.toDebugCanvasString());
+        checkSelectionBounds(newSelection);
+
+        // test with translation
+        setStandardTestTranslation(layer1);
+
+        // TODO clarify : target dimensions are canvas or image dimensions?
+        new Resize(5, 10, false).process(comp);
         // TODO
-        // 1. test that both layers are resized
-        // 2. test undo with one layer
+
+
     }
 
     @Test
     public void testRotate() {
+        ImageLayer layer1 = (ImageLayer) comp.getLayer(0);
+        ImageLayer layer2 = (ImageLayer) comp.getLayer(1);
+
+        String expectedState = "{canvasWidth=20, canvasHeight=10, tx=0, ty=0, imgWidth=20, imgHeight=10}";
+        assertEquals(expectedState, layer1.toDebugCanvasString());
+        assertEquals(expectedState, layer2.toDebugCanvasString());
+
+        // test that both layers are rotated
+        new Rotate(ANGLE_90).process(comp);
+        expectedState = "{canvasWidth=10, canvasHeight=20, tx=0, ty=0, imgWidth=10, imgHeight=20}";
+        assertEquals(expectedState, layer1.toDebugCanvasString());
+        assertEquals(expectedState, layer2.toDebugCanvasString());
+
+        // test undo with one layer
+        comp.removeLayer(layer2, AddToHistory.YES, UpdateGUI.NO);
+
+        String origState = "{canvasWidth=10, canvasHeight=20, tx=0, ty=0, imgWidth=10, imgHeight=20}";
+        assertEquals(origState, layer1.toDebugCanvasString());
+
+        Rotate.SpecialAngle[] rotations = {ANGLE_90, ANGLE_180, ANGLE_270};
+        for (Rotate.SpecialAngle angle : rotations) {
+            new Rotate(angle).process(comp);
+
+            String afterState;
+            if (angle == ANGLE_90 || angle == ANGLE_270) {
+                afterState = "{canvasWidth=20, canvasHeight=10, tx=0, ty=0, imgWidth=20, imgHeight=10}";
+            } else {
+                afterState = origState;
+            }
+            assertEquals(afterState, layer1.toDebugCanvasString());
+
+            History.undo();
+            assertEquals(origState, layer1.toDebugCanvasString());
+
+            History.redo();
+            assertEquals(afterState, layer1.toDebugCanvasString());
+
+            // undo again to get ready for the next angle
+            History.undo();
+            assertEquals(origState, layer1.toDebugCanvasString());
+        }
+
+        // test with translation
+        setStandardTestTranslation(layer1);
+
+
         // TODO
-        // 1. test that both layers are rotated
-        // 2. test undo with one layer
+
+        // test with selection
+
+        // TODO
     }
 
     @Test
     public void testFlip() {
+        ImageLayer layer1 = (ImageLayer) comp.getLayer(0);
+        ImageLayer layer2 = (ImageLayer) comp.getLayer(1);
+
+        String expectedState = "{canvasWidth=20, canvasHeight=10, tx=0, ty=0, imgWidth=20, imgHeight=10}";
+        assertEquals(expectedState, layer1.toDebugCanvasString());
+        assertEquals(expectedState, layer2.toDebugCanvasString());
+
+        // test that both layers are flipped
+        new Flip(HORIZONTAL).process(comp);
+        // no change
+        assertEquals(expectedState, layer1.toDebugCanvasString());
+        assertEquals(expectedState, layer2.toDebugCanvasString());
+        new Flip(VERTICAL).process(comp);
+        // no change
+        assertEquals(expectedState, layer1.toDebugCanvasString());
+        assertEquals(expectedState, layer2.toDebugCanvasString());
+
+        // test undo with one layer
+        comp.removeLayer(layer2, AddToHistory.YES, UpdateGUI.NO);
+        assertEquals(expectedState, layer1.toDebugCanvasString());
+        new Flip(HORIZONTAL).process(comp);
+        new Flip(VERTICAL).process(comp);
+        assertEquals(expectedState, layer1.toDebugCanvasString());
+        History.undo();
+        History.undo();
+        assertEquals(expectedState, layer1.toDebugCanvasString());
+        History.redo();
+        History.redo();
+        assertEquals(expectedState, layer1.toDebugCanvasString());
+
         // TODO
-        // 1. test that both layers are flipped
-        // 2. test undo with one layer
+        // test with translation
+        setStandardTestTranslation(layer1);
+
+        // test with selection
     }
 
     @Test
     public void testCrop() {
+        ImageLayer layer1 = (ImageLayer) comp.getLayer(0);
+        ImageLayer layer2 = (ImageLayer) comp.getLayer(1);
+
+        String expectedState = "{canvasWidth=20, canvasHeight=10, tx=0, ty=0, imgWidth=20, imgHeight=10}";
+        assertEquals(expectedState, layer1.toDebugCanvasString());
+        assertEquals(expectedState, layer2.toDebugCanvasString());
+
+        // test that both layers are cropped
+        new Crop(new Rectangle(3, 3, 6, 3), false, false).process(comp);
+        expectedState = "{canvasWidth=6, canvasHeight=3, tx=0, ty=0, imgWidth=6, imgHeight=3}";
+        assertEquals(expectedState, layer1.toDebugCanvasString());
+        assertEquals(expectedState, layer2.toDebugCanvasString());
+
+        // test undo with one layer
+        comp.removeLayer(layer2, AddToHistory.YES, UpdateGUI.NO);
         // TODO
-        // 1. test that both layers are cropped
-        // 2. test undo with one layer
+        // test with translation
+        setStandardTestTranslation(layer1);
+        // TODO
+        // test selection crop with selection
+        // test crop tool crop with selection
+        // test with allow growing
     }
 
     private void checkCanvasSize(int width, int height) {
@@ -649,5 +827,13 @@ public class CompositionTest {
 
     private void checkDirty(boolean expectedValue) {
         assertThat(comp.isDirty(), is(expectedValue));
+    }
+
+    private void setStandardTestTranslation(ImageLayer layer) {
+        assert Assertions.translationIs(layer, 0, 0);
+        assert comp.getActiveLayer() == layer;
+        moveLayer(false, 2, 2);
+        moveLayer(false, -4, -4);
+        assert Assertions.translationIs(layer, -4, -4);
     }
 }

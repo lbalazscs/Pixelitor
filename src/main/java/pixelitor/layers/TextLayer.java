@@ -22,6 +22,7 @@ import pixelitor.Composition;
 import pixelitor.ImageComponents;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.comp.Flip;
+import pixelitor.filters.comp.Rotate;
 import pixelitor.filters.painters.TextAdjustmentsPanel;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.filters.painters.TranslatedTextPainter;
@@ -248,7 +249,7 @@ public class TextLayer extends ContentLayer {
     }
 
     @Override
-    public void rotate(int angleDegree, AffineTransform rotTx) {
+    public void rotate(Rotate.SpecialAngle angle) {
         // TODO
     }
 

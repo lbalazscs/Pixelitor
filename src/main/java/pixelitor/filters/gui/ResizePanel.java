@@ -258,7 +258,7 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
                     Dialogs.showErrorDialog(this, "Error", p.getErrorMessage());
                     return;
                 }
-                new Resize(comp, p.getNewWidth(), p.getNewHeight(), false).actionPerformed(null);
+                new Resize(p.getNewWidth(), p.getNewHeight(), false).process(comp);
                 close();
             }
         };

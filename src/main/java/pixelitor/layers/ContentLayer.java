@@ -19,6 +19,7 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.filters.comp.Flip;
+import pixelitor.filters.comp.Rotate;
 import pixelitor.history.CompoundEdit;
 import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.PixelitorEdit;
@@ -102,7 +103,7 @@ public abstract class ContentLayer extends Layer {
 
     public abstract void flip(Flip.Direction direction, AffineTransform flipTx);
 
-    public abstract void rotate(int angleDegree, AffineTransform rotTx);
+    public abstract void rotate(Rotate.SpecialAngle angle);
 
     public abstract void enlargeCanvas(int north, int east, int south, int west);
 

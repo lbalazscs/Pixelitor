@@ -105,6 +105,9 @@ import static pixelitor.FillType.FOREGROUND;
 import static pixelitor.FillType.TRANSPARENT;
 import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
 import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
+import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_180;
+import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_270;
+import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_90;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.MOTION_BLUR;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
 import static pixelitor.menus.MenuAction.AllowedLayerType.HAS_LAYER_MASK;
@@ -396,13 +399,13 @@ public class MenuBar extends JMenuBar {
         JMenu rotateSubmenu = new JMenu("Rotate/Flip");
         editMenu.add(rotateSubmenu);
         // rotate
-        createMenuItem(new Rotate(90, "Rotate 90\u00B0 CW"), rotateSubmenu);
-        createMenuItem(new Rotate(180, "Rotate 180\u00B0"), rotateSubmenu);
-        createMenuItem(new Rotate(270, "Rotate 90\u00B0 CCW"), rotateSubmenu);
+        createMenuItem(new Rotate(ANGLE_90), rotateSubmenu);
+        createMenuItem(new Rotate(ANGLE_180), rotateSubmenu);
+        createMenuItem(new Rotate(ANGLE_270), rotateSubmenu);
         rotateSubmenu.addSeparator();
         // flip
-        createMenuItem(Flip.createFlip(HORIZONTAL), rotateSubmenu);
-        createMenuItem(Flip.createFlip(VERTICAL), rotateSubmenu);
+        createMenuItem(new Flip(HORIZONTAL), rotateSubmenu);
+        createMenuItem(new Flip(VERTICAL), rotateSubmenu);
     }
 
     private void initColorsMenu() {
@@ -948,14 +951,12 @@ public class MenuBar extends JMenuBar {
         };
         createMenuItem(filterCreatorAction, developMenu, EnabledIf.ACTION_ENABLED);
 
-        Action debugSpecialAction = new MenuAction("Debug Special") {
+        createMenuItem(new MenuAction("Debug Special") {
             @Override
             void onClick() {
                 BufferedImage img = ImageComponents.getActiveCompositeImage().get();
 
                 Composite composite = new MultiplyComposite(1.0f);
-//                Composite composite =  BlendComposite.Multiply;
-//                Composite composite =  new TestComposite();
 
                 long startTime = System.nanoTime();
 
@@ -971,27 +972,24 @@ public class MenuBar extends JMenuBar {
                 System.out.println("MenuBar.actionPerformed: it took " + totalTime + " ms, average time = " + totalTime / testsRun);
 
             }
-        };
-        createMenuItem(debugSpecialAction, developMenu, EnabledIf.ACTION_ENABLED);
+        }, developMenu, EnabledIf.ACTION_ENABLED);
 
-        Action dumpEvents = new MenuAction("Dump Event Queue") {
+        createMenuItem(new MenuAction("Dump Event Queue") {
             @Override
             void onClick() {
                 DebugEventQueue.dump();
             }
-        };
-        createMenuItem(dumpEvents, developMenu);
+        }, developMenu);
 
-        Action dumpPID = new MenuAction("Debug PID") {
+        createMenuItem(new MenuAction("Debug PID") {
             @Override
             void onClick() {
                 String vmRuntimeInfo = ManagementFactory.getRuntimeMXBean().getName();
                 System.out.println(String.format("MenuBar::onClick: vmRuntimeInfo = '%s'", vmRuntimeInfo));
             }
-        };
-        createMenuItem(dumpPID, developMenu);
+        }, developMenu);
 
-        Action debugMask = new MenuAction("Debug Layer Mask") {
+        createMenuItem(new MenuAction("Debug Layer Mask") {
             @Override
             void onClick() {
                 ImageLayer imageLayer = (ImageLayer) ImageComponents.getActiveLayer().get();
@@ -1006,10 +1004,9 @@ public class MenuBar extends JMenuBar {
                     Utils.debugImage(transparencyImage, "transparency image");
                 }
             }
-        };
-        createMenuItem(debugMask, developMenu);
+        }, developMenu);
 
-        Action updateFromMask = new MenuAction("Update from Mask") {
+        createMenuItem(new MenuAction("Update from Mask") {
             @Override
             void onClick() {
                 ImageLayer imageLayer = (ImageLayer) ImageComponents.getActiveLayer().get();
@@ -1019,16 +1016,14 @@ public class MenuBar extends JMenuBar {
                     Dialogs.showInfoDialog("No Mask in Current image", "Error");
                 }
             }
-        };
-        createMenuItem(updateFromMask, developMenu);
+        }, developMenu);
 
-        Action imageChangedActive = new MenuAction("imageChanged(FULL) on the active image") {
+        createMenuItem(new MenuAction("imageChanged(FULL) on the active image") {
             @Override
             void onClick() {
                 ImageComponents.getActiveComp().get().imageChanged(FULL);
             }
-        };
-        createMenuItem(imageChangedActive, developMenu);
+        }, developMenu);
 
         createMenuItem(new MenuAction("Debug getCanvasSizedSubImage") {
             @Override
@@ -1045,6 +1040,18 @@ public class MenuBar extends JMenuBar {
             }
         }, developMenu);
 
+        createMenuItem(new MenuAction("Debug translation and canvas") {
+            @Override
+            void onClick() {
+                Composition comp = ImageComponents.getActiveIC().getComp();
+                Layer layer = comp.getActiveLayer();
+                if (layer instanceof ImageLayer) {
+                    ImageLayer imageLayer = (ImageLayer) layer;
+                    String s = imageLayer.toDebugCanvasString();
+                    System.out.println(s);
+                }
+            }
+        }, developMenu);
 
         this.add(developMenu);
     }

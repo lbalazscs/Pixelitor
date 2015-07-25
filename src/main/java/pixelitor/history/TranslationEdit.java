@@ -9,7 +9,7 @@ import javax.swing.undo.CannotUndoException;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 
 /**
- * Saves and restores the translation of an ImageLayer.
+ * Saves and restores the translation of a ContentLayer.
  */
 public class TranslationEdit extends PixelitorEdit {
     private ContentLayer layer;

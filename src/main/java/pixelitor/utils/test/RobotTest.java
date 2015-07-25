@@ -92,6 +92,9 @@ import java.util.Random;
 
 import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
 import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
+import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_180;
+import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_270;
+import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_90;
 
 /**
  * An automatic test using java.awt.Robot.
@@ -595,23 +598,23 @@ public class RobotTest {
         switch (r) {
             case 0:
                 logRobotEvent("rotate 90 CW");
-                action = new Rotate(90, "Rotate 90\u00B0 CW");
+                action = new Rotate(ANGLE_90);
                 break;
             case 1:
                 logRobotEvent("rotate 180");
-                action = new Rotate(180, "Rotate 180\u00B0");
+                action = new Rotate(ANGLE_180);
                 break;
             case 2:
                 logRobotEvent("rotate 90 CCW");
-                action = new Rotate(270, "Rotate 90\u00B0 CCW");
+                action = new Rotate(ANGLE_270);
                 break;
             case 3:
                 logRobotEvent("flip horizontal");
-                action = Flip.createFlip(HORIZONTAL);
+                action = new Flip(HORIZONTAL);
                 break;
             case 4:
                 logRobotEvent("flip vertical");
-                action = Flip.createFlip(VERTICAL);
+                action = new Flip(VERTICAL);
                 break;
         }
 
@@ -953,7 +956,8 @@ public class RobotTest {
         int east = rand.nextInt(3);
         int south = rand.nextInt(3);
         int west = rand.nextInt(3);
-        new EnlargeCanvas(ImageComponents.getActiveComp().get(), north, east, south, west).invoke();
+        Composition comp = ImageComponents.getActiveComp().get();
+        new EnlargeCanvas(north, east, south, west).process(comp);
     }
 }
 

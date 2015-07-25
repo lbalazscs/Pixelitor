@@ -22,22 +22,21 @@ import java.awt.geom.AffineTransform;
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
 import static pixelitor.utils.SliderSpinner.TextPosition.BORDER;
 
-public class EnlargeCanvas {
-    private final Composition comp;
+public class EnlargeCanvas implements CompAction {
     private final int north;
     private final int east;
     private final int south;
     private final int west;
 
-    public EnlargeCanvas(Composition comp, int north, int east, int south, int west) {
-        this.comp = comp;
+    public EnlargeCanvas(int north, int east, int south, int west) {
         this.north = north;
         this.east = east;
         this.south = south;
         this.west = west;
     }
 
-    public void invoke() {
+    @Override
+    public void process(Composition comp) {
         String editName = "Enlarge Canvas";
         MultiLayerBackup backup = new MultiLayerBackup(comp, editName, true);
 
@@ -90,7 +89,7 @@ public class EnlargeCanvas {
             @Override
             protected void dialogAccepted() {
                 Composition comp = ImageComponents.getActiveComp().get();
-                new EnlargeCanvas(comp, panel.getNorth(), panel.getEast(), panel.getSouth(), panel.getWest()).invoke();
+                new EnlargeCanvas(panel.getNorth(), panel.getEast(), panel.getSouth(), panel.getWest()).process(comp);
                 close();
             }
         };

@@ -41,7 +41,7 @@ public class AppLogic {
     private AppLogic() {
     }
 
-    public static void activeCompositionDimensionsChanged(Composition comp) {
+    public static void activeCompSizeChanged(Composition comp) {
         Symmetry.setCompositionSize(comp.getCanvasWidth(), comp.getCanvasHeight());
     }
 

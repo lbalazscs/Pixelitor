@@ -167,8 +167,7 @@ public class Lightning extends FilterWithParametrizedGUI {
         invertedImage = new FastLookupOp(new ShortLookupTable(0, lookupData)).filter(croppedLightningImage, invertedImage);
 
         if (debug) {
-//            AppLogic.debugImage(lightningImage, "after polar");
-            ImageComponents.setActiveIC(composition.getIC(), true);
+//            Utils.debugImage(lightningImage, "after polar");
         }
 
         dest = ImageUtils.copyImage(src);

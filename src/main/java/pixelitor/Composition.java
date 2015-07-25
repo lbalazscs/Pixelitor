@@ -682,8 +682,8 @@ public class Composition implements Serializable {
         addLayer(newLayer, AddToHistory.YES, false, false);
     }
 
-    public ImageComponent getIC() {
-        return (ImageComponent) ic;
+    public ImageDisplay getIC() {
+        return ic;
     }
 
     // we are not in a test, see method above

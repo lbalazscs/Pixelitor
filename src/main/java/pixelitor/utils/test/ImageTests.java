@@ -29,6 +29,7 @@ import pixelitor.automate.Automate;
 import pixelitor.automate.SingleDirChooserPanel;
 import pixelitor.filters.ColorWheel;
 import pixelitor.filters.ValueNoise;
+import pixelitor.filters.comp.CompAction;
 import pixelitor.filters.jhlabsproxies.JHDropShadow;
 import pixelitor.filters.jhlabsproxies.JHGaussianBlur;
 import pixelitor.filters.painters.AreaEffects;
@@ -42,7 +43,6 @@ import pixelitor.layers.BlendingMode;
 import pixelitor.layers.DeleteActiveLayerAction;
 import pixelitor.layers.ImageLayer;
 import pixelitor.tools.FgBgColorSelector;
-import pixelitor.utils.CompositionAction;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.UpdateGUI;
 import pixelitor.utils.Utils;
@@ -173,7 +173,7 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
             return;
         }
 
-        CompositionAction ca = comp -> {
+        CompAction ca = comp -> {
             comp.addNewLayerFromComposite("Overlay Blur");
             comp.getActiveLayer().setBlendingMode(BlendingMode.OVERLAY, UpdateGUI.YES, AddToHistory.YES, true);
             JHGaussianBlur blur = new JHGaussianBlur();

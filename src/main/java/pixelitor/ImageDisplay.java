@@ -76,4 +76,8 @@ public interface ImageDisplay {
     boolean isMaskShowing();
 
     boolean activeIsImageLayer();
+
+    void setShowLayerMask(boolean b);
+
+    boolean setZoom(ZoomLevel zoomLevel, boolean b);
 }
