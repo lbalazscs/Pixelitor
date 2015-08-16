@@ -53,11 +53,11 @@ public class ImageEdit extends FadeableEdit {
         this.canRepeat = canRepeat;
 
         comp.setDirty(true);
-        sanityCheck();
+        checkBackupDifferentFromActive();
     }
 
-    private void sanityCheck() {
-        // post condition: the backup should never be identical to the active image
+    private void checkBackupDifferentFromActive() {
+        // the backup should never be identical to the active image
         // otherwise the backup might be also edited
         BufferedImage layerImage = layer.getImage();
         if (layerImage == imgRef.get()) {
@@ -109,7 +109,7 @@ public class ImageEdit extends FadeableEdit {
             History.notifyMenus(this);
         }
 
-        sanityCheck();
+        checkBackupDifferentFromActive();
         return true;
     }
 

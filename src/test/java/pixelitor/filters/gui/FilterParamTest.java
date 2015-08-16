@@ -32,9 +32,9 @@ import static java.awt.Color.BLUE;
 import static java.awt.Color.CYAN;
 import static java.awt.Color.RED;
 import static java.awt.Color.WHITE;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
@@ -83,14 +83,14 @@ public class FilterParamTest {
     @Test
     public void testCreateGUI() {
         JComponent gui = param.createGUI();
-        assertNotNull(gui);
+        assertThat(gui).isNotNull();
         checkThatFilterWasNotCalled();
     }
 
     @Test
     public void testGetNrOfGridBagCols() {
         int cols = param.getNrOfGridBagCols();
-        assertTrue(cols > 0 && cols < 3);
+        assertThat(cols > 0 && cols < 3).isTrue();
         checkThatFilterWasNotCalled();
     }
 
@@ -104,7 +104,7 @@ public class FilterParamTest {
     public void testResetFalse() {
         param.reset(false);
         checkThatFilterWasNotCalled();
-        assertTrue(param.isSetToDefault());
+        assertThat(param.isSetToDefault()).isTrue();
     }
 
     @Test
@@ -118,7 +118,7 @@ public class FilterParamTest {
         }
 
         param.reset(true);
-        assertTrue(param.isSetToDefault());
+        assertThat(param.isSetToDefault()).isTrue();
 
         assertEquals("incorrect number of calls for " + param.getClass().getName(), 1, adjustmentListener.getNumCalled());
     }
@@ -127,7 +127,7 @@ public class FilterParamTest {
     public void testCopyAndSetState() {
         try {
             ParamState paramState = param.copyState();
-            assertNotNull(paramState);
+            assertThat(paramState).isNotNull();
             param.setState(paramState);
         } catch (UnsupportedOperationException e) {
             // It is OK to throw this exception
@@ -137,7 +137,7 @@ public class FilterParamTest {
 
     @Test
     public void testSimpleMethods() {
-        assertEquals("Param Name", param.getName());
+        assertThat(param.getName()).isEqualTo("Param Name");
 
 
         JComponent gui = param.createGUI();
@@ -150,17 +150,17 @@ public class FilterParamTest {
         param.setEnabled(false, APP_LOGIC);
         assertFalse(param.getClass().getName() + " was enabled", gui.isEnabled());
         param.setEnabled(true, APP_LOGIC);
-        assertTrue(gui.isEnabled());
+        assertThat(gui.isEnabled()).isTrue();
 
         param.setEnabled(false, FINAL_ANIMATION_SETTING);
         if (param.canBeAnimated()) {
-            assertTrue(gui.isEnabled());
+            assertThat(gui.isEnabled()).isTrue();
         } else {
             assertFalse(param.getClass().getName() + " was enabled", gui.isEnabled());
         }
 
         param.setEnabled(true, FINAL_ANIMATION_SETTING);
-        assertTrue(gui.isEnabled());
+        assertThat(gui.isEnabled()).isTrue();
 
         checkThatFilterWasNotCalled();
     }

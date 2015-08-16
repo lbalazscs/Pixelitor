@@ -21,11 +21,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class RandomFilterSourceTest {
     private RandomFilterSource source;
@@ -47,7 +43,7 @@ public class RandomFilterSourceTest {
     public void testNewSource() {
         checkHasNeitherPreviousOrNext();
 
-        assertNull(source.getLastFilter());
+        assertThat(source.getLastFilter()).isNull();
     }
 
     @Test
@@ -56,8 +52,8 @@ public class RandomFilterSourceTest {
         checkHasNeitherPreviousOrNext();
 
         Filter lastFilter = source.getLastFilter();
-        assertNotNull(lastFilter);
-        assertEquals(lastFilter, one);
+        assertThat(lastFilter).isNotNull();
+        assertThat(one).isEqualTo(lastFilter);
     }
 
     @Test
@@ -124,31 +120,31 @@ public class RandomFilterSourceTest {
         if (!prev.equals(filter)) {
             System.out.println("RandomFilterSourceTest::checkPreviousIs: source = " + source);
         }
-        assertEquals(filter, prev);
+        assertThat(prev).isEqualTo(filter);
     }
 
     private void checkNextIs(Filter filter) {
         Filter next = source.getNext();
-        assertEquals(filter, next);
+        assertThat(next).isEqualTo(filter);
     }
 
     private void checkHasNextButNoPrevious() {
-        assertFalse(source.hasPrevious());
-        assertTrue(source.hasNext());
+        assertThat(source.hasPrevious()).isFalse();
+        assertThat(source.hasNext()).isTrue();
     }
 
     private void checkHasNeitherPreviousOrNext() {
-        assertFalse(source.hasPrevious());
-        assertFalse(source.hasNext());
+        assertThat(source.hasPrevious()).isFalse();
+        assertThat(source.hasNext()).isFalse();
     }
 
     private void checkHasPreviousButNoNext() {
-        assertTrue(source.hasPrevious());
-        assertFalse(source.hasNext());
+        assertThat(source.hasPrevious()).isTrue();
+        assertThat(source.hasNext()).isFalse();
     }
 
     private void checkHasBothPreviousAndNext() {
-        assertTrue(source.hasPrevious());
-        assertTrue(source.hasNext());
+        assertThat(source.hasPrevious()).isTrue();
+        assertThat(source.hasNext()).isTrue();
     }
 }

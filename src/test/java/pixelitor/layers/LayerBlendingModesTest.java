@@ -15,7 +15,7 @@ import pixelitor.utils.UpdateGUI;
 import java.awt.Color;
 import java.awt.Font;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static pixelitor.Composition.fromImage;
 import static pixelitor.utils.ImageUtils.create1x1Image;
 
@@ -161,100 +161,100 @@ public class LayerBlendingModesTest {
     protected void testBlendingMode(BlendingMode blendingMode, Color expectedColor) {
         // check that the blending mode is working as expected
         upperLayer.setBlendingMode(blendingMode, UpdateGUI.NO, AddToHistory.YES, true);
-        assertEquals(expectedColor, getResultingColor());
+        assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // a white mask for the upper layer should change nothing
         upperLayer.addMask(LayerMaskAddType.REVEAL_ALL);
-        assertEquals(expectedColor, getResultingColor());
+        assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // a white mask for the lower layer should change nothing
         lowerLayer.addMask(LayerMaskAddType.REVEAL_ALL);
-        assertEquals(expectedColor, getResultingColor());
+        assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // upper layer with a black mask: expect lower color
         upperLayer.deleteMask(AddToHistory.YES, false);
         upperLayer.addMask(LayerMaskAddType.HIDE_ALL);
-        assertEquals(lowerColor, getResultingColor());
+        assertThat(getResultingColor()).isEqualTo(lowerColor);
         upperLayer.deleteMask(AddToHistory.YES, false);
 
         // adding an invert adjustment should deliver the inverted color
         Color inverted = invert(expectedColor);
         comp.addLayerNoGUI(invertAdjustment);
-        assertEquals(3, comp.getNrLayers());
-        assertEquals(inverted, getResultingColor());
+        assertThat(comp.getNrLayers()).isEqualTo(3);
+        assertThat(getResultingColor()).isEqualTo(inverted);
 
         // adding a white mask to the adjustment should change nothing
         invertAdjustment.addMask(LayerMaskAddType.REVEAL_ALL);
-        assertEquals(inverted, getResultingColor());
+        assertThat(getResultingColor()).isEqualTo(inverted);
 
         // with a black mask, the adjustment should have no effect
         invertAdjustment.deleteMask(AddToHistory.YES, false);
         invertAdjustment.addMask(LayerMaskAddType.HIDE_ALL);
-        assertEquals(expectedColor, getResultingColor());
+        assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // merging down the invert adjustment with black mask should have no effect
         comp.mergeDown(UpdateGUI.NO);
-        assertEquals(expectedColor, getResultingColor());
+        assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // adding a no-op adjustment layer should change nothing
         AdjustmentLayer noOpAdjustment = new AdjustmentLayer(comp, "No-op", new NoOpFilter());
         comp.addLayerNoGUI(noOpAdjustment);
-        assertEquals(expectedColor, getResultingColor());
+        assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // merging down the no-op adjustment with black mask should have no effect
         comp.mergeDown(UpdateGUI.NO);
-        assertEquals(expectedColor, getResultingColor());
+        assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // remove the upper layer
         comp.removeLayer(upperLayer, AddToHistory.YES, UpdateGUI.NO);
-        assertEquals(1, comp.getNrLayers());
+        assertThat(comp.getNrLayers()).isEqualTo(1);
 
         // test the blending mode with an OneColorFilter that outputs the upper color
         comp.addLayerNoGUI(alwaysUpperColorAdjustment);
         alwaysUpperColorAdjustment.setBlendingMode(blendingMode, UpdateGUI.NO, AddToHistory.YES, true);
-        assertEquals(expectedColor, getResultingColor());
+        assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // adjustment layer with with white mask
         alwaysUpperColorAdjustment.addMask(LayerMaskAddType.REVEAL_ALL);
-        assertEquals(expectedColor, getResultingColor());
+        assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // adjustment layer with with black mask, expect lower color
         alwaysUpperColorAdjustment.deleteMask(AddToHistory.YES, false);
         alwaysUpperColorAdjustment.addMask(LayerMaskAddType.HIDE_ALL);
-        assertEquals(lowerColor, getResultingColor());
+        assertThat(getResultingColor()).isEqualTo(lowerColor);
 
         // merging down the adjustment with black mask should have no effect
         comp.mergeDown(UpdateGUI.NO);
-        assertEquals(lowerColor, getResultingColor());
-        assertEquals(1, comp.getNrLayers());
+        assertThat(getResultingColor()).isEqualTo(lowerColor);
+        assertThat(comp.getNrLayers()).isEqualTo(1);
 
         // test with text layer
         comp.addLayerNoGUI(upperColorTextLayer);
         upperColorTextLayer.setBlendingMode(blendingMode, UpdateGUI.NO, AddToHistory.YES, true);
-        assertEquals(expectedColor, getResultingColor());
+        assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // text layer with white mask
         upperColorTextLayer.addMask(LayerMaskAddType.REVEAL_ALL);
-        assertEquals(expectedColor, getResultingColor());
+        assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // text layer with with black mask, expect lower color
         upperColorTextLayer.deleteMask(AddToHistory.YES, false);
         upperColorTextLayer.addMask(LayerMaskAddType.HIDE_ALL);
-        assertEquals(lowerColor, getResultingColor());
+        assertThat(getResultingColor()).isEqualTo(lowerColor);
 
         // merging down the text layer with black mask should have no effect
         comp.mergeDown(UpdateGUI.NO);
-        assertEquals(lowerColor, getResultingColor());
-        assertEquals(1, comp.getNrLayers());
+        assertThat(getResultingColor()).isEqualTo(lowerColor);
+        assertThat(comp.getNrLayers()).isEqualTo(1);
 
         // merging down the upper layer should result in the expected color
         comp.addLayerNoGUI(upperLayer);
-        assertEquals(2, comp.getNrLayers());
+        assertThat(comp.getNrLayers()).isEqualTo(2);
         upperLayer.setBlendingMode(blendingMode, UpdateGUI.NO, AddToHistory.YES, true);
-        assertEquals(expectedColor, getResultingColor());
+        assertThat(getResultingColor()).isEqualTo(expectedColor);
         comp.mergeDown(UpdateGUI.NO);
-        assertEquals(expectedColor, getResultingColor());
-        assertEquals(1, comp.getNrLayers());
+        assertThat(getResultingColor()).isEqualTo(expectedColor);
+        assertThat(comp.getNrLayers()).isEqualTo(1);
     }
 
     private TextLayer createTestTextLayerWithColor(Color color) {

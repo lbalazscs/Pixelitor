@@ -32,8 +32,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 
 public class CompositionCreationTest {
@@ -42,28 +42,28 @@ public class CompositionCreationTest {
     public void testNewImage() {
         Composition comp = NewImage.createNewComposition(FillType.WHITE, 20, 20, "New Image");
         comp.checkInvariant();
-        assertEquals(1, comp.getNrLayers());
-        assertEquals(20, comp.getCanvasWidth());
-        assertEquals(20, comp.getCanvasHeight());
-        assertNotNull(comp.getCompositeImage());
+        assertThat(comp.getNrLayers()).isEqualTo(1);
+        assertThat(comp.getCanvasWidth()).isEqualTo(20);
+        assertThat(comp.getCanvasHeight()).isEqualTo(20);
+        assertThat(comp.getCompositeImage()).isNotNull();
     }
 
     private static void testSingleLayerRead(File f) {
         Composition comp = OpenSaveManager.createCompositionFromFile(f);
         comp.checkInvariant();
-        assertEquals(1, comp.getNrLayers());
-        assertEquals(10, comp.getCanvasWidth());
-        assertEquals(10, comp.getCanvasHeight());
-        assertNotNull(comp.getCompositeImage());
+        assertThat(comp.getNrLayers()).isEqualTo(1);
+        assertThat(comp.getCanvasWidth()).isEqualTo(10);
+        assertThat(comp.getCanvasHeight()).isEqualTo(10);
+        assertThat(comp.getCompositeImage()).isNotNull();
     }
 
     private static Composition testMultiLayerRead(File f, Consumer<Layer> checkSecondLayer) {
         Composition comp = OpenSaveManager.createCompositionFromFile(f);
         comp.checkInvariant();
-        assertEquals(2, comp.getNrLayers());
-        assertEquals(10, comp.getCanvasWidth());
-        assertEquals(10, comp.getCanvasHeight());
-        assertNotNull(comp.getCompositeImage());
+        assertThat(comp.getNrLayers()).isEqualTo(2);
+        assertThat(comp.getCanvasWidth()).isEqualTo(10);
+        assertThat(comp.getCanvasHeight()).isEqualTo(10);
+        assertThat(comp.getCompositeImage()).isNotNull();
 
         Layer secondLayer = comp.getLayer(1);
         checkSecondLayer.accept(secondLayer);
@@ -125,7 +125,7 @@ public class CompositionCreationTest {
         extraChecks.add(secondLayer -> {
             assert !secondLayer.hasMask();
             assert secondLayer instanceof TextLayer;
-            assertEquals("T", ((TextLayer) secondLayer).getSettings().getText());
+            assertThat(((TextLayer) secondLayer).getSettings().getText()).isEqualTo("T");
         });
         // extra check for pxc with adjustment layer
         extraChecks.add(secondLayer -> {

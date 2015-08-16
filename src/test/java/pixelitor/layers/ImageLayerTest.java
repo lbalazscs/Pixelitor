@@ -31,12 +31,9 @@ import java.awt.AlphaComposite;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
 import static pixelitor.ChangeReason.OP_PREVIEW;
 
 public class ImageLayerTest {
@@ -60,7 +57,7 @@ public class ImageLayerTest {
     @Test
     public void testGetImage() {
         BufferedImage image = layer.getImage();
-        assertNotNull(image);
+        assertThat(image).isNotNull();
     }
 
     @Test
@@ -71,20 +68,20 @@ public class ImageLayerTest {
     @Test
     public void testStartPreviewing() {
         layer.startPreviewing();
-        assertEquals(ImageLayer.State.PREVIEW, layer.getState());
+        assertThat(layer.getState()).isEqualTo(ImageLayer.State.PREVIEW);
     }
 
     @Test
     public void testOkPressedInDialog() {
         layer.startPreviewing(); // make sure that the layer is in PREVIEW mode
         layer.okPressedInDialog("filterName");
-        assertEquals(ImageLayer.State.NORMAL, layer.getState());
+        assertThat(layer.getState()).isEqualTo(ImageLayer.State.NORMAL);
     }
 
     @Test(expected = AssertionError.class)
     public void testCancelPressedInDialog_Fail() {
         layer.cancelPressedInDialog();
-        assertEquals(ImageLayer.State.NORMAL, layer.getState());
+        assertThat(layer.getState()).isEqualTo(ImageLayer.State.NORMAL);
     }
 
     @Test
@@ -92,19 +89,19 @@ public class ImageLayerTest {
         layer.startPreviewing(); // make sure that the layer is in PREVIEW mode
 
         layer.cancelPressedInDialog();
-        assertEquals(ImageLayer.State.NORMAL, layer.getState());
+        assertThat(layer.getState()).isEqualTo(ImageLayer.State.NORMAL);
     }
 
     @Test
     public void testTweenCalculatingStarted() {
         layer.tweenCalculatingStarted();
-        assertEquals(ImageLayer.State.PREVIEW, layer.getState());
+        assertThat(layer.getState()).isEqualTo(ImageLayer.State.PREVIEW);
     }
 
     @Test(expected = AssertionError.class)
     public void testTweenCalculatingEnded_Fail() {
         layer.tweenCalculatingEnded();
-        assertEquals(ImageLayer.State.NORMAL, layer.getState());
+        assertThat(layer.getState()).isEqualTo(ImageLayer.State.NORMAL);
     }
 
     @Test
@@ -112,13 +109,13 @@ public class ImageLayerTest {
         layer.tweenCalculatingStarted(); // make sure that the layer is in PREVIEW mode
 
         layer.tweenCalculatingEnded();
-        assertEquals(ImageLayer.State.NORMAL, layer.getState());
+        assertThat(layer.getState()).isEqualTo(ImageLayer.State.NORMAL);
     }
 
     @Test(expected = IllegalStateException.class)
     public void testChangePreviewImage_Fail() {
         layer.changePreviewImage(TestHelper.createTestImage(), "filterName", OP_PREVIEW);
-        assertEquals(ImageLayer.State.PREVIEW, layer.getState());
+        assertThat(layer.getState()).isEqualTo(ImageLayer.State.PREVIEW);
     }
 
     @Test
@@ -126,7 +123,7 @@ public class ImageLayerTest {
         layer.startPreviewing(); // make sure that the layer is in PREVIEW mode
 
         layer.changePreviewImage(TestHelper.createTestImage(), "filterName", OP_PREVIEW);
-        assertEquals(ImageLayer.State.PREVIEW, layer.getState());
+        assertThat(layer.getState()).isEqualTo(ImageLayer.State.PREVIEW);
     }
 
     @Test
@@ -135,7 +132,7 @@ public class ImageLayerTest {
         for (ChangeReason changeReason : values) {
             layer.filterWithoutDialogFinished(TestHelper.createTestImage(),
                     changeReason, "opName");
-            assertEquals(ImageLayer.State.NORMAL, layer.getState());
+            assertThat(layer.getState()).isEqualTo(ImageLayer.State.NORMAL);
         }
     }
 
@@ -150,7 +147,7 @@ public class ImageLayerTest {
     @Test
     public void testGetImageBounds() {
         Rectangle bounds = layer.getImageBounds();
-        assertNotNull(bounds);
+        assertThat(bounds).isNotNull();
     }
 
     @Test
@@ -166,15 +163,15 @@ public class ImageLayerTest {
     @Test
     public void testGetImageForFilterDialogs() {
         BufferedImage image = layer.getImageForFilterDialogs();
-        assertNotNull(image);
+        assertThat(image).isNotNull();
     }
 
     @Test
     public void testCreateTmpDrawingLayer() {
         TmpDrawingLayer tmpDrawingLayer1 = layer.createTmpDrawingLayer(AlphaComposite.SrcOver, true);
-        assertNotNull(tmpDrawingLayer1);
+        assertThat(tmpDrawingLayer1).isNotNull();
         TmpDrawingLayer tmpDrawingLayer2 = layer.createTmpDrawingLayer(AlphaComposite.SrcOver, false);
-        assertNotNull(tmpDrawingLayer2);
+        assertThat(tmpDrawingLayer2).isNotNull();
     }
 
     @Test
@@ -185,14 +182,14 @@ public class ImageLayerTest {
     @Test
     public void testCreateCompositionSizedTmpImage() {
         BufferedImage image = layer.createCompositionSizedTmpImage();
-        assertNotNull(image);
+        assertThat(image).isNotNull();
     }
 
     @Test
     public void testGetCanvasSizedSubImage() {
         // TODO would be better with translation
         BufferedImage image = layer.getCanvasSizedSubImage();
-        assertNotNull(image);
+        assertThat(image).isNotNull();
         Canvas canvas = layer.getComp().getCanvas();
         assert image.getWidth() == canvas.getWidth();
         assert image.getHeight() == canvas.getHeight();
@@ -201,22 +198,22 @@ public class ImageLayerTest {
     @Test
     public void testGetFilterSourceImage() {
         BufferedImage image = layer.getFilterSourceImage();
-        assertNotNull(image);
+        assertThat(image).isNotNull();
     }
 
     @Test
     public void testGetImageOrSubImageIfSelected() {
         BufferedImage imageTT = layer.getImageOrSubImageIfSelected(true, true);
-        assertNotNull(imageTT);
+        assertThat(imageTT).isNotNull();
 
         BufferedImage imageTF = layer.getImageOrSubImageIfSelected(true, false);
-        assertNotNull(imageTF);
+        assertThat(imageTF).isNotNull();
 
         BufferedImage imageFT = layer.getImageOrSubImageIfSelected(false, true);
-        assertNotNull(imageFT);
+        assertThat(imageFT).isNotNull();
 
         BufferedImage imageFF = layer.getImageOrSubImageIfSelected(false, false);
-        assertNotNull(imageFF);
+        assertThat(imageFF).isNotNull();
     }
 
     @Test
@@ -225,10 +222,10 @@ public class ImageLayerTest {
         Selection selection = layer.getComp().getSelection().get();
 
         BufferedImage imageT = layer.getSelectionSizedPartFrom(TestHelper.createTestImage(), selection, true);
-        assertNotNull(imageT);
+        assertThat(imageT).isNotNull();
 
         BufferedImage imageF = layer.getSelectionSizedPartFrom(TestHelper.createTestImage(), selection, false);
-        assertNotNull(imageF);
+        assertThat(imageF).isNotNull();
     }
 
     @Test
@@ -239,18 +236,18 @@ public class ImageLayerTest {
     @Test
     public void testDuplicate() {
         ImageLayer duplicate = layer.duplicate();
-        assertNotNull(duplicate);
+        assertThat(duplicate).isNotNull();
 
         BufferedImage image = layer.getImage();
         BufferedImage duplicateImage = duplicate.getImage();
 
         assertNotSame(duplicateImage, image);
-        assertEquals(duplicateImage.getWidth(), image.getWidth());
-        assertEquals(duplicateImage.getHeight(), image.getHeight());
+        assertThat(image.getWidth()).isEqualTo(duplicateImage.getWidth());
+        assertThat(image.getHeight()).isEqualTo(duplicateImage.getHeight());
 
-        assertEquals(layer.getImageBounds(), duplicate.getImageBounds());
+        assertThat(duplicate.getImageBounds()).isEqualTo(layer.getImageBounds());
         assertSame(layer.getBlendingMode(), duplicate.getBlendingMode());
-        assertThat(duplicate.getOpacity(), is(layer.getOpacity()));
+        assertThat(duplicate.getOpacity()).isEqualTo(layer.getOpacity());
     }
 
 }

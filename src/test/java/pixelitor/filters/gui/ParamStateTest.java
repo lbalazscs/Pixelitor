@@ -27,7 +27,7 @@ import java.util.Collection;
 
 import static java.awt.Color.BLUE;
 import static java.awt.Color.RED;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
 
 @RunWith(Parameterized.class)
@@ -73,12 +73,12 @@ public class ParamStateTest {
     @Test
     public void testInterpolate() {
         ParamState interpolated = start.interpolate(end, 0.0);
-        assertNotNull(interpolated);
+        assertThat(interpolated).isNotNull();
 
         interpolated = start.interpolate(end, 0.5);
-        assertNotNull(interpolated);
+        assertThat(interpolated).isNotNull();
 
         interpolated = start.interpolate(end, 1.0);
-        assertNotNull(interpolated);
+        assertThat(interpolated).isNotNull();
     }
 }

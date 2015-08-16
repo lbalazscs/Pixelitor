@@ -24,8 +24,7 @@ import pixelitor.utils.ReseedSupport;
 
 import java.awt.Rectangle;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ParamSetTest {
     private ParamSet params;
@@ -79,8 +78,7 @@ public class ParamSetTest {
 
     @Test
     public void testCanBeAnimated() {
-        boolean b = params.canBeAnimated();
-        assertTrue(b);
+        assertThat(params.canBeAnimated()).isTrue();
     }
 
     @Test
@@ -93,15 +91,14 @@ public class ParamSetTest {
 
     @Test
     public void testHasGradient() {
-        boolean b = params.hasGradient();
-        assertTrue(b);
+        assertThat(params.hasGradient()).isTrue();
     }
 
     private void checkThatFilterWasNotCalled() {
-        assertEquals(0, adjustmentListener.getNumCalled());
+        assertThat(adjustmentListener.getNumCalled()).isEqualTo(0);
     }
 
     private void checkThatFilterWasCalled(int n) {
-        assertEquals(n, adjustmentListener.getNumCalled());
+        assertThat(adjustmentListener.getNumCalled()).isEqualTo(n);
     }
 }

@@ -27,12 +27,8 @@ import pixelitor.utils.UpdateGUI;
 
 import java.awt.Rectangle;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 public class LayerTest {
     private Composition comp;
@@ -47,40 +43,40 @@ public class LayerTest {
     @Test
     public void testSetVisible() {
         LayerButton layerButton = layer1.getLayerButton();
-        assertThat(layer1.isVisible(), is(true));
-        assertThat(layerButton.isVisibilityChecked(), is(true));
+        assertThat(layer1.isVisible()).isTrue();
+        assertThat(layerButton.isVisibilityChecked()).isTrue();
 
         layer1.setVisible(false, AddToHistory.YES);
-        assertThat(layer1.isVisible(), is(false));
-        assertThat(layerButton.isVisibilityChecked(), is(false));
+        assertThat(layer1.isVisible()).isFalse();
+        assertThat(layerButton.isVisibilityChecked()).isFalse();
 
         History.undo();
-        assertThat(layer1.isVisible(), is(true));
-        assertThat(layerButton.isVisibilityChecked(), is(true));
+        assertThat(layer1.isVisible()).isTrue();
+        assertThat(layerButton.isVisibilityChecked()).isTrue();
 
         History.redo();
-        assertThat(layer1.isVisible(), is(false));
-        assertThat(layerButton.isVisibilityChecked(), is(false));
+        assertThat(layer1.isVisible()).isFalse();
+        assertThat(layerButton.isVisibilityChecked()).isFalse();
     }
 
     @Test
     public void testGetDuplicateLayerName() {
         String name = layer1.getDuplicateLayerName();
-        assertEquals("layer 1 copy", name);
+        assertThat(name).isEqualTo("layer 1 copy");
     }
 
     @Test
     public void testSetOpacity() {
-        assertThat(layer1.getOpacity(), is(1.0f));
+        assertThat(layer1.getOpacity()).isEqualTo(1.0f);
 
         layer1.setOpacity(0.7f, UpdateGUI.YES, AddToHistory.YES, true);
-        assertThat(layer1.getOpacity(), is(0.7f));
+        assertThat(layer1.getOpacity()).isEqualTo(0.7f);
 
         History.undo();
-        assertThat(layer1.getOpacity(), is(1.0f));
+        assertThat(layer1.getOpacity()).isEqualTo(1.0f);
 
         History.redo();
-        assertThat(layer1.getOpacity(), is(0.7f));
+        assertThat(layer1.getOpacity()).isEqualTo(0.7f);
     }
 
     @Test
@@ -99,27 +95,27 @@ public class LayerTest {
 
     @Test
     public void testSetName() {
-        assertEquals("layer 1", layer1.getName());
+        assertThat(layer1.getName()).isEqualTo("layer 1");
 
         layer1.setName("newName", AddToHistory.YES);
-        assertEquals("newName", layer1.getName());
+        assertThat(layer1.getName()).isEqualTo("newName");
 
         History.undo();
-        assertEquals("layer 1", layer1.getName());
+        assertThat(layer1.getName()).isEqualTo("layer 1");
         History.redo();
-        assertEquals("newName", layer1.getName());
+        assertThat(layer1.getName()).isEqualTo("newName");
     }
 
     @Test
     public void testMakeActive() {
-        assertFalse(layer1.isActive());
+        assertThat(layer1.isActive()).isFalse();
         layer1.makeActive(AddToHistory.YES);
-        assertTrue(layer1.isActive());
+        assertThat(layer1.isActive()).isTrue();
 
         History.undo();
-        assertFalse(layer1.isActive());
+        assertThat(layer1.isActive()).isFalse();
         History.redo();
-        assertTrue(layer1.isActive());
+        assertThat(layer1.isActive()).isTrue();
     }
 
     @Test
@@ -143,8 +139,8 @@ public class LayerTest {
 
     @Test
     public void testDragFinished() {
-        assertEquals(0, comp.getLayerIndex(layer1));
+        assertThat(comp.getLayerIndex(layer1)).isEqualTo(0);
         layer1.dragFinished(1);
-        assertEquals(1, comp.getLayerIndex(layer1));
+        assertThat(comp.getLayerIndex(layer1)).isEqualTo(1);
     }
 }

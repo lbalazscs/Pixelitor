@@ -54,6 +54,9 @@ public class Crop implements CompAction {
         for (int i = 0; i < nrLayers; i++) {
             Layer layer = comp.getLayer(i);
             layer.crop(cropRect);
+            if (layer.hasMask()) {
+                layer.getMask().crop(cropRect);
+            }
         }
 
         MultiLayerEdit edit = new MultiLayerEdit(comp, "Crop", backup);

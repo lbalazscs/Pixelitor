@@ -4,6 +4,7 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
+import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
@@ -83,14 +84,14 @@ public class Assertions {
         return translationIs(layer, x, y);
     }
 
-    public static boolean translationIs(ImageLayer layer, int x, int y) {
+    public static boolean translationIs(ContentLayer layer, int x, int y) {
         if (layer == null) {
             throw new IllegalArgumentException();
         }
         boolean eq1 = layer.getTranslationX() == x;
         boolean eq2 = layer.getTranslationY() == y;
-        assert eq1 : "expected x = " + x + ", found = " + layer.getTranslationX();
-        assert eq2 : "expected y = " + y + ", found = " + layer.getTranslationY();
+        assert eq1 : "expected x = " + x + ", found = " + layer.getTranslationX() + " for " + layer.getName();
+        assert eq2 : "expected y = " + y + ", found = " + layer.getTranslationY() + " for " + layer.getName();
         return eq1 && eq2;
     }
 

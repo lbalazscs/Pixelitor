@@ -19,7 +19,7 @@ package pixelitor.filters.gui;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class IntChoiceParamTest {
     @Test
@@ -32,7 +32,7 @@ public class IntChoiceParamTest {
         }, true);
         for (int i = 0; i < 10; i++) {
             param.randomize();
-            assertEquals(1, param.getValue());
+            assertThat(param.getValue()).isEqualTo(1);
         }
     }
 

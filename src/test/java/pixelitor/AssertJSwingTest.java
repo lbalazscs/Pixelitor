@@ -75,9 +75,6 @@ import static java.awt.event.KeyEvent.VK_SHIFT;
 import static java.awt.event.KeyEvent.VK_Z;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static pixelitor.utils.test.Assertions.canvasSizeIs;
 import static pixelitor.utils.test.Assertions.hasSelection;
 import static pixelitor.utils.test.Assertions.noSelection;
@@ -465,7 +462,7 @@ public class AssertJSwingTest {
     }
 
     private void testExportTweeningAnimation() {
-        assertTrue(ImageComponents.getActiveComp().isPresent());
+        assertThat(ImageComponents.getActiveComp().isPresent()).isTrue();
         runMenuCommand("Export Tweening Animation...");
         DialogFixture dialog = findDialogByTitle("Export Tweening Animation");
         dialog.comboBox().selectItem("Angular Waves");
@@ -484,11 +481,11 @@ public class AssertJSwingTest {
     }
 
     private void testClose() {
-        assertEquals(2, ImageComponents.getNrOfOpenImages());
+        assertThat(ImageComponents.getNrOfOpenImages()).isEqualTo(2);
 
         runMenuCommand("Close");
 
-        assertEquals(1, ImageComponents.getNrOfOpenImages());
+        assertThat(ImageComponents.getNrOfOpenImages()).isEqualTo(1);
     }
 
     private void testCloseAll() {
@@ -516,7 +513,7 @@ public class AssertJSwingTest {
             }
         }
 
-        assertEquals(0, ImageComponents.getNrOfOpenImages());
+        assertThat(ImageComponents.getNrOfOpenImages()).isEqualTo(0);
 
         // restore for the next test
         runMenuCommand("Paste as New Image");
@@ -537,7 +534,7 @@ public class AssertJSwingTest {
         FileChoosers.setLastOpenDir(INPUT_DIR);
         FileChoosers.setLastSaveDir(BATCH_FILTER_OUTPUT_DIR);
 
-        assertTrue(ImageComponents.getActiveComp().isPresent());
+        assertThat(ImageComponents.getActiveComp().isPresent()).isTrue();
         runMenuCommand("Batch Filter...");
         DialogFixture dialog = findDialogByTitle("Batch Filter");
         dialog.comboBox("filtersCB").selectItem("Angular Waves");
@@ -756,17 +753,17 @@ public class AssertJSwingTest {
         JButtonFixture backButton = findButtonByText(dialog, "Back");
         JButtonFixture forwardButton = findButtonByText(dialog, "Forward");
 
-        assertTrue(nextRandomButton.isEnabled());
-        assertFalse(backButton.isEnabled());
-        assertFalse(forwardButton.isEnabled());
+        assertThat(nextRandomButton.isEnabled()).isTrue();
+        assertThat(backButton.isEnabled()).isFalse();
+        assertThat(forwardButton.isEnabled()).isFalse();
 
         nextRandomButton.click();
-        assertTrue(backButton.isEnabled());
-        assertFalse(forwardButton.isEnabled());
+        assertThat(backButton.isEnabled()).isTrue();
+        assertThat(forwardButton.isEnabled()).isFalse();
 
         nextRandomButton.click();
         backButton.click();
-        assertTrue(forwardButton.isEnabled());
+        assertThat(forwardButton.isEnabled()).isTrue();
 
         backButton.click();
         forwardButton.click();

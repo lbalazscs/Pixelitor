@@ -19,7 +19,7 @@ package pixelitor.filters.gui;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
 
 public class RangeParamTest {
@@ -28,7 +28,7 @@ public class RangeParamTest {
         RangeParam param = new RangeParam("Test", 0, 1000, 100, true, NONE, true);
         for (int i = 0; i < 5; i++) {
             param.randomize();
-            assertEquals(100, param.getValue());
+            assertThat(param.getValue()).isEqualTo(100);
         }
     }
 

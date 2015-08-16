@@ -44,7 +44,7 @@ public class TestFilterPerformance {
             }
             sumSeconds += seconds;
         }
-        System.out.println(String.format("   min = %.2f, average = %.2f", minSeconds, sumSeconds/ NUM_TESTS_PER_FILTER));
+        System.out.println(String.format("   min = %.2f, average = %.2f", minSeconds, sumSeconds / NUM_TESTS_PER_FILTER));
         System.exit(0);
     }
 

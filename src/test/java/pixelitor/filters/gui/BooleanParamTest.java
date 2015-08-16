@@ -19,7 +19,7 @@ package pixelitor.filters.gui;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class BooleanParamTest {
     @Test
@@ -27,7 +27,7 @@ public class BooleanParamTest {
         BooleanParam param = new BooleanParam("Test", true, true);
         for (int i = 0; i < 10; i++) {
             param.randomize();
-            assertTrue(param.isChecked());
+            assertThat(param.isChecked()).isTrue();
         }
     }
 }

@@ -26,9 +26,7 @@ import pixelitor.history.ContentLayerMoveEdit;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ContentLayerTest {
     private Composition comp;
@@ -42,48 +40,48 @@ public class ContentLayerTest {
 
     @Test
     public void testLayerMovingMethods() {
-        assertEquals(0, layer.getTranslationX());
-        assertEquals(0, layer.getTranslationY());
+        assertThat(layer.getTranslationX()).isEqualTo(0);
+        assertThat(layer.getTranslationY()).isEqualTo(0);
 
         layer.startMovement();
 
-        assertEquals(0, layer.getTranslationX());
-        assertEquals(0, layer.getTranslationY());
+        assertThat(layer.getTranslationX()).isEqualTo(0);
+        assertThat(layer.getTranslationY()).isEqualTo(0);
 
         layer.moveWhileDragging(2, 2);
 
-        assertEquals(2, layer.getTranslationX());
-        assertEquals(2, layer.getTranslationY());
+        assertThat(layer.getTranslationX()).isEqualTo(2);
+        assertThat(layer.getTranslationY()).isEqualTo(2);
 
         layer.moveWhileDragging(3, 3);
 
-        assertEquals(3, layer.getTranslationX());
-        assertEquals(3, layer.getTranslationY());
+        assertThat(layer.getTranslationX()).isEqualTo(3);
+        assertThat(layer.getTranslationY()).isEqualTo(3);
 
         layer.endMovement();
 
         // the layer was enlarged in endMovement, and the translation reset to 0, 0
-        assertEquals(0, layer.getTranslationX());
-        assertEquals(0, layer.getTranslationY());
+        assertThat(layer.getTranslationX()).isEqualTo(0);
+        assertThat(layer.getTranslationY()).isEqualTo(0);
 
         layer.startMovement();
         layer.moveWhileDragging(-1, -2);
 
-        assertEquals(-1, layer.getTranslationX());
-        assertEquals(-2, layer.getTranslationY());
+        assertThat(layer.getTranslationX()).isEqualTo(-1);
+        assertThat(layer.getTranslationY()).isEqualTo(-2);
 
         layer.endMovement();
 
         // this time the layer was not enlarged
-        assertEquals(-1, layer.getTranslationX());
-        assertEquals(-2, layer.getTranslationY());
+        assertThat(layer.getTranslationX()).isEqualTo(-1);
+        assertThat(layer.getTranslationY()).isEqualTo(-2);
     }
 
     @Test
     // this method is abstract in ImageLayer, test separately for subclasses
     public void testCreateTranslateEdit() {
         ContentLayerMoveEdit edit = layer.createMovementEdit(5, 5);
-        assertNotNull(edit);
+        assertThat(edit).isNotNull();
     }
 
     @Test
@@ -98,10 +96,10 @@ public class ContentLayerTest {
         BufferedImage image = TestHelper.createTestImage();
 
         BufferedImage resultImage = layer.applyLayer(g2, true, image);
-        assertNull(resultImage); // content layers return null
+        assertThat(resultImage).isNull(); // content layers return null
 
         resultImage = layer.applyLayer(g2, false, image);
-        assertNull(resultImage); // content layers return null
+        assertThat(resultImage).isNull(); // content layers return null
     }
 
     @Test

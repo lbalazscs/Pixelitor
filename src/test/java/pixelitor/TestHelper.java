@@ -56,7 +56,7 @@ public class TestHelper {
         c.addLayerNoGUI(layer1);
         c.addLayerNoGUI(layer2);
 
-        if(addMasks) {
+        if (addMasks) {
             layer1.addMask(LayerMaskAddType.REVEAL_ALL);
             layer2.addMask(LayerMaskAddType.REVEAL_ALL);
         }
