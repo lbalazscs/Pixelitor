@@ -40,7 +40,7 @@ public class BooleanParam extends AbstractFilterParam {
     }
 
     public BooleanParam(String name, boolean defaultValue, boolean ignoreRandomize, boolean addDefaultButton) {
-        super(name);
+        super(name, ignoreRandomize);
         this.defaultValue = defaultValue;
         currentValue = defaultValue;
         this.ignoreRandomize = ignoreRandomize;

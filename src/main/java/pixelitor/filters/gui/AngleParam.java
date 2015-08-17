@@ -37,7 +37,7 @@ public class AngleParam extends AbstractFilterParam {
     private final EventListenerList listenerList = new EventListenerList();
 
     public AngleParam(String name, double defaultValue) {
-        super(name);
+        super(name, false);
 
         setValueInRadians(defaultValue, false);
 

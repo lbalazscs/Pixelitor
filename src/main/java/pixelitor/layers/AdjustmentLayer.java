@@ -47,7 +47,7 @@ public class AdjustmentLayer extends Layer {
     @Override
     public Layer duplicate() {
         // TODO operation  should be copied so that it can be adjusted independently
-        AdjustmentLayer d = new AdjustmentLayer(comp, name, filter);
+        AdjustmentLayer d = new AdjustmentLayer(comp, getDuplicateLayerName(), filter);
 
         if (hasMask()) {
             d.addMaskBack(mask.duplicate(d));
@@ -75,4 +75,14 @@ public class AdjustmentLayer extends Layer {
     public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(getClass().getSimpleName() + "{");
+        sb.append("filter=").append(filter == null ? "null filter" : filter.getName());
+        sb.append(", super=").append(super.toString());
+        sb.append('}');
+        return sb.toString();
+    }
+
 }

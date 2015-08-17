@@ -418,10 +418,10 @@ public class RobotTest {
             Utils.executeFilterWithBusyCursor(filter, ChangeReason.OP_PREVIEW, busyCursorParent);
         } catch (Throwable e) {
             BufferedImage src = imageLayer.getFilterSourceImage();
-            System.out.println(String.format(
-                    "RobotTest::randomTweenOperation: name = %s, width = %d, height = %d, params = %s",
-                    filterName, src.getWidth(), src.getHeight(), paramSet.toString()));
-            throw e;
+            String msg = String.format(
+                    "Exception in random tween: filter name = %s, srcWidth = %d, srcHeight = %d, isMaskEditing = %b, params = %s",
+                    filterName, src.getWidth(), src.getHeight(), imageLayer.isMaskEditing(), paramSet.toString());
+            throw new IllegalStateException(msg, e);
         }
 
         imageLayer.tweenCalculatingEnded();

@@ -49,7 +49,7 @@ public class CompositionTest {
 
     @Before
     public void setUp() {
-        comp = TestHelper.create2LayerTestComposition(true);
+        comp = TestHelper.create2LayerComposition(true);
         assertEquals("Composition{name='Test', activeLayer=layer 2, layerList=[" +
                 "ImageLayer{state=NORMAL, super={tx=0, ty=0, super={name='layer 1', visible=true, " +
                 "mask=ImageLayer{state=NORMAL, super={tx=0, ty=0, super={name='layer 1 MASK', visible=true, mask=null, maskEditing=false, maskEnabled=true, isAdjustment=false}}}, maskEditing=false, maskEnabled=true, isAdjustment=false}}}, " +
@@ -107,32 +107,32 @@ public class CompositionTest {
     public void testAddLayerNoGUI() {
         tester.checkLayers("[layer 1, ACTIVE layer 2]");
 
-        ImageLayer newLayer = TestHelper.createTestImageLayer("layer 3", comp);
+        ImageLayer newLayer = TestHelper.createImageLayer("layer 3", comp);
         comp.addLayerNoGUI(newLayer);
         tester.checkLayers("[layer 1, layer 2, ACTIVE layer 3]");
-        tester.checkDirty(true);
+        tester.checkDirty(false);
     }
 
     @Test
     public void testAddLayer() {
         // add bellow active
-        comp.addLayer(TestHelper.createTestImageLayer("layer A", comp),
+        comp.addLayer(TestHelper.createImageLayer("layer A", comp),
                 AddToHistory.YES, true, true);
         tester.checkLayers("[layer 1, ACTIVE layer A, layer 2]");
         tester.checkDirty(true);
 
         // add above active
-        comp.addLayer(TestHelper.createTestImageLayer("layer B", comp),
+        comp.addLayer(TestHelper.createImageLayer("layer B", comp),
                 AddToHistory.YES, true, false);
         tester.checkLayers("[layer 1, layer A, ACTIVE layer B, layer 2]");
 
         // add to position 0
-        comp.addLayer(TestHelper.createTestImageLayer("layer C", comp),
+        comp.addLayer(TestHelper.createImageLayer("layer C", comp),
                 AddToHistory.YES, true, 0);
         tester.checkLayers("[ACTIVE layer C, layer 1, layer A, layer B, layer 2]");
 
         // add to position 2
-        comp.addLayer(TestHelper.createTestImageLayer("layer D", comp),
+        comp.addLayer(TestHelper.createImageLayer("layer D", comp),
                 AddToHistory.YES, true, 2);
         tester.checkLayers("[layer C, layer 1, ACTIVE layer D, layer A, layer B, layer 2]");
 
@@ -178,7 +178,7 @@ public class CompositionTest {
 
     @Test
     public void testFilterWithoutDialogFinished() {
-        BufferedImage image = TestHelper.createTestImage();
+        BufferedImage image = TestHelper.createImage();
         comp.filterWithoutDialogFinished(image, ChangeReason.OP_WITHOUT_DIALOG, "opName");
         comp.checkInvariant();
     }

@@ -17,25 +17,34 @@
 
 package pixelitor;
 
+import pixelitor.filters.painters.TextSettings;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.LayerMaskAddType;
+import pixelitor.layers.TextLayer;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.util.Random;
 
 public class TestHelper {
     public static final int sizeX = 20;
     public static final int sizeY = 10;
 
-    public static ImageLayer createTestImageLayer(String layerName, Composition comp) {
-        BufferedImage image = createTestImage();
+    public static ImageLayer createImageLayer(String layerName, Composition comp) {
+        BufferedImage image = createImage();
         ImageLayer layer = new ImageLayer(comp, image, layerName, null);
 //        comp.addLayerNoGUI(layer);
 
         return layer;
     }
 
-    public static Composition createEmptyTestComposition() {
+    public static TextLayer createTextLayer(Composition comp, String name) {
+        TextLayer textLayer = new TextLayer(comp, name);
+        textLayer.setSettings(TextSettings.createRandomSettings(new Random()));
+        return textLayer;
+    }
+
+    public static Composition createEmptyComposition() {
         ImageDisplayStub imageDisplayStub = new ImageDisplayStub();
 
         Composition comp = Composition.empty(sizeX, sizeY);
@@ -47,11 +56,11 @@ public class TestHelper {
         return comp;
     }
 
-    public static Composition create2LayerTestComposition(boolean addMasks) {
-        Composition c = createEmptyTestComposition();
+    public static Composition create2LayerComposition(boolean addMasks) {
+        Composition c = createEmptyComposition();
 
-        ImageLayer layer1 = createTestImageLayer("layer 1", c);
-        ImageLayer layer2 = createTestImageLayer("layer 2", c);
+        ImageLayer layer1 = createImageLayer("layer 1", c);
+        ImageLayer layer2 = createImageLayer("layer 2", c);
 
         c.addLayerNoGUI(layer1);
         c.addLayerNoGUI(layer2);
@@ -70,11 +79,11 @@ public class TestHelper {
         return c;
     }
 
-    public static BufferedImage createTestImage() {
+    public static BufferedImage createImage() {
         return new BufferedImage(sizeX, sizeY, BufferedImage.TYPE_INT_ARGB);
     }
 
     public static Graphics2D createGraphics() {
-        return createTestImage().createGraphics();
+        return createImage().createGraphics();
     }
 }

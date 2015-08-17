@@ -207,7 +207,8 @@ public class ImageLayer extends ContentLayer {
     @Override
     public ImageLayer duplicate() {
         BufferedImage imageCopy = ImageUtils.copyImage(image);
-        ImageLayer d = new ImageLayer(comp, imageCopy, getDuplicateLayerName(), null);
+        String duplicateLayerName = getDuplicateLayerName();
+        ImageLayer d = new ImageLayer(comp, imageCopy, duplicateLayerName, null);
         d.setOpacity(opacity, UpdateGUI.NO, AddToHistory.NO, true);
         d.setTranslation(translationX, translationY);
         d.setBlendingMode(blendingMode, UpdateGUI.NO, AddToHistory.NO, true);
@@ -1037,7 +1038,7 @@ public class ImageLayer extends ContentLayer {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("ImageLayer{");
+        final StringBuilder sb = new StringBuilder(getClass().getSimpleName() + "{");
         sb.append("state=").append(state);
         sb.append(", super=").append(super.toString());
         sb.append('}');

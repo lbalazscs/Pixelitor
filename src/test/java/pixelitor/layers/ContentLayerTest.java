@@ -19,23 +19,54 @@ package pixelitor.layers;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.history.ContentLayerMoveEdit;
+import pixelitor.testutils.WithMask;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
+import java.util.Collection;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Tests the functionality common to all ContentLayer subclasses
+ */
+@RunWith(Parameterized.class)
 public class ContentLayerTest {
-    private Composition comp;
     private ContentLayer layer;
+    private WithMask withMask;
+
+    @Parameterized.Parameters
+    public static Collection<Object[]> instancesToTest() {
+        Composition comp = TestHelper.createEmptyComposition();
+
+        return Arrays.asList(new Object[][]{
+                {new ImageLayer(comp, "layer 1"), WithMask.NO},
+                {new ImageLayer(comp, "layer 1"), WithMask.YES},
+                {TestHelper.createTextLayer(comp, "layer 1"), WithMask.NO},
+                {TestHelper.createTextLayer(comp, "layer 1"), WithMask.YES},
+        });
+    }
+
+    public ContentLayerTest(ContentLayer layer, WithMask withMask) {
+        this.layer = layer;
+        this.withMask = withMask;
+    }
 
     @Before
     public void setUp() {
-        comp = TestHelper.createEmptyTestComposition();
-        layer = TestHelper.createTestImageLayer("imageLayer 1", comp);
+        Composition comp = layer.getComp();
+        comp.testOnlyRemoveAllLayers();
+        comp.addLayerNoGUI(layer);
+
+        withMask.init(layer);
+
+        assert comp.getNrLayers() == 1 : "found " + comp.getNrLayers() + " layers";
     }
 
     @Test
@@ -60,21 +91,50 @@ public class ContentLayerTest {
 
         layer.endMovement();
 
-        // the layer was enlarged in endMovement, and the translation reset to 0, 0
-        assertThat(layer.getTranslationX()).isEqualTo(0);
-        assertThat(layer.getTranslationY()).isEqualTo(0);
+        checkTranslationAfterPositiveDrag();
 
         layer.startMovement();
         layer.moveWhileDragging(-1, -2);
 
-        assertThat(layer.getTranslationX()).isEqualTo(-1);
-        assertThat(layer.getTranslationY()).isEqualTo(-2);
+        checkTranslationAfterNegativeDrag();
 
         layer.endMovement();
 
-        // this time the layer was not enlarged
-        assertThat(layer.getTranslationX()).isEqualTo(-1);
-        assertThat(layer.getTranslationY()).isEqualTo(-2);
+        // No change:
+        // ImageLayer: this time the layer was not enlarged
+        // TextLayer: endMovement does not change the tmpTranslation + translation sum
+        checkTranslationAfterNegativeDrag();
+
+        // TODO should have undo
+//        History.undo();
+//        checkTranslationAfterPositiveDrag();
+//        History.undo();
+//        assertThat(layer.getTranslationX()).isEqualTo(0);
+//        assertThat(layer.getTranslationY()).isEqualTo(0);
+    }
+
+    private void checkTranslationAfterPositiveDrag() {
+        if (layer instanceof ImageLayer) {
+            // the layer was enlarged in endMovement, and the translation reset to 0, 0
+            assertThat(layer.getTranslationX()).isEqualTo(0);
+            assertThat(layer.getTranslationY()).isEqualTo(0);
+        } else if (layer instanceof TextLayer) {
+            // text layers can have positive translations
+            assertThat(layer.getTranslationX()).isEqualTo(3);
+            assertThat(layer.getTranslationY()).isEqualTo(3);
+        } else {
+            throw new IllegalStateException("unexpected layer " + layer.getClass().getName());
+        }
+    }
+
+    private void checkTranslationAfterNegativeDrag() {
+        if (layer instanceof ImageLayer) {
+            assertThat(layer.getTranslationX()).isEqualTo(-1);
+            assertThat(layer.getTranslationY()).isEqualTo(-2);
+        } else if (layer instanceof TextLayer) {
+            assertThat(layer.getTranslationX()).isEqualTo(2);
+            assertThat(layer.getTranslationY()).isEqualTo(1);
+        }
     }
 
     @Test
@@ -85,25 +145,20 @@ public class ContentLayerTest {
     }
 
     @Test
-    // this method is abstract in ImageLayer, test separately for subclasses
     public void testEnlargeCanvas() {
         layer.enlargeCanvas(5, 5, 5, 10);
     }
 
     @Test
-    public void testPaintLayer() {
+    public void testApplyLayer() {
         Graphics2D g2 = TestHelper.createGraphics();
-        BufferedImage image = TestHelper.createTestImage();
+        BufferedImage image = TestHelper.createImage();
 
-        BufferedImage resultImage = layer.applyLayer(g2, true, image);
-        assertThat(resultImage).isNull(); // content layers return null
-
-        resultImage = layer.applyLayer(g2, false, image);
-        assertThat(resultImage).isNull(); // content layers return null
+        layer.applyLayer(g2, true, image);
+        layer.applyLayer(g2, false, image);
     }
 
     @Test
-    // this method is abstract in ImageLayer, test separately for subclasses
     public void testPaintLayerOnGraphics() {
         Graphics2D g2 = TestHelper.createGraphics();
         layer.paintLayerOnGraphics(g2, false);

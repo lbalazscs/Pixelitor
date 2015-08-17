@@ -32,7 +32,7 @@ public class TextParam extends AbstractFilterParam {
     private final TextParamGUI gui;
 
     public TextParam(String name, String defaultValue) {
-        super(name);
+        super(name, false);
         this.defaultValue = defaultValue;
         gui = new TextParamGUI(this, defaultValue, adjustmentListener);
     }

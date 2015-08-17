@@ -53,7 +53,11 @@ public class TextLayer extends ContentLayer {
     private TextSettings settings;
 
     public TextLayer(Composition comp) {
-        super(comp, "", null);
+        this(comp, "");
+    }
+
+    public TextLayer(Composition comp, String name) {
+        super(comp, name, null);
 
         painter = new TranslatedTextPainter();
     }
@@ -96,7 +100,7 @@ public class TextLayer extends ContentLayer {
 
     @Override
     public Layer duplicate() {
-        TextLayer d = new TextLayer(comp);
+        TextLayer d = new TextLayer(comp, getDuplicateLayerName());
 
         d.translationX = translationX;
         d.translationY = translationY;
@@ -105,7 +109,6 @@ public class TextLayer extends ContentLayer {
                 painter.getTranslationY());
 
         d.setSettings(new TextSettings(settings));
-        d.setName(getName() + " Copy", AddToHistory.NO);
 
         if (hasMask()) {
             d.addMaskBack(mask.duplicate(d));
@@ -271,4 +274,14 @@ public class TextLayer extends ContentLayer {
 //        setTranslationX(getTranslationX() - selectionBounds.x);
 //        setTranslationY(getTranslationY() - selectionBounds.y);
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(getClass().getSimpleName() + "{");
+        sb.append("text=").append(settings == null ? "null settings" : settings.getText());
+        sb.append(", super=").append(super.toString());
+        sb.append('}');
+        return sb.toString();
+    }
+
 }

@@ -1,6 +1,7 @@
 package pixelitor.filters.comp;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -9,13 +10,15 @@ import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.history.History;
 import pixelitor.layers.ImageLayer;
+import pixelitor.testutils.NumLayers;
+import pixelitor.testutils.WithSelection;
+import pixelitor.testutils.WithTranslation;
 
 import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.Collection;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
 import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
 import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_180;
@@ -43,6 +46,7 @@ public class MultiLayerEditTests {
     @Parameterized.Parameters
     public static Collection<Object[]> instancesToTest() {
         return Arrays.asList(new Object[][]{
+                // TODO add a WithMask parameter
                 {NumLayers.MORE, WithTranslation.NO, WithSelection.NO},
                 {NumLayers.ONE, WithTranslation.NO, WithSelection.NO},
 //                {NumLayers.ONE, WithTranslation.YES, WithSelection.NO},
@@ -50,15 +54,20 @@ public class MultiLayerEditTests {
         });
     }
 
+    @BeforeClass
+    public static void initTests() {
+        History.setUndoLevels(10);
+    }
+
     @Before
     public void setUp() {
-        comp = TestHelper.create2LayerTestComposition(true);
-        assertEquals("Composition{name='Test', activeLayer=layer 2, layerList=[" +
+        comp = TestHelper.create2LayerComposition(true);
+        assertThat(comp.toString()).isEqualTo("Composition{name='Test', activeLayer=layer 2, layerList=[" +
                 "ImageLayer{state=NORMAL, super={tx=0, ty=0, super={name='layer 1', visible=true, " +
                 "mask=ImageLayer{state=NORMAL, super={tx=0, ty=0, super={name='layer 1 MASK', visible=true, mask=null, maskEditing=false, maskEnabled=true, isAdjustment=false}}}, maskEditing=false, maskEnabled=true, isAdjustment=false}}}, " +
                 "ImageLayer{state=NORMAL, super={tx=0, ty=0, super={name='layer 2', visible=true, " +
                 "mask=ImageLayer{state=NORMAL, super={tx=0, ty=0, super={name='layer 2 MASK', visible=true, mask=null, maskEditing=false, maskEnabled=true, isAdjustment=false}}}, maskEditing=false, maskEnabled=true, isAdjustment=false}}}], " +
-                "canvas=Canvas{width=20, height=10}, selection=null, dirty=false}", comp.toString());
+                "canvas=Canvas{width=20, height=10}, selection=null, dirty=false}");
         tester = new CompTester(comp);
         tester.checkDirty(false);
 
@@ -68,8 +77,6 @@ public class MultiLayerEditTests {
         numLayers.init(tester);
         withTranslation.init(tester);
         withSelection.init(tester);
-
-        History.setUndoLevels(10);
     }
 
     @Test
@@ -77,7 +84,6 @@ public class MultiLayerEditTests {
         // check original
         Rectangle origSelection = null;
         if (withSelection == WithSelection.YES) {
-            tester.setStandardTestSelection();
             origSelection = tester.getStandardTestSelectionShape();
         }
 
@@ -121,7 +127,7 @@ public class MultiLayerEditTests {
         comp.checkInvariant();
         tester.checkDirty(true);
 
-        if (numLayers == NumLayers.ONE) {
+        if (numLayers.canUndo()) {
             History.undo();
             tester.checkCanvasSize(20, 10);
             tester.checkActiveLayerAndMaskImageSize(20, 10);
@@ -182,7 +188,7 @@ public class MultiLayerEditTests {
         }
 
         // test undo with one layer
-        if (numLayers == NumLayers.ONE) {
+        if (numLayers.canUndo()) {
             History.undo();
             expectedState = "{canvasWidth=10, canvasHeight=5, tx=0, ty=0, imgWidth=10, imgHeight=5}";
             assertThat(layer1.toDebugCanvasString()).isEqualTo(expectedState);
@@ -216,8 +222,7 @@ public class MultiLayerEditTests {
         }
 
         // test undo with one layer
-        if (numLayers == NumLayers.ONE) {
-
+        if (numLayers.canUndo()) {
             String origState = "{canvasWidth=10, canvasHeight=20, tx=0, ty=0, imgWidth=10, imgHeight=20}";
             assertThat(layer1.toDebugCanvasString()).isEqualTo(origState);
 
@@ -243,29 +248,33 @@ public class MultiLayerEditTests {
                 assertThat(layer1.toDebugCanvasString()).isEqualTo(origState);
             }
         }
-
-        // test with selection
-
-        // TODO
     }
 
     @Test
     public void testFlip() {
         String expectedState = "{canvasWidth=20, canvasHeight=10, tx=0, ty=0, imgWidth=20, imgHeight=10}";
         assertThat(layer1.toDebugCanvasString()).isEqualTo(expectedState);
-        assertThat(layer2.toDebugCanvasString()).isEqualTo(expectedState);
+        if (numLayers == NumLayers.MORE) {
+            assertThat(layer2.toDebugCanvasString()).isEqualTo(expectedState);
+        }
 
-        // test that both layers are flipped
+        // test horizontal flip
         new Flip(HORIZONTAL).process(comp);
-        // no change
+        // expect no change
         assertThat(layer1.toDebugCanvasString()).isEqualTo(expectedState);
-        assertThat(layer2.toDebugCanvasString()).isEqualTo(expectedState);
-        new Flip(VERTICAL).process(comp);
-        // no change
-        assertThat(layer1.toDebugCanvasString()).isEqualTo(expectedState);
-        assertThat(layer2.toDebugCanvasString()).isEqualTo(expectedState);
+        if (numLayers == NumLayers.MORE) {
+            assertThat(layer2.toDebugCanvasString()).isEqualTo(expectedState);
+        }
 
-        if (numLayers == NumLayers.ONE) {
+        // test vertical flip
+        new Flip(VERTICAL).process(comp);
+        // expect no change
+        assertThat(layer1.toDebugCanvasString()).isEqualTo(expectedState);
+        if (numLayers == NumLayers.MORE) {
+            assertThat(layer2.toDebugCanvasString()).isEqualTo(expectedState);
+        }
+
+        if (numLayers.canUndo()) {
             assertThat(layer1.toDebugCanvasString()).isEqualTo(expectedState);
             new Flip(HORIZONTAL).process(comp);
             new Flip(VERTICAL).process(comp);
@@ -297,16 +306,13 @@ public class MultiLayerEditTests {
         }
 
         // test undo with one layer
-        if (numLayers == NumLayers.ONE) {
+        if (numLayers.canUndo()) {
             History.undo();
             assertThat(layer1.toDebugCanvasString()).isEqualTo(initialState);
 
             History.redo();
             assertThat(layer1.toDebugCanvasString()).isEqualTo(afterCropState);
         }
-
-        // TODO
-        // test with translation
 
         // TODO
         // test selection crop with selection

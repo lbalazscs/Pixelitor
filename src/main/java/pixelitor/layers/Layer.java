@@ -124,7 +124,7 @@ public abstract class Layer implements Serializable {
         this.layerButton = layerButton;
     }
 
-    String getDuplicateLayerName() {
+    protected String getDuplicateLayerName() {
         String copyString = "copy"; // could be longer or shorter in other languages
         int copyStringLength = copyString.length();
 

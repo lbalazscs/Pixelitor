@@ -287,7 +287,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
         ImageComponents.repaintActive();
     }
 
-    public void imageComponentResized(ImageComponent ic) {
+    public void icResized(ImageComponent ic) {
         if (transformSupport != null && lastCropRect != null && state == TRANSFORM) {
             transformSupport.setComponentSpaceRect(ic.fromImageToComponentSpace(lastCropRect));
         }

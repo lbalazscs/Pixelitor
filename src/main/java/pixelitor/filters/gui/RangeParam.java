@@ -54,7 +54,6 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     private ChangeEvent changeEvent = null;
     private final EventListenerList listenerList = new EventListenerList();
-    private boolean ignoreRandomize;
     private boolean adjustMaxAccordingToImage = false;
     private double maxToImageSizeRatio;
 
@@ -67,8 +66,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     public RangeParam(String name, int minValue, int maxValue, int defaultValue, boolean addDefaultButtons, SliderSpinner.TextPosition position, boolean ignoreRandomize) {
-        super(name);
-        this.ignoreRandomize = ignoreRandomize;
+        super(name, ignoreRandomize);
 
         assert minValue < maxValue : name + ": minValue (" + minValue + ") >= maxValue (" + maxValue + ')';
         assert defaultValue >= minValue : name + ": defaultValue (" + defaultValue + ") < minValue (" + minValue + ')';

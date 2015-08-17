@@ -33,7 +33,7 @@ public class ColorParam extends AbstractFilterParam {
     private final OpacitySetting opacitySetting;
 
     public ColorParam(String name, Color defaultColor, OpacitySetting opacitySetting) {
-        super(name);
+        super(name, false);
 
         this.defaultColor = defaultColor;
         this.color = defaultColor;

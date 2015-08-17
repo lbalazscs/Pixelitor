@@ -42,8 +42,8 @@ public class ImageLayerTest {
 
     @Before
     public void setUp() {
-        comp = TestHelper.createEmptyTestComposition();
-        layer = TestHelper.createTestImageLayer("layer 1", comp);
+        comp = TestHelper.createEmptyComposition();
+        layer = TestHelper.createImageLayer("layer 1", comp);
         comp.addLayerNoGUI(layer);
 
         assert layer.getComp().checkInvariant();
@@ -62,7 +62,7 @@ public class ImageLayerTest {
 
     @Test
     public void testSetImage() {
-        layer.setImage(TestHelper.createTestImage());
+        layer.setImage(TestHelper.createImage());
     }
 
     @Test
@@ -114,7 +114,7 @@ public class ImageLayerTest {
 
     @Test(expected = IllegalStateException.class)
     public void testChangePreviewImage_Fail() {
-        layer.changePreviewImage(TestHelper.createTestImage(), "filterName", OP_PREVIEW);
+        layer.changePreviewImage(TestHelper.createImage(), "filterName", OP_PREVIEW);
         assertThat(layer.getState()).isEqualTo(ImageLayer.State.PREVIEW);
     }
 
@@ -122,7 +122,7 @@ public class ImageLayerTest {
     public void testChangePreviewImage_OK() {
         layer.startPreviewing(); // make sure that the layer is in PREVIEW mode
 
-        layer.changePreviewImage(TestHelper.createTestImage(), "filterName", OP_PREVIEW);
+        layer.changePreviewImage(TestHelper.createImage(), "filterName", OP_PREVIEW);
         assertThat(layer.getState()).isEqualTo(ImageLayer.State.PREVIEW);
     }
 
@@ -130,7 +130,7 @@ public class ImageLayerTest {
     public void testFilterWithoutDialogFinished() {
         ChangeReason[] values = ChangeReason.values();
         for (ChangeReason changeReason : values) {
-            layer.filterWithoutDialogFinished(TestHelper.createTestImage(),
+            layer.filterWithoutDialogFinished(TestHelper.createImage(),
                     changeReason, "opName");
             assertThat(layer.getState()).isEqualTo(ImageLayer.State.NORMAL);
         }
@@ -138,9 +138,9 @@ public class ImageLayerTest {
 
     @Test
     public void testChangeImageUndoRedo() {
-        layer.changeImageUndoRedo(TestHelper.createTestImage(),
+        layer.changeImageUndoRedo(TestHelper.createImage(),
                 IgnoreSelection.NO);
-        layer.changeImageUndoRedo(TestHelper.createTestImage(),
+        layer.changeImageUndoRedo(TestHelper.createImage(),
                 IgnoreSelection.YES);
     }
 
@@ -221,10 +221,10 @@ public class ImageLayerTest {
         layer.getComp().createSelectionFromShape(new Rectangle(2, 2, 10, 10));
         Selection selection = layer.getComp().getSelection().get();
 
-        BufferedImage imageT = layer.getSelectionSizedPartFrom(TestHelper.createTestImage(), selection, true);
+        BufferedImage imageT = layer.getSelectionSizedPartFrom(TestHelper.createImage(), selection, true);
         assertThat(imageT).isNotNull();
 
-        BufferedImage imageF = layer.getSelectionSizedPartFrom(TestHelper.createTestImage(), selection, false);
+        BufferedImage imageF = layer.getSelectionSizedPartFrom(TestHelper.createImage(), selection, false);
         assertThat(imageF).isNotNull();
     }
 

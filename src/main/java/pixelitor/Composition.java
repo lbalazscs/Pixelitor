@@ -184,7 +184,9 @@ public class Composition implements Serializable {
     public void addLayerNoGUI(Layer newLayer) {
         layerList.add(newLayer); // adds it to top, ignoring the active layer position
         setActiveLayer(newLayer, AddToHistory.NO);
-        dirty = true;
+
+        // doesn't set the dirty flag because
+        // this method is used when adding the base layer
     }
 
     public void addLayer(Layer newLayer, AddToHistory addToHistory, boolean updateHistogram, boolean bellowActive) {
@@ -979,6 +981,11 @@ public class Composition implements Serializable {
         private boolean isUpdateHistogram() {
             return updateHistogram;
         }
+    }
+
+    // this method violates the class invariant!
+    public void testOnlyRemoveAllLayers() {
+        layerList.clear();
     }
 
     @Override

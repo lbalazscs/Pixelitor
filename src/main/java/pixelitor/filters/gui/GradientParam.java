@@ -50,7 +50,7 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     public GradientParam(String name, float[] defaultThumbPositions, Color[] defaultColors, boolean ignoreRandomize) {
-        super(name);
+        super(name, ignoreRandomize);
         this.defaultThumbPositions = defaultThumbPositions;
         this.defaultColors = defaultColors;
         this.ignoreRandomize = ignoreRandomize;

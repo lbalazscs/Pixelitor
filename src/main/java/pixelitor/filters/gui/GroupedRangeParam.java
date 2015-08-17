@@ -60,7 +60,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements RangeBased
     }
 
     public GroupedRangeParam(String name, RangeParam[] params, boolean linked) {
-        super(name);
+        super(name, false);
         rangeParams = params;
 
         checkBoxModel = new JToggleButton.ToggleButtonModel();

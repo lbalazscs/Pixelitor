@@ -34,11 +34,11 @@ public class ImagePositionParam extends AbstractFilterParam {
     private float defaultRelativeY = 0.5f;
 
     public ImagePositionParam(String name) {
-        super(name);
+        super(name, false);
     }
 
     public ImagePositionParam(String name, float relativeX, float relativeY) {
-        super(name);
+        super(name, false);
         this.relativeX = relativeX;
         this.relativeY = relativeY;
         defaultRelativeX  = relativeX;

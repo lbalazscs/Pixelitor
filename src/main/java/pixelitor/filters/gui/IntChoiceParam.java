@@ -43,15 +43,13 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
     private Value currentChoice;
 
     private final EventListenerList listenerList = new EventListenerList();
-    private final boolean ignoreRandomize;
 
     public IntChoiceParam(String name, Value[] choices) {
         this(name, choices, false);
     }
 
     public IntChoiceParam(String name, Value[] choices, boolean ignoreRandomize) {
-        super(name);
-        this.ignoreRandomize = ignoreRandomize;
+        super(name, ignoreRandomize);
 
         choicesList.addAll(Arrays.asList(choices));
 

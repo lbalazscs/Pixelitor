@@ -23,6 +23,7 @@ import pixelitor.Composition;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
 import pixelitor.PixelitorWindow;
+import pixelitor.layers.Layer;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
@@ -122,7 +123,21 @@ public abstract class Filter extends AbstractAction {
 
 //        Utils.debugImage(src, "src");
 
-        BufferedImage dest = executeForOneLayer(src);
+        BufferedImage dest = null;
+        try {
+            dest = executeForOneLayer(src);
+        } catch (Exception e) {
+            Layer activeLayer = comp.getActiveLayer();
+            String msg = String.format(
+                    "Error while executing the filter '%s'\n" +
+                            "composition = '%s'\n" +
+                            "layer = '%s'\n" +
+                            "mask editing = '%b'",
+                    getName(), comp.getName(),
+                    activeLayer.getName(), activeLayer.isMaskEditing());
+            throw new IllegalStateException(msg, e);
+        }
+
         assert dest != null;
 
         if (changeReason.isPreview()) {

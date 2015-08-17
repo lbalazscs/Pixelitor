@@ -28,9 +28,11 @@ public abstract class AbstractFilterParam implements FilterParam {
     private boolean enabledByAnimationSetting = true;
     private boolean enabledByFilterLogic = true;
     protected ParamGUI paramGUI;
+    protected boolean ignoreRandomize;
 
-    AbstractFilterParam(String name) {
+    AbstractFilterParam(String name, boolean ignoreRandomize) {
         this.name = Objects.requireNonNull(name);
+        this.ignoreRandomize = ignoreRandomize;
     }
 
     @Override
@@ -71,4 +73,8 @@ public abstract class AbstractFilterParam implements FilterParam {
         }
     }
 
+    @Override
+    public boolean ignoresRandomize() {
+        return ignoreRandomize;
+    }
 }

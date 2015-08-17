@@ -42,6 +42,10 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
 import static pixelitor.filters.gui.FilterGUIComponent.EnabledReason.APP_LOGIC;
 import static pixelitor.filters.gui.FilterGUIComponent.EnabledReason.FINAL_ANIMATION_SETTING;
 
+/**
+ * Checks whether different FilterParam implementations implement
+ * the FilterParam contract correctly
+ */
 @RunWith(Parameterized.class)
 public class FilterParamTest {
     private FilterParam param;
@@ -61,6 +65,7 @@ public class FilterParamTest {
     public static Collection<Object[]> instancesToTest() {
         return Arrays.asList(new Object[][]{
                 {new RangeParam("Param Name", 0, 10, 0)},
+                {new RangeParam("Param Name", 0, 10, 5).setIgnoreRandomize(true)},
                 {new RangeWithColorsParam(CYAN, RED, "Param Name", -100, 100, 0)},
                 {new GroupedRangeParam("Param Name", 0, 100, 0, true)},
                 {new GroupedRangeParam("Param Name", 0, 100, 0, false)},
@@ -109,7 +114,13 @@ public class FilterParamTest {
 
     @Test
     public void testResetTrue() {
-        // make sure that randomize changes the value
+        if (param.ignoresRandomize()) {
+            // we can change the value in a general way only
+            // through randomize
+            return;
+        }
+
+        // wait until randomize changes the value
         boolean changed = false;
         while (!changed) {
             param.randomize();
@@ -138,7 +149,6 @@ public class FilterParamTest {
     @Test
     public void testSimpleMethods() {
         assertThat(param.getName()).isEqualTo("Param Name");
-
 
         JComponent gui = param.createGUI();
         param.considerImageSize(new Rectangle(0, 0, 1000, 600));

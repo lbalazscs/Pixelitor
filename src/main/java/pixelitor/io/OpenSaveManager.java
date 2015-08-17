@@ -159,9 +159,9 @@ public class OpenSaveManager {
         Utils.executeWithBusyCursor(r);
     }
 
-    public static void warnAndCloseImage(ImageComponent imageComponent) {
+    public static void warnAndCloseImage(ImageComponent ic) {
         try {
-            Composition comp = imageComponent.getComp();
+            Composition comp = ic.getComp();
             if (comp.isDirty()) {
                 Object[] options = {"Save",
                         "Don't Save",
@@ -173,17 +173,17 @@ public class OpenSaveManager {
                 if (answer == JOptionPane.YES_OPTION) { // save
                     boolean fileSaved = OpenSaveManager.save(comp, false);
                     if (fileSaved) {
-                        imageComponent.close();
+                        ic.close();
                     }
                 } else if (answer == JOptionPane.NO_OPTION) { // don't save
-                    imageComponent.close();
+                    ic.close();
                 } else if (answer == JOptionPane.CANCEL_OPTION) { // cancel
                     // do nothing
                 } else { // dialog closed by pressing X
                     // do nothing
                 }
             } else {
-                imageComponent.close();
+                ic.close();
             }
         } catch (Exception ex) {
             Dialogs.showExceptionDialog(ex);

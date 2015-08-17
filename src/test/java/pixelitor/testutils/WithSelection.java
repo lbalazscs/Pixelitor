@@ -1,23 +1,26 @@
-package pixelitor.filters.comp;
+package pixelitor.testutils;
 
 import pixelitor.CompTester;
 
 import java.awt.Rectangle;
 
-enum WithSelection {
+/**
+ * Whether there is a selection present when a test runs
+ */
+public enum WithSelection {
     YES {
         @Override
-        void init(CompTester tester) {
+        public void init(CompTester tester) {
             tester.setStandardTestSelection();
             Rectangle selectionShape = tester.getStandardTestSelectionShape();
             tester.checkSelectionBounds(selectionShape);
         }
     }, NO {
         @Override
-        void init(CompTester tester) {
+        public void init(CompTester tester) {
             // do nothing
         }
     };
 
-    abstract void init(CompTester tester);
+    public abstract void init(CompTester tester);
 }

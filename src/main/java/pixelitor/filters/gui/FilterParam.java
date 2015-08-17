@@ -36,4 +36,6 @@ public interface FilterParam extends FilterGUIComponent, Resettable {
     void setState(ParamState state);
 
     boolean canBeAnimated();
+
+    boolean ignoresRandomize();
 }

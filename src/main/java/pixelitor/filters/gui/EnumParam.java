@@ -34,7 +34,7 @@ public class EnumParam<E extends Enum<E>> extends AbstractFilterParam implements
     private final E defaultValue;
 
     public EnumParam(String name, Class<E> enumClass) {
-        super(name);
+        super(name, false);
         this.enumConstants = enumClass.getEnumConstants();
         defaultValue = enumConstants[0];
         delegateModel = new EnumComboBoxModel<>(enumClass);
