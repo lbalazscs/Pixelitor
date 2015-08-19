@@ -24,7 +24,6 @@ import org.junit.runners.Parameterized;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
-import pixelitor.filters.Invert;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.testutils.WithMask;
@@ -44,8 +43,10 @@ import static org.junit.Assert.assertSame;
 public class LayerTest {
     private static Composition comp;
 
-    private Layer layer1;
+    private Class layerClass;
     private WithMask withMask;
+
+    private Layer layer1;
 
     @Parameterized.Parameters
     public static Collection<Object[]> instancesToTest() {
@@ -54,22 +55,25 @@ public class LayerTest {
         comp = TestHelper.createEmptyComposition();
 
         return Arrays.asList(new Object[][]{
-                {new ImageLayer(comp, "layer 1"), WithMask.NO},
-                {new ImageLayer(comp, "layer 1"), WithMask.YES},
-                {TestHelper.createTextLayer(comp, "layer 1"), WithMask.NO},
-                {TestHelper.createTextLayer(comp, "layer 1"), WithMask.YES},
-                {new AdjustmentLayer(comp, "layer 1", new Invert()), WithMask.NO},
-                {new AdjustmentLayer(comp, "layer 1", new Invert()), WithMask.YES},
+                {ImageLayer.class, WithMask.NO},
+                {ImageLayer.class, WithMask.YES},
+                {TextLayer.class, WithMask.NO},
+                {TextLayer.class, WithMask.YES},
+                {AdjustmentLayer.class, WithMask.NO},
+                {AdjustmentLayer.class, WithMask.YES},
         });
     }
 
-    public LayerTest(Layer layer, WithMask withMask) {
-        this.layer1 = layer;
+    public LayerTest(Class layerClass, WithMask withMask) {
+        this.layerClass = layerClass;
         this.withMask = withMask;
     }
 
     @Before
     public void setUp() {
+        // make sure each test runs with a fresh Layer
+        layer1 = TestHelper.classToLayer(layerClass, comp);
+
         comp.testOnlyRemoveAllLayers();
         comp.addLayerNoGUI(layer1);
 
@@ -98,8 +102,6 @@ public class LayerTest {
         History.redo();
         assertThat(layer1.isVisible()).isFalse();
         assertThat(layerButton.isVisibilityChecked()).isFalse();
-
-        History.undo();
     }
 
     @Test
@@ -129,8 +131,6 @@ public class LayerTest {
 
         History.redo();
         assertThat(layer1.getOpacity()).isEqualTo(0.7f);
-
-        History.undo();
     }
 
     @Test
@@ -145,8 +145,6 @@ public class LayerTest {
 
         History.redo();
         assertSame(BlendingMode.DIFFERENCE, layer1.getBlendingMode());
-
-        History.undo();
     }
 
     @Test
@@ -164,8 +162,6 @@ public class LayerTest {
         History.redo();
         assertThat(layer1.getName()).isEqualTo("newName");
         assertThat(layer1.getLayerButton().getLayerName()).isEqualTo("newName");
-
-        History.undo();
     }
 
     @Test
@@ -184,7 +180,6 @@ public class LayerTest {
         assertThat(layer1.isActive()).isFalse();
         History.redo();
         assertThat(layer1.isActive()).isTrue();
-        History.undo();
     }
 
     @Test
@@ -225,8 +220,6 @@ public class LayerTest {
 
             History.redo();
             assertThat(layer1.hasMask()).isTrue();
-
-            History.undo();
         }
     }
 
@@ -242,8 +235,6 @@ public class LayerTest {
 
             History.redo();
             assertThat(layer1.hasMask()).isFalse();
-
-            History.undo();
         }
     }
 
@@ -261,8 +252,6 @@ public class LayerTest {
 
             History.redo();
             assertThat(layer1.isMaskEnabled()).isFalse();
-
-            History.undo();
         }
     }
 }

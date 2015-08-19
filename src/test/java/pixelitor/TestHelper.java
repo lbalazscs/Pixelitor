@@ -17,8 +17,11 @@
 
 package pixelitor;
 
+import pixelitor.filters.Invert;
 import pixelitor.filters.painters.TextSettings;
+import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMaskAddType;
 import pixelitor.layers.TextLayer;
 
@@ -85,5 +88,19 @@ public class TestHelper {
 
     public static Graphics2D createGraphics() {
         return createImage().createGraphics();
+    }
+
+    public static Layer classToLayer(Class layerClass, Composition comp) {
+        Layer layer;
+        if (layerClass.equals(ImageLayer.class)) {
+            layer = new ImageLayer(comp, "layer 1");
+        } else if (layerClass.equals(TextLayer.class)) {
+            layer = createTextLayer(comp, "layer 1");
+        } else if (layerClass.equals(AdjustmentLayer.class)) {
+            layer = new AdjustmentLayer(comp, "layer 1", new Invert());
+        } else {
+            throw new IllegalStateException();
+        }
+        return layer;
     }
 }

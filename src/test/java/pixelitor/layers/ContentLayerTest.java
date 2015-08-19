@@ -38,29 +38,35 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(Parameterized.class)
 public class ContentLayerTest {
-    private ContentLayer layer;
+    private static Composition comp;
+
+    private Class layerClass;
     private WithMask withMask;
+
+    private ContentLayer layer;
 
     @Parameterized.Parameters
     public static Collection<Object[]> instancesToTest() {
-        Composition comp = TestHelper.createEmptyComposition();
+        comp = TestHelper.createEmptyComposition();
 
         return Arrays.asList(new Object[][]{
-                {new ImageLayer(comp, "layer 1"), WithMask.NO},
-                {new ImageLayer(comp, "layer 1"), WithMask.YES},
-                {TestHelper.createTextLayer(comp, "layer 1"), WithMask.NO},
-                {TestHelper.createTextLayer(comp, "layer 1"), WithMask.YES},
+                {ImageLayer.class, WithMask.NO},
+                {ImageLayer.class, WithMask.YES},
+                {TextLayer.class, WithMask.NO},
+                {TextLayer.class, WithMask.YES},
         });
     }
 
-    public ContentLayerTest(ContentLayer layer, WithMask withMask) {
-        this.layer = layer;
+    public ContentLayerTest(Class layerClass, WithMask withMask) {
+        this.layerClass = layerClass;
         this.withMask = withMask;
     }
 
     @Before
     public void setUp() {
-        Composition comp = layer.getComp();
+        // make sure each test runs with a fresh Layer
+        layer = (ContentLayer) TestHelper.classToLayer(layerClass, comp);
+
         comp.testOnlyRemoveAllLayers();
         comp.addLayerNoGUI(layer);
 
