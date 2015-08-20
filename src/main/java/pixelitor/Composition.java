@@ -56,6 +56,7 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -367,7 +368,7 @@ public class Composition implements Serializable {
         layer.startMovement();
     }
 
-    public void moveActiveContentRelative(int relativeX, int relativeY) {
+    public void moveActiveContentRelative(double relativeX, double relativeY) {
         Layer layer = getActiveMaskOrLayer();
         layer.moveWhileDragging(relativeX, relativeY);
         imageChanged(FULL);
@@ -570,7 +571,7 @@ public class Composition implements Serializable {
         return dirty;
     }
 
-    public void updateRegion(int startX, int startY, int endX, int endY, int thickness) {
+    public void updateRegion(double startX, double startY, double endX, double endY, int thickness) {
         compositeImageUpToDate = false;
         ic.updateRegion(startX, startY, endX, endY, thickness);
     }
@@ -941,7 +942,10 @@ public class Composition implements Serializable {
         getActiveMaskOrImageLayer().setShowOriginal(b);
     }
 
-    public void cropSelection(Rectangle cropRect) {
+    /**
+     * Applies the cropping to the selection
+     */
+    public void cropSelection(Rectangle2D cropRect) {
         if (selection != null) {
             Shape currentShape = selection.getShape();
             Shape intersection = SelectionInteraction.INTERSECT.combine(currentShape, cropRect);

@@ -78,8 +78,8 @@ public class SmudgeTool extends DirectBrushTool {
     @Override
     public void mousePressed(MouseEvent e, ImageDisplay ic) {
         BufferedImage sourceImage = ic.getComp().getActiveMaskOrImageLayer().getImage();
-        int x = userDrag.getStartX();
-        int y = userDrag.getStartY();
+        double x = userDrag.getStartX();
+        double y = userDrag.getStartY();
         if (!e.isShiftDown()) { // not a line-click
             smudgeBrush.setSource(sourceImage, x, y, strengthParam.getValueAsPercentage());
         }

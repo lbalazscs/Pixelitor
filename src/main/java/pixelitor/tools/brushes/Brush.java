@@ -41,7 +41,7 @@ public interface Brush {
      * @param x        the x of the mouse event (NOT translated with the radius)
      * @param y        the y of the mouse event (NOT translated with the radius)
      */
-    void onDragStart(int x, int y);
+    void onDragStart(double x, double y);
 
     /**
      * A new drawing mouse event has been received;
@@ -49,7 +49,7 @@ public interface Brush {
      * @param x        the x of the mouse event (NOT translated with the radius)
      * @param y        the y of the mouse event (NOT translated with the radius)
      */
-    void onNewMousePoint(int x, int y);
+    void onNewMousePoint(double x, double y);
 
     default void dispose() {}
 }

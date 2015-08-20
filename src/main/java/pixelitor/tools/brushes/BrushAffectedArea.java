@@ -28,10 +28,10 @@ import java.awt.Rectangle;
  */
 public class BrushAffectedArea implements Brush {
     // affected area coordinates
-    private int minX = 0;
-    private int minY = 0;
-    private int maxX = 0;
-    private int maxY = 0;
+    private double minX = 0;
+    private double minY = 0;
+    private double maxX = 0;
+    private double maxY = 0;
 
     private Brush delegate;
 
@@ -43,7 +43,7 @@ public class BrushAffectedArea implements Brush {
     public BrushAffectedArea() {
     }
 
-    public void updateAffectedCoordinates(int x, int y) {
+    public void updateAffectedCoordinates(double x, double y) {
         if(x > maxX) {
             maxX = x;
         } else if(x < minX) {
@@ -57,7 +57,7 @@ public class BrushAffectedArea implements Brush {
         }
     }
 
-    public void initAffectedCoordinates(int x, int y) {
+    public void initAffectedCoordinates(double x, double y) {
         minX = x;
         minY = y;
         maxX = x;
@@ -72,11 +72,11 @@ public class BrushAffectedArea implements Brush {
         int radius2 = 2 * radius;
         int radius4 = 4 * radius;
 
-        int saveX = minX - radius2;
-        int saveY = minY - radius2;
-        int saveWidth = maxX - minX + radius4;
-        int saveHeight = maxY - minY + radius4;
-        Rectangle rectangleAffectedByBrush = new Rectangle(saveX, saveY, saveWidth, saveHeight);
+        double saveX = minX - radius2;
+        double saveY = minY - radius2;
+        double saveWidth = maxX - minX + radius4;
+        double saveHeight = maxY - minY + radius4;
+        Rectangle rectangleAffectedByBrush = new Rectangle((int) saveX, (int) saveY, (int) saveWidth, (int) saveHeight);
         return rectangleAffectedByBrush;
     }
 
@@ -91,13 +91,13 @@ public class BrushAffectedArea implements Brush {
     }
 
     @Override
-    public void onDragStart(int x, int y) {
+    public void onDragStart(double x, double y) {
         updateAffectedCoordinates(x, y);
         delegate.onDragStart(x, y);
     }
 
     @Override
-    public void onNewMousePoint(int x, int y) {
+    public void onNewMousePoint(double x, double y) {
         updateAffectedCoordinates(x, y);
         delegate.onNewMousePoint(x, y);
     }

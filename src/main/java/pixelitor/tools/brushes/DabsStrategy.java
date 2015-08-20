@@ -25,9 +25,9 @@ package pixelitor.tools.brushes;
  * between symmetry brushes, because they call back a specific brush.
  */
 public interface DabsStrategy {
-    void onDragStart(int x, int y);
+    void onDragStart(double x, double y);
 
-    void onNewMousePoint(int x, int y);
+    void onNewMousePoint(double x, double y);
 
     void settingsChanged();
 }

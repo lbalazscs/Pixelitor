@@ -132,8 +132,8 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     @Override
     public void mousePressed(MouseEvent e, ImageDisplay ic) {
         boolean withLine = withLine(e);
-        int x = userDrag.getStartX();
-        int y = userDrag.getStartY();
+        double x = userDrag.getStartX();
+        double y = userDrag.getStartY();
 
         drawTo(ic.getComp(), x, y, withLine);
         firstMouseDown = false;
@@ -151,8 +151,8 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
 
     @Override
     public void mouseDragged(MouseEvent e, ImageDisplay ic) {
-        int x = userDrag.getEndX();
-        int y = userDrag.getEndY();
+        double x = userDrag.getEndX();
+        double y = userDrag.getEndY();
 
         // at this point x and y are already scaled according to the zoom level
         // (unlike e.getX(), e.getY())
@@ -208,7 +208,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     /**
      * Called from mousePressed, mouseDragged, and drawBrushStroke
      */
-    private void drawTo(Composition comp, int x, int y, boolean connectClickWithLine) {
+    private void drawTo(Composition comp, double x, double y, boolean connectClickWithLine) {
         if (graphics == null) { // a new brush stroke has to be initialized
             ImageLayer imageLayer = comp.getActiveMaskOrImageLayer();
             createGraphicsForNewBrushStroke(comp, imageLayer);

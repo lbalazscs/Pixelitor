@@ -42,18 +42,18 @@ public class OnePixelBrush extends AbstractBrush {
     }
 
     @Override
-    public void onDragStart(int x, int y) {
+    public void onDragStart(double x, double y) {
         updateComp(x, y);
         setPrevious(x, y);
     }
 
     @Override
-    public void onNewMousePoint(int x, int y) {
+    public void onNewMousePoint(double x, double y) {
         if (!settings.hasAA()) {
             targetG.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_OFF);
         }
 
-        targetG.drawLine(previousX, previousY, x, y);
+        targetG.drawLine((int) previousX, (int) previousY, (int) x, (int) y);
         updateComp(x, y);
         setPrevious(x, y);
     }

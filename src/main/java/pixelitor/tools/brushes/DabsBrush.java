@@ -53,13 +53,13 @@ public abstract class DabsBrush extends AbstractBrush {
     public abstract void putDab(double x, double y, double theta);
 
     @Override
-    public void onDragStart(int x, int y) {
+    public void onDragStart(double x, double y) {
         dabsStrategy.onDragStart(x, y);
         updateComp(x, y);
     }
 
     @Override
-    public void onNewMousePoint(int x, int y) {
+    public void onNewMousePoint(double x, double y) {
         dabsStrategy.onNewMousePoint(x, y);
         updateComp(x, y);
     }

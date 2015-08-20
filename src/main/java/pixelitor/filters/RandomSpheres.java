@@ -18,6 +18,7 @@
 package pixelitor.filters;
 
 import org.jdesktop.swingx.painter.effects.InnerGlowPathEffect;
+import pixelitor.FgBgColors;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ElevationAngleParam;
@@ -25,7 +26,6 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.painters.EffectConfiguratorPanel;
-import pixelitor.tools.FgBgColorSelector;
 import pixelitor.utils.ReseedSupport;
 
 import java.awt.AlphaComposite;
@@ -113,7 +113,7 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
         Color c = null;
 
         if (colorSrc == COLORS_FG_BG) {
-            colors = new Color[]{FgBgColorSelector.getFG(), FgBgColorSelector.getBG()};
+            colors = new Color[]{FgBgColors.getFG(), FgBgColors.getBG()};
             c = colors[0];
         }
 

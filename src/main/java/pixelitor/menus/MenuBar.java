@@ -24,6 +24,7 @@ import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.Desktop;
+import pixelitor.FgBgColors;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
 import pixelitor.NewImage;
@@ -75,7 +76,6 @@ import pixelitor.menus.view.ShowHideLayersAction;
 import pixelitor.menus.view.ShowHideStatusBarAction;
 import pixelitor.menus.view.ShowHideToolsAction;
 import pixelitor.menus.view.ZoomMenu;
-import pixelitor.tools.FgBgColorSelector;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.FilterCreator;
@@ -785,7 +785,7 @@ public class MenuBar extends JMenuBar {
                 ((ImageLayer) layer).applyLayerMask(AddToHistory.YES);
 
                 ic.setShowLayerMask(false);
-                FgBgColorSelector.INSTANCE.setLayerMaskEditing(false);
+                FgBgColors.setLayerMaskEditing(false);
 
                 layer.getComp().imageChanged(FULL);
             }
@@ -800,7 +800,7 @@ public class MenuBar extends JMenuBar {
                 ImageComponent ic = ImageComponents.getActiveIC();
                 Layer activeLayer = ic.getComp().getActiveLayer();
                 ic.setShowLayerMask(false);
-                FgBgColorSelector.INSTANCE.setLayerMaskEditing(false);
+                FgBgColors.setLayerMaskEditing(false);
                 activeLayer.setMaskEditing(false);
             }
         }, layerMaskSubMenu, CTRL_1);
@@ -811,7 +811,7 @@ public class MenuBar extends JMenuBar {
                 ImageComponent ic = ImageComponents.getActiveIC();
                 Layer activeLayer = ic.getComp().getActiveLayer();
                 ic.setShowLayerMask(true);
-                FgBgColorSelector.INSTANCE.setLayerMaskEditing(true);
+                FgBgColors.setLayerMaskEditing(true);
                 activeLayer.setMaskEditing(true);
             }
         }, layerMaskSubMenu, CTRL_2);
@@ -822,7 +822,7 @@ public class MenuBar extends JMenuBar {
                 ImageComponent ic = ImageComponents.getActiveIC();
                 Layer activeLayer = ic.getComp().getActiveLayer();
                 ic.setShowLayerMask(false);
-                FgBgColorSelector.INSTANCE.setLayerMaskEditing(true);
+                FgBgColors.setLayerMaskEditing(true);
                 activeLayer.setMaskEditing(true);
             }
         }, layerMaskSubMenu, CTRL_3);

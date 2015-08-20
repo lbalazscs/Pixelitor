@@ -26,10 +26,10 @@ import java.awt.image.BufferedImage;
  * The brush used by the Clone Tool
  */
 public class CloneBrush extends CopyBrush {
-    private int srcX;
-    private int srcY;
-    private int dx;
-    private int dy;
+    private double srcX;
+    private double srcY;
+    private double dx;
+    private double dy;
     private boolean aligned = true;
 
     private boolean firstCloningStart = true;
@@ -41,7 +41,7 @@ public class CloneBrush extends CopyBrush {
         super(radius, type, new RadiusRatioSpacing(0.25));
     }
 
-    public void setSource(BufferedImage sourceImage, int srcX, int srcY) {
+    public void setSource(BufferedImage sourceImage, double srcX, double srcY) {
         this.sourceImage = sourceImage;
         this.srcX = srcX;
         this.srcY = srcY;
@@ -49,7 +49,7 @@ public class CloneBrush extends CopyBrush {
     }
 
     // marks the point where the cloning was started
-    public void setCloningDestPoint(int destX, int destY) {
+    public void setCloningDestPoint(double destX, double destY) {
         boolean reinitializeDistance = false;
         // aligned = forces the source point to follow the mouse, even after a stroke is completed
         // unaligned =  the cloning distance is reinitialized for each stroke

@@ -45,6 +45,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyVetoException;
 
@@ -345,7 +346,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
      * Repaints only a region of the image, called from the brush tools
      */
     @Override
-    public void updateRegion(int startX, int startY, int endX, int endY, int thickness) {
+    public void updateRegion(double startX, double startY, double endX, double endY, int thickness) {
         if (zoomLevel != ZoomLevel.Z100) { // not the 100% view
             startX = (int) (drawStartX + viewScale * startX);
             startY = (int) (drawStartY + viewScale * startY);
@@ -360,12 +361,12 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         }
 
         if (endX < startX) {
-            int tmp = startX;
+            double tmp = startX;
             startX = endX;
             endX = tmp;
         }
         if (endY < startY) {
-            int tmp = startY;
+            double tmp = startY;
             startY = endY;
             endY = tmp;
         }
@@ -374,10 +375,10 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         startY -= thickness;
         endY += thickness;
 
-        int repWidth = endX - startX;
-        int repHeight = endY - startY;
+        double repWidth = endX - startX;
+        double repHeight = endY - startY;
 
-        repaint(startX, startY, repWidth, repHeight);
+        repaint((int)startX, (int)startY, (int)repWidth, (int)repHeight);
     }
 
     public void makeSureItIsVisible() {
@@ -541,20 +542,20 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     }
 
     @Override
-    public int componentXToImageSpace(int mouseX) {
-        return (int) ((mouseX - drawStartX) / viewScale);
+    public double componentXToImageSpace(int mouseX) {
+        return ((mouseX - drawStartX) / viewScale);
     }
 
     @Override
-    public int componentYToImageSpace(int mouseY) {
-        return (int) ((mouseY - drawStartY) / viewScale);
+    public double componentYToImageSpace(int mouseY) {
+        return ((mouseY - drawStartY) / viewScale);
     }
 
-    public int imageXToComponentSpace(int mouseX) {
+    public int imageXToComponentSpace(double mouseX) {
         return (int) (drawStartX + mouseX * viewScale);
     }
 
-    public int imageYToComponentSpace(int mouseY) {
+    public int imageYToComponentSpace(double mouseY) {
         return (int) (drawStartY + mouseY * viewScale);
     }
 
@@ -575,22 +576,22 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     }
 
     @Override
-    public Rectangle fromComponentToImageSpace(Rectangle input) {
-        return new Rectangle(
+    public Rectangle2D fromComponentToImageSpace(Rectangle input) {
+        return new Rectangle.Double(
                 componentXToImageSpace(input.x),
                 componentYToImageSpace(input.y),
-                (int) (input.width / viewScale),
-                (int) (input.height / viewScale)
+                (input.getWidth() / viewScale),
+                (input.getHeight() / viewScale)
         );
     }
 
     @Override
-    public Rectangle fromImageToComponentSpace(Rectangle input) {
+    public Rectangle fromImageToComponentSpace(Rectangle2D input) {
         return new Rectangle(
-                imageXToComponentSpace(input.x),
-                imageYToComponentSpace(input.y),
-                (int) (input.width * viewScale),
-                (int) (input.height * viewScale)
+                imageXToComponentSpace(input.getX()),
+                imageYToComponentSpace(input.getY()),
+                (int) (input.getWidth() * viewScale),
+                (int) (input.getHeight() * viewScale)
         );
     }
 

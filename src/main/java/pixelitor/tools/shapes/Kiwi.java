@@ -20,7 +20,7 @@ package pixelitor.tools.shapes;
  * Kiwi shape based on http://en.wikipedia.org/wiki/File:Kiwi_silhouette-by-flomar.svg
  */
 public class Kiwi extends GeneralShape {
-    public Kiwi(double x, double y, int width, int height) {
+    public Kiwi(double x, double y, double width, double height) {
         double cp1X; // x of control point 1
         double cp1Y; // y of control point 1
         double cp2X; // x of control point 2

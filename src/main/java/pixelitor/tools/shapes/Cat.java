@@ -20,7 +20,7 @@ package pixelitor.tools.shapes;
  * Cat based on http://commons.wikimedia.org/wiki/File:Cat_silhouette.svg
  */
 public class Cat extends GeneralShape {
-    public Cat(double x, double y, int width, int height) {
+    public Cat(double x, double y, double width, double height) {
 
         double cp1X; // x of control point 1
         double cp1Y; // y of control point 1

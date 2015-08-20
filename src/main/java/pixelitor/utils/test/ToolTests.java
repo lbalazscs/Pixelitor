@@ -18,11 +18,11 @@
 package pixelitor.utils.test;
 
 import pixelitor.Composition;
+import pixelitor.FgBgColors;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
 import pixelitor.NewImage;
 import pixelitor.tools.AbstractBrushTool;
-import pixelitor.tools.FgBgColorSelector;
 import pixelitor.tools.GradientTool;
 import pixelitor.tools.GradientType;
 import pixelitor.tools.MoveTool;
@@ -185,7 +185,7 @@ public class ToolTests {
     private static void testToolAction(Composition comp, Random rand, int canvasWidth, int canvasHeight, boolean brushOnly) {
         assert SwingUtilities.isEventDispatchThread();
 
-        FgBgColorSelector.setRandomColors();
+        FgBgColors.setRandomColors();
 
         Point start = new Point(rand.nextInt(canvasWidth), rand.nextInt(canvasHeight));
         Point end = new Point(rand.nextInt(canvasWidth), rand.nextInt(canvasHeight));

@@ -20,6 +20,7 @@ package pixelitor.layers;
 import pixelitor.AppLogic;
 import pixelitor.Canvas;
 import pixelitor.Composition;
+import pixelitor.FgBgColors;
 import pixelitor.history.AddLayerMaskEdit;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.CompoundEdit;
@@ -33,7 +34,6 @@ import pixelitor.history.LayerRenameEdit;
 import pixelitor.history.LayerVisibilityChangeEdit;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.selection.Selection;
-import pixelitor.tools.FgBgColorSelector;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.HistogramsPanel;
 import pixelitor.utils.UpdateGUI;
@@ -41,8 +41,8 @@ import pixelitor.utils.UpdateGUI;
 import java.awt.AlphaComposite;
 import java.awt.Composite;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -334,7 +334,7 @@ public abstract class Layer implements Serializable {
         if (switchActiveToNormalView) {
             if (isActive()) {
                 comp.getIC().setShowLayerMask(false);
-                FgBgColorSelector.INSTANCE.setLayerMaskEditing(false);
+                FgBgColors.setLayerMaskEditing(false);
             }
         }
     }
@@ -416,7 +416,7 @@ public abstract class Layer implements Serializable {
 
     public abstract void resize(int targetWidth, int targetHeight, boolean progressiveBilinear);
 
-    public abstract void crop(Rectangle cropRect);
+    public abstract void crop(Rectangle2D cropRect);
 
     public LayerMask getMask() {
         return mask;
@@ -476,7 +476,7 @@ public abstract class Layer implements Serializable {
         }
     }
 
-    public void moveWhileDragging(int x, int y) {
+    public void moveWhileDragging(double x, double y) {
         Layer linked = getLinked();
         if (linked != null) {
             linked.moveWhileDragging(x, y);

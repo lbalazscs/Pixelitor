@@ -254,4 +254,22 @@ public class LayerTest {
             assertThat(layer1.isMaskEnabled()).isFalse();
         }
     }
+
+    @Test
+    public void testMaskLinking() {
+        if (withMask == WithMask.YES) {
+            assertThat(layer1.hasMask()).isTrue();
+            LayerMask mask = layer1.getMask();
+            assertThat(mask.isLinked()).isTrue();
+
+            mask.setLinked(false, AddToHistory.YES);
+            assertThat(mask.isLinked()).isFalse();
+
+            History.undo();
+            assertThat(mask.isLinked()).isTrue();
+
+            History.redo();
+            assertThat(mask.isLinked()).isFalse();
+        }
+    }
 }

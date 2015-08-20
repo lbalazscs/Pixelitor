@@ -43,6 +43,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.RasterFormatException;
 import java.awt.image.WritableRaster;
@@ -834,9 +835,9 @@ public class ImageLayer extends ContentLayer {
     }
 
     @Override
-    public void crop(Rectangle cropRect) {
-        int cropWidth = cropRect.width;
-        int cropHeight = cropRect.height;
+    public void crop(Rectangle2D cropRect) {
+        int cropWidth = (int) cropRect.getWidth();
+        int cropHeight = (int) cropRect.getHeight();
 
         BufferedImage img = getImage();
 
@@ -844,8 +845,8 @@ public class ImageLayer extends ContentLayer {
         int transX = getTranslationX();
         int transY = getTranslationY();
 
-        int cropX = cropRect.x - transX;
-        int cropY = cropRect.y - transY;
+        int cropX = (int) (cropRect.getX() - transX);
+        int cropY = (int) (cropRect.getY() - transY);
 
         BufferedImage dest = ImageUtils.crop(img, cropX, cropY, cropWidth, cropHeight);
         setImage(dest);

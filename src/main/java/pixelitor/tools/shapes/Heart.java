@@ -20,7 +20,7 @@ package pixelitor.tools.shapes;
  * A heart shape
  */
 public class Heart extends GeneralShape {
-    public Heart(double x, double y, int width, int height) {
+    public Heart(double x, double y, double width, double height) {
         double maxX = x + width;
 
         double centerX = x + width / 2.0f;

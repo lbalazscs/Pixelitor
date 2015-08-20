@@ -67,11 +67,11 @@ public class RandomStar implements Shape {
         randomize();
     }
 
-    public RandomStar(double x, double y, int width, int height) {
+    public RandomStar(double x, double y, double width, double height) {
         double centerX = x + width / 2.0;
         double centerY = y + height / 2.0;
-        int[] radii = new int[numRadius];
-        int maxRadius = 1 + width / 2;
+        double[] radii = new double[numRadius];
+        double maxRadius = 1 + width / 2;
 
         radii[0] = maxRadius;
         for (int i = 1; i < radii.length; i++) {
@@ -82,7 +82,7 @@ public class RandomStar implements Shape {
         for (int i = 0; i < numPoints; i++) {
             double angle = initialAngle + i * unitAngle;
             int radiusIndex = i % radii.length;
-            int radius = radii[radiusIndex];
+            double radius = radii[radiusIndex];
             double circleX = FastMath.cos(angle) * radius;
             double circleY = FastMath.sin(angle) * radius;
             double relX = centerX + circleX;

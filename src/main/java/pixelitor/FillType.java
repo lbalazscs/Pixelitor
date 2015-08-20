@@ -16,8 +16,6 @@
  */
 package pixelitor;
 
-import pixelitor.tools.FgBgColorSelector;
-
 import java.awt.Color;
 
 import static pixelitor.utils.ColorUtils.TRANSPARENT_COLOR;
@@ -44,12 +42,12 @@ public enum FillType {
     }, FOREGROUND("Foreground Color") {
         @Override
         public Color getColor() {
-            return FgBgColorSelector.getFG();
+            return FgBgColors.getFG();
         }
     }, BACKGROUND("Background Color") {
         @Override
         public Color getColor() {
-            return FgBgColorSelector.getBG();
+            return FgBgColors.getBG();
         }
     };
 

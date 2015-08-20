@@ -16,7 +16,7 @@
  */
 package pixelitor.tools.shapestool;
 
-import pixelitor.tools.FgBgColorSelector;
+import pixelitor.FgBgColors;
 import pixelitor.tools.UserDrag;
 
 import java.awt.AlphaComposite;
@@ -40,10 +40,16 @@ enum TwoPointBasedPaint {
     LINEAR_GRADIENT {
         @Override
         protected Paint getPaint(UserDrag ud) {
-            Color fgColor = FgBgColorSelector.getFG();
-            Color bgColor = FgBgColorSelector.getBG();
+            Color fgColor = FgBgColors.getFG();
+            Color bgColor = FgBgColors.getBG();
 
-            return new GradientPaint(ud.getStartXFromCenter(), ud.getStartYFromCenter(), fgColor, ud.getEndX(), ud.getEndY(), bgColor);
+            return new GradientPaint(
+                    (float)ud.getStartXFromCenter(),
+                    (float)ud.getStartYFromCenter(),
+                    fgColor,
+                    (float)ud.getEndX(),
+                    (float)ud.getEndY(),
+                    bgColor);
         }
 
         @Override
@@ -56,11 +62,11 @@ enum TwoPointBasedPaint {
 
         @Override
         protected Paint getPaint(UserDrag userDrag) {
-            Color fgColor = FgBgColorSelector.getFG();
-            Color bgColor = FgBgColorSelector.getBG();
+            Color fgColor = FgBgColors.getFG();
+            Color bgColor = FgBgColors.getBG();
 
             Point2D center = userDrag.getCenterPoint();
-            float distance = userDrag.getDistance();
+            float distance = (float) userDrag.getDistance();
 
             return new RadialGradientPaint(center, distance / 2, center, FRACTIONS, new Color[]{fgColor, bgColor},
                     MultipleGradientPaint.CycleMethod.NO_CYCLE, MultipleGradientPaint.ColorSpaceType.SRGB, gradientTransform);
@@ -73,7 +79,7 @@ enum TwoPointBasedPaint {
     }, FOREGROUND {
         @Override
         protected Paint getPaint(UserDrag userDrag) {
-            Color fgColor = FgBgColorSelector.getFG();
+            Color fgColor = FgBgColors.getFG();
             return fgColor;
         }
 
@@ -84,7 +90,7 @@ enum TwoPointBasedPaint {
     }, BACKGROUND {
         @Override
         protected Paint getPaint(UserDrag userDrag) {
-            Color bgColor = FgBgColorSelector.getBG();
+            Color bgColor = FgBgColors.getBG();
             return bgColor;
         }
 

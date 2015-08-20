@@ -133,7 +133,7 @@ public abstract class Tool {
         if (mouseDown) {
             // can happen if the tool is changed while drawing, and then changed back
             MouseEvent fake = new MouseEvent((Component) e.getSource(), e.getID(), e.getWhen(), e.getModifiers(),
-                    userDrag.getEndX(), userDrag.getEndY(), 1, false);
+                    (int)userDrag.getEndX(), (int)userDrag.getEndY(), 1, false);
             dispatchMouseReleased(fake, ic); // try to clean-up
         }
         mouseDown = true;

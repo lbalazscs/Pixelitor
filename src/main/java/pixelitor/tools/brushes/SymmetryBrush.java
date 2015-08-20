@@ -67,12 +67,12 @@ public class SymmetryBrush implements Brush {
     }
 
     @Override
-    public void onDragStart(int x, int y) {
+    public void onDragStart(double x, double y) {
         symmetry.onDragStart(this, x, y);
     }
 
     @Override
-    public void onNewMousePoint(int x, int y) {
+    public void onNewMousePoint(double x, double y) {
         symmetry.onNewMousePoint(this, x, y);
     }
 
@@ -114,12 +114,12 @@ public class SymmetryBrush implements Brush {
         return true;
     }
 
-    public void onDragStart(int brushNo, int x, int y) {
+    public void onDragStart(int brushNo, double x, double y) {
         affectedArea.updateAffectedCoordinates(x, y);
         brushes[brushNo].onDragStart(x, y);
     }
 
-    public void onNewMousePoint(int brushNo, int endX, int endY) {
+    public void onNewMousePoint(int brushNo, double endX, double endY) {
         affectedArea.updateAffectedCoordinates(endX, endY);
         brushes[brushNo].onNewMousePoint(endX, endY);
     }

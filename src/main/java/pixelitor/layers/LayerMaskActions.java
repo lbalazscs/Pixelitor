@@ -1,8 +1,8 @@
 package pixelitor.layers;
 
+import pixelitor.FgBgColors;
 import pixelitor.history.AddToHistory;
 import pixelitor.menus.NamedAction;
-import pixelitor.tools.FgBgColorSelector;
 import pixelitor.utils.Dialogs;
 
 import javax.swing.*;
@@ -99,7 +99,7 @@ public class LayerMaskActions {
 
             if (layer.isActive()) {
                 layer.getComp().getIC().setShowLayerMask(false);
-                FgBgColorSelector.INSTANCE.setLayerMaskEditing(false);
+                FgBgColors.setLayerMaskEditing(false);
             }
 
             layer.getComp().imageChanged(FULL);

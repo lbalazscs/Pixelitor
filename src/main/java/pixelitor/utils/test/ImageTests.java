@@ -21,6 +21,7 @@ import org.jdesktop.swingx.painter.AbstractLayoutPainter;
 import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
 import pixelitor.Build;
 import pixelitor.Composition;
+import pixelitor.FgBgColors;
 import pixelitor.FillType;
 import pixelitor.ImageComponents;
 import pixelitor.NewImage;
@@ -42,7 +43,6 @@ import pixelitor.layers.AddNewLayerAction;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.DeleteActiveLayerAction;
 import pixelitor.layers.ImageLayer;
-import pixelitor.tools.FgBgColorSelector;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.UpdateGUI;
 import pixelitor.utils.Utils;
@@ -149,7 +149,7 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
         layer.setOpacity(0.4f, UpdateGUI.YES, AddToHistory.YES, true);
         layer.setBlendingMode(BlendingMode.LUMINOSITY, UpdateGUI.YES, AddToHistory.YES, true);
 
-        FgBgColorSelector.INSTANCE.setFgColor(WHITE);
+        FgBgColors.setFG(WHITE);
         Font font = new Font(SPLASH_SCREEN_FONT, Font.BOLD, 48);
         addRasterizedTextLayer(ic, "Pixelitor", WHITE, font, -17, BlendingMode.NORMAL, 0.9f, false);
         addDropShadow();
@@ -197,8 +197,8 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
     }
 
     public static void testLayers() {
-        FgBgColorSelector.setBG(WHITE);
-        FgBgColorSelector.setFG(BLACK);
+        FgBgColors.setBG(WHITE);
+        FgBgColors.setFG(BLACK);
         NewImage.addNewImage(FillType.TRANSPARENT, 400, 400, "Layer Test");
         Composition comp = ImageComponents.getActiveComp().get();
 

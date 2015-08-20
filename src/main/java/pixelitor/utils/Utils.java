@@ -42,6 +42,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.DataBuffer;
@@ -288,22 +289,27 @@ public final class Utils {
     }
 
     // makes sure that the returned rectangle has positive width, height
-    public static Rectangle toPositiveRect(Rectangle input) {
-        if (input.width >= 0) {
-            if (input.height >= 0) {
+    public static Rectangle2D toPositiveRect(Rectangle2D input) {
+        double inX = input.getX();
+        double inY = input.getY();
+        double inWidth = input.getWidth();
+        double inHeight = input.getHeight();
+
+        if (inWidth >= 0) {
+            if (inHeight >= 0) {
                 return input; // should be the most common case
             } else { // negative height
-                int newY = input.y + input.height;
-                return new Rectangle(input.x, newY, input.width, -input.height);
+                double newY = inY + inHeight;
+                return new Rectangle2D.Double(inX, newY, inWidth, -inHeight);
             }
         } else { // negative width
-            if (input.height >= 0) {
-                int newX = input.x + input.width;
-                return new Rectangle(newX, input.y, -input.width, input.height);
+            if (inHeight >= 0) {
+                double newX = inX + inWidth;
+                return new Rectangle2D.Double(newX, inY, -inWidth, inHeight);
             } else { // negative height
-                int newX = input.x + input.width;
-                int newY = input.y + input.height;
-                return new Rectangle(newX, newY, -input.width, -input.height);
+                double newX = inX + inWidth;
+                double newY = inY + inHeight;
+                return new Rectangle2D.Double(newX, newY, -inWidth, -inHeight);
             }
         }
     }

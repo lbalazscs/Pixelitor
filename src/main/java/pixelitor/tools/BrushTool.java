@@ -18,6 +18,7 @@
 package pixelitor.tools;
 
 import pixelitor.Composition;
+import pixelitor.FgBgColors;
 import pixelitor.ImageDisplay;
 import pixelitor.layers.ImageLayer;
 import pixelitor.utils.ColorUtils;
@@ -73,7 +74,7 @@ public class BrushTool extends TmpLayerBrushTool {
     public void drawBrushStrokeProgrammatically(Composition comp, Point startingPoint, Point endPoint) {
         createGraphicsForNewBrushStroke(comp, comp.getActiveMaskOrImageLayer());
 
-        graphics.setColor(FgBgColorSelector.getFG());
+        graphics.setColor(FgBgColors.getFG());
 
         super.drawBrushStrokeProgrammatically(comp, startingPoint, endPoint);
 
@@ -84,25 +85,25 @@ public class BrushTool extends TmpLayerBrushTool {
         int button = e.getButton();
 
         if (SwingUtilities.isRightMouseButton(e)) {
-            drawingColor = FgBgColorSelector.getBG();
+            drawingColor = FgBgColors.getBG();
         } else if (SwingUtilities.isMiddleMouseButton(e)) {
             // TODO we never get here because isAltDown is always true for middle-button events, even if Alt is not pressed?
-            Color fg = FgBgColorSelector.getFG();
-            Color bg = FgBgColorSelector.getBG();
+            Color fg = FgBgColors.getFG();
+            Color bg = FgBgColors.getBG();
             if(e.isControlDown()) {
                 drawingColor = ColorUtils.getHSBAverageColor(fg, bg);
             } else {
                 drawingColor = ColorUtils.getRGBAverageColor(fg, bg);
             }
         } else {
-            drawingColor = FgBgColorSelector.getFG();
+            drawingColor = FgBgColors.getFG();
         }
     }
 
     @Override
     public void trace(Composition comp, Shape shape) {
         if (drawingColor == null) {
-            drawingColor = FgBgColorSelector.getFG();
+            drawingColor = FgBgColors.getFG();
         }
         super.trace(comp, shape);
     }

@@ -18,10 +18,10 @@ package pixelitor.selection;
 
 import pixelitor.tools.UserDrag;
 
-import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Rectangle2D;
 
 /**
  * The type of a new selection created interactively by the user
@@ -30,14 +30,14 @@ public enum SelectionType {
     RECTANGLE("Rectangle") {
         @Override
         public Shape updateShape(UserDrag userDrag, Shape currentSelectionShape) {
-            Rectangle dragRectangle = userDrag.createPositiveRect();
+            Rectangle2D dragRectangle = userDrag.createPositiveRect();
             return dragRectangle;
         }
     }, ELLIPSE("Ellipse") {
         @Override
         public Shape updateShape(UserDrag userDrag, Shape currentSelectionShape) {
-            Rectangle dr = userDrag.createPositiveRect();
-            return new Ellipse2D.Float(dr.x, dr.y, dr.width, dr.height);
+            Rectangle2D dr = userDrag.createPositiveRect();
+            return new Ellipse2D.Double(dr.getX(), dr.getY(), dr.getWidth(), dr.getHeight());
         }
     }, LASSO("Freehand") {
         @Override

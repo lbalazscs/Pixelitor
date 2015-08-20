@@ -24,6 +24,7 @@ import pixelitor.menus.view.ZoomLevel;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 
 /**
  * Separates the GUI code from the non-GUI code.
@@ -40,7 +41,7 @@ public interface ImageDisplay {
 
     void changeLayerOrderInTheGUI(int oldIndex, int newIndex);
 
-    void updateRegion(int startX, int startY, int endX, int endY, int thickness);
+    void updateRegion(double startX, double startY, double endX, double endY, int thickness);
 
     void canvasSizeChanged();
 
@@ -52,13 +53,13 @@ public interface ImageDisplay {
 
     // the following methods are needed by the tools
 
-    int componentXToImageSpace(int mouseX);
+    double componentXToImageSpace(int mouseX);
 
-    int componentYToImageSpace(int mouseY);
+    double componentYToImageSpace(int mouseY);
 
-    Rectangle fromImageToComponentSpace(Rectangle input);
+    Rectangle fromImageToComponentSpace(Rectangle2D input);
 
-    Rectangle fromComponentToImageSpace(Rectangle input);
+    Rectangle2D fromComponentToImageSpace(Rectangle input);
 
     Cursor getCursor();
 

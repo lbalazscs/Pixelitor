@@ -18,6 +18,7 @@
 package pixelitor.tools;
 
 import pixelitor.AppLogic;
+import pixelitor.FgBgColors;
 import pixelitor.ImageDisplay;
 import pixelitor.layers.ImageLayer;
 
@@ -62,8 +63,8 @@ public class ColorPickerTool extends Tool {
     }
 
     public void sampleColor(MouseEvent e, ImageDisplay ic, boolean selectBackground) {
-        int x = ic.componentXToImageSpace(e.getX());
-        int y = ic.componentYToImageSpace(e.getY());
+        int x = (int) ic.componentXToImageSpace(e.getX());
+        int y = (int) ic.componentYToImageSpace(e.getY());
 
         BufferedImage img;
         if (sampleLayerOnly.isSelected()) {
@@ -89,9 +90,9 @@ public class ColorPickerTool extends Tool {
 
             Color sampledColor = new Color(rgb);
             if (selectBackground) {
-                FgBgColorSelector.INSTANCE.setBgColor(sampledColor);
+                FgBgColors.setBG(sampledColor);
             } else {
-                FgBgColorSelector.INSTANCE.setFgColor(sampledColor);
+                FgBgColors.setFG(sampledColor);
             }
         }
     }

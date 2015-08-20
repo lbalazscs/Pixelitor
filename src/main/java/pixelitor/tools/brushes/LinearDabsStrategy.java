@@ -39,7 +39,7 @@ public class LinearDabsStrategy implements DabsStrategy {
     }
 
     @Override
-    public void onDragStart(int x, int y) {
+    public void onDragStart(double x, double y) {
         brush.setupBrushStamp(x, y);
         distanceFromLastDab = 0; // moved from reset()
 
@@ -57,7 +57,7 @@ public class LinearDabsStrategy implements DabsStrategy {
     }
 
     @Override
-    public void onNewMousePoint(int endX, int endY) {
+    public void onNewMousePoint(double endX, double endY) {
         double dx = endX - prevX;
         double dy = endY - prevY;
         double lineDistance = Math.sqrt(dx * dx + dy * dy);

@@ -106,9 +106,10 @@ public class PixelitorWindow extends JFrame {
         verticalBoxWest = Box.createVerticalBox();
         toolsPanel = new ToolsPanel();
 
+        FgBgColors.setGUI(new FgBgColorSelector());
         if (AppPreferences.WorkSpace.getToolsVisibility()) {
             verticalBoxWest.add(toolsPanel);
-            verticalBoxWest.add(FgBgColorSelector.INSTANCE);
+            verticalBoxWest.add(FgBgColors.getGUI());
             add(ToolSettingsPanelContainer.INSTANCE, BorderLayout.NORTH);
         }
 
@@ -219,12 +220,12 @@ public class PixelitorWindow extends JFrame {
     public void setToolsVisibility(boolean v, boolean revalidate) {
         if (v) {
             verticalBoxWest.add(toolsPanel);
-            verticalBoxWest.add(FgBgColorSelector.INSTANCE);
+            verticalBoxWest.add(FgBgColors.getGUI());
             add(ToolSettingsPanelContainer.INSTANCE, BorderLayout.NORTH);
 
         } else {
             verticalBoxWest.remove(toolsPanel);
-            verticalBoxWest.remove(FgBgColorSelector.INSTANCE);
+            verticalBoxWest.remove(FgBgColors.getGUI());
             remove(ToolSettingsPanelContainer.INSTANCE);
         }
         if (revalidate) {

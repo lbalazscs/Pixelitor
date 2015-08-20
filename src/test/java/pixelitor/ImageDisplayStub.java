@@ -25,6 +25,7 @@ import javax.swing.*;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 
 public class ImageDisplayStub implements ImageDisplay {
     private Cursor cursor = Cursor.getDefaultCursor();
@@ -55,7 +56,7 @@ public class ImageDisplayStub implements ImageDisplay {
     }
 
     @Override
-    public void updateRegion(int startX, int startY, int endX, int endY, int thickness) {
+    public void updateRegion(double startX, double startY, double endX, double endY, int thickness) {
     }
 
     @Override
@@ -75,18 +76,18 @@ public class ImageDisplayStub implements ImageDisplay {
     }
 
     @Override
-    public int componentXToImageSpace(int mouseX) {
+    public double componentXToImageSpace(int mouseX) {
         return mouseX;
     }
 
     @Override
-    public int componentYToImageSpace(int mouseY) {
+    public double componentYToImageSpace(int mouseY) {
         return mouseY;
     }
 
     @Override
-    public Rectangle fromImageToComponentSpace(Rectangle input) {
-        return input;
+    public Rectangle fromImageToComponentSpace(Rectangle2D in) {
+        return new Rectangle((int) in.getX(), (int) in.getY(), (int) in.getWidth(), (int) in.getHeight());
     }
 
     @Override

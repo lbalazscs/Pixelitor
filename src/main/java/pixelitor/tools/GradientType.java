@@ -36,16 +36,16 @@ public enum GradientType {
     LINEAR("Linear") {
         @Override
         public Paint getGradient(UserDrag userDrag, Color[] colors, MultipleGradientPaint.CycleMethod cycleMethod) {
-            Point2D.Float start = userDrag.getStartPoint();
-            Point2D.Float end = userDrag.getEndPoint();
+            Point2D.Double start = userDrag.getStartPoint();
+            Point2D.Double end = userDrag.getEndPoint();
 
             return new LinearGradientPaint(start, end, ImageUtils.FRACTIONS_2_COLOR_UNIFORM, colors, cycleMethod, colorSpaceType, gradientTransform);
         }
     }, RADIAL("Radial") {
         @Override
         public Paint getGradient(UserDrag userDrag, Color[] colors, MultipleGradientPaint.CycleMethod cycleMethod) {
-            float radius = userDrag.getDistance();
-            Point2D.Float center = userDrag.getStartPoint();
+            float radius = (float) userDrag.getDistance();
+            Point2D.Double center = userDrag.getStartPoint();
 
             return new RadialGradientPaint(center, radius, center, ImageUtils.FRACTIONS_2_COLOR_UNIFORM, colors, cycleMethod, colorSpaceType, gradientTransform);
         }

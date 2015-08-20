@@ -20,7 +20,7 @@ package pixelitor.tools.shapes;
  * Rabbit shape based on http://commons.wikimedia.org/wiki/File:Lapin01.svg
  */
 public class Rabbit extends GeneralShape {
-    public Rabbit(double x, double y, int width, int height) {
+    public Rabbit(double x, double y, double width, double height) {
         double cp1X; // x of control point 1
         double cp1Y; // y of control point 1
         double cp2X; // x of control point 2

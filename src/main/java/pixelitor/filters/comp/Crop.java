@@ -12,16 +12,16 @@ import pixelitor.history.MultiLayerEdit;
 import pixelitor.layers.Layer;
 
 import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 
 import static pixelitor.Composition.ImageChangeActions.FULL;
 
 public class Crop implements CompAction {
-    private Rectangle cropRect;
+    private Rectangle2D cropRect;
     private final boolean selectionCrop;
     private final boolean allowGrowing;
 
-    public Crop(Rectangle cropRect, boolean selectionCrop, boolean allowGrowing) {
+    public Crop(Rectangle2D cropRect, boolean selectionCrop, boolean allowGrowing) {
         this.cropRect = cropRect;
         this.selectionCrop = selectionCrop;
         this.allowGrowing = allowGrowing;
@@ -30,7 +30,7 @@ public class Crop implements CompAction {
     public void process(Composition comp) {
         Canvas canvas = comp.getCanvas();
         if (!allowGrowing) {
-            cropRect = cropRect.intersection(canvas.getBounds());
+            cropRect = cropRect.createIntersection(canvas.getBounds());
         }
 
         if (cropRect.isEmpty()) {
@@ -62,7 +62,9 @@ public class Crop implements CompAction {
         MultiLayerEdit edit = new MultiLayerEdit(comp, "Crop", backup);
         History.addEdit(edit);
 
-        canvas.updateSize(cropRect.width, cropRect.height);
+        int cropRectWidth = (int) cropRect.getWidth();
+        int cropRectHeight = (int) cropRect.getHeight();
+        canvas.updateSize(cropRectWidth, cropRectHeight);
         comp.updateAllIconImages();
         comp.setDirty(true);
 
@@ -70,7 +72,7 @@ public class Crop implements CompAction {
         if (display instanceof ImageComponent) { // not in a test
             ImageComponent ic = (ImageComponent) display;
 
-            ic.setPreferredSize(new Dimension(cropRect.width, cropRect.height));
+            ic.setPreferredSize(new Dimension(cropRectWidth, cropRectHeight));
             ic.revalidate();
             ic.makeSureItIsVisible();
 

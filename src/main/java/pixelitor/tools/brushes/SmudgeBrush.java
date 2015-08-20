@@ -17,7 +17,7 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.tools.FgBgColorSelector;
+import pixelitor.FgBgColors;
 
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
@@ -38,7 +38,7 @@ public class SmudgeBrush extends CopyBrush {
         super(radius, type, new FixedDistanceSpacing(1.0));
     }
 
-    public void setSource(BufferedImage sourceImage, int srcX, int srcY, float strength) {
+    public void setSource(BufferedImage sourceImage, double srcX, double srcY, float strength) {
         this.sourceImage = sourceImage;
         lastX = srcX;
         lastY = srcY;
@@ -52,7 +52,7 @@ public class SmudgeBrush extends CopyBrush {
         type.beforeDrawImage(g);
 
         if (firstUsageInStroke && fingerPainting) {
-            g.setColor(FgBgColorSelector.getFG());
+            g.setColor(FgBgColors.getFG());
             g.fillRect(0, 0, diameter, diameter);
         } else {
             // samples the source image at lastX, lastY into the brush image

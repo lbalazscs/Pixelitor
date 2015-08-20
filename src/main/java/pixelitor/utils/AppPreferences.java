@@ -18,6 +18,7 @@
 package pixelitor.utils;
 
 import pixelitor.Desktop;
+import pixelitor.FgBgColors;
 import pixelitor.NewImage;
 import pixelitor.PixelitorWindow;
 import pixelitor.TipsOfTheDay;
@@ -26,7 +27,6 @@ import pixelitor.io.FileChoosers;
 import pixelitor.menus.file.RecentFileInfo;
 import pixelitor.menus.file.RecentFileInfos;
 import pixelitor.menus.file.RecentFilesMenu;
-import pixelitor.tools.FgBgColorSelector;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
@@ -257,12 +257,12 @@ public final class AppPreferences {
     }
 
     private static void saveFgBgColors() {
-        Color fgColor = FgBgColorSelector.getFG();
+        Color fgColor = FgBgColors.getFG();
         if (fgColor != null) {
             mainUserNode.putInt(FG_COLOR_KEY, fgColor.getRGB());
         }
 
-        Color bgColor = FgBgColorSelector.getBG();
+        Color bgColor = FgBgColors.getBG();
         if (bgColor != null) {
             mainUserNode.putInt(BG_COLOR_KEY, bgColor.getRGB());
         }

@@ -20,31 +20,57 @@ package pixelitor.layers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import pixelitor.Canvas;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
+import pixelitor.FgBgColors;
 import pixelitor.TestHelper;
+import pixelitor.history.AddToHistory;
+import pixelitor.history.History;
 import pixelitor.selection.IgnoreSelection;
 import pixelitor.selection.Selection;
+import pixelitor.testutils.WithMask;
+import pixelitor.tools.FgBgColorSelector;
 
 import java.awt.AlphaComposite;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
+import java.util.Collection;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static pixelitor.ChangeReason.OP_PREVIEW;
 
+@RunWith(Parameterized.class)
 public class ImageLayerTest {
     private Composition comp;
     private ImageLayer layer;
+
+    private WithMask withMask;
+
+    @Parameterized.Parameters
+    public static Collection<Object[]> instancesToTest() {
+        return Arrays.asList(new Object[][]{
+                {WithMask.NO},
+                {WithMask.YES},
+        });
+    }
+
+    public ImageLayerTest(WithMask withMask) {
+        this.withMask = withMask;
+    }
 
     @Before
     public void setUp() {
         comp = TestHelper.createEmptyComposition();
         layer = TestHelper.createImageLayer("layer 1", comp);
         comp.addLayerNoGUI(layer);
+
+        withMask.init(layer);
 
         assert layer.getComp().checkInvariant();
     }
@@ -250,4 +276,26 @@ public class ImageLayerTest {
         assertThat(duplicate.getOpacity()).isEqualTo(layer.getOpacity());
     }
 
+    @Test
+    public void testApplyLayerMask() {
+        if (withMask == WithMask.YES) {
+            FgBgColors.setGUI(new FgBgColorSelector() {
+                @Override
+                protected void setupKeyboardShortcuts() {
+                    // do nothing - prevent initializing whe whole GUI
+                }
+            });
+
+            assertThat(layer.hasMask()).isTrue();
+
+            layer.applyLayerMask(AddToHistory.YES);
+            assertThat(layer.hasMask()).isFalse();
+
+            History.undo();
+            assertThat(layer.hasMask()).isTrue();
+
+            History.redo();
+            assertThat(layer.hasMask()).isFalse();
+        }
+    }
 }

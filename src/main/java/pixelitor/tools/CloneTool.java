@@ -107,8 +107,8 @@ public class CloneTool extends TmpLayerBrushTool {
 
     @Override
     public void mousePressed(MouseEvent e, ImageDisplay ic) {
-        int x = userDrag.getStartX();
-        int y = userDrag.getStartY();
+        double x = userDrag.getStartX();
+        double y = userDrag.getStartY();
 
         if (e.isAltDown() || SwingUtilities.isRightMouseButton(e)) {
             setCloningSource(ic, x, y);
@@ -141,7 +141,7 @@ public class CloneTool extends TmpLayerBrushTool {
         }
     }
 
-    private void handleUndefinedSource(ImageDisplay ic, int x, int y) {
+    private void handleUndefinedSource(ImageDisplay ic, double x, double y) {
         if (Build.CURRENT.isRobotTest()) {
             // special case: do not show dialogs for random robot tests,
             // just act as if this was an alt-click
@@ -155,7 +155,7 @@ public class CloneTool extends TmpLayerBrushTool {
         }
     }
 
-    private void setCloningSource(ImageDisplay ic, int x, int y) {
+    private void setCloningSource(ImageDisplay ic, double x, double y) {
         BufferedImage sourceImage;
         if (sampleAllLayers) {
             sourceImage = ic.getComp().getCompositeImage();

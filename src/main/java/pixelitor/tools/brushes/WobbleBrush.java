@@ -34,7 +34,7 @@ public class WobbleBrush extends StrokeBrush {
     }
 
     @Override
-    public void drawShape(int x, int y) {
+    public void drawShape(double x, double y) {
         float smallThickness = diameter / SIZE_DIVIDING_FACTOR;
 
         if(diameter != lastDiameter) {
@@ -42,12 +42,12 @@ public class WobbleBrush extends StrokeBrush {
         }
         targetG.setStroke(lastStroke);
 
-        Shape circle = new Ellipse2D.Float(x, y, 0.1f, 0.1f);
+        Shape circle = new Ellipse2D.Double(x, y, 0.1, 0.1);
         targetG.draw(circle);
     }
 
     @Override
-    public void drawLine(int startX, int startY, int endX, int endY) {
+    public void drawLine(double startX, double startY, double endX, double endY) {
         int savedRadius = radius;
         radius = (int) (radius / SIZE_DIVIDING_FACTOR);
         super.drawLine(startX, startY, endX, endY);

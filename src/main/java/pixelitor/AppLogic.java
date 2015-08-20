@@ -20,7 +20,6 @@ package pixelitor;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerChangeListener;
 import pixelitor.layers.LayerMaskChangeListener;
-import pixelitor.tools.FgBgColorSelector;
 import pixelitor.tools.Symmetry;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.GUIUtils;
@@ -63,6 +62,7 @@ public class AppLogic {
         }
     }
 
+    // used for GUI updates
     public static void activeCompLayerCountChanged(Composition comp, int newLayerCount) {
         for (LayerChangeListener listener : layerChangeListeners) {
             listener.activeCompLayerCountChanged(comp, newLayerCount);
@@ -81,7 +81,7 @@ public class AppLogic {
             Composition comp = newActiveLayer.getComp();
             if (comp.hasRealIC()) {
                 comp.getIC().setShowLayerMask(false);
-                FgBgColorSelector.INSTANCE.setLayerMaskEditing(false);
+                FgBgColors.setLayerMaskEditing(false);
             }
         }
     }

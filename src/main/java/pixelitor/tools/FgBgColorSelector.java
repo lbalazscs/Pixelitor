@@ -45,15 +45,13 @@ public class FgBgColorSelector extends JLayeredPane {
     private static final int SMALL_BUTTON_SIZE = 15;
     private static final int SMALL_BUTTON_VERTICAL_SPACE = 15;
 
-    public static final FgBgColorSelector INSTANCE = new FgBgColorSelector();
-
-    private Action randomizeColorsAction;
+    public Action randomizeColorsAction;
     private Action resetToDefaultAction;
     private Action swapColorsAction;
 
     private boolean layerMaskEditing = false;
 
-    private FgBgColorSelector() {
+    public FgBgColorSelector() {
         setLayout(null);
 
         initFGButton();
@@ -154,7 +152,7 @@ public class FgBgColorSelector extends JLayeredPane {
         }
     }
 
-    private Color getBgColor() {
+    public Color getBgColor() {
         return getPossiblyGrayedColor(bgColor);
     }
 
@@ -170,7 +168,7 @@ public class FgBgColorSelector extends JLayeredPane {
         return new Color(0xFF_00_00_00 | (average << 16) | (average << 8) | average);
     }
 
-    private Color getFgColor() {
+    public Color getFgColor() {
         return getPossiblyGrayedColor(fgColor);
     }
 
@@ -179,26 +177,6 @@ public class FgBgColorSelector extends JLayeredPane {
             return colorToGray(c);
         }
         return c;
-    }
-
-    public static Color getFG() {
-        return INSTANCE.getFgColor();
-    }
-
-    public static Color getBG() {
-        return INSTANCE.getBgColor();
-    }
-
-    public static void setFG(Color c) {
-        INSTANCE.setFgColor(c);
-    }
-
-    public static void setBG(Color c) {
-        INSTANCE.setBgColor(c);
-    }
-
-    public static void setRandomColors() {
-        INSTANCE.randomizeColorsAction.actionPerformed(null);
     }
 
     public void setFgColor(Color c) {
@@ -225,7 +203,7 @@ public class FgBgColorSelector extends JLayeredPane {
 //        }
     }
 
-    private void setupKeyboardShortcuts() {
+    protected void setupKeyboardShortcuts() {
         GlobalKeyboardWatch.addKeyboardShortCut('d', true, "reset", resetToDefaultAction);
         GlobalKeyboardWatch.addKeyboardShortCut('x', true, "switch", swapColorsAction);
         GlobalKeyboardWatch.addKeyboardShortCut('r', true, "randomize", randomizeColorsAction);

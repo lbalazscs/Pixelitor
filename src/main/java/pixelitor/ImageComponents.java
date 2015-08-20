@@ -30,6 +30,7 @@ import pixelitor.utils.ImageSwitchListener;
 
 import java.awt.Cursor;
 import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -147,7 +148,7 @@ public class ImageComponents {
         try {
             Optional<Composition> opt = getActiveComp();
             opt.ifPresent(comp -> {
-                Rectangle cropRect = Tools.CROP.getCropRect(comp.getIC());
+                Rectangle2D cropRect = Tools.CROP.getCropRect(comp.getIC());
                 new Crop(cropRect, false, allowGrowing).process(comp);
             });
         } catch (Exception ex) {

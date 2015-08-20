@@ -47,22 +47,22 @@ public abstract class StrokeBrush extends AbstractBrush {
     }
 
     @Override
-    public void onDragStart(int x, int y) {
+    public void onDragStart(double x, double y) {
         drawShape(x, y);
         updateComp(x, y);
         setPrevious(x, y);
     }
 
     @Override
-    public void onNewMousePoint(int x, int y) {
+    public void onNewMousePoint(double x, double y) {
         drawLine(previousX, previousY, x, y);
         updateComp(x, y);
         setPrevious(x, y);
     }
 
-    abstract void drawShape(int x, int y);
+    abstract void drawShape(double x, double y);
 
-    protected void drawLine(int startX, int startY, int endX, int endY) {
+    protected void drawLine(double startX, double startY, double endX, double endY) {
         int thickness = 2*radius;
         if(thickness != lastDiameter) {
             lastStroke = strokeType.getStroke(thickness, cap, join, null);
@@ -71,6 +71,6 @@ public abstract class StrokeBrush extends AbstractBrush {
 
         targetG.setStroke(lastStroke);
 
-        targetG.drawLine(startX, startY, endX, endY);
+        targetG.drawLine((int) startX, (int) startY, (int) endX, (int) endY);
     }
 }

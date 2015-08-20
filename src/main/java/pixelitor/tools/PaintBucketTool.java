@@ -81,8 +81,8 @@ public class PaintBucketTool extends Tool {
 
     @Override
     public void mouseReleased(MouseEvent e, ImageDisplay ic) {
-        int x = userDrag.getEndX();
-        int y = userDrag.getEndY();
+        double x = userDrag.getEndX();
+        double y = userDrag.getEndY();
 
         Composition comp = ic.getComp();
         ImageLayer layer = comp.getActiveMaskOrImageLayer();
@@ -104,7 +104,7 @@ public class PaintBucketTool extends Tool {
 
         Color newColor = getFillColor();
 
-        Rectangle replacedArea = scanlineFloodFill(workingCopy, x, y, newColor, toleranceParam.getValue());
+        Rectangle replacedArea = scanlineFloodFill(workingCopy, (int) x, (int) y, newColor, toleranceParam.getValue());
 
         if (replacedArea != null) { // something was replaced
             ToolAffectedArea affectedArea = new ToolAffectedArea(comp, replacedArea, true);

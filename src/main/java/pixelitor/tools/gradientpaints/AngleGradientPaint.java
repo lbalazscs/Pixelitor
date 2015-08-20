@@ -124,7 +124,7 @@ public class AngleGradientPaint implements Paint {
 
                     boolean needsAA = false;
                     if (cycleMethod != REFLECT) {
-                        int distance = userDrag.taxiCabMetric(x, y);
+                        double distance = userDrag.taxiCabMetric(x, y);
                         double threshold = 0.2 / distance;
                         needsAA = interpolationValue > (1.0 - threshold) || interpolationValue < threshold;
                     }

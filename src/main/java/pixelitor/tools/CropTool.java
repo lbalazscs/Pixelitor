@@ -40,6 +40,7 @@ import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
+import java.awt.geom.Rectangle2D;
 
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.Color.BLACK;
@@ -66,7 +67,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
 
     // The crop rectangle in image space.
     // This variable is used only while the image component is resized
-    private Rectangle lastCropRect;
+    private Rectangle2D lastCropRect;
     private JCheckBox allowGrowingCB;
 
     CropTool() {
@@ -162,7 +163,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
                 if (transformSupport != null) {
                     throw new IllegalStateException();
                 }
-                Rectangle imageSpaceRect = userDrag.createPositiveRect();
+                Rectangle2D imageSpaceRect = userDrag.createPositiveRect();
                 Rectangle compSpaceRect = ic.fromImageToComponentSpace(imageSpaceRect);
 
                 transformSupport = new TransformSupport(compSpaceRect, imageSpaceRect);
@@ -186,7 +187,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
         if (callingIC != ImageComponents.getActiveIC()) {
             return;
         }
-        Rectangle cropRect = getCropRect(callingIC);
+        Rectangle2D cropRect = getCropRect(callingIC);
         if (cropRect == null) {
             return;
         }
@@ -202,11 +203,11 @@ public class CropTool extends Tool implements ImageSwitchListener {
         // so we have to intersect with the view rectangle...
         Rectangle componentSpaceViewRect = callingIC.getViewRect();
         // ...but first get this to image space...
-        Rectangle imageSpaceViewRect = callingIC.fromComponentToImageSpace(componentSpaceViewRect);
+        Rectangle2D imageSpaceViewRect = callingIC.fromComponentToImageSpace(componentSpaceViewRect);
         // ... and now we can intersect
-        canvasBounds = canvasBounds.intersection(imageSpaceViewRect);
+        Rectangle2D canvasImgIntersection = canvasBounds.createIntersection(imageSpaceViewRect);
         Path2D darkAreaClip = new Path2D.Double(Path2D.WIND_EVEN_ODD);
-        darkAreaClip.append(canvasBounds, false);
+        darkAreaClip.append(canvasImgIntersection, false);
         darkAreaClip.append(cropRect, false);
         g2.setClip(darkAreaClip);
 
@@ -216,7 +217,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
         Composite previousComposite = g2.getComposite();
         g2.setComposite(hideComposite);
 
-        g2.fill(canvasBounds);
+        g2.fill(canvasImgIntersection);
 
         g2.setColor(previousColor);
         g2.setComposite(previousComposite);
@@ -239,7 +240,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
     /**
      * Returns the crop rectangle in image space
      */
-    public Rectangle getCropRect(ImageDisplay ic) {
+    public Rectangle2D getCropRect(ImageDisplay ic) {
         switch (state) {
             case INITIAL:
                 lastCropRect = null;

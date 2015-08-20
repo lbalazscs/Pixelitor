@@ -129,7 +129,7 @@ public class DiamondGradientPaint implements Paint {
                     int base = (j * width + i) * 4;
                     int x = startX + i;
 
-                    float interpolationValue = getInterpolationValue(x, y);
+                    double interpolationValue = getInterpolationValue(x, y);
 
                     boolean needsAA = false;
                     if (cycleMethod == REPEAT) {
@@ -191,14 +191,14 @@ public class DiamondGradientPaint implements Paint {
             return raster;
         }
 
-        public float getInterpolationValue(float x, float y) {
-            float dx = x - userDrag.getStartX();
-            float dy = y - userDrag.getStartY();
+        public double getInterpolationValue(double x, double y) {
+            double dx = x - userDrag.getStartX();
+            double dy = y - userDrag.getStartY();
 
-            float v1 = Math.abs((dx * this.dragRelDX) + (dy * this.dragRelDY));
-            float v2 = Math.abs((dx * this.dragRelDY) - (dy * this.dragRelDX));
+            double v1 = Math.abs((dx * this.dragRelDX) + (dy * this.dragRelDY));
+            double v2 = Math.abs((dx * this.dragRelDY) - (dy * this.dragRelDX));
 
-            float interpolationValue = v1 + v2;
+            double interpolationValue = v1 + v2;
 
             if (cycleMethod == NO_CYCLE) {
                 if (interpolationValue > 1.0) {

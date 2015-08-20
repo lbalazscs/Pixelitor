@@ -45,6 +45,7 @@ import pixelitor.io.FileChoosers;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.LayerButton;
 import pixelitor.menus.view.ZoomLevel;
+import pixelitor.testutils.WithSelection;
 import pixelitor.tools.BrushType;
 import pixelitor.tools.GradientColorType;
 import pixelitor.tools.GradientTool;
@@ -97,8 +98,6 @@ public class AssertJSwingTest {
     enum Randomize {YES, NO}
 
     enum ShowOriginal {YES, NO}
-
-    enum WithSelection {YES, NO}
 
     // TODO create independent tests with static initialization of the window
 

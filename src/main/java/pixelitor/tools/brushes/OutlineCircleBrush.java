@@ -35,8 +35,8 @@ public class OutlineCircleBrush extends StrokeBrush {
     }
 
     @Override
-    public void drawShape(int x, int y) {
-        Shape circle = new Ellipse2D.Float(x - radius, y - radius, diameter, diameter);
+    public void drawShape(double x, double y) {
+        Shape circle = new Ellipse2D.Double(x - radius, y - radius, diameter, diameter);
         Stroke saveStroke = targetG.getStroke();
         targetG.setStroke(StrokeType.OUTLINE.getInnerStroke());
         targetG.draw(circle);

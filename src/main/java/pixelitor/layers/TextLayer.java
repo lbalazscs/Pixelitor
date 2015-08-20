@@ -37,8 +37,8 @@ import pixelitor.utils.OKCancelDialog;
 import pixelitor.utils.UpdateGUI;
 
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -118,7 +118,7 @@ public class TextLayer extends ContentLayer {
     }
 
     @Override
-    public void moveWhileDragging(int x, int y) {
+    public void moveWhileDragging(double x, double y) {
         super.moveWhileDragging(x, y);
         painter.setTranslation(getTranslationX(), getTranslationY());
     }
@@ -262,7 +262,7 @@ public class TextLayer extends ContentLayer {
     }
 
     @Override
-    public void crop(Rectangle cropRect) {
+    public void crop(Rectangle2D cropRect) {
 //        Rectangle textBounds = painter.getTextBounds();
 //        int currentX = textBounds.x;
 //        int currentY = textBounds.y;

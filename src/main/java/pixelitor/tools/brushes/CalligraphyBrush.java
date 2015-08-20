@@ -33,7 +33,7 @@ public class CalligraphyBrush extends StrokeBrush {
     }
 
     @Override
-    protected void drawShape(int x, int y) {
+    protected void drawShape(double x, double y) {
         // TODO these calculations could be simpler
 
         float projectedShift = diameter / 1.4142f;
@@ -56,7 +56,7 @@ public class CalligraphyBrush extends StrokeBrush {
     }
 
     @Override
-    public void drawLine(int startX, int startY, int endX, int endY) {
+    public void drawLine(double startX, double startY, double endX, double endY) {
         super.drawLine(startX, startY, endX, endY);
 
         // for some reason this must be called, otherwise gaps remain

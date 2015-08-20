@@ -19,7 +19,6 @@ package pixelitor;
 
 import net.jafama.FastMath;
 import pixelitor.io.OpenSaveManager;
-import pixelitor.tools.FgBgColorSelector;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.Utils;
@@ -101,7 +100,7 @@ public class Pixelitor {
         } else {
             // ensure that the focus is not grabbed by a textfield
             // so that the keyboard shortcuts work properly
-            FgBgColorSelector.INSTANCE.requestFocus();
+            FgBgColors.getGUI().requestFocus();
         }
 
         TipsOfTheDay.showTips(pw, false);

@@ -28,8 +28,8 @@ public abstract class AbstractBrush implements Brush {
 
     protected int radius = AbstractBrushTool.DEFAULT_BRUSH_RADIUS;
     protected int diameter;
-    protected int previousX;
-    protected int previousY;
+    protected double previousX;
+    protected double previousY;
 
     protected AbstractBrush(int radius) {
         setRadius(radius);
@@ -50,12 +50,12 @@ public abstract class AbstractBrush implements Brush {
     }
 
     // call before setPrevious
-    protected void updateComp(int x, int y) {
+    protected void updateComp(double x, double y) {
         comp.updateRegion(previousX, previousY, x, y, diameter);
     }
 
     // call after updateComp
-    protected void setPrevious(int x, int y) {
+    protected void setPrevious(double x, double y) {
         this.previousX = x;
         this.previousY = y;
     }

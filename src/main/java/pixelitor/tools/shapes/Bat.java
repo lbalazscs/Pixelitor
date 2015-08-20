@@ -20,7 +20,7 @@ package pixelitor.tools.shapes;
  * Bat shape based on http://en.wikipedia.org/wiki/File:Bat_shadow_black.svg
  */
 public class Bat extends GeneralShape {
-    public Bat(double x, double y, int width, int height) {
+    public Bat(double x, double y, double width, double height) {
         double cp1X; // x of control point 1
         double cp1Y; // y of control point 1
         double cp2X; // x of control point 2

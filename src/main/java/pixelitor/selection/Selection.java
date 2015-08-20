@@ -291,7 +291,9 @@ public class Selection {
                 state = DIED;
                 break;
             case HAS_SHAPE:
-                marchingAntsTimer.stop();
+                if(marchingAntsTimer != null) { // can be null in unit tests
+                    marchingAntsTimer.stop();
+                }
                 updateComponent();
                 ic = null;
                 state = DIED;
@@ -371,8 +373,8 @@ public class Selection {
         System.arraycopy(xPoints, 0, newXPoints, 0, nPoints);
         System.arraycopy(yPoints, 0, newXPoints, 0, nPoints);
 
-        newXPoints[newNPoints - 1] = userDrag.getEndX();
-        newYPoints[newNPoints - 1] = userDrag.getEndY();
+        newXPoints[newNPoints - 1] = (int) userDrag.getEndX();
+        newYPoints[newNPoints - 1] = (int) userDrag.getEndY();
 
         currentSelectionShape = new Polygon(newXPoints, newYPoints, newNPoints);
     }

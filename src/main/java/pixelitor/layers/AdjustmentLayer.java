@@ -20,7 +20,7 @@ import pixelitor.Composition;
 import pixelitor.filters.Filter;
 
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -62,7 +62,7 @@ public class AdjustmentLayer extends Layer {
     }
 
     @Override
-    public void crop(Rectangle cropRect) {
+    public void crop(Rectangle2D cropRect) {
         // do nothing
     }
 

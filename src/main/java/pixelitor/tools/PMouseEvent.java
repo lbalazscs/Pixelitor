@@ -23,6 +23,10 @@ package pixelitor.tools;
 public class PMouseEvent {
     private boolean shiftDown;
 
+    // event coordinates in image space
+    private double x;
+    private double y;
+
     boolean wasShiftDown() {
         return shiftDown;
     }

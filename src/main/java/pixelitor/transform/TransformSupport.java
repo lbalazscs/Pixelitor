@@ -26,6 +26,7 @@ import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Rectangle2D;
 
 /**
  * Helps with interactive manipulation of selections/transforms
@@ -33,7 +34,7 @@ import java.awt.event.MouseEvent;
 public class TransformSupport {
     private final Handles handles;
     private Rectangle compSpaceRect;
-    private Rectangle imageSpaceRect;
+    private Rectangle2D imageSpaceRect;
     private int dragStartX;
     private int dragStartY;
     private int dragStartRectWidth;
@@ -42,7 +43,7 @@ public class TransformSupport {
     // true while the user is adjusting the handles
     private boolean adjusting;
 
-    public TransformSupport(Rectangle compSpaceRect, Rectangle imageSpaceRect) {
+    public TransformSupport(Rectangle compSpaceRect, Rectangle2D imageSpaceRect) {
         this.compSpaceRect = compSpaceRect;
         this.imageSpaceRect = imageSpaceRect;
         handles = new Handles(compSpaceRect);
@@ -108,7 +109,7 @@ public class TransformSupport {
         handles.setCursorForPoint(e.getX(), e.getY(), ic);
     }
 
-    public Rectangle getImageSpaceRect(ImageDisplay ic) {
+    public Rectangle2D getImageSpaceRect(ImageDisplay ic) {
         if(adjusting) {
             recalculateImageSpaceRect(ic);
         }
@@ -136,7 +137,8 @@ public class TransformSupport {
     }
 
     private void recalculateImageSpaceRect(ImageDisplay ic) {
-        imageSpaceRect = Utils.toPositiveRect(ic.fromComponentToImageSpace(compSpaceRect));
+        Rectangle2D imageSpaceRect = ic.fromComponentToImageSpace(compSpaceRect);
+        this.imageSpaceRect = Utils.toPositiveRect(imageSpaceRect);
     }
 
     public void arrowKeyPressed(ArrowKey key, ImageComponent ic) {

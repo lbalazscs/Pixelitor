@@ -19,27 +19,26 @@ package pixelitor.tools;
 
 import pixelitor.ImageDisplay;
 
-import java.awt.Graphics;
-import java.awt.Rectangle;
+import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 
 /**
- * Represents the mouse drag on the image made by the user while using a tool
- * The coordinates are scaled from mouse coordinates to image coordinates to compensate the zoom level,
- * and also translated because the centered image does not necessarily start at 0, 0
+ * Represents the mouse drag on the image made by the user while using a tool.
+ * The coordinates are in image coordinates.
  */
 public class UserDrag {
-    private int startX;
-    private int startY;
-    private int endX;
-    private int endY;
+    private double startX;
+    private double startY;
+    private double endX;
+    private double endY;
 
     private boolean startFromCenter;
 
-    private int oldEndX;
-    private int oldEndY;
+    private double oldEndX;
+    private double oldEndY;
 
     private boolean constrainPoints = false;
 
@@ -64,8 +63,8 @@ public class UserDrag {
         endY = ic.componentYToImageSpace(e.getY());
 
         if (constrainPoints) {
-            int dx = Math.abs(endX - startX);
-            int dy = Math.abs(endY - startY);
+            double dx = Math.abs(endX - startX);
+            double dy = Math.abs(endY - startY);
 
             if (dx > dy) {
                 endY = startY;
@@ -79,15 +78,15 @@ public class UserDrag {
         this.constrainPoints = constrainPoints;
     }
 
-    public int getStartX() {
+    public double getStartX() {
         return startX;
     }
 
-    public int getStartY() {
+    public double getStartY() {
         return startY;
     }
 
-    public int getStartXFromCenter() {
+    public double getStartXFromCenter() {
         if (startFromCenter) {
             return startX - (endX - startX);
         } else {
@@ -95,7 +94,7 @@ public class UserDrag {
         }
     }
 
-    public int getStartYFromCenter() {
+    public double getStartYFromCenter() {
         if (startFromCenter) {
             return startY - (endY - startY);
         } else {
@@ -103,26 +102,26 @@ public class UserDrag {
         }
     }
 
-    public int getEndX() {
+    public double getEndX() {
         return endX;
     }
 
-    public int getEndY() {
+    public double getEndY() {
         return endY;
     }
 
-    public Point2D.Float getStartPoint() {
-        return new Point2D.Float(startX, startY);
+    public Point2D.Double getStartPoint() {
+        return new Point2D.Double(startX, startY);
     }
 
-    public Point2D.Float getEndPoint() {
-        return new Point2D.Float(endX, endY);
+    public Point2D.Double getEndPoint() {
+        return new Point2D.Double(endX, endY);
     }
 
-    public float getDistance() {
-        int dx = startX - endX;
-        int dy = startY - endY;
-        return (float) Math.sqrt(dx * dx + dy * dy);
+    public double getDistance() {
+        double dx = startX - endX;
+        double dy = startY - endY;
+        return Math.sqrt(dx * dx + dy * dy);
     }
 
     public double getStartDistanceFrom(double x, double y) {
@@ -140,12 +139,12 @@ public class UserDrag {
         return Math.atan2(x - startX, y - startY);
     }
 
-    public void drawLine(Graphics g) {
-        g.drawLine(startX, startY, endX, endY);
+    public void drawLine(Graphics2D g) {
+        g.draw(asLine());
     }
 
     public Line2D asLine() {
-        return new Line2D.Float(startX, startY, endX, endY);
+        return new Line2D.Double(startX, startY, endX, endY);
     }
 
     public void saveEndValues() {
@@ -154,18 +153,18 @@ public class UserDrag {
     }
 
     public void adjustStartForSpaceDownMove() {
-        int dx = endX - oldEndX;
-        int dy = endY - oldEndY;
+        double dx = endX - oldEndX;
+        double dy = endY - oldEndY;
 
         startX += dx;
         startY += dy;
     }
 
-    public int getDX() {
+    public double getDX() {
         return endX - startX;
     }
 
-    public int getDY() {
+    public double getDY() {
         return endY - startY;
     }
 
@@ -174,15 +173,15 @@ public class UserDrag {
      *
      * @return a Rectangle where the width and height can be < 0
      */
-    public Rectangle createPossiblyEmptyRect() {
-        int x;
-        int y;
-        int width;
-        int height;
+    public Rectangle2D createPossiblyEmptyRect() {
+        double x;
+        double y;
+        double width;
+        double height;
 
         if (startFromCenter) {
-            int halfWidth = endX - startX; // can be negative
-            int halfHeight = endY - startY; // can be negative
+            double halfWidth = endX - startX; // can be negative
+            double halfHeight = endY - startY; // can be negative
 
             x = startX - halfWidth;
             y = startY - halfHeight;
@@ -196,7 +195,7 @@ public class UserDrag {
             height = endY - startY;
         }
 
-        return new Rectangle(x, y, width, height);
+        return new Rectangle2D.Double(x, y, width, height);
     }
 
     /**
@@ -204,14 +203,14 @@ public class UserDrag {
      *
      * @return a Rectangle where the width and height are >= 0
      */
-    public Rectangle createPositiveRect() {
-        int x;
-        int y;
-        int width;
-        int height;
+    public Rectangle2D createPositiveRect() {
+        double x;
+        double y;
+        double width;
+        double height;
 
         if (startFromCenter) {
-            int halfWidth;  // positive or zero
+            double halfWidth;  // positive or zero
             if (endX > startX) {
                 halfWidth = endX - startX;
                 x = startX - halfWidth;
@@ -220,7 +219,7 @@ public class UserDrag {
                 x = endX;
             }
 
-            int halfHeight; // positive or zero
+            double halfHeight; // positive or zero
             if (endY > startY) {
                 halfHeight = endY - startY;
                 y = startY - halfHeight;
@@ -232,7 +231,7 @@ public class UserDrag {
             width = 2 * halfWidth;
             height = 2 * halfHeight;
         } else {
-            int tmpEndX;
+            double tmpEndX;
             if (endX > startX) {
                 x = startX;
                 tmpEndX = endX;
@@ -241,7 +240,7 @@ public class UserDrag {
                 tmpEndX = startX;
             }
 
-            int tmpEndY;
+            double tmpEndY;
             if (endY > startY) {
                 y = startY;
                 tmpEndY = endY;
@@ -253,16 +252,15 @@ public class UserDrag {
             width = tmpEndX - x;
             height = tmpEndY - y;
         }
-        return new Rectangle(x, y, width, height);
+        return new Rectangle2D.Double(x, y, width, height);
     }
 
     public Point2D getCenterPoint() {
-        float cx = (startX + endX) / 2.0f;
-        float cy = (startY + endY) / 2.0f;
+        double cx = (startX + endX) / 2.0;
+        double cy = (startY + endY) / 2.0;
 
-        return new Point2D.Float(cx, cy);
+        return new Point2D.Double(cx, cy);
     }
-
 
     public void setStartFromCenter(boolean startFromCenter) {
         this.startFromCenter = startFromCenter;
@@ -299,7 +297,7 @@ public class UserDrag {
                 '}';
     }
 
-    public int taxiCabMetric(int x, int y) {
+    public double taxiCabMetric(int x, int y) {
         return Math.abs(x - startX) + Math.abs(y - startY);
     }
 }

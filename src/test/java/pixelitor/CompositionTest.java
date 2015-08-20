@@ -546,4 +546,39 @@ public class CompositionTest {
         tester.checkActiveLayerAndMaskImageSize(20, 10);
     }
 
+    @Test
+    public void testDeselect() {
+        assertThat(comp.hasSelection()).isFalse();
+        tester.setStandardTestSelection();
+        assertThat(comp.hasSelection()).isTrue();
+        tester.checkSelectionBounds(tester.getStandardTestSelectionShape());
+
+        comp.deselect(AddToHistory.YES);
+
+        assertThat(comp.hasSelection()).isFalse();
+        History.undo();
+        assertThat(comp.hasSelection()).isTrue();
+        tester.checkSelectionBounds(tester.getStandardTestSelectionShape());
+        History.redo();
+        assertThat(comp.hasSelection()).isFalse();
+    }
+
+    @Test
+    public void testCropSelection() {
+        tester.setStandardTestSelection();
+        tester.checkSelectionBounds(tester.getStandardTestSelectionShape());
+        comp.cropSelection(new Rectangle(2, 2, 4, 4));
+        tester.checkSelectionBounds(new Rectangle(2, 2, 2, 2));
+    }
+
+    @Test
+    public void testSimpleMethods() {
+        assertThat(comp.getActiveLayerIndex()).isEqualTo(1);
+        assertThat(comp.activeIsImageLayer()).isTrue();
+        assertThat(comp.hasActiveImageLayerOrMask()).isTrue();
+
+        assertThat(comp.getName()).isEqualTo("Test");
+        comp.setName("New Name");
+        assertThat(comp.getName()).isEqualTo("New Name");
+    }
 }

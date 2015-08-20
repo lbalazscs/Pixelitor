@@ -29,7 +29,7 @@ public class IdealBrush extends StrokeBrush {
     }
 
     @Override
-    public void drawShape(int x, int y) {
-        targetG.fillOval(x - radius, y - radius, diameter, diameter);
+    public void drawShape(double x, double y) {
+        targetG.fillOval((int) x - radius, (int) y - radius, diameter, diameter);
     }
 }

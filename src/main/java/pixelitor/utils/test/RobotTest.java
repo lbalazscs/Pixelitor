@@ -22,6 +22,7 @@ import pixelitor.ChangeReason;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.Desktop;
+import pixelitor.FgBgColors;
 import pixelitor.GlobalKeyboardWatch;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
@@ -63,7 +64,6 @@ import pixelitor.menus.view.ShowHideLayersAction;
 import pixelitor.menus.view.ShowHideStatusBarAction;
 import pixelitor.menus.view.ShowHideToolsAction;
 import pixelitor.menus.view.ZoomLevel;
-import pixelitor.tools.FgBgColorSelector;
 import pixelitor.tools.Tool;
 import pixelitor.tools.ToolSettingsPanelContainer;
 import pixelitor.tools.Tools;
@@ -305,7 +305,7 @@ public class RobotTest {
 
     private static void randomColors() {
         logRobotEvent("random colors");
-        FgBgColorSelector.setRandomColors();
+        FgBgColors.setRandomColors();
     }
 
     private static void randomOperation() {
@@ -453,7 +453,8 @@ public class RobotTest {
             KeyEvent.VK_X, KeyEvent.VK_H,
             KeyEvent.VK_P, KeyEvent.VK_B,
             KeyEvent.VK_ALT, KeyEvent.VK_TAB,
-            KeyEvent.VK_COMMA, KeyEvent.VK_HOME, KeyEvent.VK_RIGHT
+            KeyEvent.VK_COMMA, KeyEvent.VK_HOME,
+            KeyEvent.VK_RIGHT, KeyEvent.VK_LEFT, KeyEvent.VK_UP, KeyEvent.VK_DOWN
 //            , KeyEvent.VK_V, // do not trigger move tool
     };
 

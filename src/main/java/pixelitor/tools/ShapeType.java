@@ -26,7 +26,6 @@ import pixelitor.tools.shapes.Rabbit;
 import pixelitor.tools.shapes.RandomStar;
 import pixelitor.utils.Utils;
 
-import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
@@ -42,7 +41,7 @@ public enum ShapeType {
         @Override
         public Shape getShape(UserDrag userDrag) {
             updateCoordinatesPositive(userDrag);
-            return new Rectangle(x, y, width, height);
+            return new Rectangle2D.Double(x, y, width, height);
         }
 
         @Override
@@ -53,7 +52,7 @@ public enum ShapeType {
         @Override
         public Shape getShape(UserDrag userDrag) {
             updateCoordinatesPositive(userDrag);
-            return new Ellipse2D.Float(x, y, width, height);
+            return new Ellipse2D.Double(x, y, width, height);
         }
 
         @Override
@@ -67,8 +66,8 @@ public enum ShapeType {
             return createDiamond(x, y, width, height);
         }
 
-        private Shape createDiamond(double x, double y, int width, int height) {
-            Path2D.Float path = new Path2D.Float();
+        private Shape createDiamond(double x, double y, double width, double height) {
+            Path2D.Double path = new Path2D.Double();
 
             double cx = x + width / 2.0;
             double cy = y + height / 2.0;
@@ -115,9 +114,9 @@ public enum ShapeType {
             return createStar(x, y, width, height);
         }
 
-        protected Shape createStar(double x, double y, int width, int height) {
-            double halfWidth = ((double) width) / 2;
-            double halfHeight = ((double) height) / 2;
+        protected Shape createStar(double x, double y, double width, double height) {
+            double halfWidth = width / 2;
+            double halfHeight = height / 2;
             double cx = x + halfWidth;
             double cy = y + halfHeight;
             double innerRadius;
@@ -174,7 +173,7 @@ public enum ShapeType {
 
             updateCoordinates(userDrag);
 
-            float distance = userDrag.getDistance();
+            double distance = userDrag.getDistance();
             if (userDrag.isStartFromCenter()) {
                 distance *= 2;
             }
@@ -255,23 +254,23 @@ public enum ShapeType {
      * Update the x, y, width, height coordinates so that width and height are positive
      */
     protected void updateCoordinatesPositive(UserDrag userDrag) {
-        Rectangle r = userDrag.createPositiveRect();
-        x = r.x;
-        y = r.y;
-        width = r.width;
-        height = r.height;
+        Rectangle2D r = userDrag.createPositiveRect();
+        x = r.getX();
+        y = r.getY();
+        width = r.getWidth();
+        height = r.getHeight();
     }
 
     /**
      * Update the x, y, width, height coordinates
      */
     protected void updateCoordinates(UserDrag userDrag) {
-        Rectangle r = userDrag.createPossiblyEmptyRect();
+        Rectangle2D r = userDrag.createPossiblyEmptyRect();
 
-        x = r.x;
-        y = r.y;
-        width = r.width;
-        height = r.height;
+        x = r.getX();
+        y = r.getY();
+        width = r.getWidth();
+        height = r.getHeight();
     }
 
     private final String guiName;
@@ -282,7 +281,7 @@ public enum ShapeType {
         this.closed = closed;
     }
 
-    protected int x, y, width, height;
+    protected double x, y, width, height;
 
     public abstract Shape getShape(UserDrag userDrag);
 

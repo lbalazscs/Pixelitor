@@ -60,9 +60,9 @@ public abstract class ContentLayer extends Layer {
     }
 
     @Override
-    public void moveWhileDragging(int x, int y) {
-        tmpTranslationX = x;
-        tmpTranslationY = y;
+    public void moveWhileDragging(double x, double y) {
+        tmpTranslationX = (int) x;
+        tmpTranslationY = (int) y;
         super.moveWhileDragging(x, y);
     }
 
