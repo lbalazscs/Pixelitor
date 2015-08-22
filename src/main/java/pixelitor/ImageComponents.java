@@ -42,7 +42,7 @@ import java.util.Optional;
  */
 public class ImageComponents {
     private static final List<ImageComponent> icList = new ArrayList<>();
-    private static ImageComponent activeIC;
+    private static ImageDisplay activeIC;
     private static final Collection<ImageSwitchListener> imageSwitchListeners = new ArrayList<>();
 
     private ImageComponents() {
@@ -81,7 +81,7 @@ public class ImageComponents {
         }
     }
 
-    public static ImageComponent getActiveIC() {
+    public static ImageDisplay getActiveIC() {
         return activeIC;
     }
 
@@ -178,15 +178,18 @@ public class ImageComponents {
         setNewImageAsActiveIfNecessary();
     }
 
-    public static void setActiveIC(ImageComponent newActiveIC, boolean activate) {
-        activeIC = newActiveIC;
+    public static void setActiveIC(ImageDisplay display, boolean activate) {
+        activeIC = display;
         if (activate) {
-            if (newActiveIC == null) {
+            if (display == null) {
                 throw new IllegalStateException("cannot activate null imageComponent");
             }
-            InternalImageFrame internalFrame = activeIC.getInternalFrame();
+            // activate is always false in unit tests
+            ImageComponent ic = (ImageComponent) display;
+
+            InternalImageFrame internalFrame = ic.getInternalFrame();
             Desktop.INSTANCE.activateInternalImageFrame(internalFrame);
-            newActiveIC.onActivation();
+            ic.onActivation();
         }
     }
 
@@ -216,7 +219,9 @@ public class ImageComponents {
      * Another image became active
      */
     public static void activeImageHasChanged(ImageComponent ic) {
-        ImageComponent oldIC = activeIC;
+        // not called in unit tests
+        ImageComponent oldIC = (ImageComponent) activeIC;
+
         setActiveIC(ic, false);
         for (ImageSwitchListener listener : imageSwitchListeners) {
             listener.activeImageHasChanged(oldIC, ic);
@@ -252,7 +257,7 @@ public class ImageComponents {
 
     public static void fitActiveToScreen() {
         if (activeIC != null) {
-            activeIC.setupFitScreenZoomSize();
+            ((ImageComponent)activeIC).setupFitScreenZoomSize();
         }
     }
 

@@ -17,7 +17,7 @@
 
 package pixelitor.tools;
 
-import pixelitor.AppLogic;
+import pixelitor.MessageHandler;
 import pixelitor.utils.IconUtils;
 
 import javax.swing.*;
@@ -31,9 +31,11 @@ import java.awt.event.ActionListener;
  */
 public class ToolButton extends JToggleButton implements ActionListener {
     private final Tool tool;
+    private final MessageHandler messageHandler;
 
-    public ToolButton(Tool tool) {
+    public ToolButton(Tool tool, MessageHandler messageHandler) {
         this.tool = tool;
+        this.messageHandler = messageHandler;
         tool.setButton(this);
 
         // used for component lookup when testing
@@ -66,6 +68,8 @@ public class ToolButton extends JToggleButton implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         Tools.setCurrentTool(tool);
-        AppLogic.setStatusMessage(tool.getName() + " Tool: " + tool.getToolMessage());
+
+        String msg = tool.getName() + " Tool: " + tool.getToolMessage();
+        messageHandler.showStatusBarMessage(msg);
     }
 }

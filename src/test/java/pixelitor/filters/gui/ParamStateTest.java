@@ -20,6 +20,8 @@ package pixelitor.filters.gui;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 
 import java.awt.Color;
 import java.util.Arrays;
@@ -32,15 +34,13 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
 
 @RunWith(Parameterized.class)
 public class ParamStateTest {
-    private ParamState start;
-    private ParamState end;
+    @Parameter
+    public ParamState start;
 
-    public ParamStateTest(ParamState start, ParamState end) {
-        this.end = end;
-        this.start = start;
-    }
+    @Parameter(value = 1)
+    public ParamState end;
 
-    @Parameterized.Parameters
+    @Parameters
     public static Collection<Object[]> instancesToTest() {
         FilterParam angleParamStart = new AngleParam("AngleParam", 0);
         FilterParam angleParamEnd = new AngleParam("AngleParam", 1);

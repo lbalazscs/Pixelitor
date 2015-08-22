@@ -20,8 +20,8 @@ package pixelitor.utils;
 import pixelitor.Build;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
+import pixelitor.ImageDisplay;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.Filter;
 
@@ -336,7 +336,7 @@ public final class Utils {
     @SuppressWarnings("WeakerAccess")
     public static void debugImage(BufferedImage img, String name) {
         BufferedImage copy = ImageUtils.copyImage(img);
-        ImageComponent savedIC = ImageComponents.getActiveIC();
+        ImageDisplay savedIC = ImageComponents.getActiveIC();
 
         Optional<Composition> debugCompOpt = ImageComponents.findCompositionByName(name);
         if(debugCompOpt.isPresent()) {

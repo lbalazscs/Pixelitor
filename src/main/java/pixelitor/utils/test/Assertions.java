@@ -2,8 +2,8 @@ package pixelitor.utils.test;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
+import pixelitor.ImageDisplay;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
@@ -96,7 +96,7 @@ public class Assertions {
     }
 
     public static boolean cropToolRectangleBoundsAre(int x, int y, int w, int h) {
-        ImageComponent ic = ImageComponents.getActiveIC();
+        ImageDisplay ic = ImageComponents.getActiveIC();
         if (ic == null) {
             throw new IllegalStateException();
         }
@@ -119,7 +119,7 @@ public class Assertions {
     }
 
     public static boolean zoomIs(ZoomLevel zoom) {
-        ImageComponent ic = ImageComponents.getActiveIC();
+        ImageDisplay ic = ImageComponents.getActiveIC();
         if (ic == null) {
             throw new IllegalStateException();
         }

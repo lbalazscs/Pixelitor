@@ -297,7 +297,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
         if (state == TRANSFORM) {
-            ImageComponent ic = ImageComponents.getActiveIC();
+            ImageDisplay ic = ImageComponents.getActiveIC();
             if (ic != null) {
                 transformSupport.arrowKeyPressed(key, ic);
                 return true;

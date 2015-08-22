@@ -25,12 +25,12 @@ public class LayerBlendingModesTest {
     private ImageLayer lowerLayer;
     private Layer upperLayer;
 
-    private Color lowerColor = new Color(211, 141, 86);
-    private Color upperColor = new Color(119, 86, 132);
+    private final Color lowerColor = new Color(211, 141, 86);
+    private final Color upperColor = new Color(119, 86, 132);
 
-    AdjustmentLayer invertAdjustment;
-    AdjustmentLayer alwaysUpperColorAdjustment;
-    TextLayer upperColorTextLayer;
+    private AdjustmentLayer invertAdjustment;
+    private AdjustmentLayer alwaysUpperColorAdjustment;
+    private TextLayer upperColorTextLayer;
 
     @Before
     public void setUp() {
@@ -158,7 +158,7 @@ public class LayerBlendingModesTest {
         testBlendingMode(BlendingMode.LUMINOSITY, new Color(132, 88, 54));
     }
 
-    protected void testBlendingMode(BlendingMode blendingMode, Color expectedColor) {
+    private void testBlendingMode(BlendingMode blendingMode, Color expectedColor) {
         // check that the blending mode is working as expected
         upperLayer.setBlendingMode(blendingMode, UpdateGUI.NO, AddToHistory.YES, true);
         assertThat(getResultingColor()).isEqualTo(expectedColor);

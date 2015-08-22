@@ -140,7 +140,12 @@ public class GradientTool extends Tool {
         // repeated gradients are still jaggy
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
-        Color[] colors = {colorType.getStartColor(invert), colorType.getEndColor(invert)};
+        Color startColor = colorType.getStartColor(invert);
+        Color endColor = colorType.getEndColor(invert);
+        assert startColor != null;
+        assert endColor != null;
+        Color[] colors = {startColor, endColor};
+
         Paint gradient = gradientType.getGradient(userDrag, colors, cycleMethod);
 
         g.setPaint(gradient);

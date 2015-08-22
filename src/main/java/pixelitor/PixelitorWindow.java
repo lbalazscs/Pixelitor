@@ -50,6 +50,8 @@ public class PixelitorWindow extends JFrame {
     private PixelitorWindow() {
         super(Build.getPixelitorWindowFixTitle());
 
+        AppLogic.setMessageHandler(new GUIMessageHandler(this));
+
         setupWindowClosing();
 
         addMenus();

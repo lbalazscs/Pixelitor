@@ -19,8 +19,8 @@ package pixelitor.menus;
 
 import pixelitor.Build;
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
+import pixelitor.ImageDisplay;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
@@ -158,7 +158,7 @@ public final class SelectionActions {
 
         @Override
         void onClick() {
-            ImageComponent ic = ImageComponents.getActiveIC();
+            ImageDisplay ic = ImageComponents.getActiveIC();
             if(ic == null) {
                 return;
             }

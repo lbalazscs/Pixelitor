@@ -82,12 +82,11 @@ public class BrushTool extends TmpLayerBrushTool {
     }
 
     private void setupDrawingColor(MouseEvent e) {
-        int button = e.getButton();
-
         if (SwingUtilities.isRightMouseButton(e)) {
             drawingColor = FgBgColors.getBG();
         } else if (SwingUtilities.isMiddleMouseButton(e)) {
             // TODO we never get here because isAltDown is always true for middle-button events, even if Alt is not pressed?
+            // See source comment in java.awt.Event for ALT_MASK
             Color fg = FgBgColors.getFG();
             Color bg = FgBgColors.getBG();
             if(e.isControlDown()) {

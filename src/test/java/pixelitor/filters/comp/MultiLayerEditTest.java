@@ -5,6 +5,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 import pixelitor.CompTester;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
@@ -26,24 +28,23 @@ import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_270;
 import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_90;
 
 @RunWith(Parameterized.class)
-public class MultiLayerEditTests {
+public class MultiLayerEditTest {
     private Composition comp;
     private CompTester tester;
 
     private ImageLayer layer1;
     private ImageLayer layer2;
 
-    private NumLayers numLayers;
-    private WithTranslation withTranslation;
-    private WithSelection withSelection;
+    @Parameter
+    public NumLayers numLayers;
 
-    public MultiLayerEditTests(NumLayers numLayers, WithTranslation withTranslation, WithSelection withSelection) {
-        this.numLayers = numLayers;
-        this.withTranslation = withTranslation;
-        this.withSelection = withSelection;
-    }
+    @Parameter(value = 1)
+    public WithTranslation withTranslation;
 
-    @Parameterized.Parameters
+    @Parameter(value = 2)
+    public WithSelection withSelection;
+
+    @Parameters(name = "{index}: layers = {0}, translation = {1}, selection = {2}")
     public static Collection<Object[]> instancesToTest() {
         return Arrays.asList(new Object[][]{
                 // TODO add a WithMask parameter

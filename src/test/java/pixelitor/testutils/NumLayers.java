@@ -19,7 +19,7 @@ public enum NumLayers {
         }
     };
 
-    private boolean canUndo;
+    private final boolean canUndo;
 
     NumLayers(boolean canUndo) {
         this.canUndo = canUndo;

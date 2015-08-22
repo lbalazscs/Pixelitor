@@ -81,4 +81,6 @@ public interface ImageDisplay {
     void setShowLayerMask(boolean b);
 
     boolean setZoom(ZoomLevel zoomLevel, boolean b);
+
+    void close();
 }

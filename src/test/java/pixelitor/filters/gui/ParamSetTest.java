@@ -25,18 +25,22 @@ import pixelitor.utils.ReseedSupport;
 import java.awt.Rectangle;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class ParamSetTest {
     private ParamSet params;
-    private ParamAdjustmentListenerSpy adjustmentListener;
+    private ParamAdjustmentListener adjustmentListener;
     private RangeParam extraParam;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         params = new ParamSet(ParamTest.getTestParams())
                 .withAction(ReseedSupport.createAction())
                 .addCommonActions();
-        adjustmentListener = new ParamAdjustmentListenerSpy();
+        adjustmentListener = mock(ParamAdjustmentListener.class);
         params.setAdjustmentListener(adjustmentListener);
         extraParam = new RangeParam("Extra Param", 0, 200, 0);
         extraParam.setAdjustmentListener(adjustmentListener);
@@ -62,10 +66,10 @@ public class ParamSetTest {
         checkThatFilterWasNotCalled();
 
         extraParam.setValue(43, true);
-        checkThatFilterWasCalled(1);
+        verify(adjustmentListener, times(1)).paramAdjusted();
 
         params.triggerFilter();
-        checkThatFilterWasCalled(2);
+        verify(adjustmentListener, times(2)).paramAdjusted();
     }
 
     @Test
@@ -95,10 +99,6 @@ public class ParamSetTest {
     }
 
     private void checkThatFilterWasNotCalled() {
-        assertThat(adjustmentListener.getNumCalled()).isEqualTo(0);
-    }
-
-    private void checkThatFilterWasCalled(int n) {
-        assertThat(adjustmentListener.getNumCalled()).isEqualTo(n);
+        verify(adjustmentListener, never()).paramAdjusted();
     }
 }

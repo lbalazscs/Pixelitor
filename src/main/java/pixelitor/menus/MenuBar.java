@@ -27,6 +27,7 @@ import pixelitor.Desktop;
 import pixelitor.FgBgColors;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
+import pixelitor.ImageDisplay;
 import pixelitor.NewImage;
 import pixelitor.PixelitorWindow;
 import pixelitor.TipsOfTheDay;
@@ -761,7 +762,7 @@ public class MenuBar extends JMenuBar {
         Action deleteLayerMask = new MenuAction("Delete", HAS_LAYER_MASK) {
             @Override
             void onClick() {
-                ImageComponent ic = ImageComponents.getActiveIC();
+                ImageDisplay ic = ImageComponents.getActiveIC();
                 Layer layer = ic.getComp().getActiveLayer();
 
                 layer.deleteMask(AddToHistory.YES, true);
@@ -774,7 +775,7 @@ public class MenuBar extends JMenuBar {
         Action applyLayerMask = new MenuAction("Apply", HAS_LAYER_MASK) {
             @Override
             void onClick() {
-                ImageComponent ic = ImageComponents.getActiveIC();
+                ImageDisplay ic = ImageComponents.getActiveIC();
                 Layer layer = ic.getComp().getActiveLayer();
 
                 if (!(layer instanceof ImageLayer)) {
@@ -797,7 +798,7 @@ public class MenuBar extends JMenuBar {
         createMenuItem(new MenuAction("Show and Edit Composition") {
             @Override
             void onClick() {
-                ImageComponent ic = ImageComponents.getActiveIC();
+                ImageDisplay ic = ImageComponents.getActiveIC();
                 Layer activeLayer = ic.getComp().getActiveLayer();
                 ic.setShowLayerMask(false);
                 FgBgColors.setLayerMaskEditing(false);
@@ -808,7 +809,7 @@ public class MenuBar extends JMenuBar {
         createMenuItem(new MenuAction("Show and Edit Mask", HAS_LAYER_MASK) {
             @Override
             void onClick() {
-                ImageComponent ic = ImageComponents.getActiveIC();
+                ImageDisplay ic = ImageComponents.getActiveIC();
                 Layer activeLayer = ic.getComp().getActiveLayer();
                 ic.setShowLayerMask(true);
                 FgBgColors.setLayerMaskEditing(true);
@@ -819,7 +820,7 @@ public class MenuBar extends JMenuBar {
         createMenuItem(new MenuAction("Show Composition, but Edit Mask", HAS_LAYER_MASK) {
             @Override
             void onClick() {
-                ImageComponent ic = ImageComponents.getActiveIC();
+                ImageDisplay ic = ImageComponents.getActiveIC();
                 Layer activeLayer = ic.getComp().getActiveLayer();
                 ic.setShowLayerMask(false);
                 FgBgColors.setLayerMaskEditing(true);

@@ -36,10 +36,6 @@ import org.assertj.swing.fixture.JTabbedPaneFixture;
 import org.assertj.swing.fixture.JTextComponentFixture;
 import org.assertj.swing.launcher.ApplicationLauncher;
 import org.fest.util.Files;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
 import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.io.FileChoosers;
 import pixelitor.layers.ImageLayer;
@@ -82,7 +78,6 @@ import static pixelitor.utils.test.Assertions.noSelection;
 import static pixelitor.utils.test.Assertions.numLayersIs;
 import static pixelitor.utils.test.Assertions.selectionBoundsAre;
 
-@Ignore
 public class AssertJSwingTest {
     private static final File BASE_TESTING_DIR = new File("C:\\pix_tests");
     private static final File INPUT_DIR = new File(BASE_TESTING_DIR, "input");
@@ -90,7 +85,7 @@ public class AssertJSwingTest {
     private static final File BATCH_FILTER_OUTPUT_DIR = new File(BASE_TESTING_DIR, "batch_filter_output");
 
     private Robot robot;
-    public static final int ROBOT_DELAY_MILLIS = 100;
+    private static final int ROBOT_DELAY_MILLIS = 100;
 
     private FrameFixture window;
     private final Random random = new Random();
@@ -99,38 +94,35 @@ public class AssertJSwingTest {
 
     enum ShowOriginal {YES, NO}
 
-    // TODO create independent tests with static initialization of the window
+    public static void main(String[] args) {
+        initialize();
+        AssertJSwingTest test = new AssertJSwingTest();
+        test.setUp();
+        test.testApp();
+        System.out.println("AssertJSwingTest::main: finished");
+    }
 
-    @BeforeClass
     public static void initialize() {
         cleanOutputs();
         checkTestingDirs();
         Utils.checkThatAssertionsAreEnabled();
     }
 
-    @Before
     public void setUp() {
-        setUpRobot();
-        onSetUp();
-    }
-
-    private void setUpRobot() {
         robot = BasicRobot.robotWithNewAwtHierarchy();
         robot.settings().delayBetweenEvents(ROBOT_DELAY_MILLIS);
-    }
 
-    protected void onSetUp() {
         ApplicationLauncher
                 .application("pixelitor.Pixelitor")
                 .withArgs((new File(INPUT_DIR, "a.jpg")).getPath())
                 .start();
+
         window = WindowFinder.findFrame("frame0")
                 .withTimeout(15, SECONDS)
                 .using(robot);
         PixelitorWindow.getInstance().setLocation(0, 0);
     }
 
-    @Test
     public void testApp() {
         testDevelopMenu();
         testTools();
@@ -554,13 +546,11 @@ public class AssertJSwingTest {
     }
 
     private void testScreenCapture() {
-        ImageComponent activeIC = ImageComponents.getActiveIC();
+        ImageDisplay activeIC = ImageComponents.getActiveIC();
         testScreenCapture(true);
         testScreenCapture(false);
         try {
-            SwingUtilities.invokeAndWait(() -> {
-                ImageComponents.setActiveIC(activeIC, true);
-            });
+            SwingUtilities.invokeAndWait(() -> ImageComponents.setActiveIC(activeIC, true));
         } catch (InterruptedException | InvocationTargetException e) {
             e.printStackTrace();
         }
@@ -1166,7 +1156,7 @@ public class AssertJSwingTest {
 
     private void testMouseWheelZooming() {
         window.pressKey(VK_CONTROL);
-        ImageComponent c = ImageComponents.getActiveIC();
+        ImageComponent c = (ImageComponent) ImageComponents.getActiveIC();
         robot.rotateMouseWheel(c, 2);
         robot.rotateMouseWheel(c, -2);
         window.releaseKey(VK_CONTROL);
@@ -1409,7 +1399,7 @@ public class AssertJSwingTest {
         robot.releaseKey(VK_ALT);
     }
 
-    protected static void cleanOutputs() {
+    private static void cleanOutputs() {
         try {
             String cleanerScript = BASE_TESTING_DIR + "\\0000_clean_outputs.bat";
             Process process = Runtime.getRuntime().exec(cleanerScript);
@@ -1424,7 +1414,7 @@ public class AssertJSwingTest {
         altClick();
     }
 
-    private void addSelection() {
+    private static void addSelection() {
         Runnable task = () -> {
             Composition comp = ImageComponents.getActiveIC().getComp();
             comp.createSelectionFromShape(new Rectangle(10, 10, 100, 100));

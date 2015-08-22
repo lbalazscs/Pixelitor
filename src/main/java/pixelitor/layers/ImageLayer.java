@@ -285,10 +285,7 @@ public class ImageLayer extends ContentLayer {
      * Initializes a preview session
      */
     public void startPreviewing() {
-//        System.out.println("ImageLayer::startPreviewing: this class = " + this.getClass().getName());
-//        if(!(this instanceof LayerMask)) {
-//            Thread.dumpStack();
-//        }
+        assert state == NORMAL : "state was " + state;
 
         if (comp.hasSelection()) {
             // if we have a selection, then the preview image reference cannot be simply
@@ -337,8 +334,6 @@ public class ImageLayer extends ContentLayer {
     }
 
     public void stopPreviewing() {
-//        System.out.println("ImageLayer::stopPreviewing: this class = " + this.getClass().getName());
-
         assert state == PREVIEW || state == SHOW_ORIGINAL;
         assert previewImage != null;
 
@@ -369,8 +364,6 @@ public class ImageLayer extends ContentLayer {
      * @return true if the image has to be repainted
      */
     public void changePreviewImage(BufferedImage img, String filterName, ChangeReason changeReason) {
-//        System.out.println(String.format("ImageLayer::changePreviewImage: filterName = '%s'", filterName));
-
         // typically we should be in PREVIEW mode
         if (state == SHOW_ORIGINAL) {
             // this is OK, something was adjusted while in show original mode
@@ -473,7 +466,7 @@ public class ImageLayer extends ContentLayer {
         return needsEnlarging;
     }
 
-    public void enlargeLayer() {
+    public void enlargeImage() {
         try {
             // the image needs to be enlarged so that it covers
             // the canvas completely
@@ -791,7 +784,7 @@ public class ImageLayer extends ContentLayer {
         boolean needsEnlarging = checkImageDoesNotCoverCanvas();
         if (needsEnlarging) {
             BufferedImage backupImage = getImage();
-            enlargeLayer();
+            enlargeImage();
             edit = new ContentLayerMoveEdit(this, backupImage, oldTranslationX, oldTranslationY);
         } else {
             edit = new ContentLayerMoveEdit(this, null, oldTranslationX, oldTranslationY);

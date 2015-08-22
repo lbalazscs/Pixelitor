@@ -22,6 +22,7 @@ import pixelitor.AppLogic;
 import pixelitor.Composition;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
+import pixelitor.ImageDisplay;
 import pixelitor.PixelitorWindow;
 import pixelitor.automate.SingleDirChooserPanel;
 import pixelitor.layers.ImageLayer;
@@ -159,7 +160,7 @@ public class OpenSaveManager {
         Utils.executeWithBusyCursor(r);
     }
 
-    public static void warnAndCloseImage(ImageComponent ic) {
+    public static void warnAndCloseImage(ImageDisplay ic) {
         try {
             Composition comp = ic.getComp();
             if (comp.isDirty()) {

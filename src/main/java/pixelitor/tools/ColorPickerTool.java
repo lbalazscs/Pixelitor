@@ -17,7 +17,6 @@
 
 package pixelitor.tools;
 
-import pixelitor.AppLogic;
 import pixelitor.FgBgColors;
 import pixelitor.ImageDisplay;
 import pixelitor.layers.ImageLayer;
@@ -97,13 +96,13 @@ public class ColorPickerTool extends Tool {
         }
     }
 
-    private static void showColorInStatusBar(int x, int y, int rgb) {
+    private void showColorInStatusBar(int x, int y, int rgb) {
         int a = (rgb >>> 24) & 0xFF;
         int r = (rgb >>> 16) & 0xFF;
         int g = (rgb >>> 8) & 0xFF;
         int b = (rgb) & 0xFF;
 
         String msg = "x = " + x + ", y = " + y + ", alpha = " + a + ", red = " + r + ", green = " + g + ", blue = " + b;
-        AppLogic.setStatusMessage(msg);
+        messageHandler.showStatusBarMessage(msg);
     }
 }

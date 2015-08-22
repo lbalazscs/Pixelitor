@@ -36,16 +36,13 @@ import java.util.Collection;
 public class AppLogic {
     private static final Collection<LayerChangeListener> layerChangeListeners = new ArrayList<>();
     private static final Collection<LayerMaskChangeListener> layerMaskChangeListeners = new ArrayList<>();
+    private static MessageHandler messageHandler;
 
     private AppLogic() {
     }
 
     public static void activeCompSizeChanged(Composition comp) {
         Symmetry.setCompositionSize(comp.getCanvasWidth(), comp.getCanvasHeight());
-    }
-
-    public static void setStatusMessage(String msg) {
-        PixelitorWindow.getInstance().setStatusBarMessage(msg);
     }
 
     public static void addLayerChangeListener(LayerChangeListener listener) {
@@ -103,7 +100,8 @@ public class AppLogic {
     }
 
     public static void showFileSavedMessage(File file) {
-        AppLogic.setStatusMessage("File " + file.getAbsolutePath() + " saved.");
+        String msg = "File " + file.getAbsolutePath() + " saved.";
+        PixelitorWindow.getInstance().setStatusBarMessage(msg);
     }
 
     public static void exitApp(PixelitorWindow pw) {
@@ -117,6 +115,14 @@ public class AppLogic {
             pw.setVisible(false);
             AppPreferences.savePrefsAndExit();
         }
+    }
+
+    public static MessageHandler getMessageHandler() {
+        return messageHandler;
+    }
+
+    public static void setMessageHandler(MessageHandler messageHandler) {
+        AppLogic.messageHandler = messageHandler;
     }
 }
 

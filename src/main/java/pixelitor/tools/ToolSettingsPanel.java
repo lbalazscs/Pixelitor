@@ -87,4 +87,12 @@ public class ToolSettingsPanel extends JPanel {
             listener.copyBrushTypeChanged(brushType);
         });
     }
+
+    public void addAutoZoomButtons() {
+        JButton actualPixelsButton = new JButton(AutoZoomButtons.ACTUAL_PIXELS_ACTION);
+        add(actualPixelsButton);
+
+        JButton fitScreenButton = new JButton(AutoZoomButtons.FIT_SCREEN_ACTION);
+        add(fitScreenButton);
+    }
 }

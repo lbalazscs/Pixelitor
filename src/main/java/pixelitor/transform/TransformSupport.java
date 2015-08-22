@@ -17,7 +17,6 @@
 
 package pixelitor.transform;
 
-import pixelitor.ImageComponent;
 import pixelitor.ImageDisplay;
 import pixelitor.tools.ArrowKey;
 import pixelitor.utils.Utils;
@@ -141,7 +140,7 @@ public class TransformSupport {
         this.imageSpaceRect = Utils.toPositiveRect(imageSpaceRect);
     }
 
-    public void arrowKeyPressed(ArrowKey key, ImageComponent ic) {
+    public void arrowKeyPressed(ArrowKey key, ImageDisplay ic) {
         double viewScale = ic.getZoomLevel().getViewScale();
         compSpaceRect.translate((int) (key.getMoveX() * viewScale), (int) (key.getMoveY() * viewScale));
         handles.updateRect(compSpaceRect);

@@ -22,6 +22,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class RandomFilterSourceTest {
     private RandomFilterSource source;
@@ -30,7 +32,9 @@ public class RandomFilterSourceTest {
     public static void globalInit() {
         for (int i = 'A'; i < 'Z' + 1; i++) {
             char[] charsInFilterName = {(char) i};
-            FilterUtils.addFilter(new FilterSpy(new String(charsInFilterName)));
+            Filter filter = mock(Filter.class);
+            when(filter.getName()).thenReturn(new String(charsInFilterName));
+            FilterUtils.addFilter(filter);
         }
     }
 
@@ -69,7 +73,7 @@ public class RandomFilterSourceTest {
         checkNextIs(two);
         checkHasPreviousButNoNext();
 
-        Filter three = source.getRandom();
+        source.getRandom(); // three
         checkHasPreviousButNoNext();
 
         checkPreviousIs(two);
@@ -95,7 +99,7 @@ public class RandomFilterSourceTest {
         Filter one = source.getRandom();
         Filter two = source.getRandom();
         Filter three = source.getRandom();
-        Filter four = source.getRandom();
+        source.getRandom(); // four
 
         checkPreviousIs(three);
         checkPreviousIs(two);
@@ -104,7 +108,7 @@ public class RandomFilterSourceTest {
         Filter five = source.getRandom();
         checkHasPreviousButNoNext();
 
-        Filter six = source.getRandom();
+        source.getRandom(); // six
         checkHasPreviousButNoNext();
 
         // and now go back to verify the history
@@ -117,9 +121,6 @@ public class RandomFilterSourceTest {
 
     private void checkPreviousIs(Filter filter) {
         Filter prev = source.getPrevious();
-        if (!prev.equals(filter)) {
-            System.out.println("RandomFilterSourceTest::checkPreviousIs: source = " + source);
-        }
         assertThat(prev).isEqualTo(filter);
     }
 

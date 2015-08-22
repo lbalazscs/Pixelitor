@@ -21,6 +21,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 
 import javax.swing.*;
 import java.awt.Rectangle;
@@ -33,9 +35,10 @@ import static java.awt.Color.CYAN;
 import static java.awt.Color.RED;
 import static java.awt.Color.WHITE;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
@@ -48,20 +51,18 @@ import static pixelitor.filters.gui.FilterGUIComponent.EnabledReason.FINAL_ANIMA
  */
 @RunWith(Parameterized.class)
 public class FilterParamTest {
-    private FilterParam param;
-    private ParamAdjustmentListenerSpy adjustmentListener;
+    @Parameter
+    public FilterParam param;
+
+    private ParamAdjustmentListener adjustmentListener;
 
     @Before
-    public void setUp() throws Exception {
-        adjustmentListener = new ParamAdjustmentListenerSpy();
+    public void setUp() {
+        adjustmentListener = mock(ParamAdjustmentListener.class);
         param.setAdjustmentListener(adjustmentListener);
     }
 
-    public FilterParamTest(FilterParam param) {
-        this.param = param;
-    }
-
-    @Parameterized.Parameters
+    @Parameters(name = "{index}: param = {0}")
     public static Collection<Object[]> instancesToTest() {
         return Arrays.asList(new Object[][]{
                 {new RangeParam("Param Name", 0, 10, 0)},
@@ -89,6 +90,22 @@ public class FilterParamTest {
     public void testCreateGUI() {
         JComponent gui = param.createGUI();
         assertThat(gui).isNotNull();
+        assertThat(gui.isEnabled()).isTrue();
+
+        // all params return a GUI that implements ParamGUI
+        // with the exception of GradientParam
+        if (!(param instanceof GradientParam)) {
+            assertThat(gui instanceof ParamGUI).isTrue();
+            ParamGUI paramGUI = (ParamGUI) gui;
+
+            paramGUI.setEnabled(false);
+            assertThat(gui.isEnabled()).isFalse();
+            paramGUI.setEnabled(true);
+            assertThat(gui.isEnabled()).isTrue();
+
+            paramGUI.updateGUI();
+        }
+
         checkThatFilterWasNotCalled();
     }
 
@@ -102,12 +119,14 @@ public class FilterParamTest {
     @Test
     public void testRandomize() {
         param.randomize();
+
         checkThatFilterWasNotCalled();
     }
 
     @Test
     public void testResetFalse() {
         param.reset(false);
+
         checkThatFilterWasNotCalled();
         assertThat(param.isSetToDefault()).isTrue();
     }
@@ -117,10 +136,15 @@ public class FilterParamTest {
         if (param.ignoresRandomize()) {
             // we can change the value in a general way only
             // through randomize
+
+            // in this case we don't know whether to expect
+            // the calling of the filter
+            param.reset(true);
+            assertThat(param.isSetToDefault()).isTrue();
             return;
         }
 
-        // wait until randomize changes the value
+        // wait until randomize changes the value to a non-default value
         boolean changed = false;
         while (!changed) {
             param.randomize();
@@ -131,7 +155,7 @@ public class FilterParamTest {
         param.reset(true);
         assertThat(param.isSetToDefault()).isTrue();
 
-        assertEquals("incorrect number of calls for " + param.getClass().getName(), 1, adjustmentListener.getNumCalled());
+        verify(adjustmentListener, times(1)).paramAdjusted();
     }
 
     @Test
@@ -153,12 +177,11 @@ public class FilterParamTest {
         JComponent gui = param.createGUI();
         param.considerImageSize(new Rectangle(0, 0, 1000, 600));
 
-        boolean b = param.canBeAnimated();
-
-        assertTrue(param.getClass().getName() + " is not enabled by default", gui.isEnabled());
+        param.canBeAnimated();
 
         param.setEnabled(false, APP_LOGIC);
-        assertFalse(param.getClass().getName() + " was enabled", gui.isEnabled());
+        assertThat(gui.isEnabled()).isFalse();
+
         param.setEnabled(true, APP_LOGIC);
         assertThat(gui.isEnabled()).isTrue();
 
@@ -166,7 +189,7 @@ public class FilterParamTest {
         if (param.canBeAnimated()) {
             assertThat(gui.isEnabled()).isTrue();
         } else {
-            assertFalse(param.getClass().getName() + " was enabled", gui.isEnabled());
+            assertThat(gui.isEnabled()).isFalse();
         }
 
         param.setEnabled(true, FINAL_ANIMATION_SETTING);
@@ -176,6 +199,6 @@ public class FilterParamTest {
     }
 
     private void checkThatFilterWasNotCalled() {
-        assertEquals("Filter was called for " + param.getClass().getName(), 0, adjustmentListener.getNumCalled());
+        verify(adjustmentListener, never()).paramAdjusted();
     }
 }

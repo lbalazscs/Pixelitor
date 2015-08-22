@@ -19,8 +19,8 @@ package pixelitor.utils.test;
 
 import pixelitor.Composition;
 import pixelitor.FgBgColors;
-import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
+import pixelitor.ImageDisplay;
 import pixelitor.NewImage;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.GradientTool;
@@ -57,7 +57,7 @@ public class ToolTests {
     public static void testTools() {
         NewImage.addNewImage(WHITE, 400, 400, "Tool Tests");
 
-        ImageComponent ic = ImageComponents.getActiveIC();
+        ImageDisplay ic = ImageComponents.getActiveIC();
         Composition comp = ic.getComp();
 
         addRadialBWGradientToActiveLayer(comp, true);

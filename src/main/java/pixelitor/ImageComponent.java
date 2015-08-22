@@ -179,6 +179,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         return internalFrame;
     }
 
+    @Override
     public void close() {
         if (internalFrame != null) {
             // this will also cause the calling of AppLogic.imageClosed via

@@ -24,14 +24,27 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMaskAddType;
 import pixelitor.layers.TextLayer;
+import pixelitor.tools.Alt;
+import pixelitor.tools.Ctrl;
+import pixelitor.tools.FgBgColorSelector;
+import pixelitor.tools.Mouse;
+import pixelitor.tools.Shift;
 
+import javax.swing.*;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Graphics2D;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.Random;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class TestHelper {
     public static final int sizeX = 20;
     public static final int sizeY = 10;
+    private static Component eventSource = new JPanel();
 
     public static ImageLayer createImageLayer(String layerName, Composition comp) {
         BufferedImage image = createImage();
@@ -102,5 +115,34 @@ public class TestHelper {
             throw new IllegalStateException();
         }
         return layer;
+    }
+
+    public static void setupMockFgBgSelector() {
+        FgBgColorSelector fgBgColorSelector = mock(FgBgColorSelector.class);
+        when(fgBgColorSelector.getFgColor()).thenReturn(Color.BLACK);
+        when(fgBgColorSelector.getBgColor()).thenReturn(Color.WHITE);
+        FgBgColors.setGUI(fgBgColorSelector);
+    }
+
+    public static MouseEvent createEvent(int id, Alt alt, Ctrl ctrl, Shift shift, Mouse mouse, int x, int y) {
+        int modifiers = 0;
+        modifiers = alt.modify(modifiers);
+        modifiers = ctrl.modify(modifiers);
+        modifiers = shift.modify(modifiers);
+        modifiers = mouse.modify(modifiers);
+        boolean popupTrigger = false;
+        if (mouse == Mouse.RIGHT) {
+            popupTrigger = true;
+        }
+        //noinspection MagicConstant
+        return new MouseEvent(eventSource,
+                id,
+                System.currentTimeMillis(),
+                modifiers,
+                x,
+                y,
+                1, // click count
+                popupTrigger
+        );
     }
 }

@@ -96,6 +96,7 @@ public class Composition implements Serializable {
     private transient BufferedImage cachedCompositeImage = null;
     private transient ImageDisplay ic;
     private transient Selection selection;
+    private transient MessageHandler messageHandler;
 
     // A Composition can be created either with one of the following static
     // factory methods or through deserialization (pxc)
@@ -924,7 +925,12 @@ public class Composition implements Serializable {
                 float seconds = totalTime / 1000.0f;
                 performanceMessage = String.format("%s took %.1f s", filterMenuName, seconds);
             }
-            AppLogic.setStatusMessage(performanceMessage);
+
+            if (messageHandler == null) {
+                messageHandler = AppLogic.getMessageHandler();
+            }
+            messageHandler.showStatusBarMessage(performanceMessage);
+
         } catch (OutOfMemoryError e) {
             Dialogs.showOutOfMemoryDialog(e);
         } catch (Throwable e) { // make sure AssertionErrors are caught
@@ -985,11 +991,6 @@ public class Composition implements Serializable {
         private boolean isUpdateHistogram() {
             return updateHistogram;
         }
-    }
-
-    // this method violates the class invariant!
-    public void testOnlyRemoveAllLayers() {
-        layerList.clear();
     }
 
     @Override

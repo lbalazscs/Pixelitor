@@ -145,4 +145,8 @@ public class ImageDisplayStub implements ImageDisplay {
     public boolean setZoom(ZoomLevel zoomLevel, boolean b) {
         return false;
     }
+
+    @Override
+    public void close() {
+    }
 }

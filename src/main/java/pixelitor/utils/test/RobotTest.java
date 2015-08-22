@@ -24,8 +24,8 @@ import pixelitor.ConsistencyChecks;
 import pixelitor.Desktop;
 import pixelitor.FgBgColors;
 import pixelitor.GlobalKeyboardWatch;
-import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
+import pixelitor.ImageDisplay;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.Brick;
 import pixelitor.filters.Fade;
@@ -470,7 +470,7 @@ public class RobotTest {
     }
 
     private static void randomZoom() {
-        ImageComponent ic = ImageComponents.getActiveIC();
+        ImageDisplay ic = ImageComponents.getActiveIC();
         if (ic != null) {
             ZoomLevel randomZoomLevel = null;
 
@@ -488,7 +488,7 @@ public class RobotTest {
     private static void randomZoomOut() {
         logRobotEvent("randomZoomOut");
 
-        ImageComponent ic = ImageComponents.getActiveIC();
+        ImageDisplay ic = ImageComponents.getActiveIC();
         if (ic != null) {
             ZoomLevel previous = ic.getZoomLevel().zoomOut();
             ic.setZoom(previous, false);

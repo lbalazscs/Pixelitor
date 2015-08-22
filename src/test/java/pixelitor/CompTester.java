@@ -21,8 +21,8 @@ import static org.junit.Assert.assertEquals;
  * and test helper methods.
  */
 public class CompTester {
-    private Composition comp;
-    private Rectangle standardTestSelectionShape = new Rectangle(4, 4, 8, 4);
+    private final Composition comp;
+    private final Rectangle standardTestSelectionShape = new Rectangle(4, 4, 8, 4);
 
     public CompTester(Composition comp) {
         this.comp = comp;

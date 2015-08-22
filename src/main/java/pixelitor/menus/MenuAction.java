@@ -17,8 +17,8 @@
 
 package pixelitor.menus;
 
-import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
+import pixelitor.ImageDisplay;
 import pixelitor.layers.Layer;
 import pixelitor.layers.TextLayer;
 import pixelitor.utils.Dialogs;
@@ -93,7 +93,7 @@ abstract class MenuAction extends AbstractAction {
             if (layerType == AllowedLayerType.ANY) {
                 onClick();
             } else {
-                ImageComponent ic = ImageComponents.getActiveIC();
+                ImageDisplay ic = ImageComponents.getActiveIC();
                 Layer activeLayer = ic.getComp().getActiveLayer();
                 if (layerType.isAllowed(activeLayer)) {
                     onClick();

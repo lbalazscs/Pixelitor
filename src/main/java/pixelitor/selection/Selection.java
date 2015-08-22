@@ -17,6 +17,7 @@
 
 package pixelitor.selection;
 
+import pixelitor.AppLogic;
 import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
@@ -26,7 +27,6 @@ import pixelitor.history.History;
 import pixelitor.history.SelectionChangeEdit;
 import pixelitor.menus.SelectionModifyType;
 import pixelitor.tools.UserDrag;
-import pixelitor.utils.Dialogs;
 
 import javax.swing.*;
 import java.awt.BasicStroke;
@@ -202,7 +202,7 @@ public class Selection {
                 currentSelectionShape = null;
                 updateComponent();
                 if (!Build.CURRENT.isRobotTest()) {
-                    Dialogs.showInfoDialog("Nothing selected", "As a result of the "
+                    AppLogic.getMessageHandler().showInfoDialog("Nothing selected", "As a result of the "
                             + selectionInteraction.toString().toLowerCase() + " operation, nothing is selected now.");
                 }
                 somethingSelected = false;

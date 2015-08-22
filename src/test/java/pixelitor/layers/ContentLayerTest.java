@@ -21,6 +21,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.history.ContentLayerMoveEdit;
@@ -38,16 +40,19 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(Parameterized.class)
 public class ContentLayerTest {
-    private static Composition comp;
+    private Composition comp;
 
-    private Class layerClass;
-    private WithMask withMask;
+    @Parameter
+    public Class layerClass;
+
+    @Parameter(value = 1)
+    public WithMask withMask;
 
     private ContentLayer layer;
 
-    @Parameterized.Parameters
+    @Parameters(name = "{index}: layer = {0}, mask = {1}")
     public static Collection<Object[]> instancesToTest() {
-        comp = TestHelper.createEmptyComposition();
+
 
         return Arrays.asList(new Object[][]{
                 {ImageLayer.class, WithMask.NO},
@@ -57,17 +62,11 @@ public class ContentLayerTest {
         });
     }
 
-    public ContentLayerTest(Class layerClass, WithMask withMask) {
-        this.layerClass = layerClass;
-        this.withMask = withMask;
-    }
-
     @Before
     public void setUp() {
-        // make sure each test runs with a fresh Layer
+        comp = TestHelper.createEmptyComposition();
         layer = (ContentLayer) TestHelper.classToLayer(layerClass, comp);
 
-        comp.testOnlyRemoveAllLayers();
         comp.addLayerNoGUI(layer);
 
         withMask.init(layer);

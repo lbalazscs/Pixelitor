@@ -20,8 +20,8 @@ package pixelitor.filters;
 import pixelitor.Build;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
+import pixelitor.ImageDisplay;
 import pixelitor.PixelitorWindow;
 import pixelitor.layers.Layer;
 import pixelitor.utils.Dialogs;
@@ -82,7 +82,7 @@ public abstract class Filter extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        ImageComponent ic = ImageComponents.getActiveIC();
+        ImageDisplay ic = ImageComponents.getActiveIC();
         if(ic != null) {
             if (!ic.activeIsImageLayer()) {
                 Dialogs.showNotImageLayerDialog();

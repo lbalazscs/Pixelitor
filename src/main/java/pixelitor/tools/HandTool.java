@@ -36,7 +36,7 @@ public class HandTool extends Tool {
 
     @Override
     public void initSettingsPanel() {
-        AutoZoomButtons.addAutoZoomButtons(settingsPanel);
+        settingsPanel.addAutoZoomButtons();
     }
 
     @Override

@@ -18,8 +18,8 @@
 package pixelitor.filters.animation;
 
 import pixelitor.ChangeReason;
-import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
+import pixelitor.ImageDisplay;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.Filter;
 import pixelitor.filters.FilterWithParametrizedGUI;
@@ -121,7 +121,7 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         long runCountAfter = Filter.runCount;
         assert runCountAfter == runCountBefore + 1;
 
-        ImageComponent ic = ImageComponents.getActiveIC();
+        ImageDisplay ic = ImageComponents.getActiveIC();
         ic.repaint();
 
         return ImageComponents.getActiveCompositeImage().get();

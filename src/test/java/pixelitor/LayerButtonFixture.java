@@ -33,7 +33,7 @@ public class LayerButtonFixture extends JToggleButtonFixture {
         super(robot, toggleButtonName);
     }
 
-    public void setOpenEye(final boolean b) {
+    public void setOpenEye(boolean b) {
         // it would be nicer if we had a JCheckBoxFixture for the
         // visibility checkbox and this would happen through robot events
 

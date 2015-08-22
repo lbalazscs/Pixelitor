@@ -26,7 +26,6 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.CloneBrush;
 import pixelitor.tools.brushes.CopyBrushType;
-import pixelitor.utils.Dialogs;
 import pixelitor.utils.GridBagHelper;
 import pixelitor.utils.OKDialog;
 import pixelitor.utils.ScalingMirror;
@@ -151,7 +150,7 @@ public class CloneTool extends TmpLayerBrushTool {
             if (JVM.isLinux) {
                 msg += "\n(You might need to disable Alt-Click for window dragging in the window manager)";
             }
-            Dialogs.showErrorDialog("No source", msg);
+            messageHandler.showErrorDialog("No source", msg);
         }
     }
 
@@ -174,5 +173,9 @@ public class CloneTool extends TmpLayerBrushTool {
     @Override
     protected Symmetry getSymmetry() {
         throw new UnsupportedOperationException("no symmetry");
+    }
+
+    protected void setStateTestOnly(State state) {
+        this.state = state;
     }
 }

@@ -17,11 +17,12 @@
 
 package pixelitor.layers;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Canvas;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
@@ -47,12 +48,12 @@ import static pixelitor.ChangeReason.OP_PREVIEW;
 
 @RunWith(Parameterized.class)
 public class ImageLayerTest {
-    private Composition comp;
     private ImageLayer layer;
 
-    private WithMask withMask;
+    @Parameter
+    public WithMask withMask;
 
-    @Parameterized.Parameters
+    @Parameters(name = "{index}: mask = {0}")
     public static Collection<Object[]> instancesToTest() {
         return Arrays.asList(new Object[][]{
                 {WithMask.NO},
@@ -60,24 +61,15 @@ public class ImageLayerTest {
         });
     }
 
-    public ImageLayerTest(WithMask withMask) {
-        this.withMask = withMask;
-    }
-
     @Before
     public void setUp() {
-        comp = TestHelper.createEmptyComposition();
+        Composition comp = TestHelper.createEmptyComposition();
         layer = TestHelper.createImageLayer("layer 1", comp);
         comp.addLayerNoGUI(layer);
 
         withMask.init(layer);
 
         assert layer.getComp().checkInvariant();
-    }
-
-    @After
-    public void tearDown() {
-
     }
 
     @Test
@@ -164,6 +156,7 @@ public class ImageLayerTest {
 
     @Test
     public void testChangeImageUndoRedo() {
+        // TODO add selection
         layer.changeImageUndoRedo(TestHelper.createImage(),
                 IgnoreSelection.NO);
         layer.changeImageUndoRedo(TestHelper.createImage(),
@@ -174,16 +167,6 @@ public class ImageLayerTest {
     public void testGetImageBounds() {
         Rectangle bounds = layer.getImageBounds();
         assertThat(bounds).isNotNull();
-    }
-
-    @Test
-    public void testCheckImageDoesNotCoverCanvas() {
-        boolean b = layer.checkImageDoesNotCoverCanvas();
-    }
-
-    @Test
-    public void testEnlargeLayer() {
-        layer.enlargeLayer();
     }
 
     @Test

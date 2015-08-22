@@ -17,8 +17,8 @@
 
 package pixelitor.menus.view;
 
-import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
+import pixelitor.ImageDisplay;
 import pixelitor.menus.OpenImageEnabledRadioButtonMenuItem;
 
 /**
@@ -30,7 +30,7 @@ public class ZoomMenuItem extends OpenImageEnabledRadioButtonMenuItem {
         super(zoomLevel.toString());
 
         addActionListener(e -> {
-            ImageComponent ic = ImageComponents.getActiveIC();
+            ImageDisplay ic = ImageComponents.getActiveIC();
             ic.setZoom(zoomLevel, false);
         });
     }

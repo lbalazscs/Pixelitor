@@ -207,5 +207,9 @@ public class History {
     public static Optional<PixelitorEdit> getLastEdit() {
         return undoManager.getLastEdit();
     }
+
+    public static void clear() {
+        undoManager.discardAllEdits();
+    }
 }
 

@@ -40,11 +40,4 @@ public class AutoZoomButtons {
         }
     };
 
-    public static void addAutoZoomButtons(JPanel p) {
-        JButton actualPixelsButton = new JButton(ACTUAL_PIXELS_ACTION);
-        p.add(actualPixelsButton);
-
-        JButton fitScreenButton = new JButton(FIT_SCREEN_ACTION);
-        p.add(fitScreenButton);
-    }
 }

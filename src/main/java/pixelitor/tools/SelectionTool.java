@@ -18,7 +18,6 @@
 package pixelitor.tools;
 
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
 import pixelitor.ImageDisplay;
 import pixelitor.history.AddToHistory;
@@ -241,7 +240,7 @@ public class SelectionTool extends Tool {
 
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
-        ImageComponent ic = ImageComponents.getActiveIC();
+        ImageDisplay ic = ImageComponents.getActiveIC();
         if (ic != null) {
             Composition comp = ic.getComp();
             Optional<Selection> selection = comp.getSelection();
