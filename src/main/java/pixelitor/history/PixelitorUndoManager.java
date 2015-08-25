@@ -28,7 +28,6 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;
-import java.util.Optional;
 
 /**
  * An undo manager that is also a list model for debugging history
@@ -46,13 +45,9 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Undoa
     /**
      * This method is necessary mostly because lastEdit() in CompoundEdit is protected
      */
-    public Optional<PixelitorEdit> getLastEdit() {
+    public PixelitorEdit getLastEdit() {
         UndoableEdit edit = super.lastEdit();
-        if (edit != null) {
-            return Optional.of((PixelitorEdit) edit);
-        }
-
-        return Optional.empty();
+        return (PixelitorEdit) edit;
     }
 
     @Override
@@ -68,8 +63,10 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Undoa
 
     @Override
     public void undo() throws CannotUndoException {
+        // 1. do the actual undo
         super.undo();
 
+        // 2. update the selection model
         int index = selectionModel.getLeadSelectionIndex();
         if (index > 0) {
             selectionModel.setSelectionInterval(index - 1, index - 1);

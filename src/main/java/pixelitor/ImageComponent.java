@@ -627,7 +627,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
     @Override
     public void addLayerToGUI(Layer newLayer, int newLayerIndex) {
-        LayerButton layerButton = newLayer.getLayerButton();
+        LayerButton layerButton = newLayer.getUI().getLayerButton();
         layersPanel.addLayerButton(layerButton, newLayerIndex);
 
         if (ImageComponents.isActive(this)) {

@@ -17,6 +17,7 @@
 
 package pixelitor.history;
 
+import pixelitor.Canvas;
 import pixelitor.Composition;
 
 import javax.swing.undo.CannotRedoException;
@@ -70,10 +71,12 @@ public class CanvasChangeEdit extends PixelitorEdit {
     }
 
     private void swapCanvasDimensions() {
-        int tmpCanvasWidth = comp.getCanvasWidth();
-        int tmpCanvasHeight = comp.getCanvasHeight();
+        Canvas canvas = comp.getCanvas();
 
-        comp.getCanvas().updateSize(backupCanvasWidth, backupCanvasHeight);
+        int tmpCanvasWidth = canvas.getWidth();
+        int tmpCanvasHeight = canvas.getHeight();
+
+        canvas.updateSize(backupCanvasWidth, backupCanvasHeight);
 
         backupCanvasWidth = tmpCanvasWidth;
         backupCanvasHeight = tmpCanvasHeight;

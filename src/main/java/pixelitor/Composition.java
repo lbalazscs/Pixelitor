@@ -39,6 +39,7 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
 import pixelitor.layers.LayerMask;
+import pixelitor.layers.LayerUI;
 import pixelitor.menus.SelectionActions;
 import pixelitor.selection.IgnoreSelection;
 import pixelitor.selection.Selection;
@@ -96,7 +97,6 @@ public class Composition implements Serializable {
     private transient BufferedImage cachedCompositeImage = null;
     private transient ImageDisplay ic;
     private transient Selection selection;
-    private transient MessageHandler messageHandler;
 
     // A Composition can be created either with one of the following static
     // factory methods or through deserialization (pxc)
@@ -153,8 +153,8 @@ public class Composition implements Serializable {
             Layer oldLayer = activeLayer;
             activeLayer = newActiveLayer;
 
-            LayerButton layerButton = activeLayer.getLayerButton();
-            layerButton.setSelected(true);
+            LayerUI layerUI = activeLayer.getUI();
+            layerUI.setSelected(true);
 
             AppLogic.activeLayerChanged(newActiveLayer);
 
@@ -663,7 +663,7 @@ public class Composition implements Serializable {
         }
 
         if(updateGUI.isYes()) {
-            LayerButton button = layerToBeRemoved.getLayerButton();
+            LayerButton button = layerToBeRemoved.getUI().getLayerButton();
             ic.deleteLayerButton(button);
 
             if (isActiveComp()) {
@@ -925,12 +925,7 @@ public class Composition implements Serializable {
                 float seconds = totalTime / 1000.0f;
                 performanceMessage = String.format("%s took %.1f s", filterMenuName, seconds);
             }
-
-            if (messageHandler == null) {
-                messageHandler = AppLogic.getMessageHandler();
-            }
-            messageHandler.showStatusBarMessage(performanceMessage);
-
+            AppLogic.showStatusMessage(performanceMessage);
         } catch (OutOfMemoryError e) {
             Dialogs.showOutOfMemoryDialog(e);
         } catch (Throwable e) { // make sure AssertionErrors are caught

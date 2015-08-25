@@ -67,7 +67,7 @@ public abstract class Layer implements Serializable {
     protected LayerMask mask;
     private boolean maskEnabled = true;
 
-    private transient LayerButton layerButton;
+    private transient LayerUI ui;
     protected transient boolean isAdjustment = false;
 
     float opacity = 1.0f;
@@ -90,9 +90,9 @@ public abstract class Layer implements Serializable {
         canvas = comp.getCanvas();
 
         if (parent != null) { // this is a layer mask
-            layerButton = parent.getLayerButton();
+            ui = parent.getUI();
         } else { // normal layer
-            layerButton = new LayerButton(this);
+            ui = new LayerGUI(this);
         }
     }
 
@@ -108,7 +108,7 @@ public abstract class Layer implements Serializable {
         this.visible = newVisibility;
         comp.imageChanged(FULL);
         comp.setDirty(true);
-        layerButton.setOpenEye(newVisibility);
+        ui.setOpenEye(newVisibility);
 
         if (addToHistory.isYes()) {
             LayerVisibilityChangeEdit edit = new LayerVisibilityChangeEdit(comp, this, newVisibility);
@@ -116,12 +116,12 @@ public abstract class Layer implements Serializable {
         }
     }
 
-    public LayerButton getLayerButton() {
-        return layerButton;
+    public LayerUI getUI() {
+        return ui;
     }
 
-    public void setLayerButton(LayerButton layerButton) {
-        this.layerButton = layerButton;
+    public void setUI(LayerUI ui) {
+        this.ui = ui;
     }
 
     protected String getDuplicateLayerName() {
@@ -174,6 +174,10 @@ public abstract class Layer implements Serializable {
         assert newOpacity <= 1.0f : "newOpacity = " + newOpacity;
         assert newOpacity >= 0.0f : "newOpacity = " + newOpacity;
 
+        if (opacity == newOpacity) {
+            return;
+        }
+
         if (addToHistory.isYes()) {
             LayerOpacityEdit edit = new LayerOpacityEdit(this, opacity);
             History.addEdit(edit);
@@ -182,7 +186,7 @@ public abstract class Layer implements Serializable {
         this.opacity = newOpacity;
 
         if (updateGUI.isYes()) {
-            LayerBlendingModePanel.INSTANCE.setOpacity(newOpacity);
+            ui.setUIOpacity(newOpacity);
         }
         if(updateImage) {
             updateAfterBMorOpacityChange();
@@ -213,7 +217,7 @@ public abstract class Layer implements Serializable {
             return;
         }
 
-        layerButton.changeNameProgrammatically(newName);
+        ui.changeNameProgrammatically(newName);
 
         if (addToHistory.isYes()) {
             LayerRenameEdit edit = new LayerRenameEdit(this, previousName, name);
@@ -251,11 +255,11 @@ public abstract class Layer implements Serializable {
         // We create a layer button only for real layers.
         // For layer masks, we share the button of the real layer.
         if (parent == null) { // not mask
-            layerButton = new LayerButton(this);
+            ui = new LayerGUI(this);
 
             if (mask != null) {
-                mask.setLayerButton(layerButton);
-                layerButton.addMaskIconLabel();
+                mask.setUI(ui);
+                ui.addMaskIconLabel();
                 mask.updateIconImage();
             }
         }
@@ -290,7 +294,7 @@ public abstract class Layer implements Serializable {
 
         // needs to be added first, because the inherited layer
         // mask constructor already will try to update the image
-        layerButton.addMaskIconLabel();
+        ui.addMaskIconLabel();
 
         comp.imageChanged(FULL);
 
@@ -311,7 +315,7 @@ public abstract class Layer implements Serializable {
     public void addMaskBack(LayerMask mask) {
         this.mask = mask;
         comp.imageChanged(FULL);
-        layerButton.addMaskIconLabel();
+        ui.addMaskIconLabel();
         AppLogic.maskChanged(this);
         mask.updateIconImage();
     }
@@ -329,7 +333,7 @@ public abstract class Layer implements Serializable {
         }
 
         AppLogic.maskChanged(this);
-        layerButton.deleteMaskIconLabel();
+        ui.deleteMaskIconLabel();
 
         if (switchActiveToNormalView) {
             if (isActive()) {

@@ -136,6 +136,9 @@ public class Pixelitor {
             return;
         }
 
+//        NewImage.addNewImage(FillType.WHITE, 100, 100, "Test");
+
+
 //        Tests3x3.addStandardImage(false);
 
 //        ImageComponents.getActiveIC().setZoom(ZoomLevel.Z6400, true);
@@ -149,7 +152,6 @@ public class Pixelitor {
 //        TextLayer.createNew(pw);
 
 
-//        NewImage.addNewImage(FillType.WHITE, 600, 400, "Test INT_ARGB");
 //        ImageComponents.getActiveLayer().get()
 //                .addMask(LayerMaskAddType.REVEAL_ALL_INT_ARGB);
 //

@@ -720,7 +720,7 @@ public class MenuBar extends JMenuBar {
     private void initAdjustmentLayersSubmenu(JMenu parentMenu) {
         JMenu adjustmentLayersSubMenu = new JMenu("New Adjustment Layer");
 
-        createMenuItem(new MenuAction("Invert") {
+        createMenuItem(new MenuAction("Invert Adjustment") { // TODO not "Invert" because of assertj test lookup confusion
             @Override
             void onClick() {
                 Composition comp = ImageComponents.getActiveComp().get();

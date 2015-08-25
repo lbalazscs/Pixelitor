@@ -77,8 +77,14 @@ public class MultiLayerBackup {
         return backupShape != null;
     }
 
-    public ImageEdit createImageEdit() {
+    public ImageEdit createImageEdit(BufferedImage currentImage) {
         assert backupImage != null;
+        if(currentImage == backupImage) {
+            // for enlarge canvas with big layer it can happen that
+            // the image does not need to be changed at all
+            return null;
+        }
+
         ImageEdit edit;
         if (backupMaskImage != null) {
             edit = new ImageAndMaskEdit(comp, editName, layer,

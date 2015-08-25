@@ -52,8 +52,6 @@ public class ContentLayerTest {
 
     @Parameters(name = "{index}: layer = {0}, mask = {1}")
     public static Collection<Object[]> instancesToTest() {
-
-
         return Arrays.asList(new Object[][]{
                 {ImageLayer.class, WithMask.NO},
                 {ImageLayer.class, WithMask.YES},
@@ -65,7 +63,7 @@ public class ContentLayerTest {
     @Before
     public void setUp() {
         comp = TestHelper.createEmptyComposition();
-        layer = (ContentLayer) TestHelper.classToLayer(layerClass, comp);
+        layer = (ContentLayer) TestHelper.createLayerOfClass(layerClass, comp);
 
         comp.addLayerNoGUI(layer);
 

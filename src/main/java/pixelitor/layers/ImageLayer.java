@@ -455,6 +455,7 @@ public class ImageLayer extends ContentLayer {
         }
     }
 
+    // returns the image bounds relative to the canvas
     public Rectangle getImageBounds() {
         return new Rectangle(translationX, translationY, image.getWidth(), image.getHeight());
     }
@@ -466,11 +467,11 @@ public class ImageLayer extends ContentLayer {
         return needsEnlarging;
     }
 
-    public void enlargeImage() {
+    /**
+     * Enlarges the image so that it covers the canvas completely.
+     */
+    public void enlargeImage(Rectangle canvasBounds) {
         try {
-            // the image needs to be enlarged so that it covers
-            // the canvas completely
-            Rectangle canvasBounds = comp.getCanvasBounds();
             Rectangle imageBounds = getImageBounds();
             Rectangle targetImageBounds = imageBounds.union(canvasBounds);
 
@@ -484,8 +485,8 @@ public class ImageLayer extends ContentLayer {
             g.drawImage(image, drawX, drawY, null);
             g.dispose();
 
-            translationX = targetImageBounds.x;
-            translationY = targetImageBounds.y;
+            translationX = targetImageBounds.x - canvasBounds.x;
+            translationY = targetImageBounds.y - canvasBounds.y;
 
             setImage(bi);
         } catch (OutOfMemoryError e) {
@@ -520,7 +521,7 @@ public class ImageLayer extends ContentLayer {
     }
 
     @Override
-    public void flip(Flip.Direction direction, AffineTransform flipTx) {
+    public void flip(Flip.Direction direction, AffineTransform canvasTx) {
         AffineTransform imageTx = direction.getImageTX(this);
         int translationXAbs = -getTranslationX();
         int translationYAbs = -getTranslationY();
@@ -751,31 +752,24 @@ public class ImageLayer extends ContentLayer {
 
     @Override
     public void enlargeCanvas(int north, int east, int south, int west) {
-        int width = image.getWidth();
-        int height = image.getHeight();
-//        int canvasWidth = canvas.getWidth();
-//        int canvasHeight = canvas.getHeight();
+        // all coordinates in this method are
+        // relative to the previous state of the canvas
+        Rectangle imageBounds = getImageBounds();
+        Rectangle canvasBounds = comp.getCanvasBounds();
 
-        // TODO the layer can already be larger than the canvas
+        Rectangle transformedCanvasBounds = new Rectangle(
+                canvasBounds.x - west,
+                canvasBounds.y - north,
+                canvasBounds.width + west + east,
+                canvasBounds.height + north + south);
 
-        int newImageWidth = width + east + west;
-        int newImageHeight = height + north + south;
-        int newImagePaintX = west;
-        int newImagePaintY = north;
-        int newTranslationX = getTranslationX();
-        int newTranslationY = getTranslationY();
-
-        BufferedImage newImage = ImageUtils.createCompatibleDest(image, newImageWidth, newImageHeight);
-
-        Graphics2D g = newImage.createGraphics();
-        g.drawImage(image, newImagePaintX, newImagePaintY, null);
-        g.dispose();
-
-        image.flush();
-        image = newImage;
-        imageRefChanged();
-
-        setTranslation(newTranslationX, newTranslationY);
+        if (imageBounds.contains(transformedCanvasBounds)) {
+            // even after the canvas enlargement, the image does not need to be enlarged
+            translationX += west;
+            translationY += north;
+        } else {
+            enlargeImage(transformedCanvasBounds);
+        }
     }
 
     @Override
@@ -784,7 +778,7 @@ public class ImageLayer extends ContentLayer {
         boolean needsEnlarging = checkImageDoesNotCoverCanvas();
         if (needsEnlarging) {
             BufferedImage backupImage = getImage();
-            enlargeImage();
+            enlargeImage(comp.getCanvasBounds());
             edit = new ContentLayerMoveEdit(this, backupImage, oldTranslationX, oldTranslationY);
         } else {
             edit = new ContentLayerMoveEdit(this, null, oldTranslationX, oldTranslationY);
@@ -973,8 +967,10 @@ public class ImageLayer extends ContentLayer {
         return state;
     }
 
-    // every image creation in thus class should use this method
-    // which can be overridden by the LayerMask subclass
+    // every image creation in this class should use this method
+    // which is overridden by the LayerMask subclass
+    // because normal image layers are enlarged with transparent pixels
+    // and layer masks are enlarged with white pixels
     protected BufferedImage createEmptyImageForLayer(int width, int height) {
         return ImageUtils.createCompatibleImage(width, height);
     }
@@ -988,7 +984,7 @@ public class ImageLayer extends ContentLayer {
     }
 
     public void updateIconImage() {
-        getLayerButton().updateLayerIconImage(this);
+        getUI().updateLayerIconImage(this);
     }
 
     public void applyLayerMask(AddToHistory addToHistory) {

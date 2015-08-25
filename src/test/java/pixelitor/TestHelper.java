@@ -44,7 +44,7 @@ import static org.mockito.Mockito.when;
 public class TestHelper {
     public static final int sizeX = 20;
     public static final int sizeY = 10;
-    private static Component eventSource = new JPanel();
+    private static final Component eventSource = new JPanel();
 
     public static ImageLayer createImageLayer(String layerName, Composition comp) {
         BufferedImage image = createImage();
@@ -103,7 +103,7 @@ public class TestHelper {
         return createImage().createGraphics();
     }
 
-    public static Layer classToLayer(Class layerClass, Composition comp) {
+    public static Layer createLayerOfClass(Class layerClass, Composition comp) {
         Layer layer;
         if (layerClass.equals(ImageLayer.class)) {
             layer = new ImageLayer(comp, "layer 1");

@@ -38,6 +38,7 @@ public class MultiLayerEdit extends PixelitorEdit {
     private TranslationEdit translationEdit;
     private SelectionChangeEdit selectionChangeEdit;
     private DeselectEdit deselectEdit;
+    private boolean undoable;
 
     public MultiLayerEdit(Composition comp, String name, MultiLayerBackup backup) {
         super(comp, name);
@@ -47,9 +48,11 @@ public class MultiLayerEdit extends PixelitorEdit {
         int nrLayers = comp.getNrImageLayers();
         if (nrLayers == 1) {
             layer = comp.getAnyImageLayer();
-            imageEdit = backup.createImageEdit();
+            imageEdit = backup.createImageEdit(layer.getImage());
+            undoable = true;
         } else {
             imageEdit = null;
+            undoable = false;
         }
 
         if (comp.hasSelection()) {
@@ -65,17 +68,9 @@ public class MultiLayerEdit extends PixelitorEdit {
         }
     }
 
-//    public void setSelectionChangeEdit(SelectionChangeEdit selectionChangeEdit) {
-//        this.selectionChangeEdit = selectionChangeEdit;
-//    }
-
-//    public void setDeselectEdit(DeselectEdit deselectEdit) {
-//        this.deselectEdit = deselectEdit;
-//    }
-
     @Override
     public boolean canUndo() {
-        if (imageEdit == null) {
+        if (!undoable) {
             return false;
         }
         return super.canUndo();
@@ -83,7 +78,7 @@ public class MultiLayerEdit extends PixelitorEdit {
 
     @Override
     public boolean canRedo() {
-        if (imageEdit == null) {
+        if (!undoable) {
             return false;
         }
         return super.canRedo();
@@ -98,7 +93,9 @@ public class MultiLayerEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        imageEdit.undo();
+        if(imageEdit != null) {
+            imageEdit.undo();
+        }
         if (canvasChangeEdit != null) {
             canvasChangeEdit.undo();
         }
@@ -119,7 +116,9 @@ public class MultiLayerEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        imageEdit.redo();
+        if(imageEdit != null) {
+            imageEdit.redo();
+        }
         if (canvasChangeEdit != null) {
             canvasChangeEdit.redo();
         }
@@ -149,7 +148,9 @@ public class MultiLayerEdit extends PixelitorEdit {
     public void die() {
         super.die();
 
-        imageEdit.die();
+        if (imageEdit != null) {
+            imageEdit.die();
+        }
         if (canvasChangeEdit != null) {
             canvasChangeEdit.die();
         }

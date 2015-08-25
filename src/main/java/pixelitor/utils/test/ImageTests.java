@@ -251,7 +251,7 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
         ImageLayer layer = (ImageLayer) ic.getActiveLayer();
         layer.setTranslation(0, translationY);
 
-        layer.enlargeImage();
+        layer.enlargeImage(layer.getComp().getCanvasBounds());
 
         layer.setOpacity(opacity, UpdateGUI.YES, AddToHistory.YES, true);
         layer.setBlendingMode(blendingMode, UpdateGUI.YES, AddToHistory.YES, true);

@@ -31,6 +31,7 @@ public class LayerOpacityEdit extends PixelitorEdit {
 
     public LayerOpacityEdit(Layer layer, float backupOpacity) {
         super(layer.getComp(), "Layer Opacity Change");
+
         this.layer = layer;
         this.backupOpacity = backupOpacity;
 
@@ -53,7 +54,10 @@ public class LayerOpacityEdit extends PixelitorEdit {
 
     private void swapOpacity() {
         float tmp = layer.getOpacity();
+
         layer.setOpacity(backupOpacity, UpdateGUI.YES, AddToHistory.NO, true);
+        assert layer.getOpacity() == backupOpacity;
+
         backupOpacity = tmp;
         History.notifyMenus(this);
     }
@@ -68,5 +72,9 @@ public class LayerOpacityEdit extends PixelitorEdit {
     @Override
     public boolean canRepeat() {
         return false;
+    }
+
+    public Layer getLayer() {
+        return layer;
     }
 }

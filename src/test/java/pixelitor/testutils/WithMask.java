@@ -1,5 +1,6 @@
 package pixelitor.testutils;
 
+import pixelitor.Composition;
 import pixelitor.history.AddToHistory;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMaskAddType;
@@ -22,4 +23,12 @@ public enum WithMask {
     };
 
     public abstract void init(Layer layer);
+
+    public void init(Composition comp) {
+        int nrLayers = comp.getNrLayers();
+        for (int i = 0; i < nrLayers; i++) {
+            Layer layer = comp.getLayer(i);
+            init(layer);
+        }
+    }
 }

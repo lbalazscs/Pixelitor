@@ -17,7 +17,9 @@
 
 package pixelitor.layers;
 
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -25,9 +27,13 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Canvas;
 import pixelitor.Composition;
+import pixelitor.ImageComponents;
+import pixelitor.ImageDisplay;
+import pixelitor.ImageDisplayStub;
 import pixelitor.TestHelper;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
+import pixelitor.history.LayerOpacityEdit;
 import pixelitor.testutils.WithMask;
 import pixelitor.utils.UpdateGUI;
 
@@ -44,7 +50,7 @@ import static org.junit.Assert.assertSame;
 @RunWith(Parameterized.class)
 public class LayerTest {
     private Composition comp;
-    private Layer layer1;
+    private Layer layer;
 
     @Parameter
     public Class layerClass;
@@ -64,47 +70,67 @@ public class LayerTest {
         });
     }
 
+    @BeforeClass
+    public static void beforeClass() {
+        History.setUndoLevels(100);
+        History.clear();
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        History.setUndoLevels(10);
+        History.clear();
+    }
+
     @Before
     public void setUp() {
+        History.clear();
         comp = TestHelper.createEmptyComposition();
         // make sure each test runs with a fresh Layer
-        layer1 = TestHelper.classToLayer(layerClass, comp);
+        layer = TestHelper.createLayerOfClass(layerClass, comp);
 
-        comp.addLayerNoGUI(layer1);
+        comp.addLayerNoGUI(layer);
 
-        ImageLayer layer2 = TestHelper.createImageLayer("layer 2", comp);
+        ImageLayer layer2 = TestHelper.createImageLayer("LayerTest layer 2", comp);
         comp.addLayerNoGUI(layer2);
 
-        withMask.init(layer1);
+        withMask.init(layer);
+
+        comp.setActiveLayer(layer, AddToHistory.YES);
 
         assert comp.getNrLayers() == 2 : "found " + comp.getNrLayers() + " layers";
-        History.clear();
+
+        // TODO this should be automatic for all tests
+        // or should be avoidable
+        ImageDisplay ic = new ImageDisplayStub();
+        ImageComponents.setActiveIC(ic, false);
+        ((ImageDisplayStub) ic).setComp(comp);
     }
 
     @Test
     public void testSetVisible() {
-        LayerButton layerButton = layer1.getLayerButton();
-        assertThat(layer1.isVisible()).isTrue();
-        assertThat(layerButton.isVisibilityChecked()).isTrue();
+        LayerUI layerUI = layer.getUI();
+        assertThat(layer.isVisible()).isTrue();
+        assertThat(layerUI.isVisibilityChecked()).isTrue();
 
-        layer1.setVisible(false, AddToHistory.YES);
-        assertThat(layer1.isVisible()).isFalse();
-        assertThat(layerButton.isVisibilityChecked()).isFalse();
+        layer.setVisible(false, AddToHistory.YES);
+        assertThat(layer.isVisible()).isFalse();
+        assertThat(layerUI.isVisibilityChecked()).isFalse();
 
         History.undo();
-        assertThat(layer1.isVisible()).isTrue();
-        assertThat(layerButton.isVisibilityChecked()).isTrue();
+        assertThat(layer.isVisible()).isTrue();
+        assertThat(layerUI.isVisibilityChecked()).isTrue();
 
         History.redo();
-        assertThat(layer1.isVisible()).isFalse();
-        assertThat(layerButton.isVisibilityChecked()).isFalse();
+        assertThat(layer.isVisible()).isFalse();
+        assertThat(layerUI.isVisibilityChecked()).isFalse();
     }
 
     @Test
     public void testDuplicate() {
-        Layer copy = layer1.duplicate();
+        Layer copy = layer.duplicate();
         assertThat(copy.getName()).isEqualTo("layer 1 copy");
-        assertThat(copy.getClass()).isEqualTo(layer1.getClass());
+        assertThat(copy.getClass()).isEqualTo(layer.getClass());
 
         Layer copy2 = copy.duplicate();
         assertThat(copy2.getName()).isEqualTo("layer 1 copy 2");
@@ -115,146 +141,153 @@ public class LayerTest {
 
     @Test
     public void testOpacityChange() {
-        assertThat(layer1.getOpacity()).isEqualTo(1.0f);
+        float oldValue = 1.0f;
+        float newValue = 0.7f;
+        assertThat(layer.getOpacity()).isEqualTo(oldValue);
 
-        layer1.setOpacity(0.7f, UpdateGUI.YES, AddToHistory.YES, true);
-        assertThat(layer1.getOpacity()).isEqualTo(0.7f);
+        layer.setOpacity(newValue, UpdateGUI.YES, AddToHistory.YES, true);
+        assertThat(layer.getOpacity()).isEqualTo(newValue);
 
-// TODO WTF: fails when all unit tests are run
-//        History.undo();
-//        assertThat(layer1.getOpacity()).isEqualTo(1.0f);
-//
-//        History.redo();
-//        assertThat(layer1.getOpacity()).isEqualTo(0.7f);
+        LayerOpacityEdit lastEdit = (LayerOpacityEdit) History.getLastEdit();
+        assertSame(layer, lastEdit.getLayer());
+
+        History.undo();
+        float opacity = layer.getOpacity();
+        assertThat(opacity).isEqualTo(oldValue);
+
+        History.redo();
+        assertThat(layer.getOpacity()).isEqualTo(newValue);
     }
 
     @Test
     public void testBlendingModeChange() {
-        assertSame(BlendingMode.NORMAL, layer1.getBlendingMode());
+        assertSame(BlendingMode.NORMAL, layer.getBlendingMode());
 
-        layer1.setBlendingMode(BlendingMode.DIFFERENCE, UpdateGUI.YES, AddToHistory.YES, true);
-        assertSame(BlendingMode.DIFFERENCE, layer1.getBlendingMode());
+        layer.setBlendingMode(BlendingMode.DIFFERENCE, UpdateGUI.YES, AddToHistory.YES, true);
+        assertSame(BlendingMode.DIFFERENCE, layer.getBlendingMode());
 
         History.undo();
-        assertSame(BlendingMode.NORMAL, layer1.getBlendingMode());
+        assertSame(BlendingMode.NORMAL, layer.getBlendingMode());
 
         History.redo();
-        assertSame(BlendingMode.DIFFERENCE, layer1.getBlendingMode());
+        assertSame(BlendingMode.DIFFERENCE, layer.getBlendingMode());
     }
 
     @Test
     public void testNameChange() {
-        assertThat(layer1.getName()).isEqualTo("layer 1");
+        assertThat(layer.getName()).isEqualTo("layer 1");
 
-        layer1.setName("newName", AddToHistory.YES);
-        assertThat(layer1.getName()).isEqualTo("newName");
-        assertThat(layer1.getLayerButton().getLayerName()).isEqualTo("newName");
+        layer.setName("newName", AddToHistory.YES);
+        assertThat(layer.getName()).isEqualTo("newName");
+        assertThat(layer.getUI().getLayerName()).isEqualTo("newName");
 
         History.undo();
-        assertThat(layer1.getName()).isEqualTo("layer 1");
-        assertThat(layer1.getLayerButton().getLayerName()).isEqualTo("layer 1");
+        assertThat(layer.getName()).isEqualTo("layer 1");
+        assertThat(layer.getUI().getLayerName()).isEqualTo("layer 1");
 
         History.redo();
-        assertThat(layer1.getName()).isEqualTo("newName");
-        assertThat(layer1.getLayerButton().getLayerName()).isEqualTo("newName");
+        assertThat(layer.getName()).isEqualTo("newName");
+        assertThat(layer.getUI().getLayerName()).isEqualTo("newName");
     }
 
     @Test
     public void testMergeDownOn() {
         ImageLayer lower = TestHelper.createImageLayer("lower", comp);
-        layer1.mergeDownOn(lower);
+        layer.mergeDownOn(lower);
     }
 
     @Test
     public void testMakeActive() {
-        assertThat(layer1.isActive()).isFalse();
-        layer1.makeActive(AddToHistory.YES);
-        assertThat(layer1.isActive()).isTrue();
+        Layer layer2 = comp.getLayer(1);
+
+        assertThat(layer2.isActive()).isFalse();
+        layer2.makeActive(AddToHistory.YES);
+        assertThat(layer2.isActive()).isTrue();
 
         History.undo();
-        assertThat(layer1.isActive()).isFalse();
+        assertThat(layer2.isActive()).isFalse();
         History.redo();
-        assertThat(layer1.isActive()).isTrue();
+        assertThat(layer2.isActive()).isTrue();
     }
 
     @Test
     public void testResize() {
-        Canvas canvas = layer1.getComp().getCanvas();
+        Canvas canvas = layer.getComp().getCanvas();
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
 
-        layer1.resize(canvasWidth, canvasHeight, true);
+        layer.resize(canvasWidth, canvasHeight, true);
 
-        layer1.resize(30, 25, true);
-        layer1.resize(25, 30, false);
+        layer.resize(30, 25, true);
+        layer.resize(25, 30, false);
 
-        layer1.resize(canvasWidth, canvasHeight, true);
+        layer.resize(canvasWidth, canvasHeight, true);
     }
 
     @Test
     public void testCrop() {
-        layer1.crop(new Rectangle(3, 3, 5, 5));
+        layer.crop(new Rectangle(3, 3, 5, 5));
     }
 
     @Test
     public void testDragFinished() {
-        assertThat(comp.getLayerIndex(layer1)).isEqualTo(0);
-        layer1.dragFinished(1);
-        assertThat(comp.getLayerIndex(layer1)).isEqualTo(1);
+        assertThat(comp.getLayerIndex(layer)).isEqualTo(0);
+        layer.dragFinished(1);
+        assertThat(comp.getLayerIndex(layer)).isEqualTo(1);
     }
 
     @Test
     public void testAddMask() {
         if (withMask == WithMask.NO) {
-            assertThat(layer1.hasMask()).isFalse();
-            layer1.addMask(LayerMaskAddType.REVEAL_ALL);
-            assertThat(layer1.hasMask()).isTrue();
+            assertThat(layer.hasMask()).isFalse();
+            layer.addMask(LayerMaskAddType.REVEAL_ALL);
+            assertThat(layer.hasMask()).isTrue();
 
             History.undo();
-            assertThat(layer1.hasMask()).isFalse();
+            assertThat(layer.hasMask()).isFalse();
 
             History.redo();
-            assertThat(layer1.hasMask()).isTrue();
+            assertThat(layer.hasMask()).isTrue();
         }
     }
 
     @Test
     public void testDeleteMask() {
         if (withMask == WithMask.YES) {
-            assertThat(layer1.hasMask()).isTrue();
-            layer1.deleteMask(AddToHistory.YES, false);
-            assertThat(layer1.hasMask()).isFalse();
+            assertThat(layer.hasMask()).isTrue();
+            layer.deleteMask(AddToHistory.YES, false);
+            assertThat(layer.hasMask()).isFalse();
 
             History.undo();
-            assertThat(layer1.hasMask()).isTrue();
+            assertThat(layer.hasMask()).isTrue();
 
             History.redo();
-            assertThat(layer1.hasMask()).isFalse();
+            assertThat(layer.hasMask()).isFalse();
         }
     }
 
     @Test
     public void testSetMaskEnabled() {
         if (withMask == WithMask.YES) {
-            assertThat(layer1.hasMask()).isTrue();
-            assertThat(layer1.isMaskEnabled()).isTrue();
+            assertThat(layer.hasMask()).isTrue();
+            assertThat(layer.isMaskEnabled()).isTrue();
 
-            layer1.setMaskEnabled(false, AddToHistory.YES);
-            assertThat(layer1.isMaskEnabled()).isFalse();
+            layer.setMaskEnabled(false, AddToHistory.YES);
+            assertThat(layer.isMaskEnabled()).isFalse();
 
             History.undo();
-            assertThat(layer1.isMaskEnabled()).isTrue();
+            assertThat(layer.isMaskEnabled()).isTrue();
 
             History.redo();
-            assertThat(layer1.isMaskEnabled()).isFalse();
+            assertThat(layer.isMaskEnabled()).isFalse();
         }
     }
 
     @Test
     public void testMaskLinking() {
         if (withMask == WithMask.YES) {
-            assertThat(layer1.hasMask()).isTrue();
-            LayerMask mask = layer1.getMask();
+            assertThat(layer.hasMask()).isTrue();
+            LayerMask mask = layer.getMask();
             assertThat(mask.isLinked()).isTrue();
 
             mask.setLinked(false, AddToHistory.YES);

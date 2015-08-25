@@ -132,9 +132,9 @@ public class History {
             return false;
         }
 
-        Optional<PixelitorEdit> lastEdit = undoManager.getLastEdit();
-        if (lastEdit.isPresent()) {
-            return lastEdit.get().canRepeat();
+        PixelitorEdit lastEdit = undoManager.getLastEdit();
+        if (lastEdit != null) {
+            return lastEdit.canRepeat();
         }
         return false;
     }
@@ -143,9 +143,9 @@ public class History {
      * Used for the name of the fade/repeat menu items
      */
     public static String getLastEditName() {
-        Optional<PixelitorEdit> lastEdit = undoManager.getLastEdit();
-        if (lastEdit.isPresent()) {
-            return lastEdit.get().getPresentationName();
+        PixelitorEdit lastEdit = undoManager.getLastEdit();
+        if (lastEdit != null) {
+            return lastEdit.getPresentationName();
         }
         return "";
     }
@@ -158,9 +158,8 @@ public class History {
         if (numUndoneEdits > 0) {
             return Optional.empty();
         }
-        Optional<PixelitorEdit> lastEditOpt = undoManager.getLastEdit();
-        if (lastEditOpt.isPresent()) {
-            PixelitorEdit lastEdit = lastEditOpt.get();
+        PixelitorEdit lastEdit = undoManager.getLastEdit();
+        if (lastEdit != null) {
             if (lastEdit instanceof FadeableEdit) {
                 FadeableEdit fadeableEdit = (FadeableEdit) lastEdit;
                 if (!fadeableEdit.isFadeable()) {
@@ -204,7 +203,7 @@ public class History {
     }
 
     // for debugging only
-    public static Optional<PixelitorEdit> getLastEdit() {
+    public static PixelitorEdit getLastEdit() {
         return undoManager.getLastEdit();
     }
 

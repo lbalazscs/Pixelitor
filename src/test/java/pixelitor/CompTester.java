@@ -7,6 +7,7 @@ import pixelitor.layers.Layer;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionInteraction;
 import pixelitor.selection.SelectionType;
+import pixelitor.testutils.WithTranslation;
 import pixelitor.utils.UpdateGUI;
 import pixelitor.utils.test.Assertions;
 
@@ -22,6 +23,8 @@ import static org.junit.Assert.assertEquals;
  */
 public class CompTester {
     private final Composition comp;
+
+    // all coordinates and distances must be even here because of the resize test
     private final Rectangle standardTestSelectionShape = new Rectangle(4, 4, 8, 4);
 
     public CompTester(Composition comp) {
@@ -55,9 +58,11 @@ public class CompTester {
         assertEquals("width", w, image.getWidth());
         assertEquals("height", h, image.getHeight());
 
-        BufferedImage maskImage = layer.getMask().getImage();
-        assertEquals("mask width", w, maskImage.getWidth());
-        assertEquals("mask height", h, maskImage.getHeight());
+        if (layer.hasMask()) {
+            BufferedImage maskImage = layer.getMask().getImage();
+            assertEquals("mask width", w, maskImage.getWidth());
+            assertEquals("mask height", h, maskImage.getHeight());
+        }
     }
 
     public void checkCanvasSize(int width, int height) {
@@ -83,7 +88,7 @@ public class CompTester {
         comp.getSelection().get().setShape(rect);
     }
 
-    public void setStandardTestTranslationToAllLayers() {
+    public void setStandardTestTranslationToAllLayers(WithTranslation translation) {
         int nrLayers = comp.getNrLayers();
         for (int i = 0; i < nrLayers; i++) {
             Layer layer = comp.getLayer(i);
@@ -96,12 +101,12 @@ public class CompTester {
                 int ty = contentLayer.getTranslationY();
                 assert ty == 0 : "ty = " + ty + " on " + contentLayer.getName();
 
-                setStandardTestTranslation(contentLayer);
+                setStandardTestTranslation(contentLayer, translation);
             }
         }
     }
 
-    public void setStandardTestTranslation(ContentLayer layer) {
+    public void setStandardTestTranslation(ContentLayer layer, WithTranslation translation) {
         // Composition only allows to move the active layer
         // so if the given layer is not active, we need to activate it temporarily
         Layer activeLayerBefore = comp.getActiveLayer();
@@ -112,9 +117,12 @@ public class CompTester {
         }
 
         assert Assertions.translationIs(layer, 0, 0);
-        moveLayer(false, 2, 2);
-        moveLayer(false, -4, -4);
-        assert Assertions.translationIs(layer, -4, -4);
+
+        translation.moveLayer(this);
+
+        int expectedTX = translation.getExpectedTX();
+        int expectedTY = translation.getExpectedTY();
+        assert Assertions.translationIs(layer, expectedTX, expectedTY);
 
         if (activeLayerChanged) {
             comp.setActiveLayer(activeLayerBefore, AddToHistory.NO);

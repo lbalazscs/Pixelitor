@@ -102,7 +102,7 @@ public class AssertJSwingTest {
         System.out.println("AssertJSwingTest::main: finished");
     }
 
-    public static void initialize() {
+    private static void initialize() {
         cleanOutputs();
         checkTestingDirs();
         Utils.checkThatAssertionsAreEnabled();
@@ -123,7 +123,7 @@ public class AssertJSwingTest {
         PixelitorWindow.getInstance().setLocation(0, 0);
     }
 
-    public void testApp() {
+    private void testApp() {
         testDevelopMenu();
         testTools();
         testMenus();

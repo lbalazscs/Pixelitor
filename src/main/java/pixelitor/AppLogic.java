@@ -101,7 +101,11 @@ public class AppLogic {
 
     public static void showFileSavedMessage(File file) {
         String msg = "File " + file.getAbsolutePath() + " saved.";
-        PixelitorWindow.getInstance().setStatusBarMessage(msg);
+        showStatusMessage(msg);
+    }
+
+    public static void showStatusMessage(String msg) {
+        messageHandler.showStatusBarMessage(msg);
     }
 
     public static void exitApp(PixelitorWindow pw) {

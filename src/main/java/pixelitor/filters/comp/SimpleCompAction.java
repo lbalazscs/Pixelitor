@@ -57,11 +57,11 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
         MultiLayerBackup backup = new MultiLayerBackup(comp, getEditName(), changesCanvasDimensions);
 
         Canvas canvas = comp.getCanvas();
-        AffineTransform tx = createTransform(canvas);
+        AffineTransform canvasTX = createTransform(canvas);
 
         if (comp.hasSelection()) {
             Selection selection = comp.getSelectionOrNull();
-            selection.transform(tx, AddToHistory.NO);
+            selection.transform(canvasTX, AddToHistory.NO);
         }
 
         int nrLayers = comp.getNrLayers();
@@ -69,11 +69,11 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
             Layer layer = comp.getLayer(i);
             if (layer instanceof ContentLayer) {
                 ContentLayer contentLayer = (ContentLayer) layer;
-                applyTx(contentLayer, tx);
+                applyTx(contentLayer, canvasTX);
             }
             if (layer.hasMask()) {
                 LayerMask mask = layer.getMask();
-                applyTx(mask, tx);
+                applyTx(mask, canvasTX);
             }
         }
 
