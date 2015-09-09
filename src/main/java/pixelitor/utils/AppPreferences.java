@@ -105,7 +105,6 @@ public final class AppPreferences {
         }
         int width = mainUserNode.getInt(NEW_IMAGE_WIDTH, defaultWidth);
         int height = mainUserNode.getInt(NEW_IMAGE_HEIGHT, defaultHeight);
-        //noinspection NonThreadSafeLazyInitialization
         newImageSize = new Dimension(width, height);
     }
 

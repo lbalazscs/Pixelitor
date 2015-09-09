@@ -46,7 +46,7 @@ public final class NewImage {
 
     public static void addNewImage(FillType bg, int width, int height, String title) {
         Composition comp = createNewComposition(bg, width, height, title);
-        PixelitorWindow.getInstance().addComposition(comp);
+        AppLogic.addComposition(comp);
     }
 
     public static Composition createNewComposition(FillType bg, int width, int height, String title) {

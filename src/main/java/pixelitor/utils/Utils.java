@@ -17,6 +17,7 @@
 
 package pixelitor.utils;
 
+import pixelitor.AppLogic;
 import pixelitor.Build;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
@@ -122,7 +123,7 @@ public final class Utils {
             try {
                 desktop.browse(uri);
             } catch (IOException e) {
-                Dialogs.showExceptionDialog(e);
+                Messages.showException(e);
             }
         }
     }
@@ -346,7 +347,7 @@ public final class Utils {
             comp.repaint();
         } else {
             Composition comp = Composition.fromImage(copy, null, name);
-            PixelitorWindow.getInstance().addComposition(comp);
+            AppLogic.addComposition(comp);
         }
 
         if (savedIC != null) {

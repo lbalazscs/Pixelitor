@@ -17,9 +17,9 @@
 
 package pixelitor.menus.edit;
 
+import pixelitor.AppLogic;
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
-import pixelitor.PixelitorWindow;
 import pixelitor.history.AddToHistory;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
@@ -58,7 +58,7 @@ public enum PasteDestination {
             Composition comp = Composition.fromImage(pastedImage,
                     null, title);
 
-            PixelitorWindow.getInstance().addComposition(comp);
+            AppLogic.addComposition(comp);
             pastedCount++;
         }
     };

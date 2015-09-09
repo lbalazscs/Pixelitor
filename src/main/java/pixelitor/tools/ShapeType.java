@@ -139,7 +139,7 @@ public enum ShapeType {
 
         @Override
         public Shape getShape(double x, double y, int diameter) {
-            return createStar(x, y, diameter, diameter / 3 + 1);
+            return createStar(x, y, diameter, diameter / 3.0 + 1);
         }
     }, RANDOM_STAR("Random Star", true) {
         private UserDrag lastUserDrag;

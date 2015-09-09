@@ -27,7 +27,7 @@ import pixelitor.io.FileChoosers;
 import pixelitor.io.FileExtensionUtils;
 import pixelitor.io.OpenSaveManager;
 import pixelitor.io.OutputFormat;
-import pixelitor.utils.Dialogs;
+import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 import pixelitor.utils.ValidatedDialog;
 
@@ -75,7 +75,7 @@ public class Automate {
 
         File[] inputFiles = FileExtensionUtils.getAllSupportedFilesInDir(lastOpenDir);
         if (inputFiles.length == 0) {
-            Dialogs.showInfoDialog("No files", "There are no supported files in " + lastOpenDir.getAbsolutePath());
+            Messages.showInfo("No files", "There are no supported files in " + lastOpenDir.getAbsolutePath());
             return;
         }
 
@@ -100,7 +100,7 @@ public class Automate {
                     try {
                         EventQueue.invokeAndWait(edtTask);
                     } catch (InterruptedException | InvocationTargetException e) {
-                        Dialogs.showExceptionDialog(e);
+                        Messages.showException(e);
                     }
 
                     if (stopProcessing) {

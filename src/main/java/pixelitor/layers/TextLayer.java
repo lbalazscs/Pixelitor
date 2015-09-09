@@ -145,10 +145,46 @@ public class TextLayer extends ContentLayer {
         return settings;
     }
 
-    private void updateLayerName() {
+    public void updateLayerName() {
         if (settings != null) {
             setName(settings.getText(), AddToHistory.NO);
         }
+    }
+
+    public void edit(PixelitorWindow pw) {
+        if (Build.CURRENT.isRobotTest()) {
+            return; // avoid dialogs
+        }
+
+        TextSettings oldSettings = getSettings();
+        TextAdjustmentsPanel p = new TextAdjustmentsPanel(this);
+        OKCancelDialog d = new OKCancelDialog(p, pw, "Edit Text Layer") {
+            @Override
+            protected void dialogAccepted() {
+                close();
+
+                commitSettings(oldSettings);
+            }
+
+            @Override
+            protected void dialogCanceled() {
+                close();
+
+                setSettings(oldSettings);
+                comp.imageChanged(Composition.ImageChangeActions.FULL);
+            }
+        };
+        d.setVisible(true);
+    }
+
+    public void commitSettings(TextSettings oldSettings) {
+        updateLayerName();
+        TextLayerChangeEdit edit = new TextLayerChangeEdit(
+                comp,
+                this,
+                oldSettings
+        );
+        History.addEdit(edit);
     }
 
     ///// from here static utility methods
@@ -188,47 +224,7 @@ public class TextLayer extends ContentLayer {
         d.setVisible(true);
     }
 
-    public static void editActive(PixelitorWindow pw) {
-        Composition comp = ImageComponents.getActiveIC().getComp();
-        Layer layer = comp.getActiveLayer();
-        TextLayer textLayer = (TextLayer) layer;
-        edit(pw, comp, textLayer);
-    }
-
-    public static void edit(PixelitorWindow pw, Composition comp, TextLayer textLayer) {
-        if (Build.CURRENT.isRobotTest()) {
-            return; // avoid dialogs
-        }
-
-        TextSettings oldSettings = textLayer.getSettings();
-        TextAdjustmentsPanel p = new TextAdjustmentsPanel(textLayer);
-        OKCancelDialog d = new OKCancelDialog(p, pw, "Edit Text Layer") {
-            @Override
-            protected void dialogAccepted() {
-                close();
-
-                textLayer.updateLayerName();
-                TextLayerChangeEdit edit = new TextLayerChangeEdit(
-                        textLayer.getComp(),
-                        textLayer,
-                        oldSettings
-                );
-                History.addEdit(edit);
-            }
-
-            @Override
-            protected void dialogCanceled() {
-                close();
-
-                textLayer.setSettings(oldSettings);
-                comp.imageChanged(Composition.ImageChangeActions.FULL);
-            }
-        };
-        d.setVisible(true);
-    }
-
-    public static void replaceWithRasterized() {
-        Composition comp = ImageComponents.getActiveIC().getComp();
+    public static void replaceWithRasterized(Composition comp) {
         Layer layer = comp.getActiveLayer();
         TextLayer textLayer = (TextLayer) layer;
         BufferedImage rasterizedImage = textLayer.createRasterizedImage();
@@ -277,7 +273,7 @@ public class TextLayer extends ContentLayer {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder(getClass().getSimpleName() + "{");
+        StringBuilder sb = new StringBuilder(getClass().getSimpleName() + "{");
         sb.append("text=").append(settings == null ? "null settings" : settings.getText());
         sb.append(", super=").append(super.toString());
         sb.append('}');

@@ -18,7 +18,7 @@
 package pixelitor;
 
 import pixelitor.io.DropListener;
-import pixelitor.utils.Dialogs;
+import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.Dimension;
@@ -147,7 +147,7 @@ public class Desktop {
             desktopPane.getDesktopManager().activateFrame(internalFrame);
             ImageComponents.newImageOpened(ic.getComp());
         } catch (PropertyVetoException e) {
-            Dialogs.showExceptionDialog(e);
+            Messages.showException(e);
         }
     }
 

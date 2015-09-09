@@ -7,9 +7,11 @@ package pixelitor;
 public interface MessageHandler {
     void showStatusBarMessage(String msg);
 
-    void showInfoDialog(String title, String msg);
+    void showInfo(String title, String msg);
 
-    void showErrorDialog(String title, String msg);
+    void showError(String title, String msg);
 
-    void showNotImageLayerDialog();
+    void showNotImageLayerError();
+
+    void showException(Throwable e);
 }

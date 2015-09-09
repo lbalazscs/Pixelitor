@@ -33,6 +33,7 @@ import pixelitor.selection.Selection;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Messages;
 import pixelitor.utils.UpdateGUI;
 import pixelitor.utils.Utils;
 
@@ -959,7 +960,7 @@ public class ImageLayer extends ContentLayer {
         if (previewImage != null) {
             Utils.debugImage(previewImage, "previewImage");
         } else {
-            Dialogs.showInfoDialog("null", "previewImage is null");
+            Messages.showInfo("null", "previewImage is null");
         }
     }
 
@@ -1015,7 +1016,7 @@ public class ImageLayer extends ContentLayer {
     }
 
     public String toDebugCanvasString() {
-        final StringBuilder sb = new StringBuilder("{");
+        StringBuilder sb = new StringBuilder("{");
         sb.append("canvasWidth=").append(canvas.getWidth());
         sb.append(", canvasHeight=").append(canvas.getHeight());
         sb.append(", tx=").append(translationX);
@@ -1028,7 +1029,7 @@ public class ImageLayer extends ContentLayer {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder(getClass().getSimpleName() + "{");
+        StringBuilder sb = new StringBuilder(getClass().getSimpleName() + "{");
         sb.append("state=").append(state);
         sb.append(", super=").append(super.toString());
         sb.append('}');

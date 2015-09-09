@@ -17,7 +17,7 @@
 
 package pixelitor;
 
-import pixelitor.utils.Dialogs;
+import pixelitor.utils.Messages;
 
 /**
  * Handles uncaught exceptions and other errors
@@ -37,6 +37,6 @@ public class ExceptionHandler implements Thread.UncaughtExceptionHandler {
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
-        Dialogs.showExceptionDialog(e);
+        Messages.showException(e);
     }
 }

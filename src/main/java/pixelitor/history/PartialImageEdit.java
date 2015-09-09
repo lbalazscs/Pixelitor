@@ -96,7 +96,7 @@ public class PartialImageEdit extends FadeableEdit {
         History.notifyMenus(this);
     }
 
-    private void debugRaster(String name, Raster raster) {
+    private static void debugRaster(String name, Raster raster) {
         Rectangle rasterBounds = raster.getBounds();
         String className = raster.getClass().getSimpleName();
         DataBuffer dataBuffer = raster.getDataBuffer();

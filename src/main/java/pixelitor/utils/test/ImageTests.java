@@ -43,7 +43,7 @@ import pixelitor.layers.AddNewLayerAction;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.DeleteActiveLayerAction;
 import pixelitor.layers.ImageLayer;
-import pixelitor.utils.Dialogs;
+import pixelitor.utils.Messages;
 import pixelitor.utils.UpdateGUI;
 import pixelitor.utils.Utils;
 
@@ -115,7 +115,7 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
                         EventQueue.invokeAndWait(guiTask);
                         Thread.sleep(1000L);
                     } catch (InterruptedException | InvocationTargetException e) {
-                        Dialogs.showExceptionDialog(e);
+                        Messages.showException(e);
                     }
                 } // end of for loop
                 progressMonitor.close();

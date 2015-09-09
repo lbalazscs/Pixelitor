@@ -32,7 +32,7 @@ public class OpenInBrowserAction extends AbstractAction {
         try {
             uri = new URI(url);
         } catch (URISyntaxException e) {
-            Dialogs.showExceptionDialog(e);
+            Messages.showException(e);
         }
     }
 

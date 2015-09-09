@@ -23,6 +23,7 @@ import pixelitor.io.FileChoosers;
 import pixelitor.io.OpenRaster;
 import pixelitor.io.OpenSaveManager;
 import pixelitor.utils.Dialogs;
+import pixelitor.utils.Messages;
 import pixelitor.utils.OKCancelDialog;
 
 import javax.swing.*;
@@ -64,7 +65,7 @@ public class OpenRasterExportPanel extends JPanel {
                         OpenRaster.writeOpenRaster(activeComp, file, addMergedImage);
                         OpenSaveManager.afterSaveActions(activeComp, file, true);
                     } catch (IOException e) {
-                        Dialogs.showExceptionDialog(e);
+                        Messages.showException(e);
                     }
                 }
             }

@@ -3,7 +3,7 @@ package pixelitor.layers;
 import pixelitor.FgBgColors;
 import pixelitor.history.AddToHistory;
 import pixelitor.menus.NamedAction;
-import pixelitor.utils.Dialogs;
+import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.Component;
@@ -91,7 +91,7 @@ public class LayerMaskActions {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (!(layer instanceof ImageLayer)) {
-                Dialogs.showNotImageLayerDialog();
+                Messages.showNotImageLayerError();
                 return;
             }
 

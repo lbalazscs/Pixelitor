@@ -7,7 +7,6 @@ import javax.swing.*;
  */
 public abstract class NamedAction extends AbstractAction {
     protected NamedAction() {
-        super();
     }
 
     protected NamedAction(String name) {

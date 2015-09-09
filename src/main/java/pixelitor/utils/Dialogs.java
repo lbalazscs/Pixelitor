@@ -39,15 +39,11 @@ import java.util.logging.Level;
 public class Dialogs {
     private static boolean mainWindowInitialized = false;
 
-    private Dialogs() { // should not me instantiated
+    private Dialogs() { // should not be instantiated
     }
 
     public static void setMainWindowInitialized(boolean mainWindowInitialized) {
         Dialogs.mainWindowInitialized = mainWindowInitialized;
-    }
-
-    public static boolean isMainWindowInitialized() {
-        return mainWindowInitialized;
     }
 
     public static Frame getParentForDialogs() {

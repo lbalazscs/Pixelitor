@@ -78,7 +78,7 @@ public class AdjustmentLayer extends Layer {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder(getClass().getSimpleName() + "{");
+        StringBuilder sb = new StringBuilder(getClass().getSimpleName() + "{");
         sb.append("filter=").append(filter == null ? "null filter" : filter.getName());
         sb.append(", super=").append(super.toString());
         sb.append('}');

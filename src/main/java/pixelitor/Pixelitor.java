@@ -21,6 +21,7 @@ import net.jafama.FastMath;
 import pixelitor.io.OpenSaveManager;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Dialogs;
+import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -122,7 +123,7 @@ public class Pixelitor {
             if (f.exists()) {
                 OpenSaveManager.openFile(f);
             } else {
-                Dialogs.showErrorDialog("File not found", "The file \"" + f.getAbsolutePath() + "\" does not exist");
+                Messages.showError("File not found", "The file \"" + f.getAbsolutePath() + "\" does not exist");
             }
         }
     }
@@ -130,6 +131,7 @@ public class Pixelitor {
     /**
      * A possibility for automatic debugging or testing
      */
+    @SuppressWarnings("UnusedParameters")
     private static void afterStartTestActions(PixelitorWindow pw) {
         if (Build.CURRENT == Build.FINAL) {
             // in the final builds nothing should run

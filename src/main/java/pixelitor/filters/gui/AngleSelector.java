@@ -29,7 +29,6 @@ import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
  * Contains an AbstractAngleSelectorComponent and a SliderSpinner
  */
 public class AngleSelector extends JPanel implements ParamGUI {
-    @SuppressWarnings("FieldMayBeFinal") // idea bug: it cannot be final
     private boolean userChangedSpinner = true;
     private final SliderSpinner sliderSpinner;
     private final AbstractAngleSelectorComponent selectorGUI;

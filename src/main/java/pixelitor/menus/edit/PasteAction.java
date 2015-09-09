@@ -17,8 +17,8 @@
 
 package pixelitor.menus.edit;
 
-import pixelitor.utils.Dialogs;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.Toolkit;
@@ -73,14 +73,14 @@ public class PasteAction extends AbstractAction {
                 destination.addImage(pastedImage);
             }
         } catch (Exception ex) {
-            Dialogs.showExceptionDialog(ex);
+            Messages.showException(ex);
         }
     }
 
     private static BufferedImage getImageFromClipboard() {
         Transferable clipboardContents = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
         if (clipboardContents == null) {
-            Dialogs.showInfoDialog("Paste", "There is nothing to paste.");
+            Messages.showInfo("Paste", "There is nothing to paste.");
             return null;
         }
 
@@ -89,10 +89,10 @@ public class PasteAction extends AbstractAction {
             try {
                 pastedImage = (BufferedImage) clipboardContents.getTransferData(DataFlavor.imageFlavor);
             } catch (UnsupportedFlavorException | IOException ex) {
-                Dialogs.showExceptionDialog(ex);
+                Messages.showException(ex);
             }
         } else {
-            Dialogs.showInfoDialog("Paste", "The clipboard content is not an image.");
+            Messages.showInfo("Paste", "The clipboard content is not an image.");
             return null;
         }
         return pastedImage;

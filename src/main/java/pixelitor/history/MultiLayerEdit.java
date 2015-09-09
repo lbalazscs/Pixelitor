@@ -35,10 +35,10 @@ public class MultiLayerEdit extends PixelitorEdit {
 
     private final ImageEdit imageEdit;
     private final CanvasChangeEdit canvasChangeEdit;
-    private TranslationEdit translationEdit;
+    private final TranslationEdit translationEdit;
     private SelectionChangeEdit selectionChangeEdit;
     private DeselectEdit deselectEdit;
-    private boolean undoable;
+    private final boolean undoable;
 
     public MultiLayerEdit(Composition comp, String name, MultiLayerBackup backup) {
         super(comp, name);

@@ -78,7 +78,7 @@ public class LayerButton extends JToggleButton {
             Icon textLayerIcon = IconUtils.getTextLayerIcon();
             layerIcon = new JButton(textLayerIcon);
 
-            ((JButton) layerIcon).addActionListener(e -> TextLayer.edit(PixelitorWindow.getInstance(), layer.getComp(), (TextLayer) layer));
+            ((JButton) layerIcon).addActionListener(e -> ((TextLayer) layer).edit(PixelitorWindow.getInstance()));
         } else if (layer instanceof AdjustmentLayer) {
             Icon adjLayerIcon = IconUtils.getAdjLayerIcon();
             layerIcon = new JButton(adjLayerIcon);
@@ -96,7 +96,7 @@ public class LayerButton extends JToggleButton {
         wireSelectionWithLayerActivation(layer);
     }
 
-    private void configureLayerIcon(JComponent layerIcon) {
+    private static void configureLayerIcon(JComponent layerIcon) {
         layerIcon.putClientProperty("JComponent.sizeVariant", "mini");
 
         if (layerIcon instanceof JButton) {

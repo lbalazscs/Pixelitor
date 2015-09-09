@@ -138,8 +138,8 @@ public class Rotate extends SimpleCompAction {
             }
         };
 
-        protected int angleDegree;
-        private String name;
+        protected final int angleDegree;
+        private final String name;
 
         SpecialAngle(int angleDegree, String name) {
             this.angleDegree = angleDegree;

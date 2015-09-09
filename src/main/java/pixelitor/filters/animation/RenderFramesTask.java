@@ -25,7 +25,7 @@ import pixelitor.filters.Filter;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.ParamSetState;
 import pixelitor.layers.ImageLayer;
-import pixelitor.utils.Dialogs;
+import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -45,7 +45,7 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         try {
             renderFrames();
         } catch (Exception e) {
-            SwingUtilities.invokeLater(() -> Dialogs.showExceptionDialog(e));
+            SwingUtilities.invokeLater(() -> Messages.showException(e));
         }
 
         return null;
@@ -95,7 +95,7 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
                 animationWriter.addFrame(image);
             } catch (IOException e) {
                 canceled = true;
-                Dialogs.showExceptionDialog(e);
+                Messages.showException(e);
                 break;
             }
         }

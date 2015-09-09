@@ -21,7 +21,7 @@ import pixelitor.ImageComponents;
 import pixelitor.ImageDisplay;
 import pixelitor.filters.Filter;
 import pixelitor.layers.ImageLayer;
-import pixelitor.utils.Dialogs;
+import pixelitor.utils.Messages;
 
 import java.awt.event.ActionEvent;
 
@@ -57,7 +57,7 @@ public abstract class FilterWithGUI extends Filter {
         ImageDisplay ic = ImageComponents.getActiveIC();
         if(ic != null) {
             if (!ic.activeIsImageLayer()) {
-                Dialogs.showNotImageLayerDialog();
+                Messages.showNotImageLayerError();
                 return;
             }
 

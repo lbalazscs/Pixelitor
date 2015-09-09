@@ -25,8 +25,8 @@ import pixelitor.menus.SelectionActions;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.menus.view.ZoomMenu;
 import pixelitor.tools.Tools;
-import pixelitor.utils.Dialogs;
 import pixelitor.utils.ImageSwitchListener;
+import pixelitor.utils.Messages;
 
 import java.awt.Cursor;
 import java.awt.Rectangle;
@@ -152,7 +152,7 @@ public class ImageComponents {
                 new Crop(cropRect, false, allowGrowing).process(comp);
             });
         } catch (Exception ex) {
-            Dialogs.showExceptionDialog(ex);
+            Messages.showException(ex);
         }
     }
 
@@ -166,14 +166,14 @@ public class ImageComponents {
                 new Crop(selectionBounds, true, true).process(comp);
             }));
         } catch (Exception ex) {
-            Dialogs.showExceptionDialog(ex);
+            Messages.showException(ex);
         }
     }
 
     public static void imageClosed(ImageComponent ic) {
         icList.remove(ic);
         if (icList.isEmpty()) {
-            allImagesAreClosed();
+            onAllImagesClosed();
         }
         setNewImageAsActiveIfNecessary();
     }
@@ -206,10 +206,10 @@ public class ImageComponents {
         imageSwitchListeners.add(listener);
     }
 
-    private static void allImagesAreClosed() {
+    private static void onAllImagesClosed() {
         setActiveIC(null, false);
         imageSwitchListeners.forEach(ImageSwitchListener::noOpenImageAnymore);
-        History.allImagesAreClosed();
+        History.onAllImagesClosed();
         SelectionActions.setEnabled(false, null);
 
         PixelitorWindow.getInstance().setTitle(Build.getPixelitorWindowFixTitle());
@@ -250,6 +250,7 @@ public class ImageComponents {
     }
 
     public static void repaintAll() {
+        //noinspection Convert2streamapi
         for (ImageComponent ic : icList) {
             ic.repaint();
         }

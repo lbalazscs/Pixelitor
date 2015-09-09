@@ -18,7 +18,7 @@ import static pixelitor.Composition.ImageChangeActions.FULL;
  */
 public class ImageAndMaskEdit extends ImageEdit {
     private final boolean canRepeat;
-    private ImageEdit maskImageEdit;
+    private final ImageEdit maskImageEdit;
 
     public ImageAndMaskEdit(Composition comp, String name, ImageLayer layer,
                             BufferedImage backupImage,

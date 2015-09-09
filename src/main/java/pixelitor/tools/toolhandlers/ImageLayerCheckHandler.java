@@ -35,7 +35,7 @@ public class ImageLayerCheckHandler extends ToolHandler {
     @Override
     boolean mousePressed(MouseEvent e, ImageDisplay ic) {
         if (!ic.activeIsImageLayer()) {
-            messageHandler.showNotImageLayerDialog();
+            messageHandler.showNotImageLayerError();
             return true;
         }
 

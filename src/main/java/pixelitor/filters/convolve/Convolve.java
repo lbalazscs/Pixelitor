@@ -20,7 +20,7 @@ package pixelitor.filters.convolve;
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.FilterWithGUI;
-import pixelitor.utils.Dialogs;
+import pixelitor.utils.Messages;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
@@ -57,7 +57,7 @@ public class Convolve extends FilterWithGUI {
         try {
             convolveOp.filter(src, dest);
         } catch (ImagingOpException e) {
-            Dialogs.showExceptionDialog(e);
+            Messages.showException(e);
         }
 
         return dest;

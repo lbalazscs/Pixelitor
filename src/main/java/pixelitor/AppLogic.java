@@ -21,12 +21,11 @@ import pixelitor.layers.Layer;
 import pixelitor.layers.LayerChangeListener;
 import pixelitor.layers.LayerMaskChangeListener;
 import pixelitor.tools.Symmetry;
+import pixelitor.tools.Tools;
 import pixelitor.utils.AppPreferences;
-import pixelitor.utils.GUIUtils;
-import pixelitor.utils.debug.AppNode;
+import pixelitor.utils.Messages;
 
 import javax.swing.*;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -36,7 +35,6 @@ import java.util.Collection;
 public class AppLogic {
     private static final Collection<LayerChangeListener> layerChangeListeners = new ArrayList<>();
     private static final Collection<LayerMaskChangeListener> layerMaskChangeListeners = new ArrayList<>();
-    private static MessageHandler messageHandler;
 
     private AppLogic() {
     }
@@ -89,25 +87,6 @@ public class AppLogic {
         }
     }
 
-    public static void showDebugAppDialog() {
-        AppNode node = new AppNode();
-        String title = "Pixelitor Internal State";
-
-        JTree tree = new JTree(node);
-        String text = node.toDetailedString();
-
-        GUIUtils.showTextDialog(tree, title, text);
-    }
-
-    public static void showFileSavedMessage(File file) {
-        String msg = "File " + file.getAbsolutePath() + " saved.";
-        showStatusMessage(msg);
-    }
-
-    public static void showStatusMessage(String msg) {
-        messageHandler.showStatusBarMessage(msg);
-    }
-
     public static void exitApp(PixelitorWindow pw) {
         if (ImageComponents.thereAreUnsavedChanges()) {
             int answer = JOptionPane.showConfirmDialog(null, "There are unsaved changes. Are you sure you want to exit?", "Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
@@ -121,12 +100,20 @@ public class AppLogic {
         }
     }
 
-    public static MessageHandler getMessageHandler() {
-        return messageHandler;
-    }
+    /**
+     * Adds a composition to the app.
+     */
+    public static void addComposition(Composition comp) {
+        try {
+            ImageComponent ic = new ImageComponent(comp);
+            ic.setCursor(Tools.getCurrentTool().getCursor());
+            ImageComponents.setActiveIC(ic, false);
+            comp.addLayersToGUI();
 
-    public static void setMessageHandler(MessageHandler messageHandler) {
-        AppLogic.messageHandler = messageHandler;
+            Desktop.INSTANCE.addNewImageComponent(ic);
+        } catch (Exception e) {
+            Messages.showException(e);
+        }
     }
 }
 

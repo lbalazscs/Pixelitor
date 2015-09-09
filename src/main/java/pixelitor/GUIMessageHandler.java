@@ -3,7 +3,7 @@ package pixelitor;
 import pixelitor.utils.Dialogs;
 
 public class GUIMessageHandler implements MessageHandler {
-    PixelitorWindow pw;
+    final PixelitorWindow pw;
 
     public GUIMessageHandler(PixelitorWindow pw) {
         this.pw = pw;
@@ -15,17 +15,22 @@ public class GUIMessageHandler implements MessageHandler {
     }
 
     @Override
-    public void showInfoDialog(String title, String msg) {
+    public void showInfo(String title, String msg) {
         Dialogs.showInfoDialog(title, msg);
     }
 
     @Override
-    public void showErrorDialog(String title, String msg) {
+    public void showError(String title, String msg) {
         Dialogs.showErrorDialog(title, msg);
     }
 
     @Override
-    public void showNotImageLayerDialog() {
+    public void showNotImageLayerError() {
         Dialogs.showNotImageLayerDialog();
+    }
+
+    @Override
+    public void showException(Throwable e) {
+        Dialogs.showExceptionDialog(e);
     }
 }

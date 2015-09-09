@@ -19,7 +19,7 @@ package pixelitor.menus.edit;
 
 import pixelitor.Build;
 import pixelitor.ImageComponents;
-import pixelitor.utils.Dialogs;
+import pixelitor.utils.Messages;
 import pixelitor.utils.debug.BufferedImageNode;
 
 import javax.swing.*;
@@ -48,7 +48,7 @@ public class CopyAction extends AbstractAction {
                 // TODO we could try to rasterize text layers
 
                 if(!Build.CURRENT.isRobotTest()) {
-                    Dialogs.showNotImageLayerDialog();
+                    Messages.showNotImageLayerError();
                 }
                 return;
             }
@@ -71,7 +71,7 @@ public class CopyAction extends AbstractAction {
                 System.out.println(String.format("CopyAction::RasterFormatException in actionPerformed: s = '%s'", s));
             }
         } catch (Exception ex) {
-            Dialogs.showExceptionDialog(ex);
+            Messages.showException(ex);
         }
     }
 }

@@ -101,6 +101,7 @@ public abstract class ContentLayer extends Layer {
         this.translationY = y;
     }
 
+    @SuppressWarnings("UnusedParameters")
     public abstract void flip(Flip.Direction direction, AffineTransform flipTx);
 
     public abstract void rotate(Rotate.SpecialAngle angle);
@@ -109,7 +110,7 @@ public abstract class ContentLayer extends Layer {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("{");
+        StringBuilder sb = new StringBuilder("{");
         sb.append("tx=").append(translationX);
         sb.append(", ty=").append(translationY);
         sb.append(", super=").append(super.toString());

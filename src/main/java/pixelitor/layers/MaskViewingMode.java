@@ -6,7 +6,7 @@ public enum MaskViewingMode {
     CTRL_2(""),
     CTRL_3("");
 
-    private String guiName;
+    private final String guiName;
 
     MaskViewingMode(String guiName) {
         this.guiName = guiName;

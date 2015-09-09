@@ -68,9 +68,9 @@ import pixelitor.tools.Tool;
 import pixelitor.tools.ToolSettingsPanelContainer;
 import pixelitor.tools.Tools;
 import pixelitor.utils.AppPreferences;
-import pixelitor.utils.Dialogs;
 import pixelitor.utils.GUIUtils;
 import pixelitor.utils.MemoryInfo;
+import pixelitor.utils.Messages;
 import pixelitor.utils.UpdateGUI;
 import pixelitor.utils.Utils;
 
@@ -124,7 +124,7 @@ public class RobotTest {
 
     public static void runRobot() {
         if (Build.CURRENT != Build.DEVELOPMENT) {
-            Dialogs.showErrorDialog("Error", "Build is not DEVELOPMENT");
+            Messages.showError("Error", "Build is not DEVELOPMENT");
             return;
         }
         Build.CURRENT.setRobotTest(true);
@@ -218,13 +218,13 @@ public class RobotTest {
                             }
                             ConsistencyChecks.checkAll(true);
                         } catch (Exception e) {
-                            Dialogs.showExceptionDialog(e);
+                            Messages.showException(e);
                         }
                     };
                     try {
                         EventQueue.invokeAndWait(runnable);
                     } catch (InterruptedException | InvocationTargetException e) {
-                        Dialogs.showExceptionDialog(e);
+                        Messages.showException(e);
                     }
                 }
                 System.out.println("\nRobotTest.runRobot FINISHED at " + new Date());
@@ -895,7 +895,8 @@ public class RobotTest {
     private static void randomTextLayerRasterize() {
         Layer layer = ImageComponents.getActiveLayer().get();
         if (layer instanceof TextLayer) {
-            TextLayer.replaceWithRasterized();
+            Composition comp = ImageComponents.getActiveComp().get();
+            TextLayer.replaceWithRasterized(comp);
         }
     }
 

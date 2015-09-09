@@ -20,7 +20,7 @@ import org.jdesktop.swingx.JXTipOfTheDay;
 import org.jdesktop.swingx.tips.TipLoader;
 import org.jdesktop.swingx.tips.TipOfTheDayModel;
 import pixelitor.utils.AppPreferences;
-import pixelitor.utils.Dialogs;
+import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -67,7 +67,7 @@ public class TipsOfTheDay {
                 nextTip = 0;
             }
         } catch (IOException ex) {
-            Dialogs.showExceptionDialog(ex);
+            Messages.showException(ex);
         }
     }
 

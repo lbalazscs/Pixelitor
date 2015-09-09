@@ -36,7 +36,7 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
     private ImageEdit imageEdit;
 
     private ContentLayer layer;
-    private TranslationEdit translationEdit;
+    private final TranslationEdit translationEdit;
 
     public ContentLayerMoveEdit(ContentLayer layer, BufferedImage backupImage, int oldTranslationX, int oldTranslationY) {
         super(layer.getComp(), NAME);

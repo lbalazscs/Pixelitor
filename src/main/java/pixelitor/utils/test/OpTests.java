@@ -36,7 +36,7 @@ import pixelitor.history.History;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.OutputFormat;
 import pixelitor.layers.ImageLayer;
-import pixelitor.utils.Dialogs;
+import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -119,7 +119,7 @@ public class OpTests {
                     get();
                 } catch (ExecutionException e) {
                     Throwable cause = e.getCause();
-                    Dialogs.showExceptionDialog(cause);
+                    Messages.showException(cause);
                 } catch (InterruptedException e) {
                     // Process e here
                 } finally {
@@ -179,7 +179,7 @@ public class OpTests {
             String msg = String.format(
                     "Executing getCompositeImage() %d times took %d ms, average time = %d ms",
                     times, totalTime, totalTime / times);
-            Dialogs.showInfoDialog("Test Result", msg);
+            Messages.showInfo("Test Result", msg);
         };
         Utils.executeWithBusyCursor(task);
     }

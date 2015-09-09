@@ -28,7 +28,7 @@ import pixelitor.automate.SingleDirChooserPanel;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.menus.file.RecentFilesMenu;
-import pixelitor.utils.Dialogs;
+import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
 import javax.imageio.ImageIO;
@@ -65,7 +65,7 @@ public class OpenSaveManager {
         Runnable r = () -> {
             Composition comp = createCompositionFromFile(file);
             if(comp != null) { // there was no decoding problem
-                PixelitorWindow.getInstance().addComposition(comp);
+                AppLogic.addComposition(comp);
             }
         };
         Utils.executeWithBusyCursor(r);
@@ -90,11 +90,11 @@ public class OpenSaveManager {
         try {
             img = ImageIO.read(file);
         } catch (IOException ex) {
-            Dialogs.showExceptionDialog(ex);
+            Messages.showException(ex);
         }
         if (img == null) {
             String message = String.format("Could not load \"%s\" as an image file", file.getName());
-            Dialogs.showErrorDialog("Error", message);
+            Messages.showError("Error", message);
             return null;
         }
 
@@ -116,7 +116,7 @@ public class OpenSaveManager {
                     throw new IllegalStateException("type = " + type);
             }
         } catch (NotPxcFormatException | ParserConfigurationException | IOException | SAXException e) {
-            Dialogs.showExceptionDialog(e);
+            Messages.showException(e);
         }
         return comp;
     }
@@ -154,7 +154,7 @@ public class OpenSaveManager {
                     ImageIO.write(image, format, selectedFile);
                 }
             } catch (IOException e) {
-                Dialogs.showExceptionDialog(e);
+                Messages.showException(e);
             }
         };
         Utils.executeWithBusyCursor(r);
@@ -187,7 +187,7 @@ public class OpenSaveManager {
                 ic.close();
             }
         } catch (Exception ex) {
-            Dialogs.showExceptionDialog(ex);
+            Messages.showException(ex);
         }
     }
 
@@ -211,7 +211,7 @@ public class OpenSaveManager {
                 }
             }
         } catch (IOException e) {
-            Dialogs.showExceptionDialog(e);
+            Messages.showException(e);
         }
     }
 
@@ -248,7 +248,7 @@ public class OpenSaveManager {
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
-            Dialogs.showExceptionDialog(e);
+            Messages.showException(e);
         }
 
         return comp;
@@ -361,7 +361,7 @@ public class OpenSaveManager {
         if(addToRecentMenus) {
             RecentFilesMenu.getInstance().addFile(file);
         }
-        AppLogic.showFileSavedMessage(file);
+        Messages.showFileSavedMessage(file);
     }
 }
 

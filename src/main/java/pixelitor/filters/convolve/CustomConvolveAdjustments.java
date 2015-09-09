@@ -19,7 +19,7 @@ package pixelitor.filters.convolve;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.filters.gui.AdjustPanel;
-import pixelitor.utils.Dialogs;
+import pixelitor.utils.Messages;
 import pixelitor.utils.NotANumberException;
 import pixelitor.utils.Utils;
 
@@ -287,7 +287,7 @@ public class CustomConvolveAdjustments extends AdjustPanel implements ActionList
             try {
                 values[i] = Utils.string2float(s);
             } catch (NotANumberException ex) {
-                Dialogs.showErrorDialog("Wrong Number Format", ex.getMessage());
+                Messages.showError("Wrong Number Format", ex.getMessage());
             }
             sum += values[i];
         }

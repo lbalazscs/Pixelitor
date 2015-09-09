@@ -77,7 +77,7 @@ public class DrunkVision extends FilterWithParametrizedGUI {
 
     // generates the transforms for the images that are shifted
     // from the original
-    private Point[] generateTransforms(int numImages, int maxDistance, Random rand) {
+    private static Point[] generateTransforms(int numImages, int maxDistance, Random rand) {
         Point[] retVal = new Point[numImages];
         int i = 0;
         double firstPointAngle = 0;
@@ -121,7 +121,7 @@ public class DrunkVision extends FilterWithParametrizedGUI {
         return retVal;
     }
 
-    private Point pointFormPolar(double angle, double dist) {
+    private static Point pointFormPolar(double angle, double dist) {
         int x = (int) (dist * FastMath.cos(angle));
         int y = (int) (dist * FastMath.sin(angle));
         return new Point(x, y);

@@ -22,7 +22,7 @@ import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.ImageComponents;
 import pixelitor.utils.AppPreferences;
-import pixelitor.utils.Dialogs;
+import pixelitor.utils.Messages;
 import pixelitor.utils.test.DebugEventQueue;
 import pixelitor.utils.test.HistoryEvent;
 
@@ -89,7 +89,7 @@ public class History {
             numUndoneEdits++; // increase it before calling undoManager.undo() so that the result of undo is not fadeable
             undoManager.undo();
         } catch (CannotUndoException e) {
-            Dialogs.showInfoDialog("No undo available", "No undo available, probably because the undo image was discarded in order to save memory");
+            Messages.showInfo("No undo available", "No undo available, probably because the undo image was discarded in order to save memory");
         }
     }
 
@@ -103,7 +103,7 @@ public class History {
             undoManager.redo();
         } catch (CannotRedoException e) {
             // TODO is a "No redo avaliable" scenario possible?
-            Dialogs.showExceptionDialog(e);
+            Messages.showException(e);
         }
     }
 
@@ -190,7 +190,7 @@ public class History {
         return getPreviousEditForFade(comp).isPresent();
     }
 
-    public static void allImagesAreClosed() {
+    public static void onAllImagesClosed() {
         numUndoneEdits = 0;
 //        lastFadeableEdit = null;
 

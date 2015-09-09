@@ -18,6 +18,9 @@ import java.awt.Shape;
 import java.awt.image.BufferedImage;
 
 public class Assertions {
+    private Assertions() {
+    }
+
     public static boolean hasSelection() {
         Composition comp = ImageComponents.getActiveCompOrNull();
         if (comp == null) {

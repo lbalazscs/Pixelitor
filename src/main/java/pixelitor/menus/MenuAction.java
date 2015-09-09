@@ -21,7 +21,7 @@ import pixelitor.ImageComponents;
 import pixelitor.ImageDisplay;
 import pixelitor.layers.Layer;
 import pixelitor.layers.TextLayer;
-import pixelitor.utils.Dialogs;
+import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -100,11 +100,11 @@ abstract class MenuAction extends AbstractAction {
                 } else {
                     String errorTitle = layerType.getErrorTitle();
                     String errorMessage = layerType.getErrorMessage(activeLayer);
-                    Dialogs.showInfoDialog(errorTitle, errorMessage);
+                    Messages.showInfo(errorTitle, errorMessage);
                 }
             }
         } catch (Exception ex) {
-            Dialogs.showExceptionDialog(ex);
+            Messages.showException(ex);
         }
     }
 

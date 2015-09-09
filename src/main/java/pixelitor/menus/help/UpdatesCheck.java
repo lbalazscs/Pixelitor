@@ -19,6 +19,7 @@ package pixelitor.menus.help;
 
 import pixelitor.Build;
 import pixelitor.utils.Dialogs;
+import pixelitor.utils.Messages;
 import pixelitor.utils.OpenInBrowserAction;
 
 import javax.swing.*;
@@ -40,7 +41,7 @@ public class UpdatesCheck {
 
             if(Build.VERSION_NUMBER.equals(lastVersion)) {
                 String msg = String.format("You already have the latest version (%s) of Pixelitor installed", lastVersion);
-                Dialogs.showInfoDialog("Pixelitor is up to date", msg);
+                Messages.showInfo("Pixelitor is up to date", msg);
             } else {
                 String requiredJavaVersion = versionInfo.getProperty("required_java_version"); // like "7"
                 newVersionAlert(lastVersion, requiredJavaVersion);
@@ -50,7 +51,7 @@ public class UpdatesCheck {
             String msg = "Could not check for updates on the Pixelitor website.\nPress OK to see the details.";
             int userAnswer = JOptionPane.showConfirmDialog(frame, msg, "Could not check for updates", JOptionPane.OK_CANCEL_OPTION, JOptionPane.ERROR_MESSAGE);
             if(userAnswer == JOptionPane.OK_OPTION) {
-                Dialogs.showExceptionDialog(e);
+                Messages.showException(e);
             }
         }
     }

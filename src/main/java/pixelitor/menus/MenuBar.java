@@ -78,9 +78,9 @@ import pixelitor.menus.view.ShowHideStatusBarAction;
 import pixelitor.menus.view.ShowHideToolsAction;
 import pixelitor.menus.view.ZoomMenu;
 import pixelitor.utils.AppPreferences;
-import pixelitor.utils.Dialogs;
 import pixelitor.utils.FilterCreator;
 import pixelitor.utils.HistogramsPanel;
+import pixelitor.utils.Messages;
 import pixelitor.utils.PerformanceTestingDialog;
 import pixelitor.utils.Tests3x3;
 import pixelitor.utils.UpdateGUI;
@@ -708,7 +708,7 @@ public class MenuBar extends JMenuBar {
             Action debugAppAction = new MenuAction("Show Pixelitor Internal State...") {
                 @Override
                 void onClick() {
-                    AppLogic.showDebugAppDialog();
+                    Messages.showDebugAppDialog();
                 }
             };
             createMenuItem(debugAppAction, layersMenu, EnabledIf.ACTION_ENABLED);
@@ -779,7 +779,7 @@ public class MenuBar extends JMenuBar {
                 Layer layer = ic.getComp().getActiveLayer();
 
                 if (!(layer instanceof ImageLayer)) {
-                    Dialogs.showNotImageLayerDialog();
+                    Messages.showNotImageLayerError();
                     return;
                 }
 
@@ -1014,7 +1014,7 @@ public class MenuBar extends JMenuBar {
                 if (imageLayer.hasMask()) {
                     imageLayer.getMask().updateFromBWImage();
                 } else {
-                    Dialogs.showInfoDialog("No Mask in Current image", "Error");
+                    Messages.showInfo("No Mask in Current image", "Error");
                 }
             }
         }, developMenu);
@@ -1070,14 +1070,18 @@ public class MenuBar extends JMenuBar {
         createMenuItem(new MenuAction("Edit...", IS_TEXT_LAYER) {
             @Override
             void onClick() {
-                TextLayer.editActive(pw);
+                Composition comp = ImageComponents.getActiveIC().getComp();
+                Layer layer = comp.getActiveLayer();
+                TextLayer textLayer = (TextLayer) layer;
+                textLayer.edit(pw);
             }
         }, textLayerMenu, CTRL_T);
 
         createMenuItem(new MenuAction("Rasterize", IS_TEXT_LAYER) {
             @Override
             void onClick() {
-                TextLayer.replaceWithRasterized();
+                Composition comp = ImageComponents.getActiveComp().get();
+                TextLayer.replaceWithRasterized(comp);
             }
         }, textLayerMenu);
 

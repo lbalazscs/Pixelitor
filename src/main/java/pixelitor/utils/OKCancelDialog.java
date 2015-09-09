@@ -85,7 +85,7 @@ public abstract class OKCancelDialog extends JDialog {
             try {
                 dialogAccepted();
             } catch (Exception ex) {
-                Dialogs.showExceptionDialog(ex);
+                Messages.showException(ex);
             }
         });
 
@@ -93,7 +93,7 @@ public abstract class OKCancelDialog extends JDialog {
             try {
                 dialogCanceled();
             } catch (Exception ex) {
-                Dialogs.showExceptionDialog(ex);
+                Messages.showException(ex);
             }
         });
 

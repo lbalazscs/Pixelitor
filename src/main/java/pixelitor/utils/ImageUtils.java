@@ -382,7 +382,7 @@ public class ImageUtils {
             try {
                 pg.grabPixels();
             } catch (InterruptedException e) {
-                Dialogs.showExceptionDialog(e);
+                Messages.showException(e);
             }
         }
         return pixels;
@@ -395,7 +395,7 @@ public class ImageUtils {
         URL imgURL = ImageUtils.class.getResource(iconPath);
         if (imgURL == null) {
             String message = iconPath + " not found";
-            Dialogs.showErrorDialog("Error", message);
+            Messages.showError("Error", message);
         }
         return imgURL;
     }
@@ -414,7 +414,7 @@ public class ImageUtils {
         try {
             image = ImageIO.read(imgURL);
         } catch (IOException e) {
-            Dialogs.showExceptionDialog(e);
+            Messages.showException(e);
         }
         return image;
     }

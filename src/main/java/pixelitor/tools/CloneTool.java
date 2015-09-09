@@ -150,7 +150,7 @@ public class CloneTool extends TmpLayerBrushTool {
             if (JVM.isLinux) {
                 msg += "\n(You might need to disable Alt-Click for window dragging in the window manager)";
             }
-            messageHandler.showErrorDialog("No source", msg);
+            messageHandler.showError("No source", msg);
         }
     }
 

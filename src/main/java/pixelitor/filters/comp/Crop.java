@@ -27,6 +27,7 @@ public class Crop implements CompAction {
         this.allowGrowing = allowGrowing;
     }
 
+    @Override
     public void process(Composition comp) {
         Canvas canvas = comp.getCanvas();
         if (!allowGrowing) {

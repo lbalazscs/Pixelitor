@@ -7,13 +7,14 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
-import pixelitor.AppLogic;
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
 import pixelitor.ImageDisplay;
 import pixelitor.ImageDisplayStub;
 import pixelitor.MessageHandler;
 import pixelitor.TestHelper;
+import pixelitor.TestMessageHandler;
+import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
@@ -24,7 +25,6 @@ import java.util.List;
 import static java.awt.event.MouseEvent.MOUSE_DRAGGED;
 import static java.awt.event.MouseEvent.MOUSE_PRESSED;
 import static java.awt.event.MouseEvent.MOUSE_RELEASED;
-import static org.mockito.Mockito.mock;
 
 /**
  * Behavior that is common to all tools
@@ -40,11 +40,11 @@ public class ToolTest {
     public static Collection<Object[]> instancesToTest() {
         TestHelper.setupMockFgBgSelector();
 
-        MessageHandler messageHandler = mock(MessageHandler.class);
+        MessageHandler messageHandler = new TestMessageHandler();
         for (Tool tool : Tools.getTools()) {
             tool.setMessageHandler(messageHandler);
         }
-        AppLogic.setMessageHandler(messageHandler);
+        Messages.setMessageHandler(messageHandler);
         Tools.CLONE.setStateTestOnly(CloneTool.State.CLONING);
 
         Tool[] tools = Tools.getTools();

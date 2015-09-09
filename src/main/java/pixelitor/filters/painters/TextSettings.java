@@ -91,6 +91,10 @@ public class TextSettings implements Serializable {
         return text;
     }
 
+    public void setText(String text) {
+        this.text = text;
+    }
+
     public AbstractLayoutPainter.VerticalAlignment getVerticalAlignment() {
         return verticalAlignment;
     }

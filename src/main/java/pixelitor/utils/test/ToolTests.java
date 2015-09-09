@@ -30,7 +30,7 @@ import pixelitor.tools.ShapeType;
 import pixelitor.tools.Tools;
 import pixelitor.tools.UserDrag;
 import pixelitor.tools.shapestool.ShapesTool;
-import pixelitor.utils.Dialogs;
+import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -206,7 +206,7 @@ public class ToolTests {
                 Tools.SHAPES.paintShapeOnIC(comp, new UserDrag(start.x, start.y, end.x, end.y));
             }
         } catch (Exception e) {
-            Dialogs.showExceptionDialog(e);
+            Messages.showException(e);
         }
     }
 }

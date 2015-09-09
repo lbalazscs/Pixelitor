@@ -17,11 +17,12 @@
 
 package pixelitor.menus.file;
 
+import pixelitor.AppLogic;
 import pixelitor.Composition;
 import pixelitor.PixelitorWindow;
-import pixelitor.utils.Dialogs;
 import pixelitor.utils.GridBagHelper;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Messages;
 import pixelitor.utils.OKCancelDialog;
 
 import javax.swing.*;
@@ -95,11 +96,11 @@ public class ScreenCaptureAction extends AbstractAction {
 
             String name = "Screen Capture " + captureCount;
             Composition comp = Composition.fromImage(screenCapture, null, name);
-            window.addComposition(comp);
+            AppLogic.addComposition(comp);
 
             captureCount++;
         } catch (Exception ex) {
-            Dialogs.showExceptionDialog(ex);
+            Messages.showException(ex);
         }
     }
 }

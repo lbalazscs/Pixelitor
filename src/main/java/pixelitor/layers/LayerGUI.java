@@ -1,7 +1,7 @@
 package pixelitor.layers;
 
 public class LayerGUI implements LayerUI {
-    private LayerButton layerButton;
+    private final LayerButton layerButton;
 
     public LayerGUI(Layer layer) {
         this.layerButton = new LayerButton(layer);

@@ -28,21 +28,21 @@ public class FractalTree extends FilterWithParametrizedGUI {
     public static final int QUALITY_BETTER = 1;
     public static final int QUALITY_FASTER = 2;
 
-    private RangeParam iterations = new RangeParam("Age (Iterations)", 1, 16, 10);
-    private RangeParam angle = new RangeParam("Angle", 1, 45, 20);
-    private RangeParam randomnessParam = new RangeParam("Randomness", 0, 100, 40);
-    private GroupedRangeParam width = new GroupedRangeParam("Width",
+    private final RangeParam iterations = new RangeParam("Age (Iterations)", 1, 16, 10);
+    private final RangeParam angle = new RangeParam("Angle", 1, 45, 20);
+    private final RangeParam randomnessParam = new RangeParam("Randomness", 0, 100, 40);
+    private final GroupedRangeParam width = new GroupedRangeParam("Width",
             new RangeParam[]{
                     new RangeParam("Overall", 100, 300, 100),
                     new RangeParam("Trunk", 100, 500, 200),
             },
             false);
 
-    private RangeParam zoom = new RangeParam("Zoom", 10, 200, 100);
-    private RangeParam curvedness = new RangeParam("Curvedness", 0, 50, 10);
-    private GroupedRangeParam physics = new GroupedRangeParam("Physics",
+    private final RangeParam zoom = new RangeParam("Zoom", 10, 200, 100);
+    private final RangeParam curvedness = new RangeParam("Curvedness", 0, 50, 10);
+    private final GroupedRangeParam physics = new GroupedRangeParam("Physics",
             "Gravity", "Wind", -100, 100, 0, false);
-    private IntChoiceParam quality = new IntChoiceParam("Quality",
+    private final IntChoiceParam quality = new IntChoiceParam("Quality",
             new IntChoiceParam.Value[]{
                     new IntChoiceParam.Value("Better", QUALITY_BETTER),
                     new IntChoiceParam.Value("Faster", QUALITY_FASTER)
@@ -212,7 +212,7 @@ public class FractalTree extends FilterWithParametrizedGUI {
         return angle;
     }
 
-    private void connectPoints(Graphics2D g, double x1, double y1, double x2, double y2, float c) {
+    private static void connectPoints(Graphics2D g, double x1, double y1, double x2, double y2, float c) {
         if (c == 0) {
             Line2D.Double line = new Line2D.Double(x1, y1, x2, y2);
             g.draw(line);

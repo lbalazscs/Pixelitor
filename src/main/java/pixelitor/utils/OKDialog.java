@@ -29,7 +29,7 @@ import java.awt.event.KeyEvent;
  * A dialog with an OK button at the bottom
  */
 public class OKDialog extends JDialog {
-    private String okButtonText;
+    private final String okButtonText;
     private JScrollPane scrollPane;
 
     public OKDialog(Frame owner, JComponent form, String title) {

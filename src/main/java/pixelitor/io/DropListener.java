@@ -18,7 +18,7 @@
 package pixelitor.io;
 
 import pixelitor.PixelitorWindow;
-import pixelitor.utils.Dialogs;
+import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.datatransfer.DataFlavor;
@@ -54,7 +54,7 @@ public class DropListener extends DropTargetAdapter {
                     List<File> list = (List<File>) transferable.getTransferData(flavor);
                     dropFiles(list);
                 } catch (UnsupportedFlavorException | IOException e) {
-                    Dialogs.showExceptionDialog(e);
+                    Messages.showException(e);
                     dtde.rejectDrop();
                 }
                 dtde.dropComplete(true);

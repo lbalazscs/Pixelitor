@@ -34,8 +34,8 @@ import pixelitor.history.LayerRenameEdit;
 import pixelitor.history.LayerVisibilityChangeEdit;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.selection.Selection;
-import pixelitor.utils.Dialogs;
 import pixelitor.utils.HistogramsPanel;
+import pixelitor.utils.Messages;
 import pixelitor.utils.UpdateGUI;
 
 import java.awt.AlphaComposite;
@@ -275,13 +275,13 @@ public abstract class Layer implements Serializable {
 
     public void addMask(LayerMaskAddType addType) {
         if (mask != null) {
-            Dialogs.showInfoDialog("Has layer mask",
+            Messages.showInfo("Has layer mask",
                     String.format("The layer \"%s\" already has a layer mask.", getName()));
             return;
         }
         Selection selection = comp.getSelectionOrNull();
         if (addType.missingSelection(selection)) {
-            Dialogs.showInfoDialog("No selection",
+            Messages.showInfo("No selection",
                     String.format("The composition \"%s\" has no selection.", comp.getName()));
             return;
         }
@@ -550,7 +550,7 @@ public abstract class Layer implements Serializable {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("{");
+        StringBuilder sb = new StringBuilder("{");
         sb.append("name='").append(name).append('\'');
         sb.append(", visible=").append(visible);
         sb.append(", mask=").append(mask);

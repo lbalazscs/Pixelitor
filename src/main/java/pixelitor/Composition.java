@@ -48,6 +48,7 @@ import pixelitor.selection.SelectionType;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.HistogramsPanel;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Messages;
 import pixelitor.utils.UpdateGUI;
 import pixelitor.utils.Utils;
 
@@ -588,6 +589,7 @@ public class Composition implements Serializable {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
 
+        //noinspection Convert2streamapi
         for (Layer layer : layerList) {
             if (layer instanceof ImageLayer) {
                 ((ImageLayer) layer).updateIconImage();
@@ -853,7 +855,7 @@ public class Composition implements Serializable {
                 History.addEdit(new CompoundEdit(this, editName, translationEdit, imageEdit));
             }
         } else {
-            Dialogs.showNotImageLayerDialog();
+            Messages.showNotImageLayerError();
         }
     }
 
@@ -925,14 +927,14 @@ public class Composition implements Serializable {
                 float seconds = totalTime / 1000.0f;
                 performanceMessage = String.format("%s took %.1f s", filterMenuName, seconds);
             }
-            AppLogic.showStatusMessage(performanceMessage);
+            Messages.showStatusMessage(performanceMessage);
         } catch (OutOfMemoryError e) {
             Dialogs.showOutOfMemoryDialog(e);
         } catch (Throwable e) { // make sure AssertionErrors are caught
             if (Build.CURRENT.isRobotTest()) {
                 throw e; // we can debug the exact filter parameters only in RobotTest
             }
-            Dialogs.showExceptionDialog(e);
+            Messages.showException(e);
         }
 
         FilterUtils.setLastExecutedFilter(filter);
@@ -990,7 +992,7 @@ public class Composition implements Serializable {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("Composition{");
+        StringBuilder sb = new StringBuilder("Composition{");
         sb.append("name='").append(name).append('\'');
         sb.append(", activeLayer=").append(activeLayer.getName());
         sb.append(", layerList=").append(layerList);

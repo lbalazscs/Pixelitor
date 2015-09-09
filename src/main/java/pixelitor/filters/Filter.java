@@ -24,8 +24,8 @@ import pixelitor.ImageComponents;
 import pixelitor.ImageDisplay;
 import pixelitor.PixelitorWindow;
 import pixelitor.layers.Layer;
-import pixelitor.utils.Dialogs;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -85,7 +85,7 @@ public abstract class Filter extends AbstractAction {
         ImageDisplay ic = ImageComponents.getActiveIC();
         if(ic != null) {
             if (!ic.activeIsImageLayer()) {
-                Dialogs.showNotImageLayerDialog();
+                Messages.showNotImageLayerError();
                 return;
             }
             execute(ChangeReason.OP_WITHOUT_DIALOG);

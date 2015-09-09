@@ -19,7 +19,7 @@ package pixelitor.menus.file;
 
 import pixelitor.io.OpenSaveManager;
 import pixelitor.utils.AppPreferences;
-import pixelitor.utils.Dialogs;
+import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;
@@ -43,10 +43,10 @@ public final class RecentFilesMenu extends JMenu {
             } else {
                 // the file was deleted since Pixelitor started
                 String message = String.format("The file %s does not exist.", f.toString());
-                Dialogs.showErrorDialog("Problem", message);
+                Messages.showError("Problem", message);
             }
         } catch (Exception ex) {
-            Dialogs.showExceptionDialog(ex);
+            Messages.showException(ex);
         }
     };
 
@@ -58,7 +58,7 @@ public final class RecentFilesMenu extends JMenu {
             try {
                 clear();
             } catch (Exception ex) {
-                Dialogs.showExceptionDialog(ex);
+                Messages.showException(ex);
             }
         };
         clearMenuItem.addActionListener(clearer);

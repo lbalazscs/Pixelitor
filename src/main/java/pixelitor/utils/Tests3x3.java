@@ -1,8 +1,8 @@
 package pixelitor.utils;
 
+import pixelitor.AppLogic;
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
-import pixelitor.PixelitorWindow;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 import pixelitor.menus.view.ZoomLevel;
@@ -112,7 +112,7 @@ public class Tests3x3 {
             LayerMask mask = new LayerMask(comp, maskImg, layer);
             layer.addMaskBack(mask);
         }
-        PixelitorWindow.getInstance().addComposition(comp);
+        AppLogic.addComposition(comp);
         comp.getIC().setZoom(ZoomLevel.Z6400, true);
     }
 
@@ -121,7 +121,7 @@ public class Tests3x3 {
         String s = "BufferedImage getExpectedImageAfter OP() {\n";
         int width = actual.getWidth();
         int height = actual.getHeight();
-        s += String.format("BufferedImage img = ImageUtils.createCompatibleImage(3, 3);\n",
+        s += String.format("BufferedImage img = ImageUtils.createCompatibleImage(%d, %d);\n",
                 width, height);
 
         for (int x = 0; x < width; x++) {

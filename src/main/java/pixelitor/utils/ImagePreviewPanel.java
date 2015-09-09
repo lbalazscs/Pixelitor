@@ -82,7 +82,7 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
             try {
                 bigImage = ImageIO.read(file);
             } catch (IOException ex) {
-                Dialogs.showExceptionDialog(ex);
+                Messages.showException(ex);
             }
         } else {
             // TODO: load all with ImageIO and cache

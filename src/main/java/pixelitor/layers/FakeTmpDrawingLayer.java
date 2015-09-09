@@ -46,22 +46,27 @@ public class FakeTmpDrawingLayer implements TmpDrawingLayer {
         }
     }
 
+    @Override
     public Graphics2D getGraphics() {
         return g;
     }
 
+    @Override
     public int getWidth() {
         return canvas.getWidth();
     }
 
+    @Override
     public int getHeight() {
         return canvas.getHeight();
     }
 
+    @Override
     public void dispose() {
         g.dispose();
     }
 
+    @Override
     public void paintLayer(Graphics2D g, int translationX, int translationY) {
         // do nothing
     }

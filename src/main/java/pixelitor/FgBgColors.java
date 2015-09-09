@@ -7,6 +7,9 @@ import java.awt.Color;
 public class FgBgColors {
     private static FgBgColorSelector gui;
 
+    private FgBgColors() {
+    }
+
     public static void setGUI(FgBgColorSelector gui) {
         FgBgColors.gui = gui;
     }

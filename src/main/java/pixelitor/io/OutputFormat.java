@@ -17,8 +17,8 @@
 package pixelitor.io;
 
 import pixelitor.Composition;
-import pixelitor.utils.Dialogs;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Messages;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -68,7 +68,7 @@ public enum OutputFormat {
             try {
                 OpenRaster.writeOpenRaster(comp, file, false);
             } catch (IOException e) {
-                Dialogs.showExceptionDialog(e);
+                Messages.showException(e);
             }
         }
     };

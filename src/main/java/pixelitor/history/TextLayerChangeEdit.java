@@ -38,6 +38,10 @@ public class TextLayerChangeEdit extends PixelitorEdit {
         this.backupTextSettings = oldTextSettings;
         comp.setDirty(true);
         this.layer = layer;
+
+        if(oldTextSettings == layer.getSettings()) {
+            throw new IllegalArgumentException("same settings");
+        }
     }
 
     @Override
@@ -58,6 +62,8 @@ public class TextLayerChangeEdit extends PixelitorEdit {
         TextSettings tmp = layer.getSettings();
         layer.setSettings(backupTextSettings);
         backupTextSettings = tmp;
+
+        layer.updateLayerName();
 
         layer.getComp().imageChanged(FULL);
         History.notifyMenus(this);

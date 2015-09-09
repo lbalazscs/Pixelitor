@@ -28,6 +28,7 @@ import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Messages;
 import pixelitor.utils.debug.ImageComponentNode;
 
 import javax.swing.*;
@@ -193,7 +194,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         try {
             getInternalFrame().setSelected(true);
         } catch (PropertyVetoException e) {
-            Dialogs.showExceptionDialog(e);
+            Messages.showException(e);
         }
         LayersContainer.showLayersPanel(layersPanel);
     }
@@ -388,6 +389,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         }
     }
 
+    @Override
     public void setShowLayerMask(boolean showLayerMask) {
         this.showLayerMask = showLayerMask;
         repaint();
@@ -456,6 +458,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     /**
      * @return true if there was a change in zoom
      */
+    @Override
     public boolean setZoom(ZoomLevel newZoomLevel, boolean settingTheInitialSize) {
         if (this.zoomLevel == newZoomLevel && !settingTheInitialSize) {
             return false;

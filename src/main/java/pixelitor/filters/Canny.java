@@ -21,8 +21,8 @@ import pd.CannyEdgeDetector;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.utils.Dialogs;
 import pixelitor.utils.MemoryInfo;
+import pixelitor.utils.Messages;
 
 import java.awt.image.BufferedImage;
 
@@ -56,7 +56,7 @@ public class Canny extends FilterWithParametrizedGUI {
         long availableMemoryMB = memoryInfo.getAvailableMemoryMB();
 
         if (estimatedMemoryMB > availableMemoryMB) {
-            Dialogs.showInfoDialog("Not enough memory",
+            Messages.showInfo("Not enough memory",
                     "This image is too large for the Canny edge detection algorithm.\n" +
                             "Press Cancel in the following dialog and try with smaller images.\n" +
                             "Available memory is " + availableMemoryMB + " megabytes, memory needed for this image is " + estimatedMemoryMB + " megabytes.");

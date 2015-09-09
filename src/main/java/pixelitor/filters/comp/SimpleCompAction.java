@@ -53,6 +53,7 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
         process(comp);
     }
 
+    @Override
     public void process(Composition comp) {
         MultiLayerBackup backup = new MultiLayerBackup(comp, getEditName(), changesCanvasDimensions);
 

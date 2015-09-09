@@ -22,6 +22,7 @@ import pixelitor.ImageComponents;
 import pixelitor.filters.comp.Resize;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.GridBagHelper;
+import pixelitor.utils.Messages;
 import pixelitor.utils.OKCancelDialog;
 
 import javax.swing.*;
@@ -117,7 +118,7 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
             Number number = doubleFormatter.parse(s);
             retVal = number.doubleValue();
         } catch (ParseException ex) {
-            Dialogs.showExceptionDialog(ex);
+            Messages.showException(ex);
         }
         return retVal;
     }

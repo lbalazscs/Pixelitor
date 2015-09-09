@@ -17,7 +17,7 @@
 
 package pixelitor.io;
 
-import pixelitor.utils.Dialogs;
+import pixelitor.utils.Messages;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -59,7 +59,7 @@ public final class JpegOutput {
             ByteArrayInputStream in = new ByteArrayInputStream(bytes);
             previewImage = ImageIO.read(in);
         } catch (IOException e) {
-            Dialogs.showExceptionDialog(e);
+            Messages.showException(e);
         }
 
         int sizeInBytes = bytes.length;

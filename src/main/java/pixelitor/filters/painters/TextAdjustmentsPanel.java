@@ -293,7 +293,6 @@ public class TextAdjustmentsPanel extends AdjustPanel implements ParamAdjustment
         }
 
         Font selectedFont = getSelectedFont();
-        int size = selectedFont.getSize();
 
         TextSettings settings = new TextSettings(
                 text, selectedFont, color.getColor(), areaEffects,

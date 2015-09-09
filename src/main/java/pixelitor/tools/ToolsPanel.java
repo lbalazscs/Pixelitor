@@ -17,13 +17,13 @@
 
 package pixelitor.tools;
 
-import pixelitor.AppLogic;
 import pixelitor.Build;
 import pixelitor.GlobalKeyboardWatch;
 import pixelitor.MessageHandler;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.painters.TextFilter;
 import pixelitor.layers.TextLayer;
+import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -36,7 +36,7 @@ public class ToolsPanel extends JPanel {
     public ToolsPanel() {
         Box verticalBox = Box.createVerticalBox();
         ButtonGroup group = new ButtonGroup();
-        MessageHandler messageHandler = AppLogic.getMessageHandler();
+        MessageHandler messageHandler = Messages.getMessageHandler();
 
         Tool[] tools = Tools.getTools();
         for (Tool tool : tools) {

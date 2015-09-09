@@ -28,8 +28,8 @@ import pixelitor.history.AddToHistory;
 import pixelitor.selection.Selection;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.Tools;
-import pixelitor.utils.Dialogs;
 import pixelitor.utils.GridBagHelper;
+import pixelitor.utils.Messages;
 import pixelitor.utils.OKCancelDialog;
 
 import javax.swing.*;
@@ -165,7 +165,7 @@ public final class SelectionActions {
             Composition comp = ic.getComp();
 
             if (!comp.activeIsImageLayer()) {
-                Dialogs.showNotImageLayerDialog();
+                Messages.showNotImageLayerError();
                 return;
             }
 

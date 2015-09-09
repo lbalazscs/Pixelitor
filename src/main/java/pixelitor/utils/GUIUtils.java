@@ -51,7 +51,7 @@ public final class GUIUtils {
                 String lookAndFeelClass = AppPreferences.getLookAndFeelClass();
                 UIManager.setLookAndFeel(lookAndFeelClass);
             } catch (Exception e) {
-                Dialogs.showExceptionDialog(e);
+                Messages.showException(e);
             }
 
             JFrame frame = new JFrame("Test");

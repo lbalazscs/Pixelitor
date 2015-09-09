@@ -21,11 +21,11 @@ import pixelitor.layers.LayersContainer;
 import pixelitor.menus.MenuBar;
 import pixelitor.tools.FgBgColorSelector;
 import pixelitor.tools.ToolSettingsPanelContainer;
-import pixelitor.tools.Tools;
 import pixelitor.tools.ToolsPanel;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.HistogramsPanel;
+import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -50,7 +50,7 @@ public class PixelitorWindow extends JFrame {
     private PixelitorWindow() {
         super(Build.getPixelitorWindowFixTitle());
 
-        AppLogic.setMessageHandler(new GUIMessageHandler(this));
+        Messages.setMessageHandler(new GUIMessageHandler(this));
 
         setupWindowClosing();
 
@@ -154,22 +154,6 @@ public class PixelitorWindow extends JFrame {
      */
     private static class PixelitorWindowHolder {
         static final PixelitorWindow field = new PixelitorWindow();
-    }
-
-    /**
-     * Adds a composition to the app.
-     */
-    public void addComposition(Composition comp) {
-        try {
-            ImageComponent ic = new ImageComponent(comp);
-            ic.setCursor(Tools.getCurrentTool().getCursor());
-            ImageComponents.setActiveIC(ic, false);
-            comp.addLayersToGUI();
-
-            Desktop.INSTANCE.addNewImageComponent(ic);
-        } catch (Exception e) {
-            Dialogs.showExceptionDialog(e);
-        }
     }
 
     public void setStatusBarMessage(String msg) {

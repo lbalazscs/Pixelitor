@@ -18,12 +18,11 @@
 package pixelitor.menus.file;
 
 import org.jdesktop.swingx.VerticalLayout;
-import pixelitor.AppLogic;
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.LayerAnimationFrames;
-import pixelitor.utils.Dialogs;
+import pixelitor.utils.Messages;
 import pixelitor.utils.OKCancelDialog;
 
 import javax.swing.*;
@@ -38,7 +37,7 @@ public class AnimGifExport {
         Composition activeComp = ImageComponents.getActiveComp().get();
         int nrLayers = activeComp.getNrLayers();
         if(nrLayers < 2) {
-            Dialogs.showInfoDialog("Only one layer",
+            Messages.showInfo("Only one layer",
                     "Animation frames are based on the layers of the image.\n" +
                             activeComp.getName() + " has only one layer.");
             return;
@@ -61,7 +60,7 @@ public class AnimGifExport {
             LayerAnimationFrames animation = new LayerAnimationFrames(activeComp,
                     delayMillis, pingPong);
             animation.saveToFile(file);
-            AppLogic.showFileSavedMessage(file);
+            Messages.showFileSavedMessage(file);
         }
     }
 

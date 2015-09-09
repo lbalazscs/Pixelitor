@@ -17,9 +17,7 @@
 
 package pixelitor.layers;
 
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -70,21 +68,8 @@ public class LayerTest {
         });
     }
 
-    @BeforeClass
-    public static void beforeClass() {
-        History.setUndoLevels(100);
-        History.clear();
-    }
-
-    @AfterClass
-    public static void afterClass() {
-        History.setUndoLevels(10);
-        History.clear();
-    }
-
     @Before
     public void setUp() {
-        History.clear();
         comp = TestHelper.createEmptyComposition();
         // make sure each test runs with a fresh Layer
         layer = TestHelper.createLayerOfClass(layerClass, comp);
