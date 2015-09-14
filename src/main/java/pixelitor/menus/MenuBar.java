@@ -41,8 +41,9 @@ import pixelitor.filters.comp.Rotate;
 import pixelitor.filters.convolve.Convolve;
 import pixelitor.filters.gui.ResizePanel;
 import pixelitor.filters.jhlabsproxies.*;
+import pixelitor.filters.levels.Levels;
+import pixelitor.filters.levels.Levels2;
 import pixelitor.filters.lookup.ColorBalance;
-import pixelitor.filters.lookup.Levels;
 import pixelitor.filters.lookup.Luminosity;
 import pixelitor.filters.painters.TextFilter;
 import pixelitor.history.AddToHistory;
@@ -416,6 +417,9 @@ public class MenuBar extends JMenuBar {
         createMenuItem(new HueSat(), colorsMenu, CTRL_U);
         createMenuItem(new Colorize(), colorsMenu);
         createMenuItem(new Levels(), colorsMenu, CTRL_L);
+        if (Build.advancedLayersEnabled()) {
+            createMenuItem(new Levels2(), colorsMenu);
+        }
         createMenuItem(new Brightness(), colorsMenu);
         createMenuItem(new Solarize(), colorsMenu);
         createMenuItem(new Sepia(), colorsMenu);

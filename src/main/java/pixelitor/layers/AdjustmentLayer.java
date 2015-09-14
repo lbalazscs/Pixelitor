@@ -18,6 +18,7 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.filters.Filter;
+import pixelitor.filters.gui.FilterWithGUI;
 
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
@@ -85,4 +86,11 @@ public class AdjustmentLayer extends Layer {
         return sb.toString();
     }
 
+    public void configure() {
+        System.out.println("AdjustmentLayer::configure: 1");
+        if (!(filter instanceof FilterWithGUI)) {
+            return;
+        }
+        System.out.println("AdjustmentLayer::configure: 2");
+    }
 }

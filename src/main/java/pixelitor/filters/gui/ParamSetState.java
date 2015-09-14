@@ -22,7 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Captures the state of a ParamSet at a given moment
+ * Captures the state of all filter parameters in a given filter
  * (like the "Memento" design pattern)
  * Params that cannot be animated are not included
  */

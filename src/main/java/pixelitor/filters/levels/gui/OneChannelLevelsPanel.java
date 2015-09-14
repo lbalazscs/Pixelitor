@@ -17,68 +17,36 @@
 
 package pixelitor.filters.levels.gui;
 
-import pixelitor.filters.gui.ParamAdjustmentListener;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.levels.GrayScaleLookup;
+import pixelitor.filters.levels.OneChannelLevelsModel;
 import pixelitor.utils.CardPanelWithCombo;
 import pixelitor.utils.SliderSpinner;
 
 import javax.swing.*;
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static java.awt.Color.BLACK;
 import static java.awt.Color.GRAY;
-import static java.awt.Color.WHITE;
 
-public class OneChannelLevelsPanel extends CardPanelWithCombo.Card implements ParamAdjustmentListener {
+public class OneChannelLevelsPanel extends CardPanelWithCombo.Card {
     //    private String channelName;
     private final Collection<SliderSpinner> sliders = new ArrayList<>();
     private final Box box = Box.createVerticalBox();
 
-    private GrayScaleLookup adjustment = GrayScaleLookup.getDefaultAdjustment();
-    private static final int BLACK_DEFAULT = 0;
-    private static final int WHITE_DEFAULT = 255;
-    private static final Color DARK_CYAN = new Color(0, 128, 128);
-    private static final Color LIGHT_PINK = new Color(255, 128, 128);
-    private static final Color DARK_PURPLE = new Color(128, 0, 128);
-    private static final Color LIGHT_GREEN = new Color(128, 255, 128);
-    private static final Color DARK_YELLOW_GREEN = new Color(128, 128, 0);
-    private static final Color LIGHT_BLUE = new Color(128, 128, 255);
-    private static final Color DARK_BLUE = new Color(0, 0, 128);
-    private static final Color LIGHT_YELLOW = new Color(255, 255, 128);
-    private static final Color DARK_GREEN = new Color(0, 128, 0);
-    private static final Color LIGHT_PURPLE = new Color(255, 128, 255);
-    private static final Color DARK_RED = new Color(128, 0, 0);
-    private static final Color LIGHT_CYAN = new Color(128, 255, 128);
+
 
     private final SliderSpinner inputBlackSlider;
     private final SliderSpinner inputWhiteSlider;
     private final SliderSpinner outputBlackSlider;
     private final SliderSpinner outputWhiteSlider;
-    private final GrayScaleAdjustmentChangeListener grayScaleAdjustmentChangeListener;
 
-    public OneChannelLevelsPanel(Type type, GrayScaleAdjustmentChangeListener grayScaleAdjustmentChangeListener) {
-        super(type.getName());
-        this.grayScaleAdjustmentChangeListener = grayScaleAdjustmentChangeListener;
+    public OneChannelLevelsPanel(OneChannelLevelsModel model) {
+        super(model.getName());
         add(box);
 
-        RangeParam inputBlackParam = new RangeParam("Input Dark", 0, 255, BLACK_DEFAULT);
-        inputBlackParam.setAdjustmentListener(this);
-        inputBlackSlider = new SliderSpinner(inputBlackParam, GRAY, type.getBackColor());
-
-        RangeParam inputWhiteParam = new RangeParam("Input Light", 0, 255, WHITE_DEFAULT);
-        inputWhiteParam.setAdjustmentListener(this);
-        inputWhiteSlider = new SliderSpinner(inputWhiteParam, type.getWhiteColor(), GRAY);
-
-        RangeParam outputBlackParam = new RangeParam("Output Dark", 0, 255, BLACK_DEFAULT);
-        outputBlackParam.setAdjustmentListener(this);
-        outputBlackSlider = new SliderSpinner(outputBlackParam, GRAY, type.getWhiteColor());
-
-        RangeParam outputWhiteParam = new RangeParam("Output Light", 0, 255, WHITE_DEFAULT);
-        outputWhiteParam.setAdjustmentListener(this);
-        outputWhiteSlider = new SliderSpinner(outputWhiteParam, type.getBackColor(), GRAY);
+        inputBlackSlider = new SliderSpinner(model.getInputBlackParam(), GRAY, model.getBackColor());
+        inputWhiteSlider = new SliderSpinner(model.getInputWhiteParam(), model.getWhiteColor(), GRAY);
+        outputBlackSlider = new SliderSpinner(model.getOutputBlackParam(), GRAY, model.getWhiteColor());
+        outputWhiteSlider = new SliderSpinner(model.getOutputWhiteParam(), model.getBackColor(), GRAY);
 
         addSliderSpinner(inputBlackSlider);
         addSliderSpinner(inputWhiteSlider);
@@ -86,148 +54,10 @@ public class OneChannelLevelsPanel extends CardPanelWithCombo.Card implements Pa
         addSliderSpinner(outputWhiteSlider);
     }
 
-    public void resetToDefaultSettings() {
-        sliders.forEach(SliderSpinner::resetToDefaultSettings);
-        updateAdjustment();
-    }
-
     private void addSliderSpinner(SliderSpinner sp) {
         box.add(sp);
         sliders.add(sp);
     }
 
-    public GrayScaleLookup getAdjustment() {
-        return adjustment;
-    }
 
-    @Override
-    public void paramAdjusted() {
-        updateAdjustment();
-
-        grayScaleAdjustmentChangeListener.grayScaleAdjustmentHasChanged();
-    }
-
-    private void updateAdjustment() {
-        int inputBlackValue = inputBlackSlider.getCurrentValue();
-        int inputWhiteValue = inputWhiteSlider.getCurrentValue();
-        int outputBlackValue = outputBlackSlider.getCurrentValue();
-        int outputWhiteValue = outputWhiteSlider.getCurrentValue();
-
-        adjustment = new GrayScaleLookup(inputBlackValue, inputWhiteValue, outputBlackValue, outputWhiteValue);
-    }
-
-    enum Type {
-        RGB {
-            @Override
-            public String getName() {
-                return "Red, Green, Blue";
-            }
-
-            @Override
-            Color getBackColor() {
-                return BLACK;
-            }
-
-            @Override
-            Color getWhiteColor() {
-                return WHITE;
-            }
-        }, R {
-            @Override
-            public String getName() {
-                return "Red";
-            }
-
-            @Override
-            Color getBackColor() {
-                return DARK_CYAN;
-            }
-
-            @Override
-            Color getWhiteColor() {
-                return LIGHT_PINK;
-            }
-        }, G {
-            @Override
-            public String getName() {
-                return "Green";
-            }
-
-            @Override
-            Color getBackColor() {
-                return DARK_PURPLE;
-            }
-
-            @Override
-            Color getWhiteColor() {
-                return LIGHT_GREEN;
-            }
-        }, B {
-            @Override
-            public String getName() {
-                return "Blue";
-            }
-
-            @Override
-            Color getBackColor() {
-                return DARK_YELLOW_GREEN;
-            }
-
-            @Override
-            Color getWhiteColor() {
-                return LIGHT_BLUE;
-            }
-        }, RG {
-            @Override
-            public String getName() {
-                return "Red, Green";
-            }
-
-            @Override
-            Color getBackColor() {
-                return DARK_BLUE;
-            }
-
-            @Override
-            Color getWhiteColor() {
-                return LIGHT_YELLOW;
-            }
-        }, RB {
-            @Override
-            public String getName() {
-                return "Red, Blue";
-            }
-
-            @Override
-            Color getBackColor() {
-                return DARK_GREEN;
-            }
-
-            @Override
-            Color getWhiteColor() {
-                return LIGHT_PURPLE;
-            }
-        }, GB {
-            @Override
-            public String getName() {
-                return "Green, Blue";
-            }
-
-            @Override
-            Color getBackColor() {
-                return DARK_RED;
-            }
-
-            @Override
-            Color getWhiteColor() {
-                return LIGHT_CYAN;
-            }
-        };
-
-        abstract String getName();
-
-        abstract Color getBackColor();
-
-        abstract Color getWhiteColor();
-    }
 }

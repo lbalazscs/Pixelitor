@@ -20,11 +20,11 @@ package pixelitor.filters.levels;
 import com.jhlabs.image.PixelUtils;
 
 /**
- * Contains a lookup array of 256 elements, describing the pixel-by-pixel adjustments
- * made to a single channel
+ * A lookup table of 256 elements,
+ * describing the adjustments made to a single channel
  */
 public class GrayScaleLookup {
-    private static final GrayScaleLookup defaultAdjustment = new GrayScaleLookup(0, 255, 0, 255);
+    private static final GrayScaleLookup DEFAULT = new GrayScaleLookup(0, 255, 0, 255);
     private final short[] mapping = new short[256];
 
     public GrayScaleLookup(int inputBlackValue, int inputWhiteValue,
@@ -40,7 +40,7 @@ public class GrayScaleLookup {
         return mapping[input];
     }
 
-    public static GrayScaleLookup getDefaultAdjustment() {
-        return defaultAdjustment;
+    public static GrayScaleLookup getDefault() {
+        return DEFAULT;
     }
 }

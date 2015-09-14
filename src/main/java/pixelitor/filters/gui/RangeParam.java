@@ -194,6 +194,17 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     public void setValue(int n, boolean trigger) {
+// these assertions cannot be made because of swing bugs
+//        assert n <= maxValue : getName() + ": n (" + n + ") > maxValue (" + maxValue + ')';
+//        assert n >= minValue : getName() + ": n (" + n + ") < minValue (" + minValue + ')';
+
+        if (n > maxValue) {
+            n = maxValue;
+        }
+        if (n < minValue) {
+            n = minValue;
+        }
+
         if (value != n) {
             value = n;
             fireStateChanged();

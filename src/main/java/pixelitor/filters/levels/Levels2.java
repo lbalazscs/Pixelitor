@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2009-2014 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,17 +8,18 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
  */
-package pixelitor.filters.lookup;
+package pixelitor.filters.levels;
 
-import pixelitor.filters.gui.FilterWithGUI;
-import pixelitor.filters.levels.GrayScaleLookup;
-import pixelitor.filters.levels.RGBLookup;
+import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.gui.AdjustPanel;
+import pixelitor.filters.levels.gui.LevelsPanel;
+import pixelitor.filters.lookup.FastLookupOp;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
@@ -27,30 +28,38 @@ import java.util.Objects;
 import java.util.Random;
 
 /**
- * A lookup filter that is initialized at runtime with an RGBLookup
+ * The Levels filter
  */
-public abstract class DynamicLookupFilter extends FilterWithGUI {
+public class Levels2 extends FilterWithParametrizedGUI implements LookupFilter {
     private RGBLookup rgbLookup;
+    private final LevelsModel model;
 
-    DynamicLookupFilter(String name) {
-        super(name);
-    }
-
-    public void setRGBLookup(RGBLookup rgbLookup) {
-        this.rgbLookup = Objects.requireNonNull(rgbLookup);
+    public Levels2() {
+        super("Levels 2", true, false);
+        model = new LevelsModel(this);
+        setParamSet(model.getParamSet());
     }
 
     @Override
-    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
+    public AdjustPanel createAdjustPanel() {
+        return new LevelsPanel(this, model);
+    }
 
+    @Override
+    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         if (rgbLookup == null) {
-            throw new IllegalStateException("rgbLookup not initialized in DynamicLookupOp");
+            throw new IllegalStateException("rgbLookup not initialized");
         }
 
         BufferedImageOp filterOp = new FastLookupOp((ShortLookupTable) rgbLookup.getLookupOp());
         filterOp.filter(src, dest);
 
         return dest;
+    }
+
+    @Override
+    public void setRGBLookup(RGBLookup rgbLookup) {
+        this.rgbLookup = Objects.requireNonNull(rgbLookup);
     }
 
     @Override

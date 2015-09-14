@@ -17,11 +17,10 @@
 
 package pixelitor.filters.levels.gui;
 
+import pixelitor.filters.Filter;
 import pixelitor.filters.gui.AdjustPanel;
-import pixelitor.filters.levels.GrayScaleLookup;
-import pixelitor.filters.levels.RGBLookup;
-import pixelitor.filters.lookup.DynamicLookupFilter;
-import pixelitor.utils.GUIUtils;
+import pixelitor.filters.levels.LevelsModel;
+import pixelitor.filters.levels.OneChannelLevelsModel;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -30,33 +29,17 @@ import java.awt.CardLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.ArrayList;
-import java.util.Collection;
 
-public class LevelsPanel extends AdjustPanel implements ItemListener, GrayScaleAdjustmentChangeListener {
+public class LevelsPanel extends AdjustPanel implements ItemListener {
     private final DefaultComboBoxModel<String> selectorModel;
 
-    private final OneChannelLevelsPanel rgbPanel;
-    private final OneChannelLevelsPanel rPanel;
-    private final OneChannelLevelsPanel gPanel;
-    private final OneChannelLevelsPanel bPanel;
-    private final OneChannelLevelsPanel rgPanel;
-    private final OneChannelLevelsPanel gbPanel;
-    private final OneChannelLevelsPanel rbPanel;
     private final JPanel cardPanel;
-    private final Collection<OneChannelLevelsPanel> levelsPanels = new ArrayList<>();
     private final JCheckBox showOriginalCB;
 
-    public LevelsPanel(DynamicLookupFilter filter) {
+    public LevelsPanel(Filter filter, LevelsModel model) {
         super(filter);
 
-        rgbPanel = new OneChannelLevelsPanel(OneChannelLevelsPanel.Type.RGB, this);
-        rPanel = new OneChannelLevelsPanel(OneChannelLevelsPanel.Type.R, this);
-        gPanel = new OneChannelLevelsPanel(OneChannelLevelsPanel.Type.G, this);
-        bPanel = new OneChannelLevelsPanel(OneChannelLevelsPanel.Type.B, this);
-        rgPanel = new OneChannelLevelsPanel(OneChannelLevelsPanel.Type.RG, this);
-        gbPanel = new OneChannelLevelsPanel(OneChannelLevelsPanel.Type.GB, this);
-        rbPanel = new OneChannelLevelsPanel(OneChannelLevelsPanel.Type.RB, this);
+        model.setExecutor(this);
 
         setLayout(new BorderLayout());
 
@@ -68,20 +51,18 @@ public class LevelsPanel extends AdjustPanel implements ItemListener, GrayScaleA
         northPanel.setLayout(new FlowLayout());
         northPanel.add(selector);
         JButton resetAllButton = new JButton("Reset all");
-        resetAllButton.addActionListener(e -> resetToDefaultSettings());
+        resetAllButton.addActionListener(e -> model.resetToDefaultSettings());
         northPanel.add(resetAllButton);
         add(northPanel, BorderLayout.NORTH);
 
         cardPanel = new JPanel();
         cardPanel.setLayout(new CardLayout());
 
-        addNewCard(rgbPanel);
-        addNewCard(rPanel);
-        addNewCard(gPanel);
-        addNewCard(bPanel);
-        addNewCard(rgPanel);
-        addNewCard(gbPanel);
-        addNewCard(rbPanel);
+        OneChannelLevelsModel[] models = model.getSubModels();
+        for (OneChannelLevelsModel m : models) {
+            OneChannelLevelsPanel p = new OneChannelLevelsPanel(m);
+            addNewCard(p);
+        }
 
         add(cardPanel, BorderLayout.CENTER);
 
@@ -95,39 +76,11 @@ public class LevelsPanel extends AdjustPanel implements ItemListener, GrayScaleA
         String channelName = chPanel.getCardName();
         cardPanel.add(chPanel, channelName);
         selectorModel.addElement(channelName);
-        levelsPanels.add(chPanel);
-    }
-
-    public static void main(String[] args) {
-        GUIUtils.testJComponent(new LevelsPanel(null));
     }
 
     @Override
     public void itemStateChanged(ItemEvent e) {
         CardLayout cl = (CardLayout) (cardPanel.getLayout());
         cl.show(cardPanel, (String) e.getItem());
-    }
-
-    private void resetToDefaultSettings() {
-        levelsPanels.forEach(OneChannelLevelsPanel::resetToDefaultSettings);
-        grayScaleAdjustmentHasChanged();
-    }
-
-    @Override
-    public void grayScaleAdjustmentHasChanged() {
-        GrayScaleLookup rgb = rgbPanel.getAdjustment();
-
-        GrayScaleLookup r = rPanel.getAdjustment();
-        GrayScaleLookup g = gPanel.getAdjustment();
-        GrayScaleLookup b = bPanel.getAdjustment();
-
-        GrayScaleLookup rg = rgPanel.getAdjustment();
-        GrayScaleLookup gb = gbPanel.getAdjustment();
-        GrayScaleLookup rb = rbPanel.getAdjustment();
-
-        RGBLookup unifiedAdjustments = new RGBLookup(rgb, r, g, b, rg, rb, gb);
-        DynamicLookupFilter levelsFilter = (DynamicLookupFilter) op;
-        levelsFilter.setRGBLookup(unifiedAdjustments);
-        super.executeFilterPreview();
     }
 }

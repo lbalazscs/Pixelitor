@@ -83,9 +83,7 @@ public class LayerButton extends JToggleButton {
             Icon adjLayerIcon = IconUtils.getAdjLayerIcon();
             layerIcon = new JButton(adjLayerIcon);
 
-            ((JButton) layerIcon).addActionListener(e -> {
-                System.out.println("LayerButton::LayerButton: adjustment layer icon clicked");
-            });
+            ((JButton) layerIcon).addActionListener(e -> ((AdjustmentLayer) layer).configure());
         } else {
             layerIcon = new JLabel("", null, CENTER);
         }

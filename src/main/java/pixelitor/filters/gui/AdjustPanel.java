@@ -26,14 +26,15 @@ import javax.swing.*;
 /**
  * The superclass of all filter adjustment panels
  */
-public abstract class AdjustPanel extends JPanel {
+public abstract class AdjustPanel extends JPanel implements PreviewExecutor {
     protected Filter op;
 
     protected AdjustPanel(Filter filter) {
         this.op = filter;
     }
 
-    protected void executeFilterPreview() {
+    @Override
+    public void executeFilterPreview() {
         Utils.executeFilterWithBusyCursor(op, ChangeReason.OP_PREVIEW, this);
     }
 

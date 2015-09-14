@@ -44,6 +44,10 @@ public class ParamSet {
         paramList.add(param);
     }
 
+    public ParamSet(List<FilterParam> params) {
+        paramList.addAll(params);
+    }
+
     public ParamSet withActions(FilterAction... actions) {
         actionList.addAll(Arrays.asList(actions));
         return this;
