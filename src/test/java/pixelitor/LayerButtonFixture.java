@@ -20,7 +20,6 @@ package pixelitor;
 import org.assertj.swing.core.Robot;
 import org.assertj.swing.fixture.JToggleButtonFixture;
 import pixelitor.layers.LayerButton;
-import pixelitor.layers.LayerUI;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
@@ -39,7 +38,7 @@ public class LayerButtonFixture extends JToggleButtonFixture {
         // visibility checkbox and this would happen through robot events
 
         try {
-            SwingUtilities.invokeAndWait(() -> ((LayerUI) target()).setOpenEye(b));
+            SwingUtilities.invokeAndWait(() -> ((LayerButton) target()).setOpenEye(b));
         } catch (InterruptedException | InvocationTargetException e) {
             e.printStackTrace();
         }

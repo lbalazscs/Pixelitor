@@ -126,6 +126,7 @@ public class MenuBar extends JMenuBar {
     private static final KeyStroke CTRL_E = KeyStroke.getKeyStroke('E', InputEvent.CTRL_MASK);
     private static final KeyStroke CTRL_F = KeyStroke.getKeyStroke('F', InputEvent.CTRL_MASK);
     private static final KeyStroke CTRL_G = KeyStroke.getKeyStroke('G', InputEvent.CTRL_MASK);
+    private static final KeyStroke CTRL_H = KeyStroke.getKeyStroke('H', InputEvent.CTRL_MASK);
     private static final KeyStroke CTRL_I = KeyStroke.getKeyStroke('I', InputEvent.CTRL_MASK);
     private static final KeyStroke CTRL_J = KeyStroke.getKeyStroke('J', InputEvent.CTRL_MASK);
     private static final KeyStroke CTRL_K = KeyStroke.getKeyStroke('K', InputEvent.CTRL_MASK);
@@ -890,6 +891,15 @@ public class MenuBar extends JMenuBar {
 
         viewMenu.addSeparator();
 
+        Action showHistoryAction = new MenuAction("Show History...") {
+            @Override
+            void onClick() {
+                History.showHistory();
+            }
+        };
+        createMenuItem(showHistoryAction, viewMenu, CTRL_H);
+
+
         viewMenu.add(new ShowHideStatusBarAction());
         createMenuItem(new ShowHideHistogramsAction(), viewMenu, EnabledIf.ACTION_ENABLED, F6);
         createMenuItem(new ShowHideLayersAction(), viewMenu, EnabledIf.ACTION_ENABLED, F7);
@@ -1251,14 +1261,6 @@ public class MenuBar extends JMenuBar {
 
     private static void initDebugSubmenu(JMenu develMenu, PixelitorWindow pixelitorWindow) {
         JMenu debugSubmenu = new JMenu("Debug");
-
-        Action debugHistoryAction = new MenuAction("Debug History...") {
-            @Override
-            void onClick() {
-                History.showHistory();
-            }
-        };
-        createMenuItem(debugHistoryAction, debugSubmenu);
 
         Action repaintActive = new MenuAction("repaint() on the active image") {
             @Override
