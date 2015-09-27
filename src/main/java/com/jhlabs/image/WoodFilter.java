@@ -221,6 +221,14 @@ public class WoodFilter extends PointFilter {
 
         f += fibres*Noise.noise2(nx*scale, ny*50);
 
+		// TODO happened during robot tests
+		if (f == Float.NaN) {
+			System.out.println("WoodFilter::filterRGB: x = " + x + ", y = " + y);
+			System.out.println(String.format("WoodFilter::filterRGB: m00 = %.2f, m01 = %.2f, m10 = %.2f, m11 = %.2f", m00, m01, m10, m11));
+			System.out.println(String.format("WoodFilter::filterRGB: scale = %.2f, stretch = %.2f, angle = %.2f", scale, stretch, angle));
+			System.out.println(String.format("WoodFilter::filterRGB: rings = %.2f, turbulence = %.2f, fibres = %.2f, gain = %.2f", rings, turbulence, fibres, gain));
+		}
+
 		int a = rgb & 0xff000000;
 		int v;
 		if (colormap != null) {

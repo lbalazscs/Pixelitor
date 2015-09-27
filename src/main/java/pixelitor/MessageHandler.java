@@ -5,7 +5,7 @@ package pixelitor;
  * in order to enable GUI-independent testability.
  */
 public interface MessageHandler {
-    void showStatusBarMessage(String msg);
+    void showStatusMessage(String msg);
 
     void showInfo(String title, String msg);
 

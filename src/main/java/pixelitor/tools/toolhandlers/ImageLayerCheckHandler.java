@@ -18,7 +18,7 @@
 package pixelitor.tools.toolhandlers;
 
 import pixelitor.ImageDisplay;
-import pixelitor.MessageHandler;
+import pixelitor.utils.Messages;
 
 import java.awt.event.MouseEvent;
 
@@ -26,16 +26,13 @@ import java.awt.event.MouseEvent;
  * Checks whether the active layer is an image layer.
  */
 public class ImageLayerCheckHandler extends ToolHandler {
-    private final MessageHandler messageHandler;
-
-    public ImageLayerCheckHandler(MessageHandler messageHandler) {
-        this.messageHandler = messageHandler;
+    public ImageLayerCheckHandler() {
     }
 
     @Override
     boolean mousePressed(MouseEvent e, ImageDisplay ic) {
         if (!ic.activeIsImageLayer()) {
-            messageHandler.showNotImageLayerError();
+            Messages.showNotImageLayerError();
             return true;
         }
 

@@ -41,9 +41,6 @@ public class ToolTest {
         TestHelper.setupMockFgBgSelector();
 
         MessageHandler messageHandler = new TestMessageHandler();
-        for (Tool tool : Tools.getTools()) {
-            tool.setMessageHandler(messageHandler);
-        }
         Messages.setMessageHandler(messageHandler);
         Tools.CLONE.setStateTestOnly(CloneTool.State.CLONING);
 

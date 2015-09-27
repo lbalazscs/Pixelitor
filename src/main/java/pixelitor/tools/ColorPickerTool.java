@@ -20,6 +20,7 @@ package pixelitor.tools;
 import pixelitor.FgBgColors;
 import pixelitor.ImageDisplay;
 import pixelitor.layers.ImageLayer;
+import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -103,6 +104,6 @@ public class ColorPickerTool extends Tool {
         int b = (rgb) & 0xFF;
 
         String msg = "x = " + x + ", y = " + y + ", alpha = " + a + ", red = " + r + ", green = " + g + ", blue = " + b;
-        messageHandler.showStatusBarMessage(msg);
+        Messages.showStatusMessage(msg);
     }
 }

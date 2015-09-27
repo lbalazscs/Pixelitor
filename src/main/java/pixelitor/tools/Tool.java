@@ -22,7 +22,6 @@ import pixelitor.Composition;
 import pixelitor.GlobalKeyboardWatch;
 import pixelitor.ImageComponents;
 import pixelitor.ImageDisplay;
-import pixelitor.MessageHandler;
 import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.history.PartialImageEdit;
@@ -48,7 +47,6 @@ import java.awt.image.BufferedImage;
  */
 public abstract class Tool {
     private boolean mouseDown = false;
-    protected MessageHandler messageHandler;
     private ToolButton toolButton;
 
     private final String name;
@@ -90,7 +88,7 @@ public abstract class Tool {
         ToolHandler lastHandler = null;
         if (allowOnlyImageLayers) {
             lastHandler = addHandlerToChain(
-                    new ImageLayerCheckHandler(messageHandler), lastHandler);
+                    new ImageLayerCheckHandler(), lastHandler);
         }
         if (handToolForwarding) {
             // most tools behave like the hand tool if the space is pressed
@@ -325,9 +323,5 @@ public abstract class Tool {
     public boolean arrowKeyPressed(ArrowKey key) {
         // empty for the convenience of subclasses
         return false; // not consumed
-    }
-
-    public void setMessageHandler(MessageHandler messageHandler) {
-        this.messageHandler = messageHandler;
     }
 }

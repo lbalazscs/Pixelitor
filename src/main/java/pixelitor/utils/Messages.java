@@ -28,10 +28,6 @@ public class Messages {
     private Messages() { // should not be instantiated
     }
 
-    public static MessageHandler getMessageHandler() {
-        return messageHandler;
-    }
-
     public static void setMessageHandler(MessageHandler messageHandler) {
         Messages.messageHandler = messageHandler;
     }
@@ -64,7 +60,7 @@ public class Messages {
     }
 
     public static void showStatusMessage(String msg) {
-        messageHandler.showStatusBarMessage(msg);
+        messageHandler.showStatusMessage(msg);
     }
 
     public static void showNotImageLayerError() {

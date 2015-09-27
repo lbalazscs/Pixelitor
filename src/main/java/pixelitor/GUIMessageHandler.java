@@ -10,7 +10,7 @@ public class GUIMessageHandler implements MessageHandler {
     }
 
     @Override
-    public void showStatusBarMessage(String msg) {
+    public void showStatusMessage(String msg) {
         pw.setStatusBarMessage(msg);
     }
 

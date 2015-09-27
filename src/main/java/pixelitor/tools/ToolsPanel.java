@@ -19,11 +19,9 @@ package pixelitor.tools;
 
 import pixelitor.Build;
 import pixelitor.GlobalKeyboardWatch;
-import pixelitor.MessageHandler;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.painters.TextFilter;
 import pixelitor.layers.TextLayer;
-import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -36,12 +34,10 @@ public class ToolsPanel extends JPanel {
     public ToolsPanel() {
         Box verticalBox = Box.createVerticalBox();
         ButtonGroup group = new ButtonGroup();
-        MessageHandler messageHandler = Messages.getMessageHandler();
 
         Tool[] tools = Tools.getTools();
         for (Tool tool : tools) {
-            tool.setMessageHandler(messageHandler);
-            ToolButton toolButton = new ToolButton(tool, messageHandler);
+            ToolButton toolButton = new ToolButton(tool);
             verticalBox.add(toolButton);
             group.add(toolButton);
             setupKeyboardShortcut(tool);

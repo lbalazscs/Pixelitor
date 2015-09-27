@@ -17,8 +17,8 @@
 
 package pixelitor.tools;
 
-import pixelitor.MessageHandler;
 import pixelitor.utils.IconUtils;
+import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.Dimension;
@@ -31,11 +31,9 @@ import java.awt.event.ActionListener;
  */
 public class ToolButton extends JToggleButton implements ActionListener {
     private final Tool tool;
-    private final MessageHandler messageHandler;
 
-    public ToolButton(Tool tool, MessageHandler messageHandler) {
+    public ToolButton(Tool tool) {
         this.tool = tool;
-        this.messageHandler = messageHandler;
         tool.setButton(this);
 
         // used for component lookup when testing
@@ -70,6 +68,6 @@ public class ToolButton extends JToggleButton implements ActionListener {
         Tools.setCurrentTool(tool);
 
         String msg = tool.getName() + " Tool: " + tool.getToolMessage();
-        messageHandler.showStatusBarMessage(msg);
+        Messages.showStatusMessage(msg);
     }
 }

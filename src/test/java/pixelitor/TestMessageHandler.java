@@ -5,7 +5,7 @@ package pixelitor;
  */
 public class TestMessageHandler implements MessageHandler {
     @Override
-    public void showStatusBarMessage(String msg) {
+    public void showStatusMessage(String msg) {
     }
 
     @Override

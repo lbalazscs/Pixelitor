@@ -87,6 +87,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.InvocationTargetException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
 
@@ -147,12 +148,14 @@ public class RobotTest {
         GlobalKeyboardWatch.addKeyboardShortCut(exitKeyStroke, "exit", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("RobotTest: exiting app because \"" + exitKeyStroke + "\" was pressed");
+                System.out.println("RobotTest: exiting app because '" + exitKeyStroke.getKeyChar() + "' was pressed");
                 System.exit(1);
             }
         });
 
-        System.out.println("RobotTest.runRobot CALLED at " + new Date() + ", press the '" + stopKeyStroke.getKeyChar() + "' key to stop it");
+        System.out.printf("RobotTest.runRobot CALLED at %s, the '%s' key stops, the '%s' key exits.%n",
+                new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()),
+                stopKeyStroke.getKeyChar(), exitKeyStroke.getKeyChar());
 
         Robot r = null;
         try {

@@ -27,6 +27,7 @@ import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.CloneBrush;
 import pixelitor.tools.brushes.CopyBrushType;
 import pixelitor.utils.GridBagHelper;
+import pixelitor.utils.Messages;
 import pixelitor.utils.OKDialog;
 import pixelitor.utils.ScalingMirror;
 
@@ -150,7 +151,7 @@ public class CloneTool extends TmpLayerBrushTool {
             if (JVM.isLinux) {
                 msg += "\n(You might need to disable Alt-Click for window dragging in the window manager)";
             }
-            messageHandler.showError("No source", msg);
+            Messages.showError("No source", msg);
         }
     }
 
