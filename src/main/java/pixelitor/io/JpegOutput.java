@@ -44,7 +44,9 @@ public final class JpegOutput {
 
     public static void writeJPG(BufferedImage image, File file, float quality) throws IOException {
         ImageOutputStream ios = ImageIO.createImageOutputStream(file);
-        writeJPGtoStream(image, ios, quality);
+        if (ios != null) {
+            writeJPGtoStream(image, ios, quality);
+        }
     }
 
     public static ImageWithSize writeJPGtoPreviewImage(BufferedImage image, float quality) {
