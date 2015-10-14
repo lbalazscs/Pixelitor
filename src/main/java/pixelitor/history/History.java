@@ -23,6 +23,7 @@ import pixelitor.ConsistencyChecks;
 import pixelitor.ImageComponents;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Messages;
+import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.test.DebugEventQueue;
 import pixelitor.utils.test.HistoryEvent;
 
@@ -207,8 +208,20 @@ public class History {
         return undoManager.getLastEdit();
     }
 
+    @VisibleForTesting
     public static void clear() {
         undoManager.discardAllEdits();
+        assertNumEditsIs(0);
+    }
+
+    @VisibleForTesting
+    public static void assertNumEditsIs(int expectedEdits) {
+        int numEdits = undoManager.getSize();
+        if (numEdits != expectedEdits) {
+            throw new AssertionError(String.format(
+                    "Expected %d edits, but found %d",
+                    expectedEdits, numEdits));
+        }
     }
 }
 

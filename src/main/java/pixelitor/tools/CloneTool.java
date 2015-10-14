@@ -30,6 +30,7 @@ import pixelitor.utils.GridBagHelper;
 import pixelitor.utils.Messages;
 import pixelitor.utils.OKDialog;
 import pixelitor.utils.ScalingMirror;
+import pixelitor.utils.VisibleForTesting;
 
 import javax.swing.*;
 import java.awt.Cursor;
@@ -176,7 +177,8 @@ public class CloneTool extends TmpLayerBrushTool {
         throw new UnsupportedOperationException("no symmetry");
     }
 
-    protected void setStateTestOnly(State state) {
+    @VisibleForTesting
+    protected void setState(State state) {
         this.state = state;
     }
 }

@@ -60,6 +60,7 @@ public class TextLayerTest {
         withMask.init(layer);
 
         assert layer.getComp().checkInvariant();
+        History.clear();
     }
 
     @Test
@@ -67,7 +68,9 @@ public class TextLayerTest {
         checkThereIsOnlyOneLayerOfType(TextLayer.class);
 
         TextLayer.replaceWithRasterized(comp);
+
         checkThereIsOnlyOneLayerOfType(ImageLayer.class);
+        History.assertNumEditsIs(1);
 
         History.undo();
         checkThereIsOnlyOneLayerOfType(TextLayer.class);
@@ -101,7 +104,9 @@ public class TextLayerTest {
         layer.setSettings(newSettings);
 
         layer.commitSettings(oldSettings);
+
         assertThat(layer.getName()).isEqualTo(newText);
+        History.assertNumEditsIs(1);
 
         History.undo();
         assertThat(layer.getName()).isEqualTo(oldText);

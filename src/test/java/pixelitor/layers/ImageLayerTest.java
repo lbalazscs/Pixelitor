@@ -262,6 +262,8 @@ public class ImageLayerTest {
     @Test
     public void testApplyLayerMask() {
         if (withMask == WithMask.YES) {
+            History.clear();
+
             FgBgColors.setGUI(new FgBgColorSelector() {
                 @Override
                 protected void setupKeyboardShortcuts() {
@@ -273,6 +275,8 @@ public class ImageLayerTest {
 
             layer.applyLayerMask(AddToHistory.YES);
             assertThat(layer.hasMask()).isFalse();
+
+            History.assertNumEditsIs(1);
 
             History.undo();
             assertThat(layer.hasMask()).isTrue();

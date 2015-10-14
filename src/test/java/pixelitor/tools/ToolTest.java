@@ -42,7 +42,7 @@ public class ToolTest {
 
         MessageHandler messageHandler = new TestMessageHandler();
         Messages.setMessageHandler(messageHandler);
-        Tools.CLONE.setStateTestOnly(CloneTool.State.CLONING);
+        Tools.CLONE.setState(CloneTool.State.CLONING);
 
         Tool[] tools = Tools.getTools();
 //        Tool[] tools = {Tools.BRUSH};

@@ -434,7 +434,7 @@ public class Composition implements Serializable {
                     imageLayerBellow.updateIconImage();
                     Layer mergedLayer = activeLayer;
 
-                    removeActiveLayer(updateGUI);
+                    removeActiveLayer(updateGUI, AddToHistory.NO);
 
                     PixelitorEdit edit = new CompoundEdit(this, "Merge Down",
                             new ImageEdit(this, "", imageLayerBellow, backupImage, IgnoreSelection.YES, false),
@@ -638,8 +638,8 @@ public class Composition implements Serializable {
         removeLayer(layer, AddToHistory.YES, UpdateGUI.YES);
     }
 
-    public void removeActiveLayer(UpdateGUI updateGUI) {
-        removeLayer(activeLayer, AddToHistory.YES, updateGUI);
+    public void removeActiveLayer(UpdateGUI updateGUI, AddToHistory addToHistory) {
+        removeLayer(activeLayer, addToHistory, updateGUI);
     }
 
     public void removeLayer(Layer layerToBeRemoved, AddToHistory addToHistory, UpdateGUI updateGUI) {

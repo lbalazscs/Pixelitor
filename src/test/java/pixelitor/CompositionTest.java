@@ -58,7 +58,8 @@ public class CompositionTest {
                 "canvas=Canvas{width=20, height=10}, selection=null, dirty=false}", comp.toString());
         tester = new CompTester(comp);
         tester.checkDirty(false);
-        History.setUndoLevels(10);
+
+        History.clear();
     }
 
     @Test
@@ -67,11 +68,13 @@ public class CompositionTest {
 
         comp.addNewEmptyLayer("newLayer 1", true);
         tester.checkLayers("[layer 1, ACTIVE newLayer 1, layer 2]");
+        History.assertNumEditsIs(1);
 
         comp.addNewEmptyLayer("newLayer 2", false);
 
         tester.checkLayers("[layer 1, newLayer 1, ACTIVE newLayer 2, layer 2]");
         tester.checkDirty(true);
+        History.assertNumEditsIs(2);
 
         History.undo();
         tester.checkLayers("[layer 1, ACTIVE newLayer 1, layer 2]");
@@ -95,6 +98,7 @@ public class CompositionTest {
         assertSame(layer, comp.getActiveLayer());
         tester.checkLayers("[ACTIVE layer 1, layer 2]");
         tester.checkDirty(false);
+        History.assertNumEditsIs(1);
 
         History.undo();
         tester.checkLayers("[layer 1, ACTIVE layer 2]");
@@ -136,6 +140,8 @@ public class CompositionTest {
                 AddToHistory.YES, true, 2);
         tester.checkLayers("[layer C, layer 1, ACTIVE layer D, layer A, layer B, layer 2]");
 
+        History.assertNumEditsIs(4);
+
         History.undo();
         tester.checkLayers("[ACTIVE layer C, layer 1, layer A, layer B, layer 2]");
 
@@ -169,6 +175,7 @@ public class CompositionTest {
 
         tester.checkLayers("[layer 1, layer 2, ACTIVE layer 2 copy]");
         tester.checkDirty(true);
+        History.assertNumEditsIs(1);
 
         History.undo();
         tester.checkLayers("[layer 1, ACTIVE layer 2]");
@@ -250,9 +257,12 @@ public class CompositionTest {
     public void testMergeDown() {
         tester.checkLayers("[layer 1, ACTIVE layer 2]");
         comp.setActiveLayer(comp.getLayer(1), AddToHistory.YES);
+
         comp.mergeDown(UpdateGUI.NO);
+
         tester.checkLayers("[ACTIVE layer 1]");
         tester.checkDirty(true);
+        History.assertNumEditsIs(1);
 
         History.undo();
         tester.checkLayers("[layer 1, ACTIVE layer 2]");
@@ -312,9 +322,10 @@ public class CompositionTest {
     @Test
     public void testRemoveActiveLayer() {
         tester.checkLayers("[layer 1, ACTIVE layer 2]");
-        comp.removeActiveLayer(UpdateGUI.NO);
+        comp.removeActiveLayer(UpdateGUI.NO, AddToHistory.YES);
         tester.checkLayers("[ACTIVE layer 1]");
         tester.checkDirty(true);
+        History.assertNumEditsIs(1);
 
         History.undo();
         tester.checkLayers("[layer 1, ACTIVE layer 2]");
@@ -331,6 +342,7 @@ public class CompositionTest {
         comp.removeLayer(layer2, AddToHistory.YES, UpdateGUI.NO);
         tester.checkLayers("[ACTIVE layer 1]");
         tester.checkDirty(true);
+        History.assertNumEditsIs(1);
 
         History.undo();
         tester.checkLayers("[layer 1, ACTIVE layer 2]");
@@ -362,6 +374,7 @@ public class CompositionTest {
         comp.addNewLayerFromComposite("composite layer");
         tester.checkLayers("[layer 1, layer 2, ACTIVE composite layer]");
         tester.checkDirty(true);
+        History.assertNumEditsIs(1);
 
         History.undo();
         tester.checkLayers("[layer 1, ACTIVE layer 2]");
@@ -423,6 +436,7 @@ public class CompositionTest {
 
         comp.invertSelection();
         tester.checkSelectionBounds(comp.getCanvasBounds());
+        History.assertNumEditsIs(1);
 
         History.undo();
         tester.checkSelectionBounds(new Rectangle(3, 3, 4, 4));
@@ -465,6 +479,7 @@ public class CompositionTest {
         // remove one layer so that we have undo
         comp.removeLayer(comp.getActiveLayer(), AddToHistory.YES, UpdateGUI.NO);
         tester.checkLayers("[ACTIVE layer 1]");
+        History.assertNumEditsIs(1);
 
         tester.checkActiveLayerTranslation(0, 0);
         tester.checkActiveLayerAndMaskImageSize(20, 10);
@@ -556,9 +571,12 @@ public class CompositionTest {
         comp.deselect(AddToHistory.YES);
 
         assertThat(comp.hasSelection()).isFalse();
+        History.assertNumEditsIs(1);
+
         History.undo();
         assertThat(comp.hasSelection()).isTrue();
         tester.checkSelectionBounds(tester.getStandardTestSelectionShape());
+
         History.redo();
         assertThat(comp.hasSelection()).isFalse();
     }

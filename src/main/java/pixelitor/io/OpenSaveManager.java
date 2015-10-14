@@ -154,8 +154,8 @@ public class OpenSaveManager {
                     ImageIO.write(image, format, selectedFile);
                 }
             } catch (IOException e) {
-                if (e.getMessage().contains("used by another process")) {
-                    String msg = String.format("Cannot save to \n%s\n because this file is being used by another program",
+                if (e.getMessage().contains("another process")) {
+                    String msg = String.format("Cannot save to\n%s\nbecause this file is being used by another program.",
                             selectedFile.getAbsolutePath());
                     Messages.showError("Cannot save", msg);
                 } else {

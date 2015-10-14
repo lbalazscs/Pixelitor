@@ -26,6 +26,7 @@ import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.history.ContentLayerMoveEdit;
+import pixelitor.history.History;
 import pixelitor.testutils.WithMask;
 
 import java.awt.Graphics2D;
@@ -70,6 +71,7 @@ public class ContentLayerTest {
         withMask.init(layer);
 
         assert comp.getNrLayers() == 1 : "found " + comp.getNrLayers() + " layers";
+        History.clear();
     }
 
     @Test
@@ -109,6 +111,7 @@ public class ContentLayerTest {
         checkTranslationAfterNegativeDrag();
 
         // TODO should have undo
+//        History.assertNumEditsIs(2);
 //        History.undo();
 //        checkTranslationAfterPositiveDrag();
 //        History.undo();

@@ -103,6 +103,7 @@ public class MultiLayerEditTest {
         if (withSelection == WithSelection.YES) {
             origSelection = tester.getStandardTestSelectionShape();
         }
+        History.clear();
     }
 
     private void checkOriginalState() {
@@ -139,6 +140,8 @@ public class MultiLayerEditTest {
         checkEnlargeCanvasAfterState(north, east, south, west);
 
         if (numLayers.canUndo()) {
+            History.assertNumEditsIs(1);
+
             History.undo();
             checkOriginalState();
 
@@ -182,6 +185,8 @@ public class MultiLayerEditTest {
         checkStateAfterResize();
 
         if (numLayers.canUndo()) {
+            History.assertNumEditsIs(1);
+
             History.undo();
             checkOriginalState();
 
@@ -223,8 +228,11 @@ public class MultiLayerEditTest {
         checkStateAfterRotate(ANGLE_90);
 
         if (numLayers.canUndo()) {
+            History.assertNumEditsIs(1);
+
             History.undo();
             checkOriginalState();
+
             History.redo();
             checkStateAfterRotate(ANGLE_90);
         }
@@ -237,8 +245,11 @@ public class MultiLayerEditTest {
         checkStateAfterRotate(ANGLE_180);
 
         if (numLayers.canUndo()) {
+            History.assertNumEditsIs(1);
+
             History.undo();
             checkOriginalState();
+
             History.redo();
             checkStateAfterRotate(ANGLE_180);
         }
@@ -251,8 +262,11 @@ public class MultiLayerEditTest {
         checkStateAfterRotate(ANGLE_270);
 
         if (numLayers.canUndo()) {
+            History.assertNumEditsIs(1);
+
             History.undo();
             checkOriginalState();
+
             History.redo();
             checkStateAfterRotate(ANGLE_270);
         }
@@ -337,8 +351,11 @@ public class MultiLayerEditTest {
         checkStateAfterFlip(HORIZONTAL);
 
         if (numLayers.canUndo()) {
+            History.assertNumEditsIs(1);
+
             History.undo();
             checkOriginalState();
+
             History.redo();
             checkStateAfterFlip(HORIZONTAL);
         }
@@ -352,8 +369,11 @@ public class MultiLayerEditTest {
         checkStateAfterFlip(VERTICAL);
 
         if (numLayers.canUndo()) {
+            History.assertNumEditsIs(1);
+
             History.undo();
             checkOriginalState();
+
             History.redo();
             checkStateAfterFlip(VERTICAL);
         }
@@ -413,6 +433,8 @@ public class MultiLayerEditTest {
 
         // test undo with one layer
         if (numLayers.canUndo()) {
+            History.assertNumEditsIs(1);
+
             History.undo();
             checkOriginalState();
 

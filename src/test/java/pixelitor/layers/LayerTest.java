@@ -90,6 +90,8 @@ public class LayerTest {
         ImageDisplay ic = new ImageDisplayStub();
         ImageComponents.setActiveIC(ic, false);
         ((ImageDisplayStub) ic).setComp(comp);
+
+        History.clear();
     }
 
     @Test
@@ -99,8 +101,10 @@ public class LayerTest {
         assertThat(layerUI.isVisibilityChecked()).isTrue();
 
         layer.setVisible(false, AddToHistory.YES);
+
         assertThat(layer.isVisible()).isFalse();
         assertThat(layerUI.isVisibilityChecked()).isFalse();
+        History.assertNumEditsIs(1);
 
         History.undo();
         assertThat(layer.isVisible()).isTrue();
@@ -131,8 +135,9 @@ public class LayerTest {
         assertThat(layer.getOpacity()).isEqualTo(oldValue);
 
         layer.setOpacity(newValue, UpdateGUI.YES, AddToHistory.YES, true);
-        assertThat(layer.getOpacity()).isEqualTo(newValue);
 
+        assertThat(layer.getOpacity()).isEqualTo(newValue);
+        History.assertNumEditsIs(1);
         LayerOpacityEdit lastEdit = (LayerOpacityEdit) History.getLastEdit();
         assertSame(layer, lastEdit.getLayer());
 
@@ -149,7 +154,9 @@ public class LayerTest {
         assertSame(BlendingMode.NORMAL, layer.getBlendingMode());
 
         layer.setBlendingMode(BlendingMode.DIFFERENCE, UpdateGUI.YES, AddToHistory.YES, true);
+
         assertSame(BlendingMode.DIFFERENCE, layer.getBlendingMode());
+        History.assertNumEditsIs(1);
 
         History.undo();
         assertSame(BlendingMode.NORMAL, layer.getBlendingMode());
@@ -163,8 +170,10 @@ public class LayerTest {
         assertThat(layer.getName()).isEqualTo("layer 1");
 
         layer.setName("newName", AddToHistory.YES);
+
         assertThat(layer.getName()).isEqualTo("newName");
         assertThat(layer.getUI().getLayerName()).isEqualTo("newName");
+        History.assertNumEditsIs(1);
 
         History.undo();
         assertThat(layer.getName()).isEqualTo("layer 1");
@@ -184,13 +193,16 @@ public class LayerTest {
     @Test
     public void testMakeActive() {
         Layer layer2 = comp.getLayer(1);
-
         assertThat(layer2.isActive()).isFalse();
+
         layer2.makeActive(AddToHistory.YES);
+
         assertThat(layer2.isActive()).isTrue();
+        History.assertNumEditsIs(1);
 
         History.undo();
         assertThat(layer2.isActive()).isFalse();
+
         History.redo();
         assertThat(layer2.isActive()).isTrue();
     }
@@ -225,8 +237,11 @@ public class LayerTest {
     public void testAddMask() {
         if (withMask == WithMask.NO) {
             assertThat(layer.hasMask()).isFalse();
+
             layer.addMask(LayerMaskAddType.REVEAL_ALL);
+
             assertThat(layer.hasMask()).isTrue();
+            History.assertNumEditsIs(1);
 
             History.undo();
             assertThat(layer.hasMask()).isFalse();
@@ -240,8 +255,10 @@ public class LayerTest {
     public void testDeleteMask() {
         if (withMask == WithMask.YES) {
             assertThat(layer.hasMask()).isTrue();
+
             layer.deleteMask(AddToHistory.YES, false);
             assertThat(layer.hasMask()).isFalse();
+            History.assertNumEditsIs(1);
 
             History.undo();
             assertThat(layer.hasMask()).isTrue();
@@ -258,7 +275,9 @@ public class LayerTest {
             assertThat(layer.isMaskEnabled()).isTrue();
 
             layer.setMaskEnabled(false, AddToHistory.YES);
+
             assertThat(layer.isMaskEnabled()).isFalse();
+            History.assertNumEditsIs(1);
 
             History.undo();
             assertThat(layer.isMaskEnabled()).isTrue();
@@ -276,7 +295,9 @@ public class LayerTest {
             assertThat(mask.isLinked()).isTrue();
 
             mask.setLinked(false, AddToHistory.YES);
+
             assertThat(mask.isLinked()).isFalse();
+            History.assertNumEditsIs(1);
 
             History.undo();
             assertThat(mask.isLinked()).isTrue();
