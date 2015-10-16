@@ -91,6 +91,7 @@ public class CloneBrush extends CopyBrush {
         type.afterDrawImage(g);
 
         g.dispose();
+        super.debugImage();
     }
 
     @Override

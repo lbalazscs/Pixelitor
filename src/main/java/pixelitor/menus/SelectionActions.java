@@ -70,7 +70,7 @@ public final class SelectionActions {
 
     private static final Action modifyAction = new MenuAction("Modify...") {
         @Override
-        void onClick() {
+        public void onClick() {
             JPanel p = new JPanel(new GridBagLayout());
             GridBagHelper gbh = new GridBagHelper(p);
             RangeParam amount = new RangeParam("Amount (pixels)", 1, 100, 10);
@@ -157,7 +157,7 @@ public final class SelectionActions {
         }
 
         @Override
-        void onClick() {
+        public void onClick() {
             ImageDisplay ic = ImageComponents.getActiveIC();
             if(ic == null) {
                 return;

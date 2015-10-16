@@ -26,7 +26,7 @@ import pixelitor.utils.Messages;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
-abstract class MenuAction extends AbstractAction {
+public abstract class MenuAction extends AbstractAction {
     public enum AllowedLayerType {
         ANY(null) {
             @Override
@@ -108,5 +108,5 @@ abstract class MenuAction extends AbstractAction {
         }
     }
 
-    abstract void onClick();
+    public abstract void onClick();
 }

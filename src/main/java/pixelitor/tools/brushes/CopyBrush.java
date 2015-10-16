@@ -17,6 +17,8 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.utils.Utils;
+
 import java.awt.image.BufferedImage;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
@@ -29,6 +31,7 @@ public abstract class CopyBrush extends DabsBrush {
     protected BufferedImage sourceImage;
     protected BufferedImage brushImage;
     protected CopyBrushType type;
+    private static boolean debugBrushImage = false;
 
     protected CopyBrush(int radius, CopyBrushType type, SpacingStrategy spacingStrategy) {
         super(radius, spacingStrategy, NOT_ANGLE_AWARE, true);
@@ -47,5 +50,15 @@ public abstract class CopyBrush extends DabsBrush {
     public void typeChanged(CopyBrushType type) {
         this.type = type;
         type.setSize(diameter);
+    }
+
+    public void debugImage() {
+        if (debugBrushImage) {
+            Utils.debugImage(brushImage, "Copy Brush");
+        }
+    }
+
+    public static void setDebugBrushImage(boolean debugBrushImage) {
+        CopyBrush.debugBrushImage = debugBrushImage;
     }
 }

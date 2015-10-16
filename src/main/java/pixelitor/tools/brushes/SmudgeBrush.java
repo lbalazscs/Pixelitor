@@ -66,6 +66,7 @@ public class SmudgeBrush extends CopyBrush {
         g.dispose();
 
         firstUsageInStroke = false;
+        super.debugImage();
     }
 
     @Override

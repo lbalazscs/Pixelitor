@@ -28,6 +28,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;
+import java.awt.BorderLayout;
 
 /**
  * An undo manager that is also a list model for debugging history
@@ -184,7 +185,14 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
 
         if (historyDialog == null) {
             historyDialog = new JDialog(PixelitorWindow.getInstance(), "History", false);
-            historyDialog.getContentPane().add(new JScrollPane(historyList));
+            JPanel p = new JPanel();
+            p.setLayout(new BorderLayout());
+            p.add(new JScrollPane(historyList), BorderLayout.CENTER);
+            JPanel buttonsPanel = new JPanel();
+            buttonsPanel.add(new JButton(History.UNDO_ACTION));
+            buttonsPanel.add(new JButton(History.REDO_ACTION));
+            p.add(buttonsPanel, BorderLayout.SOUTH);
+            historyDialog.getContentPane().add(p);
             historyDialog.setSize(200, 300);
             GUIUtils.centerOnScreen(historyDialog);
         }

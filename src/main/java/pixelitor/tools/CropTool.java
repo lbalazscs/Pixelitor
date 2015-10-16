@@ -68,6 +68,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
     // The crop rectangle in image space.
     // This variable is used only while the image component is resized
     private Rectangle2D lastCropRect;
+
     private JCheckBox allowGrowingCB;
 
     CropTool() {
@@ -100,6 +101,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
         settingsPanel.add(maskOpacitySpinner);
 
         allowGrowingCB = new JCheckBox("Allow Growing", false);
+        allowGrowingCB.setToolTipText("Enables the enlargement of the canvas");
         settingsPanel.add(allowGrowingCB);
 
         cropButton = settingsPanel.addButton("Crop",

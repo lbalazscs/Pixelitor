@@ -17,6 +17,7 @@
 
 package pixelitor;
 
+import com.bric.util.JVM;
 import org.assertj.swing.core.BasicRobot;
 import org.assertj.swing.core.GenericTypeMatcher;
 import org.assertj.swing.core.MouseButton;
@@ -41,6 +42,7 @@ import pixelitor.io.FileChoosers;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.LayerButton;
 import pixelitor.menus.view.ZoomLevel;
+import pixelitor.selection.Selection;
 import pixelitor.testutils.WithSelection;
 import pixelitor.tools.BrushType;
 import pixelitor.tools.GradientColorType;
@@ -54,6 +56,8 @@ import pixelitor.utils.Utils;
 import javax.swing.*;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -72,11 +76,12 @@ import static java.awt.event.KeyEvent.VK_SHIFT;
 import static java.awt.event.KeyEvent.VK_Z;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 import static pixelitor.utils.test.Assertions.canvasSizeIs;
 import static pixelitor.utils.test.Assertions.hasSelection;
 import static pixelitor.utils.test.Assertions.noSelection;
 import static pixelitor.utils.test.Assertions.numLayersIs;
-import static pixelitor.utils.test.Assertions.selectionBoundsAre;
+
 
 public class AssertJSwingTest {
     private static final File BASE_TESTING_DIR = new File("C:\\pix_tests");
@@ -99,7 +104,10 @@ public class AssertJSwingTest {
         AssertJSwingTest test = new AssertJSwingTest();
         test.setUp();
         test.testApp();
-        System.out.println("AssertJSwingTest::main: finished");
+
+        System.out.println("AssertJSwingTest::main: finished, exiting in 5 seconds");
+        sleep(5, SECONDS);
+        test.exit();
     }
 
     private static void initialize() {
@@ -128,8 +136,6 @@ public class AssertJSwingTest {
         testTools();
         testMenus();
         testLayers();
-
-        sleep(5, SECONDS);
     }
 
     private void testDevelopMenu() {
@@ -251,6 +257,12 @@ public class AssertJSwingTest {
         aboutDialog.button("ok").click();
     }
 
+    private void exit() {
+        String exitMenuName = JVM.isMac ? "Quit" : "Exit";
+        runMenuCommand(exitMenuName);
+        findJOptionPane().yesButton().click();
+    }
+
     private void testEditMenu() {
         keyboardInvert();
         runMenuCommand("Repeat Invert");
@@ -260,8 +272,8 @@ public class AssertJSwingTest {
 
         // select for crop
         window.toggleButton("Selection Tool Button").click();
-        move(200, 200);
-        drag(400, 400);
+        moveTo(200, 200);
+        dragTo(400, 400);
         runMenuCommand("Crop");
         keyboardUndo();
         keyboardDeselect();
@@ -874,16 +886,16 @@ public class AssertJSwingTest {
         window.toggleButton("Color Picker Tool Button").click();
         randomAltClick();
 
-        move(300, 300);
+        moveTo(300, 300);
         window.click();
-        drag(400, 400);
+        dragTo(400, 400);
     }
 
     private void testPaintBucketTool() {
         window.toggleButton("Paint Bucket Tool Button").click();
         randomAltClick();
 
-        move(300, 300);
+        moveTo(300, 300);
         window.click();
 
         keyboardUndoRedo();
@@ -902,11 +914,11 @@ public class AssertJSwingTest {
                 for (GradientColorType colorType : gradientColorTypes) {
                     window.comboBox("gradientColorTypeSelector").selectItem(colorType.toString());
                     window.checkBox("gradientInvert").uncheck();
-                    move(200, 200);
-                    drag(400, 400);
+                    moveTo(200, 200);
+                    dragTo(400, 400);
                     window.checkBox("gradientInvert").check();
-                    move(200, 200);
-                    drag(400, 400);
+                    moveTo(200, 200);
+                    dragTo(400, 400);
                 }
             }
         }
@@ -972,15 +984,15 @@ public class AssertJSwingTest {
             window.checkBox("sampleAllLayersCB").uncheck();
         }
 
-        move(300, 300);
+        moveTo(300, 300);
 
         altClick();
 
-        move(startX, 300);
+        moveTo(startX, 300);
         for (int i = 1; i <= 5; i++) {
             int x = startX + i * 10;
-            drag(x, 300);
-            drag(x, 400);
+            dragTo(x, 300);
+            dragTo(x, 400);
         }
         keyboardUndoRedo();
     }
@@ -992,8 +1004,13 @@ public class AssertJSwingTest {
         window.toggleButton("Selection Tool Button").click();
         randomAltClick();
 
-        move(200, 200);
-        drag(400, 400);
+        testWithSimpleSelection();
+        testWithTwoEclipseSelections();
+    }
+
+    private void testWithSimpleSelection() {
+        moveTo(200, 200);
+        dragTo(400, 400);
         keyboardNudge();
         keyboardUndo();
 
@@ -1003,27 +1020,56 @@ public class AssertJSwingTest {
         keyboardDeselect();
         keyboardUndo(); // keyboardUndo deselection
         keyboardUndo(); // keyboardUndo tracing
-        window.comboBox("selectionTypeCombo").selectItem("Ellipse");
-        move(200, 200);
-        drag(400, 400);
-        window.comboBox("selectionInteractionCombo").selectItem("Add");
-        move(400, 200);
-        drag(500, 300);
+    }
 
-        int origCanvasWidth = 1250;
-        int origCanvasHeight = 830;
+    private void testWithTwoEclipseSelections() {
+        window.comboBox("selectionTypeCombo").selectItem("Ellipse");
+
+        // replace current selection with the first ellipse
+        int e1X = 200;
+        int e1Y = 200;
+        int e1Width = 200;
+        int e1Height = 200;
+        moveTo(e1X, e1Y);
+        dragTo(e1X + e1Width, e1Y + e1Height);
+
+        // add second ellipse
+        window.comboBox("selectionInteractionCombo").selectItem("Add");
+        int e2X = 400;
+        int e2Y = 200;
+        int e2Width = 100;
+        int e2Height = 100;
+        moveTo(e2X, e2Y);
+        dragTo(e2X + e2Width, e2Y + e2Height);
+
+        Composition comp = ImageComponents.getActiveCompOrNull();
+        Canvas canvas = comp.getCanvas();
+        int origCanvasWidth = canvas.getWidth();
+        int origCanvasHeight = canvas.getHeight();
         assert canvasSizeIs(origCanvasWidth, origCanvasHeight);
 
-        int selectionWidth = 300;
-        int selectionHeight = 200;
-
         assert hasSelection();
-        assert selectionBoundsAre(129, 80, selectionWidth, selectionHeight);
+        Selection selection = comp.getSelectionOrNull();
+        Rectangle selectionBounds = selection.getShapeBounds();
+        int selectionWidth = selectionBounds.width;
+        int selectionHeight = selectionBounds.height;
+
+        // the eclipses in screen coordinates
+        Ellipse2D e1 = new Ellipse2D.Double(e1X, e1Y, e1Width, e1Height);
+        Ellipse2D e2 = new Ellipse2D.Double(e2X, e2Y, e2Width, e2Height);
+        Area area = new Area(e1);
+        area.add(new Area(e2));
+        Rectangle areaBounds = area.getBounds();
+        // the x and y are relative tyo the screen, but width and height are absolute
+        int expectedSelectionWidth = areaBounds.width;
+        int expectedSelectionHeight = areaBounds.height;
+        assertEquals("selection width", expectedSelectionWidth, selectionWidth);
+        assertEquals("selection height", expectedSelectionHeight, selectionHeight);
 
         //window.button("eraserTraceButton").click();
         findButtonByText(window, "Stroke with Current Eraser").click();
 
-        // crop from this selection tool
+        // crop using the "Crop" button in the selection tool
         assert hasSelection();
         findButtonByText(window, "Crop").click();
         assert canvasSizeIs(selectionWidth, selectionHeight);
@@ -1052,12 +1098,6 @@ public class AssertJSwingTest {
     }
 
     private void testSelectionModifyMenu() {
-        window.toggleButton("Selection Tool Button").click();
-        randomAltClick();
-
-        move(200, 200);
-        drag(400, 400);
-
         runMenuCommand("Modify...");
         DialogFixture dialog = findDialogByTitle("Modify Selection");
 
@@ -1071,11 +1111,11 @@ public class AssertJSwingTest {
 
     private void testCropTool() {
         window.toggleButton("Crop Tool Button").click();
-        move(200, 200);
-        drag(400, 400);
-        drag(450, 450);
-        move(200, 200);
-        drag(150, 150);
+        moveTo(200, 200);
+        dragTo(400, 400);
+        dragTo(450, 450);
+        moveTo(200, 200);
+        dragTo(150, 150);
         sleep(1, SECONDS);
 
         keyboardNudge();
@@ -1099,10 +1139,10 @@ public class AssertJSwingTest {
     }
 
     private void testMoveToolImpl(boolean altDrag) {
-        move(400, 400);
+        moveTo(400, 400);
         click();
         if (altDrag) {
-            altDrag(300, 300);
+            altDragTo(300, 300);
         } else {
             ImageLayer layer = ImageComponents.getActiveIC().getComp().getActiveMaskOrImageLayer();
             int txx = layer.getTranslationX();
@@ -1110,7 +1150,7 @@ public class AssertJSwingTest {
             assert txx == 0;
             assert txy == 0;
 
-            drag(200, 300);
+            dragTo(200, 300);
 
             txx = layer.getTranslationX();
             txy = layer.getTranslationY();
@@ -1125,7 +1165,7 @@ public class AssertJSwingTest {
 
     private void testZoomTool() {
         window.toggleButton("Zoom Tool Button").click();
-        move(300, 300);
+        moveTo(300, 300);
 
         click();
         click();
@@ -1199,21 +1239,21 @@ public class AssertJSwingTest {
         window.pressKey(VK_SHIFT).pressKey(VK_RIGHT).releaseKey(VK_RIGHT).releaseKey(VK_SHIFT);
     }
 
-    private void move(int x, int y) {
+    private void moveTo(int x, int y) {
         robot.moveMouse(x, y);
     }
 
     private void moveRandom() {
         int x = 200 + random.nextInt(400);
         int y = 200 + random.nextInt(400);
-        move(x, y);
+        moveTo(x, y);
     }
 
     private void shiftMoveClickRandom() {
         window.pressKey(VK_SHIFT);
         int x = 200 + random.nextInt(400);
         int y = 200 + random.nextInt(400);
-        move(x, y);
+        moveTo(x, y);
         click();
         window.releaseKey(VK_SHIFT);
     }
@@ -1221,18 +1261,18 @@ public class AssertJSwingTest {
     private void dragRandom() {
         int x = 200 + random.nextInt(400);
         int y = 200 + random.nextInt(400);
-        drag(x, y);
+        dragTo(x, y);
     }
 
-    private void drag(int x, int y) {
+    private void dragTo(int x, int y) {
         robot.pressMouse(MouseButton.LEFT_BUTTON);
         robot.moveMouse(x, y);
         robot.releaseMouse(MouseButton.LEFT_BUTTON);
     }
 
-    private void altDrag(int x, int y) {
+    private void altDragTo(int x, int y) {
         window.pressKey(VK_ALT);
-        drag(x, y);
+        dragTo(x, y);
         window.releaseKey(VK_ALT);
     }
 

@@ -21,12 +21,14 @@ import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.ImageComponents;
+import pixelitor.menus.MenuAction;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Messages;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.test.DebugEventQueue;
 import pixelitor.utils.test.HistoryEvent;
 
+import javax.swing.*;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -44,6 +46,20 @@ public class History {
     static {
         setUndoLevels(AppPreferences.loadUndoLevels());
     }
+
+    public static final Action UNDO_ACTION = new MenuAction("Undo") {
+        @Override
+        public void onClick() {
+            History.undo();
+        }
+    };
+
+    public static final Action REDO_ACTION = new MenuAction("Redo") {
+        @Override
+        public void onClick() {
+            History.redo();
+        }
+    };
 
     private History() {
     }
@@ -103,7 +119,7 @@ public class History {
             numUndoneEdits--; // after redo we should be fadeable again
             undoManager.redo();
         } catch (CannotRedoException e) {
-            // TODO is a "No redo avaliable" scenario possible?
+            // TODO is a "No redo available" scenario possible?
             Messages.showException(e);
         }
     }
