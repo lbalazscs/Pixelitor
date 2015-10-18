@@ -63,7 +63,7 @@ public class TestHelper {
     public static Composition createEmptyComposition() {
         ImageDisplayStub imageDisplayStub = new ImageDisplayStub();
 
-        Composition comp = Composition.empty(sizeX, sizeY);
+        Composition comp = Composition.createEmpty(sizeX, sizeY);
         comp.setImageComponent(imageDisplayStub);
         comp.setName("Test");
 

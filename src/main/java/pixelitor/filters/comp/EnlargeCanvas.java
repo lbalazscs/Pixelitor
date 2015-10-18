@@ -4,7 +4,6 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
@@ -56,8 +55,7 @@ public class EnlargeCanvas implements CompAction {
         Selection selection = comp.getSelectionOrNull();
         if (selection != null && (north > 0 || west > 0)) {
             selection.transform(
-                    AffineTransform.getTranslateInstance(west, north),
-                    AddToHistory.NO);
+                    AffineTransform.getTranslateInstance(west, north));
         }
 
         MultiLayerEdit edit = new MultiLayerEdit(comp, editName, backup);

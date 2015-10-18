@@ -13,36 +13,6 @@ public class LayerGUI implements LayerUI {
     }
 
     @Override
-    public void setUserInteraction(boolean userInteraction) {
-        layerButton.setUserInteraction(userInteraction);
-    }
-
-    @Override
-    public void addMouseHandler(LayersMouseHandler mouseHandler) {
-        layerButton.addMouseHandler(mouseHandler);
-    }
-
-    @Override
-    public void removeMouseHandler(LayersMouseHandler mouseHandler) {
-        layerButton.removeMouseHandler(mouseHandler);
-    }
-
-    @Override
-    public int getStaticY() {
-        return layerButton.getStaticY();
-    }
-
-    @Override
-    public void setStaticY(int staticY) {
-        layerButton.setStaticY(staticY);
-    }
-
-    @Override
-    public void dragFinished(int newLayerIndex) {
-        layerButton.dragFinished(newLayerIndex);
-    }
-
-    @Override
     public Layer getLayer() {
         return layerButton.getLayer();
     }
@@ -50,11 +20,6 @@ public class LayerGUI implements LayerUI {
     @Override
     public String getLayerName() {
         return layerButton.getLayerName();
-    }
-
-    @Override
-    public boolean isNameEditing() {
-        return layerButton.isNameEditing();
     }
 
     @Override

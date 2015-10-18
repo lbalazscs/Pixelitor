@@ -21,7 +21,6 @@ import pixelitor.Composition;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.history.LinkLayerMaskEdit;
-import pixelitor.history.PixelitorEdit;
 import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
 
@@ -137,10 +136,7 @@ public class LayerMask extends ImageLayer {
 
     public void setLinked(boolean linked, AddToHistory addToHistory) {
         this.linked = linked;
-        if (addToHistory.isYes()) {
-            PixelitorEdit edit = new LinkLayerMaskEdit(comp, this);
-            History.addEdit(edit);
-        }
+        History.addEdit(addToHistory, () -> new LinkLayerMaskEdit(comp, this));
     }
 
     @Override

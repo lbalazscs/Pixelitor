@@ -21,7 +21,6 @@ import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.ImageDisplay;
-import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.history.SelectionChangeEdit;
 import pixelitor.menus.SelectionModifyType;
@@ -406,13 +405,15 @@ public class Selection {
         History.addEdit(edit);
     }
 
-    public void transform(AffineTransform at, AddToHistory addToHistory) {
+    public Shape transform(AffineTransform at) {
         Shape backupShape = currentSelectionShape;
         currentSelectionShape = at.createTransformedShape(currentSelectionShape);
-        if (addToHistory.isYes()) {
-            SelectionChangeEdit edit = new SelectionChangeEdit(ic.getComp(), backupShape, "Nudge Selection");
-            History.addEdit(edit);
-        }
+        return backupShape;
+    }
+
+    public void nudge(AffineTransform at) {
+        Shape backupShape = transform(at);
+        History.addEdit(new SelectionChangeEdit(ic.getComp(), backupShape, "Nudge Selection"));
     }
 
     public State getState() {

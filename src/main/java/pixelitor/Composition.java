@@ -39,7 +39,6 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
 import pixelitor.layers.LayerMask;
-import pixelitor.layers.LayerUI;
 import pixelitor.menus.SelectionActions;
 import pixelitor.selection.IgnoreSelection;
 import pixelitor.selection.Selection;
@@ -118,7 +117,7 @@ public class Composition implements Serializable {
         } else if (name != null) {
             comp.setName(name);
         } else {
-            // of of the file and name arguments must be set to non-null
+            // one of the file and name arguments must be given
             throw new IllegalArgumentException("no name could be set");
         }
         return comp;
@@ -127,7 +126,7 @@ public class Composition implements Serializable {
     /**
      * Creates an empty composition (no layers, no name)
      */
-    public static Composition empty(int width, int height) {
+    public static Composition createEmpty(int width, int height) {
         Canvas canvas = new Canvas(width, height);
         Composition comp = new Composition(canvas);
         return comp;
@@ -154,15 +153,12 @@ public class Composition implements Serializable {
             Layer oldLayer = activeLayer;
             activeLayer = newActiveLayer;
 
-            LayerUI layerUI = activeLayer.getUI();
-            layerUI.setSelected(true);
-
+            // notify UI
+            activeLayer.activateUI();
             AppLogic.activeLayerChanged(newActiveLayer);
 
-            if (addToHistory.isYes()) {
-                LayerSelectionChangeEdit edit = new LayerSelectionChangeEdit(this, oldLayer, newActiveLayer);
-                History.addEdit(edit);
-            }
+            // notify history
+            History.addEdit(addToHistory, () -> new LayerSelectionChangeEdit(this, oldLayer, newActiveLayer));
         }
         assert checkInvariant();
     }
@@ -220,10 +216,7 @@ public class Composition implements Serializable {
         setActiveLayer(newLayer, AddToHistory.NO);
         ic.addLayerToGUI(newLayer, newLayerIndex);
 
-        if (addToHistory.isYes()) {
-            NewLayerEdit newLayerEdit = new NewLayerEdit(this, newLayer, activeLayerBefore);
-            History.addEdit(newLayerEdit);
-        }
+        History.addEdit(addToHistory, () -> new NewLayerEdit(this, newLayer, activeLayerBefore));
 
         if (updateHistogram) {
             imageChanged(FULL); // if the histogram is updated, a repaint is also necessary
@@ -361,8 +354,8 @@ public class Composition implements Serializable {
         return name;
     }
 
-    public void startMovement(boolean makeDuplicateLayer) {
-        if (makeDuplicateLayer) {
+    public void startMovement(boolean onDuplicateLayer) {
+        if (onDuplicateLayer) {
             duplicateLayer();
         }
 
@@ -495,10 +488,7 @@ public class Composition implements Serializable {
         imageChanged(FULL);
         AppLogic.layerOrderChanged(this);
 
-        if (addHistory.isYes()) {
-            LayerOrderChangeEdit edit = new LayerOrderChangeEdit(this, oldIndex, newIndex);
-            History.addEdit(edit);
-        }
+        History.addEdit(addHistory, () -> new LayerOrderChangeEdit(this, oldIndex, newIndex));
     }
 
     public void moveLayerSelectionUp() {
@@ -649,10 +639,7 @@ public class Composition implements Serializable {
 
         int layerIndex = layerList.indexOf(layerToBeRemoved);
 
-        if (addToHistory.isYes()) {
-            DeleteLayerEdit newLayerEdit = new DeleteLayerEdit(this, layerToBeRemoved, layerIndex);
-            History.addEdit(newLayerEdit);
-        }
+        History.addEdit(addToHistory, () -> new DeleteLayerEdit(this, layerToBeRemoved, layerIndex));
 
         layerList.remove(layerToBeRemoved);
 

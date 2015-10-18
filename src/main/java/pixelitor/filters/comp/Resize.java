@@ -2,7 +2,6 @@ package pixelitor.filters.comp;
 
 import pixelitor.AppLogic;
 import pixelitor.Composition;
-import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
@@ -62,7 +61,7 @@ public class Resize implements CompAction {
             double sx = ((double) targetWidth) / actualWidth;
             double sy = ((double) targetHeight) / actualHeight;
             AffineTransform tx = AffineTransform.getScaleInstance(sx, sy);
-            selection.transform(tx, AddToHistory.NO);
+            selection.transform(tx);
         }
 
         int nrLayers = comp.getNrLayers();

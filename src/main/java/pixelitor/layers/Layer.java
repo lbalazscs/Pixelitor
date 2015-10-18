@@ -110,10 +110,7 @@ public abstract class Layer implements Serializable {
         comp.setDirty(true);
         ui.setOpenEye(newVisibility);
 
-        if (addToHistory.isYes()) {
-            LayerVisibilityChangeEdit edit = new LayerVisibilityChangeEdit(comp, this, newVisibility);
-            History.addEdit(edit);
-        }
+        History.addEdit(addToHistory, () -> new LayerVisibilityChangeEdit(comp, this, newVisibility));
     }
 
     public LayerUI getUI() {
@@ -178,10 +175,7 @@ public abstract class Layer implements Serializable {
             return;
         }
 
-        if (addToHistory.isYes()) {
-            LayerOpacityEdit edit = new LayerOpacityEdit(this, opacity);
-            History.addEdit(edit);
-        }
+        History.addEdit(addToHistory, () -> new LayerOpacityEdit(this, opacity));
 
         this.opacity = newOpacity;
 
@@ -194,10 +188,7 @@ public abstract class Layer implements Serializable {
     }
 
     public void setBlendingMode(BlendingMode mode, UpdateGUI updateGUI, AddToHistory addToHistory, boolean updateImage) {
-        if (addToHistory.isYes()) {
-            LayerBlendingEdit edit = new LayerBlendingEdit(this, blendingMode);
-            History.addEdit(edit);
-        }
+        History.addEdit(addToHistory, () -> new LayerBlendingEdit(this, blendingMode));
 
         this.blendingMode = mode;
         if (updateGUI.isYes()) {
@@ -219,10 +210,7 @@ public abstract class Layer implements Serializable {
 
         ui.changeNameProgrammatically(newName);
 
-        if (addToHistory.isYes()) {
-            LayerRenameEdit edit = new LayerRenameEdit(this, previousName, name);
-            History.addEdit(edit);
-        }
+        History.addEdit(addToHistory, () -> new LayerRenameEdit(this, previousName, name));
     }
 
     public String getName() {
@@ -327,10 +315,7 @@ public abstract class Layer implements Serializable {
 
         comp.imageChanged(FULL);
 
-        if (addToHistory.isYes()) {
-            DeleteLayerMaskEdit edit = new DeleteLayerMaskEdit(comp, this, oldMask);
-            History.addEdit(edit);
-        }
+        History.addEdit(addToHistory, () -> new DeleteLayerMaskEdit(comp, this, oldMask));
 
         AppLogic.maskChanged(this);
         ui.deleteMaskIconLabel();
@@ -534,10 +519,7 @@ public abstract class Layer implements Serializable {
         comp.imageChanged(FULL);
         mask.updateIconImage();
 
-        if (addToHistory.isYes()) {
-            PixelitorEdit edit = new EnableLayerMaskEdit(comp, this);
-            History.addEdit(edit);
-        }
+        History.addEdit(addToHistory, () -> new EnableLayerMaskEdit(comp, this));
     }
 
     public boolean useMask() {
@@ -559,5 +541,9 @@ public abstract class Layer implements Serializable {
         sb.append(", isAdjustment=").append(isAdjustment);
         sb.append('}');
         return sb.toString();
+    }
+
+    public void activateUI() {
+        ui.setSelected(true);
     }
 }

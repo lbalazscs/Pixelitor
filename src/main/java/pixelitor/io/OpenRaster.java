@@ -150,27 +150,27 @@ public class OpenRaster {
         }
 
         Document doc = loadXMLFromString(stackXML);
-        Element documentElement = doc.getDocumentElement();
-        documentElement.normalize();
-        String documentElementNodeName = documentElement.getNodeName();
+        Element docElement = doc.getDocumentElement();
+        docElement.normalize();
+        String documentElementNodeName = docElement.getNodeName();
         if(!documentElementNodeName.equals("image")) {
             throw new IllegalStateException(String.format("stack.xml root element is '%s', expected: 'image'",
                     documentElementNodeName));
         }
 
-        String w = documentElement.getAttribute("w");
-        int compositionWidth = Integer.parseInt(w);
-        String h = documentElement.getAttribute("h");
-        int compositionHeight = Integer.parseInt(h);
+        String w = docElement.getAttribute("w");
+        int compWidth = Integer.parseInt(w);
+        String h = docElement.getAttribute("h");
+        int compHeight = Integer.parseInt(h);
 
         if(DEBUG) {
-            System.out.println(String.format("OpenRaster::readOpenRaster: w = '%s', h = '%s', compositionWidth = %d, compositionHeight = %d", w, h, compositionWidth, compositionHeight));
+            System.out.println(String.format("OpenRaster::readOpenRaster: w = '%s', h = '%s', compWidth = %d, compHeight = %d", w, h, compWidth, compHeight));
         }
 
-        Composition comp = Composition.empty(compositionWidth, compositionHeight);
+        Composition comp = Composition.createEmpty(compWidth, compHeight);
         comp.setFile(file);
 
-        NodeList layers = documentElement.getElementsByTagName("layer");
+        NodeList layers = docElement.getElementsByTagName("layer");
         for (int i = layers.getLength() - 1; i >= 0; i--) { // stack.xml contains layers in reverse order
             Node node = layers.item(i);
             Element element = (Element) node;
@@ -188,9 +188,9 @@ public class OpenRaster {
             image = ImageUtils.toCompatibleImage(image);
 
             if(DEBUG) {
-                int imageWidth = image.getWidth();
-                int imageHeight = image.getHeight();
-                System.out.println("OpenRaster::readOpenRaster: imageWidth = " + imageWidth + ", imageHeight = " + imageHeight);
+                int imgWidth = image.getWidth();
+                int imgHeight = image.getHeight();
+                System.out.println("OpenRaster::readOpenRaster: imgWidth = " + imgWidth + ", imgHeight = " + imgHeight);
 //                Utils.debugImage(image, layerImageSource);
             }
 
@@ -211,13 +211,13 @@ public class OpenRaster {
             layer.setBlendingMode(blendingMode, UpdateGUI.NO, AddToHistory.NO, false);
             float opacity = Utils.parseFloat(layerOpacity, 1.0f);
             layer.setOpacity(opacity, UpdateGUI.NO, AddToHistory.NO, false);
-            int translationX = Utils.parseInt(layerX, 0);
-            int translationY = Utils.parseInt(layerY, 0);
+            int tX = Utils.parseInt(layerX, 0);
+            int tY = Utils.parseInt(layerY, 0);
             // TODO assuming that there is no layer mask
-            layer.setTranslation(translationX, translationY);
+            layer.setTranslation(tX, tY);
 
             if(DEBUG) {
-                System.out.println(String.format("OpenRaster::readOpenRaster: opacity = %.2f, translationX = %d, translationY = %d", opacity, translationX, translationY));
+                System.out.println(String.format("OpenRaster::readOpenRaster: opacity = %.2f, tX = %d, tY = %d", opacity, tX, tY));
             }
 
             comp.addLayerNoGUI(layer);

@@ -34,6 +34,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEditSupport;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * Static methods for managing history and undo/redo for all open images
@@ -69,6 +70,12 @@ public class History {
      */
     public static void notifyMenus(PixelitorEdit edit) {
         undoableEditSupport.postEdit(edit);
+    }
+
+    public static void addEdit(AddToHistory addToHistory, Supplier<PixelitorEdit> supplier) {
+        if (addToHistory.isYes()) {
+            addEdit(supplier.get());
+        }
     }
 
     public static void addEdit(PixelitorEdit edit) {

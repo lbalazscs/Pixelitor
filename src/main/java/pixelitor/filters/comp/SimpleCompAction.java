@@ -21,7 +21,6 @@ import pixelitor.AppLogic;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
-import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
@@ -62,7 +61,7 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
 
         if (comp.hasSelection()) {
             Selection selection = comp.getSelectionOrNull();
-            selection.transform(canvasTX, AddToHistory.NO);
+            selection.transform(canvasTX);
         }
 
         int nrLayers = comp.getNrLayers();

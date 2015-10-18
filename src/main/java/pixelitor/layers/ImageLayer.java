@@ -995,10 +995,7 @@ public class ImageLayer extends ContentLayer {
         mask.applyToImage(image);
         deleteMask(AddToHistory.NO, true);
 
-        if (addToHistory.isYes()) {
-            ApplyLayerMaskEdit edit = new ApplyLayerMaskEdit(comp, this, oldMask, backupImage);
-            History.addEdit(edit);
-        }
+        History.addEdit(addToHistory, () -> new ApplyLayerMaskEdit(comp, this, oldMask, backupImage));
 
         updateIconImage();
     }

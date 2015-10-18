@@ -3,23 +3,9 @@ package pixelitor.layers;
 public interface LayerUI {
     void setOpenEye(boolean newVisibility);
 
-    void setUserInteraction(boolean userInteraction);
-
-    void addMouseHandler(LayersMouseHandler mouseHandler);
-
-    void removeMouseHandler(LayersMouseHandler mouseHandler);
-
-    int getStaticY();
-
-    void setStaticY(int staticY);
-
-    void dragFinished(int newLayerIndex);
-
     Layer getLayer();
 
     String getLayerName();
-
-    boolean isNameEditing();
 
     boolean isVisibilityChecked();
 
