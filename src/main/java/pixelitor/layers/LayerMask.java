@@ -136,6 +136,7 @@ public class LayerMask extends ImageLayer {
 
     public void setLinked(boolean linked, AddToHistory addToHistory) {
         this.linked = linked;
+        notifyLayerChangeObservers();
         History.addEdit(addToHistory, () -> new LinkLayerMaskEdit(comp, this));
     }
 

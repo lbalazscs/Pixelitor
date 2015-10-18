@@ -19,7 +19,6 @@ package pixelitor.menus.view;
 
 import pixelitor.menus.NamedAction;
 
-import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /**
@@ -38,10 +37,6 @@ public abstract class ShowHideAction extends NamedAction {
         } else {
             setName(showName);
         }
-    }
-
-    public String getName() {
-        return (String) getValue(AbstractAction.NAME);
     }
 
     @Override

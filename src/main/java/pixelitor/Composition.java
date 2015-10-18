@@ -145,7 +145,7 @@ public class Composition implements Serializable {
 
     public void addNewEmptyLayer(String name, boolean bellowActive) {
         ImageLayer newLayer = new ImageLayer(this, name);
-        addLayer(newLayer, AddToHistory.YES, false, bellowActive);
+        addLayer(newLayer, AddToHistory.YES, "New Empty Layer", false, bellowActive);
     }
 
     public void setActiveLayer(Layer newActiveLayer, AddToHistory addToHistory) {
@@ -188,7 +188,8 @@ public class Composition implements Serializable {
         // this method is used when adding the base layer
     }
 
-    public void addLayer(Layer newLayer, AddToHistory addToHistory, boolean updateHistogram, boolean bellowActive) {
+    public void addLayer(Layer newLayer, AddToHistory addToHistory, String historyName,
+                         boolean updateHistogram, boolean bellowActive) {
         int activeLayerIndex = layerList.indexOf(activeLayer);
         int newLayerIndex;
 
@@ -203,20 +204,20 @@ public class Composition implements Serializable {
             }
         }
 
-        addLayer(newLayer, addToHistory, updateHistogram, newLayerIndex);
+        addLayer(newLayer, addToHistory, historyName, updateHistogram, newLayerIndex);
     }
 
     /**
      * Adds the specified layer at the specified layer position
      */
-    public void addLayer(Layer newLayer, AddToHistory addToHistory, boolean updateHistogram, int newLayerIndex) {
+    public void addLayer(Layer newLayer, AddToHistory addToHistory, String historyName, boolean updateHistogram, int newLayerIndex) {
         Layer activeLayerBefore = activeLayer;
 
         layerList.add(newLayerIndex, newLayer);
         setActiveLayer(newLayer, AddToHistory.NO);
         ic.addLayerToGUI(newLayer, newLayerIndex);
 
-        History.addEdit(addToHistory, () -> new NewLayerEdit(this, newLayer, activeLayerBefore));
+        History.addEdit(addToHistory, () -> new NewLayerEdit(this, newLayer, activeLayerBefore, historyName));
 
         if (updateHistogram) {
             imageChanged(FULL); // if the histogram is updated, a repaint is also necessary
@@ -228,7 +229,7 @@ public class Composition implements Serializable {
 
     public void duplicateLayer() {
         Layer duplicate = activeLayer.duplicate();
-        addLayer(duplicate, AddToHistory.YES, true, false);
+        addLayer(duplicate, AddToHistory.YES, "Duplicate Layer", true, false);
         assert checkInvariant();
     }
 
@@ -398,10 +399,10 @@ public class Composition implements Serializable {
         BufferedImage bi = getCompositeImage();
 
         Layer flattenedLayer = new ImageLayer(this, bi, "flattened", null);
-        addLayer(flattenedLayer, AddToHistory.NO, false, nrLayers); // add to the top
+        addLayer(flattenedLayer, AddToHistory.NO, null, false, nrLayers); // add to the top
 
-        for (int i = nrLayers - 1; i >= 0; i--) { // remove the rest
-            removeLayer(i);
+        for (int i = nrLayers - 1; i >= 0; i--) { // delete the rest
+            deleteLayer(i);
         }
         if (updateGUI.isYes()) {
             AppLogic.activeCompLayerCountChanged(this, 1);
@@ -427,7 +428,7 @@ public class Composition implements Serializable {
                     imageLayerBellow.updateIconImage();
                     Layer mergedLayer = activeLayer;
 
-                    removeActiveLayer(updateGUI, AddToHistory.NO);
+                    deleteActiveLayer(updateGUI, AddToHistory.NO);
 
                     PixelitorEdit edit = new CompoundEdit(this, "Merge Down",
                             new ImageEdit(this, "", imageLayerBellow, backupImage, IgnoreSelection.YES, false),
@@ -623,36 +624,36 @@ public class Composition implements Serializable {
         }
     }
 
-    private void removeLayer(int layerIndex) {
+    private void deleteLayer(int layerIndex) {
         Layer layer = layerList.get(layerIndex);
-        removeLayer(layer, AddToHistory.YES, UpdateGUI.YES);
+        deleteLayer(layer, AddToHistory.YES, UpdateGUI.YES);
     }
 
-    public void removeActiveLayer(UpdateGUI updateGUI, AddToHistory addToHistory) {
-        removeLayer(activeLayer, addToHistory, updateGUI);
+    public void deleteActiveLayer(UpdateGUI updateGUI, AddToHistory addToHistory) {
+        deleteLayer(activeLayer, addToHistory, updateGUI);
     }
 
-    public void removeLayer(Layer layerToBeRemoved, AddToHistory addToHistory, UpdateGUI updateGUI) {
+    public void deleteLayer(Layer layerToBeDeleted, AddToHistory addToHistory, UpdateGUI updateGUI) {
         if (layerList.size() < 2) {
             throw new IllegalStateException("there are " + layerList.size() + " layers");
         }
 
-        int layerIndex = layerList.indexOf(layerToBeRemoved);
+        int layerIndex = layerList.indexOf(layerToBeDeleted);
 
-        History.addEdit(addToHistory, () -> new DeleteLayerEdit(this, layerToBeRemoved, layerIndex));
+        History.addEdit(addToHistory, () -> new DeleteLayerEdit(this, layerToBeDeleted, layerIndex));
 
-        layerList.remove(layerToBeRemoved);
+        layerList.remove(layerToBeDeleted);
 
-        if (layerToBeRemoved == activeLayer) {
+        if (layerToBeDeleted == activeLayer) {
             if (layerIndex > 0) {
                 setActiveLayer(layerList.get(layerIndex - 1), AddToHistory.NO);
-            } else {  // removed the fist layer, set the new first layer as active
+            } else {  // deleted the fist layer, set the new first layer as active
                 setActiveLayer(layerList.get(0), AddToHistory.NO);
             }
         }
 
         if(updateGUI.isYes()) {
-            LayerButton button = layerToBeRemoved.getUI().getLayerButton();
+            LayerButton button = layerToBeDeleted.getUI().getLayerButton();
             ic.deleteLayerButton(button);
 
             if (isActiveComp()) {
@@ -672,7 +673,7 @@ public class Composition implements Serializable {
 
     public void addNewLayerFromComposite(String newLayerName) {
         ImageLayer newLayer = new ImageLayer(this, getCompositeImage(), newLayerName, null);
-        addLayer(newLayer, AddToHistory.YES, false, false);
+        addLayer(newLayer, AddToHistory.YES, "New Layer from Composite", false, false);
     }
 
     public ImageDisplay getIC() {

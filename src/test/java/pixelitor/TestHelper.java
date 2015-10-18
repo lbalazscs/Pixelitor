@@ -42,9 +42,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class TestHelper {
-    public static final int sizeX = 20;
-    public static final int sizeY = 10;
+    private static final int TEST_WIDTH = 20;
+    private static final int TEST_HEIGHT = 10;
     private static final Component eventSource = new JPanel();
+
+    private TestHelper() {
+    }
 
     public static ImageLayer createImageLayer(String layerName, Composition comp) {
         BufferedImage image = createImage();
@@ -63,7 +66,7 @@ public class TestHelper {
     public static Composition createEmptyComposition() {
         ImageDisplayStub imageDisplayStub = new ImageDisplayStub();
 
-        Composition comp = Composition.createEmpty(sizeX, sizeY);
+        Composition comp = Composition.createEmpty(TEST_WIDTH, TEST_HEIGHT);
         comp.setImageComponent(imageDisplayStub);
         comp.setName("Test");
 
@@ -96,7 +99,7 @@ public class TestHelper {
     }
 
     public static BufferedImage createImage() {
-        return new BufferedImage(sizeX, sizeY, BufferedImage.TYPE_INT_ARGB);
+        return new BufferedImage(TEST_WIDTH, TEST_HEIGHT, BufferedImage.TYPE_INT_ARGB);
     }
 
     public static Graphics2D createGraphics() {

@@ -35,7 +35,7 @@ public class LayerMaskActions {
             menu = new JPopupMenu();
             menu.add(new JMenuItem(new DeleteMaskAction(layer)));
             menu.add(new JMenuItem(new ApplyMaskAction(layer)));
-            menu.add(new JMenuItem(new EnableDisableAnyMaskAction(layer)));
+            menu.add(new JMenuItem(new EnableDisableMaskAction(layer)));
             menu.add(new JMenuItem(new LinkUnlinkMaskAction(layer)));
         }
 
@@ -106,42 +106,62 @@ public class LayerMaskActions {
         }
     }
 
-    private static class EnableDisableAnyMaskAction extends NamedAction {
+    static class EnableDisableMaskAction extends NamedAction implements LayerChangeListener {
         private final Layer layer;
 
-        public EnableDisableAnyMaskAction(Layer layer) {
+        public EnableDisableMaskAction(Layer layer) {
             super(calcName(layer));
             this.layer = layer;
+            layer.addLayerChangeObserver(this);
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
             layer.setMaskEnabled(!layer.isMaskEnabled(), AddToHistory.YES);
+            refreshName();
+        }
+
+        private void refreshName() {
             setName(calcName(layer));
         }
 
         private static String calcName(Layer layer) {
             return layer.isMaskEnabled() ? "Disable" : "Enable";
         }
+
+        @Override
+        public void layerStateChanged() {
+            refreshName();
+        }
     }
 
-    private static class LinkUnlinkMaskAction extends NamedAction {
+    static class LinkUnlinkMaskAction extends NamedAction implements LayerChangeListener {
         private final Layer layer;
 
         public LinkUnlinkMaskAction(Layer layer) {
             super(calcName(layer));
             this.layer = layer;
+            layer.getMask().addLayerChangeObserver(this);
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
             LayerMask mask = layer.getMask();
             mask.setLinked(!mask.isLinked(), AddToHistory.YES);
+            refreshName();
+        }
+
+        private void refreshName() {
             setName(calcName(layer));
         }
 
         private static String calcName(Layer layer) {
             return layer.getMask().isLinked() ? "Unlink" : "Link";
+        }
+
+        @Override
+        public void layerStateChanged() {
+            refreshName();
         }
     }
 }

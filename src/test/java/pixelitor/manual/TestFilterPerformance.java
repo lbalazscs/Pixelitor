@@ -28,6 +28,9 @@ import java.io.IOException;
 public class TestFilterPerformance {
     private static final int SLEEP_SECONDS_BETWEEN_TESTS = 2;
 
+    private TestFilterPerformance() {
+    }
+
     public static void main(String[] args) throws IOException {
         File imgFile = new File("C:\\Users\\Laci\\Desktop\\tmp\\nagy.jpg");
         BufferedImage bigImage = ImageIO.read(imgFile);

@@ -71,6 +71,7 @@ public class TextLayerTest {
 
         checkThereIsOnlyOneLayerOfType(ImageLayer.class);
         History.assertNumEditsIs(1);
+        History.assertLastEditNameIs("Text Layer Rasterize");
 
         History.undo();
         checkThereIsOnlyOneLayerOfType(TextLayer.class);
@@ -107,6 +108,7 @@ public class TextLayerTest {
 
         assertThat(layer.getName()).isEqualTo(newText);
         History.assertNumEditsIs(1);
+        History.assertLastEditNameIs("Text Layer Change");
 
         History.undo();
         assertThat(layer.getName()).isEqualTo(oldText);

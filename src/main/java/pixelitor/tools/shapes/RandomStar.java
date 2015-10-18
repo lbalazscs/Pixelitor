@@ -77,7 +77,7 @@ public class RandomStar implements Shape {
         for (int i = 1; i < radii.length; i++) {
             radii[i] = (int) (maxRadius * radiusRatios[i]);
         }
-        double heightToWidthRatio = height / (double)width;
+        double heightToWidthRatio = height / width;
 
         for (int i = 0; i < numPoints; i++) {
             double angle = initialAngle + i * unitAngle;

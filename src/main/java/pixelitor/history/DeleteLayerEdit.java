@@ -41,7 +41,7 @@ public class DeleteLayerEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        comp.addLayer(layer, AddToHistory.NO, true, layerIndex);
+        comp.addLayer(layer, AddToHistory.NO, null, true, layerIndex);
 
         History.notifyMenus(this);
     }
@@ -50,7 +50,7 @@ public class DeleteLayerEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        comp.removeLayer(layer, AddToHistory.NO, UpdateGUI.YES);
+        comp.deleteLayer(layer, AddToHistory.NO, UpdateGUI.YES);
         History.notifyMenus(this);
     }
 

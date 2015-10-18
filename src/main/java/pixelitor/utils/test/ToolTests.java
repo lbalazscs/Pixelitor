@@ -172,7 +172,9 @@ public class ToolTests {
                     }
 
                     comp.repaint();
-
+                    if (progressMonitor.isCanceled()) {
+                        break;
+                    }
                 }
                 progressMonitor.close();
             };

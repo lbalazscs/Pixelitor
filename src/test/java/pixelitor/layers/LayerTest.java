@@ -105,6 +105,7 @@ public class LayerTest {
         assertThat(layer.isVisible()).isFalse();
         assertThat(layerUI.isVisibilityChecked()).isFalse();
         History.assertNumEditsIs(1);
+        History.assertLastEditNameIs("Hide Layer");
 
         History.undo();
         assertThat(layer.isVisible()).isTrue();
@@ -138,6 +139,7 @@ public class LayerTest {
 
         assertThat(layer.getOpacity()).isEqualTo(newValue);
         History.assertNumEditsIs(1);
+        History.assertLastEditNameIs("Layer Opacity Change");
         LayerOpacityEdit lastEdit = (LayerOpacityEdit) History.getLastEdit();
         assertSame(layer, lastEdit.getLayer());
 
@@ -157,6 +159,7 @@ public class LayerTest {
 
         assertSame(BlendingMode.DIFFERENCE, layer.getBlendingMode());
         History.assertNumEditsIs(1);
+        History.assertLastEditNameIs("Blending Mode Change");
 
         History.undo();
         assertSame(BlendingMode.NORMAL, layer.getBlendingMode());
@@ -174,6 +177,7 @@ public class LayerTest {
         assertThat(layer.getName()).isEqualTo("newName");
         assertThat(layer.getUI().getLayerName()).isEqualTo("newName");
         History.assertNumEditsIs(1);
+        History.assertLastEditNameIs("Rename Layer to newName");
 
         History.undo();
         assertThat(layer.getName()).isEqualTo("layer 1");
@@ -199,6 +203,7 @@ public class LayerTest {
 
         assertThat(layer2.isActive()).isTrue();
         History.assertNumEditsIs(1);
+        History.assertLastEditNameIs("Layer Selection Change");
 
         History.undo();
         assertThat(layer2.isActive()).isFalse();
@@ -242,6 +247,7 @@ public class LayerTest {
 
             assertThat(layer.hasMask()).isTrue();
             History.assertNumEditsIs(1);
+            History.assertLastEditNameIs("Add Layer Mask");
 
             History.undo();
             assertThat(layer.hasMask()).isFalse();
@@ -259,6 +265,7 @@ public class LayerTest {
             layer.deleteMask(AddToHistory.YES, false);
             assertThat(layer.hasMask()).isFalse();
             History.assertNumEditsIs(1);
+            History.assertLastEditNameIs("Delete Layer Mask");
 
             History.undo();
             assertThat(layer.hasMask()).isTrue();
@@ -273,17 +280,23 @@ public class LayerTest {
         if (withMask == WithMask.YES) {
             assertThat(layer.hasMask()).isTrue();
             assertThat(layer.isMaskEnabled()).isTrue();
+            LayerMaskActions.EnableDisableMaskAction enableAction = new LayerMaskActions.EnableDisableMaskAction(layer);
+            assertThat(enableAction.getName()).isEqualTo("Disable");
 
             layer.setMaskEnabled(false, AddToHistory.YES);
 
             assertThat(layer.isMaskEnabled()).isFalse();
+            assertThat(enableAction.getName()).isEqualTo("Enable");
             History.assertNumEditsIs(1);
+            History.assertLastEditNameIs("Disable Layer Mask");
 
             History.undo();
             assertThat(layer.isMaskEnabled()).isTrue();
+            assertThat(enableAction.getName()).isEqualTo("Disable");
 
             History.redo();
             assertThat(layer.isMaskEnabled()).isFalse();
+            assertThat(enableAction.getName()).isEqualTo("Enable");
         }
     }
 
@@ -293,17 +306,23 @@ public class LayerTest {
             assertThat(layer.hasMask()).isTrue();
             LayerMask mask = layer.getMask();
             assertThat(mask.isLinked()).isTrue();
+            LayerMaskActions.LinkUnlinkMaskAction linkAction = new LayerMaskActions.LinkUnlinkMaskAction(layer);
+            assertThat(linkAction.getName()).isEqualTo("Unlink");
 
             mask.setLinked(false, AddToHistory.YES);
 
             assertThat(mask.isLinked()).isFalse();
+            assertThat(linkAction.getName()).isEqualTo("Link");
             History.assertNumEditsIs(1);
+            History.assertLastEditNameIs("Unlink Layer Mask");
 
             History.undo();
             assertThat(mask.isLinked()).isTrue();
+            assertThat(linkAction.getName()).isEqualTo("Unlink");
 
             History.redo();
             assertThat(mask.isLinked()).isFalse();
+            assertThat(linkAction.getName()).isEqualTo("Link");
         }
     }
 }

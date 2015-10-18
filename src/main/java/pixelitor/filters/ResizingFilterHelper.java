@@ -12,7 +12,7 @@ import java.awt.image.BufferedImageOp;
  * For some filters it makes sense to apply them to a
  * downscaled image, and then scale the image back.
  */
-public class ResizingHelper {
+public class ResizingFilterHelper {
     public static final int BILINEAR_FAST = 0;
     public static final int BILINEAR12 = 1;
     public static final int BILINEAR11 = 2;
@@ -22,7 +22,7 @@ public class ResizingHelper {
     private final int srcHeight;
     private double resizeFactor = 1.0;
 
-    public ResizingHelper(BufferedImage src) {
+    public ResizingFilterHelper(BufferedImage src) {
         this.src = src;
         srcWidth = src.getWidth();
         srcHeight = src.getHeight();
@@ -93,8 +93,8 @@ public class ResizingHelper {
 
     public static IntChoiceParam createQualityParam() {
         return new IntChoiceParam("Detail Quality", new IntChoiceParam.Value[]{
-                new IntChoiceParam.Value("Faster", ResizingHelper.BILINEAR_FAST),
-                new IntChoiceParam.Value("Better", ResizingHelper.BILINEAR11),
+                new IntChoiceParam.Value("Faster", BILINEAR_FAST),
+                new IntChoiceParam.Value("Better", BILINEAR11),
         }, true);
     }
 }

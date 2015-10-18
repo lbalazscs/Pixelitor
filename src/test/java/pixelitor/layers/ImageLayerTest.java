@@ -277,6 +277,7 @@ public class ImageLayerTest {
             assertThat(layer.hasMask()).isFalse();
 
             History.assertNumEditsIs(1);
+            History.assertLastEditNameIs("Apply Layer Mask");
 
             History.undo();
             assertThat(layer.hasMask()).isTrue();

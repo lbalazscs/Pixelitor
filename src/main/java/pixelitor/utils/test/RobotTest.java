@@ -892,7 +892,7 @@ public class RobotTest {
         Composition comp = ImageComponents.getActiveComp().get();
         TextLayer textLayer = new TextLayer(comp);
         textLayer.setSettings(TextSettings.createRandomSettings(rand));
-        comp.addLayer(textLayer, AddToHistory.NO, true, false);
+        comp.addLayer(textLayer, AddToHistory.NO, "New Random Text Layer", true, false);
     }
 
     private static void randomTextLayerRasterize() {
@@ -906,7 +906,7 @@ public class RobotTest {
     private static void randomNewAdjustmentLayer() {
         Composition comp = ImageComponents.getActiveComp().get();
         AdjustmentLayer adjustmentLayer = new AdjustmentLayer(comp, "Invert", new Invert());
-        comp.addLayer(adjustmentLayer, AddToHistory.YES, true, false);
+        comp.addLayer(adjustmentLayer, AddToHistory.YES, "New Random Adj Layer", true, false);
     }
 
     private static void randomSetLayerMaskEditMode() {

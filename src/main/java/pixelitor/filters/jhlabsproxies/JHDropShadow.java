@@ -19,7 +19,7 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.ShadowFilter;
 import pixelitor.filters.FilterWithParametrizedGUI;
-import pixelitor.filters.ResizingHelper;
+import pixelitor.filters.ResizingFilterHelper;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
@@ -27,6 +27,8 @@ import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
 
+import java.awt.AlphaComposite;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import static java.awt.Color.BLACK;
@@ -70,12 +72,19 @@ public class JHDropShadow extends FilterWithParametrizedGUI {
         filter.setShadowColor(color.getColor().getRGB());
         filter.setShadowOnly(shadowOnly.isChecked());
 
-        ResizingHelper r = new ResizingHelper(src);
+        ResizingFilterHelper r = new ResizingFilterHelper(src);
         if (r.shouldResize()) {
             double resizeFactor = r.getResizeFactor();
             filter.setDistance((float) (distance.getValueAsFloat() / resizeFactor));
             filter.setRadius((float) (softness.getValueAsFloat() / resizeFactor));
-            dest = r.invoke(ResizingHelper.BILINEAR_FAST, filter);
+            filter.setShadowOnly(true); // we only want to resize the shadow
+            dest = r.invoke(ResizingFilterHelper.BILINEAR_FAST, filter);
+            if (!shadowOnly.isChecked()) {
+                Graphics2D g = dest.createGraphics();
+                g.setComposite(AlphaComposite.SrcOver);
+                g.drawRenderedImage(src, null);
+                g.dispose();
+            }
         } else {
             // normal case, no resizing
             filter.setDistance(distance.getValueAsFloat());

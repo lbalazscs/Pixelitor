@@ -31,7 +31,7 @@ import static pixelitor.ImageComponents.getActiveLayer;
 /**
  * The GUI selector for the opacity and blending mode of the layers
  */
-public class LayerBlendingModePanel extends BlendingModePanel implements ImageSwitchListener, LayerChangeListener {
+public class LayerBlendingModePanel extends BlendingModePanel implements ImageSwitchListener, GlobalLayerChangeListener {
     private boolean userInteractionChange = true;
 
     public static final LayerBlendingModePanel INSTANCE = new LayerBlendingModePanel();

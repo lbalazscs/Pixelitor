@@ -41,7 +41,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(Parameterized.class)
 public class ContentLayerTest {
-    private Composition comp;
 
     @Parameter
     public Class layerClass;
@@ -63,7 +62,7 @@ public class ContentLayerTest {
 
     @Before
     public void setUp() {
-        comp = TestHelper.createEmptyComposition();
+        Composition comp = TestHelper.createEmptyComposition();
         layer = (ContentLayer) TestHelper.createLayerOfClass(layerClass, comp);
 
         comp.addLayerNoGUI(layer);

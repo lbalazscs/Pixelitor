@@ -141,6 +141,7 @@ public class MultiLayerEditTest {
 
         if (numLayers.canUndo()) {
             History.assertNumEditsIs(1);
+            History.assertLastEditNameIs("Enlarge Canvas");
 
             History.undo();
             checkOriginalState();
@@ -186,6 +187,7 @@ public class MultiLayerEditTest {
 
         if (numLayers.canUndo()) {
             History.assertNumEditsIs(1);
+            History.assertLastEditNameIs("Resize");
 
             History.undo();
             checkOriginalState();
@@ -229,6 +231,7 @@ public class MultiLayerEditTest {
 
         if (numLayers.canUndo()) {
             History.assertNumEditsIs(1);
+            History.assertLastEditNameIs("Rotate 90\u00B0 CW");
 
             History.undo();
             checkOriginalState();
@@ -246,6 +249,7 @@ public class MultiLayerEditTest {
 
         if (numLayers.canUndo()) {
             History.assertNumEditsIs(1);
+            History.assertLastEditNameIs("Rotate 180\u00B0");
 
             History.undo();
             checkOriginalState();
@@ -263,6 +267,7 @@ public class MultiLayerEditTest {
 
         if (numLayers.canUndo()) {
             History.assertNumEditsIs(1);
+            History.assertLastEditNameIs("Rotate 90\u00B0 CCW");
 
             History.undo();
             checkOriginalState();
@@ -352,6 +357,7 @@ public class MultiLayerEditTest {
 
         if (numLayers.canUndo()) {
             History.assertNumEditsIs(1);
+            History.assertLastEditNameIs("Flip Horizontal");
 
             History.undo();
             checkOriginalState();
@@ -370,6 +376,7 @@ public class MultiLayerEditTest {
 
         if (numLayers.canUndo()) {
             History.assertNumEditsIs(1);
+            History.assertLastEditNameIs("Flip Vertical");
 
             History.undo();
             checkOriginalState();
@@ -434,6 +441,7 @@ public class MultiLayerEditTest {
         // test undo with one layer
         if (numLayers.canUndo()) {
             History.assertNumEditsIs(1);
+            History.assertLastEditNameIs("Crop");
 
             History.undo();
             checkOriginalState();

@@ -188,15 +188,14 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         comp.imageChanged(HISTOGRAM);
     }
 
-    public void drawBrushStrokeProgrammatically(Composition comp, Point startingPoint, Point endPoint) {
-        int startX = startingPoint.x;
-        int startY = startingPoint.y;
-        int endX = endPoint.x;
-        int endY = endPoint.y;
+    public void drawBrushStrokeProgrammatically(Composition comp, Point start, Point end) {
+        // a subclass is supposed to set up the
+        // graphics before this super method is called
+        assert graphics != null;
 
-//        setupDrawingRadius();
-        drawTo(comp, startX, startY, false);
-        drawTo(comp, endX, endY, false);
+        brush.onDragStart(start.x, start.y);
+        brush.onNewMousePoint(end.x, end.y);
+
         finishBrushStroke(comp);
     }
 

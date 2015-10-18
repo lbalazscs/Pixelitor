@@ -101,7 +101,6 @@ public abstract class ContentLayer extends Layer {
         this.translationY = y;
     }
 
-    @SuppressWarnings("UnusedParameters")
     public abstract void flip(Flip.Direction direction, AffineTransform flipTx);
 
     public abstract void rotate(Rotate.SpecialAngle angle);

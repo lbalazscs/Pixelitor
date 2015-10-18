@@ -131,30 +131,43 @@ public final class ConsistencyChecks {
         return true;
     }
 
-    public static boolean imageCoversCanvasCheck(ImageLayer imageLayer) {
-        Composition comp = imageLayer.getComp();
-        BufferedImage bufferedImage = imageLayer.getImage();
+    public static boolean imageCoversCanvasCheck(ImageLayer layer) {
+        Composition comp = layer.getComp();
+        BufferedImage bufferedImage = layer.getImage();
 
-        int x = -imageLayer.getTranslationX();
+        int x = -layer.getTranslationX();
         int canvasWidth = comp.getCanvasWidth();
         int imageWidth = bufferedImage.getWidth();
         if (x + canvasWidth > imageWidth + 1) { // allow one pixel difference for rounding effects
-            throw new IllegalStateException("x = " + x + ", canvasWidth = " + canvasWidth
-                    + ", imageWidth = " + imageWidth + ", comp = " + comp.getName()
-                    + ", class = " + imageLayer.getClass().getSimpleName());
+            return throwImageDoesNotCoverCanvasException(layer);
         }
 
-        int y = -imageLayer.getTranslationY();
+        int y = -layer.getTranslationY();
         int canvasHeight = comp.getCanvasHeight();
         int imageHeight = bufferedImage.getHeight();
 
         if (y + canvasHeight > imageHeight + 1) {
-            throw new IllegalStateException("y = " + y + ", canvasHeight = " + canvasHeight
-                    + ", imageHeight = " + imageHeight + ", comp = " + comp.getName()
-                    + ", class = " + imageLayer.getClass().getSimpleName());
+            return throwImageDoesNotCoverCanvasException(layer);
         }
 
         return true;
+    }
+
+    private static boolean throwImageDoesNotCoverCanvasException(ImageLayer layer) {
+        Composition comp = layer.getComp();
+        BufferedImage bufferedImage = layer.getImage();
+        int canvasWidth = comp.getCanvasWidth();
+        int canvasHeight = comp.getCanvasHeight();
+        int imageWidth = bufferedImage.getWidth();
+        int imageHeight = bufferedImage.getHeight();
+        int tx = layer.getTranslationX();
+        int ty = layer.getTranslationY();
+        String className = layer.getClass().getSimpleName();
+        String msg = String.format("canvasWidth = %d, canvasHeight = %d, " +
+                        "imageWidth = %d, imageHeight = %d, tx = %d, ty = %d, class = %s",
+                canvasWidth, canvasHeight, imageWidth, imageHeight, tx, ty, className);
+
+        throw new IllegalStateException(msg);
     }
 
     public static boolean layerDeleteActionEnabledCheck() {

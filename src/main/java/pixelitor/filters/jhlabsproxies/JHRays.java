@@ -19,7 +19,7 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.composite.MiscComposite;
 import com.jhlabs.image.RaysFilter;
 import pixelitor.filters.FilterWithParametrizedGUI;
-import pixelitor.filters.ResizingHelper;
+import pixelitor.filters.ResizingFilterHelper;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ParamSet;
@@ -77,9 +77,9 @@ public class JHRays extends FilterWithParametrizedGUI {
         filter.setZoom(length.getValueAsPercentage());
 
         BufferedImage rays;
-        ResizingHelper r = new ResizingHelper(src);
+        ResizingFilterHelper r = new ResizingFilterHelper(src);
         if (r.shouldResize()) {
-            rays = r.invoke(ResizingHelper.BILINEAR_FAST, filter);
+            rays = r.invoke(ResizingFilterHelper.BILINEAR_FAST, filter);
         } else {
             // normal case, no resizing
             rays = filter.filter(src, dest);

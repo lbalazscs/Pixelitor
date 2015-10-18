@@ -96,11 +96,14 @@ public class MultiLayerEdit extends PixelitorEdit {
         if(imageEdit != null) {
             imageEdit.undo();
         }
-        if (canvasChangeEdit != null) {
-            canvasChangeEdit.undo();
-        }
         if (translationEdit != null) {
             translationEdit.undo();
+        }
+        // it is important to undo the canvas change edit
+        // after the image and translation edits because
+        // of the image covers canvas checks
+        if (canvasChangeEdit != null) {
+            canvasChangeEdit.undo();
         }
         if (selectionChangeEdit != null) {
             selectionChangeEdit.undo();
@@ -119,11 +122,14 @@ public class MultiLayerEdit extends PixelitorEdit {
         if(imageEdit != null) {
             imageEdit.redo();
         }
-        if (canvasChangeEdit != null) {
-            canvasChangeEdit.redo();
-        }
         if (translationEdit != null) {
             translationEdit.redo();
+        }
+        // it is important to redo the canvas change edit
+        // after the image and translation edits because
+        // of the image covers canvas checks
+        if (canvasChangeEdit != null) {
+            canvasChangeEdit.redo();
         }
         if (selectionChangeEdit != null) {
             selectionChangeEdit.redo();
@@ -151,11 +157,11 @@ public class MultiLayerEdit extends PixelitorEdit {
         if (imageEdit != null) {
             imageEdit.die();
         }
-        if (canvasChangeEdit != null) {
-            canvasChangeEdit.die();
-        }
         if (translationEdit != null) {
             translationEdit.die();
+        }
+        if (canvasChangeEdit != null) {
+            canvasChangeEdit.die();
         }
         if (selectionChangeEdit != null) {
             selectionChangeEdit.die();

@@ -18,7 +18,7 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.OilFilter;
 import pixelitor.filters.FilterWithParametrizedGUI;
-import pixelitor.filters.ResizingHelper;
+import pixelitor.filters.ResizingFilterHelper;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
@@ -32,7 +32,7 @@ import java.awt.image.BufferedImage;
 public class JHOilPainting extends FilterWithParametrizedGUI {
     private final GroupedRangeParam brushSize = new GroupedRangeParam("Brush Size", 0, 10, 1, false);
     private final RangeParam coarseness = new RangeParam("Coarseness", 2, 255, 25);
-    private final IntChoiceParam detailQuality = ResizingHelper.createQualityParam();
+    private final IntChoiceParam detailQuality = ResizingFilterHelper.createQualityParam();
 
     private OilFilter filter;
 
@@ -59,7 +59,7 @@ public class JHOilPainting extends FilterWithParametrizedGUI {
 
         filter.setLevels(coarseness.getValue());
 
-        ResizingHelper r = new ResizingHelper(src);
+        ResizingFilterHelper r = new ResizingFilterHelper(src);
         if (r.shouldResize()) {
             double resizeFactor = r.getResizeFactor();
             filter.setRangeX((int) (brushX / resizeFactor));

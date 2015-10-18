@@ -41,7 +41,7 @@ public enum PasteDestination {
             Composition comp = ImageComponents.getActiveComp().get();
             Layer newLayer = new ImageLayer(comp, pastedImage, "Pasted Layer", comp.getCanvasWidth(), comp.getCanvasHeight());
 
-            comp.addLayer(newLayer, AddToHistory.YES, true, false);
+            comp.addLayer(newLayer, AddToHistory.YES, "New Pasted Layer", true, false);
         }
     }, NEW_IMAGE {
         private int pastedCount = 1;

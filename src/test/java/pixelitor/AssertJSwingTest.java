@@ -44,6 +44,7 @@ import pixelitor.layers.LayerButton;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.Selection;
 import pixelitor.testutils.WithSelection;
+import pixelitor.testutils.WithTranslation;
 import pixelitor.tools.BrushType;
 import pixelitor.tools.GradientColorType;
 import pixelitor.tools.GradientTool;
@@ -139,7 +140,6 @@ public class AssertJSwingTest {
     }
 
     private void testDevelopMenu() {
-
     }
 
     private void testTools() {
@@ -275,7 +275,7 @@ public class AssertJSwingTest {
         moveTo(200, 200);
         dragTo(400, 400);
         runMenuCommand("Crop");
-        keyboardUndo();
+        keyboardUndoRedoUndo();
         keyboardDeselect();
 
         testCopyPaste();
@@ -294,47 +294,62 @@ public class AssertJSwingTest {
     private void testMultiLayerEdits() {
         // crop is also a multilayer edit, but it is tested with the crop tool
 
-        testResize(WithSelection.NO);
-        testResize(WithSelection.YES);
+        WithTranslation[] translationSettings =
+                {WithTranslation.NO, WithTranslation.YES};
+        WithSelection[] selectionSettings =
+                {WithSelection.NO, WithSelection.YES};
 
-        testEnlargeCanvas(WithSelection.NO);
-        testEnlargeCanvas(WithSelection.YES);
-
-        testRotateFlip(WithSelection.NO);
-        testRotateFlip(WithSelection.YES);
+        for (WithTranslation translation : translationSettings) {
+            for (WithSelection selection : selectionSettings) {
+                testResize(selection, translation);
+                testEnlargeCanvas(selection, translation);
+                testRotateFlip(selection, translation);
+            }
+        }
     }
 
-    private void testRotateFlip(WithSelection withSelection) {
+    private void testResize(WithSelection withSelection, WithTranslation withTranslation) {
         if (withSelection == WithSelection.YES) {
             addSelection();
         } else {
             keyboardDeselect();
         }
 
-        runMenuCommand("Rotate 90° CW");
-        keyboardUndoRedo();
+        if (withTranslation == WithTranslation.YES) {
+            addTranslation();
+        }
 
-        runMenuCommand("Rotate 180°");
-        keyboardUndoRedo();
+        runMenuCommand("Resize...");
+        DialogFixture resizeDialog = findDialogByTitle("Resize");
 
-        runMenuCommand("Rotate 90° CCW");
-        keyboardUndoRedo();
+        JTextComponentFixture widthTF = resizeDialog.textBox("widthTF");
+        widthTF.deleteText().enterText("622");
 
-        runMenuCommand("Flip Horizontal");
-        keyboardUndoRedo();
+        // no need to also set the height, because
+        // constrain proportions is checked by default
 
-        runMenuCommand("Flip Vertical");
-        keyboardUndoRedo();
+        resizeDialog.button("ok").click();
+
+        keyboardUndoRedoUndo();
+
+        if (withTranslation == WithTranslation.YES) {
+            keyboardUndo(); // undo translation
+        }
 
         keyboardDeselect();
     }
 
-    private void testEnlargeCanvas(WithSelection withSelection) {
+    private void testEnlargeCanvas(WithSelection withSelection, WithTranslation withTranslation) {
         if (withSelection == WithSelection.YES) {
             addSelection();
         } else {
             keyboardDeselect();
         }
+
+        if (withTranslation == WithTranslation.YES) {
+            addTranslation();
+        }
+
         runMenuCommand("Enlarge Canvas...");
         DialogFixture enlargeDialog = findDialogByTitle("Enlarge Canvas");
 
@@ -345,30 +360,43 @@ public class AssertJSwingTest {
 
         enlargeDialog.button("ok").click();
 
-        keyboardUndoRedo();
-        keyboardUndo();
+        keyboardUndoRedoUndo();
+
+        if (withTranslation == WithTranslation.YES) {
+            keyboardUndo(); // undo translation
+        }
         keyboardDeselect();
     }
 
-    private void testResize(WithSelection withSelection) {
+    private void testRotateFlip(WithSelection withSelection, WithTranslation withTranslation) {
         if (withSelection == WithSelection.YES) {
             addSelection();
         } else {
             keyboardDeselect();
         }
 
-        runMenuCommand("Resize...");
-        DialogFixture resizeDialog = findDialogByTitle("Resize");
+        if (withTranslation == WithTranslation.YES) {
+            addTranslation();
+        }
 
-        JTextComponentFixture widthTF = resizeDialog.textBox("widthTF");
-        widthTF.deleteText().enterText("622");
+        runMenuCommand("Rotate 90° CW");
+        keyboardUndoRedoUndo();
 
-        JTextComponentFixture heightTF = resizeDialog.textBox("heightTF");
-        heightTF.deleteText().enterText("422");
+        runMenuCommand("Rotate 180°");
+        keyboardUndoRedoUndo();
 
-        resizeDialog.button("ok").click();
+        runMenuCommand("Rotate 90° CCW");
+        keyboardUndoRedoUndo();
 
-        keyboardUndoRedo();
+        runMenuCommand("Flip Horizontal");
+        keyboardUndoRedoUndo();
+
+        runMenuCommand("Flip Vertical");
+        keyboardUndoRedoUndo();
+
+        if (withTranslation == WithTranslation.YES) {
+            keyboardUndo(); // undo translation
+        }
         keyboardDeselect();
     }
 
@@ -743,8 +771,7 @@ public class AssertJSwingTest {
 // TODO test the advanced settings dialog
 
         findButtonByText(dialog, "OK").click();
-        keyboardUndoRedo();
-        keyboardUndo();
+        keyboardUndoRedoUndo();
     }
 
     private void testRandomFilter() {
@@ -771,8 +798,7 @@ public class AssertJSwingTest {
         nextRandomButton.click();
 
         findButtonByText(dialog, "OK").click();
-        keyboardUndoRedo();
-        keyboardUndo();
+        keyboardUndoRedoUndo();
     }
 
     private void runMenuCommand(String text) {
@@ -782,8 +808,7 @@ public class AssertJSwingTest {
     private void testNoDialogFilter(String name) {
         runMenuCommand(name);
 
-        keyboardUndoRedo();
-        keyboardUndo();
+        keyboardUndoRedoUndo();
     }
 
     private void testFilterWithDialog(String name, Randomize randomize, ShowOriginal showOriginal, String... extraButtonsToClick) {
@@ -807,8 +832,7 @@ public class AssertJSwingTest {
 
         dialog.button("ok").click();
 
-        keyboardUndoRedo();
-        keyboardUndo();
+        keyboardUndoRedoUndo();
     }
 
     private void testHandTool() {
@@ -848,8 +872,7 @@ public class AssertJSwingTest {
             }
         }
 
-        keyboardUndoRedo();
-        keyboardUndo();
+        keyboardUndoRedoUndo();
     }
 
     private void setupEffectsDialog() {
@@ -898,8 +921,7 @@ public class AssertJSwingTest {
         moveTo(300, 300);
         window.click();
 
-        keyboardUndoRedo();
-        keyboardUndo();
+        keyboardUndoRedoUndo();
     }
 
     private void testGradientTool() {
@@ -1012,7 +1034,7 @@ public class AssertJSwingTest {
         moveTo(200, 200);
         dragTo(400, 400);
         keyboardNudge();
-        keyboardUndo();
+        keyboardUndoRedoUndo();
 
         //window.button("brushTraceButton").click();
         findButtonByText(window, "Stroke with Current Brush").click();
@@ -1074,7 +1096,7 @@ public class AssertJSwingTest {
         findButtonByText(window, "Crop").click();
         assert canvasSizeIs(selectionWidth, selectionHeight);
         assert noSelection();
-        keyboardUndo();
+        keyboardUndoRedoUndo();
         assert hasSelection();
         assert canvasSizeIs(origCanvasWidth, origCanvasHeight);
 
@@ -1082,7 +1104,7 @@ public class AssertJSwingTest {
         runMenuCommand("Crop");
         assert noSelection();
         assert canvasSizeIs(selectionWidth, selectionHeight);
-        keyboardUndo();
+        keyboardUndoRedoUndo();
         assert hasSelection();
         assert canvasSizeIs(origCanvasWidth, origCanvasHeight);
 
@@ -1105,8 +1127,7 @@ public class AssertJSwingTest {
         findButtonByText(dialog, "Change!").click();
         findButtonByText(dialog, "Close").click();
 
-        keyboardUndoRedo();
-        keyboardUndo();
+        keyboardUndoRedoUndo();
     }
 
     private void testCropTool() {
@@ -1119,14 +1140,13 @@ public class AssertJSwingTest {
         sleep(1, SECONDS);
 
         keyboardNudge();
-        keyboardUndo();
+        keyboardUndoRedoUndo();
 
         randomAltClick(); // must be at the end, otherwise it tries to start a rectangle
 
         findButtonByText(window, "Crop").click();
 
-        keyboardUndoRedo();
-        keyboardUndo();
+        keyboardUndoRedoUndo();
     }
 
     private void testMoveTool() {
@@ -1135,7 +1155,7 @@ public class AssertJSwingTest {
         testMoveToolImpl(true);
 
         keyboardNudge();
-        keyboardUndo();
+        keyboardUndoRedoUndo();
     }
 
     private void testMoveToolImpl(boolean altDrag) {
@@ -1159,8 +1179,7 @@ public class AssertJSwingTest {
             assert txx == -200 : "txx = " + txx;
             assert txy == -100 : "txy = " + txx;
         }
-        keyboardUndoRedo();
-        keyboardUndo();
+        keyboardUndoRedoUndo();
     }
 
     private void testZoomTool() {
@@ -1217,6 +1236,12 @@ public class AssertJSwingTest {
     private void keyboardUndoRedo() {
         keyboardUndo();
         keyboardRedo();
+    }
+
+    private void keyboardUndoRedoUndo() {
+        keyboardUndo();
+        keyboardRedo();
+        keyboardUndo();
     }
 
     private void keyboardInvert() {
@@ -1454,16 +1479,16 @@ public class AssertJSwingTest {
         altClick();
     }
 
-    private static void addSelection() {
-        Runnable task = () -> {
-            Composition comp = ImageComponents.getActiveIC().getComp();
-            comp.createSelectionFromShape(new Rectangle(10, 10, 100, 100));
-        };
-        try {
-            SwingUtilities.invokeAndWait(task);
-        } catch (InterruptedException | InvocationTargetException e) {
-            e.printStackTrace();
-        }
-        sleep(1, SECONDS);
+    private void addSelection() {
+        window.toggleButton("Selection Tool Button").click();
+        moveTo(200, 200);
+        dragTo(400, 400);
+    }
+
+    private void addTranslation() {
+        window.toggleButton("Move Tool Button").click();
+        moveTo(400, 400);
+        click();
+        dragTo(200, 300);
     }
 }

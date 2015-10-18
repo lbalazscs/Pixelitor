@@ -30,7 +30,7 @@ public class LevelsModel {
      * Contains the sub-models in the order they should appear in
      * the GUI
      */
-    private OneChannelLevelsModel[] subModels;
+    private final OneChannelLevelsModel[] subModels;
 
     public LevelsModel(LookupFilter filter) {
         this.filter = filter;

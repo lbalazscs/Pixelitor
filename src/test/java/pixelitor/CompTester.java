@@ -137,7 +137,7 @@ public class CompTester {
         return standardTestSelectionShape;
     }
 
-    public void removeActiveLayer() {
-        comp.removeLayer(comp.getActiveLayer(), AddToHistory.YES, UpdateGUI.NO);
+    public void deleteActiveLayer() {
+        comp.deleteLayer(comp.getActiveLayer(), AddToHistory.YES, UpdateGUI.NO);
     }
 }

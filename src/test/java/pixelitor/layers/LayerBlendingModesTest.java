@@ -35,11 +35,10 @@ public class LayerBlendingModesTest {
     @Before
     public void setUp() {
         comp = fromImage(create1x1Image(lowerColor), null, "test");
-        ImageLayer upperLayer = new ImageLayer(comp, create1x1Image(upperColor), "Layer 2", null);
+        this.upperLayer = new ImageLayer(comp, create1x1Image(upperColor), "Layer 2", null);
         comp.addLayerNoGUI(upperLayer);
 
         lowerLayer = (ImageLayer) comp.getLayer(0);
-        this.upperLayer = comp.getLayer(1);
 
         assert lowerLayer.getComp().checkInvariant();
         assert lowerLayer.getComp() == this.upperLayer.getComp();
@@ -205,8 +204,8 @@ public class LayerBlendingModesTest {
         comp.mergeDown(UpdateGUI.NO);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
-        // remove the upper layer
-        comp.removeLayer(upperLayer, AddToHistory.YES, UpdateGUI.NO);
+        // delete the upper layer
+        comp.deleteLayer(upperLayer, AddToHistory.YES, UpdateGUI.NO);
         assertThat(comp.getNrLayers()).isEqualTo(1);
 
         // test the blending mode with an OneColorFilter that outputs the upper color

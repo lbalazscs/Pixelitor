@@ -17,8 +17,10 @@
 package pixelitor.layers;
 
 /**
- * A listener interface for changes in layer mask state
+ * A listener interface for changes in layer mask state.
+ * Global in the sense that it does not observe a given
+ * layer, but rather the active layer of the active composition
  */
-public interface LayerMaskChangeListener {
-    void maskAddedOrRemoved(Layer affectedLayer);
+public interface GlobalLayerMaskChangeListener {
+    void maskAddedOrDeleted(Layer affectedLayer);
 }

@@ -42,7 +42,7 @@ public class Flip extends SimpleCompAction {
 
     @Override
     protected String getEditName() {
-        return "Flip";
+        return direction.getName();
     }
 
     @Override

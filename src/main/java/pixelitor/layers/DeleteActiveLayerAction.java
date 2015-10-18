@@ -32,7 +32,7 @@ import java.awt.event.ActionEvent;
 /**
  * An Action that deletes the active layer
  */
-public class DeleteActiveLayerAction extends AbstractAction implements ImageSwitchListener, LayerChangeListener {
+public class DeleteActiveLayerAction extends AbstractAction implements ImageSwitchListener, GlobalLayerChangeListener {
     public static final DeleteActiveLayerAction INSTANCE = new DeleteActiveLayerAction();
 
     private DeleteActiveLayerAction() {
@@ -46,7 +46,7 @@ public class DeleteActiveLayerAction extends AbstractAction implements ImageSwit
     @Override
     public void actionPerformed(ActionEvent e) {
         Composition comp = ImageComponents.getActiveComp().get();
-        comp.removeActiveLayer(UpdateGUI.YES, AddToHistory.YES);
+        comp.deleteActiveLayer(UpdateGUI.YES, AddToHistory.YES);
     }
 
     @Override

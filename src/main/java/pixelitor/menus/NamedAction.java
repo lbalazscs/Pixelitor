@@ -1,5 +1,7 @@
 package pixelitor.menus;
 
+import pixelitor.utils.VisibleForTesting;
+
 import javax.swing.*;
 
 /**
@@ -15,5 +17,10 @@ public abstract class NamedAction extends AbstractAction {
 
     public void setName(String newName) {
         this.putValue(AbstractAction.NAME, newName);
+    }
+
+    @VisibleForTesting
+    public String getName() {
+        return (String) getValue(AbstractAction.NAME);
     }
 }

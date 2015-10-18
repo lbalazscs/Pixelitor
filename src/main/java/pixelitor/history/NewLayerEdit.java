@@ -32,8 +32,9 @@ public class NewLayerEdit extends PixelitorEdit {
     private Layer newLayer;
     private final int newLayerIndex;
 
-    public NewLayerEdit(Composition comp, Layer newLayer, Layer activeLayerBefore) {
-        super(comp, "New Layer");
+    public NewLayerEdit(Composition comp, Layer newLayer, Layer activeLayerBefore, String historyName) {
+        super(comp, historyName);
+
         this.activeLayerBefore = activeLayerBefore;
         comp.setDirty(true);
         this.newLayer = newLayer;
@@ -44,7 +45,7 @@ public class NewLayerEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        comp.removeLayer(newLayer, AddToHistory.NO, UpdateGUI.YES);
+        comp.deleteLayer(newLayer, AddToHistory.NO, UpdateGUI.YES);
         comp.setActiveLayer(activeLayerBefore, AddToHistory.NO);
         History.notifyMenus(this);
     }
@@ -53,7 +54,7 @@ public class NewLayerEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        comp.addLayer(newLayer, AddToHistory.NO, true, newLayerIndex);
+        comp.addLayer(newLayer, AddToHistory.NO, null, true, newLayerIndex);
 
         History.notifyMenus(this);
     }

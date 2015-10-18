@@ -51,8 +51,8 @@ import pixelitor.history.History;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.OpenSaveManager;
 import pixelitor.io.OptimizedJpegSavePanel;
+import pixelitor.layers.AddAdjLayerAction;
 import pixelitor.layers.AddNewLayerAction;
-import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.DeleteActiveLayerAction;
 import pixelitor.layers.DuplicateLayerAction;
@@ -717,9 +717,7 @@ public class MenuBar extends JMenuBar {
         createMenuItem(new MenuAction("Invert Adjustment") { // TODO not "Invert" because of assertj test lookup confusion
             @Override
             public void onClick() {
-                Composition comp = ImageComponents.getActiveComp().get();
-                AdjustmentLayer adjustmentLayer = new AdjustmentLayer(comp, "Invert", new Invert());
-                comp.addLayer(adjustmentLayer, AddToHistory.YES, true, false);
+                AddAdjLayerAction.INSTANCE.actionPerformed(null);
             }
         }, adjustmentLayersSubMenu);
 

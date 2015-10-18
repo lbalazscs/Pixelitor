@@ -47,7 +47,7 @@ public class Rotate extends SimpleCompAction {
 
     @Override
     protected String getEditName() {
-        return "Rotate";
+        return angle.getName();
     }
 
     @Override

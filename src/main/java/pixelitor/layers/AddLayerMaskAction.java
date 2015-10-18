@@ -29,7 +29,7 @@ import java.awt.event.ActionEvent;
 /**
  * An Action that adds a new layer mask.
  */
-public class AddLayerMaskAction extends AbstractAction implements ImageSwitchListener, LayerMaskChangeListener, LayerChangeListener {
+public class AddLayerMaskAction extends AbstractAction implements ImageSwitchListener, GlobalLayerMaskChangeListener, GlobalLayerChangeListener {
     public static final AddLayerMaskAction INSTANCE = new AddLayerMaskAction();
 
     private AddLayerMaskAction() {
@@ -83,7 +83,7 @@ public class AddLayerMaskAction extends AbstractAction implements ImageSwitchLis
     }
 
     @Override
-    public void maskAddedOrRemoved(Layer affectedLayer) {
+    public void maskAddedOrDeleted(Layer affectedLayer) {
         setEnabled(!affectedLayer.hasMask());
     }
 

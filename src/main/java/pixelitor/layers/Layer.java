@@ -47,6 +47,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.awt.AlphaComposite.DstIn;
 import static java.awt.AlphaComposite.SRC_OVER;
@@ -67,11 +69,13 @@ public abstract class Layer implements Serializable {
     protected LayerMask mask;
     private boolean maskEnabled = true;
 
-    private transient LayerUI ui;
-    protected transient boolean isAdjustment = false;
-
     float opacity = 1.0f;
     BlendingMode blendingMode = BlendingMode.NORMAL;
+
+    // transient variables from here
+    private transient LayerUI ui;
+    protected transient boolean isAdjustment = false;
+    private transient List<LayerChangeListener> layerChangeObservers;
 
     /**
      * Whether the edited image is the layer image or
@@ -79,7 +83,7 @@ public abstract class Layer implements Serializable {
      * This flag is logically independent from the showLayerMask
      * flag in the image component.
      */
-    private boolean maskEditing = false;
+    private transient boolean maskEditing = false;
 
     Layer(Composition comp, String name, Layer parent) {
         this.comp = comp;
@@ -93,6 +97,24 @@ public abstract class Layer implements Serializable {
             ui = parent.getUI();
         } else { // normal layer
             ui = new LayerGUI(this);
+        }
+        layerChangeObservers = new ArrayList<>();
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        layerChangeObservers = new ArrayList<>();
+
+        // We create a layer button only for real layers.
+        // For layer masks, we share the button of the real layer.
+        if (parent == null) { // not mask
+            ui = new LayerGUI(this);
+
+            if (mask != null) {
+                mask.setUI(ui);
+                ui.addMaskIconLabel();
+                mask.updateIconImage();
+            }
         }
     }
 
@@ -235,22 +257,6 @@ public abstract class Layer implements Serializable {
 
     public void makeActive(AddToHistory addToHistory) {
         comp.setActiveLayer(this, addToHistory);
-    }
-
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-
-        // We create a layer button only for real layers.
-        // For layer masks, we share the button of the real layer.
-        if (parent == null) { // not mask
-            ui = new LayerGUI(this);
-
-            if (mask != null) {
-                mask.setUI(ui);
-                ui.addMaskIconLabel();
-                mask.updateIconImage();
-            }
-        }
     }
 
     boolean isActive() {
@@ -518,6 +524,7 @@ public abstract class Layer implements Serializable {
         this.maskEnabled = maskEnabled;
         comp.imageChanged(FULL);
         mask.updateIconImage();
+        notifyLayerChangeObservers();
 
         History.addEdit(addToHistory, () -> new EnableLayerMaskEdit(comp, this));
     }
@@ -528,6 +535,20 @@ public abstract class Layer implements Serializable {
 
     public Layer getParent() {
         return parent;
+    }
+
+    public void activateUI() {
+        ui.setSelected(true);
+    }
+
+    public void addLayerChangeObserver(LayerChangeListener listener) {
+        layerChangeObservers.add(listener);
+    }
+
+    protected void notifyLayerChangeObservers() {
+        for (LayerChangeListener observer : layerChangeObservers) {
+            observer.layerStateChanged();
+        }
     }
 
     @Override
@@ -541,9 +562,5 @@ public abstract class Layer implements Serializable {
         sb.append(", isAdjustment=").append(isAdjustment);
         sb.append('}');
         return sb.toString();
-    }
-
-    public void activateUI() {
-        ui.setSelected(true);
     }
 }

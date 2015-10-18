@@ -44,7 +44,7 @@ public class AddAdjLayerAction extends AbstractAction implements ImageSwitchList
     public void actionPerformed(ActionEvent e) {
         Composition comp = ImageComponents.getActiveComp().get();
         AdjustmentLayer adjustmentLayer = new AdjustmentLayer(comp, "Invert", new Invert());
-        comp.addLayer(adjustmentLayer, AddToHistory.YES, true, false);
+        comp.addLayer(adjustmentLayer, AddToHistory.YES, "New Adjustment Layer", true, false);
     }
 
     @Override

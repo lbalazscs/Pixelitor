@@ -17,9 +17,9 @@
 
 package pixelitor;
 
+import pixelitor.layers.GlobalLayerChangeListener;
+import pixelitor.layers.GlobalLayerMaskChangeListener;
 import pixelitor.layers.Layer;
-import pixelitor.layers.LayerChangeListener;
-import pixelitor.layers.LayerMaskChangeListener;
 import pixelitor.tools.Symmetry;
 import pixelitor.tools.Tools;
 import pixelitor.utils.AppPreferences;
@@ -33,8 +33,11 @@ import java.util.Collection;
  * Static methods to support global application logic
  */
 public class AppLogic {
-    private static final Collection<LayerChangeListener> layerChangeListeners = new ArrayList<>();
-    private static final Collection<LayerMaskChangeListener> layerMaskChangeListeners = new ArrayList<>();
+    /**
+     * Global listeners which always act on the active layer of the active composition
+     */
+    private static final Collection<GlobalLayerChangeListener> layerChangeListeners = new ArrayList<>();
+    private static final Collection<GlobalLayerMaskChangeListener> layerMaskChangeListeners = new ArrayList<>();
 
     private AppLogic() {
     }
@@ -43,30 +46,30 @@ public class AppLogic {
         Symmetry.setCompositionSize(comp.getCanvasWidth(), comp.getCanvasHeight());
     }
 
-    public static void addLayerChangeListener(LayerChangeListener listener) {
+    public static void addLayerChangeListener(GlobalLayerChangeListener listener) {
         layerChangeListeners.add(listener);
     }
 
-    public static void addLayerMaskChangeListener(LayerMaskChangeListener listener) {
+    public static void addLayerMaskChangeListener(GlobalLayerMaskChangeListener listener) {
         layerMaskChangeListeners.add(listener);
     }
 
     public static void maskChanged(Layer affectedLayer) {
-        for (LayerMaskChangeListener listener : layerMaskChangeListeners) {
-            listener.maskAddedOrRemoved(affectedLayer);
+        for (GlobalLayerMaskChangeListener listener : layerMaskChangeListeners) {
+            listener.maskAddedOrDeleted(affectedLayer);
         }
     }
 
     // used for GUI updates
     public static void activeCompLayerCountChanged(Composition comp, int newLayerCount) {
-        for (LayerChangeListener listener : layerChangeListeners) {
+        for (GlobalLayerChangeListener listener : layerChangeListeners) {
             listener.activeCompLayerCountChanged(comp, newLayerCount);
         }
     }
 
     public static void activeLayerChanged(Layer newActiveLayer) {
         assert newActiveLayer != null;
-        for (LayerChangeListener listener : layerChangeListeners) {
+        for (GlobalLayerChangeListener listener : layerChangeListeners) {
             listener.activeLayerChanged(newActiveLayer);
         }
 
@@ -82,7 +85,7 @@ public class AppLogic {
     }
 
     public static void layerOrderChanged(Composition comp) {
-        for (LayerChangeListener listener : layerChangeListeners) {
+        for (GlobalLayerChangeListener listener : layerChangeListeners) {
             listener.layerOrderChanged(comp);
         }
     }

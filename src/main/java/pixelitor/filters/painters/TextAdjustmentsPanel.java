@@ -87,6 +87,10 @@ public class TextAdjustmentsPanel extends AdjustPanel implements ParamAdjustment
         super(null);
         this.textLayer = textLayer;
         createGUI(textLayer.getSettings());
+
+        // make sure that the text layer has a settings object
+        // even if the user presses OK without making any adjustments
+        paramAdjusted();
     }
 
     private void createGUI(TextSettings settings) {

@@ -9,8 +9,8 @@ public enum NumLayers {
     ONE(true) {
         @Override
         public void init(CompTester tester) {
-            // remove one layer so that we have undo
-            tester.removeActiveLayer();
+            // delete one layer so that we have undo
+            tester.deleteActiveLayer();
         }
     }, MORE(false) {
         @Override

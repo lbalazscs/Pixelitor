@@ -29,7 +29,7 @@ import java.awt.event.ActionEvent;
 /**
  * An Action that moves the active layer up or down in the layer stack
  */
-public class LayerMoveAction extends AbstractAction implements ImageSwitchListener, LayerChangeListener {
+public class LayerMoveAction extends AbstractAction implements ImageSwitchListener, GlobalLayerChangeListener {
     public static final LayerMoveAction INSTANCE_UP = new LayerMoveAction(true);
     public static final LayerMoveAction INSTANCE_DOWN = new LayerMoveAction(false);
     private final boolean up;

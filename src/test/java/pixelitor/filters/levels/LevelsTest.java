@@ -128,19 +128,19 @@ public class LevelsTest {
         return captor.getValue();
     }
 
-    private void checkRedMapping(RGBLookup lookup, int input, int expected) {
+    private static void checkRedMapping(RGBLookup lookup, int input, int expected) {
         assertEquals(expected, lookup.mapRed(input));
     }
 
-    private void checkGreenMapping(RGBLookup lookup, int input, int expected) {
+    private static void checkGreenMapping(RGBLookup lookup, int input, int expected) {
         assertEquals(expected, lookup.mapGreen(input));
     }
 
-    private void checkBlueMapping(RGBLookup lookup, int input, int expected) {
+    private static void checkBlueMapping(RGBLookup lookup, int input, int expected) {
         assertEquals(expected, lookup.mapBlue(input));
     }
 
-    private void checkRGBMapping(RGBLookup lookup, int input, int expectedRed, int expectedGreen, int expectedBlue) {
+    private static void checkRGBMapping(RGBLookup lookup, int input, int expectedRed, int expectedGreen, int expectedBlue) {
         assertEquals(expectedRed, lookup.mapRed(input));
         assertEquals(expectedGreen, lookup.mapGreen(input));
         assertEquals(expectedBlue, lookup.mapBlue(input));

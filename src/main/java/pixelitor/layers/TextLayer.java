@@ -201,7 +201,7 @@ public class TextLayer extends ContentLayer {
         Layer activeLayerBefore = comp.getActiveLayer();
 
         // don't add it yet to history, only after the user chooses to press OK
-        comp.addLayer(textLayer, AddToHistory.NO, true, false);
+        comp.addLayer(textLayer, AddToHistory.NO, null, true, false);
 
         TextAdjustmentsPanel p = new TextAdjustmentsPanel(textLayer);
         OKCancelDialog d = new OKCancelDialog(p, pw, "Create Text Layer") {
@@ -211,14 +211,14 @@ public class TextLayer extends ContentLayer {
                 textLayer.updateLayerName();
 
                 // now it is safe to add it to the history
-                NewLayerEdit newLayerEdit = new NewLayerEdit(comp, textLayer, activeLayerBefore);
+                NewLayerEdit newLayerEdit = new NewLayerEdit(comp, textLayer, activeLayerBefore, "New Text Layer");
                 History.addEdit(newLayerEdit);
             }
 
             @Override
             protected void dialogCanceled() {
                 close();
-                comp.removeLayer(textLayer, AddToHistory.NO, UpdateGUI.YES);
+                comp.deleteLayer(textLayer, AddToHistory.NO, UpdateGUI.YES);
             }
         };
         d.setVisible(true);
@@ -230,8 +230,8 @@ public class TextLayer extends ContentLayer {
         BufferedImage rasterizedImage = textLayer.createRasterizedImage();
 
         ImageLayer newLayer = new ImageLayer(comp, rasterizedImage, layer.getName(), null);
-        comp.addLayer(newLayer, AddToHistory.NO, false, false);
-        comp.removeLayer(textLayer, AddToHistory.NO, UpdateGUI.YES);
+        comp.addLayer(newLayer, AddToHistory.NO, null, false, false);
+        comp.deleteLayer(textLayer, AddToHistory.NO, UpdateGUI.YES);
 
         TextLayerRasterizeEdit edit = new TextLayerRasterizeEdit(comp, textLayer, newLayer);
         History.addEdit(edit);

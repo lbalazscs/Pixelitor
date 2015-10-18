@@ -208,7 +208,7 @@ public class History {
             return false;
         }
         Composition comp = optComp.get();
-        if(!comp.hasActiveImageLayerOrMask()) {
+        if (!comp.hasActiveImageLayerOrMask()) {
             return false;
         }
         return getPreviousEditForFade(comp).isPresent();
@@ -246,5 +246,14 @@ public class History {
                     expectedEdits, numEdits));
         }
     }
-}
 
+    @VisibleForTesting
+    public static void assertLastEditNameIs(String expectedName) {
+        String lastEditName = undoManager.getLastEdit().getName();
+        if (!lastEditName.equals(expectedName)) {
+            throw new AssertionError(String.format(
+                    "Expected '%s' as the last edit name, but found '%s'",
+                    expectedName, lastEditName));
+        }
+    }
+}

@@ -43,8 +43,8 @@ public class TextLayerRasterizeEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        comp.addLayer(before, AddToHistory.NO, false, false);
-        comp.removeLayer(after, AddToHistory.NO, UpdateGUI.YES);
+        comp.addLayer(before, AddToHistory.NO, null, false, false);
+        comp.deleteLayer(after, AddToHistory.NO, UpdateGUI.YES);
         History.notifyMenus(this);
     }
 
@@ -52,8 +52,8 @@ public class TextLayerRasterizeEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        comp.addLayer(after, AddToHistory.NO, false, false);
-        comp.removeLayer(before, AddToHistory.NO, UpdateGUI.YES);
+        comp.addLayer(after, AddToHistory.NO, null, false, false);
+        comp.deleteLayer(before, AddToHistory.NO, UpdateGUI.YES);
         History.notifyMenus(this);
     }
 
