@@ -59,6 +59,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR_PRE;
 
@@ -438,4 +439,12 @@ public final class Utils {
         }
     }
 
+    @VisibleForTesting
+    public static void sleep(int duration, TimeUnit unit) {
+        try {
+            Thread.sleep(unit.toMillis(duration));
+        } catch (InterruptedException e) {
+            throw new IllegalStateException("interrupted!");
+        }
+    }
 }

@@ -17,8 +17,10 @@
 
 package pixelitor.tools;
 
+import pixelitor.Composition;
 import pixelitor.ImageDisplay;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.tools.brushes.Brush;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.CopyBrushType;
 import pixelitor.tools.brushes.SmudgeBrush;
@@ -26,6 +28,7 @@ import pixelitor.utils.SliderSpinner;
 
 import javax.swing.*;
 import java.awt.Cursor;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
@@ -81,13 +84,30 @@ public class SmudgeTool extends DirectBrushTool {
         double x = userDrag.getStartX();
         double y = userDrag.getStartY();
         if (!e.isShiftDown()) { // not a line-click
-            smudgeBrush.setSource(sourceImage, x, y, strengthParam.getValueAsPercentage());
+            initStroke(sourceImage, x, y);
         }
         super.mousePressed(e, ic);
+    }
+
+    private void initStroke(BufferedImage sourceImage, double x, double y) {
+        smudgeBrush.setSource(sourceImage, x, y, strengthParam.getValueAsPercentage());
     }
 
     @Override
     protected Symmetry getSymmetry() {
         throw new UnsupportedOperationException("no symmetry");
+    }
+
+    @Override
+    protected Brush getPaintingBrush() {
+        return smudgeBrush;
+    }
+
+    @Override
+    protected void prepareProgrammaticBrushStroke(Composition comp, Point start) {
+        super.prepareProgrammaticBrushStroke(comp, start);
+
+        BufferedImage sourceImg = comp.getActiveMaskOrImageLayer().getImage();
+        initStroke(sourceImg, start.x, start.y);
     }
 }

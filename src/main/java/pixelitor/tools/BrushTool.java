@@ -71,14 +71,9 @@ public class BrushTool extends TmpLayerBrushTool {
     }
 
     @Override
-    public void drawBrushStrokeProgrammatically(Composition comp, Point start, Point end) {
-        createGraphicsForNewBrushStroke(comp, comp.getActiveMaskOrImageLayer());
-
+    protected void prepareProgrammaticBrushStroke(Composition comp, Point start) {
+        super.prepareProgrammaticBrushStroke(comp, start);
         graphics.setColor(FgBgColors.getFG());
-
-        super.drawBrushStrokeProgrammatically(comp, start, end);
-
-        comp.getActiveMaskOrImageLayer().mergeTmpDrawingLayerDown();
     }
 
     private void setupDrawingColor(MouseEvent e) {

@@ -18,7 +18,6 @@
 package pixelitor.utils.test;
 
 import pixelitor.Composition;
-import pixelitor.FgBgColors;
 import pixelitor.ImageComponents;
 import pixelitor.ImageDisplay;
 import pixelitor.NewImage;
@@ -30,14 +29,9 @@ import pixelitor.tools.ShapeType;
 import pixelitor.tools.Tools;
 import pixelitor.tools.UserDrag;
 import pixelitor.tools.shapestool.ShapesTool;
-import pixelitor.utils.Messages;
-import pixelitor.utils.Utils;
 
-import javax.swing.*;
 import java.awt.AlphaComposite;
 import java.awt.Point;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Random;
 
 import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
 import static pixelitor.FillType.WHITE;
@@ -145,70 +139,5 @@ public class ToolTests {
                 false);
     }
 
-    public static void randomToolActions(int numStrokes, boolean brushOnly) {
-        Composition comp = ImageComponents.getActiveComp().get();
-        Random random = new Random();
 
-        if (comp != null) {
-            int canvasWidth = comp.getCanvasWidth();
-            int canvasHeight = comp.getCanvasHeight();
-
-            ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("1001 Tool Actions");
-
-            // So far we are on the EDT
-            Runnable notEDTThreadTask = () -> {
-                assert !SwingUtilities.isEventDispatchThread();
-                for (int i = 0; i < numStrokes; i++) {
-                    int progressPercentage = (int) ((float) i * 100 / numStrokes);
-                    progressMonitor.setProgress(progressPercentage);
-                    progressMonitor.setNote(progressPercentage + "%");
-
-                    Runnable edtRunnable = () -> testToolAction(comp, random, canvasWidth, canvasHeight, brushOnly);
-
-                    try {
-                        SwingUtilities.invokeAndWait(edtRunnable);
-                    } catch (InterruptedException | InvocationTargetException e) {
-                        e.printStackTrace();
-                    }
-
-                    comp.repaint();
-                    if (progressMonitor.isCanceled()) {
-                        break;
-                    }
-                }
-                progressMonitor.close();
-            };
-            new Thread(notEDTThreadTask).start();
-        }
-    }
-
-
-    // called on the EDT
-    private static void testToolAction(Composition comp, Random rand, int canvasWidth, int canvasHeight, boolean brushOnly) {
-        assert SwingUtilities.isEventDispatchThread();
-
-        FgBgColors.setRandomColors();
-
-        Point start = new Point(rand.nextInt(canvasWidth), rand.nextInt(canvasHeight));
-        Point end = new Point(rand.nextInt(canvasWidth), rand.nextInt(canvasHeight));
-
-        boolean doTheBrush;
-        if(brushOnly) {
-            doTheBrush = true;
-        } else {
-            doTheBrush = rand.nextBoolean();
-        }
-
-        try {
-            if (doTheBrush) {
-                Tools.BRUSH.randomize();
-                Tools.BRUSH.drawBrushStrokeProgrammatically(comp, start, end);
-            } else {
-                Tools.SHAPES.randomize();
-                Tools.SHAPES.paintShapeOnIC(comp, new UserDrag(start.x, start.y, end.x, end.y));
-            }
-        } catch (Exception e) {
-            Messages.showException(e);
-        }
-    }
 }

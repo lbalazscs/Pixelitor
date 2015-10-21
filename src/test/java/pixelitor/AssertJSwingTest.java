@@ -30,6 +30,7 @@ import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.fixture.JButtonFixture;
 import org.assertj.swing.fixture.JCheckBoxFixture;
+import org.assertj.swing.fixture.JComboBoxFixture;
 import org.assertj.swing.fixture.JFileChooserFixture;
 import org.assertj.swing.fixture.JMenuItemFixture;
 import org.assertj.swing.fixture.JOptionPaneFixture;
@@ -37,6 +38,7 @@ import org.assertj.swing.fixture.JTabbedPaneFixture;
 import org.assertj.swing.fixture.JTextComponentFixture;
 import org.assertj.swing.launcher.ApplicationLauncher;
 import org.fest.util.Files;
+import pixelitor.automate.AutoPaint;
 import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.io.FileChoosers;
 import pixelitor.layers.ImageLayer;
@@ -52,6 +54,7 @@ import pixelitor.tools.GradientType;
 import pixelitor.tools.ShapeType;
 import pixelitor.tools.ShapesAction;
 import pixelitor.tools.Symmetry;
+import pixelitor.tools.Tool;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -63,7 +66,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 import static java.awt.event.KeyEvent.VK_0;
 import static java.awt.event.KeyEvent.VK_ADD;
@@ -107,7 +109,7 @@ public class AssertJSwingTest {
         test.testApp();
 
         System.out.println("AssertJSwingTest::main: finished, exiting in 5 seconds");
-        sleep(5, SECONDS);
+        Utils.sleep(5, SECONDS);
         test.exit();
     }
 
@@ -420,6 +422,7 @@ public class AssertJSwingTest {
         testBatchResize();
         testBatchFilter();
         testExportLayerToPNG();
+        testAutoPaint();
         testScreenCapture();
         testCloseAll();
     }
@@ -570,7 +573,7 @@ public class AssertJSwingTest {
         DialogFixture dialog = findDialogByTitle("Batch Filter");
         dialog.comboBox("filtersCB").selectItem("Angular Waves");
         dialog.button("ok").click(); // next
-        sleep(3, SECONDS);
+        Utils.sleep(3, SECONDS);
         findButtonByText(dialog, "Randomize Settings").click();
         dialog.button("ok").click(); // start processing
 
@@ -582,7 +585,30 @@ public class AssertJSwingTest {
         addNewLayer();
         runMenuCommand("Export Layers to PNG...");
         findDialogByTitle("Select Output Folder").button("ok").click();
-        sleep(2, SECONDS);
+        Utils.sleep(2, SECONDS);
+    }
+
+    private void testAutoPaint() {
+        for (Tool tool : AutoPaint.ALLOWED_TOOLS) {
+            testAutoPaintWithTool(tool);
+        }
+    }
+
+    private void testAutoPaintWithTool(Tool tool) {
+        runMenuCommand("Auto Paint...");
+        DialogFixture dialog = findDialogByTitle("Auto Paint");
+
+        JComboBoxFixture toolSelector = dialog.comboBox("toolSelector");
+        toolSelector.selectItem(tool.toString());
+
+        JTextComponentFixture numStrokesTF = dialog.textBox("numStrokesTF");
+        String testNumStrokes = "111";
+        if (!numStrokesTF.text().equals(testNumStrokes)) {
+            numStrokesTF.deleteText();
+            numStrokesTF.enterText(testNumStrokes);
+        }
+
+        dialog.button("ok").click();
     }
 
     private void testScreenCapture() {
@@ -897,7 +923,7 @@ public class AssertJSwingTest {
 
     private void setupStrokeSettingsDialog() {
         findButtonByText(window, "Stroke Settings...").click();
-        sleep(1, SECONDS);
+        Utils.sleep(1, SECONDS);
         DialogFixture dialog = findDialogByTitle("Stroke Settings");
 
         dialog.slider().slideTo(20);
@@ -1137,7 +1163,7 @@ public class AssertJSwingTest {
         dragTo(450, 450);
         moveTo(200, 200);
         dragTo(150, 150);
-        sleep(1, SECONDS);
+        Utils.sleep(1, SECONDS);
 
         keyboardNudge();
         keyboardUndoRedoUndo();
@@ -1301,14 +1327,6 @@ public class AssertJSwingTest {
         window.releaseKey(VK_ALT);
     }
 
-    private static void sleep(int duration, TimeUnit unit) {
-        try {
-            Thread.sleep(unit.toMillis(duration));
-        } catch (InterruptedException e) {
-            throw new IllegalStateException("interrupted!");
-        }
-    }
-
     private JMenuItemFixture findMenuItemByText(String guiName) {
         return new JMenuItemFixture(robot, robot.finder().find(new GenericTypeMatcher<JMenuItem>(JMenuItem.class) {
             @Override
@@ -1417,11 +1435,11 @@ public class AssertJSwingTest {
     }
 
     private void waitForProgressMonitorEnd() {
-        sleep(2, SECONDS); // wait until progress monitor comes up
+        Utils.sleep(2, SECONDS); // wait until progress monitor comes up
 
         boolean dialogRunning = true;
         while (dialogRunning) {
-            sleep(1, SECONDS);
+            Utils.sleep(1, SECONDS);
             try {
                 findDialogByTitle("Progress...");
             } catch (Exception e) {

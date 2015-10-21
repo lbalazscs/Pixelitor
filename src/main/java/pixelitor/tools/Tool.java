@@ -324,4 +324,9 @@ public abstract class Tool {
         // empty for the convenience of subclasses
         return false; // not consumed
     }
+
+    @Override
+    public String toString() {
+        return name; // so that they can be easily selected from a JComboBox
+    }
 }

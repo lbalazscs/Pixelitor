@@ -22,6 +22,7 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.utils.BlendingModePanel;
 
 import java.awt.Cursor;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 
 /**
@@ -54,11 +55,16 @@ public abstract class TmpLayerBrushTool extends AbstractBrushTool {
         }
     }
 
-
     @Override
     BufferedImage getOriginalImage(Composition comp) {
         // it can simply return the layer image because
         // the drawing was on the temporary layer
         return comp.getActiveMaskOrImageLayer().getImage();
+    }
+
+    @Override
+    public void drawBrushStrokeProgrammatically(Composition comp, Point start, Point end) {
+        super.drawBrushStrokeProgrammatically(comp, start, end);
+        comp.getActiveMaskOrImageLayer().mergeTmpDrawingLayerDown();
     }
 }

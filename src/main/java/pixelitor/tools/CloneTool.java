@@ -19,10 +19,12 @@ package pixelitor.tools;
 
 import com.bric.util.JVM;
 import pixelitor.Build;
+import pixelitor.Composition;
 import pixelitor.ImageDisplay;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.tools.brushes.Brush;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.CloneBrush;
 import pixelitor.tools.brushes.CopyBrushType;
@@ -35,8 +37,10 @@ import pixelitor.utils.VisibleForTesting;
 import javax.swing.*;
 import java.awt.Cursor;
 import java.awt.GridBagLayout;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.util.Random;
 
 import static pixelitor.tools.CloneTool.State.CLONING;
 import static pixelitor.tools.CloneTool.State.NO_SOURCE;
@@ -114,24 +118,30 @@ public class CloneTool extends TmpLayerBrushTool {
         if (e.isAltDown() || SwingUtilities.isRightMouseButton(e)) {
             setCloningSource(ic, x, y);
         } else {
+            boolean notWithLine = !withLine(e);
+
             if (state == NO_SOURCE) {
                 handleUndefinedSource(ic, x, y);
                 return;
             }
-            state = CLONING; // must be a new stroke after the source setting
-
-            float scaleAbs = scaleParam.getValueAsPercentage();
-            ScalingMirror mirror = (ScalingMirror) mirrorParam.getSelectedItem();
-            cloneBrush.setScale(
-                    mirror.getScaleX(scaleAbs),
-                    mirror.getScaleY(scaleAbs));
-            cloneBrush.setRotate(rotationParam.getValueInRadians());
-
-            if (!withLine(e)) {  // when drawing with line, the destination should not change for mouse press
-                cloneBrush.setCloningDestPoint(x, y);
-            }
+            startNewCloningStroke(x, y, notWithLine);
 
             super.mousePressed(e, ic);
+        }
+    }
+
+    private void startNewCloningStroke(double x, double y, boolean notWithLine) {
+        state = CLONING; // must be a new stroke after the source setting
+
+        float scaleAbs = scaleParam.getValueAsPercentage();
+        ScalingMirror mirror = (ScalingMirror) mirrorParam.getSelectedItem();
+        cloneBrush.setScale(
+                mirror.getScaleX(scaleAbs),
+                mirror.getScaleY(scaleAbs));
+        cloneBrush.setRotate(rotationParam.getValueInRadians());
+
+        if (notWithLine) {  // when drawing with line, the destination should not change for mouse press
+            cloneBrush.setCloningDestPoint(x, y);
         }
     }
 
@@ -180,5 +190,24 @@ public class CloneTool extends TmpLayerBrushTool {
     @VisibleForTesting
     protected void setState(State state) {
         this.state = state;
+    }
+
+    @Override
+    protected Brush getPaintingBrush() {
+        return cloneBrush;
+    }
+
+    @Override
+    protected void prepareProgrammaticBrushStroke(Composition comp, Point start) {
+        super.prepareProgrammaticBrushStroke(comp, start);
+
+        int canvasWidth = comp.getCanvasWidth();
+        int canvasHeight = comp.getCanvasHeight();
+        Random rand = new Random();
+        int sourceX = rand.nextInt(canvasWidth);
+        int sourceY = rand.nextInt(canvasHeight);
+
+        setCloningSource(comp.getIC(), sourceX, sourceY);
+        startNewCloningStroke(start.x, start.y, true);
     }
 }

@@ -189,14 +189,18 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     }
 
     public void drawBrushStrokeProgrammatically(Composition comp, Point start, Point end) {
-        // a subclass is supposed to set up the
-        // graphics before this super method is called
-        assert graphics != null;
+        prepareProgrammaticBrushStroke(comp, start);
 
-        brush.onDragStart(start.x, start.y);
-        brush.onNewMousePoint(end.x, end.y);
+        Brush paintingBrush = getPaintingBrush();
+        paintingBrush.onDragStart(start.x, start.y);
+        paintingBrush.onNewMousePoint(end.x, end.y);
 
         finishBrushStroke(comp);
+    }
+
+    protected void prepareProgrammaticBrushStroke(Composition comp, Point start) {
+        ImageLayer layer = comp.getActiveMaskOrImageLayer();
+        createGraphicsForNewBrushStroke(comp, layer);
     }
 
     /**
@@ -337,5 +341,9 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     @Override
     protected boolean doColorPickerForwarding() {
         return true;
+    }
+
+    protected Brush getPaintingBrush() {
+        return brush;
     }
 }

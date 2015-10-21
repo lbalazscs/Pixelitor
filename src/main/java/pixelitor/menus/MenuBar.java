@@ -31,6 +31,7 @@ import pixelitor.ImageDisplay;
 import pixelitor.NewImage;
 import pixelitor.PixelitorWindow;
 import pixelitor.TipsOfTheDay;
+import pixelitor.automate.AutoPaint;
 import pixelitor.automate.BatchFilterWizard;
 import pixelitor.automate.BatchResize;
 import pixelitor.filters.*;
@@ -194,13 +195,12 @@ public class MenuBar extends JMenuBar {
         createMenuItem(NewImage.getAction(), fileMenu, EnabledIf.ACTION_ENABLED, CTRL_N);
 
         // open
-        Action openAction = new MenuAction("Open...") {
+        createMenuItem(new MenuAction("Open...") {
             @Override
             public void onClick() {
                 FileChoosers.open();
             }
-        };
-        createMenuItem(openAction, fileMenu, EnabledIf.ACTION_ENABLED, CTRL_O);
+        }, fileMenu, EnabledIf.ACTION_ENABLED, CTRL_O);
 
         // recent files
         JMenu recentFiles = RecentFilesMenu.getInstance();
@@ -209,97 +209,88 @@ public class MenuBar extends JMenuBar {
         fileMenu.addSeparator();
 
         // save
-        Action saveAction = new MenuAction("Save") {
+        createMenuItem(new MenuAction("Save") {
             @Override
             public void onClick() {
                 OpenSaveManager.save(false);
             }
-        };
-        createMenuItem(saveAction, fileMenu, CTRL_S);
+        }, fileMenu, CTRL_S);
 
         // save as
-        Action saveAsAction = new MenuAction("Save As...") {
+        createMenuItem(new MenuAction("Save As...") {
             @Override
             public void onClick() {
                 OpenSaveManager.save(true);
             }
-        };
-        createMenuItem(saveAsAction, fileMenu, CTRL_SHIFT_S);
+        }, fileMenu, CTRL_SHIFT_S);
 
-        Action optimizedSaveAction = new MenuAction("Export Optimized JPEG...") {
+        createMenuItem(new MenuAction("Export Optimized JPEG...") {
             @Override
             public void onClick() {
                 Composition comp = ImageComponents.getActiveComp().get();
                 BufferedImage image = comp.getCompositeImage();
                 OptimizedJpegSavePanel.showInDialog(image, pixelitorWindow);
             }
-        };
-        createMenuItem(optimizedSaveAction, fileMenu);
+        }, fileMenu);
 
-        Action exportORA = new MenuAction("Export OpenRaster...") {
+        createMenuItem(new MenuAction("Export OpenRaster...") {
             @Override
             public void onClick() {
                 OpenRasterExportPanel.showInDialog(pixelitorWindow);
             }
-        };
-        createMenuItem(exportORA, fileMenu);
+        }, fileMenu);
 
         fileMenu.addSeparator();
 
-        Action exportLayerAnim = new MenuAction("Export Layer Animation...") {
+        createMenuItem(new MenuAction("Export Layer Animation...") {
             @Override
             public void onClick() {
                 AnimGifExport.start(pixelitorWindow);
             }
-        };
-        createMenuItem(exportLayerAnim, fileMenu);
+        }, fileMenu);
 
-        Action exportTweeningAnim = new MenuAction("Export Tweening Animation...") {
+        createMenuItem(new MenuAction("Export Tweening Animation...") {
             @Override
             public void onClick() {
                 new TweenWizard().start(pixelitorWindow);
             }
-        };
-        createMenuItem(exportTweeningAnim, fileMenu);
+        }, fileMenu);
 
         fileMenu.addSeparator();
 
         // close
-        Action closeAction = new MenuAction("Close") {
+        createMenuItem(new MenuAction("Close") {
             @Override
             public void onClick() {
                 OpenSaveManager.warnAndCloseImage(ImageComponents.getActiveIC());
             }
-        };
-        createMenuItem(closeAction, fileMenu, CTRL_W);
+        }, fileMenu, CTRL_W);
 
         // close all
-        Action closeAllAction = new MenuAction("Close All") {
+        createMenuItem(new MenuAction("Close All") {
             @Override
             public void onClick() {
                 OpenSaveManager.warnAndCloseAllImages();
             }
-        };
-        createMenuItem(closeAllAction, fileMenu, CTRL_ALT_W);
+        }, fileMenu, CTRL_ALT_W);
 
         initAutomateSubmenu(fileMenu, pixelitorWindow);
 
         if (!JVM.isMac) {
-            Action newFromScreenCapture = new ScreenCaptureAction();
-            createMenuItem(newFromScreenCapture, fileMenu, EnabledIf.ACTION_ENABLED);
+            createMenuItem(new ScreenCaptureAction(),
+                    fileMenu, EnabledIf.ACTION_ENABLED);
         }
 
         fileMenu.addSeparator();
 
         // exit
         String exitName = JVM.isMac ? "Quit" : "Exit";
-        Action exitAction = new MenuAction(exitName) {
+        createMenuItem(new MenuAction(exitName) {
             @Override
             public void onClick() {
                 AppLogic.exitApp(pixelitorWindow);
             }
-        };
-        createMenuItem(exitAction, fileMenu, EnabledIf.ACTION_ENABLED);
+        }, fileMenu, EnabledIf.ACTION_ENABLED);
 
         this.add(fileMenu);
     }
@@ -308,29 +299,34 @@ public class MenuBar extends JMenuBar {
         JMenu batchSubmenu = new JMenu("Automate");
         fileMenu.add(batchSubmenu);
 
-        Action batchResizeAction = new MenuAction("Batch Resize...") {
+        createMenuItem(new MenuAction("Batch Resize...") {
             @Override
             public void onClick() {
                 BatchResize.start();
             }
-        };
-        createMenuItem(batchResizeAction, batchSubmenu, EnabledIf.ACTION_ENABLED);
+        }, batchSubmenu, EnabledIf.ACTION_ENABLED);
 
-        Action batchFilterAction = new MenuAction("Batch Filter...") {
+        createMenuItem(new MenuAction("Batch Filter...") {
             @Override
             public void onClick() {
                 new BatchFilterWizard().start(pixelitorWindow);
             }
-        };
-        createMenuItem(batchFilterAction, batchSubmenu, EnabledIf.ACTION_ENABLED);
+        }, batchSubmenu, EnabledIf.ACTION_ENABLED);
 
-        Action exportLayersAction = new MenuAction("Export Layers to PNG...") {
+        createMenuItem(new MenuAction("Export Layers to PNG...") {
             @Override
             public void onClick() {
                 OpenSaveManager.exportLayersToPNG();
             }
-        };
-        createMenuItem(exportLayersAction, batchSubmenu, EnabledIf.THERE_IS_OPEN_IMAGE);
+        }, batchSubmenu, EnabledIf.THERE_IS_OPEN_IMAGE);
+
+        createMenuItem(new MenuAction("Auto Paint...") {
+            @Override
+            public void onClick() {
+                AutoPaint.showDialog();
+            }
+        }, batchSubmenu);
+
     }
 
     private void initEditMenu() {
@@ -361,13 +357,12 @@ public class MenuBar extends JMenuBar {
         editMenu.addSeparator();
 
         // resize
-        Action resizeAction = new MenuAction("Resize...") {
+        createMenuItem(new MenuAction("Resize...") {
             @Override
             public void onClick() {
                 ResizePanel.resizeActiveImage();
             }
-        };
-        createMenuItem(resizeAction, editMenu, CTRL_ALT_I);
+        }, editMenu, CTRL_ALT_I);
 
         createMenuItem(SelectionActions.getCropAction(), editMenu, EnabledIf.ACTION_ENABLED);
         createMenuItem(EnlargeCanvas.getAction(), editMenu);
@@ -543,7 +538,6 @@ public class MenuBar extends JMenuBar {
 
         createMenuItem(new ChannelToTransparency(), otherFiltersSubmenu);
 
-
         filterMenu.add(otherFiltersSubmenu);
     }
 
@@ -553,11 +547,9 @@ public class MenuBar extends JMenuBar {
         createMenuItem(new JHPointillize(), artisticFiltersSubmenu);
         createMenuItem(new JHStamp(), artisticFiltersSubmenu);
         createMenuItem(new JHOilPainting(), artisticFiltersSubmenu);
-
         createMenuItem(new RandomSpheres(), artisticFiltersSubmenu);
         createMenuItem(new JHSmear(), artisticFiltersSubmenu);
         createMenuItem(new JHEmboss(), artisticFiltersSubmenu);
-
         createMenuItem(new Orton(), artisticFiltersSubmenu);
         createMenuItem(new PhotoCollage(), artisticFiltersSubmenu);
         createMenuItem(new JHWeave(), artisticFiltersSubmenu);
@@ -647,50 +639,39 @@ public class MenuBar extends JMenuBar {
         layersMenu.add(AddNewLayerAction.INSTANCE);
         layersMenu.add(DeleteActiveLayerAction.INSTANCE);
 
-        Action flattenImageAction = new MenuAction("Flatten Image") {
+        createMenuItem(new MenuAction("Flatten Image") {
             @Override
             public void onClick() {
                 Composition comp = ImageComponents.getActiveComp().get();
                 comp.flattenImage(UpdateGUI.YES);
             }
-        };
-        createMenuItem(flattenImageAction, layersMenu);
+        }, layersMenu);
 
-        Action mergeDownAction = new MenuAction("Merge Down") {
+        createMenuItem(new MenuAction("Merge Down") {
             @Override
             public void onClick() {
                 Composition comp = ImageComponents.getActiveComp().get();
                 comp.mergeDown(UpdateGUI.YES);
             }
-        };
-        createMenuItem(mergeDownAction, layersMenu, CTRL_E);
+        }, layersMenu, CTRL_E);
 
-//        Action duplicateLayerAction = new MenuAction("Duplicate Layer") {
-//            @Override
-//            void onClick() {
-//                Composition comp = ImageComponents.getActiveComp().get();
-//                comp.duplicateLayer();
-//            }
-//        };
         createMenuItem(DuplicateLayerAction.INSTANCE, layersMenu, CTRL_J);
 
-        Action newLayerFromCompositeAction = new MenuAction("New Layer from Composite") {
+        createMenuItem(new MenuAction("New Layer from Composite") {
             @Override
             public void onClick() {
                 Composition comp = ImageComponents.getActiveComp().get();
                 comp.addNewLayerFromComposite("Composite");
             }
-        };
-        createMenuItem(newLayerFromCompositeAction, layersMenu, CTRL_SHIFT_ALT_E);
+        }, layersMenu, CTRL_SHIFT_ALT_E);
 
-        Action layerToCanvasSizeAction = new MenuAction("Layer to Canvas Size") {
+        createMenuItem(new MenuAction("Layer to Canvas Size") {
             @Override
             public void onClick() {
                 Composition comp = ImageComponents.getActiveComp().get();
                 comp.activeLayerToCanvasSize();
             }
-        };
-        createMenuItem(layerToCanvasSizeAction, layersMenu);
+        }, layersMenu);
 
         initLayerStackSubmenu(layersMenu);
 
@@ -699,13 +680,12 @@ public class MenuBar extends JMenuBar {
             initTextLayerSubmenu(layersMenu, pw);
             initAdjustmentLayersSubmenu(layersMenu);
 
-            Action debugAppAction = new MenuAction("Show Pixelitor Internal State...") {
+            createMenuItem(new MenuAction("Show Pixelitor Internal State...") {
                 @Override
                 public void onClick() {
                     Messages.showDebugAppDialog();
                 }
-            };
-            createMenuItem(debugAppAction, layersMenu, EnabledIf.ACTION_ENABLED);
+            }, layersMenu, EnabledIf.ACTION_ENABLED);
         }
 
         this.add(layersMenu);
@@ -751,7 +731,7 @@ public class MenuBar extends JMenuBar {
             }
         }, layerMaskSubMenu);
 
-        Action deleteLayerMask = new MenuAction("Delete", HAS_LAYER_MASK) {
+        createMenuItem(new MenuAction("Delete", HAS_LAYER_MASK) {
             @Override
             public void onClick() {
                 ImageDisplay ic = ImageComponents.getActiveIC();
@@ -761,10 +741,9 @@ public class MenuBar extends JMenuBar {
 
                 layer.getComp().imageChanged(FULL);
             }
-        };
-        createMenuItem(deleteLayerMask, layerMaskSubMenu);
+        }, layerMaskSubMenu);
 
-        Action applyLayerMask = new MenuAction("Apply", HAS_LAYER_MASK) {
+        createMenuItem(new MenuAction("Apply", HAS_LAYER_MASK) {
             @Override
             public void onClick() {
                 ImageDisplay ic = ImageComponents.getActiveIC();
@@ -782,8 +761,7 @@ public class MenuBar extends JMenuBar {
 
                 layer.getComp().imageChanged(FULL);
             }
-        };
-        createMenuItem(applyLayerMask, layerMaskSubMenu);
+        }, layerMaskSubMenu);
 
         layerMaskSubMenu.addSeparator();
 
@@ -830,43 +808,39 @@ public class MenuBar extends JMenuBar {
 
         createMenuItem(LayerMoveAction.INSTANCE_DOWN, layerStackSubmenu, CTRL_OPEN_BRACKET);
 
-        Action moveToLast = new MenuAction("Layer to Top") {
+        createMenuItem(new MenuAction("Layer to Top") {
             @Override
             public void onClick() {
                 Composition comp = ImageComponents.getActiveComp().get();
                 comp.moveActiveLayerToTop();
             }
-        };
-        createMenuItem(moveToLast, layerStackSubmenu, CTRL_SHIFT_CLOSE_BRACKET);
+        }, layerStackSubmenu, CTRL_SHIFT_CLOSE_BRACKET);
 
-        Action moveToFirstAction = new MenuAction("Layer to Bottom") {
+        createMenuItem(new MenuAction("Layer to Bottom") {
             @Override
             public void onClick() {
                 Composition comp = ImageComponents.getActiveComp().get();
                 comp.moveActiveLayerToBottom();
             }
-        };
-        createMenuItem(moveToFirstAction, layerStackSubmenu, CTRL_SHIFT_OPEN_BRACKET);
+        }, layerStackSubmenu, CTRL_SHIFT_OPEN_BRACKET);
 
         layerStackSubmenu.addSeparator();
 
-        Action moveSelectionUpAction = new MenuAction("Raise Layer Selection") {
+        createMenuItem(new MenuAction("Raise Layer Selection") {
             @Override
             public void onClick() {
                 Composition comp = ImageComponents.getActiveComp().get();
                 comp.moveLayerSelectionUp();
             }
-        };
-        createMenuItem(moveSelectionUpAction, layerStackSubmenu, ALT_CLOSE_BRACKET);
+        }, layerStackSubmenu, ALT_CLOSE_BRACKET);
 
-        Action moveDownSelectionAction = new MenuAction("Lower Layer Selection") {
+        createMenuItem(new MenuAction("Lower Layer Selection") {
             @Override
             public void onClick() {
                 Composition comp = ImageComponents.getActiveComp().get();
                 comp.moveLayerSelectionDown();
             }
-        };
-        createMenuItem(moveDownSelectionAction, layerStackSubmenu, ALT_OPEN_BRACKET);
+        }, layerStackSubmenu, ALT_OPEN_BRACKET);
 
         layersMenu.add(layerStackSubmenu);
     }
@@ -878,14 +852,12 @@ public class MenuBar extends JMenuBar {
 
         viewMenu.addSeparator();
 
-        Action showHistoryAction = new MenuAction("Show History...") {
+        createMenuItem(new MenuAction("Show History...") {
             @Override
             public void onClick() {
                 History.showHistory();
             }
-        };
-        createMenuItem(showHistoryAction, viewMenu, CTRL_H);
-
+        }, viewMenu, CTRL_H);
 
         viewMenu.add(new ShowHideStatusBarAction());
         createMenuItem(new ShowHideHistogramsAction(), viewMenu, EnabledIf.ACTION_ENABLED, F6);
@@ -893,13 +865,12 @@ public class MenuBar extends JMenuBar {
         viewMenu.add(new ShowHideToolsAction());
         createMenuItem(ShowHideAllAction.INSTANCE, viewMenu, EnabledIf.ACTION_ENABLED, TAB);
 
-        Action defaultWorkspaceAction = new MenuAction("Set Default Workspace") {
+        createMenuItem(new MenuAction("Set Default Workspace") {
             @Override
             public void onClick() {
                 AppPreferences.WorkSpace.setDefault();
             }
-        };
-        createMenuItem(defaultWorkspaceAction, viewMenu, EnabledIf.ACTION_ENABLED);
+        }, viewMenu, EnabledIf.ACTION_ENABLED);
 
         JCheckBoxMenuItem showPixelGridMI = new JCheckBoxMenuItem("Show Pixel Grid");
         showPixelGridMI.addActionListener(e -> {
@@ -918,21 +889,19 @@ public class MenuBar extends JMenuBar {
     private static void initArrangeWindowsSubmenu(JMenu viewMenu) {
         JMenu arrangeWindowsSubmenu = new JMenu("Arrange Windows");
 
-        Action cascadeWindowsAction = new MenuAction("Cascade") {
+        createMenuItem(new MenuAction("Cascade") {
             @Override
             public void onClick() {
                 Desktop.INSTANCE.cascadeWindows();
             }
-        };
-        createMenuItem(cascadeWindowsAction, arrangeWindowsSubmenu);
+        }, arrangeWindowsSubmenu);
 
-        Action tileWindowsAction = new MenuAction("Tile") {
+        createMenuItem(new MenuAction("Tile") {
             @Override
             public void onClick() {
                 Desktop.INSTANCE.tileWindows();
             }
-        };
-        createMenuItem(tileWindowsAction, arrangeWindowsSubmenu);
+        }, arrangeWindowsSubmenu);
 
         viewMenu.add(arrangeWindowsSubmenu);
     }
@@ -945,13 +914,12 @@ public class MenuBar extends JMenuBar {
         initSplashSubmenu(developMenu);
         initExperimentalSubmenu(developMenu);
 
-        Action filterCreatorAction = new MenuAction("Filter Creator...") {
+        createMenuItem(new MenuAction("Filter Creator...") {
             @Override
             public void onClick() {
                 FilterCreator.showInDialog(pw);
             }
-        };
-        createMenuItem(filterCreatorAction, developMenu, EnabledIf.ACTION_ENABLED);
+        }, developMenu, EnabledIf.ACTION_ENABLED);
 
         createMenuItem(new MenuAction("Debug Special") {
             @Override
@@ -1099,21 +1067,20 @@ public class MenuBar extends JMenuBar {
     private static void initSplashSubmenu(JMenu developMenu) {
         JMenu splashMenu = new JMenu("Splash");
 
-        Action splashScreenAction = new MenuAction("Create Splash Image") {
+        createMenuItem(new MenuAction("Create Splash Image") {
             @Override
             public void onClick() {
                 ImageTests.createSplashImage();
             }
-        };
-        createMenuItem(splashScreenAction, splashMenu, EnabledIf.ACTION_ENABLED);
+        }, splashMenu, EnabledIf.ACTION_ENABLED);
 
-        Action manySplashScreensAction = new MenuAction("Save Many Splash Images...") {
+        createMenuItem(new MenuAction("Save Many Splash Images...") {
             @Override
             public void onClick() {
                 ImageTests.saveManySplashImages();
             }
-        };
-        createMenuItem(manySplashScreensAction, splashMenu, EnabledIf.ACTION_ENABLED);
+        }, splashMenu, EnabledIf.ACTION_ENABLED);
+
         developMenu.add(splashMenu);
     }
 
@@ -1141,114 +1108,86 @@ public class MenuBar extends JMenuBar {
 
         createMenuItem(new ParamTest(), testSubmenu);
 
-        Action randomResizeAction = new MenuAction("Random Resize") {
+        createMenuItem(new MenuAction("Random Resize") {
             @Override
             public void onClick() {
                 OpTests.randomResize();
             }
-        };
-        createMenuItem(randomResizeAction, testSubmenu, CTRL_ALT_R);
+        }, testSubmenu, CTRL_ALT_R);
 
-        Action randomToolAction = new MenuAction("1001 Brush & Shape Actions") {
-            @Override
-            public void onClick() {
-                ToolTests.randomToolActions(1001, false);
-            }
-        };
-        createMenuItem(randomToolAction, testSubmenu);
-
-        Action randomBrushAction = new MenuAction("1001 Brush Only Actions") {
-            @Override
-            public void onClick() {
-                ToolTests.randomToolActions(1001, true);
-            }
-        };
-        createMenuItem(randomBrushAction, testSubmenu);
-
-
-        Action robotTestAction = new MenuAction("Robot Test") {
+        createMenuItem(new MenuAction("Robot Test") {
             @Override
             public void onClick() {
                 RobotTest.runRobot();
             }
-        };
-        createMenuItem(robotTestAction, testSubmenu, EnabledIf.ACTION_ENABLED, CTRL_R);
+        }, testSubmenu, EnabledIf.ACTION_ENABLED, CTRL_R);
 
-        Action opPerformanceTestAction = new MenuAction("Filter Performance Test...") {
+        createMenuItem(new MenuAction("Filter Performance Test...") {
             @Override
             public void onClick() {
                 new PerformanceTestingDialog(pixelitorWindow);
             }
-        };
-        createMenuItem(opPerformanceTestAction, testSubmenu);
+        }, testSubmenu);
 
-        Action findSlowestFilter = new MenuAction("Find Slowest Filter") {
+        createMenuItem(new MenuAction("Find Slowest Filter") {
             @Override
             public void onClick() {
                 OpTests.findSlowestFilter();
             }
-        };
-        createMenuItem(findSlowestFilter, testSubmenu);
+        }, testSubmenu);
 
-        Action ciPerformanceTestAction = new MenuAction("getCompositeImage() Performance Test...") {
+        createMenuItem(new MenuAction("getCompositeImage() Performance Test...") {
             @Override
             public void onClick() {
                 OpTests.getCompositeImagePerformanceTest();
             }
-        };
-        createMenuItem(ciPerformanceTestAction, testSubmenu);
+        }, testSubmenu);
 
         testSubmenu.addSeparator();
 
-        Action runAllOps = new MenuAction("Run All Filters on Current Layer") {
+        createMenuItem(new MenuAction("Run All Filters on Current Layer") {
             @Override
             public void onClick() {
                 OpTests.runAllFiltersOnCurrentLayer();
             }
-        };
-        createMenuItem(runAllOps, testSubmenu);
+        }, testSubmenu);
 
-        Action saveAllOps = new MenuAction("Save the Result of Each Filter...") {
+        createMenuItem(new MenuAction("Save the Result of Each Filter...") {
             @Override
             public void onClick() {
                 OpTests.saveTheResultOfEachFilter();
             }
-        };
-        createMenuItem(saveAllOps, testSubmenu);
+        }, testSubmenu);
 
-        Action saveInAllFormats = new MenuAction("Save Current Image in All Formats...") {
+        createMenuItem(new MenuAction("Save Current Image in All Formats...") {
             @Override
             public void onClick() {
                 OpenSaveManager.saveCurrentImageInAllFormats();
             }
-        };
-        createMenuItem(saveInAllFormats, testSubmenu);
+        }, testSubmenu);
 
         testSubmenu.addSeparator();
 
-        Action testAllOnNewImg = new MenuAction("Test Layer Operations") {
+        createMenuItem(new MenuAction("Test Layer Operations") {
             @Override
             public void onClick() {
                 ImageTests.testLayers();
             }
-        };
-        createMenuItem(testAllOnNewImg, testSubmenu, EnabledIf.ACTION_ENABLED);
+        }, testSubmenu, EnabledIf.ACTION_ENABLED);
 
-        Action testTools = new MenuAction("Test Tools") {
+        createMenuItem(new MenuAction("Test Tools") {
             @Override
             public void onClick() {
                 ToolTests.testTools();
             }
-        };
-        createMenuItem(testTools, testSubmenu, EnabledIf.ACTION_ENABLED);
+        }, testSubmenu, EnabledIf.ACTION_ENABLED);
 
-        Action testIOOverlayBlur = new MenuAction("IO Overlay Blur...") {
+        createMenuItem(new MenuAction("IO Overlay Blur...") {
             @Override
             public void onClick() {
                 ImageTests.ioOverlayBlur();
             }
-        };
-        createMenuItem(testIOOverlayBlur, testSubmenu, EnabledIf.ACTION_ENABLED);
+        }, testSubmenu, EnabledIf.ACTION_ENABLED);
 
         developMenu.add(testSubmenu);
     }
@@ -1256,23 +1195,21 @@ public class MenuBar extends JMenuBar {
     private static void initDebugSubmenu(JMenu develMenu, PixelitorWindow pixelitorWindow) {
         JMenu debugSubmenu = new JMenu("Debug");
 
-        Action repaintActive = new MenuAction("repaint() on the active image") {
+        createMenuItem(new MenuAction("repaint() on the active image") {
             @Override
             public void onClick() {
                 ImageComponents.repaintActive();
             }
-        };
-        createMenuItem(repaintActive, debugSubmenu);
+        }, debugSubmenu);
 
-        Action revalidateActive = new MenuAction("revalidate() the main window") {
+        createMenuItem(new MenuAction("revalidate() the main window") {
             @Override
             public void onClick() {
                 pixelitorWindow.getContentPane().revalidate();
             }
-        };
-        createMenuItem(revalidateActive, debugSubmenu, EnabledIf.ACTION_ENABLED);
+        }, debugSubmenu, EnabledIf.ACTION_ENABLED);
 
-        Action resetLayerTranslation = new MenuAction("reset the translation of current layer") {
+        createMenuItem(new MenuAction("reset the translation of current layer") {
             @Override
             public void onClick() {
                 Composition comp = ImageComponents.getActiveComp().get();
@@ -1286,8 +1223,7 @@ public class MenuBar extends JMenuBar {
                 }
                 comp.imageChanged(FULL);
             }
-        };
-        createMenuItem(resetLayerTranslation, debugSubmenu);
+        }, debugSubmenu);
 
         createMenuItem(new MenuAction("Debug Translation") {
             @Override
@@ -1307,31 +1243,28 @@ public class MenuBar extends JMenuBar {
             }
         }, debugSubmenu, CTRL_K);
 
-        Action updateHistogram = new MenuAction("Update Histograms") {
+        createMenuItem(new MenuAction("Update Histograms") {
             @Override
             public void onClick() {
                 Composition comp = ImageComponents.getActiveComp().get();
                 HistogramsPanel.INSTANCE.updateFromCompIfShown(comp);
             }
-        };
-        createMenuItem(updateHistogram, debugSubmenu);
+        }, debugSubmenu);
 
-        Action saveAllImagesToDir = new MenuAction("Save All Images to Folder...") {
+        createMenuItem(new MenuAction("Save All Images to Folder...") {
             @Override
             public void onClick() {
                 OpenSaveManager.saveAllImagesToDir();
             }
-        };
-        createMenuItem(saveAllImagesToDir, debugSubmenu);
+        }, debugSubmenu);
 
-        Action debugImageLayerImages = new MenuAction("Debug ImageLayer Images") {
+        createMenuItem(new MenuAction("Debug ImageLayer Images") {
             @Override
             public void onClick() {
                 Optional<ImageLayer> layer = ImageComponents.getActiveImageLayerOrMask();
                 layer.get().debugImages();
             }
-        };
-        createMenuItem(debugImageLayerImages, debugSubmenu);
+        }, debugSubmenu);
 
         develMenu.add(debugSubmenu);
     }
@@ -1339,13 +1272,12 @@ public class MenuBar extends JMenuBar {
     private void initHelpMenu(PixelitorWindow pixelitorWindow) {
         JMenu helpMenu = createMenu("Help", 'H');
 
-        Action tipOfTheDayAction = new MenuAction("Tip of the Day") {
+        createMenuItem(new MenuAction("Tip of the Day") {
             @Override
             public void onClick() {
                 TipsOfTheDay.showTips(pixelitorWindow, true);
             }
-        };
-        createMenuItem(tipOfTheDayAction, helpMenu, EnabledIf.ACTION_ENABLED);
+        }, helpMenu, EnabledIf.ACTION_ENABLED);
 
 //        JMenu webSubMenu = new JMenu("Web");
 //        MenuFactory.createMenuItem(new OpenInBrowserAction("Ask for Help", "https://sourceforge.net/projects/pixelitor/forums/forum/1034234"), null, webSubMenu, MenuEnableCondition.ACTION_ENABLED);
@@ -1355,21 +1287,19 @@ public class MenuBar extends JMenuBar {
 
         helpMenu.addSeparator();
 
-        Action checkForUpdateAction = new MenuAction("Check for Update...") {
+        helpMenu.add(new MenuAction("Check for Update...") {
             @Override
             public void onClick() {
                 UpdatesCheck.checkForUpdates();
             }
-        };
-        helpMenu.add(checkForUpdateAction);
+        });
 
-        Action aboutAction = new MenuAction("About") {
+        createMenuItem(new MenuAction("About") {
             @Override
             public void onClick() {
                 AboutDialog.showDialog(pixelitorWindow);
             }
-        };
-        createMenuItem(aboutAction, helpMenu, EnabledIf.ACTION_ENABLED);
+        }, helpMenu, EnabledIf.ACTION_ENABLED);
 
         this.add(helpMenu);
     }
