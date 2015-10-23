@@ -81,4 +81,9 @@ public class ColorSelector extends JPanel implements ParamGUI {
 
         colorSwatch.setForeground(model.getColor());
     }
+
+    @Override
+    public void setToolTip(String tip) {
+        colorSwatch.setToolTipText(tip);
+    }
 }

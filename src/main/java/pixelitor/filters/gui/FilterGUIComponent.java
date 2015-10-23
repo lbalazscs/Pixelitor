@@ -27,6 +27,10 @@ public interface FilterGUIComponent {
 
     JComponent createGUI();
 
+    /**
+     * Should return either 1 or 2.
+     * If 2 is returned, then a label based on the name is added.
+     */
     int getNrOfGridBagCols();
 
     void setAdjustmentListener(ParamAdjustmentListener listener);

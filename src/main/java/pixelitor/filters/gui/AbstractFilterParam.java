@@ -77,4 +77,11 @@ public abstract class AbstractFilterParam implements FilterParam {
     public boolean ignoresRandomize() {
         return ignoreRandomize;
     }
+
+    @Override
+    public void setToolTip(String tip) {
+        if(paramGUI != null) {
+            paramGUI.setToolTip(tip);
+        }
+    }
 }

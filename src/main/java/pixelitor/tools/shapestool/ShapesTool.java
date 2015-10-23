@@ -21,7 +21,7 @@ import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import org.jdesktop.swingx.painter.effects.AreaEffect;
 import pixelitor.Composition;
 import pixelitor.ImageDisplay;
-import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.StrokeParam;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.history.History;
@@ -65,14 +65,7 @@ public class ShapesTool extends Tool {
     private final EnumComboBoxModel<TwoPointBasedPaint> fillModel = new EnumComboBoxModel<>(TwoPointBasedPaint.class);
     private final EnumComboBoxModel<TwoPointBasedPaint> strokeFillModel = new EnumComboBoxModel<>(TwoPointBasedPaint.class);
 
-    private final RangeParam strokeWidthParam = new RangeParam("Stroke Width", 1, 100, 5);
-
-    // controls in the Stroke Settings dialog
-    private final ButtonModel dashedModel = new JToggleButton.ToggleButtonModel();
-    private final EnumComboBoxModel<BasicStrokeCap> strokeCapModel = new EnumComboBoxModel<>(BasicStrokeCap.class);
-    private final EnumComboBoxModel<BasicStrokeJoin> strokeJoinModel = new EnumComboBoxModel<>(BasicStrokeJoin.class);
-    private final EnumComboBoxModel<StrokeType> strokeTypeModel = new EnumComboBoxModel<>(StrokeType.class);
-
+    private StrokeParam strokeParam = new StrokeParam("");
 
     private JButton strokeSettingsButton;
     private BasicStroke basicStrokeForOpenShapes;
@@ -196,9 +189,10 @@ public class ShapesTool extends Tool {
             int thickness = 0;
             int extraStrokeThickness = 0;
             if (action.enableStrokePaintSelection()) {
-                thickness = strokeWidthParam.getValue();
+                thickness = strokeParam.getStrokeWidth();
 
-                extraStrokeThickness = strokeTypeModel.getSelectedItem().getExtraWidth(thickness);
+                StrokeType strokeType = strokeParam.getStrokeType();
+                extraStrokeThickness = strokeType.getExtraWidth(thickness);
                 thickness += extraStrokeThickness;
             }
 
@@ -255,8 +249,7 @@ public class ShapesTool extends Tool {
 
     private void initAndShowStrokeSettingsDialog() {
         if (toolDialog == null) {
-            toolDialog = new StrokeSettingsDialog(strokeWidthParam, strokeCapModel,
-                    strokeJoinModel, strokeTypeModel, dashedModel);
+            toolDialog = strokeParam.createSettingsDialogForShapesTool();
         }
 
         GUIUtils.centerOnScreen(toolDialog);
@@ -345,7 +338,7 @@ public class ShapesTool extends Tool {
             if (stroke == null) {
                 // During a single mouse drag, only one stroke should be created
                 // This is particularly important for "random shape"
-                stroke = createStroke();
+                stroke = strokeParam.createStroke();
             }
             g.setStroke(stroke);
 //            g.setPaint(strokeFill.getPaint(userDrag));
@@ -362,7 +355,7 @@ public class ShapesTool extends Tool {
                         effect.apply(g, currentShape, 0, 0);
                     } else if (action.hasStroke()) { // special case if there is only stroke
                         if (stroke == null) {
-                            stroke = createStroke();
+                            stroke = strokeParam.createStroke();
                         }
                         effect.apply(g, stroke.createStrokedShape(currentShape), 0, 0);
                     } else { // "effects only"
@@ -376,7 +369,7 @@ public class ShapesTool extends Tool {
             Shape selectionShape;
             if (action.enableStrokeSettings()) {
                 if (stroke == null) {
-                    stroke = createStroke();
+                    stroke = strokeParam.createStroke();
                 }
                 selectionShape = stroke.createStrokedShape(currentShape);
             } else if (!shapeType.isClosed()) {
@@ -396,24 +389,6 @@ public class ShapesTool extends Tool {
                 comp.createSelectionFromShape(selectionShape);
             }
         }
-    }
-
-    private Stroke createStroke() {
-        int strokeWidth = strokeWidthParam.getValue();
-
-        float[] dashFloats = null;
-        if (dashedModel.isSelected()) {
-            dashFloats = new float[]{2 * strokeWidth, 2 * strokeWidth};
-        }
-
-        Stroke s = strokeTypeModel.getSelectedItem().getStroke(
-                strokeWidth,
-                strokeCapModel.getSelectedItem().getValue(),
-                strokeJoinModel.getSelectedItem().getValue(),
-                dashFloats
-        );
-
-        return s;
     }
 
     public boolean isDrawing() {
@@ -456,13 +431,6 @@ public class ShapesTool extends Tool {
      */
     public void setAction(ShapesAction action) {
         actionModel.setSelectedItem(action);
-    }
-
-    /**
-     * Can be used for debugging
-     */
-    public void setStrokeType(StrokeType newStrokeType) {
-        strokeTypeModel.setSelectedItem(newStrokeType);
     }
 }
 

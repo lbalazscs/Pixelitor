@@ -31,7 +31,7 @@ import java.util.Random;
 public class EnumParam<E extends Enum<E>> extends AbstractFilterParam implements ComboBoxModel<E> {
     private final EnumComboBoxModel<E> delegateModel;
     private final E[] enumConstants;
-    private final E defaultValue;
+    private E defaultValue;
 
     public EnumParam(String name, Class<E> enumClass) {
         super(name, false);
@@ -94,6 +94,11 @@ public class EnumParam<E extends Enum<E>> extends AbstractFilterParam implements
     @Override
     public void setSelectedItem(Object anItem) {
         setSelectedItem((E) anItem, true);
+    }
+
+    public void selectAndSetAsDefault(E item) {
+        defaultValue = item;
+        setSelectedItem(item);
     }
 
     private void setSelectedItem(E value, boolean trigger) {

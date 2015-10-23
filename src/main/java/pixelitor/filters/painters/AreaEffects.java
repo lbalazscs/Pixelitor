@@ -23,6 +23,8 @@ import org.jdesktop.swingx.painter.effects.InnerGlowPathEffect;
 import org.jdesktop.swingx.painter.effects.NeonBorderEffect;
 import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
 
+import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.geom.Point2D;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -70,6 +72,13 @@ public class AreaEffects implements Serializable {
         }
         AreaEffect[] retVal = effects.toArray(new AreaEffect[effects.size()]);
         return retVal;
+    }
+
+    public void apply(Graphics2D g2, Shape shape) {
+        AreaEffect[] areaEffects = asArray();
+        for (AreaEffect effect : areaEffects) {
+            effect.apply(g2, shape, 0, 0);
+        }
     }
 
     public int getMaxEffectThickness() {

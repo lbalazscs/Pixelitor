@@ -24,6 +24,7 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.SliderSpinner;
 import pixelitor.utils.Utils;
 
+import javax.swing.event.ChangeListener;
 import java.awt.Color;
 import java.awt.geom.Point2D;
 
@@ -53,6 +54,11 @@ public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
         spreadParam = new RangeParam("Spread:", 1, 100, defaultSpread);
         SliderSpinner spreadSlider = new SliderSpinner(spreadParam, NONE, false);
         gbHelper.addLabelWithControl("Spread:", spreadSlider);
+
+        ChangeListener changeListener = e -> updateDefaultButtonState();
+        distanceParam.addChangeListener(changeListener);
+        angleParam.addChangeListener(changeListener);
+        spreadParam.addChangeListener(changeListener);
     }
 
     @Override
@@ -76,4 +82,23 @@ public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
         return spreadParam.getValue();
     }
 
+    @Override
+    public boolean isSetToDefault() {
+        return super.isSetToDefault()
+                && angleParam.isSetToDefault()
+                && distanceParam.isSetToDefault()
+                && spreadParam.isSetToDefault();
+    }
+
+    @Override
+    public void reset(boolean triggerAction) {
+        super.reset(false);
+        angleParam.reset(false);
+        distanceParam.reset(false);
+        spreadParam.reset(false);
+
+        if (triggerAction && adjustmentListener != null) {
+            adjustmentListener.paramAdjusted();
+        }
+    }
 }

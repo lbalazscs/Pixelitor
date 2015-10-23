@@ -512,6 +512,7 @@ public class MenuBar extends JMenuBar {
         createMenuItem(new JHBrushedMetal(), renderSubmenu);
         createMenuItem(new Voronoi(), renderSubmenu);
         createMenuItem(new FractalTree(), renderSubmenu);
+        createMenuItem(new MysticRose(), renderSubmenu);
 
         filterMenu.add(renderSubmenu);
     }
@@ -1087,8 +1088,6 @@ public class MenuBar extends JMenuBar {
     private static void initExperimentalSubmenu(JMenu developMenu) {
         JMenu experimentalSubmenu = new JMenu("Experimental");
         developMenu.add(experimentalSubmenu);
-
-        createMenuItem(new MysticRose(), experimentalSubmenu);
 
         createMenuItem(new Droste(), experimentalSubmenu);
 

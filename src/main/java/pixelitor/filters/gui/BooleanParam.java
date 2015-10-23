@@ -89,7 +89,7 @@ public class BooleanParam extends AbstractFilterParam {
     public void setValue(boolean newValue, UpdateGUI updateGUI, boolean trigger) {
         if (currentValue != newValue) {
             currentValue = newValue;
-            if (trigger) {
+            if (trigger && adjustmentListener != null) {
                 adjustmentListener.paramAdjusted();
             }
         }

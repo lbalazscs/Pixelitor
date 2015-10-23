@@ -38,4 +38,6 @@ public interface FilterParam extends FilterGUIComponent, Resettable {
     boolean canBeAnimated();
 
     boolean ignoresRandomize();
+
+    void setToolTip(String tip);
 }

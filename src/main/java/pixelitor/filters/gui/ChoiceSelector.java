@@ -68,4 +68,9 @@ public class ChoiceSelector extends JPanel implements ActionListener, ParamGUI {
 //        model.setSelectedItem(comboBox.getSelectedItem());
         defaultButton.updateState();
     }
+
+    @Override
+    public void setToolTip(String tip) {
+        comboBox.setToolTipText(tip);
+    }
 }

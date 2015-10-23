@@ -747,6 +747,7 @@ public class AssertJSwingTest {
         testFilterWithDialog("Brushed Metal...", Randomize.YES, ShowOriginal.NO);
         testFilterWithDialog("Voronoi Diagram...", Randomize.YES, ShowOriginal.NO);
         testFilterWithDialog("Fractal Tree...", Randomize.YES, ShowOriginal.NO);
+        testFilterWithDialog("Mystic Rose...", Randomize.YES, ShowOriginal.NO);
         testFilterWithDialog("Crystallize...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Pointillize...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Stamp...", Randomize.YES, ShowOriginal.YES);

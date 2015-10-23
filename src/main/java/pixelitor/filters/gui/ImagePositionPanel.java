@@ -114,4 +114,9 @@ public class ImagePositionPanel extends JPanel implements ParamGUI {
         ySlider.setEnabled(enabled);
         super.setEnabled(enabled);
     }
+
+    @Override
+    public void setToolTip(String tip) {
+        // TODO should have some generic tooltip
+    }
 }

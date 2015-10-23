@@ -80,4 +80,9 @@ public class TextParamGUI extends JPanel implements ParamGUI {
     public void setText(String s) {
         tf.setText(s);
     }
+
+    @Override
+    public void setToolTip(String tip) {
+        tf.setToolTipText(tip);
+    }
 }

@@ -23,6 +23,8 @@ import org.jdesktop.swingx.painter.effects.AbstractAreaEffect;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.Resettable;
+import pixelitor.utils.DefaultButton;
 import pixelitor.utils.GridBagHelper;
 import pixelitor.utils.SliderSpinner;
 
@@ -37,18 +39,27 @@ import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
 /**
  * An effect configurator panel...
  */
-public abstract class EffectConfiguratorPanel extends JPanel {
+public abstract class EffectConfiguratorPanel extends JPanel implements Resettable {
     private final JCheckBox enabledCB;
     private final ColorSwatch colorSwatch;
+
+    private final boolean defaultEnabled;
+    private final Color defaultColor;
+
     private Color color;
     static final int BUTTON_SIZE = 20;
     ParamAdjustmentListener adjustmentListener;
+
+    private DefaultButton defaultButton;
 
     private final RangeParam opacityRange;
 
     protected final GridBagHelper gbHelper;
 
     EffectConfiguratorPanel(String effectName, boolean defaultEnabled, Color defaultColor) {
+        this.defaultEnabled = defaultEnabled;
+        this.defaultColor = defaultColor;
+
         setBorder(BorderFactory.createTitledBorder('"' + effectName + "\" Configuration"));
 
         opacityRange = new RangeParam("Width:", 1, 100, 100);
@@ -57,6 +68,7 @@ public abstract class EffectConfiguratorPanel extends JPanel {
         enabledCB = new JCheckBox();
         enabledCB.setName("enabledCB");
         enabledCB.setSelected(defaultEnabled);
+        enabledCB.addActionListener(e -> updateDefaultButtonState());
 
         colorSwatch = new ColorSwatch(defaultColor, BUTTON_SIZE);
         color = defaultColor;
@@ -79,13 +91,19 @@ public abstract class EffectConfiguratorPanel extends JPanel {
     private void changeColor() {
         Color selectedColor = ColorPicker.showDialog(PixelitorWindow.getInstance(), "Select Color", color, true);
         if (selectedColor != null) { // ok was pressed
-            color = selectedColor;
-            colorSwatch.setForeground(color);
-            colorSwatch.paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
+            setColor(selectedColor, true);
+        }
+    }
 
-            if (adjustmentListener != null) {
-                adjustmentListener.paramAdjusted();
-            }
+    private void setColor(Color newColor, boolean trigger) {
+        color = newColor;
+        colorSwatch.setForeground(color);
+        colorSwatch.paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
+
+        updateDefaultButtonState();
+
+        if (trigger && adjustmentListener != null) {
+            adjustmentListener.paramAdjusted();
         }
     }
 
@@ -130,5 +148,29 @@ public abstract class EffectConfiguratorPanel extends JPanel {
     public static int calculateBrushSteps(int brushWidth) {
         int brushSteps = 1 + brushWidth / 3;
         return brushSteps;
+    }
+
+    @Override
+    public boolean isSetToDefault() {
+        boolean enabled = enabledCB.isSelected();
+
+        return (enabled == defaultEnabled)
+                && color.equals(defaultColor);
+    }
+
+    @Override
+    public void reset(boolean triggerAction) {
+        enabledCB.setSelected(defaultEnabled);
+        setColor(defaultColor, triggerAction);
+    }
+
+    public void setDefaultButton(DefaultButton defaultButton) {
+        this.defaultButton = defaultButton;
+    }
+
+    protected void updateDefaultButtonState() {
+        if (defaultButton != null) {
+            defaultButton.updateState();
+        }
     }
 }

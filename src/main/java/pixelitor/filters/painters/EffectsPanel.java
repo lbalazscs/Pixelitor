@@ -22,6 +22,8 @@ import org.jdesktop.swingx.painter.effects.InnerGlowPathEffect;
 import org.jdesktop.swingx.painter.effects.NeonBorderEffect;
 import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
 import pixelitor.filters.gui.ParamAdjustmentListener;
+import pixelitor.filters.gui.Resettable;
+import pixelitor.utils.DefaultButton;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -37,7 +39,7 @@ import static java.awt.Color.WHITE;
 /**
  * Configuration panel for SwingX effects
  */
-public class EffectsPanel extends JPanel {
+public class EffectsPanel extends JPanel implements Resettable {
     public static final String GLOW_TAB_NAME = "Glow               ";
     public static final String INNER_GLOW_TAB_NAME = "Inner Glow     ";
     public static final String NEON_BORDER_TAB_NAME = "Neon Border ";
@@ -226,6 +228,29 @@ public class EffectsPanel extends JPanel {
 
     public int getMaxEffectThickness() {
         return returnedEffects.getMaxEffectThickness();
+    }
+
+    @Override
+    public boolean isSetToDefault() {
+        return glowConfigurator.isSetToDefault()
+                && innerGlowConfigurator.isSetToDefault()
+                && neonBorderConfigurator.isSetToDefault()
+                && dropShadowConfigurator.isSetToDefault();
+    }
+
+    @Override
+    public void reset(boolean triggerAction) {
+        glowConfigurator.reset(false);
+        innerGlowConfigurator.reset(false);
+        neonBorderConfigurator.reset(false);
+        dropShadowConfigurator.reset(triggerAction);
+    }
+
+    public void setDefaultButton(DefaultButton button) {
+        glowConfigurator.setDefaultButton(button);
+        innerGlowConfigurator.setDefaultButton(button);
+        neonBorderConfigurator.setDefaultButton(button);
+        dropShadowConfigurator.setDefaultButton(button);
     }
 }
 

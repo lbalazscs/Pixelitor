@@ -23,6 +23,7 @@ import pixelitor.PixelitorWindow;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
+import java.awt.Dialog;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Frame;
@@ -37,7 +38,7 @@ public abstract class OKCancelDialog extends JDialog {
     protected JComponent formPanel;
     private JLabel messageLabel;
     private JScrollPane scrollPane;
-    private final JButton okButton;
+    private JButton okButton;
 
     protected OKCancelDialog(JComponent form, String title) {
         this(form, PixelitorWindow.getInstance(), title, "OK", "Cancel");
@@ -47,12 +48,29 @@ public abstract class OKCancelDialog extends JDialog {
         this(form, owner, title, "OK", "Cancel");
     }
 
+    protected OKCancelDialog(JComponent form, Dialog owner, String title) {
+        this(form, owner, title, "OK", "Cancel");
+    }
+
     protected OKCancelDialog(JComponent form, Frame owner, String title, String okText, String cancelText) {
+        this(form, owner, title, okText, cancelText, true);
+    }
+
+    protected OKCancelDialog(JComponent form, Dialog owner, String title, String okText, String cancelText) {
         this(form, owner, title, okText, cancelText, true);
     }
 
     protected OKCancelDialog(JComponent form, Frame owner, String title, String okText, String cancelText, boolean addScrollBars) {
         super(owner, title, true);
+        init(form, okText, cancelText, addScrollBars);
+    }
+
+    protected OKCancelDialog(JComponent form, Dialog owner, String title, String okText, String cancelText, boolean addScrollBars) {
+        super(owner, title, true);
+        init(form, okText, cancelText, addScrollBars);
+    }
+
+    private void init(JComponent form, String okText, String cancelText, boolean addScrollBars) {
         assert EventQueue.isDispatchThread();
 
         this.formPanel = form;

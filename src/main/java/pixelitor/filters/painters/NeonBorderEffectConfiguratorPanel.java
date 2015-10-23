@@ -30,12 +30,14 @@ import java.awt.event.MouseEvent;
  */
 public class NeonBorderEffectConfiguratorPanel extends SimpleEffectConfiguratorPanel {
     private Color innerColor;
+    private final Color defaultInnerColor;
     private final ColorSwatch innerColorSwatch;
 
     NeonBorderEffectConfiguratorPanel(boolean defaultSelected, Color defaultColor, Color innerColor, int defaultWidth) {
         super("Neon Border", defaultSelected, defaultColor, defaultWidth);
 
         this.innerColor = innerColor;
+        this.defaultInnerColor = innerColor;
         innerColorSwatch = new ColorSwatch(this.innerColor, BUTTON_SIZE);
 
         innerColorSwatch.addMouseListener(new MouseAdapter() {
@@ -43,13 +45,7 @@ public class NeonBorderEffectConfiguratorPanel extends SimpleEffectConfiguratorP
             public void mouseClicked(MouseEvent e) {
                 Color selectedColor = ColorPicker.showDialog(PixelitorWindow.getInstance(), "Select Color", NeonBorderEffectConfiguratorPanel.this.innerColor, true);
                 if (selectedColor != null) { // ok was pressed
-                    NeonBorderEffectConfiguratorPanel.this.innerColor = selectedColor;
-                    innerColorSwatch.setForeground(NeonBorderEffectConfiguratorPanel.this.innerColor);
-                    innerColorSwatch.paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
-
-                    if (adjustmentListener != null) {
-                        adjustmentListener.paramAdjusted();
-                    }
+                    setNewInnerColor(selectedColor, true);
                 }
             }
         });
@@ -57,7 +53,30 @@ public class NeonBorderEffectConfiguratorPanel extends SimpleEffectConfiguratorP
         gbHelper.addLabelWithControl("Inner Color:", innerColorSwatch);
     }
 
+    private void setNewInnerColor(Color selectedColor, boolean trigger) {
+        this.innerColor = selectedColor;
+        innerColorSwatch.setForeground(this.innerColor);
+        innerColorSwatch.paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
+
+        if (trigger && adjustmentListener != null) {
+            adjustmentListener.paramAdjusted();
+        }
+        updateDefaultButtonState();
+    }
+
     public Color getInnerColor() {
         return innerColor;
+    }
+
+    @Override
+    public boolean isSetToDefault() {
+        return super.isSetToDefault()
+                && innerColor.equals(defaultInnerColor);
+    }
+
+    @Override
+    public void reset(boolean triggerAction) {
+        super.reset(false);
+        setNewInnerColor(defaultInnerColor, triggerAction);
     }
 }

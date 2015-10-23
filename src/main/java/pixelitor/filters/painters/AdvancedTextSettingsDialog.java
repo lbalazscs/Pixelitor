@@ -77,7 +77,7 @@ public class AdvancedTextSettingsDialog extends OKDialog {
         JComponent trackingGUI = trackingParam.createGUI();
         gbh.addLabelWithControl("Tracking (Letter-spacing):", trackingGUI);
 
-        setupGUI(p, false);
+        setupGUI(p);
     }
 
     public void updateMap(Map<TextAttribute, Object> map) {

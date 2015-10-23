@@ -69,4 +69,9 @@ public class GroupedRangeSelector extends JPanel implements ParamGUI {
     public void updateGUI() {
         // can be empty
     }
+
+    @Override
+    public void setToolTip(String tip) {
+        // TODO
+    }
 }

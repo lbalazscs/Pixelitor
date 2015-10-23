@@ -27,4 +27,6 @@ public interface ParamGUI {
     void updateGUI();
 
     void setEnabled(boolean b);
+
+    void setToolTip(String tip);
 }

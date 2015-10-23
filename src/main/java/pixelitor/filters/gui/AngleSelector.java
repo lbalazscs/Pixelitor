@@ -88,5 +88,10 @@ public class AngleSelector extends JPanel implements ParamGUI {
         sliderSpinner.setEnabled(enabled);
         super.setEnabled(enabled);
     }
+
+    @Override
+    public void setToolTip(String tip) {
+        // TODO should have some generic tooltip
+    }
 }
 

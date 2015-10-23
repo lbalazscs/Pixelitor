@@ -65,4 +65,9 @@ public class BooleanSelector extends JPanel implements ParamGUI {
     public void updateGUI() {
         checkBox.setSelected(model.isChecked());
     }
+
+    @Override
+    public void setToolTip(String tip) {
+        checkBox.setToolTipText(tip);
+    }
 }

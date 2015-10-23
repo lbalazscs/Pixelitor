@@ -40,6 +40,8 @@ public class SimpleEffectConfiguratorPanel extends EffectConfiguratorPanel {
         widthSlider = new SliderSpinner(widthRange, NONE, false);
 
         gbHelper.addLabelWithControl("Width:", widthSlider);
+
+        widthRange.addChangeListener(e -> updateDefaultButtonState());
     }
 
     @Override
@@ -51,5 +53,17 @@ public class SimpleEffectConfiguratorPanel extends EffectConfiguratorPanel {
     public void setAdjustmentListener(ParamAdjustmentListener adjustmentListener) {
         super.setAdjustmentListener(adjustmentListener);
         widthRange.setAdjustmentListener(adjustmentListener);
+    }
+
+    @Override
+    public boolean isSetToDefault() {
+        return super.isSetToDefault()
+                && widthRange.isSetToDefault();
+    }
+
+    @Override
+    public void reset(boolean triggerAction) {
+        super.reset(false);
+        widthRange.reset(triggerAction);
     }
 }

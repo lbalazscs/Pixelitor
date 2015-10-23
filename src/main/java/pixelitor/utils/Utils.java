@@ -25,8 +25,12 @@ import pixelitor.ImageComponents;
 import pixelitor.ImageDisplay;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.Filter;
+import pixelitor.filters.gui.AbstractFilterParam;
+import pixelitor.filters.gui.FilterGUIComponent;
 
 import javax.swing.*;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
@@ -60,6 +64,7 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR_PRE;
 
@@ -447,4 +452,48 @@ public final class Utils {
             throw new IllegalStateException("interrupted!");
         }
     }
+
+    public static <T> void setupDisableOtherIf(ComboBoxModel<T> current, AbstractFilterParam other, Predicate<T> condition) {
+        current.addListDataListener(new ListDataListener() {
+            @Override
+            public void intervalAdded(ListDataEvent e) {
+            }
+
+            @Override
+            public void intervalRemoved(ListDataEvent e) {
+            }
+
+            @Override
+            public void contentsChanged(ListDataEvent e) {
+                if (condition.test((T) current.getSelectedItem())) {
+                    other.setEnabled(false, FilterGUIComponent.EnabledReason.APP_LOGIC);
+                } else {
+                    other.setEnabled(true, FilterGUIComponent.EnabledReason.APP_LOGIC);
+                }
+            }
+        });
+    }
+
+    public static <T> void setupEnableOtherIf(ComboBoxModel<T> current, AbstractFilterParam other, Predicate<T> condition) {
+        other.setEnabled(false, FilterGUIComponent.EnabledReason.APP_LOGIC);
+        current.addListDataListener(new ListDataListener() {
+            @Override
+            public void intervalAdded(ListDataEvent e) {
+            }
+
+            @Override
+            public void intervalRemoved(ListDataEvent e) {
+            }
+
+            @Override
+            public void contentsChanged(ListDataEvent e) {
+                if (condition.test((T) current.getSelectedItem())) {
+                    other.setEnabled(true, FilterGUIComponent.EnabledReason.APP_LOGIC);
+                } else {
+                    other.setEnabled(false, FilterGUIComponent.EnabledReason.APP_LOGIC);
+                }
+            }
+        });
+    }
+
 }

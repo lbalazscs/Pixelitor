@@ -41,7 +41,8 @@ public class OKDialog extends JDialog {
         this.okButtonText = okButtonText;
 
         assert form != null;
-        setupGUI(form, true);
+        setupGUI(form);
+        setVisible(true);
     }
 
     public OKDialog(Frame owner, String title, String okButtonText) {
@@ -49,13 +50,16 @@ public class OKDialog extends JDialog {
         this.okButtonText = okButtonText;
     }
 
+    public OKDialog(Dialog owner, String title) {
+        this(owner, title, "OK");
+    }
+
     public OKDialog(Dialog owner, String title, String okButtonText) {
         super(owner, title);
         this.okButtonText = okButtonText;
     }
 
-
-    public void setupGUI(JComponent form, boolean setVisible) {
+    public void setupGUI(JComponent form) {
         setLayout(new BorderLayout());
 
         scrollPane = new JScrollPane(form, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -69,22 +73,18 @@ public class OKDialog extends JDialog {
         p2.add(ok);
         add(p2, BorderLayout.SOUTH);
 
-        ok.addActionListener(evt -> okPressed());
+        ok.addActionListener(evt -> dialogAccepted());
 
         // cancel when ESC is pressed
-        ((JComponent) getContentPane()).registerKeyboardAction(e -> closeDialog(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        ((JComponent) getContentPane()).registerKeyboardAction(e -> close(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         pack();
 
         GUIUtils.centerOnScreen(this);
-
-        if (setVisible) {
-            setVisible(true);
-        }
     }
 
-    protected void okPressed() {
-        closeDialog();
+    protected void dialogAccepted() {
+        close();
     }
 
     @Override
@@ -97,7 +97,7 @@ public class OKDialog extends JDialog {
         }
     }
 
-    private void closeDialog() {
+    protected void close() {
         setVisible(false);
         dispose();
     }
