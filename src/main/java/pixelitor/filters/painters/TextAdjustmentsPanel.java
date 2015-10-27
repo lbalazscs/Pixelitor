@@ -34,6 +34,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.Color;
 import java.awt.Dialog;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridBagLayout;
@@ -114,7 +115,10 @@ public class TextAdjustmentsPanel extends AdjustPanel implements ParamAdjustment
         watermarkCB = new JCheckBox("Use Text for Watermarking", hasWatermark);
         watermarkCB.addActionListener(this);
 
-        verticalBox.add(watermarkCB);
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        bottomPanel.add(watermarkCB);
+
+        verticalBox.add(bottomPanel);
 
         add(verticalBox);
     }

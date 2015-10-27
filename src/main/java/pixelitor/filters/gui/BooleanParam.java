@@ -28,7 +28,6 @@ import java.awt.Rectangle;
 public class BooleanParam extends AbstractFilterParam {
     private final boolean defaultValue;
     private boolean currentValue;
-    private final boolean ignoreRandomize;
     private final boolean addDefaultButton;
 
     public BooleanParam(String name, boolean defaultValue) {
@@ -43,7 +42,6 @@ public class BooleanParam extends AbstractFilterParam {
         super(name, ignoreRandomize);
         this.defaultValue = defaultValue;
         currentValue = defaultValue;
-        this.ignoreRandomize = ignoreRandomize;
         this.addDefaultButton = addDefaultButton;
     }
 

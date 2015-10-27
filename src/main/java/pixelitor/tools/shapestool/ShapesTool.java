@@ -65,7 +65,7 @@ public class ShapesTool extends Tool {
     private final EnumComboBoxModel<TwoPointBasedPaint> fillModel = new EnumComboBoxModel<>(TwoPointBasedPaint.class);
     private final EnumComboBoxModel<TwoPointBasedPaint> strokeFillModel = new EnumComboBoxModel<>(TwoPointBasedPaint.class);
 
-    private StrokeParam strokeParam = new StrokeParam("");
+    private final StrokeParam strokeParam = new StrokeParam("");
 
     private JButton strokeSettingsButton;
     private BasicStroke basicStrokeForOpenShapes;

@@ -10,7 +10,7 @@ import java.awt.Rectangle;
 
 public class EffectsParam extends AbstractFilterParam {
     private EffectsPanel effectsPanel;
-    private boolean separateDialog;
+    private final boolean separateDialog;
 
     public EffectsParam(String name, boolean ignoreRandomize, boolean separateDialog) {
         super(name, ignoreRandomize);
@@ -20,15 +20,14 @@ public class EffectsParam extends AbstractFilterParam {
     @Override
     public JComponent createGUI() {
         assert adjustmentListener != null;
-        EffectsPanel effectsPanel = new EffectsPanel(adjustmentListener, null);
-        this.effectsPanel = effectsPanel;
+        effectsPanel = new EffectsPanel(adjustmentListener, null);
 
         if (separateDialog) {
             DefaultButton button = new DefaultButton(effectsPanel);
             effectsPanel.setDefaultButton(button);
 
             ConfigureParamGUI configureParamGUI = new ConfigureParamGUI(owner -> {
-                OKDialog effectsDialog = new OKDialog(owner, "Effects");
+                OKDialog effectsDialog = new OKDialog(owner, "Effects", "Close");
                 effectsDialog.setupGUI(effectsPanel);
                 return effectsDialog;
             }, button);

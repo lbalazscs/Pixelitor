@@ -77,7 +77,6 @@ public class ScreenCaptureAction extends AbstractAction {
 
             boolean hidePixelitor = hidePixelitorCB.isSelected();
             if (hidePixelitor) {
-//                window.setVisible(false);
                 window.iconify();
                 Thread.sleep(500);
             }
@@ -96,6 +95,7 @@ public class ScreenCaptureAction extends AbstractAction {
 
             String name = "Screen Capture " + captureCount;
             Composition comp = Composition.fromImage(screenCapture, null, name);
+            comp.setDirty(true);
             AppLogic.addComposition(comp);
 
             captureCount++;

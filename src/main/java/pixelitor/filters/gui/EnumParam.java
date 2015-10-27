@@ -98,7 +98,7 @@ public class EnumParam<E extends Enum<E>> extends AbstractFilterParam implements
 
     public void selectAndSetAsDefault(E item) {
         defaultValue = item;
-        setSelectedItem(item);
+        setSelectedItem(item, false);
     }
 
     private void setSelectedItem(E value, boolean trigger) {

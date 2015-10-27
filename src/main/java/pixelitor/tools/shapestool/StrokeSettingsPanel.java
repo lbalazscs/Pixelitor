@@ -76,7 +76,7 @@ public class StrokeSettingsPanel extends JPanel {
         return capJoinPanel;
     }
 
-    private JPanel createStrokeTypePanel(EnumParam<StrokeType> strokeTypeParam,
+    private static JPanel createStrokeTypePanel(EnumParam<StrokeType> strokeTypeParam,
                                          EnumParam<ShapeType> shapeTypeParam,
                                          BooleanParam dashedParam) {
         JPanel strokeTypePanel = new JPanel();

@@ -30,7 +30,6 @@ import java.awt.event.KeyEvent;
  */
 public class OKDialog extends JDialog {
     private final String okButtonText;
-    private JScrollPane scrollPane;
 
     public OKDialog(Frame owner, JComponent form, String title) {
         this(owner, form, title, "OK");
@@ -62,7 +61,7 @@ public class OKDialog extends JDialog {
     public void setupGUI(JComponent form) {
         setLayout(new BorderLayout());
 
-        scrollPane = new JScrollPane(form, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        JScrollPane scrollPane = new JScrollPane(form, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         add(scrollPane, BorderLayout.CENTER);
 
 //        add(form, BorderLayout.CENTER);

@@ -22,42 +22,23 @@ import pixelitor.utils.CardPanelWithCombo;
 import pixelitor.utils.SliderSpinner;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.Collection;
 
 import static java.awt.Color.GRAY;
 
 public class OneChannelLevelsPanel extends CardPanelWithCombo.Card {
-    //    private String channelName;
-    private final Collection<SliderSpinner> sliders = new ArrayList<>();
-    private final Box box = Box.createVerticalBox();
-
-
-
-    private final SliderSpinner inputBlackSlider;
-    private final SliderSpinner inputWhiteSlider;
-    private final SliderSpinner outputBlackSlider;
-    private final SliderSpinner outputWhiteSlider;
-
     public OneChannelLevelsPanel(OneChannelLevelsModel model) {
         super(model.getName());
+        Box box = Box.createVerticalBox();
         add(box);
 
-        inputBlackSlider = new SliderSpinner(model.getInputBlackParam(), GRAY, model.getBackColor());
-        inputWhiteSlider = new SliderSpinner(model.getInputWhiteParam(), model.getWhiteColor(), GRAY);
-        outputBlackSlider = new SliderSpinner(model.getOutputBlackParam(), GRAY, model.getWhiteColor());
-        outputWhiteSlider = new SliderSpinner(model.getOutputWhiteParam(), model.getBackColor(), GRAY);
+        SliderSpinner inputBlackSlider = new SliderSpinner(model.getInputBlackParam(), GRAY, model.getBackColor());
+        SliderSpinner inputWhiteSlider = new SliderSpinner(model.getInputWhiteParam(), model.getWhiteColor(), GRAY);
+        SliderSpinner outputBlackSlider = new SliderSpinner(model.getOutputBlackParam(), GRAY, model.getWhiteColor());
+        SliderSpinner outputWhiteSlider = new SliderSpinner(model.getOutputWhiteParam(), model.getBackColor(), GRAY);
 
-        addSliderSpinner(inputBlackSlider);
-        addSliderSpinner(inputWhiteSlider);
-        addSliderSpinner(outputBlackSlider);
-        addSliderSpinner(outputWhiteSlider);
+        box.add(inputBlackSlider);
+        box.add(inputWhiteSlider);
+        box.add(outputBlackSlider);
+        box.add(outputWhiteSlider);
     }
-
-    private void addSliderSpinner(SliderSpinner sp) {
-        box.add(sp);
-        sliders.add(sp);
-    }
-
-
 }

@@ -24,7 +24,7 @@ public abstract class ArrowKey {
 
     private final boolean shiftDown;
 
-    protected ArrowKey(boolean shiftDown) {
+    private ArrowKey(boolean shiftDown) {
         this.shiftDown = shiftDown;
     }
 

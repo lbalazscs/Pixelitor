@@ -132,7 +132,7 @@ public class PixelitorWindow extends JFrame {
         URL imgURL48 = getClass().getResource("/images/pixelitor_icon48.png");
         URL imgURL256 = getClass().getResource("/images/pixelitor_icon256.png");
 
-        if (imgURL32 != null) {
+        if (imgURL32 != null && imgURL48 != null && imgURL256 != null) {
             List<Image> icons = new ArrayList<>(2);
             icons.add(new ImageIcon(imgURL32).getImage());
             icons.add(new ImageIcon(imgURL48).getImage());
@@ -140,7 +140,6 @@ public class PixelitorWindow extends JFrame {
             setIconImages(icons);
         } else {
             String message = "icon imgURL is null";
-//            JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
             Dialogs.showErrorDialog(this, "Error", message);
         }
     }

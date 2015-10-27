@@ -546,6 +546,7 @@ public abstract class Layer implements Serializable {
     }
 
     protected void notifyLayerChangeObservers() {
+        //noinspection Convert2streamapi
         for (LayerChangeListener observer : layerChangeObservers) {
             observer.layerStateChanged();
         }
@@ -553,14 +554,11 @@ public abstract class Layer implements Serializable {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("{");
-        sb.append("name='").append(name).append('\'');
-        sb.append(", visible=").append(visible);
-        sb.append(", mask=").append(mask);
-        sb.append(", maskEditing=").append(maskEditing);
-        sb.append(", maskEnabled=").append(maskEnabled);
-        sb.append(", isAdjustment=").append(isAdjustment);
-        sb.append('}');
-        return sb.toString();
+        return "{name='" + name + '\''
+                + ", visible=" + visible
+                + ", mask=" + mask
+                + ", maskEditing=" + maskEditing
+                + ", maskEnabled=" + maskEnabled
+                + ", isAdjustment=" + isAdjustment + '}';
     }
 }

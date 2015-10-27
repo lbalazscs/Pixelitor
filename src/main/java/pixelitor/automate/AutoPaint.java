@@ -29,6 +29,9 @@ public class AutoPaint {
     //    public static final Tool[] ALLOWED_TOOLS = {SMUDGE, BRUSH, CLONE, ERASER, SHAPES};
     public static final Tool[] ALLOWED_TOOLS = {SMUDGE, BRUSH, CLONE, ERASER};
 
+    private AutoPaint() {
+    }
+
     public static void showDialog() {
         ConfigPanel configPanel = new ConfigPanel();
         JDialog d = new OKCancelDialog(configPanel, "Auto Paint") {
@@ -118,13 +121,13 @@ public class AutoPaint {
         private final JComboBox<Tool> toolSelector;
         private static Tool defaultTool = SMUDGE;
 
-        private IntTextField numStrokesTF;
+        private final IntTextField numStrokesTF;
         private static int defaultNumStrokes = 100;
 
-        private IntTextField lengthTF;
+        private final IntTextField lengthTF;
         private static int defaultLength = 100;
 
-        public ConfigPanel() {
+        private ConfigPanel() {
             super(new GridBagLayout());
             GridBagHelper gbh = new GridBagHelper(this);
 
