@@ -590,11 +590,19 @@ public class AssertJSwingTest {
 
     private void testAutoPaint() {
         for (Tool tool : AutoPaint.ALLOWED_TOOLS) {
-            testAutoPaintWithTool(tool);
+            testAutoPaintWithTool(tool, WithSelection.NO);
+            testAutoPaintWithTool(tool, WithSelection.YES);
         }
+        keyboardDeselect();
     }
 
-    private void testAutoPaintWithTool(Tool tool) {
+    private void testAutoPaintWithTool(Tool tool, WithSelection withSelection) {
+        if (withSelection == WithSelection.YES) {
+            addSelection();
+        } else {
+            keyboardDeselect();
+        }
+
         runMenuCommand("Auto Paint...");
         DialogFixture dialog = findDialogByTitle("Auto Paint");
 
@@ -609,6 +617,7 @@ public class AssertJSwingTest {
         }
 
         dialog.button("ok").click();
+        keyboardUndoRedoUndo();
     }
 
     private void testScreenCapture() {
@@ -1501,7 +1510,7 @@ public class AssertJSwingTest {
     private void addSelection() {
         window.toggleButton("Selection Tool Button").click();
         moveTo(200, 200);
-        dragTo(400, 400);
+        dragTo(600, 500);
     }
 
     private void addTranslation() {

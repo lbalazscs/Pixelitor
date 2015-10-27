@@ -19,6 +19,7 @@ package pixelitor.menus;
 
 import pixelitor.ImageComponents;
 import pixelitor.ImageDisplay;
+import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.TextLayer;
 import pixelitor.utils.Messages;
@@ -48,7 +49,7 @@ public abstract class MenuAction extends AbstractAction {
             public String getErrorMessage(Layer layer) {
                 return String.format("The layer \"%s\" has no layer mask.", layer.getName());
             }
-        }, IS_TEXT_LAYER("Not text layer") {
+        }, IS_TEXT_LAYER("Not a text layer") {
             @Override
             boolean isAllowed(Layer layer) {
                 return (layer instanceof TextLayer);
@@ -57,6 +58,16 @@ public abstract class MenuAction extends AbstractAction {
             @Override
             public String getErrorMessage(Layer layer) {
                 return String.format("The layer \"%s\" is not a text layer.", layer.getName());
+            }
+        }, IS_IMAGE_LAYER("Not an image layer") {
+            @Override
+            boolean isAllowed(Layer layer) {
+                return (layer instanceof ImageLayer);
+            }
+
+            @Override
+            public String getErrorMessage(Layer layer) {
+                return String.format("The layer \"%s\" is not an image layer.", layer.getName());
             }
         };
 

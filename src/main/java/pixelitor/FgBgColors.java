@@ -34,7 +34,7 @@ public class FgBgColors {
         gui.setBgColor(c);
     }
 
-    public static void setRandomColors() {
+    public static void randomizeColors() {
         gui.randomizeColorsAction.actionPerformed(null);
     }
 

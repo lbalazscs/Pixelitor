@@ -31,6 +31,7 @@ import javax.swing.*;
 import java.awt.Component;
 import java.awt.Frame;
 import java.awt.Toolkit;
+import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
 
 /**
@@ -102,6 +103,10 @@ public class Dialogs {
 
     public static void showExceptionDialog(Throwable e) {
         e.printStackTrace();
+
+        if(e instanceof InvocationTargetException) {
+            e = e.getCause();
+        }
 
         if (Build.CURRENT.isRobotTest()) {
             DebugEventQueue.dump();

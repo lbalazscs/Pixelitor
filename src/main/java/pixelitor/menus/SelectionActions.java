@@ -99,7 +99,7 @@ public final class SelectionActions {
     }
 
     public static void setEnabled(boolean b, Composition comp) {
-        assert SwingUtilities.isEventDispatchThread();
+        assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
 
         if (Build.CURRENT.isRobotTest()) {
             if (comp != null) {

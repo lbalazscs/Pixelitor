@@ -18,7 +18,10 @@
 package pixelitor;
 
 import net.jafama.FastMath;
+import pixelitor.filters.Filter;
 import pixelitor.io.OpenSaveManager;
+import pixelitor.layers.LayerMaskAddType;
+import pixelitor.tools.Tool;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Dialogs;
 import pixelitor.utils.Messages;
@@ -138,68 +141,31 @@ public class Pixelitor {
             return;
         }
 
+//        AutoPaint.showDialog();
 //        NewImage.addNewImage(FillType.WHITE, 100, 100, "Test");
-
 
 //        Tests3x3.addStandardImage(false);
 
 //        ImageComponents.getActiveIC().setZoom(ZoomLevel.Z6400, true);
-//
-//        Tools.MOVE.getButton().doClick();
-//
-//        NewImage.addNewImage(FillType.WHITE, 600, 400, "Test");
-//        ImageComponents.getActiveLayer().get()
-//                .addMask(LayerMaskAddType.PATTERN);
-//
-//        TextLayer.createNew(pw);
-
-
-//        ImageComponents.getActiveLayer().get()
-//                .addMask(LayerMaskAddType.REVEAL_ALL_INT_ARGB);
-//
-//        NewImage.addNewImage(FillType.WHITE, 600, 400, "Test INT_RGB");
-//        ImageComponents.getActiveLayer().get()
-//                .addMask(LayerMaskAddType.REVEAL_ALL_INT_RGB);
-
-
-//        // show and edit layer mask
-//        ImageComponent ic = ImageComponents.getActiveIC();
-//        Layer activeLayer = ic.getComp().getActiveLayer();
-//        ic.setShowLayerMask(true);
-//        FgBgColorSelector.INSTANCE.setMaskEditing(true);
-//        activeLayer.setMaskEditing(true);
-
-//        new DrunkVision().actionPerformed(null);
-
-//        new ChannelToTransparency().actionPerformed(null);
-
-//        Tools.SELECTION.getButton().doClick();
-
-//        new BatchFilterWizard().start(pw);
 
 //        GlobalKeyboardWatch.registerDebugMouseWatching();
 
 //        new TweenWizard().start(pw);
 
-//        CircleToSquare op = new CircleToSquare();
-//        op.actionPerformed(null);
-
-//        Composition comp = AppLogic.getActiveComp();
-//        if(comp != null) {
-//            String layerName = "text layer";
-//            String layerText = "text layer text";
-//            TextLayer textLayer = new TextLayer(comp, layerName, layerText);
-//            comp.addLayer(textLayer, true, true, false);
-//        }
-
 //        pw.dispatchEvent(new KeyEvent(pw, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), KeyEvent.CTRL_MASK, KeyEvent.VK_T, 'T'));
+    }
 
-//        History.showHistory();
+    private static void clickTool(Tool tool) {
+        tool.getButton().doClick();
+    }
 
-//        Tools.SHAPES.setAction(ShapesAction.STROKE);
-//        Tools.SHAPES.setStrokeType(StrokeType.WOBBLE);
+    private static void startFilter(Filter filter) {
+        filter.actionPerformed(null);
+    }
 
-//        ImageTests.createSplashImage();
-//        AppLogic.getActiveComp().moveLayerSelectionDown();
+    private static void addNewImage() {
+        NewImage.addNewImage(FillType.WHITE, 600, 400, "Test");
+        ImageComponents.getActiveLayer().get()
+                .addMask(LayerMaskAddType.PATTERN);
     }
 }

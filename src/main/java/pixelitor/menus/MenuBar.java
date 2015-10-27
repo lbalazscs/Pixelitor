@@ -115,6 +115,7 @@ import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_90;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.MOTION_BLUR;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
 import static pixelitor.menus.MenuAction.AllowedLayerType.HAS_LAYER_MASK;
+import static pixelitor.menus.MenuAction.AllowedLayerType.IS_IMAGE_LAYER;
 import static pixelitor.menus.MenuAction.AllowedLayerType.IS_TEXT_LAYER;
 
 /**
@@ -320,13 +321,12 @@ public class MenuBar extends JMenuBar {
             }
         }, batchSubmenu, EnabledIf.THERE_IS_OPEN_IMAGE);
 
-        createMenuItem(new MenuAction("Auto Paint...") {
+        createMenuItem(new MenuAction("Auto Paint...", IS_IMAGE_LAYER) {
             @Override
             public void onClick() {
                 AutoPaint.showDialog();
             }
-        }, batchSubmenu);
-
+        }, batchSubmenu, EnabledIf.THERE_IS_OPEN_IMAGE);
     }
 
     private void initEditMenu() {

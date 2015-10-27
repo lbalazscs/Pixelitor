@@ -43,6 +43,7 @@ public class History {
     private static final UndoableEditSupport undoableEditSupport = new UndoableEditSupport();
     private static final PixelitorUndoManager undoManager = new PixelitorUndoManager();
     private static int numUndoneEdits = 0;
+    private static boolean suspended = false;
 
     static {
         setUndoLevels(AppPreferences.loadUndoLevels());
@@ -80,6 +81,9 @@ public class History {
 
     public static void addEdit(PixelitorEdit edit) {
         assert edit != null;
+        if (suspended) {
+            return;
+        }
 
         if (edit.canUndo()) {
             undoManager.addEdit(edit);
@@ -255,5 +259,9 @@ public class History {
                     "Expected '%s' as the last edit name, but found '%s'",
                     expectedName, lastEditName));
         }
+    }
+
+    public static void setSuspended(boolean suspended) {
+        History.suspended = suspended;
     }
 }

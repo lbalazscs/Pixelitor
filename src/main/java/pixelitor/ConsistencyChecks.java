@@ -97,9 +97,7 @@ public final class ConsistencyChecks {
 
     private static void selectionCheck(Composition comp) {
         if (!SwingUtilities.isEventDispatchThread()) {
-            if (!Build.CURRENT.isPerformanceTest()) {
-                throw new IllegalStateException("ConsistencyChecks::selectionCheck: not on EDT");
-            }
+            return;
         }
 
         if (comp.hasSelection()) {

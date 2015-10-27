@@ -250,8 +250,16 @@ public final class Utils {
         });
     }
 
-    public static ProgressMonitor createPercentageProgressMonitor(String title) {
-        return new ProgressMonitor(PixelitorWindow.getInstance(), title, "", 0, 100);
+    public static ProgressMonitor createPercentageProgressMonitor(String message) {
+        return new ProgressMonitor(PixelitorWindow.getInstance(), message, "", 0, 100);
+    }
+
+    public static ProgressMonitor createPercentageProgressMonitor(String message, String cancelButtonText) {
+        String oldText = UIManager.getString("OptionPane.cancelButtonText");
+        UIManager.put("OptionPane.cancelButtonText", cancelButtonText);
+        ProgressMonitor pm = new ProgressMonitor(PixelitorWindow.getInstance(), message, "", 0, 100);
+        UIManager.put("OptionPane.cancelButtonText", oldText);
+        return pm;
     }
 
     public static double transformAtan2AngleToIntuitive(double angleInRadians) {

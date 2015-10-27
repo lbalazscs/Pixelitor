@@ -80,7 +80,7 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
             return;
         }
 
-        ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("Save Many Splash Images");
+        ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("Save Many Splash Images", "Stop");
 
         SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
             @Override

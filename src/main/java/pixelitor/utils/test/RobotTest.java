@@ -308,7 +308,7 @@ public class RobotTest {
 
     private static void randomColors() {
         logRobotEvent("random colors");
-        FgBgColors.setRandomColors();
+        FgBgColors.randomizeColors();
     }
 
     private static void randomOperation() {

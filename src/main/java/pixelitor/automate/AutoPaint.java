@@ -4,6 +4,10 @@ import net.jafama.FastMath;
 import pixelitor.Composition;
 import pixelitor.FgBgColors;
 import pixelitor.ImageComponents;
+import pixelitor.history.History;
+import pixelitor.history.ImageEdit;
+import pixelitor.layers.ImageLayer;
+import pixelitor.selection.IgnoreSelection;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.Tool;
 import pixelitor.tools.UserDrag;
@@ -17,6 +21,7 @@ import pixelitor.utils.Utils;
 import javax.swing.*;
 import java.awt.GridBagLayout;
 import java.awt.Point;
+import java.awt.image.BufferedImage;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Random;
 
@@ -38,61 +43,89 @@ public class AutoPaint {
             @Override
             protected void dialogAccepted() {
                 close();
-                int numStrokes = configPanel.getNumStrokes();
-                int length = configPanel.getStrokeLength();
-                Tool tool = configPanel.getSelectedTool();
-                autoPaint(tool, numStrokes, length);
+                Settings settings = configPanel.getSettings();
+                paintStrokes(settings);
             }
         };
         d.setVisible(true);
     }
 
-    private static void autoPaint(Tool tool, int numStrokes, int strokeLength) {
-        Composition comp = ImageComponents.getActiveComp().get();
+    private static void paintStrokes(Settings settings) {
+        // So far we are on the EDT
+        assert SwingUtilities.isEventDispatchThread();
+
+        Composition comp = ImageComponents.getActiveComp().orElseThrow(() -> new RuntimeException("no active composition"));
+        ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("Auto Paint", "Stop");
+
+        ImageLayer imageLayer = comp.getActiveMaskOrImageLayer();
+        BufferedImage backupImage = imageLayer.getImageOrSubImageIfSelected(true, true);
+        History.setSuspended(true);
+
+        Runnable notEDTThreadTask = () -> {
+            try {
+                runStrokesOutsideEDT(settings, comp, progressMonitor);
+            } catch (InterruptedException e) {
+                Messages.showException(e);
+            } catch (InvocationTargetException e) {
+                Throwable cause = e.getCause();
+                Messages.showException(cause);
+            } finally {
+                Runnable edtFinish = () -> {
+                    History.setSuspended(false);
+                    ImageEdit edit = new ImageEdit(comp, "Auto Paint",
+                            imageLayer, backupImage, IgnoreSelection.NO, false);
+                    History.addEdit(edit);
+                };
+                try {
+                    SwingUtilities.invokeAndWait(edtFinish);
+                } catch (InterruptedException | InvocationTargetException e) {
+                    Messages.showException(e);
+                }
+            }
+        };
+
+        Thread thread = new Thread(notEDTThreadTask);
+        // start the non-EDT thread but do not wait until it finishes
+        // because this thread needs to put tasks on the EDT
+        thread.start();
+    }
+
+    private static void runStrokesOutsideEDT(Settings settings, Composition comp, ProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
+        assert !SwingUtilities.isEventDispatchThread();
+
         Random random = new Random();
+        int canvasWidth = comp.getCanvasWidth();
+        int canvasHeight = comp.getCanvasHeight();
 
-        if (comp != null) {
-            int canvasWidth = comp.getCanvasWidth();
-            int canvasHeight = comp.getCanvasHeight();
-
-            ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("Auto Paint");
-
-            // So far we are on the EDT
-            assert SwingUtilities.isEventDispatchThread();
-
-            Runnable notEDTThreadTask = () -> {
-                assert !SwingUtilities.isEventDispatchThread();
-                for (int i = 0; i < numStrokes; i++) {
-                    int progressPercentage = (int) ((float) i * 100 / numStrokes);
-                    progressMonitor.setProgress(progressPercentage);
-                    progressMonitor.setNote(progressPercentage + "%");
+        int numStrokes = settings.getNumStrokes();
+        for (int i = 0; i < numStrokes; i++) {
+            int progressPercentage = (int) ((float) i * 100 / numStrokes);
+            progressMonitor.setProgress(progressPercentage);
+            progressMonitor.setNote(progressPercentage + "%");
 
 //                    Utils.sleep(1, TimeUnit.SECONDS);
 
-                    Runnable edtRunnable = () -> paintSingleStroke(comp, tool, canvasWidth, canvasHeight, strokeLength, random);
+            Runnable edtRunnable = () -> paintSingleStroke(comp, settings, canvasWidth, canvasHeight, random);
 
-                    try {
-                        SwingUtilities.invokeAndWait(edtRunnable);
-                    } catch (InterruptedException | InvocationTargetException e) {
-                        e.printStackTrace();
-                    }
+            SwingUtilities.invokeAndWait(edtRunnable);
 
-                    comp.repaint();
-                    if (progressMonitor.isCanceled()) {
-                        break;
-                    }
-                }
-                progressMonitor.close();
-            };
-            new Thread(notEDTThreadTask).start();
+            comp.repaint();
+            if (progressMonitor.isCanceled()) {
+                break;
+            }
         }
+        progressMonitor.close();
     }
 
-    // called on the EDT
-    private static void paintSingleStroke(Composition comp, Tool tool, int canvasWidth, int canvasHeight, int strokeLength, Random rand) {
+    private static void paintSingleStroke(Composition comp, Settings settings, int canvasWidth, int canvasHeight, Random rand) {
+        // called on the EDT
         assert SwingUtilities.isEventDispatchThread();
 
-        FgBgColors.setRandomColors();
+        if (settings.withRandomColors()) {
+            FgBgColors.randomizeColors();
+        }
+
+        int strokeLength = settings.getStrokeLength();
 
         Point start = new Point(rand.nextInt(canvasWidth), rand.nextInt(canvasHeight));
         double randomAngle = rand.nextDouble() * 2 * Math.PI;
@@ -102,6 +135,7 @@ public class AutoPaint {
         Point end = new Point(endX, endY);
 
         try {
+            Tool tool = settings.getTool();
             // tool.randomize();
             if (tool instanceof AbstractBrushTool) {
                 AbstractBrushTool abt = (AbstractBrushTool) tool;
@@ -127,6 +161,10 @@ public class AutoPaint {
         private final IntTextField lengthTF;
         private static int defaultLength = 100;
 
+        private final JCheckBox randomColorsCB;
+        private JLabel randomColorsLabel;
+        private static boolean defaultRandomColors = true;
+
         private ConfigPanel() {
             super(new GridBagLayout());
             GridBagHelper gbh = new GridBagHelper(this);
@@ -142,24 +180,73 @@ public class AutoPaint {
 
             lengthTF = new IntTextField(String.valueOf(defaultLength));
             gbh.addLabelWithControl("Stroke Length:", lengthTF);
+
+            randomColorsLabel = new JLabel("Random Colors:");
+            randomColorsCB = new JCheckBox();
+            randomColorsCB.setSelected(defaultRandomColors);
+            gbh.addTwoControls(randomColorsLabel, randomColorsCB);
+
+            toolSelector.addActionListener(e -> updateRandomColorsEnabledState());
+            updateRandomColorsEnabledState();
+        }
+
+        private void updateRandomColorsEnabledState() {
+            Tool tool = (Tool) toolSelector.getSelectedItem();
+            if (tool == BRUSH) {
+                randomColorsLabel.setEnabled(true);
+                randomColorsCB.setEnabled(true);
+            } else {
+                randomColorsLabel.setEnabled(false);
+                randomColorsCB.setEnabled(false);
+            }
+        }
+
+        public Settings getSettings() {
+            int numStrokes = numStrokesTF.getIntValue();
+            defaultNumStrokes = numStrokes;
+
+            int strokeLength = lengthTF.getIntValue();
+            defaultLength = strokeLength;
+
+            Tool tool = (Tool) toolSelector.getSelectedItem();
+            defaultTool = tool;
+
+            boolean randomColorsEnabled = randomColorsCB.isEnabled();
+            boolean randomColorsSelected = randomColorsCB.isSelected();
+            boolean randomColors = randomColorsEnabled && randomColorsSelected;
+            defaultRandomColors = randomColorsSelected;
+
+            return new Settings(tool, numStrokes, strokeLength, randomColors);
+        }
+    }
+
+    private static class Settings {
+        private final Tool tool;
+        private final int numStrokes;
+        private final int strokeLength;
+        private final boolean randomColors;
+
+        private Settings(Tool tool, int numStrokes, int strokeLength, boolean randomColors) {
+            this.tool = tool;
+            this.numStrokes = numStrokes;
+            this.strokeLength = strokeLength;
+            this.randomColors = randomColors;
+        }
+
+        public Tool getTool() {
+            return tool;
         }
 
         public int getNumStrokes() {
-            int retVal = numStrokesTF.getIntValue();
-            defaultNumStrokes = retVal;
-            return retVal;
+            return numStrokes;
         }
 
         public int getStrokeLength() {
-            int retVal = lengthTF.getIntValue();
-            defaultLength = retVal;
-            return retVal;
+            return strokeLength;
         }
 
-        public Tool getSelectedTool() {
-            Tool retVal = (Tool) toolSelector.getSelectedItem();
-            defaultTool = retVal;
-            return retVal;
+        public boolean withRandomColors() {
+            return randomColors;
         }
     }
 }
