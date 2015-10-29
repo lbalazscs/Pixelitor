@@ -46,7 +46,6 @@ import pixelitor.layers.LayerButton;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.Selection;
 import pixelitor.testutils.WithSelection;
-import pixelitor.testutils.WithTranslation;
 import pixelitor.tools.BrushType;
 import pixelitor.tools.GradientColorType;
 import pixelitor.tools.GradientTool;
@@ -93,7 +92,8 @@ public class AssertJSwingTest {
     private static final File BATCH_FILTER_OUTPUT_DIR = new File(BASE_TESTING_DIR, "batch_filter_output");
 
     private Robot robot;
-    private static final int ROBOT_DELAY_MILLIS = 100;
+    private static final int ROBOT_DELAY_MILLIS_FAST = 100;
+    private static final int ROBOT_DELAY_MILLIS_SLOW = 500;
 
     private FrameFixture window;
     private final Random random = new Random();
@@ -121,7 +121,6 @@ public class AssertJSwingTest {
 
     public void setUp() {
         robot = BasicRobot.robotWithNewAwtHierarchy();
-        robot.settings().delayBetweenEvents(ROBOT_DELAY_MILLIS);
 
         ApplicationLauncher
                 .application("pixelitor.Pixelitor")
@@ -135,10 +134,19 @@ public class AssertJSwingTest {
     }
 
     private void testApp() {
-        testDevelopMenu();
-        testTools();
-        testMenus();
-        testLayers();
+        boolean singleTest = false;
+        if (singleTest) {
+            robot.settings().delayBetweenEvents(ROBOT_DELAY_MILLIS_SLOW);
+
+            testMultiLayerEdits();
+        } else {
+            robot.settings().delayBetweenEvents(ROBOT_DELAY_MILLIS_FAST);
+
+            testDevelopMenu();
+            testTools();
+            testMenus();
+            testLayers();
+        }
     }
 
     private void testDevelopMenu() {
@@ -296,31 +304,14 @@ public class AssertJSwingTest {
     private void testMultiLayerEdits() {
         // crop is also a multilayer edit, but it is tested with the crop tool
 
-        WithTranslation[] translationSettings =
-                {WithTranslation.NO, WithTranslation.YES};
-        WithSelection[] selectionSettings =
-                {WithSelection.NO, WithSelection.YES};
-
-        for (WithTranslation translation : translationSettings) {
-            for (WithSelection selection : selectionSettings) {
-                testResize(selection, translation);
-                testEnlargeCanvas(selection, translation);
-                testRotateFlip(selection, translation);
-            }
-        }
+        runWithSelectionAndTranslation(() -> {
+            testResize();
+            testEnlargeCanvas();
+            testRotateFlip();
+        });
     }
 
-    private void testResize(WithSelection withSelection, WithTranslation withTranslation) {
-        if (withSelection == WithSelection.YES) {
-            addSelection();
-        } else {
-            keyboardDeselect();
-        }
-
-        if (withTranslation == WithTranslation.YES) {
-            addTranslation();
-        }
-
+    private void testResize() {
         runMenuCommand("Resize...");
         DialogFixture resizeDialog = findDialogByTitle("Resize");
 
@@ -333,25 +324,9 @@ public class AssertJSwingTest {
         resizeDialog.button("ok").click();
 
         keyboardUndoRedoUndo();
-
-        if (withTranslation == WithTranslation.YES) {
-            keyboardUndo(); // undo translation
-        }
-
-        keyboardDeselect();
     }
 
-    private void testEnlargeCanvas(WithSelection withSelection, WithTranslation withTranslation) {
-        if (withSelection == WithSelection.YES) {
-            addSelection();
-        } else {
-            keyboardDeselect();
-        }
-
-        if (withTranslation == WithTranslation.YES) {
-            addTranslation();
-        }
-
+    private void testEnlargeCanvas() {
         runMenuCommand("Enlarge Canvas...");
         DialogFixture enlargeDialog = findDialogByTitle("Enlarge Canvas");
 
@@ -363,24 +338,9 @@ public class AssertJSwingTest {
         enlargeDialog.button("ok").click();
 
         keyboardUndoRedoUndo();
-
-        if (withTranslation == WithTranslation.YES) {
-            keyboardUndo(); // undo translation
-        }
-        keyboardDeselect();
     }
 
-    private void testRotateFlip(WithSelection withSelection, WithTranslation withTranslation) {
-        if (withSelection == WithSelection.YES) {
-            addSelection();
-        } else {
-            keyboardDeselect();
-        }
-
-        if (withTranslation == WithTranslation.YES) {
-            addTranslation();
-        }
-
+    private void testRotateFlip() {
         runMenuCommand("Rotate 90° CW");
         keyboardUndoRedoUndo();
 
@@ -395,11 +355,6 @@ public class AssertJSwingTest {
 
         runMenuCommand("Flip Vertical");
         keyboardUndoRedoUndo();
-
-        if (withTranslation == WithTranslation.YES) {
-            keyboardUndo(); // undo translation
-        }
-        keyboardDeselect();
     }
 
     private void testCopyPaste() {
@@ -675,14 +630,14 @@ public class AssertJSwingTest {
     }
 
     private void testFilters() {
-        testFilterWithDialog("Color Balance...", Randomize.YES, ShowOriginal.YES);
+        testColorBalance();
         testFilterWithDialog("Hue/Saturation...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Colorize...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Levels...", Randomize.NO, ShowOriginal.YES);
         testFilterWithDialog("Brightness/Contrast...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Solarize...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Sepia...", Randomize.NO, ShowOriginal.YES);
-        testNoDialogFilter("Invert");
+        testInvert();
         testFilterWithDialog("Channel Invert...", Randomize.NO, ShowOriginal.YES);
         testFilterWithDialog("Channel Mixer...", Randomize.YES,
                 ShowOriginal.YES, "Swap Red-Green", "Swap Red-Blue", "Swap Green-Blue",
@@ -791,6 +746,16 @@ public class AssertJSwingTest {
 
 
         testText();
+    }
+
+    private void testColorBalance() {
+        runWithSelectionAndTranslation(
+                () -> testFilterWithDialog("Color Balance...",
+                        Randomize.YES, ShowOriginal.YES));
+    }
+
+    private void testInvert() {
+        runWithSelectionAndTranslation(() -> testNoDialogFilter("Invert"));
     }
 
     private void testText() {
@@ -1518,5 +1483,27 @@ public class AssertJSwingTest {
         moveTo(400, 400);
         click();
         dragTo(200, 300);
+    }
+
+    private void runWithSelectionAndTranslation(Runnable task) {
+        keyboardDeselect();
+
+        // simple run
+        task.run();
+
+        // run with selection
+        addSelection();
+        task.run();
+        keyboardDeselect();
+
+        // run with translation
+        addTranslation();
+        task.run();
+
+        // run with both translation and selection
+        addSelection();
+        task.run();
+        keyboardUndo(); // undo selection
+        keyboardUndo(); // undo translation
     }
 }
