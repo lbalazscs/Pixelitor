@@ -39,8 +39,8 @@ public class ToolAffectedArea {
 
         if (!relativeToImage) {
             ContentLayer layer = comp.getActiveMaskOrImageLayer();
-            int dx = -layer.getTranslationX();
-            int dy = -layer.getTranslationY();
+            int dx = -layer.getTX();
+            int dy = -layer.getTY();
             this.rectangle.translate(dx, dy);
         }
     }

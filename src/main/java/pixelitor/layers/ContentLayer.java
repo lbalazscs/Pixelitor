@@ -34,8 +34,8 @@ public abstract class ContentLayer extends Layer {
     private static final long serialVersionUID = 2L;
 
     // used only while dragging
-    private transient int tmpTranslationX = 0;
-    private transient int tmpTranslationY = 0;
+    private transient int tmpTX = 0;
+    private transient int tmpTY = 0;
 
     int translationX = 0;
     int translationY = 0;
@@ -44,44 +44,43 @@ public abstract class ContentLayer extends Layer {
         super(comp, name, parent);
     }
 
-    public int getTranslationX() {
-        return translationX + tmpTranslationX;
+    public int getTX() {
+        return translationX + tmpTX;
     }
 
-    public int getTranslationY() {
-        return translationY + tmpTranslationY;
+    public int getTY() {
+        return translationY + tmpTY;
     }
 
     @Override
     public void startMovement() {
-        tmpTranslationX = 0;
-        tmpTranslationY = 0;
+        tmpTX = 0;
+        tmpTY = 0;
         super.startMovement();
     }
 
     @Override
     public void moveWhileDragging(double x, double y) {
-        tmpTranslationX = (int) x;
-        tmpTranslationY = (int) y;
+        tmpTX = (int) x;
+        tmpTY = (int) y;
         super.moveWhileDragging(x, y);
     }
 
     @Override
     public PixelitorEdit endMovement() {
-
-        int oldTranslationX = translationX;
-        int oldTranslationY = translationY;
+        int oldTX = translationX;
+        int oldTY = translationY;
 
         // while dragging only the temporary values were updated
         // and now they can be committed to the final value
-        translationX += tmpTranslationX;
-        translationY += tmpTranslationY;
-        tmpTranslationX = 0;
-        tmpTranslationY = 0;
+        translationX += tmpTX;
+        translationY += tmpTY;
+        tmpTX = 0;
+        tmpTY = 0;
 
         PixelitorEdit linkedEdit = super.endMovement();
 
-        ContentLayerMoveEdit ownEdit = createMovementEdit(oldTranslationX, oldTranslationY);
+        ContentLayerMoveEdit ownEdit = createMovementEdit(oldTX, oldTY);
         if (linkedEdit == null) {
             return ownEdit;
         } else {
@@ -89,7 +88,7 @@ public abstract class ContentLayer extends Layer {
         }
     }
 
-    abstract ContentLayerMoveEdit createMovementEdit(int oldTranslationX, int oldTranslationY);
+    abstract ContentLayerMoveEdit createMovementEdit(int oldTX, int oldTY);
 
     /**
      * Programmatically set the translation.

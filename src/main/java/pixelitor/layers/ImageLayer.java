@@ -17,6 +17,7 @@
 
 package pixelitor.layers;
 
+import pixelitor.Canvas;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
@@ -181,15 +182,15 @@ public class ImageLayer extends ContentLayer {
 
         boolean addXTranslation = pastedWidth > width;
         boolean addYTranslation = pastedHeight > height;
-        int newXTrans = 0;
-        int newYTrans = 0;
+        int newTX = 0;
+        int newTY = 0;
         if (addXTranslation) {
-            newXTrans = -(pastedWidth - width) / 2;
+            newTX = -(pastedWidth - width) / 2;
         }
         if (addYTranslation) {
-            newYTrans = -(pastedHeight - height) / 2;
+            newTY = -(pastedHeight - height) / 2;
         }
-        setTranslation(newXTrans, newYTrans);
+        setTranslation(newTX, newTY);
 
         checkConstructorPostConditions();
         updateIconImage();
@@ -243,7 +244,7 @@ public class ImageLayer extends ContentLayer {
             if (selectionShape != null) {
                 // the argument image pixels will replace the old ones only where selected
                 Graphics2D g = src.createGraphics();
-                g.translate(-getTranslationX(), -getTranslationY());
+                g.translate(-getTX(), -getTY());
                 g.setComposite(AlphaComposite.Src);
                 g.setClip(selectionShape);
                 Rectangle bounds = selectionShape.getBounds();
@@ -524,10 +525,10 @@ public class ImageLayer extends ContentLayer {
     @Override
     public void flip(Flip.Direction direction, AffineTransform canvasTx) {
         AffineTransform imageTx = direction.getImageTX(this);
-        int translationXAbs = -getTranslationX();
-        int translationYAbs = -getTranslationY();
-        int newTranslationXAbs;
-        int newTranslationYAbs;
+        int tXAbs = -getTX();
+        int tYAbs = -getTY();
+        int newTXAbs;
+        int newTYAbs;
 
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
@@ -538,18 +539,18 @@ public class ImageLayer extends ContentLayer {
         Graphics2D g2 = dest.createGraphics();
 
         if (direction == HORIZONTAL) {
-            newTranslationXAbs = imageWidth - canvasWidth - translationXAbs;
-            newTranslationYAbs = translationYAbs;
+            newTXAbs = imageWidth - canvasWidth - tXAbs;
+            newTYAbs = tYAbs;
         } else {
-            newTranslationXAbs = translationXAbs;
-            newTranslationYAbs = imageHeight - canvasHeight - translationYAbs;
+            newTXAbs = tXAbs;
+            newTYAbs = imageHeight - canvasHeight - tYAbs;
         }
 
         g2.setTransform(imageTx);
         g2.drawImage(image, 0, 0, imageWidth, imageHeight, null);
         g2.dispose();
 
-        setTranslation(-newTranslationXAbs, -newTranslationYAbs);
+        setTranslation(-newTXAbs, -newTYAbs);
 
         setImage(dest);
     }
@@ -557,10 +558,12 @@ public class ImageLayer extends ContentLayer {
     @SuppressWarnings("SuspiciousNameCombination")
     @Override
     public void rotate(Rotate.SpecialAngle angle) {
-        int translationXAbs = -getTranslationX();
-        int translationYAbs = -getTranslationY();
-        int newTranslationXAbs = 0;
-        int newTranslationYAbs = 0;
+        int tx = getTX();
+        int ty = getTY();
+        int tXAbs = -tx;
+        int tYAbs = -ty;
+        int newTXAbs = 0;
+        int newTYAbs = 0;
 
         int imageWidth = image.getWidth();
         int imageHeight = image.getHeight();
@@ -570,14 +573,14 @@ public class ImageLayer extends ContentLayer {
 
         int angleDegree = angle.getAngleDegree();
         if (angleDegree == 90) {
-            newTranslationXAbs = imageHeight - translationYAbs - canvasHeight;
-            newTranslationYAbs = translationXAbs;
+            newTXAbs = imageHeight - tYAbs - canvasHeight;
+            newTYAbs = tXAbs;
         } else if (angleDegree == 270) {
-            newTranslationXAbs = translationYAbs;
-            newTranslationYAbs = imageWidth - translationXAbs - canvasWidth;
+            newTXAbs = tYAbs;
+            newTYAbs = imageWidth - tXAbs - canvasWidth;
         } else if (angleDegree == 180) {
-            newTranslationXAbs = imageWidth - canvasWidth - translationXAbs;
-            newTranslationYAbs = imageHeight - canvasHeight - translationYAbs;
+            newTXAbs = imageWidth - canvasWidth - tXAbs;
+            newTYAbs = imageHeight - canvasHeight - tYAbs;
         }
 
         BufferedImage dest = angle.createDestImage(image);
@@ -586,13 +589,12 @@ public class ImageLayer extends ContentLayer {
         // nearest neighbor should be ok for 90, 180, 270 degrees
         g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
 
-        g2.setTransform(angle.getCanvasTX(canvas)); // TODO
+        g2.setTransform(angle.getImageTX(this));
 
         g2.drawImage(image, 0, 0, imageWidth, imageHeight, null);
         g2.dispose();
 
-
-        setTranslation(-newTranslationXAbs, -newTranslationYAbs);
+        setTranslation(-newTXAbs, -newTYAbs);
 
 //        setImageWithSelection(dest);
         setImage(dest);
@@ -600,11 +602,11 @@ public class ImageLayer extends ContentLayer {
 
     @Override
     public void mergeDownOn(ImageLayer bellowImageLayer) {
-        int aX = getTranslationX();
-        int aY = getTranslationY();
+        int aX = getTX();
+        int aY = getTY();
         BufferedImage bellowImage = bellowImageLayer.getImage();
-        int bX = bellowImageLayer.getTranslationX();
-        int bY = bellowImageLayer.getTranslationY();
+        int bX = bellowImageLayer.getTX();
+        int bY = bellowImageLayer.getTY();
         BufferedImage activeImage = getImage();
         Graphics2D g = bellowImage.createGraphics();
         int x = aX - bX;
@@ -626,7 +628,7 @@ public class ImageLayer extends ContentLayer {
         }
         Graphics2D g = image.createGraphics();
 
-        tmpDrawingLayer.paintLayer(g, -getTranslationX(), -getTranslationY());
+        tmpDrawingLayer.paintLayer(g, -getTX(), -getTY());
         g.dispose();
 
         tmpDrawingLayer.dispose();
@@ -644,8 +646,8 @@ public class ImageLayer extends ContentLayer {
     }
 
     public BufferedImage getCanvasSizedSubImage() {
-        int x = -getTranslationX();
-        int y = -getTranslationY();
+        int x = -getTX();
+        int y = -getTY();
 
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
@@ -704,7 +706,7 @@ public class ImageLayer extends ContentLayer {
 
         Rectangle bounds = selection.getShapeBounds(); // relative to the composition
 
-        bounds.translate(-getTranslationX(), -getTranslationY()); // relative to the image
+        bounds.translate(-getTX(), -getTY()); // relative to the image
 
 //        Rectangle imageBounds = new Rectangle(0, 0, src.getWidth(), src.getHeight());
 //        bounds = bounds.intersection(imageBounds);
@@ -739,7 +741,7 @@ public class ImageLayer extends ContentLayer {
         int canvasHeight = canvas.getHeight();
 
         if ((imageWidth > canvasWidth) || (imageHeight > canvasHeight)) {
-            BufferedImage newImage = ImageUtils.crop(image, -getTranslationX(), -getTranslationY(), canvasWidth, canvasHeight);
+            BufferedImage newImage = ImageUtils.crop(image, -getTX(), -getTY(), canvasWidth, canvasHeight);
 
             BufferedImage tmp = image;
             setImage(newImage);
@@ -774,15 +776,15 @@ public class ImageLayer extends ContentLayer {
     }
 
     @Override
-    ContentLayerMoveEdit createMovementEdit(int oldTranslationX, int oldTranslationY) {
+    ContentLayerMoveEdit createMovementEdit(int oldTX, int oldTY) {
         ContentLayerMoveEdit edit;
         boolean needsEnlarging = checkImageDoesNotCoverCanvas();
         if (needsEnlarging) {
             BufferedImage backupImage = getImage();
             enlargeImage(comp.getCanvasBounds());
-            edit = new ContentLayerMoveEdit(this, backupImage, oldTranslationX, oldTranslationY);
+            edit = new ContentLayerMoveEdit(this, backupImage, oldTX, oldTY);
         } else {
-            edit = new ContentLayerMoveEdit(this, null, oldTranslationX, oldTranslationY);
+            edit = new ContentLayerMoveEdit(this, null, oldTX, oldTY);
         }
 
         return edit;
@@ -810,8 +812,8 @@ public class ImageLayer extends ContentLayer {
 
         if (bigLayer) {
             setTranslation(
-                    (int) (getTranslationX() * horizontalResizeRatio),
-                    (int) (getTranslationY() * verticalResizeRatio)
+                    (int) (getTX() * horizontalResizeRatio),
+                    (int) (getTY() * verticalResizeRatio)
             );
         }
     }
@@ -830,8 +832,8 @@ public class ImageLayer extends ContentLayer {
         BufferedImage img = getImage();
 
         // the selectionBounds is in image space except for the translation
-        int transX = getTranslationX();
-        int transY = getTranslationY();
+        int transX = getTX();
+        int transY = getTY();
 
         int cropX = (int) (cropRect.getX() - transX);
         int cropY = (int) (cropRect.getY() - transY);
@@ -854,18 +856,18 @@ public class ImageLayer extends ContentLayer {
             paintLayerOnGraphicsWOTmpLayer(g, firstVisibleLayer, visibleImage);
         } else { // we are in the middle of a brush draw
             if (isNormalAndOpaque()) {
-                g.drawImage(visibleImage, getTranslationX(), getTranslationY(), null);
+                g.drawImage(visibleImage, getTX(), getTY(), null);
                 tmpDrawingLayer.paintLayer(g, 0, 0);
             } else { // layer is not in normal mode
                 // first create a merged layer-brush image
                 BufferedImage mergedLayerBrushImg = ImageUtils.copyImage(visibleImage); // TODO a canvas-sized image is enough and then less translating is necessary
                 Graphics2D mergedLayerBrushG = mergedLayerBrushImg.createGraphics();
 
-                tmpDrawingLayer.paintLayer(mergedLayerBrushG, -getTranslationX(), -getTranslationY()); // draw the brush on the layer
+                tmpDrawingLayer.paintLayer(mergedLayerBrushG, -getTX(), -getTY()); // draw the brush on the layer
                 mergedLayerBrushG.dispose();
 
                 // now draw the merged layer-brush on the target Graphics with the layer composite
-                g.drawImage(mergedLayerBrushImg, getTranslationX(), getTranslationY(), null);
+                g.drawImage(mergedLayerBrushImg, getTX(), getTY(), null);
             }
         }
     }
@@ -874,7 +876,7 @@ public class ImageLayer extends ContentLayer {
         if (Tools.isShapesDrawing() && isActive() && !isMaskEditing()) {
             paintDraggedShapesIntoActiveLayer(g, visibleImage, firstVisibleLayer);
         } else { // the simple case
-            g.drawImage(visibleImage, getTranslationX(), getTranslationY(), null);
+            g.drawImage(visibleImage, getTX(), getTY(), null);
         }
     }
 
@@ -883,7 +885,7 @@ public class ImageLayer extends ContentLayer {
             // Create a copy of the graphics, because we don't want to
             // mess with the clipping of the original
             Graphics2D gCopy = (Graphics2D) g.create();
-            gCopy.drawImage(visibleImage, getTranslationX(), getTranslationY(), null);
+            gCopy.drawImage(visibleImage, getTX(), getTY(), null);
             comp.applySelectionClipping(gCopy, null);
             Tools.SHAPES.paintOverLayer(gCopy, comp);
             gCopy.dispose();
@@ -897,7 +899,7 @@ public class ImageLayer extends ContentLayer {
             // first visible layer and has a blending mode different from normal
             BufferedImage tmp = createCompositionSizedTmpImage();
             Graphics2D tmpG = tmp.createGraphics();
-            tmpG.drawImage(visibleImage, getTranslationX(), getTranslationY(), null);
+            tmpG.drawImage(visibleImage, getTX(), getTY(), null);
 
             comp.applySelectionClipping(tmpG, null);
             Tools.SHAPES.paintOverLayer(tmpG, comp);
@@ -1010,6 +1012,21 @@ public class ImageLayer extends ContentLayer {
         PixelitorEdit edit = super.endMovement();
         updateIconImage();
         return edit;
+    }
+
+    public void debugTranslation() {
+        int tx = getTX();
+        int ty = getTY();
+        System.out.println("ImageLayer::debugTranslation: tx = " + tx + ", ty = " + ty);
+        Canvas canvas = getComp().getCanvas();
+        int canvasWidth = canvas.getWidth();
+        int canvasHeight = canvas.getHeight();
+        System.out.println("ImageLayer::debugTranslation: canvasWidth = " + canvasWidth + ", canvasHeight = " + canvasHeight);
+        BufferedImage image = getImage();
+        int imageWidth = image.getWidth();
+        int imageHeight = image.getHeight();
+        System.out.println("ImageLayer::debugTranslation: imageWidth = " + imageWidth + ", imageHeight = " + imageHeight);
+        System.out.println();
     }
 
     public String toDebugCanvasString() {

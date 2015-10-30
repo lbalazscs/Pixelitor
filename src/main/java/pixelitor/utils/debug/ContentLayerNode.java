@@ -19,7 +19,7 @@ public class ContentLayerNode extends DebugNode {
         addFloatChild("opacity", layer.getOpacity());
         addQuotedStringChild("blending mode", layer.getBlendingMode().toString());
         addQuotedStringChild("name", layer.getName());
-        addIntChild("translation X", layer.getTranslationX());
-        addIntChild("translation Y", layer.getTranslationY());
+        addIntChild("translation X", layer.getTX());
+        addIntChild("translation Y", layer.getTY());
     }
 }

@@ -45,7 +45,6 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.layers.LayerButton;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.Selection;
-import pixelitor.testutils.WithSelection;
 import pixelitor.tools.BrushType;
 import pixelitor.tools.GradientColorType;
 import pixelitor.tools.GradientTool;
@@ -138,7 +137,7 @@ public class AssertJSwingTest {
         if (singleTest) {
             robot.settings().delayBetweenEvents(ROBOT_DELAY_MILLIS_SLOW);
 
-            testMultiLayerEdits();
+            testAutoPaint();
         } else {
             robot.settings().delayBetweenEvents(ROBOT_DELAY_MILLIS_FAST);
 
@@ -544,20 +543,14 @@ public class AssertJSwingTest {
     }
 
     private void testAutoPaint() {
-        for (Tool tool : AutoPaint.ALLOWED_TOOLS) {
-            testAutoPaintWithTool(tool, WithSelection.NO);
-            testAutoPaintWithTool(tool, WithSelection.YES);
-        }
-        keyboardDeselect();
+        runWithSelectionAndTranslation(() -> {
+            for (Tool tool : AutoPaint.ALLOWED_TOOLS) {
+                testAutoPaintWithTool(tool);
+            }
+        });
     }
 
-    private void testAutoPaintWithTool(Tool tool, WithSelection withSelection) {
-        if (withSelection == WithSelection.YES) {
-            addSelection();
-        } else {
-            keyboardDeselect();
-        }
-
+    private void testAutoPaintWithTool(Tool tool) {
         runMenuCommand("Auto Paint...");
         DialogFixture dialog = findDialogByTitle("Auto Paint");
 
@@ -1166,15 +1159,15 @@ public class AssertJSwingTest {
             altDragTo(300, 300);
         } else {
             ImageLayer layer = ImageComponents.getActiveIC().getComp().getActiveMaskOrImageLayer();
-            int txx = layer.getTranslationX();
-            int txy = layer.getTranslationY();
+            int txx = layer.getTX();
+            int txy = layer.getTY();
             assert txx == 0;
             assert txy == 0;
 
             dragTo(200, 300);
 
-            txx = layer.getTranslationX();
-            txy = layer.getTranslationY();
+            txx = layer.getTX();
+            txy = layer.getTY();
 
             // This will be true only if we are at 100% zoom!
             assert txx == -200 : "txx = " + txx;
@@ -1321,7 +1314,8 @@ public class AssertJSwingTest {
     }
 
     private static JButtonFixture findButtonByText(ComponentContainerFixture container, String text) {
-        JButtonFixture button = container.button(new GenericTypeMatcher<JButton>(JButton.class) {
+        JButtonFixture buttonFixture = container.button(
+                new GenericTypeMatcher<JButton>(JButton.class) {
             @Override
             protected boolean isMatching(JButton button) {
                 if (!button.isShowing()) {
@@ -1340,11 +1334,12 @@ public class AssertJSwingTest {
             }
         });
 
-        return button;
+        return buttonFixture;
     }
 
     private static JButtonFixture findButtonByActionName(ComponentContainerFixture container, String actionName) {
-        JButtonFixture button = container.button(new GenericTypeMatcher<JButton>(JButton.class) {
+        JButtonFixture buttonFixture = container.button(
+                new GenericTypeMatcher<JButton>(JButton.class) {
             @Override
             protected boolean isMatching(JButton button) {
                 if (!button.isShowing()) {
@@ -1364,12 +1359,13 @@ public class AssertJSwingTest {
             }
         });
 
-        return button;
+        return buttonFixture;
     }
 
 
     private static JButtonFixture findButtonByToolTip(ComponentContainerFixture container, String toolTip) {
-        JButtonFixture button = container.button(new GenericTypeMatcher<JButton>(JButton.class) {
+        JButtonFixture buttonFixture = container.button(
+                new GenericTypeMatcher<JButton>(JButton.class) {
             @Override
             protected boolean isMatching(JButton button) {
                 if (!button.isShowing()) {
@@ -1388,7 +1384,7 @@ public class AssertJSwingTest {
             }
         });
 
-        return button;
+        return buttonFixture;
     }
 
 

@@ -69,12 +69,12 @@ public class RealTmpDrawingLayer implements TmpDrawingLayer {
     }
 
     @Override
-    public void paintLayer(Graphics2D g, int translationX, int translationY) {
+    public void paintLayer(Graphics2D g, int tx, int ty) {
         if (composite == null) {
             throw new IllegalStateException("tmpDrawingComposite == null");
         }
 
         g.setComposite(composite);
-        g.drawImage(image, translationX, translationY, null);
+        g.drawImage(image, tx, ty, null);
     }
 }

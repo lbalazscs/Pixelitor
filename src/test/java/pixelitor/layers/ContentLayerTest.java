@@ -75,23 +75,23 @@ public class ContentLayerTest {
 
     @Test
     public void testLayerMovingMethods() {
-        assertThat(layer.getTranslationX()).isEqualTo(0);
-        assertThat(layer.getTranslationY()).isEqualTo(0);
+        assertThat(layer.getTX()).isEqualTo(0);
+        assertThat(layer.getTY()).isEqualTo(0);
 
         layer.startMovement();
 
-        assertThat(layer.getTranslationX()).isEqualTo(0);
-        assertThat(layer.getTranslationY()).isEqualTo(0);
+        assertThat(layer.getTX()).isEqualTo(0);
+        assertThat(layer.getTY()).isEqualTo(0);
 
         layer.moveWhileDragging(2, 2);
 
-        assertThat(layer.getTranslationX()).isEqualTo(2);
-        assertThat(layer.getTranslationY()).isEqualTo(2);
+        assertThat(layer.getTX()).isEqualTo(2);
+        assertThat(layer.getTY()).isEqualTo(2);
 
         layer.moveWhileDragging(3, 3);
 
-        assertThat(layer.getTranslationX()).isEqualTo(3);
-        assertThat(layer.getTranslationY()).isEqualTo(3);
+        assertThat(layer.getTX()).isEqualTo(3);
+        assertThat(layer.getTY()).isEqualTo(3);
 
         layer.endMovement();
 
@@ -114,19 +114,19 @@ public class ContentLayerTest {
 //        History.undo();
 //        checkTranslationAfterPositiveDrag();
 //        History.undo();
-//        assertThat(layer.getTranslationX()).isEqualTo(0);
-//        assertThat(layer.getTranslationY()).isEqualTo(0);
+//        assertThat(layer.getTX()).isEqualTo(0);
+//        assertThat(layer.getTY()).isEqualTo(0);
     }
 
     private void checkTranslationAfterPositiveDrag() {
         if (layer instanceof ImageLayer) {
             // the layer was enlarged in endMovement, and the translation reset to 0, 0
-            assertThat(layer.getTranslationX()).isEqualTo(0);
-            assertThat(layer.getTranslationY()).isEqualTo(0);
+            assertThat(layer.getTX()).isEqualTo(0);
+            assertThat(layer.getTY()).isEqualTo(0);
         } else if (layer instanceof TextLayer) {
             // text layers can have positive translations
-            assertThat(layer.getTranslationX()).isEqualTo(3);
-            assertThat(layer.getTranslationY()).isEqualTo(3);
+            assertThat(layer.getTX()).isEqualTo(3);
+            assertThat(layer.getTY()).isEqualTo(3);
         } else {
             throw new IllegalStateException("unexpected layer " + layer.getClass().getName());
         }
@@ -134,11 +134,11 @@ public class ContentLayerTest {
 
     private void checkTranslationAfterNegativeDrag() {
         if (layer instanceof ImageLayer) {
-            assertThat(layer.getTranslationX()).isEqualTo(-1);
-            assertThat(layer.getTranslationY()).isEqualTo(-2);
+            assertThat(layer.getTX()).isEqualTo(-1);
+            assertThat(layer.getTY()).isEqualTo(-2);
         } else if (layer instanceof TextLayer) {
-            assertThat(layer.getTranslationX()).isEqualTo(2);
-            assertThat(layer.getTranslationY()).isEqualTo(1);
+            assertThat(layer.getTX()).isEqualTo(2);
+            assertThat(layer.getTY()).isEqualTo(1);
         }
     }
 

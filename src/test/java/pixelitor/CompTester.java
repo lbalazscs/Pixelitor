@@ -48,8 +48,8 @@ public class CompTester {
 
     public void checkActiveLayerTranslation(int tx, int ty) {
         ContentLayer layer = (ContentLayer) comp.getActiveLayer();
-        assertEquals("tx", tx, layer.getTranslationX());
-        assertEquals("ty", ty, layer.getTranslationY());
+        assertEquals("tx", tx, layer.getTX());
+        assertEquals("ty", ty, layer.getTY());
     }
 
     public void checkActiveLayerAndMaskImageSize(int w, int h) {
@@ -96,9 +96,9 @@ public class CompTester {
                 ContentLayer contentLayer = (ContentLayer) layer;
 
                 // should be used on layers without translation
-                int tx = contentLayer.getTranslationX();
+                int tx = contentLayer.getTX();
                 assert tx == 0 : "tx = " + tx + " on " + contentLayer.getName();
-                int ty = contentLayer.getTranslationY();
+                int ty = contentLayer.getTY();
                 assert ty == 0 : "ty = " + ty + " on " + contentLayer.getName();
 
                 setStandardTestTranslation(contentLayer, translation);

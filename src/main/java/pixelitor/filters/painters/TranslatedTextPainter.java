@@ -27,6 +27,8 @@ import java.awt.Rectangle;
  * layers can be moved with the move tool)
  */
 public class TranslatedTextPainter extends TextPainter {
+    private static final long serialVersionUID = -2064757977654857961L;
+
     private int translationX = 0;
     private int translationY = 0;
 
@@ -55,11 +57,11 @@ public class TranslatedTextPainter extends TextPainter {
         this.translationY = translationY;
     }
 
-    public int getTranslationX() {
+    public int getTX() {
         return translationX;
     }
 
-    public int getTranslationY() {
+    public int getTY() {
         return translationY;
     }
 

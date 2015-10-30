@@ -122,8 +122,8 @@ public class LayerMask extends ImageLayer {
         LayerMask d = new LayerMask(comp, ImageUtils.copyImage(image), original);
         if (original instanceof ContentLayer) {
             ContentLayer originalContent = (ContentLayer) original;
-            int otx = originalContent.getTranslationX();
-            int oty = originalContent.getTranslationY();
+            int otx = originalContent.getTX();
+            int oty = originalContent.getTY();
             d.setTranslation(otx, oty);
         }
 
@@ -156,13 +156,13 @@ public class LayerMask extends ImageLayer {
         if (Tools.isShapesDrawing()) {
             paintDraggedShapesIntoActiveLayer(g, visibleImage, firstVisibleLayer);
         } else { // the simple case
-            g.drawImage(visibleImage, getTranslationX(), getTranslationY(), null);
+            g.drawImage(visibleImage, getTX(), getTY(), null);
         }
     }
 
     @Override
     protected void paintDraggedShapesIntoActiveLayer(Graphics2D g, BufferedImage visibleImage, boolean firstVisibleLayer) {
-        g.drawImage(visibleImage, getTranslationX(), getTranslationY(), null);
+        g.drawImage(visibleImage, getTX(), getTY(), null);
         Tools.SHAPES.paintOverLayer(g, comp);
     }
 

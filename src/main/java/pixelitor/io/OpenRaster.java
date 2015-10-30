@@ -103,8 +103,8 @@ public class OpenRaster {
                 layer.getBlendingMode().toSVGName(),
                 layer.getOpacity(),
                 layerIndex,
-                imageLayer.getTranslationX(),
-                imageLayer.getTranslationX());
+                imageLayer.getTX(),
+                imageLayer.getTX());
         ZipEntry entry = new ZipEntry(String.format("data/%d.png", layerIndex));
         zos.putNextEntry(entry);
         BufferedImage image = imageLayer.getImage();

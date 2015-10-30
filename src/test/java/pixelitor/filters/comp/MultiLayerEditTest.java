@@ -120,8 +120,8 @@ public class MultiLayerEditTest {
 
         if (numLayers == NumLayers.MORE) {
             // check the translation of the non-active layer
-            assertThat(layer2.getTranslationX()).isEqualTo(0);
-            assertThat(layer2.getTranslationY()).isEqualTo(0);
+            assertThat(layer2.getTX()).isEqualTo(0);
+            assertThat(layer2.getTY()).isEqualTo(0);
         }
 
         comp.checkInvariant();
@@ -340,8 +340,8 @@ public class MultiLayerEditTest {
 
         if (numLayers == NumLayers.MORE) {
             // check the translation of the non-active layer
-            assertThat(layer2.getTranslationX()).isEqualTo(0);
-            assertThat(layer2.getTranslationY()).isEqualTo(0);
+            assertThat(layer2.getTX()).isEqualTo(0);
+            assertThat(layer2.getTY()).isEqualTo(0);
         }
 
         comp.checkInvariant();
@@ -423,8 +423,8 @@ public class MultiLayerEditTest {
 
         if (numLayers == NumLayers.MORE) {
             // check the translation of the non-active layer
-            assertThat(layer2.getTranslationX()).isEqualTo(0);
-            assertThat(layer2.getTranslationY()).isEqualTo(0);
+            assertThat(layer2.getTX()).isEqualTo(0);
+            assertThat(layer2.getTY()).isEqualTo(0);
         }
 
         comp.checkInvariant();

@@ -74,8 +74,8 @@ public class TransformLayer extends FilterWithParametrizedGUI {
         float relativeX = centerParam.getRelativeX();
         float relativeY = centerParam.getRelativeY();
 
-        double centerShiftX = (-layer.getTranslationX() + src.getWidth()) * relativeX;
-        double centerShiftY = (-layer.getTranslationY() + src.getHeight()) * relativeY;
+        double centerShiftX = (-layer.getTX() + src.getWidth()) * relativeX;
+        double centerShiftY = (-layer.getTY() + src.getHeight()) * relativeY;
 
         AffineTransform transform = AffineTransform.getRotateInstance(theta, centerShiftX, centerShiftY);
 

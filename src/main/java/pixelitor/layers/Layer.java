@@ -373,11 +373,11 @@ public abstract class Layer implements Serializable {
         Graphics2D mig = maskedImage.createGraphics();
         paintLayerOnGraphics(mig, firstVisibleLayer);
         mig.setComposite(DstIn);
-        mig.drawImage(mask.getTransparencyImage(), mask.getTranslationX(), mask.getTranslationY(), null);
+        mig.drawImage(mask.getTransparencyImage(), mask.getTX(), mask.getTY(), null);
         mig.dispose();
 
         // 2. paint the masked image onto the graphics
-//            g.drawImage(maskedImage, getTranslationX(), getTranslationY(), null);
+//            g.drawImage(maskedImage, getTX(), getTY(), null);
         setupDrawingComposite(g, firstVisibleLayer);
         g.drawImage(maskedImage, 0, 0, null);
     }

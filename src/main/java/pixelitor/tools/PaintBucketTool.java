@@ -87,8 +87,8 @@ public class PaintBucketTool extends Tool {
         Composition comp = ic.getComp();
         ImageLayer layer = comp.getActiveMaskOrImageLayer();
 
-        int translationX = layer.getTranslationX();
-        int translationY = layer.getTranslationY();
+        int translationX = layer.getTX();
+        int translationY = layer.getTY();
 
         x -= translationX;
         y -= translationY;

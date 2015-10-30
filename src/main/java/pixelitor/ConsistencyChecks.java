@@ -133,18 +133,18 @@ public final class ConsistencyChecks {
         Composition comp = layer.getComp();
         BufferedImage bufferedImage = layer.getImage();
 
-        int x = -layer.getTranslationX();
+        int txAbs = -layer.getTX();
         int canvasWidth = comp.getCanvasWidth();
         int imageWidth = bufferedImage.getWidth();
-        if (x + canvasWidth > imageWidth + 1) { // allow one pixel difference for rounding effects
+        if (txAbs + canvasWidth > imageWidth + 1) { // allow one pixel difference for rounding effects
             return throwImageDoesNotCoverCanvasException(layer);
         }
 
-        int y = -layer.getTranslationY();
+        int tyAbs = -layer.getTY();
         int canvasHeight = comp.getCanvasHeight();
         int imageHeight = bufferedImage.getHeight();
 
-        if (y + canvasHeight > imageHeight + 1) {
+        if (tyAbs + canvasHeight > imageHeight + 1) {
             return throwImageDoesNotCoverCanvasException(layer);
         }
 
@@ -158,8 +158,8 @@ public final class ConsistencyChecks {
         int canvasHeight = comp.getCanvasHeight();
         int imageWidth = bufferedImage.getWidth();
         int imageHeight = bufferedImage.getHeight();
-        int tx = layer.getTranslationX();
-        int ty = layer.getTranslationY();
+        int tx = layer.getTX();
+        int ty = layer.getTY();
         String className = layer.getClass().getSimpleName();
         String msg = String.format("canvasWidth = %d, canvasHeight = %d, " +
                         "imageWidth = %d, imageHeight = %d, tx = %d, ty = %d, class = %s",

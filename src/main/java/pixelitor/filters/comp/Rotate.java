@@ -20,6 +20,7 @@ package pixelitor.filters.comp;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.layers.ContentLayer;
+import pixelitor.layers.ImageLayer;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.geom.AffineTransform;
@@ -89,6 +90,15 @@ public class Rotate extends SimpleCompAction {
 
                 return ImageUtils.createCompatibleDest(image, newImageWidth, newImageHeight);
             }
+
+            @Override
+            public AffineTransform getImageTX(ImageLayer layer) {
+                // rotate, then translate to compensate
+                AffineTransform rotTx = AffineTransform.getTranslateInstance(
+                        layer.getImage().getHeight(), 0);
+                rotTx.quadrantRotate(1);
+                return rotTx;
+            }
         }, ANGLE_180(180, "Rotate 180\u00B0") {
             @Override
             public void changeCanvas(Canvas canvas) {
@@ -111,6 +121,16 @@ public class Rotate extends SimpleCompAction {
                 int newImageHeight = image.getHeight();
 
                 return ImageUtils.createCompatibleDest(image, newImageWidth, newImageHeight);
+            }
+
+            @Override
+            public AffineTransform getImageTX(ImageLayer layer) {
+                Canvas canvas = layer.getComp().getCanvas();
+                AffineTransform transform = getCanvasTX(canvas);
+                int tx = layer.getTX();
+                int ty = layer.getTY();
+                transform.translate(tx, ty);
+                return transform;
             }
         }, ANGLE_270(270, "Rotate 90\u00B0 CCW") {
             @Override
@@ -136,6 +156,15 @@ public class Rotate extends SimpleCompAction {
 
                 return ImageUtils.createCompatibleDest(image, newImageWidth, newImageHeight);
             }
+
+            @Override
+            public AffineTransform getImageTX(ImageLayer layer) {
+                // rotate, then translate to compensate
+                AffineTransform rotTx = AffineTransform.getTranslateInstance(
+                        0, layer.getImage().getWidth());
+                rotTx.quadrantRotate(3);
+                return rotTx;
+            }
         };
 
         protected final int angleDegree;
@@ -158,10 +187,14 @@ public class Rotate extends SimpleCompAction {
          */
         public abstract AffineTransform getCanvasTX(Canvas canvas);
 
+        /**
+         * Return the transformation of the image
+         */
+        public abstract AffineTransform getImageTX(ImageLayer layer);
+
         public int getAngleDegree() {
             return angleDegree;
         }
-
 
         public abstract BufferedImage createDestImage(BufferedImage image);
     }

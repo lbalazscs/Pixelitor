@@ -38,7 +38,7 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
     private ContentLayer layer;
     private final TranslationEdit translationEdit;
 
-    public ContentLayerMoveEdit(ContentLayer layer, BufferedImage backupImage, int oldTranslationX, int oldTranslationY) {
+    public ContentLayerMoveEdit(ContentLayer layer, BufferedImage backupImage, int oldTX, int oldTY) {
         super(layer.getComp(), NAME);
 
         this.layer = layer;
@@ -49,7 +49,7 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
             imageEdit.setEmbedded(true);
         }
 
-        this.translationEdit = new TranslationEdit(comp, layer, oldTranslationX, oldTranslationY);
+        this.translationEdit = new TranslationEdit(comp, layer, oldTX, oldTY);
 
         layer.getComp().setDirty(true);
     }

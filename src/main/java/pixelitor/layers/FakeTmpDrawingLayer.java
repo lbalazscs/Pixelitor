@@ -67,7 +67,7 @@ public class FakeTmpDrawingLayer implements TmpDrawingLayer {
     }
 
     @Override
-    public void paintLayer(Graphics2D g, int translationX, int translationY) {
+    public void paintLayer(Graphics2D g, int tx, int ty) {
         // do nothing
     }
 }

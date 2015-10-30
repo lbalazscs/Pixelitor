@@ -15,5 +15,5 @@ public interface TmpDrawingLayer {
 
     void dispose();
 
-    void paintLayer(Graphics2D g, int translationX, int translationY);
+    void paintLayer(Graphics2D g, int tx, int ty);
 }

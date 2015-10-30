@@ -91,10 +91,10 @@ public class Assertions {
         if (layer == null) {
             throw new IllegalArgumentException();
         }
-        boolean eq1 = layer.getTranslationX() == x;
-        boolean eq2 = layer.getTranslationY() == y;
-        assert eq1 : "expected x = " + x + ", found = " + layer.getTranslationX() + " for " + layer.getName();
-        assert eq2 : "expected y = " + y + ", found = " + layer.getTranslationY() + " for " + layer.getName();
+        boolean eq1 = layer.getTX() == x;
+        boolean eq2 = layer.getTY() == y;
+        assert eq1 : "expected x = " + x + ", found = " + layer.getTX() + " for " + layer.getName();
+        assert eq2 : "expected y = " + y + ", found = " + layer.getTY() + " for " + layer.getName();
         return eq1 && eq2;
     }
 

@@ -283,8 +283,8 @@ public class ShapesTool extends Tool {
      */
     public void paintShapeOnIC(Composition comp, UserDrag userDrag) {
         ImageLayer layer = comp.getActiveMaskOrImageLayer();
-        int translationX = -layer.getTranslationX();
-        int translationY = -layer.getTranslationY();
+        int translationX = -layer.getTX();
+        int translationY = -layer.getTY();
 
         BufferedImage bi = layer.getImage();
         Graphics2D g2 = bi.createGraphics();

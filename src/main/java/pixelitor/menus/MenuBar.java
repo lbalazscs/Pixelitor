@@ -21,7 +21,6 @@ import com.bric.util.JVM;
 import com.jhlabs.composite.MultiplyComposite;
 import pixelitor.AppLogic;
 import pixelitor.Build;
-import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.Desktop;
 import pixelitor.FgBgColors;
@@ -1224,23 +1223,13 @@ public class MenuBar extends JMenuBar {
             }
         }, debugSubmenu);
 
-        createMenuItem(new MenuAction("Debug Translation") {
+        createMenuItem(new MenuAction("Debug Translation", IS_IMAGE_LAYER) {
             @Override
             public void onClick() {
                 ImageLayer layer = ImageComponents.getActiveImageLayerOrMaskOrNull();
-                int tx = layer.getTranslationX();
-                int ty = layer.getTranslationY();
-                System.out.println("MenuBar::onClick: tx = " + tx + ", ty = " + ty);
-                Canvas canvas = layer.getComp().getCanvas();
-                int canvasWidth = canvas.getWidth();
-                int canvasHeight = canvas.getHeight();
-                System.out.println("MenuBar::onClick: canvasWidth = " + canvasWidth + ", canvasHeight = " + canvasHeight);
-                BufferedImage image = layer.getImage();
-                int imageWidth = image.getWidth();
-                int imageHeight = image.getHeight();
-                System.out.println("MenuBar::onClick: imageWidth = " + imageWidth + ", imageHeight = " + imageHeight);
+                layer.debugTranslation();
             }
-        }, debugSubmenu, CTRL_K);
+        }, debugSubmenu, EnabledIf.THERE_IS_OPEN_IMAGE, CTRL_K);
 
         createMenuItem(new MenuAction("Update Histograms") {
             @Override

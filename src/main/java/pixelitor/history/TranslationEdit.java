@@ -13,25 +13,25 @@ import static pixelitor.Composition.ImageChangeActions.FULL;
  */
 public class TranslationEdit extends PixelitorEdit {
     private ContentLayer layer;
-    private int backupTranslationX = 0;
-    private int backupTranslationY = 0;
+    private int backupTX = 0;
+    private int backupTY = 0;
 
     /**
      * This constructor must be called before the change
      */
     public TranslationEdit(Composition comp, ContentLayer layer) {
-        this(comp, layer, layer.getTranslationX(), layer.getTranslationY());
+        this(comp, layer, layer.getTX(), layer.getTY());
     }
 
     /**
      * This constructor can be called after the change
      */
-    public TranslationEdit(Composition comp, ContentLayer layer, int oldTranslationX, int oldTranslationY) {
+    public TranslationEdit(Composition comp, ContentLayer layer, int oldTX, int oldTY) {
         super(comp, "");
         this.layer = layer;
 
-        this.backupTranslationX = oldTranslationX;
-        this.backupTranslationY = oldTranslationY;
+        this.backupTX = oldTX;
+        this.backupTY = oldTY;
 
         // currently always embedded
         embedded = true;
@@ -52,12 +52,12 @@ public class TranslationEdit extends PixelitorEdit {
     }
 
     private void swapTranslation() {
-        int tmpX = layer.getTranslationX();
-        int tmpY = layer.getTranslationY();
+        int tmpTX = layer.getTX();
+        int tmpTY = layer.getTY();
 
-        layer.setTranslation(backupTranslationX, backupTranslationY);
-        backupTranslationX = tmpX;
-        backupTranslationY = tmpY;
+        layer.setTranslation(backupTX, backupTY);
+        backupTX = tmpTX;
+        backupTY = tmpTY;
 
         if (!embedded) {
             layer.getComp().imageChanged(FULL);

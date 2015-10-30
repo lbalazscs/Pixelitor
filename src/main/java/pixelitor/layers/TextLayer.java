@@ -105,8 +105,8 @@ public class TextLayer extends ContentLayer {
         d.translationX = translationX;
         d.translationY = translationY;
         d.painter.setTranslation(
-                painter.getTranslationX(),
-                painter.getTranslationY());
+                painter.getTX(),
+                painter.getTY());
 
         d.setSettings(new TextSettings(settings));
 
@@ -120,12 +120,12 @@ public class TextLayer extends ContentLayer {
     @Override
     public void moveWhileDragging(double x, double y) {
         super.moveWhileDragging(x, y);
-        painter.setTranslation(getTranslationX(), getTranslationY());
+        painter.setTranslation(getTX(), getTY());
     }
 
     @Override
-    ContentLayerMoveEdit createMovementEdit(int oldTranslationX, int oldTranslationY) {
-        return new ContentLayerMoveEdit(this, null, oldTranslationX, oldTranslationY);
+    ContentLayerMoveEdit createMovementEdit(int oldTX, int oldTY) {
+        return new ContentLayerMoveEdit(this, null, oldTX, oldTY);
     }
 
     @Override
@@ -267,8 +267,8 @@ public class TextLayer extends ContentLayer {
 
         // TODO this still doesn't work probably because
         // the alignment has not been taken into account
-//        setTranslationX(getTranslationX() - selectionBounds.x);
-//        setTranslationY(getTranslationY() - selectionBounds.y);
+//        setTranslationX(getTX() - selectionBounds.x);
+//        setTranslationY(getTY() - selectionBounds.y);
     }
 
     @Override
