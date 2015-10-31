@@ -537,6 +537,7 @@ public class MenuBar extends JMenuBar {
         createMenuItem(new Transition2D(), otherFiltersSubmenu);
 
         createMenuItem(new ChannelToTransparency(), otherFiltersSubmenu);
+        createMenuItem(new InvertTransparency(), otherFiltersSubmenu);
 
         filterMenu.add(otherFiltersSubmenu);
     }
