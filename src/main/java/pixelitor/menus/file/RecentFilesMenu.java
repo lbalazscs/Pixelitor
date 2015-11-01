@@ -19,6 +19,7 @@ package pixelitor.menus.file;
 
 import pixelitor.io.OpenSaveManager;
 import pixelitor.utils.AppPreferences;
+import pixelitor.utils.BoundedUniqueList;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
@@ -26,13 +27,13 @@ import java.awt.event.ActionListener;
 import java.io.File;
 
 public final class RecentFilesMenu extends JMenu {
+    public static final int MAX_RECENT_FILES = 10;
 
     private static RecentFilesMenu singleInstance;
 
-    private final int maxRecentFiles;
     private final JMenuItem clearMenuItem;
 
-    private RecentFileInfos recentFileInfos;
+    private BoundedUniqueList<RecentFileInfo> recentFileInfos;
 
     private final ActionListener fileOpener = e -> {
         try {
@@ -52,7 +53,7 @@ public final class RecentFilesMenu extends JMenu {
 
     private RecentFilesMenu() {
         super("Recent Files");
-        maxRecentFiles = RecentFileInfos.MAX_RECENT_FILES;
+
         clearMenuItem = new JMenuItem("Clear Recent Files");
         ActionListener clearer = e -> {
             try {
@@ -68,7 +69,7 @@ public final class RecentFilesMenu extends JMenu {
     }
 
     private void clear() {
-        AppPreferences.removeRecentFiles(maxRecentFiles);
+        AppPreferences.removeRecentFiles(MAX_RECENT_FILES);
         recentFileInfos.clear();
         clearGUI();
     }
@@ -98,7 +99,7 @@ public final class RecentFilesMenu extends JMenu {
         removeAll();
     }
 
-    public RecentFileInfos getRecentFileInfosForSaving() {
+    public BoundedUniqueList<RecentFileInfo> getRecentFileInfosForSaving() {
         return recentFileInfos;
     }
 

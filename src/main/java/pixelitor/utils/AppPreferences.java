@@ -25,7 +25,6 @@ import pixelitor.TipsOfTheDay;
 import pixelitor.history.History;
 import pixelitor.io.FileChoosers;
 import pixelitor.menus.file.RecentFileInfo;
-import pixelitor.menus.file.RecentFileInfos;
 import pixelitor.menus.file.RecentFilesMenu;
 
 import javax.swing.*;
@@ -144,9 +143,9 @@ public final class AppPreferences {
         window.setSize(width, height);
     }
 
-    public static RecentFileInfos loadRecentFiles() {
-        RecentFileInfos recentFileInfos = new RecentFileInfos();
-        for (int i = 0; i < RecentFileInfos.MAX_RECENT_FILES; i++) {
+    public static BoundedUniqueList<RecentFileInfo> loadRecentFiles() {
+        BoundedUniqueList<RecentFileInfo> retVal = new BoundedUniqueList<>(RecentFilesMenu.MAX_RECENT_FILES);
+        for (int i = 0; i < RecentFilesMenu.MAX_RECENT_FILES; i++) {
             String key = RECENT_FILE_PREFS_KEY + i;
             String fileName = recentFilesUserNode.get(key, null);
             if (fileName == null) {
@@ -156,13 +155,13 @@ public final class AppPreferences {
 
             if (file.exists()) {
                 RecentFileInfo fileInfo = new RecentFileInfo(file);
-                recentFileInfos.addIfNotPresent(fileInfo);
+                retVal.addIfNotThere(fileInfo);
             }
         }
-        return recentFileInfos;
+        return retVal;
     }
 
-    private static void saveRecentFiles(RecentFileInfos fileInfos) {
+    private static void saveRecentFiles(BoundedUniqueList<RecentFileInfo> fileInfos) {
         for (int i = 0; i < fileInfos.size(); i++) {
             String key = RECENT_FILE_PREFS_KEY + i;
             String value = fileInfos.get(i).getSavedName();
