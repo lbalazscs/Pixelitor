@@ -150,6 +150,19 @@ public class ImageMath {
         return x * x * (3 - 2 * x);
     }
 
+    // smooth step with doubles
+    public static double smoothStep(double a, double b, double x) {
+        if (x < a) {
+            return 0;
+        }
+        if (x >= b) {
+            return 1;
+        }
+        x = (x - a) / (b - a);
+        return x * x * (3 - 2 * x);
+    }
+
+
     /**
      * A "circle up" function. Returns y on a unit circle given 1-x. Useful for forming bevels.
      *

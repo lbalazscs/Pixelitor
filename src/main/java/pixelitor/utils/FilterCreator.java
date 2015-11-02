@@ -373,31 +373,31 @@ public class FilterCreator extends JPanel {
         for (ParameterInfo param : desc.getParams()) {
             String paramVarName = param.getVariableName();
 
-            retVal += "    private RangeParam " + paramVarName + " = new RangeParam(\"" + param.getName() + "\", "
+            retVal += "    private final RangeParam " + paramVarName + " = new RangeParam(\"" + param.getName() + "\", "
                     + param.getMin() + ", " + param.getMax() + ", " + param.getDefaultValue() + ");";
 
             retVal += '\n';
         }
 
         if (desc.hasCenter()) {
-            retVal += "    private ImagePositionParam center = new ImagePositionParam(\"Center\");\n";
+            retVal += "    private final ImagePositionParam center = new ImagePositionParam(\"Center\");\n";
         }
         if (desc.hasAngleParam()) {
-            retVal += "    private AngleParam angle = new AngleParam(\"Angle\", 0);\n";
+            retVal += "    private final AngleParam angle = new AngleParam(\"Angle\", 0);\n";
         }
         if (desc.hasEdgeAction()) {
-            retVal += "    private IntChoiceParam edgeAction =  IntChoiceParam.getEdgeActionChoices();\n";
+            retVal += "    private final IntChoiceParam edgeAction =  IntChoiceParam.getEdgeActionChoices();\n";
         }
         if (desc.hasInterpolation()) {
-            retVal += "    private IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();\n";
+            retVal += "    private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();\n";
         }
         if (desc.hasColor()) {
-            retVal += "    private ColorParam color = new ColorParam(\"Color:\", Color.WHITE, false, false);\n";
+            retVal += "    private final ColorParam color = new ColorParam(\"Color:\", Color.WHITE, false, false);\n";
         }
         if (desc.hasGradient()) {
-            retVal += "    private float[] defaultThumbPositions = new float[]{0f, 1f};\n";
-            retVal += "    private Color[] defaultValues = new Color[]{Color.BLACK, Color.WHITE};\n";
-            retVal += "    private GradientParam gradient = new GradientParam(\"Colors:\", defaultThumbPositions, defaultValues);\n";
+            retVal += "    private final float[] defaultThumbPositions = new float[]{0f, 1f};\n";
+            retVal += "    private final Color[] defaultValues = new Color[]{Color.BLACK, Color.WHITE};\n";
+            retVal += "    private final GradientParam gradient = new GradientParam(\"Colors:\", defaultThumbPositions, defaultValues);\n";
         }
         return retVal;
     }

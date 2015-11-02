@@ -8,7 +8,7 @@ import java.util.List;
  */
 public class BoundedUniqueList<E> {
     private final int maxSize;
-    private List<E> list;
+    private final List<E> list;
 
     public BoundedUniqueList(int maxSize) {
         this.maxSize = maxSize;

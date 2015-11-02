@@ -591,6 +591,7 @@ public class MenuBar extends JMenuBar {
         createMenuItem(new JHSparkle(), lightSubmenu);
         createMenuItem(new JHRays(), lightSubmenu);
         createMenuItem(new JHGlint(), lightSubmenu);
+        createMenuItem(new Flashlight(), lightSubmenu);
     }
 
     private static void initDistortSubmenu(JMenu filterMenu) {

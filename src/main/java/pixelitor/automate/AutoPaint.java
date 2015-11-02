@@ -162,7 +162,7 @@ public class AutoPaint {
         private static int defaultLength = 100;
 
         private final JCheckBox randomColorsCB;
-        private JLabel randomColorsLabel;
+        private final JLabel randomColorsLabel;
         private static boolean defaultRandomColors = true;
 
         private ConfigPanel() {
