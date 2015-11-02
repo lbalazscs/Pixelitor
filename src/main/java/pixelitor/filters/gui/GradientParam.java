@@ -28,6 +28,8 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.beans.PropertyChangeEvent;
 
+import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+
 /**
  * Represents a gradient. (Note that unlike other filter parameter implementations,
  * this is not really a model for the GradientSlider GUI component,
@@ -45,11 +47,11 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     public GradientParam(String name, float[] defaultThumbPositions, Color[] defaultColors) {
-        this(name, defaultThumbPositions, defaultColors, false);
+        this(name, defaultThumbPositions, defaultColors, ALLOW_RANDOMIZE);
     }
 
-    public GradientParam(String name, float[] defaultThumbPositions, Color[] defaultColors, boolean ignoreRandomize) {
-        super(name, ignoreRandomize);
+    public GradientParam(String name, float[] defaultThumbPositions, Color[] defaultColors, RandomizePolicy randomizePolicy) {
+        super(name, randomizePolicy);
         this.defaultThumbPositions = defaultThumbPositions;
         this.defaultColors = defaultColors;
 
@@ -111,7 +113,7 @@ public class GradientParam extends AbstractFilterParam {
 
     @Override
     public void randomize() {
-        if (!ignoreRandomize) {
+        if (randomizePolicy.allowRandomize()) {
             Color[] randomColors = new Color[defaultThumbPositions.length];
             for (int i = 0; i < randomColors.length; i++) {
                 randomColors[i] = ColorUtils.getRandomColor(false);

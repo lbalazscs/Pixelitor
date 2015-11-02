@@ -22,6 +22,9 @@ import pixelitor.utils.UpdateGUI;
 import javax.swing.*;
 import java.awt.Rectangle;
 
+import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+
 /**
  * A filter parameter for a boolean value.
  */
@@ -31,15 +34,15 @@ public class BooleanParam extends AbstractFilterParam {
     private final boolean addDefaultButton;
 
     public BooleanParam(String name, boolean defaultValue) {
-        this(name, defaultValue, false);
+        this(name, defaultValue, ALLOW_RANDOMIZE);
     }
 
-    public BooleanParam(String name, boolean defaultValue, boolean ignoreRandomize) {
-        this(name, defaultValue, ignoreRandomize, false);
+    public BooleanParam(String name, boolean defaultValue, RandomizePolicy randomizePolicy) {
+        this(name, defaultValue, randomizePolicy, false);
     }
 
-    public BooleanParam(String name, boolean defaultValue, boolean ignoreRandomize, boolean addDefaultButton) {
-        super(name, ignoreRandomize);
+    public BooleanParam(String name, boolean defaultValue, RandomizePolicy randomizePolicy, boolean addDefaultButton) {
+        super(name, randomizePolicy);
         this.defaultValue = defaultValue;
         currentValue = defaultValue;
         this.addDefaultButton = addDefaultButton;
@@ -55,7 +58,7 @@ public class BooleanParam extends AbstractFilterParam {
     }
 
     public static BooleanParam createParamForHPSharpening() {
-        return new BooleanParam("High-Pass Sharpening", false, true);
+        return new BooleanParam("High-Pass Sharpening", false, IGNORE_RANDOMIZE);
     }
 
     @Override
@@ -75,7 +78,7 @@ public class BooleanParam extends AbstractFilterParam {
 
     @Override
     public void randomize() {
-        if (!ignoreRandomize) {
+        if (randomizePolicy.allowRandomize()) {
             setValue(Math.random() > 0.5, UpdateGUI.YES, false);
         }
     }

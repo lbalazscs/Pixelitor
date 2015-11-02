@@ -8,13 +8,15 @@ import pixelitor.utils.OKDialog;
 import javax.swing.*;
 import java.awt.Rectangle;
 
+import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+
 public class EffectsParam extends AbstractFilterParam {
     private EffectsPanel effectsPanel;
     private final boolean separateDialog;
 
-    public EffectsParam(String name, boolean ignoreRandomize, boolean separateDialog) {
-        super(name, ignoreRandomize);
-        this.separateDialog = separateDialog;
+    public EffectsParam(String name) {
+        super(name, ALLOW_RANDOMIZE);
+        this.separateDialog = true;
     }
 
     @Override

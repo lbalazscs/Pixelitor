@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Random;
 
 import static pixelitor.filters.gui.FilterGUIComponent.EnabledReason.APP_LOGIC;
+import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
  * A filter parameter for selecting a choice from a list of values
@@ -45,11 +46,11 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
     private final EventListenerList listenerList = new EventListenerList();
 
     public IntChoiceParam(String name, Value[] choices) {
-        this(name, choices, false);
+        this(name, choices, ALLOW_RANDOMIZE);
     }
 
-    public IntChoiceParam(String name, Value[] choices, boolean ignoreRandomize) {
-        super(name, ignoreRandomize);
+    public IntChoiceParam(String name, Value[] choices, RandomizePolicy randomizePolicy) {
+        super(name, randomizePolicy);
 
         choicesList.addAll(Arrays.asList(choices));
 
@@ -87,7 +88,7 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
 
     @Override
     public void randomize() {
-        if (!ignoreRandomize) {
+        if (randomizePolicy.allowRandomize()) {
             Random rnd = new Random();
             int randomIndex = rnd.nextInt(choicesList.size());
             setCurrentChoice(choicesList.get(randomIndex), false);

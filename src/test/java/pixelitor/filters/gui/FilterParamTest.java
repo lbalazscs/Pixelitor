@@ -44,6 +44,7 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
 import static pixelitor.filters.gui.FilterGUIComponent.EnabledReason.APP_LOGIC;
 import static pixelitor.filters.gui.FilterGUIComponent.EnabledReason.FINAL_ANIMATION_SETTING;
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
  * Checks whether different FilterParam implementations implement
@@ -66,7 +67,7 @@ public class FilterParamTest {
     public static Collection<Object[]> instancesToTest() {
         return Arrays.asList(new Object[][]{
                 {new RangeParam("Param Name", 0, 10, 0)},
-                {new RangeParam("Param Name", 0, 10, 5).setIgnoreRandomize(true)},
+                {new RangeParam("Param Name", 0, 10, 5).setRandomizePolicy(IGNORE_RANDOMIZE)},
                 {new RangeWithColorsParam(CYAN, RED, "Param Name", -100, 100, 0)},
                 {new GroupedRangeParam("Param Name", 0, 100, 0, true)},
                 {new GroupedRangeParam("Param Name", 0, 100, 0, false)},
@@ -85,7 +86,7 @@ public class FilterParamTest {
                 })
                 },
                 {new StrokeParam("Param Name")},
-                {new EffectsParam("Param Name", false, true)},
+                {new EffectsParam("Param Name")},
         });
     }
 

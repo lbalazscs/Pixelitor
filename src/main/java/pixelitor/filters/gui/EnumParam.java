@@ -34,7 +34,7 @@ public class EnumParam<E extends Enum<E>> extends AbstractFilterParam implements
     private E defaultValue;
 
     public EnumParam(String name, Class<E> enumClass) {
-        super(name, false);
+        super(name, RandomizePolicy.ALLOW_RANDOMIZE);
         this.enumConstants = enumClass.getEnumConstants();
         defaultValue = enumConstants[0];
         delegateModel = new EnumComboBoxModel<>(enumClass);

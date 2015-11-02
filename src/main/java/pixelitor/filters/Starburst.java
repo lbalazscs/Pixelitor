@@ -36,6 +36,7 @@ import static java.awt.Color.WHITE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
  * Starburst
@@ -45,7 +46,7 @@ public class Starburst extends FilterWithParametrizedGUI {
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final ColorParam bgColor = new ColorParam("Background Color:", WHITE, NO_OPACITY);
     private final ColorParam fgColor = new ColorParam("Rays Color:", BLACK, NO_OPACITY);
-    private final BooleanParam randomColorsParam = new BooleanParam("Use Random Colors for Rays", false, true);
+    private final BooleanParam randomColorsParam = new BooleanParam("Use Random Colors for Rays", false, IGNORE_RANDOMIZE);
     private final AngleParam rotate = new AngleParam("Rotate", 0);
 
     public Starburst() {

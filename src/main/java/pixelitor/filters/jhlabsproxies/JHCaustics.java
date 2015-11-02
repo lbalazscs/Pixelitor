@@ -28,6 +28,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 import static pixelitor.utils.SliderSpinner.TextPosition.BORDER;
 
 /**
@@ -41,7 +42,7 @@ public class JHCaustics extends FilterWithParametrizedGUI {
     private final RangeParam dispersion = new RangeParam("Dispersion (Color Separation)", 0, 100, 0);
     private final RangeParam turbulence = new RangeParam("Turbulence", 0, 8, 0);
     private final RangeParam time = new RangeParam("Time", 0, 999, 0);
-    private final RangeParam samples = new RangeParam("Samples (Quality)", 1, 10, 1, true, BORDER, true);
+    private final RangeParam samples = new RangeParam("Samples (Quality)", 1, 10, 1, true, BORDER, IGNORE_RANDOMIZE);
 
     private CausticsFilter filter;
 

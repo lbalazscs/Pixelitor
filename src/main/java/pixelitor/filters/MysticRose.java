@@ -59,7 +59,7 @@ public class MysticRose extends FilterWithParametrizedGUI {
     private final RangeParam radius = new RangeParam("Radius (Height %)", 1, 200, 45);
     private final RangeParam rotate = new RangeParam("Rotate", 0, 100, 0);
     private final StrokeParam strokeParam = new StrokeParam("Stroke Settings");
-    private final EffectsParam effectsParam = new EffectsParam("Effects", false, true);
+    private final EffectsParam effectsParam = new EffectsParam("Effects");
 
     private final IntChoiceParam background = new IntChoiceParam("Background",
             new IntChoiceParam.Value[]{

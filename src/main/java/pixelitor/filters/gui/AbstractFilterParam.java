@@ -19,6 +19,8 @@ package pixelitor.filters.gui;
 
 import java.util.Objects;
 
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+
 /**
  * A convenience parent class for filter parameter implementations.
  */
@@ -28,11 +30,11 @@ public abstract class AbstractFilterParam implements FilterParam {
     private boolean enabledByAnimationSetting = true;
     private boolean enabledByFilterLogic = true;
     protected ParamGUI paramGUI;
-    protected boolean ignoreRandomize;
+    protected RandomizePolicy randomizePolicy;
 
-    AbstractFilterParam(String name, boolean ignoreRandomize) {
+    AbstractFilterParam(String name, RandomizePolicy randomizePolicy) {
         this.name = Objects.requireNonNull(name);
-        this.ignoreRandomize = ignoreRandomize;
+        this.randomizePolicy = randomizePolicy;
     }
 
     @Override
@@ -75,7 +77,7 @@ public abstract class AbstractFilterParam implements FilterParam {
 
     @Override
     public boolean ignoresRandomize() {
-        return ignoreRandomize;
+        return randomizePolicy == IGNORE_RANDOMIZE;
     }
 
     @Override

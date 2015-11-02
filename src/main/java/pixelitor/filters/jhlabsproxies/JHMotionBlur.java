@@ -31,6 +31,7 @@ import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
 
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.MOTION_BLUR;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
 
@@ -71,7 +72,7 @@ public class JHMotionBlur extends FilterWithParametrizedGUI {
             new IntChoiceParam.Value("High Quality", MBMethod.GOOD.ordinal()),
     };
 
-    private final IntChoiceParam method = new IntChoiceParam("Quality", methodChoices, true);
+    private final IntChoiceParam method = new IntChoiceParam("Quality", methodChoices, IGNORE_RANDOMIZE);
 
     public enum Mode {
         MOTION_BLUR {

@@ -14,6 +14,8 @@ import javax.swing.*;
 import java.awt.Rectangle;
 import java.awt.Stroke;
 
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+
 public class StrokeParam extends AbstractFilterParam {
     private final RangeParam strokeWidthParam = new RangeParam("Stroke Width", 1, 100, 5);
     // controls in the Stroke Settings dialog
@@ -30,7 +32,7 @@ public class StrokeParam extends AbstractFilterParam {
     };
 
     public StrokeParam(String name) {
-        super(name, true);
+        super(name, IGNORE_RANDOMIZE);
     }
 
     @Override

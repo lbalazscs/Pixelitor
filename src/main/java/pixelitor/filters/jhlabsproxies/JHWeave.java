@@ -26,6 +26,8 @@ import pixelitor.filters.gui.ParamSet;
 
 import java.awt.image.BufferedImage;
 
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+
 /**
  * Weave based on the JHLabs WeaveFilter
  */
@@ -41,7 +43,7 @@ public class JHWeave extends FilterWithParametrizedGUI {
     private final GroupedRangeParam gap = new GroupedRangeParam("Gap", 0, 100, 6);
     private final BooleanParam roundThreads = new BooleanParam("Round Threads", false);
     private final BooleanParam shadeCrossings = new BooleanParam("Shade Crossings", true);
-    private final BooleanParam useImageColors = new BooleanParam("Use Image Colors", true, true);
+    private final BooleanParam useImageColors = new BooleanParam("Use Image Colors", true, IGNORE_RANDOMIZE);
 
     private WeaveFilter filter;
 

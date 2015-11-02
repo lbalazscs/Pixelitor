@@ -18,6 +18,8 @@ package pixelitor.filters.gui;
 
 import pixelitor.layers.BlendingMode;
 
+import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+
 /**
  *
  */
@@ -25,11 +27,11 @@ public class BlendingModeParam extends IntChoiceParam {
     private final BlendingMode[] blendingModes;
 
     public BlendingModeParam(BlendingMode... blendingModes) {
-        this(blendingModes, false);
+        this(blendingModes, ALLOW_RANDOMIZE);
     }
 
-    public BlendingModeParam(BlendingMode[] blendingModes, boolean ignoreRandomize) {
-        super("Blending Mode", transformToValues(blendingModes), ignoreRandomize);
+    public BlendingModeParam(BlendingMode[] blendingModes, RandomizePolicy randomizePolicy) {
+        super("Blending Mode", transformToValues(blendingModes), randomizePolicy);
         this.blendingModes = blendingModes;
     }
 

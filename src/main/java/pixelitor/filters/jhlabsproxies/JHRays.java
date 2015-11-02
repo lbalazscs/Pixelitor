@@ -29,6 +29,8 @@ import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+
 /**
  * Rays based on the JHLabs RaysFilter
  */
@@ -39,7 +41,7 @@ public class JHRays extends FilterWithParametrizedGUI {
     private final RangeParam opacity = new RangeParam("Opacity (%)", 0, 100, 80);
     private final RangeParam strength = new RangeParam("Strength", 0, 500, 200);
     private final RangeParam threshold = new RangeParam("Threshold (%)", 0, 100, 25);
-    private final BooleanParam raysOnly = new BooleanParam("Rays Only", false, true);
+    private final BooleanParam raysOnly = new BooleanParam("Rays Only", false, IGNORE_RANDOMIZE);
 
     // setting a ColorMap does not work properly
 

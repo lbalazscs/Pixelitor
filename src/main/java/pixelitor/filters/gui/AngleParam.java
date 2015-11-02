@@ -26,6 +26,8 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 import java.awt.Rectangle;
 
+import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+
 /**
  * A filter parameter for selecting an angle
  */
@@ -37,7 +39,7 @@ public class AngleParam extends AbstractFilterParam {
     private final EventListenerList listenerList = new EventListenerList();
 
     public AngleParam(String name, double defaultValue) {
-        super(name, false);
+        super(name, ALLOW_RANDOMIZE);
 
         setValueInRadians(defaultValue, false);
 

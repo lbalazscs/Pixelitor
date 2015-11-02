@@ -23,6 +23,8 @@ import javax.swing.*;
 import java.awt.Color;
 import java.awt.Rectangle;
 
+import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+
 /**
  * A filter parameter for selecting a color
  */
@@ -33,7 +35,7 @@ public class ColorParam extends AbstractFilterParam {
     private final OpacitySetting opacitySetting;
 
     public ColorParam(String name, Color defaultColor, OpacitySetting opacitySetting) {
-        super(name, false);
+        super(name, ALLOW_RANDOMIZE);
 
         this.defaultColor = defaultColor;
         this.color = defaultColor;

@@ -19,6 +19,8 @@ import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+
 /**
  * Renders a fractal tree
  */
@@ -46,7 +48,7 @@ public class FractalTree extends FilterWithParametrizedGUI {
             new IntChoiceParam.Value[]{
                     new IntChoiceParam.Value("Better", QUALITY_BETTER),
                     new IntChoiceParam.Value("Faster", QUALITY_FASTER)
-            }, true);
+            }, IGNORE_RANDOMIZE);
 
     // precalculated objects for the various depths
     private Stroke[] widthLookup;
@@ -58,7 +60,7 @@ public class FractalTree extends FilterWithParametrizedGUI {
 
     final GradientParam colors = new GradientParam("Colors",
             new float[]{0.25f, 0.75f},
-            new Color[]{BROWN, GREEN}, true);
+            new Color[]{BROWN, GREEN}, IGNORE_RANDOMIZE);
     private double defaultLength;
     private double randPercent;
     private double lengthDeviation;

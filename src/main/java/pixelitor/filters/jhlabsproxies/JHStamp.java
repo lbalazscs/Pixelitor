@@ -28,6 +28,7 @@ import java.awt.image.BufferedImage;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
  * Stamp based on the JHLabs StampFilter
@@ -46,7 +47,7 @@ public class JHStamp extends FilterWithParametrizedGUI {
                     // this is calculated with floats, but the animation is still not smooth
 //                    new IntChoiceParam.Value("Box Blur, 3 iterations", StampFilter.BOX3_BLUR),
                     new IntChoiceParam.Value("Gaussian (slow for large images!)", StampFilter.GAUSSIAN_BLUR)
-            }, true);
+            }, IGNORE_RANDOMIZE);
 
     private StampFilter filter;
 

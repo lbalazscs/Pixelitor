@@ -27,6 +27,7 @@ import javax.swing.event.EventListenerList;
 import java.awt.Rectangle;
 import java.util.Random;
 
+import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 import static pixelitor.utils.SliderSpinner.TextPosition.BORDER;
 import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
 
@@ -62,11 +63,11 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     public RangeParam(String name, int minValue, int maxValue, int defaultValue, boolean addDefaultButtons, SliderSpinner.TextPosition position) {
-        this(name, minValue, maxValue, defaultValue, addDefaultButtons, position, false);
+        this(name, minValue, maxValue, defaultValue, addDefaultButtons, position, ALLOW_RANDOMIZE);
     }
 
-    public RangeParam(String name, int minValue, int maxValue, int defaultValue, boolean addDefaultButtons, SliderSpinner.TextPosition position, boolean ignoreRandomize) {
-        super(name, ignoreRandomize);
+    public RangeParam(String name, int minValue, int maxValue, int defaultValue, boolean addDefaultButtons, SliderSpinner.TextPosition position, RandomizePolicy randomizePolicy) {
+        super(name, randomizePolicy);
 
         assert minValue < maxValue : name + ": minValue (" + minValue + ") >= maxValue (" + maxValue + ')';
         assert defaultValue >= minValue : name + ": defaultValue (" + defaultValue + ") < minValue (" + minValue + ')';
@@ -130,7 +131,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     @Override
     public void randomize() {
-        if(!ignoreRandomize) {
+        if (randomizePolicy.allowRandomize()) {
             int range = maxValue - minValue;
             Random rnd = new Random();
             int newValue = minValue + rnd.nextInt(range);
@@ -327,8 +328,8 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         value = doubleValue;
     }
 
-    public RangeParam setIgnoreRandomize(boolean ignoreRandomize) {
-        this.ignoreRandomize = ignoreRandomize;
+    public RangeParam setRandomizePolicy(RandomizePolicy randomizePolicy) {
+        this.randomizePolicy = randomizePolicy;
         return this;
     }
 

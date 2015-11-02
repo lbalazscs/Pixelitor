@@ -58,7 +58,6 @@ public class JHFocus extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        // TODO unlike BoxBlurFilter, VariableBlurFilter supports only integer radii
         int hRadius = blurRadius.getValue(0);
         int vRadius = blurRadius.getValue(1);
         if ((hRadius == 0) && (vRadius == 0)) {
@@ -84,8 +83,10 @@ public class JHFocus extends FilterWithParametrizedGUI {
                 (penumbraMultiplier.getValueAsDouble() + 100.0) / 100.0);
         filter.setInverted(invert.isChecked());
 
-        filter.setHRadius(hRadius);
-        filter.setVRadius(vRadius);
+        // TODO unlike BoxBlurFilter, VariableBlurFilter supports only integer radii
+        filter.setHRadius(blurRadius.getValueAsFloat(0));
+        filter.setVRadius(blurRadius.getValueAsFloat(1));
+
         filter.setIterations(numberOfIterations.getValue());
         filter.setPremultiplyAlpha(false);
 

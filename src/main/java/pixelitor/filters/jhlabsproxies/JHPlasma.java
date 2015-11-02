@@ -35,6 +35,7 @@ import static java.awt.Color.BLACK;
 import static java.awt.Color.ORANGE;
 import static java.awt.Color.RED;
 import static java.awt.Color.YELLOW;
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
  * Plasma based on the JHLabs PlasmaFilter
@@ -50,7 +51,7 @@ public class JHPlasma extends FilterWithParametrizedGUI {
             new IntChoiceParam.Value("Less", LESS_COLORS),
             new IntChoiceParam.Value("More", MORE_COLORS),
             new IntChoiceParam.Value("Use Gradient", GRADIENT_COLORS),
-    }, true);
+    }, IGNORE_RANDOMIZE);
 
     @SuppressWarnings("FieldCanBeLocal")
     private final FilterAction reseedAction = new ReseedNoiseFilterAction(new ActionListener() {

@@ -22,6 +22,8 @@ import pixelitor.utils.Utils;
 import javax.swing.*;
 import java.awt.Rectangle;
 
+import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+
 /**
  * A filter parameter for text input
  */
@@ -32,7 +34,7 @@ public class TextParam extends AbstractFilterParam {
     private final TextParamGUI gui;
 
     public TextParam(String name, String defaultValue) {
-        super(name, false);
+        super(name, ALLOW_RANDOMIZE);
         this.defaultValue = defaultValue;
         gui = new TextParamGUI(this, defaultValue, adjustmentListener);
     }

@@ -22,6 +22,8 @@ import com.jhlabs.image.ImageMath;
 import javax.swing.*;
 import java.awt.Rectangle;
 
+import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+
 /**
  * Two or more range params that are grouped and can be linked.
  */
@@ -60,7 +62,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements RangeBased
     }
 
     public GroupedRangeParam(String name, RangeParam[] params, boolean linked) {
-        super(name, false);
+        super(name, ALLOW_RANDOMIZE);
         rangeParams = params;
 
         checkBoxModel = new JToggleButton.ToggleButtonModel();

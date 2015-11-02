@@ -20,12 +20,13 @@ package pixelitor.filters.gui;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
 
 public class RangeParamTest {
     @Test
     public void isIgnoreRandomizeWorking() {
-        RangeParam param = new RangeParam("Test", 0, 1000, 100, true, NONE, true);
+        RangeParam param = new RangeParam("Test", 0, 1000, 100, true, NONE, IGNORE_RANDOMIZE);
         for (int i = 0; i < 5; i++) {
             param.randomize();
             assertThat(param.getValue()).isEqualTo(100);

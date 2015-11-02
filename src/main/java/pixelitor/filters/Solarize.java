@@ -23,6 +23,8 @@ import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
 
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+
 /**
  * Solarize
  */
@@ -37,7 +39,7 @@ public class Solarize extends FilterWithParametrizedGUI {
     private final IntChoiceParam type = new IntChoiceParam("Type", new IntChoiceParam.Value[]{
             new IntChoiceParam.Value("Classic", TYPE_CLASSIC),
             new IntChoiceParam.Value("Upside Down Curve", TYPE_INVERTED)
-    }, true);
+    }, IGNORE_RANDOMIZE);
 
     public Solarize() {
         super("Solarize", true, false);

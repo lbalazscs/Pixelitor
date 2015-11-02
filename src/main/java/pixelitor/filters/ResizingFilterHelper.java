@@ -8,6 +8,8 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+
 /**
  * For some filters it makes sense to apply them to a
  * downscaled image, and then scale the image back.
@@ -95,6 +97,6 @@ public class ResizingFilterHelper {
         return new IntChoiceParam("Detail Quality", new IntChoiceParam.Value[]{
                 new IntChoiceParam.Value("Faster", BILINEAR_FAST),
                 new IntChoiceParam.Value("Better", BILINEAR11),
-        }, true);
+        }, IGNORE_RANDOMIZE);
     }
 }

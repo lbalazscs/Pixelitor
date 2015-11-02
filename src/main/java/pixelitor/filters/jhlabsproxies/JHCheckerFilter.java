@@ -14,6 +14,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
  * Checker filter based on the JHLabs CheckFilter
@@ -24,7 +25,7 @@ public class JHCheckerFilter extends FilterWithParametrizedGUI {
     private final ColorParam color1 = new ColorParam("Color 1:", Color.BLACK, NO_OPACITY);
     private final ColorParam color2 = new ColorParam("Color 1:", Color.WHITE, NO_OPACITY);
     private final RangeParam fuzziness = new RangeParam("Fuzziness", 0, 50, 0);
-    private final BooleanParam bumpMap = new BooleanParam("Bump Map Original", false, true);
+    private final BooleanParam bumpMap = new BooleanParam("Bump Map Original", false, IGNORE_RANDOMIZE);
 
 //    private final RangeParam aaRes = new RangeParam("Anti-aliasing Quality", 1, 10, 2);
 
@@ -37,7 +38,6 @@ public class JHCheckerFilter extends FilterWithParametrizedGUI {
                 angle,
                 color1,
                 color2,
-//                aaRes.setIgnoreRandomize(true),
                 fuzziness,
                 bumpMap
         ));

@@ -23,6 +23,8 @@ import pixelitor.utils.UpdateGUI;
 import javax.swing.*;
 import java.awt.Rectangle;
 
+import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+
 /**
  * A filter parameter for selecting an image coordinate (relative to the image size)
  */
@@ -34,11 +36,11 @@ public class ImagePositionParam extends AbstractFilterParam {
     private float defaultRelativeY = 0.5f;
 
     public ImagePositionParam(String name) {
-        super(name, false);
+        super(name, ALLOW_RANDOMIZE);
     }
 
     public ImagePositionParam(String name, float relativeX, float relativeY) {
-        super(name, false);
+        super(name, ALLOW_RANDOMIZE);
         this.relativeX = relativeX;
         this.relativeY = relativeY;
         defaultRelativeX  = relativeX;

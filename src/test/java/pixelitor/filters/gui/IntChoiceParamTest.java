@@ -20,6 +20,7 @@ package pixelitor.filters.gui;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 public class IntChoiceParamTest {
     @Test
@@ -29,7 +30,7 @@ public class IntChoiceParamTest {
                 new IntChoiceParam.Value("Name 2", 2),
                 new IntChoiceParam.Value("Name 3", 3),
                 new IntChoiceParam.Value("Name 4", 4),
-        }, true);
+        }, IGNORE_RANDOMIZE);
         for (int i = 0; i < 10; i++) {
             param.randomize();
             assertThat(param.getValue()).isEqualTo(1);

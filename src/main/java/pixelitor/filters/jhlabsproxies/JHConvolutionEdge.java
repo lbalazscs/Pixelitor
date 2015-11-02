@@ -26,6 +26,8 @@ import pixelitor.filters.gui.ParamSet;
 
 import java.awt.image.BufferedImage;
 
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+
 /**
  * ConvolutionEdge based on the JHLabs EdgeFilter
  */
@@ -47,7 +49,7 @@ public class JHConvolutionEdge extends FilterWithParametrizedGUI {
             new IntChoiceParam.Value("None", METHOD_NONE),
     });
 
-    private final BooleanParam invertImage = new BooleanParam("Invert", false, true);
+    private final BooleanParam invertImage = new BooleanParam("Invert", false, IGNORE_RANDOMIZE);
 
     private EdgeFilter filter;
     private static final int METHOD_SOBEL = 1;

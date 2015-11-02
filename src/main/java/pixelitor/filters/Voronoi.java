@@ -28,20 +28,22 @@ import pixelitor.utils.ReseedSupport;
 
 import java.awt.image.BufferedImage;
 
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+
 /**
  * Voronoi based on VoronoiFilter
  */
 public class Voronoi extends FilterWithParametrizedGUI {
     private final RangeParam numberOfPoints = new RangeParam("Number of Points", 1, 200, 10);
     private final EnumParam<Metric> distance = new EnumParam<>("Distance", Metric.class);
-    private final BooleanParam showPoints = new BooleanParam("Show Points", false, true);
-    private final BooleanParam useImageColors = new BooleanParam("Use Image Colors", false, true);
+    private final BooleanParam showPoints = new BooleanParam("Show Points", false, IGNORE_RANDOMIZE);
+    private final BooleanParam useImageColors = new BooleanParam("Use Image Colors", false, IGNORE_RANDOMIZE);
     private final IntChoiceParam antiAliasing = new IntChoiceParam("Anti-aliasing",
             new IntChoiceParam.Value[]{
                     new IntChoiceParam.Value("None (Faster)", 0),
                     new IntChoiceParam.Value("2x2 (Better, slower)", 2),
                     new IntChoiceParam.Value("4x4 (Best, slowest)", 4),
-            }, true);
+            }, IGNORE_RANDOMIZE);
 
     private VoronoiFilter filter;
 

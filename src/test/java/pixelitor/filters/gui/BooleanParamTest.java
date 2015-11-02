@@ -20,11 +20,12 @@ package pixelitor.filters.gui;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 public class BooleanParamTest {
     @Test
     public void isIgnoreRandomizeWorking() {
-        BooleanParam param = new BooleanParam("Test", true, true);
+        BooleanParam param = new BooleanParam("Test", true, IGNORE_RANDOMIZE);
         for (int i = 0; i < 10; i++) {
             param.randomize();
             assertThat(param.isChecked()).isTrue();
