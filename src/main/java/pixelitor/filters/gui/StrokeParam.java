@@ -171,7 +171,7 @@ public class StrokeParam extends AbstractFilterParam {
         }
     }
 
-    protected void updateDefaultButtonState() {
+    private void updateDefaultButtonState() {
         if (defaultButton != null) {
             defaultButton.updateState();
         }

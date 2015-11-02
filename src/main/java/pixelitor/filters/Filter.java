@@ -123,7 +123,7 @@ public abstract class Filter extends AbstractAction {
 
 //        Utils.debugImage(src, "src");
 
-        BufferedImage dest = null;
+        BufferedImage dest;
         try {
             dest = executeForOneLayer(src);
         } catch (Exception e) {

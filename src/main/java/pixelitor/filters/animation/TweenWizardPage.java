@@ -86,7 +86,6 @@ public enum TweenWizardPage implements WizardPage {
 
         @Override
         public void onWizardCancelled(Wizard wizard) {
-            FilterWithParametrizedGUI filter = getAnimation(wizard).getFilter();
             ImageComponents.getActiveImageLayerOrMask().get().cancelPressedInDialog();
         }
 
@@ -129,7 +128,6 @@ public enum TweenWizardPage implements WizardPage {
 
         @Override
         public void onWizardCancelled(Wizard wizard) {
-            FilterWithParametrizedGUI filter = getAnimation(wizard).getFilter();
             ImageComponents.getActiveImageLayerOrMask().get().cancelPressedInDialog();
         }
 

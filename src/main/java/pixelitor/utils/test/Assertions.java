@@ -33,6 +33,7 @@ public class Assertions {
         return !hasSelection();
     }
 
+    @SuppressWarnings("SameReturnValue")
     public static boolean selectionBoundsAre(int x, int y, int w, int h) {
         Composition comp = ImageComponents.getActiveCompOrNull();
         if (comp == null) {
@@ -66,6 +67,7 @@ public class Assertions {
         return mask.isLinked() == linked;
     }
 
+    @SuppressWarnings("SameReturnValue")
     public static boolean canvasSizeIs(int w, int h) {
         Composition comp = ImageComponents.getActiveCompOrNull();
         if (comp == null) {

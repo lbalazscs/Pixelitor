@@ -273,11 +273,9 @@ public class TextLayer extends ContentLayer {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(getClass().getSimpleName() + "{");
-        sb.append("text=").append(settings == null ? "null settings" : settings.getText());
-        sb.append(", super=").append(super.toString());
-        sb.append('}');
-        return sb.toString();
+        return getClass().getSimpleName()
+                + "{text=" + (settings == null ? "null settings" : settings.getText())
+                + ", super=" + super.toString() + '}';
     }
 
 }

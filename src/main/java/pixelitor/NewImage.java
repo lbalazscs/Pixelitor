@@ -120,6 +120,7 @@ public final class NewImage {
             setLayout(new GridBagLayout());
             GridBagHelper gridBagHelper = new GridBagHelper(this);
 
+            //noinspection SuspiciousNameCombination
             setBorder(BorderFactory.createEmptyBorder(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH));
 
             widthTextField = new IntTextField(String.valueOf(defaultWidth));

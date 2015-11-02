@@ -43,9 +43,11 @@ public class GradientBorder extends AbstractBorder {
 
     @Override
     public Insets getBorderInsets(Component c) {
+        //noinspection SuspiciousNameCombination
         return new Insets(WIDTH, WIDTH, WIDTH, WIDTH);
     }
 
+    @SuppressWarnings("SuspiciousNameCombination")
     @Override
     public Insets getBorderInsets(Component c, Insets i) {
         i.left = WIDTH;

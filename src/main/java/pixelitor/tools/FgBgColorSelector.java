@@ -180,7 +180,7 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     public void setFgColor(Color c) {
-        Color old = fgColor;
+//        Color old = fgColor;
         fgColor = c;
 
         Color usedColor = getPossiblyGrayedColor(fgColor);
@@ -192,7 +192,7 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     public void setBgColor(Color c) {
-        Color old = bgColor;
+//        Color old = bgColor;
         bgColor = c;
 
         Color usedColor = getPossiblyGrayedColor(bgColor);

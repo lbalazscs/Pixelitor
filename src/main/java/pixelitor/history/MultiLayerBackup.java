@@ -40,9 +40,9 @@ public class MultiLayerBackup {
         }
         // the translation of the mask should be the same as the
         // translation of the main image
-        ContentLayer layer = comp.getAnyContentLayer();
-        if (layer != null) { // could be null, if there are only text layers
-            translationEdit = new TranslationEdit(comp, layer);
+        ContentLayer contentLayer = comp.getAnyContentLayer();
+        if (contentLayer != null) { // could be null, if there are only text layers
+            translationEdit = new TranslationEdit(comp, contentLayer);
         }
 
         if (comp.hasSelection()) {
@@ -57,8 +57,8 @@ public class MultiLayerBackup {
                 ImageLayer imageLayer = (ImageLayer) compLayer;
                 this.layer = imageLayer;
                 backupImage = imageLayer.getImage();
-                if (layer.hasMask()) {
-                    backupMaskImage = layer.getMask().getImage();
+                if (imageLayer.hasMask()) {
+                    backupMaskImage = contentLayer.getMask().getImage();
                 }
                 break;
             }

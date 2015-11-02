@@ -98,7 +98,7 @@ public class LayersMouseHandler extends MouseInputAdapter {
      * the coordinates of the argument into the layer button space
      */
     private static LayerButton getLayerButtonFromEvent(MouseEvent e) {
-        LayerButton layerButton = null;
+        LayerButton layerButton;
         Component c = e.getComponent();
         // the source of the event must be either the layer button
         // or the textfield inside it

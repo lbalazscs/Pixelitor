@@ -53,6 +53,7 @@ public final class ConsistencyChecks {
     /**
      * Checks whether Fade would work now
      */
+    @SuppressWarnings("SameReturnValue")
     public static boolean fadeCheck(Composition comp) {
         if (!History.canFade()) {
             return true;
@@ -168,6 +169,7 @@ public final class ConsistencyChecks {
         throw new IllegalStateException(msg);
     }
 
+    @SuppressWarnings("SameReturnValue")
     public static boolean layerDeleteActionEnabledCheck() {
         DeleteActiveLayerAction action = DeleteActiveLayerAction.INSTANCE;
         if (action == null) {

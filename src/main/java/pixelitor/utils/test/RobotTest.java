@@ -330,8 +330,6 @@ public class RobotTest {
 
         ImageLayer layer = ImageComponents.getActiveImageLayerOrMask().get();
         if (op instanceof FilterWithGUI) {
-            FilterWithGUI fg = (FilterWithGUI) op;
-
             layer.startPreviewing();
 
             try {

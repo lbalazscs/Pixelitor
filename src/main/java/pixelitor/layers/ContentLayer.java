@@ -108,11 +108,8 @@ public abstract class ContentLayer extends Layer {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("{");
-        sb.append("tx=").append(translationX);
-        sb.append(", ty=").append(translationY);
-        sb.append(", super=").append(super.toString());
-        sb.append('}');
-        return sb.toString();
+        return "{tx=" + translationX
+                + ", ty=" + translationY
+                + ", super=" + super.toString() + '}';
     }
 }

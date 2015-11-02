@@ -102,7 +102,6 @@ public class SelectionTool extends Tool {
 
         Composition comp = ic.getComp();
         Optional<Selection> optionalSelection = comp.getSelection();
-        boolean noSelectionYet;
 
         if (optionalSelection.isPresent()) {
             Selection selection = optionalSelection.get();

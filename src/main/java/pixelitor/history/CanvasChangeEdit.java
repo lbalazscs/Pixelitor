@@ -44,16 +44,6 @@ public class CanvasChangeEdit extends PixelitorEdit {
     }
 
     @Override
-    public boolean canUndo() {
-        return super.canUndo();
-    }
-
-    @Override
-    public boolean canRedo() {
-        return super.canRedo();
-    }
-
-    @Override
     public boolean canRepeat() {
         return false;
     }
@@ -85,10 +75,5 @@ public class CanvasChangeEdit extends PixelitorEdit {
             comp.updateAllIconImages();
             History.notifyMenus(this);
         }
-    }
-
-    @Override
-    public void die() {
-        super.die();
     }
 }

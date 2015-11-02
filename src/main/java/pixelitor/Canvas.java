@@ -95,10 +95,7 @@ public class Canvas implements Serializable {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("Canvas{");
-        sb.append("width=").append(width);
-        sb.append(", height=").append(height);
-        sb.append('}');
-        return sb.toString();
+        return "Canvas{width=" + width
+                + ", height=" + height + '}';
     }
 }

@@ -136,8 +136,8 @@ public class TransformSupport {
     }
 
     private void recalculateImageSpaceRect(ImageDisplay ic) {
-        Rectangle2D imageSpaceRect = ic.fromComponentToImageSpace(compSpaceRect);
-        this.imageSpaceRect = Utils.toPositiveRect(imageSpaceRect);
+        Rectangle2D possiblyNegativeRect = ic.fromComponentToImageSpace(compSpaceRect);
+        this.imageSpaceRect = Utils.toPositiveRect(possiblyNegativeRect);
     }
 
     public void arrowKeyPressed(ArrowKey key, ImageDisplay ic) {

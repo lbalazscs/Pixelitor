@@ -161,7 +161,6 @@ public enum BrushType {
     }
 
     protected BrushSettings findSettings(Tool tool) {
-        BrushSettings settings = null;
         if (settingsByTool == null) {
             settingsByTool = new IdentityHashMap<>();
             return null;

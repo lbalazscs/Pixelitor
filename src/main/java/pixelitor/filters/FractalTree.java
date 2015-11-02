@@ -56,7 +56,7 @@ public class FractalTree extends FilterWithParametrizedGUI {
     private boolean leftFirst;
     private boolean hasRandomness;
 
-    GradientParam colors = new GradientParam("Colors",
+    final GradientParam colors = new GradientParam("Colors",
             new float[]{0.25f, 0.75f},
             new Color[]{BROWN, GREEN}, true);
     private double defaultLength;
@@ -259,8 +259,8 @@ public class FractalTree extends FilterWithParametrizedGUI {
     }
 
     private static class Physics {
-        public double gravityStrength;
-        public double windStrength;
+        public final double gravityStrength;
+        public final double windStrength;
 
         private Physics(int gravity, int wind, float strokeWidth2) {
             double effectStrength = 0.02 / strokeWidth2;

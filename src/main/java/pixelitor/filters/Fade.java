@@ -49,11 +49,6 @@ public class Fade extends FilterWithParametrizedGUI {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         assert History.canFade();
-
-        if (opacityParam.getValue() == 100) {
-            return src;
-        }
-
         // the fade menu item must be active only if History.canFade()
         BufferedImage previous = ImageComponents.getActiveComp()
                 .flatMap(History::getPreviousEditForFade)
@@ -65,16 +60,27 @@ public class Fade extends FilterWithParametrizedGUI {
             return src;
         }
 
-        // A simple AlphaComposite would not handle semitransparent pixels correctly
+        dest = fade(previous, src, dest, opacityParam);
 
-        int[] srcData = ImageUtils.getPixelsAsArray(src);
+        return dest;
+    }
+
+    public void setOpacity(int newOpacity) {
+        opacityParam.setValue(newOpacity);
+    }
+
+    public static BufferedImage fade(BufferedImage before, BufferedImage after, BufferedImage dest, RangeParam opacity) {
+        if (opacity.getValue() == 100) {
+            return after;
+        }
+
+        float fadeFactor = opacity.getValueAsPercentage();
+        // A simple AlphaComposite would not handle semitransparent pixels correctly
+        int[] srcData = ImageUtils.getPixelsAsArray(after);
         int[] destData = ImageUtils.getPixelsAsArray(dest);
-        int[] prevData = ImageUtils.getPixelsAsArray(previous);
+        int[] prevData = ImageUtils.getPixelsAsArray(before);
 
         int length = srcData.length;
-
-        float fadeFactor = opacityParam.getValueAsPercentage();
-
         for (int i = 0; i < length; i++) {
             int rgb = srcData[i];
             int a = (rgb >>> 24) & 0xFF;
@@ -95,11 +101,6 @@ public class Fade extends FilterWithParametrizedGUI {
 
             destData[i] = (a << 24) | (r << 16) | (g << 8) | b;
         }
-
         return dest;
-    }
-
-    public void setOpacity(int newOpacity) {
-        opacityParam.setValue(newOpacity);
     }
 }

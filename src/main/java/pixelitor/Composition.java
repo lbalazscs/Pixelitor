@@ -980,15 +980,12 @@ public class Composition implements Serializable {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("Composition{");
-        sb.append("name='").append(name).append('\'');
-        sb.append(", activeLayer=").append(activeLayer.getName());
-        sb.append(", layerList=").append(layerList);
-        sb.append(", canvas=").append(canvas);
-        sb.append(", selection=").append(selection);
-        sb.append(", dirty=").append(dirty);
-        sb.append('}');
-        return sb.toString();
+        return "Composition{name='" + name + '\''
+                + ", activeLayer=" + activeLayer.getName()
+                + ", layerList=" + layerList
+                + ", canvas=" + canvas
+                + ", selection=" + selection
+                + ", dirty=" + dirty + '}';
     }
 
     /**

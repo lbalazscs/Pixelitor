@@ -17,7 +17,6 @@
 
 package pixelitor.layers;
 
-import pixelitor.Canvas;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
@@ -555,7 +554,6 @@ public class ImageLayer extends ContentLayer {
         setImage(dest);
     }
 
-    @SuppressWarnings("SuspiciousNameCombination")
     @Override
     public void rotate(Rotate.SpecialAngle angle) {
         int tx = getTX();
@@ -1018,11 +1016,9 @@ public class ImageLayer extends ContentLayer {
         int tx = getTX();
         int ty = getTY();
         System.out.println("ImageLayer::debugTranslation: tx = " + tx + ", ty = " + ty);
-        Canvas canvas = getComp().getCanvas();
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
         System.out.println("ImageLayer::debugTranslation: canvasWidth = " + canvasWidth + ", canvasHeight = " + canvasHeight);
-        BufferedImage image = getImage();
         int imageWidth = image.getWidth();
         int imageHeight = image.getHeight();
         System.out.println("ImageLayer::debugTranslation: imageWidth = " + imageWidth + ", imageHeight = " + imageHeight);
@@ -1030,23 +1026,20 @@ public class ImageLayer extends ContentLayer {
     }
 
     public String toDebugCanvasString() {
-        StringBuilder sb = new StringBuilder("{");
-        sb.append("canvasWidth=").append(canvas.getWidth());
-        sb.append(", canvasHeight=").append(canvas.getHeight());
-        sb.append(", tx=").append(translationX);
-        sb.append(", ty=").append(translationY);
-        sb.append(", imgWidth=").append(image.getWidth());
-        sb.append(", imgHeight=").append(image.getHeight());
-        sb.append('}');
-        return sb.toString();
+        return "{canvasWidth=" + canvas.getWidth()
+                + ", canvasHeight=" + canvas.getHeight()
+                + ", tx=" + translationX
+                + ", ty=" + translationY
+                + ", imgWidth=" + image.getWidth()
+                + ", imgHeight=" + image.getHeight()
+                + '}';
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(getClass().getSimpleName() + "{");
-        sb.append("state=").append(state);
-        sb.append(", super=").append(super.toString());
-        sb.append('}');
-        return sb.toString();
+        return getClass().getSimpleName()
+                + "{" + "state=" + state
+                + ", super=" + super.toString()
+                + '}';
     }
 }

@@ -63,7 +63,7 @@ public class ResizingFilterHelper {
             g2.dispose();
         } else {
             Object hint;
-            double step = 0;
+            double step;
             if (quality == BILINEAR11) {
                 hint = RenderingHints.VALUE_INTERPOLATION_BILINEAR;
                 step = 1.1;

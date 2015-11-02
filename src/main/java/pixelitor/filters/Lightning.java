@@ -20,8 +20,6 @@ package pixelitor.filters;
 import com.jhlabs.composite.DifferenceComposite;
 import com.jhlabs.composite.ScreenComposite;
 import com.jhlabs.image.PolarFilter;
-import pixelitor.Composition;
-import pixelitor.ImageComponents;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.FilterAction;
 import pixelitor.filters.gui.ImagePositionParam;
@@ -86,7 +84,6 @@ public class Lightning extends FilterWithParametrizedGUI {
         g.fillRect(0, 0, lightningImage.getWidth(), lightningImage.getHeight());
         g.dispose();
 
-        Composition composition = ImageComponents.getActiveComp().get();
         if (debug) {
             Utils.debugImage(lightningImage, "lightningImage before polar");
         }
