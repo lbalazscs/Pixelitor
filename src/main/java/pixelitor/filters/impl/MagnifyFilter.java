@@ -101,8 +101,8 @@ public class MagnifyFilter extends TransformFilter {
             double simpleX = radiusRatio * x + (1 - radiusRatio) * cx;
             double simpleY = radiusRatio * y + (1 - radiusRatio) * cy;
 
-            out[0] = (float) ImageMath.lerp(outside, x, simpleX);
-            out[1] = (float) ImageMath.lerp(outside, y, simpleY);
+            out[0] = (float) ImageMath.lerp(outside, simpleX, x);
+            out[1] = (float) ImageMath.lerp(outside, simpleY, y);
         }
     }
 

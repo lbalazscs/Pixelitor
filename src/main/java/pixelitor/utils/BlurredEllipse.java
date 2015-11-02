@@ -72,7 +72,7 @@ public class BlurredEllipse {
                 // http://en.wikipedia.org/wiki/Smoothstep
                 // http://www.wolframalpha.com/input/?i=Plot[{%281+%2B+Cos[a+*+Pi]%29%2F2%2C+1+-+3+*+a+*+a+%2B+2+*+a+*+a+*a}%2C+{a%2C+0%2C+1}]
                 double trigRatio = 1 + ratio * ratio * (2 * ratio - 3);
-                return trigRatio;
+                return 1.0 - trigRatio;
             }
         } else { // ellipsis
             double dx2 = dx * dx;
@@ -92,7 +92,7 @@ public class BlurredEllipse {
                 double ratio = (b - innerRadiusY) / yRadiusDifference; // gives a value between 0 and 1
                 double trigRatio = (FastMath.cos(ratio * Math.PI) + 1.0) / 2.0;
 
-                return trigRatio;
+                return 1.0 - trigRatio;
             }
         }
     }

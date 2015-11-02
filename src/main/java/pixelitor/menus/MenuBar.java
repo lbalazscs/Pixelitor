@@ -567,6 +567,7 @@ public class MenuBar extends JMenuBar {
         createMenuItem(new JHLensBlur(), bsSubmenu);
         createMenuItem(new JHMotionBlur(MOTION_BLUR), bsSubmenu);
         createMenuItem(new JHMotionBlur(SPIN_ZOOM_BLUR), bsSubmenu);
+        createMenuItem(new JHFocus(), bsSubmenu);
         bsSubmenu.addSeparator();
         createMenuItem(new JHUnsharpMask(), bsSubmenu);
         filterMenu.add(bsSubmenu);
