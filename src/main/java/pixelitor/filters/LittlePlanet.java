@@ -23,6 +23,7 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.LittlePlanetFilter;
 
 import java.awt.image.BufferedImage;
@@ -33,8 +34,8 @@ import java.awt.image.BufferedImage;
 public class LittlePlanet extends FilterWithParametrizedGUI {
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final AngleParam rotateResult = new AngleParam("Rotate Result", -Math.PI / 2);
-    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 300, 100);
-    private final RangeParam innerZoom = new RangeParam("Inner Zoom (%)", 30, 180, 100);
+    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 300);
+    private final RangeParam innerZoom = new RangeParam("Inner Zoom (%)", 30, 100, 180);
     private final BooleanParam invert = new BooleanParam("Invert", false);
 
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices(true);
@@ -44,7 +45,7 @@ public class LittlePlanet extends FilterWithParametrizedGUI {
     private LittlePlanetFilter filter;
 
     public LittlePlanet() {
-        super("Little Planet", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 rotateResult,
                 zoom,

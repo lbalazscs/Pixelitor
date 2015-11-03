@@ -16,6 +16,9 @@
  */
 package pixelitor;
 
+import pixelitor.filters.Fill;
+import pixelitor.filters.FilterAction;
+
 import java.awt.Color;
 
 import static pixelitor.utils.ColorUtils.TRANSPARENT_COLOR;
@@ -62,5 +65,12 @@ public enum FillType {
     @Override
     public String toString() {
         return guiName;
+    }
+
+    public FilterAction createFillFilterAction() {
+        FilterAction fa = new FilterAction(guiName, () -> new Fill(this));
+        fa.noGUI();
+        fa.withFillListName();
+        return fa;
     }
 }

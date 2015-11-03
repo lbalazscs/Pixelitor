@@ -23,6 +23,7 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.RangeWithColorsParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.levels.RGBLookup;
 
 import java.awt.image.BufferedImage;
@@ -52,12 +53,12 @@ public class ColorBalance extends FilterWithParametrizedGUI {
             new IntChoiceParam.Value("Highlights", HIGHLIGHTS),
     });
 
-    private final RangeParam cyanRed = new RangeWithColorsParam(CYAN, RED, "Cyan-Red", -100, 100, 0);
-    private final RangeParam magentaGreen = new RangeWithColorsParam(MAGENTA, GREEN, "Magenta-Green", -100, 100, 0);
-    private final RangeParam yellowBlue = new RangeWithColorsParam(YELLOW, BLUE, "Yellow-Blue", -100, 100, 0);
+    private final RangeParam cyanRed = new RangeWithColorsParam(CYAN, RED, "Cyan-Red", -100, 0, 100);
+    private final RangeParam magentaGreen = new RangeWithColorsParam(MAGENTA, GREEN, "Magenta-Green", -100, 0, 100);
+    private final RangeParam yellowBlue = new RangeWithColorsParam(YELLOW, BLUE, "Yellow-Blue", -100, 0, 100);
 
     public ColorBalance() {
-        super("Color Balance", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 affectParam,
                 cyanRed,

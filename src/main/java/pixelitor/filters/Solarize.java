@@ -19,6 +19,7 @@ package pixelitor.filters;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -32,9 +33,9 @@ public class Solarize extends FilterWithParametrizedGUI {
     private static final int TYPE_CLASSIC = 1; // pixels above the threshold level are inverted + contrast is maximized
     private static final int TYPE_INVERTED = 2; // upside down: corresponds to a V-shaped curves adjustment
 
-    private final RangeParam redThreshold = new RangeParam("Red Threshold", 0, 255, 128);
-    private final RangeParam greenThreshold = new RangeParam("Green Threshold", 0, 255, 128);
-    private final RangeParam blueThreshold = new RangeParam("Blue Threshold", 0, 255, 128);
+    private final RangeParam redThreshold = new RangeParam("Red Threshold", 0, 128, 255);
+    private final RangeParam greenThreshold = new RangeParam("Green Threshold", 0, 128, 255);
+    private final RangeParam blueThreshold = new RangeParam("Blue Threshold", 0, 128, 255);
 
     private final IntChoiceParam type = new IntChoiceParam("Type", new IntChoiceParam.Value[]{
             new IntChoiceParam.Value("Classic", TYPE_CLASSIC),
@@ -42,7 +43,7 @@ public class Solarize extends FilterWithParametrizedGUI {
     }, IGNORE_RANDOMIZE);
 
     public Solarize() {
-        super("Solarize", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 type,
                 redThreshold,

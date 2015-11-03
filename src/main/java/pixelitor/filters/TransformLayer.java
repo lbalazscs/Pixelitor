@@ -23,6 +23,7 @@ import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ParamSet;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.layers.ImageLayer;
 
 import java.awt.Graphics2D;
@@ -43,11 +44,11 @@ public class TransformLayer extends FilterWithParametrizedGUI {
     private final ImagePositionParam centerParam = new ImagePositionParam("Pivot Point");
     private final AngleParam angleParam = new AngleParam("Rotate Angle", 0);
     private final ColorParam bgColorParam = new ColorParam("Background Color:", TRANSPARENT_COLOR, USER_ONLY_OPACITY);
-    private final GroupedRangeParam scaleParam = new GroupedRangeParam("Scale (%)", 1, 500, 100);
-    private final GroupedRangeParam shearParam = new GroupedRangeParam("Shear", -500, 500, 0);
+    private final GroupedRangeParam scaleParam = new GroupedRangeParam("Scale (%)", 1, 100, 500);
+    private final GroupedRangeParam shearParam = new GroupedRangeParam("Shear", -500, 0, 500);
 
     public TransformLayer() {
-        super("Transform Layer", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 centerParam,
                 angleParam,

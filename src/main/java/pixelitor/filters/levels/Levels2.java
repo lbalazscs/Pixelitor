@@ -18,6 +18,7 @@ package pixelitor.filters.levels;
 
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.AdjustPanel;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.levels.gui.LevelsPanel;
 import pixelitor.filters.lookup.FastLookupOp;
 
@@ -35,7 +36,7 @@ public class Levels2 extends FilterWithParametrizedGUI implements LookupFilter {
     private final LevelsModel model;
 
     public Levels2() {
-        super("Levels 2", true, false);
+        super(ShowOriginal.YES);
         model = new LevelsModel(this);
         setParamSet(model.getParamSet());
     }

@@ -20,6 +20,7 @@ package pixelitor.tools;
 import pixelitor.Composition;
 import pixelitor.FillType;
 import pixelitor.ImageDisplay;
+import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.layers.ImageLayer;
 import pixelitor.utils.ImageUtils;
@@ -48,7 +49,7 @@ import static pixelitor.utils.SliderSpinner.TextPosition.WEST;
  * A paint bucket tool.
  */
 public class PaintBucketTool extends Tool {
-    private final RangeParam toleranceParam = new RangeParam("Tolerance", 0, 255, 20);
+    private final RangeParam toleranceParam = new RangeParam("Tolerance", 0, 20, 255);
     private JComboBox<FillType> fillComboBox;
 
     public PaintBucketTool() {
@@ -58,7 +59,7 @@ public class PaintBucketTool extends Tool {
 
     @Override
     public void initSettingsPanel() {
-        settingsPanel.add(new SliderSpinner(toleranceParam, WEST, false));
+        settingsPanel.add(new SliderSpinner(toleranceParam, WEST, AddDefaultButton.NO));
 
         fillComboBox = new JComboBox<>(new FillType[]{FOREGROUND, BACKGROUND, TRANSPARENT});
         settingsPanel.addWithLabel("Fill With:", fillComboBox);

@@ -23,6 +23,7 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -33,17 +34,17 @@ public class JHKaleidoscope extends FilterWithParametrizedGUI {
     private final AngleParam angle = new AngleParam("Angle", 0);
     private final AngleParam rotateResult = new AngleParam("Rotate Result", 0);
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final RangeParam sides = new RangeParam("Sides", 0, 10, 3);
+    private final RangeParam sides = new RangeParam("Sides", 0, 3, 10);
 //    private final RangeParam radius = new RangeParam("Radius", 0, 999, 0);
 
-    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 500, 100);
+    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 500);
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices(true);
     private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
 
     private KaleidoscopeFilter filter;
 
     public JHKaleidoscope() {
-        super("Kaleidoscope", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 center,
                 angle,

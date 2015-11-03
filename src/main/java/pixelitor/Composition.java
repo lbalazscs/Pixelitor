@@ -899,7 +899,7 @@ public class Composition implements Serializable {
      * Executes the given filter with busy cursor
      */
     public void executeFilterWithBusyCursor(Filter filter, ChangeReason changeReason, Component busyCursorParent) {
-        String filterMenuName = filter.getMenuName();
+        String filterName = filter.getName();
 
         try {
             long startTime = System.nanoTime();
@@ -910,10 +910,10 @@ public class Composition implements Serializable {
             long totalTime = (System.nanoTime() - startTime) / 1_000_000;
             String performanceMessage;
             if (totalTime < 1000) {
-                performanceMessage = filterMenuName + " took " + totalTime + " ms";
+                performanceMessage = filterName + " took " + totalTime + " ms";
             } else {
                 float seconds = totalTime / 1000.0f;
-                performanceMessage = String.format("%s took %.1f s", filterMenuName, seconds);
+                performanceMessage = String.format("%s took %.1f s", filterName, seconds);
             }
             Messages.showStatusMessage(performanceMessage);
         } catch (OutOfMemoryError e) {
@@ -926,7 +926,7 @@ public class Composition implements Serializable {
         }
 
         FilterUtils.setLastExecutedFilter(filter);
-        RepeatLast.INSTANCE.setMenuName("Repeat " + filterMenuName);
+        RepeatLast.INSTANCE.setName("Repeat " + filterName);
     }
 
     public void setShowOriginal(boolean b) {

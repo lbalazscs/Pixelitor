@@ -23,6 +23,7 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -30,7 +31,7 @@ import java.awt.image.BufferedImage;
  * Dither based on the JHLabs DitherFilter
  */
 public class JHDither extends FilterWithParametrizedGUI {
-    private final RangeParam levels = new RangeParam("Levels", 2, 100, 8);
+    private final RangeParam levels = new RangeParam("Levels", 2, 8, 100);
     private final BooleanParam colorDither = new BooleanParam("Color Dither", true);
     private final IntChoiceParam matrixMethod = new IntChoiceParam("Matrix Type", new IntChoiceParam.Value[]{
             new IntChoiceParam.Value("2x2", DitherFilter.MATRIX_2x2),
@@ -48,7 +49,7 @@ public class JHDither extends FilterWithParametrizedGUI {
     private DitherFilter filter;
 
     public JHDither() {
-        super("Dither", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 levels,
                 colorDither,

@@ -25,11 +25,6 @@ import java.awt.image.BufferedImage;
  * Invert filter
  */
 public class Invert extends Filter {
-
-    public Invert() {
-        super("Invert");
-    }
-
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         invertImage(src, dest);

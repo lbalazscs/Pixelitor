@@ -17,6 +17,7 @@
 
 package pixelitor.utils;
 
+import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.ParamGUI;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.Resettable;
@@ -58,15 +59,15 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     private boolean sliderMoved = false;
     private boolean spinnerMoved = false;
 
-    public SliderSpinner(RangeParam model, TextPosition position, boolean addDefaultButton) {
+    public SliderSpinner(RangeParam model, TextPosition position, AddDefaultButton addDefaultButton) {
         this(model, null, null, position, addDefaultButton);
     }
 
     public SliderSpinner(RangeParam model, Color leftColor, Color rightColor) {
-        this(model, leftColor, rightColor, TextPosition.BORDER, true);
+        this(model, leftColor, rightColor, TextPosition.BORDER, AddDefaultButton.YES);
     }
 
-    private SliderSpinner(RangeParam model, Color leftColor, Color rightColor, TextPosition textPosition, boolean addDefaultButton) {
+    private SliderSpinner(RangeParam model, Color leftColor, Color rightColor, TextPosition textPosition, AddDefaultButton addDefaultButton) {
         setLayout(new BorderLayout());
         this.model = model;
 
@@ -109,7 +110,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         add(slider, BorderLayout.CENTER);
         p.add(spinner);
 
-        if (addDefaultButton) {
+        if (addDefaultButton.isYes()) {
             defaultButton = new DefaultButton(resettableParam == null ? model : resettableParam);
 //            int spinnerHeight = (int) spinner.getPreferredSize().getHeight();
 //            defaultButton.setPreferredSize(new Dimension(spinnerHeight, spinnerHeight));

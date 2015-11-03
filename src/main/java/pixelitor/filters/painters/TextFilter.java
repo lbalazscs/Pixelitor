@@ -18,9 +18,12 @@
 package pixelitor.filters.painters;
 
 import org.jdesktop.swingx.painter.TextPainter;
+import pixelitor.filters.FilterAction;
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.FilterWithGUI;
+import pixelitor.utils.ImageUtils;
 
+import javax.swing.*;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
@@ -29,11 +32,9 @@ import java.awt.image.BufferedImage;
  */
 public class TextFilter extends FilterWithGUI {
     private TextSettings settings;
-    public static final TextFilter INSTANCE = new TextFilter();
+    private static TextFilter instance;
 
     private TextFilter() {
-        super("Text");
-        copySrcToDstBeforeRunning = true;
     }
 
     @Override
@@ -41,7 +42,6 @@ public class TextFilter extends FilterWithGUI {
         if (settings.getText().isEmpty()) {
             return src;
         }
-
 
         TextPainter textPainter = new TextPainter();
         settings.configurePainter(textPainter);
@@ -54,6 +54,7 @@ public class TextFilter extends FilterWithGUI {
 
             textPainter.setFillPaint(settings.getColor());
 
+            dest = ImageUtils.copyImage(src);
             Graphics2D g = dest.createGraphics();
             textPainter.paint(g, this, width, height);
             g.dispose();
@@ -74,5 +75,22 @@ public class TextFilter extends FilterWithGUI {
 
     public void setSettings(TextSettings settings) {
         this.settings = settings;
+    }
+
+    @SuppressWarnings("NonThreadSafeLazyInitialization")
+    public static TextFilter getInstance() {
+        assert SwingUtilities.isEventDispatchThread();
+
+        if (instance == null) {
+            System.out.println("TextFilter::getInstance: CREATING");
+            instance = new TextFilter();
+        }
+
+        return instance;
+    }
+
+    public static FilterAction createFilterAction() {
+        FilterAction fa = new FilterAction("Text", TextFilter::getInstance);
+        return fa;
     }
 }

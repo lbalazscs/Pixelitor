@@ -25,10 +25,6 @@ import java.awt.image.BufferedImage;
  * A filter that delegates the filtering to a randomly chosen filter
  */
 public class RandomFilter extends FilterWithGUI {
-    public RandomFilter() {
-        super("Random Filter");
-    }
-
     @Override
     public AdjustPanel createAdjustPanel() {
         return new RandomFilterAdjustPanel();

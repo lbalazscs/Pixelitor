@@ -21,6 +21,7 @@ import com.jhlabs.image.ImageMath;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ReseedSupport;
 
@@ -36,7 +37,7 @@ public class AddNoise extends FilterWithParametrizedGUI {
     private static final int METHOD_COVERAGE_ANIM = 2;
 
     private final RangeParam opacity = new RangeParam("Opacity (%)", 0, 100, 100);
-    private final RangeParam coverage = new RangeParam("Coverage (%)", 0, 100, 50);
+    private final RangeParam coverage = new RangeParam("Coverage (%)", 0, 50, 100);
     private final RangeParam saturation = new RangeParam("Saturation (%)", 0, 100, 100);
     private final IntChoiceParam method = new IntChoiceParam("Method", new IntChoiceParam.Value[]{
             new IntChoiceParam.Value("Faster", METHOD_FASTER),
@@ -46,7 +47,7 @@ public class AddNoise extends FilterWithParametrizedGUI {
     private final float[] tmpHSV = new float[3];
 
     public AddNoise() {
-        super("Add Noise", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 coverage,
                 saturation,

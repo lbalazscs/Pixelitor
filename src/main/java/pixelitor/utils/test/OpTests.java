@@ -78,7 +78,7 @@ public class OpTests {
                     Filter[] filters = FilterUtils.getFiltersShuffled(
                             filter -> (!(filter instanceof Fade)) // TODO Fade just hangs... (Threads?)
                                     && (!(filter instanceof RandomFilter))
-                                    && filter.isEnabled());
+                                    );
                     progressMonitor.setProgress(0);
 
                     for (int i = 0; i < filters.length; i++) {
@@ -89,7 +89,7 @@ public class OpTests {
                         progressMonitor.setProgress((int) ((float) i * 100 / filters.length));
 
 
-                        progressMonitor.setNote("Running " + filter.getMenuName());
+                        progressMonitor.setNote("Running " + filter.getName());
                         if (progressMonitor.isCanceled()) {
                             break;
                         }
@@ -97,7 +97,7 @@ public class OpTests {
                         filter.randomizeSettings();
                         filter.execute(ChangeReason.TEST_WITH_HISTORY_AND_PREVIEW);
                         Composition comp = ImageComponents.getActiveComp().get();
-                        String fileName = "test_" + Utils.toFileName(filter.getMenuName()) + '.' + outputFormat.toString();
+                        String fileName = "test_" + Utils.toFileName(filter.getName()) + '.' + outputFormat.toString();
                         File f = new File(selectedDir, fileName);
                         outputFormat.saveComposition(comp, f, false);
 
@@ -149,7 +149,7 @@ public class OpTests {
                 progressMonitor.setProgress((int) ((float) i * 100 / allOpsLength));
                 Filter op = allOps[i];
 
-                String msg = "Running " + op.getMenuName();
+                String msg = "Running " + op.getName();
 
                 progressMonitor.setNote(msg);
                 if (progressMonitor.isCanceled()) {
@@ -157,7 +157,7 @@ public class OpTests {
                 }
 
                 op.randomizeSettings();
-                op.actionPerformed(null);
+                op.execute();
             }
             progressMonitor.close();
         } finally {
@@ -198,7 +198,7 @@ public class OpTests {
 
         Filter[] filters = FilterUtils.getFiltersShuffled(
                 f -> (!(f instanceof Fade || f instanceof Canny || f instanceof Lightning))
-                        && f.isEnabled() && (f instanceof FilterWithParametrizedGUI));
+                        && (f instanceof FilterWithParametrizedGUI));
 
         Map<String, Double> results = new HashMap<>();
 

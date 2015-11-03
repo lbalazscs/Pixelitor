@@ -21,6 +21,7 @@ import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -33,11 +34,11 @@ public class JHVideoFeedback extends FilterWithParametrizedGUI {
 
     // distance and angle are not cool
 
-    private final RangeParam iterations = new RangeParam("Iterations", 2, 30, 3);
+    private final RangeParam iterations = new RangeParam("Iterations", 2, 3, 30);
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final RangeParam rotationParam = new RangeParam("Rotation (degrees/iteration)", -30, 30, 0);
-    private final RangeParam zoom = new RangeParam("Zoom (percent/iteration)", -100, -5, -10);
+    private final RangeParam rotationParam = new RangeParam("Rotation (degrees/iteration)", -30, 0, 30);
+    private final RangeParam zoom = new RangeParam("Zoom (percent/iteration)", -100, -10, -5);
 
     private final RangeParam startOpacity = new RangeParam("Start Opacity (%)", 0, 100, 100);
     private final RangeParam endOpacity = new RangeParam("End Opacity (%)", 0, 100, 100);
@@ -45,7 +46,7 @@ public class JHVideoFeedback extends FilterWithParametrizedGUI {
     private FeedbackFilter filter;
 
     public JHVideoFeedback() {
-        super("Video Feedback", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
 //                distance,
                 iterations,

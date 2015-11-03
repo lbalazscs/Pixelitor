@@ -21,6 +21,7 @@ import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -28,14 +29,14 @@ import java.awt.image.BufferedImage;
  * Frosted Glass based on the JHLabs DiffuseFilter
  */
 public class JHFrostedGlass extends FilterWithParametrizedGUI {
-    private final RangeParam amount = new RangeParam("Amount", 1, 100, 10);
+    private final RangeParam amount = new RangeParam("Amount", 1, 10, 100);
 
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
     private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
     private DiffuseFilter filter;
 
     public JHFrostedGlass() {
-        super("Frosted Glass", true, false);
+        super(ShowOriginal.YES);
         edgeAction.setDefaultChoice(IntChoiceParam.EDGE_REPEAT_PIXELS);
         setParamSet(new ParamSet(amount.adjustRangeToImageSize(0.1),
                 interpolation,

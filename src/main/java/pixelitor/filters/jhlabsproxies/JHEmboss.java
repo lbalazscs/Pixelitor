@@ -23,6 +23,7 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ElevationAngleParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -34,13 +35,13 @@ public class JHEmboss extends FilterWithParametrizedGUI {
 
     private final AngleParam lightDirection = new AngleParam("Light Direction (Azimuth) - Degrees", 0);
     private final ElevationAngleParam lightElevation = new ElevationAngleParam("Light Elevation Angle - Degrees", INTUITIVE_RADIANS_30);
-    private final RangeParam bumpHeight = new RangeParam("Depth", 2, 500, 100);
+    private final RangeParam bumpHeight = new RangeParam("Depth", 2, 100, 500);
     private final BooleanParam texture = new BooleanParam("Texture (Multiply with the Source Image)", false);
 
     private EmbossFilter filter;
 
     public JHEmboss() {
-        super("Emboss", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 lightDirection,
                 lightElevation,

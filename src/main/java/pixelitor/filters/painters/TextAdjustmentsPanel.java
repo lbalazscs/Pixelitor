@@ -20,6 +20,7 @@ package pixelitor.filters.painters;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import pixelitor.Composition;
+import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ColorSelector;
@@ -201,8 +202,8 @@ public class TextAdjustmentsPanel extends AdjustPanel implements ParamAdjustment
         gbh.addLabel("Font Size:", 0, 0);
         int defaultFontSize = settings == null ? 100 : settings.getFont().getSize();
 
-        RangeParam fontSizeParam = new RangeParam("", 1, 1000, defaultFontSize);
-        fontSizeSlider = new SliderSpinner(fontSizeParam, NONE, false);
+        RangeParam fontSizeParam = new RangeParam("", 1, defaultFontSize, 1000);
+        fontSizeSlider = new SliderSpinner(fontSizeParam, NONE, AddDefaultButton.NO);
         fontSizeSlider.setSliderName("fontSize");
         fontSizeParam.setAdjustmentListener(this);
         gbh.addLastControl(fontSizeSlider);

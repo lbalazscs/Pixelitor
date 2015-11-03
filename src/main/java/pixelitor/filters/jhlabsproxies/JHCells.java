@@ -20,13 +20,14 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.CellularFilter;
 import com.jhlabs.math.Noise;
 import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.gui.ActionSetting;
 import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.FilterAction;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
+import pixelitor.filters.gui.ReseedNoiseActionSetting;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.CachedFloatRandom;
 
 import java.awt.image.BufferedImage;
@@ -44,13 +45,13 @@ public class JHCells extends FilterWithParametrizedGUI {
 
     private final GradientParam gradient = new GradientParam("Colors", BLACK, WHITE);
 
-    private final RangeParam scale = new RangeParam("Zoom", 1, 500, 100);
-    private final RangeParam stretch = new RangeParam("Stretch (%)", 100, 999, 100);
+    private final RangeParam scale = new RangeParam("Zoom", 1, 100, 500);
+    private final RangeParam stretch = new RangeParam("Stretch (%)", 100, 100, 999);
 //    private RangeParam f1Param = new RangeParam("F1", -100, 100, -100);
 //    private RangeParam f2Param = new RangeParam("F2", -100, 100, -100);
 //    private RangeParam f3Param = new RangeParam("F3", -100, 100, 0);
 
-    private final RangeParam gridRandomness = new RangeParam("Grid Randomness", 1, 100, 1);
+    private final RangeParam gridRandomness = new RangeParam("Grid Randomness", 1, 1, 100);
     private final IntChoiceParam gridType = IntChoiceParam.getGridTypeChoices("Grid Type", gridRandomness);
 
     private final IntChoiceParam type = new IntChoiceParam("Type", new IntChoiceParam.Value[]{
@@ -59,16 +60,17 @@ public class JHCells extends FilterWithParametrizedGUI {
             new IntChoiceParam.Value("Grid", TYPE_GRID),
             new IntChoiceParam.Value("Grid 2", TYPE_STRANGE),
     });
-    private final RangeParam refineType = new RangeParam("Refine Type", 0, 100, 0);
-    private final RangeParam darkLightBalance = new RangeParam("Dark/Light Balance", -20, 20, 0);
+    private final RangeParam refineType = new RangeParam("Refine Type", 0, 0, 100);
+    private final RangeParam darkLightBalance = new RangeParam("Dark/Light Balance", -20, 0, 20);
 
     private final AngleParam angle = new AngleParam("Angle", 0);
 
     private CellularFilter filter;
 
     public JHCells() {
-        super("Cells", false, false);
-        FilterAction reseedAction = new ReseedNoiseFilterAction(e -> {
+        super(ShowOriginal.NO);
+
+        ActionSetting reseedAction = new ReseedNoiseActionSetting(e -> {
             CachedFloatRandom.reseedCache();
             Noise.reseed();
         });
@@ -83,7 +85,6 @@ public class JHCells extends FilterWithParametrizedGUI {
                 stretch,
                 angle
         ).withAction(reseedAction));
-        listNamePrefix = "Render ";
     }
 
     @Override

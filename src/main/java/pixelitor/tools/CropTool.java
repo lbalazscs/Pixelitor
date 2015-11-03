@@ -22,6 +22,7 @@ import pixelitor.Composition;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
 import pixelitor.ImageDisplay;
+import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.transform.TransformSupport;
 import pixelitor.utils.ImageSwitchListener;
@@ -58,7 +59,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
 
     private TransformSupport transformSupport;
 
-    private final RangeParam maskOpacityParam = new RangeParam("Mask Opacity (%)", 0, 100, 75);
+    private final RangeParam maskOpacityParam = new RangeParam("Mask Opacity (%)", 0, 75, 100);
 
     private Composite hideComposite = AlphaComposite.getInstance(SRC_OVER, maskOpacityParam.getValueAsPercentage());
 
@@ -97,7 +98,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
 
     @Override
     public void initSettingsPanel() {
-        SliderSpinner maskOpacitySpinner = new SliderSpinner(maskOpacityParam, WEST, false);
+        SliderSpinner maskOpacitySpinner = new SliderSpinner(maskOpacityParam, WEST, AddDefaultButton.NO);
         settingsPanel.add(maskOpacitySpinner);
 
         allowGrowingCB = new JCheckBox("Allow Growing", false);

@@ -18,6 +18,7 @@
 package pixelitor.filters.convolve;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
+import pixelitor.filters.FilterAction;
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.utils.Messages;
@@ -39,7 +40,6 @@ public class Convolve extends FilterWithGUI {
     private final int size;
 
     public Convolve(int size) {
-        super("Custom " + size + 'x' + size + " Convolution");
         this.size = size;
     }
 
@@ -93,5 +93,11 @@ public class Convolve extends FilterWithGUI {
 
     public int getSize() {
         return size;
+    }
+
+    public static FilterAction createFilterAction(int size) {
+        String name = "Custom " + size + 'x' + size + " Convolution";
+        FilterAction fa = new FilterAction(name, () -> new Convolve(size));
+        return fa;
     }
 }

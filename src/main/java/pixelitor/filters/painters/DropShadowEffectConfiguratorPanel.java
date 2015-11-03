@@ -17,6 +17,7 @@
 
 package pixelitor.filters.painters;
 
+import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.AngleSelectorComponent;
 import pixelitor.filters.gui.ParamAdjustmentListener;
@@ -43,16 +44,16 @@ public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
                                       int defaultSpread) {
         super("Drop Shadow", defaultEnabled, defaultColor);
 
-        distanceParam = new RangeParam("Distance:", 1, 100, defaultDistance);
-        SliderSpinner distanceSlider = new SliderSpinner(distanceParam, NONE, false);
+        distanceParam = new RangeParam("Distance:", 1, defaultDistance, 100);
+        SliderSpinner distanceSlider = new SliderSpinner(distanceParam, NONE, AddDefaultButton.NO);
         gbHelper.addLabelWithControl("Distance:", distanceSlider);
 
         angleParam = new AngleParam("Angle", defaultAngle);
         AngleSelectorComponent angleSelectorComponent = new AngleSelectorComponent(angleParam);
         gbHelper.addLabelWithControl("Angle:", angleSelectorComponent);
 
-        spreadParam = new RangeParam("Spread:", 1, 100, defaultSpread);
-        SliderSpinner spreadSlider = new SliderSpinner(spreadParam, NONE, false);
+        spreadParam = new RangeParam("Spread:", 1, defaultSpread, 100);
+        SliderSpinner spreadSlider = new SliderSpinner(spreadParam, NONE, AddDefaultButton.NO);
         gbHelper.addLabelWithControl("Spread:", spreadSlider);
 
         ChangeListener changeListener = e -> updateDefaultButtonState();

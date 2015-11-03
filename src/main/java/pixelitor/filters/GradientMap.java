@@ -20,6 +20,7 @@ package pixelitor.filters;
 import com.jhlabs.image.Colormap;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.ParamSet;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -34,7 +35,7 @@ public class GradientMap extends FilterWithParametrizedGUI {
     private final GradientParam gradientParam = new GradientParam("Colors", BLACK, WHITE);
 
     public GradientMap() {
-        super("Gradient Map", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(gradientParam));
     }
 

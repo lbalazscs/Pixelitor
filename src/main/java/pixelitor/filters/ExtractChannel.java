@@ -20,6 +20,7 @@ package pixelitor.filters;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.lookup.FastLookupOp;
 import pixelitor.filters.lookup.LookupFactory;
 
@@ -52,7 +53,7 @@ public class ExtractChannel extends FilterWithParametrizedGUI {
     private final BooleanParam bwParam = new BooleanParam("Black and White", false);
 
     public ExtractChannel() {
-        super("Extract Channel", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 channelParam,
                 bwParam));

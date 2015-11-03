@@ -25,19 +25,14 @@ import java.awt.image.BufferedImage;
  * Reduce Noise based on the JHLabs ReduceNoiseFilter
  */
 public class JHReduceNoise extends Filter {
-
-    private ReduceNoiseFilter filter;
+    private final ReduceNoiseFilter filter;
 
     public JHReduceNoise() {
-        super("Reduce Single Pixel Noise");
+        filter = new ReduceNoiseFilter();
     }
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new ReduceNoiseFilter();
-        }
-
         dest = filter.filter(src, dest);
         return dest;
     }

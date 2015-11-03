@@ -22,10 +22,10 @@ public class OneChannelLevelsModel implements ParamAdjustmentListener {
         this.type = type;
         this.bigModel = bigModel;
 
-        inputBlackParam = new RangeParam("Input Dark", 0, 254, BLACK_DEFAULT);
-        inputWhiteParam = new RangeParam("Input Light", 1, 255, WHITE_DEFAULT);
-        outputBlackParam = new RangeParam("Output Dark", 0, 254, BLACK_DEFAULT);
-        outputWhiteParam = new RangeParam("Output Light", 1, 255, WHITE_DEFAULT);
+        inputBlackParam = new RangeParam("Input Dark", 0, BLACK_DEFAULT, 254);
+        inputWhiteParam = new RangeParam("Input Light", 1, WHITE_DEFAULT, 255);
+        outputBlackParam = new RangeParam("Output Dark", 0, BLACK_DEFAULT, 254);
+        outputWhiteParam = new RangeParam("Output Light", 1, WHITE_DEFAULT, 255);
 
         inputBlackParam.setAdjustmentListener(this);
         inputWhiteParam.setAdjustmentListener(this);

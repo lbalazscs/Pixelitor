@@ -21,6 +21,7 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.DrosteFilter;
 
 import java.awt.image.BufferedImage;
@@ -29,15 +30,15 @@ import java.awt.image.BufferedImage;
  * Droste based on DrosteFilter
  */
 public class Droste extends FilterWithParametrizedGUI {
-    private final RangeParam innerRadius = new RangeParam("Inner Radius", 1, 100, 25);
+    private final RangeParam innerRadius = new RangeParam("Inner Radius", 1, 25, 100);
     private final RangeParam outerRadius = new RangeParam("Outer Radius", 1, 100, 100);
-    private final RangeParam periodicity = new RangeParam("Periodicity", -6, 6, 1);
-    private final RangeParam strands = new RangeParam("Strands", -12, 12, 1);
-    private final RangeParam zoom = new RangeParam("Zoom", 1, 100, 1);
-    private final RangeParam rotate = new RangeParam("Rotate", 0, 100, 0);
-    private final RangeParam numberOfLevels = new RangeParam("Number of Levels", 0, 100, 0);
-    private final RangeParam startingLevel = new RangeParam("Starting Level", 0, 100, 0);
-    private final RangeParam fractalPoints = new RangeParam("Fractal Points", 1, 10, 1);
+    private final RangeParam periodicity = new RangeParam("Periodicity", -6, 1, 6);
+    private final RangeParam strands = new RangeParam("Strands", -12, 1, 12);
+    private final RangeParam zoom = new RangeParam("Zoom", 1, 1, 100);
+    private final RangeParam rotate = new RangeParam("Rotate", 0, 0, 100);
+    private final RangeParam numberOfLevels = new RangeParam("Number of Levels", 0, 0, 100);
+    private final RangeParam startingLevel = new RangeParam("Starting Level", 0, 0, 100);
+    private final RangeParam fractalPoints = new RangeParam("Fractal Points", 1, 1, 10);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
     private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
@@ -45,7 +46,7 @@ public class Droste extends FilterWithParametrizedGUI {
     private DrosteFilter filter;
 
     public Droste() {
-        super("Droste", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 innerRadius,
                 outerRadius,

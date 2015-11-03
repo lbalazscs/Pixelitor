@@ -13,7 +13,6 @@ public class OneColorFilter extends Filter {
     private final Color color;
 
     public OneColorFilter(Color color) {
-        super("One Color: " + color.toString());
         this.color = color;
     }
 

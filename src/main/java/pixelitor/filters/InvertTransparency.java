@@ -8,17 +8,14 @@ import java.awt.image.BufferedImage;
  * Invert Transparency
  */
 public class InvertTransparency extends Filter {
-    private InvertAlphaFilter filter;
+    private final InvertAlphaFilter filter;
 
     public InvertTransparency() {
-        super("Invert Transparency");
+        filter = new InvertAlphaFilter();
     }
 
     @Override
     protected BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new InvertAlphaFilter();
-        }
         return filter.filter(src, dest);
     }
 

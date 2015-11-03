@@ -18,12 +18,14 @@
 package pixelitor.filters;
 
 import com.jhlabs.image.PixelUtils;
+import pixelitor.filters.gui.ActionSetting;
+import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.ChannelMixerAdjustments;
-import pixelitor.filters.gui.FilterAction;
 import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
@@ -41,17 +43,17 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
     private static final int MIN_PERCENT = -200;
     private static final int MAX_PERCENT = 200;
 
-    private final RangeParam redFromRed = new RangeParam("<html><b><font color=red>Red</font></b> from <font color=red>red</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 100, true, NONE);
-    private final RangeParam redFromGreen = new RangeParam("<html><b><font color=red>Red</font></b> from <font color=green>green</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 0, true, NONE);
-    private final RangeParam redFromBlue = new RangeParam("<html><b><font color=red>Red</font></b> from <font color=blue>blue</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 0, true, NONE);
+    private final RangeParam redFromRed = createParam("Red", "Red", 100);
+    private final RangeParam redFromGreen = createParam("Red", "Green", 0);
+    private final RangeParam redFromBlue = createParam("Red", "Blue", 0);
 
-    private final RangeParam greenFromRed = new RangeParam("<html><b><font color=green>Green</font></b> from <font color=red>red</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 0, true, NONE);
-    private final RangeParam greenFromGreen = new RangeParam("<html><b><font color=green>Green</font></b> from <font color=green>green</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 100, true, NONE);
-    private final RangeParam greenFromBlue = new RangeParam("<html><b><font color=green>Green</font></b> from <font color=blue>blue</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 0, true, NONE);
+    private final RangeParam greenFromRed = createParam("Green", "Red", 0);
+    private final RangeParam greenFromGreen = createParam("Green", "Green", 100);
+    private final RangeParam greenFromBlue = createParam("Green", "Blue", 0);
 
-    private final RangeParam blueFromRed = new RangeParam("<html><b><font color=blue>Blue</font></b> from <font color=red>red</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 0, true, NONE);
-    private final RangeParam blueFromGreen = new RangeParam("<html><b><font color=blue>Blue</font></b> from <font color=green>green</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 0, true, NONE);
-    private final RangeParam blueFromBlue = new RangeParam("<html><b><font color=blue>Blue</font></b> from <font color=blue>blue</font> (%):</html>", MIN_PERCENT, MAX_PERCENT, 100, true, NONE);
+    private final RangeParam blueFromRed = createParam("Blue", "Red", 0);
+    private final RangeParam blueFromGreen = createParam("Blue", "Green", 0);
+    private final RangeParam blueFromBlue = createParam("Blue", "Blue", 100);
 
     private final ActionListener normalizeAction = e -> {
         normalizeChannel(redFromRed, redFromGreen, redFromBlue);
@@ -218,8 +220,8 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
     private final Action[] actions = {switchRedGreen, switchRedBlue, switchGreenBlue, shiftRGBR, shiftRBGR, averageBW, luminosityBW, sepia};
 
     public ChannelMixer() {
-        super("Channel Mixer", true, false);
-        FilterAction normalize = new FilterAction("Normalize", normalizeAction, "Makes sure that the sum of the channel contributions is 100%");
+        super(ShowOriginal.YES);
+        ActionSetting normalize = new ActionSetting("Normalize", normalizeAction, "Makes sure that the sum of the channel contributions is 100%");
         FilterParam[] params = {
                 redFromRed,
                 redFromGreen,
@@ -237,7 +239,7 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
                 .withAction(normalize));
 
         // add this extra action, but after the standard "Randomize Settings"
-        FilterAction randomizeAndNormalize = new FilterAction("Randomize and Normalize",
+        ActionSetting randomizeAndNormalize = new ActionSetting("Randomize and Normalize",
                 new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
@@ -331,4 +333,9 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
         return new ChannelMixerAdjustments(this, actions);
     }
 
+    private static RangeParam createParam(String first, String second, int defaultValue) {
+        String name = "<html><b><font color=" + first + ">" + first
+                + "</font></b> from <b><font color=" + second + ">" + second + "</font></b> (%):</html>";
+        return new RangeParam(name, MIN_PERCENT, defaultValue, MAX_PERCENT, AddDefaultButton.YES, NONE);
+    }
 }

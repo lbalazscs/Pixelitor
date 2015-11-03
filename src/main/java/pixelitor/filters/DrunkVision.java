@@ -20,6 +20,7 @@ package pixelitor.filters;
 import net.jafama.FastMath;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ReseedSupport;
 
@@ -36,11 +37,11 @@ import static java.lang.Math.PI;
  * "Drunk Vision" filter inspired by "Fragment Blur" in paint.net
  */
 public class DrunkVision extends FilterWithParametrizedGUI {
-    private final RangeParam drunkenness = new RangeParam("Drunkenness", 0, 100, 20);
-    private final RangeParam numEyes = new RangeParam("Number of Eyes", 2, 42, 5);
+    private final RangeParam drunkenness = new RangeParam("Drunkenness", 0, 20, 100);
+    private final RangeParam numEyes = new RangeParam("Number of Eyes", 2, 5, 42);
 
     public DrunkVision() {
-        super("Drunk Vision", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 drunkenness,
                 numEyes

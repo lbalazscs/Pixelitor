@@ -19,12 +19,13 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.PlasmaFilter;
 import pixelitor.filters.FilterWithParametrizedGUI;
-import pixelitor.filters.gui.FilterAction;
+import pixelitor.filters.gui.ActionSetting;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
+import pixelitor.filters.gui.ReseedNoiseActionSetting;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -41,7 +42,7 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
  * Plasma based on the JHLabs PlasmaFilter
  */
 public class JHPlasma extends FilterWithParametrizedGUI {
-    private final RangeParam turbulence = new RangeParam("Turbulence", 0, 600, 100);
+    private final RangeParam turbulence = new RangeParam("Turbulence", 0, 100, 600);
 
     private static final int LESS_COLORS = 0;
     private static final int MORE_COLORS = 1;
@@ -54,7 +55,7 @@ public class JHPlasma extends FilterWithParametrizedGUI {
     }, IGNORE_RANDOMIZE);
 
     @SuppressWarnings("FieldCanBeLocal")
-    private final FilterAction reseedAction = new ReseedNoiseFilterAction(new ActionListener() {
+    private final ActionSetting reseedAction = new ReseedNoiseActionSetting(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (filter != null) {
@@ -71,13 +72,13 @@ public class JHPlasma extends FilterWithParametrizedGUI {
 
 
     public JHPlasma() {
-        super("Plasma", false, false);
+        super(ShowOriginal.NO);
+
         setParamSet(new ParamSet(
                 turbulence,
                 type,
                 gradient
         ).withAction(reseedAction));
-        listNamePrefix = "Render ";
     }
 
     @Override

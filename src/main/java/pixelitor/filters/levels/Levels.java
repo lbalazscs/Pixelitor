@@ -34,7 +34,6 @@ public class Levels extends FilterWithGUI implements LookupFilter {
     private RGBLookup rgbLookup;
 
     public Levels() {
-        super("Levels");
     }
 
     @Override

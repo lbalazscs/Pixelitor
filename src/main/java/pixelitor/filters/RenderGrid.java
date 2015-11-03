@@ -22,6 +22,7 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.AlphaComposite;
@@ -41,15 +42,15 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
  * Draw Grid
  */
 public class RenderGrid extends FilterWithParametrizedGUI {
-    private final RangeParam spacingParam = new RangeParam("Spacing", 1, 100, 40);
-    private final RangeParam widthParam = new RangeParam("Width", 1, 100, 20);
+    private final RangeParam spacingParam = new RangeParam("Spacing", 1, 40, 100);
+    private final RangeParam widthParam = new RangeParam("Width", 1, 20, 100);
     private final ColorParam colorParam = new ColorParam("Color", BLACK, FREE_OPACITY);
     private final BooleanParam emptyIntersectionsParam = new BooleanParam("Empty Intersections", false);
     private final RangeParam opacityParam = new RangeParam("Opacity (%)", 0, 100, 100);
     private final AngleParam rotateResult = new AngleParam("Rotate Result", 0);
 
     public RenderGrid() {
-        super("Grid", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 spacingParam,
                 widthParam,

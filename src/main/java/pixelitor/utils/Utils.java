@@ -26,7 +26,7 @@ import pixelitor.ImageDisplay;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.Filter;
 import pixelitor.filters.gui.AbstractFilterParam;
-import pixelitor.filters.gui.FilterGUIComponent;
+import pixelitor.filters.gui.FilterSetting;
 
 import javax.swing.*;
 import javax.swing.event.ListDataEvent;
@@ -474,16 +474,16 @@ public final class Utils {
             @Override
             public void contentsChanged(ListDataEvent e) {
                 if (condition.test((T) current.getSelectedItem())) {
-                    other.setEnabled(false, FilterGUIComponent.EnabledReason.APP_LOGIC);
+                    other.setEnabled(false, FilterSetting.EnabledReason.APP_LOGIC);
                 } else {
-                    other.setEnabled(true, FilterGUIComponent.EnabledReason.APP_LOGIC);
+                    other.setEnabled(true, FilterSetting.EnabledReason.APP_LOGIC);
                 }
             }
         });
     }
 
     public static <T> void setupEnableOtherIf(ComboBoxModel<T> current, AbstractFilterParam other, Predicate<T> condition) {
-        other.setEnabled(false, FilterGUIComponent.EnabledReason.APP_LOGIC);
+        other.setEnabled(false, FilterSetting.EnabledReason.APP_LOGIC);
         current.addListDataListener(new ListDataListener() {
             @Override
             public void intervalAdded(ListDataEvent e) {
@@ -496,9 +496,9 @@ public final class Utils {
             @Override
             public void contentsChanged(ListDataEvent e) {
                 if (condition.test((T) current.getSelectedItem())) {
-                    other.setEnabled(true, FilterGUIComponent.EnabledReason.APP_LOGIC);
+                    other.setEnabled(true, FilterSetting.EnabledReason.APP_LOGIC);
                 } else {
-                    other.setEnabled(false, FilterGUIComponent.EnabledReason.APP_LOGIC);
+                    other.setEnabled(false, FilterSetting.EnabledReason.APP_LOGIC);
                 }
             }
         });

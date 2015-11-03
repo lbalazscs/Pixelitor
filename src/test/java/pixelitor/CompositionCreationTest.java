@@ -96,9 +96,8 @@ public class CompositionCreationTest {
         testSingleLayerRead(f);
     }
 
-
     @Test
-    public void testReadWritePXC() throws IOException {
+    public void testReadWritePXC() {
         // read and test
         String[] fileNames = {
                 "src/test/resources/pxc_test_input.pxc",
@@ -135,17 +134,21 @@ public class CompositionCreationTest {
 
         for (int i = 0; i < fileNames.length; i++) {
             String fileName = fileNames[i];
-            File f = new File(fileName);
-            Composition comp = testMultiLayerRead(f, extraChecks.get(i));
+            try {
+                File f = new File(fileName);
+                Composition comp = testMultiLayerRead(f, extraChecks.get(i));
 
-            // write to tmp file
-            File tmp = File.createTempFile("pix_tmp", ".pxc");
-            OpenSaveManager.serializePXC(comp, tmp);
+                // write to tmp file
+                File tmp = File.createTempFile("pix_tmp", ".pxc");
+                OpenSaveManager.serializePXC(comp, tmp);
 
-            // read back and test
-            testMultiLayerRead(tmp, extraChecks.get(i));
+                // read back and test
+                testMultiLayerRead(tmp, extraChecks.get(i));
 
-            tmp.delete();
+                tmp.delete();
+            } catch (Exception e) {
+                throw new IllegalStateException("Error while testing " + fileName, e);
+            }
         }
     }
 

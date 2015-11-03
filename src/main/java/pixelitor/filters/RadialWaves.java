@@ -21,7 +21,8 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
+import pixelitor.filters.gui.ReseedNoiseActionSetting;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.RadialWavesFilter;
 
 import java.awt.image.BufferedImage;
@@ -30,13 +31,13 @@ import java.awt.image.BufferedImage;
  * Radial waves in a polar coordinate system
  */
 public class RadialWaves extends FilterWithParametrizedGUI {
-    private final RangeParam angularDivision = new RangeParam("Angular Division", 1, 100, 10);
-    private final RangeParam radialAmplitude = new RangeParam("Radial Amplitude", 0, 100, 20);
+    private final RangeParam angularDivision = new RangeParam("Angular Division", 1, 10, 100);
+    private final RangeParam radialAmplitude = new RangeParam("Radial Amplitude", 0, 20, 100);
 
-    private final RangeParam phase = new RangeParam("Phase (time)", 0, 360, 0);
+    private final RangeParam phase = new RangeParam("Phase (time)", 0, 0, 360);
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 500, 100);
+    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 500);
     private final IntChoiceParam waveType = IntChoiceParam.getWaveTypeChoices();
 
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
@@ -45,7 +46,7 @@ public class RadialWaves extends FilterWithParametrizedGUI {
     private RadialWavesFilter filter;
 
     public RadialWaves() {
-        super("Radial Waves", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 center,
                 angularDivision,
@@ -55,7 +56,7 @@ public class RadialWaves extends FilterWithParametrizedGUI {
                 zoom,
                 edgeAction,
                 interpolation
-        ).withAction(new ReseedNoiseFilterAction("Reseed Noise")));
+        ).withAction(new ReseedNoiseActionSetting("Reseed Noise")));
     }
 
     @Override

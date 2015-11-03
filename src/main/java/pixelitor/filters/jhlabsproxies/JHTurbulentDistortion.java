@@ -21,7 +21,8 @@ import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
+import pixelitor.filters.gui.ReseedNoiseActionSetting;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -29,9 +30,9 @@ import java.awt.image.BufferedImage;
  * Turbulent Distortion based on the JHlabs MarbleFilter
  */
 public class JHTurbulentDistortion extends FilterWithParametrizedGUI {
-    private final RangeParam scale = new RangeParam("Size", 2, 100, 20);
-    private final RangeParam amount = new RangeParam("Amount", 1, 100, 10);
-    private final RangeParam turbulence = new RangeParam("Turbulence", 1, 100, 50);
+    private final RangeParam scale = new RangeParam("Size", 2, 20, 100);
+    private final RangeParam amount = new RangeParam("Amount", 1, 10, 100);
+    private final RangeParam turbulence = new RangeParam("Turbulence", 1, 50, 100);
 
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
     private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
@@ -39,7 +40,7 @@ public class JHTurbulentDistortion extends FilterWithParametrizedGUI {
     private MarbleFilter filter;
 
     public JHTurbulentDistortion() {
-        super("Turbulent Distortion", true, false);
+        super(ShowOriginal.YES);
 
         edgeAction.setDefaultChoice(IntChoiceParam.EDGE_REPEAT_PIXELS);
         setParamSet(new ParamSet(
@@ -48,7 +49,7 @@ public class JHTurbulentDistortion extends FilterWithParametrizedGUI {
                 turbulence,
                 edgeAction,
                 interpolation
-        ).withAction(new ReseedNoiseFilterAction()));
+        ).withAction(new ReseedNoiseActionSetting()));
     }
 
     @Override

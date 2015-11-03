@@ -20,9 +20,9 @@ package pixelitor.filters.gui;
 import javax.swing.*;
 
 /**
- * Something that appears in a filter GUI
+ * The model of something that appears in a filter GUI
  */
-public interface FilterGUIComponent {
+public interface FilterSetting {
     String getName();
 
     JComponent createGUI();

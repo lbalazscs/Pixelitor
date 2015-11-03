@@ -23,6 +23,7 @@ import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.GeographicalAdjustmentPanel;
 import pixelitor.filters.gui.ParamSet;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -44,14 +45,13 @@ public class JHFourColorGradient extends FilterWithParametrizedGUI {
     private FourColorFilter filter;
 
     public JHFourColorGradient() {
-        super("Four Color Gradient", false, false);
+        super(ShowOriginal.NO);
         setParamSet(new ParamSet(
                 northWestParam,
                 northEastParam,
                 southWestParam,
                 southEastParam
         ));
-        listNamePrefix = "Fill with ";
     }
 
     @Override
@@ -71,6 +71,6 @@ public class JHFourColorGradient extends FilterWithParametrizedGUI {
 
     @Override
     public AdjustPanel createAdjustPanel() {
-        return new GeographicalAdjustmentPanel(this, true, false);
+        return new GeographicalAdjustmentPanel(this, true, ShowOriginal.NO);
     }
 }

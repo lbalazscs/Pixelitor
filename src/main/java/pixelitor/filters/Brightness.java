@@ -20,18 +20,19 @@ package pixelitor.filters;
 import com.jhlabs.image.PixelUtils;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
 
 public class Brightness extends FilterWithParametrizedGUI {
-    private final RangeParam power = new RangeParam("Brightness Power (%)", 50, 150, 100);
-    private final RangeParam multiply = new RangeParam("Brightness Multiply (%)", 1, 200, 100);
-    private final RangeParam add = new RangeParam("Brightness Add", -255, 255, 0);
-    private final RangeParam contrast = new RangeParam("Contrast", -255, 255, 0);
+    private final RangeParam power = new RangeParam("Brightness Power (%)", 50, 100, 150);
+    private final RangeParam multiply = new RangeParam("Brightness Multiply (%)", 1, 100, 200);
+    private final RangeParam add = new RangeParam("Brightness Add", -255, 0, 255);
+    private final RangeParam contrast = new RangeParam("Contrast", -255, 0, 255);
 
     public Brightness() {
-        super("Brightness/Contrast", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 power,
                 multiply,

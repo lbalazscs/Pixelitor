@@ -21,6 +21,7 @@ import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -30,12 +31,12 @@ import static java.awt.Color.WHITE;
  * Glint based on the JHLabs GlintFilter
  */
 public class JHGlint extends FilterWithParametrizedGUI {
-    private final RangeParam threshold = new RangeParam("Threshold (%)", 0, 100, 70);
-    private final RangeParam coverage = new RangeParam("Coverage (%)", 0, 100, 50);
-    private final RangeParam intensity = new RangeParam("Intensity (%)", 0, 100, 15);
+    private final RangeParam threshold = new RangeParam("Threshold (%)", 0, 70, 100);
+    private final RangeParam coverage = new RangeParam("Coverage (%)", 0, 50, 100);
+    private final RangeParam intensity = new RangeParam("Intensity (%)", 0, 15, 100);
 
-    private final RangeParam lengthParam = new RangeParam("Length", 0, 100, 20);
-    private final RangeParam blur = new RangeParam("Blur", 0, 20, 1);
+    private final RangeParam lengthParam = new RangeParam("Length", 0, 20, 100);
+    private final RangeParam blur = new RangeParam("Blur", 0, 1, 20);
 //    private BooleanParam glintOnly = new BooleanParam("Glint Only", false);
 
     private final GradientParam colors = new GradientParam("Colors", WHITE, WHITE);
@@ -44,7 +45,7 @@ public class JHGlint extends FilterWithParametrizedGUI {
     private GlintFilter filter;
 
     public JHGlint() {
-        super("Glint", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 threshold,
                 coverage,

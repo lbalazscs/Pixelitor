@@ -23,6 +23,7 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -32,7 +33,7 @@ import java.awt.image.BufferedImageOp;
  * Fast Blur
  */
 public class FastBlur extends FilterWithParametrizedGUI {
-    private final RangeParam radiusParam = new RangeParam("Radius", 0, 100, 0);
+    private final RangeParam radiusParam = new RangeParam("Radius", 0, 0, 100);
     private final BooleanParam hpSharpening = BooleanParam.createParamForHPSharpening();
 
     private static final int METHOD_BETTER = 1;
@@ -44,7 +45,7 @@ public class FastBlur extends FilterWithParametrizedGUI {
     });
 
     public FastBlur() {
-        super("Fast Blur", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 radiusParam,
                 qualityParam,

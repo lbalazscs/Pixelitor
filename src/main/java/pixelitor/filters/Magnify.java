@@ -21,6 +21,7 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.MagnifyFilter;
 
 import java.awt.image.BufferedImage;
@@ -29,9 +30,9 @@ import java.awt.image.BufferedImage;
  * Magnify filter
  */
 public class Magnify extends FilterWithParametrizedGUI {
-    private final RangeParam magnification = new RangeParam("Magnification (%)", 1, 500, 150);
-    private final GroupedRangeParam outerRadius = new GroupedRangeParam("Outer Radius", 0, 999, 200);
-    private final RangeParam outerInnerRadiusRatio = new RangeParam("Outer/Inner Radius Ratio (%)", 100, 999, 200);
+    private final RangeParam magnification = new RangeParam("Magnification (%)", 1, 150, 500);
+    private final GroupedRangeParam outerRadius = new GroupedRangeParam("Outer Radius", 0, 200, 999);
+    private final RangeParam outerInnerRadiusRatio = new RangeParam("Outer/Inner Radius Ratio (%)", 100, 200, 999);
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
@@ -40,7 +41,9 @@ public class Magnify extends FilterWithParametrizedGUI {
     private MagnifyFilter filter;
 
     public Magnify() {
-        super("Magnify", true, true);
+        super(ShowOriginal.YES);
+        showAffectedArea();
+
         setParamSet(new ParamSet(
                 magnification,
                 outerRadius.adjustRangeToImageSize(1.0),

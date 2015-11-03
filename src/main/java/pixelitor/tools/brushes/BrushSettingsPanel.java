@@ -18,6 +18,7 @@
 package pixelitor.tools.brushes;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
+import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.tools.ShapeType;
@@ -47,7 +48,7 @@ public class BrushSettingsPanel extends JPanel {
     }
 
     protected void addAngleSettingsSelector() {
-        angleJitter = new RangeParam("", 0, 180, 0, true, NONE);
+        angleJitter = new RangeParam("", 0, 0, 180, AddDefaultButton.YES, NONE);
         gbh.addLabelWithControlNoFill("  Angle Jitter (degrees):", angleJitter.createGUI());
         angleJitter.setAdjustmentListener(this::changeAngleSettings);
 
@@ -57,7 +58,8 @@ public class BrushSettingsPanel extends JPanel {
     }
 
     protected void addSpacingSelector(DabsBrushSettings settings) {
-        RangeParam spacingSelector = new RangeParam("", 1, 1000, (int) Math.round(DEFAULT_SPACING_RATIO * 100), true, NONE);
+        RangeParam spacingSelector = new RangeParam("", 1, (int) Math.round(DEFAULT_SPACING_RATIO * 100), 1000,
+                AddDefaultButton.YES, NONE);
         gbh.addLabelWithControlNoFill("Spacing (radius %):", spacingSelector.createGUI());
         spacingSelector.setAdjustmentListener(
                 () -> settings.changeSpacing(new RadiusRatioSpacing(spacingSelector.getValueAsPercentage())));

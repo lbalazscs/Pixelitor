@@ -42,8 +42,8 @@ import static org.mockito.Mockito.verify;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
-import static pixelitor.filters.gui.FilterGUIComponent.EnabledReason.APP_LOGIC;
-import static pixelitor.filters.gui.FilterGUIComponent.EnabledReason.FINAL_ANIMATION_SETTING;
+import static pixelitor.filters.gui.FilterSetting.EnabledReason.APP_LOGIC;
+import static pixelitor.filters.gui.FilterSetting.EnabledReason.FINAL_ANIMATION_SETTING;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
@@ -66,11 +66,11 @@ public class FilterParamTest {
     @Parameters(name = "{index}: param = {0}")
     public static Collection<Object[]> instancesToTest() {
         return Arrays.asList(new Object[][]{
-                {new RangeParam("Param Name", 0, 10, 0)},
-                {new RangeParam("Param Name", 0, 10, 5).setRandomizePolicy(IGNORE_RANDOMIZE)},
-                {new RangeWithColorsParam(CYAN, RED, "Param Name", -100, 100, 0)},
-                {new GroupedRangeParam("Param Name", 0, 100, 0, true)},
-                {new GroupedRangeParam("Param Name", 0, 100, 0, false)},
+                {new RangeParam("Param Name", 0, 0, 10)},
+                {new RangeParam("Param Name", 0, 5, 10).setRandomizePolicy(IGNORE_RANDOMIZE)},
+                {new RangeWithColorsParam(CYAN, RED, "Param Name", -100, 0, 100)},
+                {new GroupedRangeParam("Param Name", 0, 0, 100, true)},
+                {new GroupedRangeParam("Param Name", 0, 0, 100, false)},
                 {new ImagePositionParam("Param Name")},
                 {new GradientParam("Param Name", BLACK, WHITE)},
                 {new TextParam("Param Name", "default text")},

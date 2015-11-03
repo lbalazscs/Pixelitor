@@ -21,6 +21,7 @@ import com.jhlabs.composite.MultiplyComposite;
 import com.jhlabs.image.BoxBlurFilter;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Graphics2D;
@@ -30,11 +31,11 @@ import java.awt.image.BufferedImage;
  * Orton effect - based on http://pcin.net/update/2006/11/01/the-orton-effect-digital-photography-tip-of-the-week/
  */
 public class Orton extends FilterWithParametrizedGUI {
-    private final RangeParam blurRadius = new RangeParam("Blur Radius", 0, 10, 3);
+    private final RangeParam blurRadius = new RangeParam("Blur Radius", 0, 3, 10);
     private final RangeParam amount = new RangeParam("Amount (%)", 0, 100, 100);
 
     public Orton() {
-        super("Orton Effect", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 blurRadius.adjustRangeToImageSize(0.01),
                 amount

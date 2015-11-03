@@ -24,6 +24,7 @@ import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -36,17 +37,17 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
 public class JHSparkle extends FilterWithParametrizedGUI {
     private final BooleanParam lightOnly = new BooleanParam("Light Only", false);
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final RangeParam nrOfRays = new RangeParam("Number of Rays", 1, 500, 200);
-    private final RangeParam radius = new RangeParam("High Intensity Radius", 1, 500, 50);
-    private final RangeParam shine = new RangeParam("Shine", 0, 100, 50);
-    private final RangeParam randomness = new RangeParam("Randomness", 0, 50, 25);
+    private final RangeParam nrOfRays = new RangeParam("Number of Rays", 1, 200, 500);
+    private final RangeParam radius = new RangeParam("High Intensity Radius", 1, 50, 500);
+    private final RangeParam shine = new RangeParam("Shine", 0, 50, 100);
+    private final RangeParam randomness = new RangeParam("Randomness", 0, 25, 50);
 
     private final ColorParam color = new ColorParam("Color", WHITE, USER_ONLY_OPACITY);
 
     private SparkleFilter filter;
 
     public JHSparkle() {
-        super("Sparkle", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 center,
                 lightOnly,

@@ -22,6 +22,7 @@ import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.ImageDisplay;
 import pixelitor.PixelitorWindow;
+import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.tools.brushes.Brush;
@@ -62,8 +63,8 @@ public class CloneTool extends TmpLayerBrushTool {
 
     private CloneBrush cloneBrush;
 
-    private final RangeParam scaleParam = new RangeParam("", 10, 400, 100, true, NONE);
-    private final RangeParam rotationParam = new RangeParam("", -180, 180, 0, true, NONE);
+    private final RangeParam scaleParam = new RangeParam("", 10, 100, 400, AddDefaultButton.YES, NONE);
+    private final RangeParam rotationParam = new RangeParam("", -180, 0, 180, AddDefaultButton.YES, NONE);
     private final EnumParam<ScalingMirror> mirrorParam = new EnumParam<>("", ScalingMirror.class);
 
     protected CloneTool() {

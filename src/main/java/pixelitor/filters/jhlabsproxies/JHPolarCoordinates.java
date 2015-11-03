@@ -23,6 +23,7 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -40,13 +41,13 @@ public class JHPolarCoordinates extends FilterWithParametrizedGUI {
     private final IntChoiceParam type = new IntChoiceParam("Type", gridTypeChoices);
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
     private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
-    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 500, 100);
+    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 500);
     private final AngleParam angle = new AngleParam("Angle", 0);
 
     private PolarFilter filter;
 
     public JHPolarCoordinates() {
-        super("Polar Coordinates", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(center, type, zoom, angle, edgeAction, interpolation));
     }
 

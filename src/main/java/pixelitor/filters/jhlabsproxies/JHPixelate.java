@@ -22,6 +22,7 @@ import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.BrickBlockFilter;
 import pixelitor.utils.ImageUtils;
 
@@ -55,13 +56,13 @@ public class JHPixelate extends FilterWithParametrizedGUI {
 //            new IntChoiceParam.Value("Grid", STYLE_GRID_ONLY)
     });
 
-    private final RangeParam cellSizeParam = new RangeParam("Cell Size", 3, 200, 20);
+    private final RangeParam cellSizeParam = new RangeParam("Cell Size", 3, 20, 200);
 
     private BlockFilter blockFilter;
     private BrickBlockFilter brickBlockFilter;
 
     public JHPixelate() {
-        super("Pixelate", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 cellSizeParam.adjustRangeToImageSize(0.2),
                 styleParam,

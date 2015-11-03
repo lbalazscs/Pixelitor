@@ -20,6 +20,7 @@ package pixelitor.filters.animation;
 import pixelitor.ImageComponents;
 import pixelitor.automate.Wizard;
 import pixelitor.automate.WizardPage;
+import pixelitor.filters.FilterAction;
 import pixelitor.filters.FilterUtils;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.AdjustPanel;
@@ -34,7 +35,7 @@ import java.awt.FlowLayout;
  */
 public enum TweenWizardPage implements WizardPage {
     SELECT_FILTER {
-        JComboBox<FilterWithParametrizedGUI> filtersCB;
+        JComboBox<FilterAction> filtersCB;
 
         @Override
         public String getHeaderText(Wizard wizard) {
@@ -61,7 +62,8 @@ public enum TweenWizardPage implements WizardPage {
 
         @Override
         public void onMovingToTheNext(Wizard wizard) {
-            FilterWithParametrizedGUI filter = (FilterWithParametrizedGUI) filtersCB.getSelectedItem();
+            FilterAction selectedItem = (FilterAction) filtersCB.getSelectedItem();
+            FilterWithParametrizedGUI filter = (FilterWithParametrizedGUI) selectedItem.getFilter();
             getAnimation(wizard).setFilter(filter);
         }
     }, INITIAL_FILTER_SETTINGS {

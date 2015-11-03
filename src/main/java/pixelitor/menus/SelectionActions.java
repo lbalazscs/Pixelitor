@@ -73,7 +73,7 @@ public final class SelectionActions {
         public void onClick() {
             JPanel p = new JPanel(new GridBagLayout());
             GridBagHelper gbh = new GridBagHelper(p);
-            RangeParam amount = new RangeParam("Amount (pixels)", 1, 100, 10);
+            RangeParam amount = new RangeParam("Amount (pixels)", 1, 10, 100);
             EnumParam<SelectionModifyType> type = new EnumParam<>("Type", SelectionModifyType.class);
             gbh.addLabelWithControl("Amount", amount.createGUI());
             gbh.addLabelWithControl("Type", type.createGUI());

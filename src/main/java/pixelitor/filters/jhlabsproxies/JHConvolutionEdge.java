@@ -23,6 +23,7 @@ import pixelitor.filters.Invert;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -63,7 +64,7 @@ public class JHConvolutionEdge extends FilterWithParametrizedGUI {
     };
 
     public JHConvolutionEdge() {
-        super("Convolution Edge Detection", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 horizontalMethod,
                 verticalMethod,

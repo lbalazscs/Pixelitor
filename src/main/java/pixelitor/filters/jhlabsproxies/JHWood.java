@@ -22,7 +22,8 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
+import pixelitor.filters.gui.ReseedNoiseActionSetting;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -31,20 +32,21 @@ import java.awt.image.BufferedImage;
  * Renders wood texture based on the JHLabs WoodFilter
  */
 public class JHWood extends FilterWithParametrizedGUI {
-    private final RangeParam rings = new RangeParam("Rings", 1, 100, 50);
-    private final RangeParam scale = new RangeParam("Zoom", 1, 500, 100);
-    private final RangeParam stretch = new RangeParam("Stretch", 1, 50, 10);
+    private final RangeParam rings = new RangeParam("Rings", 1, 50, 100);
+    private final RangeParam scale = new RangeParam("Zoom", 1, 100, 500);
+    private final RangeParam stretch = new RangeParam("Stretch", 1, 10, 50);
     private final AngleParam angle = new AngleParam("Angle", 0);
-    private final RangeParam turbulence = new RangeParam("Turbulence", 0, 100, 0);
-    private final RangeParam fibres = new RangeParam("Fibres", 0, 100, 10);
-    private final RangeParam gain = new RangeParam("Gain", 0, 100, 80);
+    private final RangeParam turbulence = new RangeParam("Turbulence", 0, 0, 100);
+    private final RangeParam fibres = new RangeParam("Fibres", 0, 10, 100);
+    private final RangeParam gain = new RangeParam("Gain", 0, 80, 100);
 
     private final GradientParam gradient = new GradientParam("Colors", new Color(229, 196, 148), new Color(152, 123, 81));
 
     private WoodFilter filter;
 
     public JHWood() {
-        super("Wood", false, false);
+        super(ShowOriginal.NO);
+
         setParamSet(new ParamSet(
                 angle,
                 scale.adjustRangeToImageSize(0.5),
@@ -54,8 +56,7 @@ public class JHWood extends FilterWithParametrizedGUI {
                 turbulence,
                 fibres,
                 gain
-        ).withAction(new ReseedNoiseFilterAction()));
-        listNamePrefix = "Render ";
+        ).withAction(new ReseedNoiseActionSetting()));
     }
 
     @Override

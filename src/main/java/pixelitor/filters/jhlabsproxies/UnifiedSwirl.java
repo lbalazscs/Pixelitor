@@ -24,6 +24,7 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -32,10 +33,10 @@ import java.awt.image.BufferedImage;
  */
 public class UnifiedSwirl extends FilterWithParametrizedGUI {
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final RangeParam radius = new RangeParam("Radius", 1, 999, 500);
-    private final RangeParam swirlAmount = new RangeParam("Swirl Amount", -360, 360, 90);
-    private final RangeParam pinchBulgeAmount = new RangeParam("Pinch-Bulge Amount", -100, 100, 0);
-    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 500, 100);
+    private final RangeParam radius = new RangeParam("Radius", 1, 500, 999);
+    private final RangeParam swirlAmount = new RangeParam("Swirl Amount", -360, 90, 360);
+    private final RangeParam pinchBulgeAmount = new RangeParam("Pinch-Bulge Amount", -100, 0, 100);
+    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 500);
     private final AngleParam rotateResult = new AngleParam("Rotate Result", 0);
 
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
@@ -44,7 +45,9 @@ public class UnifiedSwirl extends FilterWithParametrizedGUI {
     private PinchFilter filter;
 
     public UnifiedSwirl() {
-        super("Swirl, Pinch, Bulge", true, true);
+        super(ShowOriginal.YES);
+        showAffectedArea();
+
         setParamSet(new ParamSet(
                 swirlAmount,
                 pinchBulgeAmount,

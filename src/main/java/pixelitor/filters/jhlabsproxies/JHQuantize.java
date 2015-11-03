@@ -21,6 +21,7 @@ import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -28,14 +29,14 @@ import java.awt.image.BufferedImage;
  * Quantize based on the JHLabs QuantizeFilter
  */
 public class JHQuantize extends FilterWithParametrizedGUI {
-    private final RangeParam numberOfColors = new RangeParam("Number of Colors", 2, 256, 2);
+    private final RangeParam numberOfColors = new RangeParam("Number of Colors", 2, 2, 256);
     private final BooleanParam dither = new BooleanParam("Dither", false);
     private final BooleanParam serpentine = new BooleanParam("Serpentine", false);
 
     private QuantizeFilter filter;
 
     public JHQuantize() {
-        super("Quantize", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 numberOfColors,
                 dither,

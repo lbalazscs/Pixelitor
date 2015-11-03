@@ -23,17 +23,11 @@ import pixelitor.filters.Filter;
 import pixelitor.layers.ImageLayer;
 import pixelitor.utils.Messages;
 
-import java.awt.event.ActionEvent;
-
 /**
  * A filter that has a GUI for customization
  */
 public abstract class FilterWithGUI extends Filter {
-    private final String name;
-
-    protected FilterWithGUI(String name) {
-        super(name + "...", null);
-        this.name = name;
+    protected FilterWithGUI() {
     }
 
     /**
@@ -44,16 +38,7 @@ public abstract class FilterWithGUI extends Filter {
      */
     public abstract AdjustPanel createAdjustPanel();
 
-    /**
-     * Returns the menu name, but without the "..." at the end
-     */
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
+    public void execute() {
         ImageDisplay ic = ImageComponents.getActiveIC();
         if(ic != null) {
             if (!ic.activeIsImageLayer()) {

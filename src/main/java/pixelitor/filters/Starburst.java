@@ -23,6 +23,7 @@ import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ColorUtils;
 import pixelitor.utils.ReseedSupport;
 
@@ -42,7 +43,7 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
  * Starburst
  */
 public class Starburst extends FilterWithParametrizedGUI {
-    private final RangeParam numberOfRaysParam = new RangeParam("Number of Rays", 2, 100, 10);
+    private final RangeParam numberOfRaysParam = new RangeParam("Number of Rays", 2, 10, 100);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final ColorParam bgColor = new ColorParam("Background Color:", WHITE, NO_OPACITY);
     private final ColorParam fgColor = new ColorParam("Rays Color:", BLACK, NO_OPACITY);
@@ -50,7 +51,7 @@ public class Starburst extends FilterWithParametrizedGUI {
     private final AngleParam rotate = new AngleParam("Rotate", 0);
 
     public Starburst() {
-        super("Starburst", false, false);
+        super(ShowOriginal.NO);
         setParamSet(new ParamSet(
                 numberOfRaysParam,
                 bgColor,
@@ -59,7 +60,6 @@ public class Starburst extends FilterWithParametrizedGUI {
                 center,
                 rotate
         ).withAction(ReseedSupport.createAction("Reseed Colors", "Recalculates the random colors")));
-        listNamePrefix = "Fill with ";
     }
 
     @Override

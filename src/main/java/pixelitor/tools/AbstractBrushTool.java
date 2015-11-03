@@ -23,7 +23,8 @@ import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
 import pixelitor.ImageDisplay;
 import pixelitor.PixelitorWindow;
-import pixelitor.filters.gui.FilterGUIComponent;
+import pixelitor.filters.gui.AddDefaultButton;
+import pixelitor.filters.gui.FilterSetting;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.layers.ImageLayer;
 import pixelitor.tools.brushes.Brush;
@@ -61,7 +62,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     private JComboBox<BrushType> typeSelector;
 
     protected Graphics2D graphics;
-    private final RangeParam brushRadiusParam = new RangeParam("Radius", MIN_BRUSH_RADIUS, MAX_BRUSH_RADIUS, DEFAULT_BRUSH_RADIUS, false, WEST);
+    private final RangeParam brushRadiusParam = new RangeParam("Radius", MIN_BRUSH_RADIUS, DEFAULT_BRUSH_RADIUS, MAX_BRUSH_RADIUS, AddDefaultButton.NO, WEST);
 
     private final EnumComboBoxModel<Symmetry> symmetryModel = new EnumComboBoxModel<>(Symmetry.class);
 
@@ -95,7 +96,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
             BrushType brushType = (BrushType) typeSelector.getSelectedItem();
             symmetryBrush.brushTypeChanged(brushType, getRadius());
 
-            brushRadiusParam.setEnabled(brushType.sizeCanBeSet(), FilterGUIComponent.EnabledReason.APP_LOGIC);
+            brushRadiusParam.setEnabled(brushType.sizeCanBeSet(), FilterSetting.EnabledReason.APP_LOGIC);
 
             brushSettingsButton.setEnabled(brushType.hasSettings());
         });

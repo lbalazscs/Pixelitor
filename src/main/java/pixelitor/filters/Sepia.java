@@ -19,6 +19,7 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.SepiaFilter;
 
 import java.awt.image.BufferedImage;
@@ -27,12 +28,12 @@ import java.awt.image.BufferedImage;
  * Sepia filter based on Daniel Wreczycki's sepia filter
  */
 public class Sepia extends FilterWithParametrizedGUI  {
-    private final RangeParam intensity = new RangeParam("Intensity", 0, 100, 20);
+    private final RangeParam intensity = new RangeParam("Intensity", 0, 20, 100);
 
     private SepiaFilter filter;
 
     public Sepia() {
-        super("Sepia", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(intensity));
     }
 

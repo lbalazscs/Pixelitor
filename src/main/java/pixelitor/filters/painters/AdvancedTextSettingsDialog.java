@@ -71,7 +71,7 @@ public class AdvancedTextSettingsDialog extends OKDialog {
         ligaturesCB.addActionListener(actionListener);
         gbh.addLabelWithControl("Ligatures:", ligaturesCB);
 
-        trackingParam = new RangeParam("", -10, 30, 0);
+        trackingParam = new RangeParam("", -10, 0, 30);
         trackingParam.setValue(defaultTracking);
         trackingParam.addChangeListener(e -> actionListener.actionPerformed(null));
         JComponent trackingGUI = trackingParam.createGUI();

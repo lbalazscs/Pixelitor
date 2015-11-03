@@ -52,7 +52,7 @@ public class GroupedRangeSelector extends JPanel implements ParamGUI {
     private void addSliderSpinners() {
         for (int i = 0; i < numParams; i++) {
             RangeParam param = model.getRangeParam(i);
-            SliderSpinner slider = new SliderSpinner(param, NONE, true);
+            SliderSpinner slider = new SliderSpinner(param, NONE, AddDefaultButton.YES);
             slider.setupTicks();
             gridBagHelper.addLabelWithControl(param.getName(), slider, i);
         }

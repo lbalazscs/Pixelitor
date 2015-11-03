@@ -22,7 +22,7 @@ import java.awt.Rectangle;
 /**
  * A filter parameter that can be configured by the user
  */
-public interface FilterParam extends FilterGUIComponent, Resettable {
+public interface FilterParam extends FilterSetting, Resettable {
 
     /**
      * Sets a random value without triggering the filter

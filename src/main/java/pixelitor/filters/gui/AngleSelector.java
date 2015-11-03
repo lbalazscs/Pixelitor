@@ -59,7 +59,7 @@ public class AngleSelector extends JPanel implements ParamGUI {
             }
         });
 
-        SliderSpinner retVal = new SliderSpinner(spinnerModel, NONE, true);
+        SliderSpinner retVal = new SliderSpinner(spinnerModel, NONE, AddDefaultButton.YES);
 
         retVal.setResettable(angleParam);
         int maxAngleInDegrees = angleParam.getMaxAngleInDegrees();

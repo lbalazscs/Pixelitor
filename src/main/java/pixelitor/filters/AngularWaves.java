@@ -21,7 +21,8 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
+import pixelitor.filters.gui.ReseedNoiseActionSetting;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.AngularWavesFilter;
 
 import java.awt.image.BufferedImage;
@@ -30,13 +31,13 @@ import java.awt.image.BufferedImage;
  * Angular waves in a polar coordinate system
  */
 public class AngularWaves extends FilterWithParametrizedGUI {
-    private final RangeParam radialWLParam = new RangeParam("Radial Wavelength", 1, 100, 20);
-    private final RangeParam amountParam = new RangeParam("Angular Amount (Degrees)", 0, 90, 20);
+    private final RangeParam radialWLParam = new RangeParam("Radial Wavelength", 1, 20, 100);
+    private final RangeParam amountParam = new RangeParam("Angular Amount (Degrees)", 0, 20, 90);
 
-    private final RangeParam phaseParam = new RangeParam("Phase (time)", 0, 360, 0);
+    private final RangeParam phaseParam = new RangeParam("Phase (time)", 0, 0, 360);
 
     private final ImagePositionParam centerParam = new ImagePositionParam("Center");
-    private final RangeParam zoomParam = new RangeParam("Zoom (%)", 1, 500, 100);
+    private final RangeParam zoomParam = new RangeParam("Zoom (%)", 1, 100, 500);
     private final IntChoiceParam waveType = IntChoiceParam.getWaveTypeChoices();
 
     private final IntChoiceParam edgeActionParam = IntChoiceParam.getEdgeActionChoices();
@@ -45,7 +46,7 @@ public class AngularWaves extends FilterWithParametrizedGUI {
     private AngularWavesFilter filter;
 
     public AngularWaves() {
-        super("Angular Waves", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 centerParam,
                 radialWLParam.adjustRangeToImageSize(0.05),
@@ -55,7 +56,7 @@ public class AngularWaves extends FilterWithParametrizedGUI {
                 zoomParam,
                 edgeActionParam,
                 interpolationParam
-        ).withAction(new ReseedNoiseFilterAction("Reseed Noise")));
+        ).withAction(new ReseedNoiseActionSetting("Reseed Noise")));
     }
 
     @Override

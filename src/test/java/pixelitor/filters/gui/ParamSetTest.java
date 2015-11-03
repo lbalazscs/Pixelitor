@@ -42,7 +42,7 @@ public class ParamSetTest {
                 .addCommonActions();
         adjustmentListener = mock(ParamAdjustmentListener.class);
         params.setAdjustmentListener(adjustmentListener);
-        extraParam = new RangeParam("Extra Param", 0, 200, 0);
+        extraParam = new RangeParam("Extra Param", 0, 0, 200);
         extraParam.setAdjustmentListener(adjustmentListener);
         params.insertParam(extraParam, 3);
         params.considerImageSize(new Rectangle(0, 0, 400, 800));

@@ -17,9 +17,11 @@
 
 package pixelitor.filters;
 
+import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ColorUtils;
 
 import java.awt.image.BufferedImage;
@@ -34,7 +36,7 @@ public class Threshold extends FilterWithParametrizedGUI {
     private static final int CRIT_SATURATION = 5;
 
     private final RangeParam threshold = new RangeParam("Threshold", 0,
-            255, 128, false, BORDER);
+            128, 255, AddDefaultButton.NO, BORDER);
 
     private final IntChoiceParam criterion = new IntChoiceParam("Based on",
             new IntChoiceParam.Value[]{
@@ -46,7 +48,7 @@ public class Threshold extends FilterWithParametrizedGUI {
             });
 
     public Threshold() {
-        super("Threshold", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(threshold, criterion));
     }
 

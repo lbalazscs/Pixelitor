@@ -22,6 +22,7 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -31,16 +32,16 @@ import java.awt.image.BufferedImage;
  */
 public class JHBoxBlur extends FilterWithParametrizedGUI {
 
-    private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 0, 100, 0);
+    private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 0, 0, 100);
 
-    private final RangeParam numberOfIterations = new RangeParam("Number of Iterations", 1, 10, 3);
+    private final RangeParam numberOfIterations = new RangeParam("Number of Iterations", 1, 3, 10);
 
     private final BooleanParam hpSharpening = BooleanParam.createParamForHPSharpening();
 
     private BoxBlurFilter filter;
 
     public JHBoxBlur() {
-        super("Box Blur", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 radius,
                 numberOfIterations,

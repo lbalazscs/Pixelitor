@@ -6,6 +6,7 @@ import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ReseedSupport;
 
 import java.awt.BasicStroke;
@@ -30,20 +31,20 @@ public class FractalTree extends FilterWithParametrizedGUI {
     public static final int QUALITY_BETTER = 1;
     public static final int QUALITY_FASTER = 2;
 
-    private final RangeParam iterations = new RangeParam("Age (Iterations)", 1, 16, 10);
-    private final RangeParam angle = new RangeParam("Angle", 1, 45, 20);
-    private final RangeParam randomnessParam = new RangeParam("Randomness", 0, 100, 40);
+    private final RangeParam iterations = new RangeParam("Age (Iterations)", 1, 10, 16);
+    private final RangeParam angle = new RangeParam("Angle", 1, 20, 45);
+    private final RangeParam randomnessParam = new RangeParam("Randomness", 0, 40, 100);
     private final GroupedRangeParam width = new GroupedRangeParam("Width",
             new RangeParam[]{
-                    new RangeParam("Overall", 100, 300, 100),
-                    new RangeParam("Trunk", 100, 500, 200),
+                    new RangeParam("Overall", 100, 100, 300),
+                    new RangeParam("Trunk", 100, 200, 500),
             },
             false);
 
-    private final RangeParam zoom = new RangeParam("Zoom", 10, 200, 100);
-    private final RangeParam curvedness = new RangeParam("Curvedness", 0, 50, 10);
+    private final RangeParam zoom = new RangeParam("Zoom", 10, 100, 200);
+    private final RangeParam curvedness = new RangeParam("Curvedness", 0, 10, 50);
     private final GroupedRangeParam physics = new GroupedRangeParam("Physics",
-            "Gravity", "Wind", -100, 100, 0, false);
+            "Gravity", "Wind", -100, 0, 100, false);
     private final IntChoiceParam quality = new IntChoiceParam("Quality",
             new IntChoiceParam.Value[]{
                     new IntChoiceParam.Value("Better", QUALITY_BETTER),
@@ -67,7 +68,7 @@ public class FractalTree extends FilterWithParametrizedGUI {
     private double angleDeviation;
 
     public FractalTree() {
-        super("Fractal Tree", false, false);
+        super(ShowOriginal.NO);
         setParamSet(new ParamSet(
                 iterations,
                 zoom,

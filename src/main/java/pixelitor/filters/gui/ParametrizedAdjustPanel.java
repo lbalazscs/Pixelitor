@@ -35,11 +35,11 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
     private static boolean resetParams = true;
     private ShowOriginalCB showOriginalCB;
 
-    public ParametrizedAdjustPanel(FilterWithParametrizedGUI filter, boolean addShowOriginal) {
+    public ParametrizedAdjustPanel(FilterWithParametrizedGUI filter, ShowOriginal addShowOriginal) {
         this(filter, null, addShowOriginal);
     }
 
-    public ParametrizedAdjustPanel(FilterWithParametrizedGUI filter, Object otherInfo, boolean addShowOriginal) {
+    public ParametrizedAdjustPanel(FilterWithParametrizedGUI filter, Object otherInfo, ShowOriginal addShowOriginal) {
         super(filter);
 
         ParamSet params = filter.getParamSet();
@@ -57,11 +57,11 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
     /**
      * This can be overridden if a custom GUI is necessary
      */
-    protected void setupGUI(ParamSet params, Object otherInfo, boolean addShowOriginal) {
+    protected void setupGUI(ParamSet params, Object otherInfo, ShowOriginal addShowOriginal) {
         setupControlsInColumn(this, params, addShowOriginal);
     }
 
-    public void setupControlsInColumn(JPanel parent, ParamSet params, boolean addShowOriginal) {
+    public void setupControlsInColumn(JPanel parent, ParamSet params, ShowOriginal addShowOriginal) {
         parent.setLayout(new GridBagLayout());
 
         int row = 0;
@@ -85,7 +85,7 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
             row++;
         }
 
-        if (addShowOriginal) {
+        if (addShowOriginal.isYes()) {
             gbHelper.addLabel("Show Original:", 0, row);
             row++;
 
@@ -100,8 +100,8 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
         }
 
         // add filter actions
-        List<FilterAction> actionList = params.getActionList();
-        for (FilterAction action : actionList) {
+        List<ActionSetting> actionList = params.getActionList();
+        for (ActionSetting action : actionList) {
             // all the buttons go in one row
             JButton button = (JButton) action.createGUI();
             if (buttonsPanel == null) {

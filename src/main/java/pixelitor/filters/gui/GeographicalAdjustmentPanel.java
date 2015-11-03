@@ -26,19 +26,21 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.util.List;
 
+import static java.awt.FlowLayout.CENTER;
+
 /**
  * An adjustment panel, where the components can be added in "geographical" places (north-west etc.)
  */
 public class GeographicalAdjustmentPanel extends ParametrizedAdjustPanel {
     private final boolean addLabels;
 
-    public GeographicalAdjustmentPanel(FilterWithParametrizedGUI filter, boolean addLabels, boolean showOriginal) {
+    public GeographicalAdjustmentPanel(FilterWithParametrizedGUI filter, boolean addLabels, ShowOriginal showOriginal) {
         super(filter, showOriginal);
         this.addLabels = addLabels;
     }
 
     @Override
-    protected void setupGUI(ParamSet params, Object otherInfo, boolean addShowOriginal) {
+    protected void setupGUI(ParamSet params, Object otherInfo, ShowOriginal addShowOriginal) {
         setLayout(new BorderLayout(5, 5));
         JPanel controlPanel = new JPanel(new BorderLayout(5, 5));
 
@@ -82,8 +84,8 @@ public class GeographicalAdjustmentPanel extends ParametrizedAdjustPanel {
             added++;
         }
 
-        List<FilterAction> actionList = params.getActionList();
-        for (FilterAction action : actionList) {
+        List<ActionSetting> actionList = params.getActionList();
+        for (ActionSetting action : actionList) {
             JButton control = (JButton) action.createGUI();
             buttonsPanel.add(control);
         }
@@ -99,9 +101,9 @@ public class GeographicalAdjustmentPanel extends ParametrizedAdjustPanel {
         return new JPanel(layout);
     }
 
-    private static JPanel createButtonsPanel(boolean showOriginal) {
-        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        if (showOriginal) {
+    private static JPanel createButtonsPanel(ShowOriginal showOriginal) {
+        JPanel buttonsPanel = new JPanel(new FlowLayout(CENTER));
+        if (showOriginal.isYes()) {
             JCheckBox showOriginalCB = new JCheckBox("Show Original");
             showOriginalCB.setName("show original");
             showOriginalCB.addActionListener(e -> Utils.setShowOriginal(showOriginalCB.isSelected()));

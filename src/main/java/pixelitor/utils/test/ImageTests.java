@@ -234,7 +234,7 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
 
     private static void addRasterizedTextLayer(Composition ic, String text, Color textColor, Font font, int translationY, BlendingMode blendingMode, float opacity, boolean dropShadow) {
         addNewLayer(text);
-        TextFilter textFilter = TextFilter.INSTANCE;
+        TextFilter textFilter = TextFilter.getInstance();
 
         AreaEffects effects = null;
         if (dropShadow) {

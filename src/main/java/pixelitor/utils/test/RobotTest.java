@@ -27,9 +27,9 @@ import pixelitor.GlobalKeyboardWatch;
 import pixelitor.ImageComponents;
 import pixelitor.ImageDisplay;
 import pixelitor.PixelitorWindow;
-import pixelitor.filters.Brick;
 import pixelitor.filters.Fade;
 import pixelitor.filters.Filter;
+import pixelitor.filters.FilterAction;
 import pixelitor.filters.FilterUtils;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.Invert;
@@ -318,7 +318,6 @@ public class RobotTest {
 
         Filter op = FilterUtils.getRandomFilter(filter ->
                 (!(filter instanceof Fade)) &&
-                        (!(filter instanceof Brick)) &&
                         (!(filter instanceof RandomFilter)));
 
         String opName = op.getName();
@@ -950,8 +949,9 @@ public class RobotTest {
     }
 
     private static FilterWithParametrizedGUI getRandomTweenFilter() {
-        FilterWithParametrizedGUI[] filters = FilterUtils.getAnimationFiltersSorted();
-        return filters[(int) (Math.random() * filters.length)];
+        FilterAction[] filterActions = FilterUtils.getAnimationFiltersSorted();
+        FilterAction filterAction = filterActions[(int) (Math.random() * filterActions.length)];
+        return (FilterWithParametrizedGUI) filterAction.getFilter();
     }
 
     private static void randomEnlargeLayer() {

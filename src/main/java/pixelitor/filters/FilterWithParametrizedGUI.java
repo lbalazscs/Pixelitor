@@ -22,6 +22,7 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ParametrizedAdjustPanel;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Shape;
@@ -36,17 +37,17 @@ public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
     protected ParamSet paramSet;
 
     private BooleanParam showAffectedAreaParam = null;
-    private final boolean addShowOriginal;
-    private final boolean hasAffectedAreaShapeParam;
+    private final ShowOriginal addShowOriginal;
+    private boolean hasAffectedAreaShapeParam;
     private Shape[] affectedAreaShapes;
 
-    protected FilterWithParametrizedGUI(String name, boolean addShowOriginal, boolean hasAffectedAreaShape) {
-        super(name);
+    protected FilterWithParametrizedGUI(ShowOriginal addShowOriginal) {
         this.addShowOriginal = addShowOriginal;
-        this.hasAffectedAreaShapeParam = hasAffectedAreaShape;
-        if(hasAffectedAreaShapeParam) {
-            showAffectedAreaParam = new BooleanParam("Show Affected Area", false);
-        }
+    }
+
+    protected void showAffectedArea() {
+        this.hasAffectedAreaShapeParam = true;
+        showAffectedAreaParam = new BooleanParam("Show Affected Area", false);
     }
 
     @Override

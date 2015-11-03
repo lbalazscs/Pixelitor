@@ -23,6 +23,7 @@ import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.BlurredEllipse;
 import pixelitor.utils.ImageUtils;
 
@@ -34,17 +35,17 @@ import java.awt.image.BufferedImage;
 public class JHFocus extends FilterWithParametrizedGUI {
     private final ImagePositionParam center = new ImagePositionParam("Focused Area Center");
 
-    private final GroupedRangeParam radius = new GroupedRangeParam("Focused Area Radius (Pixels)", 1, 1000, 200, false);
-    private final RangeParam penumbraMultiplier = new RangeParam("Transition Area Radius (Focused Area Radius %)", 1, 500, 100);
-    private final GroupedRangeParam blurRadius = new GroupedRangeParam("Blur Radius", 0, 50, 10);
-    private final RangeParam numberOfIterations = new RangeParam("Number of Blur Iterations", 1, 10, 3);
+    private final GroupedRangeParam radius = new GroupedRangeParam("Focused Area Radius (Pixels)", 1, 200, 1000, false);
+    private final RangeParam penumbraMultiplier = new RangeParam("Transition Area Radius (Focused Area Radius %)", 1, 100, 500);
+    private final GroupedRangeParam blurRadius = new GroupedRangeParam("Blur Radius", 0, 10, 50);
+    private final RangeParam numberOfIterations = new RangeParam("Number of Blur Iterations", 1, 3, 10);
     private final BooleanParam invert = new BooleanParam("Invert", false);
     private final BooleanParam hpSharpening = BooleanParam.createParamForHPSharpening();
 
     private FocusImpl filter;
 
     public JHFocus() {
-        super("Focus", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 center,
                 radius,

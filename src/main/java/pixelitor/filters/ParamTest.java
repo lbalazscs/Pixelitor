@@ -30,6 +30,7 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.RangeWithColorsParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.gui.TextParam;
 import pixelitor.layers.BlendingMode;
 import pixelitor.utils.ImageUtils;
@@ -48,7 +49,7 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
  */
 public class ParamTest extends FilterWithParametrizedGUI {
     public ParamTest() {
-        super("ParamTest", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(getTestParams()));
     }
 
@@ -70,8 +71,8 @@ public class ParamTest extends FilterWithParametrizedGUI {
 
         return new FilterParam[]{
                 new GradientParam("Colors", defaultThumbPositions, defaultValues),
-                new RangeParam("RangeParam", 0, 100, 50),
-                new RangeWithColorsParam(RED, BLUE, "RangeWithColorsParam", 0, 100, 50),
+                new RangeParam("RangeParam", 0, 50, 100),
+                new RangeWithColorsParam(RED, BLUE, "RangeWithColorsParam", 0, 50, 100),
                 new ImagePositionParam("ImagePositionParam"),
                 new IntChoiceParam("IntChoiceParam", new IntChoiceParam.Value[]{
                         new IntChoiceParam.Value("value 1", 1),

@@ -55,7 +55,7 @@ public class ToolsPanel extends JPanel {
                 if (Build.advancedLayersEnabled()) {
                     TextLayer.createNew(PixelitorWindow.getInstance());
                 } else {
-                    TextFilter.INSTANCE.actionPerformed(e);
+                    TextFilter.getInstance().execute();
                 }
             }
         };

@@ -21,6 +21,7 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.Sphere3DFilter;
 
 import java.awt.image.BufferedImage;
@@ -29,16 +30,16 @@ import java.awt.image.BufferedImage;
  * Sphere3D based on Sphere3DFilter
  */
 public class Sphere3D extends FilterWithParametrizedGUI {
-    private final RangeParam alpha = new RangeParam("alpha", 0, 100, 50);
-    private final RangeParam beta = new RangeParam("beta", 0, 100, 50);
-    private final RangeParam gamma = new RangeParam("gamma", 0, 100, 50);
+    private final RangeParam alpha = new RangeParam("alpha", 0, 50, 100);
+    private final RangeParam beta = new RangeParam("beta", 0, 50, 100);
+    private final RangeParam gamma = new RangeParam("gamma", 0, 50, 100);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
 
     private Sphere3DFilter filter;
 
     public Sphere3D() {
-        super("Sphere3D", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 center,
                 alpha,

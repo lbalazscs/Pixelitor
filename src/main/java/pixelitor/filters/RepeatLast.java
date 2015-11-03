@@ -17,14 +17,14 @@
 
 package pixelitor.filters;
 
-import pixelitor.ChangeReason;
+import pixelitor.menus.NamedAction;
 
-import java.awt.image.BufferedImage;
+import java.awt.event.ActionEvent;
 
 import static pixelitor.ChangeReason.REPEAT_LAST;
 import static pixelitor.filters.FilterUtils.getLastExecutedFilter;
 
-public class RepeatLast extends Filter {
+public class RepeatLast extends NamedAction {
     public static final RepeatLast INSTANCE = new RepeatLast();
 
     private RepeatLast() {
@@ -33,19 +33,8 @@ public class RepeatLast extends Filter {
     }
 
     @Override
-    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        throw new IllegalStateException("should not be called");
-    }
-
-    @Override
-    public void execute(ChangeReason changeReason) {
+    public void actionPerformed(ActionEvent e) {
         getLastExecutedFilter()
                 .ifPresent(filter -> filter.execute(REPEAT_LAST));
-    }
-
-    @Override
-    public void randomizeSettings() {
-        getLastExecutedFilter()
-                .ifPresent(Filter::randomizeSettings);
     }
 }

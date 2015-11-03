@@ -23,7 +23,7 @@ import java.awt.event.ActionListener;
 /**
  * Creates a button that executes an action when pushed
  */
-public class FilterAction implements FilterGUIComponent {
+public class ActionSetting implements FilterSetting {
     private final ActionListener actionListener;
     private final Icon icon;
     private final String toolTipText;
@@ -35,11 +35,11 @@ public class FilterAction implements FilterGUIComponent {
     // most actions should be available in the final animation settings
     private boolean ignoreFinalAnimationSettingMode = true;
 
-    public FilterAction(String name, ActionListener actionListener, String toolTipText) {
+    public ActionSetting(String name, ActionListener actionListener, String toolTipText) {
         this(name, actionListener, null, toolTipText);
     }
 
-    public FilterAction(String name, ActionListener actionListener, Icon icon, String toolTipText) {
+    public ActionSetting(String name, ActionListener actionListener, Icon icon, String toolTipText) {
         this.name = name;
         this.actionListener = actionListener;
         this.icon = icon;

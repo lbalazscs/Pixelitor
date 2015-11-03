@@ -21,6 +21,7 @@ import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -29,17 +30,17 @@ import java.awt.image.BufferedImage;
  * Lens Blur based on the JHLabs LensBlurFilter
  */
 public class JHLensBlur extends FilterWithParametrizedGUI {
-    private final RangeParam amount = new RangeParam("Amount (Radius)", 0, 100, 0);
-    private final RangeParam numberOfSides = new RangeParam("Number of Sides of the Aperture", 3, 12, 5);
-    private final RangeParam bloomFactor = new RangeParam("Bloom Factor", 1, 8, 1);
-    private final RangeParam bloomThreshold = new RangeParam("Bloom Threshold", 0, 255, 200);
+    private final RangeParam amount = new RangeParam("Amount (Radius)", 0, 0, 100);
+    private final RangeParam numberOfSides = new RangeParam("Number of Sides of the Aperture", 3, 5, 12);
+    private final RangeParam bloomFactor = new RangeParam("Bloom Factor", 1, 1, 8);
+    private final RangeParam bloomThreshold = new RangeParam("Bloom Threshold", 0, 200, 255);
 
     private final BooleanParam hpSharpening = BooleanParam.createParamForHPSharpening();
 
     private LensBlurFilter filter;
 
     public JHLensBlur() {
-        super("Lens Blur", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 amount,
                 numberOfSides,

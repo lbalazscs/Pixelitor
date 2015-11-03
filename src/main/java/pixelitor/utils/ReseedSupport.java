@@ -17,8 +17,8 @@
 
 package pixelitor.utils;
 
-import pixelitor.filters.gui.FilterAction;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
+import pixelitor.filters.gui.ActionSetting;
+import pixelitor.filters.gui.ReseedNoiseActionSetting;
 
 import java.util.Random;
 
@@ -42,15 +42,15 @@ public class ReseedSupport {
     }
 
 
-    public static FilterAction createAction() {
-        return new ReseedNoiseFilterAction(
+    public static ActionSetting createAction() {
+        return new ReseedNoiseActionSetting(
                 e -> {
                     reseed();
                 });
     }
 
-    public static FilterAction createAction(String name, String toolTipText) {
-        return new ReseedNoiseFilterAction(
+    public static ActionSetting createAction(String name, String toolTipText) {
+        return new ReseedNoiseActionSetting(
                 name, toolTipText,
                 e -> reseed());
     }

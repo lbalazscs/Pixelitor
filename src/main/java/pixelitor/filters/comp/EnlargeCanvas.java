@@ -3,6 +3,7 @@ package pixelitor.filters.comp;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.ImageComponents;
+import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.history.History;
 import pixelitor.history.MultiLayerBackup;
@@ -97,10 +98,10 @@ public class EnlargeCanvas implements CompAction {
     }
 
     static class EnlargeCanvasPanel extends JPanel {
-        final RangeParam northRange = new RangeParam("North", 0, 500, 0);
-        final RangeParam eastRange = new RangeParam("East", 0, 500, 0);
-        final RangeParam southRange = new RangeParam("South", 0, 500, 0);
-        final RangeParam westRange = new RangeParam("West", 0, 500, 0);
+        final RangeParam northRange = new RangeParam("North", 0, 0, 500);
+        final RangeParam eastRange = new RangeParam("East", 0, 0, 500);
+        final RangeParam southRange = new RangeParam("South", 0, 0, 500);
+        final RangeParam westRange = new RangeParam("West", 0, 0, 500);
 
         private EnlargeCanvasPanel() {
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -112,7 +113,7 @@ public class EnlargeCanvas implements CompAction {
         }
 
         private void addSliderSpinner(RangeParam range, String sliderName) {
-            SliderSpinner s = new SliderSpinner(range, BORDER, false);
+            SliderSpinner s = new SliderSpinner(range, BORDER, AddDefaultButton.NO);
             s.setSliderName(sliderName);
             add(s);
         }

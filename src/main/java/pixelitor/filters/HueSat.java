@@ -19,6 +19,7 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
@@ -40,12 +41,12 @@ public class HueSat extends FilterWithParametrizedGUI {
     private static final int MAX_BRI = 100;
     private static final int DEFAULT_BRI = 0;
 
-    private final RangeParam hue = new RangeParam("Hue", MIN_HUE, MAX_HUE, DEFAULT_HUE);
-    private final RangeParam saturation = new RangeParam("Saturation", MIN_SAT, MAX_SAT, DEFAULT_SAT);
-    private final RangeParam brightness = new RangeParam("Brightness", MIN_BRI, MAX_BRI, DEFAULT_BRI);
+    private final RangeParam hue = new RangeParam("Hue", MIN_HUE, DEFAULT_HUE, MAX_HUE);
+    private final RangeParam saturation = new RangeParam("Saturation", MIN_SAT, DEFAULT_SAT, MAX_SAT);
+    private final RangeParam brightness = new RangeParam("Brightness", MIN_BRI, DEFAULT_BRI, MAX_BRI);
 
     public HueSat() {
-        super("Hue/Saturation", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 hue,
                 saturation,

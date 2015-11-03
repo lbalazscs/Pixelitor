@@ -19,6 +19,7 @@ package pixelitor.tools;
 
 import pixelitor.Composition;
 import pixelitor.ImageDisplay;
+import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.tools.brushes.Brush;
 import pixelitor.tools.brushes.BrushAffectedArea;
@@ -43,7 +44,7 @@ public class SmudgeTool extends DirectBrushTool {
                 "click and drag to smudge. Click and Shift-click to smudge along a line.", Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
 
-    private final RangeParam strengthParam = new RangeParam("Strength", 1, 100, 60);
+    private final RangeParam strengthParam = new RangeParam("Strength", 1, 60, 100);
     private SmudgeBrush smudgeBrush;
     private JCheckBox fingerPaintingCB;
 
@@ -66,7 +67,7 @@ public class SmudgeTool extends DirectBrushTool {
     }
 
     private void addStrengthSelector() {
-        SliderSpinner strengthSelector = new SliderSpinner(strengthParam, WEST, false);
+        SliderSpinner strengthSelector = new SliderSpinner(strengthParam, WEST, AddDefaultButton.NO);
         settingsPanel.add(strengthSelector);
     }
 

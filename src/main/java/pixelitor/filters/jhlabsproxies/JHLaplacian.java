@@ -25,19 +25,14 @@ import java.awt.image.BufferedImage;
  * Laplacian edge detection based on the JHLabs LaplaceFilter
  */
 public class JHLaplacian extends Filter {
-
-    private LaplaceFilter filter;
+    private final LaplaceFilter filter;
 
     public JHLaplacian() {
-        super("Laplacian");
+        filter = new LaplaceFilter();
     }
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new LaplaceFilter();
-        }
-
         dest = filter.filter(src, dest);
         return dest;
     }
@@ -45,10 +40,5 @@ public class JHLaplacian extends Filter {
     @Override
     public void randomizeSettings() {
         // nothing to randomize
-    }
-
-    @Override
-    public String getListName() {
-        return "Laplacian Edge Detection";
     }
 }

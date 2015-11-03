@@ -22,6 +22,7 @@ import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.VoronoiFilter;
 import pixelitor.utils.Metric;
 import pixelitor.utils.ReseedSupport;
@@ -34,7 +35,7 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
  * Voronoi based on VoronoiFilter
  */
 public class Voronoi extends FilterWithParametrizedGUI {
-    private final RangeParam numberOfPoints = new RangeParam("Number of Points", 1, 200, 10);
+    private final RangeParam numberOfPoints = new RangeParam("Number of Points", 1, 10, 200);
     private final EnumParam<Metric> distance = new EnumParam<>("Distance", Metric.class);
     private final BooleanParam showPoints = new BooleanParam("Show Points", false, IGNORE_RANDOMIZE);
     private final BooleanParam useImageColors = new BooleanParam("Use Image Colors", false, IGNORE_RANDOMIZE);
@@ -48,7 +49,7 @@ public class Voronoi extends FilterWithParametrizedGUI {
     private VoronoiFilter filter;
 
     public Voronoi() {
-        super("Voronoi Diagram", false, false);
+        super(ShowOriginal.NO);
         setParamSet(new ParamSet(
                 numberOfPoints,
                 distance,

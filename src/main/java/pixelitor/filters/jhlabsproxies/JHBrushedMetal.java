@@ -22,6 +22,7 @@ import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ReseedSupport;
 
 import java.awt.image.BufferedImage;
@@ -35,19 +36,19 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
  */
 public class JHBrushedMetal extends FilterWithParametrizedGUI {
     private final ColorParam color = new ColorParam("Color", GRAY, NO_OPACITY);
-    private final RangeParam radius = new RangeParam("Length", 0, 500, 100);
-    private final RangeParam amount = new RangeParam("Amount (%)", 0, 100, 50);
-    private final RangeParam shine = new RangeParam("Shine (%)", 0, 100, 10);
+    private final RangeParam radius = new RangeParam("Length", 0, 100, 500);
+    private final RangeParam amount = new RangeParam("Amount (%)", 0, 50, 100);
+    private final RangeParam shine = new RangeParam("Shine (%)", 0, 10, 100);
 
     public JHBrushedMetal() {
-        super("Brushed Metal", false, false);
+        super(ShowOriginal.NO);
+
         setParamSet(new ParamSet(
                 color,
                 radius.adjustRangeToImageSize(0.5),
                 amount,
                 shine
         ).withAction(ReseedSupport.createAction()));
-        listNamePrefix = "Render ";
     }
 
     @Override

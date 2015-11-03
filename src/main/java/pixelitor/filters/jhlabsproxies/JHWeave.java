@@ -23,6 +23,7 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -39,8 +40,8 @@ public class JHWeave extends FilterWithParametrizedGUI {
             new IntChoiceParam.Value("Twill", WeaveFilter.TWILL_PATTERN),
             new IntChoiceParam.Value("Crowfoot", WeaveFilter.CROWFOOT_PATTERN),
     });
-    private final GroupedRangeParam size = new GroupedRangeParam("Size", "Width", "Height", 0, 100, 16, true);
-    private final GroupedRangeParam gap = new GroupedRangeParam("Gap", 0, 100, 6);
+    private final GroupedRangeParam size = new GroupedRangeParam("Size", "Width", "Height", 0, 16, 100, true);
+    private final GroupedRangeParam gap = new GroupedRangeParam("Gap", 0, 6, 100);
     private final BooleanParam roundThreads = new BooleanParam("Round Threads", false);
     private final BooleanParam shadeCrossings = new BooleanParam("Shade Crossings", true);
     private final BooleanParam useImageColors = new BooleanParam("Use Image Colors", true, IGNORE_RANDOMIZE);
@@ -48,7 +49,7 @@ public class JHWeave extends FilterWithParametrizedGUI {
     private WeaveFilter filter;
 
     public JHWeave() {
-        super("Weave", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 pattern,
                 size.adjustRangeToImageSize(0.4),

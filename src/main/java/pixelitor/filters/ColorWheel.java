@@ -23,6 +23,7 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
@@ -32,13 +33,12 @@ import java.util.concurrent.Future;
 public class ColorWheel extends FilterWithParametrizedGUI {
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final AngleParam hueShiftParam = new AngleParam("Rotate (Degrees)", 0);
-    private final RangeParam brightnessParam = new RangeParam("Brightness (%)", 0, 100, 75);
-    private final RangeParam satParam = new RangeParam("Saturation (%)", 0, 100, 90);
+    private final RangeParam brightnessParam = new RangeParam("Brightness (%)", 0, 75, 100);
+    private final RangeParam satParam = new RangeParam("Saturation (%)", 0, 90, 100);
 
     public ColorWheel() {
-        super("Color Wheel", false, false);
+        super(ShowOriginal.NO);
         setParamSet(new ParamSet(center, hueShiftParam, brightnessParam, satParam));
-        listNamePrefix = "Fill with ";
     }
 
     @Override

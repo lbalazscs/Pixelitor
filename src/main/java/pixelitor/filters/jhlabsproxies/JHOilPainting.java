@@ -23,6 +23,7 @@ import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -30,14 +31,14 @@ import java.awt.image.BufferedImage;
  * Oil Painting based on the JHLabs OilFilter
  */
 public class JHOilPainting extends FilterWithParametrizedGUI {
-    private final GroupedRangeParam brushSize = new GroupedRangeParam("Brush Size", 0, 10, 1, false);
-    private final RangeParam coarseness = new RangeParam("Coarseness", 2, 255, 25);
+    private final GroupedRangeParam brushSize = new GroupedRangeParam("Brush Size", 0, 1, 10, false);
+    private final RangeParam coarseness = new RangeParam("Coarseness", 2, 25, 255);
     private final IntChoiceParam detailQuality = ResizingFilterHelper.createQualityParam();
 
     private OilFilter filter;
 
     public JHOilPainting() {
-        super("Oil Painting", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 brushSize.adjustRangeToImageSize(0.04),
                 coarseness,

@@ -25,6 +25,7 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.AlphaComposite;
@@ -40,16 +41,16 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
 public class JHDropShadow extends FilterWithParametrizedGUI {
 
     private final AngleParam angle = new AngleParam("Angle", ImageUtils.DEG_315_IN_RADIANS);
-    private final RangeParam distance = new RangeParam("Distance", 0, 100, 10);
-    private final RangeParam opacity = new RangeParam("Opacity (%)", 0, 100, 90);
-    private final RangeParam softness = new RangeParam("Softness", 0, 25, 10);
+    private final RangeParam distance = new RangeParam("Distance", 0, 10, 100);
+    private final RangeParam opacity = new RangeParam("Opacity (%)", 0, 90, 100);
+    private final RangeParam softness = new RangeParam("Softness", 0, 10, 25);
     private final BooleanParam shadowOnly = new BooleanParam("Shadow Only", false);
     private final ColorParam color = new ColorParam("Color", BLACK, NO_OPACITY);
 
     private ShadowFilter filter;
 
     public JHDropShadow() {
-        super("Drop Shadow", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 angle,
                 distance.adjustRangeToImageSize(0.1),

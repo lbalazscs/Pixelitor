@@ -21,6 +21,7 @@ import com.jhlabs.image.TritoneFilter;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ParamSet;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -40,7 +41,7 @@ public class JHTriTone extends FilterWithParametrizedGUI {
     private TritoneFilter filter;
 
     public JHTriTone() {
-        super("Tritone", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 shadowColor, midtonesColor, highlightsColor
         ));

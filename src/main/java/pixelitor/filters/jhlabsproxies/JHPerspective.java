@@ -24,6 +24,7 @@ import pixelitor.filters.gui.GeographicalAdjustmentPanel;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -40,7 +41,7 @@ public class JHPerspective extends FilterWithParametrizedGUI {
     private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
 
     public JHPerspective() {
-        super("Perspective", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 northWest, northEast, southWest, southEast,
                 edgeAction, interpolation
@@ -70,7 +71,7 @@ public class JHPerspective extends FilterWithParametrizedGUI {
 
     @Override
     public AdjustPanel createAdjustPanel() {
-        return new GeographicalAdjustmentPanel(this, false, true);
+        return new GeographicalAdjustmentPanel(this, false, ShowOriginal.YES);
     }
 
 }

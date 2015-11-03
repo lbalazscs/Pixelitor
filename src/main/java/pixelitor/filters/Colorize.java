@@ -20,6 +20,7 @@ package pixelitor.filters;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.lookup.LuminanceLookup;
 import pixelitor.utils.ImageUtils;
 
@@ -32,12 +33,12 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
  * Colorize
  */
 public class Colorize extends FilterWithParametrizedGUI {
-    private final RangeParam adjustBrightness = new RangeParam("Adjust Brightness", -100, 100, 0);
+    private final RangeParam adjustBrightness = new RangeParam("Adjust Brightness", -100, 0, 100);
     private final ColorParam colorParam = new ColorParam("Color:", new Color(255, 207, 119), NO_OPACITY);
     private final RangeParam opacityParam = new RangeParam("Amount (%)", 0, 100, 100);
 
     public Colorize() {
-        super("Colorize", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 colorParam,
                 adjustBrightness,

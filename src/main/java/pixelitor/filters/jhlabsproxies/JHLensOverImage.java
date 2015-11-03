@@ -23,6 +23,7 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -31,10 +32,10 @@ import java.awt.image.BufferedImage;
  */
 public class JHLensOverImage extends FilterWithParametrizedGUI {
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 0, 999, 200);
+    private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 0, 200, 999);
 
     // less than 100% doesn't create anything usable
-    private final RangeParam refractionIndex = new RangeParam("Refraction Index (%)", 100, 300, 150);
+    private final RangeParam refractionIndex = new RangeParam("Refraction Index (%)", 100, 150, 300);
 
     //    private IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
     private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
@@ -42,7 +43,9 @@ public class JHLensOverImage extends FilterWithParametrizedGUI {
     private SphereFilter filter;
 
     public JHLensOverImage() {
-        super("Lens Over Image", true, true);
+        super(ShowOriginal.YES);
+        showAffectedArea();
+
         setParamSet(new ParamSet(
                 center,
                 radius.adjustRangeToImageSize(1.0),

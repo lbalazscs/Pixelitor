@@ -22,6 +22,7 @@ import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -30,13 +31,13 @@ import java.awt.image.BufferedImage;
  * Gaussian Blur based on JHLabs GaussianFilter
  */
 public class JHGaussianBlur extends FilterWithParametrizedGUI {
-    private final RangeParam radius = new RangeParam("Radius", 0, 100, 0);
+    private final RangeParam radius = new RangeParam("Radius", 0, 0, 100);
     private final BooleanParam hpSharpening = BooleanParam.createParamForHPSharpening();
 
     private GaussianFilter filter;
 
     public JHGaussianBlur() {
-        super("Gaussian Blur", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 radius,
                 hpSharpening

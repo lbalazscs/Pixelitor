@@ -31,17 +31,17 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 public class BooleanParam extends AbstractFilterParam {
     private final boolean defaultValue;
     private boolean currentValue;
-    private final boolean addDefaultButton;
+    private final AddDefaultButton addDefaultButton;
 
     public BooleanParam(String name, boolean defaultValue) {
         this(name, defaultValue, ALLOW_RANDOMIZE);
     }
 
     public BooleanParam(String name, boolean defaultValue, RandomizePolicy randomizePolicy) {
-        this(name, defaultValue, randomizePolicy, false);
+        this(name, defaultValue, randomizePolicy, AddDefaultButton.NO);
     }
 
-    public BooleanParam(String name, boolean defaultValue, RandomizePolicy randomizePolicy, boolean addDefaultButton) {
+    public BooleanParam(String name, boolean defaultValue, RandomizePolicy randomizePolicy, AddDefaultButton addDefaultButton) {
         super(name, randomizePolicy);
         this.defaultValue = defaultValue;
         currentValue = defaultValue;

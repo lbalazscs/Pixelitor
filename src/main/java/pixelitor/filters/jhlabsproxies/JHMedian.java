@@ -25,19 +25,14 @@ import java.awt.image.BufferedImage;
  * 3x3 Median Filter based on the JHLabs MedianFilter
  */
 public class JHMedian extends Filter {
-
-    private MedianFilter filter;
+    private final MedianFilter filter;
 
     public JHMedian() {
-        super("3x3 Median Filter");
+        filter = new MedianFilter();
     }
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new MedianFilter();
-        }
-
         dest = filter.filter(src, dest);
         return dest;
     }

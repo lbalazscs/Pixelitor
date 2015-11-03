@@ -160,7 +160,7 @@ public class Pixelitor {
     }
 
     private static void startFilter(Filter filter) {
-        filter.actionPerformed(null);
+        filter.execute();
     }
 
     private static void addNewImage() {

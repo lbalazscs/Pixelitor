@@ -17,7 +17,6 @@
 
 package pixelitor.filters;
 
-import pixelitor.history.History;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -35,7 +34,7 @@ import static java.util.Comparator.comparing;
  * An utility class for managing filters
  */
 public class FilterUtils {
-    private static final List<Filter> allFilters = new ArrayList<>();
+    private static final List<FilterAction> allFilters = new ArrayList<>();
     private static Filter lastExecutedFilter = null;
 
     /**
@@ -45,48 +44,38 @@ public class FilterUtils {
     }
 
     // it returns an array because JComboBox does not accept Lists as constructor arguments
-    public static Filter[] getAllFiltersSorted() {
-        Filter[] filters = allFilters.toArray(new Filter[allFilters.size()]);
-        Arrays.sort(filters, comparing(Filter::getName));
+    public static FilterAction[] getAllFiltersSorted() {
+        FilterAction[] filters = allFilters.toArray(new FilterAction[allFilters.size()]);
+        Arrays.sort(filters, comparing(FilterAction::getName));
         return filters;
     }
 
-    public static FilterWithParametrizedGUI[] getAnimationFiltersSorted() {
-        Predicate<FilterWithParametrizedGUI> canBeAnimated = fpg -> fpg.getParamSet().canBeAnimated();
-        Predicate<FilterWithParametrizedGUI> notExcludedFromAnimation = fpg -> !fpg.excludeFromAnimation();
-        Predicate<FilterWithParametrizedGUI> checkFadeInclusion = fpg -> {
-            // include Fade only if there is something to fade
-            if (fpg instanceof Fade) {
-                return History.canFade();
-            }
-            return true;
-        };
-
-        List<FilterWithParametrizedGUI> animFilters = allFilters.stream()
-                .filter(filter -> filter instanceof FilterWithParametrizedGUI)
-                .map(filter -> (FilterWithParametrizedGUI) filter) // cast for further filtering
-                .filter(canBeAnimated
-                        .and(notExcludedFromAnimation)
-                        .and(checkFadeInclusion))
-                .sorted(comparing(Filter::getListName))
+    public static FilterAction[] getAnimationFiltersSorted() {
+        List<FilterAction> animFilters = allFilters.stream()
+                .filter(FilterAction::isAnimationFilter)
+                .sorted(comparing(FilterAction::getListName))
                 .collect(Collectors.toList());
 
-        FilterWithParametrizedGUI[] asArray = animFilters.toArray(new FilterWithParametrizedGUI[animFilters.size()]);
+        FilterAction[] asArray = animFilters.toArray(new FilterAction[animFilters.size()]);
         return asArray;
     }
 
     public static Filter getRandomFilter(Predicate<Filter> conditions) {
-        Filter filter;
+        FilterAction filterAction;
         do {
             // try a random filter until all conditions are true
-            filter = allFilters.get((int) (Math.random() * allFilters.size()));
-        } while (!conditions.test(filter));
+            filterAction = allFilters.get((int) (Math.random() * allFilters.size()));
+        } while (!conditions.test(filterAction.getFilter()));
 
-        return filter;
+        return filterAction.getFilter();
     }
 
     public static Filter[] getFiltersShuffled(Predicate<Filter> predicate) {
-        Filter[] filters = allFilters.stream().filter(predicate).toArray(Filter[]::new);
+        // used only in test code, no problem if all filters are instantiated
+        Filter[] filters = allFilters.stream()
+                .map(FilterAction::getFilter)
+                .filter(predicate).toArray(Filter[]::new);
+
         Collections.shuffle(Arrays.asList(filters));
         return filters;
     }
@@ -120,9 +109,18 @@ public class FilterUtils {
         return dest;
     }
 
-    public static void addFilter(Filter filter) {
-        if (!(filter instanceof Brick)) {
-            allFilters.add(filter);
+    public static void addFilter(FilterAction filter) {
+        allFilters.add(filter);
+    }
+
+    public static void createAllFilters() {
+        long startTime = System.nanoTime();
+
+        for (FilterAction filterAction : allFilters) {
+            filterAction.getFilter();
         }
+
+        double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
+        System.out.println(String.format("FilterUtils::createAllFilters: estimatedSeconds = '%.2f'", estimatedSeconds));
     }
 }

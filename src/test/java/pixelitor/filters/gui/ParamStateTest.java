@@ -45,11 +45,11 @@ public class ParamStateTest {
         FilterParam angleParamStart = new AngleParam("AngleParam", 0);
         FilterParam angleParamEnd = new AngleParam("AngleParam", 1);
 
-        FilterParam rangeParamStart = new RangeParam("RangeParam", 0, 100, 10);
+        FilterParam rangeParamStart = new RangeParam("RangeParam", 0, 10, 100);
         FilterParam rangeParamEnd = new RangeParam("RangeParam", 0, 100, 100);
 
-        FilterParam groupedRangeParamStart = new GroupedRangeParam("GroupedRangeParam", 0, 200, 0);
-        FilterParam groupedRangeParamEnd = new GroupedRangeParam("GroupedRangeParam", 0, 200, 0);
+        FilterParam groupedRangeParamStart = new GroupedRangeParam("GroupedRangeParam", 0, 0, 200);
+        FilterParam groupedRangeParamEnd = new GroupedRangeParam("GroupedRangeParam", 0, 0, 200);
 
         FilterParam gradientParamStart = new GradientParam("GradientParam", Color.BLACK, Color.GREEN);
         FilterParam gradientParamEnd = new GradientParam("GradientParam", BLUE, RED);

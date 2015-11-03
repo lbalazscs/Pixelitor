@@ -23,6 +23,7 @@ import pixelitor.filters.Invert;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -30,15 +31,15 @@ import java.awt.image.BufferedImage;
  * Difference of Gaussians based on the JHLabs DoGFilter
  */
 public class JHDifferenceOfGaussians extends FilterWithParametrizedGUI {
-    private final RangeParam radius1 = new RangeParam("Radius 1", 0, 10, 0);
-    private final RangeParam radius2 = new RangeParam("Radius 2", 0, 10, 4);
+    private final RangeParam radius1 = new RangeParam("Radius 1", 0, 0, 10);
+    private final RangeParam radius2 = new RangeParam("Radius 2", 0, 4, 10);
     private final BooleanParam normalize = new BooleanParam("Maximize Contrast", true);
     private final BooleanParam invert = new BooleanParam("Invert", false);
 
     private DoGFilter filter;
 
     public JHDifferenceOfGaussians() {
-        super("Difference of Gaussians", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 radius1.adjustRangeToImageSize(0.01),
                 radius2.adjustRangeToImageSize(0.01),

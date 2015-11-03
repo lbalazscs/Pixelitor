@@ -21,6 +21,7 @@ import pd.CannyEdgeDetector;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.MemoryInfo;
 import pixelitor.utils.Messages;
 
@@ -31,14 +32,14 @@ import java.awt.image.BufferedImage;
  * based on CannyEdgeDetector by Tom Gibara - http://www.tomgibara.com/computer-vision/canny-edge-detector
  */
 public class Canny extends FilterWithParametrizedGUI {
-    private final RangeParam lowThreshold = new RangeParam("Low Threshold", 1, 1000, 250);
-    private final RangeParam highThreshold = new RangeParam("High Threshold", 1, 1000, 750);
-    private final RangeParam gaussianKernelWidth = new RangeParam("Gaussian Kernel Width", 2, 50, 16);
-    private final RangeParam gaussianKernelRadius = new RangeParam("Gaussian Kernel Radius", 1, 10, 2);
+    private final RangeParam lowThreshold = new RangeParam("Low Threshold", 1, 250, 1000);
+    private final RangeParam highThreshold = new RangeParam("High Threshold", 1, 750, 1000);
+    private final RangeParam gaussianKernelWidth = new RangeParam("Gaussian Kernel Width", 2, 16, 50);
+    private final RangeParam gaussianKernelRadius = new RangeParam("Gaussian Kernel Radius", 1, 2, 10);
     private final BooleanParam contrastNormalized = new BooleanParam("Contrast Normalized", false);
 
     public Canny() {
-        super("Canny Edge Detector", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 lowThreshold,
                 highThreshold,

@@ -7,7 +7,6 @@ import java.awt.image.BufferedImage;
  */
 public class NoOpFilter extends Filter {
     public NoOpFilter() {
-        super("NoOp");
     }
 
     @Override

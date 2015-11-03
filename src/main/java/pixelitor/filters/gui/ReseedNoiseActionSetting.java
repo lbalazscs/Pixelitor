@@ -24,15 +24,15 @@ import java.awt.event.ActionListener;
 /**
  * An ActionParam that deals with reseeding some randomness
  */
-public class ReseedNoiseFilterAction extends FilterAction {
+public class ReseedNoiseActionSetting extends ActionSetting {
     // the first group of constructors is called if
     // Noise.reseed() does the reseed...
 
-    public ReseedNoiseFilterAction() {
+    public ReseedNoiseActionSetting() {
         this("Reseed");
     }
 
-    public ReseedNoiseFilterAction(String name) {
+    public ReseedNoiseActionSetting(String name) {
         super(name, e -> Noise.reseed(), "<html>Reinitialize the randomness.<br>Has effect only if some randomness is enabled in the settings.");
         setIgnoreFinalAnimationSettingMode(false);
     }
@@ -40,15 +40,15 @@ public class ReseedNoiseFilterAction extends FilterAction {
     // ... and the second group of constructors is called if
     // the given ActionListener does the reseed
 
-    public ReseedNoiseFilterAction(ActionListener actionListener) {
+    public ReseedNoiseActionSetting(ActionListener actionListener) {
         this("Reseed", actionListener);
     }
 
-    public ReseedNoiseFilterAction(String name, ActionListener actionListener) {
+    public ReseedNoiseActionSetting(String name, ActionListener actionListener) {
         this(name, "Reinitialize the randomness", actionListener);
     }
 
-    public ReseedNoiseFilterAction(String name, String toolTipText, ActionListener actionListener) {
+    public ReseedNoiseActionSetting(String name, String toolTipText, ActionListener actionListener) {
         super(name, actionListener, toolTipText);
         setIgnoreFinalAnimationSettingMode(false);
     }

@@ -18,6 +18,7 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.levels.RGBLookup;
 import pixelitor.filters.lookup.FastLookupOp;
 
@@ -29,10 +30,10 @@ import java.awt.image.ShortLookupTable;
  * Posterize
  */
 public class Posterize extends FilterWithParametrizedGUI {
-    private final RangeParam levels = new RangeParam("Levels", 2, 255, 2);
+    private final RangeParam levels = new RangeParam("Levels", 2, 2, 255);
 
     public Posterize() {
-        super("Posterize", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(levels));
     }
 

@@ -20,6 +20,7 @@ import com.jhlabs.image.GlowFilter;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -27,13 +28,13 @@ import java.awt.image.BufferedImage;
  * Glow based on the JHLabs GlowFilter
  */
 public class JHGlow extends FilterWithParametrizedGUI {
-    private final RangeParam amount = new RangeParam("Amount", 0, 100, 15);
-    private final RangeParam softness = new RangeParam("Softness (Blur Radius)", 0, 100, 20);
+    private final RangeParam amount = new RangeParam("Amount", 0, 15, 100);
+    private final RangeParam softness = new RangeParam("Softness (Blur Radius)", 0, 20, 100);
 
     private GlowFilter filter;
 
     public JHGlow() {
-        super("Glow", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 amount,
                 softness

@@ -22,6 +22,7 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -31,19 +32,20 @@ import java.awt.image.BufferedImage;
 public class JHWaterRipple extends FilterWithParametrizedGUI {
     private final ImagePositionParam center = new ImagePositionParam("Center");
 
-    private final RangeParam radius = new RangeParam("Radius", 1, 999, 300);
-    private final RangeParam wavelength = new RangeParam("Wavelength", 1, 250, 25);
-    private final RangeParam amplitude = new RangeParam("Amplitude", 1, 100, 50);
-    private final RangeParam phase = new RangeParam("Phase (Time)", 0, 360, 0);
+    private final RangeParam radius = new RangeParam("Radius", 1, 300, 999);
+    private final RangeParam wavelength = new RangeParam("Wavelength", 1, 25, 250);
+    private final RangeParam amplitude = new RangeParam("Amplitude", 1, 50, 100);
+    private final RangeParam phase = new RangeParam("Phase (Time)", 0, 0, 360);
 
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
     private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
 
-
     private WaterFilter filter;
 
     public JHWaterRipple() {
-        super("Water Ripple", true, true);
+        super(ShowOriginal.YES);
+        showAffectedArea();
+
         setParamSet(new ParamSet(
                 center,
                 radius.adjustRangeToImageSize(1.0),

@@ -50,7 +50,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     private double value;
 
     private boolean adjusting;
-    private final boolean addDefaultButtons;
+    private final AddDefaultButton addDefaultButton;
     private final SliderSpinner.TextPosition textPosition;
 
     private ChangeEvent changeEvent = null;
@@ -58,15 +58,15 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     private boolean adjustMaxAccordingToImage = false;
     private double maxToImageSizeRatio;
 
-    public RangeParam(String name, int minValue, int maxValue, int defaultValue) {
-        this(name, minValue, maxValue, defaultValue, true, BORDER);
+    public RangeParam(String name, int minValue, int defaultValue, int maxValue) {
+        this(name, minValue, defaultValue, maxValue, AddDefaultButton.YES, BORDER);
     }
 
-    public RangeParam(String name, int minValue, int maxValue, int defaultValue, boolean addDefaultButtons, SliderSpinner.TextPosition position) {
-        this(name, minValue, maxValue, defaultValue, addDefaultButtons, position, ALLOW_RANDOMIZE);
+    public RangeParam(String name, int minValue, int defaultValue, int maxValue, AddDefaultButton addDefaultButton, SliderSpinner.TextPosition position) {
+        this(name, minValue, defaultValue, maxValue, addDefaultButton, position, ALLOW_RANDOMIZE);
     }
 
-    public RangeParam(String name, int minValue, int maxValue, int defaultValue, boolean addDefaultButtons, SliderSpinner.TextPosition position, RandomizePolicy randomizePolicy) {
+    public RangeParam(String name, int minValue, int defaultValue, int maxValue, AddDefaultButton addDefaultButton, SliderSpinner.TextPosition position, RandomizePolicy randomizePolicy) {
         super(name, randomizePolicy);
 
         assert minValue < maxValue : name + ": minValue (" + minValue + ") >= maxValue (" + maxValue + ')';
@@ -77,13 +77,13 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         this.maxValue = maxValue;
         this.defaultValue = defaultValue;
         this.value = defaultValue;
-        this.addDefaultButtons = addDefaultButtons;
+        this.addDefaultButton = addDefaultButton;
         this.textPosition = position;
     }
 
     @Override
     public JComponent createGUI() {
-        SliderSpinner sliderSpinner = new SliderSpinner(this, textPosition, addDefaultButtons);
+        SliderSpinner sliderSpinner = new SliderSpinner(this, textPosition, addDefaultButton);
         paramGUI = sliderSpinner;
         paramGUI.setEnabled(shouldBeEnabled());
         return sliderSpinner;

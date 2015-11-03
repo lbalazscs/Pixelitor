@@ -40,8 +40,8 @@ public class ImagePositionPanel extends JPanel implements ParamGUI {
     public ImagePositionPanel(ImagePositionParam model, int defaultX, int defaultY) {
         this.model = model;
 
-        xSliderModel = new RangeParam("Horizontal Position (%)", 0, 100, defaultX, true, NORTH);
-        ySliderModel = new RangeParam("Vertical Position (%)", 0, 100, defaultY, true, NORTH);
+        xSliderModel = new RangeParam("Horizontal Position (%)", 0, defaultX, 100, AddDefaultButton.YES, NORTH);
+        ySliderModel = new RangeParam("Vertical Position (%)", 0, defaultY, 100, AddDefaultButton.YES, NORTH);
 
         setBorder(BorderFactory.createTitledBorder(model.getName()));
         setLayout(new BorderLayout(10, 0));
@@ -52,9 +52,9 @@ public class ImagePositionPanel extends JPanel implements ParamGUI {
 
         // add the two sliders
         Box verticalBox = Box.createVerticalBox();
-        xSlider = new SliderSpinner(xSliderModel, NORTH, true);
+        xSlider = new SliderSpinner(xSliderModel, NORTH, AddDefaultButton.YES);
         verticalBox.add(xSlider);
-        ySlider = new SliderSpinner(ySliderModel, NORTH, true);
+        ySlider = new SliderSpinner(ySliderModel, NORTH, AddDefaultButton.YES);
         verticalBox.add(ySlider);
         add(verticalBox, BorderLayout.CENTER);
 

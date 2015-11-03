@@ -20,6 +20,7 @@ package pixelitor.utils;
 import pixelitor.Build;
 import pixelitor.ChangeReason;
 import pixelitor.filters.Filter;
+import pixelitor.filters.FilterAction;
 import pixelitor.filters.FilterUtils;
 import pixelitor.filters.gui.FilterWithGUI;
 
@@ -35,7 +36,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 public class PerformanceTestingDialog extends JDialog implements ActionListener, PropertyChangeListener {
-    private final JComboBox<Filter> opSelector;
+    private final JComboBox<FilterAction> opSelector;
     private final JProgressBar progressBar;
     private final JButton startButton;
     private final JButton stopButton;
@@ -58,7 +59,7 @@ public class PerformanceTestingDialog extends JDialog implements ActionListener,
             Filter op = (Filter) opSelector.getSelectedItem();
             if (op instanceof FilterWithGUI) {
                 FilterWithGUI dialogOp = (FilterWithGUI) op;
-                dialogOp.actionPerformed(null);
+                dialogOp.execute();
             }
         });
         northPanel.add(new JLabel("Select op: "));
@@ -192,7 +193,7 @@ public class PerformanceTestingDialog extends JDialog implements ActionListener,
 
                 if (isCancelled()) {
                     totalTime = (System.nanoTime() - startTime) / 1000000;
-                    String results = getReport(op.getMenuName(), (i + 1), totalTime, shortestTime);
+                    String results = getReport(op.getName(), (i + 1), totalTime, shortestTime);
                     showResults(results);
 
                     Build.CURRENT.setPerformanceTest(false);
@@ -202,7 +203,7 @@ public class PerformanceTestingDialog extends JDialog implements ActionListener,
             }
 
             totalTime = (System.nanoTime() - startTime) / 1000000;
-            String results = getReport(op.getMenuName(), executions, totalTime, shortestTime);
+            String results = getReport(op.getName(), executions, totalTime, shortestTime);
             showResults(results);
 
             Build.CURRENT.setPerformanceTest(false);

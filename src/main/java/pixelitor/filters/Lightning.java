@@ -20,12 +20,13 @@ package pixelitor.filters;
 import com.jhlabs.composite.DifferenceComposite;
 import com.jhlabs.composite.ScreenComposite;
 import com.jhlabs.image.PolarFilter;
+import pixelitor.filters.gui.ActionSetting;
 import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.FilterAction;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
+import pixelitor.filters.gui.ReseedNoiseActionSetting;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.lookup.FastLookupOp;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
@@ -46,18 +47,18 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
  * Lightning
  */
 public class Lightning extends FilterWithParametrizedGUI {
-    private final RangeParam numberOfBolts = new RangeParam("Number of Bolts", 1, 20, 8);
+    private final RangeParam numberOfBolts = new RangeParam("Number of Bolts", 1, 8, 20);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final ColorParam colorParam = new ColorParam("Color:", WHITE, NO_OPACITY);
-    private final RangeParam boltExpansion = new RangeParam("Bolt Expansion", 1, 255, 70);
+    private final RangeParam boltExpansion = new RangeParam("Bolt Expansion", 1, 70, 255);
 
     @SuppressWarnings("FieldCanBeLocal")
-    private final FilterAction reseedAction = new ReseedNoiseFilterAction(e -> {
+    private final ActionSetting reseedAction = new ReseedNoiseActionSetting(e -> {
         Clouds.reseed();
     });
 
     public Lightning() {
-        super("Lightning", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 center,
                 numberOfBolts,

@@ -22,6 +22,7 @@ import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -34,9 +35,9 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
  * Stamp based on the JHLabs StampFilter
  */
 public class JHStamp extends FilterWithParametrizedGUI {
-    private final RangeParam lightDarkBalance = new RangeParam("Light/Dark Balance (%)", 0, 100, 50);
-    private final RangeParam smoothness = new RangeParam("Smoothness", 0, 50, 25);
-    private final RangeParam soften = new RangeParam("Soften", 0, 100, 3);
+    private final RangeParam lightDarkBalance = new RangeParam("Light/Dark Balance (%)", 0, 50, 100);
+    private final RangeParam smoothness = new RangeParam("Smoothness", 0, 25, 50);
+    private final RangeParam soften = new RangeParam("Soften", 0, 3, 100);
     private final ColorParam darkColor = new ColorParam("Dark Color", BLACK, USER_ONLY_OPACITY);
     private final ColorParam brightColor = new ColorParam("Bright Color", WHITE, USER_ONLY_OPACITY);
 
@@ -52,7 +53,7 @@ public class JHStamp extends FilterWithParametrizedGUI {
     private StampFilter filter;
 
     public JHStamp() {
-        super("Stamp", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 lightDarkBalance,
                 smoothness.adjustRangeToImageSize(0.05),

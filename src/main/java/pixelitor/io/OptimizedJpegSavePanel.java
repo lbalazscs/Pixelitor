@@ -17,6 +17,7 @@
 
 package pixelitor.io;
 
+import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.tools.HandToolSupport;
 import pixelitor.utils.Dialogs;
@@ -99,9 +100,9 @@ public class OptimizedJpegSavePanel extends JPanel {
     }
 
     private JPanel createControlsPanel() {
-        qualityParam = new RangeParam("JPEG Quality", 1, 100, 60);
+        qualityParam = new RangeParam("JPEG Quality", 1, 60, 100);
         qualityParam.setAdjustmentListener(this::updateAfterPreview);
-        SliderSpinner qualitySpinner = new SliderSpinner(qualityParam, WEST, false);
+        SliderSpinner qualitySpinner = new SliderSpinner(qualityParam, WEST, AddDefaultButton.NO);
         JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         southPanel.add(qualitySpinner);
         sizeLabel = new JLabel();

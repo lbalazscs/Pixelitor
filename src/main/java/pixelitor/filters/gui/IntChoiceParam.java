@@ -31,7 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import static pixelitor.filters.gui.FilterGUIComponent.EnabledReason.APP_LOGIC;
+import static pixelitor.filters.gui.FilterSetting.EnabledReason.APP_LOGIC;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**

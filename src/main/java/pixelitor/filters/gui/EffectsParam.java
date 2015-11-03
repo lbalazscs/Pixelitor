@@ -44,9 +44,11 @@ public class EffectsParam extends AbstractFilterParam {
     }
 
     public AreaEffects getEffects() {
-//        NeonBorderEffect effect = new NeonBorderEffect(Color.RED, Color.WHITE, 10, 1.0f);
-//        AreaEffects retVal = new AreaEffects();
-//        retVal.setNeonBorderEffect(effect);
+        // if a GUI filter is executing without a GUI
+        // (for example in a robot test), the panel needs to be created here
+        if (effectsPanel == null) {
+            effectsPanel = new EffectsPanel(adjustmentListener, null);
+        }
 
         effectsPanel.updateEffectsFromGUI();
         return effectsPanel.getEffects();
@@ -89,7 +91,7 @@ public class EffectsParam extends AbstractFilterParam {
 
     @Override
     public void reset(boolean triggerAction) {
-        if(effectsPanel != null) {
+        if (effectsPanel != null) {
             effectsPanel.reset(triggerAction);
         }
     }

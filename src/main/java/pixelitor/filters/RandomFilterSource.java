@@ -73,7 +73,7 @@ public class RandomFilterSource {
                 (filter != lastFilter
                         && (!(filter instanceof Fade))
                         && (!(filter instanceof RandomFilter))
-                        && (!(filter instanceof RepeatLast))));
+                        ));
 
         if (lastFilter != null) { // not the first call
             previousIndex++;

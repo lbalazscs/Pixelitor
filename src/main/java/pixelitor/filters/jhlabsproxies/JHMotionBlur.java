@@ -20,6 +20,7 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.MotionBlur;
 import com.jhlabs.image.MotionBlurFilter;
 import com.jhlabs.image.MotionBlurOp;
+import pixelitor.filters.FilterAction;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
@@ -27,6 +28,7 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -40,9 +42,9 @@ import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
  */
 public class JHMotionBlur extends FilterWithParametrizedGUI {
     private final AngleParam angle = new AngleParam("Direction", 0);
-    private final RangeParam distance = new RangeParam("Distance", 0, 200, 0);
-    private final RangeParam rotation = new RangeParam("Spin Blur Amount (Degrees)", -45, 45, 0);
-    private final RangeParam zoom = new RangeParam("Zoom Blur Amount (%)", 0, 200, 0);
+    private final RangeParam distance = new RangeParam("Distance", 0, 0, 200);
+    private final RangeParam rotation = new RangeParam("Spin Blur Amount (Degrees)", -45, 0, 45);
+    private final RangeParam zoom = new RangeParam("Zoom Blur Amount (%)", 0, 0, 200);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final BooleanParam hpSharpening = BooleanParam.createParamForHPSharpening();
 
@@ -85,13 +87,17 @@ public class JHMotionBlur extends FilterWithParametrizedGUI {
             public String toString() {
                 return "Spin and Zoom Blur";
             }
+        };
+
+        public FilterAction createFilterAction() {
+            return new FilterAction(toString(), () -> new JHMotionBlur(this));
         }
 
         // the ParamSet cannot be created here, because the referenced fields belong to the filter...
     }
 
     public JHMotionBlur(Mode mode) {
-        super(mode.toString(), true, false);
+        super(ShowOriginal.YES);
         this.mode = mode;
 
         if(mode == MOTION_BLUR) {

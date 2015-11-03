@@ -26,11 +26,11 @@ import java.awt.FlowLayout;
 public class ChannelMixerAdjustments extends ParametrizedAdjustPanel {
 
     public ChannelMixerAdjustments(FilterWithParametrizedGUI filter, Action[] actions) {
-        super(filter, actions, true);
+        super(filter, actions, ShowOriginal.YES);
     }
 
     @Override
-    protected void setupGUI(ParamSet params, Object otherInfo, boolean addShowOriginal) {
+    protected void setupGUI(ParamSet params, Object otherInfo, ShowOriginal addShowOriginal) {
         Action[] actions = (Action[]) otherInfo;
 
         JPanel leftPanel = new JPanel();

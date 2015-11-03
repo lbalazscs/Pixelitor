@@ -24,6 +24,7 @@ import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.Utils;
@@ -54,21 +55,21 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
  * Photo Collage
  */
 public class PhotoCollage extends FilterWithParametrizedGUI {
-    private final GroupedRangeParam sizeParam = new GroupedRangeParam("Photo Size", 40, 999, 200);
+    private final GroupedRangeParam sizeParam = new GroupedRangeParam("Photo Size", 40, 200, 999);
 
-    private final RangeParam marginSizeParam = new RangeParam("Margin", 0, 20, 5);
-    private final RangeParam imageNumberParam = new RangeParam("Number of Images", 1, 100, 10);
+    private final RangeParam marginSizeParam = new RangeParam("Margin", 0, 5, 20);
+    private final RangeParam imageNumberParam = new RangeParam("Number of Images", 1, 10, 100);
     private final RangeParam randomRotationParam = new RangeParam("Random Rotation Amount (%)", 0, 100, 100);
     private final BooleanParam allowOutsideParam = new BooleanParam("Allow Outside", true);
     private final ColorParam bgColorParam = new ColorParam("Background Color", BLACK, USER_ONLY_OPACITY);
 
-    private final RangeParam shadowOpacityParam = new RangeParam("Shadow Opacity (%)", 0, 100, 80);
+    private final RangeParam shadowOpacityParam = new RangeParam("Shadow Opacity (%)", 0, 80, 100);
     private final AngleParam shadowAngleParam = new AngleParam("Shadow Angle", 0.7);
-    private final RangeParam shadowDistanceParam = new RangeParam("Shadow Distance", 0, 20, 5);
-    private final RangeParam shadowSoftnessParam = new RangeParam("Shadow Softness", 0, 10, 3);
+    private final RangeParam shadowDistanceParam = new RangeParam("Shadow Distance", 0, 5, 20);
+    private final RangeParam shadowSoftnessParam = new RangeParam("Shadow Softness", 0, 3, 10);
 
     public PhotoCollage() {
-        super("Photo Collage", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 imageNumberParam,
                 sizeParam.adjustRangeToImageSize(1.0),

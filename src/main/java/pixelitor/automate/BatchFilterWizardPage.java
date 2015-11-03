@@ -20,6 +20,7 @@ package pixelitor.automate;
 import org.jdesktop.swingx.VerticalLayout;
 import pixelitor.ImageComponents;
 import pixelitor.filters.Filter;
+import pixelitor.filters.FilterAction;
 import pixelitor.filters.FilterUtils;
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.FilterWithGUI;
@@ -30,7 +31,7 @@ import java.awt.FlowLayout;
 public enum BatchFilterWizardPage implements WizardPage {
     SELECT_FILTER_AND_DIRS {
         private OpenSaveDirsPanel openSaveDirsPanel;
-        private JComboBox<Filter> filtersCB;
+        private JComboBox<FilterAction> filtersCB;
 
         @Override
         public String getHeaderText(Wizard wizard) {
@@ -39,7 +40,8 @@ public enum BatchFilterWizardPage implements WizardPage {
 
         @Override
         public WizardPage getNext() {
-            Filter filter = (Filter) filtersCB.getSelectedItem();
+            FilterAction selectedItem = (FilterAction) filtersCB.getSelectedItem();
+            Filter filter = selectedItem.getFilter();
             if (filter instanceof FilterWithGUI) {
                 return FILTER_GUI;
             } else {
@@ -74,7 +76,8 @@ public enum BatchFilterWizardPage implements WizardPage {
 
         @Override
         public void onMovingToTheNext(Wizard wizard) {
-            Filter filter = (Filter) filtersCB.getSelectedItem();
+            FilterAction selectedItem = (FilterAction) filtersCB.getSelectedItem();
+            Filter filter = selectedItem.getFilter();
             BatchFilterConfig config = getConfig(wizard);
             config.setFilter(filter);
             openSaveDirsPanel.saveValues();

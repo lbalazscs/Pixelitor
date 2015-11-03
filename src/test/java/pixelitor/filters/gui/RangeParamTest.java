@@ -26,7 +26,8 @@ import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
 public class RangeParamTest {
     @Test
     public void isIgnoreRandomizeWorking() {
-        RangeParam param = new RangeParam("Test", 0, 1000, 100, true, NONE, IGNORE_RANDOMIZE);
+        RangeParam param = new RangeParam("Test", 0, 100, 1000,
+                AddDefaultButton.YES, NONE, IGNORE_RANDOMIZE);
         for (int i = 0; i < 5; i++) {
             param.randomize();
             assertThat(param.getValue()).isEqualTo(100);
@@ -45,11 +46,11 @@ public class RangeParamTest {
 
     @Test(expected = AssertionError.class)
     public void testInvalidConstructorDefaultSmallerThanMin() {
-        new RangeParam("name", 5, 10, 2);
+        new RangeParam("name", 5, 2, 10);
     }
 
     @Test(expected = AssertionError.class)
     public void testInvalidConstructorDefaultBiggerThanMax() {
-        new RangeParam("name", 5, 10, 15);
+        new RangeParam("name", 5, 15, 10);
     }
 }

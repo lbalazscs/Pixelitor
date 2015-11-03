@@ -19,10 +19,12 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.CausticsFilter;
 import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
+import pixelitor.filters.gui.ReseedNoiseActionSetting;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -36,18 +38,20 @@ import static pixelitor.utils.SliderSpinner.TextPosition.BORDER;
  */
 public class JHCaustics extends FilterWithParametrizedGUI {
     private final ColorParam bgColor = new ColorParam("Background Color", new Color(0, 200, 175), NO_OPACITY);
-    private final RangeParam scale = new RangeParam("Zoom", 1, 500, 100);
-    private final RangeParam brightness = new RangeParam("Brightness", 0, 20, 7);
-    private final RangeParam focus = new RangeParam("Focus", 0, 100, 50);
-    private final RangeParam dispersion = new RangeParam("Dispersion (Color Separation)", 0, 100, 0);
-    private final RangeParam turbulence = new RangeParam("Turbulence", 0, 8, 0);
-    private final RangeParam time = new RangeParam("Time", 0, 999, 0);
-    private final RangeParam samples = new RangeParam("Samples (Quality)", 1, 10, 1, true, BORDER, IGNORE_RANDOMIZE);
+    private final RangeParam scale = new RangeParam("Zoom", 1, 100, 500);
+    private final RangeParam brightness = new RangeParam("Brightness", 0, 7, 20);
+    private final RangeParam focus = new RangeParam("Focus", 0, 50, 100);
+    private final RangeParam dispersion = new RangeParam("Dispersion (Color Separation)", 0, 0, 100);
+    private final RangeParam turbulence = new RangeParam("Turbulence", 0, 0, 8);
+    private final RangeParam time = new RangeParam("Time", 0, 0, 999);
+    private final RangeParam samples = new RangeParam("Samples (Quality)", 1, 1, 10,
+            AddDefaultButton.YES, BORDER, IGNORE_RANDOMIZE);
 
     private CausticsFilter filter;
 
     public JHCaustics() {
-        super("Caustics", false, false);
+        super(ShowOriginal.NO);
+
         setParamSet(new ParamSet(
                 bgColor,
                 scale.adjustRangeToImageSize(0.5),
@@ -57,8 +61,7 @@ public class JHCaustics extends FilterWithParametrizedGUI {
                 focus,
                 dispersion,
                 samples
-        ).withAction(new ReseedNoiseFilterAction()));
-        listNamePrefix = "Render ";
+        ).withAction(new ReseedNoiseActionSetting()));
     }
 
     @Override

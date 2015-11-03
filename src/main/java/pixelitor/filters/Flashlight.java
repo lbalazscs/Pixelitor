@@ -7,6 +7,7 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.BlurredEllipse;
 
 import java.awt.image.BufferedImage;
@@ -16,8 +17,8 @@ import java.awt.image.BufferedImage;
  */
 public class Flashlight extends FilterWithParametrizedGUI {
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 1, 1000, 200, false);
-    private final RangeParam penumbraMultiplier = new RangeParam("Penumbra (Radius %)", 1, 500, 50);
+    private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 1, 200, 1000, false);
+    private final RangeParam penumbraMultiplier = new RangeParam("Penumbra (Radius %)", 1, 50, 500);
     private final IntChoiceParam bg = new IntChoiceParam("Background",
             new IntChoiceParam.Value[]{
                     new IntChoiceParam.Value("Black", Impl.BG_BLACK),
@@ -28,7 +29,7 @@ public class Flashlight extends FilterWithParametrizedGUI {
     private Impl filter;
 
     public Flashlight() {
-        super("Flashlight", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 center,
                 radius.adjustRangeToImageSize(1.0),

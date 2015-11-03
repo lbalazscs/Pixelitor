@@ -32,9 +32,15 @@ public class RandomFilterSourceTest {
     public static void globalInit() {
         for (int i = 'A'; i < 'Z' + 1; i++) {
             char[] charsInFilterName = {(char) i};
+            String filterName = new String(charsInFilterName);
             Filter filter = mock(Filter.class);
-            when(filter.getName()).thenReturn(new String(charsInFilterName));
-            FilterUtils.addFilter(filter);
+            FilterAction filterAction = mock(FilterAction.class);
+
+            when(filterAction.getName()).thenReturn(filterName);
+            when(filter.getName()).thenReturn(filterName);
+            when(filterAction.getFilter()).thenReturn(filter);
+
+            FilterUtils.addFilter(filterAction);
         }
     }
 
@@ -50,7 +56,7 @@ public class RandomFilterSourceTest {
         assertThat(source.getLastFilter()).isNull();
     }
 
-    @Test
+    @Test(timeout=1000)
     public void testAfterOne() {
         Filter one = source.getRandom();
         checkHasNeitherPreviousOrNext();
@@ -60,7 +66,7 @@ public class RandomFilterSourceTest {
         assertThat(one).isEqualTo(lastFilter);
     }
 
-    @Test
+    @Test(timeout=1000)
     public void testAfterTwo() {
         Filter one = source.getRandom();
         Filter two = source.getRandom();
@@ -80,7 +86,7 @@ public class RandomFilterSourceTest {
         checkHasBothPreviousAndNext();
     }
 
-    @Test
+    @Test(timeout=1000)
     public void testMultipleBackForward() {
         Filter one = source.getRandom();
         Filter two = source.getRandom();
@@ -94,7 +100,7 @@ public class RandomFilterSourceTest {
         }
     }
 
-    @Test
+    @Test(timeout=1000)
     public void testGenerateWhenBackInHistory() {
         Filter one = source.getRandom();
         Filter two = source.getRandom();

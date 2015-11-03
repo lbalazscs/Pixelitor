@@ -21,6 +21,7 @@ import com.bric.swing.ColorPicker;
 import com.bric.swing.ColorSwatch;
 import org.jdesktop.swingx.painter.effects.AbstractAreaEffect;
 import pixelitor.PixelitorWindow;
+import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.Resettable;
@@ -63,7 +64,7 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
         setBorder(BorderFactory.createTitledBorder('"' + effectName + "\" Configuration"));
 
         opacityRange = new RangeParam("Width:", 1, 100, 100);
-        SliderSpinner opacitySlider = new SliderSpinner(opacityRange, NONE, false);
+        SliderSpinner opacitySlider = new SliderSpinner(opacityRange, NONE, AddDefaultButton.NO);
 
         enabledCB = new JCheckBox();
         enabledCB.setName("enabledCB");

@@ -20,6 +20,7 @@ import com.jhlabs.image.TransformFilter;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.SliceFilter;
 
 import java.awt.image.BufferedImage;
@@ -28,16 +29,16 @@ import java.awt.image.BufferedImage;
  * Slice based on SliceFilter
  */
 public class Slice extends FilterWithParametrizedGUI {
-    private final RangeParam size = new RangeParam("Size", 0, 100, 6);
-    private final RangeParam offset = new RangeParam("Offset", 0, 100, 10);
-    private final RangeParam shiftH = new RangeParam("Shift Effect Horizontal", 0, 100, 0);
-    private final RangeParam shiftV = new RangeParam("Shift Effect Vertical", 0, 100, 0);
+    private final RangeParam size = new RangeParam("Size", 0, 6, 100);
+    private final RangeParam offset = new RangeParam("Offset", 0, 10, 100);
+    private final RangeParam shiftH = new RangeParam("Shift Effect Horizontal", 0, 0, 100);
+    private final RangeParam shiftV = new RangeParam("Shift Effect Vertical", 0, 0, 100);
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
 
     private SliceFilter filter;
 
     public Slice() {
-        super("Slice", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 size.adjustRangeToImageSize(0.25),
                 offset.adjustRangeToImageSize(0.25),

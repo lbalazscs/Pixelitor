@@ -20,6 +20,7 @@ package pixelitor.filters;
 import pixelitor.ImageComponents;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.history.History;
 import pixelitor.utils.ImageUtils;
 
@@ -33,13 +34,13 @@ public class Fade extends FilterWithParametrizedGUI {
     private static final int FADE_MAX = 100;
     private static final int FADE_INIT = 100;
 
-    private final RangeParam opacityParam = new RangeParam("Opacity (%)", FADE_MIN, FADE_MAX,
-            FADE_INIT);
+    private final RangeParam opacityParam = new RangeParam("Opacity (%)", FADE_MIN, FADE_INIT, FADE_MAX
+    );
 //    private BlendingModeParam blendingModeParam = new BlendingModeParam(BlendingMode.values());
 
 
     public Fade() {
-        super("Fade", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 opacityParam
 //                blendingModeParam

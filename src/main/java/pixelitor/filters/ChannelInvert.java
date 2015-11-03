@@ -18,6 +18,7 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
@@ -74,7 +75,7 @@ public class ChannelInvert extends FilterWithParametrizedGUI {
     private final IntChoiceParam invertTypeSelector = new IntChoiceParam("Invert Channel", invertChoices);
 
     public ChannelInvert() {
-        super("Channel Invert", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(invertTypeSelector));
     }
 

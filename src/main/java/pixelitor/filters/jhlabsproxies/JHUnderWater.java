@@ -23,7 +23,8 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
+import pixelitor.filters.gui.ReseedNoiseActionSetting;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -31,11 +32,11 @@ import java.awt.image.BufferedImage;
  * UnderWater filter based on JHLabs SwimFilter
  */
 public class JHUnderWater extends FilterWithParametrizedGUI {
-    private final RangeParam amount = new RangeParam("Amount", 0, 100, 50);
-    private final RangeParam scale = new RangeParam("Scale", 1, 300, 150);
-    private final RangeParam stretch = new RangeParam("Stretch", 1, 50, 1);
+    private final RangeParam amount = new RangeParam("Amount", 0, 50, 100);
+    private final RangeParam scale = new RangeParam("Scale", 1, 150, 300);
+    private final RangeParam stretch = new RangeParam("Stretch", 1, 1, 50);
 //    private RangeParam turbulenceParam = new RangeParam("Turbulence", 0, 100, 0);
-private final RangeParam time = new RangeParam("Time", 100, 1000, 100);
+private final RangeParam time = new RangeParam("Time", 100, 100, 1000);
     private final AngleParam angle = new AngleParam("Angle", 0);
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices(true);
     private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
@@ -43,7 +44,7 @@ private final RangeParam time = new RangeParam("Time", 100, 1000, 100);
     private SwimFilter filter;
 
     public JHUnderWater() {
-        super("Underwater", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 amount.adjustRangeToImageSize(0.1),
                 scale.adjustRangeToImageSize(0.3),
@@ -53,7 +54,7 @@ private final RangeParam time = new RangeParam("Time", 100, 1000, 100);
                 time,
                 edgeAction,
                 interpolation
-        ).withAction(new ReseedNoiseFilterAction()));
+        ).withAction(new ReseedNoiseActionSetting()));
     }
 
     @Override

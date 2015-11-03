@@ -31,7 +31,7 @@ public class BooleanSelector extends JPanel implements ParamGUI {
     private final JCheckBox checkBox;
     private DefaultButton defaultButton;
 
-    public BooleanSelector(BooleanParam model, boolean addDefaultButton) {
+    public BooleanSelector(BooleanParam model, AddDefaultButton addDefaultButton) {
         this.model = model;
         setLayout(new FlowLayout(FlowLayout.LEFT));
         checkBox = new JCheckBox();
@@ -40,7 +40,7 @@ public class BooleanSelector extends JPanel implements ParamGUI {
 
         checkBox.addActionListener(e -> model.setValue(checkBox.isSelected(), UpdateGUI.NO, true));
 
-        if (addDefaultButton) {
+        if (addDefaultButton.isYes()) {
             add(Box.createHorizontalStrut(50));
             defaultButton = new DefaultButton(model);
             add(defaultButton);

@@ -17,7 +17,7 @@
 package pixelitor.menus.view;
 
 import pixelitor.ImageComponents;
-import pixelitor.menus.MenuBar;
+import pixelitor.menus.PMenu;
 import pixelitor.tools.AutoZoomButtons;
 
 import javax.swing.*;
@@ -28,7 +28,7 @@ import java.awt.event.KeyEvent;
 /**
  * The zoom menu
  */
-public class ZoomMenu extends JMenu {
+public class ZoomMenu extends PMenu {
     private static final ButtonGroup radioGroup = new ButtonGroup();
 
     private static final String ACTION_MAP_KEY_INCREASE = "increase";
@@ -58,7 +58,7 @@ public class ZoomMenu extends JMenu {
                 ImageComponents.increaseZoomForActiveIC();
             }
         };
-        MenuBar.createMenuItem(increaseAction, this, CTRL_PLUS);
+        addActionWithKey(increaseAction, CTRL_PLUS);
 
         Action decreaseAction = new AbstractAction("Zoom Out") {
             @Override
@@ -66,11 +66,11 @@ public class ZoomMenu extends JMenu {
                 ImageComponents.decreaseZoomForActiveIC();
             }
         };
-        MenuBar.createMenuItem(decreaseAction, this, CTRL_MINUS);
+        addActionWithKey(decreaseAction, CTRL_MINUS);
 
-        MenuBar.createMenuItem(AutoZoomButtons.ACTUAL_PIXELS_ACTION, this, CTRL_0);
+        addActionWithKey(AutoZoomButtons.ACTUAL_PIXELS_ACTION, CTRL_0);
 
-        MenuBar.createMenuItem(AutoZoomButtons.FIT_SCREEN_ACTION, this, CTRL_ALT_0);
+        addActionWithKey(AutoZoomButtons.FIT_SCREEN_ACTION, CTRL_ALT_0);
 
         addSeparator();
 

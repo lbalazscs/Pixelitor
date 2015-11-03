@@ -20,13 +20,14 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.CrystallizeFilter;
 import com.jhlabs.math.Noise;
 import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.gui.ActionSetting;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.FilterAction;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
+import pixelitor.filters.gui.ReseedNoiseActionSetting;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.CachedFloatRandom;
 
 import java.awt.image.BufferedImage;
@@ -38,19 +39,19 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
  * Crystallize based on the JHLabs CrystallizeFilter
  */
 public class JHCrystallize extends FilterWithParametrizedGUI {
-    private final RangeParam edgeThickness = new RangeParam("Edge Thickness", 0, 100, 40);
-    private final RangeParam size = new RangeParam("Size", 1, 200, 20);
+    private final RangeParam edgeThickness = new RangeParam("Edge Thickness", 0, 40, 100);
+    private final RangeParam size = new RangeParam("Size", 1, 20, 200);
     private final ColorParam edgeColor = new ColorParam("Edge Color", BLACK, FREE_OPACITY);
     private final BooleanParam fadeEdges = new BooleanParam("Fade Edges", false);
 
-    private final RangeParam randomness = new RangeParam("Shape Randomness (%)", 0, 100, 0);
+    private final RangeParam randomness = new RangeParam("Shape Randomness (%)", 0, 0, 100);
     private final IntChoiceParam gridType = IntChoiceParam.getGridTypeChoices("Shape", randomness);
 
     private CrystallizeFilter filter;
 
     public JHCrystallize() {
-        super("Crystallize", true, false);
-        FilterAction reseedAction = new ReseedNoiseFilterAction(e -> {
+        super(ShowOriginal.YES);
+        ActionSetting reseedAction = new ReseedNoiseActionSetting(e -> {
             CachedFloatRandom.reseedCache();
             Noise.reseed();
         });

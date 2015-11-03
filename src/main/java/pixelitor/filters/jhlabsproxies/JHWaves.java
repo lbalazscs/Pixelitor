@@ -22,7 +22,8 @@ import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
+import pixelitor.filters.gui.ReseedNoiseActionSetting;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -30,9 +31,9 @@ import java.awt.image.BufferedImage;
  * Ripple based on the JHLabs RippleFilter
  */
 public class JHWaves extends FilterWithParametrizedGUI {
-    private final GroupedRangeParam wavelengthParam = new GroupedRangeParam("Wavelength", 1, 200, 20);
-    private final GroupedRangeParam amplitudeParam = new GroupedRangeParam("Amplitude", 0, 200, 10);
-    private final GroupedRangeParam phaseParam = new GroupedRangeParam("Phase (Time)", 0, 100, 0, false);
+    private final GroupedRangeParam wavelengthParam = new GroupedRangeParam("Wavelength", 1, 20, 200);
+    private final GroupedRangeParam amplitudeParam = new GroupedRangeParam("Amplitude", 0, 10, 200);
+    private final GroupedRangeParam phaseParam = new GroupedRangeParam("Phase (Time)", 0, 0, 100, false);
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
     private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
     private final IntChoiceParam waveType = IntChoiceParam.getWaveTypeChoices();
@@ -40,7 +41,7 @@ public class JHWaves extends FilterWithParametrizedGUI {
     private RippleFilter filter;
 
     public JHWaves() {
-        super("Waves", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 wavelengthParam.adjustRangeToImageSize(0.2),
                 amplitudeParam.adjustRangeToImageSize(0.2),
@@ -48,7 +49,7 @@ public class JHWaves extends FilterWithParametrizedGUI {
                 phaseParam,
                 edgeAction,
                 interpolation
-        ).withAction(new ReseedNoiseFilterAction("Reseed Noise")));
+        ).withAction(new ReseedNoiseActionSetting("Reseed Noise")));
     }
 
     @Override

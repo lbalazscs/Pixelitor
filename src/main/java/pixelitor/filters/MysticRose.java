@@ -23,6 +23,7 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.gui.StrokeParam;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.utils.ImageUtils;
@@ -55,9 +56,9 @@ public class MysticRose extends FilterWithParametrizedGUI {
     private static final int FG_TRANSPARENT = 7;
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final RangeParam nrPoints = new RangeParam("Number of Points", 3, 42, 10);
-    private final RangeParam radius = new RangeParam("Radius (Height %)", 1, 200, 45);
-    private final RangeParam rotate = new RangeParam("Rotate", 0, 100, 0);
+    private final RangeParam nrPoints = new RangeParam("Number of Points", 3, 10, 42);
+    private final RangeParam radius = new RangeParam("Radius (Height %)", 1, 45, 200);
+    private final RangeParam rotate = new RangeParam("Rotate", 0, 0, 100);
     private final StrokeParam strokeParam = new StrokeParam("Stroke Settings");
     private final EffectsParam effectsParam = new EffectsParam("Effects");
 
@@ -77,7 +78,7 @@ public class MysticRose extends FilterWithParametrizedGUI {
             });
 
     public MysticRose() {
-        super("Mystic Rose", false, false);
+        super(ShowOriginal.NO);
         setParamSet(new ParamSet(
                 nrPoints,
                 rotate,

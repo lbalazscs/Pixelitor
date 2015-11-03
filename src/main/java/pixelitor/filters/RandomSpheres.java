@@ -25,6 +25,7 @@ import pixelitor.filters.gui.ElevationAngleParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.painters.EffectConfiguratorPanel;
 import pixelitor.utils.ReseedSupport;
 
@@ -54,8 +55,8 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
     private static final int TYPE_SPHERES = 1;
     private static final int TYPE_BUBBLES = 2;
 
-    private final RangeParam radius = new RangeParam("Radius", 2, 100, 10);
-    private final RangeParam density = new RangeParam("Density (%)", 1, 200, 50);
+    private final RangeParam radius = new RangeParam("Radius", 2, 10, 100);
+    private final RangeParam density = new RangeParam("Density (%)", 1, 50, 200);
 
     private final IntChoiceParam colorSource = new IntChoiceParam("Colors Source", new IntChoiceParam.Value[]{
             new IntChoiceParam.Value("Sample Image", COLORS_SAMPLE_IMAGE),
@@ -73,7 +74,7 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
     private final RangeParam opacity = new RangeParam("Opacity (%)", 0, 100, 100);
 
     public RandomSpheres() {
-        super("Random Spheres", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 radius.adjustRangeToImageSize(0.1),
                 density,

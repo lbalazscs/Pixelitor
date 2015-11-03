@@ -39,6 +39,7 @@ import org.assertj.swing.fixture.JTextComponentFixture;
 import org.assertj.swing.launcher.ApplicationLauncher;
 import org.fest.util.Files;
 import pixelitor.automate.AutoPaint;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.io.FileChoosers;
 import pixelitor.layers.ImageLayer;
@@ -98,8 +99,6 @@ public class AssertJSwingTest {
     private final Random random = new Random();
 
     enum Randomize {YES, NO}
-
-    enum ShowOriginal {YES, NO}
 
     public static void main(String[] args) {
         initialize();
@@ -805,7 +804,7 @@ public class AssertJSwingTest {
         keyboardUndoRedoUndo();
     }
 
-    private void testFilterWithDialog(String name, Randomize randomize, ShowOriginal showOriginal, String... extraButtonsToClick) {
+    private void testFilterWithDialog(String name, Randomize randomize, ShowOriginal checkShowOriginal, String... extraButtonsToClick) {
         findMenuItemByText(name).click();
         DialogFixture dialog = WindowFinder.findDialog("filterDialog").using(robot);
 
@@ -819,7 +818,7 @@ public class AssertJSwingTest {
             findButtonByText(dialog, "Randomize Settings").click();
         }
 
-        if (showOriginal == ShowOriginal.YES) {
+        if (checkShowOriginal.isYes()) {
             dialog.checkBox("show original").click();
             dialog.checkBox("show original").click();
         }

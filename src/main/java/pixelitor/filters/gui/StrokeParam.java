@@ -17,7 +17,7 @@ import java.awt.Stroke;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 public class StrokeParam extends AbstractFilterParam {
-    private final RangeParam strokeWidthParam = new RangeParam("Stroke Width", 1, 100, 5);
+    private final RangeParam strokeWidthParam = new RangeParam("Stroke Width", 1, 5, 100);
     // controls in the Stroke Settings dialog
     private final EnumParam<BasicStrokeCap> strokeCapParam = new EnumParam<>("", BasicStrokeCap.class);
     private final EnumParam<BasicStrokeJoin> strokeJoinParam = new EnumParam<>("", BasicStrokeJoin.class);

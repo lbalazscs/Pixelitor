@@ -18,11 +18,12 @@
 package pixelitor.filters;
 
 import pixelitor.ThreadPool;
+import pixelitor.filters.gui.ActionSetting;
 import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.FilterAction;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
+import pixelitor.filters.gui.ReseedNoiseActionSetting;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
@@ -47,11 +48,11 @@ public class ValueNoise extends FilterWithParametrizedGUI {
         reseed();
     }
 
-    private final RangeParam scale = new RangeParam("Zoom", 5, 300, 100);
-    private final RangeParam details = new RangeParam("Octaves (Details)", 1, 8, 5);
+    private final RangeParam scale = new RangeParam("Zoom", 5, 100, 300);
+    private final RangeParam details = new RangeParam("Octaves (Details)", 1, 5, 8);
 
     @SuppressWarnings("FieldCanBeLocal")
-    private final FilterAction reseedAction = new ReseedNoiseFilterAction(e -> {
+    private final ActionSetting reseedAction = new ReseedNoiseActionSetting(e -> {
         reseed();
     });
 
@@ -59,14 +60,14 @@ public class ValueNoise extends FilterWithParametrizedGUI {
     private final ColorParam color2 = new ColorParam("Color 2", WHITE, USER_ONLY_OPACITY);
 
     public ValueNoise() {
-        super("Value Noise", false, false);
+        super(ShowOriginal.NO);
+
         setParamSet(new ParamSet(
                 scale.adjustRangeToImageSize(0.3),
                 details,
                 color1,
                 color2
         ).withAction(reseedAction));
-        listNamePrefix = "Render ";
     }
 
     @Override

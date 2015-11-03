@@ -17,6 +17,7 @@
 
 package pixelitor.filters.painters;
 
+import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.SliderSpinner;
@@ -36,8 +37,8 @@ public class SimpleEffectConfiguratorPanel extends EffectConfiguratorPanel {
     public SimpleEffectConfiguratorPanel(String effectName, boolean defaultSelected, Color defaultColor, int defaultWidth) {
         super(effectName, defaultSelected, defaultColor);
 
-        widthRange = new RangeParam("Width:", 1, 100, defaultWidth);
-        widthSlider = new SliderSpinner(widthRange, NONE, false);
+        widthRange = new RangeParam("Width:", 1, defaultWidth, 100);
+        widthSlider = new SliderSpinner(widthRange, NONE, AddDefaultButton.NO);
 
         gbHelper.addLabelWithControl("Width:", widthSlider);
 

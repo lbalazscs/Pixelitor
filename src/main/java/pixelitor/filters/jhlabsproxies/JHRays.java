@@ -24,6 +24,7 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
@@ -36,11 +37,11 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
  */
 public class JHRays extends FilterWithParametrizedGUI {
     private final ImagePositionParam center = new ImagePositionParam("Light Source");
-    private final RangeParam rotation = new RangeParam("Twirl", -90, 90, 0);
-    private final RangeParam length = new RangeParam("Length", 0, 200, 20);
-    private final RangeParam opacity = new RangeParam("Opacity (%)", 0, 100, 80);
-    private final RangeParam strength = new RangeParam("Strength", 0, 500, 200);
-    private final RangeParam threshold = new RangeParam("Threshold (%)", 0, 100, 25);
+    private final RangeParam rotation = new RangeParam("Twirl", -90, 0, 90);
+    private final RangeParam length = new RangeParam("Length", 0, 20, 200);
+    private final RangeParam opacity = new RangeParam("Opacity (%)", 0, 80, 100);
+    private final RangeParam strength = new RangeParam("Strength", 0, 200, 500);
+    private final RangeParam threshold = new RangeParam("Threshold (%)", 0, 25, 100);
     private final BooleanParam raysOnly = new BooleanParam("Rays Only", false, IGNORE_RANDOMIZE);
 
     // setting a ColorMap does not work properly
@@ -48,7 +49,7 @@ public class JHRays extends FilterWithParametrizedGUI {
     private RaysFilter filter;
 
     public JHRays() {
-        super("Rays", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 center,
                 length,

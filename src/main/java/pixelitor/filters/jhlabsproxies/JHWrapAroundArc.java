@@ -23,6 +23,7 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -32,17 +33,17 @@ import java.awt.image.BufferedImage;
 public class JHWrapAroundArc extends FilterWithParametrizedGUI {
     private CircleFilter filter;
 
-    private final RangeParam radius = new RangeParam("Radius", 0, 500, 50);
-    private final RangeParam thickness = new RangeParam("Thickness", 0, 500, 150);
+    private final RangeParam radius = new RangeParam("Radius", 0, 50, 500);
+    private final RangeParam thickness = new RangeParam("Thickness", 0, 150, 500);
     private final AngleParam rotateResult = new AngleParam("Rotate Result", 0);
-    private final RangeParam spread = new RangeParam("Divide Angle", 1, 24, 2);
+    private final RangeParam spread = new RangeParam("Divide Angle", 1, 2, 24);
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
     private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
 
     public JHWrapAroundArc() {
-        super("Wrap Around Arc", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 radius.adjustRangeToImageSize(1.0),
                 thickness.adjustRangeToImageSize(0.5),

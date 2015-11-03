@@ -26,11 +26,6 @@ import java.awt.image.BufferedImage;
  */
 public class Luminosity extends Filter {
 
-    public Luminosity() {
-        super("Luminosity");
-        listNamePrefix = "Extract Channel: ";
-    }
-
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         int[] srcData = ImageUtils.getPixelsAsArray(src);

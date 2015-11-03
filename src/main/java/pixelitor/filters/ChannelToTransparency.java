@@ -21,6 +21,7 @@ import com.jhlabs.image.PointFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.lookup.LuminanceLookup;
 
 import java.awt.image.BufferedImage;
@@ -44,7 +45,7 @@ public class ChannelToTransparency extends FilterWithParametrizedGUI {
     private final BooleanParam invertParam = new BooleanParam("Invert", false);
 
     public ChannelToTransparency() {
-        super("Channel to Transparency", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 channelParam,
                 invertParam

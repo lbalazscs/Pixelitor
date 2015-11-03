@@ -21,6 +21,7 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.CircleToSquareFilter;
 
 import java.awt.image.BufferedImage;
@@ -30,9 +31,9 @@ import java.awt.image.BufferedImage;
  */
 public class CircleToSquare extends FilterWithParametrizedGUI {
     // private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 0, 500, 200);
-    private final RangeParam radius = new RangeParam("Radius", 0, 500, 200);
+    private final RangeParam radius = new RangeParam("Radius", 0, 200, 500);
 
-    private final RangeParam amount = new RangeParam("Amount (%)", -200, 200, 100);
+    private final RangeParam amount = new RangeParam("Amount (%)", -200, 100, 200);
     private final ImagePositionParam center = new ImagePositionParam("Center");
 
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
@@ -41,7 +42,9 @@ public class CircleToSquare extends FilterWithParametrizedGUI {
     private CircleToSquareFilter filter;
 
     public CircleToSquare() {
-        super("Circle to Square", true, true);
+        super(ShowOriginal.YES);
+        showAffectedArea();
+
         setParamSet(new ParamSet(
                 center,
                 radius.adjustRangeToImageSize(1.0),

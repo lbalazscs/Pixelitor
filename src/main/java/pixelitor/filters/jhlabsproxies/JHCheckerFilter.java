@@ -8,6 +8,7 @@ import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
@@ -20,11 +21,11 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
  * Checker filter based on the JHLabs CheckFilter
  */
 public class JHCheckerFilter extends FilterWithParametrizedGUI {
-    private final GroupedRangeParam size = new GroupedRangeParam("Size", "Width", "Height", 1, 100, 10, true);
+    private final GroupedRangeParam size = new GroupedRangeParam("Size", "Width", "Height", 1, 10, 100, true);
     private final AngleParam angle = new AngleParam("Angle", 0);
     private final ColorParam color1 = new ColorParam("Color 1:", Color.BLACK, NO_OPACITY);
     private final ColorParam color2 = new ColorParam("Color 1:", Color.WHITE, NO_OPACITY);
-    private final RangeParam fuzziness = new RangeParam("Fuzziness", 0, 50, 0);
+    private final RangeParam fuzziness = new RangeParam("Fuzziness", 0, 0, 50);
     private final BooleanParam bumpMap = new BooleanParam("Bump Map Original", false, IGNORE_RANDOMIZE);
 
 //    private final RangeParam aaRes = new RangeParam("Anti-aliasing Quality", 1, 10, 2);
@@ -32,7 +33,7 @@ public class JHCheckerFilter extends FilterWithParametrizedGUI {
     private CheckFilter filter;
 
     public JHCheckerFilter() {
-        super("Checker Pattern", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 size.adjustRangeToImageSize(1.0),
                 angle,

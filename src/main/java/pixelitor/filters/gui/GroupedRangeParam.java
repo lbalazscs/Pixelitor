@@ -36,29 +36,29 @@ public class GroupedRangeParam extends AbstractFilterParam implements RangeBased
     /**
      * 2 linked params: "Horizontal" and "Vertical", linked by default
      */
-    public GroupedRangeParam(String name, int minValue, int maxValue, int defaultValue) {
-        this(name, minValue, maxValue, defaultValue, true);
+    public GroupedRangeParam(String name, int minValue, int defaultValue, int maxValue) {
+        this(name, minValue, defaultValue, maxValue, true);
     }
 
     /**
      * 2 linked params: "Horizontal" and "Vertical"
      */
-    public GroupedRangeParam(String name, int minValue, int maxValue, int defaultValue, boolean linked) {
-            this(name, "Horizontal:", "Vertical:", minValue, maxValue, defaultValue, linked);
+    public GroupedRangeParam(String name, int minValue, int defaultValue, int maxValue, boolean linked) {
+        this(name, "Horizontal:", "Vertical:", minValue, defaultValue, maxValue, linked);
     }
 
     /**
      * 2 linked params
      */
-    public GroupedRangeParam(String name, String firstRangeName, String secondRangeName, int minValue, int maxValue, int defaultValue, boolean linked) {
-        this(name, new String[]{firstRangeName, secondRangeName}, minValue, maxValue, defaultValue, linked);
+    public GroupedRangeParam(String name, String firstRangeName, String secondRangeName, int minValue, int defaultValue, int maxValue, boolean linked) {
+        this(name, new String[]{firstRangeName, secondRangeName}, minValue, defaultValue, maxValue, linked);
     }
 
     /**
      * Any number of linked params
      */
-    public GroupedRangeParam(String name, String[] rangeNames, int minValue, int maxValue, int defaultValue, boolean linked) {
-        this(name, createParams(rangeNames, minValue, maxValue, defaultValue), linked);
+    public GroupedRangeParam(String name, String[] rangeNames, int minValue, int defaultValue, int maxValue, boolean linked) {
+        this(name, createParams(rangeNames, minValue, defaultValue, maxValue), linked);
     }
 
     public GroupedRangeParam(String name, RangeParam[] params, boolean linked) {
@@ -260,11 +260,11 @@ public class GroupedRangeParam extends AbstractFilterParam implements RangeBased
         }
     }
 
-    private static RangeParam[] createParams(String[] rangeNames, int minValue, int maxValue, int defaultValue) {
+    private static RangeParam[] createParams(String[] rangeNames, int minValue, int defaultValue, int maxValue) {
         RangeParam[] rangeParams = new RangeParam[rangeNames.length];
         for (int i = 0; i < rangeNames.length; i++) {
             String rangeName = rangeNames[i];
-            rangeParams[i] = new RangeParam(rangeName, minValue, maxValue, defaultValue);
+            rangeParams[i] = new RangeParam(rangeName, minValue, defaultValue, maxValue);
         }
         return rangeParams;
     }

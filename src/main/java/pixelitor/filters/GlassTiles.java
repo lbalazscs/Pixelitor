@@ -19,6 +19,7 @@ package pixelitor.filters;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.TilesFilter;
 
 import java.awt.image.BufferedImage;
@@ -27,11 +28,11 @@ import java.awt.image.BufferedImage;
  * Glass Tiles filter
  */
 public class GlassTiles extends FilterWithParametrizedGUI {
-    private final GroupedRangeParam size = new GroupedRangeParam("Tile Size", 5, 500, 100);
-    private final GroupedRangeParam curvature = new GroupedRangeParam("Curvature", 0, 20, 10);
+    private final GroupedRangeParam size = new GroupedRangeParam("Tile Size", 5, 100, 500);
+    private final GroupedRangeParam curvature = new GroupedRangeParam("Curvature", 0, 10, 20);
 //    private final RangeParam shiftXParam = new RangeParam("Shift Horizontal", 0, 10, 0);
 //    private final RangeParam shiftYParam = new RangeParam("Shift Vertical", 0, 10, 0);
-    private final GroupedRangeParam phase = new GroupedRangeParam("Shift Effect", 0, 10, 0, false);
+    private final GroupedRangeParam phase = new GroupedRangeParam("Shift Effect", 0, 0, 10, false);
 
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices(true);
     private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
@@ -39,7 +40,7 @@ public class GlassTiles extends FilterWithParametrizedGUI {
     private TilesFilter filter;
 
     public GlassTiles() {
-        super("Glass Tiles", true, false);
+        super(ShowOriginal.YES);
         setParamSet(new ParamSet(
                 size.adjustRangeToImageSize(0.5),
                 curvature,
