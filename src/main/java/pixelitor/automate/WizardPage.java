@@ -29,7 +29,7 @@ public interface WizardPage {
     /**
      * Called if the wizard was cancelled while in this state
      */
-    void onWizardCancelled(Wizard wizard);
+    void onWizardCancelled();
 
     /**
      * Called if next was pressed while in this state before moving to the next

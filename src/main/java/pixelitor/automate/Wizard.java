@@ -64,7 +64,7 @@ public abstract class Wizard {
 
             @Override
             protected void dialogCanceled() {
-                wizardPage.onWizardCancelled(Wizard.this);
+                wizardPage.onWizardCancelled();
                 super.dialogCanceled();
                 dispose();
             }

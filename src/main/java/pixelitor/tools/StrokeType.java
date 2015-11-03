@@ -68,6 +68,7 @@ public enum StrokeType {
             }
         }
 
+        @SuppressWarnings("RedundantMethodOverride")
         @Override
         public Stroke getInnerStroke() {
             return null; // TODO this should have one

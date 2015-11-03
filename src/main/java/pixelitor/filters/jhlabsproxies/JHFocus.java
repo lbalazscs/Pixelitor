@@ -41,7 +41,7 @@ public class JHFocus extends FilterWithParametrizedGUI {
     private final BooleanParam invert = new BooleanParam("Invert", false);
     private final BooleanParam hpSharpening = BooleanParam.createParamForHPSharpening();
 
-    private Impl filter;
+    private FocusImpl filter;
 
     public JHFocus() {
         super("Focus", true, false);
@@ -71,7 +71,7 @@ public class JHFocus extends FilterWithParametrizedGUI {
         }
 
         if (filter == null) {
-            filter = new Impl();
+            filter = new FocusImpl();
         }
 
         filter.setCenter(
@@ -99,7 +99,7 @@ public class JHFocus extends FilterWithParametrizedGUI {
         return dest;
     }
 
-    private static class Impl extends VariableBlurFilter {
+    private static class FocusImpl extends VariableBlurFilter {
         private double cx;
         private double cy;
         private double innerRadiusX;

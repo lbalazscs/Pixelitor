@@ -68,7 +68,7 @@ public enum BatchFilterWizardPage implements WizardPage {
         }
 
         @Override
-        public void onWizardCancelled(Wizard wizard) {
+        public void onWizardCancelled() {
 
         }
 
@@ -102,7 +102,7 @@ public enum BatchFilterWizardPage implements WizardPage {
         }
 
         @Override
-        public void onWizardCancelled(Wizard wizard) {
+        public void onWizardCancelled() {
             // we get here only if the chosen filter is a filter with GUI
 //            FilterWithGUI filter = (FilterWithGUI) getConfig(wizard).getFilter();
             ImageComponents.getActiveImageLayerOrMask().get().cancelPressedInDialog();
@@ -111,7 +111,7 @@ public enum BatchFilterWizardPage implements WizardPage {
         @Override
         public void onMovingToTheNext(Wizard wizard) {
             // cancel the previewing
-            onWizardCancelled(wizard);
+            onWizardCancelled();
         }
     };
 

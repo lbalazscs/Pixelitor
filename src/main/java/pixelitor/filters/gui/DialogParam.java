@@ -84,4 +84,10 @@ public class DialogParam extends AbstractFilterParam {
     public void reset(boolean triggerAction) {
 
     }
+
+    private void updateDefaultButtonState() {
+        if (defaultButton != null) {
+            defaultButton.updateState();
+        }
+    }
 }

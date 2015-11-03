@@ -29,18 +29,18 @@ import java.awt.image.BufferedImage;
  * Droste based on DrosteFilter
  */
 public class Droste extends FilterWithParametrizedGUI {
-    private RangeParam innerRadius = new RangeParam("Inner Radius", 1, 100, 25);
-    private RangeParam outerRadius = new RangeParam("Outer Radius", 1, 100, 100);
-    private RangeParam periodicity = new RangeParam("Periodicity", -6, 6, 1);
-    private RangeParam strands = new RangeParam("Strands", -12, 12, 1);
-    private RangeParam zoom = new RangeParam("Zoom", 1, 100, 1);
-    private RangeParam rotate = new RangeParam("Rotate", 0, 100, 0);
-    private RangeParam numberOfLevels = new RangeParam("Number of Levels", 0, 100, 0);
-    private RangeParam startingLevel = new RangeParam("Starting Level", 0, 100, 0);
-    private RangeParam fractalPoints = new RangeParam("Fractal Points", 1, 10, 1);
-    private ImagePositionParam center = new ImagePositionParam("Center");
-    private IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
-    private IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
+    private final RangeParam innerRadius = new RangeParam("Inner Radius", 1, 100, 25);
+    private final RangeParam outerRadius = new RangeParam("Outer Radius", 1, 100, 100);
+    private final RangeParam periodicity = new RangeParam("Periodicity", -6, 6, 1);
+    private final RangeParam strands = new RangeParam("Strands", -12, 12, 1);
+    private final RangeParam zoom = new RangeParam("Zoom", 1, 100, 1);
+    private final RangeParam rotate = new RangeParam("Rotate", 0, 100, 0);
+    private final RangeParam numberOfLevels = new RangeParam("Number of Levels", 0, 100, 0);
+    private final RangeParam startingLevel = new RangeParam("Starting Level", 0, 100, 0);
+    private final RangeParam fractalPoints = new RangeParam("Fractal Points", 1, 10, 1);
+    private final ImagePositionParam center = new ImagePositionParam("Center");
+    private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
+    private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
 
     private DrosteFilter filter;
 

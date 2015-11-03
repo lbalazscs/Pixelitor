@@ -56,7 +56,7 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public void onWizardCancelled(Wizard wizard) {
+        public void onWizardCancelled() {
         }
 
         @Override
@@ -85,7 +85,7 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public void onWizardCancelled(Wizard wizard) {
+        public void onWizardCancelled() {
             ImageComponents.getActiveImageLayerOrMask().get().cancelPressedInDialog();
         }
 
@@ -127,14 +127,14 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public void onWizardCancelled(Wizard wizard) {
+        public void onWizardCancelled() {
             ImageComponents.getActiveImageLayerOrMask().get().cancelPressedInDialog();
         }
 
         @Override
         public void onMovingToTheNext(Wizard wizard) {
             // cancel the previewing
-            onWizardCancelled(wizard);
+            onWizardCancelled();
 
             // save final state
             getAnimation(wizard).copyFinalStateFromCurrent();
@@ -163,7 +163,7 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public void onWizardCancelled(Wizard wizard) {
+        public void onWizardCancelled() {
 
         }
 
