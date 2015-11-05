@@ -77,7 +77,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements RangeBased
     public JComponent createGUI() {
         GroupedRangeSelector selector = new GroupedRangeSelector(this);
         paramGUI = selector;
-        paramGUI.setEnabled(shouldBeEnabled());
+        setParamGUIEnabledState();
         return selector;
     }
 

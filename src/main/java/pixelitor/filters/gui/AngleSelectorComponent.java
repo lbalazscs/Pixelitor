@@ -18,6 +18,7 @@
 package pixelitor.filters.gui;
 
 import javax.swing.*;
+import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -42,7 +43,11 @@ public class AngleSelectorComponent extends AbstractAngleSelectorComponent {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        g.setColor(BLACK);
+        if (enabled) {
+            g.setColor(BLACK);
+        } else {
+            g.setColor(Color.GRAY);
+        }
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         g2.draw(new Ellipse2D.Float(0, 0, SIZE, SIZE));

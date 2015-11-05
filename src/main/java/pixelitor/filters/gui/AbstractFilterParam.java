@@ -55,7 +55,8 @@ public abstract class AbstractFilterParam implements FilterParam {
                 break;
             case FINAL_ANIMATION_SETTING:
                 if (canBeAnimated()) {
-                    // ignore
+                    // ignore - the whole point of the final animation setting mode
+                    // is to disable/enable the filter params that cannot be animated
                     return;
                 }
                 enabledByAnimationSetting = b;
@@ -65,7 +66,12 @@ public abstract class AbstractFilterParam implements FilterParam {
         setEnabled(shouldBeEnabled());
     }
 
-    protected boolean shouldBeEnabled() {
+    public void setParamGUIEnabledState() {
+        boolean b = shouldBeEnabled();
+        paramGUI.setEnabled(b);
+    }
+
+    private boolean shouldBeEnabled() {
         return enabledByFilterLogic && enabledByAnimationSetting;
     }
 

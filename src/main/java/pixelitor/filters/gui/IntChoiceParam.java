@@ -20,6 +20,7 @@ package pixelitor.filters.gui;
 import com.jhlabs.image.CellularFilter;
 import com.jhlabs.image.TransformFilter;
 import com.jhlabs.image.WaveType;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.event.EventListenerList;
@@ -44,6 +45,7 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
     private Value currentChoice;
 
     private final EventListenerList listenerList = new EventListenerList();
+    private ActionSetting action;
 
     public IntChoiceParam(String name, Value[] choices) {
         this(name, choices, ALLOW_RANDOMIZE);
@@ -59,16 +61,16 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
     }
 
     @Override
-    public boolean isSetToDefault() {
-        return defaultChoice.equals(currentChoice);
+    public JComponent createGUI() {
+        ChoiceSelector choiceSelector = new ChoiceSelector(this, action);
+        paramGUI = choiceSelector;
+        setParamGUIEnabledState();
+        return choiceSelector;
     }
 
     @Override
-    public JComponent createGUI() {
-        ChoiceSelector choiceSelector = new ChoiceSelector(this);
-        paramGUI = choiceSelector;
-        paramGUI.setEnabled(shouldBeEnabled());
-        return choiceSelector;
+    public boolean isSetToDefault() {
+        return defaultChoice.equals(currentChoice);
     }
 
     @Override
@@ -78,7 +80,10 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
 
     @Override
     public void setAdjustmentListener(ParamAdjustmentListener listener) {
-        adjustmentListener = listener;
+        super.setAdjustmentListener(listener);
+        if (action != null) {
+            action.setAdjustmentListener(listener);
+        }
     }
 
     @Override
@@ -149,6 +154,11 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
         listenerList.remove(ListDataListener.class, l);
     }
 
+    public IntChoiceParam withAction(ActionSetting action) {
+        this.action = action;
+        return this;
+    }
+
     /**
      * Represents an integer value with a description
      */
@@ -200,7 +210,6 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
         }
     }
 
-
     public static final Value EDGE_REPEAT_PIXELS = new Value("Repeat Edge Pixels", TransformFilter.REPEAT_EDGE_PIXELS);
     public static final Value EDGE_REFLECT = new Value("Reflect Image", TransformFilter.REFLECT);
 
@@ -250,7 +259,16 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
     };
 
     public static IntChoiceParam getWaveTypeChoices() {
-        return new IntChoiceParam("Wave Type", waveTypeChoices);
+        ReseedNoiseActionSetting reseedNoise = new ReseedNoiseActionSetting("Reseed Noise",
+                "Reinitialize the randomness of the noise.");
+        IntChoiceParam icp = new IntChoiceParam("Wave Type", waveTypeChoices);
+        icp.withAction(reseedNoise);
+
+        // The "Reseed Noise" button should be enabled only if the wave type is "Noise"
+        Utils.setupEnableOtherIf(icp, reseedNoise,
+                selected -> selected.getIntValue() == WaveType.NOISE);
+
+        return icp;
     }
 
     public static IntChoiceParam getGridTypeChoices(String name, RangeParam randomnessParam) {

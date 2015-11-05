@@ -27,10 +27,12 @@ public class ActionSetting implements FilterSetting {
     private final ActionListener actionListener;
     private final Icon icon;
     private final String toolTipText;
-    private boolean finalAnimationSettingMode = false;
-
     private final String name;
     private ParamAdjustmentListener adjustmentListener;
+    private OrderedExecutionButton button;
+
+    private boolean enabledByFilterLogic = true;
+    private boolean enabledByAnimationSetting = true;
 
     // most actions should be available in the final animation settings
     private boolean ignoreFinalAnimationSettingMode = true;
@@ -48,19 +50,59 @@ public class ActionSetting implements FilterSetting {
 
     @Override
     public JComponent createGUI() {
-        OrderedExecutionButton b = new OrderedExecutionButton(getName(), actionListener, adjustmentListener, icon);
+        button = new OrderedExecutionButton(getName(), actionListener, adjustmentListener, icon);
         if(toolTipText != null) {
-            b.setToolTipText(toolTipText);
+            button.setToolTipText(toolTipText);
         }
-        if(finalAnimationSettingMode && !ignoreFinalAnimationSettingMode) {
-            b.setEnabled(false);
+        button.setEnabled(shouldBeEnabled());
+        return button;
+    }
+
+    @Override
+    public void setEnabled(boolean b, EnabledReason reason) {
+        switch (reason) {
+            case APP_LOGIC:
+                enabledByFilterLogic = b;
+                break;
+            case FINAL_ANIMATION_SETTING:
+                if (ignoreFinalAnimationSettingMode) {
+                    return;
+                }
+                enabledByAnimationSetting = b;
+                break;
         }
-        return b;
+        if (button != null) {
+            button.setEnabled(shouldBeEnabled());
+        }
+    }
+
+    private boolean shouldBeEnabled() {
+        return enabledByFilterLogic && enabledByAnimationSetting;
     }
 
     @Override
     public int getNrOfGridBagCols() {
         return 1;
+    }
+
+    public void setIgnoreFinalAnimationSettingMode(boolean ignoreFinalAnimationSettingMode) {
+        this.ignoreFinalAnimationSettingMode = ignoreFinalAnimationSettingMode;
+    }
+
+    @Override
+    public void setAdjustmentListener(ParamAdjustmentListener listener) {
+        this.adjustmentListener = listener;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s[name = '%s']",
+                getClass().getSimpleName(), getName());
     }
 
     /**
@@ -79,37 +121,5 @@ public class ActionSetting implements FilterSetting {
                 adjustmentListener.paramAdjusted();
             });
         }
-    }
-
-    public void setIgnoreFinalAnimationSettingMode(boolean ignoreFinalAnimationSettingMode) {
-        this.ignoreFinalAnimationSettingMode = ignoreFinalAnimationSettingMode;
-    }
-
-    @Override
-    public void setAdjustmentListener(ParamAdjustmentListener listener) {
-        this.adjustmentListener = listener;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public void setEnabled(boolean b, EnabledReason reason) {
-        switch (reason) {
-            case APP_LOGIC:
-                // not implemented yet - it was not needed
-                break;
-            case FINAL_ANIMATION_SETTING:
-                finalAnimationSettingMode = b;
-                break;
-        }
-    }
-
-    @Override
-    public String toString() {
-        return String.format("%s[name = '%s']",
-                getClass().getSimpleName(), getName());
     }
 }

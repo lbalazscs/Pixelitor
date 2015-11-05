@@ -38,8 +38,9 @@ public abstract class AbstractAngleSelectorComponent extends JComponent implemen
     final AngleParam model;
     static final int SIZE = 50;
     private static final Stroke ARROW_STROKE = new BasicStroke(1.7f);
-    private static final Color ARROW_COLOR = new Color(45, 66, 85);
-    private boolean enabled = true;
+    private static final Color ENABLED_ARROW_COLOR = new Color(45, 66, 85);
+    private static final Color DISABLED_ARROW_COLOR = new Color(160, 160, 160);
+    protected boolean enabled = true;
 
     int cx;
     int cy;
@@ -97,8 +98,12 @@ public abstract class AbstractAngleSelectorComponent extends JComponent implemen
     public void mouseMoved(MouseEvent e) {
     }
 
-    static void drawArrow(Graphics2D g2, double angle, float startX, float startY, float endX, float endY) {
-        g2.setColor(ARROW_COLOR);
+    void drawArrow(Graphics2D g2, double angle, float startX, float startY, float endX, float endY) {
+        if (enabled) {
+            g2.setColor(ENABLED_ARROW_COLOR);
+        } else {
+            g2.setColor(DISABLED_ARROW_COLOR);
+        }
         g2.setStroke(ARROW_STROKE);
 
         g2.setRenderingHint(KEY_STROKE_CONTROL, VALUE_STROKE_PURE);
@@ -122,5 +127,6 @@ public abstract class AbstractAngleSelectorComponent extends JComponent implemen
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
         super.setEnabled(enabled);
+        repaint();
     }
 }

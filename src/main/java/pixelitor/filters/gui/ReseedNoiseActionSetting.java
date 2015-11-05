@@ -33,11 +33,15 @@ public class ReseedNoiseActionSetting extends ActionSetting {
     }
 
     public ReseedNoiseActionSetting(String name) {
-        super(name, e -> Noise.reseed(), "<html>Reinitialize the randomness.<br>Has effect only if some randomness is enabled in the settings.");
+        this(name, "<html>Reinitialize the randomness.<br>Has effect only if some randomness is enabled in the settings.");
+    }
+
+    public ReseedNoiseActionSetting(String name, String toolTip) {
+        super(name, e -> Noise.reseed(), toolTip);
         setIgnoreFinalAnimationSettingMode(false);
     }
 
-    // ... and the second group of constructors is called if
+        // ... and the second group of constructors is called if
     // the given ActionListener does the reseed
 
     public ReseedNoiseActionSetting(ActionListener actionListener) {

@@ -21,6 +21,7 @@ package pixelitor.utils;
 //import pixelitor.menus.LookAndFeelMenu;
 
 import pixelitor.PixelitorWindow;
+import pixelitor.filters.gui.FilterParam;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -28,8 +29,10 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.GraphicsEnvironment;
+import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.awt.Window;
+import java.util.List;
 
 public final class GUIUtils {
 
@@ -114,5 +117,28 @@ public final class GUIUtils {
             }
         };
         d.setVisible(true);
+    }
+
+    public static JPanel arrangeParamsInVerticalGridBag(List<FilterParam> paramList) {
+        JPanel p = new JPanel();
+        p.setLayout(new GridBagLayout());
+
+        int row = 0;
+
+        GridBagHelper gbHelper = new GridBagHelper(p);
+        for (FilterParam param : paramList) {
+            JComponent control = param.createGUI();
+
+            int numColumns = param.getNrOfGridBagCols();
+            if (numColumns == 1) {
+                gbHelper.addOnlyControlToRow(control, row);
+            } else if (numColumns == 2) {
+                gbHelper.addLabel(param.getName() + ':', 0, row);
+                gbHelper.addLastControl(control);
+            }
+
+            row++;
+        }
+        return p;
     }
 }

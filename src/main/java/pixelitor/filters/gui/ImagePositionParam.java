@@ -54,7 +54,7 @@ public class ImagePositionParam extends AbstractFilterParam {
 
         ImagePositionPanel selector = new ImagePositionPanel(this, defaultX, defaultY);
         paramGUI = selector;
-        paramGUI.setEnabled(shouldBeEnabled());
+        setParamGUIEnabledState();
         paramGUI.updateGUI();
         return selector;
     }

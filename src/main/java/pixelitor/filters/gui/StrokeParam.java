@@ -44,7 +44,7 @@ public class StrokeParam extends AbstractFilterParam {
             return dialog;
         }, defaultButton);
 
-        paramGUI.setEnabled(shouldBeEnabled());
+        setParamGUIEnabledState();
         return (JComponent) paramGUI;
     }
 

@@ -21,7 +21,6 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseActionSetting;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.RadialWavesFilter;
 
@@ -56,7 +55,7 @@ public class RadialWaves extends FilterWithParametrizedGUI {
                 zoom,
                 edgeAction,
                 interpolation
-        ).withAction(new ReseedNoiseActionSetting("Reseed Noise")));
+        ));
     }
 
     @Override

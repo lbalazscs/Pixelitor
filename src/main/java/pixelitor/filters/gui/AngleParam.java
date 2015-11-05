@@ -50,7 +50,7 @@ public class AngleParam extends AbstractFilterParam {
     public JComponent createGUI() {
         AngleSelector angleSelector = new AngleSelector(this);
         paramGUI = angleSelector;
-        paramGUI.setEnabled(shouldBeEnabled());
+        setParamGUIEnabledState();
         return angleSelector;
     }
 

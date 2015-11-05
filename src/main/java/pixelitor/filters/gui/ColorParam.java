@@ -46,7 +46,7 @@ public class ColorParam extends AbstractFilterParam {
     public JComponent createGUI() {
         ColorSelector gui = new ColorSelector(this);
         paramGUI = gui;
-        paramGUI.setEnabled(shouldBeEnabled());
+        setParamGUIEnabledState();
 
         return gui;
     }

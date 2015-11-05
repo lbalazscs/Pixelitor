@@ -32,6 +32,7 @@ public class EnumParam<E extends Enum<E>> extends AbstractFilterParam implements
     private final EnumComboBoxModel<E> delegateModel;
     private final E[] enumConstants;
     private E defaultValue;
+    private ActionSetting action;
 
     public EnumParam(String name, Class<E> enumClass) {
         super(name, RandomizePolicy.ALLOW_RANDOMIZE);
@@ -42,9 +43,9 @@ public class EnumParam<E extends Enum<E>> extends AbstractFilterParam implements
 
     @Override
     public JComponent createGUI() {
-        ChoiceSelector choiceSelector = new ChoiceSelector(this);
+        ChoiceSelector choiceSelector = new ChoiceSelector(this, action);
         paramGUI = choiceSelector;
-        paramGUI.setEnabled(shouldBeEnabled());
+        setParamGUIEnabledState();
         return choiceSelector;
     }
 
@@ -134,5 +135,18 @@ public class EnumParam<E extends Enum<E>> extends AbstractFilterParam implements
     @Override
     public Object getSelectedItem() {
         return delegateModel.getSelectedItem();
+    }
+
+    @Override
+    public void setAdjustmentListener(ParamAdjustmentListener listener) {
+        super.setAdjustmentListener(listener);
+        if (action != null) {
+            action.setAdjustmentListener(listener);
+        }
+    }
+
+    public EnumParam withAction(ActionSetting action) {
+        this.action = action;
+        return this;
     }
 }

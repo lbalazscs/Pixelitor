@@ -87,7 +87,7 @@ public class Flashlight extends FilterWithParametrizedGUI {
             } else if (outside == 0.0) {
                 return rgb;
             } else {
-                return ImageMath.mixColors((float) outside, bgPixel, rgb);
+                return ImageMath.mixColors((float) outside, rgb, bgPixel);
             }
         }
 

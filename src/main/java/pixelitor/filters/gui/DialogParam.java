@@ -33,7 +33,7 @@ public class DialogParam extends AbstractFilterParam {
             return dialog;
         }, defaultButton);
 
-        paramGUI.setEnabled(shouldBeEnabled());
+        setParamGUIEnabledState();
         return (JComponent) paramGUI;
 
     }

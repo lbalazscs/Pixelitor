@@ -22,7 +22,6 @@ import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
-import pixelitor.filters.gui.ReseedNoiseActionSetting;
 import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
@@ -42,6 +41,7 @@ public class JHWaves extends FilterWithParametrizedGUI {
 
     public JHWaves() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
                 wavelengthParam.adjustRangeToImageSize(0.2),
                 amplitudeParam.adjustRangeToImageSize(0.2),
@@ -49,7 +49,7 @@ public class JHWaves extends FilterWithParametrizedGUI {
                 phaseParam,
                 edgeAction,
                 interpolation
-        ).withAction(new ReseedNoiseActionSetting("Reseed Noise")));
+        ));
     }
 
     @Override

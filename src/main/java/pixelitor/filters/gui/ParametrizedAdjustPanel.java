@@ -19,12 +19,13 @@ package pixelitor.filters.gui;
 
 import pixelitor.ImageComponents;
 import pixelitor.filters.FilterWithParametrizedGUI;
-import pixelitor.utils.GridBagHelper;
+import pixelitor.utils.GUIUtils;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
+import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.util.List;
 
 public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustmentListener {
@@ -54,63 +55,46 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
         paramAdjusted();
     }
 
-    /**
-     * This can be overridden if a custom GUI is necessary
-     */
     protected void setupGUI(ParamSet params, Object otherInfo, ShowOriginal addShowOriginal) {
-        setupControlsInColumn(this, params, addShowOriginal);
+        JPanel filterParamsPanel = createFilterParamsPanel(params.getParamList());
+        JPanel filterActionsPanel = createFilterActionsPanel(params.getActionList(), addShowOriginal, 3);
+
+        this.setLayout(new BorderLayout());
+        this.add(filterParamsPanel, BorderLayout.CENTER);
+        this.add(filterActionsPanel, BorderLayout.SOUTH);
     }
 
-    public void setupControlsInColumn(JPanel parent, ParamSet params, ShowOriginal addShowOriginal) {
-        parent.setLayout(new GridBagLayout());
+    /**
+     * This can be overridden if a custom arrangement is necessary
+     */
+    public JPanel createFilterParamsPanel(List<FilterParam> paramList) {
+        return GUIUtils.arrangeParamsInVerticalGridBag(paramList);
+    }
 
-        int row = 0;
-        JPanel buttonsPanel = null;
-
-        GridBagHelper gbHelper = new GridBagHelper(parent);
-
-        // add filter parameters
-        List<FilterParam> paramList = params.getParamList();
-        for (FilterParam param : paramList) {
-            JComponent control = param.createGUI();
-
-            int numColumns = param.getNrOfGridBagCols();
-            if (numColumns == 1) {
-                gbHelper.addOnlyControlToRow(control, row);
-            } else if (numColumns == 2) {
-                gbHelper.addLabel(param.getName() + ':', 0, row);
-                gbHelper.addLastControl(control);
-            }
-
-            row++;
-        }
-
+    protected JPanel createFilterActionsPanel(List<ActionSetting> actionList, ShowOriginal addShowOriginal, int maxControlsInRow) {
+        int numControls = actionList.size();
         if (addShowOriginal.isYes()) {
-            gbHelper.addLabel("Show Original:", 0, row);
-            row++;
-
-            showOriginalCB = new ShowOriginalCB();
-
-            // adds it to a panel so it is aligned to the other controls
-            // TODO but maybe this should be added as it is and the other
-            // controls should be added without gap
-            JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-            p.add(showOriginalCB);
-            gbHelper.addLastControl(p);
+            numControls++;
+            showOriginalCB = new ShowOriginalCB("Show Original");
         }
+        JPanel faPanel;
 
-        // add filter actions
-        List<ActionSetting> actionList = params.getActionList();
+        if(numControls <= maxControlsInRow) {
+            faPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        } else {
+            int cols = (numControls + 1) / 2;
+            faPanel = new JPanel(new GridLayout(2, cols));
+        }
+        if (addShowOriginal.isYes()) {
+            faPanel.add(showOriginalCB);
+        }
         for (ActionSetting action : actionList) {
             // all the buttons go in one row
             JButton button = (JButton) action.createGUI();
-            if (buttonsPanel == null) {
-                buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-                gbHelper.addOnlyControlToRow(buttonsPanel, row);
-                row++;
-            }
-            buttonsPanel.add(button);
+            faPanel.add(button);
         }
+
+        return faPanel;
     }
 
     @Override
@@ -132,7 +116,8 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
     private static class ShowOriginalCB extends JCheckBox {
         private boolean trigger = true;
 
-        public ShowOriginalCB() {
+        public ShowOriginalCB(String text) {
+            super(text);
             addActionListener(e -> {
                 if (trigger) {
                     Utils.setShowOriginal(isSelected());

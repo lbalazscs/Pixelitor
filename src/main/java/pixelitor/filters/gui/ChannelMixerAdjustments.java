@@ -18,8 +18,10 @@
 package pixelitor.filters.gui;
 
 import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.utils.GUIUtils;
 
 import javax.swing.*;
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
 
@@ -31,22 +33,28 @@ public class ChannelMixerAdjustments extends ParametrizedAdjustPanel {
 
     @Override
     protected void setupGUI(ParamSet params, Object otherInfo, ShowOriginal addShowOriginal) {
-        Action[] actions = (Action[]) otherInfo;
+        JPanel upperPanel = new JPanel(new FlowLayout());
+        JPanel leftPanel = GUIUtils.arrangeParamsInVerticalGridBag(params.getParamList());
+        JPanel rightPanel = createPresetsPanel((Action[]) otherInfo);
+        upperPanel.add(leftPanel);
+        upperPanel.add(rightPanel);
 
-        JPanel leftPanel = new JPanel();
-        setupControlsInColumn(leftPanel, params, addShowOriginal);
+        JPanel buttonsPanel = createFilterActionsPanel(params.getActionList(), addShowOriginal, 5);
 
+        setLayout(new BorderLayout());
+        add(upperPanel, BorderLayout.CENTER);
+        add(buttonsPanel, BorderLayout.SOUTH);
+    }
+
+    private JPanel createPresetsPanel(Action[] actions) {
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
         rightPanel.setBorder(BorderFactory.createTitledBorder("Presets"));
-
         for (Action action : actions) {
             JComponent b = new JButton(action);
             b.setAlignmentX(Component.LEFT_ALIGNMENT);
             rightPanel.add(b);
         }
-        setLayout(new FlowLayout());
-        add(leftPanel);
-        add(rightPanel);
+        return rightPanel;
     }
 }

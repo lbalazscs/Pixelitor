@@ -35,7 +35,7 @@ public class EffectsParam extends AbstractFilterParam {
             }, button);
 
             paramGUI = configureParamGUI;
-            paramGUI.setEnabled(shouldBeEnabled());
+            setParamGUIEnabledState();
             return configureParamGUI;
         } else {
             effectsPanel.setBorder(BorderFactory.createTitledBorder("Effects"));

@@ -32,10 +32,10 @@ public class ChoiceSelector extends JPanel implements ActionListener, ParamGUI {
     private final JComboBox<IntChoiceParam.Value> comboBox;
     private final DefaultButton defaultButton;
 
-    public ChoiceSelector(ComboBoxModel model) {
+    public ChoiceSelector(ComboBoxModel model, ActionSetting action) {
         assert model instanceof Resettable;
 
-        setLayout(new FlowLayout(FlowLayout.LEFT));
+
 
         comboBox = new JComboBox<>(model);
         comboBox.addActionListener(this);
@@ -43,12 +43,25 @@ public class ChoiceSelector extends JPanel implements ActionListener, ParamGUI {
         Dimension comboPreferredSize = comboBox.getPreferredSize();
         comboBox.setPreferredSize(new Dimension(comboPreferredSize.width + 3, comboPreferredSize.height));
 
-        add(comboBox);
 
         defaultButton = new DefaultButton((Resettable) model);
 //        int buttonSize = comboBox.getPreferredSize().height;
 //        defaultButton.setPreferredSize(new Dimension(buttonSize, buttonSize));
-        add(defaultButton);
+
+        if (action != null) {
+            JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            left.add(comboBox);
+            left.add(defaultButton);
+
+            setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+            add(left);
+            add(Box.createGlue());
+            add(action.createGUI());
+        } else {
+            setLayout(new FlowLayout(FlowLayout.LEFT));
+            add(comboBox);
+            add(defaultButton);
+        }
     }
 
     @Override
