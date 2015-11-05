@@ -19,6 +19,14 @@
  */
 package com.bric.swing;
 
+import com.bric.plaf.PlafPaintUtils;
+import net.jafama.FastMath;
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.MouseInputAdapter;
+import javax.swing.event.MouseInputListener;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -42,14 +50,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.util.Vector;
-
-import javax.swing.JPanel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.MouseInputAdapter;
-import javax.swing.event.MouseInputListener;
-
-import com.bric.plaf.PlafPaintUtils;
 
 /** This is the large graphic element in the <code>ColorPicker</code>
  * that depicts a wide range of colors.
@@ -525,12 +525,12 @@ public class ColorPickerPanel extends JPanel {
 				if(theta<0) theta+=2*Math.PI;
 				
 				double r = bri*size/2;
-				point = new Point((int)(r*Math.cos(theta)+.5+size/2.0),(int)(r*Math.sin(theta)+.5+size/2.0));
+				point = new Point((int)(r*FastMath.cos(theta)+.5+size/2.0),(int)(r* FastMath.sin(theta)+.5+size/2.0));
 			} else if(mode==ColorPicker.BRI) {
 				double theta = hue*2*Math.PI-Math.PI/2;
 				if(theta<0) theta+=2*Math.PI;
 				double r = sat*size/2;
-				point = new Point((int)(r*Math.cos(theta)+.5+size/2.0),(int)(r*Math.sin(theta)+.5+size/2.0));
+				point = new Point((int)(r*FastMath.cos(theta)+.5+size/2.0),(int)(r*FastMath.sin(theta)+.5+size/2.0));
 			}
 		} else if(mode==ColorPicker.RED) {
 			point = new Point((int)(green*size/255f+.49f),

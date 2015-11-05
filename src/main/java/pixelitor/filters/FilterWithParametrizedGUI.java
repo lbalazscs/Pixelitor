@@ -19,6 +19,7 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.BooleanParam;
+import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ParametrizedAdjustPanel;
@@ -95,5 +96,9 @@ public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
      */
     public boolean excludeFromAnimation() {
         return false;
+    }
+
+    public void addParamsToFront(FilterParam... params) {
+        paramSet.addParamsToFront(params);
     }
 }

@@ -19,6 +19,8 @@
  */
 package com.bric.image.transition;
 
+import net.jafama.FastMath;
+
 import java.awt.Color;
 import java.awt.geom.Point2D;
 
@@ -115,14 +117,14 @@ public class SwivelTransition2D extends AbstractPlanarTransition2D {
 	@Override
 	public Point2D getFrameALocation(float p) {
 		p = multiplier*p;
-		return new Point2D.Double(.5*Math.cos(Math.PI*p+Math.PI/2)+.5,
-				.5*Math.sin(Math.PI*p+Math.PI/2)+.5);
+		return new Point2D.Double(.5 * FastMath.cos(Math.PI * p + Math.PI / 2) + .5,
+				.5 * FastMath.sin(Math.PI * p + Math.PI / 2) + .5);
 	}
 	
 	@Override
 	public Point2D getFrameBLocation(float p) {
 		p = multiplier*p;
-		return new Point2D.Double(.5*Math.cos(Math.PI*p+3*Math.PI/2)+.5,
-				.5*Math.sin(Math.PI*p+3*Math.PI/2)+.5);
+		return new Point2D.Double(.5 * FastMath.cos(Math.PI * p + 3 * Math.PI / 2) + .5,
+				.5 * FastMath.sin(Math.PI * p + 3 * Math.PI / 2) + .5);
 	}
 }

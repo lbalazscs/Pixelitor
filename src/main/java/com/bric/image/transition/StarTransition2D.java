@@ -19,6 +19,8 @@
  */
 package com.bric.image.transition;
 
+import net.jafama.FastMath;
+
 import java.awt.Shape;
 import java.awt.geom.GeneralPath;
 
@@ -70,11 +72,11 @@ public class StarTransition2D extends AbstractShapeTransition2D {
 		double angle = Math.PI/10;
 		float r2 = 2.5f;
 		double k = Math.PI*2/10;
-		p.moveTo( (float)(Math.cos(angle)) , (float)(Math.sin(angle)) );
+		p.moveTo((float) (FastMath.cos(angle)), (float) (FastMath.sin(angle)));
 		for(int a = 0; a<5; a++) {
-			p.lineTo( (float)(r2*Math.cos(angle+k)), (float)(r2*Math.sin(angle+k)) );
+			p.lineTo((float) (r2 * FastMath.cos(angle + k)), (float) (r2 * FastMath.sin(angle + k)));
 			angle+= Math.PI*2.0/5.0;
-			p.lineTo( (float)(Math.cos(angle)), (float)(Math.sin(angle)) );
+			p.lineTo((float) (FastMath.cos(angle)), (float) (FastMath.sin(angle)));
 		}
 		p.closePath();
 		return p;

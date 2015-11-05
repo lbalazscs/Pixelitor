@@ -19,6 +19,8 @@
  */
 package com.bric.geom;
 
+import net.jafama.FastMath;
+
 import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
 
@@ -461,9 +463,9 @@ public abstract class PathSegment {
 		@Override
 		public void rotate(float f) {
 			if(f==0) return;
-			
-			float cos = (float)Math.cos(f);
-			float sin = (float)Math.sin(f);
+
+			float cos = (float) FastMath.cos(f);
+			float sin = (float) FastMath.sin(f);
 			for(int a = 0; a<data.length; a+=2) {
 				float x = data[a];
 				float y = data[a+1];

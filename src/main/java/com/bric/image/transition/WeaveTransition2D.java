@@ -19,6 +19,8 @@
  */
 package com.bric.image.transition;
 
+import net.jafama.FastMath;
+
 import java.awt.Dimension;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
@@ -55,7 +57,7 @@ public class WeaveTransition2D extends Transition2D {
 		for(int a = 0; a<v.size(); a++) {
 			Rectangle2D r = v.get(a);
 			AffineTransform transform = new AffineTransform();
-			float dx = (float)(Math.sin(.5*Math.PI*(1-progress))*size.width);
+			float dx = (float) (FastMath.sin(.5 * Math.PI * (1 - progress)) * size.width);
 			float k = (progress2)*(1000*dip)*(a)/(v.size());
 			dx = dx+k;
 			if(a%2==0) {

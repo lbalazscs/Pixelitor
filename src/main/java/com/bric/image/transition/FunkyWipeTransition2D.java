@@ -19,15 +19,16 @@
  */
 package com.bric.image.transition;
 
+import com.bric.geom.Clipper;
+import com.bric.geom.MeasuredShape;
+import com.bric.geom.RectangularTransform;
+import net.jafama.FastMath;
+
 import java.awt.Dimension;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-
-import com.bric.geom.Clipper;
-import com.bric.geom.MeasuredShape;
-import com.bric.geom.RectangularTransform;
 
 /** This is a fun variation of a "Wipe" transition.  The line
  * that separates the two frames spins as it slides.  The
@@ -107,13 +108,13 @@ public class FunkyWipeTransition2D extends Transition2D {
 		float k = 10000;
 		GeneralPath clip = new GeneralPath();
 		clip.moveTo((float)p.getX(), (float)p.getY());
-		clip.lineTo((float)(p.getX()+k*Math.cos(angle)), (float)(p.getY()+k*Math.sin(angle)));
-		clip.lineTo((float)(p.getX()+k*Math.cos(angle)+k*Math.cos(angle-Math.PI/2)), 
-				(float)(p.getY()+k*Math.sin(angle)+k*Math.sin(angle-Math.PI/2)) );
-		clip.lineTo((float)(p.getX()-100*Math.cos(angle)+k*Math.cos(angle-Math.PI/2)), 
-				(float)(p.getY()-k*Math.sin(angle)+k*Math.sin(angle-Math.PI/2)) );
-		clip.lineTo((float)(p.getX()-k*Math.cos(angle)), 
-				(float)(p.getY()-k*Math.sin(angle)) );
+		clip.lineTo((float)(p.getX()+k*FastMath.cos(angle)), (float)(p.getY()+k* FastMath.sin(angle)));
+		clip.lineTo((float)(p.getX()+k*FastMath.cos(angle)+k*FastMath.cos(angle-Math.PI/2)),
+				(float)(p.getY()+k*FastMath.sin(angle)+k*FastMath.sin(angle-Math.PI/2)) );
+		clip.lineTo((float)(p.getX()-100*FastMath.cos(angle)+k*FastMath.cos(angle-Math.PI/2)),
+				(float)(p.getY()-k*FastMath.sin(angle)+k*FastMath.sin(angle-Math.PI/2)) );
+		clip.lineTo((float)(p.getX()-k*FastMath.cos(angle)),
+				(float)(p.getY()-k*FastMath.sin(angle)) );
 		clip.closePath();
 		
 		AffineTransform map = RectangularTransform.create(

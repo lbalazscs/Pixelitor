@@ -50,8 +50,8 @@ public class KaleidoscopeTransition2D extends Transition2D {
 
 		Point2D p1, p2;
 		v2.add( new ImageInstruction(false) );
-		float dx = 10; //(float)(0*Math.cos(2*(1-progress)*Math.PI));
-		float dy = 10; //(float)(0*Math.sin(2*(1-progress)*Math.PI));
+		float dx = 10; //(float)(0*FastMath.cos(2*(1-progress)*Math.PI));
+		float dy = 10; //(float)(0*FastMath.sin(2*(1-progress)*Math.PI));
 		for(int a = 0; a<v1.size(); a++) {
 			try {
 				Rectangle2D r = v1.get(a);

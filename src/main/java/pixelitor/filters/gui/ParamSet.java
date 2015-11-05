@@ -32,7 +32,7 @@ import static pixelitor.filters.gui.FilterSetting.EnabledReason.FINAL_ANIMATION_
  * A fixed set of filter parameter objects
  */
 public class ParamSet {
-    private final List<FilterParam> paramList = new ArrayList<>();
+    private List<FilterParam> paramList = new ArrayList<>();
     private final List<ActionSetting> actionList = new ArrayList<>(3);
     private ParamAdjustmentListener adjustmentListener;
 
@@ -191,5 +191,14 @@ public class ParamSet {
         }
         s += "\n]";
         return s;
+    }
+
+    public void addParamsToFront(FilterParam[] params) {
+        List<FilterParam> old = paramList;
+        paramList = new ArrayList<>(params.length + old.size());
+        for (FilterParam param : params) {
+            paramList.add(param);
+        }
+        paramList.addAll(old);
     }
 }

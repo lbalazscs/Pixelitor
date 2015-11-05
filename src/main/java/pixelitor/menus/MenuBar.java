@@ -886,6 +886,7 @@ public class MenuBar extends JMenuBar {
         sub.addFA("Voronoi Diagram", Voronoi::new);
         sub.addFA("Fractal Tree", FractalTree::new);
         sub.addFA("Mystic Rose", MysticRose::new);
+        sub.addFA("Lissajous Curve", Lissajous::new);
 
         return sub;
     }

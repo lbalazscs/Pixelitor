@@ -17,7 +17,9 @@
 
 package pixelitor.tools;
 
+import com.bric.awt.BristleStroke;
 import com.bric.awt.CalligraphyStroke;
+import com.bric.awt.CharcoalStroke;
 import com.jhlabs.awt.CompositeStroke;
 import com.jhlabs.awt.ShapeStroke;
 import com.jhlabs.awt.WobbleStroke;
@@ -44,6 +46,25 @@ public enum StrokeType {
         @Override
         public int getExtraWidth(int specifiedWidth) {
             return 0;
+        }
+    }, ZIGZAG("Zigzag") {
+        private Stroke tmp;
+
+        @Override
+        public Stroke getStroke(float width, int cap, int join, float[] dashFloats) {
+            tmp = BASIC.getStroke(width, cap, join, dashFloats);
+            Stroke stroke = new ZigzagStroke(tmp, width, width);
+            return stroke;
+        }
+
+        @Override
+        public Stroke getInnerStroke() {
+            return tmp;
+        }
+
+        @Override
+        public int getExtraWidth(int specifiedWidth) {
+            return specifiedWidth / 2;
         }
     }, WOBBLE("Wobble") {
         private float lastWidth = 0.0f;
@@ -78,24 +99,25 @@ public enum StrokeType {
         public int getExtraWidth(int specifiedWidth) {
             return (int) (specifiedWidth * 1.5);
         }
-    }, ZIGZAG("Zigzag") {
-        private Stroke tmp;
-
+    }, CHARCOAL("Charcoal") {
         @Override
         public Stroke getStroke(float width, int cap, int join, float[] dashFloats) {
-            tmp = BASIC.getStroke(width, cap, join, dashFloats);
-            Stroke stroke = new ZigzagStroke(tmp, width, width);
-            return stroke;
-        }
-
-        @Override
-        public Stroke getInnerStroke() {
-            return tmp;
+            return new CharcoalStroke(width, 0.5f);
         }
 
         @Override
         public int getExtraWidth(int specifiedWidth) {
-            return specifiedWidth / 2;
+            return 0;
+        }
+    }, BRISTLE("Bristle") {
+        @Override
+        public Stroke getStroke(float width, int cap, int join, float[] dashFloats) {
+            return new BristleStroke(width, 0.5f);
+        }
+
+        @Override
+        public int getExtraWidth(int specifiedWidth) {
+            return 0;
         }
     }, OUTLINE("Outline") {
         @Override

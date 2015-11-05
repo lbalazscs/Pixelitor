@@ -19,15 +19,16 @@
  */
 package com.bric.awt;
 
-import java.awt.Shape;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.PathIterator;
-
 import com.bric.geom.GeneralPathWriter;
 import com.bric.geom.PathSegment;
 import com.bric.geom.PathWriter;
 import com.bric.geom.SimplifiedPathIterator;
+import net.jafama.FastMath;
+
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.PathIterator;
 
 /** This creates a calligraphic or ribbon-like effect while
  * tracing a shape.
@@ -367,8 +368,8 @@ public class CalligraphyPathWriter extends PathWriter {
 			
 			PathSegment.Float head = tail.getHead();
 			PathWriter dest;
-			double cos = Math.cos(angle);
-			double sin = Math.sin(angle);
+			double cos = FastMath.cos(angle);
+			double sin = FastMath.sin(angle);
 			AffineTransform transform1, transform2;
 			
 			/** Switching the order we apply the transforms fixes winding

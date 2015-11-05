@@ -19,6 +19,8 @@
  */
 package com.bric.image.transition;
 
+import net.jafama.FastMath;
+
 import java.awt.Dimension;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
@@ -53,7 +55,7 @@ public class LevitateTransition2D extends Transition2D {
 			float theta = (float)(Math.PI*k/2+(progress)*Math.PI/2);
 			if(theta>Math.PI/2) theta = (float)(Math.PI/2);
 			float k2;
-			theta = .2f+(float)(.2*Math.cos(-3*theta)); //theta*(.5f-progress);
+			theta = .2f + (float) (.2 * FastMath.cos(-3 * theta)); //theta*(.5f-progress);
 			k2 = (1-progress);
 			theta = theta*progress;
 			if(a%2==0) {

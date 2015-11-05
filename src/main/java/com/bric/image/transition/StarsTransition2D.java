@@ -19,6 +19,13 @@
  */
 package com.bric.image.transition;
 
+import com.bric.geom.RectangularTransform;
+import com.bric.geom.ShapeBounds;
+import com.bric.geom.ShapeStringUtils;
+import com.bric.geom.ShapeUtils;
+import com.bric.geom.TransformUtils;
+import net.jafama.FastMath;
+
 import java.awt.Dimension;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
@@ -27,12 +34,6 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Random;
 import java.util.Vector;
-
-import com.bric.geom.RectangularTransform;
-import com.bric.geom.ShapeBounds;
-import com.bric.geom.ShapeStringUtils;
-import com.bric.geom.ShapeUtils;
-import com.bric.geom.TransformUtils;
 
 /** In this transition the current frame splits apart into
  * shrinking stars that spin off towards a distant point. Here are playback samples:
@@ -86,11 +87,11 @@ public class StarsTransition2D extends AbstractClippedTransition2D {
 		GeneralPath p = new GeneralPath();
 		double angle = 0;
 		double k = Math.PI*2/10;
-		p.moveTo( (float)(Math.cos(angle)) , (float)(Math.sin(angle)) );
+		p.moveTo( (float)(FastMath.cos(angle)) , (float)(FastMath.sin(angle)) );
 		for(int a = 0; a<5; a++) {
-			p.lineTo( (float)(r2*Math.cos(angle+k)), (float)(r2*Math.sin(angle+k)) );
+			p.lineTo( (float)(r2*FastMath.cos(angle+k)), (float)(r2*FastMath.sin(angle+k)) );
 			angle+= Math.PI*2.0/5.0;
-			p.lineTo( (float)(Math.cos(angle)), (float)(Math.sin(angle)) );
+			p.lineTo( (float)(FastMath.cos(angle)), (float)(FastMath.sin(angle)) );
 		}
 		p.closePath();
 		return p;

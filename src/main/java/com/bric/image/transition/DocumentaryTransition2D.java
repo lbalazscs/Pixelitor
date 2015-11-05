@@ -19,13 +19,14 @@
  */
 package com.bric.image.transition;
 
+import com.bric.geom.RectangularTransform;
+import net.jafama.FastMath;
+
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.util.Vector;
-
-import com.bric.geom.RectangularTransform;
 
 /** This is a combination of zooming and panning.  It is reminiscent of PBS documentaries. Here are playback samples:
  * <p><table summary="Sample Animations of DocumentaryTransition2D" cellspacing="50" border="0"><tr>
@@ -119,7 +120,7 @@ public class DocumentaryTransition2D extends Transition2D {
 					k1*r1.height);
 		}
 		float zoomProgress;
-		float panProgress = (float)(.5+.5*Math.sin(Math.PI*(progress*progress-.5)));
+		float panProgress = (float) (.5 + .5 * FastMath.sin(Math.PI * (progress * progress - .5)));
 		if(progress<cutOff) {
 			//we're zooming in
 			zoomProgress = progress/cutOff;
