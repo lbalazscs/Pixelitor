@@ -145,12 +145,13 @@ public class ImageLayer extends ContentLayer {
         requireNonNull(image);
 
         setImage(image);
-        checkConstructorPostConditions();
         updateIconImage();
+        checkConstructorPostConditions();
     }
 
     /**
-     * Creates a new layer with the given image and size. Used when an image is pasted into a layer
+     * Creates a new layer with the given image and size.
+     * Used when an image is pasted into a layer
      */
     public ImageLayer(Composition comp, BufferedImage pastedImage, String name, int width, int height) {
         super(comp, name, null);
@@ -191,8 +192,8 @@ public class ImageLayer extends ContentLayer {
         }
         setTranslation(newTX, newTY);
 
-        checkConstructorPostConditions();
         updateIconImage();
+        checkConstructorPostConditions();
     }
 
     /**
@@ -204,6 +205,23 @@ public class ImageLayer extends ContentLayer {
         BufferedImage emptyImage = createEmptyImageForLayer(canvas.getWidth(), canvas.getHeight());
         setImage(emptyImage);
         checkConstructorPostConditions();
+    }
+
+    private void checkConstructorPostConditions() {
+        assert canvas != null;
+        assert image != null;
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+        ImageUtils.serializeImage(out, image);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        state = NORMAL;
+        in.defaultReadObject();
+        setImage(ImageUtils.deserializeImage(in));
+        imageContentChanged = false;
     }
 
     @Override
@@ -493,18 +511,6 @@ public class ImageLayer extends ContentLayer {
         } catch (OutOfMemoryError e) {
             Dialogs.showOutOfMemoryDialog(e);
         }
-    }
-
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-        ImageUtils.serializeImage(out, image);
-    }
-
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        state = NORMAL;
-        in.defaultReadObject();
-        setImage(ImageUtils.deserializeImage(in));
-        imageContentChanged = false;
     }
 
     /**
@@ -839,11 +845,6 @@ public class ImageLayer extends ContentLayer {
         BufferedImage dest = ImageUtils.crop(img, cropX, cropY, cropWidth, cropHeight);
         setImage(dest);
         setTranslation(0, 0);
-    }
-
-    private void checkConstructorPostConditions() {
-        assert canvas != null;
-        assert image != null;
     }
 
     @Override

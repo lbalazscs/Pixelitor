@@ -413,291 +413,6 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createColorsMenu() {
-        PMenu colorsMenu = new PMenu("Colors", 'C');
-
-        colorsMenu.buildFA("Color Balance", ColorBalance::new).withKey(CTRL_B).add();
-        colorsMenu.buildFA("Hue/Saturation", HueSat::new).withKey(CTRL_U).add();
-        colorsMenu.buildFA("Colorize", Colorize::new).add();
-        colorsMenu.buildFA("Levels", Levels::new).withKey(CTRL_L).add();
-        if (Build.advancedLayersEnabled()) {
-            colorsMenu.buildFA("Levels 2", Levels2::new).add();
-        }
-        colorsMenu.buildFA("Brightness/Contrast", Brightness::new).add();
-        colorsMenu.buildFA("Solarize", Solarize::new).add();
-        colorsMenu.buildFA("Sepia", Sepia::new).add();
-        colorsMenu.buildFA("Invert", Invert::new).noGUI().withKey(CTRL_I).add();
-        colorsMenu.buildFA("Channel Invert", ChannelInvert::new).add();
-        colorsMenu.buildFA("Channel Mixer", ChannelMixer::new).add();
-
-        colorsMenu.add(createExtractChannelsSubmenu());
-
-        colorsMenu.add(createReduceColorsSubmenu());
-
-        colorsMenu.add(createFillSubmenu());
-
-        return colorsMenu;
-    }
-
-    private static JMenu createFillSubmenu() {
-        PMenu sub = new PMenu("Fill with");
-
-        sub.buildFA(FOREGROUND.createFillFilterAction()).withKey(ALT_BACKSPACE).add();
-        sub.buildFA(BACKGROUND.createFillFilterAction()).withKey(CTRL_BACKSPACE).add();
-        sub.addFA(TRANSPARENT.createFillFilterAction());
-
-        sub.buildFA("Color Wheel", ColorWheel::new).withFillListName().add();
-        sub.buildFA("Four Color Gradient", JHFourColorGradient::new)
-                .withFillListName().add();
-        sub.buildFA("Starburst", Starburst::new).withFillListName().add();
-
-        return sub;
-    }
-
-    private static JMenu createExtractChannelsSubmenu() {
-        PMenu sub = new PMenu("Extract Channels");
-
-        sub.addFA("Extract Channel", ExtractChannel::new);
-
-        sub.addSeparator();
-
-        sub.buildFA("Luminosity", Luminosity::new).noGUI().extract().add();
-
-        FilterAction extractValueChannel = ExtractChannelFilter.getValueChannelFA();
-        sub.addFA(extractValueChannel);
-
-        FilterAction desaturateChannel = ExtractChannelFilter.getDesaturateChannelFA();
-        sub.addFA(desaturateChannel);
-
-        sub.addSeparator();
-
-        FilterAction getHue = ExtractChannelFilter.getHueChannelFA();
-        sub.addFA(getHue);
-
-        FilterAction getHuiInColors = ExtractChannelFilter.getHueInColorsChannelFA();
-        sub.addFA(getHuiInColors);
-
-        FilterAction getSat = ExtractChannelFilter.getSaturationChannelFA();
-        sub.addFA(getSat);
-
-        return sub;
-    }
-
-    private static JMenu createReduceColorsSubmenu() {
-        PMenu sub = new PMenu("Reduce Colors");
-
-        sub.addFA("Quantize", JHQuantize::new);
-        sub.addFA("Posterize", Posterize::new);
-        sub.addFA("Threshold", Threshold::new);
-
-        sub.addSeparator();
-
-        sub.addFA("Tritone", JHTriTone::new);
-        sub.addFA("Gradient Map", GradientMap::new);
-
-        sub.addSeparator();
-
-        sub.addFA("Color Halftone", JHColorHalftone::new);
-        sub.addFA("Dither", JHDither::new);
-
-        return sub;
-    }
-
-    private static JMenu createSelectionMenu() {
-        PMenu selectMenu = new PMenu("Selection", 'S');
-
-        selectMenu.buildAction(SelectionActions.getDeselectAction()).enableIf(ACTION_ENABLED).withKey(CTRL_D).add();
-
-        selectMenu.buildAction(SelectionActions.getInvertSelectionAction()).enableIf(ACTION_ENABLED).withKey(CTRL_SHIFT_I).add();
-        selectMenu.buildAction(SelectionActions.getModifyAction()).enableIf(ACTION_ENABLED).add();
-
-        selectMenu.addSeparator();
-        selectMenu.buildAction(SelectionActions.getTraceWithBrush()).enableIf(ACTION_ENABLED).add();
-        selectMenu.buildAction(SelectionActions.getTraceWithEraser()).enableIf(ACTION_ENABLED).add();
-
-        return selectMenu;
-    }
-
-    private static JMenu createFilterMenu() {
-        PMenu filterMenu = new PMenu("Filter", 'T');
-
-        filterMenu.add(createBlurSharpenSubmenu());
-        filterMenu.add(createDistortSubmenu());
-        filterMenu.add(createDislocateSubmenu());
-        filterMenu.add(createLightSubmenu());
-        filterMenu.add(createNoiseSubmenu());
-        filterMenu.add(createRenderSubmenu());
-        filterMenu.add(createArtisticSubmenu());
-        filterMenu.add(createFindEdgesSubmenu());
-        filterMenu.add(createOtherSubmenu());
-
-        KeyStroke keyStroke = T;
-        if (Build.advancedLayersEnabled()) {
-            keyStroke = null;
-        }
-        filterMenu.buildFA(TextFilter.createFilterAction()).withKey(keyStroke).add();
-
-        return filterMenu;
-    }
-
-    private static JMenu createRenderSubmenu() {
-        PMenu sub = new PMenu("Render");
-
-        sub.addFA("Clouds", Clouds::new);
-        sub.addRenderFA("Value Noise", ValueNoise::new);
-        sub.addRenderFA("Caustics", JHCaustics::new);
-        sub.addRenderFA("Plasma", JHPlasma::new);
-        sub.addRenderFA("Wood", JHWood::new);
-        sub.addRenderFA("Cells", JHCells::new);
-        sub.addRenderFA("Brushed Metal", JHBrushedMetal::new);
-        sub.addFA("Voronoi Diagram", Voronoi::new);
-        sub.addFA("Fractal Tree", FractalTree::new);
-        sub.addFA("Mystic Rose", MysticRose::new);
-
-        return sub;
-    }
-
-    private static JMenu createFindEdgesSubmenu() {
-        PMenu sub = new PMenu("Find Edges");
-
-        sub.addFA("Convolution Edge Detection", JHConvolutionEdge::new);
-
-        sub.addAction(new FilterAction("Laplacian", JHLaplacian::new)
-                .withListNamePrefix("Laplacian Edge Detection")
-                .noGUI());
-
-        sub.addFA("Difference of Gaussians", JHDifferenceOfGaussians::new);
-        sub.addFA("Canny Edge Detector", Canny::new);
-
-        return sub;
-    }
-
-    private static JMenu createOtherSubmenu() {
-        PMenu sub = new PMenu("Other");
-
-        sub.addFA("Random Filter", RandomFilter::new);
-        sub.addFA("Transform Layer", TransformLayer::new);
-
-        sub.addFA(Convolve.createFilterAction(3));
-        sub.addFA(Convolve.createFilterAction(5));
-
-        sub.addFA("Drop Shadow", JHDropShadow::new);
-        sub.addFA("2D Transitions", Transition2D::new);
-
-        sub.addFA("Channel to Transparency", ChannelToTransparency::new);
-
-        sub.buildFA("Invert Transparency", InvertTransparency::new).noGUI().add();
-
-        return sub;
-    }
-
-    private static JMenu createArtisticSubmenu() {
-        PMenu sub = new PMenu("Artistic");
-
-        sub.addFA("Crystallize", JHCrystallize::new);
-        sub.addFA("Pointillize", JHPointillize::new);
-        sub.addFA("Stamp", JHStamp::new);
-        sub.addFA("Oil Painting", JHOilPainting::new);
-        sub.addFA("Random Spheres", RandomSpheres::new);
-        sub.addFA("Smear", JHSmear::new);
-        sub.addFA("Emboss", JHEmboss::new);
-        sub.addFA("Orton Effect", Orton::new);
-        sub.addFA("Photo Collage", PhotoCollage::new);
-        sub.addFA("Weave", JHWeave::new);
-
-        return sub;
-    }
-
-    private static JMenu createBlurSharpenSubmenu() {
-        PMenu sub = new PMenu("Blur/Sharpen");
-        sub.addFA("Gaussian Blur", JHGaussianBlur::new);
-        sub.addFA("Smart Blur", JHSmartBlur::new);
-        sub.addFA("Box Blur", JHBoxBlur::new);
-        sub.addFA("Fast Blur", FastBlur::new);
-        sub.addFA("Lens Blur", JHLensBlur::new);
-        sub.addFA(MOTION_BLUR.createFilterAction());
-        sub.addFA(SPIN_ZOOM_BLUR.createFilterAction());
-        sub.addFA("Focus", JHFocus::new);
-        sub.addSeparator();
-        sub.addFA("Unsharp Mask", JHUnsharpMask::new);
-        return sub;
-    }
-
-    private static JMenu createNoiseSubmenu() {
-        PMenu sub = new PMenu("Noise");
-
-        sub.buildFA("Reduce Single Pixel Noise", JHReduceNoise::new).noGUI().add();
-        sub.buildFA("3x3 Median Filter", JHMedian::new).noGUI().add();
-
-        sub.addSeparator();
-
-        sub.addFA("Add Noise", AddNoise::new);
-        sub.addFA("Pixelate", JHPixelate::new);
-
-        return sub;
-    }
-
-    private static JMenu createLightSubmenu() {
-        PMenu sub = new PMenu("Light");
-
-        sub.addFA("Glow", JHGlow::new);
-        sub.addFA("Sparkle", JHSparkle::new);
-        sub.addFA("Rays", JHRays::new);
-        sub.addFA("Glint", JHGlint::new);
-        sub.addFA("Flashlight", Flashlight::new);
-
-        return sub;
-    }
-
-    private static JMenu createDistortSubmenu() {
-        PMenu sub = new PMenu("Distort");
-
-        sub.addFA("Swirl, Pinch, Bulge", UnifiedSwirl::new);
-        sub.addFA("Circle to Square", CircleToSquare::new);
-        sub.addFA("Perspective", JHPerspective::new);
-
-        sub.addSeparator();
-
-        sub.addFA("Lens Over Image", JHLensOverImage::new);
-        sub.addFA("Magnify", Magnify::new);
-
-        sub.addSeparator();
-
-        sub.addFA("Turbulent Distortion", JHTurbulentDistortion::new);
-        sub.addFA("Underwater", JHUnderWater::new);
-        sub.addFA("Water Ripple", JHWaterRipple::new);
-        sub.addFA("Waves", JHWaves::new);
-        sub.addFA("Angular Waves", AngularWaves::new);
-        sub.addFA("Radial Waves", RadialWaves::new);
-
-        sub.addSeparator();
-
-        sub.addFA("Glass Tiles", GlassTiles::new);
-        sub.addFA("Polar Glass Tiles", PolarTiles::new);
-        sub.addFA("Frosted Glass", JHFrostedGlass::new);
-
-        sub.addSeparator();
-
-        sub.addFA("Little Planet", LittlePlanet::new);
-        sub.addFA("Polar Coordinates", JHPolarCoordinates::new);
-        sub.addFA("Wrap Around Arc", JHWrapAroundArc::new);
-
-        return sub;
-    }
-
-    private static JMenu createDislocateSubmenu() {
-        PMenu sub = new PMenu("Dislocate");
-
-        sub.addFA("Kaleidoscope", JHKaleidoscope::new);
-        sub.addFA("Drunk Vision", DrunkVision::new);
-        sub.addFA("Video Feedback", JHVideoFeedback::new);
-        sub.addFA("Offset", JHOffset::new);
-        sub.addFA("Slice", Slice::new);
-        sub.addFA("Mirror", Mirror::new);
-
-        return sub;
-    }
-
     private static JMenu createLayerMenu(PixelitorWindow pw) {
         PMenu layersMenu = new PMenu("Layer", 'L');
 
@@ -756,15 +471,46 @@ public class MenuBar extends JMenuBar {
         return layersMenu;
     }
 
-    private static JMenu createAdjustmentLayersSubmenu() {
-        PMenu sub = new PMenu("New Adjustment Layer");
+    private static JMenu createLayerStackSubmenu() {
+        PMenu sub = new PMenu("Layer Stack");
 
-        sub.addAction(new MenuAction("Invert Adjustment") { // TODO not "Invert" because of assertj test lookup confusion
+        sub.addActionWithKey(LayerMoveAction.INSTANCE_UP, CTRL_CLOSE_BRACKET);
+
+        sub.addActionWithKey(LayerMoveAction.INSTANCE_DOWN, CTRL_OPEN_BRACKET);
+
+        sub.addActionWithKey(new MenuAction("Layer to Top") {
             @Override
             public void onClick() {
-                AddAdjLayerAction.INSTANCE.actionPerformed(null);
+                Composition comp = ImageComponents.getActiveComp().get();
+                comp.moveActiveLayerToTop();
             }
-        });
+        }, CTRL_SHIFT_CLOSE_BRACKET);
+
+        sub.addActionWithKey(new MenuAction("Layer to Bottom") {
+            @Override
+            public void onClick() {
+                Composition comp = ImageComponents.getActiveComp().get();
+                comp.moveActiveLayerToBottom();
+            }
+        }, CTRL_SHIFT_OPEN_BRACKET);
+
+        sub.addSeparator();
+
+        sub.addActionWithKey(new MenuAction("Raise Layer Selection") {
+            @Override
+            public void onClick() {
+                Composition comp = ImageComponents.getActiveComp().get();
+                comp.moveLayerSelectionUp();
+            }
+        }, ALT_CLOSE_BRACKET);
+
+        sub.addActionWithKey(new MenuAction("Lower Layer Selection") {
+            @Override
+            public void onClick() {
+                Composition comp = ImageComponents.getActiveComp().get();
+                comp.moveLayerSelectionDown();
+            }
+        }, ALT_OPEN_BRACKET);
 
         return sub;
     }
@@ -866,46 +612,331 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createLayerStackSubmenu() {
-        PMenu sub = new PMenu("Layer Stack");
+    private static JMenu createTextLayerSubmenu(PixelitorWindow pw) {
+        PMenu sub = new PMenu("Text Layer");
 
-        sub.addActionWithKey(LayerMoveAction.INSTANCE_UP, CTRL_CLOSE_BRACKET);
+        sub.addActionWithKey(new MenuAction("New...") {
+            @Override
+            public void onClick() {
+                TextLayer.createNew(pw);
+            }
+        }, T);
 
-        sub.addActionWithKey(LayerMoveAction.INSTANCE_DOWN, CTRL_OPEN_BRACKET);
+        sub.addActionWithKey(new MenuAction("Edit...", IS_TEXT_LAYER) {
+            @Override
+            public void onClick() {
+                Composition comp = ImageComponents.getActiveIC().getComp();
+                Layer layer = comp.getActiveLayer();
+                TextLayer textLayer = (TextLayer) layer;
+                textLayer.edit(pw);
+            }
+        }, CTRL_T);
 
-        sub.addActionWithKey(new MenuAction("Layer to Top") {
+        sub.addAction(new MenuAction("Rasterize", IS_TEXT_LAYER) {
             @Override
             public void onClick() {
                 Composition comp = ImageComponents.getActiveComp().get();
-                comp.moveActiveLayerToTop();
+                TextLayer.replaceWithRasterized(comp);
             }
-        }, CTRL_SHIFT_CLOSE_BRACKET);
+        });
 
-        sub.addActionWithKey(new MenuAction("Layer to Bottom") {
+        return sub;
+    }
+
+    private static JMenu createAdjustmentLayersSubmenu() {
+        PMenu sub = new PMenu("New Adjustment Layer");
+
+        sub.addAction(new MenuAction("Invert Adjustment") { // TODO not "Invert" because of assertj test lookup confusion
             @Override
             public void onClick() {
-                Composition comp = ImageComponents.getActiveComp().get();
-                comp.moveActiveLayerToBottom();
+                AddAdjLayerAction.INSTANCE.actionPerformed(null);
             }
-        }, CTRL_SHIFT_OPEN_BRACKET);
+        });
+
+        return sub;
+    }
+
+    private static JMenu createSelectionMenu() {
+        PMenu selectMenu = new PMenu("Selection", 'S');
+
+        selectMenu.buildAction(SelectionActions.getDeselectAction()).enableIf(ACTION_ENABLED).withKey(CTRL_D).add();
+
+        selectMenu.buildAction(SelectionActions.getInvertSelectionAction()).enableIf(ACTION_ENABLED).withKey(CTRL_SHIFT_I).add();
+        selectMenu.buildAction(SelectionActions.getModifyAction()).enableIf(ACTION_ENABLED).add();
+
+        selectMenu.addSeparator();
+        selectMenu.buildAction(SelectionActions.getTraceWithBrush()).enableIf(ACTION_ENABLED).add();
+        selectMenu.buildAction(SelectionActions.getTraceWithEraser()).enableIf(ACTION_ENABLED).add();
+
+        return selectMenu;
+    }
+
+    private static JMenu createColorsMenu() {
+        PMenu colorsMenu = new PMenu("Colors", 'C');
+
+        colorsMenu.buildFA("Color Balance", ColorBalance::new).withKey(CTRL_B).add();
+        colorsMenu.buildFA("Hue/Saturation", HueSat::new).withKey(CTRL_U).add();
+        colorsMenu.buildFA("Colorize", Colorize::new).add();
+        colorsMenu.buildFA("Levels", Levels::new).withKey(CTRL_L).add();
+        if (Build.advancedLayersEnabled()) {
+            colorsMenu.buildFA("Levels 2", Levels2::new).add();
+        }
+        colorsMenu.buildFA("Brightness/Contrast", Brightness::new).add();
+        colorsMenu.buildFA("Solarize", Solarize::new).add();
+        colorsMenu.buildFA("Sepia", Sepia::new).add();
+        colorsMenu.buildFA("Invert", Invert::new).noGUI().withKey(CTRL_I).add();
+        colorsMenu.buildFA("Channel Invert", ChannelInvert::new).add();
+        colorsMenu.buildFA("Channel Mixer", ChannelMixer::new).add();
+
+        colorsMenu.add(createExtractChannelsSubmenu());
+
+        colorsMenu.add(createReduceColorsSubmenu());
+
+        colorsMenu.add(createFillSubmenu());
+
+        return colorsMenu;
+    }
+
+    private static JMenu createExtractChannelsSubmenu() {
+        PMenu sub = new PMenu("Extract Channels");
+
+        sub.addFA("Extract Channel", ExtractChannel::new);
 
         sub.addSeparator();
 
-        sub.addActionWithKey(new MenuAction("Raise Layer Selection") {
-            @Override
-            public void onClick() {
-                Composition comp = ImageComponents.getActiveComp().get();
-                comp.moveLayerSelectionUp();
-            }
-        }, ALT_CLOSE_BRACKET);
+        sub.buildFA("Luminosity", Luminosity::new).noGUI().extract().add();
 
-        sub.addActionWithKey(new MenuAction("Lower Layer Selection") {
-            @Override
-            public void onClick() {
-                Composition comp = ImageComponents.getActiveComp().get();
-                comp.moveLayerSelectionDown();
-            }
-        }, ALT_OPEN_BRACKET);
+        FilterAction extractValueChannel = ExtractChannelFilter.getValueChannelFA();
+        sub.addFA(extractValueChannel);
+
+        FilterAction desaturateChannel = ExtractChannelFilter.getDesaturateChannelFA();
+        sub.addFA(desaturateChannel);
+
+        sub.addSeparator();
+
+        FilterAction getHue = ExtractChannelFilter.getHueChannelFA();
+        sub.addFA(getHue);
+
+        FilterAction getHuiInColors = ExtractChannelFilter.getHueInColorsChannelFA();
+        sub.addFA(getHuiInColors);
+
+        FilterAction getSat = ExtractChannelFilter.getSaturationChannelFA();
+        sub.addFA(getSat);
+
+        return sub;
+    }
+
+    private static JMenu createReduceColorsSubmenu() {
+        PMenu sub = new PMenu("Reduce Colors");
+
+        sub.addFA("Quantize", JHQuantize::new);
+        sub.addFA("Posterize", Posterize::new);
+        sub.addFA("Threshold", Threshold::new);
+
+        sub.addSeparator();
+
+        sub.addFA("Tritone", JHTriTone::new);
+        sub.addFA("Gradient Map", GradientMap::new);
+
+        sub.addSeparator();
+
+        sub.addFA("Color Halftone", JHColorHalftone::new);
+        sub.addFA("Dither", JHDither::new);
+
+        return sub;
+    }
+
+    private static JMenu createFillSubmenu() {
+        PMenu sub = new PMenu("Fill with");
+
+        sub.buildFA(FOREGROUND.createFillFilterAction()).withKey(ALT_BACKSPACE).add();
+        sub.buildFA(BACKGROUND.createFillFilterAction()).withKey(CTRL_BACKSPACE).add();
+        sub.addFA(TRANSPARENT.createFillFilterAction());
+
+        sub.buildFA("Color Wheel", ColorWheel::new).withFillListName().add();
+        sub.buildFA("Four Color Gradient", JHFourColorGradient::new)
+                .withFillListName().add();
+        sub.buildFA("Starburst", Starburst::new).withFillListName().add();
+
+        return sub;
+    }
+
+    private static JMenu createFilterMenu() {
+        PMenu filterMenu = new PMenu("Filter", 'T');
+
+        filterMenu.add(createBlurSharpenSubmenu());
+        filterMenu.add(createDistortSubmenu());
+        filterMenu.add(createDislocateSubmenu());
+        filterMenu.add(createLightSubmenu());
+        filterMenu.add(createNoiseSubmenu());
+        filterMenu.add(createRenderSubmenu());
+        filterMenu.add(createArtisticSubmenu());
+        filterMenu.add(createFindEdgesSubmenu());
+        filterMenu.add(createOtherSubmenu());
+
+        KeyStroke keyStroke = T;
+        if (Build.advancedLayersEnabled()) {
+            keyStroke = null;
+        }
+        filterMenu.buildFA(TextFilter.createFilterAction()).withKey(keyStroke).add();
+
+        return filterMenu;
+    }
+
+    private static JMenu createBlurSharpenSubmenu() {
+        PMenu sub = new PMenu("Blur/Sharpen");
+        sub.addFA("Gaussian Blur", JHGaussianBlur::new);
+        sub.addFA("Smart Blur", JHSmartBlur::new);
+        sub.addFA("Box Blur", JHBoxBlur::new);
+        sub.addFA("Fast Blur", FastBlur::new);
+        sub.addFA("Lens Blur", JHLensBlur::new);
+        sub.addFA(MOTION_BLUR.createFilterAction());
+        sub.addFA(SPIN_ZOOM_BLUR.createFilterAction());
+        sub.addFA("Focus", JHFocus::new);
+        sub.addSeparator();
+        sub.addFA("Unsharp Mask", JHUnsharpMask::new);
+        return sub;
+    }
+
+    private static JMenu createDistortSubmenu() {
+        PMenu sub = new PMenu("Distort");
+
+        sub.addFA("Swirl, Pinch, Bulge", UnifiedSwirl::new);
+        sub.addFA("Circle to Square", CircleToSquare::new);
+        sub.addFA("Perspective", JHPerspective::new);
+
+        sub.addSeparator();
+
+        sub.addFA("Lens Over Image", JHLensOverImage::new);
+        sub.addFA("Magnify", Magnify::new);
+
+        sub.addSeparator();
+
+        sub.addFA("Turbulent Distortion", JHTurbulentDistortion::new);
+        sub.addFA("Underwater", JHUnderWater::new);
+        sub.addFA("Water Ripple", JHWaterRipple::new);
+        sub.addFA("Waves", JHWaves::new);
+        sub.addFA("Angular Waves", AngularWaves::new);
+        sub.addFA("Radial Waves", RadialWaves::new);
+
+        sub.addSeparator();
+
+        sub.addFA("Glass Tiles", GlassTiles::new);
+        sub.addFA("Polar Glass Tiles", PolarTiles::new);
+        sub.addFA("Frosted Glass", JHFrostedGlass::new);
+
+        sub.addSeparator();
+
+        sub.addFA("Little Planet", LittlePlanet::new);
+        sub.addFA("Polar Coordinates", JHPolarCoordinates::new);
+        sub.addFA("Wrap Around Arc", JHWrapAroundArc::new);
+
+        return sub;
+    }
+
+    private static JMenu createDislocateSubmenu() {
+        PMenu sub = new PMenu("Dislocate");
+
+        sub.addFA("Kaleidoscope", JHKaleidoscope::new);
+        sub.addFA("Drunk Vision", DrunkVision::new);
+        sub.addFA("Video Feedback", JHVideoFeedback::new);
+        sub.addFA("Offset", JHOffset::new);
+        sub.addFA("Slice", Slice::new);
+        sub.addFA("Mirror", Mirror::new);
+
+        return sub;
+    }
+
+    private static JMenu createLightSubmenu() {
+        PMenu sub = new PMenu("Light");
+
+        sub.addFA("Glow", JHGlow::new);
+        sub.addFA("Sparkle", JHSparkle::new);
+        sub.addFA("Rays", JHRays::new);
+        sub.addFA("Glint", JHGlint::new);
+        sub.addFA("Flashlight", Flashlight::new);
+
+        return sub;
+    }
+
+    private static JMenu createNoiseSubmenu() {
+        PMenu sub = new PMenu("Noise");
+
+        sub.buildFA("Reduce Single Pixel Noise", JHReduceNoise::new).noGUI().add();
+        sub.buildFA("3x3 Median Filter", JHMedian::new).noGUI().add();
+
+        sub.addSeparator();
+
+        sub.addFA("Add Noise", AddNoise::new);
+        sub.addFA("Pixelate", JHPixelate::new);
+
+        return sub;
+    }
+
+    private static JMenu createRenderSubmenu() {
+        PMenu sub = new PMenu("Render");
+
+        sub.addFA("Clouds", Clouds::new);
+        sub.addRenderFA("Value Noise", ValueNoise::new);
+        sub.addRenderFA("Caustics", JHCaustics::new);
+        sub.addRenderFA("Plasma", JHPlasma::new);
+        sub.addRenderFA("Wood", JHWood::new);
+        sub.addRenderFA("Cells", JHCells::new);
+        sub.addRenderFA("Brushed Metal", JHBrushedMetal::new);
+        sub.addFA("Voronoi Diagram", Voronoi::new);
+        sub.addFA("Fractal Tree", FractalTree::new);
+        sub.addFA("Mystic Rose", MysticRose::new);
+
+        return sub;
+    }
+
+    private static JMenu createArtisticSubmenu() {
+        PMenu sub = new PMenu("Artistic");
+
+        sub.addFA("Crystallize", JHCrystallize::new);
+        sub.addFA("Pointillize", JHPointillize::new);
+        sub.addFA("Stamp", JHStamp::new);
+        sub.addFA("Oil Painting", JHOilPainting::new);
+        sub.addFA("Random Spheres", RandomSpheres::new);
+        sub.addFA("Smear", JHSmear::new);
+        sub.addFA("Emboss", JHEmboss::new);
+        sub.addFA("Orton Effect", Orton::new);
+        sub.addFA("Photo Collage", PhotoCollage::new);
+        sub.addFA("Weave", JHWeave::new);
+
+        return sub;
+    }
+
+    private static JMenu createFindEdgesSubmenu() {
+        PMenu sub = new PMenu("Find Edges");
+
+        sub.addFA("Convolution Edge Detection", JHConvolutionEdge::new);
+
+        sub.addAction(new FilterAction("Laplacian", JHLaplacian::new)
+                .withListNamePrefix("Laplacian Edge Detection")
+                .noGUI());
+
+        sub.addFA("Difference of Gaussians", JHDifferenceOfGaussians::new);
+        sub.addFA("Canny Edge Detector", Canny::new);
+
+        return sub;
+    }
+
+    private static JMenu createOtherSubmenu() {
+        PMenu sub = new PMenu("Other");
+
+        sub.addFA("Random Filter", RandomFilter::new);
+        sub.addFA("Transform Layer", TransformLayer::new);
+
+        sub.addFA(Convolve.createFilterAction(3));
+        sub.addFA(Convolve.createFilterAction(5));
+
+        sub.addFA("Drop Shadow", JHDropShadow::new);
+        sub.addFA("2D Transitions", Transition2D::new);
+
+        sub.addFA("Channel to Transparency", ChannelToTransparency::new);
+
+        sub.buildFA("Invert Transparency", InvertTransparency::new).noGUI().add();
 
         return sub;
     }
@@ -1105,66 +1136,69 @@ public class MenuBar extends JMenuBar {
         return developMenu;
     }
 
-    private static JMenu createTextLayerSubmenu(PixelitorWindow pw) {
-        PMenu sub = new PMenu("Text Layer");
+    private static JMenu createDebugSubmenu(PixelitorWindow pw) {
+        PMenu sub = new PMenu("Debug");
 
-        sub.addActionWithKey(new MenuAction("New...") {
+        sub.addAction(new MenuAction("repaint() on the active image") {
             @Override
             public void onClick() {
-                TextLayer.createNew(pw);
-            }
-        }, T);
-
-        sub.addActionWithKey(new MenuAction("Edit...", IS_TEXT_LAYER) {
-            @Override
-            public void onClick() {
-                Composition comp = ImageComponents.getActiveIC().getComp();
-                Layer layer = comp.getActiveLayer();
-                TextLayer textLayer = (TextLayer) layer;
-                textLayer.edit(pw);
-            }
-        }, CTRL_T);
-
-        sub.addAction(new MenuAction("Rasterize", IS_TEXT_LAYER) {
-            @Override
-            public void onClick() {
-                Composition comp = ImageComponents.getActiveComp().get();
-                TextLayer.replaceWithRasterized(comp);
+                ImageComponents.repaintActive();
             }
         });
 
-        return sub;
-    }
-
-    private static JMenu createSplashSubmenu() {
-        PMenu sub = new PMenu("Splash");
-
-        sub.buildAction(new MenuAction("Create Splash Image") {
+        sub.buildAction(new MenuAction("revalidate() the main window") {
             @Override
             public void onClick() {
-                ImageTests.createSplashImage();
+                pw.getContentPane().revalidate();
             }
         }).enableIf(ACTION_ENABLED).add();
 
-        sub.buildAction(new MenuAction("Save Many Splash Images...") {
+        sub.addAction(new MenuAction("reset the translation of current layer") {
             @Override
             public void onClick() {
-                ImageTests.saveManySplashImages();
+                Composition comp = ImageComponents.getActiveComp().get();
+                Layer layer = comp.getActiveLayer();
+                if (layer instanceof ContentLayer) {
+                    ContentLayer contentLayer = (ContentLayer) layer;
+                    contentLayer.setTranslation(0, 0);
+                }
+                if (layer.hasMask()) {
+                    layer.getMask().setTranslation(0, 0);
+                }
+                comp.imageChanged(FULL);
             }
-        }).enableIf(ACTION_ENABLED).add();
+        });
 
-        return sub;
-    }
+        sub.addActionWithKey(new MenuAction("Debug Translation", IS_IMAGE_LAYER) {
+            @Override
+            public void onClick() {
+                ImageLayer layer = ImageComponents.getActiveImageLayerOrMaskOrNull();
+                layer.debugTranslation();
+            }
+        }, CTRL_K);
 
-    private static JMenu createExperimentalSubmenu() {
-        PMenu sub = new PMenu("Experimental");
+        sub.addAction(new MenuAction("Update Histograms") {
+            @Override
+            public void onClick() {
+                Composition comp = ImageComponents.getActiveComp().get();
+                HistogramsPanel.INSTANCE.updateFromCompIfShown(comp);
+            }
+        });
 
-        sub.addFA("Droste", Droste::new);
-        sub.addFA("Sphere3D", Sphere3D::new);
-        sub.addFA("Grid", RenderGrid::new);
-        sub.addFA("Lightning", Lightning::new);
-        sub.addFA("Empty Polar", EmptyPolar::new);
-        sub.addFA("Checker Pattern", JHCheckerFilter::new);
+        sub.addAction(new MenuAction("Save All Images to Folder...") {
+            @Override
+            public void onClick() {
+                OpenSaveManager.saveAllImagesToDir();
+            }
+        });
+
+        sub.addAction(new MenuAction("Debug ImageLayer Images") {
+            @Override
+            public void onClick() {
+                Optional<ImageLayer> layer = ImageComponents.getActiveImageLayerOrMask();
+                layer.get().debugImages();
+            }
+        });
 
         return sub;
     }
@@ -1258,69 +1292,35 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createDebugSubmenu(PixelitorWindow pw) {
-        PMenu sub = new PMenu("Debug");
+    private static JMenu createSplashSubmenu() {
+        PMenu sub = new PMenu("Splash");
 
-        sub.addAction(new MenuAction("repaint() on the active image") {
+        sub.buildAction(new MenuAction("Create Splash Image") {
             @Override
             public void onClick() {
-                ImageComponents.repaintActive();
-            }
-        });
-
-        sub.buildAction(new MenuAction("revalidate() the main window") {
-            @Override
-            public void onClick() {
-                pw.getContentPane().revalidate();
+                ImageTests.createSplashImage();
             }
         }).enableIf(ACTION_ENABLED).add();
 
-        sub.addAction(new MenuAction("reset the translation of current layer") {
+        sub.buildAction(new MenuAction("Save Many Splash Images...") {
             @Override
             public void onClick() {
-                Composition comp = ImageComponents.getActiveComp().get();
-                Layer layer = comp.getActiveLayer();
-                if (layer instanceof ContentLayer) {
-                    ContentLayer contentLayer = (ContentLayer) layer;
-                    contentLayer.setTranslation(0, 0);
-                }
-                if (layer.hasMask()) {
-                    layer.getMask().setTranslation(0, 0);
-                }
-                comp.imageChanged(FULL);
+                ImageTests.saveManySplashImages();
             }
-        });
+        }).enableIf(ACTION_ENABLED).add();
 
-        sub.addActionWithKey(new MenuAction("Debug Translation", IS_IMAGE_LAYER) {
-            @Override
-            public void onClick() {
-                ImageLayer layer = ImageComponents.getActiveImageLayerOrMaskOrNull();
-                layer.debugTranslation();
-            }
-        }, CTRL_K);
+        return sub;
+    }
 
-        sub.addAction(new MenuAction("Update Histograms") {
-            @Override
-            public void onClick() {
-                Composition comp = ImageComponents.getActiveComp().get();
-                HistogramsPanel.INSTANCE.updateFromCompIfShown(comp);
-            }
-        });
+    private static JMenu createExperimentalSubmenu() {
+        PMenu sub = new PMenu("Experimental");
 
-        sub.addAction(new MenuAction("Save All Images to Folder...") {
-            @Override
-            public void onClick() {
-                OpenSaveManager.saveAllImagesToDir();
-            }
-        });
-
-        sub.addAction(new MenuAction("Debug ImageLayer Images") {
-            @Override
-            public void onClick() {
-                Optional<ImageLayer> layer = ImageComponents.getActiveImageLayerOrMask();
-                layer.get().debugImages();
-            }
-        });
+        sub.addFA("Droste", Droste::new);
+        sub.addFA("Sphere3D", Sphere3D::new);
+        sub.addFA("Grid", RenderGrid::new);
+        sub.addFA("Lightning", Lightning::new);
+        sub.addFA("Empty Polar", EmptyPolar::new);
+        sub.addFA("Checker Pattern", JHCheckerFilter::new);
 
         return sub;
     }

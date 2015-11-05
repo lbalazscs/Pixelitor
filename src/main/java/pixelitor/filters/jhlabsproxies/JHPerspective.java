@@ -20,7 +20,7 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.PerspectiveFilter;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.AdjustPanel;
-import pixelitor.filters.gui.GeographicalAdjustmentPanel;
+import pixelitor.filters.gui.GridAdjustmentPanel;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
@@ -71,7 +71,7 @@ public class JHPerspective extends FilterWithParametrizedGUI {
 
     @Override
     public AdjustPanel createAdjustPanel() {
-        return new GeographicalAdjustmentPanel(this, false, ShowOriginal.YES);
+        return new GridAdjustmentPanel(this, false, ShowOriginal.YES);
     }
 
 }

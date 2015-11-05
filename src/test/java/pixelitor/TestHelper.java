@@ -67,7 +67,7 @@ public class TestHelper {
         ImageDisplayStub imageDisplayStub = new ImageDisplayStub();
 
         Composition comp = Composition.createEmpty(TEST_WIDTH, TEST_HEIGHT);
-        comp.setImageComponent(imageDisplayStub);
+        comp.setImageDisplay(imageDisplayStub);
         comp.setName("Test");
 
         imageDisplayStub.setComp(comp);

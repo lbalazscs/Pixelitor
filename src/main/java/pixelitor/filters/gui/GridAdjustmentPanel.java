@@ -29,12 +29,13 @@ import java.util.List;
 import static java.awt.FlowLayout.CENTER;
 
 /**
- * An adjustment panel, where the components can be added in "geographical" places (north-west etc.)
+ * An adjustment panel, where the components (typically representing
+ * the four corners of the image) are added in a 2*2 grid
  */
-public class GeographicalAdjustmentPanel extends ParametrizedAdjustPanel {
+public class GridAdjustmentPanel extends ParametrizedAdjustPanel {
     private final boolean addLabels;
 
-    public GeographicalAdjustmentPanel(FilterWithParametrizedGUI filter, boolean addLabels, ShowOriginal showOriginal) {
+    public GridAdjustmentPanel(FilterWithParametrizedGUI filter, boolean addLabels, ShowOriginal showOriginal) {
         super(filter, showOriginal);
         this.addLabels = addLabels;
     }
@@ -45,24 +46,24 @@ public class GeographicalAdjustmentPanel extends ParametrizedAdjustPanel {
         JPanel controlPanel = new JPanel(new BorderLayout(5, 5));
 
         // a panel for parameters like "Edge Action", "Interpolation"
-        JPanel nonGeoPanel = new JPanel();
+        JPanel nonGridPanel = new JPanel();
 
         // the central panel, with max 4 controls
-        JPanel geoPanel = createGeoPanel();
+        JPanel gridPanel = createGridPanel();
 
         // A panel for global actions like "Randomize Settings", "Reset All"
         JPanel buttonsPanel = createButtonsPanel(addShowOriginal);
 
-        addParams(params, geoPanel, nonGeoPanel, buttonsPanel);
+        addParams(params, gridPanel, nonGridPanel, buttonsPanel);
 
-        controlPanel.add(geoPanel, BorderLayout.CENTER);
-        controlPanel.add(nonGeoPanel, BorderLayout.SOUTH);
+        controlPanel.add(gridPanel, BorderLayout.CENTER);
+        controlPanel.add(nonGridPanel, BorderLayout.SOUTH);
 
         add(controlPanel, BorderLayout.CENTER);
         add(buttonsPanel, BorderLayout.SOUTH);
     }
 
-    private void addParams(ParamSet params, JPanel geoPanel, JPanel nonGeoPanel, JPanel buttonsPanel) {
+    private void addParams(ParamSet params, JPanel gridPanel, JPanel nonGridPanel, JPanel buttonsPanel) {
         int added = 0;
 
         List<FilterParam> paramList = params.getParamList();
@@ -71,14 +72,14 @@ public class GeographicalAdjustmentPanel extends ParametrizedAdjustPanel {
             JComponent control = param.createGUI();
 
             String labelText = param.getName() + ':';
-            if (added < 4) { // the first 4 are added into the 4 "geographical" positions...
+            if (added < 4) { // the first 4 are added into the 4 grid positions...
                 if (addLabels) {
-                    geoPanel.add(new JLabel(labelText));
+                    gridPanel.add(new JLabel(labelText));
                 }
-                geoPanel.add(control);
-            } else { // ...and the rest into "non geographical" positions.
-                nonGeoPanel.add(new JLabel(labelText)); // these always need a label
-                nonGeoPanel.add(control);
+                gridPanel.add(control);
+            } else { // ...and the rest into "non grid" positions.
+                nonGridPanel.add(new JLabel(labelText)); // these always need a label
+                nonGridPanel.add(control);
             }
 
             added++;
@@ -91,7 +92,7 @@ public class GeographicalAdjustmentPanel extends ParametrizedAdjustPanel {
         }
     }
 
-    private JPanel createGeoPanel() {
+    private JPanel createGridPanel() {
         GridLayout layout;
         if (addLabels) {
             layout = new GridLayout(2, 4, 5, 5);

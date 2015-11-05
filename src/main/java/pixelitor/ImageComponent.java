@@ -83,7 +83,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
         this.comp = comp;
         this.canvas = comp.getCanvas();
-        comp.setImageComponent(this);
+        comp.setImageDisplay(this);
 
         setupFitScreenZoomSize(canvas.getWidth(), canvas.getHeight(), false);
 

@@ -21,7 +21,7 @@ import com.jhlabs.image.FourColorFilter;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.GeographicalAdjustmentPanel;
+import pixelitor.filters.gui.GridAdjustmentPanel;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
 
@@ -71,6 +71,6 @@ public class JHFourColorGradient extends FilterWithParametrizedGUI {
 
     @Override
     public AdjustPanel createAdjustPanel() {
-        return new GeographicalAdjustmentPanel(this, true, ShowOriginal.NO);
+        return new GridAdjustmentPanel(this, true, ShowOriginal.NO);
     }
 }
