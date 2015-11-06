@@ -22,10 +22,12 @@ import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.tools.ShapeType;
 import pixelitor.tools.StrokeType;
+import pixelitor.utils.GridBagHelper;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
-import java.awt.GridLayout;
+import java.awt.Dimension;
+import java.awt.GridBagLayout;
 
 import static pixelitor.tools.ShapeType.KIWI;
 import static pixelitor.tools.StrokeType.BASIC;
@@ -57,22 +59,27 @@ public class StrokeSettingsPanel extends JPanel {
             EnumParam<BasicStrokeJoin> joinParam) {
         JPanel capJoinPanel = new JPanel();
         capJoinPanel.setBorder(BorderFactory.createTitledBorder("Line Endpoints"));
-        capJoinPanel.setLayout(new GridLayout(2, 2, 0, 0));
+        capJoinPanel.setLayout(new GridBagLayout());
 
-        capJoinPanel.add(new JLabel("Endpoint Cap:", JLabel.RIGHT));
+        GridBagHelper gbh = new GridBagHelper(capJoinPanel);
 
         JComponent capSelector = capParam.createGUI();
 
-        capSelector.setToolTipText("The shape of the line endpoints");
+        // Dirty trick: manually set the preferred width so that
+        // the layout aligns with the layout in the other panel.
+        // Doubling the width is about OK.
+        Dimension dim = capSelector.getPreferredSize();
+        dim.setSize(dim.getWidth() * 2, dim.getHeight());
+        capSelector.setPreferredSize(dim);
+
         capParam.setToolTip("The shape of the line endpoints");
 
-        capJoinPanel.add(capSelector);
-
-        capJoinPanel.add(new JLabel("Corner Join:", JLabel.RIGHT));
         JComponent joinSelector = joinParam.createGUI();
-
         joinParam.setToolTip("The way lines connect at the corners");
-        capJoinPanel.add(joinSelector);
+
+        gbh.addLabelWithControl("Endpoint Cap:", capSelector);
+        gbh.addLabelWithControl("Corner Join:", joinSelector);
+
         return capJoinPanel;
     }
 
@@ -82,7 +89,7 @@ public class StrokeSettingsPanel extends JPanel {
         JPanel strokeTypePanel = new JPanel();
         strokeTypePanel.setBorder(BorderFactory.createTitledBorder("Stroke Type"));
 
-        strokeTypePanel.setLayout(new GridLayout(3, 2, 0, 0));
+        strokeTypePanel.setLayout(new GridBagLayout());
 
         shapeTypeParam.selectAndSetAsDefault(KIWI);
 
@@ -94,14 +101,10 @@ public class StrokeSettingsPanel extends JPanel {
                         && strokeType != ZIGZAG
                         && strokeType != SHAPE);
 
-        strokeTypePanel.add(new JLabel("Line Type:", JLabel.RIGHT));
-        strokeTypePanel.add(strokeTypeParam.createGUI());
-
-        strokeTypePanel.add(new JLabel("Shape:", JLabel.RIGHT));
-        strokeTypePanel.add(shapeTypeParam.createGUI());
-
-        strokeTypePanel.add(new JLabel("Dashed:", JLabel.RIGHT));
-        strokeTypePanel.add(dashedParam.createGUI());
+        GridBagHelper gbh = new GridBagHelper(strokeTypePanel);
+        gbh.addLabelWithControl("Line Type:", strokeTypeParam.createGUI());
+        gbh.addLabelWithControl("Shape:", shapeTypeParam.createGUI());
+        gbh.addLabelWithControl("Dashed:", dashedParam.createGUI());
 
         return strokeTypePanel;
     }

@@ -26,10 +26,10 @@ import java.awt.geom.Path2D;
  * Lissajous curve
  */
 public class Lissajous extends ShapeFilter {
-    private static final int NUMBER_OF_STEPS = 1000;
+    private static final int NUMBER_OF_STEPS = 2000;
 
-    private final RangeParam a = new RangeParam("a", 1, 4, 20);
-    private final RangeParam b = new RangeParam("b", 1, 5, 20);
+    private final RangeParam a = new RangeParam("a", 1, 4, 42);
+    private final RangeParam b = new RangeParam("b", 1, 5, 42);
 
     public Lissajous() {
         addParamsToFront(
@@ -42,14 +42,17 @@ public class Lissajous extends ShapeFilter {
     protected Path2D createShape(int width, int height) {
         Path2D shape = new Path2D.Double();
 
+        double aVal = a.getValueAsDouble();
+        double bVal = b.getValueAsDouble();
+
         double w = width / 2.0;
         double h = height / 2.0;
         double dt = (2 * Math.PI) / NUMBER_OF_STEPS;
 
         shape.moveTo(w, h);
         for (double t = 0; t < 2 * Math.PI; t += dt) {
-            double x = w * FastMath.sin(a.getValueAsDouble() * t) + w;
-            double y = h * FastMath.sin(b.getValueAsDouble() * t) + h;
+            double x = w * FastMath.sin(aVal * t) + w;
+            double y = h * FastMath.sin(bVal * t) + h;
             shape.lineTo(x, y);
         }
         shape.closePath();

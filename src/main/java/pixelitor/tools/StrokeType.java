@@ -99,7 +99,7 @@ public enum StrokeType {
         public int getExtraWidth(int specifiedWidth) {
             return (int) (specifiedWidth * 1.5);
         }
-    }, CHARCOAL("Charcoal") {
+    }, CHARCOAL("Charcoal (can be slow!)") {
         @Override
         public Stroke getStroke(float width, int cap, int join, float[] dashFloats) {
             return new CharcoalStroke(width, 0.5f);
@@ -109,7 +109,7 @@ public enum StrokeType {
         public int getExtraWidth(int specifiedWidth) {
             return 0;
         }
-    }, BRISTLE("Bristle") {
+    }, BRISTLE("Bristle (can be slow!)") {
         @Override
         public Stroke getStroke(float width, int cap, int join, float[] dashFloats) {
             return new BristleStroke(width, 0.5f);

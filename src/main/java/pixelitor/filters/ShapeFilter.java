@@ -28,7 +28,9 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
 
 import java.awt.AlphaComposite;
+import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.RadialGradientPaint;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.Path2D;
@@ -51,7 +53,11 @@ public abstract class ShapeFilter extends FilterWithParametrizedGUI {
 
     private static final int FG_WHITE = 5;
     private static final int FG_TOOL = 6;
-    private static final int FG_TRANSPARENT = 7;
+    private static final int FG_GRADIENT = 7;
+    private static final int FG_TRANSPARENT = 8;
+
+    private static final Color DARK_GREEN = new Color(0, 120, 0);
+    private static final Color PURPLE = new Color(155, 0, 155);
 
     private final StrokeParam strokeParam = new StrokeParam("Stroke Settings");
     private final EffectsParam effectsParam = new EffectsParam("Effects");
@@ -68,6 +74,7 @@ public abstract class ShapeFilter extends FilterWithParametrizedGUI {
             new IntChoiceParam.Value[]{
                     new IntChoiceParam.Value("White", FG_WHITE),
                     new IntChoiceParam.Value("Tool Foreground", FG_TOOL),
+                    new IntChoiceParam.Value("Radial Gradient", FG_GRADIENT),
                     new IntChoiceParam.Value("Transparent", FG_TRANSPARENT),
             }, IGNORE_RANDOMIZE);
 
@@ -119,6 +126,14 @@ public abstract class ShapeFilter extends FilterWithParametrizedGUI {
             case FG_TOOL:
                 g2.setColor(FgBgColors.getFG());
                 break;
+            case FG_GRADIENT:
+                float cx = srcWidth / 2.0f;
+                float cy = srcHeight / 2.0f;
+                float radius = (float) Math.sqrt(cx * cx + cy * cy);
+                float[] fractions = {0.0f, 1.0f};
+                Color[] colors = {DARK_GREEN, PURPLE};
+                g2.setPaint(new RadialGradientPaint(cx, cy, radius, fractions, colors));
+                break;
             case FG_TRANSPARENT:
                 g2.setComposite(AlphaComposite.Clear);
                 break;
@@ -129,13 +144,15 @@ public abstract class ShapeFilter extends FilterWithParametrizedGUI {
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         Path2D shape = createShape(srcWidth, srcHeight);
-        // work with the outline so that we can have "inner glow"
-        Shape outline = stroke.createStrokedShape(shape);
+        if (shape != null) {
+            // work with the outline so that we can have "inner glow"
+            Shape outline = stroke.createStrokedShape(shape);
 
-        g2.fill(outline);
+            g2.fill(outline);
 
-        AreaEffects effects = effectsParam.getEffects();
-        effects.apply(g2, outline);
+            AreaEffects effects = effectsParam.getEffects();
+            effects.apply(g2, outline);
+        }
 
         g2.dispose();
 

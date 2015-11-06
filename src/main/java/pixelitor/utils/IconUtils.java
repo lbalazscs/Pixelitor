@@ -24,6 +24,8 @@ import java.net.URL;
  */
 public final class IconUtils {
     private static final Icon westArrowIcon = loadIcon("west_arrow.gif");
+    private static final Icon diceIcon = loadIcon("dice.png");
+    private static final Icon dice2Icon = loadIcon("dice2.png");
     private static final Icon northArrowIcon = loadIcon("north_arrow.gif");
     private static final Icon southArrowIcon = loadIcon("south_arrow.gif");
     private static final Icon textLayerIcon = loadIcon("text_layer_icon.png");
@@ -37,6 +39,14 @@ public final class IconUtils {
 
     public static Icon getWestArrowIcon() {
         return westArrowIcon;
+    }
+
+    public static Icon getDiceIcon() {
+        return diceIcon;
+    }
+
+    public static Icon getDice2Icon() {
+        return dice2Icon;
     }
 
     public static Icon loadIcon(String iconFileName) {

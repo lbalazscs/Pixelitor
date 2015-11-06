@@ -72,12 +72,18 @@ public class ParamSet {
     }
 
     private void addRandomizeAction() {
-        ActionSetting randomizeAction = new ActionSetting("Randomize Settings", e -> randomize(), "Randomize the settings for this filter.");
+        ActionSetting randomizeAction = new ActionSetting("Randomize Settings",
+                e -> randomize(),
+                IconUtils.getDiceIcon(),
+                "Randomize the settings for this filter.");
         actionList.add(randomizeAction);
     }
 
     private void addResetAllAction() {
-        ActionSetting resetAllAction = new ActionSetting("Reset All", e -> reset(), IconUtils.getWestArrowIcon(), "Reset all settings to their default values.");
+        ActionSetting resetAllAction = new ActionSetting("Reset All",
+                e -> reset(),
+                IconUtils.getWestArrowIcon(),
+                "Reset all settings to their default values.");
         actionList.add(resetAllAction);
     }
 

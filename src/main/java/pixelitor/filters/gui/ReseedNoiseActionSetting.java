@@ -18,6 +18,7 @@
 package pixelitor.filters.gui;
 
 import com.jhlabs.math.Noise;
+import pixelitor.utils.IconUtils;
 
 import java.awt.event.ActionListener;
 
@@ -37,7 +38,7 @@ public class ReseedNoiseActionSetting extends ActionSetting {
     }
 
     public ReseedNoiseActionSetting(String name, String toolTip) {
-        super(name, e -> Noise.reseed(), toolTip);
+        super(name, e -> Noise.reseed(), IconUtils.getDice2Icon(), toolTip);
         setIgnoreFinalAnimationSettingMode(false);
     }
 
@@ -53,7 +54,7 @@ public class ReseedNoiseActionSetting extends ActionSetting {
     }
 
     public ReseedNoiseActionSetting(String name, String toolTipText, ActionListener actionListener) {
-        super(name, actionListener, toolTipText);
+        super(name, actionListener, IconUtils.getDice2Icon(), toolTipText);
         setIgnoreFinalAnimationSettingMode(false);
     }
 }
