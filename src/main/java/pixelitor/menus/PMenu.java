@@ -52,12 +52,6 @@ public class PMenu extends JMenu {
         addFA(fa);
     }
 
-    public void addRenderFA(String name, Supplier<Filter> supplier) {
-        FilterAction fa = new FilterAction(name, supplier);
-        fa.withRenderListName();
-        addFA(fa);
-    }
-
     public void addFA(FilterAction fa) {
         JMenuItem menuItem = EnabledIf.THERE_IS_OPEN_IMAGE.getMenuItem(fa);
         add(menuItem);
@@ -121,7 +115,7 @@ public class PMenu extends JMenu {
         }
 
         public FilterActionBuilder noGUI() {
-            ((FilterAction) action).noGUI();
+            ((FilterAction) action).withoutGUI();
             return this;
         }
 

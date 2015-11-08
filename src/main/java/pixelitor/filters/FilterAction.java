@@ -79,15 +79,11 @@ public class FilterAction extends AbstractAction {
         return withListNamePrefix("Fill with ");
     }
 
-    public FilterAction withRenderListName() {
-        return withListNamePrefix("Render ");
-    }
-
     public FilterAction withExtractChannelListName() {
         return withListNamePrefix("Extract Channel: ");
     }
 
-    public FilterAction noGUI() {
+    public FilterAction withoutGUI() {
         noGUI = true;
         menuName = name; // without the "..."
         putValue(Action.NAME, menuName);
@@ -96,6 +92,10 @@ public class FilterAction extends AbstractAction {
     }
 
     public boolean isAnimationFilter() {
+        if (noGUI) {
+            return false;
+        }
+
         createFilter();
         if (!(filter instanceof FilterWithParametrizedGUI)) {
             return false;

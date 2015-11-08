@@ -876,19 +876,26 @@ public class MenuBar extends JMenuBar {
     private static JMenu createRenderSubmenu() {
         PMenu sub = new PMenu("Render");
 
+        sub.add(createRenderShapesSubmenu());
+
         sub.addFA("Clouds", Clouds::new);
-        sub.addRenderFA("Value Noise", ValueNoise::new);
-        sub.addRenderFA("Caustics", JHCaustics::new);
-        sub.addRenderFA("Plasma", JHPlasma::new);
-        sub.addRenderFA("Wood", JHWood::new);
-        sub.addRenderFA("Cells", JHCells::new);
-        sub.addRenderFA("Brushed Metal", JHBrushedMetal::new);
+        sub.addFA("Value Noise", ValueNoise::new);
+        sub.addFA("Caustics", JHCaustics::new);
+        sub.addFA("Plasma", JHPlasma::new);
+        sub.addFA("Wood", JHWood::new);
+        sub.addFA("Cells", JHCells::new);
+        sub.addFA("Brushed Metal", JHBrushedMetal::new);
         sub.addFA("Voronoi Diagram", Voronoi::new);
         sub.addFA("Fractal Tree", FractalTree::new);
+
+        return sub;
+    }
+
+    private static JMenu createRenderShapesSubmenu() {
+        PMenu sub = new PMenu("Shapes");
         sub.addFA("Mystic Rose", MysticRose::new);
         sub.addFA("Lissajous Curve", Lissajous::new);
         sub.addFA("Spirograph", Spirograph::new);
-
         return sub;
     }
 
@@ -916,7 +923,7 @@ public class MenuBar extends JMenuBar {
 
         sub.addAction(new FilterAction("Laplacian", JHLaplacian::new)
                 .withListNamePrefix("Laplacian Edge Detection")
-                .noGUI());
+                .withoutGUI());
 
         sub.addFA("Difference of Gaussians", JHDifferenceOfGaussians::new);
         sub.addFA("Canny Edge Detector", Canny::new);

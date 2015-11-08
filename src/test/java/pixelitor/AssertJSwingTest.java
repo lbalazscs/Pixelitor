@@ -86,10 +86,12 @@ import static pixelitor.utils.test.Assertions.numLayersIs;
 
 
 public class AssertJSwingTest {
-    private static final File BASE_TESTING_DIR = new File("C:\\pix_tests");
-    private static final File INPUT_DIR = new File(BASE_TESTING_DIR, "input");
-    private static final File BATCH_RESIZE_OUTPUT_DIR = new File(BASE_TESTING_DIR, "batch_resize_output");
-    private static final File BATCH_FILTER_OUTPUT_DIR = new File(BASE_TESTING_DIR, "batch_filter_output");
+    private static File baseTestingDir;
+    private static File cleanerScript;
+
+    private static File inputDir;
+    private static File batchResizeOutputDir;
+    private static File batchFilterOutputDir;
 
     private Robot robot;
     private static final int ROBOT_DELAY_MILLIS_FAST = 100;
@@ -101,6 +103,8 @@ public class AssertJSwingTest {
     enum Randomize {YES, NO}
 
     public static void main(String[] args) {
+        processCLArguments(args);
+
         initialize();
         AssertJSwingTest test = new AssertJSwingTest();
         test.setUp();
@@ -109,6 +113,32 @@ public class AssertJSwingTest {
         System.out.println("AssertJSwingTest::main: finished, exiting in 5 seconds");
         Utils.sleep(5, SECONDS);
         test.exit();
+    }
+
+    private static void processCLArguments(String[] args) {
+        if (args.length != 1) {
+            System.err.println("Required argument: <base testing directory>");
+            System.exit(1);
+        }
+        baseTestingDir = new File(args[0]);
+        if (!baseTestingDir.exists()) {
+            System.err.println(String.format("Base testing dir '%s' does not exist",
+                    baseTestingDir.getAbsolutePath()));
+            System.exit(1);
+        }
+
+        inputDir = new File(baseTestingDir, "input");
+        batchResizeOutputDir = new File(baseTestingDir, "batch_resize_output");
+        batchFilterOutputDir = new File(baseTestingDir, "batch_filter_output");
+
+        String cleanerScriptExt;
+        if (JVM.isWindows) {
+            cleanerScriptExt = ".bat";
+        } else {
+            cleanerScriptExt = ".sh";
+        }
+        cleanerScript = new File(baseTestingDir + File.separator
+                + "0000_clean_outputs" + cleanerScriptExt);
     }
 
     private static void initialize() {
@@ -122,7 +152,7 @@ public class AssertJSwingTest {
 
         ApplicationLauncher
                 .application("pixelitor.Pixelitor")
-                .withArgs((new File(INPUT_DIR, "a.jpg")).getPath())
+                .withArgs((new File(inputDir, "a.jpg")).getPath())
                 .start();
 
         window = WindowFinder.findFrame("frame0")
@@ -395,7 +425,7 @@ public class AssertJSwingTest {
 
         findMenuItemByText("Open...").click();
         openDialog = JFileChooserFinder.findFileChooser("open").using(robot);
-        openDialog.selectFile(new File(INPUT_DIR, "b.jpg"));
+        openDialog.selectFile(new File(inputDir, "b.jpg"));
         openDialog.approve();
     }
 
@@ -404,7 +434,7 @@ public class AssertJSwingTest {
         runMenuCommand("Save");
         JFileChooserFixture saveDialog = findSaveFileChooser();
         // due to an assertj bug, the file must exist - TODO investigate, report
-        saveDialog.selectFile(new File(BASE_TESTING_DIR, "saved.png"));
+        saveDialog.selectFile(new File(baseTestingDir, "saved.png"));
         saveDialog.approve();
         // say OK to the overwrite question
         findJOptionPane().yesButton().click();
@@ -507,8 +537,8 @@ public class AssertJSwingTest {
     }
 
     private void testBatchResize() {
-        FileChoosers.setLastOpenDir(INPUT_DIR);
-        FileChoosers.setLastSaveDir(BATCH_RESIZE_OUTPUT_DIR);
+        FileChoosers.setLastOpenDir(inputDir);
+        FileChoosers.setLastSaveDir(batchResizeOutputDir);
         runMenuCommand("Batch Resize...");
         DialogFixture dialog = findDialogByTitle("Batch Resize");
 
@@ -518,8 +548,8 @@ public class AssertJSwingTest {
     }
 
     private void testBatchFilter() {
-        FileChoosers.setLastOpenDir(INPUT_DIR);
-        FileChoosers.setLastSaveDir(BATCH_FILTER_OUTPUT_DIR);
+        FileChoosers.setLastOpenDir(inputDir);
+        FileChoosers.setLastSaveDir(batchFilterOutputDir);
 
         assertThat(ImageComponents.getActiveComp().isPresent()).isTrue();
         runMenuCommand("Batch Filter...");
@@ -534,7 +564,7 @@ public class AssertJSwingTest {
     }
 
     private void testExportLayerToPNG() {
-        FileChoosers.setLastSaveDir(BASE_TESTING_DIR);
+        FileChoosers.setLastSaveDir(baseTestingDir);
         addNewLayer();
         runMenuCommand("Export Layers to PNG...");
         findDialogByTitle("Select Output Folder").button("ok").click();
@@ -704,6 +734,8 @@ public class AssertJSwingTest {
         testFilterWithDialog("Voronoi Diagram...", Randomize.YES, ShowOriginal.NO);
         testFilterWithDialog("Fractal Tree...", Randomize.YES, ShowOriginal.NO);
         testFilterWithDialog("Mystic Rose...", Randomize.YES, ShowOriginal.NO);
+        testFilterWithDialog("Lissajous Curve...", Randomize.YES, ShowOriginal.NO);
+        testFilterWithDialog("Spirograph...", Randomize.YES, ShowOriginal.NO);
         testFilterWithDialog("Crystallize...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Pointillize...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Stamp...", Randomize.YES, ShowOriginal.YES);
@@ -1397,7 +1429,7 @@ public class AssertJSwingTest {
 
     private void saveWithOverwrite(String fileName) {
         JFileChooserFixture saveDialog = findSaveFileChooser();
-        saveDialog.selectFile(new File(BASE_TESTING_DIR, fileName));
+        saveDialog.selectFile(new File(baseTestingDir, fileName));
         saveDialog.approve();
         // say OK to the overwrite question
         JOptionPaneFixture optionPane = findJOptionPane();
@@ -1426,13 +1458,13 @@ public class AssertJSwingTest {
     }
 
     private static void checkTestingDirs() {
-        assertThat(BASE_TESTING_DIR).exists().isDirectory();
-        assertThat(INPUT_DIR).exists().isDirectory();
-        assertThat(BATCH_RESIZE_OUTPUT_DIR).exists().isDirectory();
-        assertThat(BATCH_FILTER_OUTPUT_DIR).exists().isDirectory();
+        assertThat(baseTestingDir).exists().isDirectory();
+        assertThat(inputDir).exists().isDirectory();
+        assertThat(batchResizeOutputDir).exists().isDirectory();
+        assertThat(batchFilterOutputDir).exists().isDirectory();
 
-        assertThat(Files.fileNamesIn(BATCH_RESIZE_OUTPUT_DIR.getPath(), false)).isEmpty();
-        assertThat(Files.fileNamesIn(BATCH_FILTER_OUTPUT_DIR.getPath(), false)).isEmpty();
+        assertThat(Files.fileNamesIn(batchResizeOutputDir.getPath(), false)).isEmpty();
+        assertThat(Files.fileNamesIn(batchFilterOutputDir.getPath(), false)).isEmpty();
     }
 
     private void click() {
@@ -1454,8 +1486,12 @@ public class AssertJSwingTest {
 
     private static void cleanOutputs() {
         try {
-            String cleanerScript = BASE_TESTING_DIR + "\\0000_clean_outputs.bat";
-            Process process = Runtime.getRuntime().exec(cleanerScript);
+            if (!cleanerScript.exists()) {
+                System.out.println("Cleaner script not found.");
+                return;
+            }
+
+            Process process = Runtime.getRuntime().exec(cleanerScript.getCanonicalPath());
             process.waitFor();
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();

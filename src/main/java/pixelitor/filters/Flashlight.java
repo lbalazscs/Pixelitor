@@ -18,7 +18,7 @@ import java.awt.image.BufferedImage;
 public class Flashlight extends FilterWithParametrizedGUI {
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 1, 200, 1000, false);
-    private final RangeParam penumbraMultiplier = new RangeParam("Penumbra (Radius %)", 1, 50, 500);
+    private final RangeParam softness = new RangeParam("Softness", 0, 20, 100);
     private final IntChoiceParam bg = new IntChoiceParam("Background",
             new IntChoiceParam.Value[]{
                     new IntChoiceParam.Value("Black", Impl.BG_BLACK),
@@ -33,7 +33,7 @@ public class Flashlight extends FilterWithParametrizedGUI {
         setParamSet(new ParamSet(
                 center,
                 radius.adjustRangeToImageSize(1.0),
-                penumbraMultiplier,
+                softness,
                 bg
         ));
     }
@@ -48,9 +48,12 @@ public class Flashlight extends FilterWithParametrizedGUI {
                 src.getWidth() * center.getRelativeX(),
                 src.getHeight() * center.getRelativeY()
         );
-        filter.setRadius(radius.getValueAsDouble(0),
-                radius.getValueAsDouble(1),
-                (penumbraMultiplier.getValueAsDouble() + 100.0) / 100.0);
+
+        double radiusX = radius.getValueAsDouble(0);
+        double radiusY = radius.getValueAsDouble(1);
+        double softnessFactor = softness.getValueAsDouble() / 100.0;
+        filter.setRadius(radiusX, radiusY, softnessFactor);
+
         filter.setBG(bg.getValue());
 
         dest = filter.filter(src, dest);
@@ -96,11 +99,12 @@ public class Flashlight extends FilterWithParametrizedGUI {
             this.cy = cy;
         }
 
-        public void setRadius(double innerRadiusX, double innerRadiusY, double penumbraMultiplier) {
-            this.innerRadiusX = innerRadiusX;
-            this.innerRadiusY = innerRadiusY;
-            this.outerRadiusX = innerRadiusX * penumbraMultiplier;
-            this.outerRadiusY = innerRadiusY * penumbraMultiplier;
+        public void setRadius(double radiusX, double radiusY, double softness) {
+            this.innerRadiusX = radiusX - radiusX * softness;
+            this.innerRadiusY = radiusY - radiusY * softness;
+
+            this.outerRadiusX = radiusX + radiusX * softness;
+            this.outerRadiusY = radiusY + radiusY * softness;
         }
 
         public void setBG(int bg) {

@@ -154,10 +154,9 @@ public class ExtractChannelFilter extends Filter {
     }
 
     private static FilterAction rgbOpToFilterAction(RGBPixelOp rgbOp, String name) {
-        FilterAction fa = new FilterAction(name,
-                () -> new ExtractChannelFilter(rgbOp));
-        fa.noGUI();
-        fa.withExtractChannelListName();
-        return fa;
+        return new FilterAction(name,
+                () -> new ExtractChannelFilter(rgbOp))
+                .withoutGUI()
+                .withExtractChannelListName();
     }
 }

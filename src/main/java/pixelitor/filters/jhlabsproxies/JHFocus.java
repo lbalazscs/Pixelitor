@@ -36,7 +36,7 @@ public class JHFocus extends FilterWithParametrizedGUI {
     private final ImagePositionParam center = new ImagePositionParam("Focused Area Center");
 
     private final GroupedRangeParam radius = new GroupedRangeParam("Focused Area Radius (Pixels)", 1, 200, 1000, false);
-    private final RangeParam penumbraMultiplier = new RangeParam("Transition Area Radius (Focused Area Radius %)", 1, 100, 500);
+    private final RangeParam softness = new RangeParam("Transition Softness", 0, 20, 100);
     private final GroupedRangeParam blurRadius = new GroupedRangeParam("Blur Radius", 0, 10, 50);
     private final RangeParam numberOfIterations = new RangeParam("Number of Blur Iterations", 1, 3, 10);
     private final BooleanParam invert = new BooleanParam("Invert", false);
@@ -49,7 +49,7 @@ public class JHFocus extends FilterWithParametrizedGUI {
         setParamSet(new ParamSet(
                 center,
                 radius,
-                penumbraMultiplier,
+                softness,
                 blurRadius,
                 numberOfIterations,
                 invert,
@@ -79,9 +79,12 @@ public class JHFocus extends FilterWithParametrizedGUI {
                 src.getWidth() * center.getRelativeX(),
                 src.getHeight() * center.getRelativeY()
         );
-        filter.setRadius(radius.getValueAsDouble(0),
-                radius.getValueAsDouble(1),
-                (penumbraMultiplier.getValueAsDouble() + 100.0) / 100.0);
+
+        double radiusX = radius.getValueAsDouble(0);
+        double radiusY = radius.getValueAsDouble(1);
+        double softnessFactor = softness.getValueAsDouble() / 100.0;
+        filter.setRadius(radiusX, radiusY, softnessFactor);
+
         filter.setInverted(invert.isChecked());
 
         // TODO unlike BoxBlurFilter, VariableBlurFilter supports only integer radii
@@ -116,11 +119,12 @@ public class JHFocus extends FilterWithParametrizedGUI {
             this.cy = cy;
         }
 
-        public void setRadius(double innerRadiusX, double innerRadiusY, double penumbraMultiplier) {
-            this.innerRadiusX = innerRadiusX;
-            this.innerRadiusY = innerRadiusY;
-            this.outerRadiusX = innerRadiusX * penumbraMultiplier;
-            this.outerRadiusY = innerRadiusY * penumbraMultiplier;
+        public void setRadius(double radiusX, double radiusY, double softness) {
+            this.innerRadiusX = radiusX - radiusX * softness;
+            this.innerRadiusY = radiusY - radiusY * softness;
+
+            this.outerRadiusX = radiusX + radiusX * softness;
+            this.outerRadiusY = radiusY + radiusY * softness;
         }
 
         @Override
