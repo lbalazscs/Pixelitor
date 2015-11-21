@@ -21,6 +21,7 @@ import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.io.FileChoosers;
 import pixelitor.utils.BrowseFilesSupport;
 import pixelitor.utils.GridBagHelper;
+import pixelitor.utils.Messages;
 import pixelitor.utils.TFValidationLayerUI;
 import pixelitor.utils.TextFieldValidator;
 import pixelitor.utils.ValidatedForm;
@@ -48,7 +49,7 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
     private double fps;
     private JComboBox<Interpolation> ipCB;
     private JComboBox<TweenOutputType> outputTypeCB;
-    private JCheckBox pingPongCB;
+    private JCheckBox pingPongCB = new JCheckBox();
     private final BrowseFilesSupport browseFilesSupport = new BrowseFilesSupport(FileChoosers.getLastSaveDir().getAbsolutePath());
     private JTextField fileNameTF;
     private String errorMessage;
@@ -107,7 +108,6 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
     }
 
     private void addPingPongSelector(GridBagHelper gbHelper) {
-        pingPongCB = new JCheckBox();
         gbHelper.addLabelWithControl("Ping Pong:", pingPongCB);
 
         pingPongCB.addActionListener(e -> updateCalculations());
@@ -140,7 +140,11 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
     private void updateCalculations() {
         try {
             nrFramesLabel.setText(calculateNrFramesText());
-        } catch (Exception ex) {
+        } catch (NumberFormatException e) {
+            // expected behaviour, we can swallow the exception
+            nrFramesLabel.setText("??");
+        } catch (Exception e) {
+            Messages.showException(e);
             nrFramesLabel.setText("??");
         }
     }
