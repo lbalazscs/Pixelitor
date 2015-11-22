@@ -113,7 +113,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
                 });
         cropButton.setEnabled(false);
 
-        cancelButton.addActionListener(e -> state.cancelPressed(this));
+        cancelButton.addActionListener(e -> state.cancel(this));
         cancelButton.setEnabled(false);
         settingsPanel.add(cancelButton);
     }
@@ -307,5 +307,10 @@ public class CropTool extends Tool implements ImageSwitchListener {
             }
         }
         return false;
+    }
+
+    @Override
+    public void escPressed() {
+        state.cancel(this);
     }
 }

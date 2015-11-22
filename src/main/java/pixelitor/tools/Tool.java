@@ -248,18 +248,6 @@ public abstract class Tool {
         }
     }
 
-    public void spacePressed() {
-        if (handToolHandler != null) { // there is hand tool forwarding
-            handToolHandler.spacePressed();
-        }
-    }
-
-    public void spaceReleased() {
-        if (handToolHandler != null) { // there is hand tool forwarding
-            handToolHandler.spaceReleased();
-        }
-    }
-
     protected void toolStarted() {
         ended = false;
         ImageComponents.setToolCursor(cursor);
@@ -320,9 +308,25 @@ public abstract class Tool {
         clipStrategy.setClip(g);
     }
 
+    public void spacePressed() {
+        if (handToolHandler != null) { // there is hand tool forwarding
+            handToolHandler.spacePressed();
+        }
+    }
+
+    public void spaceReleased() {
+        if (handToolHandler != null) { // there is hand tool forwarding
+            handToolHandler.spaceReleased();
+        }
+    }
+
     public boolean arrowKeyPressed(ArrowKey key) {
         // empty for the convenience of subclasses
         return false; // not consumed
+    }
+
+    public void escPressed() {
+        // empty by default
     }
 
     @Override

@@ -24,12 +24,12 @@ enum CropToolState {
         }
 
         @Override
-        public void cancelPressed(CropTool cropTool) {
-            throw new IllegalStateException();
+        public void cancel(CropTool cropTool) {
+            // do nothing
         }
     }, USER_DRAG {
+        // the transform handles are not shown
         // from the first mouse press until the first mouse release
-        // in this state the transform handles are not shown
 
         @Override
         public CropToolState getNextAfterMousePressed() {
@@ -37,12 +37,12 @@ enum CropToolState {
         }
 
         @Override
-        public void cancelPressed(CropTool cropTool) {
-            cropTool.resetStateToInitial();
+        public void cancel(CropTool cropTool) {
+            // do nothing
         }
     }, TRANSFORM {
-        // from the first mouse release until crop or cancel is pressed
         // the handles are shown
+        // from the first mouse release until crop or cancel
 
         @Override
         public CropToolState getNextAfterMousePressed() {
@@ -50,13 +50,13 @@ enum CropToolState {
         }
 
         @Override
-        public void cancelPressed(CropTool cropTool) {
+        public void cancel(CropTool cropTool) {
             cropTool.resetStateToInitial();
         }
     };
 
     public abstract CropToolState getNextAfterMousePressed();
 
-    public abstract void cancelPressed(CropTool cropTool);
+    public abstract void cancel(CropTool cropTool);
 
 }

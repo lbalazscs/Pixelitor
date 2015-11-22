@@ -92,6 +92,11 @@ public class GlobalKeyboardWatch {
                     e.consume();
                 }
                 break;
+            case KeyEvent.VK_ESCAPE:
+                if (!dialogActive) {
+                    Tools.getCurrentTool().escPressed();
+                }
+                break;
         }
     }
 
