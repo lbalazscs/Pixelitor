@@ -26,8 +26,8 @@ import java.awt.Rectangle;
 public class MorphologyFilter extends WholeImageFilter {
     private int iterations = 1;
 
-    public static final int OP_MINIMUM = 1;
-    public static final int OP_MAXIMUM = 2;
+    public static final int OP_ERODE = 1;
+    public static final int OP_DILATE = 2;
     private int op;
 
     public static final int KERNEL_DIAMOND = 3;
@@ -78,7 +78,7 @@ public class MorphologyFilter extends WholeImageFilter {
                     short g = 0xff;
                     short b = 0xff;
 
-                    if (op == OP_MAXIMUM) {
+                    if (op == OP_DILATE) {
                         r = 0;
                         g = 0;
                         b = 0;
@@ -102,7 +102,7 @@ public class MorphologyFilter extends WholeImageFilter {
                                 if (0 <= ix && ix < width) {
                                     int comparedIndex = xOffset + ix;
 
-                                    if (op == OP_MINIMUM) {
+                                    if (op == OP_ERODE) {
                                         a = min(a, inA[comparedIndex]);
                                         r = min(r, inR[comparedIndex]);
                                         g = min(g, inG[comparedIndex]);

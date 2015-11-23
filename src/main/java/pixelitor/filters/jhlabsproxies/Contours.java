@@ -39,7 +39,7 @@ public class Contours extends FilterWithParametrizedGUI {
             MorphologyFilter morphologyFilter = new MorphologyFilter();
             morphologyFilter.setIterations(iterations);
             morphologyFilter.setKernel(MorphologyFilter.KERNEL_DIAMOND);
-            morphologyFilter.setOp(MorphologyFilter.OP_MINIMUM);
+            morphologyFilter.setOp(MorphologyFilter.OP_ERODE);
 
             dest = morphologyFilter.filter(dest, dest);
         }

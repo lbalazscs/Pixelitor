@@ -9,11 +9,17 @@ import pixelitor.filters.impl.MorphologyFilter;
 
 import java.awt.image.BufferedImage;
 
+import static pixelitor.filters.impl.MorphologyFilter.OP_DILATE;
+import static pixelitor.filters.impl.MorphologyFilter.OP_ERODE;
+
 /**
  * A morphology filter
  */
 public class Morphology extends FilterWithParametrizedGUI {
     private final MorphologyFilter filter = new MorphologyFilter();
+
+    private static final int OP_OPEN = 10;
+    private static final int OP_CLOSE = 11;
 
     private final RangeParam radius = new RangeParam("Radius", 1, 1, 20);
     private final IntChoiceParam kernel = new IntChoiceParam("Kernel Shape", new IntChoiceParam.Value[]{
@@ -21,20 +27,38 @@ public class Morphology extends FilterWithParametrizedGUI {
             new IntChoiceParam.Value("Square", MorphologyFilter.KERNEL_SQUARE),
     });
     private final IntChoiceParam op = new IntChoiceParam("Operation", new IntChoiceParam.Value[]{
-            new IntChoiceParam.Value("Maximum (Dilate)", MorphologyFilter.OP_MAXIMUM),
-            new IntChoiceParam.Value("Minimum (Erode)", MorphologyFilter.OP_MINIMUM),
+            new IntChoiceParam.Value("Maximum (Dilate)", OP_DILATE),
+            new IntChoiceParam.Value("Minimum (Erode)", OP_ERODE),
+            new IntChoiceParam.Value("Open (Erode, then Dilate)", OP_OPEN),
+            new IntChoiceParam.Value("Close (Dilate, then Erode)", OP_CLOSE),
     });
 
     public Morphology() {
         super(ShowOriginal.YES);
-        setParamSet(new ParamSet(radius, kernel, op));
+        setParamSet(new ParamSet(op, kernel, radius));
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         filter.setIterations(radius.getValue());
         filter.setKernel(kernel.getValue());
-        filter.setOp(op.getValue());
-        return filter.filter(src, dest);
+
+        int selectedOp = op.getValue();
+
+        if (selectedOp == OP_DILATE || selectedOp == OP_ERODE) {
+            filter.setOp(selectedOp);
+            dest = filter.filter(src, dest);
+        } else if (selectedOp == OP_OPEN) {
+            filter.setOp(OP_ERODE);
+            dest = filter.filter(src, dest);
+            filter.setOp(OP_DILATE);
+            dest = filter.filter(dest, dest);
+        } else if (selectedOp == OP_CLOSE) {
+            filter.setOp(OP_DILATE);
+            dest = filter.filter(src, dest);
+            filter.setOp(OP_ERODE);
+            dest = filter.filter(dest, dest);
+        }
+        return dest;
     }
 }
