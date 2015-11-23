@@ -63,7 +63,7 @@ public class StrokeParam extends AbstractFilterParam {
         strokeJoinParam.setAdjustmentListener(decoratedListener);
 
         shapeTypeParam.setAdjustmentListener(() -> {
-            ShapeType selectedItem = (ShapeType) shapeTypeParam.getSelectedItem();
+            ShapeType selectedItem = shapeTypeParam.getSelected();
             StrokeType.SHAPE.setShapeType(selectedItem);
             // it is important to call this only after the previous setup!
             decoratedListener.paramAdjusted();
@@ -77,7 +77,7 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     public StrokeType getStrokeType() {
-        return (StrokeType) strokeTypeParam.getSelectedItem();
+        return strokeTypeParam.getSelected();
     }
 
     public JDialog createSettingsDialogForShapesTool() {
@@ -110,8 +110,8 @@ public class StrokeParam extends AbstractFilterParam {
 
         StrokeType strokeType = getStrokeType();
 
-        BasicStrokeCap strokeCap = (BasicStrokeCap) strokeCapParam.getSelectedItem();
-        BasicStrokeJoin strokeJoin = (BasicStrokeJoin) strokeJoinParam.getSelectedItem();
+        BasicStrokeCap strokeCap = strokeCapParam.getSelected();
+        BasicStrokeJoin strokeJoin = strokeJoinParam.getSelected();
         Stroke s = strokeType.getStroke(
                 strokeWidth,
                 strokeCap.getValue(),

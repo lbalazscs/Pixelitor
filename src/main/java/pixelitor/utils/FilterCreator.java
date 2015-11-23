@@ -315,9 +315,9 @@ public class FilterCreator extends JPanel {
         retVal += "\n/**\n";
 
         if (desc.isProxy()) {
-            retVal += " * " + desc.getName() + " based on " + desc.getProxyName() + '\n';
+            retVal += " * " + desc.getName() + " filter based on " + desc.getProxyName() + '\n';
         } else {
-            retVal += " * " + desc.getName() + '\n';
+            retVal += " * " + desc.getName() + " filter\n";
         }
 
         retVal += " */\n";
@@ -328,7 +328,9 @@ public class FilterCreator extends JPanel {
         String retVal = "";
         retVal += "\n    public " + desc.getClassName() + "() {\n";
 
-        retVal += "        super(\"" + desc.getName() + "\", true, false);\n";
+        if(desc.isParametrizedGui()) {
+            retVal += "        super(ShowOriginal.YES);\n";
+        }
 
         if (desc.copySrc()) {
             retVal += "        copySrcToDstBeforeRunning = true;\n";
@@ -371,11 +373,13 @@ public class FilterCreator extends JPanel {
     private static String addParamsDeclaration(FilterDescription desc) {
         String retVal = "";
         for (ParameterInfo param : desc.getParams()) {
-            String paramVarName = param.getVariableName();
 
-            retVal += "    private final RangeParam " + paramVarName + " = new RangeParam(\"" + param.getName() + "\", "
-                    + param.getMin() + ", " + param.getMax() + ", " + param.getDefaultValue() + ");";
+            String paramLine = String.format(
+                    "    private final RangeParam %s = new RangeParam(\"%s\", %d, %d, %d);",
+                    param.getVariableName(), param.getName(),
+                    param.getMin(), param.getDefaultValue(), param.getMax());
 
+            retVal += paramLine;
             retVal += '\n';
         }
 

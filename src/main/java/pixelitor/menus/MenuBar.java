@@ -936,15 +936,17 @@ public class MenuBar extends JMenuBar {
 
         sub.addFA("Random Filter", RandomFilter::new);
         sub.addFA("Transform Layer", TransformLayer::new);
+        sub.addFA("Drop Shadow", JHDropShadow::new);
+        sub.addFA("2D Transitions", Transition2D::new);
+
+        sub.addSeparator();
 
         sub.addFA(Convolve.createFilterAction(3));
         sub.addFA(Convolve.createFilterAction(5));
 
-        sub.addFA("Drop Shadow", JHDropShadow::new);
-        sub.addFA("2D Transitions", Transition2D::new);
+        sub.addSeparator();
 
         sub.addFA("Channel to Transparency", ChannelToTransparency::new);
-
         sub.buildFA("Invert Transparency", InvertTransparency::new).noGUI().add();
 
         return sub;
@@ -1323,6 +1325,10 @@ public class MenuBar extends JMenuBar {
 
     private static JMenu createExperimentalSubmenu() {
         PMenu sub = new PMenu("Experimental");
+
+        sub.addFA("Contours", Contours::new);
+        sub.addFA("Morphology", Morphology::new);
+        sub.addSeparator();
 
         sub.addFA("Droste", Droste::new);
         sub.addFA("Sphere3D", Sphere3D::new);

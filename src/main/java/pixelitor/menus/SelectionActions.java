@@ -83,7 +83,7 @@ public final class SelectionActions {
                 @Override
                 protected void dialogAccepted() {
                     Selection selection = getActiveComp().get().getSelection().get();
-                    SelectionModifyType selectionModifyType = (SelectionModifyType) type.getSelectedItem();
+                    SelectionModifyType selectionModifyType = type.getSelected();
                     selection.modify(selectionModifyType, amount.getValue());
                 }
             };

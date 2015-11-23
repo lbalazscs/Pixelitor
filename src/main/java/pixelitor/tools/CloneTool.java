@@ -135,7 +135,7 @@ public class CloneTool extends TmpLayerBrushTool {
         state = CLONING; // must be a new stroke after the source setting
 
         float scaleAbs = scaleParam.getValueAsPercentage();
-        ScalingMirror mirror = (ScalingMirror) mirrorParam.getSelectedItem();
+        ScalingMirror mirror = mirrorParam.getSelected();
         cloneBrush.setScale(
                 mirror.getScaleX(scaleAbs),
                 mirror.getScaleY(scaleAbs));

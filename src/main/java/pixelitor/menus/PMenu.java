@@ -1,5 +1,6 @@
 package pixelitor.menus;
 
+import com.jhlabs.image.AbstractBufferedImageOp;
 import pixelitor.filters.Filter;
 import pixelitor.filters.FilterAction;
 
@@ -49,6 +50,14 @@ public class PMenu extends JMenu {
      */
     public void addFA(String name, Supplier<Filter> supplier) {
         FilterAction fa = new FilterAction(name, supplier);
+        addFA(fa);
+    }
+
+    /**
+     * Simple add for simple filters
+     */
+    public void addFA(String name, AbstractBufferedImageOp op) {
+        FilterAction fa = new FilterAction(name, op);
         addFA(fa);
     }
 

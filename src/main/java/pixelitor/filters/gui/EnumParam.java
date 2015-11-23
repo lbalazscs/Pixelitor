@@ -137,6 +137,11 @@ public class EnumParam<E extends Enum<E>> extends AbstractFilterParam implements
         return delegateModel.getSelectedItem();
     }
 
+    // it is always safe to call this
+    public E getSelected() {
+        return (E) delegateModel.getSelectedItem();
+    }
+
     @Override
     public void setAdjustmentListener(ParamAdjustmentListener listener) {
         super.setAdjustmentListener(listener);

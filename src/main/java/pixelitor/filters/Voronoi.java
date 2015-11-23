@@ -66,7 +66,7 @@ public class Voronoi extends FilterWithParametrizedGUI {
         }
 
         filter.setNumPoints(numberOfPoints.getValue());
-        filter.setMetric((Metric) distance.getSelectedItem());
+        filter.setMetric(distance.getSelected());
         filter.setUseImageColors(useImageColors.isChecked());
 
         dest = filter.filter(src, dest);

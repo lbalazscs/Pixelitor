@@ -1,5 +1,6 @@
 package pixelitor.filters;
 
+import com.jhlabs.image.AbstractBufferedImageOp;
 import pixelitor.history.History;
 
 import javax.swing.*;
@@ -29,6 +30,10 @@ public class FilterAction extends AbstractAction {
         putValue(Action.NAME, menuName);
 
         FilterUtils.addFilter(this);
+    }
+
+    public FilterAction(String name, AbstractBufferedImageOp op) {
+        this(name, () -> new SimpleForwardingFilter(op));
     }
 
     public String getMenuName() {
