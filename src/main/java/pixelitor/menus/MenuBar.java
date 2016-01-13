@@ -896,6 +896,7 @@ public class MenuBar extends JMenuBar {
         sub.addFA("Mystic Rose", MysticRose::new);
         sub.addFA("Lissajous Curve", Lissajous::new);
         sub.addFA("Spirograph", Spirograph::new);
+        sub.addFA("Flower of Life", FlowerOfLife::new);
         return sub;
     }
 

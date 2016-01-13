@@ -141,6 +141,8 @@ public class Pixelitor {
             return;
         }
 
+//        startFilter(new FlowerOfLife());
+
 //        AutoPaint.showDialog();
 //        NewImage.addNewImage(FillType.WHITE, 100, 100, "Test");
 

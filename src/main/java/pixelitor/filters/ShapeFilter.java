@@ -33,7 +33,6 @@ import java.awt.Graphics2D;
 import java.awt.RadialGradientPaint;
 import java.awt.Shape;
 import java.awt.Stroke;
-import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 
 import static java.awt.Color.BLACK;
@@ -143,7 +142,7 @@ public abstract class ShapeFilter extends FilterWithParametrizedGUI {
 //        g2.setStroke(stroke);
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
-        Path2D shape = createShape(srcWidth, srcHeight);
+        Shape shape = createShape(srcWidth, srcHeight);
         if (shape != null) {
             // work with the outline so that we can have "inner glow"
             Shape outline = stroke.createStrokedShape(shape);
@@ -159,5 +158,5 @@ public abstract class ShapeFilter extends FilterWithParametrizedGUI {
         return dest;
     }
 
-    protected abstract Path2D createShape(int width, int height);
+    protected abstract Shape createShape(int width, int height);
 }
