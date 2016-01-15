@@ -26,4 +26,9 @@ public class TestMessageHandler implements MessageHandler {
     public void showException(Throwable e) {
         throw new AssertionError(e);
     }
+
+    @Override
+    public void showException(Throwable e, Thread t) {
+        throw new AssertionError(e);
+    }
 }

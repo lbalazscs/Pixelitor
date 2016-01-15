@@ -78,14 +78,4 @@ public class BlendingModePanel extends JPanel {
         opacityDDSlider.setEnabled(enabled);
         blendingModeCombo.setEnabled(enabled);
     }
-
-    public void setOpacity(float f) {
-        int intValue = (int) (f * 100);
-        opacityDDSlider.setValue(intValue);
-    }
-
-    public static void main(String[] args) {
-        GUIUtils.testJComponent(new BlendingModePanel(true));
-    }
-
 }

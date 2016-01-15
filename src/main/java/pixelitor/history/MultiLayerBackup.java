@@ -38,8 +38,8 @@ public class MultiLayerBackup {
         if (changesCanvasDimensions) {
             canvasChangeEdit = new CanvasChangeEdit(comp, editName);
         }
-        // the translation of the mask should be the same as the
-        // translation of the main image
+        // TODO is the translation of the mask always the same as the
+        // translation of the main image? - consider unlinked masks
         ContentLayer contentLayer = comp.getAnyContentLayer();
         if (contentLayer != null) { // could be null, if there are only text layers
             translationEdit = new TranslationEdit(comp, contentLayer);
@@ -48,6 +48,7 @@ public class MultiLayerBackup {
         if (comp.hasSelection()) {
             Selection selection = comp.getSelectionOrNull();
             backupShape = selection.getShape();
+            assert backupShape != null;
         }
 
         int nrLayers = comp.getNrLayers();

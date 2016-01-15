@@ -21,5 +21,5 @@ public interface LayerUI {
 
     LayerButton getLayerButton();
 
-    void setUIOpacity(float newOpacity);
+    void setOpacityFromModel(float newOpacity);
 }

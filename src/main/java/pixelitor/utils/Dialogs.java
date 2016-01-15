@@ -102,6 +102,13 @@ public class Dialogs {
     }
 
     public static void showExceptionDialog(Throwable e) {
+        Thread currentThread = Thread.currentThread();
+        showExceptionDialog(e, currentThread);
+    }
+
+    public static void showExceptionDialog(Throwable e, Thread thread) {
+        String threadName = thread.getName();
+        System.err.printf("Exception in the thread '%s'%n", threadName);
         e.printStackTrace();
 
         if(e instanceof InvocationTargetException) {

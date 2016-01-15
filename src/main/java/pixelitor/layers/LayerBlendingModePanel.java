@@ -113,10 +113,20 @@ public class LayerBlendingModePanel extends BlendingModePanel implements ImageSw
         }
     }
 
-    public void setBlendingModeNotUI(BlendingMode bm) {
+    public void setBlendingModeFromModel(BlendingMode bm) {
         try {
             userInteractionChange = false;
             blendingModeCombo.setSelectedItem(bm);
+        } finally {
+            userInteractionChange = true;
+        }
+    }
+
+    public void setOpacityFromModel(float f) {
+        try {
+            userInteractionChange = false;
+            int intValue = (int) (f * 100);
+            opacityDDSlider.setValue(intValue);
         } finally {
             userInteractionChange = true;
         }

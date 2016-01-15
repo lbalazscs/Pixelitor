@@ -14,4 +14,6 @@ public interface MessageHandler {
     void showNotImageLayerError();
 
     void showException(Throwable e);
+
+    void showException(Throwable e, Thread t);
 }

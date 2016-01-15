@@ -33,4 +33,9 @@ public class GUIMessageHandler implements MessageHandler {
     public void showException(Throwable e) {
         Dialogs.showExceptionDialog(e);
     }
+
+    @Override
+    public void showException(Throwable e, Thread t) {
+        Dialogs.showExceptionDialog(e, t);
+    }
 }

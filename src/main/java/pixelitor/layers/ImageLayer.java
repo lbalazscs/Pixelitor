@@ -664,6 +664,9 @@ public class ImageLayer extends ContentLayer {
 
         BufferedImage subImage;
         try {
+            assert x + canvasWidth <= image.getWidth() : "x = " + x + ", canvasWidth = " + canvasWidth + ", image.getWidth() = " + image.getWidth();
+            assert y + canvasHeight <= image.getHeight() : "y = " + y + ", canvasHeight = " + canvasHeight + ", image.getHeight() = " + image.getHeight();
+
             subImage = image.getSubimage(x, y, canvasWidth, canvasHeight);
         } catch (RasterFormatException e) {
             System.out.println("ImageLayer.getCanvasSizedSubImage x = " + x + ", y = " + y + ", canvasWidth = " + canvasWidth + ", canvasHeight = " + canvasHeight);

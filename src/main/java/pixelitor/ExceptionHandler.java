@@ -37,6 +37,6 @@ public class ExceptionHandler implements Thread.UncaughtExceptionHandler {
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
-        Messages.showException(e);
+        Messages.showException(e, t);
     }
 }

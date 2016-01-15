@@ -59,7 +59,7 @@ public class LayerGUI implements LayerUI {
     }
 
     @Override
-    public void setUIOpacity(float newOpacity) {
-        LayerBlendingModePanel.INSTANCE.setOpacity(newOpacity);
+    public void setOpacityFromModel(float newOpacity) {
+        LayerBlendingModePanel.INSTANCE.setOpacityFromModel(newOpacity);
     }
 }

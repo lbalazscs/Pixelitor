@@ -202,7 +202,7 @@ public abstract class Layer implements Serializable {
         this.opacity = newOpacity;
 
         if (updateGUI.isYes()) {
-            ui.setUIOpacity(newOpacity);
+            ui.setOpacityFromModel(newOpacity);
         }
         if(updateImage) {
             updateAfterBMorOpacityChange();
@@ -214,7 +214,7 @@ public abstract class Layer implements Serializable {
 
         this.blendingMode = mode;
         if (updateGUI.isYes()) {
-            LayerBlendingModePanel.INSTANCE.setBlendingModeNotUI(mode);
+            LayerBlendingModePanel.INSTANCE.setBlendingModeFromModel(mode);
         }
 
         if(updateImage) {

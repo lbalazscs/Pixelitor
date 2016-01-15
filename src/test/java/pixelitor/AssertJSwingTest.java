@@ -59,8 +59,6 @@ import pixelitor.utils.Utils;
 import javax.swing.*;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
-import java.awt.geom.Area;
-import java.awt.geom.Ellipse2D;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -78,7 +76,6 @@ import static java.awt.event.KeyEvent.VK_SHIFT;
 import static java.awt.event.KeyEvent.VK_Z;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 import static pixelitor.utils.test.Assertions.canvasSizeIs;
 import static pixelitor.utils.test.Assertions.hasSelection;
 import static pixelitor.utils.test.Assertions.noSelection;
@@ -94,8 +91,7 @@ public class AssertJSwingTest {
     private static File batchFilterOutputDir;
 
     private Robot robot;
-    private static final int ROBOT_DELAY_MILLIS_FAST = 100;
-    private static final int ROBOT_DELAY_MILLIS_SLOW = 500;
+    private static final int ROBOT_DELAY_MILLIS_DEFAULT = 100;
 
     private FrameFixture window;
     private final Random random = new Random();
@@ -110,7 +106,7 @@ public class AssertJSwingTest {
         test.setUp();
         test.testApp();
 
-        System.out.println("AssertJSwingTest::main: finished, exiting in 5 seconds");
+        System.out.println("AssertJSwingTest: finished, exiting in 5 seconds");
         Utils.sleep(5, SECONDS);
         test.exit();
     }
@@ -122,8 +118,8 @@ public class AssertJSwingTest {
         }
         baseTestingDir = new File(args[0]);
         if (!baseTestingDir.exists()) {
-            System.err.println(String.format("Base testing dir '%s' does not exist",
-                    baseTestingDir.getAbsolutePath()));
+            System.err.printf("Base testing dir '%s' does not exist.%n",
+                    baseTestingDir.getAbsolutePath());
             System.exit(1);
         }
 
@@ -139,6 +135,11 @@ public class AssertJSwingTest {
         }
         cleanerScript = new File(baseTestingDir + File.separator
                 + "0000_clean_outputs" + cleanerScriptExt);
+
+        if (!cleanerScript.exists()) {
+            System.err.printf("Cleaner script %s not found.%n", cleanerScript.getName());
+            System.exit(1);
+        }
     }
 
     private static void initialize() {
@@ -161,19 +162,74 @@ public class AssertJSwingTest {
         PixelitorWindow.getInstance().setLocation(0, 0);
     }
 
+    /**
+     * Test targets: "all" (default),
+     * "tools" (includes "Selection" menus),
+     * "file",
+     * "edit",
+     * "filters" ("Colors" and "Filters" menus),
+     * "layers" ("Layers" menus and layer buttons),
+     * "develop",
+     * "rest" ("View" and "Help" menus)
+     */
     private void testApp() {
-        boolean singleTest = false;
-        if (singleTest) {
-            robot.settings().delayBetweenEvents(ROBOT_DELAY_MILLIS_SLOW);
+        setupRobotSpeed();
+        String target = System.getProperty("test.target");
+        if (target == null) {
+            target = "all"; // default target
+        }
+        System.out.printf("AssertJSwingTest: target = '%s'%n", target);
+        switch (target) {
+            case "all":
+                testAll();
+                break;
+            case "tools":
+                testTools();
+                break;
+            case "file":
+                testFileMenu();
+                break;
+            case "edit":
+                testEditMenu();
+                break;
+            case "filters":
+                testFilters();
+                break;
+            case "layers":
+                testLayers();
+                break;
+            case "develop":
+                testDevelopMenu();
+                break;
+            case "rest":
+                testViewMenu();
+                testHelpMenu();
+                break;
+            default:
+                throw new IllegalStateException("Unknown target " + target);
+        }
+    }
 
-            testAutoPaint();
+    private void testAll() {
+        testDevelopMenu();
+        testTools();
+        testFileMenu();
+        testEditMenu();
+        testFilters();
+        testViewMenu();
+        testHelpMenu();
+        testLayers();
+    }
+
+    private void setupRobotSpeed() {
+        // for example -Drobot.delay.millis=500 could be added to
+        // the command line to slow it down
+        String s = System.getProperty("robot.delay.millis");
+        if (s == null) {
+            robot.settings().delayBetweenEvents(ROBOT_DELAY_MILLIS_DEFAULT);
         } else {
-            robot.settings().delayBetweenEvents(ROBOT_DELAY_MILLIS_FAST);
-
-            testDevelopMenu();
-            testTools();
-            testMenus();
-            testLayers();
+            int delay = Integer.parseInt(s);
+            robot.settings().delayBetweenEvents(delay);
         }
     }
 
@@ -197,15 +253,6 @@ public class AssertJSwingTest {
         testShapesTool();
         testHandTool();
         testZoomTool();
-    }
-
-    private void testMenus() {
-        testFileMenu();
-        testEditMenu();
-        testFilters();
-        testZoomCommands();
-        testViewCommands();
-        testHelpMenu();
     }
 
     private void testLayers() {
@@ -620,7 +667,9 @@ public class AssertJSwingTest {
         dialog.button("ok").click();
     }
 
-    private void testViewCommands() {
+    private void testViewMenu() {
+        testZoomCommands();
+
         runMenuCommand("Set Default Workspace");
         runMenuCommand("Hide Status Bar");
         runMenuCommand("Show Status Bar");
@@ -736,6 +785,7 @@ public class AssertJSwingTest {
         testFilterWithDialog("Mystic Rose...", Randomize.YES, ShowOriginal.NO);
         testFilterWithDialog("Lissajous Curve...", Randomize.YES, ShowOriginal.NO);
         testFilterWithDialog("Spirograph...", Randomize.YES, ShowOriginal.NO);
+        testFilterWithDialog("Flower of Life...", Randomize.YES, ShowOriginal.NO);
         testFilterWithDialog("Crystallize...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Pointillize...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Stamp...", Randomize.YES, ShowOriginal.YES);
@@ -1101,18 +1151,6 @@ public class AssertJSwingTest {
         int selectionWidth = selectionBounds.width;
         int selectionHeight = selectionBounds.height;
 
-        // the eclipses in screen coordinates
-        Ellipse2D e1 = new Ellipse2D.Double(e1X, e1Y, e1Width, e1Height);
-        Ellipse2D e2 = new Ellipse2D.Double(e2X, e2Y, e2Width, e2Height);
-        Area area = new Area(e1);
-        area.add(new Area(e2));
-        Rectangle areaBounds = area.getBounds();
-        // the x and y are relative tyo the screen, but width and height are absolute
-        int expectedSelectionWidth = areaBounds.width;
-        int expectedSelectionHeight = areaBounds.height;
-        assertEquals("selection width", expectedSelectionWidth, selectionWidth);
-        assertEquals("selection height", expectedSelectionHeight, selectionHeight);
-
         //window.button("eraserTraceButton").click();
         findButtonByText(window, "Stroke with Current Eraser").click();
 
@@ -1189,7 +1227,8 @@ public class AssertJSwingTest {
         if (altDrag) {
             altDragTo(300, 300);
         } else {
-            ImageLayer layer = ImageComponents.getActiveIC().getComp().getActiveMaskOrImageLayer();
+            ImageDisplay ic = ImageComponents.getActiveIC();
+            ImageLayer layer = ic.getComp().getActiveMaskOrImageLayer();
             int txx = layer.getTX();
             int txy = layer.getTY();
             assert txx == 0;
@@ -1200,7 +1239,8 @@ public class AssertJSwingTest {
             txx = layer.getTX();
             txy = layer.getTY();
 
-            // This will be true only if we are at 100% zoom!
+            // The translations will have these values only if we are at 100% zoom!
+            assert ic.getZoomLevel() == ZoomLevel.Z100 : "zoom is " + ic.getZoomLevel();
             assert txx == -200 : "txx = " + txx;
             assert txy == -100 : "txy = " + txx;
         }
@@ -1347,23 +1387,23 @@ public class AssertJSwingTest {
     private static JButtonFixture findButtonByText(ComponentContainerFixture container, String text) {
         JButtonFixture buttonFixture = container.button(
                 new GenericTypeMatcher<JButton>(JButton.class) {
-            @Override
-            protected boolean isMatching(JButton button) {
-                if (!button.isShowing()) {
-                    return false; // not interested in buttons that are not currently displayed
-                }
-                String buttonText = button.getText();
-                if (buttonText == null) {
-                    buttonText = "";
-                }
-                return buttonText.equals(text);
-            }
+                    @Override
+                    protected boolean isMatching(JButton button) {
+                        if (!button.isShowing()) {
+                            return false; // not interested in buttons that are not currently displayed
+                        }
+                        String buttonText = button.getText();
+                        if (buttonText == null) {
+                            buttonText = "";
+                        }
+                        return buttonText.equals(text);
+                    }
 
-            @Override
-            public String toString() {
-                return "[Button Text Matcher, text = " + text + "]";
-            }
-        });
+                    @Override
+                    public String toString() {
+                        return "[Button Text Matcher, text = " + text + "]";
+                    }
+                });
 
         return buttonFixture;
     }
@@ -1371,24 +1411,24 @@ public class AssertJSwingTest {
     private static JButtonFixture findButtonByActionName(ComponentContainerFixture container, String actionName) {
         JButtonFixture buttonFixture = container.button(
                 new GenericTypeMatcher<JButton>(JButton.class) {
-            @Override
-            protected boolean isMatching(JButton button) {
-                if (!button.isShowing()) {
-                    return false; // not interested in buttons that are not currently displayed
-                }
-                Action action = button.getAction();
-                if (action == null) {
-                    return false;
-                }
-                String buttonActionName = (String) action.getValue(Action.NAME);
-                return actionName.equals(buttonActionName);
-            }
+                    @Override
+                    protected boolean isMatching(JButton button) {
+                        if (!button.isShowing()) {
+                            return false; // not interested in buttons that are not currently displayed
+                        }
+                        Action action = button.getAction();
+                        if (action == null) {
+                            return false;
+                        }
+                        String buttonActionName = (String) action.getValue(Action.NAME);
+                        return actionName.equals(buttonActionName);
+                    }
 
-            @Override
-            public String toString() {
-                return "[Button Action Name Matcher, action name = " + actionName + "]";
-            }
-        });
+                    @Override
+                    public String toString() {
+                        return "[Button Action Name Matcher, action name = " + actionName + "]";
+                    }
+                });
 
         return buttonFixture;
     }
@@ -1397,23 +1437,23 @@ public class AssertJSwingTest {
     private static JButtonFixture findButtonByToolTip(ComponentContainerFixture container, String toolTip) {
         JButtonFixture buttonFixture = container.button(
                 new GenericTypeMatcher<JButton>(JButton.class) {
-            @Override
-            protected boolean isMatching(JButton button) {
-                if (!button.isShowing()) {
-                    return false; // not interested in buttons that are not currently displayed
-                }
-                String buttonToolTip = button.getToolTipText();
-                if (buttonToolTip == null) {
-                    buttonToolTip = "";
-                }
-                return buttonToolTip.equals(toolTip);
-            }
+                    @Override
+                    protected boolean isMatching(JButton button) {
+                        if (!button.isShowing()) {
+                            return false; // not interested in buttons that are not currently displayed
+                        }
+                        String buttonToolTip = button.getToolTipText();
+                        if (buttonToolTip == null) {
+                            buttonToolTip = "";
+                        }
+                        return buttonToolTip.equals(toolTip);
+                    }
 
-            @Override
-            public String toString() {
-                return "[Button Text Matcher, text = " + toolTip + "]";
-            }
-        });
+                    @Override
+                    public String toString() {
+                        return "[Button Text Matcher, text = " + toolTip + "]";
+                    }
+                });
 
         return buttonFixture;
     }
@@ -1486,11 +1526,6 @@ public class AssertJSwingTest {
 
     private static void cleanOutputs() {
         try {
-            if (!cleanerScript.exists()) {
-                System.out.println("Cleaner script not found.");
-                return;
-            }
-
             Process process = Runtime.getRuntime().exec(cleanerScript.getCanonicalPath());
             process.waitFor();
         } catch (IOException | InterruptedException e) {

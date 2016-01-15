@@ -44,6 +44,10 @@ public class Messages {
         messageHandler.showException(e);
     }
 
+    public static void showException(Throwable e, Thread t) {
+        messageHandler.showException(e, t);
+    }
+
     public static void showDebugAppDialog() {
         AppNode node = new AppNode();
         String title = "Pixelitor Internal State";
