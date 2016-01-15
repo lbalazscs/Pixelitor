@@ -122,8 +122,8 @@ public class AssertJSwingTest {
         }
         baseTestingDir = new File(args[0]);
         if (!baseTestingDir.exists()) {
-            System.err.println(String.format("Base testing dir '%s' does not exist",
-                    baseTestingDir.getAbsolutePath()));
+            System.err.printf("Base testing dir '%s' does not exist.%n",
+                    baseTestingDir.getAbsolutePath());
             System.exit(1);
         }
 
@@ -139,6 +139,11 @@ public class AssertJSwingTest {
         }
         cleanerScript = new File(baseTestingDir + File.separator
                 + "0000_clean_outputs" + cleanerScriptExt);
+
+        if (!cleanerScript.exists()) {
+            System.err.printf("Cleaner script %s not found.%n", cleanerScript.getName());
+            System.exit(1);
+        }
     }
 
     private static void initialize() {
@@ -1486,11 +1491,6 @@ public class AssertJSwingTest {
 
     private static void cleanOutputs() {
         try {
-            if (!cleanerScript.exists()) {
-                System.out.println("Cleaner script not found.");
-                return;
-            }
-
             Process process = Runtime.getRuntime().exec(cleanerScript.getCanonicalPath());
             process.waitFor();
         } catch (IOException | InterruptedException e) {

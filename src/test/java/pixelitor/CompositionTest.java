@@ -59,6 +59,7 @@ public class CompositionTest {
         tester = new CompTester(comp);
         tester.checkDirty(false);
 
+        History.setUndoLevels(10);
         History.clear();
     }
 
@@ -514,6 +515,7 @@ public class CompositionTest {
         } else {
             // no change in the number of layers
             tester.checkLayers("[ACTIVE layer 1]");
+            History.assertNumEditsIs(2);
         }
 
         // 2. direction north-west
@@ -522,6 +524,9 @@ public class CompositionTest {
         tester.checkActiveLayerTranslation(-2, -2);
         // no need to enlarge the image again
         tester.checkActiveLayerAndMaskImageSize(22, 12);
+        if (!makeDuplicateLayer) {
+            History.assertNumEditsIs(3);
+        }
 
         // 3. direction north-west again
         tester.moveLayer(makeDuplicateLayer, -2, -2);
@@ -529,6 +534,9 @@ public class CompositionTest {
         tester.checkActiveLayerTranslation(-4, -4);
         // the image needs to be enlarged now
         tester.checkActiveLayerAndMaskImageSize(24, 14);
+        if (!makeDuplicateLayer) {
+            History.assertNumEditsIs(4);
+        }
 
         // 4. direction north-east
         tester.moveLayer(makeDuplicateLayer, 2, -2);
@@ -536,6 +544,9 @@ public class CompositionTest {
         tester.checkActiveLayerTranslation(-2, -6);
         // the image needs to be enlarged vertically
         tester.checkActiveLayerAndMaskImageSize(24, 16);
+        if (!makeDuplicateLayer) {
+            History.assertNumEditsIs(5);
+        }
 
         // 5. opposite movement: direction south-west
         tester.moveLayer(makeDuplicateLayer, -2, 2);
@@ -543,6 +554,9 @@ public class CompositionTest {
         tester.checkActiveLayerTranslation(-4, -4);
         // no need to enlarge the image
         tester.checkActiveLayerAndMaskImageSize(24, 16);
+        if (!makeDuplicateLayer) {
+            History.assertNumEditsIs(6);
+        }
 
         if (makeDuplicateLayer) {
             tester.checkLayers("[layer 1, layer 1 copy, layer 1 copy 2, layer 1 copy 3, layer 1 copy 4, ACTIVE layer 1 copy 5]");
@@ -552,13 +566,13 @@ public class CompositionTest {
         }
 
         if (!makeDuplicateLayer) { // we should have undo in this case
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < 6; i++) {
                 History.undo();
             }
             tester.checkActiveLayerTranslation(0, 0);
             tester.checkActiveLayerAndMaskImageSize(20, 10);
 
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < 6; i++) {
                 History.redo();
             }
             tester.checkActiveLayerTranslation(-4, -4);
