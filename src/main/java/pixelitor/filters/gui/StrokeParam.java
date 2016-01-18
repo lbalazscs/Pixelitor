@@ -170,6 +170,11 @@ public class StrokeParam extends AbstractFilterParam {
         }
         if (triggerAction) {
             adjustmentListener.paramAdjusted();
+        } else {
+            // this class updates the default button state
+            // simply by putting a decorator on the adjustment
+            // listeners, no this needs to be called here manually
+            updateDefaultButtonState();
         }
     }
 

@@ -20,8 +20,10 @@ public class FlowerOfLife extends ShapeFilter {
     private final static int GRID_TYPE_SQUARE = 2;
     private final static int GRID_TYPE_SQUARE_2 = 3;
 
+    public static final double SQRT_2 = 1.4142135623730950488016887242097;
+
     private final RangeParam radius = new RangeParam("Radius", 1, 50, 100);
-    private final RangeParam iterations = new RangeParam("Iterations", 1, 2, 10);
+    private final RangeParam iterations = new RangeParam("Iterations", 1, 3, 10);
     private final IntChoiceParam grid = new IntChoiceParam("Grid Type", new IntChoiceParam.Value[]{
             new IntChoiceParam.Value("Triangular", GRID_TYPE_TRIANGULAR),
             new IntChoiceParam.Value("Square", GRID_TYPE_SQUARE),
@@ -104,7 +106,7 @@ public class FlowerOfLife extends ShapeFilter {
 
         List<Circle> genSquareGridNeighbors() {
             List<Circle> n = new ArrayList<>(6);
-            double distance = r * 1.4142135623730950488016887242097; // sqrt(2)
+            double distance = r * SQRT_2;
             n.add(new Circle(cx - distance, cy, r)); // left
             n.add(new Circle(cx + distance, cy, r)); // right
             n.add(new Circle(cx, cy - distance, r)); // top
@@ -114,7 +116,7 @@ public class FlowerOfLife extends ShapeFilter {
 
         List<Circle> genSquare2GridNeighbors() {
             List<Circle> n = new ArrayList<>(6);
-            double distance = r * 1.4142135623730950488016887242097; // sqrt(2)
+            double distance = r * SQRT_2;
             n.add(new Circle(cx - distance, cy - distance, r)); // top left
             n.add(new Circle(cx + distance, cy - distance, r)); // top right
             n.add(new Circle(cx - distance, cy + distance, r)); // bottom left
@@ -143,6 +145,23 @@ public class FlowerOfLife extends ShapeFilter {
         @Override
         public int hashCode() {
             return Objects.hash(cx, cy);
+        }
+    }
+
+    @Override
+    protected float getGradientRadius(float cx, float cy) {
+        int gridType = grid.getValue();
+        float r = radius.getValueAsFloat();
+        int it = iterations.getValue();
+
+        if (gridType == GRID_TYPE_TRIANGULAR) {
+            return it * r;
+        } else if (gridType == GRID_TYPE_SQUARE) {
+            return (float) (r + (it - 1) * SQRT_2 * r);
+        } else if (gridType == GRID_TYPE_SQUARE_2) {
+            return r + (it - 1) * 2 * r;
+        } else {
+            throw new IllegalStateException("gridType = " + gridType);
         }
     }
 }

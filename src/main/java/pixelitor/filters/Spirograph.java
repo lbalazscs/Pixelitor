@@ -34,9 +34,6 @@ public class Spirograph extends ShapeFilter {
     private static final int TYPE_HYPOTROCHOID = 1;
     private static final int TYPE_EPITROCHOID = 2;
 
-    private static final int PROPORTIONS_CIRCLE = 3;
-    private static final int PROPORTIONS_IMAGE = 4;
-
     private final RangeParam time = new RangeParam("Time", 0, 185, 1000);
     private final GroupedRangeParam radii = new GroupedRangeParam("Radii",
             new RangeParam[]{
@@ -50,12 +47,6 @@ public class Spirograph extends ShapeFilter {
                     new IntChoiceParam.Value("Epitrochoid", TYPE_EPITROCHOID),
             }, IGNORE_RANDOMIZE);
 
-    private final IntChoiceParam proportions = new IntChoiceParam("Proportions",
-            new IntChoiceParam.Value[]{
-                    new IntChoiceParam.Value("Circle", PROPORTIONS_CIRCLE),
-                    new IntChoiceParam.Value("Image", PROPORTIONS_IMAGE),
-            }, IGNORE_RANDOMIZE);
-
     private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 1000);
 
     public Spirograph() {
@@ -63,7 +54,6 @@ public class Spirograph extends ShapeFilter {
                 time,
                 radii.setShowLinkedCB(false),
                 type,
-                proportions,
                 zoom
         );
     }
@@ -98,16 +88,15 @@ public class Spirograph extends ShapeFilter {
             throw new IllegalStateException();
         }
 
-        boolean followImage = proportions.getValue() == PROPORTIONS_IMAGE;
         double xMultiplier = 1.0;
         double yMultiplier = 1.0;
-        if (followImage) {
-            if (width > height) {
-                xMultiplier = ((double) width) / height;
-            } else {
-                yMultiplier = ((double) height) / height;
-            }
-        }
+//        if (followImage) {
+//            if (width > height) {
+//                xMultiplier = ((double) width) / height;
+//            } else {
+//                yMultiplier = ((double) height) / height;
+//            }
+//        }
 
         double dt = 0.05;
         double startX = combinedR + d;
@@ -116,10 +105,10 @@ public class Spirograph extends ShapeFilter {
         for (double t = dt; t < maxValue; t += dt) {
             double x = combinedR * cos(t) + d * cos(combinedR * t / r);
             double y = combinedR * sin(t) - d * sin(combinedR * t / r);
-            if (followImage) {
-                x *= xMultiplier;
-                y *= yMultiplier;
-            }
+//            if (followImage) {
+//                x *= xMultiplier;
+//                y *= yMultiplier;
+//            }
 
             shape.lineTo(w + x, h + y);
         }

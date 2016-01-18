@@ -72,16 +72,16 @@ public abstract class ShapeFilter extends FilterWithParametrizedGUI {
     private final IntChoiceParam foreground = new IntChoiceParam("Foreground",
             new IntChoiceParam.Value[]{
                     new IntChoiceParam.Value("White", FG_WHITE),
-                    new IntChoiceParam.Value("Tool Foreground", FG_TOOL),
                     new IntChoiceParam.Value("Radial Gradient", FG_GRADIENT),
+                    new IntChoiceParam.Value("Tool Foreground", FG_TOOL),
                     new IntChoiceParam.Value("Transparent", FG_TRANSPARENT),
             }, IGNORE_RANDOMIZE);
 
     public ShapeFilter() {
         super(ShowOriginal.NO);
         setParamSet(new ParamSet(
-                background,
                 foreground,
+                background,
                 strokeParam,
                 effectsParam
         ));
@@ -128,7 +128,7 @@ public abstract class ShapeFilter extends FilterWithParametrizedGUI {
             case FG_GRADIENT:
                 float cx = srcWidth / 2.0f;
                 float cy = srcHeight / 2.0f;
-                float radius = (float) Math.sqrt(cx * cx + cy * cy);
+                float radius = getGradientRadius(cx, cy);
                 float[] fractions = {0.0f, 1.0f};
                 Color[] colors = {DARK_GREEN, PURPLE};
                 g2.setPaint(new RadialGradientPaint(cx, cy, radius, fractions, colors));
@@ -156,6 +156,10 @@ public abstract class ShapeFilter extends FilterWithParametrizedGUI {
         g2.dispose();
 
         return dest;
+    }
+
+    protected float getGradientRadius(float cx, float cy) {
+        return (float) Math.sqrt(cx * cx + cy * cy);
     }
 
     protected abstract Shape createShape(int width, int height);

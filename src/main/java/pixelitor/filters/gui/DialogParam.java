@@ -16,7 +16,7 @@ public class DialogParam extends AbstractFilterParam {
     private DefaultButton defaultButton;
 
     public DialogParam(FilterParam... children) {
-        this("More Options", children);
+        this("More Settings", children);
     }
 
     public DialogParam(String name, FilterParam... children) {
@@ -35,7 +35,6 @@ public class DialogParam extends AbstractFilterParam {
 
         setParamGUIEnabledState();
         return (JComponent) paramGUI;
-
     }
 
     private JDialog createDialog(JDialog owner) {

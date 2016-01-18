@@ -29,7 +29,7 @@ import java.awt.geom.Point2D;
 public class MysticRose extends ShapeFilter {
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final RangeParam nrPoints = new RangeParam("Number of Points", 3, 10, 42);
-    private final RangeParam radius = new RangeParam("Radius (Height %)", 1, 45, 200);
+    private final RangeParam radius = new RangeParam("Radius", 1, 500, 1000);
     private final RangeParam rotate = new RangeParam("Rotate", 0, 0, 100);
 
     public MysticRose() {
@@ -37,7 +37,7 @@ public class MysticRose extends ShapeFilter {
                 nrPoints,
                 rotate,
                 center,
-                radius
+                radius.adjustRangeToImageSize(0.6)
         );
     }
 
@@ -60,7 +60,7 @@ public class MysticRose extends ShapeFilter {
     private Point2D[] calcPoints(int width, int height) {
         int numPoints = nrPoints.getValue();
         Point2D[] points = new Point2D[numPoints];
-        double r = radius.getValueAsPercentage() * height;
+        double r = radius.getValueAsDouble();
         double startAngle = 2 * Math.PI / numPoints * rotate.getValueAsPercentage();
         double cx = width * center.getRelativeX();
         double cy = height * center.getRelativeY();
@@ -70,5 +70,11 @@ public class MysticRose extends ShapeFilter {
             points[i] = new Point2D.Double((cx + r * Math.cos(theta)), (cy + r * Math.sin(theta)));
         }
         return points;
+    }
+
+    @Override
+    protected float getGradientRadius(float cx, float cy) {
+        float r = radius.getValueAsFloat();
+        return r;
     }
 }
