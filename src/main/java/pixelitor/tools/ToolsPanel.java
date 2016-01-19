@@ -17,11 +17,8 @@
 
 package pixelitor.tools;
 
-import pixelitor.Build;
 import pixelitor.GlobalKeyboardWatch;
-import pixelitor.PixelitorWindow;
-import pixelitor.filters.painters.TextFilter;
-import pixelitor.layers.TextLayer;
+import pixelitor.layers.AddTextLayerAction;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -47,16 +44,12 @@ public class ToolsPanel extends JPanel {
         setDefaultTool();
 
         // in the menu it was added using T, not t
-        // TODO when moving to 4.0 this action will not be needed, use
-        // AddTextLayerAction.INSTANCE instead
         Action textToolAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (Build.advancedLayersEnabled()) {
-                    TextLayer.createNew(PixelitorWindow.getInstance());
-                } else {
-                    TextFilter.getInstance().execute();
-                }
+                AddTextLayerAction.INSTANCE.actionPerformed(null);
+//                    TextLayer.createNew(PixelitorWindow.getInstance());
+//                    TextFilter.getInstance().execute();
             }
         };
         GlobalKeyboardWatch.addKeyboardShortCut('t', true, "text", textToolAction);

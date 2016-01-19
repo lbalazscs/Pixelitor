@@ -848,11 +848,7 @@ public class RobotTest {
 
         weightedCaller.registerCallback(1, RobotTest::layerOrderChange);
 
-        if (Build.advancedLayersEnabled()) {
-            weightedCaller.registerCallback(20, RobotTest::layerMerge);
-        } else {
-            weightedCaller.registerCallback(3, RobotTest::layerMerge);
-        }
+        weightedCaller.registerCallback(5, RobotTest::layerMerge);
 
         weightedCaller.registerCallback(3, RobotTest::layerAddDelete);
 
@@ -870,13 +866,11 @@ public class RobotTest {
 
         weightedCaller.registerCallback(1, RobotTest::randomEnlargeLayer);
 
-        if (Build.advancedLayersEnabled()) {
-            weightedCaller.registerCallback(7, RobotTest::randomNewTextLayer);
-            weightedCaller.registerCallback(7, RobotTest::randomTextLayerRasterize);
-            weightedCaller.registerCallback(2, RobotTest::randomNewAdjustmentLayer);
-            weightedCaller.registerCallback(7, RobotTest::randomSetLayerMaskEditMode);
-            weightedCaller.registerCallback(20, RobotTest::randomLayerMaskAction);
-        }
+        weightedCaller.registerCallback(7, RobotTest::randomNewTextLayer);
+        weightedCaller.registerCallback(7, RobotTest::randomTextLayerRasterize);
+        weightedCaller.registerCallback(2, RobotTest::randomNewAdjustmentLayer);
+        weightedCaller.registerCallback(7, RobotTest::randomSetLayerMaskEditMode);
+        weightedCaller.registerCallback(20, RobotTest::randomLayerMaskAction);
 
         // Not called now:
 //        randomCloseImageWOSaving();

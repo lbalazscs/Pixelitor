@@ -98,8 +98,4 @@ public enum Build {
 
     public abstract void setRobotTest(boolean robotTest);
     public abstract void setPerformanceTest(boolean performanceTest);
-
-    public static boolean advancedLayersEnabled() {
-        return "true".equals(System.getProperty("advanced.layers"));
-    }
 }

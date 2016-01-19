@@ -455,18 +455,16 @@ public class MenuBar extends JMenuBar {
 
         layersMenu.add(createLayerStackSubmenu());
 
-        if (Build.advancedLayersEnabled()) {
-            layersMenu.add(createLayerMaskSubmenu());
-            layersMenu.add(createTextLayerSubmenu(pw));
-            layersMenu.add(createAdjustmentLayersSubmenu());
+        layersMenu.add(createLayerMaskSubmenu());
+        layersMenu.add(createTextLayerSubmenu(pw));
+        layersMenu.add(createAdjustmentLayersSubmenu());
 
-            layersMenu.buildAction(new MenuAction("Show Pixelitor Internal State...") {
-                @Override
-                public void onClick() {
-                    Messages.showDebugAppDialog();
-                }
-            }).enableIf(ACTION_ENABLED).add();
-        }
+        layersMenu.buildAction(new MenuAction("Show Pixelitor Internal State...") {
+            @Override
+            public void onClick() {
+                Messages.showDebugAppDialog();
+            }
+        }).enableIf(ACTION_ENABLED).add();
 
         return layersMenu;
     }
@@ -678,9 +676,7 @@ public class MenuBar extends JMenuBar {
         colorsMenu.buildFA("Hue/Saturation", HueSat::new).withKey(CTRL_U).add();
         colorsMenu.buildFA("Colorize", Colorize::new).add();
         colorsMenu.buildFA("Levels", Levels::new).withKey(CTRL_L).add();
-        if (Build.advancedLayersEnabled()) {
-            colorsMenu.buildFA("Levels 2", Levels2::new).add();
-        }
+        colorsMenu.buildFA("Levels 2", Levels2::new).add();
         colorsMenu.buildFA("Brightness/Contrast", Brightness::new).add();
         colorsMenu.buildFA("Solarize", Solarize::new).add();
         colorsMenu.buildFA("Sepia", Sepia::new).add();
@@ -774,11 +770,8 @@ public class MenuBar extends JMenuBar {
         filterMenu.add(createFindEdgesSubmenu());
         filterMenu.add(createOtherSubmenu());
 
-        KeyStroke keyStroke = T;
-        if (Build.advancedLayersEnabled()) {
-            keyStroke = null;
-        }
-        filterMenu.buildFA(TextFilter.createFilterAction()).withKey(keyStroke).add();
+        // TODO does it still make sense to add the old text filter?
+        filterMenu.buildFA(TextFilter.createFilterAction()).add();
 
         return filterMenu;
     }
