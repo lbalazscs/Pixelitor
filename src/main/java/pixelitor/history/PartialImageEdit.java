@@ -97,6 +97,10 @@ public class PartialImageEdit extends FadeableEdit {
     }
 
     private static void debugRaster(String name, Raster raster) {
+        if (raster == null) {
+            System.err.printf("PartialImageEdit::debugRaster: NULL RASTER, name = '%s'%n", name);
+            return;
+        }
         Rectangle rasterBounds = raster.getBounds();
         String className = raster.getClass().getSimpleName();
         DataBuffer dataBuffer = raster.getDataBuffer();

@@ -22,7 +22,7 @@
     <groupId>pixelitor</groupId>
     <artifactId>Pixelitor</artifactId>
     <packaging>jar</packaging>
-    <version>3.1.4</version>
+    <version>4.0.0</version>
     <name>pixelitor</name>
     <url>http://pixelitor.sourceforge.net</url>
 
