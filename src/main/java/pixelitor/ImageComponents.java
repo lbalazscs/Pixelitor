@@ -19,6 +19,7 @@ package pixelitor;
 
 import pixelitor.filters.comp.Crop;
 import pixelitor.history.History;
+import pixelitor.io.OpenSaveManager;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.menus.SelectionActions;
@@ -32,6 +33,7 @@ import java.awt.Cursor;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -293,5 +295,17 @@ public class ImageComponents {
     public static boolean isActiveLayerImageLayer() {
         Layer activeLayer = activeIC.getComp().getActiveLayer();
         return activeLayer instanceof ImageLayer;
+    }
+
+    public static void reloadActiveFromFile() {
+        Composition comp = activeIC.getComp();
+        File file = comp.getFile();
+        if (file == null) {
+            Messages.showError("No file", String.format("The image '%s' cannot be reloaded because it was not yet saved.", comp.getName()));
+            return;
+        }
+        //OpenSaveManager.warnAndCloseImage(activeIC);
+        activeIC.close();
+        OpenSaveManager.openFile(file);
     }
 }

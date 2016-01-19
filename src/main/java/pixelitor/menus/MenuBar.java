@@ -170,6 +170,7 @@ public class MenuBar extends JMenuBar {
     private static final KeyStroke CTRL_SHIFT_OPEN_BRACKET = KeyStroke.getKeyStroke('[', InputEvent.CTRL_MASK + InputEvent.SHIFT_MASK);
     private static final KeyStroke ALT_CLOSE_BRACKET = KeyStroke.getKeyStroke(']', InputEvent.ALT_MASK);
     private static final KeyStroke ALT_OPEN_BRACKET = KeyStroke.getKeyStroke('[', InputEvent.ALT_MASK);
+    private static final KeyStroke F5 = KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0);
     private static final KeyStroke F6 = KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0);
     private static final KeyStroke F7 = KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0);
     private static final KeyStroke TAB = KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0);
@@ -276,6 +277,16 @@ public class MenuBar extends JMenuBar {
                 OpenSaveManager.warnAndCloseAllImages();
             }
         }, CTRL_ALT_W);
+
+        // reload
+        fileMenu.addActionWithKey(new MenuAction("Reload") {
+            @Override
+            public void onClick() {
+                ImageComponents.reloadActiveFromFile();
+            }
+        }, F5);
+
+        fileMenu.addSeparator();
 
         fileMenu.add(createAutomateSubmenu(pw));
 
