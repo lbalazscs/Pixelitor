@@ -47,7 +47,7 @@ public class CopyAction extends AbstractAction {
             if(!ImageComponents.isActiveLayerImageLayer()) {
                 // TODO we could try to rasterize text layers
 
-                if(!Build.CURRENT.isRobotTest()) {
+                if(!Build.CURRENT.isRandomGUITest()) {
                     Messages.showNotImageLayerError();
                 }
                 return;
@@ -58,7 +58,7 @@ public class CopyAction extends AbstractAction {
             Transferable imageTransferable = new ImageTransferable(activeImage);
 
             try {
-                // Sun Jan 04 08:00:30 CET 2015, robot test:
+                // Sun Jan 04 08:00:30 CET 2015, RandomGUITest:
                 // java.awt.image.RasterFormatException: Incorrect scanline stride: 12
                 // at sun.awt.image.ByteComponentRaster.verify(ByteComponentRaster.java:894)
                 // at sun.awt.image.ByteComponentRaster.<init>(ByteComponentRaster.java:201)

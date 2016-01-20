@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,9 @@
 package pixelitor;
 
 import org.jdesktop.swingx.painter.CheckerboardPainter;
+import pixelitor.history.AddToHistory;
+import pixelitor.history.CompositionReplacedEdit;
+import pixelitor.history.History;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
 import pixelitor.layers.LayerMask;
@@ -52,13 +55,14 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyVetoException;
 
 import static java.awt.Color.BLACK;
+import static pixelitor.Composition.ImageChangeActions.FULL;
 
 /**
  * The GUI component that shows a composition
  */
-public class ImageComponent extends JComponent implements MouseListener, MouseMotionListener, ImageDisplay {
+public class ImageComponent extends JComponent implements MouseListener, MouseMotionListener {
     private double viewScale = 1.0f;
-    private final Canvas canvas;
+    private Canvas canvas;
     private ZoomLevel zoomLevel = ZoomLevel.Z100;
 
     private InternalImageFrame internalFrame = null;
@@ -68,7 +72,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
     private final LayersPanel layersPanel;
 
-    private final Composition comp;
+    private Composition comp;
 
     private boolean showLayerMask = false;
 
@@ -84,13 +88,31 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
         this.comp = comp;
         this.canvas = comp.getCanvas();
-        comp.setImageDisplay(this);
+        comp.setIC(this);
 
         setupFitScreenZoomSize(canvas.getWidth(), canvas.getHeight(), false);
 
         layersPanel = new LayersPanel();
 
         addListeners();
+    }
+
+    public void replaceComp(Composition newComp, AddToHistory addToHistory) {
+        assert newComp != null;
+
+        Composition oldComp = comp;
+        comp = newComp;
+        oldComp.setIC(null);
+        comp.setIC(this);
+        canvas = newComp.getCanvas();
+
+        // keep the zoom level, but reinitialize the
+        // internal frame size
+        setZoom(zoomLevel, true);
+
+        comp.imageChanged(FULL);
+
+        History.addEdit(addToHistory, () -> new CompositionReplacedEdit(oldComp, newComp));
     }
 
     private void addListeners() {
@@ -181,7 +203,6 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         return internalFrame;
     }
 
-    @Override
     public void close() {
         if (internalFrame != null) {
             // this will also cause the calling of AppLogic.imageClosed via
@@ -200,12 +221,10 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         LayersContainer.showLayersPanel(layersPanel);
     }
 
-    @Override
     public double getViewScale() {
         return viewScale;
     }
 
-    @Override
     public void updateTitle() {
         if (internalFrame != null) {
             String frameTitle = createFrameTitle();
@@ -217,22 +236,18 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         return comp.getName() + " - " + zoomLevel.toString();
     }
 
-    @Override
     public ZoomLevel getZoomLevel() {
         return zoomLevel;
     }
 
-    @Override
     public void deleteLayerButton(LayerButton button) {
         layersPanel.deleteLayerButton(button);
     }
 
-    @Override
     public Composition getComp() {
         return comp;
     }
 
-    @Override
     public void changeLayerOrderInTheGUI(int oldIndex, int newIndex) {
         layersPanel.changeLayerOrderInTheGUI(oldIndex, newIndex);
     }
@@ -348,7 +363,6 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     /**
      * Repaints only a region of the image, called from the brush tools
      */
-    @Override
     public void updateRegion(double startX, double startY, double endX, double endY, int thickness) {
         if (zoomLevel != ZoomLevel.Z100) { // not the 100% view
             startX = (int) (drawStartX + viewScale * startX);
@@ -390,13 +404,11 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         }
     }
 
-    @Override
     public void setShowLayerMask(boolean showLayerMask) {
         this.showLayerMask = showLayerMask;
         repaint();
     }
 
-    @Override
     public void canvasSizeChanged() {
         assert ConsistencyChecks.imageCoversCanvasCheck(comp);
 
@@ -459,7 +471,6 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     /**
      * @return true if there was a change in zoom
      */
-    @Override
     public boolean setZoom(ZoomLevel newZoomLevel, boolean settingTheInitialSize) {
         if (this.zoomLevel == newZoomLevel && !settingTheInitialSize) {
             return false;
@@ -497,7 +508,6 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         return true;
     }
 
-    @Override
     public void increaseZoom(int mouseX, int mouseY) {
         ZoomLevel oldZoom = zoomLevel;
         ZoomLevel newZoom = zoomLevel.zoomIn();
@@ -506,7 +516,6 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         }
     }
 
-    @Override
     public void decreaseZoom(int mouseX, int mouseY) {
         ZoomLevel oldZoom = zoomLevel;
         ZoomLevel newZoom = zoomLevel.zoomOut();
@@ -547,12 +556,10 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         drawStartY = (height - canvasZoomedHeight) / 2.0;
     }
 
-    @Override
     public double componentXToImageSpace(int mouseX) {
         return ((mouseX - drawStartX) / viewScale);
     }
 
-    @Override
     public double componentYToImageSpace(int mouseY) {
         return ((mouseY - drawStartY) / viewScale);
     }
@@ -581,7 +588,6 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         );
     }
 
-    @Override
     public Rectangle2D fromComponentToImageSpace(Rectangle input) {
         return new Rectangle.Double(
                 componentXToImageSpace(input.x),
@@ -591,7 +597,6 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         );
     }
 
-    @Override
     public Rectangle fromImageToComponentSpace(Rectangle2D input) {
         return new Rectangle(
                 imageXToComponentSpace(input.getX()),
@@ -625,12 +630,10 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
      * Returns how much of this ImageComponent is currently visible considering that
      * the JScrollPane might show only a part of it
      */
-    @Override
     public Rectangle getViewRect() {
         return internalFrame.getScrollPane().getViewport().getViewRect();
     }
 
-    @Override
     public void addLayerToGUI(Layer newLayer, int newLayerIndex) {
         LayerButton layerButton = newLayer.getUI().getLayerButton();
         layersPanel.addLayerButton(layerButton, newLayerIndex);
@@ -640,13 +643,15 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         }
     }
 
-    @Override
     public boolean isMaskShowing() {
         return showLayerMask;
     }
 
-    @Override
     public boolean activeIsImageLayer() {
         return comp.activeIsImageLayer();
+    }
+
+    public boolean isMock() {
+        return false;
     }
 }

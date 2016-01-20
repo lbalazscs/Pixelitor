@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,8 @@
 package pixelitor.utils.test;
 
 import pixelitor.Composition;
+import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
-import pixelitor.ImageDisplay;
 import pixelitor.NewImage;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.GradientTool;
@@ -51,7 +51,7 @@ public class ToolTests {
     public static void testTools() {
         NewImage.addNewImage(WHITE, 400, 400, "Tool Tests");
 
-        ImageDisplay ic = ImageComponents.getActiveIC();
+        ImageComponent ic = ImageComponents.getActiveIC();
         Composition comp = ic.getComp();
 
         addRadialBWGradientToActiveLayer(comp, true);

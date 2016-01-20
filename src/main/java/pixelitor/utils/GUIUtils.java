@@ -32,7 +32,6 @@ import java.awt.GraphicsEnvironment;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.awt.Window;
-import java.util.List;
 
 public final class GUIUtils {
 
@@ -119,14 +118,14 @@ public final class GUIUtils {
         d.setVisible(true);
     }
 
-    public static JPanel arrangeParamsInVerticalGridBag(List<FilterParam> paramList) {
+    public static JPanel arrangeParamsInVerticalGridBag(Iterable<FilterParam> params) {
         JPanel p = new JPanel();
         p.setLayout(new GridBagLayout());
 
         int row = 0;
 
         GridBagHelper gbHelper = new GridBagHelper(p);
-        for (FilterParam param : paramList) {
+        for (FilterParam param : params) {
             JComponent control = param.createGUI();
 
             int numColumns = param.getNrOfGridBagCols();

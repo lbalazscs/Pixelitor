@@ -93,7 +93,7 @@ public class Dialogs {
     }
 
     public static void showNotImageLayerDialog() {
-        if (!Build.CURRENT.isRobotTest()) {
+        if (!Build.CURRENT.isRandomGUITest()) {
             showErrorDialog("Not an image layer", "The active layer is not an image layer.");
         }
 //        if(Build.CURRENT == Build.DEVELOPMENT) {
@@ -115,7 +115,7 @@ public class Dialogs {
             e = e.getCause();
         }
 
-        if (Build.CURRENT.isRobotTest()) {
+        if (Build.CURRENT.isRandomGUITest()) {
             DebugEventQueue.dump();
             History.showHistory();
             Toolkit.getDefaultToolkit().beep();

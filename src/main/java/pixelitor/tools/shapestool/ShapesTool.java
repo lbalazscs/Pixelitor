@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.tools.shapestool;
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import org.jdesktop.swingx.painter.effects.AreaEffect;
 import pixelitor.Composition;
-import pixelitor.ImageDisplay;
+import pixelitor.ImageComponent;
 import pixelitor.filters.gui.StrokeParam;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.EffectsPanel;
@@ -137,7 +137,7 @@ public class ShapesTool extends Tool {
     }
 
     @Override
-    public void mousePressed(MouseEvent e, ImageDisplay ic) {
+    public void mousePressed(MouseEvent e, ImageComponent ic) {
         Composition comp = ic.getComp();
         Optional<Selection> selection = comp.getSelection();
         if (selection.isPresent()) {
@@ -148,7 +148,7 @@ public class ShapesTool extends Tool {
     }
 
     @Override
-    public void mouseDragged(MouseEvent e, ImageDisplay ic) {
+    public void mouseDragged(MouseEvent e, ImageComponent ic) {
         // hack to prevent AssertionError when dragging started
         // from negative coordinates bug
         // TODO investigate
@@ -176,7 +176,7 @@ public class ShapesTool extends Tool {
     }
 
     @Override
-    public void mouseReleased(MouseEvent e, ImageDisplay ic) {
+    public void mouseReleased(MouseEvent e, ImageComponent ic) {
         userDrag.setStartFromCenter(e.isAltDown());
 
         Composition comp = ic.getComp();
@@ -278,17 +278,17 @@ public class ShapesTool extends Tool {
     }
 
     /**
-     * Paint a shape on the given ImageDisplay. Can be used programmatically.
+     * Paint a shape on the given ImageComponent. Can be used programmatically.
      * The start and end point points are given relative to the Composition (not Layer)
      */
     public void paintShapeOnIC(Composition comp, UserDrag userDrag) {
         ImageLayer layer = comp.getActiveMaskOrImageLayer();
-        int translationX = -layer.getTX();
-        int translationY = -layer.getTY();
+        int tx = -layer.getTX();
+        int ty = -layer.getTY();
 
         BufferedImage bi = layer.getImage();
         Graphics2D g2 = bi.createGraphics();
-        g2.translate(translationX, translationY);
+        g2.translate(tx, ty);
         comp.applySelectionClipping(g2, null);
 
         paintShape(g2, userDrag, comp);

@@ -1,3 +1,20 @@
+/*
+ * Copyright 2016 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.filters;
 
 import pixelitor.filters.gui.IntChoiceParam;
@@ -42,9 +59,8 @@ public class FlowerOfLife extends ShapeFilter {
         Path2D shape = new Path2D.Double();
 
         double r = radius.getValueAsDouble();
-
-        double cx = width / 2.0;
-        double cy = height / 2.0;
+        double cx = width * center.getRelativeX();
+        double cy = height * center.getRelativeY();
 
         Circle firstCircle = new Circle(cx, cy, r);
         Set<Circle> circles = new HashSet<>();

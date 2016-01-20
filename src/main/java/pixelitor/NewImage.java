@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,7 +51,7 @@ public final class NewImage {
 
     public static Composition createNewComposition(FillType bg, int width, int height, String title) {
 //        BufferedImage newImage = new BufferedImage(width, height, TYPE_INT_ARGB_PRE);
-        BufferedImage newImage = ImageUtils.createCompatibleImage(width, height);
+        BufferedImage newImage = ImageUtils.createSysCompatibleImage(width, height);
         fillImage(newImage, bg);
         return Composition.fromImage(newImage, null, title);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,8 @@
 package pixelitor.filters.animation;
 
 import pixelitor.ChangeReason;
+import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
-import pixelitor.ImageDisplay;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.Filter;
 import pixelitor.filters.FilterWithParametrizedGUI;
@@ -121,7 +121,7 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         long runCountAfter = Filter.runCount;
         assert runCountAfter == runCountBefore + 1;
 
-        ImageDisplay ic = ImageComponents.getActiveIC();
+        ImageComponent ic = ImageComponents.getActiveIC();
         ic.repaint();
 
         return ImageComponents.getActiveCompositeImage().get();

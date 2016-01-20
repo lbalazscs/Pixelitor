@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.tools;
 
 import pixelitor.FgBgColors;
-import pixelitor.ImageDisplay;
+import pixelitor.ImageComponent;
 import pixelitor.layers.ImageLayer;
 import pixelitor.utils.Messages;
 
@@ -47,22 +47,22 @@ public class ColorPickerTool extends Tool {
 
 
     @Override
-    public void mousePressed(MouseEvent e, ImageDisplay ic) {
+    public void mousePressed(MouseEvent e, ImageComponent ic) {
         sampleColor(e, ic, e.isAltDown() || SwingUtilities.isRightMouseButton(e));
     }
 
 
     @Override
-    public void mouseDragged(MouseEvent e, ImageDisplay ic) {
+    public void mouseDragged(MouseEvent e, ImageComponent ic) {
         sampleColor(e, ic, e.isAltDown() || SwingUtilities.isRightMouseButton(e));
     }
 
     @Override
-    public void mouseReleased(MouseEvent e, ImageDisplay ic) {
+    public void mouseReleased(MouseEvent e, ImageComponent ic) {
 
     }
 
-    public void sampleColor(MouseEvent e, ImageDisplay ic, boolean selectBackground) {
+    public void sampleColor(MouseEvent e, ImageComponent ic, boolean selectBackground) {
         int x = (int) ic.componentXToImageSpace(e.getX());
         int y = (int) ic.componentYToImageSpace(e.getY());
 

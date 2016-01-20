@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,8 +24,8 @@ import pixelitor.ConsistencyChecks;
 import pixelitor.Desktop;
 import pixelitor.FgBgColors;
 import pixelitor.GlobalKeyboardWatch;
+import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
-import pixelitor.ImageDisplay;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.Fade;
 import pixelitor.filters.Filter;
@@ -101,7 +101,7 @@ import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_90;
  * An automatic test using java.awt.Robot.
  * Can be dangerous because of the random native mouse events that can control other apps as well if they escape.
  */
-public class RobotTest {
+public class RandomGUITest {
     final static Random rand = new Random();
 
     private static final Tool preferredTool = null; // set to null to select random tools
@@ -120,24 +120,24 @@ public class RobotTest {
     /**
      * Utility class with static methods
      */
-    private RobotTest() {
+    private RandomGUITest() {
     }
 
-    public static void runRobot() {
+    public static void runTest() {
         if (Build.CURRENT != Build.DEVELOPMENT) {
             Messages.showError("Error", "Build is not DEVELOPMENT");
             return;
         }
-        Build.CURRENT.setRobotTest(true);
+        Build.CURRENT.setRandomGUITest(true);
 
         numPastedImages = 0;
 
         // make sure it can be stopped by pressing the u key
         stopKeyStroke = KeyStroke.getKeyStroke('w');
-        GlobalKeyboardWatch.addKeyboardShortCut(stopKeyStroke, "stoprobot", new AbstractAction() {
+        GlobalKeyboardWatch.addKeyboardShortCut(stopKeyStroke, "stopTest", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("RobotTest: \"" + stopKeyStroke + "\" Pressed");
+                System.out.println("RandomGUITest: \"" + stopKeyStroke + "\" Pressed");
                 continueRunning = false;
             }
         });
@@ -148,12 +148,12 @@ public class RobotTest {
         GlobalKeyboardWatch.addKeyboardShortCut(exitKeyStroke, "exit", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("RobotTest: exiting app because '" + exitKeyStroke.getKeyChar() + "' was pressed");
+                System.out.println("RandomGUITest: exiting app because '" + exitKeyStroke.getKeyChar() + "' was pressed");
                 System.exit(1);
             }
         });
 
-        System.out.printf("RobotTest.runRobot CALLED at %s, the '%s' key stops, the '%s' key exits.%n",
+        System.out.printf("RandomGUITest.runTest CALLED at %s, the '%s' key stops, the '%s' key exits.%n",
                 new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()),
                 stopKeyStroke.getKeyChar(), exitKeyStroke.getKeyChar());
 
@@ -168,7 +168,7 @@ public class RobotTest {
         Point p = generateRandomPoint();
         r.mouseMove(p.x, p.y);
 
-        logRobotEvent("initial splash");
+        logRandomEvent("initial splash");
         ImageTests.createSplashImage();
         randomCopy(); // ensure an image is on the clipboard
 
@@ -200,7 +200,7 @@ public class RobotTest {
                     }
 
                     if (!GUIUtils.appIsActive()) {
-                        System.out.println("\nRobotTest app focus lost");
+                        System.out.println("\nRandomGUITest app focus lost");
                         cleanUp();
                         break;
                     }
@@ -230,7 +230,7 @@ public class RobotTest {
                         Messages.showException(e);
                     }
                 }
-                System.out.println("\nRobotTest.runRobot FINISHED at " + new Date());
+                System.out.println("\nRandomGUITest.runTest FINISHED at " + new Date());
                 cleanUp();
                 Toolkit.getDefaultToolkit().beep();
 
@@ -258,16 +258,16 @@ public class RobotTest {
 
     private static void cleanUp() {
         AppPreferences.WorkSpace.setDefault();
-        Build.CURRENT.setRobotTest(false);
+        Build.CURRENT.setRandomGUITest(false);
     }
 
     private static void randomResize() {
-        logRobotEvent("random resize");
+        logRandomEvent("random resize");
         OpTests.randomResize();
     }
 
-    private static void logRobotEvent(String msg) {
-        DebugEventQueue.post(new RobotEvent(msg));
+    private static void logRandomEvent(String msg) {
+        DebugEventQueue.post(new RandomTestEvent(msg));
 //        System.out.println(msg);
     }
 
@@ -275,7 +275,7 @@ public class RobotTest {
         Point randomPoint = generateRandomPoint();
         int x = randomPoint.x;
         int y = randomPoint.y;
-        logRobotEvent("random move to (" + x + ", " + y + ')');
+        logRandomEvent("random move to (" + x + ", " + y + ')');
         r.mouseMove(x, y);
     }
 
@@ -283,7 +283,7 @@ public class RobotTest {
         Point randomPoint = generateRandomPoint();
         int x = randomPoint.x;
         int y = randomPoint.y;
-        logRobotEvent("random \"" + Tools.getCurrentTool().getName() + " Tool\" drag to (" + x + ", " + y + ')');
+        logRandomEvent("random \"" + Tools.getCurrentTool().getName() + " Tool\" drag to (" + x + ", " + y + ')');
 
         r.mousePress(InputEvent.BUTTON1_MASK);
         r.mouseMove(x, y);
@@ -291,7 +291,7 @@ public class RobotTest {
     }
 
     private static void click(Robot r) {
-        logRobotEvent("random click");
+        logRandomEvent("random click");
 
         r.mousePress(InputEvent.BUTTON1_MASK);
         r.delay(50);
@@ -299,7 +299,7 @@ public class RobotTest {
     }
 
     private static void randomRightClick(Robot r) {
-        logRobotEvent("random right click");
+        logRandomEvent("random right click");
 
         r.mousePress(InputEvent.BUTTON3_MASK);
         r.delay(50);
@@ -307,7 +307,7 @@ public class RobotTest {
     }
 
     private static void randomColors() {
-        logRobotEvent("random colors");
+        logRandomEvent("random colors");
         FgBgColors.randomizeColors();
     }
 
@@ -321,7 +321,7 @@ public class RobotTest {
                         (!(filter instanceof RandomFilter)));
 
         String opName = op.getName();
-        logRobotEvent("random operation: " + opName);
+        logRandomEvent("random operation: " + opName);
 
         long runCountBefore = Filter.runCount;
 
@@ -339,11 +339,11 @@ public class RobotTest {
                 if (op instanceof FilterWithParametrizedGUI) {
                     ParamSet paramSet = ((FilterWithParametrizedGUI) op).getParamSet();
                     System.out.println(String.format(
-                            "RobotTest::randomOperation: name = %s, width = %d, height = %d, params = %s",
+                            "RandomGUITest::randomOperation: name = %s, width = %d, height = %d, params = %s",
                             opName, src.getWidth(), src.getHeight(), paramSet.toString()));
                 } else {
                     System.out.println(String.format(
-                            "RobotTest::randomOperation: name = %s, width = %d, height = %d",
+                            "RandomGUITest::randomOperation: name = %s, width = %d, height = %d",
                             opName, src.getWidth(), src.getHeight()));
                 }
                 throw e;
@@ -360,7 +360,7 @@ public class RobotTest {
                 op.execute(ChangeReason.OP_WITHOUT_DIALOG);
             } catch (Exception e) {
                 System.out.println(String.format(
-                        "RobotTest::randomOperation: name = %s, width = %d, height = %d",
+                        "RandomGUITest::randomOperation: name = %s, width = %d, height = %d",
                         opName, src.getWidth(), src.getHeight()));
                 throw e;
             }
@@ -377,7 +377,7 @@ public class RobotTest {
         FilterWithParametrizedGUI filter = getRandomTweenFilter();
         String filterName = filter.getName();
 
-        logRobotEvent("randomTweenOperation: " + filterName);
+        logRandomEvent("randomTweenOperation: " + filterName);
 
         TweenAnimation animation = new TweenAnimation();
         animation.setFilter(filter);
@@ -397,9 +397,9 @@ public class RobotTest {
         ParamSetState intermediateState = animation.tween(randomTime);
         paramSet.setState(intermediateState);
 
-        logRobotEvent("random operation in randomTweenOperation: " + filterName);
+        logRandomEvent("random operation in randomTweenOperation: " + filterName);
 
-//        System.out.println(String.format("RobotTest::randomTweenOperation: " +
+//        System.out.println(String.format("RandomGUITest::randomTweenOperation: " +
 //                "filterName = '%s' time=%.2f, interpolation = %s",
 //                filterName, randomTime, randomInterpolation.toString()));
 
@@ -434,10 +434,10 @@ public class RobotTest {
 
     private static void randomFitToScreen() {
         if (Math.random() > 0.1) {
-            logRobotEvent("fitActiveToScreen");
+            logRandomEvent("fitActiveToScreen");
             ImageComponents.fitActiveToScreen();
         } else {
-            logRobotEvent("fitActiveToActualPixels");
+            logRandomEvent("fitActiveToActualPixels");
             ImageComponents.fitActiveToActualPixels();
         }
     }
@@ -462,7 +462,7 @@ public class RobotTest {
         int randomIndex = rand.nextInt(keyEvents.length);
         int keyEvent = keyEvents[randomIndex];
 
-        logRobotEvent("random key keyEvent = " + keyEvent);
+        logRandomEvent("random key keyEvent = " + keyEvent);
 
         r.keyPress(keyEvent);
         r.delay(50);
@@ -470,7 +470,7 @@ public class RobotTest {
     }
 
     private static void randomZoom() {
-        ImageDisplay ic = ImageComponents.getActiveIC();
+        ImageComponent ic = ImageComponents.getActiveIC();
         if (ic != null) {
             ZoomLevel randomZoomLevel = null;
 
@@ -480,15 +480,15 @@ public class RobotTest {
                 percentValue = randomZoomLevel.getPercentValue();
             }
 
-            logRobotEvent("random zoom zoomLevel = " + randomZoomLevel);
+            logRandomEvent("random zoom zoomLevel = " + randomZoomLevel);
             ic.setZoom(randomZoomLevel, false);
         }
     }
 
     private static void randomZoomOut() {
-        logRobotEvent("randomZoomOut");
+        logRandomEvent("randomZoomOut");
 
-        ImageDisplay ic = ImageComponents.getActiveIC();
+        ImageComponent ic = ImageComponents.getActiveIC();
         if (ic != null) {
             ZoomLevel previous = ic.getZoomLevel().zoomOut();
             ic.setZoom(previous, false);
@@ -496,14 +496,15 @@ public class RobotTest {
     }
 
     private static void repeat() {
-        logRobotEvent("repeat");
+        logRandomEvent("repeat");
         PixelitorWindow pw = PixelitorWindow.getInstance();
         pw.dispatchEvent(new KeyEvent(pw, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), KeyEvent.CTRL_MASK, KeyEvent.VK_F, 'F'));
     }
 
     private static void randomUndoRedo() {
         if (History.canUndo()) {
-            logRobotEvent("randomUndoRedo");
+            logRandomEvent("randomUndoRedo");
+
             History.undo();
 
             // for some reason, redo might not be available even if we are right
@@ -524,7 +525,7 @@ public class RobotTest {
     private static void randomCrop() {
         boolean enabled = SelectionActions.areEnabled();
         if (enabled) {
-            logRobotEvent("randomCrop");
+            logRandomEvent("randomCrop");
             SelectionActions.getCropAction().actionPerformed(new ActionEvent("", 0, ""));
         }
     }
@@ -535,7 +536,7 @@ public class RobotTest {
             return;
         }
 
-        logRobotEvent("randomFade");
+        logRandomEvent("randomFade");
 
         Fade fade = new Fade();
         fade.setOpacity(rand.nextInt(100));
@@ -544,50 +545,50 @@ public class RobotTest {
     }
 
     private static void randomizeToolSettings() {
-        logRobotEvent("randomize tool settings");
+        logRandomEvent("randomize tool settings");
         ToolSettingsPanelContainer.INSTANCE.randomizeToolSettings();
     }
 
     private static void arrangeWindows() {
         double r = Math.random();
         if (r < 0.8) {
-            logRobotEvent("arrange windows - tile");
+            logRandomEvent("arrange windows - tile");
             Desktop.INSTANCE.tileWindows();
         } else {
-            logRobotEvent("arrange windows - cascade");
+            logRandomEvent("arrange windows - cascade");
             Desktop.INSTANCE.cascadeWindows();
         }
     }
 
     private static void deselect() {
         if (SelectionActions.areEnabled()) {
-            logRobotEvent("deselect");
+            logRandomEvent("deselect");
             SelectionActions.getDeselectAction().actionPerformed(new ActionEvent("", 0, ""));
         }
     }
 
     private static void layerToCanvasSize() {
-        logRobotEvent("layer to canvas size");
+        logRandomEvent("layer to canvas size");
         ImageComponents.getActiveComp().get().activeLayerToCanvasSize();
     }
 
     private static void invertSelection() {
         if (SelectionActions.areEnabled()) {
-            logRobotEvent("invert selection");
+            logRandomEvent("invert selection");
             SelectionActions.getInvertSelectionAction().actionPerformed(new ActionEvent("", 0, ""));
         }
     }
 
     private static void traceWithCurrentBrush() {
         if (SelectionActions.areEnabled()) {
-            logRobotEvent("trace with current brush");
+            logRandomEvent("trace with current brush");
             SelectionActions.getTraceWithBrush().actionPerformed(new ActionEvent("", 0, ""));
         }
     }
 
     private static void traceWithCurrentEraser() {
         if (SelectionActions.areEnabled()) {
-            logRobotEvent("trace with current eraser");
+            logRandomEvent("trace with current eraser");
             SelectionActions.getTraceWithEraser().actionPerformed(new ActionEvent("", 0, ""));
         }
     }
@@ -598,23 +599,23 @@ public class RobotTest {
 
         switch (r) {
             case 0:
-                logRobotEvent("rotate 90 CW");
+                logRandomEvent("rotate 90 CW");
                 action = new Rotate(ANGLE_90);
                 break;
             case 1:
-                logRobotEvent("rotate 180");
+                logRandomEvent("rotate 180");
                 action = new Rotate(ANGLE_180);
                 break;
             case 2:
-                logRobotEvent("rotate 90 CCW");
+                logRandomEvent("rotate 90 CCW");
                 action = new Rotate(ANGLE_270);
                 break;
             case 3:
-                logRobotEvent("flip horizontal");
+                logRandomEvent("flip horizontal");
                 action = new Flip(HORIZONTAL);
                 break;
             case 4:
-                logRobotEvent("flip vertical");
+                logRandomEvent("flip vertical");
                 action = new Flip(VERTICAL);
                 break;
         }
@@ -628,27 +629,27 @@ public class RobotTest {
         int r = rand.nextInt(6);
         switch (r) {
             case 0:
-                logRobotEvent("layer order change: active to top");
+                logRandomEvent("layer order change: active to top");
                 comp.moveActiveLayerToTop();
                 break;
             case 1:
-                logRobotEvent("layer order change: active to bottom");
+                logRandomEvent("layer order change: active to bottom");
                 comp.moveActiveLayerToBottom();
                 break;
             case 2:
-                logRobotEvent("layer order change: selection up");
+                logRandomEvent("layer order change: selection up");
                 comp.moveLayerSelectionUp();
                 break;
             case 3:
-                logRobotEvent("layer order change: selection down");
+                logRandomEvent("layer order change: selection down");
                 comp.moveLayerSelectionDown();
                 break;
             case 4:
-                logRobotEvent("layer order change: active up");
+                logRandomEvent("layer order change: active up");
                 comp.moveActiveLayerUp();
                 break;
             case 5:
-                logRobotEvent("layer order change: active down");
+                logRandomEvent("layer order change: active down");
                 comp.moveActiveLayerDown();
                 break;
         }
@@ -658,10 +659,10 @@ public class RobotTest {
         Composition comp = ImageComponents.getActiveComp().get();
 
         if (rand.nextBoolean()) {
-            logRobotEvent("layer merge down");
+            logRandomEvent("layer merge down");
             comp.mergeDown(UpdateGUI.YES);
         } else {
-            logRobotEvent("layer flatten image");
+            logRandomEvent("layer flatten image");
             comp.flattenImage(UpdateGUI.YES);
         }
     }
@@ -669,12 +670,12 @@ public class RobotTest {
     private static void layerAddDelete() {
         if (rand.nextBoolean()) {
             if (AddNewLayerAction.INSTANCE.isEnabled()) {
-                logRobotEvent("add new layer");
+                logRandomEvent("add new layer");
                 AddNewLayerAction.INSTANCE.actionPerformed(new ActionEvent("", 0, ""));
             }
         } else {
             if (DeleteActiveLayerAction.INSTANCE.isEnabled()) {
-                logRobotEvent("delete active layer");
+                logRandomEvent("delete active layer");
                 DeleteActiveLayerAction.INSTANCE.actionPerformed(new ActionEvent("", 0, ""));
             }
         }
@@ -687,29 +688,29 @@ public class RobotTest {
 
         int r = rand.nextInt(5);
         if (r == 0) {
-            logRobotEvent("random show-hide histograms");
+            logRandomEvent("random show-hide histograms");
             new ShowHideHistogramsAction().actionPerformed(new ActionEvent("", 0, ""));
         } else if (r == 1) {
-            logRobotEvent("random show-hide layers");
+            logRandomEvent("random show-hide layers");
             new ShowHideLayersAction().actionPerformed(new ActionEvent("", 0, ""));
         } else if (r == 2) {
-            logRobotEvent("random show-hide tools");
+            logRandomEvent("random show-hide tools");
             new ShowHideToolsAction().actionPerformed(new ActionEvent("", 0, ""));
         } else if (r == 4) {
-            logRobotEvent("random show-hide statusbar");
+            logRandomEvent("random show-hide statusbar");
             new ShowHideStatusBarAction().actionPerformed(new ActionEvent("", 0, ""));
         } else if (r == 5) {
-            logRobotEvent("random show-hide all");
+            logRandomEvent("random show-hide all");
             ShowHideAllAction.INSTANCE.actionPerformed(new ActionEvent("", 0, ""));
         }
     }
 
     private static void randomCopy() {
         if (rand.nextBoolean()) {
-            logRobotEvent("random copy layer");
+            logRandomEvent("random copy layer");
             new CopyAction(CopySource.LAYER).actionPerformed(new ActionEvent("", 0, ""));
         } else {
-            logRobotEvent("random copy composite");
+            logRandomEvent("random copy composite");
             new CopyAction(CopySource.COMPOSITE).actionPerformed(new ActionEvent("", 0, ""));
         }
     }
@@ -723,11 +724,11 @@ public class RobotTest {
             if (singleImageTest) {
                 return;
             }
-            logRobotEvent("random paste as new image");
+            logRandomEvent("random paste as new image");
             new PasteAction(PasteDestination.NEW_IMAGE).actionPerformed(new ActionEvent("", 0, ""));
             numPastedImages++;
         } else if (r == 1) {
-            logRobotEvent("random paste as new layer");
+            logRandomEvent("random paste as new layer");
             new PasteAction(PasteDestination.NEW_LAYER).actionPerformed(new ActionEvent("", 0, ""));
             numPastedImages++;
         }
@@ -741,14 +742,14 @@ public class RobotTest {
 
             if (f > opacity) {
                 // always increase
-                logRobotEvent("random increase opacity");
+                logRandomEvent("random increase opacity");
                 layer.setOpacity(f, UpdateGUI.YES, AddToHistory.YES, true);
             } else if (rand.nextFloat() > 0.75) { // sometimes decrease
-                logRobotEvent("random decrease opacity");
+                logRandomEvent("random decrease opacity");
                 layer.setOpacity(f, UpdateGUI.YES, AddToHistory.YES, true);
             }
         } else {
-            logRobotEvent("random change layer blending mode");
+            logRandomEvent("random change layer blending mode");
             BlendingMode[] blendingModes = BlendingMode.values();
             BlendingMode randomBlendingMode = blendingModes[rand.nextInt(blendingModes.length)];
             layer.setBlendingMode(randomBlendingMode, UpdateGUI.YES, AddToHistory.YES, true);
@@ -760,13 +761,13 @@ public class RobotTest {
         boolean visible = layer.isVisible();
         if (rand.nextBoolean()) {
             if (!visible) {
-                logRobotEvent("random showing layer");
+                logRandomEvent("random showing layer");
                 layer.setVisible(true, AddToHistory.YES);
             }
         } else {
             if (visible) {
                 if (rand.nextFloat() > 0.8) { // sometimes hide
-                    logRobotEvent("random hiding layer");
+                    logRandomEvent("random hiding layer");
                     layer.setVisible(false, AddToHistory.YES);
                 }
             }
@@ -806,71 +807,71 @@ public class RobotTest {
 
         weightedCaller.registerCallback(1, () -> randomRightClick(r));
 
-        weightedCaller.registerCallback(1, RobotTest::randomResize);
+        weightedCaller.registerCallback(1, RandomGUITest::randomResize);
 
-        weightedCaller.registerCallback(2, RobotTest::repeat);
+        weightedCaller.registerCallback(2, RandomGUITest::repeat);
 
-        weightedCaller.registerCallback(1, RobotTest::randomUndoRedo);
+        weightedCaller.registerCallback(1, RandomGUITest::randomUndoRedo);
 
-        weightedCaller.registerCallback(1, RobotTest::randomCrop);
+        weightedCaller.registerCallback(1, RandomGUITest::randomCrop);
 
-        weightedCaller.registerCallback(1, RobotTest::randomFade);
+        weightedCaller.registerCallback(1, RandomGUITest::randomFade);
 
-        weightedCaller.registerCallback(2, RobotTest::randomizeToolSettings);
+        weightedCaller.registerCallback(2, RandomGUITest::randomizeToolSettings);
 
-        weightedCaller.registerCallback(1, RobotTest::arrangeWindows);
+        weightedCaller.registerCallback(1, RandomGUITest::arrangeWindows);
 
-        weightedCaller.registerCallback(1, RobotTest::randomColors);
+        weightedCaller.registerCallback(1, RandomGUITest::randomColors);
 
-        weightedCaller.registerCallback(5, RobotTest::randomOperation);
+        weightedCaller.registerCallback(5, RandomGUITest::randomOperation);
 
-        weightedCaller.registerCallback(25, RobotTest::randomTweenOperation);
+        weightedCaller.registerCallback(25, RandomGUITest::randomTweenOperation);
 
-        weightedCaller.registerCallback(10, RobotTest::randomFitToScreen);
+        weightedCaller.registerCallback(10, RandomGUITest::randomFitToScreen);
 
         weightedCaller.registerCallback(3, () -> randomKey(r));
 
-        weightedCaller.registerCallback(1, RobotTest::randomZoom);
+        weightedCaller.registerCallback(1, RandomGUITest::randomZoom);
 
-        weightedCaller.registerCallback(1, RobotTest::randomZoomOut);
+        weightedCaller.registerCallback(1, RandomGUITest::randomZoomOut);
 
-        weightedCaller.registerCallback(5, RobotTest::deselect);
+        weightedCaller.registerCallback(5, RandomGUITest::deselect);
 
-        weightedCaller.registerCallback(1, RobotTest::layerToCanvasSize);
+        weightedCaller.registerCallback(1, RandomGUITest::layerToCanvasSize);
 
-        weightedCaller.registerCallback(1, RobotTest::invertSelection);
+        weightedCaller.registerCallback(1, RandomGUITest::invertSelection);
 
-        weightedCaller.registerCallback(1, RobotTest::traceWithCurrentBrush);
+        weightedCaller.registerCallback(1, RandomGUITest::traceWithCurrentBrush);
 
-        weightedCaller.registerCallback(1, RobotTest::traceWithCurrentEraser);
+        weightedCaller.registerCallback(1, RandomGUITest::traceWithCurrentEraser);
 
-        weightedCaller.registerCallback(1, RobotTest::randomRotateFlip);
+        weightedCaller.registerCallback(1, RandomGUITest::randomRotateFlip);
 
-        weightedCaller.registerCallback(1, RobotTest::layerOrderChange);
+        weightedCaller.registerCallback(1, RandomGUITest::layerOrderChange);
 
-        weightedCaller.registerCallback(5, RobotTest::layerMerge);
+        weightedCaller.registerCallback(5, RandomGUITest::layerMerge);
 
-        weightedCaller.registerCallback(3, RobotTest::layerAddDelete);
+        weightedCaller.registerCallback(3, RandomGUITest::layerAddDelete);
 
-        weightedCaller.registerCallback(1, RobotTest::randomHideShow);
+        weightedCaller.registerCallback(1, RandomGUITest::randomHideShow);
 
-        weightedCaller.registerCallback(1, RobotTest::randomCopy);
+        weightedCaller.registerCallback(1, RandomGUITest::randomCopy);
 
-        weightedCaller.registerCallback(1, RobotTest::randomPaste);
+        weightedCaller.registerCallback(1, RandomGUITest::randomPaste);
 
-        weightedCaller.registerCallback(1, RobotTest::randomChangeLayerOpacityOrBlending);
+        weightedCaller.registerCallback(1, RandomGUITest::randomChangeLayerOpacityOrBlending);
 
-        weightedCaller.registerCallback(1, RobotTest::randomChangeLayerVisibility);
+        weightedCaller.registerCallback(1, RandomGUITest::randomChangeLayerVisibility);
 
-        weightedCaller.registerCallback(3, RobotTest::randomTool);
+        weightedCaller.registerCallback(3, RandomGUITest::randomTool);
 
-        weightedCaller.registerCallback(1, RobotTest::randomEnlargeLayer);
+        weightedCaller.registerCallback(1, RandomGUITest::randomEnlargeLayer);
 
-        weightedCaller.registerCallback(7, RobotTest::randomNewTextLayer);
-        weightedCaller.registerCallback(7, RobotTest::randomTextLayerRasterize);
-        weightedCaller.registerCallback(2, RobotTest::randomNewAdjustmentLayer);
-        weightedCaller.registerCallback(7, RobotTest::randomSetLayerMaskEditMode);
-        weightedCaller.registerCallback(20, RobotTest::randomLayerMaskAction);
+        weightedCaller.registerCallback(7, RandomGUITest::randomNewTextLayer);
+        weightedCaller.registerCallback(7, RandomGUITest::randomTextLayerRasterize);
+        weightedCaller.registerCallback(2, RandomGUITest::randomNewAdjustmentLayer);
+        weightedCaller.registerCallback(7, RandomGUITest::randomSetLayerMaskEditMode);
+        weightedCaller.registerCallback(20, RandomGUITest::randomLayerMaskAction);
 
         // Not called now:
 //        randomCloseImageWOSaving();

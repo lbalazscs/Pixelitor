@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,10 +44,18 @@ public abstract class ContentLayer extends Layer {
         super(comp, name, parent);
     }
 
+    /**
+     * Returns the X translation of the content
+     * relative to its default position
+     */
     public int getTX() {
         return translationX + tmpTX;
     }
 
+    /**
+     * Returns the Y translation of the content
+     * relative to its default position
+     */
     public int getTY() {
         return translationY + tmpTY;
     }

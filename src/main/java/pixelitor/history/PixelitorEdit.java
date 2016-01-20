@@ -57,7 +57,9 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
         return getPresentationName();
     }
 
-    public abstract boolean canRepeat();
+    public boolean canRepeat() {
+        return false;
+    }
 
     public String dump() {
         String compDescr = comp == null ? "null" : comp.getName();

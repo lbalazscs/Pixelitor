@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.tools;
 
-import pixelitor.ImageDisplay;
+import pixelitor.ImageComponent;
 
 import javax.swing.*;
 import java.awt.Cursor;
@@ -38,7 +38,7 @@ public class ZoomTool extends Tool {
     }
 
     @Override
-    public void mousePressed(MouseEvent e, ImageDisplay ic) {
+    public void mousePressed(MouseEvent e, ImageComponent ic) {
         int x = e.getX();
         int y = e.getY();
 
@@ -54,11 +54,11 @@ public class ZoomTool extends Tool {
     }
 
     @Override
-    public void mouseDragged(MouseEvent e, ImageDisplay ic) {
+    public void mouseDragged(MouseEvent e, ImageComponent ic) {
     }
 
     @Override
-    public void mouseReleased(MouseEvent e, ImageDisplay ic) {
+    public void mouseReleased(MouseEvent e, ImageComponent ic) {
 
     }
 

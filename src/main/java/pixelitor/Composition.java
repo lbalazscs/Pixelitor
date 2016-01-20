@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -95,7 +95,7 @@ public class Composition implements Serializable {
     private transient boolean dirty = false;
     private transient boolean compositeImageUpToDate = false;
     private transient BufferedImage cachedCompositeImage = null;
-    private transient ImageDisplay ic;
+    private transient ImageComponent ic;
     private transient Selection selection;
 
     // A Composition can be created either with one of the following static
@@ -107,7 +107,7 @@ public class Composition implements Serializable {
     public static Composition fromImage(BufferedImage img, File file, String name) {
         assert img != null;
 
-        img = ImageUtils.toCompatibleImage(img);
+        img = ImageUtils.toSysCompatibleImage(img);
         Canvas canvas = new Canvas(img.getWidth(), img.getHeight());
         Composition comp = new Composition(canvas);
         comp.addBaseLayer(img);
@@ -150,7 +150,7 @@ public class Composition implements Serializable {
     /**
      * Called when deserialized
      */
-    public void setImageDisplay(ImageDisplay ic) {
+    public void setIC(ImageComponent ic) {
         this.ic = ic;
         canvas.setIc(ic);
     }
@@ -692,13 +692,13 @@ public class Composition implements Serializable {
         addLayer(newLayer, AddToHistory.YES, "New Layer from Composite", false, false);
     }
 
-    public ImageDisplay getIC() {
+    public ImageComponent getIC() {
         return ic;
     }
 
     // we are not in a test, see method above
     public boolean hasRealIC() {
-        return ic instanceof ImageComponent;
+        return ic != null && !ic.isMock();
     }
 
     public void paintSelection(Graphics2D g) {
@@ -815,7 +815,7 @@ public class Composition implements Serializable {
     }
 
     private boolean isActiveComp() {
-        if (!(ic instanceof ImageComponent)) {
+        if (ic.isMock()) {
             // we are in a unit test
             // TODO hack
             return false;
@@ -830,7 +830,7 @@ public class Composition implements Serializable {
             ImageLayer layer = (ImageLayer) this.activeLayer;
             BufferedImage backupImage = layer.getImage();
 
-            TranslationEdit translationEdit = new TranslationEdit(this, layer);
+            TranslationEdit translationEdit = new TranslationEdit(this, layer, true);
             boolean changed = layer.cropToCanvasSize();
 
             if (changed) {
@@ -904,8 +904,8 @@ public class Composition implements Serializable {
         } catch (OutOfMemoryError e) {
             Dialogs.showOutOfMemoryDialog(e);
         } catch (Throwable e) { // make sure AssertionErrors are caught
-            if (Build.CURRENT.isRobotTest()) {
-                throw e; // we can debug the exact filter parameters only in RobotTest
+            if (Build.CURRENT.isRandomGUITest()) {
+                throw e; // we can debug the exact filter parameters only in RandomGUITest
             }
             Messages.showException(e);
         }

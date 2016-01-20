@@ -64,7 +64,7 @@ public class InternalImageFrame extends JInternalFrame implements InternalFrameL
 
     @Override
     public void internalFrameClosing(InternalFrameEvent e) {
-        if (!Build.CURRENT.isRobotTest()) {
+        if (!Build.CURRENT.isRandomGUITest()) {
             OpenSaveManager.warnAndCloseImage(ic);
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.tools;
 import com.bric.util.JVM;
 import pixelitor.Build;
 import pixelitor.Composition;
-import pixelitor.ImageDisplay;
+import pixelitor.ImageComponent;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.EnumParam;
@@ -112,7 +112,7 @@ public class CloneTool extends TmpLayerBrushTool {
     }
 
     @Override
-    public void mousePressed(MouseEvent e, ImageDisplay ic) {
+    public void mousePressed(MouseEvent e, ImageComponent ic) {
         double x = userDrag.getStartX();
         double y = userDrag.getStartY();
 
@@ -147,15 +147,15 @@ public class CloneTool extends TmpLayerBrushTool {
     }
 
     @Override
-    public void mouseDragged(MouseEvent e, ImageDisplay ic) {
+    public void mouseDragged(MouseEvent e, ImageComponent ic) {
         if (state == CLONING) { // make sure that the first source-setting stroke does not clone
             super.mouseDragged(e, ic);
         }
     }
 
-    private void handleUndefinedSource(ImageDisplay ic, double x, double y) {
-        if (Build.CURRENT.isRobotTest()) {
-            // special case: do not show dialogs for random robot tests,
+    private void handleUndefinedSource(ImageComponent ic, double x, double y) {
+        if (Build.CURRENT.isRandomGUITest()) {
+            // special case: do not show dialogs for RandomGUITest,
             // just act as if this was an alt-click
             setCloningSource(ic, x, y);
         } else {
@@ -167,7 +167,7 @@ public class CloneTool extends TmpLayerBrushTool {
         }
     }
 
-    private void setCloningSource(ImageDisplay ic, double x, double y) {
+    private void setCloningSource(ImageComponent ic, double x, double y) {
         BufferedImage sourceImage;
         if (sampleAllLayers) {
             sourceImage = ic.getComp().getCompositeImage();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,6 +34,7 @@ public class TextLayerRasterizeEdit extends PixelitorEdit {
 
     public TextLayerRasterizeEdit(Composition comp, TextLayer before, ImageLayer after) {
         super(comp, "Text Layer Rasterize");
+
         this.before = before;
         this.after = after;
         comp.setDirty(true);
@@ -45,6 +46,7 @@ public class TextLayerRasterizeEdit extends PixelitorEdit {
 
         comp.addLayer(before, AddToHistory.NO, null, false, false);
         comp.deleteLayer(after, AddToHistory.NO, UpdateGUI.YES);
+
         History.notifyMenus(this);
     }
 
@@ -54,6 +56,7 @@ public class TextLayerRasterizeEdit extends PixelitorEdit {
 
         comp.addLayer(after, AddToHistory.NO, null, false, false);
         comp.deleteLayer(before, AddToHistory.NO, UpdateGUI.YES);
+
         History.notifyMenus(this);
     }
 
@@ -63,10 +66,5 @@ public class TextLayerRasterizeEdit extends PixelitorEdit {
 
         before = null;
         after = null;
-    }
-
-    @Override
-    public boolean canRepeat() {
-        return false;
     }
 }

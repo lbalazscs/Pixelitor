@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -76,7 +76,7 @@ public class ImageUtils {
     private ImageUtils() {
     }
 
-    public static BufferedImage toCompatibleImage(BufferedImage input) {
+    public static BufferedImage toSysCompatibleImage(BufferedImage input) {
         assert input != null;
 
         GraphicsConfiguration gc = GraphicsEnvironment.getLocalGraphicsEnvironment()
@@ -96,7 +96,7 @@ public class ImageUtils {
         return output;
     }
 
-    public static BufferedImage createCompatibleImage(int width, int height) {
+    public static BufferedImage createSysCompatibleImage(int width, int height) {
         assert (width > 0) && (height > 0);
 
         GraphicsConfiguration gc = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
@@ -104,13 +104,13 @@ public class ImageUtils {
         return output;
     }
 
-    public static BufferedImage createCompatibleDest(BufferedImage src) {
+    public static BufferedImage createImageWithSameColorModel(BufferedImage src) {
         ColorModel dstCM = src.getColorModel();
         return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(src.getWidth(), src.getHeight()), dstCM.isAlphaPremultiplied(), null);
     }
 
     // like the above but instead of src width and height, it uses the arguments
-    public static BufferedImage createCompatibleDest(BufferedImage src, int width, int height) {
+    public static BufferedImage createImageWithSameColorModel(BufferedImage src, int width, int height) {
         ColorModel dstCM = src.getColorModel();
         return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(width, height), dstCM.isAlphaPremultiplied(), null);
     }
@@ -1011,7 +1011,7 @@ public class ImageUtils {
     }
 
     public static BufferedImage create1x1Image(int a, int r, int g, int b) {
-        BufferedImage img = createCompatibleImage(1, 1);
+        BufferedImage img = createSysCompatibleImage(1, 1);
         img.setRGB(0, 0, ColorUtils.toPackedInt(a, r, g, b));
         return img;
     }

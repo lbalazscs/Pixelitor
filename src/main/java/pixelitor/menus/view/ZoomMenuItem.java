@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,8 @@
 
 package pixelitor.menus.view;
 
+import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
-import pixelitor.ImageDisplay;
 import pixelitor.menus.OpenImageEnabledRadioButtonMenuItem;
 
 /**
@@ -30,7 +30,7 @@ public class ZoomMenuItem extends OpenImageEnabledRadioButtonMenuItem {
         super(zoomLevel.toString());
 
         addActionListener(e -> {
-            ImageDisplay ic = ImageComponents.getActiveIC();
+            ImageComponent ic = ImageComponents.getActiveIC();
             ic.setZoom(zoomLevel, false);
         });
     }

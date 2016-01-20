@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.Composition;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
-import pixelitor.ImageDisplay;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.FilterSetting;
@@ -131,7 +130,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     }
 
     @Override
-    public void mousePressed(MouseEvent e, ImageDisplay ic) {
+    public void mousePressed(MouseEvent e, ImageComponent ic) {
         boolean withLine = withLine(e);
         double x = userDrag.getStartX();
         double y = userDrag.getStartY();
@@ -151,7 +150,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     }
 
     @Override
-    public void mouseDragged(MouseEvent e, ImageDisplay ic) {
+    public void mouseDragged(MouseEvent e, ImageComponent ic) {
         double x = userDrag.getEndX();
         double y = userDrag.getEndY();
 
@@ -162,7 +161,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     }
 
     @Override
-    public void mouseReleased(MouseEvent e, ImageDisplay ic) {
+    public void mouseReleased(MouseEvent e, ImageComponent ic) {
         finishBrushStroke(ic.getComp());
     }
 

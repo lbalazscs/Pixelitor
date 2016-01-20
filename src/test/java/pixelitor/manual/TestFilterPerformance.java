@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,7 @@ public class TestFilterPerformance {
     public static void main(String[] args) throws IOException {
         File imgFile = new File("C:\\Users\\Laci\\Desktop\\tmp\\nagy.jpg");
         BufferedImage bigImage = ImageIO.read(imgFile);
-        bigImage = ImageUtils.toCompatibleImage(bigImage);
+        bigImage = ImageUtils.toSysCompatibleImage(bigImage);
 
         double minSeconds = Double.MAX_VALUE;
         double sumSeconds = 0;

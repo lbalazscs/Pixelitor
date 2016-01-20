@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.tools;
 
 import pixelitor.Composition;
 import pixelitor.FillType;
-import pixelitor.ImageDisplay;
+import pixelitor.ImageComponent;
 import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.layers.ImageLayer;
@@ -71,32 +71,32 @@ public class PaintBucketTool extends Tool {
     }
 
     @Override
-    public void mousePressed(MouseEvent e, ImageDisplay ic) {
+    public void mousePressed(MouseEvent e, ImageComponent ic) {
         // do nothing
     }
 
     @Override
-    public void mouseDragged(MouseEvent e, ImageDisplay ic) {
+    public void mouseDragged(MouseEvent e, ImageComponent ic) {
         // do nothing
     }
 
     @Override
-    public void mouseReleased(MouseEvent e, ImageDisplay ic) {
+    public void mouseReleased(MouseEvent e, ImageComponent ic) {
         double x = userDrag.getEndX();
         double y = userDrag.getEndY();
 
         Composition comp = ic.getComp();
         ImageLayer layer = comp.getActiveMaskOrImageLayer();
 
-        int translationX = layer.getTX();
-        int translationY = layer.getTY();
+        int tx = layer.getTX();
+        int ty = layer.getTY();
 
-        x -= translationX;
-        y -= translationY;
+        x -= tx;
+        y -= ty;
 
         AffineTransform translationTransform = null;
-        if (translationX != 0 || translationY != 0) {
-            translationTransform = AffineTransform.getTranslateInstance(-translationX, -translationY);
+        if (tx != 0 || ty != 0) {
+            translationTransform = AffineTransform.getTranslateInstance(-tx, -ty);
         }
 
         BufferedImage image = layer.getImage();

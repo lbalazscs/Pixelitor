@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,6 @@ import pixelitor.Desktop;
 import pixelitor.FgBgColors;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
-import pixelitor.ImageDisplay;
 import pixelitor.NewImage;
 import pixelitor.PixelitorWindow;
 import pixelitor.TipsOfTheDay;
@@ -90,7 +89,7 @@ import pixelitor.utils.Utils;
 import pixelitor.utils.test.DebugEventQueue;
 import pixelitor.utils.test.ImageTests;
 import pixelitor.utils.test.OpTests;
-import pixelitor.utils.test.RobotTest;
+import pixelitor.utils.test.RandomGUITest;
 import pixelitor.utils.test.ToolTests;
 
 import javax.swing.*;
@@ -554,7 +553,7 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("Delete", HAS_LAYER_MASK) {
             @Override
             public void onClick() {
-                ImageDisplay ic = ImageComponents.getActiveIC();
+                ImageComponent ic = ImageComponents.getActiveIC();
                 Layer layer = ic.getComp().getActiveLayer();
 
                 layer.deleteMask(AddToHistory.YES, true);
@@ -566,7 +565,7 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("Apply", HAS_LAYER_MASK) {
             @Override
             public void onClick() {
-                ImageDisplay ic = ImageComponents.getActiveIC();
+                ImageComponent ic = ImageComponents.getActiveIC();
                 Layer layer = ic.getComp().getActiveLayer();
 
                 if (!(layer instanceof ImageLayer)) {
@@ -588,7 +587,7 @@ public class MenuBar extends JMenuBar {
         sub.addActionWithKey(new MenuAction("Show and Edit Composition") {
             @Override
             public void onClick() {
-                ImageDisplay ic = ImageComponents.getActiveIC();
+                ImageComponent ic = ImageComponents.getActiveIC();
                 Layer activeLayer = ic.getComp().getActiveLayer();
                 ic.setShowLayerMask(false);
                 FgBgColors.setLayerMaskEditing(false);
@@ -599,7 +598,7 @@ public class MenuBar extends JMenuBar {
         sub.addActionWithKey(new MenuAction("Show and Edit Mask", HAS_LAYER_MASK) {
             @Override
             public void onClick() {
-                ImageDisplay ic = ImageComponents.getActiveIC();
+                ImageComponent ic = ImageComponents.getActiveIC();
                 Layer activeLayer = ic.getComp().getActiveLayer();
                 ic.setShowLayerMask(true);
                 FgBgColors.setLayerMaskEditing(true);
@@ -610,7 +609,7 @@ public class MenuBar extends JMenuBar {
         sub.addActionWithKey(new MenuAction("Show Composition, but Edit Mask", HAS_LAYER_MASK) {
             @Override
             public void onClick() {
-                ImageDisplay ic = ImageComponents.getActiveIC();
+                ImageComponent ic = ImageComponents.getActiveIC();
                 Layer activeLayer = ic.getComp().getActiveLayer();
                 ic.setShowLayerMask(false);
                 FgBgColors.setLayerMaskEditing(true);
@@ -1231,10 +1230,10 @@ public class MenuBar extends JMenuBar {
             }
         }, CTRL_ALT_R);
 
-        sub.buildAction(new MenuAction("Robot Test") {
+        sub.buildAction(new MenuAction("Random GUI Test") {
             @Override
             public void onClick() {
-                RobotTest.runRobot();
+                RandomGUITest.runTest();
             }
         }).enableIf(ACTION_ENABLED).withKey(CTRL_R).add();
 

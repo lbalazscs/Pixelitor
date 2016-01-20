@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,17 +17,15 @@
 
 package pixelitor.filters;
 
-import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.RangeParam;
 
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 
 /**
- * Mystic Rose
+ * Mystic Rose - https://en.wikipedia.org/wiki/Complete_graph
  */
 public class MysticRose extends ShapeFilter {
-    private final ImagePositionParam center = new ImagePositionParam("Center");
     private final RangeParam nrPoints = new RangeParam("Number of Points", 3, 10, 42);
     private final RangeParam radius = new RangeParam("Radius", 1, 500, 1000);
     private final RangeParam rotate = new RangeParam("Rotate", 0, 0, 100);
@@ -36,7 +34,6 @@ public class MysticRose extends ShapeFilter {
         addParamsToFront(
                 nrPoints,
                 rotate,
-                center,
                 radius.adjustRangeToImageSize(0.6)
         );
     }

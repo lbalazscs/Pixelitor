@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,13 +31,9 @@ public class LayerSelectionChangeEdit extends PixelitorEdit {
 
     public LayerSelectionChangeEdit(Composition comp, Layer oldLayer, Layer newLayer) {
         super(comp, "Layer Selection Change");
+
         this.oldLayer = oldLayer;
         this.newLayer = newLayer;
-    }
-
-    @Override
-    public boolean canRepeat() {
-        return false;
     }
 
     @Override

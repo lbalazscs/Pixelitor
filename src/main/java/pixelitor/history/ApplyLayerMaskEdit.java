@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,7 @@ import javax.swing.undo.CannotUndoException;
 import java.awt.image.BufferedImage;
 
 /**
- * A PixelitorEdit that represents the application of a layer mask
+ * A PixelitorEdit that represents the application of a layer mask.
  * (The layer mask is deleted, but its effect is transferred
  * to the transparency of the layer)
  */
@@ -71,10 +71,5 @@ public class ApplyLayerMaskEdit extends PixelitorEdit {
             oldImage.flush();
             oldImage = null;
         }
-    }
-
-    @Override
-    public boolean canRepeat() {
-        return false;
     }
 }

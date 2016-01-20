@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,6 +42,7 @@ public class MultiLayerEdit extends PixelitorEdit {
 
     public MultiLayerEdit(Composition comp, String name, MultiLayerBackup backup) {
         super(comp, name);
+
         this.canvasChangeEdit = backup.getCanvasChangeEdit();
         this.translationEdit = backup.getTranslationEdit();
 
@@ -85,14 +86,34 @@ public class MultiLayerEdit extends PixelitorEdit {
     }
 
     @Override
-    public boolean canRepeat() {
-        return false;
-    }
-
-    @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
+        try {
+            doTheUndo();
+        } catch (Exception e) {
+            dumpState();
+            throw e;
+        }
+
+        updateGUI();
+    }
+
+    @Override
+    public void redo() throws CannotRedoException {
+        super.redo();
+
+        try {
+            doTheRedo();
+        } catch (Exception e) {
+            dumpState();
+            throw e;
+        }
+
+        updateGUI();
+    }
+
+    private void doTheUndo() {
         if(imageEdit != null) {
             imageEdit.undo();
         }
@@ -111,14 +132,9 @@ public class MultiLayerEdit extends PixelitorEdit {
         if (deselectEdit != null) {
             deselectEdit.undo();
         }
-
-        updateGUI();
     }
 
-    @Override
-    public void redo() throws CannotRedoException {
-        super.redo();
-
+    private void doTheRedo() {
         if(imageEdit != null) {
             imageEdit.redo();
         }
@@ -137,8 +153,10 @@ public class MultiLayerEdit extends PixelitorEdit {
         if (deselectEdit != null) {
             deselectEdit.redo();
         }
+    }
 
-        updateGUI();
+    private void dumpState() {
+        System.out.printf("MultiLayerEdit:EXCEPTION getName() = '%s'%n", getName());
     }
 
     private void updateGUI() {

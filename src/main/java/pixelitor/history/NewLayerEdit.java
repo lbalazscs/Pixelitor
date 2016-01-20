@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -47,6 +47,7 @@ public class NewLayerEdit extends PixelitorEdit {
 
         comp.deleteLayer(newLayer, AddToHistory.NO, UpdateGUI.YES);
         comp.setActiveLayer(activeLayerBefore, AddToHistory.NO);
+
         History.notifyMenus(this);
     }
 
@@ -65,10 +66,5 @@ public class NewLayerEdit extends PixelitorEdit {
 
         newLayer = null;
         activeLayerBefore = null;
-    }
-
-    @Override
-    public boolean canRepeat() {
-        return false;
     }
 }

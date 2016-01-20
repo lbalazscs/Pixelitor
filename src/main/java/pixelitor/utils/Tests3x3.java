@@ -1,3 +1,20 @@
+/*
+ * Copyright 2016 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.utils;
 
 import pixelitor.AppLogic;
@@ -36,7 +53,7 @@ public class Tests3x3 {
     }
 
     public static BufferedImage getStandardImage1() {
-        BufferedImage img = ImageUtils.createCompatibleImage(3, 3);
+        BufferedImage img = ImageUtils.createSysCompatibleImage(3, 3);
         img.setRGB(0, 0, ColorUtils.toPackedInt(255, 223, 235, 120));
         img.setRGB(0, 1, ColorUtils.toPackedInt(255, 35, 125, 43));
         img.setRGB(0, 2, ColorUtils.toPackedInt(255, 89, 28, 207));
@@ -50,7 +67,7 @@ public class Tests3x3 {
     }
 
     public static BufferedImage getStandardImage2() {
-        BufferedImage img = ImageUtils.createCompatibleImage(3, 3);
+        BufferedImage img = ImageUtils.createSysCompatibleImage(3, 3);
         img.setRGB(0, 0, ColorUtils.toPackedInt(255, 190, 149, 66));
         img.setRGB(0, 1, ColorUtils.toPackedInt(255, 37, 159, 8));
         img.setRGB(0, 2, ColorUtils.toPackedInt(255, 63, 107, 198));
@@ -65,7 +82,7 @@ public class Tests3x3 {
 
 
     public static BufferedImage getRandomImage(boolean withTransparency) {
-        BufferedImage img = ImageUtils.createCompatibleImage(3, 3);
+        BufferedImage img = ImageUtils.createSysCompatibleImage(3, 3);
         Random rand = new Random();
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 3; x++) {

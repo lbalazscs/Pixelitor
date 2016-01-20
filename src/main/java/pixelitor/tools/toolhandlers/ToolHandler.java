@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.tools.toolhandlers;
 
-import pixelitor.ImageDisplay;
+import pixelitor.ImageComponent;
 
 import java.awt.event.MouseEvent;
 
@@ -35,7 +35,7 @@ public abstract class ToolHandler {
         successor = handler;
     }
 
-    public void handleMousePressed(MouseEvent e, ImageDisplay ic) {
+    public void handleMousePressed(MouseEvent e, ImageComponent ic) {
         if (mousePressed(e, ic)) {
             return;
         }
@@ -46,24 +46,24 @@ public abstract class ToolHandler {
     /**
      * @return true if the event was handled and it should no be forwarded to the next handler
      */
-    abstract boolean mousePressed(MouseEvent e, ImageDisplay ic);
+    abstract boolean mousePressed(MouseEvent e, ImageComponent ic);
 
-    public void handleMouseDragged(MouseEvent e, ImageDisplay ic) {
+    public void handleMouseDragged(MouseEvent e, ImageComponent ic) {
         if (mouseDragged(e, ic)) {
             return;
         }
         successor.handleMouseDragged(e, ic);
     }
 
-    abstract boolean mouseDragged(MouseEvent e, ImageDisplay ic);
+    abstract boolean mouseDragged(MouseEvent e, ImageComponent ic);
 
-    public void handleMouseReleased(MouseEvent e, ImageDisplay ic) {
+    public void handleMouseReleased(MouseEvent e, ImageComponent ic) {
         if (mouseReleased(e, ic)) {
             return;
         }
         successor.handleMouseReleased(e, ic);
     }
 
-    abstract boolean mouseReleased(MouseEvent e, ImageDisplay ic);
+    abstract boolean mouseReleased(MouseEvent e, ImageComponent ic);
 
 }

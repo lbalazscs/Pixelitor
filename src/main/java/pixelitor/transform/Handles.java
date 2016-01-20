@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.transform;
 
-import pixelitor.ImageDisplay;
+import pixelitor.ImageComponent;
 import pixelitor.utils.Utils;
 
 import java.awt.BasicStroke;
@@ -94,7 +94,7 @@ public class Handles {
      * Iterates over all the handles and if finds one that is over the point, its cursor is set
      * The coordinates are in image space
      */
-    public void setCursorForPoint(int x, int y, ImageDisplay c) {
+    public void setCursorForPoint(int x, int y, ImageComponent c) {
         boolean handleFound = false;
         for (Handle handle : handles) {
             if(handle.isOver(x, y)) {

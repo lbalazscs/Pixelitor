@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -209,7 +209,7 @@ public class LayerButton extends JToggleButton {
                         int thumbHeight = thumb.getHeight();
                         // thumb is GRAY image, this one needs colors
                         // TODO is is faster if thumb is created this way in createThumbnail?
-                        iconImage = ImageUtils.createCompatibleImage(thumbWidth, thumbHeight);
+                        iconImage = ImageUtils.createSysCompatibleImage(thumbWidth, thumbHeight);
                         Graphics2D g = iconImage.createGraphics();
                         g.drawImage(thumb, 0, 0, null);
                         g.setColor(new Color(200, 0, 0));

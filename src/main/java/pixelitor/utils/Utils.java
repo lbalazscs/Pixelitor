@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,8 +21,8 @@ import pixelitor.AppLogic;
 import pixelitor.Build;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
+import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
-import pixelitor.ImageDisplay;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterSetting;
@@ -228,7 +228,7 @@ public final class Utils {
 
     @SuppressWarnings("SameReturnValue")  // used in asserts
     public static boolean checkRasterMinimum(BufferedImage newImage) {
-        if (Build.CURRENT.isRobotTest()) {
+        if (Build.CURRENT.isRandomGUITest()) {
             WritableRaster raster = newImage.getRaster();
             if ((raster.getMinX() != 0) || (raster.getMinY() != 0)) {
                 throw new
@@ -350,7 +350,7 @@ public final class Utils {
     @SuppressWarnings("WeakerAccess")
     public static void debugImage(BufferedImage img, String name) {
         BufferedImage copy = ImageUtils.copyImage(img);
-        ImageDisplay savedIC = ImageComponents.getActiveIC();
+        ImageComponent savedIC = ImageComponents.getActiveIC();
 
         Optional<Composition> debugCompOpt = ImageComponents.findCompositionByName(name);
         if(debugCompOpt.isPresent()) {
@@ -375,7 +375,7 @@ public final class Utils {
         Rectangle shapeBounds = shape.getBounds();
         int imgWidth = shapeBounds.x + shapeBounds.width + 50;
         int imgHeight = shapeBounds.y + shapeBounds.height + 50;
-        BufferedImage img = ImageUtils.createCompatibleImage(imgWidth, imgHeight);
+        BufferedImage img = ImageUtils.createSysCompatibleImage(imgWidth, imgHeight);
         Graphics2D g = img.createGraphics();
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, imgWidth, imgHeight);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.tools;
 
-import pixelitor.ImageDisplay;
+import pixelitor.ImageComponent;
 
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
@@ -53,12 +53,12 @@ public class UserDrag {
         this.endY = endY;
     }
 
-    public void setStartFromMouseEvent(MouseEvent e, ImageDisplay ic) {
+    public void setStartFromMouseEvent(MouseEvent e, ImageComponent ic) {
         startX = ic.componentXToImageSpace(e.getX());
         startY = ic.componentYToImageSpace(e.getY());
     }
 
-    public void setEndFromMouseEvent(MouseEvent e, ImageDisplay ic) {
+    public void setEndFromMouseEvent(MouseEvent e, ImageComponent ic) {
         endX = ic.componentXToImageSpace(e.getX());
         endY = ic.componentYToImageSpace(e.getY());
 

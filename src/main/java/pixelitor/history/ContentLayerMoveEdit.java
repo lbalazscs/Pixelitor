@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,6 +28,7 @@ import static pixelitor.Composition.ImageChangeActions.FULL;
 
 /**
  * A PixelitorEdit hat represents the movement of a content layer.
+ * (Move Tool)
  */
 public class ContentLayerMoveEdit extends PixelitorEdit {
     public static final String NAME = "Layer Movement";
@@ -49,7 +50,7 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
             imageEdit.setEmbedded(true);
         }
 
-        this.translationEdit = new TranslationEdit(comp, layer, oldTX, oldTY);
+        this.translationEdit = new TranslationEdit(comp, layer, oldTX, oldTY, false);
 
         layer.getComp().setDirty(true);
     }
@@ -92,10 +93,5 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
             imageEdit.die();
         }
         layer = null;
-    }
-
-    @Override
-    public boolean canRepeat() {
-        return false;
     }
 }

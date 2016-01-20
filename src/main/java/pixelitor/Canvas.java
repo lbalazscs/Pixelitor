@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import java.awt.Rectangle;
 import java.io.Serializable;
 
 /**
- * The painting canvas represents the size od the composition.
+ * The painting canvas represents the size of the composition.
  * A layer can be bigger than the canvas if it is partially hidden.
  */
 public class Canvas implements Serializable {
@@ -32,7 +32,7 @@ public class Canvas implements Serializable {
     private int zoomedWidth;
     private int zoomedHeight;
 
-    private transient ImageDisplay ic;
+    private transient ImageComponent ic;
 
     // for consistency with Pixelitor 2.1.0
     private static final long serialVersionUID = -1459254568616232274L;
@@ -46,7 +46,6 @@ public class Canvas implements Serializable {
     public Canvas(int width, int height) {
         this.width = width;
         this.height = height;
-//        this.ic = ic;
     }
 
     public int getWidth() {
@@ -89,7 +88,7 @@ public class Canvas implements Serializable {
         return zoomedHeight;
     }
 
-    public void setIc(ImageDisplay ic) {
+    public void setIc(ImageComponent ic) {
         this.ic = ic;
     }
 

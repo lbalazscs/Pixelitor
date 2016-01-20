@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.tools;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.ImageDisplay;
+import pixelitor.ImageComponent;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.TmpDrawingLayer;
 import pixelitor.menus.view.ZoomLevel;
@@ -91,18 +91,18 @@ public class GradientTool extends Tool {
     }
 
     @Override
-    public void mousePressed(MouseEvent e, ImageDisplay ic) {
+    public void mousePressed(MouseEvent e, ImageComponent ic) {
 
     }
 
     @Override
-    public void mouseDragged(MouseEvent e, ImageDisplay ic) {
+    public void mouseDragged(MouseEvent e, ImageComponent ic) {
         thereWasDragging = true;  // the gradient will be drawn only when the mouse is released
         ic.repaint();
     }
 
     @Override
-    public void mouseReleased(MouseEvent e, ImageDisplay ic) {
+    public void mouseReleased(MouseEvent e, ImageComponent ic) {
         if (thereWasDragging) {
             Composition comp = ic.getComp();
 
@@ -122,7 +122,7 @@ public class GradientTool extends Tool {
     }
 
     @Override
-    public boolean dispatchMouseClicked(MouseEvent e, ImageDisplay ic) {
+    public boolean dispatchMouseClicked(MouseEvent e, ImageComponent ic) {
         if (super.dispatchMouseClicked(e, ic)) {
             return true;
         }
@@ -158,7 +158,7 @@ public class GradientTool extends Tool {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageDisplay ic, AffineTransform unscaledTransform) {
+    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent ic, AffineTransform unscaledTransform) {
         if (thereWasDragging) {
             g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 

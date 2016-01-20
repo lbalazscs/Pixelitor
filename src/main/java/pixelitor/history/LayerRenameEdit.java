@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,6 +31,7 @@ public class LayerRenameEdit extends PixelitorEdit {
 
     public LayerRenameEdit(Layer layer, String nameBefore, String nameAfter) {
         super(layer.getComp(), "Rename Layer to " + nameAfter);
+
         this.layer = layer;
         this.nameBefore = nameBefore;
         this.nameAfter = nameAfter;
@@ -62,10 +63,5 @@ public class LayerRenameEdit extends PixelitorEdit {
         super.die();
 
         layer = null;
-    }
-
-    @Override
-    public boolean canRepeat() {
-        return false;
     }
 }

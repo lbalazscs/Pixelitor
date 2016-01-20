@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -76,7 +76,7 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dest) {
         BufferedImage frameA = src;
-        BufferedImage frameB = ImageUtils.createCompatibleDest(src);
+        BufferedImage frameB = ImageUtils.createImageWithSameColorModel(src);
 
         Graphics2D g2 = dest.createGraphics();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,7 @@ public class CanvasChangeEdit extends PixelitorEdit {
     private int backupCanvasHeight;
 
     /**
-     * This constructor must be called before the change
+     * This constructor must be called before the change.
      */
     public CanvasChangeEdit(Composition comp, String name) {
         super(comp, name);
@@ -41,11 +41,6 @@ public class CanvasChangeEdit extends PixelitorEdit {
 
         backupCanvasWidth = comp.getCanvasWidth();
         backupCanvasHeight = comp.getCanvasHeight();
-    }
-
-    @Override
-    public boolean canRepeat() {
-        return false;
     }
 
     @Override

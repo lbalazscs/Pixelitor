@@ -17,10 +17,10 @@
 package pixelitor.utils.test;
 
 /**
- * An event that signalizes the start of a robot test step
+ * An event that signalizes the start of a RandomGUITest step
  */
-class RobotEvent extends PixelitorEvent {
-    RobotEvent(String description) {
-        super("[ROBOT] " + description);
+class RandomTestEvent extends PixelitorEvent {
+    RandomTestEvent(String description) {
+        super("[RANDOM] " + description);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -112,7 +112,7 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
 
         int shadowImgWidth = xSize + 2 * softShadowRoom;
         int shadowImgHeight = ySize + 2 * softShadowRoom;
-        BufferedImage shadowImage = ImageUtils.createCompatibleImage(shadowImgWidth, shadowImgHeight);
+        BufferedImage shadowImage = ImageUtils.createSysCompatibleImage(shadowImgWidth, shadowImgHeight);
 
         Graphics2D gShadow = shadowImage.createGraphics();
         gShadow.setColor(BLACK);

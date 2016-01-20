@@ -25,17 +25,16 @@ import javax.swing.*;
  */
 public enum Build {
     DEVELOPMENT {
-        private boolean robotTest = false;
+        private boolean randomGUITest = false;
         private boolean performanceTest = false;
 
-        @Override
-        public boolean isRobotTest() {
-            return robotTest;
+        public boolean isRandomGUITest() {
+            return randomGUITest;
         }
 
         @Override
-        public void setRobotTest(boolean robotTest) {
-            this.robotTest = robotTest;
+        public void setRandomGUITest(boolean randomGUITest) {
+            this.randomGUITest = randomGUITest;
             fixTitle = null;
         }
 
@@ -50,8 +49,7 @@ public enum Build {
             return performanceTest;
         }
     }, FINAL {
-        @Override
-        public boolean isRobotTest() {
+        public boolean isRandomGUITest() {
             return false;
         }
 
@@ -61,7 +59,7 @@ public enum Build {
         }
 
         @Override
-        public void setRobotTest(boolean robotTest) {
+        public void setRandomGUITest(boolean randomGUITest) {
             // no way
         }
 
@@ -85,17 +83,17 @@ public enum Build {
             if (CURRENT != FINAL) {
                 fixTitle += " DEVELOPMENT " + System.getProperty("java.version");
             }
-            if (CURRENT.isRobotTest()) {
-                fixTitle += " - ROBOT TEST";
+            if (CURRENT.isRandomGUITest()) {
+                fixTitle += " - RANDOM GUI TEST";
             }
         }
 
         return fixTitle;
     }
 
-    public abstract boolean isRobotTest();
+    public abstract boolean isRandomGUITest();
     public abstract boolean isPerformanceTest();
 
-    public abstract void setRobotTest(boolean robotTest);
+    public abstract void setRandomGUITest(boolean randomGUITest);
     public abstract void setPerformanceTest(boolean performanceTest);
 }

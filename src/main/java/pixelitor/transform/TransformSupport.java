@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.transform;
 
-import pixelitor.ImageDisplay;
+import pixelitor.ImageComponent;
 import pixelitor.tools.ArrowKey;
 import pixelitor.utils.Utils;
 
@@ -59,7 +59,7 @@ public class TransformSupport {
         dragStartRectHeight = (int) compSpaceRect.getHeight();
     }
 
-    public void mouseDragged(MouseEvent e, ImageDisplay ic) {
+    public void mouseDragged(MouseEvent e, ImageComponent ic) {
         int cursorType = ic.getCursor().getType();
         int mouseX = e.getX();
         int mouseY = e.getY();
@@ -104,11 +104,11 @@ public class TransformSupport {
         adjusting = false;
     }
 
-    public void mouseMoved(MouseEvent e, ImageDisplay ic) {
+    public void mouseMoved(MouseEvent e, ImageComponent ic) {
         handles.setCursorForPoint(e.getX(), e.getY(), ic);
     }
 
-    public Rectangle2D getImageSpaceRect(ImageDisplay ic) {
+    public Rectangle2D getImageSpaceRect(ImageComponent ic) {
         if(adjusting) {
             recalculateImageSpaceRect(ic);
         }
@@ -135,12 +135,12 @@ public class TransformSupport {
         handles.updateRect(compSpaceRect);
     }
 
-    private void recalculateImageSpaceRect(ImageDisplay ic) {
+    private void recalculateImageSpaceRect(ImageComponent ic) {
         Rectangle2D possiblyNegativeRect = ic.fromComponentToImageSpace(compSpaceRect);
         this.imageSpaceRect = Utils.toPositiveRect(possiblyNegativeRect);
     }
 
-    public void arrowKeyPressed(ArrowKey key, ImageDisplay ic) {
+    public void arrowKeyPressed(ArrowKey key, ImageComponent ic) {
         double viewScale = ic.getZoomLevel().getViewScale();
         compSpaceRect.translate((int) (key.getMoveX() * viewScale), (int) (key.getMoveY() * viewScale));
         handles.updateRect(compSpaceRect);

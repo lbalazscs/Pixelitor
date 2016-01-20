@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.tools;
 
-import pixelitor.ImageDisplay;
+import pixelitor.ImageComponent;
 import pixelitor.tools.shapestool.ShapesTool;
 
 import java.awt.event.MouseEvent;
@@ -103,23 +103,23 @@ public class Tools {
         private EventDispatcher() {
         }
 
-        public static void mouseClicked(MouseEvent e, ImageDisplay ic) {
+        public static void mouseClicked(MouseEvent e, ImageComponent ic) {
             currentTool.dispatchMouseClicked(e, ic);
         }
 
-        public static void mousePressed(MouseEvent e, ImageDisplay ic) {
+        public static void mousePressed(MouseEvent e, ImageComponent ic) {
             currentTool.dispatchMousePressed(e, ic);
         }
 
-        public static void mouseReleased(MouseEvent e, ImageDisplay ic) {
+        public static void mouseReleased(MouseEvent e, ImageComponent ic) {
             currentTool.dispatchMouseReleased(e, ic);
         }
 
-        public static void mouseDragged(MouseEvent e, ImageDisplay ic) {
+        public static void mouseDragged(MouseEvent e, ImageComponent ic) {
             currentTool.dispatchMouseDragged(e, ic);
         }
 
-        public static void mouseMoved(MouseEvent e, ImageDisplay ic) {
+        public static void mouseMoved(MouseEvent e, ImageComponent ic) {
             currentTool.dispatchMouseMoved(e, ic);
         }
     }

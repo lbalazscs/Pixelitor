@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.tools;
 
 import pixelitor.Composition;
-import pixelitor.ImageDisplay;
+import pixelitor.ImageComponent;
 import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.tools.brushes.Brush;
@@ -80,7 +80,7 @@ public class SmudgeTool extends DirectBrushTool {
     }
 
     @Override
-    public void mousePressed(MouseEvent e, ImageDisplay ic) {
+    public void mousePressed(MouseEvent e, ImageComponent ic) {
         BufferedImage sourceImage = ic.getComp().getActiveMaskOrImageLayer().getImage();
         double x = userDrag.getStartX();
         double y = userDrag.getStartY();

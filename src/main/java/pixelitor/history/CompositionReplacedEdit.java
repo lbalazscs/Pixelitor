@@ -14,55 +14,47 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.history;
 
 import pixelitor.Composition;
+import pixelitor.ImageComponent;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
-import java.awt.Shape;
-import java.util.Objects;
 
 /**
- * Represents a deselect
+ * Used when a file is reloaded.
  */
-public class DeselectEdit extends PixelitorEdit {
-    private final Shape backupShape;
-    private final String reason;
+public class CompositionReplacedEdit extends PixelitorEdit {
+    private Composition newComp;
+    private ImageComponent ic;
 
-    public DeselectEdit(Composition comp, Shape backupShape, String reason) {
-        super(comp, "Deselect");
-
-        this.reason = reason;
-        this.backupShape = Objects.requireNonNull(backupShape);
+    public CompositionReplacedEdit(Composition oldComp, Composition newComp) {
+        super(oldComp, "Reload");
+        this.newComp = newComp;
+        ic = (ImageComponent) newComp.getIC();
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
-        assert !comp.hasSelection();
-
-        comp.createSelectionFromShape(backupShape);
-
-        if (!embedded) {
-            History.notifyMenus(this);
-        }
+        ic.replaceComp(comp, AddToHistory.NO);
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        comp.deselect(AddToHistory.NO);
-
-        if (!embedded) {
-            History.notifyMenus(this);
-        }
+        ic.replaceComp(newComp, AddToHistory.NO);
     }
 
     @Override
-    public String getDebugName() {
-        return super.getDebugName() + " (reason = \"" + reason + "\")";
+    public void die() {
+        super.die();
+
+        newComp = null;
+        ic = null;
     }
 }

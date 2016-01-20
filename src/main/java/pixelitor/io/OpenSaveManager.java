@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,6 @@ import pixelitor.AppLogic;
 import pixelitor.Composition;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
-import pixelitor.ImageDisplay;
 import pixelitor.PixelitorWindow;
 import pixelitor.automate.SingleDirChooserPanel;
 import pixelitor.layers.ImageLayer;
@@ -166,7 +165,7 @@ public class OpenSaveManager {
         Utils.executeWithBusyCursor(r);
     }
 
-    public static void warnAndCloseImage(ImageDisplay ic) {
+    public static void warnAndCloseImage(ImageComponent ic) {
         try {
             Composition comp = ic.getComp();
             if (comp.isDirty()) {

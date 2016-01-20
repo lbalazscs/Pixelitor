@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,11 +33,16 @@ import pixelitor.tools.Shift;
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -64,13 +69,11 @@ public class TestHelper {
     }
 
     public static Composition createEmptyComposition() {
-        ImageDisplayStub imageDisplayStub = new ImageDisplayStub();
-
         Composition comp = Composition.createEmpty(TEST_WIDTH, TEST_HEIGHT);
-        comp.setImageDisplay(imageDisplayStub);
-        comp.setName("Test");
+        ImageComponent ic = createIC(comp);
 
-        imageDisplayStub.setComp(comp);
+        comp.setIC(ic);
+        comp.setName("Test");
 
         return comp;
     }
@@ -147,5 +150,34 @@ public class TestHelper {
                 1, // click count
                 popupTrigger
         );
+    }
+
+    public static ImageComponent setAnActiveIC(Composition comp) {
+        ImageComponent ic = createIC(comp);
+        ImageComponents.setActiveIC(ic, false);
+        return ic;
+    }
+
+    public static ImageComponent createIC(Composition comp) {
+        ImageComponent ic = mock(ImageComponent.class);
+
+        when(ic.fromComponentToImageSpace(anyObject())).then(returnsFirstArg());
+        when(ic.fromImageToComponentSpace(anyObject())).thenAnswer(invocation -> {
+            Rectangle2D in = invocation.getArgumentAt(0, Rectangle2D.class);
+            return new Rectangle((int) in.getX(), (int) in.getY(), (int) in.getWidth(), (int) in.getHeight());
+        });
+
+        Cursor cursor = Cursor.getDefaultCursor();
+        when(ic.getCursor()).thenReturn(cursor);
+
+        when(ic.activeIsImageLayer()).thenAnswer(invocation -> comp.activeIsImageLayer());
+
+        JViewport parent = new JViewport();
+        when(ic.getParent()).thenReturn(parent);
+
+        when(ic.getComp()).thenReturn(comp);
+        when(ic.isMock()).thenReturn(true);
+
+        return ic;
     }
 }

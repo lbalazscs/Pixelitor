@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,10 @@
 package pixelitor.filters;
 
 import pixelitor.FgBgColors;
+import pixelitor.filters.gui.DialogParam;
 import pixelitor.filters.gui.EffectsParam;
+import pixelitor.filters.gui.GroupedRangeParam;
+import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
@@ -33,6 +36,7 @@ import java.awt.Graphics2D;
 import java.awt.RadialGradientPaint;
 import java.awt.Shape;
 import java.awt.Stroke;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
 import static java.awt.Color.BLACK;
@@ -77,11 +81,16 @@ public abstract class ShapeFilter extends FilterWithParametrizedGUI {
                     new IntChoiceParam.Value("Transparent", FG_TRANSPARENT),
             }, IGNORE_RANDOMIZE);
 
+    protected final ImagePositionParam center = new ImagePositionParam("Center");
+    private final GroupedRangeParam scale = new GroupedRangeParam("Scale (%)", 1, 100, 500, false);
+    private final DialogParam transformSettings = new DialogParam("Transform", center, scale);
+
     public ShapeFilter() {
         super(ShowOriginal.NO);
         setParamSet(new ParamSet(
                 foreground,
                 background,
+                transformSettings,
                 strokeParam,
                 effectsParam
         ));
@@ -96,7 +105,7 @@ public abstract class ShapeFilter extends FilterWithParametrizedGUI {
         int srcWidth = src.getWidth();
         int srcHeight = src.getHeight();
 
-        dest = ImageUtils.createCompatibleDest(src);
+        dest = ImageUtils.createImageWithSameColorModel(src);
         Graphics2D g2 = dest.createGraphics();
 
         int bgVal = background.getValue();
@@ -139,11 +148,27 @@ public abstract class ShapeFilter extends FilterWithParametrizedGUI {
         }
 
         Stroke stroke = strokeParam.createStroke();
-//        g2.setStroke(stroke);
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         Shape shape = createShape(srcWidth, srcHeight);
         if (shape != null) {
+            double scaleX = scale.getValueAsPercentage(0);
+            double scaleY = scale.getValueAsPercentage(1);
+
+            if (scaleX != 1.0 || scaleY != 1.0) {
+                double cx = srcWidth * center.getRelativeX();
+                double cy = srcHeight * center.getRelativeY();
+
+                // http://stackoverflow.com/questions/17113234/affine-transform-scale-around-a-point
+                AffineTransform at = AffineTransform.getTranslateInstance
+                        (cx - scaleX * cx, cy - scaleY * cy);
+                at.scale(scaleX, scaleY);
+
+                shape = at.createTransformedShape(shape);
+            }
+
+//            g2.setStroke(stroke);
+
             // work with the outline so that we can have "inner glow"
             Shape outline = stroke.createStrokedShape(shape);
 

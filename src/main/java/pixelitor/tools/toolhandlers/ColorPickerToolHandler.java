@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.tools.toolhandlers;
 
-import pixelitor.ImageDisplay;
+import pixelitor.ImageComponent;
 import pixelitor.tools.Tools;
 
 import java.awt.event.MouseEvent;
@@ -28,7 +28,7 @@ import java.awt.event.MouseEvent;
  */
 public class ColorPickerToolHandler extends ToolHandler {
     @Override
-    boolean mousePressed(MouseEvent e, ImageDisplay ic) {
+    boolean mousePressed(MouseEvent e, ImageComponent ic) {
         if (e.isAltDown()) {
             Tools.COLOR_PICKER.sampleColor(e, ic, false);
             return true;
@@ -39,7 +39,7 @@ public class ColorPickerToolHandler extends ToolHandler {
     }
 
     @Override
-    boolean mouseDragged(MouseEvent e, ImageDisplay ic) {
+    boolean mouseDragged(MouseEvent e, ImageComponent ic) {
         if (e.isAltDown()) {
             Tools.COLOR_PICKER.sampleColor(e, ic, false);
             return true;
@@ -49,7 +49,7 @@ public class ColorPickerToolHandler extends ToolHandler {
     }
 
     @Override
-    boolean mouseReleased(MouseEvent e, ImageDisplay ic) {
+    boolean mouseReleased(MouseEvent e, ImageComponent ic) {
         return false;
     }
 }

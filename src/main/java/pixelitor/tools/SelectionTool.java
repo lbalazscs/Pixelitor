@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,8 @@
 package pixelitor.tools;
 
 import pixelitor.Composition;
+import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
-import pixelitor.ImageDisplay;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;
@@ -78,7 +78,7 @@ public class SelectionTool extends Tool {
     }
 
     @Override
-    public void mousePressed(MouseEvent e, ImageDisplay ic) {
+    public void mousePressed(MouseEvent e, ImageComponent ic) {
         boolean shiftDown = e.isShiftDown();
         boolean altDown = e.isAltDown();
 
@@ -121,7 +121,7 @@ public class SelectionTool extends Tool {
     }
 
     @Override
-    public void mouseDragged(MouseEvent e, ImageDisplay ic) {
+    public void mouseDragged(MouseEvent e, ImageComponent ic) {
         Composition comp = ic.getComp();
         Optional<Selection> selection = comp.getSelection();
 
@@ -136,7 +136,7 @@ public class SelectionTool extends Tool {
     }
 
     @Override
-    public void mouseReleased(MouseEvent e, ImageDisplay ic) {
+    public void mouseReleased(MouseEvent e, ImageComponent ic) {
         if (userDrag.isClick()) { // will be handled by mouseClicked
             return;
         }
@@ -145,7 +145,7 @@ public class SelectionTool extends Tool {
         Optional<Selection> opt = comp.getSelection();
         if (!opt.isPresent()) {
             // TODO this should not happen, but it did happen on Mac
-            // robot tests
+            // RandomGUITest
             System.out.println("SelectionTool::mouseReleased: no selection");
             return;
         }
@@ -201,7 +201,7 @@ public class SelectionTool extends Tool {
     }
 
     @Override
-    public boolean dispatchMouseClicked(MouseEvent e, ImageDisplay ic) {
+    public boolean dispatchMouseClicked(MouseEvent e, ImageComponent ic) {
         super.dispatchMouseClicked(e, ic);
 
 //        if(typeCombo.getSelectedItem() == SelectionType.POLYGONAL_LASSO) {
@@ -217,7 +217,7 @@ public class SelectionTool extends Tool {
         return false;
     }
 
-    private void addPolygonalLassoPoint(ImageDisplay ic) {
+    private void addPolygonalLassoPoint(ImageComponent ic) {
         Composition comp = ic.getComp();
         Optional<Selection> selection = comp.getSelection();
         if (selection.isPresent()) {
@@ -225,7 +225,7 @@ public class SelectionTool extends Tool {
         }
     }
 
-    private static void deselect(ImageDisplay ic, AddToHistory addToHistory) {
+    private static void deselect(ImageComponent ic, AddToHistory addToHistory) {
         Composition comp = ic.getComp();
 
         if (comp.hasSelection()) {
@@ -239,7 +239,7 @@ public class SelectionTool extends Tool {
 
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
-        ImageDisplay ic = ImageComponents.getActiveIC();
+        ImageComponent ic = ImageComponents.getActiveIC();
         if (ic != null) {
             Composition comp = ic.getComp();
             Optional<Selection> selection = comp.getSelection();

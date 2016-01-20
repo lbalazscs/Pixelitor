@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -645,7 +645,7 @@ public class AssertJSwingTest {
     }
 
     private void testScreenCapture() {
-        ImageDisplay activeIC = ImageComponents.getActiveIC();
+        ImageComponent activeIC = ImageComponents.getActiveIC();
         testScreenCapture(true);
         testScreenCapture(false);
         try {
@@ -1227,22 +1227,22 @@ public class AssertJSwingTest {
         if (altDrag) {
             altDragTo(300, 300);
         } else {
-            ImageDisplay ic = ImageComponents.getActiveIC();
+            ImageComponent ic = ImageComponents.getActiveIC();
             ImageLayer layer = ic.getComp().getActiveMaskOrImageLayer();
-            int txx = layer.getTX();
-            int txy = layer.getTY();
-            assert txx == 0;
-            assert txy == 0;
+            int tx = layer.getTX();
+            int ty = layer.getTY();
+            assert tx == 0 : "tx = " + tx;
+            assert ty == 0 : "ty = " + tx;
 
             dragTo(200, 300);
 
-            txx = layer.getTX();
-            txy = layer.getTY();
+            tx = layer.getTX();
+            ty = layer.getTY();
 
             // The translations will have these values only if we are at 100% zoom!
             assert ic.getZoomLevel() == ZoomLevel.Z100 : "zoom is " + ic.getZoomLevel();
-            assert txx == -200 : "txx = " + txx;
-            assert txy == -100 : "txy = " + txx;
+            assert tx == -200 : "tx = " + tx;
+            assert ty == -100 : "ty = " + tx;
         }
         keyboardUndoRedoUndo();
     }

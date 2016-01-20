@@ -1,10 +1,29 @@
+/*
+ * Copyright 2016 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.filters.gui;
 
 import pixelitor.utils.DefaultButton;
 import pixelitor.utils.GUIUtils;
+import pixelitor.utils.OKDialog;
 
 import javax.swing.*;
 import java.awt.Rectangle;
+import java.util.Arrays;
 
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
@@ -38,10 +57,10 @@ public class DialogParam extends AbstractFilterParam {
     }
 
     private JDialog createDialog(JDialog owner) {
-        // TODO The functionality of ParametrizedAdjustPanel
-        // should be reused here
-
-        return null;
+        JPanel p = GUIUtils.arrangeParamsInVerticalGridBag(Arrays.asList(children));
+        OKDialog d = new OKDialog(owner, getName(), "Close");
+        d.setupGUI(p);
+        return d;
     }
 
     @Override
@@ -51,7 +70,6 @@ public class DialogParam extends AbstractFilterParam {
 
     @Override
     public void considerImageSize(Rectangle bounds) {
-
     }
 
     @Override
@@ -71,22 +89,51 @@ public class DialogParam extends AbstractFilterParam {
 
     @Override
     public int getNrOfGridBagCols() {
-        return 0;
+        return 2;
     }
 
     @Override
     public boolean isSetToDefault() {
-        return false;
+        for (FilterParam child : children) {
+            if (!child.isSetToDefault()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
     public void reset(boolean triggerAction) {
-
+        for (FilterParam param : children) {
+            param.reset(false);
+        }
+        if (triggerAction) {
+            adjustmentListener.paramAdjusted();
+        } else {
+            // this class updates the default button state
+            // simply by putting a decorator on the adjustment
+            // listeners, no this needs to be called here manually
+            updateDefaultButtonState();
+        }
     }
 
     private void updateDefaultButtonState() {
         if (defaultButton != null) {
             defaultButton.updateState();
+        }
+    }
+
+    @Override
+    public void setAdjustmentListener(ParamAdjustmentListener listener) {
+        ParamAdjustmentListener decoratedListener = () -> {
+            updateDefaultButtonState();
+            listener.paramAdjusted();
+        };
+
+        super.setAdjustmentListener(decoratedListener);
+
+        for (FilterParam child : children) {
+            child.setAdjustmentListener(decoratedListener);
         }
     }
 }

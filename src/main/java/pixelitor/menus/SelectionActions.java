@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,8 +19,8 @@ package pixelitor.menus;
 
 import pixelitor.Build;
 import pixelitor.Composition;
+import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
-import pixelitor.ImageDisplay;
 import pixelitor.PixelitorWindow;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
@@ -101,7 +101,7 @@ public final class SelectionActions {
     public static void setEnabled(boolean b, Composition comp) {
         assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
 
-        if (Build.CURRENT.isRobotTest()) {
+        if (Build.CURRENT.isRandomGUITest()) {
             if (comp != null) {
                 boolean hasSelection = comp.hasSelection();
                 if (hasSelection != b) {
@@ -158,7 +158,7 @@ public final class SelectionActions {
 
         @Override
         public void onClick() {
-            ImageDisplay ic = ImageComponents.getActiveIC();
+            ImageComponent ic = ImageComponents.getActiveIC();
             if(ic == null) {
                 return;
             }

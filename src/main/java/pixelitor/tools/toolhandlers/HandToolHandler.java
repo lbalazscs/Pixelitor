@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,8 @@
 package pixelitor.tools.toolhandlers;
 
 import pixelitor.GlobalKeyboardWatch;
+import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
-import pixelitor.ImageDisplay;
 import pixelitor.tools.Tools;
 
 import java.awt.Cursor;
@@ -41,7 +41,7 @@ public class HandToolHandler extends ToolHandler {
     }
 
     @Override
-    boolean mousePressed(MouseEvent e, ImageDisplay ic) {
+    boolean mousePressed(MouseEvent e, ImageComponent ic) {
         if (GlobalKeyboardWatch.isSpaceDown()) {
             Tools.HAND.mousePressed(e, ic);
             handToolForwarding = true;
@@ -55,7 +55,7 @@ public class HandToolHandler extends ToolHandler {
     }
 
     @Override
-    boolean mouseDragged(MouseEvent e, ImageDisplay ic) {
+    boolean mouseDragged(MouseEvent e, ImageComponent ic) {
         if (handToolForwarding) {
             Tools.HAND.mouseDragged(e, ic);
             return true;
@@ -67,7 +67,7 @@ public class HandToolHandler extends ToolHandler {
     }
 
     @Override
-    boolean mouseReleased(MouseEvent e, ImageDisplay ic) {
+    boolean mouseReleased(MouseEvent e, ImageComponent ic) {
         normalToolUsage = false;
 
         if (handToolForwarding) {

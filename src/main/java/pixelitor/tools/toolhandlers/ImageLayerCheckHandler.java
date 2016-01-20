@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.tools.toolhandlers;
 
-import pixelitor.ImageDisplay;
+import pixelitor.ImageComponent;
 import pixelitor.utils.Messages;
 
 import java.awt.event.MouseEvent;
@@ -30,7 +30,7 @@ public class ImageLayerCheckHandler extends ToolHandler {
     }
 
     @Override
-    boolean mousePressed(MouseEvent e, ImageDisplay ic) {
+    boolean mousePressed(MouseEvent e, ImageComponent ic) {
         if (!ic.activeIsImageLayer()) {
             Messages.showNotImageLayerError();
             return true;
@@ -41,12 +41,12 @@ public class ImageLayerCheckHandler extends ToolHandler {
     }
 
     @Override
-    boolean mouseDragged(MouseEvent e, ImageDisplay ic) {
+    boolean mouseDragged(MouseEvent e, ImageComponent ic) {
         return !ic.activeIsImageLayer();
     }
 
     @Override
-    boolean mouseReleased(MouseEvent e, ImageDisplay ic) {
+    boolean mouseReleased(MouseEvent e, ImageComponent ic) {
         return !ic.activeIsImageLayer();
     }
 }

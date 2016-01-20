@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,8 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
-import pixelitor.ImageDisplay;
 import pixelitor.filters.Filter;
 import pixelitor.layers.ImageLayer;
 import pixelitor.utils.Messages;
@@ -39,7 +39,7 @@ public abstract class FilterWithGUI extends Filter {
     public abstract AdjustPanel createAdjustPanel();
 
     public void execute() {
-        ImageDisplay ic = ImageComponents.getActiveIC();
+        ImageComponent ic = ImageComponents.getActiveIC();
         if(ic != null) {
             if (!ic.activeIsImageLayer()) {
                 Messages.showNotImageLayerError();

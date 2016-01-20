@@ -35,22 +35,25 @@ public class MultiLayerBackup {
         this.comp = comp;
         this.editName = editName;
 
+        // save canvas dimensions
         if (changesCanvasDimensions) {
             canvasChangeEdit = new CanvasChangeEdit(comp, editName);
         }
-        // TODO is the translation of the mask always the same as the
-        // translation of the main image? - consider unlinked masks
+
+        // save translation
         ContentLayer contentLayer = comp.getAnyContentLayer();
         if (contentLayer != null) { // could be null, if there are only text layers
-            translationEdit = new TranslationEdit(comp, contentLayer);
+            translationEdit = new TranslationEdit(comp, contentLayer, true);
         }
 
+        // save selection
         if (comp.hasSelection()) {
             Selection selection = comp.getSelectionOrNull();
             backupShape = selection.getShape();
             assert backupShape != null;
         }
 
+        // save backup images
         int nrLayers = comp.getNrLayers();
         for (int i = 0; i < nrLayers; i++) {
             Layer compLayer = comp.getLayer(i);
@@ -59,7 +62,7 @@ public class MultiLayerBackup {
                 this.layer = imageLayer;
                 backupImage = imageLayer.getImage();
                 if (imageLayer.hasMask()) {
-                    backupMaskImage = contentLayer.getMask().getImage();
+                    backupMaskImage = imageLayer.getMask().getImage();
                 }
                 break;
             }

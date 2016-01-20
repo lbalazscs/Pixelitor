@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,6 +32,7 @@ public class LayerBlendingEdit extends PixelitorEdit {
 
     public LayerBlendingEdit(Layer layer, BlendingMode backupBlendingMode) {
         super(layer.getComp(), "Blending Mode Change");
+
         this.layer = layer;
         this.backupBlendingMode = backupBlendingMode;
 
@@ -65,10 +66,5 @@ public class LayerBlendingEdit extends PixelitorEdit {
         layer.setBlendingMode(backupBlendingMode, UpdateGUI.YES, AddToHistory.NO, true);
         backupBlendingMode = tmp;
         History.notifyMenus(this);
-    }
-
-    @Override
-    public boolean canRepeat() {
-        return false;
     }
 }

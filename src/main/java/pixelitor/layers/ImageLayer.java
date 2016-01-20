@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -540,7 +540,7 @@ public class ImageLayer extends ContentLayer {
         int imageWidth = image.getWidth();
         int imageHeight = image.getHeight();
 
-        BufferedImage dest = ImageUtils.createCompatibleDest(image);
+        BufferedImage dest = ImageUtils.createImageWithSameColorModel(image);
         Graphics2D g2 = dest.createGraphics();
 
         if (direction == HORIZONTAL) {
@@ -646,7 +646,7 @@ public class ImageLayer extends ContentLayer {
         int height = canvas.getHeight();
         // it is important that the tmp image has transparency
         // even for layer masks, otherwise drawing is not possible
-        return ImageUtils.createCompatibleImage(width, height);
+        return ImageUtils.createSysCompatibleImage(width, height);
     }
 
     public BufferedImage getCanvasSizedSubImage() {
@@ -977,7 +977,7 @@ public class ImageLayer extends ContentLayer {
     // because normal image layers are enlarged with transparent pixels
     // and layer masks are enlarged with white pixels
     protected BufferedImage createEmptyImageForLayer(int width, int height) {
-        return ImageUtils.createCompatibleImage(width, height);
+        return ImageUtils.createSysCompatibleImage(width, height);
     }
 
     protected void imageRefChanged() {

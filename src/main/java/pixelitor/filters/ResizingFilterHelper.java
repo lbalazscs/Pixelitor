@@ -1,3 +1,20 @@
+/*
+ * Copyright 2016 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.filters;
 
 import pixelitor.filters.gui.IntChoiceParam;
@@ -57,7 +74,7 @@ public class ResizingFilterHelper {
         BufferedImage smallDest = filter.filter(smallSrc, null);
 
         if (quality == BILINEAR_FAST) {
-            dest = ImageUtils.createCompatibleDest(src);
+            dest = ImageUtils.createImageWithSameColorModel(src);
             Graphics2D g2 = dest.createGraphics();
             g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
             g2.scale(resizeFactor, resizeFactor);
@@ -85,7 +102,7 @@ public class ResizingFilterHelper {
         // in multiple steps, so this is always done the fast way.
         int smallWidth = (int) (srcWidth / resizeFactor);
         int smallHeight = (int) (srcHeight / resizeFactor);
-        BufferedImage smallSrc = ImageUtils.createCompatibleImage(smallWidth, smallHeight);
+        BufferedImage smallSrc = ImageUtils.createSysCompatibleImage(smallWidth, smallHeight);
         Graphics2D g = smallSrc.createGraphics();
         g.scale(1.0 / resizeFactor, 1.0 / resizeFactor);
         g.drawImage(src, 0, 0, null);

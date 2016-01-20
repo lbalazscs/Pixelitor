@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 /**
- * A PixelitorEdit that represents the adding of a layer mask
+ * A PixelitorEdit that represents the adding of a layer mask.
  */
 public class AddLayerMaskEdit extends PixelitorEdit {
     private Layer layer;
@@ -61,10 +61,5 @@ public class AddLayerMaskEdit extends PixelitorEdit {
 
         layer = null;
         layerMask = null;
-    }
-
-    @Override
-    public boolean canRepeat() {
-        return false;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,8 @@
 package pixelitor.tools;
 
 import pixelitor.Composition;
+import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
-import pixelitor.ImageDisplay;
 import pixelitor.layers.ImageLayer;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
@@ -40,7 +40,7 @@ public abstract class DirectBrushTool extends AbstractBrushTool {
     }
 
     @Override
-    public void mouseReleased(MouseEvent e, ImageDisplay ic) {
+    public void mouseReleased(MouseEvent e, ImageComponent ic) {
         if (graphics == null) {
             // we can get here if the mousePressed was an Alt-press, therefore
             // consumed by the color picker. Nothing was drawn, therefore

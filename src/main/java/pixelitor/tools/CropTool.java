@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
-import pixelitor.ImageDisplay;
 import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.transform.TransformSupport;
@@ -119,7 +118,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
     }
 
     @Override
-    public void mousePressed(MouseEvent e, ImageDisplay ic) {
+    public void mousePressed(MouseEvent e, ImageComponent ic) {
         // in case of crop/image change the ended is set to true even if the tool is not ended
         // if a new drag is started, then reset it
         ended = false;
@@ -138,7 +137,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
     }
 
     @Override
-    public void mouseDragged(MouseEvent e, ImageDisplay ic) {
+    public void mouseDragged(MouseEvent e, ImageComponent ic) {
         if (state == TRANSFORM) {
             transformSupport.mouseDragged(e, ic);
         }
@@ -147,7 +146,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
 
     // TODO: this is done directly with the dispatch mechanism
     @Override
-    public void dispatchMouseMoved(MouseEvent e, ImageDisplay ic) {
+    public void dispatchMouseMoved(MouseEvent e, ImageComponent ic) {
         super.dispatchMouseMoved(e, ic);
         if (state == TRANSFORM) {
             transformSupport.mouseMoved(e, ic);
@@ -155,7 +154,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
     }
 
     @Override
-    public void mouseReleased(MouseEvent e, ImageDisplay ic) {
+    public void mouseReleased(MouseEvent e, ImageComponent ic) {
         Composition comp = ic.getComp();
         comp.imageChanged(FULL);
 
@@ -183,7 +182,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageDisplay callingIC, AffineTransform unscaledTransform) {
+    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent callingIC, AffineTransform unscaledTransform) {
         if (ended) {
             return;
         }
@@ -243,7 +242,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
     /**
      * Returns the crop rectangle in image space
      */
-    public Rectangle2D getCropRect(ImageDisplay ic) {
+    public Rectangle2D getCropRect(ImageComponent ic) {
         switch (state) {
             case INITIAL:
                 lastCropRect = null;
@@ -300,7 +299,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
         if (state == TRANSFORM) {
-            ImageDisplay ic = ImageComponents.getActiveIC();
+            ImageComponent ic = ImageComponents.getActiveIC();
             if (ic != null) {
                 transformSupport.arrowKeyPressed(key, ic);
                 return true;

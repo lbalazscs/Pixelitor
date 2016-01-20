@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -59,6 +59,7 @@ public class LayerOpacityEdit extends PixelitorEdit {
         assert layer.getOpacity() == backupOpacity : "backupOpacity = " + backupOpacity + ", current = " + layer.getOpacity();
 
         backupOpacity = tmp;
+
         History.notifyMenus(this);
     }
 
@@ -67,11 +68,6 @@ public class LayerOpacityEdit extends PixelitorEdit {
         super.die();
 
         layer = null;
-    }
-
-    @Override
-    public boolean canRepeat() {
-        return false;
     }
 
     public Layer getLayer() {

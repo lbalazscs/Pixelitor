@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -78,7 +78,7 @@ public class Lightning extends FilterWithParametrizedGUI {
         float gradientDistance = ((float) lightningImageSize) / (numberOfBolts.getValue());
 
         // create image with vertical bars
-        BufferedImage lightningImage = ImageUtils.createCompatibleImage(lightningImageSize, lightningImageSize);
+        BufferedImage lightningImage = ImageUtils.createSysCompatibleImage(lightningImageSize, lightningImageSize);
         Paint gradient = new LinearGradientPaint(0, 0, gradientDistance, 0, ImageUtils.FRACTIONS_2_COLOR_UNIFORM, new Color[]{BLACK, WHITE}, REFLECT);
         Graphics2D g = lightningImage.createGraphics();
         g.setPaint(gradient);
@@ -105,12 +105,12 @@ public class Lightning extends FilterWithParametrizedGUI {
         int xTrans = -xSizeDiff / 2 + (int) (srcWidth * (center.getRelativeX() - 0.5));
         int yTrans = -ySizeDiff / 2 + (int) (srcHeight * (center.getRelativeY() - 0.5));
 
-        BufferedImage croppedLightningImage = ImageUtils.createCompatibleImage(srcWidth, srcHeight);
+        BufferedImage croppedLightningImage = ImageUtils.createSysCompatibleImage(srcWidth, srcHeight);
         Graphics2D gCroppedLightning = croppedLightningImage.createGraphics();
         gCroppedLightning.drawImage(lightningImage, xTrans, yTrans, null);
 
         // apply difference clouds
-        BufferedImage cloudsImage = ImageUtils.createCompatibleImage(srcWidth, srcHeight);
+        BufferedImage cloudsImage = ImageUtils.createSysCompatibleImage(srcWidth, srcHeight);
         Clouds.renderClouds(cloudsImage, 100.0f, 0.5f, BLACK, WHITE);
         gCroppedLightning.setComposite(new DifferenceComposite(1.0f));
         gCroppedLightning.drawImage(cloudsImage, 0, 0, null);
@@ -161,7 +161,7 @@ public class Lightning extends FilterWithParametrizedGUI {
         }
 
 
-        BufferedImage invertedImage = ImageUtils.createCompatibleImage(srcWidth, srcHeight);
+        BufferedImage invertedImage = ImageUtils.createSysCompatibleImage(srcWidth, srcHeight);
         invertedImage = new FastLookupOp(new ShortLookupTable(0, lookupData)).filter(croppedLightningImage, invertedImage);
 
         if (debug) {

@@ -48,8 +48,8 @@ public class SimplestTransitionDemo extends JPanel {
 	public static  BufferedImage bi2 = new BufferedImage(400, 400, BufferedImage.TYPE_INT_ARGB);
 
     static {
-        bi1 = ImageUtils.toCompatibleImage(bi1);
-        bi2 = ImageUtils.toCompatibleImage(bi2);
+        bi1 = ImageUtils.toSysCompatibleImage(bi1);
+        bi2 = ImageUtils.toSysCompatibleImage(bi2);
     }
 
     /** How long the transition should last. */

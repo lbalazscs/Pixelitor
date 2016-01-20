@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,9 +25,6 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.ImageComponents;
-import pixelitor.ImageDisplay;
-import pixelitor.ImageDisplayStub;
 import pixelitor.TestHelper;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
@@ -87,9 +84,7 @@ public class LayerTest {
 
         // TODO this should be automatic for all tests
         // or should be avoidable
-        ImageDisplay ic = new ImageDisplayStub();
-        ImageComponents.setActiveIC(ic, false);
-        ((ImageDisplayStub) ic).setComp(comp);
+        TestHelper.setAnActiveIC(comp);
 
         History.clear();
     }

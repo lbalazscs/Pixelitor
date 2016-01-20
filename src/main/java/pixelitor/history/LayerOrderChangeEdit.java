@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.history;
 
@@ -30,6 +30,7 @@ public class LayerOrderChangeEdit extends PixelitorEdit {
 
     public LayerOrderChangeEdit(Composition comp, int oldLayerIndex, int newLayerIndex) {
         super(comp, "Layer Order Change");
+
         comp.setDirty(true);
         this.oldLayerIndex = oldLayerIndex;
         this.newLayerIndex = newLayerIndex;
@@ -40,6 +41,7 @@ public class LayerOrderChangeEdit extends PixelitorEdit {
         super.undo();
 
         comp.swapLayers(newLayerIndex, oldLayerIndex, AddToHistory.NO);
+
         History.notifyMenus(this);
     }
 
@@ -48,11 +50,7 @@ public class LayerOrderChangeEdit extends PixelitorEdit {
         super.redo();
 
         comp.swapLayers(oldLayerIndex, newLayerIndex, AddToHistory.NO);
-        History.notifyMenus(this);
-    }
 
-    @Override
-    public boolean canRepeat() {
-        return false;
+        History.notifyMenus(this);
     }
 }

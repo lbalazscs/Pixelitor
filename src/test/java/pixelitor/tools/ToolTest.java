@@ -1,3 +1,20 @@
+/*
+ * Copyright 2016 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.tools;
 
 import org.junit.After;
@@ -8,9 +25,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Composition;
-import pixelitor.ImageComponents;
-import pixelitor.ImageDisplay;
-import pixelitor.ImageDisplayStub;
+import pixelitor.ImageComponent;
 import pixelitor.MessageHandler;
 import pixelitor.TestHelper;
 import pixelitor.TestMessageHandler;
@@ -31,7 +46,7 @@ import static java.awt.event.MouseEvent.MOUSE_RELEASED;
  */
 @RunWith(Parameterized.class)
 public class ToolTest {
-    private ImageDisplay ic;
+    private ImageComponent ic;
 
     @Parameter
     public Tool tool;
@@ -66,9 +81,8 @@ public class ToolTest {
 
         tool.toolStarted();
         Composition comp = TestHelper.create2LayerComposition(true);
-        ic = new ImageDisplayStub();
-        ImageComponents.setActiveIC(ic, false);
-        ((ImageDisplayStub) ic).setComp(comp);
+
+        ic = TestHelper.setAnActiveIC(comp);
     }
 
     @After

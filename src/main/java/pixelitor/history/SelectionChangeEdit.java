@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -54,8 +54,10 @@ public class SelectionChangeEdit extends PixelitorEdit {
     private void swapShapes() {
         Shape tmp;
 
-        Selection selection = comp.getSelection()
-                .orElseThrow(() -> new IllegalStateException("no selection in " + comp.getName()));
+        Selection selection = comp.getSelection().orElseThrow(
+                () -> new IllegalStateException(
+                        "no selection in " + comp.getName()));
+
         tmp = selection.getShape();
 
         selection.setShape(backupShape);
@@ -65,10 +67,5 @@ public class SelectionChangeEdit extends PixelitorEdit {
         if (!embedded) {
             History.notifyMenus(this);
         }
-    }
-
-    @Override
-    public boolean canRepeat() {
-        return false;
     }
 }

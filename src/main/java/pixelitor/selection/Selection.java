@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.selection;
 import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.ImageDisplay;
+import pixelitor.ImageComponent;
 import pixelitor.history.History;
 import pixelitor.history.SelectionChangeEdit;
 import pixelitor.menus.SelectionModifyType;
@@ -50,7 +50,7 @@ import static pixelitor.selection.Selection.State.NO_SHAPE_YET;
  */
 public class Selection {
     private float dashPhase;
-    private ImageDisplay ic;
+    private ImageComponent ic;
     private Timer marchingAntsTimer;
 
     // the shape that is currently drawn
@@ -74,7 +74,7 @@ public class Selection {
             @Override
             Rectangle getShapeBounds(Shape currentSelectionShape) {
 //                throw new IllegalStateException("no shape yet");
-// TODO this should not be called, but it was on Linux during robot tests
+// TODO this should not be called, but it was on Linux during RandomGUITest
                 return new Rectangle(0, 0, 0, 0);
             }
 
@@ -120,7 +120,7 @@ public class Selection {
     /**
      * Called when a new selection is created with the marquee selection tool
      */
-    public Selection(ImageDisplay c, SelectionType selectionType, SelectionInteraction selectionInteraction) {
+    public Selection(ImageComponent c, SelectionType selectionType, SelectionInteraction selectionInteraction) {
         this.ic = c;
         this.selectionType = selectionType;
         this.selectionInteraction = selectionInteraction;
@@ -145,7 +145,7 @@ public class Selection {
      * - when a deselect is undone (and when a  new selection is undone and then redone)
      * - selections from the Shapes Tool
      */
-    public Selection(Shape shape, ImageDisplay c) {
+    public Selection(Shape shape, ImageComponent c) {
         assert c != null;
 
         this.currentSelectionShape = shape;
@@ -200,7 +200,7 @@ public class Selection {
             if (newBounds.isEmpty()) {
                 currentSelectionShape = null;
                 updateComponent();
-                if (!Build.CURRENT.isRobotTest()) {
+                if (!Build.CURRENT.isRandomGUITest()) {
                     Messages.showInfo("Nothing selected", "As a result of the "
                             + selectionInteraction.toString().toLowerCase() + " operation, nothing is selected now.");
                 }

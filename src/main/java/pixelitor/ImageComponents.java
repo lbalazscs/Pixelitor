@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor;
 
 import pixelitor.filters.comp.Crop;
+import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.io.OpenSaveManager;
 import pixelitor.layers.ImageLayer;
@@ -44,7 +45,7 @@ import java.util.Optional;
  */
 public class ImageComponents {
     private static final List<ImageComponent> icList = new ArrayList<>();
-    private static ImageDisplay activeIC;
+    private static ImageComponent activeIC;
     private static final Collection<ImageSwitchListener> imageSwitchListeners = new ArrayList<>();
 
     private ImageComponents() {
@@ -83,7 +84,7 @@ public class ImageComponents {
         }
     }
 
-    public static ImageDisplay getActiveIC() {
+    public static ImageComponent getActiveIC() {
         return activeIC;
     }
 
@@ -180,15 +181,13 @@ public class ImageComponents {
         setNewImageAsActiveIfNecessary();
     }
 
-    public static void setActiveIC(ImageDisplay display, boolean activate) {
-        activeIC = display;
+    public static void setActiveIC(ImageComponent ic, boolean activate) {
+        activeIC = ic;
         if (activate) {
-            if (display == null) {
+            if (ic == null) {
                 throw new IllegalStateException("cannot activate null imageComponent");
             }
             // activate is always false in unit tests
-            ImageComponent ic = (ImageComponent) display;
-
             InternalImageFrame internalFrame = ic.getInternalFrame();
             Desktop.INSTANCE.activateInternalImageFrame(internalFrame);
             ic.onActivation();
@@ -301,11 +300,23 @@ public class ImageComponents {
         Composition comp = activeIC.getComp();
         File file = comp.getFile();
         if (file == null) {
-            Messages.showError("No file", String.format("The image '%s' cannot be reloaded because it was not yet saved.", comp.getName()));
+            String msg = String.format("The image '%s' cannot be reloaded because it was not yet saved.", comp.getName());
+            Messages.showError("No file", msg);
             return;
         }
+        if (!file.exists()) {
+            String msg = String.format("The image '%s' cannot be reloaded\n" +
+                            " because the file %s does not exist anymore.",
+                    comp.getName(), file.getAbsolutePath());
+            Messages.showError("No file", msg);
+            return;
+        }
+
+        Composition newComp = OpenSaveManager.createCompositionFromFile(file);
+        ((ImageComponent) activeIC).replaceComp(newComp, AddToHistory.YES);
+
         //OpenSaveManager.warnAndCloseImage(activeIC);
-        activeIC.close();
-        OpenSaveManager.openFile(file);
+//        activeIC.close();
+//        OpenSaveManager.openFile(file);
     }
 }

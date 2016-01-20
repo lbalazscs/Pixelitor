@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -71,8 +71,8 @@ public class Spirograph extends ShapeFilter {
         R *= z;
         d *= z;
 
-        double w = width / 2.0;
-        double h = height / 2.0;
+        double cx = width * center.getRelativeX();
+        double cy = height * center.getRelativeY();
 
         double maxValue = time.getValue();
         if (maxValue == 0.0) {
@@ -85,32 +85,18 @@ public class Spirograph extends ShapeFilter {
         } else if (type.getValue() == TYPE_EPITROCHOID) {
             combinedR = R + r;
         } else {
-            throw new IllegalStateException();
+            throw new IllegalStateException("type = " + type.getValue());
         }
-
-        double xMultiplier = 1.0;
-        double yMultiplier = 1.0;
-//        if (followImage) {
-//            if (width > height) {
-//                xMultiplier = ((double) width) / height;
-//            } else {
-//                yMultiplier = ((double) height) / height;
-//            }
-//        }
 
         double dt = 0.05;
         double startX = combinedR + d;
         double startY = 0;
-        shape.moveTo(w + startX * xMultiplier, h + startY * yMultiplier);
+        shape.moveTo(cx + startX, cy + startY);
         for (double t = dt; t < maxValue; t += dt) {
             double x = combinedR * cos(t) + d * cos(combinedR * t / r);
             double y = combinedR * sin(t) - d * sin(combinedR * t / r);
-//            if (followImage) {
-//                x *= xMultiplier;
-//                y *= yMultiplier;
-//            }
 
-            shape.lineTo(w + x, h + y);
+            shape.lineTo(cx + x, cy + y);
         }
 
         return shape;

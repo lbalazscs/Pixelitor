@@ -186,8 +186,8 @@ public class OpTests {
 
     public static void randomResize() {
         ImageComponents.getActiveComp().ifPresent(comp -> {
-            int targetWidth = 10 + RobotTest.rand.nextInt(1200);
-            int targetHeight = 10 + RobotTest.rand.nextInt(800);
+            int targetWidth = 10 + RandomGUITest.rand.nextInt(1200);
+            int targetHeight = 10 + RandomGUITest.rand.nextInt(800);
             new Resize(targetWidth, targetHeight, false).process(comp);
         });
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -91,7 +91,7 @@ public class TextLayer extends ContentLayer {
     }
 
     public BufferedImage createRasterizedImage() {
-        BufferedImage img = ImageUtils.createCompatibleImage(canvas.getWidth(), canvas.getHeight());
+        BufferedImage img = ImageUtils.createSysCompatibleImage(canvas.getWidth(), canvas.getHeight());
         Graphics2D g = img.createGraphics();
         applyLayer(g, true, img);
         g.dispose();
@@ -152,7 +152,7 @@ public class TextLayer extends ContentLayer {
     }
 
     public void edit(PixelitorWindow pw) {
-        if (Build.CURRENT.isRobotTest()) {
+        if (Build.CURRENT.isRandomGUITest()) {
             return; // avoid dialogs
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.tools.toolhandlers;
 
-import pixelitor.ImageDisplay;
+import pixelitor.ImageComponent;
 import pixelitor.tools.Tool;
 
 import java.awt.event.MouseEvent;
@@ -34,20 +34,20 @@ public class CurrentToolHandler extends ToolHandler {
     }
 
     @Override
-    boolean mousePressed(MouseEvent e, ImageDisplay ic) {
+    boolean mousePressed(MouseEvent e, ImageComponent ic) {
         tool.mousePressed(e, ic);
         // this is the last handler in the chain, therefore it always returns true
         return true;
     }
 
     @Override
-    boolean mouseDragged(MouseEvent e, ImageDisplay ic) {
+    boolean mouseDragged(MouseEvent e, ImageComponent ic) {
         tool.mouseDragged(e, ic);
         return true;
     }
 
     @Override
-    boolean mouseReleased(MouseEvent e, ImageDisplay ic) {
+    boolean mouseReleased(MouseEvent e, ImageComponent ic) {
         tool.mouseReleased(e, ic);
         return true;
     }

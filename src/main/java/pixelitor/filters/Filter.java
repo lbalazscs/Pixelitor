@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,11 +17,10 @@
 
 package pixelitor.filters;
 
-import pixelitor.Build;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
+import pixelitor.ImageComponent;
 import pixelitor.ImageComponents;
-import pixelitor.ImageDisplay;
 import pixelitor.PixelitorWindow;
 import pixelitor.layers.Layer;
 import pixelitor.utils.ImageUtils;
@@ -85,7 +84,7 @@ public abstract class Filter implements Serializable {
     }
 
     public void execute() {
-        ImageDisplay ic = ImageComponents.getActiveIC();
+        ImageComponent ic = ImageComponents.getActiveIC();
         if (ic != null) {
             if (!ic.activeIsImageLayer()) {
                 Messages.showNotImageLayerError();
@@ -102,24 +101,36 @@ public abstract class Filter implements Serializable {
     }
 
     public BufferedImage executeForOneLayer(BufferedImage src) {
+        boolean convertFromGray = false;
+        if (src.getType() == BufferedImage.TYPE_BYTE_GRAY) { // editing a mask
+            if (!supportsGray()) {
+                System.out.println("Filter::executeForOneLayer: converting to RGB for " + getName());
+                convertFromGray = true;
+                src = ImageUtils.toSysCompatibleImage(src);
+            }
+        }
+
         BufferedImage dest = null;
         if (createDefaultDestBuffer()) {
-            dest = ImageUtils.createCompatibleDest(src);
+            dest = ImageUtils.createImageWithSameColorModel(src);
         }
 
         dest = transform(src, dest);
+
+        if (convertFromGray) { // convert the result back
+            dest = ImageUtils.convertToGrayScaleImage(dest);
+        }
+
         runCount++;
 
-        if (dest == null) {
-            if (Build.CURRENT == Build.DEVELOPMENT) {
-                System.out.println(String.format("Filter::executeForOneLayer: '%s' returned null dest", getName()));
-            }
-        }
-        assert dest != null;
+        assert dest != null : getName() + " returned null dest";
 
         return dest;
     }
 
+    /**
+     * The main functionality of a filter.
+     */
     protected abstract BufferedImage transform(BufferedImage src, BufferedImage dest);
 
     public abstract void randomizeSettings();
@@ -140,5 +151,13 @@ public abstract class Filter implements Serializable {
 
     public String getListName() {
         return filterAction.getListName();
+    }
+
+    /**
+     * Whether this filter supports editing TYPE_BYTE_GRAY
+     * images used in layer masks
+     */
+    public boolean supportsGray() {
+        return true;
     }
 }
