@@ -22,7 +22,7 @@ import pixelitor.ImageDisplay;
 import pixelitor.menus.OpenImageEnabledRadioButtonMenuItem;
 
 /**
- *
+ * A menu item that represents a zoom level
  */
 public class ZoomMenuItem extends OpenImageEnabledRadioButtonMenuItem {
 

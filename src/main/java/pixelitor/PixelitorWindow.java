@@ -19,6 +19,7 @@ package pixelitor;
 
 import pixelitor.layers.LayersContainer;
 import pixelitor.menus.MenuBar;
+import pixelitor.menus.view.ZoomComponent;
 import pixelitor.tools.FgBgColorSelector;
 import pixelitor.tools.ToolSettingsPanelContainer;
 import pixelitor.tools.ToolsPanel;
@@ -41,7 +42,8 @@ import java.util.List;
  * The main application window.
  */
 public class PixelitorWindow extends JFrame {
-    private JLabel statusBar;
+    private JPanel statusBar;
+    private JLabel statusBarLabel;
     private HistogramsPanel histogramsPanel;
     private Box verticalBoxEast;
     private Box verticalBoxWest;
@@ -119,7 +121,13 @@ public class PixelitorWindow extends JFrame {
     }
 
     private void addStatusBar() {
-        statusBar = new JLabel("Pixelitor started");
+        statusBar = new JPanel(new BorderLayout(0, 0));
+
+        statusBarLabel = new JLabel("Pixelitor started");
+        statusBar.add(statusBarLabel, BorderLayout.CENTER);
+
+        statusBar.add(ZoomComponent.INSTANCE, BorderLayout.EAST);
+
         statusBar.setBorder(BorderFactory.createEtchedBorder());
 
         if (AppPreferences.WorkSpace.getStatusBarVisibility()) {
@@ -156,7 +164,7 @@ public class PixelitorWindow extends JFrame {
     }
 
     public void setStatusBarMessage(String msg) {
-        statusBar.setText(msg);
+        statusBarLabel.setText(msg);
     }
 
     public boolean isStatusBarShown() {

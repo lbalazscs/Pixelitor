@@ -80,7 +80,7 @@ public interface ImageDisplay {
 
     void setShowLayerMask(boolean b);
 
-    boolean setZoom(ZoomLevel zoomLevel, boolean b);
+    boolean setZoom(ZoomLevel zoomLevel, boolean settingTheInitialSize);
 
     void close();
 }

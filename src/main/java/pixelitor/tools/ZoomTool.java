@@ -27,11 +27,6 @@ import java.awt.event.MouseEvent;
  * The Zoom Tool
  */
 public class ZoomTool extends Tool {
-    private int startX;
-    private int startY;
-    private int maxScrollPositionX;
-    private int maxScrollPositionY;
-
     ZoomTool() {
         super('z', "Zoom", "zoom_tool_icon.png", "click to zoom in, right-click (or Alt-click) to zoom out",
                 Cursor.getPredefinedCursor(Cursor.HAND_CURSOR), false, true, false, ClipStrategy.IMAGE_ONLY);

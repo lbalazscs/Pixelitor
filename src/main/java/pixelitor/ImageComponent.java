@@ -23,6 +23,7 @@ import pixelitor.layers.LayerButton;
 import pixelitor.layers.LayerMask;
 import pixelitor.layers.LayersContainer;
 import pixelitor.layers.LayersPanel;
+import pixelitor.menus.view.ZoomComponent;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
@@ -491,6 +492,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
 //        }
 
+        ZoomComponent.INSTANCE.setToNewZoom(zoomLevel);
         zoomLevel.getMenuItem().setSelected(true);
         return true;
     }
