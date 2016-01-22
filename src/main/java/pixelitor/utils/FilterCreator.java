@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -16,6 +16,10 @@
  */
 
 package pixelitor.utils;
+
+import pixelitor.gui.utils.GUIUtils;
+import pixelitor.gui.utils.GridBagHelper;
+import pixelitor.gui.utils.OKCancelDialog;
 
 import javax.swing.*;
 import java.awt.Dimension;

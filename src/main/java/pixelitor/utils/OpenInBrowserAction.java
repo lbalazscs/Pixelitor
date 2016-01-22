@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,21 +8,23 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.utils;
 
 import javax.swing.*;
+import java.awt.Desktop;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 /**
- *
+ * An action that opens an URL in an external browser
  */
 public class OpenInBrowserAction extends AbstractAction {
     private URI uri;
@@ -38,6 +40,17 @@ public class OpenInBrowserAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Utils.openURI(uri);
+        openURI(uri);
+    }
+
+    public static void openURI(URI uri) {
+        if (Desktop.isDesktopSupported()) {
+            Desktop desktop = Desktop.getDesktop();
+            try {
+                desktop.browse(uri);
+            } catch (IOException e) {
+                Messages.showException(e);
+            }
+        }
     }
 }

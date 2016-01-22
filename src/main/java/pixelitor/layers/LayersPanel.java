@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
-import pixelitor.ImageComponents;
+import pixelitor.gui.ImageComponents;
 
 import javax.swing.*;
 import java.util.ArrayList;

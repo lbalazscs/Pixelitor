@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,7 @@ import pixelitor.AppLogic;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.FgBgColors;
+import pixelitor.gui.HistogramsPanel;
 import pixelitor.history.AddLayerMaskEdit;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.CompoundEdit;
@@ -34,7 +35,6 @@ import pixelitor.history.LayerRenameEdit;
 import pixelitor.history.LayerVisibilityChangeEdit;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.selection.Selection;
-import pixelitor.utils.HistogramsPanel;
 import pixelitor.utils.Messages;
 import pixelitor.utils.UpdateGUI;
 

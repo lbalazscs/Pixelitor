@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,8 @@
 
 package pixelitor.menus.view;
 
-import pixelitor.PixelitorWindow;
+import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.StatusBar;
 import pixelitor.layers.LayersContainer;
 
 import javax.swing.*;
@@ -55,7 +56,7 @@ public class ShowHideAllAction extends ShowHideAction {
         if (!value) {
             histogramsWereShown = pixelitorWindow.areHistogramsShown();
             layersWereShown = LayersContainer.areLayersShown();
-            statusBarWasShown = pixelitorWindow.isStatusBarShown();
+            statusBarWasShown = StatusBar.INSTANCE.isShown();
             toolsWereShown = pixelitorWindow.areToolsShown();
         }
         if (histogramsWereShown) {

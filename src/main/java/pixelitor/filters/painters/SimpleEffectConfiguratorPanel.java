@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,11 +20,11 @@ package pixelitor.filters.painters;
 import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.utils.SliderSpinner;
+import pixelitor.gui.utils.SliderSpinner;
 
 import java.awt.Color;
 
-import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
+import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
 /**
  * An EffectConfiguratorPanel that has a width parameter.

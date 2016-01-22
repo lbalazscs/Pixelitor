@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,13 +21,13 @@ import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.tools.ShapeType;
-import pixelitor.utils.GridBagHelper;
 
 import javax.swing.*;
 import java.awt.GridBagLayout;
 
-import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
+import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
 public class BrushSettingsPanel extends JPanel {
     public static final ShapeType SHAPE_SELECTED_BY_DEFAULT = ShapeType.ARROW;

@@ -20,7 +20,7 @@ package pixelitor.selection;
 import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
+import pixelitor.gui.ImageComponent;
 import pixelitor.history.History;
 import pixelitor.history.SelectionChangeEdit;
 import pixelitor.menus.SelectionModifyType;

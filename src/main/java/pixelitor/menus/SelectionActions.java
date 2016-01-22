@@ -19,25 +19,25 @@ package pixelitor.menus;
 
 import pixelitor.Build;
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
-import pixelitor.ImageComponents;
-import pixelitor.PixelitorWindow;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
+import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.GridBagHelper;
+import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.history.AddToHistory;
 import pixelitor.selection.Selection;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.Tools;
-import pixelitor.utils.GridBagHelper;
 import pixelitor.utils.Messages;
-import pixelitor.utils.OKCancelDialog;
 
 import javax.swing.*;
 import java.awt.GridBagLayout;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
 
-import static pixelitor.ImageComponents.getActiveComp;
+import static pixelitor.gui.ImageComponents.getActiveComp;
 
 /**
  * Static methods for managing the selection actions

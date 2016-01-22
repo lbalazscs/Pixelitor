@@ -19,13 +19,14 @@ package pixelitor.layers;
 
 import pixelitor.Build;
 import pixelitor.Composition;
-import pixelitor.ImageComponents;
-import pixelitor.PixelitorWindow;
 import pixelitor.filters.comp.Flip;
 import pixelitor.filters.comp.Rotate;
 import pixelitor.filters.painters.TextAdjustmentsPanel;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.filters.painters.TranslatedTextPainter;
+import pixelitor.gui.ImageComponents;
+import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
@@ -33,7 +34,6 @@ import pixelitor.history.NewLayerEdit;
 import pixelitor.history.TextLayerChangeEdit;
 import pixelitor.history.TextLayerRasterizeEdit;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.OKCancelDialog;
 import pixelitor.utils.UpdateGUI;
 
 import java.awt.Graphics2D;

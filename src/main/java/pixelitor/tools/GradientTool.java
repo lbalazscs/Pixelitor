@@ -19,11 +19,11 @@ package pixelitor.tools;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
+import pixelitor.gui.BlendingModePanel;
+import pixelitor.gui.ImageComponent;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.TmpDrawingLayer;
 import pixelitor.menus.view.ZoomLevel;
-import pixelitor.utils.BlendingModePanel;
 
 import javax.swing.*;
 import java.awt.Color;

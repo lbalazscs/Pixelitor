@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -14,9 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.menus.view;
 
-import pixelitor.PixelitorWindow;
+import pixelitor.gui.StatusBar;
 import pixelitor.utils.AppPreferences;
 
 /**
@@ -29,8 +30,7 @@ public class ShowHideStatusBarAction extends ShowHideAction {
 
     @Override
     public boolean getCurrentVisibility() {
-        PixelitorWindow pixelitorWindow = PixelitorWindow.getInstance();
-        return pixelitorWindow.isStatusBarShown();
+        return StatusBar.INSTANCE.isShown();
     }
 
     @Override

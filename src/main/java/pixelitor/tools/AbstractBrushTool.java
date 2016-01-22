@@ -19,19 +19,19 @@ package pixelitor.tools;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
-import pixelitor.ImageComponents;
-import pixelitor.PixelitorWindow;
 import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.FilterSetting;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
+import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.OKDialog;
+import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.layers.ImageLayer;
 import pixelitor.tools.brushes.Brush;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.SymmetryBrush;
 import pixelitor.utils.ImageSwitchListener;
-import pixelitor.utils.OKDialog;
-import pixelitor.utils.SliderSpinner;
 
 import javax.swing.*;
 import java.awt.Cursor;
@@ -46,7 +46,7 @@ import java.awt.image.BufferedImage;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.Composition.ImageChangeActions.HISTOGRAM;
-import static pixelitor.utils.SliderSpinner.TextPosition.WEST;
+import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 
 /**
  * Abstract superclass for tools like brush, erase, clone.

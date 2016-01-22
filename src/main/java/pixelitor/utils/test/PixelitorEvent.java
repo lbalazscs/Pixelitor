@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,9 +18,10 @@
 package pixelitor.utils.test;
 
 import pixelitor.Composition;
-import pixelitor.ImageComponents;
+import pixelitor.gui.ImageComponents;
 import pixelitor.layers.Layer;
 
+import javax.swing.*;
 import java.awt.Rectangle;
 import java.text.Format;
 import java.text.SimpleDateFormat;
@@ -31,42 +32,73 @@ import java.util.Optional;
  * An event that occurred inside Pixelitor.
  * Used for debugging.
  */
-public abstract class PixelitorEvent {
-    private final String description;
+public class PixelitorEvent {
+    private final String message;
     private final Date date;
+    private final String threadName;
     private final Composition comp;
     private final Layer layer;
     private static final Format dateFormatter = new SimpleDateFormat("HH:mm:ss:SSS");
 
-    protected PixelitorEvent(String description) {
-        assert description != null;
-
-        this.description = description;
+    protected PixelitorEvent(String type, Composition comp, Layer layer) {
+        assert type != null;
 
         date = new Date();
-
-        Optional<Composition> opt = ImageComponents.getActiveComp();
-        if (opt.isPresent()) {
-            comp = opt.get();
-            layer = comp.getActiveLayer();
+        if (SwingUtilities.isEventDispatchThread()) {
+            threadName = "EDT";
         } else {
-            comp = null;
-            layer = null;
+            threadName = Thread.currentThread().getName();
         }
+
+        if (comp == null) {
+            assert layer == null;
+            Optional<Composition> opt = ImageComponents.getActiveComp();
+            if (opt.isPresent()) {
+                this.comp = opt.get();
+                this.layer = this.comp.getActiveLayer();
+            } else {
+                this.comp = null;
+                this.layer = null;
+            }
+        } else {
+            this.comp = comp;
+            if (layer == null) {
+                this.layer = comp.getActiveLayer();
+            } else {
+                this.layer = layer;
+            }
+        }
+
+        message = saveState(type);
     }
 
-    public String getMessage() {
-        return description;
-    }
-
-    @Override
-    public String toString() {
+    private String saveState(String type) {
         String selectionInfo = "no selection";
         if (comp.hasSelection()) {
             Rectangle rect = comp.getSelection().get().getShapeBounds();
             selectionInfo = String.format("sel. bounds = '%s'", rect.toString());
         }
-        return String.format("%s on \"%s/%s\" (%s) at %s",
-                description, comp.getName(), layer.getName(), selectionInfo, dateFormatter.format(date));
+        String maskInfo = "no mask";
+        if (layer.hasMask()) {
+            maskInfo = String.format("has mask (enabled = %s, editing = %s, linked = %s)",
+                    layer.isMaskEnabled(), layer.isMaskEditing(), layer.getMask().isLinked());
+
+        }
+
+        return String.format("%s (%s) on \"%s/%s\" (%s, %s, %s) at %s",
+                type, threadName, comp.getName(), layer.getName(),
+                layer.getClass().getSimpleName(), selectionInfo, maskInfo, dateFormatter.format(date));
+    }
+
+    public boolean isComp(Composition c) {
+        if (c == null) {
+            return true;
+        }
+        return comp == c;
+    }
+
+    @Override
+    public String toString() {
+        return message;
     }
 }

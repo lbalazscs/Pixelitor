@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,13 +18,13 @@
 package pixelitor.filters.animation;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
+import pixelitor.gui.utils.BrowseFilesSupport;
+import pixelitor.gui.utils.GridBagHelper;
+import pixelitor.gui.utils.TFValidationLayerUI;
+import pixelitor.gui.utils.TextFieldValidator;
+import pixelitor.gui.utils.ValidatedForm;
 import pixelitor.io.FileChoosers;
-import pixelitor.utils.BrowseFilesSupport;
-import pixelitor.utils.GridBagHelper;
 import pixelitor.utils.Messages;
-import pixelitor.utils.TFValidationLayerUI;
-import pixelitor.utils.TextFieldValidator;
-import pixelitor.utils.ValidatedForm;
 
 import javax.swing.*;
 import javax.swing.plaf.LayerUI;
@@ -35,8 +35,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 
-import static pixelitor.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
-import static pixelitor.utils.BrowseFilesSupport.SelectionMode.FILE;
+import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
+import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.FILE;
 
 /**
  * The settings for the tweening animation output
@@ -49,7 +49,7 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
     private double fps;
     private JComboBox<Interpolation> ipCB;
     private JComboBox<TweenOutputType> outputTypeCB;
-    private JCheckBox pingPongCB = new JCheckBox();
+    private final JCheckBox pingPongCB = new JCheckBox();
     private final BrowseFilesSupport browseFilesSupport = new BrowseFilesSupport(FileChoosers.getLastSaveDir().getAbsolutePath());
     private JTextField fileNameTF;
     private String errorMessage;

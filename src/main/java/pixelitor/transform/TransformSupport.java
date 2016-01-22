@@ -17,7 +17,7 @@
 
 package pixelitor.transform;
 
-import pixelitor.ImageComponent;
+import pixelitor.gui.ImageComponent;
 import pixelitor.tools.ArrowKey;
 import pixelitor.utils.Utils;
 

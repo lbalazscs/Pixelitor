@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,12 +28,12 @@ import pixelitor.ChangeReason;
 import pixelitor.Composition;
 import pixelitor.FgBgColors;
 import pixelitor.TestHelper;
+import pixelitor.gui.FgBgColorSelector;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.selection.IgnoreSelection;
 import pixelitor.selection.Selection;
 import pixelitor.testutils.WithMask;
-import pixelitor.tools.FgBgColorSelector;
 
 import java.awt.AlphaComposite;
 import java.awt.Rectangle;

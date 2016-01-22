@@ -17,11 +17,11 @@
 
 package pixelitor;
 
+import pixelitor.gui.utils.GridBagHelper;
+import pixelitor.gui.utils.IntTextField;
+import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.utils.AppPreferences;
-import pixelitor.utils.GridBagHelper;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.IntTextField;
-import pixelitor.utils.OKCancelDialog;
 
 import javax.swing.*;
 import java.awt.Color;

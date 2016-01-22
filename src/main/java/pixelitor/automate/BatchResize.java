@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,12 +17,12 @@
 
 package pixelitor.automate;
 
-import pixelitor.PixelitorWindow;
 import pixelitor.filters.comp.CompAction;
 import pixelitor.filters.comp.Resize;
-import pixelitor.utils.IntTextField;
-import pixelitor.utils.ValidatedDialog;
-import pixelitor.utils.ValidatedForm;
+import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.IntTextField;
+import pixelitor.gui.utils.ValidatedDialog;
+import pixelitor.gui.utils.ValidatedForm;
 
 import javax.swing.*;
 

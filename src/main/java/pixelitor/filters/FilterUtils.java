@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -116,9 +116,7 @@ public class FilterUtils {
     public static void createAllFilters() {
         long startTime = System.nanoTime();
 
-        for (FilterAction filterAction : allFilters) {
-            filterAction.getFilter();
-        }
+        allFilters.forEach(FilterAction::getFilter);
 
         double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
         System.out.println(String.format("FilterUtils::createAllFilters: estimatedSeconds = '%.2f'", estimatedSeconds));

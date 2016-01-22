@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -90,5 +90,10 @@ public class Canny extends FilterWithParametrizedGUI {
         long estimatedMemoryMB = (int) (6 * numPixels * 4 / MemoryInfo.ONE_MEGABYTE);
         estimatedMemoryMB *= 1.8; // found experimentally, this is still needed to prevent OutOfMemory errors
         return estimatedMemoryMB;
+    }
+
+    @Override
+    public boolean supportsGray() {
+        return false;
     }
 }

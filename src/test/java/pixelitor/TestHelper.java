@@ -19,6 +19,9 @@ package pixelitor;
 
 import pixelitor.filters.Invert;
 import pixelitor.filters.painters.TextSettings;
+import pixelitor.gui.FgBgColorSelector;
+import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
 import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
@@ -26,7 +29,6 @@ import pixelitor.layers.LayerMaskAddType;
 import pixelitor.layers.TextLayer;
 import pixelitor.tools.Alt;
 import pixelitor.tools.Ctrl;
-import pixelitor.tools.FgBgColorSelector;
 import pixelitor.tools.Mouse;
 import pixelitor.tools.Shift;
 

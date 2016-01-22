@@ -19,23 +19,24 @@ package pixelitor.history;
 
 import pixelitor.Composition;
 import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Layer;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
+import java.awt.image.BufferedImage;
 
 import static pixelitor.Composition.ImageChangeActions.FULL;
 
 /**
  * A PixelitorEdit representing an operation that can affect multiple layers,
  * such as resize, a crop, flip, or image rotation.
- * These are undoable only if the composition has a single image layer
+ * These are undoable only if the composition has a single layer
  */
 public class MultiLayerEdit extends PixelitorEdit {
-    private ImageLayer layer;
-
-    private final ImageEdit imageEdit;
-    private final CanvasChangeEdit canvasChangeEdit;
-    private final TranslationEdit translationEdit;
+    private Layer layer;
+    private ImageEdit imageEdit;
+    private CanvasChangeEdit canvasChangeEdit;
+    private TranslationEdit translationEdit;
     private SelectionChangeEdit selectionChangeEdit;
     private DeselectEdit deselectEdit;
     private final boolean undoable;
@@ -43,17 +44,31 @@ public class MultiLayerEdit extends PixelitorEdit {
     public MultiLayerEdit(Composition comp, String name, MultiLayerBackup backup) {
         super(comp, name);
 
-        this.canvasChangeEdit = backup.getCanvasChangeEdit();
-        this.translationEdit = backup.getTranslationEdit();
-
-        int nrLayers = comp.getNrImageLayers();
+        int nrLayers = comp.getNrLayers();
         if (nrLayers == 1) {
-            layer = comp.getAnyImageLayer();
-            imageEdit = backup.createImageEdit(layer.getImage());
             undoable = true;
+            layer = comp.getLayer(0);
         } else {
-            imageEdit = null;
             undoable = false;
+        }
+
+        if(undoable) {
+            this.canvasChangeEdit = backup.getCanvasChangeEdit();
+            this.translationEdit = backup.getTranslationEdit();
+
+            BufferedImage maskImage = null;
+            if (layer.hasMask()) {
+                maskImage = layer.getMask().getImage();
+            }
+            if(layer instanceof ImageLayer) {
+                ImageLayer imageLayer = (ImageLayer) layer;
+                BufferedImage layerImage = imageLayer.getImage();
+                imageEdit = backup.createImageEdit(layerImage, maskImage);
+            } else if(layer.hasMask()){
+                // if we have a text layer with a mask, we can still
+                // create an ImageEdit for the mask
+                imageEdit = backup.createImageEditForMaskOnly(maskImage);
+            }
         }
 
         if (comp.hasSelection()) {
@@ -161,8 +176,10 @@ public class MultiLayerEdit extends PixelitorEdit {
 
     private void updateGUI() {
         comp.imageChanged(FULL);
-        layer.updateIconImage();
-        if (imageEdit instanceof ImageAndMaskEdit) {
+        if(layer instanceof ImageLayer) {
+            ((ImageLayer)layer).updateIconImage();
+        }
+        if (layer.hasMask()) {
             layer.getMask().updateIconImage();
         }
         History.notifyMenus(this);

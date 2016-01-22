@@ -17,9 +17,9 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.ImageComponent;
-import pixelitor.ImageComponents;
 import pixelitor.filters.Filter;
+import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
 import pixelitor.layers.ImageLayer;
 import pixelitor.utils.Messages;
 

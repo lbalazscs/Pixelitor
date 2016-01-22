@@ -20,18 +20,18 @@ package pixelitor.tools;
 import com.bric.util.JVM;
 import pixelitor.Build;
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
-import pixelitor.PixelitorWindow;
 import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.ImageComponent;
+import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.GridBagHelper;
+import pixelitor.gui.utils.OKDialog;
 import pixelitor.tools.brushes.Brush;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.CloneBrush;
 import pixelitor.tools.brushes.CopyBrushType;
-import pixelitor.utils.GridBagHelper;
 import pixelitor.utils.Messages;
-import pixelitor.utils.OKDialog;
 import pixelitor.utils.ScalingMirror;
 import pixelitor.utils.VisibleForTesting;
 
@@ -43,10 +43,10 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
+import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 import static pixelitor.tools.CloneTool.State.CLONING;
 import static pixelitor.tools.CloneTool.State.NO_SOURCE;
 import static pixelitor.tools.CloneTool.State.SOURCE_DEFINED_FIRST_STROKE;
-import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
 
 /**
  * The Clone Stamp tool

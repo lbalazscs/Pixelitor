@@ -17,9 +17,8 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.utils.DefaultButton;
-import pixelitor.utils.GUIUtils;
-import pixelitor.utils.OKDialog;
+import pixelitor.gui.utils.GUIUtils;
+import pixelitor.gui.utils.OKDialog;
 
 import javax.swing.*;
 import java.awt.Rectangle;

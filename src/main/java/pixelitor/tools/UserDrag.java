@@ -17,7 +17,7 @@
 
 package pixelitor.tools;
 
-import pixelitor.ImageComponent;
+import pixelitor.gui.ImageComponent;
 
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;

@@ -17,8 +17,8 @@
 
 package pixelitor.menus;
 
-import pixelitor.ImageComponent;
-import pixelitor.ImageComponents;
+import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.TextLayer;

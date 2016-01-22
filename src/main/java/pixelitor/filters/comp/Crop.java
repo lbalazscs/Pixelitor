@@ -20,7 +20,7 @@ package pixelitor.filters.comp;
 import pixelitor.AppLogic;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
+import pixelitor.gui.ImageComponent;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.history.MultiLayerBackup;

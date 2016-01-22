@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,9 +21,9 @@ import org.jdesktop.swingx.painter.effects.GlowPathEffect;
 import org.jdesktop.swingx.painter.effects.InnerGlowPathEffect;
 import org.jdesktop.swingx.painter.effects.NeonBorderEffect;
 import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
+import pixelitor.filters.gui.DefaultButton;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.Resettable;
-import pixelitor.utils.DefaultButton;
 
 import javax.swing.*;
 import java.awt.BorderLayout;

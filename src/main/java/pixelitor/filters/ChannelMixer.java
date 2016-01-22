@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@ import java.awt.image.DataBufferInt;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 
-import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
+import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
 public class ChannelMixer extends FilterWithParametrizedGUI {
     private static final int MIN_PERCENT = -200;
@@ -337,5 +337,10 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
         String name = "<html><b><font color=" + first + ">" + first
                 + "</font></b> from <b><font color=" + second + ">" + second + "</font></b> (%):</html>";
         return new RangeParam(name, MIN_PERCENT, defaultValue, MAX_PERCENT, AddDefaultButton.YES, NONE);
+    }
+
+    @Override
+    public boolean supportsGray() {
+        return false;
     }
 }

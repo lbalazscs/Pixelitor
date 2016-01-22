@@ -17,8 +17,8 @@
 
 package pixelitor.menus.view;
 
-import pixelitor.ImageComponent;
-import pixelitor.ImageComponents;
+import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
 import pixelitor.menus.OpenImageEnabledRadioButtonMenuItem;
 
 /**

@@ -17,7 +17,7 @@
 
 package pixelitor.tools;
 
-import pixelitor.ImageComponent;
+import pixelitor.gui.ImageComponent;
 import pixelitor.tools.shapestool.ShapesTool;
 
 import java.awt.event.MouseEvent;

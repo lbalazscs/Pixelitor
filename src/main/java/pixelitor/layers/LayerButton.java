@@ -17,7 +17,7 @@
 
 package pixelitor.layers;
 
-import pixelitor.PixelitorWindow;
+import pixelitor.gui.PixelitorWindow;
 import pixelitor.history.AddToHistory;
 import pixelitor.utils.IconUtils;
 import pixelitor.utils.ImageUtils;

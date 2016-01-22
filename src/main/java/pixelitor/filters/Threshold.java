@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import pixelitor.utils.ColorUtils;
 
 import java.awt.image.BufferedImage;
 
-import static pixelitor.utils.SliderSpinner.TextPosition.BORDER;
+import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 
 public class Threshold extends FilterWithParametrizedGUI {
     private static final int CRIT_LUMINOSITY = 1;

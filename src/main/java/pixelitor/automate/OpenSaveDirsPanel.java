@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,16 +17,16 @@
 
 package pixelitor.automate;
 
+import pixelitor.gui.utils.BrowseFilesSupport;
+import pixelitor.gui.utils.GridBagHelper;
+import pixelitor.gui.utils.ValidatedForm;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.OutputFormat;
-import pixelitor.utils.BrowseFilesSupport;
-import pixelitor.utils.GridBagHelper;
-import pixelitor.utils.ValidatedForm;
 
 import java.awt.GridBagLayout;
 import java.io.File;
 
-import static pixelitor.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
+import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
 
 /**
  * A panel for selecting the opening and the saving directory

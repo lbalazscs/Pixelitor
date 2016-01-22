@@ -18,8 +18,8 @@
 package pixelitor.tools;
 
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
-import pixelitor.ImageComponents;
+import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
 import pixelitor.layers.ImageLayer;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;

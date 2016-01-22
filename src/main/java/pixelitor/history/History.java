@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,13 +20,12 @@ package pixelitor.history;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
-import pixelitor.ImageComponents;
+import pixelitor.gui.ImageComponents;
 import pixelitor.menus.MenuAction;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Messages;
 import pixelitor.utils.VisibleForTesting;
-import pixelitor.utils.test.DebugEventQueue;
-import pixelitor.utils.test.HistoryEvent;
+import pixelitor.utils.test.Events;
 
 import javax.swing.*;
 import javax.swing.event.UndoableEditListener;
@@ -43,7 +42,7 @@ public class History {
     private static final UndoableEditSupport undoableEditSupport = new UndoableEditSupport();
     private static final PixelitorUndoManager undoManager = new PixelitorUndoManager();
     private static int numUndoneEdits = 0;
-    private static boolean suspended = false;
+    private static boolean ignoreEdits = false;
 
     static {
         setUndoLevels(AppPreferences.loadUndoLevels());
@@ -81,7 +80,7 @@ public class History {
 
     public static void addEdit(PixelitorEdit edit) {
         assert edit != null;
-        if (suspended) {
+        if (ignoreEdits) {
             return;
         }
 
@@ -95,7 +94,7 @@ public class History {
         undoableEditSupport.postEdit(edit);
 
         if (Build.CURRENT != Build.FINAL) {
-            DebugEventQueue.post(new HistoryEvent(edit));
+            Events.postAddToHistoryEvent(edit);
             ConsistencyChecks.checkAll(false);
         }
     }
@@ -110,7 +109,7 @@ public class History {
 
     public static void undo() {
         if (Build.CURRENT != Build.FINAL) {
-            DebugEventQueue.post(HistoryEvent.createUndoEvent());
+            Events.postUndoEvent();
         }
 
         try {
@@ -123,7 +122,7 @@ public class History {
 
     public static void redo() {
         if (Build.CURRENT != Build.FINAL) {
-            DebugEventQueue.post(HistoryEvent.createRedoEvent());
+            Events.postRedoEvent();
         }
 
         try {
@@ -261,7 +260,7 @@ public class History {
         }
     }
 
-    public static void setSuspended(boolean suspended) {
-        History.suspended = suspended;
+    public static void setIgnoreEdits(boolean ignoreEdits) {
+        History.ignoreEdits = ignoreEdits;
     }
 }

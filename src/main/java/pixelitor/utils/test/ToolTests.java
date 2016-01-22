@@ -18,9 +18,9 @@
 package pixelitor.utils.test;
 
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
-import pixelitor.ImageComponents;
 import pixelitor.NewImage;
+import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.GradientTool;
 import pixelitor.tools.GradientType;

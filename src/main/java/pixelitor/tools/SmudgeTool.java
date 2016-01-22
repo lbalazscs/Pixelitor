@@ -18,14 +18,14 @@
 package pixelitor.tools;
 
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
 import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.ImageComponent;
+import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.tools.brushes.Brush;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.CopyBrushType;
 import pixelitor.tools.brushes.SmudgeBrush;
-import pixelitor.utils.SliderSpinner;
 
 import javax.swing.*;
 import java.awt.Cursor;
@@ -33,7 +33,7 @@ import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
-import static pixelitor.utils.SliderSpinner.TextPosition.WEST;
+import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 
 /**
  * The Smudge Tool

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,11 +19,11 @@ package pixelitor.menus.file;
 
 import org.jdesktop.swingx.VerticalLayout;
 import pixelitor.Composition;
-import pixelitor.ImageComponents;
+import pixelitor.gui.ImageComponents;
+import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.LayerAnimationFrames;
 import pixelitor.utils.Messages;
-import pixelitor.utils.OKCancelDialog;
 
 import javax.swing.*;
 import java.awt.FlowLayout;

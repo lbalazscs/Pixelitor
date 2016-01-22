@@ -17,7 +17,7 @@
 
 package pixelitor.tools;
 
-import pixelitor.ImageComponent;
+import pixelitor.gui.ImageComponent;
 
 import javax.swing.*;
 import java.awt.Cursor;

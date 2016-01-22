@@ -18,7 +18,7 @@
 package pixelitor.history;
 
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
+import pixelitor.gui.ImageComponent;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;

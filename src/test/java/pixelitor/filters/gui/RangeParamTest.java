@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
-import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
+import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
 public class RangeParamTest {
     @Test

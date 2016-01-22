@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.filters.animation;
 
-import pixelitor.ImageComponents;
 import pixelitor.automate.Wizard;
 import pixelitor.automate.WizardPage;
 import pixelitor.filters.FilterAction;
@@ -25,6 +24,7 @@ import pixelitor.filters.FilterUtils;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.ParametrizedAdjustPanel;
+import pixelitor.gui.ImageComponents;
 import pixelitor.layers.ImageLayer;
 
 import javax.swing.*;

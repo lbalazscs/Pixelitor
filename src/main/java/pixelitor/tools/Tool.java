@@ -19,9 +19,9 @@ package pixelitor.tools;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.GlobalKeyboardWatch;
-import pixelitor.ImageComponent;
-import pixelitor.ImageComponents;
+import pixelitor.gui.GlobalKeyboardWatch;
+import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
 import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.history.PartialImageEdit;

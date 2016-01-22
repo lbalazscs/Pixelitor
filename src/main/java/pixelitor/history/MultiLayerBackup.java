@@ -1,3 +1,20 @@
+/*
+ * Copyright 2016 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.history;
 
 import pixelitor.Composition;
@@ -16,7 +33,7 @@ import java.awt.image.BufferedImage;
 public class MultiLayerBackup {
     private final Composition comp;
     private final String editName;
-    private ImageLayer layer;
+    private Layer layer;
     private CanvasChangeEdit canvasChangeEdit;
     private TranslationEdit translationEdit;
     private Shape backupShape;
@@ -42,7 +59,7 @@ public class MultiLayerBackup {
 
         // save translation
         ContentLayer contentLayer = comp.getAnyContentLayer();
-        if (contentLayer != null) { // could be null, if there are only text layers
+        if (contentLayer != null) { // could be null, if there are only adj layers - TODO allowed?
             translationEdit = new TranslationEdit(comp, contentLayer, true);
         }
 
@@ -54,10 +71,12 @@ public class MultiLayerBackup {
         }
 
         // save backup images
+        boolean imageLayerFound = false;
         int nrLayers = comp.getNrLayers();
         for (int i = 0; i < nrLayers; i++) {
             Layer compLayer = comp.getLayer(i);
             if (compLayer instanceof ImageLayer) {
+                imageLayerFound = true;
                 ImageLayer imageLayer = (ImageLayer) compLayer;
                 this.layer = imageLayer;
                 backupImage = imageLayer.getImage();
@@ -67,6 +86,20 @@ public class MultiLayerBackup {
                 break;
             }
         }
+        if (!imageLayerFound) {
+            if (contentLayer != null) {
+                layer = contentLayer;
+                if (contentLayer.hasMask()) {
+                    backupMaskImage = contentLayer.getMask().getImage();
+                }
+            } else {
+                // we must have a single adj layer
+                // TODO why is this allowed??
+                layer = comp.getLayer(0);
+                backupMaskImage = layer.getMask().getImage();
+            }
+        }
+        assert layer != null;
     }
 
     public CanvasChangeEdit getCanvasChangeEdit() {
@@ -81,9 +114,14 @@ public class MultiLayerBackup {
         return backupShape != null;
     }
 
-    public ImageEdit createImageEdit(BufferedImage currentImage) {
+    public ImageEdit createImageEdit(BufferedImage currentImage, BufferedImage currentMaskImage) {
         assert backupImage != null;
-        if(currentImage == backupImage) {
+        assert layer instanceof ImageLayer;
+
+        ImageLayer imageLayer = (ImageLayer) layer;
+
+        if (currentImage == backupImage && backupMaskImage == currentMaskImage) {
+
             // for enlarge canvas with big layer it can happen that
             // the image does not need to be changed at all
             return null;
@@ -91,12 +129,22 @@ public class MultiLayerBackup {
 
         ImageEdit edit;
         if (backupMaskImage != null) {
-            edit = new ImageAndMaskEdit(comp, editName, layer,
+            edit = new ImageAndMaskEdit(comp, editName, imageLayer,
                     backupImage, backupMaskImage, false);
         } else {
-            edit = new ImageEdit(comp, editName, layer,
+            edit = new ImageEdit(comp, editName, imageLayer,
                     backupImage, IgnoreSelection.YES, false);
         }
+        edit.setEmbedded(true);
+        return edit;
+    }
+
+    public ImageEdit createImageEditForMaskOnly(BufferedImage currentMaskImage) {
+        if (backupMaskImage == currentMaskImage) {
+            return null;
+        }
+        ImageEdit edit = new ImageEdit(comp, editName, layer.getMask(),
+                backupMaskImage, IgnoreSelection.YES, false);
         edit.setEmbedded(true);
         return edit;
     }

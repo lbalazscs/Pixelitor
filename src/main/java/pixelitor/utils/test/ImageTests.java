@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,9 +23,7 @@ import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.FgBgColors;
 import pixelitor.FillType;
-import pixelitor.ImageComponents;
 import pixelitor.NewImage;
-import pixelitor.PixelitorWindow;
 import pixelitor.automate.Automate;
 import pixelitor.automate.SingleDirChooserPanel;
 import pixelitor.filters.ColorWheel;
@@ -36,6 +34,8 @@ import pixelitor.filters.jhlabsproxies.JHGaussianBlur;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.TextFilter;
 import pixelitor.filters.painters.TextSettings;
+import pixelitor.gui.ImageComponents;
+import pixelitor.gui.PixelitorWindow;
 import pixelitor.history.AddToHistory;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.OutputFormat;

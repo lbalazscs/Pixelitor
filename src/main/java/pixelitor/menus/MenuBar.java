@@ -22,12 +22,8 @@ import com.jhlabs.composite.MultiplyComposite;
 import pixelitor.AppLogic;
 import pixelitor.Build;
 import pixelitor.Composition;
-import pixelitor.Desktop;
 import pixelitor.FgBgColors;
-import pixelitor.ImageComponent;
-import pixelitor.ImageComponents;
 import pixelitor.NewImage;
-import pixelitor.PixelitorWindow;
 import pixelitor.TipsOfTheDay;
 import pixelitor.automate.AutoPaint;
 import pixelitor.automate.BatchFilterWizard;
@@ -41,10 +37,15 @@ import pixelitor.filters.convolve.Convolve;
 import pixelitor.filters.gui.ResizePanel;
 import pixelitor.filters.jhlabsproxies.*;
 import pixelitor.filters.levels.Levels;
-import pixelitor.filters.levels.Levels2;
 import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.filters.lookup.Luminosity;
 import pixelitor.filters.painters.TextFilter;
+import pixelitor.gui.Desktop;
+import pixelitor.gui.HistogramsPanel;
+import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
+import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.PerformanceTestingDialog;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.io.FileChoosers;
@@ -80,13 +81,11 @@ import pixelitor.menus.view.ZoomMenu;
 import pixelitor.tools.brushes.CopyBrush;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.FilterCreator;
-import pixelitor.utils.HistogramsPanel;
 import pixelitor.utils.Messages;
-import pixelitor.utils.PerformanceTestingDialog;
 import pixelitor.utils.Tests3x3;
 import pixelitor.utils.UpdateGUI;
 import pixelitor.utils.Utils;
-import pixelitor.utils.test.DebugEventQueue;
+import pixelitor.utils.test.Events;
 import pixelitor.utils.test.ImageTests;
 import pixelitor.utils.test.OpTests;
 import pixelitor.utils.test.RandomGUITest;
@@ -686,7 +685,7 @@ public class MenuBar extends JMenuBar {
         colorsMenu.buildFA("Hue/Saturation", HueSat::new).withKey(CTRL_U).add();
         colorsMenu.buildFA("Colorize", Colorize::new).add();
         colorsMenu.buildFA("Levels", Levels::new).withKey(CTRL_L).add();
-        colorsMenu.buildFA("Levels 2", Levels2::new).add();
+//        colorsMenu.buildFA("Levels 2", Levels2::new).add();
         colorsMenu.buildFA("Brightness/Contrast", Brightness::new).add();
         colorsMenu.buildFA("Solarize", Solarize::new).add();
         colorsMenu.buildFA("Sepia", Sepia::new).add();
@@ -1058,7 +1057,7 @@ public class MenuBar extends JMenuBar {
         developMenu.addAction(new MenuAction("Dump Event Queue") {
             @Override
             public void onClick() {
-                DebugEventQueue.dump();
+                Events.dump();
             }
         });
 
@@ -1337,7 +1336,6 @@ public class MenuBar extends JMenuBar {
         sub.addFA("Droste", Droste::new);
         sub.addFA("Sphere3D", Sphere3D::new);
         sub.addFA("Grid", RenderGrid::new);
-        sub.addFA("Lightning", Lightning::new);
         sub.addFA("Empty Polar", EmptyPolar::new);
         sub.addFA("Checker Pattern", JHCheckerFilter::new);
 

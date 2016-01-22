@@ -1,9 +1,31 @@
+/*
+ * Copyright 2016 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.automate;
 
 import net.jafama.FastMath;
 import pixelitor.Composition;
 import pixelitor.FgBgColors;
-import pixelitor.ImageComponents;
+import pixelitor.MessageHandler;
+import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
+import pixelitor.gui.utils.GridBagHelper;
+import pixelitor.gui.utils.IntTextField;
+import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.layers.ImageLayer;
@@ -12,17 +34,12 @@ import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.Tool;
 import pixelitor.tools.UserDrag;
 import pixelitor.tools.shapestool.ShapesTool;
-import pixelitor.utils.GridBagHelper;
-import pixelitor.utils.IntTextField;
 import pixelitor.utils.Messages;
-import pixelitor.utils.OKCancelDialog;
-import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.GridBagLayout;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Random;
 
 import static pixelitor.tools.Tools.BRUSH;
@@ -51,76 +68,47 @@ public class AutoPaint {
     }
 
     private static void paintStrokes(Settings settings) {
-        // So far we are on the EDT
         assert SwingUtilities.isEventDispatchThread();
 
+        String msg = String.format("Auto Paint with %s Tool: ", settings.getTool());
+
+        MessageHandler messageHandler = Messages.getMessageHandler();
+        messageHandler.startProgress(msg, settings.getNumStrokes());
+
         Composition comp = ImageComponents.getActiveComp().orElseThrow(() -> new RuntimeException("no active composition"));
-        ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("Auto Paint", "Stop");
 
         ImageLayer imageLayer = comp.getActiveMaskOrImageLayer();
         BufferedImage backupImage = imageLayer.getImageOrSubImageIfSelected(true, true);
-        History.setSuspended(true);
+        History.setIgnoreEdits(true);
 
-        Runnable notEDTThreadTask = () -> {
-            try {
-                runStrokesOutsideEDT(settings, comp, progressMonitor);
-            } catch (InterruptedException e) {
-                Messages.showException(e);
-            } catch (InvocationTargetException e) {
-                Throwable cause = e.getCause();
-                Messages.showException(cause);
-            } finally {
-                Runnable edtFinish = () -> {
-                    History.setSuspended(false);
-                    ImageEdit edit = new ImageEdit(comp, "Auto Paint",
-                            imageLayer, backupImage, IgnoreSelection.NO, false);
-                    History.addEdit(edit);
-                };
-                try {
-                    SwingUtilities.invokeAndWait(edtFinish);
-                } catch (InterruptedException | InvocationTargetException e) {
-                    Messages.showException(e);
-                }
-            }
-        };
-
-        Thread thread = new Thread(notEDTThreadTask);
-        // start the non-EDT thread but do not wait until it finishes
-        // because this thread needs to put tasks on the EDT
-        thread.start();
+        try {
+            runStrokes(settings, comp, messageHandler);
+        } finally {
+            History.setIgnoreEdits(false);
+            ImageEdit edit = new ImageEdit(comp, "Auto Paint",
+                    imageLayer, backupImage, IgnoreSelection.NO, false);
+            History.addEdit(edit);
+            messageHandler.stopProgress();
+            messageHandler.showStatusMessage(msg + "finished.");
+        }
     }
 
-    private static void runStrokesOutsideEDT(Settings settings, Composition comp, ProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
-        assert !SwingUtilities.isEventDispatchThread();
-
+    private static void runStrokes(Settings settings, Composition comp, MessageHandler messageHandler) {
         Random random = new Random();
         int canvasWidth = comp.getCanvasWidth();
         int canvasHeight = comp.getCanvasHeight();
+        ImageComponent ic = comp.getIC();
 
         int numStrokes = settings.getNumStrokes();
         for (int i = 0; i < numStrokes; i++) {
-            int progressPercentage = (int) ((float) i * 100 / numStrokes);
-            progressMonitor.setProgress(progressPercentage);
-            progressMonitor.setNote(progressPercentage + "%");
+            messageHandler.updateProgress(i);
 
-//                    Utils.sleep(1, TimeUnit.SECONDS);
-
-            Runnable edtRunnable = () -> paintSingleStroke(comp, settings, canvasWidth, canvasHeight, random);
-
-            SwingUtilities.invokeAndWait(edtRunnable);
-
-            comp.repaint();
-            if (progressMonitor.isCanceled()) {
-                break;
-            }
+            paintSingleStroke(comp, settings, canvasWidth, canvasHeight, random);
+            ic.paintImmediately(ic.getBounds());
         }
-        progressMonitor.close();
     }
 
     private static void paintSingleStroke(Composition comp, Settings settings, int canvasWidth, int canvasHeight, Random rand) {
-        // called on the EDT
-        assert SwingUtilities.isEventDispatchThread();
-
         if (settings.withRandomColors()) {
             FgBgColors.randomizeColors();
         }

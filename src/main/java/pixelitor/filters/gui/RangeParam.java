@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.filters.gui;
 
 import com.jhlabs.image.ImageMath;
-import pixelitor.utils.SliderSpinner;
+import pixelitor.gui.utils.SliderSpinner;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -28,8 +28,8 @@ import java.awt.Rectangle;
 import java.util.Random;
 
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
-import static pixelitor.utils.SliderSpinner.TextPosition.BORDER;
-import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
+import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
+import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
 /**
  * Represents an integer value with a minimum, a maximum and a default.

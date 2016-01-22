@@ -21,11 +21,13 @@ import pixelitor.AppLogic;
 import pixelitor.Build;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
-import pixelitor.ImageComponents;
-import pixelitor.PixelitorWindow;
 import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterSetting;
+import pixelitor.gui.BlendingModePanel;
+import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
+import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.SliderSpinner;
 
 import javax.swing.*;
 import javax.swing.event.ListDataEvent;
@@ -34,7 +36,6 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
-import java.awt.Desktop;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -53,8 +54,6 @@ import java.awt.image.DataBuffer;
 import java.awt.image.DirectColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
-import java.io.IOException;
-import java.net.URI;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
@@ -120,17 +119,6 @@ public final class Utils {
     public static void setShowOriginal(boolean b) {
         Composition comp = ImageComponents.getActiveComp().get();
         comp.setShowOriginal(b);
-    }
-
-    public static void openURI(URI uri) {
-        if (Desktop.isDesktopSupported()) {
-            Desktop desktop = Desktop.getDesktop();
-            try {
-                desktop.browse(uri);
-            } catch (IOException e) {
-                Messages.showException(e);
-            }
-        }
     }
 
     /**

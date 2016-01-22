@@ -18,12 +18,12 @@
 package pixelitor.filters.animation;
 
 import pixelitor.ChangeReason;
-import pixelitor.ImageComponent;
-import pixelitor.ImageComponents;
-import pixelitor.PixelitorWindow;
 import pixelitor.filters.Filter;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.ParamSetState;
+import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
+import pixelitor.gui.PixelitorWindow;
 import pixelitor.layers.ImageLayer;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;

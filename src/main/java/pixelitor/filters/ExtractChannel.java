@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -149,5 +149,10 @@ public class ExtractChannel extends FilterWithParametrizedGUI {
         BufferedImageOp filterOp = new FastLookupOp((ShortLookupTable) lookupTable);
         filterOp.filter(src, dest);
         return dest;
+    }
+
+    @Override
+    public boolean supportsGray() {
+        return false;
     }
 }

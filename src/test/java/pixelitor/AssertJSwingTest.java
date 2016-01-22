@@ -41,6 +41,9 @@ import org.fest.util.Files;
 import pixelitor.automate.AutoPaint;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.painters.EffectsPanel;
+import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
+import pixelitor.gui.PixelitorWindow;
 import pixelitor.io.FileChoosers;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.LayerButton;
@@ -55,6 +58,8 @@ import pixelitor.tools.ShapesAction;
 import pixelitor.tools.Symmetry;
 import pixelitor.tools.Tool;
 import pixelitor.utils.Utils;
+import pixelitor.utils.test.Events;
+import pixelitor.utils.test.PixelitorEventListener;
 
 import javax.swing.*;
 import java.awt.Rectangle;
@@ -156,6 +161,8 @@ public class AssertJSwingTest {
                 .withArgs((new File(inputDir, "a.jpg")).getPath())
                 .start();
 
+        new PixelitorEventListener().register();
+
         window = WindowFinder.findFrame("frame0")
                 .withTimeout(15, SECONDS)
                 .using(robot);
@@ -165,7 +172,8 @@ public class AssertJSwingTest {
     /**
      * Test targets: "all" (default),
      * "tools" (includes "Selection" menus),
-     * "file",
+     * "file", (the "File" menu with the exception of auto paint)
+     * "autopaint",
      * "edit",
      * "filters" ("Colors" and "Filters" menus),
      * "layers" ("Layers" menus and layer buttons),
@@ -176,7 +184,7 @@ public class AssertJSwingTest {
         setupRobotSpeed();
         String target = System.getProperty("test.target");
         if (target == null) {
-            target = "all"; // default target
+            target = "autopaint"; // default target
         }
         System.out.printf("AssertJSwingTest: target = '%s'%n", target);
         switch (target) {
@@ -188,6 +196,9 @@ public class AssertJSwingTest {
                 break;
             case "file":
                 testFileMenu();
+                break;
+            case "autopaint":
+                testAutoPaint();
                 break;
             case "edit":
                 testEditMenu();
@@ -214,6 +225,7 @@ public class AssertJSwingTest {
         testDevelopMenu();
         testTools();
         testFileMenu();
+        testAutoPaint();
         testEditMenu();
         testFilters();
         testViewMenu();
@@ -452,7 +464,6 @@ public class AssertJSwingTest {
         testBatchResize();
         testBatchFilter();
         testExportLayerToPNG();
-        testAutoPaint();
         testScreenCapture();
         testCloseAll();
     }
@@ -621,6 +632,7 @@ public class AssertJSwingTest {
     private void testAutoPaint() {
         runWithSelectionAndTranslation(() -> {
             for (Tool tool : AutoPaint.ALLOWED_TOOLS) {
+                Events.postAssertJEvent("auto paint with " + tool);
                 testAutoPaintWithTool(tool);
             }
         });
@@ -1552,21 +1564,24 @@ public class AssertJSwingTest {
     }
 
     private void runWithSelectionAndTranslation(Runnable task) {
-        keyboardDeselect();
-
         // simple run
+        Events.postAssertJEvent("simple run");
+        keyboardDeselect();
         task.run();
 
         // run with selection
+        Events.postAssertJEvent("selection run");
         addSelection();
         task.run();
         keyboardDeselect();
 
         // run with translation
+        Events.postAssertJEvent("translation run");
         addTranslation();
         task.run();
 
         // run with both translation and selection
+        Events.postAssertJEvent("selection+translation run");
         addSelection();
         task.run();
         keyboardUndo(); // undo selection

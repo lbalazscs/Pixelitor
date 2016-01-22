@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,9 +26,9 @@ import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ColorSelector;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.utils.GridBagHelper;
+import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.layers.TextLayer;
-import pixelitor.utils.GridBagHelper;
-import pixelitor.utils.SliderSpinner;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -47,7 +47,7 @@ import java.util.Map;
 
 import static java.awt.Color.BLACK;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
-import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
+import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
 /**
  * Customization panel for the text filters and text layers

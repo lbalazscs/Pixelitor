@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.filters.painters;
 
 import com.bric.swing.ColorPicker;
 import com.bric.swing.ColorSwatch;
-import pixelitor.PixelitorWindow;
+import pixelitor.gui.PixelitorWindow;
 
 import java.awt.Color;
 import java.awt.event.MouseAdapter;

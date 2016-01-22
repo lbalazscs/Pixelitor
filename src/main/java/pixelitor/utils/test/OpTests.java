@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,18 +20,17 @@ package pixelitor.utils.test;
 import pixelitor.Build;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
-import pixelitor.ImageComponents;
-import pixelitor.PixelitorWindow;
 import pixelitor.automate.SingleDirChooserPanel;
 import pixelitor.filters.Canny;
 import pixelitor.filters.Fade;
 import pixelitor.filters.Filter;
 import pixelitor.filters.FilterUtils;
 import pixelitor.filters.FilterWithParametrizedGUI;
-import pixelitor.filters.Lightning;
 import pixelitor.filters.RandomFilter;
 import pixelitor.filters.comp.Resize;
 import pixelitor.filters.gui.ParametrizedAdjustPanel;
+import pixelitor.gui.ImageComponents;
+import pixelitor.gui.PixelitorWindow;
 import pixelitor.history.History;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.OutputFormat;
@@ -197,7 +196,7 @@ public class OpTests {
         Build.CURRENT.setPerformanceTest(true);
 
         Filter[] filters = FilterUtils.getFiltersShuffled(
-                f -> (!(f instanceof Fade || f instanceof Canny || f instanceof Lightning))
+                f -> (!(f instanceof Fade || f instanceof Canny))
                         && (f instanceof FilterWithParametrizedGUI));
 
         Map<String, Double> results = new HashMap<>();

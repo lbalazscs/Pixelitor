@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,6 +28,7 @@ public enum Build {
         private boolean randomGUITest = false;
         private boolean performanceTest = false;
 
+        @Override
         public boolean isRandomGUITest() {
             return randomGUITest;
         }
@@ -49,6 +50,7 @@ public enum Build {
             return performanceTest;
         }
     }, FINAL {
+        @Override
         public boolean isRandomGUITest() {
             return false;
         }

@@ -17,6 +17,8 @@
 
 package pixelitor;
 
+import pixelitor.gui.ImageComponent;
+
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.io.Serializable;

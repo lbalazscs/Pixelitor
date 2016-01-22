@@ -22,8 +22,9 @@ import com.jhlabs.composite.ScreenComposite;
 import com.jhlabs.image.BoxBlurFilter;
 import com.jhlabs.image.EmbossFilter;
 import org.jdesktop.swingx.graphics.BlendComposite;
-import pixelitor.ImageComponents;
 import pixelitor.filters.Invert;
+import pixelitor.gui.ImageComponents;
+import pixelitor.gui.utils.Dialogs;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.utils.debug.BufferedImageNode;
 

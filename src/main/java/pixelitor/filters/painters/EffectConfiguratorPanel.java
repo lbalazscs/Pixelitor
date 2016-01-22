@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,14 +20,14 @@ package pixelitor.filters.painters;
 import com.bric.swing.ColorPicker;
 import com.bric.swing.ColorSwatch;
 import org.jdesktop.swingx.painter.effects.AbstractAreaEffect;
-import pixelitor.PixelitorWindow;
 import pixelitor.filters.gui.AddDefaultButton;
+import pixelitor.filters.gui.DefaultButton;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.Resettable;
-import pixelitor.utils.DefaultButton;
-import pixelitor.utils.GridBagHelper;
-import pixelitor.utils.SliderSpinner;
+import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.GridBagHelper;
+import pixelitor.gui.utils.SliderSpinner;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -35,7 +35,7 @@ import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
+import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
 /**
  * An effect configurator panel...

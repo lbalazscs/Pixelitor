@@ -19,12 +19,12 @@ package pixelitor.tools;
 
 import pixelitor.Composition;
 import pixelitor.FillType;
-import pixelitor.ImageComponent;
 import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.ImageComponent;
+import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.layers.ImageLayer;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.SliderSpinner;
 
 import javax.swing.*;
 import java.awt.AlphaComposite;
@@ -43,7 +43,7 @@ import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.FillType.BACKGROUND;
 import static pixelitor.FillType.FOREGROUND;
 import static pixelitor.FillType.TRANSPARENT;
-import static pixelitor.utils.SliderSpinner.TextPosition.WEST;
+import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 
 /**
  * A paint bucket tool.

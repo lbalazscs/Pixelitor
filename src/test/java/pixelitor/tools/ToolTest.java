@@ -25,10 +25,10 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
 import pixelitor.MessageHandler;
 import pixelitor.TestHelper;
 import pixelitor.TestMessageHandler;
+import pixelitor.gui.ImageComponent;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;

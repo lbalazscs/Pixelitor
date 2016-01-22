@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,11 +19,14 @@ package pixelitor;
 
 import net.jafama.FastMath;
 import pixelitor.filters.Filter;
+import pixelitor.gui.GUIMessageHandler;
+import pixelitor.gui.ImageComponents;
+import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.OpenSaveManager;
 import pixelitor.layers.LayerMaskAddType;
 import pixelitor.tools.Tool;
 import pixelitor.utils.AppPreferences;
-import pixelitor.utils.Dialogs;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
@@ -95,6 +98,7 @@ public class Pixelitor {
         assert SwingUtilities.isEventDispatchThread();
 
         setLookAndFeel();
+        Messages.setMessageHandler(new GUIMessageHandler());
 
         PixelitorWindow pw = PixelitorWindow.getInstance();
         Dialogs.setMainWindowInitialized(true);
@@ -141,10 +145,12 @@ public class Pixelitor {
             return;
         }
 
+//        AddTextLayerAction.INSTANCE.actionPerformed(null);
+//        AddLayerMaskAction.INSTANCE.actionPerformed(null);
+
 //        startFilter(new FlowerOfLife());
 
 //        AutoPaint.showDialog();
-//        NewImage.addNewImage(FillType.WHITE, 100, 100, "Test");
 
 //        Tests3x3.addStandardImage(false);
 

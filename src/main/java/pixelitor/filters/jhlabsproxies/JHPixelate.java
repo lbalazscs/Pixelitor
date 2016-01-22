@@ -143,4 +143,9 @@ public class JHPixelate extends FilterWithParametrizedGUI {
         g.dispose();
         return bumpSource;
     }
+
+    @Override
+    public boolean supportsGray() {
+        return false;
+    }
 }

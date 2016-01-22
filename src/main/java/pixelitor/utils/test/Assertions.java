@@ -19,8 +19,8 @@ package pixelitor.utils.test;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
-import pixelitor.ImageComponents;
+import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;

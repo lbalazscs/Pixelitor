@@ -20,6 +20,10 @@ package pixelitor;
 import pixelitor.filters.Filter;
 import pixelitor.filters.FilterUtils;
 import pixelitor.filters.RepeatLast;
+import pixelitor.gui.HistogramsPanel;
+import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
+import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.CompoundEdit;
 import pixelitor.history.DeleteLayerEdit;
@@ -44,8 +48,6 @@ import pixelitor.selection.IgnoreSelection;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionInteraction;
 import pixelitor.selection.SelectionType;
-import pixelitor.utils.Dialogs;
-import pixelitor.utils.HistogramsPanel;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.UpdateGUI;
@@ -397,16 +399,6 @@ public class Composition implements Serializable {
 
     public int getNrLayers() {
         return layerList.size();
-    }
-
-    public int getNrImageLayers() {
-        int sum = 0;
-        for (Layer layer : layerList) {
-            if (layer instanceof ImageLayer) {
-                sum++;
-            }
-        }
-        return sum;
     }
 
     public void okPressedInDialog(String filterName) {
@@ -836,15 +828,18 @@ public class Composition implements Serializable {
             if (changed) {
                 ImageEdit imageEdit;
                 String editName = "Layer to Canvas Size";
+
+                boolean maskChanged = false;
+                BufferedImage maskBackupImage = null;
                 if (layer.hasMask()) {
                     LayerMask mask = layer.getMask();
-                    BufferedImage maskBackupImage = mask.getImage();
-                    boolean maskChanged = mask.cropToCanvasSize();
-                    assert maskChanged;
-
+                    maskBackupImage = mask.getImage();
+                    maskChanged = mask.cropToCanvasSize();
+                }
+                if(maskChanged) {
                     imageEdit = new ImageAndMaskEdit(this, editName, layer, backupImage, maskBackupImage, false);
                 } else {
-                    // no mask, a simple ImageEdit will do
+                    // no mask or no mask change, a simple ImageEdit will do
                     imageEdit = new ImageEdit(this, editName, layer, backupImage, IgnoreSelection.YES, false);
                     imageEdit.setFadeable(false);
                 }

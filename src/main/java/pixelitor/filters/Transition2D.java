@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import java.awt.image.BufferedImage;
 
 
 /**
- *
+ * 2D transitions
  */
 public class Transition2D extends FilterWithParametrizedGUI {
     private final RangeParam progress = new RangeParam("Progress (%)", 0, 0, 100);
@@ -87,5 +87,10 @@ public class Transition2D extends FilterWithParametrizedGUI {
         dest = filter.filter(src, dest);
 
         return dest;
+    }
+
+    @Override
+    public boolean supportsGray() {
+        return false;
     }
 }

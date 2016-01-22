@@ -18,8 +18,8 @@
 package pixelitor.tools;
 
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
-import pixelitor.ImageComponents;
+import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;

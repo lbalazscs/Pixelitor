@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -14,9 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.menus;
 
+import pixelitor.Composition;
+import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
 import pixelitor.history.History;
+import pixelitor.utils.ImageSwitchListener;
 
 import javax.swing.*;
 import javax.swing.event.UndoableEditEvent;
@@ -25,17 +30,42 @@ import javax.swing.event.UndoableEditListener;
 /**
  *
  */
-public class RepeatMenuItem extends JMenuItem implements UndoableEditListener {
+public class RepeatMenuItem extends JMenuItem implements UndoableEditListener, ImageSwitchListener {
     public RepeatMenuItem(Action a) {
         super(a);
         History.addUndoableEditListener(this);
+        ImageComponents.addImageSwitchListener(this);
         setEnabled(false);
     }
 
     @Override
     public void undoableEditHappened(UndoableEditEvent e) {
-        boolean b = History.canRepeatOperation();
-        setEnabled(b);
+        setEnabled(History.canRepeatOperation());
         getAction().putValue(Action.NAME, "Repeat " + History.getLastEditName());
+    }
+
+    @Override
+    public void noOpenImageAnymore() {
+        setEnabled(false);
+    }
+
+    @Override
+    public void newImageOpened(Composition comp) {
+        onNewComp(comp);
+    }
+
+    @Override
+    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
+        Composition comp = newIC.getComp();
+        onNewComp(comp);
+    }
+
+    private void onNewComp(Composition comp) {
+        if (comp.activeIsImageLayer()) {
+            setEnabled(History.canRepeatOperation());
+            getAction().putValue(Action.NAME, "Repeat " + History.getLastEditName());
+        } else {
+            setEnabled(false);
+        }
     }
 }

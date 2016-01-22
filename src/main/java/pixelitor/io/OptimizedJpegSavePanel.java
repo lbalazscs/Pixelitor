@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,11 +19,11 @@ package pixelitor.io;
 
 import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.utils.Dialogs;
+import pixelitor.gui.utils.OKCancelDialog;
+import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.tools.HandToolSupport;
-import pixelitor.utils.Dialogs;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.OKCancelDialog;
-import pixelitor.utils.SliderSpinner;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -34,7 +34,7 @@ import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
 
-import static pixelitor.utils.SliderSpinner.TextPosition.WEST;
+import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 
 /**
  * The panel shown in the "Export Optimized JPEG..." dialog

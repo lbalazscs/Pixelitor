@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,11 +17,15 @@
 
 package pixelitor.utils;
 
-import pixelitor.Desktop;
 import pixelitor.FgBgColors;
 import pixelitor.NewImage;
-import pixelitor.PixelitorWindow;
+import pixelitor.Pixelitor;
 import pixelitor.TipsOfTheDay;
+import pixelitor.gui.Desktop;
+import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.GridBagHelper;
+import pixelitor.gui.utils.IntTextField;
+import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.history.History;
 import pixelitor.io.FileChoosers;
 import pixelitor.menus.file.RecentFileInfo;
@@ -40,7 +44,7 @@ import java.io.File;
 import java.util.prefs.Preferences;
 
 /**
- * This class manages the saving and loading of application preferences
+ * Static methods for saving and loading application preferences
  */
 public final class AppPreferences {
     private static final String FRAME_X_KEY = "window_x";
@@ -54,7 +58,7 @@ public final class AppPreferences {
 
     private static final String RECENT_FILE_PREFS_KEY = "recent_file_";
 
-    private static final Preferences mainUserNode = Preferences.userNodeForPackage(PixelitorWindow.class);
+    private static final Preferences mainUserNode = Preferences.userNodeForPackage(Pixelitor.class);
     private static final Preferences recentFilesUserNode = Preferences.userNodeForPackage(RecentFilesMenu.class);
 
     private static final String FG_COLOR_KEY = "fg_color";
@@ -69,9 +73,6 @@ public final class AppPreferences {
 
     private static final String UNDO_LEVELS_KEY = "undo_levels";
 
-    /**
-     * Utility class with static methods
-     */
     private AppPreferences() {
     }
 

@@ -19,13 +19,13 @@ package pixelitor.tools;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
-import pixelitor.ImageComponents;
 import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
+import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.transform.TransformSupport;
 import pixelitor.utils.ImageSwitchListener;
-import pixelitor.utils.SliderSpinner;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -45,10 +45,10 @@ import java.awt.geom.Rectangle2D;
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.Color.BLACK;
 import static pixelitor.Composition.ImageChangeActions.FULL;
+import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 import static pixelitor.tools.CropToolState.INITIAL;
 import static pixelitor.tools.CropToolState.TRANSFORM;
 import static pixelitor.tools.CropToolState.USER_DRAG;
-import static pixelitor.utils.SliderSpinner.TextPosition.WEST;
 
 /**
  * The crop tool

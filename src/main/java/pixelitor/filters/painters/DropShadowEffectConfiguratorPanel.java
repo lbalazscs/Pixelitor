@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,14 +22,14 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.AngleSelectorComponent;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.utils.SliderSpinner;
+import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.utils.Utils;
 
 import javax.swing.event.ChangeListener;
 import java.awt.Color;
 import java.awt.geom.Point2D;
 
-import static pixelitor.utils.SliderSpinner.TextPosition.NONE;
+import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
 /**
  *

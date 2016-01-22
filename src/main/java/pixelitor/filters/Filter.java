@@ -19,9 +19,9 @@ package pixelitor.filters;
 
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
-import pixelitor.ImageComponent;
-import pixelitor.ImageComponents;
-import pixelitor.PixelitorWindow;
+import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
+import pixelitor.gui.PixelitorWindow;
 import pixelitor.layers.Layer;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
@@ -57,10 +57,10 @@ public abstract class Filter implements Serializable {
      * This code is executed with busy cursor
      */
     public void runit(Composition comp, ChangeReason changeReason) {
-        BufferedImage src = comp.getFilterSource();
         BufferedImage dest;
 
         try {
+            BufferedImage src = comp.getFilterSource();
             dest = executeForOneLayer(src);
         } catch (Exception e) {
             Layer activeLayer = comp.getActiveLayer();
@@ -104,7 +104,7 @@ public abstract class Filter implements Serializable {
         boolean convertFromGray = false;
         if (src.getType() == BufferedImage.TYPE_BYTE_GRAY) { // editing a mask
             if (!supportsGray()) {
-                System.out.println("Filter::executeForOneLayer: converting to RGB for " + getName());
+//                System.out.println("Filter::executeForOneLayer: converting to RGB for " + getName());
                 convertFromGray = true;
                 src = ImageUtils.toSysCompatibleImage(src);
             }
