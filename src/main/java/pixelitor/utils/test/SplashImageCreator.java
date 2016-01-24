@@ -23,17 +23,16 @@ import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.FgBgColors;
 import pixelitor.FillType;
+import pixelitor.MessageHandler;
 import pixelitor.NewImage;
-import pixelitor.automate.Automate;
 import pixelitor.automate.SingleDirChooserPanel;
 import pixelitor.filters.ColorWheel;
 import pixelitor.filters.ValueNoise;
-import pixelitor.filters.comp.CompAction;
 import pixelitor.filters.jhlabsproxies.JHDropShadow;
-import pixelitor.filters.jhlabsproxies.JHGaussianBlur;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.TextFilter;
 import pixelitor.filters.painters.TextSettings;
+import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.history.AddToHistory;
@@ -41,37 +40,27 @@ import pixelitor.io.FileChoosers;
 import pixelitor.io.OutputFormat;
 import pixelitor.layers.AddNewLayerAction;
 import pixelitor.layers.BlendingMode;
-import pixelitor.layers.DeleteActiveLayerAction;
 import pixelitor.layers.ImageLayer;
 import pixelitor.utils.Messages;
 import pixelitor.utils.UpdateGUI;
-import pixelitor.utils.Utils;
 
-import javax.swing.*;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 
-import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static pixelitor.ChangeReason.OP_WITHOUT_DIALOG;
-import static pixelitor.Composition.ImageChangeActions.FULL;
 
 /**
- *
+ * Static methods for creating the splash images
  */
-public class ImageTests {
+public class SplashImageCreator {
+    //    public static final String SPLASH_SCREEN_FONT = "Comic Sans MS";
+    private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
 
-//    public static final String SPLASH_SCREEN_FONT = "Comic Sans MS";
-private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
-
-    /**
-     * Utility class with static methods
-     */
-    private ImageTests() {
+    private SplashImageCreator() {
     }
 
     public static void saveManySplashImages() {
@@ -79,51 +68,34 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
         if (!okPressed) {
             return;
         }
+        int numCreatedImages = 32;
 
-        ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("Save Many Splash Images", "Stop");
+        MessageHandler messageHandler = Messages.getMessageHandler();
+        String msg = String.format("Save %d Splash Images: ", numCreatedImages);
+        messageHandler.startProgress(msg, numCreatedImages);
+        File lastSaveDir = FileChoosers.getLastSaveDir();
 
-        SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
-            @Override
-            public Void doInBackground() {
-                int nurOfSplashImages = 32;
+        for (int i = 0; i < numCreatedImages; i++) {
+            OutputFormat outputFormat = OutputFormat.getLastOutputFormat();
 
-                for (int i = 0; i < nurOfSplashImages; i++) {
-                    OutputFormat outputFormat = OutputFormat.getLastOutputFormat();
+            String fileName = String.format("splash%04d.%s", i, outputFormat.toString());
 
-                    String fileName = String.format("splash%04d.%s", i, outputFormat.toString());
+            messageHandler.updateProgress(i);
 
-                    progressMonitor.setProgress((int) ((float) i * 100 / nurOfSplashImages));
-                    progressMonitor.setNote("Creating " + fileName);
-                    if (progressMonitor.isCanceled()) {
-                        break;
-                    }
+            createSplashImage();
+            ImageComponent ic = ImageComponents.getActiveIC();
+            ic.paintImmediately(ic.getBounds());
 
-                    Runnable guiTask = () -> {
-                        createSplashImage();
+            File f = new File(lastSaveDir, fileName);
 
-                        File lastSaveDir = FileChoosers.getLastSaveDir();
-                        File f = new File(lastSaveDir, fileName);
+            Composition comp = ic.getComp();
+            outputFormat.saveComposition(comp, f, false);
 
-                        Composition comp = ImageComponents.getActiveComp().get();
-
-                        outputFormat.saveComposition(comp, f, false);
-
-                        ImageComponents.getActiveIC().close();
-                        ValueNoise.reseed();
-                    };
-                    try {
-                        EventQueue.invokeAndWait(guiTask);
-                        Thread.sleep(1000L);
-                    } catch (InterruptedException | InvocationTargetException e) {
-                        Messages.showException(e);
-                    }
-                } // end of for loop
-                progressMonitor.close();
-                return null;
-            } // end of doInBackground()
-        };
-        worker.execute();
-
+            ic.close();
+            ValueNoise.reseed();
+        }
+        messageHandler.stopProgress();
+        messageHandler.showStatusMessage(String.format("Finished saving splash images to %s", lastSaveDir));
     }
 
     public static void createSplashImage() {
@@ -167,22 +139,6 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
 
     }
 
-    public static void ioOverlayBlur() {
-        boolean selected = Automate.selectInputAndOutputDir(false, "Overlay Blur - select the input and output folders");
-        if (!selected) {
-            return;
-        }
-
-        CompAction ca = comp -> {
-            comp.addNewLayerFromComposite("Overlay Blur");
-            comp.getActiveLayer().setBlendingMode(BlendingMode.OVERLAY, UpdateGUI.YES, AddToHistory.YES, true);
-            JHGaussianBlur blur = new JHGaussianBlur();
-            blur.setRadius(5);
-            blur.execute(OP_WITHOUT_DIALOG);
-        };
-        Automate.processEachFile(ca, false, "Overlay Blur Progress");
-    }
-
     private static void addDropShadow() {
         JHDropShadow dropShadow = new JHDropShadow();
         dropShadow.setDistance(5);
@@ -194,37 +150,6 @@ private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
     private static void addNewLayer(String name) {
         AddNewLayerAction.INSTANCE.actionPerformed(new ActionEvent(PixelitorWindow.getInstance(), 0, name));
         ImageComponents.getActiveLayer().get().setName(name, AddToHistory.YES);
-    }
-
-    public static void testLayers() {
-        FgBgColors.setBG(WHITE);
-        FgBgColors.setFG(BLACK);
-        NewImage.addNewImage(FillType.TRANSPARENT, 400, 400, "Layer Test");
-        Composition comp = ImageComponents.getActiveComp().get();
-
-        addRasterizedTextLayer(comp, "this should be deleted", 0);
-
-        addRasterizedTextLayer(comp, "this should at the bottom", 100);
-        comp.moveActiveLayerToBottom();
-
-        comp.moveLayerSelectionUp();
-        comp.moveLayerSelectionUp();
-        DeleteActiveLayerAction.INSTANCE.actionPerformed(null);
-
-        addRasterizedTextLayer(comp, "this should at the top", -100);
-        addRasterizedTextLayer(comp, "this should be selected", 50);
-        comp.moveActiveLayerDown();
-
-//        ic.moveActiveLayerDown();
-//        ic.flattenImage();
-
-
-        // merge down
-        // HueSat
-        // ColorBalance
-        // Channel mixer
-
-        comp.imageChanged(FULL);
     }
 
     private static void addRasterizedTextLayer(Composition ic, String text, int translationY) {

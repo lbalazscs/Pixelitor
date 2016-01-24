@@ -184,7 +184,7 @@ public class AssertJSwingTest {
         setupRobotSpeed();
         String target = System.getProperty("test.target");
         if (target == null) {
-            target = "autopaint"; // default target
+            target = "all"; // default target
         }
         System.out.printf("AssertJSwingTest: target = '%s'%n", target);
         switch (target) {

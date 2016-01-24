@@ -23,10 +23,14 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
+/**
+ * The status bar of the app.
+ */
 public class StatusBar extends JPanel {
     private final JLabel statusBarLabel;
     private final JPanel leftPanel;
     private JProgressBar progressBar;
+    private boolean inProgress = false;
 
     public static StatusBar INSTANCE = new StatusBar();
 
@@ -44,7 +48,11 @@ public class StatusBar extends JPanel {
     }
 
     public void setMessage(String msg) {
-        statusBarLabel.setText(msg);
+        if (inProgress) {
+            // ignore any messages
+        } else {
+            statusBarLabel.setText(msg);
+        }
     }
 
     public void startProgress(String msg, int max) {
@@ -57,9 +65,11 @@ public class StatusBar extends JPanel {
         // because we want to stay on the EDT
         leftPanel.validate();
         leftPanel.paintImmediately(leftPanel.getBounds());
+        inProgress = true;
     }
 
     public void updateProgress(int value) {
+        assert inProgress;
         progressBar.setValue(value);
         leftPanel.paintImmediately(leftPanel.getBounds());
     }
@@ -68,6 +78,8 @@ public class StatusBar extends JPanel {
         leftPanel.remove(progressBar);
         leftPanel.revalidate();
         repaint();
+        progressBar = null;
+        inProgress = false;
     }
 
     public boolean isShown() {

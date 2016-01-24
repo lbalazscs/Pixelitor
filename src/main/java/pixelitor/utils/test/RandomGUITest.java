@@ -172,7 +172,7 @@ public class RandomGUITest {
         r.mouseMove(p.x, p.y);
 
         log("initial splash");
-        ImageTests.createSplashImage();
+        SplashImageCreator.createSplashImage();
         randomCopy(); // ensure an image is on the clipboard
 
         SwingWorker<Void, Void> worker = createOneRoundSwingWorker(r, true);

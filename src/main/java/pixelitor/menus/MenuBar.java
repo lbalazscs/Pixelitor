@@ -86,9 +86,9 @@ import pixelitor.utils.Tests3x3;
 import pixelitor.utils.UpdateGUI;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.Events;
-import pixelitor.utils.test.ImageTests;
 import pixelitor.utils.test.OpTests;
 import pixelitor.utils.test.RandomGUITest;
+import pixelitor.utils.test.SplashImageCreator;
 import pixelitor.utils.test.ToolTests;
 
 import javax.swing.*;
@@ -1282,24 +1282,10 @@ public class MenuBar extends JMenuBar {
 
         sub.addSeparator();
 
-        sub.buildAction(new MenuAction("Test Layer Operations") {
-            @Override
-            public void onClick() {
-                ImageTests.testLayers();
-            }
-        }).enableIf(ACTION_ENABLED).add();
-
         sub.buildAction(new MenuAction("Test Tools") {
             @Override
             public void onClick() {
                 ToolTests.testTools();
-            }
-        }).enableIf(ACTION_ENABLED).add();
-
-        sub.buildAction(new MenuAction("IO Overlay Blur...") {
-            @Override
-            public void onClick() {
-                ImageTests.ioOverlayBlur();
             }
         }).enableIf(ACTION_ENABLED).add();
 
@@ -1312,14 +1298,14 @@ public class MenuBar extends JMenuBar {
         sub.buildAction(new MenuAction("Create Splash Image") {
             @Override
             public void onClick() {
-                ImageTests.createSplashImage();
+                SplashImageCreator.createSplashImage();
             }
         }).enableIf(ACTION_ENABLED).add();
 
         sub.buildAction(new MenuAction("Save Many Splash Images...") {
             @Override
             public void onClick() {
-                ImageTests.saveManySplashImages();
+                SplashImageCreator.saveManySplashImages();
             }
         }).enableIf(ACTION_ENABLED).add();
 
