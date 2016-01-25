@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,8 @@ import java.awt.image.BufferedImage;
  * Makes pixels transparent proportionally to a channel value
  */
 public class ChannelToTransparency extends FilterWithParametrizedGUI {
+    public static final String NAME = "Channel to Transparency";
+
     private static final int LUMINOSITY = 1;
     private static final int RED = 2;
     private static final int GREEN = 3;
@@ -59,7 +61,7 @@ public class ChannelToTransparency extends FilterWithParametrizedGUI {
 
         switch (channelParam.getValue()) {
             case LUMINOSITY:
-                filter = new ChannelToTransparencyFilter(invert) {
+                filter = new ChannelToTransparencyFilter(NAME, invert) {
                     @Override
                     int getChannelValue(int rgb) {
                         return LuminanceLookup.getLuminosity(rgb);
@@ -67,7 +69,7 @@ public class ChannelToTransparency extends FilterWithParametrizedGUI {
                 };
                 break;
             case RED:
-                filter = new ChannelToTransparencyFilter(invert) {
+                filter = new ChannelToTransparencyFilter(NAME, invert) {
                     @Override
                     int getChannelValue(int rgb) {
                         int r = (rgb >>> 16) & 0xFF;
@@ -76,7 +78,7 @@ public class ChannelToTransparency extends FilterWithParametrizedGUI {
                 };
                 break;
             case GREEN:
-                filter = new ChannelToTransparencyFilter(invert) {
+                filter = new ChannelToTransparencyFilter(NAME, invert) {
                     @Override
                     int getChannelValue(int rgb) {
                         int g = (rgb >>> 8) & 0xFF;
@@ -85,7 +87,7 @@ public class ChannelToTransparency extends FilterWithParametrizedGUI {
                 };
                 break;
             case BLUE:
-                filter = new ChannelToTransparencyFilter(invert) {
+                filter = new ChannelToTransparencyFilter(NAME, invert) {
                     @Override
                     int getChannelValue(int rgb) {
                         int b = (rgb) & 0xFF;
@@ -108,7 +110,8 @@ public class ChannelToTransparency extends FilterWithParametrizedGUI {
     static abstract class ChannelToTransparencyFilter extends PointFilter {
         private final boolean invert;
 
-        protected ChannelToTransparencyFilter(boolean invert) {
+        protected ChannelToTransparencyFilter(String filterName, boolean invert) {
+            super(filterName);
             this.invert = invert;
         }
 

@@ -18,6 +18,7 @@ package com.jhlabs.image;
 
 import com.jhlabs.math.Noise;
 import pixelitor.ThreadPool;
+import pixelitor.filters.jhlabsproxies.JHCaustics;
 
 import java.awt.Rectangle;
 import java.util.Random;
@@ -225,10 +226,10 @@ public class CausticsFilter extends WholeImageFilter {
 
 //        int srcWidth = originalSpace.width;
 //        int srcHeight = originalSpace.height;
-        final int outWidth = transformedSpace.width;
-        final int outHeight = transformedSpace.height;
+        int outWidth = transformedSpace.width;
+        int outHeight = transformedSpace.height;
         int index = 0;
-        final int[] pixels = new int[outWidth * outHeight];
+        int[] pixels = new int[outWidth * outHeight];
 
         for (int y = 0; y < outHeight; y++) {
             for (int x = 0; x < outWidth; x++) {
@@ -241,24 +242,17 @@ public class CausticsFilter extends WholeImageFilter {
             v = 1;
         }
 
-        final float rs = 1.0f / scale;
-        final float d = 0.95f;
-        index = 0;
+        float rs = 1.0f / scale;
+        float d = 0.95f;
 
         Future<?>[] futures = new Future[outHeight];
         for (int y = 0; y < outHeight; y++) {
-            final int finalY = y;
-            final int finalV = v;
-            Runnable lineTask = new Runnable() {
-                @Override
-                public void run() {
-                    calculateLine(outWidth, outHeight, pixels, finalV, rs, d, finalY);
-                }
-            };
-            Future<?> future = ThreadPool.executorService.submit(lineTask);
-            futures[y] = future;
+            int finalY = y;
+            int finalV = v;
+            Runnable lineTask = () -> calculateLine(outWidth, outHeight, pixels, finalV, rs, d, finalY);
+            futures[y] = ThreadPool.submit(lineTask);
         }
-        ThreadPool.waitForFutures(futures);
+        ThreadPool.waitForFutures(futures, null, JHCaustics.NAME);
 
         return pixels;
     }

@@ -21,11 +21,8 @@ import com.jhlabs.image.PointFilter;
 public class SepiaFilter extends PointFilter {
     private int intensity = 20;
 
-    public SepiaFilter() {
-    }
-
-    public SepiaFilter(int intensity) {
-        this.intensity = intensity;
+    public SepiaFilter(String filterName) {
+        super(filterName);
     }
 
     public void setIntensity(int intensity) {

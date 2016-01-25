@@ -1,3 +1,20 @@
+/*
+ * Copyright 2016 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.filters;
 
 import com.jhlabs.image.ImageMath;
@@ -13,9 +30,11 @@ import pixelitor.utils.BlurredEllipse;
 import java.awt.image.BufferedImage;
 
 /**
- * Flashlight
+ * Flashlight filter
  */
 public class Flashlight extends FilterWithParametrizedGUI {
+    public static final String NAME = "Flashlight";
+
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 1, 200, 1000, false);
     private final RangeParam softness = new RangeParam("Softness", 0, 20, 100);
@@ -74,6 +93,10 @@ public class Flashlight extends FilterWithParametrizedGUI {
 
         private int bgPixel;
         private BlurredEllipse ellipse;
+
+        public Impl() {
+            super(NAME);
+        }
 
         @Override
         public BufferedImage filter(BufferedImage src, BufferedImage dst) {

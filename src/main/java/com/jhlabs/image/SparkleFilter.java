@@ -40,7 +40,8 @@ public class SparkleFilter extends PointFilter {
 
     private double power;
 
-    public SparkleFilter() {
+    public SparkleFilter(String filterName) {
+        super(filterName);
     }
 
     public void setColor(int color) {

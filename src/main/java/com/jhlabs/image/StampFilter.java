@@ -37,20 +37,8 @@ public class StampFilter extends PointFilter {
     private int white = 0xffffffff;
     private int black = 0xff000000;
 
-    /**
-     * Construct a StampFilter.
-     */
-    public StampFilter() {
-        this(0.5f);
-    }
-
-    /**
-     * Construct a StampFilter.
-     *
-     * @param threshold the threshold value
-     */
-    public StampFilter(float threshold) {
-        setThreshold(threshold);
+    public StampFilter(String filterName) {
+        super(filterName);
     }
 
     /**

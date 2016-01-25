@@ -16,6 +16,9 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+import pixelitor.filters.jhlabsproxies.JHSmear;
+import pixelitor.utils.ProgressTracker;
+
 import java.awt.Rectangle;
 import java.util.Random;
 
@@ -143,10 +146,13 @@ public class SmearFilter extends WholeImageFilter {
             }
         }
 
+        ProgressTracker pt = null;
+
         switch (shape) {
             case CROSSES:
                 //Crosses
                 numShapes = (int) (2 * density * width * height / (distance + 1));
+                pt = new ProgressTracker(JHSmear.NAME, numShapes);
                 for (i = 0; i < numShapes; i++) {
                     int x = (randomGenerator.nextInt() & 0x7fffffff) % width;
                     int y = (randomGenerator.nextInt() & 0x7fffffff) % height;
@@ -164,6 +170,7 @@ public class SmearFilter extends WholeImageFilter {
                             outPixels[y1 * width + x] = ImageMath.mixColors(mix, rgb2, rgb);
                         }
                     }
+                    pt.itemProcessed();
                 }
                 break;
             case LINES:
@@ -171,6 +178,7 @@ public class SmearFilter extends WholeImageFilter {
                 float cosAngle = (float) Math.cos(angle);
 
                 numShapes = (int) (2 * density * width * height / 2);
+                pt = new ProgressTracker(JHSmear.NAME, numShapes);
 
                 for (i = 0; i < numShapes; i++) {
                     int sx = (randomGenerator.nextInt() & 0x7fffffff) % width;
@@ -244,13 +252,17 @@ public class SmearFilter extends WholeImageFilter {
                             }
                         }
                     }
+                    pt.itemProcessed();
                 }
                 break;
             case SQUARES:
             case CIRCLES:
                 int radius = distance + 1;
                 int radius2 = radius * radius;
+
                 numShapes = (int) (2 * density * width * height / radius);
+                pt = new ProgressTracker(JHSmear.NAME, numShapes);
+
                 for (i = 0; i < numShapes; i++) {
                     int sx = (randomGenerator.nextInt() & 0x7fffffff) % width;
                     int sy = (randomGenerator.nextInt() & 0x7fffffff) % height;
@@ -269,9 +281,11 @@ public class SmearFilter extends WholeImageFilter {
                             }
                         }
                     }
+                    pt.itemProcessed();
                 }
         }
 
+        pt.finish();
         return outPixels;
     }
 

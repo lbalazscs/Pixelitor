@@ -35,7 +35,7 @@ public class OctTreeQuantizer implements Quantizer {
     /**
      * An Octtree node.
      */
-    class OctTreeNode {
+    static class OctTreeNode {
         int children;
         int level;
         OctTreeNode parent;
@@ -217,8 +217,7 @@ public class OctTreeQuantizer implements Quantizer {
         for (int level = MAX_LEVEL - 1; level >= 0; level--) {
             List<OctTreeNode> v = colorList[level];
             if (v != null && !v.isEmpty()) {
-                for (int j = 0; j < v.size(); j++) {
-                    OctTreeNode node = v.get(j);
+                for (OctTreeNode node : v) {
                     if (node.children > 0) {
                         for (int i = 0; i < 8; i++) {
                             OctTreeNode child = node.leaf[i];
@@ -269,7 +268,6 @@ public class OctTreeQuantizer implements Quantizer {
      * @param table    the output color table
      */
     public void buildColorTable(int[] inPixels, int[] table) {
-        int count = inPixels.length;
         maximumColors = table.length;
         for (int inPixel : inPixels) {
             insertColor(inPixel);

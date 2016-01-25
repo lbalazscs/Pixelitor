@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,7 @@ import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.painters.EffectConfiguratorPanel;
+import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.ReseedSupport;
 
 import java.awt.AlphaComposite;
@@ -47,6 +48,8 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
  * Fills the image with random circles
  */
 public class RandomSpheres extends FilterWithParametrizedGUI {
+    public static final String NAME = "Random Spheres";
+
     private static final double INTUITIVE_RADIANS_45 = 5.497787143782138;
 
     private static final int COLORS_SAMPLE_IMAGE = 1;
@@ -89,6 +92,13 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+        int width = dest.getWidth();
+        int height = dest.getHeight();
+        float r = radius.getValueAsFloat();
+        int numCircles = (int) ((width * height * density.getValueAsPercentage()) / (r * r));
+
+        ProgressTracker pt = new ProgressTracker(NAME, numCircles);
+
         ReseedSupport.reInitialize();
         Random rand = ReseedSupport.getRand();
 
@@ -100,15 +110,11 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
         double angle = highlightAngleSelector.getValueInRadians();
         angle += Math.PI;
 
-        float r = radius.getValueAsFloat();
         float diameter = 2 * r;
         double elevation = highlightElevationSelector.getValueInRadians();
         int centerShiftX = (int) (r * Math.cos(angle) * Math.cos(elevation));
         int centerShiftY = (int) (r * Math.sin(angle) * Math.cos(elevation));
 
-        int width = dest.getWidth();
-        int height = dest.getHeight();
-        int numCircles = (int) ((width * height * density.getValueAsPercentage()) / (r * r));
 
         Color[] colors = null;
         Color c = null;
@@ -169,7 +175,9 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
                 innerGlow.setBrushSteps(EffectConfiguratorPanel.calculateBrushSteps(effectWidth));
                 innerGlow.apply(g, circle, 0, 0);
             }
+            pt.itemProcessed();
         }
+        pt.finish();
 
         g.dispose();
         return dest;

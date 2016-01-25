@@ -26,6 +26,11 @@ import java.util.concurrent.Future;
  * An abstract superclass for point filters. The interface is the same as the old RGBImageFilter.
  */
 public abstract class PointFilter extends AbstractBufferedImageOp {
+    private final String filterName;
+
+    protected PointFilter(String filterName) {
+        this.filterName = filterName;
+    }
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
@@ -56,11 +61,10 @@ public abstract class PointFilter extends AbstractBufferedImageOp {
                     outPixels[index] = filterRGB(x, finalY, inPixels[index]);
                 }
             };
-            Future<?> future = ThreadPool.executorService.submit(calculateLineTask);
-            futures[y] = future;
+            futures[y] = ThreadPool.submit(calculateLineTask);
         }
 
-        ThreadPool.waitForFutures(futures);
+        ThreadPool.waitForFutures(futures, null, filterName);
 
         return dst;
     }
@@ -82,10 +86,9 @@ public abstract class PointFilter extends AbstractBufferedImageOp {
                 }
                 dst.setRGB(0, finalY, width, 1, inPixels, 0, width);
             };
-            Future<?> future = ThreadPool.executorService.submit(calculateLineTask);
-            futures[y] = future;
+            futures[y] = ThreadPool.submit(calculateLineTask);
         }
-        ThreadPool.waitForFutures(futures);
+        ThreadPool.waitForFutures(futures, null, filterName);
 
         return dst;
     }

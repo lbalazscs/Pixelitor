@@ -16,6 +16,9 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+import pixelitor.filters.jhlabsproxies.JHReduceNoise;
+import pixelitor.utils.ProgressTracker;
+
 import java.awt.Rectangle;
 
 /**
@@ -59,6 +62,7 @@ public class ReduceNoiseFilter extends WholeImageFilter {
         int[] b = new int[9];
         int[] outPixels = new int[width * height];
 
+        ProgressTracker pt = new ProgressTracker(JHReduceNoise.NAME, height);
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int k = 0;
@@ -96,7 +100,9 @@ public class ReduceNoiseFilter extends WholeImageFilter {
                 outPixels[index] = (inPixels[index] & 0xff000000) | (smooth(r) << 16) | (smooth(g) << 8) | smooth(b);
                 index++;
             }
+            pt.itemProcessed();
         }
+        pt.finish();
         return outPixels;
     }
 

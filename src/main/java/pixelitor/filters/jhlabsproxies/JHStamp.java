@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,6 +35,8 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
  * Stamp based on the JHLabs StampFilter
  */
 public class JHStamp extends FilterWithParametrizedGUI {
+    public static final String NAME = "Stamp";
+
     private final RangeParam lightDarkBalance = new RangeParam("Light/Dark Balance (%)", 0, 50, 100);
     private final RangeParam smoothness = new RangeParam("Smoothness", 0, 25, 50);
     private final RangeParam soften = new RangeParam("Soften", 0, 3, 100);
@@ -67,7 +69,7 @@ public class JHStamp extends FilterWithParametrizedGUI {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
-            filter = new StampFilter();
+            filter = new StampFilter(NAME);
         }
 
         filter.setBlack(darkColor.getColor().getRGB());

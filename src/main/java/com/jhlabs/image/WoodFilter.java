@@ -39,8 +39,9 @@ public class WoodFilter extends PointFilter {
 	/**
      * Construct a WoodFilter.
      */
-    public WoodFilter() {
-	}
+    public WoodFilter(String filterName) {
+        super(filterName);
+    }
 
 	/**
      * Specifies the rings value.

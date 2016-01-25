@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,8 @@ import java.awt.image.BufferedImage;
  * Radial waves in a polar coordinate system
  */
 public class RadialWaves extends FilterWithParametrizedGUI {
+    public static final String NAME = "Radial Waves";
+
     private final RangeParam angularDivision = new RangeParam("Angular Division", 1, 10, 100);
     private final RangeParam radialAmplitude = new RangeParam("Radial Amplitude", 0, 20, 100);
 

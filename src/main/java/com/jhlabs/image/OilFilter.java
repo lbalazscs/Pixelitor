@@ -17,6 +17,7 @@ limitations under the License.
 package com.jhlabs.image;
 
 import pixelitor.ThreadPool;
+import pixelitor.filters.jhlabsproxies.JHOilPainting;
 
 import java.awt.Rectangle;
 import java.util.concurrent.Future;
@@ -30,7 +31,6 @@ import java.util.concurrent.Future;
  * to use only one intensity-histogram.
  */
 public class OilFilter extends WholeImageFilter {
-
     private int rangeX = 3;
     private int rangeY = 3;
     private int levels = 256;
@@ -70,19 +70,14 @@ public class OilFilter extends WholeImageFilter {
     protected int[] filterPixels(int width, int height, int[] inPixels, Rectangle transformedSpace) {
         int[] outPixels = new int[width * height];
 
-//        for (int y = 0; y < height; y++) {
-//            calculateLine(width, height, inPixels, outPixels, y);
-//        }
-
         Future<?>[] futures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
-            Runnable calculateLineTask = () -> calculateLine(width, height, inPixels, outPixels, finalY);
-            Future<?> future = ThreadPool.executorService.submit(calculateLineTask);
-            futures[y] = future;
+            Runnable lineTask = () -> calculateLine(width, height, inPixels, outPixels, finalY);
+            futures[y] = ThreadPool.submit(lineTask);
         }
 
-        ThreadPool.waitForFutures(futures);
+        ThreadPool.waitForFutures(futures, null, JHOilPainting.NAME);
 
         return outPixels;
     }

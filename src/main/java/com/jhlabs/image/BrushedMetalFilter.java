@@ -17,6 +17,8 @@ limitations under the License.
 package com.jhlabs.image;
 
 import net.jafama.FastMath;
+import pixelitor.filters.jhlabsproxies.JHBrushedMetal;
+import pixelitor.utils.ProgressTracker;
 
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
@@ -67,6 +69,8 @@ public class BrushedMetalFilter implements BufferedImageOp {
         int width = src.getWidth();
         int height = src.getHeight();
 
+        ProgressTracker pt = new ProgressTracker(JHBrushedMetal.NAME, height);
+
         if ( dst == null ) {
             dst = createCompatibleDestImage(src, null);
         }
@@ -103,7 +107,10 @@ public class BrushedMetalFilter implements BufferedImageOp {
             } else {
                 AbstractBufferedImageOp.setRGB(dst, 0, y, width, 1, inPixels);
             }
+
+            pt.itemProcessed();
         }
+        pt.finish();
         return dst;
     }
 

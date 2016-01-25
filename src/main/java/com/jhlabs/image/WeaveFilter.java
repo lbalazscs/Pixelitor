@@ -24,8 +24,8 @@ public class WeaveFilter extends PointFilter {
     private float yGap = 6;
     private int rows = 4;
     private int cols = 4;
-    private final int rgbX = 0xffff8080;
-    private final int rgbY = 0xff8080ff;
+    private static final int rgbX = 0xffff8080;
+    private static final int rgbY = 0xff8080ff;
     private boolean useImageColors = true;
     private boolean roundThreads = false;
     private boolean shadeCrossings = true;
@@ -66,7 +66,8 @@ public class WeaveFilter extends PointFilter {
 
     private int[][] matrix = PLAIN;
 
-    public WeaveFilter() {
+    public WeaveFilter(String filterName) {
+        super(filterName);
     }
 
     public void setXGap(float xGap) {

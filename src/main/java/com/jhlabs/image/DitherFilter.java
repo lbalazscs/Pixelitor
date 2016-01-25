@@ -213,16 +213,18 @@ public class DitherFilter extends PointFilter {
 	/**
      * Constuct a DitherFilter.
      */
-    public DitherFilter() {
+    public DitherFilter(String filterName) {
+        super(filterName);
+
 		rows = 2;
 		cols = 2;
 		matrix = ditherMagic4x4Matrix;
 		levels = 6;
 		colorDither = true;
 	}
-	
-	/**
-	 * Set the dither matrix.
+
+    /**
+     * Set the dither matrix.
 	 * @param matrix the dither matrix
      * @see #getMatrix
 	 */

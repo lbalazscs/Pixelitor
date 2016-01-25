@@ -35,6 +35,7 @@
 package org.jdesktop.swingx.image;
 
 import org.jdesktop.swingx.graphics.GraphicsUtilities;
+import pixelitor.utils.ProgressTracker;
 
 import java.awt.image.BufferedImage;
 
@@ -93,6 +94,8 @@ public class FastBlurFilter extends AbstractFilter {
         int width = src.getWidth();
         int height = src.getHeight();
 
+        ProgressTracker pt = new ProgressTracker(width + height);
+
         if (dst == null) {
             dst = createCompatibleDestImage(src, null);
         }
@@ -102,12 +105,14 @@ public class FastBlurFilter extends AbstractFilter {
 
         GraphicsUtilities.getPixels(src, 0, 0, width, height, srcPixels);
         // horizontal pass
-        blur(srcPixels, dstPixels, width, height, radius);
+        blur(srcPixels, dstPixels, width, height, radius, pt);
         // vertical pass
         //noinspection SuspiciousNameCombination
-        blur(dstPixels, srcPixels, height, width, radius);
+        blur(dstPixels, srcPixels, height, width, radius, pt);
         // the result is now stored in srcPixels due to the 2nd pass
         GraphicsUtilities.setPixels(dst, 0, 0, width, height, srcPixels);
+
+        pt.finish();
 
         return dst;
     }
@@ -120,14 +125,14 @@ public class FastBlurFilter extends AbstractFilter {
      * <p>After this method is executed, dstPixels contains a transposed and
      * filtered copy of srcPixels.</p>
      *
-     * @param srcPixels the source pixels
+     *  @param srcPixels the source pixels
      * @param dstPixels the destination pixels
      * @param width     the width of the source picture
      * @param height    the height of the source picture
      * @param radius    the radius of the blur effect
      */
     static void blur(int[] srcPixels, int[] dstPixels,
-                     int width, int height, int radius) {
+                     int width, int height, int radius, ProgressTracker pt) {
         final int windowSize = radius * 2 + 1;
         final int radiusPlusOne = radius + 1;
 
@@ -211,6 +216,8 @@ public class FastBlurFilter extends AbstractFilter {
             }
 
             srcIndex += width;
+
+            pt.itemProcessed();
         }
     }
 }

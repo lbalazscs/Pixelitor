@@ -51,7 +51,8 @@ public class CheckFilter extends PointFilter {
         this.invAaRes = 1.0f / aaRes;
     }
 
-    public CheckFilter() {
+    public CheckFilter(String filterName) {
+        super(filterName);
     }
 
     /**

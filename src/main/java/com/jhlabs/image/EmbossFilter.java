@@ -16,6 +16,9 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+import pixelitor.filters.jhlabsproxies.JHEmboss;
+import pixelitor.utils.ProgressTracker;
+
 import java.awt.Rectangle;
 
 /**
@@ -66,6 +69,8 @@ public class EmbossFilter extends WholeImageFilter {
 
     @Override
     protected int[] filterPixels(int width, int height, int[] inPixels, Rectangle transformedSpace) {
+        ProgressTracker pt = new ProgressTracker(JHEmboss.NAME, height);
+
         int index = 0;
         int[] outPixels = new int[width * height];
 
@@ -129,7 +134,9 @@ public class EmbossFilter extends WholeImageFilter {
                     outPixels[index++] = a | (shade << 16) | (shade << 8) | shade;
                 }
             }
+            pt.itemProcessed();
         }
+        pt.finish();
 
         return outPixels;
     }

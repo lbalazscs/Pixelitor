@@ -16,6 +16,9 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+import pixelitor.filters.jhlabsproxies.JHUnsharpMask;
+import pixelitor.utils.ProgressTracker;
+
 import java.awt.image.BufferedImage;
 
 /**
@@ -79,6 +82,8 @@ public class UnsharpFilter extends GaussianFilter {
         int width = src.getWidth();
         int height = src.getHeight();
 
+        ProgressTracker pt = new ProgressTracker(JHUnsharpMask.NAME, width + height);
+
         if (dst == null) {
             dst = createCompatibleDestImage(src, null);
         }
@@ -89,8 +94,8 @@ public class UnsharpFilter extends GaussianFilter {
         getRGB(src, 0, 0, width, height, inPixels);
 
         if (radius > 0) {
-            convolveAndTranspose(kernel, inPixels, outPixels, width, height, alpha, alpha && premultiplyAlpha, false, CLAMP_EDGES);
-            convolveAndTranspose(kernel, outPixels, inPixels, height, width, alpha, false, alpha && premultiplyAlpha, CLAMP_EDGES);
+            convolveAndTranspose(kernel, inPixels, outPixels, width, height, alpha, alpha && premultiplyAlpha, false, CLAMP_EDGES, pt);
+            convolveAndTranspose(kernel, outPixels, inPixels, height, width, alpha, false, alpha && premultiplyAlpha, CLAMP_EDGES, pt);
         }
 
         // src.getRGB(0, 0, width, height, outPixels, 0, width);
@@ -128,6 +133,9 @@ public class UnsharpFilter extends GaussianFilter {
         }
 
         dst.setRGB(0, 0, width, height, inPixels, 0, width);
+
+        pt.finish();
+
         return dst;
     }
 

@@ -26,6 +26,7 @@ import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.Utils;
 
@@ -55,6 +56,8 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
  * Photo Collage
  */
 public class PhotoCollage extends FilterWithParametrizedGUI {
+    public static final String NAME = "Photo Collage";
+
     private final GroupedRangeParam sizeParam = new GroupedRangeParam("Photo Size", 40, 200, 999);
 
     private final RangeParam marginSizeParam = new RangeParam("Margin", 0, 5, 20);
@@ -86,6 +89,9 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+        int numImages = imageNumberParam.getValue();
+        ProgressTracker pt = new ProgressTracker(NAME, numImages);
+
         ReseedSupport.reInitialize();
         Random rand = ReseedSupport.getRand();
 
@@ -129,7 +135,7 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
         // multiply makes sense only if the shadow color is not black
         Composite shadowComposite = AlphaComposite.getInstance(SRC_OVER, shadowOpacityParam.getValueAsPercentage());
 
-        for (int i = 0; i < imageNumberParam.getValue(); i++) {
+        for (int i = 0; i < numImages; i++) {
             // Calculate the transform of the image
             // step 2: translate
             int tx;
@@ -184,7 +190,10 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
 
             g.setPaint(imagePaint);
             g.fill(transformedImageRect);
+
+            pt.itemProcessed();
         }
+        pt.finish();
 
         g.dispose();
         return dest;

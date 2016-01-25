@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,8 @@ import java.awt.image.BufferedImage;
  * Mirror filter
  */
 public class Mirror extends FilterWithParametrizedGUI {
+    public static final String NAME = "Mirror";
+
     private final AngleParam angle = new AngleParam("Angle", 0);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices(true);

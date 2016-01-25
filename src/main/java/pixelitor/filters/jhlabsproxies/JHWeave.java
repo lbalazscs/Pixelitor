@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,6 +33,7 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
  * Weave based on the JHLabs WeaveFilter
  */
 public class JHWeave extends FilterWithParametrizedGUI {
+    public static final String NAME = "Weave";
 
     private final IntChoiceParam pattern = new IntChoiceParam("Pattern", new IntChoiceParam.Value[]{
             new IntChoiceParam.Value("Plain", WeaveFilter.PLAIN_PATTERN),
@@ -63,7 +64,7 @@ public class JHWeave extends FilterWithParametrizedGUI {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
-            filter = new WeaveFilter();
+            filter = new WeaveFilter(NAME);
         }
 
         filter.setPattern(pattern.getValue());

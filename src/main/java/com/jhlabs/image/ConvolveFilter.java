@@ -16,6 +16,9 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+import pixelitor.filters.convolve.Convolve;
+import pixelitor.utils.ProgressTracker;
+
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
@@ -288,6 +291,9 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
         int rows2 = rows / 2;
         int cols2 = cols / 2;
 
+        String filterName = Convolve.getFilterName(rows, cols);
+        ProgressTracker pt = new ProgressTracker(filterName, height);
+
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 float r = 0, g = 0, b = 0, a = 0;
@@ -333,7 +339,9 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
                 int ib = PixelUtils.clamp((int) (b + 0.5));
                 outPixels[index++] = (ia << 24) | (ir << 16) | (ig << 8) | ib;
             }
+            pt.itemProcessed();
         }
+        pt.finish();
     }
 
     /**

@@ -32,12 +32,14 @@ public class FourColorFilter extends PointFilter {
 	private int rSW, gSW, bSW;
 	private int rSE, gSE, bSE;
 
-	public FourColorFilter() {
-		setColorNW( 0xffff0000 );
-		setColorNE( 0xffff00ff );
-		setColorSW( 0xff0000ff );
-		setColorSE( 0xff00ffff );
-	}
+    public FourColorFilter(String filterName) {
+        super(filterName);
+
+        setColorNW(0xffff0000);
+        setColorNE(0xffff00ff);
+        setColorSW(0xff0000ff);
+        setColorSE(0xff00ffff);
+    }
 
 	public void setColorNW( int color ) {
 		this.colorNW = color;

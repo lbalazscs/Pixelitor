@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,6 +37,8 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
  * Four Color Gradient based on the JHLabs FourColorFilter
  */
 public class JHFourColorGradient extends FilterWithParametrizedGUI {
+    public static final String NAME = "Four Color Gradient";
+
     private final ColorParam northWestParam = new ColorParam("Northwest", GREEN, NO_OPACITY);
     private final ColorParam northEastParam = new ColorParam("Northeast", ORANGE, NO_OPACITY);
     private final ColorParam southWestParam = new ColorParam("Southwest", BLUE, NO_OPACITY);
@@ -57,7 +59,7 @@ public class JHFourColorGradient extends FilterWithParametrizedGUI {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
-            filter = new FourColorFilter();
+            filter = new FourColorFilter(NAME);
         }
 
         filter.setColorNW(northWestParam.getColor().getRGB());

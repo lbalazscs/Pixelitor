@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.WaveType;
 import com.jhlabs.math.Noise;
 import net.jafama.FastMath;
+import pixelitor.filters.AngularWaves;
 
 /**
  * Angular waves in a polar coordinate system
@@ -31,6 +32,10 @@ public class AngularWavesFilter extends CenteredTransformFilter {
     private float zoom;
     private float amount;
     private int waveType;
+
+    public AngularWavesFilter() {
+        super(AngularWaves.NAME);
+    }
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {

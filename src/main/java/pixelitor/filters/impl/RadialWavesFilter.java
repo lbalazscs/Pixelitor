@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.WaveType;
 import com.jhlabs.math.Noise;
 import net.jafama.FastMath;
+import pixelitor.filters.RadialWaves;
 
 import java.awt.image.BufferedImage;
 
@@ -35,6 +36,10 @@ public class RadialWavesFilter extends CenteredTransformFilter {
     private int waveType;
 
     private int maxSize;
+
+    public RadialWavesFilter() {
+        super(RadialWaves.NAME);
+    }
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {

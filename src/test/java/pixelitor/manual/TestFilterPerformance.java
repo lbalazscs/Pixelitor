@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.manual;
 
 import com.jhlabs.image.SparkleFilter;
@@ -63,7 +64,7 @@ public class TestFilterPerformance {
 //        KaleidoscopeFilterD f = new KaleidoscopeFilterD();
 //        f.setZoom(1.0f);
 
-        SparkleFilter f = new SparkleFilter();
+        SparkleFilter f = new SparkleFilter("SparkleFilter test");
         f.setRadius(518);
         f.setRays(200);
         f.setAmount(55);

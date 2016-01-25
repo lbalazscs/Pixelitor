@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.WoodFilter;
@@ -32,6 +33,8 @@ import java.awt.image.BufferedImage;
  * Renders wood texture based on the JHLabs WoodFilter
  */
 public class JHWood extends FilterWithParametrizedGUI {
+    public static final String NAME = "Wood";
+
     private final RangeParam rings = new RangeParam("Rings", 1, 50, 100);
     private final RangeParam scale = new RangeParam("Zoom", 1, 100, 500);
     private final RangeParam stretch = new RangeParam("Stretch", 1, 10, 50);
@@ -62,7 +65,7 @@ public class JHWood extends FilterWithParametrizedGUI {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
-            filter = new WoodFilter();
+            filter = new WoodFilter(NAME);
         }
 
         filter.setAngle((float) (angle.getValueInRadians() + Math.PI / 2));

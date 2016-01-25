@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,6 +39,8 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
  * Pointillize based on the JHLabs PointillizeFilter
  */
 public class JHPointillize extends FilterWithParametrizedGUI {
+    public static final String NAME = "Pointillize";
+
     private final RangeParam gridSize = new RangeParam("Grid Size", 1, 15, 200);
     private final RangeParam dotSize = new RangeParam("Dot Relative Size (%)", 0, 45, 100);
     private final RangeParam fuzziness = new RangeParam("Fuzziness (%)", 0, 0, 100);

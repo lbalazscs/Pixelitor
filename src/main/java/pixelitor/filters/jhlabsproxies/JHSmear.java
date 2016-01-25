@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,6 +34,8 @@ import java.util.Random;
  * Smear based on the JHLabs SmearFilter
  */
 public class JHSmear extends FilterWithParametrizedGUI {
+    public static final String NAME = "Smear";
+
     private final RangeParam distance = new RangeParam("Distance", 0, 15, 100);
     private final RangeParam density = new RangeParam("Density (%)", 0, 50, 100);
     private final AngleParam angle = new AngleParam("Angle (only for lines)", 0);

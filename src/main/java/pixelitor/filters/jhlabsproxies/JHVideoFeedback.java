@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters.jhlabsproxies;
 
@@ -29,10 +29,7 @@ import java.awt.image.BufferedImage;
  * Video Feedback based on the JHLabs FeedbackFilter
  */
 public class JHVideoFeedback extends FilterWithParametrizedGUI {
-//    private RangeParam distance = new RangeParam("Distance", 0, 100, 0);
-//    private AngleParam angle = new AngleParam("Angle", 0);
-
-    // distance and angle are not cool
+    public static final String NAME = "Video Feedback";
 
     private final RangeParam iterations = new RangeParam("Iterations", 2, 3, 30);
 

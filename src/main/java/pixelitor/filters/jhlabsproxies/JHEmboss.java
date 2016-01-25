@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,6 +31,8 @@ import java.awt.image.BufferedImage;
  * Emboss based on the JHLabs EmbossFilter
  */
 public class JHEmboss extends FilterWithParametrizedGUI {
+    public static final String NAME = "Emboss";
+
     private static final double INTUITIVE_RADIANS_30 = -0.54;
 
     private final AngleParam lightDirection = new AngleParam("Light Direction (Azimuth) - Degrees", 0);

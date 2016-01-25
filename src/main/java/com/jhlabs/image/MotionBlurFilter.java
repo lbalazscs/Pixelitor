@@ -16,6 +16,8 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+import pixelitor.utils.ProgressTracker;
+
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
@@ -258,6 +260,8 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
         int width = src.getWidth();
         int height = src.getHeight();
 
+        ProgressTracker pt = new ProgressTracker(height);
+
         if (dst == null) {
             dst = createCompatibleDestImage(src, null);
         }
@@ -344,12 +348,14 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
 				}
 				index++;
 			}
+            pt.itemProcessed();
 		}
         if ( premultiplyAlpha ) {
             ImageMath.unpremultiply(outPixels, 0, inPixels.length);
         }
 
         setRGB( dst, 0, 0, width, height, outPixels );
+        pt.finish();
         return dst;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,6 +33,7 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
  * ConvolutionEdge based on the JHLabs EdgeFilter
  */
 public class JHConvolutionEdge extends FilterWithParametrizedGUI {
+    public static final String NAME = "Convolution Edge Detection";
 
     private final IntChoiceParam horizontalMethod = new IntChoiceParam("Horizontal Edges", new IntChoiceParam.Value[]{
             new IntChoiceParam.Value("Sobel", METHOD_SOBEL),

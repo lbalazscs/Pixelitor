@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,6 +35,8 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
  * BrushedMetal based on the JHLabs BrushedMetalFilter
  */
 public class JHBrushedMetal extends FilterWithParametrizedGUI {
+    public static final String NAME = "Brushed Metal";
+
     private final ColorParam color = new ColorParam("Color", GRAY, NO_OPACITY);
     private final RangeParam radius = new RangeParam("Length", 0, 100, 500);
     private final RangeParam amount = new RangeParam("Amount (%)", 0, 50, 100);

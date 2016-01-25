@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.filters.impl;
 
 import net.jafama.FastMath;
+import pixelitor.filters.CircleToSquare;
 
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
@@ -33,6 +34,10 @@ public class CircleToSquareFilter extends CenteredTransformFilter {
     private float radiusRatio;
 
     private float amount = 1.0f;
+
+    public CircleToSquareFilter() {
+        super(CircleToSquare.NAME);
+    }
 
     public void setRadiusX(float radius) {
         this.radiusX = radius;

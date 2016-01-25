@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,6 +32,8 @@ import java.awt.image.BufferedImage;
  * Little Planet
  */
 public class LittlePlanet extends FilterWithParametrizedGUI {
+    public static final String NAME = "Little Planet";
+
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final AngleParam rotateResult = new AngleParam("Rotate Result", -Math.PI / 2);
     private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 300);

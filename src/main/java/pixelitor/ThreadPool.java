@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,11 @@
 
 package pixelitor;
 
+import com.jhlabs.image.AbstractBufferedImageOp;
+import pixelitor.utils.ProgressTracker;
+
+import java.awt.image.BufferedImage;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -30,23 +35,60 @@ public class ThreadPool {
         return NUM_AVAILABLE_PROCESSORS > 1;
     }
 
-    public static final ExecutorService executorService =
+    private static final ExecutorService executorService =
             Executors.newFixedThreadPool(NUM_AVAILABLE_PROCESSORS);
 
     private ThreadPool() {
     }
-//    public static final ExecutorService executorService =
-//            Executors.newFixedThreadPool(1);
 
+    public static Future<?> submit(Runnable task) {
+        return executorService.submit(task);
+    }
 
-    public static void waitForFutures(Future<?>[] futures) {
+    public static <T> Future<T> submit(Callable<T> task) {
+        return executorService.submit(task);
+    }
+
+    public static void waitForFutures(Future<?>[] futures, ProgressTracker pt, String filterName) {
+        boolean createTracker = pt == null;
+        if(createTracker) {
+            assert filterName != null;
+            pt = new ProgressTracker(filterName, futures.length);
+        }
+
         for (Future<?> future : futures) {
             try {
                 future.get();
+
+                // not completely accurate because the submit order is not
+                // necessarily the same as the finish order, but
+                // good enough in practice
+                pt.itemProcessed();
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
         }
+
+        if(createTracker) {
+            pt.finish();
+        }
     }
 
+    public static void waitForFutures2(BufferedImage dst, int width, Future<int[]>[] futures, String filterName) {
+        ProgressTracker pt = new ProgressTracker(filterName, futures.length);
+
+        try {
+            for (int i = 0; i < futures.length; i++) {
+                Future<int[]> line = futures[i];
+                int[] linePixels = line.get();
+                AbstractBufferedImageOp.setRGB(dst, 0, i, width, 1, linePixels);
+
+                pt.itemProcessed();
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        pt.finish();
+    }
 }

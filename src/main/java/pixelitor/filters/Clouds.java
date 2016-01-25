@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,6 +40,8 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
  * Clouds filter based on multiple Perlin noise iterations, inspired by the Paint.net clouds
  */
 public class Clouds extends FilterWithParametrizedGUI {
+    public static final String NAME = "Clouds";
+
     private static int[] p;
 
     static {
@@ -93,10 +95,9 @@ public class Clouds extends FilterWithParametrizedGUI {
             for (int y = 0; y < height; y++) {
                 int finalY = y;
                 Runnable lineTask = () -> calculateLine(scaleValue, roughnessValue, width, destData, color1, color2, finalY);
-                Future<?> future = ThreadPool.executorService.submit(lineTask);
-                futures[y] = future;
+                futures[y] = ThreadPool.submit(lineTask);
             }
-            ThreadPool.waitForFutures(futures);
+            ThreadPool.waitForFutures(futures, null, NAME);
         } else {
             for (int y = 0; y < height; y++) {
                 calculateLine(scaleValue, roughnessValue, width, destData, color1, color2, y);

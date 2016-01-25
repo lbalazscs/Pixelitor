@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,6 +32,7 @@ import java.awt.image.BufferedImage;
  * Polar Glass Tiles filter
  */
 public class PolarTiles extends FilterWithParametrizedGUI {
+    public static final String NAME = "Polar Glass Tiles";
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
 

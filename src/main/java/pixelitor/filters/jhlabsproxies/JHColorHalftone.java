@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,8 @@ import java.awt.image.BufferedImage;
  * ColorHalftone based on the JHLabs ColorHalftoneFilter
  */
 public class JHColorHalftone extends FilterWithParametrizedGUI {
+    public static final String NAME = "Color Halftone";
+
     private final RangeParam dotRadius = new RangeParam("Dot Radius (pixel %)", 10, 100, 1000);
 
     private final AngleParam cyanScreenAngle = new AngleParam("Cyan Screen Angle", 1.8849555921538759);

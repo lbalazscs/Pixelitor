@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,6 +31,8 @@ import static java.awt.Color.WHITE;
  * Glint based on the JHLabs GlintFilter
  */
 public class JHGlint extends FilterWithParametrizedGUI {
+    public static final String NAME = "Glint";
+
     private final RangeParam threshold = new RangeParam("Threshold (%)", 0, 70, 100);
     private final RangeParam coverage = new RangeParam("Coverage (%)", 0, 50, 100);
     private final RangeParam intensity = new RangeParam("Intensity (%)", 0, 15, 100);
@@ -40,7 +42,6 @@ public class JHGlint extends FilterWithParametrizedGUI {
 //    private BooleanParam glintOnly = new BooleanParam("Glint Only", false);
 
     private final GradientParam colors = new GradientParam("Colors", WHITE, WHITE);
-
 
     private GlintFilter filter;
 

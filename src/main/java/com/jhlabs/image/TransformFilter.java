@@ -23,7 +23,6 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
@@ -31,7 +30,7 @@ import java.util.concurrent.Future;
  * two methods to provide the mapping between source and destination pixels.
  */
 public abstract class TransformFilter extends AbstractBufferedImageOp {
-
+    private final String filterName;
 
     // image dimensions
     protected int srcWidth;
@@ -94,6 +93,13 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
      * The input image rectangle.
      */
 //    protected Rectangle originalSpace;
+    protected TransformFilter(String filterName) {
+        this.filterName = filterName;
+    }
+
+    protected TransformFilter() {
+        this.filterName = "Filter";
+    }
 
     /**
      * Set the action to perform for pixels off the edge of the image.
@@ -255,57 +261,45 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
         return dst;
     }
 
-    protected BufferedImage filterPixelsNN(final BufferedImage dst, final int width, int height, final int[] inPixels) {
-        final int srcWidth = width;
-        final int srcHeight = height;
-        final int outWidth = width;
+    protected BufferedImage filterPixelsNN(BufferedImage dst, int width, int height, int[] inPixels) {
+        int srcWidth = width;
+        int srcHeight = height;
+        int outWidth = width;
         int outHeight = height;
 
         Future<int[]>[] resultLines = new Future[outHeight];
 
         for (int y = 0; y < outHeight; y++) {
-            final float[] out = new float[2];
-            final int finalY = y;
-            Callable<int[]> calculateLineTask = new Callable<int[]>() {
-                @Override
-                public int[] call() throws Exception {
-                    int srcX, srcY;
-                    final int[] outPixels = new int[outWidth];
+            float[] out = new float[2];
+            int finalY = y;
+            Callable<int[]> calculateLineTask = () -> {
+                int srcX, srcY;
+                int[] outPixels = new int[outWidth];
 
-                    for (int x = 0; x < outWidth; x++) {
-                        transformInverse(x, finalY, out);
-                        srcX = (int) out[0];
-                        srcY = (int) out[1];
-                        // int casting rounds towards zero, so we check out[0] < 0, not srcX < 0
-                        outPixels[x] = getPixelNN(inPixels, srcWidth, srcHeight, srcX, srcY, out);
-                    }
-
-                    return outPixels;
-
+                for (int x = 0; x < outWidth; x++) {
+                    transformInverse(x, finalY, out);
+                    srcX = (int) out[0];
+                    srcY = (int) out[1];
+                    // int casting rounds towards zero, so we check out[0] < 0, not srcX < 0
+                    outPixels[x] = getPixelNN(inPixels, srcWidth, srcHeight, srcX, srcY, out);
                 }
+
+                return outPixels;
+
             };
-            Future<int[]> result = ThreadPool.executorService.submit(calculateLineTask);
-            resultLines[finalY] = result;
+            resultLines[finalY] = ThreadPool.submit(calculateLineTask);
         }
-        try {
-            for (int i = 0; i < resultLines.length; i++) {
-                Future<int[]> line = resultLines[i];
-                int[] linePixels = line.get();
-                setRGB(dst, 0, i, width, 1, linePixels);
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        ThreadPool.waitForFutures2(dst, width, resultLines, filterName);
 
         return dst;
     }
 
-    private BufferedImage filterPixelsBilinear(final BufferedImage dst, final int width, int height, final int[] inPixels) {
-        final int srcWidth = width;
-        final int srcHeight = height;
-        final int srcWidth1 = width - 1;
-        final int srcHeight1 = height - 1;
-        final int outWidth = width;
+    private BufferedImage filterPixelsBilinear(BufferedImage dst, int width, int height, int[] inPixels) {
+        int srcWidth = width;
+        int srcHeight = height;
+        int srcWidth1 = width - 1;
+        int srcHeight1 = height - 1;
+        int outWidth = width;
         int outHeight = height;
 //        int outX, outY;
 //		int index = 0;
@@ -313,57 +307,45 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
         Future<int[]>[] resultLines = new Future[outHeight];
 
         for (int y = 0; y < outHeight; y++) {
-            final float[] out = new float[2];
-            final int finalY = y;
-            Callable<int[]> calculateLineTask = new Callable<int[]>() {
-                @Override
-                public int[] call() throws Exception {
-                    final int[] outPixels = new int[outWidth];
-                    for (int x = 0; x < outWidth; x++) {
-                        transformInverse(x, finalY, out);
-                        int srcX = (int) FastMath.floor(out[0]);
-                        int srcY = (int) FastMath.floor(out[1]);
-                        float xWeight = out[0] - srcX;
-                        float yWeight = out[1] - srcY;
-                        int nw, ne, sw, se;
+            float[] out = new float[2];
+            int finalY = y;
+            Callable<int[]> calculateLineTask = () -> {
+                int[] outPixels = new int[outWidth];
+                for (int x = 0; x < outWidth; x++) {
+                    transformInverse(x, finalY, out);
+                    int srcX = (int) FastMath.floor(out[0]);
+                    int srcY = (int) FastMath.floor(out[1]);
+                    float xWeight = out[0] - srcX;
+                    float yWeight = out[1] - srcY;
+                    int nw, ne, sw, se;
 
-                        if ((srcX >= 0) && (srcX < srcWidth1) && (srcY >= 0) && (srcY < srcHeight1)) {
-                            // Easy case, all corners are in the image
-                            int i = (srcWidth * srcY) + srcX;
-                            nw = inPixels[i];
-                            ne = inPixels[i + 1];
-                            sw = inPixels[i + srcWidth];
-                            se = inPixels[i + srcWidth + 1];
-                        } else {
-                            // Some of the corners are off the image
-                            nw = getPixelBL(inPixels, srcX, srcY, srcWidth, srcHeight);
-                            ne = getPixelBL(inPixels, srcX + 1, srcY, srcWidth, srcHeight);
-                            sw = getPixelBL(inPixels, srcX, srcY + 1, srcWidth, srcHeight);
-                            se = getPixelBL(inPixels, srcX + 1, srcY + 1, srcWidth, srcHeight);
-                        }
-                        outPixels[x] = ImageMath.bilinearInterpolate(xWeight, yWeight, nw, ne, sw, se);
+                    if ((srcX >= 0) && (srcX < srcWidth1) && (srcY >= 0) && (srcY < srcHeight1)) {
+                        // Easy case, all corners are in the image
+                        int i = (srcWidth * srcY) + srcX;
+                        nw = inPixels[i];
+                        ne = inPixels[i + 1];
+                        sw = inPixels[i + srcWidth];
+                        se = inPixels[i + srcWidth + 1];
+                    } else {
+                        // Some of the corners are off the image
+                        nw = getPixelBL(inPixels, srcX, srcY, srcWidth, srcHeight);
+                        ne = getPixelBL(inPixels, srcX + 1, srcY, srcWidth, srcHeight);
+                        sw = getPixelBL(inPixels, srcX, srcY + 1, srcWidth, srcHeight);
+                        se = getPixelBL(inPixels, srcX + 1, srcY + 1, srcWidth, srcHeight);
                     }
-                    return outPixels;
+                    outPixels[x] = ImageMath.bilinearInterpolate(xWeight, yWeight, nw, ne, sw, se);
                 }
+                return outPixels;
             };
 
-            Future<int[]> result = ThreadPool.executorService.submit(calculateLineTask);
-            resultLines[finalY] = result;
+            resultLines[finalY] = ThreadPool.submit(calculateLineTask);
         }
-        try {
-            for (int i = 0; i < resultLines.length; i++) {
-                Future<int[]> line = resultLines[i];
-                int[] linePixels = line.get();
-                setRGB(dst, 0, i, width, 1, linePixels);
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        ThreadPool.waitForFutures2(dst, width, resultLines, filterName);
 
         return dst;
     }
 
-    final private int getPixelBL(int[] pixels, int x, int y, int width, int height) {
+    private int getPixelBL(int[] pixels, int x, int y, int width, int height) {
         if ((x < 0) || (x >= width)) {  // x out of range
             if ((y < 0) || (y >= height)) { // y also out of range {
                 switch (edgeAction) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,7 +38,8 @@ import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.MOTION_BLUR;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
 
 /**
- * Motion Blur based on the JHLabs MotionBlur
+ * "Motion Blur" and "Spin and Zoom Blur" based on the JHLabs
+ * MotionBlurOp/MotionBlurFilter classes
  */
 public class JHMotionBlur extends FilterWithParametrizedGUI {
     private final AngleParam angle = new AngleParam("Direction", 0);

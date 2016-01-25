@@ -17,6 +17,8 @@ limitations under the License.
 package com.jhlabs.image;
 
 import pixelitor.ThreadPool;
+import pixelitor.filters.jhlabsproxies.JHGlint;
+import pixelitor.utils.ProgressTracker;
 
 import java.awt.image.BufferedImage;
 import java.util.concurrent.Future;
@@ -174,16 +176,24 @@ public class GlintFilter extends AbstractBufferedImageOp {
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        final int width = src.getWidth();
-        final int height = src.getHeight();
-        final int[] pixels = new int[width];
+        int width = src.getWidth();
+        int height = src.getHeight();
+        int[] pixels = new int[width];
+
+        ProgressTracker pt;
+        if (blur != 0) {
+            // width+height for the Gaussian, then height again for further processing
+            pt = new ProgressTracker(JHGlint.NAME, width + 2 * height);
+        } else {
+            pt = new ProgressTracker(JHGlint.NAME, height);
+        }
 
         // Laszlo: added this in order to prevent division by 0
         int calculatedLength2 = (int) (length / 1.414f);
-        final int length2 = calculatedLength2 > 0 ? calculatedLength2 : 1;
+        int length2 = calculatedLength2 > 0 ? calculatedLength2 : 1;
 
-        final int[] colors = new int[length + 1];
-        final int[] colors2 = new int[length2 + 1];
+        int[] colors = new int[length + 1];
+        int[] colors2 = new int[length2 + 1];
 
         if (colormap != null) {
             for (int i = 0; i <= length; i++) {
@@ -227,44 +237,33 @@ public class GlintFilter extends AbstractBufferedImageOp {
         }
 
         if (blur != 0) {
-            mask = new GaussianFilter(blur).filter(mask, null);
+            GaussianFilter gf = new GaussianFilter(blur);
+            gf.setProgressTracker(pt);
+            mask = gf.filter(mask, null);
         }
 
         if (dst == null) {
             dst = createCompatibleDestImage(src, null);
         }
-        final int[] dstPixels;
+        int[] dstPixels;
         if (glintOnly) {
             dstPixels = new int[width * height];
         } else {
             dstPixels = getRGB(src, 0, 0, width, height, null);//FIXME - only need 2*length
         }
 
-        boolean multiThreaded = true;
-        if(multiThreaded) {
-            Future<?>[] futures = new Future[height];
-            for (int y = 0; y < height; y++) {
-                final int finalY = y;
-                final BufferedImage finalMask = mask;
-                Runnable r = new Runnable() {
-                    @Override
-                    public void run() {
-                        calculateLine(width, height, pixels, length2, colors, colors2, finalMask, dstPixels, finalY);
-//                        System.out.println("GlintFilter::run calculatedLine: finalY = " + finalY + " in " + Thread.currentThread().getName());
-                    }
-                };
-                Future<?> future = ThreadPool.executorService.submit(r);
-                futures[y] = future;
-            }
-//            ThreadPool.executorService.invokeAll()
-            ThreadPool.waitForFutures(futures);
-        } else {
-            for (int y = 0; y < height; y++) {
-                calculateLine(width, height, pixels, length2, colors, colors2, mask, dstPixels, y);
-            }
+        Future<?>[] futures = new Future[height];
+        for (int y = 0; y < height; y++) {
+            int finalY = y;
+            BufferedImage finalMask = mask;
+            Runnable lineTask = () -> calculateLine(width, height, pixels, length2, colors, colors2, finalMask, dstPixels, finalY);
+            futures[y] = ThreadPool.submit(lineTask);
         }
+        ThreadPool.waitForFutures(futures, pt, null);
 
-		setRGB( dst, 0, 0, width, height, dstPixels );
+        setRGB(dst, 0, 0, width, height, dstPixels);
+
+        pt.finish();
 
         return dst;
     }
@@ -329,6 +328,6 @@ public class GlintFilter extends AbstractBufferedImageOp {
     }
 
     public String toString() {
-		return "Effects/Glint...";
-	}
+        return "Effects/Glint...";
+    }
 }

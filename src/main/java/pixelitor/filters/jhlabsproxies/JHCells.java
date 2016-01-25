@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,6 +39,8 @@ import static java.awt.Color.WHITE;
  * Cells based on the JHLabs CellularFilter
  */
 public class JHCells extends FilterWithParametrizedGUI {
+    public static final String NAME = "Cells";
+
     private static final int TYPE_CELLS = 1;
     private static final int TYPE_GRID = 2;
     private static final int TYPE_STRANGE = 3;
@@ -90,7 +92,7 @@ public class JHCells extends FilterWithParametrizedGUI {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
-            filter = new CellularFilter();
+            filter = new CellularFilter(NAME);
         }
 
         float tune = refineType.getValueAsPercentage();

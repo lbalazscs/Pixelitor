@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,6 +39,8 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
  * Renders value noise
  */
 public class ValueNoise extends FilterWithParametrizedGUI {
+    public static final String NAME = "Value Noise";
+
     private static final Random rand = new Random();
     private static int r1;
     private static int r2;
@@ -96,10 +98,9 @@ public class ValueNoise extends FilterWithParametrizedGUI {
             for (int y = 0; y < height; y++) {
                 int finalY = y;
                 Runnable lineTask = () -> calculateLine(lookupTable, destData, width, frequency, persistence, amplitude, finalY);
-                Future<?> future = ThreadPool.executorService.submit(lineTask);
-                futures[y] = future;
+                futures[y] = ThreadPool.submit(lineTask);
             }
-            ThreadPool.waitForFutures(futures);
+            ThreadPool.waitForFutures(futures, null, NAME);
         } else {
             for (int y = 0; y < height; y++) {
                 calculateLine(lookupTable, destData, width, frequency, persistence, amplitude, y);

@@ -16,8 +16,10 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+import pixelitor.filters.jhlabsproxies.JHColorHalftone;
+import pixelitor.utils.ProgressTracker;
+
 import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
 
 /**
  * A Filter to pixellate images.
@@ -110,8 +112,8 @@ public class ColorHalftoneFilter extends AbstractBufferedImageOp {
     public BufferedImage filter( BufferedImage src, BufferedImage dst ) {
         int width = src.getWidth();
         int height = src.getHeight();
-		int type = src.getType();
-		WritableRaster srcRaster = src.getRaster();
+
+        ProgressTracker pt = new ProgressTracker(JHColorHalftone.NAME, height);
 
         if ( dst == null ) {
             dst = createCompatibleDestImage(src, null);
@@ -180,7 +182,10 @@ public class ColorHalftoneFilter extends AbstractBufferedImageOp {
                 }
             }
 			setRGB( dst, 0, y, width, 1, outPixels );
+
+            pt.itemProcessed();
         }
+        pt.finish();
 
         return dst;
     }

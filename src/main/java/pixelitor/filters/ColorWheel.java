@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,12 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.Future;
 
+/**
+ * Renders a color wheel
+ */
 public class ColorWheel extends FilterWithParametrizedGUI {
+    public static final String NAME = "Color Wheel";
+
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final AngleParam hueShiftParam = new AngleParam("Rotate (Degrees)", 0);
     private final RangeParam brightnessParam = new RangeParam("Brightness (%)", 0, 75, 100);
@@ -55,20 +60,13 @@ public class ColorWheel extends FilterWithParametrizedGUI {
         float saturation = satParam.getValueAsPercentage();
         float brightness = brightnessParam.getValueAsPercentage();
 
-        boolean multiThreaded = ThreadPool.runMultiThreaded();
-        if (multiThreaded) {
-            Future<?>[] futures = new Future[height];
-            for (int y = 0; y < height; y++) {
-                int finalY = y;
-                Runnable lineTask = () -> calculateLine(destData, width, cx, cy, hueShift, saturation, brightness, finalY);
-                futures[y] = ThreadPool.executorService.submit(lineTask);
-            }
-            ThreadPool.waitForFutures(futures);
-        } else {
-            for (int y = 0; y < height; y++) {
-                calculateLine(destData, width, cx, cy, hueShift, saturation, brightness, y);
-            }
+        Future<?>[] futures = new Future[height];
+        for (int y = 0; y < height; y++) {
+            int finalY = y;
+            Runnable lineTask = () -> calculateLine(destData, width, cx, cy, hueShift, saturation, brightness, finalY);
+            futures[y] = ThreadPool.submit(lineTask);
         }
+        ThreadPool.waitForFutures(futures, null, NAME);
 
         return dest;
     }

@@ -21,16 +21,25 @@ import pixelitor.utils.ImageUtils;
 import java.awt.image.BufferedImage;
 
 /**
- * A filter which adds Gaussian blur to an image, producing a glowing effect.
+ * A filter which adds blur to an image, producing a glowing effect.
  *
  * @author Jerry Huxtable
  */
-public class GlowFilter extends GaussianFilter {
+public class GlowFilter extends AbstractBufferedImageOp {
 
     private float amount = 0.5f;
 
+    /**
+     * The blur radius.
+     */
+    protected float radius;
+
     public GlowFilter() {
         radius = 2;
+    }
+
+    public void setRadius(float radius) {
+        this.radius = radius;
     }
 
     /**
@@ -76,21 +85,6 @@ public class GlowFilter extends GaussianFilter {
 
         int[] outPixels = ImageUtils.getPixelsAsArray(srcCopy);
 
-/*        int[] inPixels = new int[width * height];
-        int[] outPixels = new int[width * height];
-//        src.getRGB(0, 0, width, height, inPixels, 0, width);
-//        int[] inPixels = ImageUtils.getPixelsAsArray(src);
-        getRGB(src, 0, 0, width, height, inPixels);
-
-        if (radius > 0) {
-            convolveAndTranspose(kernel, inPixels, outPixels, width, height, alpha, alpha && premultiplyAlpha, false, CLAMP_EDGES);
-            convolveAndTranspose(kernel, outPixels, inPixels, height, width, alpha, false, alpha && premultiplyAlpha, CLAMP_EDGES);
-        }
-
-//        src.getRGB(0, 0, width, height, outPixels, 0, width);
-//        outPixels = ImageUtils.getPixelsAsArray(src);
-        getRGB(src, 0, 0, width, height, outPixels);
-*/
         float a = 4 * amount;
 
         int index = 0;

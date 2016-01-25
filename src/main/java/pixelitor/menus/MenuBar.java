@@ -688,7 +688,7 @@ public class MenuBar extends JMenuBar {
 //        colorsMenu.buildFA("Levels 2", Levels2::new).add();
         colorsMenu.buildFA("Brightness/Contrast", Brightness::new).add();
         colorsMenu.buildFA("Solarize", Solarize::new).add();
-        colorsMenu.buildFA("Sepia", Sepia::new).add();
+        colorsMenu.buildFA(Sepia.NAME, Sepia::new).add();
         colorsMenu.buildFA("Invert", Invert::new).noGUI().withKey(CTRL_I).add();
         colorsMenu.buildFA("Channel Invert", ChannelInvert::new).add();
         colorsMenu.buildFA("Channel Mixer", ChannelMixer::new).add();
@@ -740,13 +740,13 @@ public class MenuBar extends JMenuBar {
 
         sub.addSeparator();
 
-        sub.addFA("Tritone", JHTriTone::new);
+        sub.addFA(JHTriTone.NAME, JHTriTone::new);
         sub.addFA("Gradient Map", GradientMap::new);
 
         sub.addSeparator();
 
-        sub.addFA("Color Halftone", JHColorHalftone::new);
-        sub.addFA("Dither", JHDither::new);
+        sub.addFA(JHColorHalftone.NAME, JHColorHalftone::new);
+        sub.addFA(JHDither.NAME, JHDither::new);
 
         return sub;
     }
@@ -758,8 +758,8 @@ public class MenuBar extends JMenuBar {
         sub.buildFA(BACKGROUND.createFillFilterAction()).withKey(CTRL_BACKSPACE).add();
         sub.addFA(TRANSPARENT.createFillFilterAction());
 
-        sub.buildFA("Color Wheel", ColorWheel::new).withFillListName().add();
-        sub.buildFA("Four Color Gradient", JHFourColorGradient::new)
+        sub.buildFA(ColorWheel.NAME, ColorWheel::new).withFillListName().add();
+        sub.buildFA(JHFourColorGradient.NAME, JHFourColorGradient::new)
                 .withFillListName().add();
         sub.buildFA("Starburst", Starburst::new).withFillListName().add();
 
@@ -787,24 +787,24 @@ public class MenuBar extends JMenuBar {
 
     private static JMenu createBlurSharpenSubmenu() {
         PMenu sub = new PMenu("Blur/Sharpen");
-        sub.addFA("Gaussian Blur", JHGaussianBlur::new);
-        sub.addFA("Smart Blur", JHSmartBlur::new);
         sub.addFA("Box Blur", JHBoxBlur::new);
         sub.addFA("Fast Blur", FastBlur::new);
+        sub.addFA("Focus", JHFocus::new);
+        sub.addFA(JHGaussianBlur.NAME, JHGaussianBlur::new);
         sub.addFA("Lens Blur", JHLensBlur::new);
         sub.addFA(MOTION_BLUR.createFilterAction());
+        sub.addFA(JHSmartBlur.NAME, JHSmartBlur::new);
         sub.addFA(SPIN_ZOOM_BLUR.createFilterAction());
-        sub.addFA("Focus", JHFocus::new);
         sub.addSeparator();
-        sub.addFA("Unsharp Mask", JHUnsharpMask::new);
+        sub.addFA(JHUnsharpMask.NAME, JHUnsharpMask::new);
         return sub;
     }
 
     private static JMenu createDistortSubmenu() {
         PMenu sub = new PMenu("Distort");
 
-        sub.addFA("Swirl, Pinch, Bulge", UnifiedSwirl::new);
-        sub.addFA("Circle to Square", CircleToSquare::new);
+        sub.addFA(SwirlPinchBulge.NAME, SwirlPinchBulge::new);
+        sub.addFA(CircleToSquare.NAME, CircleToSquare::new);
         sub.addFA("Perspective", JHPerspective::new);
 
         sub.addSeparator();
@@ -818,18 +818,18 @@ public class MenuBar extends JMenuBar {
         sub.addFA("Underwater", JHUnderWater::new);
         sub.addFA("Water Ripple", JHWaterRipple::new);
         sub.addFA("Waves", JHWaves::new);
-        sub.addFA("Angular Waves", AngularWaves::new);
-        sub.addFA("Radial Waves", RadialWaves::new);
+        sub.addFA(AngularWaves.NAME, AngularWaves::new);
+        sub.addFA(RadialWaves.NAME, RadialWaves::new);
 
         sub.addSeparator();
 
         sub.addFA("Glass Tiles", GlassTiles::new);
-        sub.addFA("Polar Glass Tiles", PolarTiles::new);
+        sub.addFA(PolarTiles.NAME, PolarTiles::new);
         sub.addFA("Frosted Glass", JHFrostedGlass::new);
 
         sub.addSeparator();
 
-        sub.addFA("Little Planet", LittlePlanet::new);
+        sub.addFA(LittlePlanet.NAME, LittlePlanet::new);
         sub.addFA("Polar Coordinates", JHPolarCoordinates::new);
         sub.addFA("Wrap Around Arc", JHWrapAroundArc::new);
 
@@ -839,12 +839,12 @@ public class MenuBar extends JMenuBar {
     private static JMenu createDislocateSubmenu() {
         PMenu sub = new PMenu("Dislocate");
 
+        sub.addFA(DrunkVision.NAME, DrunkVision::new);
         sub.addFA("Kaleidoscope", JHKaleidoscope::new);
-        sub.addFA("Drunk Vision", DrunkVision::new);
-        sub.addFA("Video Feedback", JHVideoFeedback::new);
         sub.addFA("Offset", JHOffset::new);
+        sub.addFA(Mirror.NAME, Mirror::new);
         sub.addFA("Slice", Slice::new);
-        sub.addFA("Mirror", Mirror::new);
+        sub.addFA(JHVideoFeedback.NAME, JHVideoFeedback::new);
 
         return sub;
     }
@@ -853,10 +853,10 @@ public class MenuBar extends JMenuBar {
         PMenu sub = new PMenu("Light");
 
         sub.addFA("Glow", JHGlow::new);
-        sub.addFA("Sparkle", JHSparkle::new);
+        sub.addFA(JHSparkle.NAME, JHSparkle::new);
         sub.addFA("Rays", JHRays::new);
-        sub.addFA("Glint", JHGlint::new);
-        sub.addFA("Flashlight", Flashlight::new);
+        sub.addFA(JHGlint.NAME, JHGlint::new);
+        sub.addFA(Flashlight.NAME, Flashlight::new);
 
         return sub;
     }
@@ -864,8 +864,8 @@ public class MenuBar extends JMenuBar {
     private static JMenu createNoiseSubmenu() {
         PMenu sub = new PMenu("Noise");
 
-        sub.buildFA("Reduce Single Pixel Noise", JHReduceNoise::new).noGUI().add();
-        sub.buildFA("3x3 Median Filter", JHMedian::new).noGUI().add();
+        sub.buildFA(JHReduceNoise.NAME, JHReduceNoise::new).noGUI().add();
+        sub.buildFA(JHMedian.NAME, JHMedian::new).noGUI().add();
 
         sub.addSeparator();
 
@@ -880,15 +880,15 @@ public class MenuBar extends JMenuBar {
 
         sub.add(createRenderShapesSubmenu());
 
-        sub.addFA("Clouds", Clouds::new);
-        sub.addFA("Value Noise", ValueNoise::new);
-        sub.addFA("Caustics", JHCaustics::new);
+        sub.addFA(Clouds.NAME, Clouds::new);
+        sub.addFA(ValueNoise.NAME, ValueNoise::new);
+        sub.addFA(JHCaustics.NAME, JHCaustics::new);
         sub.addFA("Plasma", JHPlasma::new);
-        sub.addFA("Wood", JHWood::new);
-        sub.addFA("Cells", JHCells::new);
-        sub.addFA("Brushed Metal", JHBrushedMetal::new);
-        sub.addFA("Voronoi Diagram", Voronoi::new);
-        sub.addFA("Fractal Tree", FractalTree::new);
+        sub.addFA(JHWood.NAME, JHWood::new);
+        sub.addFA(JHCells.NAME, JHCells::new);
+        sub.addFA(JHBrushedMetal.NAME, JHBrushedMetal::new);
+        sub.addFA(Voronoi.NAME, Voronoi::new);
+        sub.addFA(FractalTree.NAME, FractalTree::new);
 
         return sub;
     }
@@ -905,16 +905,16 @@ public class MenuBar extends JMenuBar {
     private static JMenu createArtisticSubmenu() {
         PMenu sub = new PMenu("Artistic");
 
-        sub.addFA("Crystallize", JHCrystallize::new);
-        sub.addFA("Pointillize", JHPointillize::new);
-        sub.addFA("Stamp", JHStamp::new);
-        sub.addFA("Oil Painting", JHOilPainting::new);
-        sub.addFA("Random Spheres", RandomSpheres::new);
-        sub.addFA("Smear", JHSmear::new);
-        sub.addFA("Emboss", JHEmboss::new);
+        sub.addFA(JHCrystallize.NAME, JHCrystallize::new);
+        sub.addFA(JHPointillize.NAME, JHPointillize::new);
+        sub.addFA(JHStamp.NAME, JHStamp::new);
+        sub.addFA(JHOilPainting.NAME, JHOilPainting::new);
+        sub.addFA(RandomSpheres.NAME, RandomSpheres::new);
+        sub.addFA(JHSmear.NAME, JHSmear::new);
+        sub.addFA(JHEmboss.NAME, JHEmboss::new);
         sub.addFA("Orton Effect", Orton::new);
-        sub.addFA("Photo Collage", PhotoCollage::new);
-        sub.addFA("Weave", JHWeave::new);
+        sub.addFA(PhotoCollage.NAME, PhotoCollage::new);
+        sub.addFA(JHWeave.NAME, JHWeave::new);
 
         return sub;
     }
@@ -922,7 +922,7 @@ public class MenuBar extends JMenuBar {
     private static JMenu createFindEdgesSubmenu() {
         PMenu sub = new PMenu("Find Edges");
 
-        sub.addFA("Convolution Edge Detection", JHConvolutionEdge::new);
+        sub.addFA(JHConvolutionEdge.NAME, JHConvolutionEdge::new);
 
         sub.addAction(new FilterAction("Laplacian", JHLaplacian::new)
                 .withListNamePrefix("Laplacian Edge Detection")
@@ -949,8 +949,8 @@ public class MenuBar extends JMenuBar {
 
         sub.addSeparator();
 
-        sub.addFA("Channel to Transparency", ChannelToTransparency::new);
-        sub.buildFA("Invert Transparency", InvertTransparency::new).noGUI().add();
+        sub.addFA(ChannelToTransparency.NAME, ChannelToTransparency::new);
+        sub.buildFA(InvertTransparency.NAME, InvertTransparency::new).noGUI().add();
 
         return sub;
     }
@@ -1320,10 +1320,10 @@ public class MenuBar extends JMenuBar {
         sub.addSeparator();
 
         sub.addFA("Droste", Droste::new);
-        sub.addFA("Sphere3D", Sphere3D::new);
+        sub.addFA(Sphere3D.NAME, Sphere3D::new);
         sub.addFA("Grid", RenderGrid::new);
-        sub.addFA("Empty Polar", EmptyPolar::new);
-        sub.addFA("Checker Pattern", JHCheckerFilter::new);
+        sub.addFA(EmptyPolar.NAME, EmptyPolar::new);
+        sub.addFA(JHCheckerFilter.NAME, JHCheckerFilter::new);
 
         return sub;
     }

@@ -16,6 +16,8 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+import pixelitor.filters.jhlabsproxies.JHPointillize;
+
 public class PointillizeFilter extends CellularFilter {
 
     private float edgeThickness = 0.4f;
@@ -24,6 +26,7 @@ public class PointillizeFilter extends CellularFilter {
     private float fuzziness = 0.1f;
 
     public PointillizeFilter() {
+        super(JHPointillize.NAME);
         setScale(16);
         setRandomness(0.0f);
     }

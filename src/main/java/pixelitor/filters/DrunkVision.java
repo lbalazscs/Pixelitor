@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.ReseedSupport;
 
 import java.awt.AlphaComposite;
@@ -37,6 +38,8 @@ import static java.lang.Math.PI;
  * "Drunk Vision" filter inspired by "Fragment Blur" in paint.net
  */
 public class DrunkVision extends FilterWithParametrizedGUI {
+    public static final String NAME = "Drunk Vision";
+
     private final RangeParam drunkenness = new RangeParam("Drunkenness", 0, 20, 100);
     private final RangeParam numEyes = new RangeParam("Number of Eyes", 2, 5, 42);
 
@@ -54,6 +57,9 @@ public class DrunkVision extends FilterWithParametrizedGUI {
             return src;
         }
 
+        int numShiftedImages = numEyes.getValue() - 1;
+        ProgressTracker pt = new ProgressTracker(NAME, numShiftedImages);
+
         dest = ImageUtils.copyImage(src);
 
         Graphics2D g = dest.createGraphics();
@@ -61,15 +67,16 @@ public class DrunkVision extends FilterWithParametrizedGUI {
         ReseedSupport.reInitialize();
         Random rand = ReseedSupport.getRand();
 
-        int numShiftedImages = numEyes.getValue() - 1;
         int maxDistance = (int) (drunkenness.getValueAsPercentage() * 0.2 * (src.getWidth() + src.getHeight()));
 
         Point[] transformPoints = generateTransforms(numShiftedImages, maxDistance, rand);
-        for (int i = 0; i < transformPoints.length; i++) {
+        for (int i = 0; i < numShiftedImages; i++) {
             AffineTransform transform = AffineTransform.getTranslateInstance(transformPoints[i].x, transformPoints[i].y);
             g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f / (i + 2)));
             g.drawImage(src, transform, null);
+            pt.itemProcessed();
         }
+        pt.finish();
 
         g.dispose();
 

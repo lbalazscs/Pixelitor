@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,6 +31,8 @@ import java.awt.image.BufferedImage;
  * Dither based on the JHLabs DitherFilter
  */
 public class JHDither extends FilterWithParametrizedGUI {
+    public static final String NAME = "Dither";
+
     private final RangeParam levels = new RangeParam("Levels", 2, 8, 100);
     private final BooleanParam colorDither = new BooleanParam("Color Dither", true);
     private final IntChoiceParam matrixMethod = new IntChoiceParam("Matrix Type", new IntChoiceParam.Value[]{
@@ -60,7 +62,7 @@ public class JHDither extends FilterWithParametrizedGUI {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         if(filter == null) {
-            filter = new DitherFilter();
+            filter = new DitherFilter(NAME);
         }
 
         filter.setLevels(levels.getValue());

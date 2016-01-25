@@ -28,7 +28,8 @@ import java.util.concurrent.Future;
 /**
  * A filter which produces an image with a cellular texture.
  */
-public class CellularFilter extends WholeImageFilter implements Function2D, Cloneable {
+public class CellularFilter extends WholeImageFilter implements Function2D {
+    private final String filterName;
 
     protected float scale = 32;
     protected float stretch = 1.0f;
@@ -49,7 +50,7 @@ public class CellularFilter extends WholeImageFilter implements Function2D, Clon
     protected float m11 = 1.0f;
 //    protected Point[] results = null;
 
-    protected ThreadLocal<Point[]> resultsTL = new ThreadLocal<Point[]>() {
+    protected static final ThreadLocal<Point[]> resultsTL = new ThreadLocal<Point[]>() {
         @Override
         protected Point[] initialValue() {
             Point[] results = new Point[3];
@@ -61,7 +62,7 @@ public class CellularFilter extends WholeImageFilter implements Function2D, Clon
     };
 
     protected float randomness = 0;
-//    private float min;
+    //    private float min;
 //    private float max;
     private static byte[] probabilities;
     private float gradientCoefficient;
@@ -74,7 +75,8 @@ public class CellularFilter extends WholeImageFilter implements Function2D, Clon
 
     GridType gridType;
 
-    public CellularFilter() {
+    public CellularFilter(String filterName) {
+        this.filterName = filterName;
         if (probabilities == null) {
             probabilities = new byte[8192];
             float factorial = 1;
@@ -251,15 +253,15 @@ public class CellularFilter extends WholeImageFilter implements Function2D, Clon
     }
 
     public void setGridType(int gt) {
-        if(gt == GR_HEXAGONAL) {
+        if (gt == GR_HEXAGONAL) {
             gridType = GridType.HEXAGONAL;
         } else if (gt == GR_OCTAGONAL) {
             gridType = GridType.OCTAGONAL;
-        } else if(gt == GR_RANDOM) {
+        } else if (gt == GR_RANDOM) {
             gridType = GridType.RANDOM;
-        } else if(gt == GR_SQUARE) {
+        } else if (gt == GR_SQUARE) {
             gridType = GridType.SQUARE;
-        } else if(gt == GR_TRIANGULAR) {
+        } else if (gt == GR_TRIANGULAR) {
             gridType = GridType.TRIANGULAR;
         } else {
             throw new IllegalArgumentException("gridType = " + gt);
@@ -318,7 +320,7 @@ public class CellularFilter extends WholeImageFilter implements Function2D, Clon
         return amount;
     }
 
-    public class Point {
+    public static class Point {
         public int index;
         public float x, y;
         public float dx, dy;
@@ -437,7 +439,7 @@ public class CellularFilter extends WholeImageFilter implements Function2D, Clon
             }
         };
 
-        ThreadLocal<CachedFloatRandom> randomTL = new ThreadLocal<CachedFloatRandom>() {
+        static final ThreadLocal<CachedFloatRandom> randomTL = new ThreadLocal<CachedFloatRandom>() {
             @Override
             protected CachedFloatRandom initialValue() {
                 return new CachedFloatRandom();
@@ -602,40 +604,26 @@ public class CellularFilter extends WholeImageFilter implements Function2D, Clon
     }
 
     @Override
-    protected int[] filterPixels(final int width, final int height, final int[] inPixels, Rectangle transformedSpace) {
+    protected int[] filterPixels(int width, int height, int[] inPixels, Rectangle transformedSpace) {
 //		float[] minmax = Noise.findRange(this, null);
 //		min = minmax[0];
 //		max = minmax[1];
 
 
-        final int[] outPixels = new int[width * height];
+        int[] outPixels = new int[width * height];
 
-        boolean multiThreaded = true;
-        if(multiThreaded) {
-            Future<?>[] futures = new Future[height];
-            for (int y = 0; y < height; y++) {
-                final int finalY = y;
-                final Runnable calculateLineTask = new Runnable() {
-                    @Override
-                    public void run() {
-                        int index = width * finalY;
-                        for (int x = 0; x < width; x++) {
-                            outPixels[index++] = getPixel(x, finalY, inPixels, width, height);
-                        }
-                    }
-                };
-                Future<?> future = ThreadPool.executorService.submit(calculateLineTask);
-                futures[y] = future;
-            }
-            ThreadPool.waitForFutures(futures);
-        } else {
-            int index = 0;
-            for (int y = 0; y < height; y++) {
+        Future<?>[] futures = new Future[height];
+        for (int y = 0; y < height; y++) {
+            int finalY = y;
+            Runnable calculateLineTask = () -> {
+                int index = width * finalY;
                 for (int x = 0; x < width; x++) {
-                    outPixels[index++] = getPixel(x, y, inPixels, width, height);
+                    outPixels[index++] = getPixel(x, finalY, inPixels, width, height);
                 }
-            }
+            };
+            futures[y] = ThreadPool.submit(calculateLineTask);
         }
+        ThreadPool.waitForFutures(futures, null, filterName);
 
         return outPixels;
     }

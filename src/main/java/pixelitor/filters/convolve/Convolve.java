@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor.filters.convolve;
@@ -96,8 +96,12 @@ public class Convolve extends FilterWithGUI {
     }
 
     public static FilterAction createFilterAction(int size) {
-        String name = "Custom " + size + 'x' + size + " Convolution";
+        String name = getFilterName(size, size);
         FilterAction fa = new FilterAction(name, () -> new Convolve(size));
         return fa;
+    }
+
+    public static String getFilterName(int width, int height) {
+        return "Custom " + width + 'x' + height + " Convolution";
     }
 }

@@ -35,6 +35,7 @@
 package org.jdesktop.swingx.image;
 
 import org.jdesktop.swingx.graphics.GraphicsUtilities;
+import pixelitor.utils.ProgressTracker;
 
 import java.awt.image.BufferedImage;
 
@@ -140,15 +141,19 @@ public class StackBlurFilter extends AbstractFilter {
         int[] srcPixels = new int[width * height];
         int[] dstPixels = new int[width * height];
 
+        ProgressTracker pt = new ProgressTracker(iterations * (width + height));
+
         GraphicsUtilities.getPixels(src, 0, 0, width, height, srcPixels);
         for (int i = 0; i < iterations; i++) {
             // horizontal pass
-            FastBlurFilter.blur(srcPixels, dstPixels, width, height, radius);
+            FastBlurFilter.blur(srcPixels, dstPixels, width, height, radius, pt);
             // vertical pass
-            FastBlurFilter.blur(dstPixels, srcPixels, height, width, radius);
+            FastBlurFilter.blur(dstPixels, srcPixels, height, width, radius, pt);
         }
         // the result is now stored in srcPixels due to the 2nd pass
         GraphicsUtilities.setPixels(dst, 0, 0, width, height, srcPixels);
+
+        pt.finish();
 
         return dst;
     }

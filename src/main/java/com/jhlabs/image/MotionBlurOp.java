@@ -16,6 +16,8 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+import pixelitor.utils.ProgressTracker;
+
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -249,6 +251,8 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
             return dst;
         }
 
+        ProgressTracker pt = new ProgressTracker(steps);
+
         AlphaComposite alphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f);
         BufferedImage tmp = createCompatibleDestImage(src, null);
         for (int i = 0; i < steps; i++) {
@@ -276,7 +280,10 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
             translateY *= 2;
             scale *= 2;
             rotate *= 2;
+
+            pt.itemProcessed();
         }
+        pt.finish();
         return dst;
     }
 

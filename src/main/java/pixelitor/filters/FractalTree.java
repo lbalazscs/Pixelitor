@@ -1,3 +1,20 @@
+/*
+ * Copyright 2016 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.filters;
 
 import net.jafama.FastMath;
@@ -7,6 +24,7 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.ReseedSupport;
 
 import java.awt.BasicStroke;
@@ -26,12 +44,14 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
  * Renders a fractal tree
  */
 public class FractalTree extends FilterWithParametrizedGUI {
+    public static final String NAME = "Fractal Tree";
+
     public static final Color BROWN = new Color(140, 100, 73);
     public static final Color GREEN = new Color(31, 125, 42);
     public static final int QUALITY_BETTER = 1;
     public static final int QUALITY_FASTER = 2;
 
-    private final RangeParam iterations = new RangeParam("Age (Iterations)", 1, 10, 16);
+    private final RangeParam iterations = new RangeParam("Age (Iterations)", 1, 10, 17);
     private final RangeParam angle = new RangeParam("Angle", 1, 20, 45);
     private final RangeParam randomnessParam = new RangeParam("Randomness", 0, 40, 100);
     private final GroupedRangeParam width = new GroupedRangeParam("Width",
@@ -66,6 +86,8 @@ public class FractalTree extends FilterWithParametrizedGUI {
     private double randPercent;
     private double lengthDeviation;
     private double angleDeviation;
+
+    private ProgressTracker pt;
 
     public FractalTree() {
         super(ShowOriginal.NO);
@@ -136,9 +158,18 @@ public class FractalTree extends FilterWithParametrizedGUI {
         if (rand.nextBoolean()) {
             c = -c;
         }
+
+        int drawTreeCalls = 2;
+        for(int i = 1; i < maxDepth; i++) {
+            drawTreeCalls *= 2;
+        }
+        drawTreeCalls--;
+        pt = new ProgressTracker(NAME, drawTreeCalls);
+
         drawTree(g, src.getWidth() / 2.0, src.getHeight(), 270 + calcAngleRandomness(rand), maxDepth, rand, c);
 
         g.dispose();
+        pt.finish();
 
         return dest;
     }
@@ -147,6 +178,7 @@ public class FractalTree extends FilterWithParametrizedGUI {
         if (depth == 0) {
             return;
         }
+
         int nextDepth = depth - 1;
         c = -c; // change the direction of the curvature in each iteration
 
@@ -177,6 +209,9 @@ public class FractalTree extends FilterWithParametrizedGUI {
 
         double leftBranchAngle = angle - split + calcAngleRandomness(rand);
         double rightBranchAngle = angle + split + calcAngleRandomness(rand);
+
+        pt.itemProcessed();
+
         leftFirst = !leftFirst;
         if (leftFirst) {
             drawTree(g, x2, y2, leftBranchAngle, nextDepth, rand, c);

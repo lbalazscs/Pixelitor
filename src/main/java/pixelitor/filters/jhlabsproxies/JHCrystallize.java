@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,6 +39,8 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
  * Crystallize based on the JHLabs CrystallizeFilter
  */
 public class JHCrystallize extends FilterWithParametrizedGUI {
+    public static final String NAME = "Crystallize";
+
     private final RangeParam edgeThickness = new RangeParam("Edge Thickness", 0, 40, 100);
     private final RangeParam size = new RangeParam("Size", 1, 20, 200);
     private final ColorParam edgeColor = new ColorParam("Edge Color", BLACK, FREE_OPACITY);

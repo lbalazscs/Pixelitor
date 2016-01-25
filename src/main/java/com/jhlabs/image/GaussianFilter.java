@@ -17,6 +17,8 @@ limitations under the License.
 package com.jhlabs.image;
 
 import pixelitor.ThreadPool;
+import pixelitor.filters.jhlabsproxies.JHGaussianBlur;
+import pixelitor.utils.ProgressTracker;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.Kernel;
@@ -29,6 +31,8 @@ import java.util.concurrent.Future;
  * @author Jerry Huxtable
  */
 public class GaussianFilter extends ConvolveFilter {
+    private ProgressTracker pt;
+    private boolean usedAsHelper = false;
 
     /**
      * The blur radius.
@@ -84,6 +88,10 @@ public class GaussianFilter extends ConvolveFilter {
         int width = src.getWidth();
         int height = src.getHeight();
 
+        if (!usedAsHelper) {
+            pt = new ProgressTracker(JHGaussianBlur.NAME, width + height);
+        }
+
         if (dst == null) {
             dst = createCompatibleDestImage(src, null);
         }
@@ -91,18 +99,22 @@ public class GaussianFilter extends ConvolveFilter {
         int[] inPixels = new int[width * height];
         int[] outPixels = new int[width * height];
 
-
 //        src.getRGB(0, 0, width, height, inPixels, 0, width);
 //        int[] inPixels = ImageUtils.getPixelsAsArray( src);
         getRGB(src, 0, 0, width, height, inPixels);
 
         if (radius > 0) {
-            convolveAndTranspose(kernel, inPixels, outPixels, width, height, alpha, alpha && premultiplyAlpha, false, CLAMP_EDGES);
-            convolveAndTranspose(kernel, outPixels, inPixels, height, width, alpha, false, alpha && premultiplyAlpha, CLAMP_EDGES);
+            convolveAndTranspose(kernel, inPixels, outPixels, width, height, alpha, alpha && premultiplyAlpha, false, CLAMP_EDGES, pt);
+            convolveAndTranspose(kernel, outPixels, inPixels, height, width, alpha, false, alpha && premultiplyAlpha, CLAMP_EDGES, pt);
         }
 
 //        dst.setRGB(0, 0, width, height, inPixels, 0, width);
         setRGB(dst, 0, 0, width, height, inPixels);
+
+        if (!usedAsHelper) {
+            pt.finish();
+        }
+
         return dst;
     }
 
@@ -117,35 +129,21 @@ public class GaussianFilter extends ConvolveFilter {
      * @param alpha      whether to blur the alpha channel
      * @param edgeAction what to do at the edges
      */
-    public static void convolveAndTranspose(Kernel kernel, final int[] inPixels, final int[] outPixels, final int width, final int height, final boolean alpha, final boolean premultiply, final boolean unpremultiply, final int edgeAction) {
-        final float[] matrix = kernel.getKernelData(null);
+    public static void convolveAndTranspose(Kernel kernel, int[] inPixels, int[] outPixels, int width, int height, boolean alpha, boolean premultiply, boolean unpremultiply,
+                                            int edgeAction, ProgressTracker pt) {
+        float[] matrix = kernel.getKernelData(null);
         int cols = kernel.getWidth();
-        final int cols2 = cols / 2;
+        int cols2 = cols / 2;
 
-        boolean oneThreaded = (ThreadPool.NUM_AVAILABLE_PROCESSORS == 1);
-//        boolean oneThreaded = true;
+        Future<?>[] resultLines = new Future[height];
 
-        if(oneThreaded) {
-            for (int y = 0; y < height; y++) {
-                convolveAndTransposeLine(inPixels, outPixels, width, height, alpha, premultiply, unpremultiply, edgeAction, matrix, cols2, y);
-            }
-        } else {
-            Future<?>[] resultLines = new Future[height];
-
-            for (int y = 0; y < height; y++) {
-                final int finalY = y;
-                Runnable lineTask = new Runnable() {
-                    @Override
-                    public void run() {
-                        convolveAndTransposeLine(inPixels, outPixels, width, height, alpha, premultiply, unpremultiply, edgeAction, matrix, cols2, finalY);
-                    }
-                };
-                Future<?> future = ThreadPool.executorService.submit(lineTask);
-                resultLines[y] = future;
-            }
-
-            ThreadPool.waitForFutures(resultLines);
+        for (int y = 0; y < height; y++) {
+            int finalY = y;
+            Runnable lineTask = () -> convolveAndTransposeLine(inPixels, outPixels, width, height, alpha, premultiply, unpremultiply, edgeAction, matrix, cols2, finalY);
+            resultLines[y] = ThreadPool.submit(lineTask);
         }
+
+        ThreadPool.waitForFutures(resultLines, pt, null);
     }
 
     private static void convolveAndTransposeLine(int[] inPixels, int[] outPixels, int width, int height, boolean alpha, boolean premultiply, boolean unpremultiply, int edgeAction, float[] matrix, int cols2, int y) {
@@ -237,9 +235,14 @@ public class GaussianFilter extends ConvolveFilter {
         }
 
         return new Kernel(rows, 1, matrix);
-	}
+    }
 
-	public String toString() {
-		return "Blur/Gaussian Blur...";
-	}
+    public void setProgressTracker(ProgressTracker pt) {
+        this.pt = pt;
+        usedAsHelper = true;
+    }
+
+    public String toString() {
+        return "Blur/Gaussian Blur...";
+    }
 }

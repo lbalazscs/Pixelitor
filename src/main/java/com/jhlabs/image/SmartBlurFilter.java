@@ -16,6 +16,9 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+import pixelitor.filters.jhlabsproxies.JHSmartBlur;
+import pixelitor.utils.ProgressTracker;
+
 import java.awt.image.BufferedImage;
 import java.awt.image.Kernel;
 
@@ -33,6 +36,8 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
         int width = src.getWidth();
         int height = src.getHeight();
 
+        ProgressTracker pt = new ProgressTracker(JHSmartBlur.NAME, width + height);
+
         if (dst == null) {
             dst = createCompatibleDestImage(src, null);
         }
@@ -42,17 +47,20 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
         getRGB(src, 0, 0, width, height, inPixels);
 
         Kernel kernel = GaussianFilter.makeKernel(hRadius);
-        thresholdBlur(kernel, inPixels, outPixels, width, height, true);
-        thresholdBlur(kernel, outPixels, inPixels, height, width, true);
+        thresholdBlur(kernel, inPixels, outPixels, width, height, true, pt);
+        thresholdBlur(kernel, outPixels, inPixels, height, width, true, pt);
 
         setRGB(dst, 0, 0, width, height, inPixels);
+
+        pt.finish();
+
         return dst;
     }
 
     /**
      * Convolve with a kernel consisting of one row
      */
-    private void thresholdBlur(Kernel kernel, int[] inPixels, int[] outPixels, int width, int height, boolean alpha) {
+    private void thresholdBlur(Kernel kernel, int[] inPixels, int[] outPixels, int width, int height, boolean alpha, ProgressTracker pt) {
 //		int index = 0;
         float[] matrix = kernel.getKernelData(null);
         int cols = kernel.getWidth();
@@ -119,6 +127,7 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
                 outPixels[outIndex] = (ia << 24) | (ir << 16) | (ig << 8) | ib;
                 outIndex += height;
             }
+            pt.itemProcessed();
         }
     }
 

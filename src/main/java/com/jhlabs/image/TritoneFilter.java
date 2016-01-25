@@ -28,8 +28,12 @@ public class TritoneFilter extends PointFilter {
 	private int midColor = 0xff888888;
 	private int highColor = 0xffffffff;
     private int[] lut;
-	
-    @Override
+
+	public TritoneFilter(String filterName) {
+        super(filterName);
+	}
+
+	@Override
     public BufferedImage filter( BufferedImage src, BufferedImage dst ) {
         lut = new int[256];
         for ( int i = 0; i < 128; i++ ) {

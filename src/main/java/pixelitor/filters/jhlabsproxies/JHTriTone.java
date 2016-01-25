@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,6 +34,8 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
  * Tritone based on the JHLabs TritoneFilter
  */
 public class JHTriTone extends FilterWithParametrizedGUI {
+    public static final String NAME = "Tritone";
+
     private final ColorParam shadowColor = new ColorParam("Shadow Color:", BLACK, NO_OPACITY);
     private final ColorParam midtonesColor = new ColorParam("Midtones Color:", RED, NO_OPACITY);
     private final ColorParam highlightsColor = new ColorParam("Highlights Color:", YELLOW, NO_OPACITY);
@@ -50,7 +52,7 @@ public class JHTriTone extends FilterWithParametrizedGUI {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
-            filter = new TritoneFilter();
+            filter = new TritoneFilter(NAME);
         }
 
         filter.setShadowColor(shadowColor.getColor().getRGB());
