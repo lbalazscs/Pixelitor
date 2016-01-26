@@ -17,6 +17,7 @@
 
 package pixelitor;
 
+import com.bric.util.JVM;
 import net.jafama.FastMath;
 import pixelitor.filters.Filter;
 import pixelitor.gui.GUIMessageHandler;
@@ -31,6 +32,7 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
+import javax.swing.plaf.MenuBarUI;
 import java.awt.EventQueue;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
@@ -53,7 +55,7 @@ public class Pixelitor {
             Build.CURRENT = Build.DEVELOPMENT;
         }
 
-        setupForMacintosh();
+        System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Pixelitor");
 
         ExceptionHandler.INSTANCE.register();
         EventQueue.invokeLater(() -> {
@@ -86,14 +88,6 @@ public class Pixelitor {
         new Thread(loadFontsTask).start();
     }
 
-    private static void setupForMacintosh() {
-        // this works
-        System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Pixelitor");
-
-        // this is respected only by the native Aqua look-and-feel
-        System.setProperty("apple.laf.useScreenMenuBar", "true");
-    }
-
     private static void createAndShowGUI(String[] args) {
         assert SwingUtilities.isEventDispatchThread();
 
@@ -102,6 +96,18 @@ public class Pixelitor {
 
         PixelitorWindow pw = PixelitorWindow.getInstance();
         Dialogs.setMainWindowInitialized(true);
+
+        if (JVM.isMac) {
+            JMenuBar menuBar = pw.getJMenuBar();
+            try {
+                // this property is respected only by the Aqua look-and-feel...
+                System.setProperty("apple.laf.useScreenMenuBar", "true");
+                // ...so set the look-and-feel for the menu only to Aqua
+                menuBar.setUI((MenuBarUI) Class.forName("com.apple.laf.AquaMenuBarUI").newInstance());
+            } catch (Exception e) {
+                // ignore
+            }
+        }
 
         if (args.length > 0) {
             openFilesGivenAsProgramArguments(args);
