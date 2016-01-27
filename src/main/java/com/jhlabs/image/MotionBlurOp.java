@@ -28,7 +28,7 @@ import java.awt.image.BufferedImage;
  * A filter which produces motion blur the faster, but lower-quality way.
  */
 public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur {
-
+    private final String filterName;
     private float centreX = 0.5f, centreY = 0.5f;
     private float distance;
     private float angle;
@@ -38,22 +38,8 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
     /**
      * Construct a MotionBlurOp.
      */
-    public MotionBlurOp() {
-    }
-
-    /**
-     * Construct a MotionBlurOp.
-     *
-     * @param distance the distance of blur.
-     * @param angle    the angle of blur.
-     * @param rotation the angle of rotation.
-     * @param zoom     the zoom factor.
-     */
-    public MotionBlurOp(float distance, float angle, float rotation, float zoom) {
-        this.distance = distance;
-        this.angle = angle;
-        this.rotation = rotation;
-        this.zoom = zoom;
+    public MotionBlurOp(String filterName) {
+        this.filterName = filterName;
     }
 
     /**
@@ -251,7 +237,7 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
             return dst;
         }
 
-        ProgressTracker pt = new ProgressTracker(steps);
+        ProgressTracker pt = new ProgressTracker(filterName, steps);
 
         AlphaComposite alphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f);
         BufferedImage tmp = createCompatibleDestImage(src, null);

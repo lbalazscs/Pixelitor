@@ -16,6 +16,8 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+import pixelitor.utils.ProgressTracker;
+
 /**
  * The interface for an image quantizer. The addColor method is called (repeatedly
  * if necessary) with all the image pixels. A color table can then be returned by
@@ -31,12 +33,13 @@ public interface Quantizer {
 
     /**
      * Add pixels to the quantizer.
-     *
      * @param pixels the array of ARGB pixels
      * @param offset the offset into the array
      * @param count  the count of pixels
+     * @param pt
+     * @param width
      */
-    public void addPixels(int[] pixels, int offset, int count);
+    public void addPixels(int[] pixels, int offset, int count, ProgressTracker pt, int width);
 
     /**
      * Build a color table from the added pixels.

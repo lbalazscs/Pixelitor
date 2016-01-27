@@ -34,9 +34,10 @@ public class SwimFilter extends TransformFilter {
 	private float m10 = 0.0f;
 	private float m11 = 1.0f;
 
-	public SwimFilter() {
+	public SwimFilter(String filterName) {
+		super(filterName);
 	}
-	
+
 	/**
 	 * Set the amount of swim.
 	 * @param amount the amount of swim
@@ -122,27 +123,6 @@ public class SwimFilter extends TransformFilter {
 		return angle;
 	}
 
-//	/**
-//     * Specifies the turbulence of the texture.
-//     * @param turbulence the turbulence of the texture.
-//     * @min-value 0
-//     * @max-value 1
-//     * @see #getTurbulence
-//     */
-//	public void setTurbulence(float turbulence) {
-//		this.turbulence = turbulence;
-//		System.out.println(String.format("SwimFilter::setTurbulence: turbulence = %.2f", turbulence));
-//	}
-//
-//	/**
-//     * Returns the turbulence of the effect.
-//     * @return the turbulence of the effect.
-//     * @see #setTurbulence
-//     */
-//	public float getTurbulence() {
-//		return turbulence;
-//	}
-
 	/**
      * Specifies the time. Use this to animate the effect.
      * @param time the time.
@@ -162,24 +142,18 @@ public class SwimFilter extends TransformFilter {
 		return time;
 	}
 
+	@Override
 	protected void transformInverse(int x, int y, float[] out) {
 		float nx = m00*x + m01*y;
 		float ny = m10*x + m11*y;
 		nx /= scale;
 		ny /= scale * stretch;
 
-//		if ( turbulence == 0.0f ) {
 		float noise3x = Noise.noise3(nx + 0.5f, ny, time);
 		float noise3y = Noise.noise3(nx, ny + 0.5f, time);
 
-//		System.out.println(String.format("SwimFilter::transformInverse: noise3x = %.2f, noise3y = %.2f", noise3x, noise3y));
-
 		out[0] = x + amount * noise3x;
 		out[1] = y + amount * noise3y;
-//		} else {
-//			out[0] = x + amount * Noise.turbulence3(nx+0.5f, ny, turbulence, time);
-//			out[1] = y + amount * Noise.turbulence3(nx, ny+0.5f, turbulence, time);
-//		}
 	}
 
 	public String toString() {

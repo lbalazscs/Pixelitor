@@ -39,8 +39,8 @@ public class WaterFilter extends TransformFilter {
     private float icentreX;
     private float icentreY;
 
-    public WaterFilter() {
-        setEdgeAction(REPEAT_EDGE_PIXELS);
+    public WaterFilter(String filterName) {
+        super(filterName);
     }
 
     /**

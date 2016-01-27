@@ -23,17 +23,12 @@ import java.util.concurrent.ThreadLocalRandom;
  * This filter diffuses an image by moving its pixels in random directions.
  */
 public class DiffuseFilter extends TransformFilter {
-//    private Random random;
     private float[] sinTable, cosTable;
     private float scale = 4;
 
-    public DiffuseFilter() {
+    public DiffuseFilter(String filterName) {
+        super(filterName);
         setEdgeAction(REPEAT_EDGE_PIXELS);
-
-//        random = new Random();
-//        random = ThreadLocalRandom.current();
-        // MXSIntSeqRNGis slightly faster than ThreadLocalRandom, but not concurrent
-//        random = new MXSIntSeqRNG();
     }
 
     /**

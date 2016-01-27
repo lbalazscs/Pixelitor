@@ -125,56 +125,56 @@ import static pixelitor.menus.MenuAction.AllowedLayerType.IS_TEXT_LAYER;
  * The menu bar of the app
  */
 public class MenuBar extends JMenuBar {
-    private static final int menuShortcutKeyMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+    public static final int MENU_SHORTCUT_KEY_MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 
-    private static final KeyStroke CTRL_B = KeyStroke.getKeyStroke('B', menuShortcutKeyMask);
-    private static final KeyStroke CTRL_C = KeyStroke.getKeyStroke('C', menuShortcutKeyMask);
-    private static final KeyStroke CTRL_D = KeyStroke.getKeyStroke('D', menuShortcutKeyMask);
-    private static final KeyStroke CTRL_E = KeyStroke.getKeyStroke('E', menuShortcutKeyMask);
-    private static final KeyStroke CTRL_F = KeyStroke.getKeyStroke('F', menuShortcutKeyMask);
-    private static final KeyStroke CTRL_G = KeyStroke.getKeyStroke('G', menuShortcutKeyMask);
-    private static final KeyStroke CTRL_H = KeyStroke.getKeyStroke('H', menuShortcutKeyMask);
-    private static final KeyStroke CTRL_I = KeyStroke.getKeyStroke('I', menuShortcutKeyMask);
-    private static final KeyStroke CTRL_J = KeyStroke.getKeyStroke('J', menuShortcutKeyMask);
-    private static final KeyStroke CTRL_K = KeyStroke.getKeyStroke('K', menuShortcutKeyMask);
-    private static final KeyStroke CTRL_L = KeyStroke.getKeyStroke('L', menuShortcutKeyMask);
-    private static final KeyStroke CTRL_N = KeyStroke.getKeyStroke('N', menuShortcutKeyMask);
-    private static final KeyStroke CTRL_O = KeyStroke.getKeyStroke('O', menuShortcutKeyMask);
-    private static final KeyStroke CTRL_R = KeyStroke.getKeyStroke('R', menuShortcutKeyMask);
-    private static final KeyStroke CTRL_S = KeyStroke.getKeyStroke('S', menuShortcutKeyMask);
-    private static final KeyStroke CTRL_T = KeyStroke.getKeyStroke('T', menuShortcutKeyMask);
-    private static final KeyStroke CTRL_U = KeyStroke.getKeyStroke('U', menuShortcutKeyMask);
-    private static final KeyStroke CTRL_V = KeyStroke.getKeyStroke('V', menuShortcutKeyMask);
-    private static final KeyStroke CTRL_Z = KeyStroke.getKeyStroke('Z', menuShortcutKeyMask);
-    private static final KeyStroke CTRL_W = KeyStroke.getKeyStroke('W', menuShortcutKeyMask);
+    private static final KeyStroke CTRL_B = KeyStroke.getKeyStroke('B', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_C = KeyStroke.getKeyStroke('C', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_D = KeyStroke.getKeyStroke('D', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_E = KeyStroke.getKeyStroke('E', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_F = KeyStroke.getKeyStroke('F', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_G = KeyStroke.getKeyStroke('G', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_H = KeyStroke.getKeyStroke('H', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_I = KeyStroke.getKeyStroke('I', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_J = KeyStroke.getKeyStroke('J', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_K = KeyStroke.getKeyStroke('K', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_L = KeyStroke.getKeyStroke('L', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_N = KeyStroke.getKeyStroke('N', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_O = KeyStroke.getKeyStroke('O', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_R = KeyStroke.getKeyStroke('R', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_S = KeyStroke.getKeyStroke('S', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_T = KeyStroke.getKeyStroke('T', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_U = KeyStroke.getKeyStroke('U', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_V = KeyStroke.getKeyStroke('V', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_Z = KeyStroke.getKeyStroke('Z', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_W = KeyStroke.getKeyStroke('W', MENU_SHORTCUT_KEY_MASK);
 
-    private static final KeyStroke CTRL_1 = KeyStroke.getKeyStroke('1', menuShortcutKeyMask);
-    private static final KeyStroke CTRL_2 = KeyStroke.getKeyStroke('2', menuShortcutKeyMask);
-    private static final KeyStroke CTRL_3 = KeyStroke.getKeyStroke('3', menuShortcutKeyMask);
+    private static final KeyStroke CTRL_1 = KeyStroke.getKeyStroke('1', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_2 = KeyStroke.getKeyStroke('2', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_3 = KeyStroke.getKeyStroke('3', MENU_SHORTCUT_KEY_MASK);
 
-    private static final KeyStroke CTRL_SHIFT_S = KeyStroke.getKeyStroke('S', menuShortcutKeyMask + InputEvent.SHIFT_MASK);
-    private static final KeyStroke CTRL_ALT_W = KeyStroke.getKeyStroke('W', menuShortcutKeyMask | InputEvent.ALT_MASK);
-    private static final KeyStroke CTRL_SHIFT_Z = KeyStroke.getKeyStroke('Z', InputEvent.SHIFT_MASK + menuShortcutKeyMask);
-    private static final KeyStroke CTRL_SHIFT_F = KeyStroke.getKeyStroke('F', menuShortcutKeyMask + InputEvent.SHIFT_MASK);
-    private static final KeyStroke CTRL_SHIFT_C = KeyStroke.getKeyStroke('C', menuShortcutKeyMask + InputEvent.SHIFT_MASK);
-    private static final KeyStroke CTRL_SHIFT_V = KeyStroke.getKeyStroke('V', menuShortcutKeyMask + InputEvent.SHIFT_MASK);
-    private static final KeyStroke CTRL_ALT_I = KeyStroke.getKeyStroke('I', menuShortcutKeyMask | InputEvent.ALT_MASK);
+    private static final KeyStroke CTRL_SHIFT_S = KeyStroke.getKeyStroke('S', MENU_SHORTCUT_KEY_MASK + InputEvent.SHIFT_MASK);
+    private static final KeyStroke CTRL_ALT_W = KeyStroke.getKeyStroke('W', MENU_SHORTCUT_KEY_MASK | InputEvent.ALT_MASK);
+    private static final KeyStroke CTRL_SHIFT_Z = KeyStroke.getKeyStroke('Z', InputEvent.SHIFT_MASK + MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_SHIFT_F = KeyStroke.getKeyStroke('F', MENU_SHORTCUT_KEY_MASK + InputEvent.SHIFT_MASK);
+    private static final KeyStroke CTRL_SHIFT_C = KeyStroke.getKeyStroke('C', MENU_SHORTCUT_KEY_MASK + InputEvent.SHIFT_MASK);
+    private static final KeyStroke CTRL_SHIFT_V = KeyStroke.getKeyStroke('V', MENU_SHORTCUT_KEY_MASK + InputEvent.SHIFT_MASK);
+    private static final KeyStroke CTRL_ALT_I = KeyStroke.getKeyStroke('I', MENU_SHORTCUT_KEY_MASK | InputEvent.ALT_MASK);
     private static final KeyStroke ALT_BACKSPACE = KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, InputEvent.ALT_MASK);
-    private static final KeyStroke CTRL_BACKSPACE = KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, menuShortcutKeyMask);
-    private static final KeyStroke CTRL_SHIFT_I = KeyStroke.getKeyStroke('I', menuShortcutKeyMask + InputEvent.SHIFT_MASK);
+    private static final KeyStroke CTRL_BACKSPACE = KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_SHIFT_I = KeyStroke.getKeyStroke('I', MENU_SHORTCUT_KEY_MASK + InputEvent.SHIFT_MASK);
     private static final KeyStroke T = KeyStroke.getKeyStroke('T');
-    private static final KeyStroke CTRL_SHIFT_ALT_E = KeyStroke.getKeyStroke('E', menuShortcutKeyMask + InputEvent.ALT_MASK + InputEvent.SHIFT_MASK);
-    private static final KeyStroke CTRL_CLOSE_BRACKET = KeyStroke.getKeyStroke(']', menuShortcutKeyMask);
-    private static final KeyStroke CTRL_OPEN_BRACKET = KeyStroke.getKeyStroke('[', menuShortcutKeyMask);
-    private static final KeyStroke CTRL_SHIFT_CLOSE_BRACKET = KeyStroke.getKeyStroke(']', menuShortcutKeyMask + InputEvent.SHIFT_MASK);
-    private static final KeyStroke CTRL_SHIFT_OPEN_BRACKET = KeyStroke.getKeyStroke('[', menuShortcutKeyMask + InputEvent.SHIFT_MASK);
+    private static final KeyStroke CTRL_SHIFT_ALT_E = KeyStroke.getKeyStroke('E', MENU_SHORTCUT_KEY_MASK + InputEvent.ALT_MASK + InputEvent.SHIFT_MASK);
+    private static final KeyStroke CTRL_CLOSE_BRACKET = KeyStroke.getKeyStroke(']', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_OPEN_BRACKET = KeyStroke.getKeyStroke('[', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_SHIFT_CLOSE_BRACKET = KeyStroke.getKeyStroke(']', MENU_SHORTCUT_KEY_MASK + InputEvent.SHIFT_MASK);
+    private static final KeyStroke CTRL_SHIFT_OPEN_BRACKET = KeyStroke.getKeyStroke('[', MENU_SHORTCUT_KEY_MASK + InputEvent.SHIFT_MASK);
     private static final KeyStroke ALT_CLOSE_BRACKET = KeyStroke.getKeyStroke(']', InputEvent.ALT_MASK);
     private static final KeyStroke ALT_OPEN_BRACKET = KeyStroke.getKeyStroke('[', InputEvent.ALT_MASK);
     private static final KeyStroke F5 = KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0);
     private static final KeyStroke F6 = KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0);
     private static final KeyStroke F7 = KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0);
     private static final KeyStroke TAB = KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0);
-    private static final KeyStroke CTRL_ALT_R = KeyStroke.getKeyStroke('R', menuShortcutKeyMask + InputEvent.ALT_MASK);
+    private static final KeyStroke CTRL_ALT_R = KeyStroke.getKeyStroke('R', MENU_SHORTCUT_KEY_MASK + InputEvent.ALT_MASK);
 
     public MenuBar(PixelitorWindow pw) {
         this.add(createFileMenu(pw));
@@ -736,7 +736,7 @@ public class MenuBar extends JMenuBar {
     private static JMenu createReduceColorsSubmenu() {
         PMenu sub = new PMenu("Reduce Colors");
 
-        sub.addFA("Quantize", JHQuantize::new);
+        sub.addFA(JHQuantize.NAME, JHQuantize::new);
         sub.addFA("Posterize", Posterize::new);
         sub.addFA("Threshold", Threshold::new);
 
@@ -793,7 +793,7 @@ public class MenuBar extends JMenuBar {
         sub.addFA("Fast Blur", FastBlur::new);
         sub.addFA("Focus", JHFocus::new);
         sub.addFA(JHGaussianBlur.NAME, JHGaussianBlur::new);
-        sub.addFA("Lens Blur", JHLensBlur::new);
+        sub.addFA(JHLensBlur.NAME, JHLensBlur::new);
         sub.addFA(MOTION_BLUR.createFilterAction());
         sub.addFA(JHSmartBlur.NAME, JHSmartBlur::new);
         sub.addFA(SPIN_ZOOM_BLUR.createFilterAction());
@@ -807,33 +807,33 @@ public class MenuBar extends JMenuBar {
 
         sub.addFA(SwirlPinchBulge.NAME, SwirlPinchBulge::new);
         sub.addFA(CircleToSquare.NAME, CircleToSquare::new);
-        sub.addFA("Perspective", JHPerspective::new);
+        sub.addFA(JHPerspective.NAME, JHPerspective::new);
 
         sub.addSeparator();
 
-        sub.addFA("Lens Over Image", JHLensOverImage::new);
-        sub.addFA("Magnify", Magnify::new);
+        sub.addFA(JHLensOverImage.NAME, JHLensOverImage::new);
+        sub.addFA(Magnify.NAME, Magnify::new);
 
         sub.addSeparator();
 
-        sub.addFA("Turbulent Distortion", JHTurbulentDistortion::new);
-        sub.addFA("Underwater", JHUnderWater::new);
-        sub.addFA("Water Ripple", JHWaterRipple::new);
-        sub.addFA("Waves", JHWaves::new);
+        sub.addFA(JHTurbulentDistortion.NAME, JHTurbulentDistortion::new);
+        sub.addFA(JHUnderWater.NAME, JHUnderWater::new);
+        sub.addFA(JHWaterRipple.NAME, JHWaterRipple::new);
+        sub.addFA(JHWaves.NAME, JHWaves::new);
         sub.addFA(AngularWaves.NAME, AngularWaves::new);
         sub.addFA(RadialWaves.NAME, RadialWaves::new);
 
         sub.addSeparator();
 
-        sub.addFA("Glass Tiles", GlassTiles::new);
+        sub.addFA(GlassTiles.NAME, GlassTiles::new);
         sub.addFA(PolarTiles.NAME, PolarTiles::new);
-        sub.addFA("Frosted Glass", JHFrostedGlass::new);
+        sub.addFA(JHFrostedGlass.NAME, JHFrostedGlass::new);
 
         sub.addSeparator();
 
         sub.addFA(LittlePlanet.NAME, LittlePlanet::new);
-        sub.addFA("Polar Coordinates", JHPolarCoordinates::new);
-        sub.addFA("Wrap Around Arc", JHWrapAroundArc::new);
+        sub.addFA(JHPolarCoordinates.NAME, JHPolarCoordinates::new);
+        sub.addFA(JHWrapAroundArc.NAME, JHWrapAroundArc::new);
 
         return sub;
     }
@@ -842,10 +842,10 @@ public class MenuBar extends JMenuBar {
         PMenu sub = new PMenu("Dislocate");
 
         sub.addFA(DrunkVision.NAME, DrunkVision::new);
-        sub.addFA("Kaleidoscope", JHKaleidoscope::new);
-        sub.addFA("Offset", JHOffset::new);
+        sub.addFA(JHKaleidoscope.NAME, JHKaleidoscope::new);
+        sub.addFA(JHOffset.NAME, JHOffset::new);
         sub.addFA(Mirror.NAME, Mirror::new);
-        sub.addFA("Slice", Slice::new);
+        sub.addFA(Slice.NAME, Slice::new);
         sub.addFA(JHVideoFeedback.NAME, JHVideoFeedback::new);
 
         return sub;
@@ -857,7 +857,7 @@ public class MenuBar extends JMenuBar {
         sub.addFA(Flashlight.NAME, Flashlight::new);
         sub.addFA(JHGlint.NAME, JHGlint::new);
         sub.addFA("Glow", JHGlow::new);
-        sub.addFA("Rays", JHRays::new);
+        sub.addFA(JHRays.NAME, JHRays::new);
         sub.addFA(JHSparkle.NAME, JHSparkle::new);
 
         return sub;
@@ -911,14 +911,14 @@ public class MenuBar extends JMenuBar {
         PMenu sub = new PMenu("Artistic");
 
         sub.addFA(JHCrystallize.NAME, JHCrystallize::new);
-        sub.addFA(JHPointillize.NAME, JHPointillize::new);
-        sub.addFA(JHStamp.NAME, JHStamp::new);
-        sub.addFA(JHOilPainting.NAME, JHOilPainting::new);
-        sub.addFA(RandomSpheres.NAME, RandomSpheres::new);
-        sub.addFA(JHSmear.NAME, JHSmear::new);
         sub.addFA(JHEmboss.NAME, JHEmboss::new);
+        sub.addFA(JHOilPainting.NAME, JHOilPainting::new);
         sub.addFA("Orton Effect", Orton::new);
         sub.addFA(PhotoCollage.NAME, PhotoCollage::new);
+        sub.addFA(JHPointillize.NAME, JHPointillize::new);
+        sub.addFA(RandomSpheres.NAME, RandomSpheres::new);
+        sub.addFA(JHSmear.NAME, JHSmear::new);
+        sub.addFA(JHStamp.NAME, JHStamp::new);
         sub.addFA(JHWeave.NAME, JHWeave::new);
 
         return sub;
@@ -1324,7 +1324,7 @@ public class MenuBar extends JMenuBar {
         sub.addFA("Morphology", Morphology::new);
         sub.addSeparator();
 
-        sub.addFA("Droste", Droste::new);
+        sub.addFA(Droste.NAME, Droste::new);
         sub.addFA(Sphere3D.NAME, Sphere3D::new);
         sub.addFA("Grid", RenderGrid::new);
         sub.addFA(EmptyPolar.NAME, EmptyPolar::new);

@@ -28,11 +28,13 @@ public class OffsetFilter extends TransformFilter {
     private float relativeY;
     private boolean useRelative = false;
 
-    public OffsetFilter() {
-        this(0, 0, true);
+    public OffsetFilter(String filterName) {
+        this(0, 0, true, filterName);
     }
 
-    public OffsetFilter(int xOffset, int yOffset, boolean wrap) {
+    public OffsetFilter(int xOffset, int yOffset, boolean wrap, String filterName) {
+        super(filterName);
+
         this.xOffset = xOffset;
         this.yOffset = yOffset;
         this.wrap = wrap;

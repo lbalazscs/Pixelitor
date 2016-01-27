@@ -27,6 +27,7 @@ import java.awt.image.BufferedImage;
  */
 public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionBlur {
 
+    private final String filterName;
     private float angle = 0.0f;
     private float falloff = 1.0f;
     private float distance = 1.0f;
@@ -41,22 +42,8 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
     /**
      * Construct a MotionBlurFilter.
      */
-    public MotionBlurFilter() {
-    }
-
-    /**
-     * Construct a MotionBlurFilter.
-     *
-     * @param distance the distance of blur.
-     * @param angle    the angle of blur.
-     * @param rotation the angle of rotation.
-     * @param zoom     the zoom factor.
-     */
-    public MotionBlurFilter(float distance, float angle, float rotation, float zoom) {
-        this.distance = distance;
-        this.angle = angle;
-        this.rotation = rotation;
-        this.zoom = zoom;
+    public MotionBlurFilter(String filterName) {
+        this.filterName = filterName;
     }
 
     /**
@@ -260,7 +247,7 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
         int width = src.getWidth();
         int height = src.getHeight();
 
-        ProgressTracker pt = new ProgressTracker(height);
+        ProgressTracker pt = new ProgressTracker(filterName, height);
 
         if (dst == null) {
             dst = createCompatibleDestImage(src, null);

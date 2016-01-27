@@ -44,6 +44,7 @@ import java.awt.color.ColorSpace;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
+import java.awt.event.KeyEvent;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
@@ -341,7 +342,7 @@ public final class Utils {
         ImageComponent savedIC = ImageComponents.getActiveIC();
 
         Optional<Composition> debugCompOpt = ImageComponents.findCompositionByName(name);
-        if(debugCompOpt.isPresent()) {
+        if (debugCompOpt.isPresent()) {
             // if we already have a debug composition, simply replace the image
             Composition comp = debugCompOpt.get();
             comp.getActiveMaskOrImageLayer().setImage(copy);
@@ -448,6 +449,24 @@ public final class Utils {
         }
     }
 
+    public static String keystrokeAsText(KeyStroke keyStroke) {
+        String s = "";
+        int modifiers = keyStroke.getModifiers();
+        if (modifiers > 0) {
+            s = KeyEvent.getKeyModifiersText(modifiers);
+            s += " ";
+        }
+        int keyCode = keyStroke.getKeyCode();
+        if (keyCode != 0) {
+            s += KeyEvent.getKeyText(keyCode);
+        } else {
+            s += keyStroke.getKeyChar();
+        }
+
+        return s;
+    }
+
+
     public static <T> void setupDisableOtherIf(ComboBoxModel<T> current, FilterSetting other, Predicate<T> condition) {
         current.addListDataListener(new ListDataListener() {
             @Override
@@ -490,5 +509,6 @@ public final class Utils {
             }
         });
     }
+
 
 }

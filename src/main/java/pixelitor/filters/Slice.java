@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,6 +29,8 @@ import java.awt.image.BufferedImage;
  * Slice based on SliceFilter
  */
 public class Slice extends FilterWithParametrizedGUI {
+    public static final String NAME = "Slice";
+
     private final RangeParam size = new RangeParam("Size", 0, 6, 100);
     private final RangeParam offset = new RangeParam("Offset", 0, 10, 100);
     private final RangeParam shiftH = new RangeParam("Shift Effect Horizontal", 0, 0, 100);
@@ -51,7 +53,7 @@ public class Slice extends FilterWithParametrizedGUI {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         if(filter == null) {
-            filter = new SliceFilter();
+            filter = new SliceFilter(NAME);
         }
 
         filter.setOffset(offset.getValue());

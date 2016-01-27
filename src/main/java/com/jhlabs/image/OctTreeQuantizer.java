@@ -16,6 +16,8 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+import pixelitor.utils.ProgressTracker;
+
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Vector;
@@ -95,17 +97,22 @@ public class OctTreeQuantizer implements Quantizer {
 
     /**
      * Add pixels to the quantizer.
-     *
      * @param pixels the array of ARGB pixels
      * @param offset the offset into the array
      * @param count  the count of pixels
+     * @param pt
+     * @param width
      */
     @Override
-    public void addPixels(int[] pixels, int offset, int count) {
+    public void addPixels(int[] pixels, int offset, int count, ProgressTracker pt, int width) {
+        int workUnit = (int) (width * 2.5);
         for (int i = 0; i < count; i++) {
             insertColor(pixels[i + offset]);
             if (colors > reduceColors) {
                 reduceTree(reduceColors);
+            }
+            if(i % workUnit == 0) {
+                pt.itemProcessed();
             }
         }
     }

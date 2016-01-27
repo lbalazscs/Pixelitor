@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,11 +32,12 @@ import java.awt.image.BufferedImage;
  * UnderWater filter based on JHLabs SwimFilter
  */
 public class JHUnderWater extends FilterWithParametrizedGUI {
+    public static final String NAME = "Underwater";
+
     private final RangeParam amount = new RangeParam("Amount", 0, 50, 100);
     private final RangeParam scale = new RangeParam("Scale", 1, 150, 300);
     private final RangeParam stretch = new RangeParam("Stretch", 1, 1, 50);
-//    private RangeParam turbulenceParam = new RangeParam("Turbulence", 0, 100, 0);
-private final RangeParam time = new RangeParam("Time", 100, 100, 1000);
+    private final RangeParam time = new RangeParam("Time", 100, 100, 1000);
     private final AngleParam angle = new AngleParam("Angle", 0);
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices(true);
     private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
@@ -50,7 +51,6 @@ private final RangeParam time = new RangeParam("Time", 100, 100, 1000);
                 scale.adjustRangeToImageSize(0.3),
                 stretch,
                 angle,
-//                turbulenceParam,
                 time,
                 edgeAction,
                 interpolation
@@ -60,13 +60,12 @@ private final RangeParam time = new RangeParam("Time", 100, 100, 1000);
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         if(filter == null) {
-            filter = new SwimFilter();
+            filter = new SwimFilter(NAME);
         }
 
         filter.setAmount(amount.getValueAsFloat());
         filter.setScale(scale.getValueAsFloat());
         filter.setStretch(stretch.getValueAsFloat());
-//        filter.setTurbulence(turbulenceParam.getValueAsPercentage());
         filter.setTime(time.getValueAsPercentage());
         filter.setAngle((float) angle.getValueInRadians());
         filter.setEdgeAction(edgeAction.getValue());

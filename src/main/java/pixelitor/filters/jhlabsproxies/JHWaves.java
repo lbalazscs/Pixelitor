@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,8 @@ import java.awt.image.BufferedImage;
  * Ripple based on the JHLabs RippleFilter
  */
 public class JHWaves extends FilterWithParametrizedGUI {
+    public static final String NAME = "Waves";
+
     private final GroupedRangeParam wavelengthParam = new GroupedRangeParam("Wavelength", 1, 20, 200);
     private final GroupedRangeParam amplitudeParam = new GroupedRangeParam("Amplitude", 0, 10, 200);
     private final GroupedRangeParam phaseParam = new GroupedRangeParam("Phase (Time)", 0, 0, 100, false);
@@ -62,7 +64,7 @@ public class JHWaves extends FilterWithParametrizedGUI {
         }
 
         if (filter == null) {
-            filter = new RippleFilter();
+            filter = new RippleFilter(NAME);
         }
 
         int xWavelength = wavelengthParam.getValue(0);

@@ -59,19 +59,23 @@ public class StatusBar extends JPanel {
         statusBarLabel.setText(msg);
         progressBar = new JProgressBar(0, max);
         progressBar.setStringPainted(true);
-        leftPanel.add(progressBar);
 
         // call these instead of revalidate/repaint
         // because we want to stay on the EDT
         leftPanel.validate();
-        leftPanel.paintImmediately(leftPanel.getBounds());
+        progressBar.setSize(progressBar.getPreferredSize());
+        progressBar.setLocation(statusBarLabel.getPreferredSize().width + 7, -1);
+        leftPanel.add(progressBar);
+
+        leftPanel.paintImmediately(0, 0, leftPanel.getWidth(), leftPanel.getHeight());
+
         inProgress = true;
     }
 
     public void updateProgress(int value) {
         assert inProgress;
         progressBar.setValue(value);
-        leftPanel.paintImmediately(leftPanel.getBounds());
+        leftPanel.paintImmediately(progressBar.getBounds());
     }
 
     public void stopProgress() {

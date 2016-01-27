@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.composite.MiscComposite;
@@ -36,6 +37,8 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
  * Rays based on the JHLabs RaysFilter
  */
 public class JHRays extends FilterWithParametrizedGUI {
+    public static final String NAME = "Rays";
+
     private final ImagePositionParam center = new ImagePositionParam("Light Source");
     private final RangeParam rotation = new RangeParam("Twirl", -90, 0, 90);
     private final RangeParam length = new RangeParam("Length", 0, 20, 200);
@@ -64,7 +67,7 @@ public class JHRays extends FilterWithParametrizedGUI {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
-            filter = new RaysFilter();
+            filter = new RaysFilter(NAME);
         }
 
         filter.setCentreX(center.getRelativeX());

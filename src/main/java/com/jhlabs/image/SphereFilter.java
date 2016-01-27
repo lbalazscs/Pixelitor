@@ -39,15 +39,17 @@ public class SphereFilter extends TransformFilter {
     private float icentreX;
     private float icentreY;
 
-    public SphereFilter() {
+    public SphereFilter(String filterName) {
+        super(filterName);
+
         setEdgeAction(REPEAT_EDGE_PIXELS);
         setRadius(100.0f);
     }
 
     /**
-     * Set the index of refaction.
+     * Set the index of refraction.
      *
-     * @param refractionIndex the index of refaction
+     * @param refractionIndex the index of refraction
      * @see #getRefractionIndex
      */
     public void setRefractionIndex(float refractionIndex) {

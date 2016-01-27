@@ -38,7 +38,9 @@ public class RippleFilter extends TransformFilter {
     /**
      * Construct a RippleFilter.
      */
-    public RippleFilter() {
+    public RippleFilter(String filterName) {
+        super(filterName);
+
         xAmplitude = 5.0f;
         yAmplitude = 0.0f;
         xWavelength = yWavelength = 16.0f;

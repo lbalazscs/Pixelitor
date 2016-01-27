@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,6 +31,8 @@ import java.awt.image.BufferedImage;
  * A kaleidoscope based on the JHLabs KaleidoscopeFilter
  */
 public class JHKaleidoscope extends FilterWithParametrizedGUI {
+    public static final String NAME = "Kaleidoscope";
+
     private final AngleParam angle = new AngleParam("Angle", 0);
     private final AngleParam rotateResult = new AngleParam("Rotate Result", 0);
     private final ImagePositionParam center = new ImagePositionParam("Center");
@@ -60,7 +62,7 @@ public class JHKaleidoscope extends FilterWithParametrizedGUI {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
-            filter = new KaleidoscopeFilter();
+            filter = new KaleidoscopeFilter(NAME);
         }
         filter.setAngle((float) angle.getValueInRadians());
         filter.setAngle2((float) rotateResult.getValueInRadians());

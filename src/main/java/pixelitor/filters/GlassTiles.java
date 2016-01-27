@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters;
 
@@ -28,10 +28,10 @@ import java.awt.image.BufferedImage;
  * Glass Tiles filter
  */
 public class GlassTiles extends FilterWithParametrizedGUI {
+    public static final String NAME = "Glass Tiles";
+
     private final GroupedRangeParam size = new GroupedRangeParam("Tile Size", 5, 100, 500);
     private final GroupedRangeParam curvature = new GroupedRangeParam("Curvature", 0, 10, 20);
-//    private final RangeParam shiftXParam = new RangeParam("Shift Horizontal", 0, 10, 0);
-//    private final RangeParam shiftYParam = new RangeParam("Shift Vertical", 0, 10, 0);
     private final GroupedRangeParam phase = new GroupedRangeParam("Shift Effect", 0, 0, 10, false);
 
     private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices(true);
@@ -53,7 +53,7 @@ public class GlassTiles extends FilterWithParametrizedGUI {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
-            filter = new TilesFilter();
+            filter = new TilesFilter(NAME);
         }
 
         filter.setSizeX(size.getValue(0));

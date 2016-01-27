@@ -41,7 +41,8 @@ public class KaleidoscopeFilter extends TransformFilter {
     /**
      * Construct a KaleidoscopeFilter with no distortion.
      */
-    public KaleidoscopeFilter() {
+    public KaleidoscopeFilter(String filterName) {
+        super(filterName);
         setEdgeAction(REPEAT_EDGE_PIXELS);
     }
 

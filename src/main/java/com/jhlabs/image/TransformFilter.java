@@ -63,7 +63,7 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
 
 
     /**
-     * Use nearest-neighbout interpolation.
+     * Use nearest-neighbour interpolation.
      */
     public final static int NEAREST_NEIGHBOUR = 0;
     public final static int NEAREST_NEIGHBOUR_OLD = 2;
@@ -93,12 +93,9 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
      * The input image rectangle.
      */
 //    protected Rectangle originalSpace;
+
     protected TransformFilter(String filterName) {
         this.filterName = filterName;
-    }
-
-    protected TransformFilter() {
-        this.filterName = "Filter";
     }
 
     /**

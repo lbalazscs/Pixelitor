@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,6 +29,8 @@ import java.awt.image.BufferedImage;
  * Quantize based on the JHLabs QuantizeFilter
  */
 public class JHQuantize extends FilterWithParametrizedGUI {
+    public static final String NAME = "Quantize";
+
     private final RangeParam numberOfColors = new RangeParam("Number of Colors", 2, 2, 256);
     private final BooleanParam dither = new BooleanParam("Dither", false);
     private final BooleanParam serpentine = new BooleanParam("Serpentine", false);
@@ -37,6 +39,7 @@ public class JHQuantize extends FilterWithParametrizedGUI {
 
     public JHQuantize() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
                 numberOfColors,
                 dither,
@@ -47,7 +50,7 @@ public class JHQuantize extends FilterWithParametrizedGUI {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
-            filter = new QuantizeFilter();
+            filter = new QuantizeFilter(NAME);
         }
 
         filter.setNumColors(numberOfColors.getValue());

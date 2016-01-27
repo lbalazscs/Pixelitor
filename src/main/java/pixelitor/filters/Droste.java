@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,8 @@ import java.awt.image.BufferedImage;
  * Droste based on DrosteFilter
  */
 public class Droste extends FilterWithParametrizedGUI {
+    public static final String NAME = "Droste";
+
     private final RangeParam innerRadius = new RangeParam("Inner Radius", 1, 25, 100);
     private final RangeParam outerRadius = new RangeParam("Outer Radius", 1, 100, 100);
     private final RangeParam periodicity = new RangeParam("Periodicity", -6, 1, 6);
@@ -65,7 +67,7 @@ public class Droste extends FilterWithParametrizedGUI {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
-            filter = new DrosteFilter();
+            filter = new DrosteFilter(NAME);
         }
 
         filter.setRadiusInside(innerRadius.getValueAsPercentage());

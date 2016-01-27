@@ -18,6 +18,7 @@ package com.jhlabs.image;
 
 import com.jhlabs.math.FFT;
 import net.jafama.FastMath;
+import pixelitor.utils.ProgressTracker;
 
 import java.awt.image.BufferedImage;
 
@@ -31,6 +32,12 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
     private float bloomThreshold = 192;
     private float angle = 0;
     private int sides = 5;
+
+    private final String filterName;
+
+    public LensBlurFilter(String filterName) {
+        this.filterName = filterName;
+    }
 
     /**
      * Set the radius of the kernel, and hence the amount of blur.
@@ -197,6 +204,13 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
 
         fft.transform2D(mask[0], mask[1], w, h, true);
 
+        int workUnits = 0;
+        // count the work units the same was as the code does...
+        for (int tileY = -iradius; tileY < height; tileY += tileHeight - 2 * iradius) {
+            workUnits++;
+        }
+        ProgressTracker pt = new ProgressTracker(filterName, workUnits);
+
         for (int tileY = -iradius; tileY < height; tileY += tileHeight - 2 * iradius) {
             for (int tileX = -iradius; tileX < width; tileX += tileWidth - 2 * iradius) {
 //                System.out.println("Tile: "+tileX+" "+tileY+" "+tileWidth+" "+tileHeight);
@@ -361,7 +375,9 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
                 dst.setRGB(tx, ty, tw, th, rgb, iradius * w + iradius, w );
                 // setRGB(dst, tx, ty, tw, th, rgb);
             }
+            pt.itemProcessed();
         }
+        pt.finish();
         return dst;
     }
 

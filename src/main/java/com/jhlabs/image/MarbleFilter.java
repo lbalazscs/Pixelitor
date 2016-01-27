@@ -30,7 +30,8 @@ public class MarbleFilter extends TransformFilter {
     private float amount = 4;
     private float turbulence = 1;
 
-    public MarbleFilter() {
+    public MarbleFilter(String filterName) {
+        super(filterName);
         setEdgeAction(REPEAT_EDGE_PIXELS);
     }
 

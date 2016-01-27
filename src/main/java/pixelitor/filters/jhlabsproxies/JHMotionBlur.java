@@ -52,27 +52,27 @@ public class JHMotionBlur extends FilterWithParametrizedGUI {
     private final Mode mode;
 
     enum MBMethod {
-        FAST {
+        FASTER {
             @Override
-            public MotionBlur getImplementation() {
-                return new MotionBlurOp();
+            public MotionBlur getImplementation(String filterName) {
+                return new MotionBlurOp(filterName);
             }
-        }, GOOD {
+        }, BETTER {
             @Override
-            public MotionBlur getImplementation() {
-                MotionBlurFilter filter = new MotionBlurFilter();
+            public MotionBlur getImplementation(String filterName) {
+                MotionBlurFilter filter = new MotionBlurFilter(filterName);
                 filter.setPremultiplyAlpha(false);
                 filter.setWrapEdges(false);
                 return filter;
             }
         };
 
-        public abstract MotionBlur getImplementation();
+        public abstract MotionBlur getImplementation(String filterName);
     }
 
     private static final IntChoiceParam.Value[] methodChoices = {
-            new IntChoiceParam.Value("Faster", MBMethod.FAST.ordinal()),
-            new IntChoiceParam.Value("High Quality", MBMethod.GOOD.ordinal()),
+            new IntChoiceParam.Value("Faster", MBMethod.FASTER.ordinal()),
+            new IntChoiceParam.Value("High Quality (slow for large images)", MBMethod.BETTER.ordinal()),
     };
 
     private final IntChoiceParam method = new IntChoiceParam("Quality", methodChoices, IGNORE_RANDOMIZE);
@@ -140,7 +140,8 @@ public class JHMotionBlur extends FilterWithParametrizedGUI {
         int intValue = method.getValue();
         MBMethod chosenMethod = MBMethod.values()[intValue];
 
-        MotionBlur filter = chosenMethod.getImplementation();
+        String filterName = mode.toString();
+        MotionBlur filter = chosenMethod.getImplementation(filterName);
 
         filter.setCentreX(center.getRelativeX());
         filter.setCentreY(center.getRelativeY());

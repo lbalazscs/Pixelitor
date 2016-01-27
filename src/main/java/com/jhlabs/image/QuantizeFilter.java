@@ -16,6 +16,8 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+import pixelitor.utils.ProgressTracker;
+
 import java.awt.Rectangle;
 
 /**
@@ -42,6 +44,12 @@ public class QuantizeFilter extends WholeImageFilter {
     private boolean dither;
     private int numColors = 256;
     private boolean serpentine = true;
+
+    private final String filterName;
+
+    public QuantizeFilter(String filterName) {
+        this.filterName = filterName;
+    }
 
     /**
      * Set the number of colors to quantize to.
@@ -99,15 +107,29 @@ public class QuantizeFilter extends WholeImageFilter {
 
     public void quantize(int[] inPixels, int[] outPixels, int width, int height, int numColors, boolean dither, boolean serpentine) {
         int count = width * height;
+
+        // With dither it takes about 2.5 times longer.
+        // For dithering we count "height" work units,
+        // therefore we need height/2.5 for the other
+        // computation-intensive task (addPixels)
+        int units = (int) (height / 2.5);
+        ProgressTracker pt;
+        if(dither) {
+            pt = new ProgressTracker(filterName, units + height);
+        } else {
+            pt = new ProgressTracker(filterName, units + 1);
+        }
+
         Quantizer quantizer = new OctTreeQuantizer();
         quantizer.setup(numColors);
-        quantizer.addPixels(inPixels, 0, count);
+        quantizer.addPixels(inPixels, 0, count, pt, width);
         int[] table = quantizer.buildColorTable();
 
         if (!dither) {
             for (int i = 0; i < count; i++) {
                 outPixels[i] = table[quantizer.getIndexForColor(inPixels[i])];
             }
+            pt.itemProcessed(); // this computation is relatively fast
         } else {
             int index = 0;
             for (int y = 0; y < height; y++) {
@@ -167,8 +189,10 @@ public class QuantizeFilter extends WholeImageFilter {
                     }
                     index += direction;
                 }
+                pt.itemProcessed();
             }
         }
+        pt.finish();
     }
 
     @Override

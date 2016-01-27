@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,8 @@ import java.awt.image.BufferedImage;
  * Lens Blur based on the JHLabs LensBlurFilter
  */
 public class JHLensBlur extends FilterWithParametrizedGUI {
+    public static final String NAME = "Lens Blur";
+
     private final RangeParam amount = new RangeParam("Amount (Radius)", 0, 0, 100);
     private final RangeParam numberOfSides = new RangeParam("Number of Sides of the Aperture", 3, 5, 12);
     private final RangeParam bloomFactor = new RangeParam("Bloom Factor", 1, 1, 8);
@@ -58,7 +60,7 @@ public class JHLensBlur extends FilterWithParametrizedGUI {
         }
 
         if (filter == null) {
-            filter = new LensBlurFilter();
+            filter = new LensBlurFilter(NAME);
         }
 
         filter.setRadius(amount.getValueAsFloat());

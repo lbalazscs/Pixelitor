@@ -29,19 +29,19 @@ public class ProgressTracker {
     private static final MessageHandler messageHandler = Messages.getMessageHandler();
     private final long startTime;
     private final String name;
-    private final int itemsTotal;
+    private final int numComputationUnits;
 
     private int finished = 0;
     private int lastPercent = 0;
     private boolean progressBar = false;
 
-    public ProgressTracker(int itemsTotal) {
-        this("Filter", itemsTotal);
+    public ProgressTracker(int numComputationUnits) {
+        this("Filter", numComputationUnits);
     }
 
-    public ProgressTracker(String name, int itemsTotal) {
+    public ProgressTracker(String name, int numComputationUnits) {
         this.name = name + ":";
-        this.itemsTotal = itemsTotal;
+        this.numComputationUnits = numComputationUnits;
         startTime = System.currentTimeMillis();
     }
 
@@ -49,7 +49,7 @@ public class ProgressTracker {
         finished++;
         double millis = System.currentTimeMillis() - startTime;
         if (millis > THRESHOLD_MILLIS) {
-            int percent = ((int) (finished * 100.0 / itemsTotal));
+            int percent = ((int) (finished * 100.0 / numComputationUnits));
             if (percent != lastPercent) {
                 if (!progressBar) {
                     messageHandler.startProgress(name, 100);

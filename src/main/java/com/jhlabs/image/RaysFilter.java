@@ -29,7 +29,8 @@ public class RaysFilter extends MotionBlurOp {
     //    private boolean raysOnly = false;
     private Colormap colormap;
 
-    public RaysFilter() {
+    public RaysFilter(String filterName) {
+        super(filterName);
     }
 
 //    /**

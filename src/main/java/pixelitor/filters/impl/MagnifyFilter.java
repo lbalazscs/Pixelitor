@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 
 /**
- *
+ * The Magnify filter.
  */
 public class MagnifyFilter extends TransformFilter {
     private float centerX;
@@ -43,6 +43,10 @@ public class MagnifyFilter extends TransformFilter {
 
     private double cx;
     private double cy;
+
+    public MagnifyFilter(String filterName) {
+        super(filterName);
+    }
 
     public void setCenterX(float centerX) {
         this.centerX = centerX;

@@ -18,11 +18,24 @@
 package pixelitor.tools;
 
 import pixelitor.gui.ImageComponents;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+
+import static pixelitor.menus.MenuBar.MENU_SHORTCUT_KEY_MASK;
 
 public class AutoZoomButtons {
+    public static final KeyStroke ACTUAL_PIXELS_KEY = KeyStroke.getKeyStroke(KeyEvent.VK_0, MENU_SHORTCUT_KEY_MASK);
+    public static final KeyStroke FIT_SCREEN_KEY = KeyStroke.getKeyStroke(KeyEvent.VK_0, MENU_SHORTCUT_KEY_MASK + InputEvent.ALT_MASK);
+
+    public static final String FIT_SCREEN_TOOLTIP = String.format("Display the image at the largest zoom that can fit in the window (%s)",
+            Utils.keystrokeAsText(FIT_SCREEN_KEY));
+    public static final String ACTUAL_PIXELS_TOOLTIP = String.format("Set the zoom level to 100%% (%s)",
+            Utils.keystrokeAsText(ACTUAL_PIXELS_KEY));
+
     private AutoZoomButtons() {
     }
 
@@ -40,4 +53,9 @@ public class AutoZoomButtons {
         }
     };
 
+    static {
+        // setup tool tips
+        FIT_SCREEN_ACTION.putValue(Action.SHORT_DESCRIPTION, FIT_SCREEN_TOOLTIP);
+        ACTUAL_PIXELS_ACTION.putValue(Action.SHORT_DESCRIPTION, ACTUAL_PIXELS_TOOLTIP);
+    }
 }

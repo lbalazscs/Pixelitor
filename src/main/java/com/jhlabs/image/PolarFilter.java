@@ -55,26 +55,14 @@ public class PolarFilter extends TransformFilter {
     /**
      * Construct a PolarFilter.
      */
-    public PolarFilter() {
-        this(RECT_TO_POLAR);
-    }
-
-    /**
-     * Construct a PolarFilter.
-     *
-     * @param type the distortion type
-     */
-    public PolarFilter(int type) {
-        this.type = type;
-        setEdgeAction(REPEAT_EDGE_PIXELS);
+    public PolarFilter(String filterName) {
+        super(filterName);
     }
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
         this.width = src.getWidth();
         this.height = src.getHeight();
-//		centreX = width/2;
-//		centreY = height/2;
 
         centreX = width * relativeCentreX;
         centreY = height * relativeCentreY;

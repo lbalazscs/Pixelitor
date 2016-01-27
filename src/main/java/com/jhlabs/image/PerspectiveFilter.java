@@ -38,8 +38,8 @@ public class PerspectiveFilter extends TransformFilter {
 	/**
      * Construct a PerspectiveFilter.
      */
-    public PerspectiveFilter() {
-		this( 0, 0, 1, 0, 1, 1, 0, 1);
+    public PerspectiveFilter(String filterName) {
+		this( 0, 0, 1, 0, 1, 1, 0, 1, filterName);
 	}
 	
 	/**
@@ -53,7 +53,8 @@ public class PerspectiveFilter extends TransformFilter {
      * @param x3 the new position of the bottom left corner
      * @param y3 the new position of the bottom left corner
      */
-	public PerspectiveFilter(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3) {
+	public PerspectiveFilter(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3, String filterName) {
+        super(filterName);
 		unitSquareToQuad(x0, y0, x1, y1, x2, y2, x3, y3);
 	}
 	

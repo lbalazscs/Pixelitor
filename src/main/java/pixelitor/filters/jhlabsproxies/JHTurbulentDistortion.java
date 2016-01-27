@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,9 +27,11 @@ import pixelitor.filters.gui.ShowOriginal;
 import java.awt.image.BufferedImage;
 
 /**
- * Turbulent Distortion based on the JHlabs MarbleFilter
+ * Turbulent Distortion based on the JHLabs MarbleFilter
  */
 public class JHTurbulentDistortion extends FilterWithParametrizedGUI {
+    public static final String NAME = "Turbulent Distortion";
+
     private final RangeParam scale = new RangeParam("Size", 2, 20, 100);
     private final RangeParam amount = new RangeParam("Amount", 1, 10, 100);
     private final RangeParam turbulence = new RangeParam("Turbulence", 1, 50, 100);
@@ -55,7 +57,7 @@ public class JHTurbulentDistortion extends FilterWithParametrizedGUI {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
-            filter = new MarbleFilter();
+            filter = new MarbleFilter(NAME);
         }
 
         filter.setTurbulence(turbulence.getValueAsPercentage());

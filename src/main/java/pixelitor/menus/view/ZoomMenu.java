@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.menus.view;
 
 import pixelitor.gui.ImageComponents;
@@ -24,6 +25,8 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+
+import static pixelitor.menus.MenuBar.MENU_SHORTCUT_KEY_MASK;
 
 /**
  * The zoom menu
@@ -36,12 +39,10 @@ public class ZoomMenu extends PMenu {
     private static final String ACTION_MAP_KEY_ACTUAL_PIXELS = "actual pixels";
     private static final String ACTION_MAP_KEY_FIT_SCREEN = "fit screen";
 
-    private static final KeyStroke CTRL_PLUS = KeyStroke.getKeyStroke(KeyEvent.VK_PLUS, InputEvent.CTRL_MASK);
-    private static final KeyStroke CTRL_MINUS = KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, InputEvent.CTRL_MASK);
-    private static final KeyStroke CTRL_0 = KeyStroke.getKeyStroke(KeyEvent.VK_0, InputEvent.CTRL_MASK);
+    private static final KeyStroke CTRL_PLUS = KeyStroke.getKeyStroke(KeyEvent.VK_PLUS, MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_MINUS = KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_NUMPAD_PLUS = KeyStroke.getKeyStroke(KeyEvent.VK_ADD, InputEvent.CTRL_DOWN_MASK);
     private static final KeyStroke CTRL_NUMPAD_MINUS = KeyStroke.getKeyStroke(KeyEvent.VK_SUBTRACT, InputEvent.CTRL_DOWN_MASK);
-    private static final KeyStroke CTRL_ALT_0 = KeyStroke.getKeyStroke(KeyEvent.VK_0, InputEvent.CTRL_MASK + InputEvent.ALT_MASK);
     private static final KeyStroke CTRL_SHIFT_EQUALS = KeyStroke.getKeyStroke(KeyEvent.VK_EQUALS, InputEvent.CTRL_DOWN_MASK + InputEvent.SHIFT_MASK);
     private static final KeyStroke CTRL_NUMPAD_0 = KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD0, InputEvent.CTRL_DOWN_MASK);
     private static final KeyStroke CTRL_ALT_NUMPAD_0 = KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD0, InputEvent.CTRL_DOWN_MASK + InputEvent.ALT_MASK);
@@ -68,9 +69,9 @@ public class ZoomMenu extends PMenu {
         };
         addActionWithKey(decreaseAction, CTRL_MINUS);
 
-        addActionWithKey(AutoZoomButtons.ACTUAL_PIXELS_ACTION, CTRL_0);
+        addActionWithKey(AutoZoomButtons.ACTUAL_PIXELS_ACTION, AutoZoomButtons.ACTUAL_PIXELS_KEY);
 
-        addActionWithKey(AutoZoomButtons.FIT_SCREEN_ACTION, CTRL_ALT_0);
+        addActionWithKey(AutoZoomButtons.FIT_SCREEN_ACTION, AutoZoomButtons.FIT_SCREEN_KEY);
 
         addSeparator();
 
