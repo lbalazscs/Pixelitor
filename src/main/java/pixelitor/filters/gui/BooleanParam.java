@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,10 @@ package pixelitor.filters.gui;
 import pixelitor.utils.UpdateGUI;
 
 import javax.swing.*;
+import javax.swing.event.ChangeListener;
 import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.List;
 
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
@@ -32,6 +35,7 @@ public class BooleanParam extends AbstractFilterParam {
     private final boolean defaultValue;
     private boolean currentValue;
     private final AddDefaultButton addDefaultButton;
+    private List<ChangeListener> changeListenerList;
 
     public BooleanParam(String name, boolean defaultValue) {
         this(name, defaultValue, ALLOW_RANDOMIZE);
@@ -53,6 +57,14 @@ public class BooleanParam extends AbstractFilterParam {
         BooleanSelector selector = new BooleanSelector(this, addDefaultButton);
         paramGUI = selector;
         setParamGUIEnabledState();
+
+        if (changeListenerList != null) {
+            // some change listeners for the GUI were temporarily stored here
+            for (ChangeListener listener : changeListenerList) {
+                selector.addChangeListener(listener);
+            }
+            changeListenerList.clear();
+        }
 
         return selector;
     }
@@ -124,4 +136,19 @@ public class BooleanParam extends AbstractFilterParam {
                 getClass().getSimpleName(), getName(), currentValue);
     }
 
+    public void addChangeListener(ChangeListener changeListener) {
+        if (paramGUI != null) {
+            // if a GUI was already created, pass the listener to it
+            BooleanSelector selector = (BooleanSelector) paramGUI;
+            selector.addChangeListener(changeListener);
+            return;
+        }
+
+        // if there is no GUI, store the listener so that
+        // it can be added to the GUI as soon as the GUI is created
+        if (changeListenerList == null) {
+            changeListenerList = new ArrayList<>(2);
+        }
+        changeListenerList.add(changeListener);
+    }
 }

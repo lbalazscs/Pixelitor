@@ -1,3 +1,20 @@
+/*
+ * Copyright 2016 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.layers;
 
 import pixelitor.FgBgColors;
@@ -34,9 +51,16 @@ public class LayerMaskActions {
         public PopupMouseListener(Layer layer) {
             menu = new JPopupMenu();
             menu.add(new JMenuItem(new DeleteMaskAction(layer)));
-            menu.add(new JMenuItem(new ApplyMaskAction(layer)));
+
+            if (layer instanceof ImageLayer) {
+                menu.add(new JMenuItem(new ApplyMaskAction(layer)));
+            }
+
             menu.add(new JMenuItem(new EnableDisableMaskAction(layer)));
-            menu.add(new JMenuItem(new LinkUnlinkMaskAction(layer)));
+
+            if (layer instanceof ContentLayer) {
+                menu.add(new JMenuItem(new LinkUnlinkMaskAction(layer)));
+            }
         }
 
         @Override

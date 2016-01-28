@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.QuantizeFilter;
@@ -22,6 +23,7 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.utils.Utils;
 
 import java.awt.image.BufferedImage;
 
@@ -33,12 +35,15 @@ public class JHQuantize extends FilterWithParametrizedGUI {
 
     private final RangeParam numberOfColors = new RangeParam("Number of Colors", 2, 2, 256);
     private final BooleanParam dither = new BooleanParam("Dither", false);
-    private final BooleanParam serpentine = new BooleanParam("Serpentine", false);
+    private final BooleanParam serpentine = new BooleanParam("Dither with Serpentine", false);
 
     private QuantizeFilter filter;
 
     public JHQuantize() {
         super(ShowOriginal.YES);
+
+        // enable serpentine only if dither is checked
+        Utils.setupEnableOtherIf(dither, serpentine, checked -> checked);
 
         setParamSet(new ParamSet(
                 numberOfColors,

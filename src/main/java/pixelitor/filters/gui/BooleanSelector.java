@@ -20,6 +20,7 @@ package pixelitor.filters.gui;
 import pixelitor.utils.UpdateGUI;
 
 import javax.swing.*;
+import javax.swing.event.ChangeListener;
 import java.awt.FlowLayout;
 
 /**
@@ -68,5 +69,9 @@ public class BooleanSelector extends JPanel implements ParamGUI {
     @Override
     public void setToolTip(String tip) {
         checkBox.setToolTipText(tip);
+    }
+
+    public void addChangeListener(ChangeListener changeListener) {
+        checkBox.addChangeListener(changeListener);
     }
 }

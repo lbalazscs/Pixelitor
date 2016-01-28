@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,6 +34,7 @@ import java.util.Random;
 
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.APP_LOGIC;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
  * A filter parameter for selecting a choice from a list of values
@@ -225,7 +226,7 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
     }
 
     public static IntChoiceParam getEdgeActionChoices(boolean reflectFirst) {
-        IntChoiceParam choice = new IntChoiceParam("Edge Action", edgeActions);
+        IntChoiceParam choice = new IntChoiceParam("Edge Action", edgeActions, ALLOW_RANDOMIZE);
         if(reflectFirst) {
             choice.setDefaultChoice(EDGE_REFLECT);
         }
@@ -240,7 +241,7 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
     };
 
     public static IntChoiceParam getInterpolationChoices() {
-        return new IntChoiceParam("Interpolation", interpolationChoices);
+        return new IntChoiceParam("Interpolation", interpolationChoices, IGNORE_RANDOMIZE);
     }
 
     private static final IntChoiceParam.Value[] gridTypeChoices = {

@@ -22,6 +22,7 @@ import pixelitor.Build;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
 import pixelitor.filters.Filter;
+import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.FilterSetting;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.ImageComponent;
@@ -510,5 +511,24 @@ public final class Utils {
         });
     }
 
+    public static void setupDisableOtherIf(BooleanParam current, FilterSetting other, Predicate<Boolean> condition) {
+        current.addChangeListener(e -> {
+            if (condition.test(current.isChecked())) {
+                other.setEnabled(false, FilterSetting.EnabledReason.APP_LOGIC);
+            } else {
+                other.setEnabled(true, FilterSetting.EnabledReason.APP_LOGIC);
+            }
+        });
+    }
 
+    public static void setupEnableOtherIf(BooleanParam current, FilterSetting other, Predicate<Boolean> condition) {
+        other.setEnabled(false, FilterSetting.EnabledReason.APP_LOGIC);
+        current.addChangeListener(e -> {
+            if (condition.test(current.isChecked())) {
+                other.setEnabled(true, FilterSetting.EnabledReason.APP_LOGIC);
+            } else {
+                other.setEnabled(false, FilterSetting.EnabledReason.APP_LOGIC);
+            }
+        });
+    }
 }
