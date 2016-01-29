@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import pixelitor.filters.gui.IntChoiceParam;
@@ -29,6 +30,8 @@ import java.awt.image.BufferedImage;
  * 2D transitions
  */
 public class Transition2D extends FilterWithParametrizedGUI {
+    public static final String NAME = "2D Transitions";
+
     private final RangeParam progress = new RangeParam("Progress (%)", 0, 0, 100);
     private final IntChoiceParam type = new IntChoiceParam("Type", new IntChoiceParam.Value[]{
             new IntChoiceParam.Value("Box In", BricTransitionFilter.BOX_IN),
@@ -78,7 +81,7 @@ public class Transition2D extends FilterWithParametrizedGUI {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
-            filter = new BricTransitionFilter();
+            filter = new BricTransitionFilter(NAME);
         }
 
         filter.setType(type.getValue());

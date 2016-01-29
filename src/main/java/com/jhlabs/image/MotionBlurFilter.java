@@ -16,8 +16,6 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import pixelitor.utils.ProgressTracker;
-
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
@@ -26,8 +24,6 @@ import java.awt.image.BufferedImage;
  * A filter which produces motion blur the slow, but higher-quality way.
  */
 public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionBlur {
-
-    private final String filterName;
     private float angle = 0.0f;
     private float falloff = 1.0f;
     private float distance = 1.0f;
@@ -43,7 +39,7 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
      * Construct a MotionBlurFilter.
      */
     public MotionBlurFilter(String filterName) {
-        this.filterName = filterName;
+        super(filterName);
     }
 
     /**
@@ -247,7 +243,7 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
         int width = src.getWidth();
         int height = src.getHeight();
 
-        ProgressTracker pt = new ProgressTracker(filterName, height);
+        pt = createProgressTracker(height);
 
         if (dst == null) {
             dst = createCompatibleDestImage(src, null);
@@ -335,14 +331,16 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
 				}
 				index++;
 			}
-            pt.itemProcessed();
+            pt.unitDone();
 		}
         if ( premultiplyAlpha ) {
             ImageMath.unpremultiply(outPixels, 0, inPixels.length);
         }
 
         setRGB( dst, 0, 0, width, height, outPixels );
-        pt.finish();
+
+        finishProgressTracker();
+
         return dst;
     }
 

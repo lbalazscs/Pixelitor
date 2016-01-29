@@ -30,8 +30,6 @@ import java.util.concurrent.Future;
  * two methods to provide the mapping between source and destination pixels.
  */
 public abstract class TransformFilter extends AbstractBufferedImageOp {
-    private final String filterName;
-
     // image dimensions
     protected int srcWidth;
     protected int srcHeight;
@@ -95,7 +93,7 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
 //    protected Rectangle originalSpace;
 
     protected TransformFilter(String filterName) {
-        this.filterName = filterName;
+        super(filterName);
     }
 
     /**
@@ -264,6 +262,7 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
         int outWidth = width;
         int outHeight = height;
 
+        pt = createProgressTracker(outHeight);
         Future<int[]>[] resultLines = new Future[outHeight];
 
         for (int y = 0; y < outHeight; y++) {
@@ -286,7 +285,8 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
             };
             resultLines[finalY] = ThreadPool.submit(calculateLineTask);
         }
-        ThreadPool.waitForFutures2(dst, width, resultLines, filterName);
+        ThreadPool.waitForFutures2(dst, width, resultLines, pt);
+        finishProgressTracker();
 
         return dst;
     }
@@ -301,6 +301,7 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
 //        int outX, outY;
 //		int index = 0;
 
+        pt = createProgressTracker(outHeight);
         Future<int[]>[] resultLines = new Future[outHeight];
 
         for (int y = 0; y < outHeight; y++) {
@@ -337,7 +338,8 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
 
             resultLines[finalY] = ThreadPool.submit(calculateLineTask);
         }
-        ThreadPool.waitForFutures2(dst, width, resultLines, filterName);
+        ThreadPool.waitForFutures2(dst, width, resultLines, pt);
+        finishProgressTracker();
 
         return dst;
     }

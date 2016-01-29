@@ -1,3 +1,20 @@
+/*
+ * Copyright 2016 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.history;
 
 import pixelitor.Composition;
@@ -7,13 +24,14 @@ import javax.swing.undo.CannotUndoException;
 
 /**
  * A PixelitorEdit that represents two edits
- * that need to be undone/redone together
+ * that need to be undone/redone together.
+ * Similar in purpose to javax.swing.undo.CompoundEdit
  */
-public class CompoundEdit extends PixelitorEdit {
+public class LinkedEdit extends PixelitorEdit {
     private final PixelitorEdit first;
     private final PixelitorEdit second;
 
-    public CompoundEdit(Composition comp, String name, PixelitorEdit first, PixelitorEdit second) {
+    public LinkedEdit(Composition comp, String name, PixelitorEdit first, PixelitorEdit second) {
         super(comp, name);
         this.first = first;
         this.second = second;

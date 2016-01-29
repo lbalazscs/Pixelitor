@@ -16,9 +16,6 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import pixelitor.filters.convolve.Convolve;
-import pixelitor.utils.ProgressTracker;
-
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
@@ -72,8 +69,8 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
     /**
      * Construct a filter with a null kernel. This is only useful if you're going to change the kernel later on.
      */
-    public ConvolveFilter() {
-        this(new float[9]);
+    public ConvolveFilter(String filterName) {
+        this(new float[9], filterName);
     }
 
     /**
@@ -81,8 +78,8 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
      *
      * @param matrix an array of 9 floats containing the kernel
      */
-    public ConvolveFilter(float[] matrix) {
-        this(new Kernel(3, 3, matrix));
+    public ConvolveFilter(float[] matrix, String filterName) {
+        this(new Kernel(3, 3, matrix), filterName);
     }
 
     /**
@@ -92,8 +89,8 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
      * @param cols   the number of columns in the kernel
      * @param matrix an array of rows*cols floats containing the kernel
      */
-    public ConvolveFilter(int rows, int cols, float[] matrix) {
-        this(new Kernel(cols, rows, matrix));
+    public ConvolveFilter(int rows, int cols, float[] matrix, String filterName) {
+        this(new Kernel(cols, rows, matrix), filterName);
     }
 
     /**
@@ -101,7 +98,8 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
      *
      * @param kernel the convolution kernel
      */
-    public ConvolveFilter(Kernel kernel) {
+    public ConvolveFilter(Kernel kernel, String filterName) {
+        super(filterName);
         this.kernel = kernel;
     }
 
@@ -247,7 +245,7 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
      * @param height     the height
      * @param edgeAction what to do at the edges
      */
-    public static void convolve(Kernel kernel, int[] inPixels, int[] outPixels, int width, int height, int edgeAction) {
+    public void convolve(Kernel kernel, int[] inPixels, int[] outPixels, int width, int height, int edgeAction) {
         convolve(kernel, inPixels, outPixels, width, height, true, edgeAction);
     }
 
@@ -262,7 +260,7 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
      * @param alpha      include alpha channel
      * @param edgeAction what to do at the edges
      */
-    public static void convolve(Kernel kernel, int[] inPixels, int[] outPixels, int width, int height, boolean alpha, int edgeAction) {
+    public void convolve(Kernel kernel, int[] inPixels, int[] outPixels, int width, int height, boolean alpha, int edgeAction) {
         if (kernel.getHeight() == 1) {
             convolveH(kernel, inPixels, outPixels, width, height, alpha, edgeAction);
         } else if (kernel.getWidth() == 1) {
@@ -283,7 +281,7 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
      * @param alpha      include alpha channel
      * @param edgeAction what to do at the edges
      */
-    public static void convolveHV(Kernel kernel, int[] inPixels, int[] outPixels, int width, int height, boolean alpha, int edgeAction) {
+    public void convolveHV(Kernel kernel, int[] inPixels, int[] outPixels, int width, int height, boolean alpha, int edgeAction) {
         int index = 0;
         float[] matrix = kernel.getKernelData(null);
         int rows = kernel.getHeight();
@@ -291,8 +289,7 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
         int rows2 = rows / 2;
         int cols2 = cols / 2;
 
-        String filterName = Convolve.getFilterName(rows, cols);
-        ProgressTracker pt = new ProgressTracker(filterName, height);
+        pt = createProgressTracker(height);
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
@@ -339,9 +336,9 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
                 int ib = PixelUtils.clamp((int) (b + 0.5));
                 outPixels[index++] = (ia << 24) | (ir << 16) | (ig << 8) | ib;
             }
-            pt.itemProcessed();
+            pt.unitDone();
         }
-        pt.finish();
+        finishProgressTracker();
     }
 
     /**

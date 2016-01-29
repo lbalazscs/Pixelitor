@@ -26,11 +26,14 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.utils.BasicProgressTracker;
+import pixelitor.utils.ImageUtils;
+import pixelitor.utils.ProgressTracker;
 
-import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
+import static pixelitor.filters.ResizingFilterHelper.ScaleUpQuality.BILINEAR_FAST;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
@@ -82,29 +85,54 @@ public class JHRays extends FilterWithParametrizedGUI {
         // this is a scale and not really a length
         filter.setZoom(length.getValueAsPercentage());
 
-        BufferedImage rays;
         ResizingFilterHelper r = new ResizingFilterHelper(src);
-        if (r.shouldResize()) {
-            rays = r.invoke(ResizingFilterHelper.BILINEAR_FAST, filter);
+        boolean shouldResize = r.shouldResize();
+
+        int filterUnits = 3;
+        int workUnits = filterUnits + 3; // +3 for the rays only step at the end
+        if (shouldResize) {
+            int resizeUnits = r.getResizeWorkUnits(BILINEAR_FAST);
+            workUnits += resizeUnits;
+        }
+        ProgressTracker pt = new BasicProgressTracker(NAME, workUnits);
+//        ProgressTracker pt = new DebugProgressTracker(NAME, workUnits);
+        filter.setProgressTracker(pt);
+
+        BufferedImage rays;
+        if (shouldResize) {
+            rays = r.invoke(BILINEAR_FAST, filter, pt, 0);
         } else {
             // normal case, no resizing
             rays = filter.filter(src, dest);
         }
 
+        // so far we have the rays image,
+        // which contains white rays on a black background
+        if (raysOnly.isChecked()) {
+            // make sure we have a transparent background
+            if (dest == null) {
+                dest = filter.createCompatibleDestImage(src, null);
+            }
+            Graphics2D g = dest.createGraphics();
+            g.setComposite(MiscComposite.getInstance(MiscComposite.ADD, opacity.getValueAsPercentage()));
+            g.drawRenderedImage(rays, null);
+            g.dispose();
 
-        if (dest == null) {
-            dest = filter.createCompatibleDestImage(src, null);
+            pt.addUnits(3);
+            pt.finish();
+
+            return dest;
         }
 
-        // according to "rays only" setting return the rays image or an added image
+        // add the rays on top of the source
+        dest = ImageUtils.copyImage(src);
         Graphics2D g = dest.createGraphics();
-        if (!raysOnly.isChecked()) {
-            g.setComposite(AlphaComposite.SrcOver);
-            g.drawRenderedImage(src, null);
-        }
         g.setComposite(MiscComposite.getInstance(MiscComposite.ADD, opacity.getValueAsPercentage()));
         g.drawRenderedImage(rays, null);
         g.dispose();
+
+        pt.addUnits(3);
+        pt.finish();
 
         return dest;
     }

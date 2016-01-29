@@ -20,8 +20,8 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.filters.comp.Flip;
 import pixelitor.filters.comp.Rotate;
-import pixelitor.history.CompoundEdit;
 import pixelitor.history.ContentLayerMoveEdit;
+import pixelitor.history.LinkedEdit;
 import pixelitor.history.PixelitorEdit;
 
 import java.awt.geom.AffineTransform;
@@ -92,7 +92,7 @@ public abstract class ContentLayer extends Layer {
         if (linkedEdit == null) {
             return ownEdit;
         } else {
-            return new CompoundEdit(comp, ContentLayerMoveEdit.NAME, ownEdit, linkedEdit);
+            return new LinkedEdit(comp, ContentLayerMoveEdit.NAME, ownEdit, linkedEdit);
         }
     }
 

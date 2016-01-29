@@ -16,22 +16,19 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import pixelitor.filters.jhlabsproxies.JHColorHalftone;
-import pixelitor.utils.ProgressTracker;
-
 import java.awt.image.BufferedImage;
 
 /**
  * A Filter to pixellate images.
  */
 public class ColorHalftoneFilter extends AbstractBufferedImageOp {
-	
 	private float dotRadius = 2;
     private float cyanScreenAngle = (float)Math.toRadians( 108 );
     private float magentaScreenAngle = (float)Math.toRadians( 162 );
     private float yellowScreenAngle = (float)Math.toRadians( 90 );
 
-	public ColorHalftoneFilter() {
+	public ColorHalftoneFilter(String filterName) {
+        super(filterName);
 	}
 
 	/**
@@ -113,7 +110,7 @@ public class ColorHalftoneFilter extends AbstractBufferedImageOp {
         int width = src.getWidth();
         int height = src.getHeight();
 
-        ProgressTracker pt = new ProgressTracker(JHColorHalftone.NAME, height);
+        pt = createProgressTracker(height);
 
         if ( dst == null ) {
             dst = createCompatibleDestImage(src, null);
@@ -183,9 +180,9 @@ public class ColorHalftoneFilter extends AbstractBufferedImageOp {
             }
 			setRGB( dst, 0, y, width, 1, outPixels );
 
-            pt.itemProcessed();
+            pt.unitDone();
         }
-        pt.finish();
+        finishProgressTracker();
 
         return dst;
     }

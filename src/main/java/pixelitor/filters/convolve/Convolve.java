@@ -33,14 +33,16 @@ import java.util.Random;
  * A customizable convolution
  */
 public class Convolve extends FilterWithGUI {
+    private final String filterName;
 
     private final EnumComboBoxModel<ConvolveMethod> convolveMethodModel = new EnumComboBoxModel<>(ConvolveMethod.class);
 
     private float[] kernelMatrix;
     private final int size;
 
-    public Convolve(int size) {
+    public Convolve(int size, String filterName) {
         this.size = size;
+        this.filterName = filterName;
     }
 
     public void setKernelMatrix(float[] kernelMatrix) {
@@ -53,7 +55,8 @@ public class Convolve extends FilterWithGUI {
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         Kernel kernel = new Kernel(size, size, kernelMatrix);
-        BufferedImageOp convolveOp = convolveMethodModel.getSelectedItem().getConvolveOp(kernel);
+        ConvolveMethod convolveMethod = convolveMethodModel.getSelectedItem();
+        BufferedImageOp convolveOp = convolveMethod.getConvolveOp(kernel, filterName);
         try {
             convolveOp.filter(src, dest);
         } catch (ImagingOpException e) {
@@ -97,7 +100,7 @@ public class Convolve extends FilterWithGUI {
 
     public static FilterAction createFilterAction(int size) {
         String name = getFilterName(size, size);
-        FilterAction fa = new FilterAction(name, () -> new Convolve(size));
+        FilterAction fa = new FilterAction(name, () -> new Convolve(size, name));
         return fa;
     }
 

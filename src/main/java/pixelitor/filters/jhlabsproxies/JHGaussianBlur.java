@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 
@@ -53,7 +54,7 @@ public class JHGaussianBlur extends FilterWithParametrizedGUI {
         }
 
         if (filter == null) {
-            filter = new GaussianFilter();
+            filter = new GaussianFilter(NAME);
         }
 
         filter.setRadius(radius.getValueAsFloat());

@@ -25,7 +25,9 @@ import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ReseedNoiseActionSetting;
 import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.utils.BasicProgressTracker;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.ProgressTracker;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -54,7 +56,6 @@ public class Clouds extends FilterWithParametrizedGUI {
     private final ColorParam color1 = new ColorParam("Color 1", BLACK, USER_ONLY_OPACITY);
     private final ColorParam color2 = new ColorParam("Color 2", WHITE, USER_ONLY_OPACITY);
 
-    @SuppressWarnings("FieldCanBeLocal")
     private final ActionSetting reseedAction = new ReseedNoiseActionSetting(e -> {
         reseed();
     });
@@ -72,37 +73,33 @@ public class Clouds extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+        ProgressTracker pt = new BasicProgressTracker(NAME, src.getHeight());
 
         renderClouds(dest,
                 scale.getValueAsFloat(),
                 roughness.getValueAsPercentage(),
                 color1.getColor(),
-                color2.getColor());
+                color2.getColor(),
+                pt);
 
+        pt.finish();
         return dest;
     }
 
-    public static void renderClouds(BufferedImage dest, float scaleValue, float roughnessValue, Color c1, Color c2) {
+    public static void renderClouds(BufferedImage dest, float scaleValue, float roughnessValue, Color c1, Color c2, ProgressTracker pt) {
         int width = dest.getWidth();
         int height = dest.getHeight();
         int[] destData = ImageUtils.getPixelsAsArray(dest);
         int[] color1 = {c1.getAlpha(), c1.getRed(), c1.getGreen(), c1.getBlue()};
         int[] color2 = {c2.getAlpha(), c2.getRed(), c2.getGreen(), c2.getBlue()};
 
-        boolean multiThreaded = ThreadPool.runMultiThreaded();
-        if(multiThreaded) {
-            Future<?>[] futures = new Future[height];
-            for (int y = 0; y < height; y++) {
-                int finalY = y;
-                Runnable lineTask = () -> calculateLine(scaleValue, roughnessValue, width, destData, color1, color2, finalY);
-                futures[y] = ThreadPool.submit(lineTask);
-            }
-            ThreadPool.waitForFutures(futures, null, NAME);
-        } else {
-            for (int y = 0; y < height; y++) {
-                calculateLine(scaleValue, roughnessValue, width, destData, color1, color2, y);
-            }
+        Future<?>[] futures = new Future[height];
+        for (int y = 0; y < height; y++) {
+            int finalY = y;
+            Runnable lineTask = () -> calculateLine(scaleValue, roughnessValue, width, destData, color1, color2, finalY);
+            futures[y] = ThreadPool.submit(lineTask);
         }
+        ThreadPool.waitForFutures(futures, pt);
     }
 
     private static void calculateLine(float scaleValue, float roughnessValue, int width, int[] destData, int[] color1, int[] color2, int y) {

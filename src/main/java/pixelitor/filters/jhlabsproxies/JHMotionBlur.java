@@ -34,6 +34,8 @@ import pixelitor.utils.ImageUtils;
 import java.awt.image.BufferedImage;
 
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.filters.jhlabsproxies.JHMotionBlur.MBMethod.BETTER;
+import static pixelitor.filters.jhlabsproxies.JHMotionBlur.MBMethod.FASTER;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.MOTION_BLUR;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
 
@@ -45,7 +47,7 @@ public class JHMotionBlur extends FilterWithParametrizedGUI {
     private final AngleParam angle = new AngleParam("Direction", 0);
     private final RangeParam distance = new RangeParam("Distance", 0, 0, 200);
     private final RangeParam rotation = new RangeParam("Spin Blur Amount (Degrees)", -45, 0, 45);
-    private final RangeParam zoom = new RangeParam("Zoom Blur Amount (%)", 0, 0, 200);
+    private final RangeParam zoom = new RangeParam("Zoom Blur Amount", 0, 0, 200);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final BooleanParam hpSharpening = BooleanParam.createParamForHPSharpening();
 
@@ -71,8 +73,8 @@ public class JHMotionBlur extends FilterWithParametrizedGUI {
     }
 
     private static final IntChoiceParam.Value[] methodChoices = {
-            new IntChoiceParam.Value("Faster", MBMethod.FASTER.ordinal()),
-            new IntChoiceParam.Value("High Quality (slow for large images)", MBMethod.BETTER.ordinal()),
+            new IntChoiceParam.Value("Faster", FASTER.ordinal()),
+            new IntChoiceParam.Value("High Quality (slow for large images)", BETTER.ordinal()),
     };
 
     private final IntChoiceParam method = new IntChoiceParam("Quality", methodChoices, IGNORE_RANDOMIZE);

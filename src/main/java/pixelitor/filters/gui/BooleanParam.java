@@ -60,6 +60,8 @@ public class BooleanParam extends AbstractFilterParam {
 
         if (changeListenerList != null) {
             // some change listeners for the GUI were temporarily stored here
+
+            //noinspection Convert2streamapi
             for (ChangeListener listener : changeListenerList) {
                 selector.addChangeListener(listener);
             }

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.impl;
 
 import com.jhlabs.image.TransformFilter;
@@ -29,7 +30,7 @@ public abstract class CenteredTransformFilter extends TransformFilter {
     protected float cx;
     protected float cy;
 
-    public CenteredTransformFilter(String filterName) {
+    protected CenteredTransformFilter(String filterName) {
         super(filterName);
     }
 

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.GlintFilter;
@@ -67,7 +68,7 @@ public class JHGlint extends FilterWithParametrizedGUI {
         }
 
         if (filter == null) {
-            filter = new GlintFilter();
+            filter = new GlintFilter(NAME);
         }
 
         filter.setThreshold(threshold.getValueAsPercentage());

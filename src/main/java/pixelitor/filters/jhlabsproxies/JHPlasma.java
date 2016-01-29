@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,6 +42,8 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
  * Plasma based on the JHLabs PlasmaFilter
  */
 public class JHPlasma extends FilterWithParametrizedGUI {
+    public static final String NAME = "Plasma";
+
     private final RangeParam turbulence = new RangeParam("Turbulence", 0, 100, 600);
 
     private static final int LESS_COLORS = 0;
@@ -54,7 +56,6 @@ public class JHPlasma extends FilterWithParametrizedGUI {
             new IntChoiceParam.Value("Use Gradient", GRADIENT_COLORS),
     }, IGNORE_RANDOMIZE);
 
-    @SuppressWarnings("FieldCanBeLocal")
     private final ActionSetting reseedAction = new ReseedNoiseActionSetting(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -85,7 +86,7 @@ public class JHPlasma extends FilterWithParametrizedGUI {
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
 
         if (filter == null) {
-            filter = new PlasmaFilter();
+            filter = new PlasmaFilter(NAME);
         }
 
         filter.setLessColors(type.getValue() != MORE_COLORS);

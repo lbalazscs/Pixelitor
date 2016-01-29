@@ -16,8 +16,6 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import pixelitor.utils.ProgressTracker;
-
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -28,7 +26,6 @@ import java.awt.image.BufferedImage;
  * A filter which produces motion blur the faster, but lower-quality way.
  */
 public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur {
-    private final String filterName;
     private float centreX = 0.5f, centreY = 0.5f;
     private float distance;
     private float angle;
@@ -39,7 +36,7 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
      * Construct a MotionBlurOp.
      */
     public MotionBlurOp(String filterName) {
-        this.filterName = filterName;
+        super(filterName);
     }
 
     /**
@@ -237,7 +234,7 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
             return dst;
         }
 
-        ProgressTracker pt = new ProgressTracker(filterName, steps);
+        pt = createProgressTracker(steps);
 
         AlphaComposite alphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f);
         BufferedImage tmp = createCompatibleDestImage(src, null);
@@ -267,9 +264,11 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
             scale *= 2;
             rotate *= 2;
 
-            pt.itemProcessed();
+            pt.unitDone();
         }
-        pt.finish();
+
+        finishProgressTracker();
+
         return dst;
     }
 

@@ -17,7 +17,6 @@ limitations under the License.
 package com.jhlabs.image;
 
 import pixelitor.ThreadPool;
-import pixelitor.filters.jhlabsproxies.JHGaussianBlur;
 import pixelitor.utils.ProgressTracker;
 
 import java.awt.image.BufferedImage;
@@ -31,8 +30,6 @@ import java.util.concurrent.Future;
  * @author Jerry Huxtable
  */
 public class GaussianFilter extends ConvolveFilter {
-    private ProgressTracker pt;
-    private boolean usedAsHelper = false;
 
     /**
      * The blur radius.
@@ -47,8 +44,8 @@ public class GaussianFilter extends ConvolveFilter {
     /**
      * Construct a Gaussian filter.
      */
-    public GaussianFilter() {
-        this(2);
+    public GaussianFilter(String filterName) {
+        this(2, filterName);
     }
 
     /**
@@ -56,7 +53,8 @@ public class GaussianFilter extends ConvolveFilter {
      *
      * @param radius blur radius in pixels
      */
-    public GaussianFilter(float radius) {
+    public GaussianFilter(float radius, String filterName) {
+        super(filterName);
         setRadius(radius);
     }
 
@@ -88,9 +86,7 @@ public class GaussianFilter extends ConvolveFilter {
         int width = src.getWidth();
         int height = src.getHeight();
 
-        if (!usedAsHelper) {
-            pt = new ProgressTracker(JHGaussianBlur.NAME, width + height);
-        }
+        ProgressTracker pt = createProgressTracker(width + height);
 
         if (dst == null) {
             dst = createCompatibleDestImage(src, null);
@@ -111,9 +107,7 @@ public class GaussianFilter extends ConvolveFilter {
 //        dst.setRGB(0, 0, width, height, inPixels, 0, width);
         setRGB(dst, 0, 0, width, height, inPixels);
 
-        if (!usedAsHelper) {
-            pt.finish();
-        }
+        finishProgressTracker();
 
         return dst;
     }
@@ -136,14 +130,13 @@ public class GaussianFilter extends ConvolveFilter {
         int cols2 = cols / 2;
 
         Future<?>[] resultLines = new Future[height];
-
         for (int y = 0; y < height; y++) {
             int finalY = y;
             Runnable lineTask = () -> convolveAndTransposeLine(inPixels, outPixels, width, height, alpha, premultiply, unpremultiply, edgeAction, matrix, cols2, finalY);
             resultLines[y] = ThreadPool.submit(lineTask);
         }
 
-        ThreadPool.waitForFutures(resultLines, pt, null);
+        ThreadPool.waitForFutures(resultLines, pt);
     }
 
     private static void convolveAndTransposeLine(int[] inPixels, int[] outPixels, int width, int height, boolean alpha, boolean premultiply, boolean unpremultiply, int edgeAction, float[] matrix, int cols2, int y) {
@@ -235,11 +228,6 @@ public class GaussianFilter extends ConvolveFilter {
         }
 
         return new Kernel(rows, 1, matrix);
-    }
-
-    public void setProgressTracker(ProgressTracker pt) {
-        this.pt = pt;
-        usedAsHelper = true;
     }
 
     public String toString() {

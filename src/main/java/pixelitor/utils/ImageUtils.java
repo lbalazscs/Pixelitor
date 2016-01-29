@@ -44,6 +44,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorConvertOp;
 import java.awt.image.ColorModel;
+import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
 import java.awt.image.PixelGrabber;
 import java.awt.image.Raster;
@@ -234,7 +235,7 @@ public class ImageUtils {
     /**
      * Also an iterative approach, but using even smaller steps
      */
-    public static BufferedImage enlargeSmooth(BufferedImage src, int targetWidth, int targetHeight, Object hint, double step) {
+    public static BufferedImage enlargeSmooth(BufferedImage src, int targetWidth, int targetHeight, Object hint, double step, ProgressTracker pt) {
         int srcWidth = src.getWidth();
         int srcHeight = src.getHeight();
         double factorX = targetWidth / (double) srcWidth;
@@ -258,12 +259,14 @@ public class ImageUtils {
             if (hint != null) {
                 g.setRenderingHint(KEY_INTERPOLATION, hint);
             }
+
             g.drawImage(last, stepScale, null);
             g.dispose();
 
             BufferedImage willBeForgotten = last;
             last = tmp;
             willBeForgotten.flush();
+            pt.unitDone();
         }
 
         // do the last step: resize exactly to the target values
@@ -272,8 +275,26 @@ public class ImageUtils {
         if (hint != null) {
             g.setRenderingHint(KEY_INTERPOLATION, hint);
         }
+
         g.drawImage(last, 0, 0, targetWidth, targetHeight, null);
         g.dispose();
+        pt.unitDone();
+
+        return retVal;
+    }
+
+    /**
+     * Returns the number of steps necessary for
+     * For progress tracking
+     */
+    public static int getNumStepsForEnlargeSmooth(double resizeFactor, double step) {
+        double progress = 1.0;
+        double lastStep = resizeFactor / step;
+        int retVal = 1; // for the final step
+        while (progress < lastStep) {
+            progress = progress * step;
+            retVal++;
+        }
         return retVal;
     }
 
@@ -387,6 +408,14 @@ public class ImageUtils {
             }
         }
         return pixels;
+    }
+
+    public static byte[] getPixelsAsByteArray(BufferedImage src) {
+        assert src.getType() == BufferedImage.TYPE_BYTE_GRAY;
+
+        WritableRaster raster = src.getRaster();
+        DataBufferByte db = (DataBufferByte) raster.getDataBuffer();
+        return db.getData();
     }
 
     public static URL resourcePathToURL(String fileName) {
@@ -734,8 +763,7 @@ public class ImageUtils {
         g.fillOval(softness, softness, size - 2 * softness, size - 2 * softness);
         g.dispose();
 
-
-        BoxBlurFilter blur = new BoxBlurFilter(softness, softness, 1);
+        BoxBlurFilter blur = new BoxBlurFilter(softness, softness, 1, null);
         brushImage = blur.filter(brushImage, brushImage);
 
         return brushImage;
@@ -834,19 +862,19 @@ public class ImageUtils {
         }
     }
 
-    public static BufferedImage bumpMap(BufferedImage src, BufferedImage bumpMapSource) {
-        return bumpMap(src, bumpMapSource, (float) ImageUtils.DEG_315_IN_RADIANS, 0.53f, 2.0f);
+    public static BufferedImage bumpMap(BufferedImage src, BufferedImage bumpMapSource, String filterName) {
+        return bumpMap(src, bumpMapSource, (float) ImageUtils.DEG_315_IN_RADIANS, 0.53f, 2.0f, filterName);
     }
 
-    public static BufferedImage bumpMap(BufferedImage src, BufferedImage bumpMapSource, float azimuth, float elevation, float bumpHeight) {
-        return bumpMap(src, bumpMapSource, BlendComposite.HardLight, azimuth, elevation, bumpHeight);
+    public static BufferedImage bumpMap(BufferedImage src, BufferedImage bumpMapSource, float azimuth, float elevation, float bumpHeight, String filterName) {
+        return bumpMap(src, bumpMapSource, BlendComposite.HardLight, azimuth, elevation, bumpHeight, filterName);
     }
 
-    public static BufferedImage bumpMap(BufferedImage src, BufferedImage bumpMapSource, Composite composite, float azimuth, float elevation, float bumpHeight) {
+    public static BufferedImage bumpMap(BufferedImage src, BufferedImage bumpMapSource, Composite composite, float azimuth, float elevation, float bumpHeight, String filterName) {
         // TODO optimize it so that the bumpMapSource can be smaller, and an offset is given - useful for text effects
         // tiling could be also an option
 
-        EmbossFilter embossFilter = new EmbossFilter();
+        EmbossFilter embossFilter = new EmbossFilter(filterName);
         embossFilter.setAzimuth(azimuth);
         embossFilter.setElevation(elevation);
         embossFilter.setBumpHeight(bumpHeight);

@@ -24,7 +24,6 @@ import pixelitor.FgBgColors;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.history.AddLayerMaskEdit;
 import pixelitor.history.AddToHistory;
-import pixelitor.history.CompoundEdit;
 import pixelitor.history.DeleteLayerMaskEdit;
 import pixelitor.history.DeselectEdit;
 import pixelitor.history.EnableLayerMaskEdit;
@@ -33,6 +32,7 @@ import pixelitor.history.LayerBlendingEdit;
 import pixelitor.history.LayerOpacityEdit;
 import pixelitor.history.LayerRenameEdit;
 import pixelitor.history.LayerVisibilityChangeEdit;
+import pixelitor.history.LinkedEdit;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.selection.Selection;
 import pixelitor.utils.Messages;
@@ -299,7 +299,7 @@ public abstract class Layer implements Serializable {
             Shape backupShape = selection.getShape();
             comp.deselect(AddToHistory.NO);
             DeselectEdit deselectEdit = new DeselectEdit(comp, backupShape, "nested deselect");
-            edit = new CompoundEdit(comp, "Layer Mask from Selection", edit, deselectEdit);
+            edit = new LinkedEdit(comp, "Layer Mask from Selection", edit, deselectEdit);
         }
 
         History.addEdit(edit);

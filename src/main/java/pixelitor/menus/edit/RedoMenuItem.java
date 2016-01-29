@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,6 +28,9 @@ import javax.swing.event.UndoableEditListener;
 public class RedoMenuItem extends JMenuItem implements UndoableEditListener {
     public RedoMenuItem(Action a) {
         super(a);
+
+        assert a == History.REDO_ACTION;
+
         History.addUndoableEditListener(this);
         setEnabled(false);
     }

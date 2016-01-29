@@ -42,22 +42,8 @@ public class ShadowFilter extends AbstractBufferedImageOp {
     /**
      * Construct a ShadowFilter.
      */
-    public ShadowFilter() {
-    }
-
-    /**
-     * Construct a ShadowFilter.
-     *
-     * @param radius  the radius of the shadow
-     * @param xOffset the X offset of the shadow
-     * @param yOffset the Y offset of the shadow
-     * @param opacity the opacity of the shadow
-     */
-    public ShadowFilter(float radius, float xOffset, float yOffset, float opacity) {
-        this.radius = radius;
-        this.angle = (float) Math.atan2(yOffset, xOffset);
-        this.distance = (float) Math.sqrt(xOffset * xOffset + yOffset * yOffset);
-        this.opacity = opacity;
+    public ShadowFilter(String filterName) {
+        super(filterName);
     }
 
     /**
@@ -262,7 +248,8 @@ public class ShadowFilter extends AbstractBufferedImageOp {
         };
         BufferedImage shadow = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         new BandCombineOp(extractAlpha, null).filter(src.getRaster(), shadow.getRaster());
-        shadow = new GaussianFilter(radius).filter(shadow, null);
+//        shadow = new GaussianFilter(radius, filterName).filter(shadow, null);
+        shadow = new BoxBlurFilter(radius, radius, 3, filterName).filter(shadow, null);
 
         Graphics2D g = dst.createGraphics();
         g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));

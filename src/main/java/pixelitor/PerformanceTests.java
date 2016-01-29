@@ -26,7 +26,7 @@ import java.awt.image.BufferedImageOp;
 
 public class PerformanceTests {
     private static final FilterWrapper[] filters = {
-            new FilterWrapper(new CausticsFilter()),
+            new FilterWrapper(new CausticsFilter("PerformanceTests")),
 //            new FilterWrapper(new BrushedMetalFilter()),
 //            new FilterWrapper(new CircleFilter()),
 //            new FilterWrapper(new CircleToSquareFilter()),

@@ -85,7 +85,7 @@ public abstract class ShapeFilter extends FilterWithParametrizedGUI {
     private final GroupedRangeParam scale = new GroupedRangeParam("Scale (%)", 1, 100, 500, false);
     private final DialogParam transformSettings = new DialogParam("Transform", center, scale);
 
-    public ShapeFilter() {
+    protected ShapeFilter() {
         super(ShowOriginal.NO);
         setParamSet(new ParamSet(
                 foreground,

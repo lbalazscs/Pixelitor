@@ -16,9 +16,6 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import pixelitor.filters.jhlabsproxies.JHVideoFeedback;
-import pixelitor.utils.ProgressTracker;
-
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -41,7 +38,8 @@ public class FeedbackFilter extends AbstractBufferedImageOp {
     /**
      * Construct a FeedbackFilter.
      */
-    public FeedbackFilter() {
+    public FeedbackFilter(String filterName) {
+        super(filterName);
     }
 
     /**
@@ -52,7 +50,9 @@ public class FeedbackFilter extends AbstractBufferedImageOp {
      * @param rotation the amount to rotate on each iteration
      * @param zoom     the amount to scale on each iteration
      */
-    public FeedbackFilter(float distance, float angle, float rotation, float zoom) {
+    public FeedbackFilter(float distance, float angle, float rotation, float zoom, String filterName) {
+        super(filterName);
+
         this.distance = distance;
         this.angle = angle;
         this.rotation = rotation;
@@ -290,7 +290,9 @@ public class FeedbackFilter extends AbstractBufferedImageOp {
 
         Graphics2D g = dst.createGraphics();
         g.drawImage(src, null, null);
-        ProgressTracker pt = new ProgressTracker(JHVideoFeedback.NAME, iterations);
+
+        pt = createProgressTracker(iterations);
+
         for (int i = 0; i < iterations; i++) {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
@@ -304,9 +306,10 @@ public class FeedbackFilter extends AbstractBufferedImageOp {
             g.translate( -cx, -cy );
 
             g.drawImage( src, null, null );
-            pt.itemProcessed();
+            pt.unitDone();
         }
-        pt.finish();
+        finishProgressTracker();
+
 		g.dispose();
         return dst;
     }

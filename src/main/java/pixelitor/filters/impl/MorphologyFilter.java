@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,8 @@ public class MorphologyFilter extends WholeImageFilter {
     public static final int KERNEL_SQUARE = 4;
     private int kernel;
 
-    public MorphologyFilter() {
+    public MorphologyFilter(String filterName) {
+        super(filterName);
     }
 
     public void setKernel(int kernel) {

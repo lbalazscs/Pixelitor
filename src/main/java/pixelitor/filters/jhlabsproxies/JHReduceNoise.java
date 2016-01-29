@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.ReduceNoiseFilter;
@@ -30,7 +31,7 @@ public class JHReduceNoise extends Filter {
     private final ReduceNoiseFilter filter;
 
     public JHReduceNoise() {
-        filter = new ReduceNoiseFilter();
+        filter = new ReduceNoiseFilter(NAME);
     }
 
     @Override

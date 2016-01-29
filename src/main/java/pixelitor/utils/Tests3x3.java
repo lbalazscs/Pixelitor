@@ -130,7 +130,7 @@ public class Tests3x3 {
             layer.addMaskBack(mask);
         }
         AppLogic.addComposition(comp);
-        comp.getIC().setZoom(ZoomLevel.Z6400, true);
+        comp.getIC().setZoom(ZoomLevel.Z6400, true, null);
     }
 
     // creates expected results from actual ones for regression tests

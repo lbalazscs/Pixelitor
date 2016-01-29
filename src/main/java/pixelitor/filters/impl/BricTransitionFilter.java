@@ -73,6 +73,10 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
     private GooTransition2D gooTransition2D;
     private SquaresTransition2D squaresTransition2D;
 
+    public BricTransitionFilter(String filterName) {
+        super(filterName);
+    }
+
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dest) {
         BufferedImage frameA = src;

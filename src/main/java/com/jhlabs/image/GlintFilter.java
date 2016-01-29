@@ -17,8 +17,6 @@ limitations under the License.
 package com.jhlabs.image;
 
 import pixelitor.ThreadPool;
-import pixelitor.filters.jhlabsproxies.JHGlint;
-import pixelitor.utils.ProgressTracker;
 
 import java.awt.image.BufferedImage;
 import java.util.concurrent.Future;
@@ -39,8 +37,8 @@ public class GlintFilter extends AbstractBufferedImageOp {
     private float coverage = 1.0f; // probability in percentage
 //    private Random random;
 
-    public GlintFilter() {
-//        random = new Random();
+    public GlintFilter(String filterName) {
+        super(filterName);
 
     }
 
@@ -180,12 +178,11 @@ public class GlintFilter extends AbstractBufferedImageOp {
         int height = src.getHeight();
         int[] pixels = new int[width];
 
-        ProgressTracker pt;
         if (blur != 0) {
             // width+height for the Gaussian, then height again for further processing
-            pt = new ProgressTracker(JHGlint.NAME, width + 2 * height);
+            pt = createProgressTracker(width + 2 * height);
         } else {
-            pt = new ProgressTracker(JHGlint.NAME, height);
+            pt = createProgressTracker(height);
         }
 
         // Laszlo: added this in order to prevent division by 0
@@ -237,7 +234,7 @@ public class GlintFilter extends AbstractBufferedImageOp {
         }
 
         if (blur != 0) {
-            GaussianFilter gf = new GaussianFilter(blur);
+            GaussianFilter gf = new GaussianFilter(blur, filterName);
             gf.setProgressTracker(pt);
             mask = gf.filter(mask, null);
         }
@@ -259,11 +256,11 @@ public class GlintFilter extends AbstractBufferedImageOp {
             Runnable lineTask = () -> calculateLine(width, height, pixels, length2, colors, colors2, finalMask, dstPixels, finalY);
             futures[y] = ThreadPool.submit(lineTask);
         }
-        ThreadPool.waitForFutures(futures, pt, null);
+        ThreadPool.waitForFutures(futures, pt);
 
         setRGB(dst, 0, 0, width, height, dstPixels);
 
-        pt.finish();
+        finishProgressTracker();
 
         return dst;
     }

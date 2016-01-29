@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import pixelitor.utils.IconUtils;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -202,9 +203,7 @@ public class ParamSet {
     public void addParamsToFront(FilterParam[] params) {
         List<FilterParam> old = paramList;
         paramList = new ArrayList<>(params.length + old.size());
-        for (FilterParam param : params) {
-            paramList.add(param);
-        }
+        Collections.addAll(paramList, params);
         paramList.addAll(old);
     }
 }

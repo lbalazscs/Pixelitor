@@ -23,6 +23,9 @@ import java.awt.image.BufferedImage;
  * @author Jerry Huxtable
  */
 public class LaplaceFilter extends AbstractBufferedImageOp {
+    public LaplaceFilter(String filterName) {
+        super(filterName);
+    }
 
     private static void brightness(int[] row) {
         for ( int i = 0; i < row.length; i++ ) {
@@ -39,6 +42,8 @@ public class LaplaceFilter extends AbstractBufferedImageOp {
         int width = src.getWidth();
         int height = src.getHeight();
 
+        pt = createProgressTracker(2 * height);
+
         if ( dst == null ) {
             dst = createCompatibleDestImage(src, null);
         }
@@ -51,6 +56,7 @@ public class LaplaceFilter extends AbstractBufferedImageOp {
         row2 = getRGB( src, 0, 0, width, 1, row2 );
         brightness( row1 );
         brightness( row2 );
+
         for ( int y = 0; y < height; y++ ) {
             if ( y < height-1) {
                 row3 = getRGB( src, 0, y+1, width, 1, row3 );
@@ -77,10 +83,13 @@ public class LaplaceFilter extends AbstractBufferedImageOp {
             }
             setRGB( dst, 0, y, width, 1, pixels );
             int[] t = row1; row1 = row2; row2 = row3; row3 = t;
+
+            pt.unitDone();
         }
 
         row1 = getRGB( dst, 0, 0, width, 1, row1 );
         row2 = getRGB( dst, 0, 0, width, 1, row2 );
+
         for ( int y = 0; y < height; y++ ) {
             if ( y < height-1) {
                 row3 = getRGB( dst, 0, y+1, width, 1, row3 );
@@ -103,7 +112,11 @@ public class LaplaceFilter extends AbstractBufferedImageOp {
             }
             setRGB( dst, 0, y, width, 1, pixels );
             int[] t = row1; row1 = row2; row2 = row3; row3 = t;
+
+            pt.unitDone();
         }
+
+        finishProgressTracker();
 
         return dst;
     }

@@ -24,10 +24,9 @@ import pixelitor.layers.Layer;
 import pixelitor.layers.TextLayer;
 import pixelitor.utils.Messages;
 
-import javax.swing.*;
 import java.awt.event.ActionEvent;
 
-public abstract class MenuAction extends AbstractAction {
+public abstract class MenuAction extends NamedAction {
     public enum AllowedLayerType {
         ANY(null) {
             @Override

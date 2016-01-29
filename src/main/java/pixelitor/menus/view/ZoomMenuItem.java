@@ -31,7 +31,7 @@ public class ZoomMenuItem extends OpenImageEnabledRadioButtonMenuItem {
 
         addActionListener(e -> {
             ImageComponent ic = ImageComponents.getActiveIC();
-            ic.setZoom(zoomLevel, false);
+            ic.setZoom(zoomLevel, false, null);
         });
     }
 }

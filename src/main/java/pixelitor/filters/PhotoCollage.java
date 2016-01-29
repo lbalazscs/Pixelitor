@@ -17,7 +17,7 @@
 
 package pixelitor.filters;
 
-import org.jdesktop.swingx.image.StackBlurFilter;
+import com.jhlabs.image.BoxBlurFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
@@ -25,6 +25,7 @@ import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.utils.BasicProgressTracker;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.ReseedSupport;
@@ -90,7 +91,7 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         int numImages = imageNumberParam.getValue();
-        ProgressTracker pt = new ProgressTracker(NAME, numImages);
+        ProgressTracker pt = new BasicProgressTracker(NAME, numImages);
 
         ReseedSupport.reInitialize();
         Random rand = ReseedSupport.getRand();
@@ -125,7 +126,8 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
         gShadow.fillRect(softShadowRoom, softShadowRoom, xSize, ySize);
         gShadow.dispose();
         if (shadowSoftness > 0) {
-            shadowImage = new StackBlurFilter(shadowSoftness).filter(shadowImage, shadowImage);
+            shadowImage = new BoxBlurFilter(shadowSoftness, shadowSoftness, 1, NAME)
+                    .filter(shadowImage, shadowImage);
         }
 
         Point2D offset = Utils.calculateOffset(shadowDistanceParam.getValue(), shadowAngleParam.getValueInRadians());
@@ -191,7 +193,7 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
             g.setPaint(imagePaint);
             g.fill(transformedImageRect);
 
-            pt.itemProcessed();
+            pt.unitDone();
         }
         pt.finish();
 

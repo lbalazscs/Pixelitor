@@ -36,6 +36,8 @@ import static java.awt.Color.WHITE;
  * Pixelate based on the JHLabs BlockFilter
  */
 public class JHPixelate extends FilterWithParametrizedGUI {
+    public static final String NAME = "Pixelate";
+
     private static final int STYLE_FLAT = 0;
     private static final int STYLE_3D = 1;
     private static final int STYLE_EMBEDDED = 2;
@@ -81,13 +83,13 @@ public class JHPixelate extends FilterWithParametrizedGUI {
         if (style == STYLE_FLAT || style == STYLE_3D || style == STYLE_EMBEDDED) {
             if (type == TYPE_SQUARE) {
                 if (blockFilter == null) {
-                    blockFilter = new BlockFilter();
+                    blockFilter = new BlockFilter(NAME);
                 }
                 blockFilter.setBlockSize(cellSize);
                 dest = blockFilter.filter(src, dest);
             } else if (type == TYPE_BRICK) {
                 if (brickBlockFilter == null) {
-                    brickBlockFilter = new BrickBlockFilter();
+                    brickBlockFilter = new BrickBlockFilter(NAME);
                 }
                 brickBlockFilter.setHorizontalBlockSize(cellSize * 2);
                 brickBlockFilter.setVerticalBlockSize(cellSize);
@@ -108,7 +110,7 @@ public class JHPixelate extends FilterWithParametrizedGUI {
             }
 
             if (style == STYLE_3D || style == STYLE_EMBEDDED) {
-                dest = ImageUtils.bumpMap(dest, bumpSource);
+                dest = ImageUtils.bumpMap(dest, bumpSource, NAME);
 //            } else if (style == STYLE_GRID_ONLY) {
 //                dest = ImageUtils.bumpMap(src, bumpSource);
             } else {

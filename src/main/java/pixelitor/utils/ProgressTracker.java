@@ -17,53 +17,40 @@
 
 package pixelitor.utils;
 
-import pixelitor.MessageHandler;
-
 /**
- * Tracks the progress of some operation and shows a
- * status bar update if it takes a long time.
+ * Tracks the progress of some operation.
  */
-public class ProgressTracker {
-    private static final int THRESHOLD_MILLIS = 200;
+public interface ProgressTracker {
+    /**
+     * One work unit - usually a line of pixels - was finished
+     */
+    void unitDone();
 
-    private static final MessageHandler messageHandler = Messages.getMessageHandler();
-    private final long startTime;
-    private final String name;
-    private final int numComputationUnits;
+    /**
+     * Multiple work units were finished
+     */
+    void addUnits(int units);
 
-    private int finished = 0;
-    private int lastPercent = 0;
-    private boolean progressBar = false;
+    /**
+     * All the work is done
+     */
+    void finish();
 
-    public ProgressTracker(int numComputationUnits) {
-        this("Filter", numComputationUnits);
-    }
-
-    public ProgressTracker(String name, int numComputationUnits) {
-        this.name = name + ":";
-        this.numComputationUnits = numComputationUnits;
-        startTime = System.currentTimeMillis();
-    }
-
-    public void itemProcessed() {
-        finished++;
-        double millis = System.currentTimeMillis() - startTime;
-        if (millis > THRESHOLD_MILLIS) {
-            int percent = ((int) (finished * 100.0 / numComputationUnits));
-            if (percent != lastPercent) {
-                if (!progressBar) {
-                    messageHandler.startProgress(name, 100);
-                    progressBar = true;
-                }
-                messageHandler.updateProgress(percent);
-                lastPercent = percent;
-            }
+    /**
+     * A "null object" tracker that does nothing and
+     * also can be shared because it has no state
+     */
+    ProgressTracker NULL_TRACKER = new ProgressTracker() {
+        @Override
+        public void addUnits(int units) {
         }
-    }
 
-    public void finish() {
-        if (progressBar) {
-            messageHandler.stopProgress();
+        @Override
+        public void unitDone() {
         }
-    }
+
+        @Override
+        public void finish() {
+        }
+    };
 }

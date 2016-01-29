@@ -38,6 +38,7 @@ public abstract class FilterWithGUI extends Filter {
      */
     public abstract AdjustPanel createAdjustPanel();
 
+    @Override
     public void execute() {
         ImageComponent ic = ImageComponents.getActiveIC();
         if(ic != null) {

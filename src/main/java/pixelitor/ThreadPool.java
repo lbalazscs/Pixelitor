@@ -30,11 +30,6 @@ import java.util.concurrent.Future;
 public class ThreadPool {
     public static final int NUM_AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
 
-    // not all filters respect this setting!
-    public static boolean runMultiThreaded() {
-        return NUM_AVAILABLE_PROCESSORS > 1;
-    }
-
     private static final ExecutorService executorService =
             Executors.newFixedThreadPool(NUM_AVAILABLE_PROCESSORS);
 
@@ -49,12 +44,8 @@ public class ThreadPool {
         return executorService.submit(task);
     }
 
-    public static void waitForFutures(Future<?>[] futures, ProgressTracker pt, String filterName) {
-        boolean createTracker = pt == null;
-        if(createTracker) {
-            assert filterName != null;
-            pt = new ProgressTracker(filterName, futures.length);
-        }
+    public static void waitForFutures(Future<?>[] futures, ProgressTracker pt) {
+        assert pt != null;
 
         for (Future<?> future : futures) {
             try {
@@ -63,19 +54,15 @@ public class ThreadPool {
                 // not completely accurate because the submit order is not
                 // necessarily the same as the finish order, but
                 // good enough in practice
-                pt.itemProcessed();
+                pt.unitDone();
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
         }
-
-        if(createTracker) {
-            pt.finish();
-        }
     }
 
-    public static void waitForFutures2(BufferedImage dst, int width, Future<int[]>[] futures, String filterName) {
-        ProgressTracker pt = new ProgressTracker(filterName, futures.length);
+    public static void waitForFutures2(BufferedImage dst, int width, Future<int[]>[] futures, ProgressTracker pt) {
+        assert pt != null;
 
         try {
             for (int i = 0; i < futures.length; i++) {
@@ -83,12 +70,10 @@ public class ThreadPool {
                 int[] linePixels = line.get();
                 AbstractBufferedImageOp.setRGB(dst, 0, i, width, 1, linePixels);
 
-                pt.itemProcessed();
+                pt.unitDone();
             }
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
-
-        pt.finish();
     }
 }

@@ -21,6 +21,7 @@ import pixelitor.gui.ImageComponent;
 
 import javax.swing.*;
 import java.awt.Cursor;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 
 /**
@@ -39,17 +40,15 @@ public class ZoomTool extends Tool {
 
     @Override
     public void mousePressed(MouseEvent e, ImageComponent ic) {
-        int x = e.getX();
-        int y = e.getY();
-
+        Point mousePos = e.getPoint();
         if(SwingUtilities.isLeftMouseButton(e)) {
             if(e.isAltDown()) {
-                ic.decreaseZoom(x, y);
+                ic.decreaseZoom(mousePos);
             } else {
-                ic.increaseZoom(x, y);
+                ic.increaseZoom(mousePos);
             }
         } else if(SwingUtilities.isRightMouseButton(e)) {
-            ic.decreaseZoom(x, y);
+            ic.decreaseZoom(mousePos);
         }
     }
 

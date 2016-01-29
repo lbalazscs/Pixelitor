@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.VariableBlurFilter;
@@ -33,12 +34,13 @@ import java.awt.image.BufferedImage;
  * JH Focus filter based on the JHLabs VariableBlurFilter
  */
 public class JHFocus extends FilterWithParametrizedGUI {
-    private final ImagePositionParam center = new ImagePositionParam("Focused Area Center");
+    public static final String NAME = "Focus";
 
+    private final ImagePositionParam center = new ImagePositionParam("Focused Area Center");
     private final GroupedRangeParam radius = new GroupedRangeParam("Focused Area Radius (Pixels)", 1, 200, 1000, false);
     private final RangeParam softness = new RangeParam("Transition Softness", 0, 20, 100);
     private final GroupedRangeParam blurRadius = new GroupedRangeParam("Blur Radius", 0, 10, 50);
-    private final RangeParam numberOfIterations = new RangeParam("Number of Blur Iterations", 1, 3, 10);
+    private final RangeParam numberOfIterations = new RangeParam("Blur Iterations (Quality)", 1, 3, 10);
     private final BooleanParam invert = new BooleanParam("Invert", false);
     private final BooleanParam hpSharpening = BooleanParam.createParamForHPSharpening();
 
@@ -72,7 +74,7 @@ public class JHFocus extends FilterWithParametrizedGUI {
         }
 
         if (filter == null) {
-            filter = new FocusImpl();
+            filter = new FocusImpl(NAME);
         }
 
         filter.setCenter(
@@ -113,6 +115,10 @@ public class JHFocus extends FilterWithParametrizedGUI {
         private boolean inverted;
 
         private BlurredEllipse ellipse;
+
+        public FocusImpl(String filterName) {
+            super(filterName);
+        }
 
         public void setCenter(double cx, double cy) {
             this.cx = cx;

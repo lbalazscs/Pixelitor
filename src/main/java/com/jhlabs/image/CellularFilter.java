@@ -29,8 +29,6 @@ import java.util.concurrent.Future;
  * A filter which produces an image with a cellular texture.
  */
 public class CellularFilter extends WholeImageFilter implements Function2D {
-    private final String filterName;
-
     protected float scale = 32;
     protected float stretch = 1.0f;
     protected float angle = 0.0f;
@@ -76,7 +74,8 @@ public class CellularFilter extends WholeImageFilter implements Function2D {
     GridType gridType;
 
     public CellularFilter(String filterName) {
-        this.filterName = filterName;
+        super(filterName);
+
         if (probabilities == null) {
             probabilities = new byte[8192];
             float factorial = 1;
@@ -609,7 +608,7 @@ public class CellularFilter extends WholeImageFilter implements Function2D {
 //		min = minmax[0];
 //		max = minmax[1];
 
-
+        pt = createProgressTracker(height);
         int[] outPixels = new int[width * height];
 
         Future<?>[] futures = new Future[height];
@@ -623,7 +622,9 @@ public class CellularFilter extends WholeImageFilter implements Function2D {
             };
             futures[y] = ThreadPool.submit(calculateLineTask);
         }
-        ThreadPool.waitForFutures(futures, null, filterName);
+        ThreadPool.waitForFutures(futures, pt);
+
+        finishProgressTracker();
 
         return outPixels;
     }

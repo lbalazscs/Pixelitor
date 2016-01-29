@@ -478,8 +478,20 @@ public class RandomGUITest {
             }
 
             log("random zoom zoomLevel = " + randomZoomLevel);
-            ic.setZoom(randomZoomLevel, false);
+
+            if (rand.nextBoolean()) {
+                ic.setZoom(randomZoomLevel, false, null);
+            } else {
+                Point mousePos = getRandomPointOnIC(ic);
+                ic.setZoom(randomZoomLevel, false, mousePos);
+            }
         }
+    }
+
+    private static Point getRandomPointOnIC(ImageComponent ic) {
+        int randX = rand.nextInt(ic.getWidth());
+        int randY = rand.nextInt(ic.getWidth());
+        return new Point(randX, randY);
     }
 
     private static void randomZoomOut() {
@@ -487,8 +499,13 @@ public class RandomGUITest {
 
         ImageComponent ic = ImageComponents.getActiveIC();
         if (ic != null) {
-            ZoomLevel previous = ic.getZoomLevel().zoomOut();
-            ic.setZoom(previous, false);
+            ZoomLevel newZoom = ic.getZoomLevel().zoomOut();
+            if (rand.nextBoolean()) {
+                ic.setZoom(newZoom, false, null);
+            } else {
+                Point mousePos = getRandomPointOnIC(ic);
+                ic.setZoom(newZoom, false, mousePos);
+            }
         }
     }
 

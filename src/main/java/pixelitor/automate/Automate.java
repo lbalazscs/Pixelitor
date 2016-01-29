@@ -122,7 +122,7 @@ public class Automate {
         OpenSaveManager.openFile(file);
         Composition comp = ImageComponents.getActiveComp().get();
 
-        ImageComponent ic = (ImageComponent) comp.getIC();
+        ImageComponent ic = comp.getIC();
         InternalImageFrame frame = ic.getInternalFrame();
         frame.paintImmediately(frame.getBounds());
 

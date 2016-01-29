@@ -1,3 +1,20 @@
+/*
+ * Copyright 2016 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.filters.jhlabsproxies;
 
 import pixelitor.filters.FilterWithParametrizedGUI;
@@ -16,7 +33,9 @@ import static pixelitor.filters.impl.MorphologyFilter.OP_ERODE;
  * A morphology filter
  */
 public class Morphology extends FilterWithParametrizedGUI {
-    private final MorphologyFilter filter = new MorphologyFilter();
+    public static final String NAME = "Morphology";
+
+    private final MorphologyFilter filter = new MorphologyFilter(NAME);
 
     private static final int OP_OPEN = 10;
     private static final int OP_CLOSE = 11;

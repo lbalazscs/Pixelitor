@@ -16,9 +16,6 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import pixelitor.filters.jhlabsproxies.JHUnsharpMask;
-import pixelitor.utils.ProgressTracker;
-
 import java.awt.image.BufferedImage;
 
 /**
@@ -31,7 +28,8 @@ public class UnsharpFilter extends GaussianFilter {
     private float amount = 0.5f;
     private int threshold = 1;
 
-    public UnsharpFilter() {
+    public UnsharpFilter(String filterName) {
+        super(filterName);
         radius = 2;
     }
 
@@ -82,7 +80,7 @@ public class UnsharpFilter extends GaussianFilter {
         int width = src.getWidth();
         int height = src.getHeight();
 
-        ProgressTracker pt = new ProgressTracker(JHUnsharpMask.NAME, width + height);
+        pt = createProgressTracker(width + height);
 
         if (dst == null) {
             dst = createCompatibleDestImage(src, null);
@@ -134,7 +132,7 @@ public class UnsharpFilter extends GaussianFilter {
 
         dst.setRGB(0, 0, width, height, inPixels, 0, width);
 
-        pt.finish();
+        finishProgressTracker();
 
         return dst;
     }

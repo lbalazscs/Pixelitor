@@ -18,6 +18,7 @@
 package pixelitor.gui;
 
 import pixelitor.io.DropListener;
+import pixelitor.menus.view.ZoomLevel;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
@@ -46,6 +47,42 @@ public class Desktop {
         new DropTarget(desktopPane, new DropListener());
 
         desktopPane.setBackground(GRAY);
+    }
+
+    public static ZoomLevel calcFitScreenZoom(int imageWidth, int imageHeight, boolean alsoZoomInToFitScreen) {
+        Dimension desktopSize = INSTANCE.getDesktopSize();
+        double desktopWidth = desktopSize.getWidth();
+        double desktopHeight = desktopSize.getHeight();
+
+        double imageToDesktopHorizontalRatio = imageWidth / desktopWidth;
+        double imageToDesktopVerticalRatio = imageHeight / (desktopHeight - 35); // subtract because of internal frame header
+        double maxImageToDesktopRatio = Math.max(imageToDesktopHorizontalRatio, imageToDesktopVerticalRatio);
+        double idealZoomPercent = 100.0 / maxImageToDesktopRatio;
+        ZoomLevel[] zoomLevels = ZoomLevel.values();
+        ZoomLevel maximallyZoomedOut = zoomLevels[0];
+
+        if (maximallyZoomedOut.getPercentValue() > idealZoomPercent) {
+            // the image is so big that it will have scroll bars even if it is maximally zoomed out
+            return maximallyZoomedOut;
+        }
+
+        ZoomLevel lastOK = maximallyZoomedOut;
+        // iterate all the zoom levels from zoomed out to zoomed in
+        for (ZoomLevel level : zoomLevels) {
+            if (level.getPercentValue() > idealZoomPercent) {
+                // found one that is too much zoomed in
+                return lastOK;
+            }
+            if (!alsoZoomInToFitScreen) { // we don't want to zoom in more than 100%
+                if (lastOK == ZoomLevel.Z100) {
+                    return lastOK;
+                }
+            }
+            lastOK = level;
+        }
+        // if we get here, it means that the image is so small that even at maximal zoom
+        // it fits the screen, set it then to the maximal zoom
+        return lastOK;
     }
 
     public JDesktopPane getDesktopPane() {
@@ -137,7 +174,7 @@ public class Desktop {
         int maxHeight = desktopPane.getHeight() - CASCADE_VERTICAL_SHIFT;
         locationY %= maxHeight;
 
-        ImageComponent activeIC = (ImageComponent) ImageComponents.getActiveIC();
+        ImageComponent activeIC = ImageComponents.getActiveIC();
         InternalImageFrame internalFrame = new InternalImageFrame(activeIC, locationX, locationY);
         activeIC.setInternalFrame(internalFrame);
 

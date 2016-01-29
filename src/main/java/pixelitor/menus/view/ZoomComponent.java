@@ -63,7 +63,7 @@ public class ZoomComponent extends JPanel implements ImageSwitchListener {
             ZoomLevel value = values[selectedZoomIndex];
             ImageComponent activeIC = ImageComponents.getActiveIC();
             if (activeIC != null) {
-                activeIC.setZoom(value, false);
+                activeIC.setZoomAtCenter(value);
                 setNewZoomText(value);
             }
         });

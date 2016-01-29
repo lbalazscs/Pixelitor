@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.FeedbackFilter;
@@ -65,7 +66,7 @@ public class JHVideoFeedback extends FilterWithParametrizedGUI {
         }
 
         if (filter == null) {
-            filter = new FeedbackFilter();
+            filter = new FeedbackFilter(NAME);
         }
 
         float rotation = rotationParam.getValueInRadians();

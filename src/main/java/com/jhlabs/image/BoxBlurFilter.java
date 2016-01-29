@@ -16,6 +16,8 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+import pixelitor.utils.ProgressTracker;
+
 import java.awt.image.BufferedImage;
 
 /**
@@ -23,7 +25,6 @@ import java.awt.image.BufferedImage;
  * and a number of iterations can be given which allows an approximation to Gaussian blur.
  */
 public class BoxBlurFilter extends AbstractBufferedImageOp {
-
     private float hRadius;
     private float vRadius;
     private int iterations = 1;
@@ -32,7 +33,8 @@ public class BoxBlurFilter extends AbstractBufferedImageOp {
     /**
      * Construct a default BoxBlurFilter.
      */
-    public BoxBlurFilter() {
+    public BoxBlurFilter(String filterName) {
+        super(filterName);
     }
 
     /**
@@ -42,7 +44,9 @@ public class BoxBlurFilter extends AbstractBufferedImageOp {
      * @param vRadius    the vertical radius of blur
      * @param iterations the number of time to iterate the blur
      */
-    public BoxBlurFilter(float hRadius, float vRadius, int iterations) {
+    public BoxBlurFilter(float hRadius, float vRadius, int iterations, String filterName) {
+        super(filterName);
+
         this.hRadius = hRadius;
         this.vRadius = vRadius;
         this.iterations = iterations;
@@ -73,6 +77,10 @@ public class BoxBlurFilter extends AbstractBufferedImageOp {
         int width = src.getWidth();
         int height = src.getHeight();
 
+        // the fractional blur is not included - it should
+        // be executed only for tweening
+        pt = createProgressTracker(iterations * (width + height));
+
         if (dst == null) {
             dst = createCompatibleDestImage(src, null);
         }
@@ -84,17 +92,31 @@ public class BoxBlurFilter extends AbstractBufferedImageOp {
         if (premultiplyAlpha) {
             ImageMath.premultiply(inPixels, 0, inPixels.length);
         }
+
         for (int i = 0; i < iterations; i++) {
-            blur(inPixels, outPixels, width, height, hRadius);
-            blur(outPixels, inPixels, height, width, vRadius);
+            blur(inPixels, outPixels, width, height, hRadius, pt);
+            blur(outPixels, inPixels, height, width, vRadius, pt);
         }
-        blurFractional(inPixels, outPixels, width, height, hRadius);
-        blurFractional(outPixels, inPixels, height, width, vRadius);
+
+        boolean blurFractional = false;
+        double hFraction = hRadius - Math.floor(hRadius);
+        double vFraction = vRadius - Math.floor(vRadius);
+        if (hFraction > 0.001 || vFraction > 0.001) {
+            blurFractional = true;
+        }
+
+        if (blurFractional) {
+            blurFractional(inPixels, outPixels, width, height, hRadius);
+            blurFractional(outPixels, inPixels, height, width, vRadius);
+        }
+
         if (premultiplyAlpha) {
             ImageMath.unpremultiply(inPixels, 0, inPixels.length);
         }
-
         setRGB(dst, 0, 0, width, height, inPixels);
+
+        finishProgressTracker();
+
         return dst;
     }
 
@@ -106,13 +128,14 @@ public class BoxBlurFilter extends AbstractBufferedImageOp {
      * @param width  the width of the pixel array
      * @param height the height of the pixel array
      * @param radius the radius of blur
+     * @param pt
      */
-    public static void blur(int[] in, int[] out, int width, int height, float radius) {
+    public static void blur(int[] in, int[] out, int width, int height, float radius, ProgressTracker pt) {
         int widthMinus1 = width - 1;
         int r = (int) radius;
         int tableSize = 2 * r + 1;
 
-        if(tableSize < 0) {
+        if (tableSize < 0) {
             throw new IllegalArgumentException(String.format("tableSize is negative, radius = %.2f", radius));
         }
 
@@ -157,6 +180,8 @@ public class BoxBlurFilter extends AbstractBufferedImageOp {
                 outIndex += height;
             }
             inIndex += width;
+
+            pt.unitDone();
         }
     }
 
@@ -288,11 +313,11 @@ public class BoxBlurFilter extends AbstractBufferedImageOp {
      * @return the number of iterations
      * @see #setIterations
      */
-	public int getIterations() {
-		return iterations;
-	}
+    public int getIterations() {
+        return iterations;
+    }
 
-	public String toString() {
-		return "Blur/Box Blur...";
-	}
+    public String toString() {
+        return "Blur/Box Blur...";
+    }
 }

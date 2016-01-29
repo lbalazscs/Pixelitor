@@ -18,7 +18,6 @@ package com.jhlabs.image;
 
 import com.jhlabs.math.Noise;
 import pixelitor.ThreadPool;
-import pixelitor.filters.jhlabsproxies.JHCaustics;
 
 import java.awt.Rectangle;
 import java.util.Random;
@@ -42,7 +41,8 @@ public class CausticsFilter extends WholeImageFilter {
 
     private float s, c;
 
-    public CausticsFilter() {
+    public CausticsFilter(String filterName) {
+        super(filterName);
     }
 
     /**
@@ -245,6 +245,8 @@ public class CausticsFilter extends WholeImageFilter {
         float rs = 1.0f / scale;
         float d = 0.95f;
 
+        pt = createProgressTracker(outHeight);
+
         Future<?>[] futures = new Future[outHeight];
         for (int y = 0; y < outHeight; y++) {
             int finalY = y;
@@ -252,7 +254,9 @@ public class CausticsFilter extends WholeImageFilter {
             Runnable lineTask = () -> calculateLine(outWidth, outHeight, pixels, finalV, rs, d, finalY);
             futures[y] = ThreadPool.submit(lineTask);
         }
-        ThreadPool.waitForFutures(futures, null, JHCaustics.NAME);
+        ThreadPool.waitForFutures(futures, pt);
+
+        finishProgressTracker();
 
         return pixels;
     }

@@ -26,32 +26,28 @@ import java.util.concurrent.Future;
  * An abstract superclass for point filters. The interface is the same as the old RGBImageFilter.
  */
 public abstract class PointFilter extends AbstractBufferedImageOp {
-    private final String filterName;
-
     protected PointFilter(String filterName) {
-        this.filterName = filterName;
+        super(filterName);
     }
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        if (src.getType() == BufferedImage.TYPE_BYTE_GRAY) {
-            if (dst == null) {
-                dst = createCompatibleDestImage(src, null);
-            }
-            return grayFilter(src, dst);
-        }
-
         int width = src.getWidth();
         int height = src.getHeight();
+
         setDimensions(width, height);
-
-        int[] inPixels = ImageUtils.getPixelsAsArray(src);
-
         if (dst == null) {
             dst = createCompatibleDestImage(src, null);
         }
+
+        if (src.getType() == BufferedImage.TYPE_BYTE_GRAY) {
+            return grayFilter(src, dst);
+        }
+
+        int[] inPixels = ImageUtils.getPixelsAsArray(src);
         int[] outPixels = ImageUtils.getPixelsAsArray(dst);
 
+        pt = createProgressTracker(height);
         Future<?>[] futures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
@@ -64,7 +60,8 @@ public abstract class PointFilter extends AbstractBufferedImageOp {
             futures[y] = ThreadPool.submit(calculateLineTask);
         }
 
-        ThreadPool.waitForFutures(futures, null, filterName);
+        ThreadPool.waitForFutures(futures, pt);
+        finishProgressTracker();
 
         return dst;
     }
@@ -73,8 +70,7 @@ public abstract class PointFilter extends AbstractBufferedImageOp {
         int width = src.getWidth();
         int height = src.getHeight();
 
-        setDimensions(width, height);
-
+        pt = createProgressTracker(height);
         Future<?>[] futures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
@@ -88,7 +84,8 @@ public abstract class PointFilter extends AbstractBufferedImageOp {
             };
             futures[y] = ThreadPool.submit(calculateLineTask);
         }
-        ThreadPool.waitForFutures(futures, null, filterName);
+        ThreadPool.waitForFutures(futures, pt);
+        finishProgressTracker();
 
         return dst;
     }

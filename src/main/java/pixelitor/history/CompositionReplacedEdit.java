@@ -33,7 +33,7 @@ public class CompositionReplacedEdit extends PixelitorEdit {
     public CompositionReplacedEdit(Composition oldComp, Composition newComp) {
         super(oldComp, "Reload");
         this.newComp = newComp;
-        ic = (ImageComponent) newComp.getIC();
+        ic = newComp.getIC();
     }
 
     @Override

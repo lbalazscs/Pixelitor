@@ -112,7 +112,7 @@ public class OctTreeQuantizer implements Quantizer {
                 reduceTree(reduceColors);
             }
             if(i % workUnit == 0) {
-                pt.itemProcessed();
+                pt.unitDone();
             }
         }
     }

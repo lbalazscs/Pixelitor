@@ -16,9 +16,6 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import pixelitor.filters.jhlabsproxies.JHConvolutionEdge;
-import pixelitor.utils.ProgressTracker;
-
 import java.awt.Rectangle;
 
 /**
@@ -72,7 +69,8 @@ public class EdgeFilter extends WholeImageFilter {
 	protected float[] vEdgeMatrix = SOBEL_V;
 	protected float[] hEdgeMatrix = SOBEL_H;
 
-	public EdgeFilter() {
+	public EdgeFilter(String filterName) {
+		super(filterName);
 	}
 
 	public void setVEdgeMatrix(float[] vEdgeMatrix) {
@@ -93,7 +91,7 @@ public class EdgeFilter extends WholeImageFilter {
 
 	@Override
     protected int[] filterPixels( int width, int height, int[] inPixels, Rectangle transformedSpace ) {
-		ProgressTracker pt = new ProgressTracker(JHConvolutionEdge.NAME, height);
+        pt = createProgressTracker(height);
 
 		int index = 0;
 		int[] outPixels = new int[width * height];
@@ -142,9 +140,9 @@ public class EdgeFilter extends WholeImageFilter {
 				b = PixelUtils.clamp(b);
 				outPixels[index++] = a | (r << 16) | (g << 8) | b;
 			}
-			pt.itemProcessed();
+			pt.unitDone();
 		}
-		pt.finish();
+        finishProgressTracker();
 		return outPixels;
 	}
 

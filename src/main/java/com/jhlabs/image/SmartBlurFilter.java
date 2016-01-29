@@ -16,7 +16,6 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import pixelitor.filters.jhlabsproxies.JHSmartBlur;
 import pixelitor.utils.ProgressTracker;
 
 import java.awt.image.BufferedImage;
@@ -26,17 +25,20 @@ import java.awt.image.Kernel;
  * A filter which performs a "smart blur". i.e. a blur which blurs smotth parts of the image while preserving edges.
  */
 public class SmartBlurFilter extends AbstractBufferedImageOp {
-
     private int hRadius = 5;
     private int vRadius = 5;
     private int threshold = 10;
+
+    public SmartBlurFilter(String filterName) {
+        super(filterName);
+    }
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
         int width = src.getWidth();
         int height = src.getHeight();
 
-        ProgressTracker pt = new ProgressTracker(JHSmartBlur.NAME, width + height);
+        pt = createProgressTracker(width + height);
 
         if (dst == null) {
             dst = createCompatibleDestImage(src, null);
@@ -52,7 +54,7 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
 
         setRGB(dst, 0, 0, width, height, inPixels);
 
-        pt.finish();
+        finishProgressTracker();
 
         return dst;
     }
@@ -127,7 +129,7 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
                 outPixels[outIndex] = (ia << 24) | (ir << 16) | (ig << 8) | ib;
                 outIndex += height;
             }
-            pt.itemProcessed();
+            pt.unitDone();
         }
     }
 

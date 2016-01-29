@@ -52,7 +52,7 @@ public class JHColorHalftone extends FilterWithParametrizedGUI {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         if(filter == null) {
-            filter = new ColorHalftoneFilter();
+            filter = new ColorHalftoneFilter(NAME);
         }
 
         float cyan = (float) cyanScreenAngle.getValueInIntuitiveRadians();

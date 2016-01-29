@@ -16,8 +16,6 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import pixelitor.utils.ProgressTracker;
-
 import java.awt.Rectangle;
 
 /**
@@ -45,10 +43,8 @@ public class QuantizeFilter extends WholeImageFilter {
     private int numColors = 256;
     private boolean serpentine = true;
 
-    private final String filterName;
-
     public QuantizeFilter(String filterName) {
-        this.filterName = filterName;
+        super(filterName);
     }
 
     /**
@@ -113,12 +109,13 @@ public class QuantizeFilter extends WholeImageFilter {
         // therefore we need height/2.5 for the other
         // computation-intensive task (addPixels)
         int units = (int) (height / 2.5);
-        ProgressTracker pt;
+        int workUnits;
         if(dither) {
-            pt = new ProgressTracker(filterName, units + height);
+            workUnits = units + height;
         } else {
-            pt = new ProgressTracker(filterName, units + 1);
+            workUnits = units + 1;
         }
+        pt = createProgressTracker(workUnits);
 
         Quantizer quantizer = new OctTreeQuantizer();
         quantizer.setup(numColors);
@@ -129,7 +126,7 @@ public class QuantizeFilter extends WholeImageFilter {
             for (int i = 0; i < count; i++) {
                 outPixels[i] = table[quantizer.getIndexForColor(inPixels[i])];
             }
-            pt.itemProcessed(); // this computation is relatively fast
+            pt.unitDone(); // this computation is relatively fast
         } else {
             int index = 0;
             for (int y = 0; y < height; y++) {
@@ -189,10 +186,11 @@ public class QuantizeFilter extends WholeImageFilter {
                     }
                     index += direction;
                 }
-                pt.itemProcessed();
+                pt.unitDone();
             }
         }
-        pt.finish();
+
+        finishProgressTracker();
     }
 
     @Override

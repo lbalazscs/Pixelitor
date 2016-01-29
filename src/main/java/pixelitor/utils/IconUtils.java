@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,8 @@ public final class IconUtils {
     private static final Icon southArrowIcon = loadIcon("south_arrow.gif");
     private static final Icon textLayerIcon = loadIcon("text_layer_icon.png");
     private static final Icon adjLayerIcon = loadIcon("adj_layer_icon.png");
+    private static final Icon undoIcon = loadIcon("undo.png");
+    private static final Icon redoIcon = loadIcon("redo.png");
 
     /**
      * Utility class with static methods
@@ -71,5 +73,13 @@ public final class IconUtils {
 
     public static Icon getAdjLayerIcon() {
         return adjLayerIcon;
+    }
+
+    public static Icon getUndoIcon() {
+        return undoIcon;
+    }
+
+    public static Icon getRedoIcon() {
+        return redoIcon;
     }
 }

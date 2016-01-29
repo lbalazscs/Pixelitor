@@ -16,18 +16,15 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import org.jdesktop.swingx.image.FastBlurFilter;
-
 import java.awt.image.BufferedImage;
 
 /**
  * A filter which produces a rubber-stamp type of effect by performing a thresholded blur.
  */
 public class StampFilter extends PointFilter {
-    public static final int FAST_BLUR = 1;
     public static final int BOX3_BLUR = 2;
     public static final int GAUSSIAN_BLUR = 3;
-    private int blurMethod = FAST_BLUR;
+    private int blurMethod = BOX3_BLUR;
 
     private float threshold;
     private float softness = 0;
@@ -146,16 +143,14 @@ public class StampFilter extends PointFilter {
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        if(blurMethod == FAST_BLUR) {
-            dst = new FastBlurFilter((int) radius).filter(src, null);
-        } else if (blurMethod == BOX3_BLUR) {
+        if (blurMethod == BOX3_BLUR) {
             if ((src.getWidth() == 1) || (src.getHeight() == 1)) {
                 // otherwise we get ArrayIndexOutOfBoundsException in BoxBlurFilter
                 return src;
             }
-            dst = new BoxBlurFilter(radius, radius, 3).filter(src, null);
+            dst = new BoxBlurFilter(radius, radius, 3, filterName).filter(src, null);
         } else if(blurMethod == GAUSSIAN_BLUR) {
-            dst = new GaussianFilter(radius).filter(src, null);
+            dst = new GaussianFilter(radius, filterName).filter(src, null);
         } else {
             throw new IllegalStateException("blurMethod = " + blurMethod);
         }

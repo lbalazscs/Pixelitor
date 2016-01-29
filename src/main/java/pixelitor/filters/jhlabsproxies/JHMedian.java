@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.MedianFilter;
@@ -30,7 +31,7 @@ public class JHMedian extends Filter {
     private final MedianFilter filter;
 
     public JHMedian() {
-        filter = new MedianFilter();
+        filter = new MedianFilter(NAME);
     }
 
     @Override

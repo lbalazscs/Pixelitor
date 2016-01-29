@@ -69,7 +69,7 @@ public class JHCaustics extends FilterWithParametrizedGUI {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
-            filter = new CausticsFilter();
+            filter = new CausticsFilter(NAME);
         }
 
         filter.setAmount(focus.getValueAsPercentage());

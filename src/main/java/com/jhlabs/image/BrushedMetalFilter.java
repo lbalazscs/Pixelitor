@@ -17,22 +17,14 @@ limitations under the License.
 package com.jhlabs.image;
 
 import net.jafama.FastMath;
-import pixelitor.filters.jhlabsproxies.JHBrushedMetal;
-import pixelitor.utils.ProgressTracker;
 
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
-import java.awt.image.ColorModel;
 import java.util.Random;
 
 /**
  * A filter which produces an image simulating brushed metal.
  */
-public class BrushedMetalFilter implements BufferedImageOp {
+public class BrushedMetalFilter extends AbstractBufferedImageOp {
 
 	private int radius = 10;
 	private float amount = 0.1f;
@@ -44,7 +36,8 @@ public class BrushedMetalFilter implements BufferedImageOp {
     /**
      * Constructs a BrushedMetalFilter object.
      */
-    public BrushedMetalFilter() {
+    public BrushedMetalFilter(String filterName) {
+        super(filterName);
     }
     
     /**
@@ -56,7 +49,9 @@ public class BrushedMetalFilter implements BufferedImageOp {
      * @param monochrome  a boolean -- true for monochrome texture
      * @param shine       a float specifying the shine to add
      */
-    public BrushedMetalFilter( int color, int radius, float amount, boolean monochrome, float shine) {
+    public BrushedMetalFilter( int color, int radius, float amount, boolean monochrome, float shine, String filterName) {
+        super(filterName);
+
         this.color = color;
         this.radius = radius;
         this.amount = amount;
@@ -69,7 +64,7 @@ public class BrushedMetalFilter implements BufferedImageOp {
         int width = src.getWidth();
         int height = src.getHeight();
 
-        ProgressTracker pt = new ProgressTracker(JHBrushedMetal.NAME, height);
+        pt = createProgressTracker(height);
 
         if ( dst == null ) {
             dst = createCompatibleDestImage(src, null);
@@ -108,9 +103,9 @@ public class BrushedMetalFilter implements BufferedImageOp {
                 AbstractBufferedImageOp.setRGB(dst, 0, y, width, 1, inPixels);
             }
 
-            pt.itemProcessed();
+            pt.unitDone();
         }
-        pt.finish();
+        finishProgressTracker();
         return dst;
     }
 
@@ -277,33 +272,6 @@ public class BrushedMetalFilter implements BufferedImageOp {
 	public boolean getMonochrome() {
 		return monochrome;
 	}
-	
-    @Override
-    public BufferedImage createCompatibleDestImage(BufferedImage src, ColorModel dstCM) {
-        if ( dstCM == null ) {
-            dstCM = src.getColorModel();
-        }
-        return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(src.getWidth(), src.getHeight()), dstCM.isAlphaPremultiplied(), null);
-    }
-    
-    @Override
-    public Rectangle2D getBounds2D( BufferedImage src ) {
-        return new Rectangle(0, 0, src.getWidth(), src.getHeight());
-    }
-    
-    @Override
-    public Point2D getPoint2D( Point2D srcPt, Point2D dstPt ) {
-        if ( dstPt == null ) {
-            dstPt = new Point2D.Double();
-        }
-        dstPt.setLocation( srcPt.getX(), srcPt.getY() );
-        return dstPt;
-    }
-
-    @Override
-    public RenderingHints getRenderingHints() {
-        return null;
-    }
 
 	public String toString() {
 		return "Texture/Brushed Metal...";

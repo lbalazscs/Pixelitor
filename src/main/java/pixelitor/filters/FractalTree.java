@@ -24,6 +24,7 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.utils.BasicProgressTracker;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.ReseedSupport;
 
@@ -164,7 +165,7 @@ public class FractalTree extends FilterWithParametrizedGUI {
             drawTreeCalls *= 2;
         }
         drawTreeCalls--;
-        pt = new ProgressTracker(NAME, drawTreeCalls);
+        pt = new BasicProgressTracker(NAME, drawTreeCalls);
 
         drawTree(g, src.getWidth() / 2.0, src.getHeight(), 270 + calcAngleRandomness(rand), maxDepth, rand, c);
 
@@ -210,7 +211,7 @@ public class FractalTree extends FilterWithParametrizedGUI {
         double leftBranchAngle = angle - split + calcAngleRandomness(rand);
         double rightBranchAngle = angle + split + calcAngleRandomness(rand);
 
-        pt.itemProcessed();
+        pt.unitDone();
 
         leftFirst = !leftFirst;
         if (leftFirst) {

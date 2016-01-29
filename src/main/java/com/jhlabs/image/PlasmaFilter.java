@@ -21,9 +21,11 @@ import java.util.Date;
 import java.util.Random;
 
 public class PlasmaFilter extends WholeImageFilter {
+    public static final int DO_PLASMA_CALL_PER_UNIT = 200_000;
+    private int doPlasmaCalls = 0;
 
-	public float turbulence = 1.0f;
-	private float scaling = 0.0f;
+    public float turbulence = 1.0f;
+    private float scaling = 0.0f;
 	private Colormap colormap = new LinearColormap();
 	private Random random;
 	private long seed = 567;
@@ -31,7 +33,8 @@ public class PlasmaFilter extends WholeImageFilter {
 
     private boolean lessColors = false;
 
-	public PlasmaFilter() {
+	public PlasmaFilter(String filterName) {
+		super(filterName);
         random = new Random();
 	}
 
@@ -172,6 +175,12 @@ public class PlasmaFilter extends WholeImageFilter {
 	}
 
     private boolean doPlasma(int x1, int y1, int x2, int y2, int[] pixels, int stride, int depth, int scale) {
+        doPlasmaCalls++;
+        if (doPlasmaCalls == DO_PLASMA_CALL_PER_UNIT) {
+            doPlasmaCalls = 0;
+            pt.unitDone();
+        }
+
 		int mx, my;
 
 		if (depth == 0) {
@@ -272,27 +281,64 @@ public class PlasmaFilter extends WholeImageFilter {
         outPixels[0 * width + w1/2] = randomRGB();
         outPixels[h1 * width + w1/2] = randomRGB();
 
+        int estimatedDoPlasmaCalls = estimateDoPlasmaCalls(width, height);
+        int workUnits = estimatedDoPlasmaCalls / DO_PLASMA_CALL_PER_UNIT;
+        pt = createProgressTracker(workUnits);
+
+        doPlasmaCalls = 0;
+
         /*
          * Now we recurse through the image, going further each time.
          */
         int depth = 1;
-		while (doPlasma(0, 0, width-1, height-1, outPixels, width, depth, 0)) {
+        while (doPlasma(0, 0, width - 1, height - 1, outPixels, width, depth, 0)) {
             depth++;
         }
 
-		if (useColormap && colormap != null) {
-			int index = 0;
-			for (int y = 0; y < height; y++) {
-				for (int x = 0; x < width; x++) {
-					outPixels[index] = colormap.getColor((outPixels[index] & 0xff)/255.0f);
-					index++;
-				}
-			}
-		}
-		return outPixels;
-	}
+        if (useColormap && colormap != null) {
+            int index = 0;
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    outPixels[index] = colormap.getColor((outPixels[index] & 0xff) / 255.0f);
+                    index++;
+                }
+            }
+        }
+        finishProgressTracker();
+        return outPixels;
+    }
 
-	public String toString() {
-		return "Texture/Plasma...";
+    private static int estimateDoPlasmaCalls(int width, int height) {
+        // some logarithmic formula could be found
+        // instead of these empirical values
+        int maxSize = Math.max(width, height);
+        int estimatedDoPlasmaCalls = 7278;
+        if (maxSize <= 129) {
+            // doesn't care about smaller thresholds, they
+            // don't have a progress bar anyway
+            estimatedDoPlasmaCalls = 7278;
+        } else if (maxSize <= 257) {
+            estimatedDoPlasmaCalls = 29123;
+        } else if (maxSize <= 513) {
+            estimatedDoPlasmaCalls = 116504;
+        } else if (maxSize <= 1025) {
+            estimatedDoPlasmaCalls = 466029;
+        } else if (maxSize <= 2049) {
+            estimatedDoPlasmaCalls = 1864130;
+        } else if (maxSize <= 4097) {
+            estimatedDoPlasmaCalls = 7456535;
+        } else if (maxSize <= 8193) {
+            estimatedDoPlasmaCalls = 29826156;
+        } else {
+            // doesn't care about bigger thresholds
+            // we don't expect images with a
+            // max size of more than 16 000 pixels
+            estimatedDoPlasmaCalls = 119304641;
+        }
+        return estimatedDoPlasmaCalls;
+    }
+
+    public String toString() {
+        return "Texture/Plasma...";
 	}
 }

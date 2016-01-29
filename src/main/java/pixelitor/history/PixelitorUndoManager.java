@@ -19,6 +19,7 @@ package pixelitor.history;
 
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.utils.VisibleForTesting;
 
 import javax.swing.*;
 import javax.swing.event.EventListenerList;
@@ -28,21 +29,43 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;
-import java.awt.BorderLayout;
 
 /**
  * An undo manager that is also a list model for debugging history
  */
 public class PixelitorUndoManager extends UndoManager implements ListModel<PixelitorEdit> {
-    private final DefaultListSelectionModel selectionModel;
+    private final HistoryListSelectionModel selectionModel;
     private final EventListenerList listenerList = new EventListenerList();
     private JDialog historyDialog;
+
     private PixelitorEdit selectedEdit;
-    private boolean manualUserJump = true;
+
+    /**
+     * When we get a selection event and this variable is true,
+     * we can be sure that the change was initiated by the user
+     * through the history GUI, and not through addEdit, undo, redo calls
+     */
+    private boolean manualSelectionChange = true;
 
     public PixelitorUndoManager() {
-        selectionModel = new DefaultListSelectionModel();
+        selectionModel = new HistoryListSelectionModel();
         selectionModel.setSelectionMode(DefaultListSelectionModel.SINGLE_SELECTION);
+
+        selectionModel.addListSelectionListener(e -> {
+            if (!manualSelectionChange) {
+                return;
+            }
+
+            // if the selection was changed by clicking on the JList
+            // in the history panel, then jump to the correct state
+            int selectedIndex = getSelectedIndex();
+            assert selectedIndex != -1;
+            PixelitorEdit newSelectedEdit = getElementAt(selectedIndex);
+
+            if (newSelectedEdit != selectedEdit) {
+                jumpTo(newSelectedEdit);
+            }
+        });
     }
 
     /**
@@ -57,13 +80,15 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
     public boolean addEdit(UndoableEdit edit) {
         assert edit instanceof PixelitorEdit;
 
+        // 1. do the actual addEdit
         boolean retVal = super.addEdit(edit);
 
-        manualUserJump = false;
+        // 2. update the selection model
+        manualSelectionChange = false;
         int index = edits.size() - 1;
         fireIntervalAdded(this, index, index);
         selectionModel.setSelectionInterval(index, index);
-        manualUserJump = true;
+        manualSelectionChange = true;
 
         selectedEdit = (PixelitorEdit) edit;
 
@@ -76,14 +101,19 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
         super.undo();
 
         // 2. update the selection model
-        manualUserJump = false;
-        int index = selectionModel.getLeadSelectionIndex();
+        manualSelectionChange = false;
+        int index = getSelectedIndex();
         if (index > 0) {
-            selectionModel.setSelectionInterval(index - 1, index - 1);
+            int prevIndex = index - 1;
+            selectionModel.setSelectionInterval(prevIndex, prevIndex);
+            selectedEdit = (PixelitorEdit) edits.get(prevIndex);
         } else {
+            selectionModel.setAllowDeselect(true);
             selectionModel.clearSelection();
+            selectionModel.setAllowDeselect(false);
+            selectedEdit = null;
         }
-        manualUserJump = true;
+        manualSelectionChange = true;
     }
 
     @Override
@@ -92,14 +122,26 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
         super.redo();
 
         // 2. update the selection model
-        manualUserJump = false;
+        manualSelectionChange = false;
         if (selectionModel.isSelectionEmpty()) {
+            // the first gets selected
             selectionModel.setSelectionInterval(0, 0);
+            selectedEdit = (PixelitorEdit) edits.get(0);
         } else {
-            int index = selectionModel.getLeadSelectionIndex();
-            selectionModel.setSelectionInterval(index + 1, index + 1);
+            int index = getSelectedIndex();
+            int nextIndex = index + 1;
+            selectionModel.setSelectionInterval(nextIndex, nextIndex);
+            selectedEdit = (PixelitorEdit) edits.get(nextIndex);
         }
-        manualUserJump = true;
+        manualSelectionChange = true;
+    }
+
+    public int getSelectedIndex() {
+        if (selectionModel.isSelectionEmpty()) {
+            return -1;
+        }
+
+        return selectionModel.getLeadSelectionIndex();
     }
 
     // ListModel methods
@@ -141,18 +183,13 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
     /**
      * Jumps in the history so that we have the state after the given edit
      */
-    private void jumpTo(PixelitorEdit edit) {
-        assert edit != selectedEdit;
+    private void jumpTo(PixelitorEdit targetEdit) {
+        assert targetEdit != selectedEdit;
 
-        int targetIndex = edits.indexOf(edit);
+        int targetIndex = edits.indexOf(targetEdit);
         int currentIndex = edits.indexOf(selectedEdit);
 
         assert targetIndex != currentIndex;
-//        assert currentIndex == indexOfNextAdd - 1;
-
-        System.out.println(String.format("PixelitorUndoManager::jumpTo: " +
-                        "name = '%s' currentIndex = %d, targetIndex = %d",
-                edit.getName(), currentIndex, targetIndex));
 
         if (targetIndex > currentIndex) {
             // redo until necessary
@@ -167,32 +204,18 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
                 currentIndex--;
             }
         }
+        selectedEdit = targetEdit;
     }
 
     public void showHistory() {
-        JList<PixelitorEdit> historyList = new JList<>(this);
-        historyList.setSelectionModel(selectionModel);
-        historyList.addListSelectionListener(e -> {
-            if (!manualUserJump) {
-                return;
-            }
-            PixelitorEdit newSelectedEdit = historyList.getSelectedValue();
-            if (newSelectedEdit != selectedEdit) {
-                jumpTo(newSelectedEdit);
-                selectedEdit = newSelectedEdit;
-            }
-        });
-
         if (historyDialog == null) {
+            JList<PixelitorEdit> historyList = new JList<>(this);
+            historyList.setSelectionModel(selectionModel);
+
             historyDialog = new JDialog(PixelitorWindow.getInstance(), "History", false);
-            JPanel p = new JPanel();
-            p.setLayout(new BorderLayout());
-            p.add(new JScrollPane(historyList), BorderLayout.CENTER);
-            JPanel buttonsPanel = new JPanel();
-            buttonsPanel.add(new JButton(History.UNDO_ACTION));
-            buttonsPanel.add(new JButton(History.REDO_ACTION));
-            p.add(buttonsPanel, BorderLayout.SOUTH);
+            JPanel p = new HistoryPanel(this, historyList);
             historyDialog.getContentPane().add(p);
+
             historyDialog.setSize(200, 300);
             GUIUtils.centerOnScreen(historyDialog);
         }
@@ -209,5 +232,10 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
             PixelitorEdit edit = (PixelitorEdit) edits.get(i);
             System.out.println("edit [" + i + "] = " + edit.dump());
         }
+    }
+
+    @VisibleForTesting
+    public ListSelectionModel getSelectionModel() {
+        return selectionModel;
     }
 }

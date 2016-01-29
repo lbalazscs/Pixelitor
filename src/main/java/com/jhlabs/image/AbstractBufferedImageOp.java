@@ -16,6 +16,9 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+import pixelitor.utils.BasicProgressTracker;
+import pixelitor.utils.ProgressTracker;
+
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
@@ -28,6 +31,49 @@ import java.awt.image.ColorModel;
  * A convenience class which implements those methods of BufferedImageOp which are rarely changed.
  */
 public abstract class AbstractBufferedImageOp implements BufferedImageOp, Cloneable {
+    //  ******* Start of Pixelitor-specific stuff *******
+    /**
+     * The filter name in Pixelitor.
+     */
+    protected final String filterName;
+
+    protected ProgressTracker pt;
+
+    /**
+     * Whether this filter is used as a helper filter for another
+     * filter. Important for progress tracking.
+     */
+    private boolean usedAsHelper = false;
+
+    protected AbstractBufferedImageOp(String filterName) {
+        this.filterName = filterName;
+    }
+
+    public void setProgressTracker(ProgressTracker pt) {
+        this.pt = pt;
+        usedAsHelper = true;
+    }
+
+    public ProgressTracker getProgressTracker() {
+        return pt;
+    }
+
+    protected ProgressTracker createProgressTracker(int workUnits) {
+        if (!usedAsHelper) {
+            pt = new BasicProgressTracker(filterName, workUnits);
+        }
+        return pt;
+    }
+
+    protected void finishProgressTracker() {
+        // if it is used as a helper filter, then the
+        // calling filter will finish it
+        if (!usedAsHelper) {
+            pt.finish();
+        }
+    }
+
+    //  ******* End of Pixelitor-specific stuff *******
 
     @Override
     public BufferedImage createCompatibleDestImage(BufferedImage src, ColorModel dstCM) {

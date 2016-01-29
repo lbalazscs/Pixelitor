@@ -58,7 +58,7 @@ public class StatusBar extends JPanel {
     public void startProgress(String msg, int max) {
         statusBarLabel.setText(msg);
         progressBar = new JProgressBar(0, max);
-        progressBar.setStringPainted(true);
+//        progressBar.setStringPainted(true);
 
         // call these instead of revalidate/repaint
         // because we want to stay on the EDT

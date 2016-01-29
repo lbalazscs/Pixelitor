@@ -39,7 +39,8 @@ public abstract class WholeImageFilter extends AbstractBufferedImageOp {
     /**
      * Construct a WholeImageFilter.
      */
-    public WholeImageFilter() {
+    protected WholeImageFilter(String filterName) {
+        super(filterName);
     }
 
     @Override

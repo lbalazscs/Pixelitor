@@ -18,7 +18,6 @@ package com.jhlabs.image;
 
 import com.jhlabs.math.FFT;
 import net.jafama.FastMath;
-import pixelitor.utils.ProgressTracker;
 
 import java.awt.image.BufferedImage;
 
@@ -33,10 +32,8 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
     private float angle = 0;
     private int sides = 5;
 
-    private final String filterName;
-
     public LensBlurFilter(String filterName) {
-        this.filterName = filterName;
+        super(filterName);
     }
 
     /**
@@ -209,7 +206,7 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
         for (int tileY = -iradius; tileY < height; tileY += tileHeight - 2 * iradius) {
             workUnits++;
         }
-        ProgressTracker pt = new ProgressTracker(filterName, workUnits);
+        pt = createProgressTracker(workUnits);
 
         for (int tileY = -iradius; tileY < height; tileY += tileHeight - 2 * iradius) {
             for (int tileX = -iradius; tileX < width; tileX += tileWidth - 2 * iradius) {
@@ -375,9 +372,10 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
                 dst.setRGB(tx, ty, tw, th, rgb, iradius * w + iradius, w );
                 // setRGB(dst, tx, ty, tw, th, rgb);
             }
-            pt.itemProcessed();
+            pt.unitDone();
         }
-        pt.finish();
+        finishProgressTracker();
+
         return dst;
     }
 

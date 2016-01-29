@@ -25,7 +25,6 @@ import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.AddToHistory;
-import pixelitor.history.CompoundEdit;
 import pixelitor.history.DeleteLayerEdit;
 import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;
@@ -33,6 +32,7 @@ import pixelitor.history.ImageAndMaskEdit;
 import pixelitor.history.ImageEdit;
 import pixelitor.history.LayerOrderChangeEdit;
 import pixelitor.history.LayerSelectionChangeEdit;
+import pixelitor.history.LinkedEdit;
 import pixelitor.history.NewLayerEdit;
 import pixelitor.history.NotUndoableEdit;
 import pixelitor.history.PixelitorEdit;
@@ -311,7 +311,7 @@ public class Composition implements Serializable {
 
                     deleteActiveLayer(updateGUI, AddToHistory.NO);
 
-                    PixelitorEdit edit = new CompoundEdit(this, "Merge Down",
+                    PixelitorEdit edit = new LinkedEdit(this, "Merge Down",
                             new ImageEdit(this, "", imageLayerBellow, backupImage, IgnoreSelection.YES, false),
                             new DeleteLayerEdit(this, mergedLayer, activeIndex)
                     );
@@ -843,7 +843,7 @@ public class Composition implements Serializable {
                     imageEdit = new ImageEdit(this, editName, layer, backupImage, IgnoreSelection.YES, false);
                     imageEdit.setFadeable(false);
                 }
-                History.addEdit(new CompoundEdit(this, editName, translationEdit, imageEdit));
+                History.addEdit(new LinkedEdit(this, editName, translationEdit, imageEdit));
             }
         } else {
             Messages.showNotImageLayerError();

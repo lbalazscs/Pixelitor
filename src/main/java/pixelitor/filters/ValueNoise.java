@@ -24,7 +24,9 @@ import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ReseedNoiseActionSetting;
 import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.utils.BasicProgressTracker;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.ProgressTracker;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -53,7 +55,6 @@ public class ValueNoise extends FilterWithParametrizedGUI {
     private final RangeParam scale = new RangeParam("Zoom", 5, 100, 300);
     private final RangeParam details = new RangeParam("Octaves (Details)", 1, 5, 8);
 
-    @SuppressWarnings("FieldCanBeLocal")
     private final ActionSetting reseedAction = new ReseedNoiseActionSetting(e -> {
         reseed();
     });
@@ -92,20 +93,17 @@ public class ValueNoise extends FilterWithParametrizedGUI {
         float persistence = 0.6f;
         float amplitude = 1.0f;
 
-        boolean multiThreaded = ThreadPool.runMultiThreaded();
-        if(multiThreaded) {
-            Future<?>[] futures = new Future[height];
-            for (int y = 0; y < height; y++) {
-                int finalY = y;
-                Runnable lineTask = () -> calculateLine(lookupTable, destData, width, frequency, persistence, amplitude, finalY);
-                futures[y] = ThreadPool.submit(lineTask);
-            }
-            ThreadPool.waitForFutures(futures, null, NAME);
-        } else {
-            for (int y = 0; y < height; y++) {
-                calculateLine(lookupTable, destData, width, frequency, persistence, amplitude, y);
-            }
+        ProgressTracker pt = new BasicProgressTracker(NAME, height);
+
+        Future<?>[] futures = new Future[height];
+        for (int y = 0; y < height; y++) {
+            int finalY = y;
+            Runnable lineTask = () -> calculateLine(lookupTable, destData, width, frequency, persistence, amplitude, finalY);
+            futures[y] = ThreadPool.submit(lineTask);
         }
+        ThreadPool.waitForFutures(futures, pt);
+
+        pt.finish();
 
         return dest;
     }

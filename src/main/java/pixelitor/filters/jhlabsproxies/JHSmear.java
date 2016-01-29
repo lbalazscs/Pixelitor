@@ -78,7 +78,7 @@ public class JHSmear extends FilterWithParametrizedGUI {
         Random rand = ReseedSupport.getRand();
 
         if (filter == null) {
-            filter = new SmearFilter();
+            filter = new SmearFilter(NAME);
         }
 
         filter.setDistance(distanceValue);

@@ -17,7 +17,6 @@ limitations under the License.
 package com.jhlabs.image;
 
 import pixelitor.ThreadPool;
-import pixelitor.filters.jhlabsproxies.JHOilPainting;
 
 import java.awt.Rectangle;
 import java.util.concurrent.Future;
@@ -35,7 +34,8 @@ public class OilFilter extends WholeImageFilter {
     private int rangeY = 3;
     private int levels = 256;
 
-    public OilFilter() {
+    public OilFilter(String filterName) {
+        super(filterName);
     }
 
     public void setRangeX(int rangeX) {
@@ -70,6 +70,7 @@ public class OilFilter extends WholeImageFilter {
     protected int[] filterPixels(int width, int height, int[] inPixels, Rectangle transformedSpace) {
         int[] outPixels = new int[width * height];
 
+        pt = createProgressTracker(height);
         Future<?>[] futures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
@@ -77,7 +78,8 @@ public class OilFilter extends WholeImageFilter {
             futures[y] = ThreadPool.submit(lineTask);
         }
 
-        ThreadPool.waitForFutures(futures, null, JHOilPainting.NAME);
+        ThreadPool.waitForFutures(futures, pt);
+        finishProgressTracker();
 
         return outPixels;
     }

@@ -224,7 +224,7 @@ public class ImageComponents {
      */
     public static void activeImageHasChanged(ImageComponent ic) {
         // not called in unit tests
-        ImageComponent oldIC = (ImageComponent) activeIC;
+        ImageComponent oldIC = activeIC;
 
         setActiveIC(ic, false);
         for (ImageSwitchListener listener : imageSwitchListeners) {
@@ -262,13 +262,13 @@ public class ImageComponents {
 
     public static void fitActiveToScreen() {
         if (activeIC != null) {
-            ((ImageComponent)activeIC).setupFitScreenZoomSize();
+            activeIC.zoomToFitScreen();
         }
     }
 
     public static void fitActiveToActualPixels() {
         if (activeIC != null) {
-            activeIC.setZoom(ZoomLevel.Z100, false);
+            activeIC.setZoomAtCenter(ZoomLevel.Z100);
         }
     }
 
@@ -278,7 +278,7 @@ public class ImageComponents {
     public static void increaseZoomForActiveIC() {
         ZoomLevel currentZoom = activeIC.getZoomLevel();
         ZoomLevel newZoomLevel = currentZoom.zoomIn();
-        activeIC.setZoom(newZoomLevel, false);
+        activeIC.setZoomAtCenter(newZoomLevel);
     }
 
     /**
@@ -287,7 +287,7 @@ public class ImageComponents {
     public static void decreaseZoomForActiveIC() {
         ZoomLevel currentZoom = activeIC.getZoomLevel();
         ZoomLevel newZoomLevel = currentZoom.zoomOut();
-        activeIC.setZoom(newZoomLevel, false);
+        activeIC.setZoomAtCenter(newZoomLevel);
     }
 
     public static boolean isActive(ImageComponent ic) {
@@ -316,7 +316,7 @@ public class ImageComponents {
         }
 
         Composition newComp = OpenSaveManager.createCompositionFromFile(file);
-        ((ImageComponent) activeIC).replaceComp(newComp, AddToHistory.YES);
+        activeIC.replaceComp(newComp, AddToHistory.YES);
 
         //OpenSaveManager.warnAndCloseImage(activeIC);
 //        activeIC.close();

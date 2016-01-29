@@ -81,7 +81,7 @@ public class JHCheckerFilter extends FilterWithParametrizedGUI {
         dest = filter.filter(src, dest);
 
         if (bumpMap.isChecked()) {
-            return ImageUtils.bumpMap(src, dest);
+            return ImageUtils.bumpMap(src, dest, NAME);
         }
 
         return dest;

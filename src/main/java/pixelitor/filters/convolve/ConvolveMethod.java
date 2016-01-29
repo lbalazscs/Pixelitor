@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,8 +29,8 @@ import java.awt.image.Kernel;
 enum ConvolveMethod {
     JHLabs {
         @Override
-        BufferedImageOp getConvolveOp(Kernel kernel) {
-            ConvolveFilter filter = new ConvolveFilter(kernel);
+        BufferedImageOp getConvolveOp(Kernel kernel, String filterName) {
+            ConvolveFilter filter = new ConvolveFilter(kernel, filterName);
             filter.setEdgeAction(ConvolveFilter.CLAMP_EDGES);
             filter.setPremultiplyAlpha(false);
             filter.setUseAlpha(false);
@@ -43,7 +43,7 @@ enum ConvolveMethod {
         }
     }, AWT {
         @Override
-        BufferedImageOp getConvolveOp(Kernel kernel) {
+        BufferedImageOp getConvolveOp(Kernel kernel, String filterName) {
             return new ConvolveOp(kernel);
         }
 
@@ -53,5 +53,5 @@ enum ConvolveMethod {
         }
     };
 
-    abstract BufferedImageOp getConvolveOp(Kernel kernel);
+    abstract BufferedImageOp getConvolveOp(Kernel kernel, String filterName);
 }

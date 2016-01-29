@@ -16,6 +16,8 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+import pixelitor.utils.ProgressTracker;
+
 import java.awt.image.BufferedImage;
 
 /**
@@ -140,6 +142,7 @@ public class RaysFilter extends MotionBlurOp {
         int[] pixels = new int[width];
         int[] srcPixels = new int[width];
 
+        pt = createProgressTracker(3);
         BufferedImage rays = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 
         int threshold3 = (int) (threshold * 3 * 255);
@@ -161,8 +164,15 @@ public class RaysFilter extends MotionBlurOp {
             }
             setRGB(rays, 0, y, width, 1, pixels);
         }
+        pt.unitDone();
+        ProgressTracker savedTracker = pt;
+        // do not track the super call, it is fast
+        pt = ProgressTracker.NULL_TRACKER;
 
         rays = super.filter(rays, null);
+
+        pt = savedTracker;
+        pt.unitDone();
 
         for (int y = 0; y < height; y++) {
             getRGB(rays, 0, y, width, 1, pixels);
@@ -188,6 +198,8 @@ public class RaysFilter extends MotionBlurOp {
             }
             setRGB(rays, 0, y, width, 1, pixels);
         }
+        pt.unitDone();
+        finishProgressTracker();
 
         return rays;
     }

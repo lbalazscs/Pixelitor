@@ -62,7 +62,8 @@ public class JHBrushedMetal extends FilterWithParametrizedGUI {
                 radius.getValue(),
                 amount.getValueAsPercentage(),
                 true,
-                shine.getValueAsPercentage());
+                shine.getValueAsPercentage(),
+                NAME);
 
         filter.setRandom(rand);
 

@@ -21,6 +21,7 @@ import net.jafama.FastMath;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.utils.BasicProgressTracker;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.ReseedSupport;
@@ -58,7 +59,7 @@ public class DrunkVision extends FilterWithParametrizedGUI {
         }
 
         int numShiftedImages = numEyes.getValue() - 1;
-        ProgressTracker pt = new ProgressTracker(NAME, numShiftedImages);
+        ProgressTracker pt = new BasicProgressTracker(NAME, numShiftedImages);
 
         dest = ImageUtils.copyImage(src);
 
@@ -74,7 +75,7 @@ public class DrunkVision extends FilterWithParametrizedGUI {
             AffineTransform transform = AffineTransform.getTranslateInstance(transformPoints[i].x, transformPoints[i].y);
             g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f / (i + 2)));
             g.drawImage(src, transform, null);
-            pt.itemProcessed();
+            pt.unitDone();
         }
         pt.finish();
 

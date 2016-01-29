@@ -382,6 +382,9 @@ public class MenuBar extends JMenuBar {
 
         editMenu.addSeparator();
 
+        editMenu.buildAction(SelectionActions.getCropAction()).enableIf(ACTION_ENABLED).add();
+        editMenu.addAction(EnlargeCanvas.getAction());
+
         // resize
         editMenu.addActionWithKey(new MenuAction("Resize...") {
             @Override
@@ -390,8 +393,6 @@ public class MenuBar extends JMenuBar {
             }
         }, CTRL_ALT_I);
 
-        editMenu.buildAction(SelectionActions.getCropAction()).enableIf(ACTION_ENABLED).add();
-        editMenu.addAction(EnlargeCanvas.getAction());
         editMenu.add(createRotateFlipSubmenu());
 
         editMenu.addSeparator();
@@ -684,7 +685,7 @@ public class MenuBar extends JMenuBar {
         PMenu colorsMenu = new PMenu("Colors", 'C');
 
         colorsMenu.buildFA("Color Balance", ColorBalance::new).withKey(CTRL_B).add();
-        colorsMenu.buildFA("Hue/Saturation", HueSat::new).withKey(CTRL_U).add();
+        colorsMenu.buildFA(HueSat.NAME, HueSat::new).withKey(CTRL_U).add();
         colorsMenu.buildFA("Colorize", Colorize::new).add();
         colorsMenu.buildFA("Levels", Levels::new).withKey(CTRL_L).add();
 //        colorsMenu.buildFA("Levels 2", Levels2::new).add();
@@ -789,9 +790,9 @@ public class MenuBar extends JMenuBar {
 
     private static JMenu createBlurSharpenSubmenu() {
         PMenu sub = new PMenu("Blur/Sharpen");
-        sub.addFA("Box Blur", JHBoxBlur::new);
-        sub.addFA("Fast Blur", FastBlur::new);
-        sub.addFA("Focus", JHFocus::new);
+        sub.addFA(JHBoxBlur.NAME, JHBoxBlur::new);
+//        sub.addFA(FastBlur.NAME, FastBlur::new);
+        sub.addFA(JHFocus.NAME, JHFocus::new);
         sub.addFA(JHGaussianBlur.NAME, JHGaussianBlur::new);
         sub.addFA(JHLensBlur.NAME, JHLensBlur::new);
         sub.addFA(MOTION_BLUR.createFilterAction());
@@ -856,7 +857,7 @@ public class MenuBar extends JMenuBar {
 
         sub.addFA(Flashlight.NAME, Flashlight::new);
         sub.addFA(JHGlint.NAME, JHGlint::new);
-        sub.addFA("Glow", JHGlow::new);
+        sub.addFA(JHGlow.NAME, JHGlow::new);
         sub.addFA(JHRays.NAME, JHRays::new);
         sub.addFA(JHSparkle.NAME, JHSparkle::new);
 
@@ -871,8 +872,8 @@ public class MenuBar extends JMenuBar {
 
         sub.addSeparator();
 
-        sub.addFA("Add Noise", AddNoise::new);
-        sub.addFA("Pixelate", JHPixelate::new);
+        sub.addFA(AddNoise.NAME, AddNoise::new);
+        sub.addFA(JHPixelate.NAME, JHPixelate::new);
 
         return sub;
     }
@@ -880,10 +881,8 @@ public class MenuBar extends JMenuBar {
     private static JMenu createRenderSubmenu() {
         PMenu sub = new PMenu("Render");
 
-        sub.add(createRenderShapesSubmenu());
-
         sub.addFA(Clouds.NAME, Clouds::new);
-        sub.addFA("Plasma", JHPlasma::new);
+        sub.addFA(JHPlasma.NAME, JHPlasma::new);
         sub.addFA(ValueNoise.NAME, ValueNoise::new);
 
         sub.addSeparator();
@@ -895,15 +894,17 @@ public class MenuBar extends JMenuBar {
         sub.addFA(Voronoi.NAME, Voronoi::new);
         sub.addFA(JHWood.NAME, JHWood::new);
 
+        sub.add(createRenderShapesSubmenu());
+
         return sub;
     }
 
     private static JMenu createRenderShapesSubmenu() {
         PMenu sub = new PMenu("Shapes");
-        sub.addFA("Mystic Rose", MysticRose::new);
-        sub.addFA("Lissajous Curve", Lissajous::new);
-        sub.addFA("Spirograph", Spirograph::new);
         sub.addFA("Flower of Life", FlowerOfLife::new);
+        sub.addFA("Lissajous Curve", Lissajous::new);
+        sub.addFA("Mystic Rose", MysticRose::new);
+        sub.addFA("Spirograph", Spirograph::new);
         return sub;
     }
 
@@ -913,7 +914,7 @@ public class MenuBar extends JMenuBar {
         sub.addFA(JHCrystallize.NAME, JHCrystallize::new);
         sub.addFA(JHEmboss.NAME, JHEmboss::new);
         sub.addFA(JHOilPainting.NAME, JHOilPainting::new);
-        sub.addFA("Orton Effect", Orton::new);
+        sub.addFA(Orton.NAME, Orton::new);
         sub.addFA(PhotoCollage.NAME, PhotoCollage::new);
         sub.addFA(JHPointillize.NAME, JHPointillize::new);
         sub.addFA(RandomSpheres.NAME, RandomSpheres::new);
@@ -929,12 +930,11 @@ public class MenuBar extends JMenuBar {
 
         sub.addFA(JHConvolutionEdge.NAME, JHConvolutionEdge::new);
 
-        sub.addAction(new FilterAction("Laplacian", JHLaplacian::new)
-                .withListNamePrefix("Laplacian Edge Detection")
+        sub.addAction(new FilterAction(JHLaplacian.NAME, JHLaplacian::new)
                 .withoutGUI());
 
-        sub.addFA("Difference of Gaussians", JHDifferenceOfGaussians::new);
-        sub.addFA("Canny Edge Detector", Canny::new);
+        sub.addFA(JHDifferenceOfGaussians.NAME, JHDifferenceOfGaussians::new);
+        sub.addFA("Canny", Canny::new);
 
         return sub;
     }
@@ -944,8 +944,8 @@ public class MenuBar extends JMenuBar {
 
         sub.addFA("Random Filter", RandomFilter::new);
         sub.addFA("Transform Layer", TransformLayer::new);
-        sub.addFA("Drop Shadow", JHDropShadow::new);
-        sub.addFA("2D Transitions", Transition2D::new);
+        sub.addFA(JHDropShadow.NAME, JHDropShadow::new);
+        sub.addFA(Transition2D.NAME, Transition2D::new);
 
         sub.addSeparator();
 
@@ -1320,8 +1320,8 @@ public class MenuBar extends JMenuBar {
     private static JMenu createExperimentalSubmenu() {
         PMenu sub = new PMenu("Experimental");
 
-        sub.addFA("Contours", Contours::new);
-        sub.addFA("Morphology", Morphology::new);
+        sub.addFA(Contours.NAME, Contours::new);
+        sub.addFA(Morphology.NAME, Morphology::new);
         sub.addSeparator();
 
         sub.addFA(Droste.NAME, Droste::new);

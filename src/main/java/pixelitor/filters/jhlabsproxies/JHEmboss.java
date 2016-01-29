@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.EmbossFilter;
@@ -55,7 +56,7 @@ public class JHEmboss extends FilterWithParametrizedGUI {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
-            filter = new EmbossFilter();
+            filter = new EmbossFilter(NAME);
         }
 
         filter.setAzimuth((float) lightDirection.getValueInIntuitiveRadians());

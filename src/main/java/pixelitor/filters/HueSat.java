@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,10 +17,10 @@
 
 package pixelitor.filters;
 
+import com.jhlabs.image.PointFilter;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
-import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -29,6 +29,8 @@ import java.awt.image.BufferedImage;
  * Hue-Saturation (and Colorize) filter
  */
 public class HueSat extends FilterWithParametrizedGUI {
+    public static final String NAME = "Hue/Saturation";
+
     private static final int MIN_HUE = -180;
     private static final int MAX_HUE = 180;
     private static final int DEFAULT_HUE = 0;
@@ -68,20 +70,33 @@ public class HueSat extends FilterWithParametrizedGUI {
         float briShift = brightness.getValueAsPercentage();
         float hueShift = hue.getValueAsFloat() / 360.0f;
 
-        int[] srcData = ImageUtils.getPixelsAsArray(src);
-        int[] destData = ImageUtils.getPixelsAsArray(dest);
+        dest = new Impl(hueShift, satShift, briShift).filter(src, dest);
 
-        int length = srcData.length;
-        assert length == destData.length;
+        return dest;
+    }
 
-        float[] tmpHSBArray = {0.0f, 0.0f, 0.0f};
+    private static class Impl extends PointFilter {
+        private final float hueShift;
+        private final float satShift;
+        private final float briShift;
 
-        for (int i = 0; i < length; i++) {
-            int rgb = srcData[i];
+        protected Impl(float hueShift, float satShift, float briShift) {
+            super(NAME);
+            this.hueShift = hueShift;
+            this.satShift = satShift;
+            this.briShift = briShift;
+        }
+
+        @Override
+        public int filterRGB(int x, int y, int rgb) {
             int a = rgb & 0xFF000000;
             int r = (rgb >>> 16) & 0xFF;
             int g = (rgb >>> 8) & 0xFF;
             int b = (rgb) & 0xFF;
+
+            // for the multithreaded performance it is better to
+            // create this array here instead of reusing it as a class field
+            float[] tmpHSBArray = {0.0f, 0.0f, 0.0f};
 
             tmpHSBArray = Color.RGBtoHSB(r, g, b, tmpHSBArray);
 
@@ -105,9 +120,7 @@ public class HueSat extends FilterWithParametrizedGUI {
 
             int newRGB = Color.HSBtoRGB(shiftedHue, shiftedSat, shiftedBri);  // alpha is 255 here
             newRGB &= 0x00FFFFFF;  // set alpha to 0
-            destData[i] = a | newRGB; // add the real alpha
+            return a | newRGB; // add the real alpha
         }
-
-        return dest;
     }
 }

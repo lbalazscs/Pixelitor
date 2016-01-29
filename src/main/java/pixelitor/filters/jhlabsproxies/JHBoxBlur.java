@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.BoxBlurFilter;
@@ -28,14 +29,13 @@ import pixelitor.utils.ImageUtils;
 import java.awt.image.BufferedImage;
 
 /**
- * JH Box Blur based on the JHLabs BoxBlurFilter
+ * Box Blur based on the JHLabs BoxBlurFilter
  */
 public class JHBoxBlur extends FilterWithParametrizedGUI {
+    public static final String NAME = "Box Blur";
 
     private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 0, 0, 100);
-
-    private final RangeParam numberOfIterations = new RangeParam("Number of Iterations", 1, 3, 10);
-
+    private final RangeParam numberOfIterations = new RangeParam("Iterations (Quality)", 1, 3, 10);
     private final BooleanParam hpSharpening = BooleanParam.createParamForHPSharpening();
 
     private BoxBlurFilter filter;
@@ -62,7 +62,7 @@ public class JHBoxBlur extends FilterWithParametrizedGUI {
         }
 
         if (filter == null) {
-            filter = new BoxBlurFilter();
+            filter = new BoxBlurFilter(NAME);
         }
 
         filter.setHRadius(hRadius);

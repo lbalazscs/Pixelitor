@@ -33,7 +33,8 @@ public class DoGFilter extends AbstractBufferedImageOp {
     private boolean normalize = true;
     private boolean invert;
 
-	public DoGFilter() {
+	public DoGFilter(String filterName) {
+        super(filterName);
 	}
 
 	/**
@@ -97,14 +98,33 @@ public class DoGFilter extends AbstractBufferedImageOp {
         int width = src.getWidth();
         int height = src.getHeight();
         BufferedImage image1;
+
+        int singleBlurUnit = 3 * (width + height);
+        int workUnits = 0;
+        if (radius1 > 0.0f) {
+            workUnits += singleBlurUnit;
+        }
+        if (radius2 > 0.0f) {
+            workUnits += singleBlurUnit;
+        }
+        workUnits += (singleBlurUnit / 2); // subtract
+        if (doNormalize()) {
+            workUnits += singleBlurUnit * 0.16; // normalize
+        }
+        pt = createProgressTracker(workUnits);
+
         if(radius1 > 0.0f) {
-            image1 = new BoxBlurFilter( radius1, radius1, 3 ).filter( src, null );
+            BoxBlurFilter blur = new BoxBlurFilter(radius1, radius1, 3, filterName);
+            blur.setProgressTracker(pt);
+            image1 = blur.filter(src, null);
         } else {
             image1 = src;
         }
 //        BufferedImage image2;
         if(radius2 > 0.0f) {
-            dst = new BoxBlurFilter( radius2, radius2, 3 ).filter( src, null );
+            BoxBlurFilter blur = new BoxBlurFilter(radius2, radius2, 3, filterName);
+            blur.setProgressTracker(pt);
+            dst = blur.filter(src, null);
         } else {
             dst = ImageUtils.copyImage(src);
         }
@@ -113,7 +133,10 @@ public class DoGFilter extends AbstractBufferedImageOp {
         g2d.setComposite( new SubtractComposite( 1.0f ) );
         g2d.drawImage( image1, 0, 0, null );
         g2d.dispose();
-        if ( normalize && radius1 != radius2 ) {
+
+        pt.addUnits(singleBlurUnit / 2);
+
+        if (doNormalize()) {
             int[] pixels = null;
             int max = 0;
             for ( int y = 0; y < height; y++ ) {
@@ -157,10 +180,20 @@ public class DoGFilter extends AbstractBufferedImageOp {
 //        if ( invert )
 //            image2 = new InvertFilter().filter( image2, image2 );
 
+        // the progress of invert is not tracked,
+        // because it is in the calling filter
+        // but it is a fast operation anyway
+
+        finishProgressTracker();
+
         return dst;
     }
 
-	public String toString() {
-		return "Edges/Difference of Gaussians...";
+    private boolean doNormalize() {
+        return normalize && radius1 != radius2;
+    }
+
+    public String toString() {
+        return "Edges/Difference of Gaussians...";
 	}
 }

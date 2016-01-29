@@ -24,7 +24,9 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.utils.BasicProgressTracker;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.ProgressTracker;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -60,13 +62,16 @@ public class ColorWheel extends FilterWithParametrizedGUI {
         float saturation = satParam.getValueAsPercentage();
         float brightness = brightnessParam.getValueAsPercentage();
 
+        ProgressTracker pt = new BasicProgressTracker(NAME, height);
+
         Future<?>[] futures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
             Runnable lineTask = () -> calculateLine(destData, width, cx, cy, hueShift, saturation, brightness, finalY);
             futures[y] = ThreadPool.submit(lineTask);
         }
-        ThreadPool.waitForFutures(futures, null, NAME);
+        ThreadPool.waitForFutures(futures, pt);
+        pt.finish();
 
         return dest;
     }

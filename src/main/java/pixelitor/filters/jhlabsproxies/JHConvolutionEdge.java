@@ -76,7 +76,7 @@ public class JHConvolutionEdge extends FilterWithParametrizedGUI {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
-            filter = new EdgeFilter();
+            filter = new EdgeFilter(NAME);
         }
 
         int horizontal = horizontalMethod.getValue();

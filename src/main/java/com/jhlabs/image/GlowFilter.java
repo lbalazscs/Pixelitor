@@ -34,7 +34,8 @@ public class GlowFilter extends AbstractBufferedImageOp {
      */
     protected float radius;
 
-    public GlowFilter() {
+    public GlowFilter(String filterName) {
+        super(filterName);
         radius = 2;
     }
 
@@ -79,7 +80,7 @@ public class GlowFilter extends AbstractBufferedImageOp {
 
 
         if(radius > 0) {
-            BoxBlurFilter boxBlur = new BoxBlurFilter(radius, radius, 3);
+            BoxBlurFilter boxBlur = new BoxBlurFilter(radius, radius, 3, filterName);
             srcCopy = boxBlur.filter(srcCopy, srcCopy);
         }
 

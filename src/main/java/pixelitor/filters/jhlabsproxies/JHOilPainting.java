@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.OilFilter;
@@ -24,8 +25,13 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.utils.BasicProgressTracker;
+import pixelitor.utils.ProgressTracker;
 
 import java.awt.image.BufferedImage;
+
+import static pixelitor.filters.ResizingFilterHelper.ScaleUpQuality;
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
  * Oil Painting based on the JHLabs OilFilter
@@ -33,9 +39,15 @@ import java.awt.image.BufferedImage;
 public class JHOilPainting extends FilterWithParametrizedGUI {
     public static final String NAME = "Oil Painting";
 
+    private static final int FASTER = 0;
+    private static final int BETTER = 1;
+
     private final GroupedRangeParam brushSize = new GroupedRangeParam("Brush Size", 0, 1, 10, false);
     private final RangeParam coarseness = new RangeParam("Coarseness", 2, 25, 255);
-    private final IntChoiceParam detailQuality = ResizingFilterHelper.createQualityParam();
+    private final IntChoiceParam detailQuality = new IntChoiceParam("Detail Quality", new IntChoiceParam.Value[]{
+            new IntChoiceParam.Value("Faster", FASTER),
+            new IntChoiceParam.Value("Better", BETTER),
+    }, IGNORE_RANDOMIZE);
 
     private OilFilter filter;
 
@@ -57,17 +69,44 @@ public class JHOilPainting extends FilterWithParametrizedGUI {
         }
 
         if (filter == null) {
-            filter = new OilFilter();
+            filter = new OilFilter(NAME);
         }
 
         filter.setLevels(coarseness.getValue());
 
         ResizingFilterHelper r = new ResizingFilterHelper(src);
         if (r.shouldResize()) {
+            ScaleUpQuality scaleUpQuality;
+            if (detailQuality.getValue() == BETTER) {
+                scaleUpQuality = ScaleUpQuality.BILINEAR11;
+            } else if (detailQuality.getValue() == FASTER) {
+                scaleUpQuality = ScaleUpQuality.BILINEAR_FAST;
+            } else {
+                throw new IllegalStateException("unexpected value" + detailQuality.getValue());
+            }
+
             double resizeFactor = r.getResizeFactor();
-            filter.setRangeX((int) (brushX / resizeFactor));
-            filter.setRangeY((int) (brushY / resizeFactor));
-            dest = r.invoke(detailQuality.getValue(), filter);
+            // these will determine the real running time of the filter
+            int downScaledBrushX = (int) (brushX / resizeFactor);
+            int downScaledBrushY = (int) (brushY / resizeFactor);
+
+            int resizeUnits = r.getResizeWorkUnits(scaleUpQuality);
+            long filterWorkAmount = downScaledBrushX * downScaledBrushY;
+            int filterUnits = (int) (filterWorkAmount / 4);
+            int workUnits = resizeUnits + filterUnits;
+
+            ProgressTracker pt = new BasicProgressTracker(NAME, workUnits);
+//            ProgressTracker pt = new DebugProgressTracker("Oil, brushX = " + downScaledBrushX + ", brushY = " + downScaledBrushY, workUnits);
+
+            ProgressTracker filterTracker = r.createFilterTracker(pt, filterUnits);
+
+            filter.setProgressTracker(filterTracker);
+
+            filter.setRangeX(downScaledBrushX);
+            filter.setRangeY(downScaledBrushY);
+
+            dest = r.invoke(scaleUpQuality, filter, pt, 0);
+            pt.finish();
         } else {
             // normal case, no resizing
             filter.setRangeX(brushX);
