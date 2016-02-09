@@ -73,6 +73,10 @@ public class PixelitorEvent {
     }
 
     private String saveState(String type) {
+        if(comp == null) { // "all images are closed" is also an event
+            return String.format("%s (%s) no composition", type, threadName);
+        }
+
         String selectionInfo = "no selection";
         if (comp.hasSelection()) {
             Rectangle rect = comp.getSelection().get().getShapeBounds();
@@ -82,7 +86,6 @@ public class PixelitorEvent {
         if (layer.hasMask()) {
             maskInfo = String.format("has mask (enabled = %s, editing = %s, linked = %s)",
                     layer.isMaskEnabled(), layer.isMaskEditing(), layer.getMask().isLinked());
-
         }
 
         return String.format("%s (%s) on \"%s/%s\" (%s, %s, %s) at %s",

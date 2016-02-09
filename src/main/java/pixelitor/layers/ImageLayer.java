@@ -118,7 +118,7 @@ public class ImageLayer extends ContentLayer {
     //
     private transient State state = NORMAL;
 
-    protected transient TmpDrawingLayer tmpDrawingLayer;
+    private transient TmpDrawingLayer tmpDrawingLayer;
 
     /**
      * The image content of this image layer
@@ -225,16 +225,16 @@ public class ImageLayer extends ContentLayer {
     }
 
     @Override
-    public ImageLayer duplicate() {
+    public ImageLayer duplicate(boolean exact) {
         BufferedImage imageCopy = ImageUtils.copyImage(image);
-        String duplicateLayerName = getDuplicateLayerName();
+        String duplicateLayerName = getDuplicateLayerName(exact);
         ImageLayer d = new ImageLayer(comp, imageCopy, duplicateLayerName, null);
         d.setOpacity(opacity, UpdateGUI.NO, AddToHistory.NO, true);
         d.setTranslation(translationX, translationY);
         d.setBlendingMode(blendingMode, UpdateGUI.NO, AddToHistory.NO, true);
 
         if (hasMask()) {
-            d.addMaskBack(mask.duplicate(d));
+            d.addMask(mask.duplicate(d));
         }
 
         return d;
@@ -528,7 +528,7 @@ public class ImageLayer extends ContentLayer {
     }
 
     @Override
-    public void flip(Flip.Direction direction, AffineTransform canvasTx) {
+    public void flip(Flip.Direction direction) {
         AffineTransform imageTx = direction.getImageTX(this);
         int tXAbs = -getTX();
         int tYAbs = -getTY();
@@ -621,8 +621,8 @@ public class ImageLayer extends ContentLayer {
         g.dispose();
     }
 
-    public TmpDrawingLayer createTmpDrawingLayer(Composite c, boolean respectSelection) {
-        tmpDrawingLayer = new RealTmpDrawingLayer(this, c, respectSelection);
+    public TmpDrawingLayer createTmpDrawingLayer(Composite c) {
+        tmpDrawingLayer = new TmpDrawingLayer(this, c);
         return tmpDrawingLayer;
     }
 
@@ -637,8 +637,6 @@ public class ImageLayer extends ContentLayer {
 
         tmpDrawingLayer.dispose();
         tmpDrawingLayer = null;
-
-        updateIconImage();
     }
 
     public BufferedImage createCompositionSizedTmpImage() {
@@ -650,15 +648,15 @@ public class ImageLayer extends ContentLayer {
     }
 
     public BufferedImage getCanvasSizedSubImage() {
+        if (!isBigLayer()) {
+            return image;
+        }
+
         int x = -getTX();
         int y = -getTY();
 
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
-
-        if (!isBigLayer()) {
-            return image;
-        }
 
         assert ConsistencyChecks.imageCoversCanvasCheck(this);
 
@@ -995,11 +993,13 @@ public class ImageLayer extends ContentLayer {
     public void applyLayerMask(AddToHistory addToHistory) {
         BufferedImage backupImage = ImageUtils.copyImage(image);
         LayerMask oldMask = mask;
+        MaskViewMode oldMode = comp.getIC().getMaskViewMode();
 
         mask.applyToImage(image);
-        deleteMask(AddToHistory.NO, true);
+        deleteMask(AddToHistory.NO);
 
-        History.addEdit(addToHistory, () -> new ApplyLayerMaskEdit(comp, this, oldMask, backupImage));
+        History.addEdit(addToHistory, () ->
+                new ApplyLayerMaskEdit(comp, this, oldMask, backupImage, oldMode));
 
         updateIconImage();
     }

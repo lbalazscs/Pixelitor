@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -176,7 +176,7 @@ public class CompositionTest {
     public void testDuplicateLayer() {
         tester.checkLayers("[layer 1, ACTIVE layer 2]");
 
-        comp.duplicateLayer();
+        comp.duplicateActiveLayer();
 
         tester.checkLayers("[layer 1, layer 2, ACTIVE layer 2 copy]");
         tester.checkDirty(true);
@@ -508,7 +508,7 @@ public class CompositionTest {
         tester.checkActiveLayerTranslation(0, 0);
         tester.checkActiveLayerAndMaskImageSize(22, 12);
         History.assertNumEditsIs(makeDuplicateLayer ? 3 : 2);
-        History.assertLastEditNameIs("Layer Movement");
+        History.assertLastEditNameIs("Move Layer");
 
         if (makeDuplicateLayer) {
             tester.checkLayers("[layer 1, ACTIVE layer 1 copy]");

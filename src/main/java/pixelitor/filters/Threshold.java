@@ -29,6 +29,8 @@ import java.awt.image.BufferedImage;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 
 public class Threshold extends FilterWithParametrizedGUI {
+    public static final String NAME = "Threshold";
+
     private static final int CRIT_LUMINOSITY = 1;
     private static final int CRIT_RED = 2;
     private static final int CRIT_GREEN = 3;
@@ -40,11 +42,11 @@ public class Threshold extends FilterWithParametrizedGUI {
 
     private final IntChoiceParam criterion = new IntChoiceParam("Based on",
             new IntChoiceParam.Value[]{
-                new IntChoiceParam.Value("Luminosity", CRIT_LUMINOSITY),
-                new IntChoiceParam.Value("Red Channel", CRIT_RED),
-                new IntChoiceParam.Value("Green Channel", CRIT_GREEN),
-                new IntChoiceParam.Value("Blue Channel", CRIT_BLUE),
-                new IntChoiceParam.Value("Saturation", CRIT_SATURATION),
+                    new IntChoiceParam.Value("Luminosity", CRIT_LUMINOSITY),
+                    new IntChoiceParam.Value("Red Channel", CRIT_RED),
+                    new IntChoiceParam.Value("Green Channel", CRIT_GREEN),
+                    new IntChoiceParam.Value("Blue Channel", CRIT_BLUE),
+                    new IntChoiceParam.Value("Saturation", CRIT_SATURATION),
             });
 
     public Threshold() {
@@ -122,6 +124,7 @@ public class Threshold extends FilterWithParametrizedGUI {
             case CRIT_SATURATION:
                 return new RGBPixelOp() {
                     final float satThreshold = (float) (threshold / 255.0f);
+
                     @Override
                     public int changeRGB(int a, int r, int g, int b) {
                         float sat = ColorUtils.calcSaturation(r, g, b);
@@ -141,5 +144,10 @@ public class Threshold extends FilterWithParametrizedGUI {
 
         }
         throw new IllegalStateException("basedOn = " + basedOn);
+    }
+
+    @Override
+    public boolean supportsGray() {
+        return false;
     }
 }

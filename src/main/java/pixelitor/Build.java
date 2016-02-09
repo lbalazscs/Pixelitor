@@ -71,6 +71,8 @@ public enum Build {
         }
     };
 
+    public static final boolean enableAdjLayers = false;
+
     public static Build CURRENT = FINAL;
 
     public static final String VERSION_NUMBER = "4.0.0";

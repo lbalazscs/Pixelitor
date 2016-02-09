@@ -24,6 +24,7 @@ import pixelitor.layers.Layer;
 import pixelitor.layers.TextLayer;
 import pixelitor.utils.Messages;
 
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 public abstract class MenuAction extends NamedAction {
@@ -94,6 +95,11 @@ public abstract class MenuAction extends NamedAction {
 
     protected MenuAction(String name, AllowedLayerType layerType) {
         super(name);
+        this.layerType = layerType;
+    }
+
+    protected MenuAction(String name, Icon icon, AllowedLayerType layerType) {
+        super(name, icon);
         this.layerType = layerType;
     }
 

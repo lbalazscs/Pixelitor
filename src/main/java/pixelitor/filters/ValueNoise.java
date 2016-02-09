@@ -181,4 +181,9 @@ public class ValueNoise extends FilterWithParametrizedGUI {
     public void setDetails(int newDetails) {
         details.setValue(newDetails);
     }
+
+    @Override
+    public boolean supportsGray() {
+        return false;
+    }
 }

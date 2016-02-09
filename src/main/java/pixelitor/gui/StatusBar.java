@@ -32,7 +32,7 @@ public class StatusBar extends JPanel {
     private JProgressBar progressBar;
     private boolean inProgress = false;
 
-    public static StatusBar INSTANCE = new StatusBar();
+    public static final StatusBar INSTANCE = new StatusBar();
 
     private StatusBar() {
         super(new BorderLayout(0, 0));

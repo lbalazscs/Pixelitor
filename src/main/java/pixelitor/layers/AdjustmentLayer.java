@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,12 +8,13 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.layers;
 
 import pixelitor.Composition;
@@ -46,12 +47,12 @@ public class AdjustmentLayer extends Layer {
     }
 
     @Override
-    public Layer duplicate() {
-        // TODO operation  should be copied so that it can be adjusted independently
-        AdjustmentLayer d = new AdjustmentLayer(comp, getDuplicateLayerName(), filter);
+    public Layer duplicate(boolean exact) {
+        // TODO the filter should be copied so that it can be adjusted independently
+        AdjustmentLayer d = new AdjustmentLayer(comp, getDuplicateLayerName(exact), filter);
 
         if (hasMask()) {
-            d.addMaskBack(mask.duplicate(d));
+            d.addMask(mask.duplicate(d));
         }
 
         return d;

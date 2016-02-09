@@ -22,7 +22,9 @@ import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.gui.ImageComponents;
 import pixelitor.menus.MenuAction;
+import pixelitor.menus.MenuAction.AllowedLayerType;
 import pixelitor.utils.AppPreferences;
+import pixelitor.utils.IconUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.test.Events;
@@ -48,14 +50,16 @@ public class History {
         setUndoLevels(AppPreferences.loadUndoLevels());
     }
 
-    public static final Action UNDO_ACTION = new MenuAction("Undo") {
+    public static final Action UNDO_ACTION = new MenuAction("Undo",
+            IconUtils.getUndoIcon(), AllowedLayerType.ANY) {
         @Override
         public void onClick() {
             History.undo();
         }
     };
 
-    public static final Action REDO_ACTION = new MenuAction("Redo") {
+    public static final Action REDO_ACTION = new MenuAction("Redo",
+            IconUtils.getRedoIcon(), AllowedLayerType.ANY) {
         @Override
         public void onClick() {
             History.redo();

@@ -23,48 +23,80 @@ import pixelitor.utils.IconUtils;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.Insets;
 import java.awt.RenderingHints;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
 /**
  * A GUI element representing a layer in an image
  */
 public class LayerButton extends JToggleButton {
-    //    public static final EmptyBorder BORDER = new EmptyBorder(5, 5, 5, 5);
-    private final Layer layer;
-
     private static final Icon OPEN_EYE_ICON = IconUtils.loadIcon("eye_open.png");
     private static final Icon CLOSED_EYE_ICON = IconUtils.loadIcon("eye_closed.png");
 
     private static final String uiClassID = "LayerButtonUI";
-    private JCheckBox visibilityCB;
 
+    public static final Color UNSELECTED_COLOR = new Color(214, 217, 223);
+    public static final Color SELECTED_COLOR = new Color(48, 76, 111);
+
+    public static final int BORDER_WIDTH = 2;
+
+    private enum SelectionState {
+        UNSELECTED {
+            @Override
+            public void activate(JLabel layer, JLabel mask) {
+                layer.setBorder(unSelectedIconOnUnselectedLayerBorder);
+                if (mask != null) {
+                    mask.setBorder(unSelectedIconOnUnselectedLayerBorder);
+                }
+            }
+        }, SELECT_LAYER {
+            @Override
+            public void activate(JLabel layer, JLabel mask) {
+                layer.setBorder(selectedBorder);
+                if (mask != null) {
+                    mask.setBorder(unSelectedIconOnSelectedLayerBorder);
+                }
+            }
+        }, SELECT_MASK {
+            @Override
+            public void activate(JLabel layer, JLabel mask) {
+                layer.setBorder(unSelectedIconOnSelectedLayerBorder);
+                if (mask != null) {
+                    mask.setBorder(selectedBorder);
+                }
+            }
+        };
+
+        private static final Border lightBorder = BorderFactory.createLineBorder(UNSELECTED_COLOR, 1);
+        private static final Border darkBorder = BorderFactory.createLineBorder(SELECTED_COLOR, 1);
+        private static final Border selectedBorder = BorderFactory.createCompoundBorder(lightBorder, darkBorder);
+        private static final Border unSelectedIconOnSelectedLayerBorder = BorderFactory.createLineBorder(SELECTED_COLOR, BORDER_WIDTH);
+        private static final Border unSelectedIconOnUnselectedLayerBorder = BorderFactory.createLineBorder(UNSELECTED_COLOR, BORDER_WIDTH);
+
+        public abstract void activate(JLabel layer, JLabel mask);
+    }
+
+    private SelectionState selectionState = SelectionState.UNSELECTED;
+
+    private final Layer layer;
     private boolean userInteraction = true;
-    private LayerNameEditor nameEditor;
 
-    private final JComponent layerIcon;
+    private JCheckBox visibilityCB;
+    private LayerNameEditor nameEditor;
+    private final JLabel layerIconLabel;
     private JLabel maskIconLabel;
 
     /**
      * The Y coordinate in the parent when it is not dragging
      */
     private int staticY;
-//    private final JPanel iconsPanel;
-
-    @Override
-    public String getUIClassID() {
-        return uiClassID;
-    }
-
-    @Override
-    public void updateUI() {
-        setUI(new LayerButtonUI());
-    }
 
     public LayerButton(Layer layer) {
         this.layer = layer;
@@ -76,33 +108,61 @@ public class LayerButton extends JToggleButton {
 
         if (layer instanceof TextLayer) {
             Icon textLayerIcon = IconUtils.getTextLayerIcon();
-            layerIcon = new JButton(textLayerIcon);
-
-            ((JButton) layerIcon).addActionListener(e -> ((TextLayer) layer).edit(PixelitorWindow.getInstance()));
+            layerIconLabel = new JLabel(textLayerIcon);
         } else if (layer instanceof AdjustmentLayer) {
             Icon adjLayerIcon = IconUtils.getAdjLayerIcon();
-            layerIcon = new JButton(adjLayerIcon);
-
-            ((JButton) layerIcon).addActionListener(e -> ((AdjustmentLayer) layer).configure());
+            layerIconLabel = new JLabel(adjLayerIcon);
         } else {
-            layerIcon = new JLabel("", null, CENTER);
+            layerIconLabel = new JLabel("", null, CENTER);
         }
 
-        configureLayerIcon(layerIcon);
-        add(layerIcon, LayerButtonLayout.ICON);
+        layerIconLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int clickCount = e.getClickCount();
+                if (clickCount == 1) {
+                    MaskViewMode.NORMAL.activate(layer);
+                } else {
+                    if (layer instanceof TextLayer) {
+                        ((TextLayer) layer).edit(PixelitorWindow.getInstance());
+                    } else if (layer instanceof AdjustmentLayer) {
+                        ((AdjustmentLayer) layer).configure();
+                    }
+                }
+                if (SwingUtilities.isLeftMouseButton(e)) {
+                    selectLayerIfIconClicked(e);
+                }
+            }
+        });
+
+        configureLayerIcon(layerIconLabel, "layerIcon");
+        configureBorders(layer.isMaskEditing());
+
+        add(layerIconLabel, LayerButtonLayout.LAYER);
 
         wireSelectionWithLayerActivation(layer);
     }
 
-    private static void configureLayerIcon(JComponent layerIcon) {
+    private static void configureLayerIcon(JComponent layerIcon, String name) {
         layerIcon.putClientProperty("JComponent.sizeVariant", "mini");
+        layerIcon.setName(name);
 
         if (layerIcon instanceof JButton) {
             JButton layerButton = (JButton) layerIcon;
-            layerButton.setMargin(new Insets(0, 0, 0, 0));
-            layerButton.setBorderPainted(false);
+//            layerButton.setMargin(new Insets(0, 0, 0, 0));
+//            layerButton.setBorderPainted(false);
         }
-        layerIcon.setPreferredSize(new Dimension(LayerButtonLayout.ICON_SIZE, LayerButtonLayout.ICON_SIZE));
+        layerIcon.setPreferredSize(new Dimension(LayerButtonLayout.LABEL_SIZE, LayerButtonLayout.LABEL_SIZE));
+    }
+
+    public static void selectLayerIfIconClicked(MouseEvent e) {
+        // By adding a mouse listener to the JLabel, it loses the
+        // ability to automatically transmit the mouse events to its
+        // parent, and therefore the layer cannot be selected anymore
+        // by left-clicking on this label. This is the workaround.
+        JLabel source = (JLabel) e.getSource();
+        LayerButton layerButton = (LayerButton) source.getParent();
+        layerButton.setSelected(true);
     }
 
     private void initVisibilityControl(Layer layer) {
@@ -112,15 +172,15 @@ public class LayerButton extends JToggleButton {
         visibilityCB.setSelected(true);
         visibilityCB.setToolTipText("Layer Visibility");
         visibilityCB.setSelectedIcon(OPEN_EYE_ICON);
-        add(visibilityCB, LayerButtonLayout.ICON);
-//        iconsPanel.add(visibilityCB);
-        visibilityCB.addItemListener(e -> layer.setVisible(visibilityCB.isSelected(), AddToHistory.YES));
+        add(visibilityCB, LayerButtonLayout.CHECKBOX);
+
+        visibilityCB.addItemListener(e ->
+                layer.setVisible(visibilityCB.isSelected(), AddToHistory.YES));
     }
 
     private void initLayerNameEditor(Layer layer) {
         nameEditor = new LayerNameEditor(this, layer);
         add(nameEditor, LayerButtonLayout.NAME_EDITOR);
-//        add(nameEditor, BorderLayout.CENTER);
         addPropertyChangeListener("name", evt -> nameEditor.setText(getName()));
     }
 
@@ -130,6 +190,12 @@ public class LayerButton extends JToggleButton {
                 layer.makeActive(userInteraction ? AddToHistory.YES : AddToHistory.NO);
             } else {
                 nameEditor.disableEditing();
+                // Invoke later because we can get here in the middle
+                // of a new layer activation, when isSelected still
+                // returns false, but the layer will be selected during
+                // the same event processing.
+                SwingUtilities.invokeLater(() ->
+                        configureBorders(layer.isMaskEditing()));
             }
         });
     }
@@ -191,12 +257,10 @@ public class LayerButton extends JToggleButton {
     public void updateLayerIconImage(ImageLayer layer) {
         boolean updateMask = layer instanceof LayerMask;
 
-//        System.out.println("LayerButton::updateLayerIconImage: CALLED, updateMask = " + updateMask);
-
         BufferedImage img = layer.getCanvasSizedSubImage();
 
         Runnable notEDT = () -> {
-            BufferedImage thumb = ImageUtils.createThumbnail(img, LayerButtonLayout.ICON_SIZE);
+            BufferedImage thumb = ImageUtils.createThumbnail(img, LayerButtonLayout.THUMB_SIZE);
             Runnable edt = () -> {
                 if (updateMask) {
                     if (maskIconLabel == null) {
@@ -221,7 +285,7 @@ public class LayerButton extends JToggleButton {
                     }
                     maskIconLabel.setIcon(new ImageIcon(iconImage));
                 } else {
-                    ((JLabel) layerIcon).setIcon(new ImageIcon(thumb));
+                    layerIconLabel.setIcon(new ImageIcon(thumb));
                 }
                 repaint();
             };
@@ -233,15 +297,58 @@ public class LayerButton extends JToggleButton {
     public void addMaskIconLabel() {
         maskIconLabel = new JLabel("", null, CENTER);
         LayerMaskActions.addPopupMenu(maskIconLabel, layer);
-        configureLayerIcon(maskIconLabel);
-        add(maskIconLabel, LayerButtonLayout.ICON);
+        configureLayerIcon(maskIconLabel, "maskIcon");
+        configureBorders(layer.isMaskEditing());
+        add(maskIconLabel, LayerButtonLayout.MASK);
+
+        maskIconLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.isAltDown()) {
+                    MaskViewMode.SHOW_MASK.activate(layer);
+                } else {
+                    MaskViewMode.EDIT_MASK.activate(layer);
+                }
+            }
+        });
+
         revalidate();
     }
 
     public void deleteMaskIconLabel() {
+        // TODO remove the two mouse listeners?
         remove(maskIconLabel);
         revalidate();
         maskIconLabel = null;
+    }
+
+    public void configureBorders(boolean maskEditing) {
+        SelectionState newSelectionState;
+
+        if (!isSelected()) {
+            newSelectionState = SelectionState.UNSELECTED;
+        } else {
+            if (maskEditing) {
+                newSelectionState = SelectionState.SELECT_MASK;
+            } else {
+                newSelectionState = SelectionState.SELECT_LAYER;
+            }
+        }
+
+        if (newSelectionState != selectionState) {
+            selectionState = newSelectionState;
+            selectionState.activate(layerIconLabel, maskIconLabel);
+        }
+    }
+
+    @Override
+    public String getUIClassID() {
+        return uiClassID;
+    }
+
+    @Override
+    public void updateUI() {
+        setUI(new LayerButtonUI());
     }
 
     @Override

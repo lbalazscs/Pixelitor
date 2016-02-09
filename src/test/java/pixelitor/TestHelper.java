@@ -26,11 +26,13 @@ import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMaskAddType;
+import pixelitor.layers.MaskViewMode;
 import pixelitor.layers.TextLayer;
 import pixelitor.tools.Alt;
 import pixelitor.tools.Ctrl;
 import pixelitor.tools.Mouse;
 import pixelitor.tools.Shift;
+import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -53,6 +55,11 @@ public class TestHelper {
     private static final int TEST_HEIGHT = 10;
     private static final Component eventSource = new JPanel();
 
+    static {
+        setupMockFgBgSelector();
+        Messages.setMessageHandler(new TestMessageHandler());
+    }
+
     private TestHelper() {
     }
 
@@ -72,9 +79,8 @@ public class TestHelper {
 
     public static Composition createEmptyComposition() {
         Composition comp = Composition.createEmpty(TEST_WIDTH, TEST_HEIGHT);
-        ImageComponent ic = createIC(comp);
+        ImageComponent ic = setupAnICFor(comp);
 
-        comp.setIC(ic);
         comp.setName("Test");
 
         return comp;
@@ -93,6 +99,11 @@ public class TestHelper {
             layer1.addMask(LayerMaskAddType.REVEAL_ALL);
             layer2.addMask(LayerMaskAddType.REVEAL_ALL);
         }
+
+        // TODO it should not be necessary to call
+        // separately for both layers
+        MaskViewMode.NORMAL.activate(layer1);
+        MaskViewMode.NORMAL.activate(layer2);
 
         assert layer2 == c.getActiveLayer();
         assert layer1 == c.getLayer(0);
@@ -154,13 +165,13 @@ public class TestHelper {
         );
     }
 
-    public static ImageComponent setAnActiveIC(Composition comp) {
-        ImageComponent ic = createIC(comp);
+    public static ImageComponent setupAnActiveICFor(Composition comp) {
+        ImageComponent ic = setupAnICFor(comp);
         ImageComponents.setActiveIC(ic, false);
         return ic;
     }
 
-    public static ImageComponent createIC(Composition comp) {
+    public static ImageComponent setupAnICFor(Composition comp) {
         ImageComponent ic = mock(ImageComponent.class);
 
         when(ic.fromComponentToImageSpace(anyObject())).then(returnsFirstArg());
@@ -179,6 +190,9 @@ public class TestHelper {
 
         when(ic.getComp()).thenReturn(comp);
         when(ic.isMock()).thenReturn(true);
+        when(ic.getMaskViewMode()).thenReturn(MaskViewMode.NORMAL);
+
+        comp.setIC(ic);
 
         return ic;
     }

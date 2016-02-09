@@ -31,6 +31,7 @@ import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 import pixelitor.selection.Selection;
+import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -90,6 +91,9 @@ public class EnlargeCanvas implements CompAction {
 
         comp.imageChanged(REPAINT);
         comp.setDirty(true);
+
+        Messages.showStatusMessage("Canvas enlarged to "
+                + newCanvasWidth + " x " + newCanvasHeight + " pixels.");
     }
 
     public static Action getAction() {

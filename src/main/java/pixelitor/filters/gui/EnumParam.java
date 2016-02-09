@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -137,9 +137,9 @@ public class EnumParam<E extends Enum<E>> extends AbstractFilterParam implements
         return delegateModel.getSelectedItem();
     }
 
-    // it is always safe to call this
+    // no need for casting with this one
     public E getSelected() {
-        return (E) delegateModel.getSelectedItem();
+        return delegateModel.getSelectedItem();
     }
 
     @Override

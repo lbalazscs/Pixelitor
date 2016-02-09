@@ -20,12 +20,12 @@ package pixelitor.tools;
 import pixelitor.Composition;
 import pixelitor.FgBgColors;
 import pixelitor.gui.ImageComponent;
-import pixelitor.layers.ImageLayer;
 import pixelitor.utils.ColorUtils;
 
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Shape;
 import java.awt.event.MouseEvent;
@@ -63,11 +63,9 @@ public class BrushTool extends TmpLayerBrushTool {
     }
 
     @Override
-    protected void createGraphicsForNewBrushStroke(Composition comp, ImageLayer layer) {
-        super.createGraphicsForNewBrushStroke(comp, layer);
-
+    protected void initializeGraphics(Graphics2D g) {
         // reinitialize the color for each stroke
-        graphics.setColor(drawingColor);
+        g.setColor(drawingColor);
     }
 
     @Override
@@ -84,7 +82,7 @@ public class BrushTool extends TmpLayerBrushTool {
             // See source comment in java.awt.Event for ALT_MASK
             Color fg = FgBgColors.getFG();
             Color bg = FgBgColors.getBG();
-            if(e.isControlDown()) {
+            if (e.isControlDown()) {
                 drawingColor = ColorUtils.getHSBAverageColor(fg, bg);
             } else {
                 drawingColor = ColorUtils.getRGBAverageColor(fg, bg);
@@ -96,9 +94,7 @@ public class BrushTool extends TmpLayerBrushTool {
 
     @Override
     public void trace(Composition comp, Shape shape) {
-        if (drawingColor == null) {
-            drawingColor = FgBgColors.getFG();
-        }
+        drawingColor = FgBgColors.getFG();
         super.trace(comp, shape);
     }
 }

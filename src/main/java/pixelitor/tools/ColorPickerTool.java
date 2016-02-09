@@ -32,7 +32,7 @@ import java.awt.image.BufferedImage;
  * The color picker tool
  */
 public class ColorPickerTool extends Tool {
-    private final JCheckBox sampleLayerOnly = new JCheckBox("Sample Active Layer Only");
+    private final JCheckBox sampleLayerOnly = new JCheckBox("Sample Only the Active Layer/Mask");
 
     public ColorPickerTool() {
         super('i', "Color Picker", "color_picker_tool_icon.png",
@@ -67,6 +67,7 @@ public class ColorPickerTool extends Tool {
         int y = (int) ic.componentYToImageSpace(e.getY());
 
         BufferedImage img;
+        boolean isMask = false;
         if (sampleLayerOnly.isSelected()) {
             if (!ic.activeIsImageLayer()) {
                 return;
@@ -74,6 +75,7 @@ public class ColorPickerTool extends Tool {
 
             ImageLayer layer = ic.getComp().getActiveMaskOrImageLayer();
             img = layer.getImage();
+            isMask = img.getType() == BufferedImage.TYPE_BYTE_GRAY;
 
             x -= layer.getTX();
             y -= layer.getTY();
@@ -86,7 +88,7 @@ public class ColorPickerTool extends Tool {
         if (x < imgWidth && y < imgHeight && x >= 0 && y >= 0) {
             int rgb = img.getRGB(x, y);
 
-            showColorInStatusBar(x, y, rgb);
+            showColorInStatusBar(x, y, rgb, isMask);
 
             Color sampledColor = new Color(rgb);
             if (selectBackground) {
@@ -97,13 +99,19 @@ public class ColorPickerTool extends Tool {
         }
     }
 
-    private void showColorInStatusBar(int x, int y, int rgb) {
+    private void showColorInStatusBar(int x, int y, int rgb, boolean isMask) {
         int a = (rgb >>> 24) & 0xFF;
         int r = (rgb >>> 16) & 0xFF;
         int g = (rgb >>> 8) & 0xFF;
         int b = (rgb) & 0xFF;
 
-        String msg = "x = " + x + ", y = " + y + ", alpha = " + a + ", red = " + r + ", green = " + g + ", blue = " + b;
+        String msg = "x = " + x + ", y = " + y;
+        if (isMask) {
+            msg += ", gray = " + r;
+        } else {
+            msg += ", alpha = " + a + ", red = " + r + ", green = " + g + ", blue = " + b;
+        }
+
         Messages.showStatusMessage(msg);
     }
 }

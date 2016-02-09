@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,6 +33,8 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
  * Colorize
  */
 public class Colorize extends FilterWithParametrizedGUI {
+    public static final String NAME = "Colorize";
+
     private final RangeParam adjustBrightness = new RangeParam("Adjust Brightness", -100, 0, 100);
     private final ColorParam colorParam = new ColorParam("Color:", new Color(255, 207, 119), NO_OPACITY);
     private final RangeParam opacityParam = new RangeParam("Amount (%)", 0, 100, 100);
@@ -94,7 +96,7 @@ public class Colorize extends FilterWithParametrizedGUI {
             int destGreen = greenLookup[lum];
             int destBlue = blueLookup[lum];
 
-            if(opacity < 1.0f) {
+            if (opacity < 1.0f) {
                 int r = (rgb >>> 16) & 0xFF;
                 int g = (rgb >>> 8) & 0xFF;
                 int b = rgb & 0xFF;
@@ -108,5 +110,10 @@ public class Colorize extends FilterWithParametrizedGUI {
         }
 
         return dest;
+    }
+
+    @Override
+    public boolean supportsGray() {
+        return false;
     }
 }

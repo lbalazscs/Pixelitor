@@ -45,7 +45,7 @@ import pixelitor.tools.ToolTest;
 @Suite.SuiteClasses({
 // commented out because this test suite is intended to run with
 // a test jar, but this test requires the test files to be
-// unpacked om the file system
+// unpacked on the file system
 //        CompositionCreationTest.class,
 
         PixelitorUndoManagerTest.class,

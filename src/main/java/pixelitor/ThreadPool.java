@@ -28,7 +28,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class ThreadPool {
-    public static final int NUM_AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
+    private static final int NUM_AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
 
     private static final ExecutorService executorService =
             Executors.newFixedThreadPool(NUM_AVAILABLE_PROCESSORS);

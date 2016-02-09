@@ -886,11 +886,11 @@ public class RandomGUITest {
                     ((ImageLayer) layer).applyLayerMask(AddToHistory.YES);
                 } else {
                     log("random delete layer mask");
-                    layer.deleteMask(AddToHistory.YES, true);
+                    layer.deleteMask(AddToHistory.YES);
                 }
             } else {
                 log("random delete layer mask");
-                layer.deleteMask(AddToHistory.YES, true);
+                layer.deleteMask(AddToHistory.YES);
             }
         }
     }
@@ -984,7 +984,11 @@ public class RandomGUITest {
 
         weightedCaller.registerCallback(7, RandomGUITest::randomNewTextLayer);
         weightedCaller.registerCallback(7, RandomGUITest::randomTextLayerRasterize);
-        weightedCaller.registerCallback(2, RandomGUITest::randomNewAdjustmentLayer);
+
+        if (Build.enableAdjLayers) {
+            weightedCaller.registerCallback(2, RandomGUITest::randomNewAdjustmentLayer);
+        }
+
         weightedCaller.registerCallback(7, RandomGUITest::randomSetLayerMaskEditMode);
         weightedCaller.registerCallback(20, RandomGUITest::randomLayerMaskAction);
 

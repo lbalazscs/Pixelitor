@@ -31,19 +31,23 @@ import java.util.Random;
 public class BlendingModePanel extends JPanel {
     protected final DropDownSlider opacityDDSlider;
     protected final JComboBox<BlendingMode> blendingModeCombo;
+    private final JLabel opacityLabel;
+    private final JLabel gmLabel;
 
     public BlendingModePanel(boolean longText) {
         setLayout(new FlowLayout(FlowLayout.LEFT));
-        add(new JLabel("Opacity:"));
+        opacityLabel = new JLabel("Opacity:");
+        add(opacityLabel);
         opacityDDSlider = new DropDownSlider(100, 0, 100, true);
 
         add(opacityDDSlider);
 
         if (longText) {
-            add(new JLabel("%, Blending Mode:", SwingConstants.LEFT));
+            gmLabel = new JLabel("%, Blending Mode:", SwingConstants.LEFT);
         } else {
-            add(new JLabel("%", SwingConstants.LEFT));
+            gmLabel = new JLabel("%", SwingConstants.LEFT);
         }
+        add(gmLabel);
 
         BlendingMode[] blendingModes = BlendingMode.values();
         blendingModeCombo = new JComboBox<>(blendingModes);
@@ -75,8 +79,10 @@ public class BlendingModePanel extends JPanel {
     }
 
     @Override
-    public void setEnabled(boolean enabled) {
-        opacityDDSlider.setEnabled(enabled);
-        blendingModeCombo.setEnabled(enabled);
+    public void setEnabled(boolean b) {
+        opacityLabel.setEnabled(b);
+        opacityDDSlider.setEnabled(b);
+        gmLabel.setEnabled(b);
+        blendingModeCombo.setEnabled(b);
     }
 }

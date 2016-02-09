@@ -82,7 +82,7 @@ public class ToolTest {
         tool.toolStarted();
         Composition comp = TestHelper.create2LayerComposition(true);
 
-        ic = TestHelper.setAnActiveIC(comp);
+        ic = TestHelper.setupAnActiveICFor(comp);
     }
 
     @After

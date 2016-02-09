@@ -22,6 +22,7 @@ import org.assertj.swing.core.BasicRobot;
 import org.assertj.swing.core.GenericTypeMatcher;
 import org.assertj.swing.core.MouseButton;
 import org.assertj.swing.core.Robot;
+import org.assertj.swing.core.matcher.JButtonMatcher;
 import org.assertj.swing.finder.JFileChooserFinder;
 import org.assertj.swing.finder.JOptionPaneFinder;
 import org.assertj.swing.finder.WindowFinder;
@@ -32,8 +33,10 @@ import org.assertj.swing.fixture.JButtonFixture;
 import org.assertj.swing.fixture.JCheckBoxFixture;
 import org.assertj.swing.fixture.JComboBoxFixture;
 import org.assertj.swing.fixture.JFileChooserFixture;
+import org.assertj.swing.fixture.JListFixture;
 import org.assertj.swing.fixture.JMenuItemFixture;
 import org.assertj.swing.fixture.JOptionPaneFixture;
+import org.assertj.swing.fixture.JPopupMenuFixture;
 import org.assertj.swing.fixture.JTabbedPaneFixture;
 import org.assertj.swing.fixture.JTextComponentFixture;
 import org.assertj.swing.launcher.ApplicationLauncher;
@@ -62,14 +65,19 @@ import pixelitor.utils.test.Events;
 import pixelitor.utils.test.PixelitorEventListener;
 
 import javax.swing.*;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Date;
 import java.util.Random;
 
 import static java.awt.event.KeyEvent.VK_0;
+import static java.awt.event.KeyEvent.VK_1;
+import static java.awt.event.KeyEvent.VK_2;
+import static java.awt.event.KeyEvent.VK_3;
 import static java.awt.event.KeyEvent.VK_ADD;
 import static java.awt.event.KeyEvent.VK_ALT;
 import static java.awt.event.KeyEvent.VK_CONTROL;
@@ -81,6 +89,10 @@ import static java.awt.event.KeyEvent.VK_SHIFT;
 import static java.awt.event.KeyEvent.VK_Z;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static pixelitor.AssertJSwingTest.TestingMode.ON_MASK_VIEW_LAYER;
+import static pixelitor.AssertJSwingTest.TestingMode.ON_MASK_VIEW_MASK;
+import static pixelitor.AssertJSwingTest.TestingMode.WITHOUT_MASK;
+import static pixelitor.AssertJSwingTest.TestingMode.WITH_MASK;
 import static pixelitor.utils.test.Assertions.canvasSizeIs;
 import static pixelitor.utils.test.Assertions.hasSelection;
 import static pixelitor.utils.test.Assertions.noSelection;
@@ -97,11 +109,16 @@ public class AssertJSwingTest {
 
     private Robot robot;
     private static final int ROBOT_DELAY_MILLIS_DEFAULT = 100;
+    private static final int ROBOT_DELAY_MILLIS_SLOW = 500;
 
     private FrameFixture window;
     private final Random random = new Random();
 
     enum Randomize {YES, NO}
+
+    enum TestingMode {WITHOUT_MASK, WITH_MASK, ON_MASK_VIEW_LAYER, ON_MASK_VIEW_MASK}
+
+    private TestingMode testingMode;
 
     public static void main(String[] args) {
         processCLArguments(args);
@@ -111,7 +128,7 @@ public class AssertJSwingTest {
         test.setUp();
         test.testApp();
 
-        System.out.println("AssertJSwingTest: finished, exiting in 5 seconds");
+        System.out.printf("AssertJSwingTest: finished at %s, exiting in 5 seconds", new Date().toString());
         Utils.sleep(5, SECONDS);
         test.exit();
     }
@@ -181,12 +198,24 @@ public class AssertJSwingTest {
      * "rest" ("View" and "Help" menus)
      */
     private void testApp() {
+        testingMode = ON_MASK_VIEW_MASK;
+        applyTestingMode();
+
+        boolean testOneMethodSlowly = false;
+        if (testOneMethodSlowly) {
+            robot.settings().delayBetweenEvents(ROBOT_DELAY_MILLIS_SLOW);
+
+            testMoveTool();
+
+            return;
+        }
+
         setupRobotSpeed();
         String target = System.getProperty("test.target");
         if (target == null) {
             target = "all"; // default target
         }
-        System.out.printf("AssertJSwingTest: target = '%s'%n", target);
+        System.out.printf("AssertJSwingTest: target = %s, testingMode = %s, started at %s%n", target, testingMode, new Date().toString());
         switch (target) {
             case "all":
                 testAll();
@@ -263,6 +292,7 @@ public class AssertJSwingTest {
         testPaintBucketTool();
         testColorPickerTool();
         testShapesTool();
+        testReload(); // file menu, but better here
         testHandTool();
         testZoomTool();
     }
@@ -271,9 +301,9 @@ public class AssertJSwingTest {
         LayerButtonFixture layer1Button = findLayerButton("layer 1");
         layer1Button.requireSelected();
 
-        JButtonFixture addEmptyLayerButton = findButtonByActionName(window, "Add New Layer");
-        JButtonFixture deleteLayerButton = findButtonByActionName(window, "Delete Layer");
-        JButtonFixture duplicateLayerButton = findButtonByActionName(window, "Duplicate Layer");
+        JButtonFixture addEmptyLayerButton = window.button("addLayer");
+        JButtonFixture deleteLayerButton = window.button("deleteLayer");
+        JButtonFixture duplicateLayerButton = window.button("duplicateLayer");
 
         addEmptyLayerButton.click();
         LayerButtonFixture layer2Button = findLayerButton("layer 2");
@@ -281,6 +311,8 @@ public class AssertJSwingTest {
 
         deleteLayerButton.click();
         duplicateLayerButton.click();
+        applyTestingMode();
+
         LayerButtonFixture layer1CopyButton = findLayerButton("layer 1 copy");
         layer1CopyButton.requireSelected();
 
@@ -297,14 +329,74 @@ public class AssertJSwingTest {
         findMenuItemByText("Layer to Canvas Size").click();
 
         findMenuItemByText("New Layer from Composite").click();
+        applyTestingMode();
+
         findMenuItemByText("Duplicate Layer").click();
         findMenuItemByText("Merge Down").click();
         findMenuItemByText("Duplicate Layer").click();
+        applyTestingMode();
 
         findMenuItemByText("Add New Layer").click();
+        applyTestingMode();
+
         findMenuItemByText("Delete Layer").click();
 
         findMenuItemByText("Flatten Image").click();
+
+        testLayerMasks();
+        testTextLayers();
+
+        if (Build.enableAdjLayers) {
+            testAdjLayers();
+        }
+    }
+
+    private void testLayerMasks() {
+        addLayerMask(false);
+
+        testLayerMaskIconPopupMenus();
+    }
+
+    private void testLayerMaskIconPopupMenus() {
+        // test delete
+        JPopupMenuFixture popupMenu = window.label("maskIcon").showPopupMenu();
+        findPopupMenuFixtureByText(popupMenu, "Delete").click();
+        keyboardUndoRedoUndo();
+
+        // test apply
+        popupMenu = window.label("maskIcon").showPopupMenu();
+        findPopupMenuFixtureByText(popupMenu, "Apply").click();
+        keyboardUndoRedoUndo();
+
+        // test disable
+        popupMenu = window.label("maskIcon").showPopupMenu();
+        findPopupMenuFixtureByText(popupMenu, "Disable").click();
+        keyboardUndoRedo();
+
+        // test enable - after the redo we should find a menu item called "Enable"
+        popupMenu = window.label("maskIcon").showPopupMenu();
+        findPopupMenuFixtureByText(popupMenu, "Enable").click();
+        keyboardUndoRedo();
+
+        // test unlink
+        popupMenu = window.label("maskIcon").showPopupMenu();
+        findPopupMenuFixtureByText(popupMenu, "Unlink").click();
+        keyboardUndoRedo();
+
+        // test link - after the redo we should find a menu item called "Link"
+        popupMenu = window.label("maskIcon").showPopupMenu();
+        findPopupMenuFixtureByText(popupMenu, "Link").click();
+        keyboardUndoRedo();
+    }
+
+    private void testTextLayers() {
+        addTextLayer();
+        // TODO
+    }
+
+    private void testAdjLayers() {
+        addAdjustmentLayer();
+        // TODO
     }
 
     private LayerButtonFixture findLayerButton(String layerName) {
@@ -447,8 +539,13 @@ public class AssertJSwingTest {
     private void testCopyPaste() {
         runMenuCommand("Copy Layer");
         runMenuCommand("Paste as New Layer");
+
+        applyTestingMode();
+
         runMenuCommand("Copy Composite");
         runMenuCommand("Paste as New Image");
+
+        applyTestingMode();
     }
 
     private void testFileMenu() {
@@ -466,6 +563,7 @@ public class AssertJSwingTest {
         testExportLayerToPNG();
         testScreenCapture();
         testCloseAll();
+        // reload testing is in testTools
     }
 
     private void testNewImage() {
@@ -474,6 +572,7 @@ public class AssertJSwingTest {
         newImageDialog.textBox("widthTF").deleteText().enterText("611");
         newImageDialog.textBox("heightTF").deleteText().enterText("411");
         newImageDialog.button("ok").click();
+        applyTestingMode();
     }
 
     private void testFileOpen() {
@@ -485,6 +584,8 @@ public class AssertJSwingTest {
         openDialog = JFileChooserFinder.findFileChooser("open").using(robot);
         openDialog.selectFile(new File(inputDir, "b.jpg"));
         openDialog.approve();
+
+        applyTestingMode();
     }
 
     private void testSaveUnnamed() {
@@ -557,8 +658,16 @@ public class AssertJSwingTest {
 
     private void testClose() {
         assertThat(ImageComponents.getNrOfOpenImages()).isEqualTo(2);
+        boolean dirty = ImageComponents.getActiveCompOrNull().isDirty();
 
         runMenuCommand("Close");
+
+        // we might get a "Do you want to save changes" dialog
+        if (dirty) {
+            JOptionPaneFixture optionPane = findJOptionPane();
+            JButtonMatcher matcher = JButtonMatcher.withText("Don't Save").andShowing();
+            optionPane.button(matcher).click();
+        }
 
         assertThat(ImageComponents.getNrOfOpenImages()).isEqualTo(1);
     }
@@ -592,6 +701,7 @@ public class AssertJSwingTest {
 
         // restore for the next test
         runMenuCommand("Paste as New Image");
+        applyTestingMode();
     }
 
     private void testBatchResize() {
@@ -677,10 +787,19 @@ public class AssertJSwingTest {
             cb.uncheck();
         }
         dialog.button("ok").click();
+        applyTestingMode();
+    }
+
+    private void testReload() {
+        runMenuCommand("Reload");
+        keyboardUndoRedo();
+        applyTestingMode();
     }
 
     private void testViewMenu() {
         testZoomCommands();
+
+        testHistory();
 
         runMenuCommand("Set Default Workspace");
         runMenuCommand("Hide Status Bar");
@@ -710,6 +829,55 @@ public class AssertJSwingTest {
         for (ZoomLevel zoomLevel : values) {
             runMenuCommand(zoomLevel.toString());
         }
+    }
+
+    private void testHistory() {
+        // before testing make sure that we have something
+        // in the history even if this is running alone
+        window.toggleButton("Brush Tool Button").click();
+        moveRandom();
+        dragRandom();
+        window.toggleButton("Eraser Tool Button").click();
+        moveRandom();
+        dragRandom();
+
+        // now start testing the history
+        runMenuCommand("Show History...");
+        DialogFixture dialog = findDialogByTitle("History");
+
+        JButtonFixture undoButton = dialog.button("undo");
+        JButtonFixture redoButton = dialog.button("redo");
+
+        undoButton.requireEnabled();
+        redoButton.requireDisabled();
+
+        undoButton.click();
+        redoButton.requireEnabled();
+        redoButton.click();
+
+        JListFixture list = dialog.list();
+        String[] contents = list.contents();
+
+        // after clicking the first item,
+        // we have one last undo
+        list.clickItem(0);
+        undoButton.requireEnabled();
+        redoButton.requireEnabled();
+        undoButton.click();
+        // no more undo, the list should contain no selection
+        list.requireNoSelection();
+        undoButton.requireDisabled();
+        redoButton.requireEnabled();
+
+        // after clicking the last item,
+        // we have a selection and undo, but no redo
+        int lastIndex = contents.length - 1;
+        list.clickItem(lastIndex);
+        list.requireSelection(lastIndex);
+        undoButton.requireEnabled();
+        redoButton.requireDisabled();
+
+        dialog.close();
     }
 
     private void testFilters() {
@@ -750,7 +918,6 @@ public class AssertJSwingTest {
         testFilterWithDialog("Gaussian Blur...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Smart Blur...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Box Blur...", Randomize.YES, ShowOriginal.YES);
-        testFilterWithDialog("Fast Blur...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Lens Blur...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Motion Blur...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Spin and Zoom Blur...", Randomize.YES, ShowOriginal.YES);
@@ -811,7 +978,7 @@ public class AssertJSwingTest {
         testFilterWithDialog("Convolution Edge Detection...", Randomize.YES, ShowOriginal.YES);
         testNoDialogFilter("Laplacian");
         testFilterWithDialog("Difference of Gaussians...", Randomize.YES, ShowOriginal.YES);
-        testFilterWithDialog("Canny Edge Detector...", Randomize.YES, ShowOriginal.YES);
+        testFilterWithDialog("Canny...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("Drop Shadow...", Randomize.YES, ShowOriginal.YES);
         testFilterWithDialog("2D Transitions...", Randomize.YES, ShowOriginal.YES);
 
@@ -1257,6 +1424,11 @@ public class AssertJSwingTest {
             assert ty == -100 : "ty = " + tx;
         }
         keyboardUndoRedoUndo();
+        if (altDrag) {
+            // TODO the alt-dragged movement creates two history edits:
+            // a duplicate and a layer move. Now also undo the duplication
+            keyboardUndo();
+        }
     }
 
     private void testZoomTool() {
@@ -1397,28 +1569,34 @@ public class AssertJSwingTest {
     }
 
     private static JButtonFixture findButtonByText(ComponentContainerFixture container, String text) {
-        JButtonFixture buttonFixture = container.button(
-                new GenericTypeMatcher<JButton>(JButton.class) {
+        JButtonMatcher matcher = JButtonMatcher.withText(text).andShowing();
+        return container.button(matcher);
+    }
+
+    private JMenuItemFixture findPopupMenuFixtureByText(JPopupMenuFixture popupMenu, String text) {
+        JMenuItemFixture menuItemFixture = popupMenu.menuItem(
+                new GenericTypeMatcher<JMenuItem>(JMenuItem.class) {
                     @Override
-                    protected boolean isMatching(JButton button) {
-                        if (!button.isShowing()) {
-                            return false; // not interested in buttons that are not currently displayed
+                    protected boolean isMatching(JMenuItem menuItem) {
+                        if (!menuItem.isShowing()) {
+                            return false; // not interested in menuItems that are not currently displayed
                         }
-                        String buttonText = button.getText();
-                        if (buttonText == null) {
-                            buttonText = "";
+                        String menuItemText = menuItem.getText();
+                        if (menuItemText == null) {
+                            menuItemText = "";
                         }
-                        return buttonText.equals(text);
+                        return menuItemText.equals(text);
                     }
 
                     @Override
                     public String toString() {
-                        return "[Button Text Matcher, text = " + text + "]";
+                        return "[MenuItem Text Matcher, text = " + text + "]";
                     }
                 });
 
-        return buttonFixture;
+        return menuItemFixture;
     }
+
 
     private static JButtonFixture findButtonByActionName(ComponentContainerFixture container, String actionName) {
         JButtonFixture buttonFixture = container.button(
@@ -1586,5 +1764,78 @@ public class AssertJSwingTest {
         task.run();
         keyboardUndo(); // undo selection
         keyboardUndo(); // undo translation
+    }
+
+    private void addLayerMask(boolean allowExistingMask) {
+        boolean hasMask = ImageComponents.getActiveLayerOrNull().hasMask();
+        if (hasMask) {
+            if (!allowExistingMask) {
+                throw new IllegalStateException("already has mask");
+            }
+        } else {
+            window.button("addLayerMask").click();
+
+            // draw a radial gradient
+            window.toggleButton("Gradient Tool Button").click();
+            window.comboBox("gradientTypeSelector").selectItem(GradientType.RADIAL.toString());
+            window.checkBox("gradientInvert").check();
+            ImageComponent ic = ImageComponents.getActiveIC();
+            Canvas canvas = ic.getComp().getCanvas();
+            int width = canvas.getZoomedWidth();
+            int height = canvas.getZoomedHeight();
+            Point onScreen = ic.getLocationOnScreen();
+            moveTo(onScreen.x + width / 2, onScreen.y + height / 2);
+            dragTo(onScreen.x + width, onScreen.y + height / 2);
+        }
+    }
+
+    private void addTextLayer() {
+        window.button("addTextLayer").click();
+
+        DialogFixture dialog = findDialogByTitle("Create Text Layer");
+
+        dialog.textBox("textTF").enterText("some text");
+
+        dialog.button("ok").click();
+    }
+
+    private void addAdjustmentLayer() {
+        window.button("addAdjLayer").click();
+    }
+
+    /**
+     * This method should be called whenever a new layer is created
+     * in order to set up the mask testing mode
+     */
+    private void applyTestingMode() {
+        if (testingMode == WITHOUT_MASK) {
+            // do nothing
+        } else if (testingMode == WITH_MASK) {
+            // existing masks are allowed because even if they result
+            // from a layer duplication, a correct mask tate must be set up
+            addLayerMask(true);
+            pressCtrlOne();
+        } else if (testingMode == ON_MASK_VIEW_LAYER) {
+            addLayerMask(true);
+            pressCtrlThree();
+        } else if (testingMode == ON_MASK_VIEW_MASK) {
+            addLayerMask(true);
+            pressCtrlTwo();
+        }
+    }
+
+    private void pressCtrlOne() {
+        window.pressKey(VK_CONTROL).pressKey(VK_1)
+                .releaseKey(VK_1).releaseKey(VK_CONTROL);
+    }
+
+    private void pressCtrlTwo() {
+        window.pressKey(VK_CONTROL).pressKey(VK_2)
+                .releaseKey(KeyEvent.VK_2).releaseKey(VK_CONTROL);
+    }
+
+    private void pressCtrlThree() {
+        window.pressKey(VK_CONTROL).pressKey(VK_3)
+                .releaseKey(VK_3).releaseKey(VK_CONTROL);
     }
 }

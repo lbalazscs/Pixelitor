@@ -177,14 +177,14 @@ public class ImageLayerTest {
 
     @Test
     public void testCreateTmpDrawingLayer() {
-        TmpDrawingLayer tmpDrawingLayer1 = layer.createTmpDrawingLayer(AlphaComposite.SrcOver, true);
+        TmpDrawingLayer tmpDrawingLayer1 = layer.createTmpDrawingLayer(AlphaComposite.SrcOver);
         assertThat(tmpDrawingLayer1).isNotNull();
-        TmpDrawingLayer tmpDrawingLayer2 = layer.createTmpDrawingLayer(AlphaComposite.SrcOver, false);
+        TmpDrawingLayer tmpDrawingLayer2 = layer.createTmpDrawingLayer(AlphaComposite.SrcOver);
         assertThat(tmpDrawingLayer2).isNotNull();
     }
 
     @Test
-    public void testMergeTmpDrawingImageDown() {
+    public void testMergeTmpDrawingLayerDown() {
         layer.mergeTmpDrawingLayerDown();
     }
 
@@ -244,7 +244,7 @@ public class ImageLayerTest {
 
     @Test
     public void testDuplicate() {
-        ImageLayer duplicate = layer.duplicate();
+        ImageLayer duplicate = layer.duplicate(false);
         assertThat(duplicate).isNotNull();
 
         BufferedImage image = layer.getImage();

@@ -22,20 +22,15 @@ import pixelitor.NewImage;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.tools.AbstractBrushTool;
-import pixelitor.tools.GradientTool;
-import pixelitor.tools.GradientType;
 import pixelitor.tools.MoveTool;
 import pixelitor.tools.ShapeType;
 import pixelitor.tools.Tools;
 import pixelitor.tools.UserDrag;
 import pixelitor.tools.shapestool.ShapesTool;
 
-import java.awt.AlphaComposite;
 import java.awt.Point;
 
-import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
 import static pixelitor.FillType.WHITE;
-import static pixelitor.tools.GradientColorType.BLACK_TO_WHITE;
 
 /**
  *
@@ -54,7 +49,7 @@ public class ToolTests {
         ImageComponent ic = ImageComponents.getActiveIC();
         Composition comp = ic.getComp();
 
-        addRadialBWGradientToActiveLayer(comp, true);
+        SplashImageCreator.addRadialBWGradientToActiveLayer(comp, true);
 
         int xDistanceFormEdge = 20;
         int yDistanceFormEdge = 20;
@@ -106,38 +101,4 @@ public class ToolTests {
         brushTool.drawBrushStrokeProgrammatically(comp, bottomRight, bottomLeft);
         brushTool.drawBrushStrokeProgrammatically(comp, bottomLeft, topLeft);
     }
-
-    public static void addRadialBWGradientToActiveLayer(Composition comp, boolean radial) {
-        int canvasWidth = comp.getCanvasWidth();
-        int canvasHeight = comp.getCanvasHeight();
-
-        int startX = canvasWidth / 2;
-        int startY = canvasHeight / 2;
-
-        int endX = 0;
-        int endY = 0;
-        if (canvasWidth > canvasHeight) {
-            endX = startX;
-        } else {
-            endY = startY;
-        }
-
-        GradientType gradientType;
-
-        if (radial) {
-            gradientType = GradientType.RADIAL;
-        } else {
-            gradientType = GradientType.SPIRAL_CW;
-        }
-
-        GradientTool.drawGradient(comp.getActiveMaskOrImageLayer(),
-                gradientType,
-                BLACK_TO_WHITE,
-                REFLECT,
-                AlphaComposite.SrcOver,
-                new UserDrag(startX, startY, endX, endY),
-                false);
-    }
-
-
 }

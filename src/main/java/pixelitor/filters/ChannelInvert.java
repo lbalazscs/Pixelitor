@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,9 +25,11 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 /**
- * Advanced invert - inverts only some of the RGB or HSB channels
+ * Inverts only some of the RGB or HSB channels
  */
 public class ChannelInvert extends FilterWithParametrizedGUI {
+    public static final String NAME = "Channel Invert";
+
     private static final int NOTHING = 0;
     private static final int RED_ONLY = 1;
     private static final int GREEN_ONLY = 2;
@@ -180,4 +182,8 @@ public class ChannelInvert extends FilterWithParametrizedGUI {
         return dest;
     }
 
+    @Override
+    public boolean supportsGray() {
+        return false;
+    }
 }

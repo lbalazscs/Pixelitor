@@ -84,7 +84,7 @@ public class LayerTest {
 
         // TODO this should be automatic for all tests
         // or should be avoidable
-        TestHelper.setAnActiveIC(comp);
+        TestHelper.setupAnActiveICFor(comp);
 
         History.clear();
     }
@@ -113,15 +113,18 @@ public class LayerTest {
 
     @Test
     public void testDuplicate() {
-        Layer copy = layer.duplicate();
+        Layer copy = layer.duplicate(false);
         assertThat(copy.getName()).isEqualTo("layer 1 copy");
         assertThat(copy.getClass()).isEqualTo(layer.getClass());
 
-        Layer copy2 = copy.duplicate();
+        Layer copy2 = copy.duplicate(false);
         assertThat(copy2.getName()).isEqualTo("layer 1 copy 2");
 
-        Layer copy3 = copy2.duplicate();
+        Layer copy3 = copy2.duplicate(false);
         assertThat(copy3.getName()).isEqualTo("layer 1 copy 3");
+
+        Layer exactCopy = layer.duplicate(true);
+        assertThat(exactCopy.getName()).isEqualTo("layer 1");
     }
 
     @Test
@@ -257,7 +260,7 @@ public class LayerTest {
         if (withMask == WithMask.YES) {
             assertThat(layer.hasMask()).isTrue();
 
-            layer.deleteMask(AddToHistory.YES, false);
+            layer.deleteMask(AddToHistory.YES);
             assertThat(layer.hasMask()).isFalse();
             History.assertNumEditsIs(1);
             History.assertLastEditNameIs("Delete Layer Mask");

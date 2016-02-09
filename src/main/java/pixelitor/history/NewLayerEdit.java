@@ -14,10 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.history;
 
 import pixelitor.Composition;
 import pixelitor.layers.Layer;
+import pixelitor.layers.MaskViewMode;
 import pixelitor.utils.UpdateGUI;
 
 import javax.swing.undo.CannotRedoException;
@@ -31,14 +33,17 @@ public class NewLayerEdit extends PixelitorEdit {
     private Layer activeLayerBefore;
     private Layer newLayer;
     private final int newLayerIndex;
+    private MaskViewMode oldViewMode;
 
-    public NewLayerEdit(Composition comp, Layer newLayer, Layer activeLayerBefore, String historyName) {
+    public NewLayerEdit(Composition comp, Layer newLayer, Layer activeLayerBefore, String historyName, MaskViewMode oldViewMode) {
         super(comp, historyName);
 
         this.activeLayerBefore = activeLayerBefore;
-        comp.setDirty(true);
+        this.oldViewMode = oldViewMode;
         this.newLayer = newLayer;
         this.newLayerIndex = comp.getLayerIndex(newLayer);
+
+        comp.setDirty(true);
     }
 
     @Override
@@ -47,6 +52,8 @@ public class NewLayerEdit extends PixelitorEdit {
 
         comp.deleteLayer(newLayer, AddToHistory.NO, UpdateGUI.YES);
         comp.setActiveLayer(activeLayerBefore, AddToHistory.NO);
+
+        oldViewMode.activate(comp.getIC(), activeLayerBefore);
 
         History.notifyMenus(this);
     }

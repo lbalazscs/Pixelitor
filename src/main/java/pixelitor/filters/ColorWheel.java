@@ -86,4 +86,9 @@ public class ColorWheel extends FilterWithParametrizedGUI {
             destData[x + y * width] = Color.HSBtoRGB(hue, saturation, brightness);
         }
     }
+
+    @Override
+    public boolean supportsGray() {
+        return false;
+    }
 }

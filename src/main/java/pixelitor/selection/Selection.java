@@ -128,6 +128,23 @@ public class Selection {
         state = NO_SHAPE_YET;
     }
 
+    // copy constructor
+    public Selection(Selection orig, boolean shareIC) {
+        if (shareIC) {
+            this.ic = orig.ic;
+        }
+
+        // the shapes can be shared
+        this.currentSelectionShape = orig.currentSelectionShape;
+        this.lastSelectionShape = orig.lastSelectionShape;
+
+        this.selectionType = orig.selectionType;
+        this.selectionInteraction = orig.selectionInteraction;
+        this.state = orig.state;
+
+        // the Timer is not copied! - setIC starts it
+    }
+
 //    /**
 //     * Called when a new selection is created with the lasso selection tool
 //     */
@@ -418,6 +435,14 @@ public class Selection {
 
     public State getState() {
         return state;
+    }
+
+    public void setIC(ImageComponent ic) {
+        assert ic != null;
+        this.ic = ic;
+        if(state == HAS_SHAPE) {
+            startMarching();
+        }
     }
 
     @Override

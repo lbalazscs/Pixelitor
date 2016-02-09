@@ -14,10 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.history;
 
 import pixelitor.Composition;
 import pixelitor.layers.Layer;
+import pixelitor.layers.MaskViewMode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -27,12 +29,14 @@ import javax.swing.undo.CannotUndoException;
  */
 public class EnableLayerMaskEdit extends PixelitorEdit {
     private Layer layer;
+    private final MaskViewMode oldMode;
 
-    public EnableLayerMaskEdit(Composition comp, Layer layer) {
+    public EnableLayerMaskEdit(Composition comp, Layer layer, MaskViewMode oldMode) {
         super(comp, layer.isMaskEnabled() ?
                 "Enable Layer Mask" : "Disable Layer Mask");
 
         this.layer = layer;
+        this.oldMode = oldMode;
         comp.setDirty(true);
     }
 
@@ -40,16 +44,22 @@ public class EnableLayerMaskEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        layer.setMaskEnabled(!layer.isMaskEnabled(), AddToHistory.NO);
-
-        History.notifyMenus(this);
+        changeEnabledState();
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        layer.setMaskEnabled(!layer.isMaskEnabled(), AddToHistory.NO);
+        changeEnabledState();
+    }
+
+    public void changeEnabledState() {
+        boolean newEnabled = !layer.isMaskEnabled();
+        layer.setMaskEnabled(newEnabled, AddToHistory.NO);
+        if (newEnabled) {
+            oldMode.activate(comp.getIC(), layer);
+        }
 
         History.notifyMenus(this);
     }

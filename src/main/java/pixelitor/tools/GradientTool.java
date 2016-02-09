@@ -22,6 +22,7 @@ import pixelitor.Composition;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.ImageComponent;
 import pixelitor.layers.ImageLayer;
+import pixelitor.layers.LayerMask;
 import pixelitor.layers.TmpDrawingLayer;
 import pixelitor.menus.view.ZoomLevel;
 
@@ -34,6 +35,7 @@ import java.awt.MultipleGradientPaint;
 import java.awt.Paint;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 
 import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
 import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
@@ -135,8 +137,21 @@ public class GradientTool extends Tool {
             return;
         }
 
-        TmpDrawingLayer tmpDrawingLayer = layer.createTmpDrawingLayer(composite, true);
-        Graphics2D g = tmpDrawingLayer.getGraphics();
+        Graphics2D g;
+        int width;
+        int height;
+        if (layer instanceof LayerMask) {
+            BufferedImage subImage = layer.getCanvasSizedSubImage();
+            g = subImage.createGraphics();
+            width = subImage.getWidth();
+            height = subImage.getHeight();
+        } else {
+            TmpDrawingLayer tmpDrawingLayer = layer.createTmpDrawingLayer(composite);
+            g = tmpDrawingLayer.getGraphics();
+            width = tmpDrawingLayer.getWidth();
+            height = tmpDrawingLayer.getHeight();
+        }
+        layer.getComp().applySelectionClipping(g, null);
         // repeated gradients are still jaggy
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
@@ -150,11 +165,10 @@ public class GradientTool extends Tool {
 
         g.setPaint(gradient);
 
-        int width = tmpDrawingLayer.getWidth();
-        int height = tmpDrawingLayer.getHeight();
         g.fillRect(0, 0, width, height);
         g.dispose();
         layer.mergeTmpDrawingLayerDown();
+        layer.updateIconImage();
     }
 
     @Override
@@ -184,5 +198,13 @@ public class GradientTool extends Tool {
                 return REPEAT;
         }
         throw new IllegalStateException("should not get here");
+    }
+
+    public void setupMaskDrawing(boolean editMask) {
+        if (editMask) {
+            blendingModePanel.setEnabled(false);
+        } else {
+            blendingModePanel.setEnabled(true);
+        }
     }
 }

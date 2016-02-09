@@ -24,8 +24,6 @@ import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.LinkedEdit;
 import pixelitor.history.PixelitorEdit;
 
-import java.awt.geom.AffineTransform;
-
 /**
  * A layer with a content (text or image layer) that
  * can be moved/rotated.
@@ -37,6 +35,10 @@ public abstract class ContentLayer extends Layer {
     private transient int tmpTX = 0;
     private transient int tmpTY = 0;
 
+    /**
+     * The translation relative to the default position.
+     * For image layers, this is always negative or zero.
+     */
     int translationX = 0;
     int translationY = 0;
 
@@ -108,7 +110,7 @@ public abstract class ContentLayer extends Layer {
         this.translationY = y;
     }
 
-    public abstract void flip(Flip.Direction direction, AffineTransform flipTx);
+    public abstract void flip(Flip.Direction direction);
 
     public abstract void rotate(Rotate.SpecialAngle angle);
 

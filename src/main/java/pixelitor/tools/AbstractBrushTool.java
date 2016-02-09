@@ -34,6 +34,7 @@ import pixelitor.tools.brushes.SymmetryBrush;
 import pixelitor.utils.ImageSwitchListener;
 
 import javax.swing.*;
+import java.awt.Composite;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -41,7 +42,6 @@ import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.PathIterator;
-import java.awt.image.BufferedImage;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
@@ -56,7 +56,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     public static final int MAX_BRUSH_RADIUS = 100;
     public static final int DEFAULT_BRUSH_RADIUS = 10;
 
-    boolean respectSelection = true; // false while tracing a selection
+    private boolean respectSelection = true; // false while tracing a selection
 
     private JComboBox<BrushType> typeSelector;
 
@@ -71,6 +71,8 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
 
     private boolean firstMouseDown = true; // for the first click don't draw lines even if it is a shift-click
     private JButton brushSettingsButton;
+
+    DrawStrategy drawStrategy;
 
     AbstractBrushTool(char activationKeyChar, String name, String iconFileName, String toolMessage, Cursor cursor) {
         super(activationKeyChar, name, iconFileName, toolMessage,
@@ -135,7 +137,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         double x = userDrag.getStartX();
         double y = userDrag.getStartY();
 
-        drawTo(ic.getComp(), x, y, withLine);
+        newMousePoint(ic.getComp(), x, y, withLine);
         firstMouseDown = false;
 
         if (withLine) {
@@ -157,33 +159,37 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         // at this point x and y are already scaled according to the zoom level
         // (unlike e.getX(), e.getY())
 
-        drawTo(ic.getComp(), x, y, false);
+        newMousePoint(ic.getComp(), x, y, false);
     }
 
     @Override
     public void mouseReleased(MouseEvent e, ImageComponent ic) {
-        finishBrushStroke(ic.getComp());
+        if (graphics == null) {
+            // we can get here if the mousePressed was an Alt-press, therefore
+            // consumed by the color picker. Nothing was drawn, therefore
+            // there is no need to save a backup, we can just return
+            // TODO is this true after all the refactorings?
+            return;
+        }
+
+        Composition comp = ic.getComp();
+        finishBrushStroke(comp);
     }
-
-    /**
-     * Returns the original (untouched) image for undo
-     */
-    abstract BufferedImage getOriginalImage(Composition comp);
-
-    abstract void mergeTmpLayer(Composition comp);
 
     private void finishBrushStroke(Composition comp) {
         int radius = getRadius();
         ToolAffectedArea affectedArea = new ToolAffectedArea(comp,
                 brushAffectedArea.getRectangleAffectedByBrush(radius), false);
-        saveSubImageForUndo(getOriginalImage(comp), affectedArea);
-
-        mergeTmpLayer(comp);
+        saveSubImageForUndo(drawStrategy.getOriginalImage(comp), affectedArea);
 
         if (graphics != null) {
             graphics.dispose();
         }
         graphics = null;
+
+        drawStrategy.finishBrushStroke(comp);
+
+        comp.getActiveMaskOrImageLayer().updateIconImage();
 
         comp.imageChanged(HISTOGRAM);
     }
@@ -199,22 +205,46 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     }
 
     protected void prepareProgrammaticBrushStroke(Composition comp, Point start) {
+        drawStrategy.prepareBrushStroke(comp);
         ImageLayer layer = comp.getActiveMaskOrImageLayer();
-        createGraphicsForNewBrushStroke(comp, layer);
+        graphics = createGraphicsForNewBrushStroke(comp, layer);
     }
 
     /**
      * Creates the global Graphics2D object graphics.
      */
-    abstract void createGraphicsForNewBrushStroke(Composition comp, ImageLayer layer);
+    private Graphics2D createGraphicsForNewBrushStroke(Composition comp, ImageLayer layer) {
+        Composite composite = getComposite();
+        Graphics2D g = drawStrategy.createDrawGraphics(layer, composite);
+        initializeGraphics(g);
+        if (respectSelection) {
+            comp.applySelectionClipping(g, null);
+        }
+
+        brush.setTarget(comp, g);
+        return g;
+    }
 
     /**
-     * Called from mousePressed, mouseDragged, and drawBrushStroke
+     * An opportunity to do extra tool-specific
+     * initializations in the subclasses
      */
-    private void drawTo(Composition comp, double x, double y, boolean connectClickWithLine) {
+    protected void initializeGraphics(Graphics2D g) {
+    }
+
+    // overridden in brush tools with blending mode
+    protected Composite getComposite() {
+        return null;
+    }
+
+    /**
+     * Called from mousePressed, mouseDragged
+     */
+    private void newMousePoint(Composition comp, double x, double y, boolean connectClickWithLine) {
         if (graphics == null) { // a new brush stroke has to be initialized
+            drawStrategy.prepareBrushStroke(comp);
             ImageLayer imageLayer = comp.getActiveMaskOrImageLayer();
-            createGraphicsForNewBrushStroke(comp, imageLayer);
+            graphics = createGraphicsForNewBrushStroke(comp, imageLayer);
             graphics.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
             if (connectClickWithLine) {
@@ -264,12 +294,13 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
      * Traces the given shape with the current brush tool
      */
     public void trace(Composition comp, Shape shape) {
-//        setupDrawingRadius();
         try {
             respectSelection = false;
 
+            drawStrategy.prepareBrushStroke(comp);
+
             ImageLayer imageLayer = comp.getActiveMaskOrImageLayer();
-            createGraphicsForNewBrushStroke(comp, imageLayer);
+            graphics = createGraphicsForNewBrushStroke(comp, imageLayer);
 
             doTraceAfterSetup(shape);
 

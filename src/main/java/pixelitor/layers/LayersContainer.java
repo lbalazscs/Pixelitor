@@ -17,6 +17,7 @@
 
 package pixelitor.layers;
 
+import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
@@ -54,25 +55,23 @@ public class LayersContainer extends JPanel implements ImageSwitchListener {
         JPanel southPanel = new JPanel();
         southPanel.setLayout(new BoxLayout(southPanel, BoxLayout.X_AXIS));
 
-        JButton addButton = createButtonFromAction(AddNewLayerAction.INSTANCE);
-        JButton deleteButton = createButtonFromAction(DeleteActiveLayerAction.INSTANCE);
-        JButton duplicateButton = createButtonFromAction(DuplicateLayerAction.INSTANCE);
+        southPanel.add(createButtonFromAction(AddNewLayerAction.INSTANCE, "addLayer"));
+        southPanel.add(createButtonFromAction(DeleteActiveLayerAction.INSTANCE, "deleteLayer"));
+        southPanel.add(createButtonFromAction(DuplicateLayerAction.INSTANCE, "duplicateLayer"));
+        southPanel.add(createButtonFromAction(AddLayerMaskAction.INSTANCE, "addLayerMask"));
+        southPanel.add(createButtonFromAction(AddTextLayerAction.INSTANCE, "addTextLayer"));
 
-        southPanel.add(addButton);
-        southPanel.add(deleteButton);
-        southPanel.add(duplicateButton);
-
-        southPanel.add(createButtonFromAction(AddLayerMaskAction.INSTANCE));
-        southPanel.add(createButtonFromAction(AddTextLayerAction.INSTANCE));
-        southPanel.add(createButtonFromAction(AddAdjLayerAction.INSTANCE));
+        if (Build.enableAdjLayers) {
+            southPanel.add(createButtonFromAction(AddAdjLayerAction.INSTANCE, "addAdjLayer"));
+        }
 
         return southPanel;
     }
 
-    private static JButton createButtonFromAction(Action a) {
+    private static JButton createButtonFromAction(Action a, String name) {
         JButton button = new JButton(a);
         button.setHideActionText(true);
-//        button.setToolTipText((String) a.getValue(Action.NAME));
+        button.setName(name);
         return button;
     }
 
