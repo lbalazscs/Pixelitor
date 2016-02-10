@@ -22,7 +22,6 @@ import com.jhlabs.composite.MultiplyComposite;
 import pixelitor.AppLogic;
 import pixelitor.Build;
 import pixelitor.Composition;
-import pixelitor.FgBgColors;
 import pixelitor.NewImage;
 import pixelitor.TipsOfTheDay;
 import pixelitor.automate.AutoPaint;
@@ -61,6 +60,7 @@ import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 import pixelitor.layers.LayerMaskAddType;
 import pixelitor.layers.LayerMoveAction;
+import pixelitor.layers.MaskViewMode;
 import pixelitor.layers.TextLayer;
 import pixelitor.menus.edit.CopyAction;
 import pixelitor.menus.edit.CopySource;
@@ -469,14 +469,10 @@ public class MenuBar extends JMenuBar {
 
         layersMenu.add(createLayerMaskSubmenu());
         layersMenu.add(createTextLayerSubmenu(pw));
-        layersMenu.add(createAdjustmentLayersSubmenu());
 
-        layersMenu.buildAction(new MenuAction("Show Pixelitor Internal State...") {
-            @Override
-            public void onClick() {
-                Messages.showDebugAppDialog();
-            }
-        }).enableIf(ACTION_ENABLED).add();
+        if (Build.enableAdjLayers) {
+            layersMenu.add(createAdjustmentLayersSubmenu());
+        }
 
         return layersMenu;
     }
@@ -558,7 +554,7 @@ public class MenuBar extends JMenuBar {
                 ImageComponent ic = ImageComponents.getActiveIC();
                 Layer layer = ic.getComp().getActiveLayer();
 
-                layer.deleteMask(AddToHistory.YES, true);
+                layer.deleteMask(AddToHistory.YES);
 
                 layer.getComp().imageChanged(FULL);
             }
@@ -577,47 +573,18 @@ public class MenuBar extends JMenuBar {
 
                 ((ImageLayer) layer).applyLayerMask(AddToHistory.YES);
 
-                ic.setShowLayerMask(false);
-                FgBgColors.setLayerMaskEditing(false);
-
+                // TODO actually this should not be necessary
                 layer.getComp().imageChanged(FULL);
             }
         });
 
         sub.addSeparator();
 
-        sub.addActionWithKey(new MenuAction("Show and Edit Composition") {
-            @Override
-            public void onClick() {
-                ImageComponent ic = ImageComponents.getActiveIC();
-                Layer activeLayer = ic.getComp().getActiveLayer();
-                ic.setShowLayerMask(false);
-                FgBgColors.setLayerMaskEditing(false);
-                activeLayer.setMaskEditing(false);
-            }
-        }, CTRL_1);
+        sub.addActionWithKey(MaskViewMode.NORMAL.createMenuAction(), CTRL_1);
 
-        sub.addActionWithKey(new MenuAction("Show and Edit Mask", HAS_LAYER_MASK) {
-            @Override
-            public void onClick() {
-                ImageComponent ic = ImageComponents.getActiveIC();
-                Layer activeLayer = ic.getComp().getActiveLayer();
-                ic.setShowLayerMask(true);
-                FgBgColors.setLayerMaskEditing(true);
-                activeLayer.setMaskEditing(true);
-            }
-        }, CTRL_2);
+        sub.addActionWithKey(MaskViewMode.SHOW_MASK.createMenuAction(), CTRL_2);
 
-        sub.addActionWithKey(new MenuAction("Show Composition, but Edit Mask", HAS_LAYER_MASK) {
-            @Override
-            public void onClick() {
-                ImageComponent ic = ImageComponents.getActiveIC();
-                Layer activeLayer = ic.getComp().getActiveLayer();
-                ic.setShowLayerMask(false);
-                FgBgColors.setLayerMaskEditing(true);
-                activeLayer.setMaskEditing(true);
-            }
-        }, CTRL_3);
+        sub.addActionWithKey(MaskViewMode.EDIT_MASK.createMenuAction(), CTRL_3);
 
         return sub;
     }
@@ -686,14 +653,14 @@ public class MenuBar extends JMenuBar {
 
         colorsMenu.buildFA("Color Balance", ColorBalance::new).withKey(CTRL_B).add();
         colorsMenu.buildFA(HueSat.NAME, HueSat::new).withKey(CTRL_U).add();
-        colorsMenu.buildFA("Colorize", Colorize::new).add();
+        colorsMenu.buildFA(Colorize.NAME, Colorize::new).add();
         colorsMenu.buildFA("Levels", Levels::new).withKey(CTRL_L).add();
 //        colorsMenu.buildFA("Levels 2", Levels2::new).add();
-        colorsMenu.buildFA("Brightness/Contrast", Brightness::new).add();
-        colorsMenu.buildFA("Solarize", Solarize::new).add();
+        colorsMenu.buildFA(Brightness.NAME, Brightness::new).add();
+        colorsMenu.buildFA(Solarize.NAME, Solarize::new).add();
         colorsMenu.buildFA(Sepia.NAME, Sepia::new).add();
         colorsMenu.buildFA("Invert", Invert::new).noGUI().withKey(CTRL_I).add();
-        colorsMenu.buildFA("Channel Invert", ChannelInvert::new).add();
+        colorsMenu.buildFA(ChannelInvert.NAME, ChannelInvert::new).add();
         colorsMenu.buildFA("Channel Mixer", ChannelMixer::new).add();
 
         colorsMenu.add(createExtractChannelsSubmenu());
@@ -712,7 +679,7 @@ public class MenuBar extends JMenuBar {
 
         sub.addSeparator();
 
-        sub.buildFA("Luminosity", Luminosity::new).noGUI().extract().add();
+        sub.buildFA(Luminosity.NAME, Luminosity::new).noGUI().extract().add();
 
         FilterAction extractValueChannel = ExtractChannelFilter.getValueChannelFA();
         sub.addFA(extractValueChannel);
@@ -739,12 +706,12 @@ public class MenuBar extends JMenuBar {
 
         sub.addFA(JHQuantize.NAME, JHQuantize::new);
         sub.addFA("Posterize", Posterize::new);
-        sub.addFA("Threshold", Threshold::new);
+        sub.addFA(Threshold.NAME, Threshold::new);
 
         sub.addSeparator();
 
         sub.addFA(JHTriTone.NAME, JHTriTone::new);
-        sub.addFA("Gradient Map", GradientMap::new);
+        sub.addFA(GradientMap.NAME, GradientMap::new);
 
         sub.addSeparator();
 
@@ -1028,6 +995,13 @@ public class MenuBar extends JMenuBar {
         developMenu.add(createTestSubmenu(pw));
         developMenu.add(createSplashSubmenu());
         developMenu.add(createExperimentalSubmenu());
+
+        developMenu.buildAction(new MenuAction("Show Pixelitor Internal State...") {
+            @Override
+            public void onClick() {
+                Messages.showDebugAppDialog();
+            }
+        }).enableIf(ACTION_ENABLED).add();
 
         developMenu.buildAction(new MenuAction("Filter Creator...") {
             @Override

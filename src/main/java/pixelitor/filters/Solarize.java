@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters;
 
 import pixelitor.filters.gui.IntChoiceParam;
@@ -30,6 +31,8 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
  * Solarize
  */
 public class Solarize extends FilterWithParametrizedGUI {
+    public static final String NAME = "Solarize";
+
     private static final int TYPE_CLASSIC = 1; // pixels above the threshold level are inverted + contrast is maximized
     private static final int TYPE_INVERTED = 2; // upside down: corresponds to a V-shaped curves adjustment
 
@@ -137,5 +140,10 @@ public class Solarize extends FilterWithParametrizedGUI {
         }
 
         return dest;
+    }
+
+    @Override
+    public boolean supportsGray() {
+        return false;
     }
 }

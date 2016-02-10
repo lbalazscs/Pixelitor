@@ -24,16 +24,16 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Canvas;
-import pixelitor.ChangeReason;
 import pixelitor.Composition;
-import pixelitor.FgBgColors;
+import pixelitor.ConsistencyChecks;
 import pixelitor.TestHelper;
-import pixelitor.gui.FgBgColorSelector;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.selection.IgnoreSelection;
 import pixelitor.selection.Selection;
 import pixelitor.testutils.WithMask;
+import pixelitor.testutils.WithTranslation;
+import pixelitor.utils.ImageUtils;
 
 import java.awt.AlphaComposite;
 import java.awt.Rectangle;
@@ -44,174 +44,270 @@ import java.util.Collection;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static pixelitor.ChangeReason.OP_PREVIEW;
+import static pixelitor.ChangeReason.OP_WITHOUT_DIALOG;
+import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
+import static pixelitor.layers.ImageLayer.State.NORMAL;
+import static pixelitor.layers.ImageLayer.State.PREVIEW;
 
 @RunWith(Parameterized.class)
 public class ImageLayerTest {
     private ImageLayer layer;
+    private LayerUI ui;
+    int layerIconUpdatesAtStart;
 
     @Parameter
     public WithMask withMask;
 
-    @Parameters(name = "{index}: mask = {0}")
+    @Parameter(value = 1)
+    public WithTranslation withTranslation;
+
+    private Composition comp;
+
+    @Parameters(name = "{index}: mask = {0}, translation = {1}")
     public static Collection<Object[]> instancesToTest() {
         return Arrays.asList(new Object[][]{
-                {WithMask.NO},
-                {WithMask.YES},
+                {WithMask.NO, WithTranslation.NO},
+                {WithMask.YES, WithTranslation.NO},
+                {WithMask.NO, WithTranslation.YES},
+                {WithMask.YES, WithTranslation.YES},
         });
     }
 
     @Before
     public void setUp() {
-        Composition comp = TestHelper.createEmptyComposition();
+        comp = TestHelper.createMockComposition();
+
         layer = TestHelper.createImageLayer("layer 1", comp);
-        comp.addLayerNoGUI(layer);
+
+        ui = mock(LayerUI.class);
+        layer.setUI(ui);
 
         withMask.init(layer);
 
-        assert layer.getComp().checkInvariant();
-    }
+        withTranslation.init(layer);
 
-    @Test
-    public void testGetImage() {
-        BufferedImage image = layer.getImage();
-        assertThat(image).isNotNull();
-    }
-
-    @Test
-    public void testSetImage() {
-        layer.setImage(TestHelper.createImage());
-    }
-
-    @Test
-    public void testStartPreviewing() {
-        layer.startPreviewing();
-        assertThat(layer.getState()).isEqualTo(ImageLayer.State.PREVIEW);
-    }
-
-    @Test
-    public void testOkPressedInDialog() {
-        layer.startPreviewing(); // make sure that the layer is in PREVIEW mode
-        layer.okPressedInDialog("filterName");
-        assertThat(layer.getState()).isEqualTo(ImageLayer.State.NORMAL);
-    }
-
-    @Test(expected = AssertionError.class)
-    public void testCancelPressedInDialog_Fail() {
-        layer.cancelPressedInDialog();
-        assertThat(layer.getState()).isEqualTo(ImageLayer.State.NORMAL);
-    }
-
-    @Test
-    public void testCancelPressedInDialog_OK() {
-        layer.startPreviewing(); // make sure that the layer is in PREVIEW mode
-
-        layer.cancelPressedInDialog();
-        assertThat(layer.getState()).isEqualTo(ImageLayer.State.NORMAL);
-    }
-
-    @Test
-    public void testTweenCalculatingStarted() {
-        layer.tweenCalculatingStarted();
-        assertThat(layer.getState()).isEqualTo(ImageLayer.State.PREVIEW);
-    }
-
-    @Test(expected = AssertionError.class)
-    public void testTweenCalculatingEnded_Fail() {
-        layer.tweenCalculatingEnded();
-        assertThat(layer.getState()).isEqualTo(ImageLayer.State.NORMAL);
-    }
-
-    @Test
-    public void testTweenCalculatingEnded_OK() {
-        layer.tweenCalculatingStarted(); // make sure that the layer is in PREVIEW mode
-
-        layer.tweenCalculatingEnded();
-        assertThat(layer.getState()).isEqualTo(ImageLayer.State.NORMAL);
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void testChangePreviewImage_Fail() {
-        layer.changePreviewImage(TestHelper.createImage(), "filterName", OP_PREVIEW);
-        assertThat(layer.getState()).isEqualTo(ImageLayer.State.PREVIEW);
-    }
-
-    @Test
-    public void testChangePreviewImage_OK() {
-        layer.startPreviewing(); // make sure that the layer is in PREVIEW mode
-
-        layer.changePreviewImage(TestHelper.createImage(), "filterName", OP_PREVIEW);
-        assertThat(layer.getState()).isEqualTo(ImageLayer.State.PREVIEW);
-    }
-
-    @Test
-    public void testFilterWithoutDialogFinished() {
-        ChangeReason[] values = ChangeReason.values();
-        for (ChangeReason changeReason : values) {
-            layer.filterWithoutDialogFinished(TestHelper.createImage(),
-                    changeReason, "opName");
-            assertThat(layer.getState()).isEqualTo(ImageLayer.State.NORMAL);
+        layerIconUpdatesAtStart = 0;
+        if (withTranslation.isYes()) {
+            layerIconUpdatesAtStart = 1;
         }
     }
 
     @Test
-    public void testChangeImageUndoRedo() {
-        // TODO add selection
+    public void test_getSetImage() {
+        // setImage is called already in the ImageLayer constructor
+        int expectedImageChangedCalls = 1;
+        if (withMask == WithMask.YES) {
+            // plus the mask constructor
+            expectedImageChangedCalls++;
+        }
+        if (withTranslation == WithTranslation.YES) {
+            expectedImageChangedCalls++;
+        }
+        verify(comp, times(expectedImageChangedCalls)).imageChanged(INVALIDATE_CACHE);
+
+        BufferedImage image = layer.getImage();
+        assertThat(image).isNotNull();
+
+        BufferedImage testImage = TestHelper.createImage();
+        layer.setImage(testImage);
+
+        // called one more time
+        verify(comp, times(expectedImageChangedCalls + 1)).imageChanged(INVALIDATE_CACHE);
+
+        // actually setImage should not update the layer image
+        checkNumLayerIconUpdates(0);
+
+        assertThat(layer.getImage()).isSameAs(testImage);
+    }
+
+    @Test
+    public void test_startPreviewing_WOSelection() {
+        BufferedImage image = layer.getImage();
+        layer.startPreviewing();
+        assertThat(layer.getState()).isEqualTo(PREVIEW);
+        assertThat(layer.getPreviewImage()).isSameAs(image);
+        checkNumLayerIconUpdates(0);
+    }
+
+    @Test
+    public void test_startPreviewing_WithSelection() {
+        BufferedImage image = layer.getImage();
+        TestHelper.addSelectionRectTo(comp, 2, 2, 2, 2);
+        layer.startPreviewing();
+        assertThat(layer.getState()).isEqualTo(PREVIEW);
+        assertThat(layer.getPreviewImage()).isNotSameAs(image);
+        checkNumLayerIconUpdates(0);
+    }
+
+    @Test
+    public void test_okPressedInDialog() {
+        layer.startPreviewing(); // make sure that the layer is in PREVIEW mode
+        layer.okPressedInDialog("filterName");
+        assertThat(layer.getState()).isEqualTo(NORMAL);
+        assertThat(layer.getPreviewImage()).isNull();
+        checkNumLayerIconUpdates(0);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void test_cancelPressedInDialog_Fail() {
+        layer.cancelPressedInDialog();
+    }
+
+    @Test
+    public void test_cancelPressedInDialog_OK() {
+        layer.startPreviewing(); // make sure that the layer is in PREVIEW mode
+
+        layer.cancelPressedInDialog();
+        assertThat(layer.getState()).isEqualTo(NORMAL);
+        assertThat(layer.getPreviewImage()).isNull();
+        checkNumLayerIconUpdates(0);
+    }
+
+    @Test
+    public void test_tweenCalculatingStarted() {
+        assertThat(layer.getPreviewImage()).isNull();
+        layer.tweenCalculatingStarted();
+        assertThat(layer.getState()).isEqualTo(PREVIEW);
+        assertThat(layer.getPreviewImage()).isNotNull();
+        checkNumLayerIconUpdates(0);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void test_tweenCalculatingEnded_Fail() {
+        // fails because the the tween calculation was not started
+        layer.tweenCalculatingEnded();
+    }
+
+    @Test
+    public void test_tweenCalculatingEnded_OK() {
+        layer.tweenCalculatingStarted(); // make sure that the layer is in PREVIEW mode
+
+        layer.tweenCalculatingEnded();
+        assertThat(layer.getState()).isEqualTo(NORMAL);
+        assertThat(layer.getPreviewImage()).isNull();
+        checkNumLayerIconUpdates(0);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void test_changePreviewImage_Fail() {
+        layer.changePreviewImage(TestHelper.createImage(), "filterName", OP_PREVIEW);
+    }
+
+    @Test
+    public void test_changePreviewImage_OK() {
+        layer.startPreviewing(); // make sure that the layer is in PREVIEW mode
+
+        layer.changePreviewImage(TestHelper.createImage(), "filterName", OP_PREVIEW);
+        assertThat(layer.getState()).isEqualTo(PREVIEW);
+        assertThat(layer.getPreviewImage()).isNotNull();
+        checkNumLayerIconUpdates(0);
+    }
+
+    @Test
+    public void test_filterWithoutDialogFinished() {
+        assert ConsistencyChecks.imageCoversCanvasCheck(layer);
+
+        BufferedImage dest = ImageUtils.copyImage(layer.getImage());
+        layer.filterWithoutDialogFinished(dest,
+                OP_WITHOUT_DIALOG, "opName");
+        assertThat(layer.getState()).isEqualTo(NORMAL);
+
+        checkNumLayerIconUpdates(1);
+    }
+
+    @Test
+    public void test_changeImageUndoRedo() {
+        TestHelper.addSelectionRectTo(comp, 2, 2, 2, 2);
         layer.changeImageUndoRedo(TestHelper.createImage(),
                 IgnoreSelection.NO);
         layer.changeImageUndoRedo(TestHelper.createImage(),
                 IgnoreSelection.YES);
+        checkNumLayerIconUpdates(0);
     }
 
     @Test
-    public void testGetImageBounds() {
+    public void test_getImageBounds() {
         Rectangle bounds = layer.getImageBounds();
         assertThat(bounds).isNotNull();
+
+        if (withTranslation == WithTranslation.NO) {
+            assertThat(bounds).isEqualTo(layer.canvas.getBounds());
+        } else {
+            assertThat(bounds).isNotEqualTo(layer.canvas.getBounds());
+        }
+        checkNumLayerIconUpdates(0);
     }
 
     @Test
-    public void testGetImageForFilterDialogs() {
+    public void test_getImageForFilterDialogs_WOSelection() {
         BufferedImage image = layer.getImageForFilterDialogs();
+
         assertThat(image).isNotNull();
+        // no selection, we expect it to return the image
+        assertThat(image).isSameAs(layer.getImage());
+        checkNumLayerIconUpdates(0);
     }
 
     @Test
-    public void testCreateTmpDrawingLayer() {
-        TmpDrawingLayer tmpDrawingLayer1 = layer.createTmpDrawingLayer(AlphaComposite.SrcOver, true);
-        assertThat(tmpDrawingLayer1).isNotNull();
-        TmpDrawingLayer tmpDrawingLayer2 = layer.createTmpDrawingLayer(AlphaComposite.SrcOver, false);
-        assertThat(tmpDrawingLayer2).isNotNull();
+    public void test_getImageForFilterDialogs_WithSelection() {
+        TestHelper.addSelectionRectTo(comp, 2, 2, 2, 2);
+
+        BufferedImage image = layer.getImageForFilterDialogs();
+
+        assertThat(image).isNotNull();
+        assertThat(image).isNotSameAs(layer.getImage());
+        assertThat(image.getWidth()).isEqualTo(2);
+        assertThat(image.getHeight()).isEqualTo(2);
+        checkNumLayerIconUpdates(0);
     }
 
     @Test
-    public void testMergeTmpDrawingImageDown() {
+    public void test_TmpDrawingLayer() {
+        TmpDrawingLayer tmpDrawingLayer
+                = layer.createTmpDrawingLayer(AlphaComposite.SrcOver);
+        assertThat(tmpDrawingLayer).isNotNull();
+        assertThat(tmpDrawingLayer.getWidth()).isEqualTo(layer.canvas.getWidth());
+        assertThat(tmpDrawingLayer.getHeight()).isEqualTo(layer.canvas.getHeight());
+
         layer.mergeTmpDrawingLayerDown();
+        checkNumLayerIconUpdates(0);
     }
 
     @Test
-    public void testCreateCompositionSizedTmpImage() {
+    public void test_createCompositionSizedTmpImage() {
         BufferedImage image = layer.createCompositionSizedTmpImage();
         assertThat(image).isNotNull();
+        assertThat(image.getWidth()).isEqualTo(layer.canvas.getWidth());
+        assertThat(image.getHeight()).isEqualTo(layer.canvas.getHeight());
+        checkNumLayerIconUpdates(0);
     }
 
     @Test
-    public void testGetCanvasSizedSubImage() {
+    public void test_getCanvasSizedSubImage() {
         // TODO would be better with translation
         BufferedImage image = layer.getCanvasSizedSubImage();
         assertThat(image).isNotNull();
         Canvas canvas = layer.getComp().getCanvas();
         assert image.getWidth() == canvas.getWidth();
         assert image.getHeight() == canvas.getHeight();
+        checkNumLayerIconUpdates(0);
     }
 
     @Test
-    public void testGetFilterSourceImage() {
+    public void test_getFilterSourceImage() {
         BufferedImage image = layer.getFilterSourceImage();
         assertThat(image).isNotNull();
+        checkNumLayerIconUpdates(0);
+        // TODO
     }
 
     @Test
-    public void testGetImageOrSubImageIfSelected() {
+    public void test_getImageOrSubImageIfSelected() {
         BufferedImage imageTT = layer.getImageOrSubImageIfSelected(true, true);
         assertThat(imageTT).isNotNull();
 
@@ -223,28 +319,39 @@ public class ImageLayerTest {
 
         BufferedImage imageFF = layer.getImageOrSubImageIfSelected(false, false);
         assertThat(imageFF).isNotNull();
+
+        checkNumLayerIconUpdates(0);
+        // TODO
     }
 
     @Test
-    public void testGetSelectionSizedPartFrom() {
-        layer.getComp().createSelectionFromShape(new Rectangle(2, 2, 10, 10));
-        Selection selection = layer.getComp().getSelection().get();
+    public void test_getSelectionSizedPartFrom() {
+        Selection selection = mock(Selection.class);
+        when(selection.getShapeBounds()).thenReturn(new Rectangle(2, 2, 10, 10));
 
         BufferedImage imageT = layer.getSelectionSizedPartFrom(TestHelper.createImage(), selection, true);
         assertThat(imageT).isNotNull();
 
         BufferedImage imageF = layer.getSelectionSizedPartFrom(TestHelper.createImage(), selection, false);
         assertThat(imageF).isNotNull();
+
+        checkNumLayerIconUpdates(0);
     }
 
     @Test
-    public void testCropToCanvasSize() {
+    public void test_cropToCanvasSize() {
         layer.cropToCanvasSize();
+
+        Canvas canvas = layer.getComp().getCanvas();
+        BufferedImage image = layer.getImage();
+        assert image.getWidth() == canvas.getWidth();
+        assert image.getHeight() == canvas.getHeight();
+        checkNumLayerIconUpdates(0);
     }
 
     @Test
-    public void testDuplicate() {
-        ImageLayer duplicate = layer.duplicate();
+    public void test_duplicate() {
+        ImageLayer duplicate = layer.duplicate(false);
         assertThat(duplicate).isNotNull();
 
         BufferedImage image = layer.getImage();
@@ -257,24 +364,20 @@ public class ImageLayerTest {
         assertThat(duplicate.getImageBounds()).isEqualTo(layer.getImageBounds());
         assertSame(layer.getBlendingMode(), duplicate.getBlendingMode());
         assertThat(duplicate.getOpacity()).isEqualTo(layer.getOpacity());
+
+        checkNumLayerIconUpdates(0);
     }
 
     @Test
-    public void testApplyLayerMask() {
+    public void test_applyLayerMask() {
         if (withMask == WithMask.YES) {
             History.clear();
-
-            FgBgColors.setGUI(new FgBgColorSelector() {
-                @Override
-                protected void setupKeyboardShortcuts() {
-                    // do nothing - prevent initializing whe whole GUI
-                }
-            });
 
             assertThat(layer.hasMask()).isTrue();
 
             layer.applyLayerMask(AddToHistory.YES);
             assertThat(layer.hasMask()).isFalse();
+            checkNumLayerIconUpdates(1);
 
             History.assertNumEditsIs(1);
             History.assertLastEditNameIs("Apply Layer Mask");
@@ -284,6 +387,11 @@ public class ImageLayerTest {
 
             History.redo();
             assertThat(layer.hasMask()).isFalse();
+            checkNumLayerIconUpdates(2);
         }
+    }
+
+    private void checkNumLayerIconUpdates(int num) {
+        verify(ui, times(layerIconUpdatesAtStart + num)).updateLayerIconImage(layer);
     }
 }

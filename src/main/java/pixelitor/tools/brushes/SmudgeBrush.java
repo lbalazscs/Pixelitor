@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,10 +28,20 @@ import java.awt.image.BufferedImage;
  * The brush used by the Smudge Tool
  */
 public class SmudgeBrush extends CopyBrush {
+    /**
+     * The smudge brush samples the source image at
+     * the last mouse coordinates and puts the pixels to
+     * the current coordinates.
+     */
     private double lastX;
     private double lastY;
+
     private float strength;
     private boolean firstUsageInStroke = true;
+
+    /**
+     * If true, we start with the foreground color
+     */
     private boolean fingerPainting = false;
 
     public SmudgeBrush(int radius, CopyBrushType type) {

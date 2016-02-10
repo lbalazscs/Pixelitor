@@ -50,6 +50,13 @@ public class Canvas implements Serializable {
         this.height = height;
     }
 
+    public Canvas(Canvas orig) {
+        this.width = orig.width;
+        this.height = orig.height;
+        this.zoomedWidth = orig.zoomedWidth;
+        this.zoomedHeight = orig.zoomedHeight;
+    }
+
     public int getWidth() {
         return width;
     }

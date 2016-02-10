@@ -47,19 +47,21 @@ public class Handles {
     private final List<Handle> handles = Arrays.asList(upperLeft, upperRight, lowerRight, lowerLeft,
             right, upper, lower, left);
 
+    private final Stroke bigStroke;
+    private final Stroke smallStroke;
+
     public Handles(Rectangle compSpaceRect) {
         updateRect(compSpaceRect);
+        bigStroke = new BasicStroke(3);
+        smallStroke = new BasicStroke(1);
     }
 
     public void paint(Graphics2D g) {
-        Stroke bigStroke = new BasicStroke(3);
-        Stroke smallStroke = new BasicStroke(1);
-
-        drawRect(g, bigStroke, smallStroke);
-        drawHandles(g, bigStroke, smallStroke);
+        drawRect(g);
+        drawHandles(g);
     }
 
-    private void drawRect(Graphics2D g, Stroke bigStroke, Stroke smallStroke) {
+    private void drawRect(Graphics2D g) {
         Rectangle rect = getSelectedRectInComponentSpace();
 
         g.setColor(BLACK);
@@ -70,7 +72,7 @@ public class Handles {
         g.draw(rect);
     }
 
-    private void drawHandles(Graphics2D g, Stroke bigStroke, Stroke smallStroke) {
+    private void drawHandles(Graphics2D g) {
         for (Handle handle : handles) {
             g.setStroke(bigStroke);
             g.setColor(BLACK);

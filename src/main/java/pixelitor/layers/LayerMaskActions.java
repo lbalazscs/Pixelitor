@@ -17,7 +17,6 @@
 
 package pixelitor.layers;
 
-import pixelitor.FgBgColors;
 import pixelitor.history.AddToHistory;
 import pixelitor.menus.NamedAction;
 import pixelitor.utils.Messages;
@@ -34,8 +33,8 @@ public class LayerMaskActions {
     private LayerMaskActions() {
     }
 
-    public static void addPopupMenu(JComponent c, Layer layer) {
-        c.addMouseListener(new PopupMouseListener(layer));
+    public static void addPopupMenu(JLabel label, Layer layer) {
+        label.addMouseListener(new PopupMouseListener(layer));
     }
 
     private static Layer getLayer(JPopupMenu menu) {
@@ -68,13 +67,7 @@ public class LayerMaskActions {
             if (e.isPopupTrigger()) {
                 popup(e);
             } else if (SwingUtilities.isLeftMouseButton(e)) {
-                // By adding a mouse listener to the JLabel, it loses the
-                // ability to automatically transmit the mouse events to its
-                // parent, and therefore the layer cannot be selected anymore
-                // by left-clicking on this label. This is the workaround.
-                JLabel source = (JLabel) e.getSource();
-                LayerButton layerButton = (LayerButton) source.getParent();
-                layerButton.setSelected(true);
+                LayerButton.selectLayerIfIconClicked(e);
             }
         }
 
@@ -100,7 +93,7 @@ public class LayerMaskActions {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            layer.deleteMask(AddToHistory.YES, true);
+            layer.deleteMask(AddToHistory.YES);
         }
     }
 
@@ -120,11 +113,6 @@ public class LayerMaskActions {
             }
 
             ((ImageLayer) layer).applyLayerMask(AddToHistory.YES);
-
-            if (layer.isActive()) {
-                layer.getComp().getIC().setShowLayerMask(false);
-                FgBgColors.setLayerMaskEditing(false);
-            }
 
             layer.getComp().imageChanged(FULL);
         }

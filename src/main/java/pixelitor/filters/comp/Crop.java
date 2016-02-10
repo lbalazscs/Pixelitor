@@ -26,6 +26,7 @@ import pixelitor.history.History;
 import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
 import pixelitor.layers.Layer;
+import pixelitor.utils.Messages;
 
 import java.awt.Dimension;
 import java.awt.geom.Rectangle2D;
@@ -96,5 +97,7 @@ public class Crop implements CompAction {
         comp.imageChanged(FULL);
 
         AppLogic.activeCompSizeChanged(comp);
+        Messages.showStatusMessage("Image cropped to "
+                + cropRectWidth + " x " + cropRectHeight + " pixels.");
     }
 }

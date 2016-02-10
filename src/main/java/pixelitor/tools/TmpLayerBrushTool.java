@@ -17,13 +17,10 @@
 
 package pixelitor.tools;
 
-import pixelitor.Composition;
 import pixelitor.gui.BlendingModePanel;
-import pixelitor.layers.ImageLayer;
 
+import java.awt.Composite;
 import java.awt.Cursor;
-import java.awt.Point;
-import java.awt.image.BufferedImage;
 
 /**
  * A brush tool that draws each stroke into a temporary layer
@@ -34,37 +31,27 @@ public abstract class TmpLayerBrushTool extends AbstractBrushTool {
 
     protected TmpLayerBrushTool(char activationKeyChar, String name, String iconFileName, String toolMessage, Cursor cursor) {
         super(activationKeyChar, name, iconFileName, toolMessage, cursor);
+        drawStrategy = DrawStrategy.TMP_LAYER;
+    }
+
+
+    public void setupMaskDrawing(boolean isMask) {
+        if (isMask) {
+            drawStrategy = DrawStrategy.DIRECT;
+            blendingModePanel.setEnabled(false);
+        } else {
+            drawStrategy = DrawStrategy.TMP_LAYER;
+            blendingModePanel.setEnabled(true);
+        }
     }
 
     @Override
-    protected void createGraphicsForNewBrushStroke(Composition comp, ImageLayer layer) {
-        graphics = layer.createTmpDrawingLayer(blendingModePanel.getComposite(), respectSelection).getGraphics();
-        brush.setTarget(comp, graphics);
+    protected Composite getComposite() {
+        return blendingModePanel.getComposite();
     }
 
     protected void addBlendingModePanel() {
         blendingModePanel = new BlendingModePanel(true);
         settingsPanel.add(blendingModePanel);
-    }
-
-    @Override
-    void mergeTmpLayer(Composition comp) {
-        if (graphics != null) {
-            ImageLayer imageLayer = comp.getActiveMaskOrImageLayer();
-            imageLayer.mergeTmpDrawingLayerDown();
-        }
-    }
-
-    @Override
-    BufferedImage getOriginalImage(Composition comp) {
-        // it can simply return the layer image because
-        // the drawing was on the temporary layer
-        return comp.getActiveMaskOrImageLayer().getImage();
-    }
-
-    @Override
-    public void drawBrushStrokeProgrammatically(Composition comp, Point start, Point end) {
-        super.drawBrushStrokeProgrammatically(comp, start, end);
-        comp.getActiveMaskOrImageLayer().mergeTmpDrawingLayerDown();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,8 @@ import pixelitor.utils.ImageUtils;
 import java.awt.image.BufferedImage;
 
 public class Brightness extends FilterWithParametrizedGUI {
+    public static final String NAME = "Brightness/Contrast";
+
     private final RangeParam power = new RangeParam("Brightness Power (%)", 50, 100, 150);
     private final RangeParam multiply = new RangeParam("Brightness Multiply (%)", 1, 100, 200);
     private final RangeParam add = new RangeParam("Brightness Add", -255, 0, 255);
@@ -68,7 +70,7 @@ public class Brightness extends FilterWithParametrizedGUI {
             int lookupValueInt = ((int) (lookupValue * multiplyValue)) + addValue;
 
             // contrastValue
-            lookupValueInt = (int)(contrastFactor * (lookupValueInt - 128) + 128);
+            lookupValueInt = (int) (contrastFactor * (lookupValueInt - 128) + 128);
 
             lookup[i] = PixelUtils.clamp(lookupValueInt);
         }
@@ -94,5 +96,10 @@ public class Brightness extends FilterWithParametrizedGUI {
         }
 
         return dest;
+    }
+
+    @Override
+    public boolean supportsGray() {
+        return false;
     }
 }

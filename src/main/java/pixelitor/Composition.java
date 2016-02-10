@@ -43,6 +43,7 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
 import pixelitor.layers.LayerMask;
+import pixelitor.layers.MaskViewMode;
 import pixelitor.menus.SelectionActions;
 import pixelitor.selection.IgnoreSelection;
 import pixelitor.selection.Selection;
@@ -134,6 +135,38 @@ public class Composition implements Serializable {
         return comp;
     }
 
+    public static Composition createCopy(Composition orig, boolean shareIC) {
+        Canvas canvasCopy = new Canvas(orig.getCanvas());
+        Composition comp = new Composition(canvasCopy);
+
+        // copy layers
+        for (Layer layer : orig.layerList) {
+            Layer layerCopy = layer.duplicate(true);
+            comp.layerList.add(layerCopy);
+            if (layer == orig.activeLayer) {
+                comp.activeLayer = layerCopy;
+            }
+        }
+
+        comp.newLayerCount = orig.newLayerCount;
+        comp.name = orig.name;
+        comp.file = orig.file;
+        comp.dirty = orig.dirty;
+        if (orig.selection != null) {
+            comp.selection = new Selection(orig.selection, shareIC);
+        }
+        if (shareIC) {
+            comp.ic = orig.ic;
+        }
+
+        // cachedCompositeImage is not copied because
+        // this will be typically used in undo situations
+        comp.cachedCompositeImage = null;
+        comp.compositeImageUpToDate = false;
+
+        return comp;
+    }
+
     private Composition(Canvas canvas) {
         this.canvas = canvas;
     }
@@ -150,11 +183,15 @@ public class Composition implements Serializable {
     }
 
     /**
-     * Called when deserialized
+     * Called when deserialized and when duplicated
      */
     public void setIC(ImageComponent ic) {
         this.ic = ic;
         canvas.setIc(ic);
+
+        if (selection != null) { // can happen when duplicating
+            selection.setIC(ic);
+        }
     }
 
     public boolean isEmpty() {
@@ -256,12 +293,13 @@ public class Composition implements Serializable {
      */
     public void addLayer(Layer newLayer, AddToHistory addToHistory, String historyName, boolean updateHistogram, int newLayerIndex) {
         Layer activeLayerBefore = activeLayer;
+        MaskViewMode oldViewMode = ic.getMaskViewMode();
 
         layerList.add(newLayerIndex, newLayer);
         setActiveLayer(newLayer, AddToHistory.NO);
         ic.addLayerToGUI(newLayer, newLayerIndex);
 
-        History.addEdit(addToHistory, () -> new NewLayerEdit(this, newLayer, activeLayerBefore, historyName));
+        History.addEdit(addToHistory, () -> new NewLayerEdit(this, newLayer, activeLayerBefore, historyName, oldViewMode));
 
         if (updateHistogram) {
             imageChanged(FULL); // if the histogram is updated, a repaint is also necessary
@@ -287,8 +325,8 @@ public class Composition implements Serializable {
         ic.addLayerToGUI(layer, layerIndex);
     }
 
-    public void duplicateLayer() {
-        Layer duplicate = activeLayer.duplicate();
+    public void duplicateActiveLayer() {
+        Layer duplicate = activeLayer.duplicate(false);
         addLayer(duplicate, AddToHistory.YES, "Duplicate Layer", true, false);
         assert checkInvariant();
     }
@@ -474,7 +512,8 @@ public class Composition implements Serializable {
     public ImageLayer getActiveMaskOrImageLayer() {
         ImageLayer layer = getActiveMaskOrImageLayerOrNull();
         if (layer == null) {
-            throw new IllegalStateException("active layer is not image layer");
+            throw new IllegalStateException("active layer is not image layer or mask, it is "
+                    + activeLayer.getClass().getSimpleName());
         }
         return layer;
     }
@@ -499,15 +538,14 @@ public class Composition implements Serializable {
         return getActiveMaskOrImageLayer().getFilterSourceImage();
     }
 
-    public void startMovement(boolean onDuplicateLayer) {
-        if (onDuplicateLayer) {
-            duplicateLayer();
+    public void startMovement(boolean duplicateLayer) {
+        if (duplicateLayer) {
+            duplicateActiveLayer();
         }
 
         Layer layer = getActiveMaskOrLayer();
         layer.startMovement();
     }
-
 
     public void moveActiveContentRelative(double relativeX, double relativeY) {
         Layer layer = getActiveMaskOrLayer();
@@ -702,9 +740,8 @@ public class Composition implements Serializable {
     public void deselect(AddToHistory addToHistory) {
         if (selection != null) {
             if (addToHistory.isYes()) {
-                Shape shape = selection.getShape();
-                if (shape != null) { // for a simple click without a previous selection this is null
-                    DeselectEdit edit = new DeselectEdit(this, shape, "Composition.deselect");
+                DeselectEdit edit = createDeselectEdit();
+                if (edit != null) {
                     History.addEdit(edit);
                 }
             }
@@ -718,6 +755,15 @@ public class Composition implements Serializable {
                 // we can get here from a DeselectEdit.redo on a non-active composition
             }
         }
+    }
+
+    public DeselectEdit createDeselectEdit() {
+        DeselectEdit edit = null;
+        Shape shape = selection.getShape();
+        if (shape != null) { // for a simple click without a previous selection this is null
+            edit = new DeselectEdit(this, shape, "Composition.deselect");
+        }
+        return edit;
     }
 
     public Optional<Selection> getSelection() {

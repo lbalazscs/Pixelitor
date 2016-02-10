@@ -26,6 +26,7 @@ import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.transform.TransformSupport;
 import pixelitor.utils.ImageSwitchListener;
+import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -58,9 +59,9 @@ public class CropTool extends Tool implements ImageSwitchListener {
 
     private TransformSupport transformSupport;
 
-    private final RangeParam maskOpacityParam = new RangeParam("Mask Opacity (%)", 0, 75, 100);
+    private final RangeParam maskOpacity = new RangeParam("Mask Opacity (%)", 0, 75, 100);
 
-    private Composite hideComposite = AlphaComposite.getInstance(SRC_OVER, maskOpacityParam.getValueAsPercentage());
+    private Composite hideComposite = AlphaComposite.getInstance(SRC_OVER, maskOpacity.getValueAsPercentage());
 
     private final JButton cancelButton = new JButton("Cancel");
     private JButton cropButton;
@@ -76,17 +77,17 @@ public class CropTool extends Tool implements ImageSwitchListener {
                 "Click and drag to define the crop area. Hold SPACE down to move the entire region.",
                 Cursor.getDefaultCursor(), false, true, true, ClipStrategy.FULL_AREA);
         spaceDragBehavior = true;
-        maskOpacityParam.addChangeListener(new ChangeListener() {
+        maskOpacity.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                float alpha = maskOpacityParam.getValueAsPercentage();
+                float alpha = maskOpacity.getValueAsPercentage();
                 // because of a swing bug, the slider can get out of range
                 if (alpha < 0.0f) {
                     alpha = 0.0f;
-                    maskOpacityParam.setValue(0);
+                    maskOpacity.setValue(0);
                 } else if (alpha > 1.0f) {
                     alpha = 1.0f;
-                    maskOpacityParam.setValue(100);
+                    maskOpacity.setValue(100);
                 }
                 hideComposite = AlphaComposite.getInstance(SRC_OVER, alpha);
                 ImageComponents.repaintActive();
@@ -97,7 +98,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
 
     @Override
     public void initSettingsPanel() {
-        SliderSpinner maskOpacitySpinner = new SliderSpinner(maskOpacityParam, WEST, AddDefaultButton.NO);
+        SliderSpinner maskOpacitySpinner = new SliderSpinner(maskOpacity, WEST, AddDefaultButton.NO);
         settingsPanel.add(maskOpacitySpinner);
 
         allowGrowingCB = new JCheckBox("Allow Growing", false);
@@ -193,6 +194,13 @@ public class CropTool extends Tool implements ImageSwitchListener {
         if (cropRect == null) {
             return;
         }
+
+        // here we have the cropping rectangle in image space, therefore
+        // this is a good opportunity to update the status bar message
+        // even if it has nothing to do with painting
+        int width = (int) cropRect.getWidth();
+        int height = (int) cropRect.getHeight();
+        Messages.showStatusMessage("Cropping area is " + width + " x " + height + " pixels.");
 
         // paint the semi-transparent dark area outside the crop rectangle
         Shape previousClip = g2.getClip();  // save for later use

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,5 +44,10 @@ public class Fill extends Filter {
     @Override
     public void randomizeSettings() {
         // no settings
+    }
+
+    @Override
+    public boolean supportsGray() {
+        return false;
     }
 }

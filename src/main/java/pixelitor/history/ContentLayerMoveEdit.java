@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.history;
 
 import pixelitor.layers.ContentLayer;
@@ -31,7 +32,7 @@ import static pixelitor.Composition.ImageChangeActions.FULL;
  * (Move Tool)
  */
 public class ContentLayerMoveEdit extends PixelitorEdit {
-    public static final String NAME = "Layer Movement";
+    public static final String NAME = "Move Layer";
 
     // can be null, if no image enlargement is taking place
     private ImageEdit imageEdit;

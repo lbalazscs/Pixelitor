@@ -14,11 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.history;
 
 import pixelitor.Composition;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.LayerMask;
+import pixelitor.layers.MaskViewMode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -33,9 +35,11 @@ public class ApplyLayerMaskEdit extends PixelitorEdit {
     private LayerMask oldMask;
     private BufferedImage oldImage;
     private ImageLayer layer;
+    private final MaskViewMode oldMode;
 
-    public ApplyLayerMaskEdit(Composition comp, ImageLayer layer, LayerMask oldMask, BufferedImage oldImage) {
+    public ApplyLayerMaskEdit(Composition comp, ImageLayer layer, LayerMask oldMask, BufferedImage oldImage, MaskViewMode oldMode) {
         super(comp, "Apply Layer Mask");
+        this.oldMode = oldMode;
         comp.setDirty(true);
         this.oldImage = oldImage;
         this.layer = layer;
@@ -47,7 +51,8 @@ public class ApplyLayerMaskEdit extends PixelitorEdit {
         super.undo();
 
         layer.setImage(oldImage);
-        layer.addMaskBack(oldMask);
+        layer.addMask(oldMask);
+        oldMode.activate(comp.getIC(), layer);
 
         History.notifyMenus(this);
     }
@@ -56,6 +61,7 @@ public class ApplyLayerMaskEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
+        // the mask view mode is automatically set to normal
         layer.applyLayerMask(AddToHistory.NO);
 
         History.notifyMenus(this);

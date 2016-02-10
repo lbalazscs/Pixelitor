@@ -19,6 +19,7 @@ package pixelitor.history;
 
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
+import pixelitor.layers.MaskViewMode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -28,26 +29,30 @@ import javax.swing.undo.CannotUndoException;
  */
 public class CompositionReplacedEdit extends PixelitorEdit {
     private Composition newComp;
+    private final MaskViewMode oldMode;
     private ImageComponent ic;
 
-    public CompositionReplacedEdit(Composition oldComp, Composition newComp) {
-        super(oldComp, "Reload");
+    public CompositionReplacedEdit(String name, ImageComponent ic, Composition oldComp, Composition newComp, MaskViewMode oldMode) {
+        super(oldComp, name);
         this.newComp = newComp;
-        ic = newComp.getIC();
+        this.oldMode = oldMode;
+        this.ic = ic;
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
-        ic.replaceComp(comp, AddToHistory.NO);
+        ic.replaceComp(comp, AddToHistory.NO, oldMode);
+        History.notifyMenus(this);
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        ic.replaceComp(newComp, AddToHistory.NO);
+        ic.replaceComp(newComp, AddToHistory.NO, MaskViewMode.NORMAL);
+        History.notifyMenus(this);
     }
 
     @Override

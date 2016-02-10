@@ -17,6 +17,7 @@
 
 package pixelitor;
 
+import org.mockito.MockingDetails;
 import pixelitor.filters.Invert;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.FgBgColorSelector;
@@ -27,10 +28,12 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMaskAddType;
 import pixelitor.layers.TextLayer;
+import pixelitor.selection.Selection;
 import pixelitor.tools.Alt;
 import pixelitor.tools.Ctrl;
 import pixelitor.tools.Mouse;
 import pixelitor.tools.Shift;
+import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -41,17 +44,25 @@ import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.Optional;
 import java.util.Random;
 
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.when;
+import static pixelitor.layers.MaskViewMode.NORMAL;
 
 public class TestHelper {
     private static final int TEST_WIDTH = 20;
     private static final int TEST_HEIGHT = 10;
     private static final Component eventSource = new JPanel();
+
+    static {
+        setupMockFgBgSelector();
+        Messages.setMessageHandler(new TestMessageHandler());
+    }
 
     private TestHelper() {
     }
@@ -72,10 +83,29 @@ public class TestHelper {
 
     public static Composition createEmptyComposition() {
         Composition comp = Composition.createEmpty(TEST_WIDTH, TEST_HEIGHT);
-        ImageComponent ic = createIC(comp);
+        ImageComponent ic = setupAnICFor(comp);
 
-        comp.setIC(ic);
         comp.setName("Test");
+
+        return comp;
+    }
+
+    public static Composition createMockComposition() {
+        Composition comp = mock(Composition.class);
+
+        Canvas canvas = new Canvas(TEST_WIDTH, TEST_HEIGHT);
+        when(comp.getCanvas()).thenReturn(canvas);
+        when(comp.getCanvasBounds()).thenReturn(new Rectangle(0, 0, TEST_WIDTH, TEST_HEIGHT));
+        when(comp.getCanvasWidth()).thenReturn(TEST_WIDTH);
+        when(comp.getCanvasHeight()).thenReturn(TEST_HEIGHT);
+
+        ImageComponent ic = mock(ImageComponent.class);
+        when(ic.getComp()).thenReturn(comp);
+        when(ic.isMock()).thenReturn(true);
+        when(ic.getMaskViewMode()).thenReturn(NORMAL);
+        when(comp.getIC()).thenReturn(ic);
+
+        when(comp.getSelection()).thenReturn(Optional.empty());
 
         return comp;
     }
@@ -93,6 +123,11 @@ public class TestHelper {
             layer1.addMask(LayerMaskAddType.REVEAL_ALL);
             layer2.addMask(LayerMaskAddType.REVEAL_ALL);
         }
+
+        // TODO it should not be necessary to call
+        // separately for both layers
+        NORMAL.activate(layer1);
+        NORMAL.activate(layer2);
 
         assert layer2 == c.getActiveLayer();
         assert layer1 == c.getLayer(0);
@@ -154,13 +189,13 @@ public class TestHelper {
         );
     }
 
-    public static ImageComponent setAnActiveIC(Composition comp) {
-        ImageComponent ic = createIC(comp);
+    public static ImageComponent setupAnActiveICFor(Composition comp) {
+        ImageComponent ic = setupAnICFor(comp);
         ImageComponents.setActiveIC(ic, false);
         return ic;
     }
 
-    public static ImageComponent createIC(Composition comp) {
+    public static ImageComponent setupAnICFor(Composition comp) {
         ImageComponent ic = mock(ImageComponent.class);
 
         when(ic.fromComponentToImageSpace(anyObject())).then(returnsFirstArg());
@@ -179,7 +214,22 @@ public class TestHelper {
 
         when(ic.getComp()).thenReturn(comp);
         when(ic.isMock()).thenReturn(true);
+        when(ic.getMaskViewMode()).thenReturn(NORMAL);
+
+        comp.setIC(ic);
 
         return ic;
+    }
+
+    public static void addSelectionRectTo(Composition comp, int x, int y, int width, int height) {
+        Rectangle shape = new Rectangle(x, y, width, height);
+        MockingDetails mockingDetails = mockingDetails(comp);
+        if (mockingDetails.isMock()) {
+            Selection selection = new Selection(shape, comp.getIC());
+            when(comp.getSelection()).thenReturn(Optional.of(selection));
+            when(comp.hasSelection()).thenReturn(true);
+        } else {
+            comp.createSelectionFromShape(shape);
+        }
     }
 }

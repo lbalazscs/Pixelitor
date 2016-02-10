@@ -88,7 +88,7 @@ public class DebugProgressTracker implements ProgressTracker {
         private final StackTraceElement ste;
         private final String what;
         private final long time;
-        long duration;
+        private final long duration;
 
         public CallInfo(String what, long time, long lastTime, StackTraceElement ste) {
             this.what = what;

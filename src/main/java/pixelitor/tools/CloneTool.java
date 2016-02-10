@@ -27,6 +27,7 @@ import pixelitor.gui.ImageComponent;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.OKDialog;
+import pixelitor.layers.ImageLayer;
 import pixelitor.tools.brushes.Brush;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.CloneBrush;
@@ -159,9 +160,9 @@ public class CloneTool extends TmpLayerBrushTool {
             // just act as if this was an alt-click
             setCloningSource(ic, x, y);
         } else {
-            String msg = "Define a source point first with Alt-Click.";
+            String msg = "Define a source point first with Alt-Click (or with right-click).";
             if (JVM.isLinux) {
-                msg += "\n(You might need to disable Alt-Click for window dragging in the window manager)";
+                msg += "\n(For Alt-Click you might need to disable Alt-Click for window dragging in the window manager)";
             }
             Messages.showError("No source", msg);
         }
@@ -169,12 +170,17 @@ public class CloneTool extends TmpLayerBrushTool {
 
     private void setCloningSource(ImageComponent ic, double x, double y) {
         BufferedImage sourceImage;
+        int dx = 0;
+        int dy = 0;
         if (sampleAllLayers) {
             sourceImage = ic.getComp().getCompositeImage();
         } else {
-            sourceImage = ic.getComp().getActiveMaskOrImageLayer().getImage();
+            ImageLayer imageLayer = ic.getComp().getActiveMaskOrImageLayer();
+            sourceImage = imageLayer.getImage();
+            dx = -imageLayer.getTX();
+            dy = -imageLayer.getTY();
         }
-        cloneBrush.setSource(sourceImage, x, y);
+        cloneBrush.setSource(sourceImage, x + dx, y + dy);
         state = SOURCE_DEFINED_FIRST_STROKE;
     }
 

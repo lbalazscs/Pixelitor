@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.history;
 
 import pixelitor.Composition;
@@ -41,7 +42,7 @@ public class AddLayerMaskEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        layer.deleteMask(AddToHistory.NO, false);
+        layer.deleteMask(AddToHistory.NO);
 
         History.notifyMenus(this);
     }
@@ -50,7 +51,7 @@ public class AddLayerMaskEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        layer.addMaskBack(layerMask);
+        layer.addMask(layerMask);
 
         History.notifyMenus(this);
     }

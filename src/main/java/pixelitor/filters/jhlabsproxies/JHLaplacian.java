@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.LaplaceFilter;
@@ -42,5 +43,10 @@ public class JHLaplacian extends Filter {
     @Override
     public void randomizeSettings() {
         // nothing to randomize
+    }
+
+    @Override
+    public boolean supportsGray() {
+        return false;
     }
 }

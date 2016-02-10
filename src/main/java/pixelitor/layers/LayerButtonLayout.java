@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,36 +8,46 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.layers;
 
+import javax.swing.*;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.LayoutManager;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A layout manager for a layout button
  */
 public class LayerButtonLayout implements LayoutManager {
-    //    private Component visibilityButton;
     private Component nameEditor;
-    //    private Component layerIcon;
-    private final List<Component> icons = new ArrayList<>(3);
 
-    public static final String ICON = "ICON";
+    private JCheckBox checkBox;
+    private JLabel layerLabel;
+    private JLabel maskLabel;
+
+    public static final String CHECKBOX = "CHECKBOX";
+    public static final String LAYER = "LAYER";
+    public static final String MASK = "MASK";
     public static final String NAME_EDITOR = "NAME_EDITOR";
 
     private static final int GAP = 7;
-    public static final int ICON_SIZE = 24;
-    private static final int HEIGHT = ICON_SIZE + 2 * GAP;
+    public static final int THUMB_SIZE = 24;
+
+    /**
+     * The labels will appear to have THUMB_SIZE, but in reality
+     * they must be larger in order to leave space to the borders
+     */
+    public static final int LABEL_SIZE = THUMB_SIZE + 2 * LayerButton.BORDER_WIDTH;
+
+    private static final int HEIGHT = THUMB_SIZE + 2 * GAP;
 
     public LayerButtonLayout() {
     }
@@ -45,8 +55,12 @@ public class LayerButtonLayout implements LayoutManager {
     @Override
     public void addLayoutComponent(String name, Component comp) {
         synchronized (comp.getTreeLock()) {
-            if (ICON.equals(name)) {
-                icons.add(comp);
+            if (CHECKBOX.equals(name)) {
+                checkBox = (JCheckBox) comp;
+            } else if (LAYER.equals(name)) {
+                layerLabel = (JLabel) comp;
+            } else if (MASK.equals(name)) {
+                maskLabel = (JLabel) comp;
             } else if (NAME_EDITOR.equals(name)) {
                 nameEditor = comp;
             } else {
@@ -57,7 +71,9 @@ public class LayerButtonLayout implements LayoutManager {
 
     @Override
     public void removeLayoutComponent(Component comp) {
-        icons.remove(comp);
+        if (comp == maskLabel) {
+            maskLabel = null;
+        }
     }
 
     @Override
@@ -75,12 +91,25 @@ public class LayerButtonLayout implements LayoutManager {
     @Override
     public void layoutContainer(Container parent) {
         synchronized (parent.getTreeLock()) {
-
             int startX = GAP;
-            for (Component icon : icons) {
-                icon.setBounds(startX, GAP, ICON_SIZE, ICON_SIZE);
-                startX += ICON_SIZE;
-                startX += GAP;
+
+            // lay out the checkbox
+            checkBox.setBounds(startX, GAP, THUMB_SIZE, THUMB_SIZE);
+            startX += (THUMB_SIZE + GAP - LayerButton.BORDER_WIDTH);
+
+            // lay out the layer icon
+            int labelStartY = GAP - LayerButton.BORDER_WIDTH;
+            layerLabel.setBounds(startX, labelStartY, LABEL_SIZE, LABEL_SIZE);
+            startX += LABEL_SIZE;
+
+            // lay out the mask
+            if (maskLabel != null) {
+                // no need to add distance between layer and mask icons
+                // because there will be a visual distance because of the borders
+                maskLabel.setBounds(startX, labelStartY, LABEL_SIZE, LABEL_SIZE);
+                startX += (LABEL_SIZE + GAP);
+            } else {
+                startX += GAP; // distance between layer icon and text field
             }
 
             int editorHeight = (int) nameEditor.getPreferredSize().getHeight();

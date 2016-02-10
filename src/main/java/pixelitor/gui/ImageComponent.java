@@ -25,12 +25,16 @@ import pixelitor.ConsistencyChecks;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.CompositionReplacedEdit;
+import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;
+import pixelitor.history.LinkedEdit;
+import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
 import pixelitor.layers.LayerMask;
 import pixelitor.layers.LayersContainer;
 import pixelitor.layers.LayersPanel;
+import pixelitor.layers.MaskViewMode;
 import pixelitor.menus.view.ZoomComponent;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.tools.Tool;
@@ -59,7 +63,6 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyVetoException;
 
 import static java.awt.Color.BLACK;
-import static pixelitor.Composition.ImageChangeActions.FULL;
 
 /**
  * The GUI component that shows a composition
@@ -74,11 +77,11 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     private static final Color BG_GRAY = new Color(200, 200, 200);
     private static final CheckerboardPainter checkerBoardPainter = new CheckerboardPainter(BG_GRAY, Color.WHITE);
 
-    private final LayersPanel layersPanel;
+    private LayersPanel layersPanel;
 
     private Composition comp;
 
-    private boolean showLayerMask = false;
+    private MaskViewMode maskViewMode;
 
     // the start of the image if the ImageComponent is resized to bigger
     // than the canvas, and the image needs to be centralized
@@ -102,11 +105,30 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         addListeners();
     }
 
-    public void replaceComp(Composition newComp, AddToHistory addToHistory) {
+    public void replaceComp(Composition newComp, AddToHistory addToHistory, MaskViewMode newMaskViewMode) {
         assert newComp != null;
+
+        MaskViewMode oldMode = maskViewMode;
 
         Composition oldComp = comp;
         comp = newComp;
+
+        // do this here so that the old comp is deselected before
+        // its ic is set to null
+        if (addToHistory.isYes()) {
+            PixelitorEdit edit;
+            PixelitorEdit replaceEdit = new CompositionReplacedEdit(
+                    "Reload", this, oldComp, newComp, oldMode);
+            if (oldComp.hasSelection()) {
+                DeselectEdit deselectEdit = oldComp.createDeselectEdit();
+                edit = new LinkedEdit(oldComp, "Reload", deselectEdit, replaceEdit);
+                oldComp.deselect(AddToHistory.NO);
+            } else {
+                edit = replaceEdit;
+            }
+            History.addEdit(edit);
+        }
+
         oldComp.setIC(null);
         comp.setIC(this);
         canvas = newComp.getCanvas();
@@ -115,9 +137,12 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         // internal frame size
         setZoom(zoomLevel, true, null);
 
-        comp.imageChanged(FULL);
+        // refresh the layer buttons
+        layersPanel = new LayersPanel();
+        comp.addLayersToGUI();
+        LayersContainer.showLayersPanel(layersPanel);
 
-        History.addEdit(addToHistory, () -> new CompositionReplacedEdit(oldComp, newComp));
+        newMaskViewMode.activate(this, comp.getActiveLayer());
     }
 
     private void addListeners() {
@@ -292,8 +317,9 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
         g2.scale(viewScale, viewScale);
 
-        if (showLayerMask) {
+        if (maskViewMode.showMask()) {
             LayerMask layerMask = comp.getActiveLayer().getMask();
+            assert layerMask != null : "no mask in " + maskViewMode;
             layerMask.paintLayerOnGraphics(g2, true);
         } else {
             BufferedImage drawnImage = comp.getCompositeImage();
@@ -407,12 +433,14 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         }
     }
 
-    public void setShowLayerMask(boolean showLayerMask) {
-        this.showLayerMask = showLayerMask;
+    public MaskViewMode getMaskViewMode() {
+        return maskViewMode;
+    }
 
-        if (showLayerMask) {
-            assert comp.getActiveLayer().hasMask();
-        }
+    public void setMaskViewMode(MaskViewMode maskViewMode) {
+        this.maskViewMode = maskViewMode;
+
+        assert maskViewMode.checkOnAssignment(comp.getActiveLayer());
 
         repaint();
     }
@@ -626,10 +654,6 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         if (ImageComponents.isActive(this)) {
             AppLogic.activeCompLayerCountChanged(comp, comp.getNrLayers());
         }
-    }
-
-    public boolean isMaskShowing() {
-        return showLayerMask;
     }
 
     public boolean activeIsImageLayer() {

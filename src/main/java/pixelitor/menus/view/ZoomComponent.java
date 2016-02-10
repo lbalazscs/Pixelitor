@@ -35,7 +35,7 @@ import static pixelitor.tools.AutoZoomButtons.FIT_SCREEN_TOOLTIP;
  * The zoom widget in the status bar
  */
 public class ZoomComponent extends JPanel implements ImageSwitchListener {
-    public static ZoomComponent INSTANCE = new ZoomComponent();
+    public static final ZoomComponent INSTANCE = new ZoomComponent();
 
     private static final int PREFERRED_HEIGHT = 17;
     private final JSlider zoomSlider;

@@ -22,6 +22,7 @@ import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.utils.SliderSpinner;
+import pixelitor.layers.ImageLayer;
 import pixelitor.tools.brushes.Brush;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.CopyBrushType;
@@ -81,7 +82,13 @@ public class SmudgeTool extends DirectBrushTool {
 
     @Override
     public void mousePressed(MouseEvent e, ImageComponent ic) {
-        BufferedImage sourceImage = ic.getComp().getActiveMaskOrImageLayer().getImage();
+        ImageLayer layer = ic.getComp().getActiveMaskOrImageLayer();
+
+        // We could also pass the full image and the translation
+        // and the smudge brush could always adjust the last sampling point
+        // with the translation.
+        BufferedImage sourceImage = layer.getCanvasSizedSubImage();
+
         double x = userDrag.getStartX();
         double y = userDrag.getStartY();
         if (!e.isShiftDown()) { // not a line-click
@@ -108,7 +115,8 @@ public class SmudgeTool extends DirectBrushTool {
     protected void prepareProgrammaticBrushStroke(Composition comp, Point start) {
         super.prepareProgrammaticBrushStroke(comp, start);
 
-        BufferedImage sourceImg = comp.getActiveMaskOrImageLayer().getImage();
+        ImageLayer layer = comp.getActiveMaskOrImageLayer();
+        BufferedImage sourceImg = layer.getCanvasSizedSubImage();
         initStroke(sourceImg, start.x, start.y);
     }
 }

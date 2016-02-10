@@ -37,7 +37,6 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.UpdateGUI;
 
 import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -99,8 +98,8 @@ public class TextLayer extends ContentLayer {
     }
 
     @Override
-    public Layer duplicate() {
-        TextLayer d = new TextLayer(comp, getDuplicateLayerName());
+    public Layer duplicate(boolean exact) {
+        TextLayer d = new TextLayer(comp, getDuplicateLayerName(exact));
 
         d.translationX = translationX;
         d.translationY = translationY;
@@ -111,7 +110,7 @@ public class TextLayer extends ContentLayer {
         d.setSettings(new TextSettings(settings));
 
         if (hasMask()) {
-            d.addMaskBack(mask.duplicate(d));
+            d.addMask(mask.duplicate(d));
         }
 
         return d;
@@ -199,6 +198,7 @@ public class TextLayer extends ContentLayer {
         TextLayer textLayer = new TextLayer(comp);
 
         Layer activeLayerBefore = comp.getActiveLayer();
+        MaskViewMode oldViewMode = comp.getIC().getMaskViewMode();
 
         // don't add it yet to history, only after the user chooses to press OK
         comp.addLayer(textLayer, AddToHistory.NO, null, true, false);
@@ -211,7 +211,7 @@ public class TextLayer extends ContentLayer {
                 textLayer.updateLayerName();
 
                 // now it is safe to add it to the history
-                NewLayerEdit newLayerEdit = new NewLayerEdit(comp, textLayer, activeLayerBefore, "New Text Layer");
+                NewLayerEdit newLayerEdit = new NewLayerEdit(comp, textLayer, activeLayerBefore, "New Text Layer", oldViewMode);
                 History.addEdit(newLayerEdit);
             }
 
@@ -243,7 +243,7 @@ public class TextLayer extends ContentLayer {
     }
 
     @Override
-    public void flip(Flip.Direction direction, AffineTransform flipTx) {
+    public void flip(Flip.Direction direction) {
         // TODO
     }
 

@@ -22,6 +22,7 @@ import pixelitor.utils.IconUtils;
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.ActionListener;
 
 public class HistoryPanel extends JPanel {
     private final JButton undoButton;
@@ -37,26 +38,28 @@ public class HistoryPanel extends JPanel {
         Icon undoIcon = IconUtils.getUndoIcon();
         Icon redoIcon = IconUtils.getRedoIcon();
 
-        undoButton = new JButton(undoIcon);
-        redoButton = new JButton(redoIcon);
+        undoButton = createButton(undoIcon, "undo",
+                "AbstractUndoableEdit.undoText", History.UNDO_ACTION);
+        redoButton = createButton(redoIcon, "redo",
+                "AbstractUndoableEdit.redoText", History.REDO_ACTION);
 
-        undoButton.setToolTipText(UIManager.getString("AbstractUndoableEdit.undoText"));
-        redoButton.setToolTipText(UIManager.getString("AbstractUndoableEdit.redoText"));
-
-        History.addUndoableEditListener(e -> {
-            updateEnabledState();
-        });
+        History.addUndoableEditListener(e -> updateEnabledState());
         updateEnabledState();
-
-        undoButton.addActionListener(History.UNDO_ACTION);
-        redoButton.addActionListener(History.REDO_ACTION);
 
         buttonsPanel.add(undoButton);
         buttonsPanel.add(redoButton);
         add(buttonsPanel, BorderLayout.SOUTH);
     }
 
-    public void updateEnabledState() {
+    private static JButton createButton(Icon icon, String name, String tooltipResource, ActionListener actionListener) {
+        JButton b = new JButton(icon);
+        b.setName(name);
+        b.setToolTipText(UIManager.getString(tooltipResource));
+        b.addActionListener(actionListener);
+        return b;
+    }
+
+    private void updateEnabledState() {
         undoButton.setEnabled(pum.canUndo());
         redoButton.setEnabled(pum.canRedo());
     }

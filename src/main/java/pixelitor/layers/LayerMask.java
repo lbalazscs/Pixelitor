@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -118,14 +118,14 @@ public class LayerMask extends ImageLayer {
         }
     }
 
-    public LayerMask duplicate(Layer original) {
-        LayerMask d = new LayerMask(comp, ImageUtils.copyImage(image), original);
-        if (original instanceof ContentLayer) {
-            ContentLayer originalContent = (ContentLayer) original;
-            int otx = originalContent.getTX();
-            int oty = originalContent.getTY();
-            d.setTranslation(otx, oty);
-        }
+    /**
+     * Duplicates this layer mask, and attaches the duplicated mask
+     * to the given layer
+     */
+    public LayerMask duplicate(Layer master) {
+        LayerMask d = new LayerMask(comp, ImageUtils.copyImage(image), master);
+
+        d.setTranslation(getTX(), getTY());
 
         return d;
     }
@@ -141,15 +141,14 @@ public class LayerMask extends ImageLayer {
     }
 
     @Override
-    public TmpDrawingLayer createTmpDrawingLayer(Composite c, boolean respectSelection) {
-        tmpDrawingLayer = new FakeTmpDrawingLayer(this, respectSelection);
-        return tmpDrawingLayer;
+    public TmpDrawingLayer createTmpDrawingLayer(Composite c) {
+        throw new IllegalStateException("tmp layer with masks");
     }
 
-    @Override
-    public void mergeTmpDrawingLayerDown() {
-        updateIconImage();
-    }
+//    @Override
+//    public void mergeTmpDrawingLayerDown() {
+//        updateIconImage();
+//    }
 
     @Override
     protected void paintLayerOnGraphicsWOTmpLayer(Graphics2D g, boolean firstVisibleLayer, BufferedImage visibleImage) {

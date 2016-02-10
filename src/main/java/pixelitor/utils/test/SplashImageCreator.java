@@ -41,9 +41,13 @@ import pixelitor.io.OutputFormat;
 import pixelitor.layers.AddNewLayerAction;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.ImageLayer;
+import pixelitor.tools.GradientTool;
+import pixelitor.tools.GradientType;
+import pixelitor.tools.UserDrag;
 import pixelitor.utils.Messages;
 import pixelitor.utils.UpdateGUI;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -51,7 +55,9 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 
 import static java.awt.Color.WHITE;
+import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
 import static pixelitor.ChangeReason.OP_WITHOUT_DIALOG;
+import static pixelitor.tools.GradientColorType.BLACK_TO_WHITE;
 
 /**
  * Static methods for creating the splash images
@@ -116,7 +122,7 @@ public class SplashImageCreator {
         layer.setBlendingMode(BlendingMode.SCREEN, UpdateGUI.YES, AddToHistory.YES, true);
 
         addNewLayer("Gradient");
-        ToolTests.addRadialBWGradientToActiveLayer(ic, true);
+        addRadialBWGradientToActiveLayer(ic, true);
         layer = (ImageLayer) ic.getActiveLayer();
         layer.setOpacity(0.4f, UpdateGUI.YES, AddToHistory.YES, true);
         layer.setBlendingMode(BlendingMode.LUMINOSITY, UpdateGUI.YES, AddToHistory.YES, true);
@@ -180,5 +186,37 @@ public class SplashImageCreator {
 
         layer.setOpacity(opacity, UpdateGUI.YES, AddToHistory.YES, true);
         layer.setBlendingMode(blendingMode, UpdateGUI.YES, AddToHistory.YES, true);
+    }
+
+    public static void addRadialBWGradientToActiveLayer(Composition comp, boolean radial) {
+        int canvasWidth = comp.getCanvasWidth();
+        int canvasHeight = comp.getCanvasHeight();
+
+        int startX = canvasWidth / 2;
+        int startY = canvasHeight / 2;
+
+        int endX = 0;
+        int endY = 0;
+        if (canvasWidth > canvasHeight) {
+            endX = startX;
+        } else {
+            endY = startY;
+        }
+
+        GradientType gradientType;
+
+        if (radial) {
+            gradientType = GradientType.RADIAL;
+        } else {
+            gradientType = GradientType.SPIRAL_CW;
+        }
+
+        GradientTool.drawGradient(comp.getActiveMaskOrImageLayer(),
+                gradientType,
+                BLACK_TO_WHITE,
+                REFLECT,
+                AlphaComposite.SrcOver,
+                new UserDrag(startX, startY, endX, endY),
+                false);
     }
 }

@@ -26,6 +26,7 @@ import pixelitor.history.History;
 import pixelitor.io.OpenSaveManager;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
+import pixelitor.layers.MaskViewMode;
 import pixelitor.menus.SelectionActions;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.menus.view.ZoomMenu;
@@ -308,18 +309,19 @@ public class ImageComponents {
             return;
         }
         if (!file.exists()) {
-            String msg = String.format("The image '%s' cannot be reloaded\n" +
-                            " because the file %s does not exist anymore.",
+            String msg = String.format("The image '%s' cannot be reloaded because the file\n" +
+                            "%s\n" +
+                            "does not exist anymore.",
                     comp.getName(), file.getAbsolutePath());
-            Messages.showError("No file", msg);
+            Messages.showError("No file found", msg);
             return;
         }
 
         Composition newComp = OpenSaveManager.createCompositionFromFile(file);
-        activeIC.replaceComp(newComp, AddToHistory.YES);
+        activeIC.replaceComp(newComp, AddToHistory.YES, MaskViewMode.NORMAL);
 
-        //OpenSaveManager.warnAndCloseImage(activeIC);
-//        activeIC.close();
-//        OpenSaveManager.openFile(file);
+        String msg = String.format("The image '%s' was reloaded from the file %s.",
+                comp.getName(), file.getAbsolutePath());
+        Messages.showStatusMessage(msg);
     }
 }

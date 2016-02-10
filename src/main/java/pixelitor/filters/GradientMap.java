@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,6 +32,8 @@ import static java.awt.Color.WHITE;
  * Gradient map
  */
 public class GradientMap extends FilterWithParametrizedGUI {
+    public static final String NAME = "Gradient Map";
+
     private final GradientParam gradientParam = new GradientParam("Colors", BLACK, WHITE);
 
     public GradientMap() {
@@ -67,5 +69,10 @@ public class GradientMap extends FilterWithParametrizedGUI {
         }
 
         return dest;
+    }
+
+    @Override
+    public boolean supportsGray() {
+        return false;
     }
 }

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.utils.debug;
 
 import pixelitor.Canvas;
@@ -31,7 +32,9 @@ public class ImageComponentNode extends DebugNode {
         Composition comp = ic.getComp();
         add(new CompositionNode(comp));
 
-        addQuotedStringChild("name", comp.getName());   // it is comp
+        addQuotedStringChild("name", comp.getName());
+
+        addQuotedStringChild("mask view mode", ic.getMaskViewMode().toString());
 
         int width = ic.getWidth();
         addIntChild("ic width", width);
@@ -44,8 +47,8 @@ public class ImageComponentNode extends DebugNode {
         int internalFrameHeight = internalFrame.getHeight();
         addIntChild("internalFrameHeight", internalFrameHeight);
 
+        addStringChild("zoom level", ic.getZoomLevel().toString());
         Canvas canvas = ic.getCanvas();
-
         int zoomedCanvasWidth = canvas.getZoomedWidth();
         addIntChild("zoomedCanvasWidth", zoomedCanvasWidth);
         int zoomedCanvasHeight = canvas.getZoomedHeight();

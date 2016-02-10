@@ -20,8 +20,8 @@ package pixelitor.layers;
 import pixelitor.AppLogic;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.FgBgColors;
 import pixelitor.gui.HistogramsPanel;
+import pixelitor.gui.ImageComponent;
 import pixelitor.history.AddLayerMaskEdit;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.DeleteLayerMaskEdit;
@@ -63,7 +63,11 @@ public abstract class Layer implements Serializable {
 
     protected Canvas canvas;
     String name;
+
+    // the real layer for layer masks,
+    // null for real layers
     protected final Layer parent;
+
     private boolean visible = true;
     final Composition comp;
     protected LayerMask mask;
@@ -143,7 +147,10 @@ public abstract class Layer implements Serializable {
         this.ui = ui;
     }
 
-    protected String getDuplicateLayerName() {
+    protected String getDuplicateLayerName(boolean exact) {
+        if (exact) {
+            return name;
+        }
         String copyString = "copy"; // could be longer or shorter in other languages
         int copyStringLength = copyString.length();
 
@@ -170,7 +177,11 @@ public abstract class Layer implements Serializable {
         return name.substring(0, index + copyStringLength) + ' ' + copyNr;
     }
 
-    public abstract Layer duplicate();
+    /**
+     * If exact is true, then the duplicate layer will
+     * have the same name, otherwise a new "copy name" is generated
+     */
+    public abstract Layer duplicate(boolean exact);
 
     public float getOpacity() {
         return opacity;
@@ -303,10 +314,17 @@ public abstract class Layer implements Serializable {
         }
 
         History.addEdit(edit);
+        MaskViewMode.EDIT_MASK.activate(comp.getIC(), this);
     }
 
-    // called if the deletion of a layer mask is undone
-    public void addMaskBack(LayerMask mask) {
+    /**
+     * Adds a mask that is already configured to be used
+     * with this layer
+     */
+    public void addMask(LayerMask mask) {
+        assert mask != null;
+        assert mask.getParent() == this;
+
         this.mask = mask;
         comp.imageChanged(FULL);
         ui.addMaskIconLabel();
@@ -314,24 +332,24 @@ public abstract class Layer implements Serializable {
         mask.updateIconImage();
     }
 
-    public void deleteMask(AddToHistory addToHistory, boolean switchActiveToNormalView) {
+    public void deleteMask(AddToHistory addToHistory) {
         LayerMask oldMask = mask;
+        MaskViewMode oldMode = comp.getIC().getMaskViewMode();
         mask = null;
         maskEditing = false;
 
         comp.imageChanged(FULL);
 
-        History.addEdit(addToHistory, () -> new DeleteLayerMaskEdit(comp, this, oldMask));
+        History.addEdit(addToHistory, () -> new DeleteLayerMaskEdit(comp, this, oldMask, oldMode));
 
         AppLogic.maskChanged(this);
         ui.deleteMaskIconLabel();
 
-        if (switchActiveToNormalView) {
-            if (isActive()) {
-                comp.getIC().setShowLayerMask(false);
-                FgBgColors.setLayerMaskEditing(false);
-            }
-        }
+//        if (switchActiveToNormalView) {
+//            if (isActive()) {
+        MaskViewMode.NORMAL.activate(comp.getIC(), this);
+//            }
+//        }
     }
 
     /**
@@ -431,6 +449,7 @@ public abstract class Layer implements Serializable {
 
     public void setMaskEditing(boolean b) {
         this.maskEditing = b;
+        ui.setMaskEditing(b); // sets the border around the icon
     }
 
     public boolean isMaskEditing() {
@@ -522,11 +541,18 @@ public abstract class Layer implements Serializable {
     public void setMaskEnabled(boolean maskEnabled, AddToHistory addToHistory) {
         assert mask != null;
         this.maskEnabled = maskEnabled;
+
+        ImageComponent ic = comp.getIC();
+        MaskViewMode oldMode = ic.getMaskViewMode();
+        if (!maskEnabled) {
+            MaskViewMode.NORMAL.activate(ic, this);
+        }
+
         comp.imageChanged(FULL);
         mask.updateIconImage();
         notifyLayerChangeObservers();
 
-        History.addEdit(addToHistory, () -> new EnableLayerMaskEdit(comp, this));
+        History.addEdit(addToHistory, () -> new EnableLayerMaskEdit(comp, this, oldMode));
     }
 
     public boolean useMask() {

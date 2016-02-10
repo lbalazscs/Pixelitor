@@ -24,6 +24,7 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.layers.GlobalLayerChangeListener;
 import pixelitor.layers.GlobalLayerMaskChangeListener;
 import pixelitor.layers.Layer;
+import pixelitor.layers.MaskViewMode;
 import pixelitor.tools.Symmetry;
 import pixelitor.tools.Tools;
 import pixelitor.utils.AppPreferences;
@@ -77,15 +78,8 @@ public class AppLogic {
             listener.activeLayerChanged(newActiveLayer);
         }
 
-        // if the new active layer has no layer mask, then
-        // disable all mask-editing modes
-        if (!newActiveLayer.hasMask()) {
-            Composition comp = newActiveLayer.getComp();
-            if (comp.hasRealIC()) {
-                comp.getIC().setShowLayerMask(false);
-                FgBgColors.setLayerMaskEditing(false);
-            }
-        }
+        // always go to normal mask-viewing mode on the new layer
+        MaskViewMode.NORMAL.activate(newActiveLayer);
     }
 
     public static void layerOrderChanged(Composition comp) {

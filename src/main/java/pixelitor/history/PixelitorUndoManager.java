@@ -19,6 +19,7 @@ package pixelitor.history;
 
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.utils.Messages;
 import pixelitor.utils.VisibleForTesting;
 
 import javax.swing.*;
@@ -97,6 +98,8 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
 
     @Override
     public void undo() throws CannotUndoException {
+        String editName = selectedEdit.getName();
+
         // 1. do the actual undo
         super.undo();
 
@@ -114,6 +117,9 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
             selectedEdit = null;
         }
         manualSelectionChange = true;
+
+        // 3. show status message
+        Messages.showStatusMessage(editName + " undone.");
     }
 
     @Override
@@ -134,6 +140,12 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
             selectedEdit = (PixelitorEdit) edits.get(nextIndex);
         }
         manualSelectionChange = true;
+
+        // this will be true only after the redo is done!
+        String editName = selectedEdit.getName();
+
+        // 3. show status message
+        Messages.showStatusMessage(editName + " redone.");
     }
 
     public int getSelectedIndex() {

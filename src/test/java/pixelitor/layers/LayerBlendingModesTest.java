@@ -1,9 +1,27 @@
+/*
+ * Copyright 2016 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.layers;
 
 import org.jdesktop.swingx.painter.AbstractLayoutPainter;
 import org.junit.Before;
 import org.junit.Test;
 import pixelitor.Composition;
+import pixelitor.TestHelper;
 import pixelitor.filters.Invert;
 import pixelitor.filters.NoOpFilter;
 import pixelitor.filters.OneColorFilter;
@@ -35,6 +53,8 @@ public class LayerBlendingModesTest {
     @Before
     public void setUp() {
         comp = fromImage(create1x1Image(lowerColor), null, "test");
+        TestHelper.setupAnICFor(comp);
+
         this.upperLayer = new ImageLayer(comp, create1x1Image(upperColor), "Layer 2", null);
         comp.addLayerNoGUI(upperLayer);
 
@@ -171,10 +191,10 @@ public class LayerBlendingModesTest {
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // upper layer with a black mask: expect lower color
-        upperLayer.deleteMask(AddToHistory.YES, false);
+        upperLayer.deleteMask(AddToHistory.YES);
         upperLayer.addMask(LayerMaskAddType.HIDE_ALL);
         assertThat(getResultingColor()).isEqualTo(lowerColor);
-        upperLayer.deleteMask(AddToHistory.YES, false);
+        upperLayer.deleteMask(AddToHistory.YES);
 
         // adding an invert adjustment should deliver the inverted color
         Color inverted = invert(expectedColor);
@@ -187,7 +207,7 @@ public class LayerBlendingModesTest {
         assertThat(getResultingColor()).isEqualTo(inverted);
 
         // with a black mask, the adjustment should have no effect
-        invertAdjustment.deleteMask(AddToHistory.YES, false);
+        invertAdjustment.deleteMask(AddToHistory.YES);
         invertAdjustment.addMask(LayerMaskAddType.HIDE_ALL);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
@@ -218,7 +238,7 @@ public class LayerBlendingModesTest {
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // adjustment layer with with black mask, expect lower color
-        alwaysUpperColorAdjustment.deleteMask(AddToHistory.YES, false);
+        alwaysUpperColorAdjustment.deleteMask(AddToHistory.YES);
         alwaysUpperColorAdjustment.addMask(LayerMaskAddType.HIDE_ALL);
         assertThat(getResultingColor()).isEqualTo(lowerColor);
 
@@ -237,7 +257,7 @@ public class LayerBlendingModesTest {
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // text layer with with black mask, expect lower color
-        upperColorTextLayer.deleteMask(AddToHistory.YES, false);
+        upperColorTextLayer.deleteMask(AddToHistory.YES);
         upperColorTextLayer.addMask(LayerMaskAddType.HIDE_ALL);
         assertThat(getResultingColor()).isEqualTo(lowerColor);
 

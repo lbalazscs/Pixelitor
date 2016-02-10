@@ -41,6 +41,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.Toolkit;
+import java.awt.Transparency;
 import java.awt.color.ColorSpace;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -52,6 +53,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.DirectColorModel;
 import java.awt.image.Raster;
@@ -376,21 +378,33 @@ public final class Utils {
         debugImage(img, name);
     }
 
-    public static void debugRaster(Raster raster) {
-        ColorModel colorModel = new DirectColorModel(
-                ColorSpace.getInstance(ColorSpace.CS_sRGB),
-                32,
-                0x00ff0000,// Red
-                0x0000ff00,// Green
-                0x000000ff,// Blue
-                0xff000000,// Alpha
-                true,       // Alpha Premultiplied
-                DataBuffer.TYPE_INT
-        );
+    public static void debugRaster(Raster raster, String name) {
+        ColorModel colorModel;
+        int numBands = raster.getNumBands();
+
+        if (numBands == 4) { // normal color image
+            colorModel = new DirectColorModel(
+                    ColorSpace.getInstance(ColorSpace.CS_sRGB),
+                    32,
+                    0x00ff0000,// Red
+                    0x0000ff00,// Green
+                    0x000000ff,// Blue
+                    0xff000000,// Alpha
+                    true,       // Alpha Premultiplied
+                    DataBuffer.TYPE_INT
+            );
+        } else if (numBands == 1) { // grayscale image
+            ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_GRAY);
+            int[] nBits = {8};
+            colorModel = new ComponentColorModel(cs, nBits, false, true,
+                    Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
+        } else {
+            throw new IllegalStateException("numBands = " + numBands);
+        }
 
         Raster correctlyTranslated = raster.createChild(raster.getMinX(), raster.getMinY(), raster.getWidth(), raster.getHeight(), 0, 0, null);
         BufferedImage debugImage = new BufferedImage(colorModel, (WritableRaster) correctlyTranslated, true, null);
-        debugImage(debugImage);
+        debugImage(debugImage, name);
     }
 
     public static void debugRasterWithEmptySpace(Raster raster) {

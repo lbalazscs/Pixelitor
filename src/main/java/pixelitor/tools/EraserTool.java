@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,11 +17,9 @@
 
 package pixelitor.tools;
 
-import pixelitor.Composition;
-import pixelitor.layers.ImageLayer;
-
 import java.awt.AlphaComposite;
 import java.awt.Cursor;
+import java.awt.Graphics2D;
 
 import static java.awt.AlphaComposite.DST_OUT;
 
@@ -45,10 +43,8 @@ public class EraserTool extends DirectBrushTool {
     }
 
     @Override
-    void createGraphicsForNewBrushStroke(Composition comp, ImageLayer layer) {
-        super.createGraphicsForNewBrushStroke(comp, layer);
-
+    protected void initializeGraphics(Graphics2D g) {
         // the color does not matter as long as AlphaComposite.DST_OUT is used
-        graphics.setComposite(AlphaComposite.getInstance(DST_OUT));
+        g.setComposite(AlphaComposite.getInstance(DST_OUT));
     }
 }

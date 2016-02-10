@@ -133,18 +133,18 @@ public final class ConsistencyChecks {
 
     public static boolean imageCoversCanvasCheck(ImageLayer layer) {
         Composition comp = layer.getComp();
-        BufferedImage bufferedImage = layer.getImage();
+        BufferedImage image = layer.getImage();
 
         int txAbs = -layer.getTX();
         int canvasWidth = comp.getCanvasWidth();
-        int imageWidth = bufferedImage.getWidth();
+        int imageWidth = image.getWidth();
         if (txAbs + canvasWidth > imageWidth + 1) { // allow one pixel difference for rounding effects
             return throwImageDoesNotCoverCanvasException(layer);
         }
 
         int tyAbs = -layer.getTY();
         int canvasHeight = comp.getCanvasHeight();
-        int imageHeight = bufferedImage.getHeight();
+        int imageHeight = image.getHeight();
 
         if (tyAbs + canvasHeight > imageHeight + 1) {
             return throwImageDoesNotCoverCanvasException(layer);

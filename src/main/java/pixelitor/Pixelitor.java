@@ -21,11 +21,15 @@ import com.bric.util.JVM;
 import net.jafama.FastMath;
 import pixelitor.filters.Filter;
 import pixelitor.gui.GUIMessageHandler;
+import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.OpenSaveManager;
+import pixelitor.layers.AddLayerMaskAction;
+import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMaskAddType;
+import pixelitor.layers.MaskViewMode;
 import pixelitor.tools.Tool;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Messages;
@@ -103,6 +107,8 @@ public class Pixelitor {
                 // this property is respected only by the Aqua look-and-feel...
                 System.setProperty("apple.laf.useScreenMenuBar", "true");
                 // ...so set the look-and-feel for the menu only to Aqua
+
+                //noinspection ClassNewInstance
                 menuBar.setUI((MenuBarUI) Class.forName("com.apple.laf.AquaMenuBarUI").newInstance());
             } catch (Exception e) {
                 // ignore
@@ -151,8 +157,10 @@ public class Pixelitor {
             return;
         }
 
+//        clickTool(Tools.GRADIENT);
+//        addMaskAndShowIt();
+
 //        AddTextLayerAction.INSTANCE.actionPerformed(null);
-//        AddLayerMaskAction.INSTANCE.actionPerformed(null);
 
 //        startFilter(new FlowerOfLife());
 
@@ -167,6 +175,13 @@ public class Pixelitor {
 //        new TweenWizard().start(pw);
 
 //        pw.dispatchEvent(new KeyEvent(pw, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), KeyEvent.CTRL_MASK, KeyEvent.VK_T, 'T'));
+    }
+
+    private static void addMaskAndShowIt() {
+        AddLayerMaskAction.INSTANCE.actionPerformed(null);
+        ImageComponent ic = ImageComponents.getActiveIC();
+        Layer layer = ic.getComp().getActiveLayer();
+        MaskViewMode.SHOW_MASK.activate(ic, layer);
     }
 
     private static void clickTool(Tool tool) {

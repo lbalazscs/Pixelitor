@@ -227,4 +227,9 @@ public class Clouds extends FilterWithParametrizedGUI {
             p[i + 256] = p[i];
         }
     }
+
+    @Override
+    public boolean supportsGray() {
+        return false;
+    }
 }
