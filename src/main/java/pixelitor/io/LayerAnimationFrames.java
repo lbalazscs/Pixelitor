@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,8 @@ import pd.AnimatedGifEncoder;
 import pixelitor.Composition;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
+import pixelitor.layers.TextLayer;
+import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
 
 import java.awt.image.BufferedImage;
@@ -54,6 +56,17 @@ public class LayerAnimationFrames {
         if (layer instanceof ImageLayer) {
             ImageLayer imageLayer = (ImageLayer) layer;
             BufferedImage image = imageLayer.getCanvasSizedSubImage();
+
+            if (layer.hasMask()) {
+                // TODO probably problems with translation
+                image = ImageUtils.copyImage(image);
+                layer.getMask().applyToImage(image);
+            }
+
+            images.add(image);
+        } else if (layer instanceof TextLayer) {
+            TextLayer textLayer = (TextLayer) layer;
+            BufferedImage image = textLayer.createRasterizedImage();
             images.add(image);
         }
     }

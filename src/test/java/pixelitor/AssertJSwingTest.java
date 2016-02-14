@@ -37,6 +37,7 @@ import org.assertj.swing.fixture.JListFixture;
 import org.assertj.swing.fixture.JMenuItemFixture;
 import org.assertj.swing.fixture.JOptionPaneFixture;
 import org.assertj.swing.fixture.JPopupMenuFixture;
+import org.assertj.swing.fixture.JSliderFixture;
 import org.assertj.swing.fixture.JTabbedPaneFixture;
 import org.assertj.swing.fixture.JTextComponentFixture;
 import org.assertj.swing.launcher.ApplicationLauncher;
@@ -50,6 +51,7 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.io.FileChoosers;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.LayerButton;
+import pixelitor.menus.view.ZoomControl;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.Selection;
 import pixelitor.tools.BrushType;
@@ -71,6 +73,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
 
@@ -91,7 +94,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static pixelitor.AssertJSwingTest.TestingMode.ON_MASK_VIEW_LAYER;
 import static pixelitor.AssertJSwingTest.TestingMode.ON_MASK_VIEW_MASK;
-import static pixelitor.AssertJSwingTest.TestingMode.WITHOUT_MASK;
+import static pixelitor.AssertJSwingTest.TestingMode.SIMPLE;
 import static pixelitor.AssertJSwingTest.TestingMode.WITH_MASK;
 import static pixelitor.utils.test.Assertions.canvasSizeIs;
 import static pixelitor.utils.test.Assertions.hasSelection;
@@ -113,77 +116,85 @@ public class AssertJSwingTest {
 
     private FrameFixture window;
     private final Random random = new Random();
+    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss");
 
     enum Randomize {YES, NO}
 
-    enum TestingMode {WITHOUT_MASK, WITH_MASK, ON_MASK_VIEW_LAYER, ON_MASK_VIEW_MASK}
+    enum TestingMode {SIMPLE, WITH_MASK, ON_MASK_VIEW_LAYER, ON_MASK_VIEW_MASK}
 
     private TestingMode testingMode;
 
-    public static void main(String[] args) {
-        processCLArguments(args);
+    // TODO for some reason, assertj-swing sees this dialog
+    // only the first time it is shown, this flag is a workaround
+    boolean stokeSettingsSetup = false;
 
-        initialize();
+    public static void main(String[] args) {
+        long startMillis = System.currentTimeMillis();
+
+        initialize(args);
+
         AssertJSwingTest test = new AssertJSwingTest();
         test.setUp();
-        test.testApp();
 
-        System.out.printf("AssertJSwingTest: finished at %s, exiting in 5 seconds", new Date().toString());
+        boolean testOneMethodSlowly = false;
+        if (testOneMethodSlowly) {
+            test.robot.settings().delayBetweenEvents(ROBOT_DELAY_MILLIS_SLOW);
+
+            test.testCloneTool();
+
+        } else {
+            TestingMode[] testingModes = getTestingModes();
+            String target = getTarget();
+
+            for (int i = 0; i < testingModes.length; i++) {
+                TestingMode mode = testingModes[i];
+                test.testTarget(mode, target);
+
+                if (i < testingModes.length - 1) {
+                    // we have another round to go
+                    test.reinitializeTesting();
+                }
+            }
+        }
+
+        long totalTimeMillis = System.currentTimeMillis() - startMillis;
+        System.out.printf("AssertJSwingTest: finished at %s after %s, exiting in 5 seconds",
+                DATE_FORMAT.format(new Date()),
+                Utils.formatMillis(totalTimeMillis));
         Utils.sleep(5, SECONDS);
         test.exit();
     }
 
-    private static void processCLArguments(String[] args) {
-        if (args.length != 1) {
-            System.err.println("Required argument: <base testing directory>");
-            System.exit(1);
+    private void reinitializeTesting() {
+        if (ImageComponents.getNrOfOpenImages() > 0) {
+            closeAll();
         }
-        baseTestingDir = new File(args[0]);
-        if (!baseTestingDir.exists()) {
-            System.err.printf("Base testing dir '%s' does not exist.%n",
-                    baseTestingDir.getAbsolutePath());
-            System.exit(1);
+        openFile("a.jpg");
+
+        window.toggleButton("Shapes Tool Button").click();
+        // make sure that action is set to fill
+        // in order to enable the effects button
+        window.comboBox("actionCB").selectItem(ShapesAction.FILL.toString());
+    }
+
+    private static String getTarget() {
+        String target = System.getProperty("test.target");
+        if (target == null) {
+            target = "all"; // default target
         }
+        return target;
+    }
 
-        inputDir = new File(baseTestingDir, "input");
-        batchResizeOutputDir = new File(baseTestingDir, "batch_resize_output");
-        batchFilterOutputDir = new File(baseTestingDir, "batch_filter_output");
-
-        String cleanerScriptExt;
-        if (JVM.isWindows) {
-            cleanerScriptExt = ".bat";
+    private static TestingMode[] getTestingModes() {
+        TestingMode[] testingModes;
+        String testModeProp = System.getProperty("test.mode");
+        if (testModeProp == null || testModeProp.equals("all")) {
+            testingModes = TestingMode.values();
         } else {
-            cleanerScriptExt = ".sh";
+            TestingMode mode = TestingMode.valueOf(testModeProp);
+            testingModes = new TestingMode[]{mode};
         }
-        cleanerScript = new File(baseTestingDir + File.separator
-                + "0000_clean_outputs" + cleanerScriptExt);
-
-        if (!cleanerScript.exists()) {
-            System.err.printf("Cleaner script %s not found.%n", cleanerScript.getName());
-            System.exit(1);
-        }
-    }
-
-    private static void initialize() {
-        cleanOutputs();
-        checkTestingDirs();
-        Utils.checkThatAssertionsAreEnabled();
-    }
-
-    public void setUp() {
-        robot = BasicRobot.robotWithNewAwtHierarchy();
-
-        ApplicationLauncher
-                .application("pixelitor.Pixelitor")
-                .withArgs((new File(inputDir, "a.jpg")).getPath())
-                .start();
-
-        new PixelitorEventListener().register();
-
-        window = WindowFinder.findFrame("frame0")
-                .withTimeout(15, SECONDS)
-                .using(robot);
-        PixelitorWindow.getInstance().setLocation(0, 0);
+        return testingModes;
     }
 
     /**
@@ -191,31 +202,20 @@ public class AssertJSwingTest {
      * "tools" (includes "Selection" menus),
      * "file", (the "File" menu with the exception of auto paint)
      * "autopaint",
-     * "edit",
+     * "edit", ("Edit" and "Image" menus)
      * "filters" ("Colors" and "Filters" menus),
      * "layers" ("Layers" menus and layer buttons),
      * "develop",
      * "rest" ("View" and "Help" menus)
      */
-    private void testApp() {
-        testingMode = ON_MASK_VIEW_MASK;
+    private void testTarget(TestingMode testingMode, String target) {
+        this.testingMode = testingMode;
         applyTestingMode();
-
-        boolean testOneMethodSlowly = false;
-        if (testOneMethodSlowly) {
-            robot.settings().delayBetweenEvents(ROBOT_DELAY_MILLIS_SLOW);
-
-            testMoveTool();
-
-            return;
-        }
-
         setupRobotSpeed();
-        String target = System.getProperty("test.target");
-        if (target == null) {
-            target = "all"; // default target
-        }
-        System.out.printf("AssertJSwingTest: target = %s, testingMode = %s, started at %s%n", target, testingMode, new Date().toString());
+
+        System.out.printf("AssertJSwingTest: target = %s, testingMode = %s, started at %s%n",
+                target, testingMode, DATE_FORMAT.format(new Date()));
+
         switch (target) {
             case "all":
                 testAll();
@@ -253,12 +253,20 @@ public class AssertJSwingTest {
     private void testAll() {
         testDevelopMenu();
         testTools();
-        testFileMenu();
+
+        if (testingMode == SIMPLE) {
+            testFileMenu();
+        }
+
         testAutoPaint();
         testEditMenu();
         testFilters();
         testViewMenu();
-        testHelpMenu();
+
+        if (testingMode == SIMPLE) {
+            testHelpMenu();
+        }
+
         testLayers();
     }
 
@@ -457,7 +465,7 @@ public class AssertJSwingTest {
         runMenuCommand("Repeat Invert");
         runMenuCommand("Undo Invert");
         runMenuCommand("Redo Invert");
-        testFilterWithDialog("Fade Invert", Randomize.NO, ShowOriginal.YES);
+        testFilterWithDialog("Fade Invert...", Randomize.NO, ShowOriginal.YES);
 
         // select for crop
         window.toggleButton("Selection Tool Button").click();
@@ -563,7 +571,9 @@ public class AssertJSwingTest {
         testExportLayerToPNG();
         testScreenCapture();
         testCloseAll();
-        // reload testing is in testTools
+
+        // open an image for the next test
+        openFile("a.jpg");
     }
 
     private void testNewImage() {
@@ -580,12 +590,7 @@ public class AssertJSwingTest {
         JFileChooserFixture openDialog = JFileChooserFinder.findFileChooser("open").using(robot);
         openDialog.cancel();
 
-        findMenuItemByText("Open...").click();
-        openDialog = JFileChooserFinder.findFileChooser("open").using(robot);
-        openDialog.selectFile(new File(inputDir, "b.jpg"));
-        openDialog.approve();
-
-        applyTestingMode();
+        openFile("b.jpg");
     }
 
     private void testSaveUnnamed() {
@@ -675,33 +680,7 @@ public class AssertJSwingTest {
     private void testCloseAll() {
         assertThat(ImageComponents.getNrOfOpenImages() > 1);
 
-        // save for the next test
-        runMenuCommand("Copy Composite");
-
-        runMenuCommand("Close All");
-
-        // close all warnings
-        boolean warnings = true;
-        while (warnings) {
-            try {
-                JOptionPaneFixture pane = findJOptionPane();
-                // click "Don't Save"
-                pane.button(new GenericTypeMatcher<JButton>(JButton.class) {
-                    @Override
-                    protected boolean isMatching(JButton button) {
-                        return button.getText().equals("Don't Save");
-                    }
-                }).click();
-            } catch (Exception e) { // no more JOptionPane found
-                warnings = false;
-            }
-        }
-
-        assertThat(ImageComponents.getNrOfOpenImages()).isEqualTo(0);
-
-        // restore for the next test
-        runMenuCommand("Paste as New Image");
-        applyTestingMode();
+        closeAll();
     }
 
     private void testBatchResize() {
@@ -1102,7 +1081,6 @@ public class AssertJSwingTest {
         randomAltClick();
 
         setupEffectsDialog();
-        boolean stokeSettingsSetup = false;
 
         for (ShapeType shapeType : ShapeType.values()) {
             window.comboBox("shapeTypeCB").selectItem(shapeType.toString());
@@ -1151,7 +1129,6 @@ public class AssertJSwingTest {
 
     private void setupStrokeSettingsDialog() {
         findButtonByText(window, "Stroke Settings...").click();
-        Utils.sleep(1, SECONDS);
         DialogFixture dialog = findDialogByTitle("Stroke Settings");
 
         dialog.slider().slideTo(20);
@@ -1337,9 +1314,9 @@ public class AssertJSwingTest {
         assert hasSelection();
         findButtonByText(window, "Crop").click();
         assert canvasSizeIs(selectionWidth, selectionHeight);
-        assert noSelection();
+        assert noSelection() : "selected after crop";
         keyboardUndoRedoUndo();
-        assert hasSelection();
+        assert hasSelection() : "no selection after crop undo";
         assert canvasSizeIs(origCanvasWidth, origCanvasHeight);
 
         // crop from the menu
@@ -1442,6 +1419,7 @@ public class AssertJSwingTest {
 
         testMouseWheelZooming();
         testControlPlusMinusZooming();
+        testZoomControlZooming();
     }
 
     private void testControlPlusMinusZooming() {
@@ -1449,6 +1427,20 @@ public class AssertJSwingTest {
         pressCtrlNumpadPlus();
         pressCtrlMinus();
         pressCtrlMinus();
+    }
+
+    private void testZoomControlZooming() {
+        JSliderFixture slider = window.slider(new GenericTypeMatcher<JSlider>(JSlider.class) {
+            @Override
+            protected boolean isMatching(JSlider s) {
+                return s.getParent() == ZoomControl.INSTANCE;
+            }
+        });
+        slider.slideToMinimum();
+
+        findButtonByText(window, "100%").click();
+        slider.slideToMaximum();
+        findButtonByText(window, "Fit").click();
     }
 
     private void pressCtrlNumpadPlus() {
@@ -1464,9 +1456,9 @@ public class AssertJSwingTest {
 
     private void testMouseWheelZooming() {
         window.pressKey(VK_CONTROL);
-        ImageComponent c = (ImageComponent) ImageComponents.getActiveIC();
-        robot.rotateMouseWheel(c, 2);
-        robot.rotateMouseWheel(c, -2);
+        ImageComponent ic = ImageComponents.getActiveIC();
+        robot.rotateMouseWheel(ic, 2);
+        robot.rotateMouseWheel(ic, -2);
         window.releaseKey(VK_CONTROL);
     }
 
@@ -1573,7 +1565,7 @@ public class AssertJSwingTest {
         return container.button(matcher);
     }
 
-    private JMenuItemFixture findPopupMenuFixtureByText(JPopupMenuFixture popupMenu, String text) {
+    private static JMenuItemFixture findPopupMenuFixtureByText(JPopupMenuFixture popupMenu, String text) {
         JMenuItemFixture menuItemFixture = popupMenu.menuItem(
                 new GenericTypeMatcher<JMenuItem>(JMenuItem.class) {
                     @Override
@@ -1808,7 +1800,7 @@ public class AssertJSwingTest {
      * in order to set up the mask testing mode
      */
     private void applyTestingMode() {
-        if (testingMode == WITHOUT_MASK) {
+        if (testingMode == SIMPLE) {
             // do nothing
         } else if (testingMode == WITH_MASK) {
             // existing masks are allowed because even if they result
@@ -1837,5 +1829,92 @@ public class AssertJSwingTest {
     private void pressCtrlThree() {
         window.pressKey(VK_CONTROL).pressKey(VK_3)
                 .releaseKey(VK_3).releaseKey(VK_CONTROL);
+    }
+
+    private void openFile(String fileName) {
+        JFileChooserFixture openDialog;
+        findMenuItemByText("Open...").click();
+        openDialog = JFileChooserFinder.findFileChooser("open").using(robot);
+        openDialog.selectFile(new File(inputDir, fileName));
+        openDialog.approve();
+
+        applyTestingMode();
+    }
+
+    private void closeAll() {
+        runMenuCommand("Close All");
+
+        // close all warnings
+        boolean warnings = true;
+        while (warnings) {
+            try {
+                JOptionPaneFixture pane = findJOptionPane();
+                // click "Don't Save"
+                pane.button(new GenericTypeMatcher<JButton>(JButton.class) {
+                    @Override
+                    protected boolean isMatching(JButton button) {
+                        return button.getText().equals("Don't Save");
+                    }
+                }).click();
+            } catch (Exception e) { // no more JOptionPane found
+                warnings = false;
+            }
+        }
+
+        assertThat(ImageComponents.getNrOfOpenImages()).isEqualTo(0);
+    }
+
+    private static void processCLArguments(String[] args) {
+        if (args.length != 1) {
+            System.err.println("Required argument: <base testing directory>");
+            System.exit(1);
+        }
+        baseTestingDir = new File(args[0]);
+        if (!baseTestingDir.exists()) {
+            System.err.printf("Base testing dir '%s' does not exist.%n",
+                    baseTestingDir.getAbsolutePath());
+            System.exit(1);
+        }
+
+        inputDir = new File(baseTestingDir, "input");
+        batchResizeOutputDir = new File(baseTestingDir, "batch_resize_output");
+        batchFilterOutputDir = new File(baseTestingDir, "batch_filter_output");
+
+        String cleanerScriptExt;
+        if (JVM.isWindows) {
+            cleanerScriptExt = ".bat";
+        } else {
+            cleanerScriptExt = ".sh";
+        }
+        cleanerScript = new File(baseTestingDir + File.separator
+                + "0000_clean_outputs" + cleanerScriptExt);
+
+        if (!cleanerScript.exists()) {
+            System.err.printf("Cleaner script %s not found.%n", cleanerScript.getName());
+            System.exit(1);
+        }
+    }
+
+    private static void initialize(String[] args) {
+        processCLArguments(args);
+        cleanOutputs();
+        checkTestingDirs();
+        Utils.checkThatAssertionsAreEnabled();
+    }
+
+    public void setUp() {
+        robot = BasicRobot.robotWithNewAwtHierarchy();
+
+        ApplicationLauncher
+                .application("pixelitor.Pixelitor")
+                .withArgs((new File(inputDir, "a.jpg")).getPath())
+                .start();
+
+        new PixelitorEventListener().register();
+
+        window = WindowFinder.findFrame("frame0")
+                .withTimeout(15, SECONDS)
+                .using(robot);
+        PixelitorWindow.getInstance().setLocation(0, 0);
     }
 }

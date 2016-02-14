@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -53,8 +53,11 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
         return name;
     }
 
+    /**
+     * Can be overridden to include more information
+     */
     public String getDebugName() {
-        return getPresentationName();
+        return name;
     }
 
     public boolean canRepeat() {

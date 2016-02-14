@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -16,7 +16,6 @@
  */
 package pixelitor.menus;
 
-import pixelitor.menus.edit.FadeMenuItem;
 import pixelitor.menus.edit.RedoMenuItem;
 import pixelitor.menus.edit.UndoMenuItem;
 
@@ -35,11 +34,6 @@ enum EnabledIf {
         @Override
         public JMenuItem getMenuItem(Action a) {
             return new RepeatMenuItem(a);
-        }
-    }, FADING_POSSIBLE {
-        @Override
-        public JMenuItem getMenuItem(Action a) {
-            return new FadeMenuItem(a);
         }
     }, UNDO_POSSIBLE {
         @Override

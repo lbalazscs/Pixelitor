@@ -27,7 +27,8 @@ public interface ImageSwitchListener {
     void noOpenImageAnymore();
 
     /**
-     * Called when the user has opened a new image
+     * Called when the user has opened a new image,
+     * and also when the composition was reloaded.
      */
     void newImageOpened(Composition comp);
 

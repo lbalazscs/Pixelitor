@@ -32,6 +32,7 @@ import pixelitor.tools.brushes.Brush;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.SymmetryBrush;
 import pixelitor.utils.ImageSwitchListener;
+import pixelitor.utils.VisibleForTesting;
 
 import javax.swing.*;
 import java.awt.Composite;
@@ -197,9 +198,8 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     public void drawBrushStrokeProgrammatically(Composition comp, Point start, Point end) {
         prepareProgrammaticBrushStroke(comp, start);
 
-        Brush paintingBrush = getPaintingBrush();
-        paintingBrush.onDragStart(start.x, start.y);
-        paintingBrush.onNewMousePoint(end.x, end.y);
+        brush.onDragStart(start.x, start.y);
+        brush.onNewMousePoint(end.x, end.y);
 
         finishBrushStroke(comp);
     }
@@ -374,7 +374,13 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         return true;
     }
 
-    protected Brush getPaintingBrush() {
+    @VisibleForTesting
+    protected Brush getBrush() {
         return brush;
+    }
+
+    @VisibleForTesting
+    protected void setBrush(Brush brush) {
+        this.brush = brush;
     }
 }

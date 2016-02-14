@@ -18,13 +18,19 @@
 package pixelitor.menus.edit;
 
 import pixelitor.AppLogic;
+import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponents;
 import pixelitor.history.AddToHistory;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
+import pixelitor.layers.LayerMask;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+
+import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 
 /**
  * Represents the destination of the pasted image
@@ -38,7 +44,7 @@ public enum PasteDestination {
 
         @Override
         void addImage(BufferedImage pastedImage) {
-            Composition comp = ImageComponents.getActiveComp().get();
+            Composition comp = ImageComponents.getActiveCompOrNull();
             Layer newLayer = new ImageLayer(comp, pastedImage, "Pasted Layer", comp.getCanvasWidth(), comp.getCanvasHeight());
 
             comp.addLayer(newLayer, AddToHistory.YES, "New Pasted Layer", true, false);
@@ -60,6 +66,44 @@ public enum PasteDestination {
 
             AppLogic.addComposition(comp);
             pastedCount++;
+        }
+    }, MASK {
+        @Override
+        public String toString() {
+            return "Paste as Layer Mask";
+        }
+
+        @Override
+        void addImage(BufferedImage pastedImage) {
+            Composition comp = ImageComponents.getActiveCompOrNull();
+            Canvas canvas = comp.getCanvas();
+            int width = canvas.getWidth();
+            int height = canvas.getHeight();
+
+            int imgWidth = pastedImage.getWidth();
+            int imgHeight = pastedImage.getHeight();
+
+            BufferedImage bwImage = new BufferedImage(width, height, TYPE_BYTE_GRAY);
+            Graphics2D g = bwImage.createGraphics();
+
+            if (imgWidth < width || imgHeight < height) {
+                g.setColor(Color.WHITE);
+                g.fillRect(0, 0, width, height);
+            }
+
+            int x = (width - imgWidth) / 2;
+            int y = (height - imgHeight) / 2;
+            g.drawImage(pastedImage, x, y, null);
+
+            g.dispose();
+
+            Layer layer = comp.getActiveLayer();
+            if (layer.hasMask()) {
+                LayerMask mask = layer.getMask();
+                mask.replaceImage(bwImage, "Replace Mask");
+            } else {
+                layer.addImageAsMask(bwImage, false, "Add Pasted Mask");
+            }
         }
     };
 

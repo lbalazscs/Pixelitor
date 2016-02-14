@@ -17,7 +17,7 @@
 
 package pixelitor.gui;
 
-import pixelitor.menus.view.ZoomComponent;
+import pixelitor.menus.view.ZoomControl;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -42,7 +42,7 @@ public class StatusBar extends JPanel {
         leftPanel.add(statusBarLabel);
 
         add(leftPanel, BorderLayout.CENTER);
-        add(ZoomComponent.INSTANCE, BorderLayout.EAST);
+        add(ZoomControl.INSTANCE, BorderLayout.EAST);
 
         setBorder(BorderFactory.createEtchedBorder());
     }

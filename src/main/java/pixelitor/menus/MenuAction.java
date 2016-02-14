@@ -69,6 +69,23 @@ public abstract class MenuAction extends NamedAction {
             public String getErrorMessage(Layer layer) {
                 return String.format("The layer \"%s\" is not an image layer.", layer.getName());
             }
+        }, IS_IMAGE_LAYER_OR_MASK("Not an image layer or mask") {
+            @Override
+            boolean isAllowed(Layer layer) {
+                if (layer instanceof ImageLayer) {
+                    return true;
+                }
+                if (layer.isMaskEditing()) {
+                    return true;
+                }
+
+                return false;
+            }
+
+            @Override
+            public String getErrorMessage(Layer layer) {
+                return String.format("The active layer is not an image layer or a mask.");
+            }
         };
 
         private final String errorTitle;

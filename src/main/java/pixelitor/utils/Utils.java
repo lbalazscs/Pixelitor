@@ -481,6 +481,20 @@ public final class Utils {
         return s;
     }
 
+    public static String formatMillis(long millis) {
+        long seconds = millis / 1000;
+        long s = seconds % 60;
+        long m = (seconds / 60) % 60;
+        long h = (seconds / (60 * 60)) % 24;
+        return String.format("%d:%02d:%02d", h, m, s);
+    }
+
+    public static boolean callingClassIs(String name) {
+        // designed to be used in assertions:
+        // it checks the caller of the caller
+        String callingClassName = new Exception().getStackTrace()[2].getClassName();
+        return callingClassName.contains(name);
+    }
 
     public static <T> void setupDisableOtherIf(ComboBoxModel<T> current, FilterSetting other, Predicate<T> condition) {
         current.addListDataListener(new ListDataListener() {

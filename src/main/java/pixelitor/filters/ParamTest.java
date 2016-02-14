@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -55,7 +55,7 @@ public class ParamTest extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        if ((Build.CURRENT == Build.DEVELOPMENT) && (!Build.CURRENT.isRandomGUITest()) && (!Build.CURRENT.isPerformanceTest())) {
+        if ((Build.CURRENT == Build.DEVELOPMENT) && (!Build.CURRENT.isRandomGUITest())) {
             System.out.println("ParamTest.doTransform CALLED");
         }
 

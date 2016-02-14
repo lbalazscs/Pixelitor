@@ -456,15 +456,15 @@ public class Composition implements Serializable {
         layer.changePreviewImage(img, filterName, changeReason);
     }
 
-    public boolean activeIsImageLayer() {
-        return (activeLayer instanceof ImageLayer) || activeLayer.isMaskEditing();
-    }
-
-    public boolean hasActiveImageLayerOrMask() {
-        if (activeLayer instanceof ImageLayer) {
+    public boolean activeIsImageLayerOrMask() {
+        if(activeLayer instanceof ImageLayer) {
             return true;
         }
-        return activeLayer.hasMask();
+        if(activeLayer.isMaskEditing()) {
+            return true;
+        }
+
+        return false;
     }
 
     public Layer getActiveMaskOrLayer() {
@@ -532,10 +532,6 @@ public class Composition implements Serializable {
     public BufferedImage getImageOrSubImageIfSelectedForActiveLayer(boolean copyIfFull, boolean copyAndTranslateIfSelected) {
         return getActiveMaskOrImageLayer()
                 .getImageOrSubImageIfSelected(copyIfFull, copyAndTranslateIfSelected);
-    }
-
-    public BufferedImage getFilterSource() {
-        return getActiveMaskOrImageLayer().getFilterSourceImage();
     }
 
     public void startMovement(boolean duplicateLayer) {

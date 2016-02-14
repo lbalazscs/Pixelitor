@@ -46,7 +46,7 @@ public class Events {
     }
 
     public static void postListenerEvent(String type, Composition comp, Layer layer) {
-        post(new PixelitorEvent("[L] " + type, comp, layer));
+        post(new PixelitorEvent("[LISTENER] " + type, comp, layer));
     }
 
     public static void postAssertJEvent(String type) {
@@ -54,26 +54,28 @@ public class Events {
     }
 
     public static void postAssertJEvent(String type, Composition comp, Layer layer) {
-        post(new PixelitorEvent("[A] " + type, comp, layer));
+        post(new PixelitorEvent("[ASSERTJ] " + type, comp, layer));
     }
 
     public static void postAddToHistoryEvent(PixelitorEdit edit) {
         post(new PixelitorEvent("    [ADD TO HIST] " + edit.getDebugName(), null, null));
     }
 
-    public static void postUndoEvent() {
-        post(new PixelitorEvent("    [UNDO]", null, null));
+    public static void postUndoEvent(PixelitorEdit editToBeUndone) {
+        String editName = editToBeUndone.getDebugName();
+        post(new PixelitorEvent("    [UNDO " + editName + "]", null, null));
     }
 
-    public static void postRedoEvent() {
-        post(new PixelitorEvent("    [REDO]", null, null));
+    public static void postRedoEvent(PixelitorEdit editToBeRedone) {
+        String editName = editToBeRedone.getDebugName();
+        post(new PixelitorEvent("    [REDO " + editName + "]", null, null));
     }
 
     /**
      * An event that signalizes the start of a RandomGUITest step
      */
     public static void postRandomTestEvent(String description) {
-        post(new PixelitorEvent("[R] " + description, null, null));
+        post(new PixelitorEvent("[RAND] " + description, null, null));
     }
 
     public static void dump() {

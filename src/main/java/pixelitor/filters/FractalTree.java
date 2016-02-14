@@ -47,10 +47,10 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 public class FractalTree extends FilterWithParametrizedGUI {
     public static final String NAME = "Fractal Tree";
 
-    public static final Color BROWN = new Color(140, 100, 73);
-    public static final Color GREEN = new Color(31, 125, 42);
-    public static final int QUALITY_BETTER = 1;
-    public static final int QUALITY_FASTER = 2;
+    private static final Color BROWN = new Color(140, 100, 73);
+    private static final Color GREEN = new Color(31, 125, 42);
+    private static final int QUALITY_BETTER = 1;
+    private static final int QUALITY_FASTER = 2;
 
     private final RangeParam iterations = new RangeParam("Age (Iterations)", 1, 10, 17);
     private final RangeParam angle = new RangeParam("Angle", 1, 20, 45);
@@ -80,7 +80,7 @@ public class FractalTree extends FilterWithParametrizedGUI {
     private boolean leftFirst;
     private boolean hasRandomness;
 
-    final GradientParam colors = new GradientParam("Colors",
+    private final GradientParam colors = new GradientParam("Colors",
             new float[]{0.25f, 0.75f},
             new Color[]{BROWN, GREEN}, IGNORE_RANDOMIZE);
     private double defaultLength;

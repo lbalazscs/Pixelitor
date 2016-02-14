@@ -45,7 +45,7 @@ public class ColorSelector extends JPanel implements ParamGUI {
 //        button = new JButton();
 //        button.setPreferredSize(new Dimension(BUTTON_SIZE, BUTTON_SIZE));
 //        button.setBackground(model.getColor());
-//        button.addActionListener(this);
+//        button.addActionListener(e -> showColorDialog());
 //        add(button);
 
         colorSwatch = new ColorSwatch(model.getColor(), BUTTON_SIZE);
@@ -53,7 +53,7 @@ public class ColorSelector extends JPanel implements ParamGUI {
 
         colorSwatch.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mouseReleased(MouseEvent e) {
                 showColorDialog();
             }
         });
@@ -77,7 +77,7 @@ public class ColorSelector extends JPanel implements ParamGUI {
 
     @Override
     public void updateGUI() {
-        // button.setBackground(model.getColor());
+//        button.setBackground(model.getColor());
 
         colorSwatch.setForeground(model.getColor());
     }
@@ -85,5 +85,7 @@ public class ColorSelector extends JPanel implements ParamGUI {
     @Override
     public void setToolTip(String tip) {
         colorSwatch.setToolTipText(tip);
+
+//        button.setToolTipText(tip);
     }
 }

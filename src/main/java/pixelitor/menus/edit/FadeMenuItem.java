@@ -18,6 +18,8 @@
 package pixelitor.menus.edit;
 
 import pixelitor.Composition;
+import pixelitor.filters.Fade;
+import pixelitor.filters.FilterAction;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.history.History;
@@ -31,8 +33,10 @@ import javax.swing.event.UndoableEditListener;
  * The Fade menu item. It is enabled only if fading is possible.
  */
 public class FadeMenuItem extends JMenuItem implements UndoableEditListener, ImageSwitchListener {
-    public FadeMenuItem(Action a) {
-        super(a);
+    public static final FadeMenuItem INSTANCE = new FadeMenuItem();
+
+    private FadeMenuItem() {
+        super(new FilterAction("Fade", Fade::new));
         History.addUndoableEditListener(this);
         ImageComponents.addImageSwitchListener(this);
         setEnabled(false);
@@ -41,9 +45,17 @@ public class FadeMenuItem extends JMenuItem implements UndoableEditListener, Ima
     @Override
     public void undoableEditHappened(UndoableEditEvent e) {
         boolean b = History.canFade();
+        refresh(b);
+    }
 
-        setEnabled(b);
-        getAction().putValue(Action.NAME, "Fade " + History.getLastEditName());
+    public void refresh(boolean canFade) {
+        setEnabled(canFade);
+        Action action = getAction();
+        if (canFade) {
+            action.putValue(Action.NAME, "Fade " + History.getLastEditName() + "...");
+        } else {
+            action.putValue(Action.NAME, "Fade...");
+        }
     }
 
     @Override

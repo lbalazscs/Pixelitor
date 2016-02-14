@@ -23,10 +23,10 @@ import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.FgBgColorSelector;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.history.History;
 import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
-import pixelitor.layers.LayerMaskAddType;
 import pixelitor.layers.TextLayer;
 import pixelitor.selection.Selection;
 import pixelitor.tools.Alt;
@@ -52,19 +52,39 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.when;
+import static pixelitor.layers.LayerMaskAddType.REVEAL_ALL;
 import static pixelitor.layers.MaskViewMode.NORMAL;
 
 public class TestHelper {
     private static final int TEST_WIDTH = 20;
     private static final int TEST_HEIGHT = 10;
     private static final Component eventSource = new JPanel();
+    private static boolean initialized = false;
 
     static {
-        setupMockFgBgSelector();
-        Messages.setMessageHandler(new TestMessageHandler());
+        initTesting();
     }
 
     private TestHelper() {
+    }
+
+    /**
+     * Initialize some static methods that must be done only once
+     */
+    public static void initTesting() {
+        if (!initialized) {
+            setupMockFgBgSelector();
+            Messages.setMessageHandler(new TestMessageHandler());
+            History.setUndoLevels(10);
+            initialized = true;
+        }
+    }
+
+    private static void setupMockFgBgSelector() {
+        FgBgColorSelector fgBgColorSelector = mock(FgBgColorSelector.class);
+        when(fgBgColorSelector.getFgColor()).thenReturn(Color.BLACK);
+        when(fgBgColorSelector.getBgColor()).thenReturn(Color.WHITE);
+        FgBgColors.setGUI(fgBgColorSelector);
     }
 
     public static ImageLayer createImageLayer(String layerName, Composition comp) {
@@ -83,7 +103,7 @@ public class TestHelper {
 
     public static Composition createEmptyComposition() {
         Composition comp = Composition.createEmpty(TEST_WIDTH, TEST_HEIGHT);
-        ImageComponent ic = setupAnICFor(comp);
+        setupAnICFor(comp);
 
         comp.setName("Test");
 
@@ -120,8 +140,8 @@ public class TestHelper {
         c.addLayerNoGUI(layer2);
 
         if (addMasks) {
-            layer1.addMask(LayerMaskAddType.REVEAL_ALL);
-            layer2.addMask(LayerMaskAddType.REVEAL_ALL);
+            layer1.addMask(REVEAL_ALL);
+            layer2.addMask(REVEAL_ALL);
         }
 
         // TODO it should not be necessary to call
@@ -158,13 +178,6 @@ public class TestHelper {
             throw new IllegalStateException();
         }
         return layer;
-    }
-
-    public static void setupMockFgBgSelector() {
-        FgBgColorSelector fgBgColorSelector = mock(FgBgColorSelector.class);
-        when(fgBgColorSelector.getFgColor()).thenReturn(Color.BLACK);
-        when(fgBgColorSelector.getBgColor()).thenReturn(Color.WHITE);
-        FgBgColors.setGUI(fgBgColorSelector);
     }
 
     public static MouseEvent createEvent(int id, Alt alt, Ctrl ctrl, Shift shift, Mouse mouse, int x, int y) {
@@ -207,7 +220,8 @@ public class TestHelper {
         Cursor cursor = Cursor.getDefaultCursor();
         when(ic.getCursor()).thenReturn(cursor);
 
-        when(ic.activeIsImageLayer()).thenAnswer(invocation -> comp.activeIsImageLayer());
+        when(ic.activeIsImageLayerOrMask()).thenAnswer(
+                invocation -> comp.activeIsImageLayerOrMask());
 
         JViewport parent = new JViewport();
         when(ic.getParent()).thenReturn(parent);

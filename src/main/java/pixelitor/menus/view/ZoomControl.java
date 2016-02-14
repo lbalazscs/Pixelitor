@@ -34,15 +34,19 @@ import static pixelitor.tools.AutoZoomButtons.FIT_SCREEN_TOOLTIP;
 /**
  * The zoom widget in the status bar
  */
-public class ZoomComponent extends JPanel implements ImageSwitchListener {
-    public static final ZoomComponent INSTANCE = new ZoomComponent();
+public class ZoomControl extends JPanel implements ImageSwitchListener {
+    public static final ZoomControl INSTANCE = new ZoomControl();
 
     private static final int PREFERRED_HEIGHT = 17;
     private final JSlider zoomSlider;
     private final JLabel zoomDisplay;
     private final JLabel zoomLabel;
+    private final JButton fitButton;
+    private final JButton actualPixelsButton;
 
-    private ZoomComponent() {
+    private boolean enabled = true;
+
+    private ZoomControl() {
         super(new FlowLayout(FlowLayout.LEFT, 0, 0));
 
         ZoomLevel[] values = ZoomLevel.values();
@@ -75,14 +79,14 @@ public class ZoomComponent extends JPanel implements ImageSwitchListener {
         add(zoomDisplay);
 
         Dimension buttonSize = new Dimension(60, PREFERRED_HEIGHT);
-        addZoomButton(buttonSize, "Fit", FIT_SCREEN_ACTION, FIT_SCREEN_TOOLTIP);
-        addZoomButton(buttonSize, "100%", ACTUAL_PIXELS_ACTION, ACTUAL_PIXELS_TOOLTIP);
+        fitButton = addZoomButton(buttonSize, "Fit", FIT_SCREEN_ACTION, FIT_SCREEN_TOOLTIP);
+        actualPixelsButton = addZoomButton(buttonSize, "100%", ACTUAL_PIXELS_ACTION, ACTUAL_PIXELS_TOOLTIP);
 
         setLookIfNoImage();
         ImageComponents.addImageSwitchListener(this);
     }
 
-    private void addZoomButton(Dimension buttonSize, String text, Action action, String tooltip) {
+    private JButton addZoomButton(Dimension buttonSize, String text, Action action, String tooltip) {
         JButton b = new JButton(text) {
             boolean shiftLocation = true;
 
@@ -119,17 +123,18 @@ public class ZoomComponent extends JPanel implements ImageSwitchListener {
 //        b.putClientProperty("Nimbus.Overrides", def);
 
         add(b);
+        return b;
     }
 
     private void setLookIfNoImage() {
-        zoomLabel.setEnabled(false);
-        zoomSlider.setEnabled(false);
+        setEnabled(false);
+
         zoomDisplay.setText("");
     }
 
     public void setToNewZoom(ZoomLevel newZoom) {
-        zoomLabel.setEnabled(true);
-        zoomSlider.setEnabled(true);
+        setEnabled(true);
+
         zoomSlider.setValue(newZoom.ordinal());
         setNewZoomText(newZoom);
     }
@@ -152,5 +157,16 @@ public class ZoomComponent extends JPanel implements ImageSwitchListener {
     @Override
     public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
         setToNewZoom(newIC.getZoomLevel());
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        if (this.enabled != enabled) {
+            zoomLabel.setEnabled(enabled);
+            zoomSlider.setEnabled(enabled);
+            fitButton.setEnabled(enabled);
+            actualPixelsButton.setEnabled(enabled);
+        }
+        this.enabled = enabled;
     }
 }

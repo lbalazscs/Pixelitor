@@ -22,7 +22,6 @@ import pixelitor.menus.NamedAction;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -37,26 +36,29 @@ public class LayerMaskActions {
         label.addMouseListener(new PopupMouseListener(layer));
     }
 
-    private static Layer getLayer(JPopupMenu menu) {
-        Component invoker = menu.getInvoker();
-        LayerButton layerButton = (LayerButton) invoker.getParent();
-        Layer layer = layerButton.getLayer();
-        return layer;
-    }
-
     private static class PopupMouseListener extends MouseAdapter {
         private final JPopupMenu menu;
 
         public PopupMouseListener(Layer layer) {
             menu = new JPopupMenu();
+
+            JMenu showMenu = new JMenu("Show/Edit");
+            menu.add(showMenu);
+            showMenu.add(MaskViewMode.NORMAL.createPopupMenuItem(layer));
+            showMenu.add(MaskViewMode.SHOW_MASK.createPopupMenuItem(layer));
+            showMenu.add(MaskViewMode.EDIT_MASK.createPopupMenuItem(layer));
+            menu.addSeparator();
+
             menu.add(new JMenuItem(new DeleteMaskAction(layer)));
 
+            // masks can be applied only to image layers
             if (layer instanceof ImageLayer) {
                 menu.add(new JMenuItem(new ApplyMaskAction(layer)));
             }
 
             menu.add(new JMenuItem(new EnableDisableMaskAction(layer)));
 
+            // masks can be linked only to content layers
             if (layer instanceof ContentLayer) {
                 menu.add(new JMenuItem(new LinkUnlinkMaskAction(layer)));
             }
@@ -108,6 +110,8 @@ public class LayerMaskActions {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (!(layer instanceof ImageLayer)) {
+                // actually we should never get here because the popup menu
+                // is enabled only for image layers
                 Messages.showNotImageLayerError();
                 return;
             }

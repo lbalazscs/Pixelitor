@@ -24,7 +24,7 @@ import pixelitor.gui.utils.OKDialog;
 import javax.swing.*;
 import java.awt.Rectangle;
 
-import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
  * Shape effects in a dialog
@@ -34,7 +34,7 @@ public class EffectsParam extends AbstractFilterParam {
     private final boolean separateDialog;
 
     public EffectsParam(String name) {
-        super(name, ALLOW_RANDOMIZE);
+        super(name, IGNORE_RANDOMIZE); // randomize() is not implemented!
         this.separateDialog = true;
     }
 
@@ -105,7 +105,10 @@ public class EffectsParam extends AbstractFilterParam {
 
     @Override
     public boolean isSetToDefault() {
-        return effectsPanel.isSetToDefault();
+        if (effectsPanel != null) {
+            return effectsPanel.isSetToDefault();
+        }
+        return true;
     }
 
     @Override

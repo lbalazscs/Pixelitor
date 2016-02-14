@@ -21,6 +21,7 @@ import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.history.History;
+import pixelitor.history.PixelitorEdit;
 import pixelitor.utils.ImageSwitchListener;
 
 import javax.swing.*;
@@ -40,8 +41,16 @@ public class RepeatMenuItem extends JMenuItem implements UndoableEditListener, I
 
     @Override
     public void undoableEditHappened(UndoableEditEvent e) {
-        setEnabled(History.canRepeatOperation());
-        getAction().putValue(Action.NAME, "Repeat " + History.getLastEditName());
+        PixelitorEdit edit = (PixelitorEdit) e.getEdit();
+
+        if (edit == null) { // happens when all images are closed
+            setEnabled(false);
+            getAction().putValue(Action.NAME, "Repeat");
+            return;
+        }
+
+        setEnabled(edit.canRepeat());
+        getAction().putValue(Action.NAME, "Repeat " + edit.getPresentationName());
     }
 
     @Override
@@ -61,7 +70,7 @@ public class RepeatMenuItem extends JMenuItem implements UndoableEditListener, I
     }
 
     private void onNewComp(Composition comp) {
-        if (comp.activeIsImageLayer()) {
+        if (comp.activeIsImageLayerOrMask()) {
             setEnabled(History.canRepeatOperation());
             getAction().putValue(Action.NAME, "Repeat " + History.getLastEditName());
         } else {

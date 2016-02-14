@@ -25,11 +25,8 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Composition;
-import pixelitor.MessageHandler;
 import pixelitor.TestHelper;
-import pixelitor.TestMessageHandler;
 import pixelitor.gui.ImageComponent;
-import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
@@ -52,11 +49,7 @@ public class ToolTest {
     public Tool tool;
 
     @Parameters(name = "{index}: {0}")
-    public static Collection<Object[]> instancesToTest() {
-        TestHelper.setupMockFgBgSelector();
-
-        MessageHandler messageHandler = new TestMessageHandler();
-        Messages.setMessageHandler(messageHandler);
+    public static Collection<Object[]> instancesToTest() throws InvocationTargetException, InterruptedException {
         Tools.CLONE.setState(CloneTool.State.CLONING);
 
         Tool[] tools = Tools.getTools();
@@ -64,6 +57,10 @@ public class ToolTest {
 
         List<Object[]> instances = new ArrayList<>();
         for (Tool tool : tools) {
+            tool.setSettingsPanel(new ToolSettingsPanel());
+//            tool.initSettingsPanel();
+            SwingUtilities.invokeAndWait(tool::initSettingsPanel);
+
             instances.add(new Object[]{tool});
         }
 
@@ -71,14 +68,7 @@ public class ToolTest {
     }
 
     @Before
-    public void setUp() throws InvocationTargetException, InterruptedException {
-        ToolSettingsPanel settingsPanel = new ToolSettingsPanel();
-        tool.setSettingsPanel(settingsPanel);
-
-        // TODO
-        SwingUtilities.invokeAndWait(tool::initSettingsPanel);
-//        tool.initSettingsPanel();
-
+    public void setUp()  {
         tool.toolStarted();
         Composition comp = TestHelper.create2LayerComposition(true);
 

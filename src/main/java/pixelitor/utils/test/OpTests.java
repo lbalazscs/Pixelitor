@@ -17,7 +17,6 @@
 
 package pixelitor.utils.test;
 
-import pixelitor.Build;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
 import pixelitor.automate.SingleDirChooserPanel;
@@ -193,7 +192,6 @@ public class OpTests {
 
     public static void findSlowestFilter() {
         assert SwingUtilities.isEventDispatchThread();
-        Build.CURRENT.setPerformanceTest(true);
 
         Filter[] filters = FilterUtils.getFiltersShuffled(
                 f -> (!(f instanceof Fade || f instanceof Canny))

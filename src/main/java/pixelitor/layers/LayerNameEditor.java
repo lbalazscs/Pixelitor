@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,6 +31,9 @@ public class LayerNameEditor extends JTextField {
 
     public LayerNameEditor(LayerButton layerButton, Layer layer) {
         super(layer.getName());
+
+        setToolTipText("Double-click to rename this layer.");
+
         this.layerButton = layerButton;
         disableEditing();
 

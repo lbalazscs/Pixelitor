@@ -52,7 +52,7 @@ public class Rotate extends SimpleCompAction {
     }
 
     @Override
-    protected void applyTx(ContentLayer contentLayer, AffineTransform tx) {
+    protected void applyTx(ContentLayer contentLayer) {
         contentLayer.rotate(angle);
     }
 

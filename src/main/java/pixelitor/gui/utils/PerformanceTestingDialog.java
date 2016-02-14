@@ -17,7 +17,6 @@
 
 package pixelitor.gui.utils;
 
-import pixelitor.Build;
 import pixelitor.ChangeReason;
 import pixelitor.filters.Filter;
 import pixelitor.filters.FilterAction;
@@ -167,7 +166,6 @@ public class PerformanceTestingDialog extends JDialog implements ActionListener,
 
         @Override
         public Void doInBackground() {
-            Build.CURRENT.setPerformanceTest(true);
             //Initialize progress property.
             int progress = 0;
 
@@ -196,8 +194,6 @@ public class PerformanceTestingDialog extends JDialog implements ActionListener,
                     String results = getReport(op.getName(), (i + 1), totalTime, shortestTime);
                     showResults(results);
 
-                    Build.CURRENT.setPerformanceTest(false);
-
                     return null;
                 }
             }
@@ -205,8 +201,6 @@ public class PerformanceTestingDialog extends JDialog implements ActionListener,
             totalTime = (System.nanoTime() - startTime) / 1000000;
             String results = getReport(op.getName(), executions, totalTime, shortestTime);
             showResults(results);
-
-            Build.CURRENT.setPerformanceTest(false);
 
             return null;
         }

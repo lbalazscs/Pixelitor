@@ -34,6 +34,7 @@ import pixelitor.layers.ImageLayerTest;
 import pixelitor.layers.LayerBlendingModesTest;
 import pixelitor.layers.LayerTest;
 import pixelitor.layers.TextLayerTest;
+import pixelitor.tools.AbstractBrushToolTest;
 import pixelitor.tools.ToolTest;
 
 /**
@@ -65,6 +66,7 @@ import pixelitor.tools.ToolTest;
         LayerTest.class,
         TextLayerTest.class,
         ToolTest.class,
+        AbstractBrushToolTest.class,
 })
 public class AllTestsSuite {
     // empty

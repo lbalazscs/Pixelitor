@@ -213,7 +213,9 @@ public class TextAdjustmentsPanel extends AdjustPanel implements ParamAdjustment
         String[] availableFonts = localGE.getAvailableFontFamilyNames();
         fontFamilyChooserCB = new JComboBox(availableFonts);
         if (settings != null) {
-            String fontName = settings.getFont().getFontName();
+            // it is important to use Font.getName(), and not Font.getFontName(),
+            // otherwise it might not be in the combo box
+            String fontName = settings.getFont().getName();
             fontFamilyChooserCB.setSelectedItem(fontName);
         }
         fontFamilyChooserCB.addActionListener(this);
@@ -275,10 +277,26 @@ public class TextAdjustmentsPanel extends AdjustPanel implements ParamAdjustment
         // It is important to create here a new Map, because
         // the old one stores old values in TextAttribute.SIZE
         // and other fields which would override the current ones.
+        // TODO there has to be a simpler way, for example overwriting
+        // however, it is not trivial, there is no single "style" TextAttribute
+        Map<TextAttribute, Object> oldMap = map;
         map = new HashMap<>();
 
         if (advancedSettingsDialog != null) {
             advancedSettingsDialog.updateMap(map);
+        } else if (oldMap != null) {
+            // no dialog, copy manually the advanced settings
+            TextAttribute[] advancedSettings = {
+                    TextAttribute.STRIKETHROUGH,
+                    TextAttribute.UNDERLINE,
+                    TextAttribute.KERNING,
+                    TextAttribute.LIGATURES,
+                    TextAttribute.TRACKING
+            };
+
+            for (TextAttribute setting : advancedSettings) {
+                map.put(setting, oldMap.get(setting));
+            }
         }
 
         return font.deriveFont(map);

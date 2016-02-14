@@ -51,48 +51,57 @@ public final class ConsistencyChecks {
         });
     }
 
+    public static boolean fadeCheck(Composition comp) {
+        ImageLayer layer = comp.getActiveMaskOrImageLayerOrNull();
+        if(layer == null) {
+            // nothing to check
+            return true;
+        }
+        return fadeCheck(layer);
+    }
+
     /**
      * Checks whether Fade would work now
      */
     @SuppressWarnings("SameReturnValue")
-    public static boolean fadeCheck(Composition comp) {
+    public static boolean fadeCheck(ImageLayer layer) {
+        assert layer != null;
         if (!History.canFade()) {
             return true;
         }
-        Optional<FadeableEdit> edit = History.getPreviousEditForFade(comp);
+        Optional<FadeableEdit> edit = History.getPreviousEditForFade(layer);
         if (edit.isPresent()) {
-            ImageLayer layer = comp.getActiveMaskOrImageLayerOrNull();
-            if (layer != null) {
-                BufferedImage current = layer.getImageOrSubImageIfSelected(false, true);
+            BufferedImage current = layer.getImageOrSubImageIfSelected(false, true);
 
-                FadeableEdit fadeableEdit = edit.get();
-                BufferedImage previous = fadeableEdit.getBackupImage();
-                if (previous == null) {
-                    // soft reference expired
-                    return true;
-                }
-
-                boolean differentWidth = current.getWidth() != previous.getWidth();
-                boolean differentHeight = current.getHeight() != previous.getHeight();
-                if (differentWidth || differentHeight) {
-                    Utils.debugImage(current, "current");
-                    Utils.debugImage(previous, "previous");
-                    String lastFadeableOp = History.getLastEditName();
-                    throw new IllegalStateException("'Fade " + lastFadeableOp + "' would not work now:"
-                            + "\nFadeableEdit class = " + fadeableEdit.getClass().getName() + ", and name = " + fadeableEdit.getName()
-                            + "\n current selected dimensions: " + current.getWidth() + "x" + current.getHeight() + ", "
-                            + "history dimensions: " + previous.getWidth() + "x" + previous.getHeight()
-                            + "\nchecked composition = " + comp.getName() + "(hasSelection = " + comp.hasSelection()
-                            + (comp.hasSelection() ? ", selection bounds = " + comp.getSelection().get().getShapeBounds() : "") + ")"
-                            + "\nchecked composition canvas = " + comp.getCanvas().getBounds()
-                            + "\nhistory composition = " + fadeableEdit.getComp().getName()
-                            + "\nactive composition = " + ImageComponents.getActiveComp().get().getName()
-                            + "\n"
-
-
-                    );
-                }
+            FadeableEdit fadeableEdit = edit.get();
+            BufferedImage previous = fadeableEdit.getBackupImage();
+            if (previous == null) {
+                // soft reference expired
+                return true;
             }
+
+            boolean differentWidth = current.getWidth() != previous.getWidth();
+            boolean differentHeight = current.getHeight() != previous.getHeight();
+            if (differentWidth || differentHeight) {
+                Utils.debugImage(current, "current");
+                Utils.debugImage(previous, "previous");
+                String lastFadeableOp = History.getLastEditName();
+                Composition comp = layer.getComp();
+                throw new IllegalStateException("'Fade " + lastFadeableOp + "' would not work now:"
+                        + "\nFadeableEdit class = " + fadeableEdit.getClass().getName() + ", and name = " + fadeableEdit.getName()
+                        + "\n current selected dimensions: " + current.getWidth() + "x" + current.getHeight() + ", "
+                        + "history dimensions: " + previous.getWidth() + "x" + previous.getHeight()
+                        + "\nchecked composition = " + comp.getName() + "(hasSelection = " + comp.hasSelection()
+                        + (comp.hasSelection() ? ", selection bounds = " + comp.getSelection().get().getShapeBounds() : "") + ")"
+                        + "\nchecked composition canvas = " + comp.getCanvas().getBounds()
+                        + "\nhistory composition = " + fadeableEdit.getComp().getName()
+                        + "\nactive composition = " + ImageComponents.getActiveComp().get().getName()
+                        + "\n"
+
+
+                );
+            }
+
         }
         return true;
     }
@@ -138,7 +147,7 @@ public final class ConsistencyChecks {
         int txAbs = -layer.getTX();
         int canvasWidth = comp.getCanvasWidth();
         int imageWidth = image.getWidth();
-        if (txAbs + canvasWidth > imageWidth + 1) { // allow one pixel difference for rounding effects
+        if (txAbs + canvasWidth > imageWidth) {
             return throwImageDoesNotCoverCanvasException(layer);
         }
 
@@ -146,7 +155,7 @@ public final class ConsistencyChecks {
         int canvasHeight = comp.getCanvasHeight();
         int imageHeight = image.getHeight();
 
-        if (tyAbs + canvasHeight > imageHeight + 1) {
+        if (tyAbs + canvasHeight > imageHeight) {
             return throwImageDoesNotCoverCanvasException(layer);
         }
 
@@ -188,11 +197,11 @@ public final class ConsistencyChecks {
         int nrLayers = comp.getNrLayers();
         if (enabled) {
             if (nrLayers <= 1) {
-                throw new IllegalStateException("nrLayers = " + nrLayers);
+                throw new IllegalStateException("enabled, but nrLayers = " + nrLayers);
             }
         } else { // disabled
             if (nrLayers >= 2) {
-                throw new IllegalStateException("nrLayers = " + nrLayers);
+                throw new IllegalStateException("disabled, but nrLayers = " + nrLayers);
             }
         }
         return true;

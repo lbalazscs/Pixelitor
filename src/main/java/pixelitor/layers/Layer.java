@@ -62,7 +62,7 @@ public abstract class Layer implements Serializable {
     private static final long serialVersionUID = 2L;
 
     protected Canvas canvas;
-    String name;
+    private String name;
 
     // the real layer for layer masks,
     // null for real layers
@@ -295,7 +295,20 @@ public abstract class Layer implements Serializable {
         int canvasHeight = canvas.getHeight();
 
         BufferedImage bwMask = addType.getBWImage(canvasWidth, canvasHeight, selection);
+
+
+        String editName = "Add Layer Mask";
+        boolean deselect = addType.needsSelection();
+        if (deselect) {
+            editName = "Layer Mask from Selection";
+        }
+
+        addImageAsMask(bwMask, deselect, editName);
+    }
+
+    public void addImageAsMask(BufferedImage bwMask, boolean deselect, String editName) {
         mask = new LayerMask(comp, bwMask, this);
+        maskEnabled = true;
 
         // needs to be added first, because the inherited layer
         // mask constructor already will try to update the image
@@ -305,16 +318,17 @@ public abstract class Layer implements Serializable {
 
         AppLogic.maskChanged(this);
 
-        PixelitorEdit edit = new AddLayerMaskEdit(comp, this);
-        if (addType.needsSelection()) {
+        PixelitorEdit edit = new AddLayerMaskEdit(comp, this, editName);
+        if (deselect) {
+            Selection selection = comp.getSelectionOrNull();
             Shape backupShape = selection.getShape();
             comp.deselect(AddToHistory.NO);
             DeselectEdit deselectEdit = new DeselectEdit(comp, backupShape, "nested deselect");
-            edit = new LinkedEdit(comp, "Layer Mask from Selection", edit, deselectEdit);
+            edit = new LinkedEdit(comp, editName, edit, deselectEdit);
         }
 
         History.addEdit(edit);
-        MaskViewMode.EDIT_MASK.activate(comp.getIC(), this);
+        MaskViewMode.EDIT_MASK.activate(comp, this);
     }
 
     /**
@@ -334,7 +348,8 @@ public abstract class Layer implements Serializable {
 
     public void deleteMask(AddToHistory addToHistory) {
         LayerMask oldMask = mask;
-        MaskViewMode oldMode = comp.getIC().getMaskViewMode();
+        ImageComponent ic = comp.getIC();
+        MaskViewMode oldMode = ic.getMaskViewMode();
         mask = null;
         maskEditing = false;
 
@@ -345,11 +360,7 @@ public abstract class Layer implements Serializable {
         AppLogic.maskChanged(this);
         ui.deleteMaskIconLabel();
 
-//        if (switchActiveToNormalView) {
-//            if (isActive()) {
-        MaskViewMode.NORMAL.activate(comp.getIC(), this);
-//            }
-//        }
+        MaskViewMode.NORMAL.activate(ic, this);
     }
 
     /**
@@ -382,7 +393,7 @@ public abstract class Layer implements Serializable {
      * The returned image is canvas-sized, and the masks and the
      * translations are taken into account
      */
-    void paintLayerOnGraphicsWithMask(boolean firstVisibleLayer, Graphics2D g) {
+    private void paintLayerOnGraphicsWithMask(boolean firstVisibleLayer, Graphics2D g) {
 //        Canvas canvas = comp.getCanvas();
 
         // 1. create the masked image
@@ -403,7 +414,7 @@ public abstract class Layer implements Serializable {
     /**
      * Used by adjustment layers and watermarked text layers
      */
-    protected BufferedImage adjustImageWithMasksAndBlending(BufferedImage imgSoFar, boolean isFirstVisibleLayer) {
+    private BufferedImage adjustImageWithMasksAndBlending(BufferedImage imgSoFar, boolean isFirstVisibleLayer) {
         if (isFirstVisibleLayer) {
             return imgSoFar; // there's nothing we can do
         }
@@ -448,21 +459,20 @@ public abstract class Layer implements Serializable {
     }
 
     public void setMaskEditing(boolean b) {
+        assert b ? hasMask() : true;
         this.maskEditing = b;
         ui.setMaskEditing(b); // sets the border around the icon
     }
 
     public boolean isMaskEditing() {
-        if (maskEditing) {
-            assert mask != null;
-        }
+        assert maskEditing ? hasMask() : true;
         return maskEditing;
     }
 
     /**
      * Returns true if the layer is in normal mode and the opacity is 100%
      */
-    public boolean isNormalAndOpaque() {
+    protected boolean isNormalAndOpaque() {
         return blendingMode == BlendingMode.NORMAL && opacity > 0.999f;
     }
 
@@ -516,7 +526,7 @@ public abstract class Layer implements Serializable {
      * (Assuming that we are in the edited layer)
      * or null if this layer should move alone
      */
-    protected Layer getLinked() {
+    private Layer getLinked() {
         if (mask != null) {
             if (!maskEditing) { // we are in the edited layer
                 if (mask.isLinked()) {
@@ -555,7 +565,7 @@ public abstract class Layer implements Serializable {
         History.addEdit(addToHistory, () -> new EnableLayerMaskEdit(comp, this, oldMode));
     }
 
-    public boolean useMask() {
+    private boolean useMask() {
         return mask != null && maskEnabled;
     }
 

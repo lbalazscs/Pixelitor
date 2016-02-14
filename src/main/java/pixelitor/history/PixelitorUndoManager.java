@@ -192,6 +192,20 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
         }
     }
 
+    protected void fireIntervalRemoved(Object source, int index0, int index1) {
+        Object[] listeners = listenerList.getListenerList();
+        ListDataEvent e = null;
+
+        for (int i = listeners.length - 2; i >= 0; i -= 2) {
+            if (listeners[i] == ListDataListener.class) {
+                if (e == null) {
+                    e = new ListDataEvent(source, ListDataEvent.INTERVAL_REMOVED, index0, index1);
+                }
+                ((ListDataListener) listeners[i + 1]).intervalRemoved(e);
+            }
+        }
+    }
+
     /**
      * Jumps in the history so that we have the state after the given edit
      */
@@ -249,5 +263,27 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
     @VisibleForTesting
     public ListSelectionModel getSelectionModel() {
         return selectionModel;
+    }
+
+    // the super method is not public
+    public PixelitorEdit getEditToBeUndone() {
+        return (PixelitorEdit) super.editToBeUndone();
+    }
+
+    // the super method is not public
+    protected PixelitorEdit getEditToBeRedone() {
+        return (PixelitorEdit) super.editToBeRedone();
+    }
+
+    @Override
+    public synchronized void discardAllEdits() {
+        // this method is called whenever a not undoable edit was added
+        int maxIndex = edits.size() - 1;
+
+        super.discardAllEdits();
+
+        manualSelectionChange = false;
+        fireIntervalRemoved(this, 0, maxIndex);
+        manualSelectionChange = true;
     }
 }

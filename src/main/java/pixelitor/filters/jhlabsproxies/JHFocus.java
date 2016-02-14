@@ -38,7 +38,7 @@ public class JHFocus extends FilterWithParametrizedGUI {
 
     private final ImagePositionParam center = new ImagePositionParam("Focused Area Center");
     private final GroupedRangeParam radius = new GroupedRangeParam("Focused Area Radius (Pixels)", 1, 200, 1000, false);
-    private final RangeParam softness = new RangeParam("Transition Softness", 0, 20, 100);
+    private final RangeParam softness = new RangeParam("Transition Softness", 0, 20, 99);
     private final GroupedRangeParam blurRadius = new GroupedRangeParam("Blur Radius", 0, 10, 50);
     private final RangeParam numberOfIterations = new RangeParam("Blur Iterations (Quality)", 1, 3, 10);
     private final BooleanParam invert = new BooleanParam("Invert", false);

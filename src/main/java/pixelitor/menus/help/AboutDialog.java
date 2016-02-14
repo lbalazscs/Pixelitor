@@ -72,7 +72,7 @@ public class AboutDialog extends OKDialog {
         addLabel("<html><b><font size=+1>Pixelitor</font></b></html>");
         addLabel("Version " + Build.VERSION_NUMBER);
         box.add(Box.createRigidArea(new Dimension(10, 20)));
-        addLabel("<html><center> Copyright \u00A9 2009-2015 L\u00E1szl\u00F3 Bal\u00E1zs-Cs\u00EDki <br>and Contributors<br><br>");
+        addLabel("<html><center> Copyright \u00A9 2009-2016 L\u00E1szl\u00F3 Bal\u00E1zs-Cs\u00EDki <br>and Contributors<br><br>");
         addLabel("lbalazscs\u0040gmail.com");
 
         JButton linkButton = createLinkButton();

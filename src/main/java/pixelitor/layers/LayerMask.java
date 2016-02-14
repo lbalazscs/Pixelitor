@@ -57,6 +57,8 @@ public class LayerMask extends ImageLayer {
 
     public LayerMask(Composition comp, BufferedImage bwImage, Layer layer) {
         super(comp, bwImage, layer.getName() + " MASK", layer);
+
+        assert bwImage.getType() == BufferedImage.TYPE_BYTE_GRAY;
     }
 
     public void applyToImage(BufferedImage in) {

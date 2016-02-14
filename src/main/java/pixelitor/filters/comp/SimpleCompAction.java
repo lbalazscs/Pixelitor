@@ -69,11 +69,11 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
             Layer layer = comp.getLayer(i);
             if (layer instanceof ContentLayer) {
                 ContentLayer contentLayer = (ContentLayer) layer;
-                applyTx(contentLayer, canvasTX);
+                applyTx(contentLayer);
             }
             if (layer.hasMask()) {
                 LayerMask mask = layer.getMask();
-                applyTx(mask, canvasTX);
+                applyTx(mask);
             }
         }
 
@@ -96,7 +96,7 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
 
     protected abstract String getEditName();
 
-    protected abstract void applyTx(ContentLayer contentLayer, AffineTransform tx);
+    protected abstract void applyTx(ContentLayer contentLayer);
 
     protected abstract AffineTransform createTransform(Canvas canvas);
 }

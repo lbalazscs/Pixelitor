@@ -69,7 +69,7 @@ public class ColorPickerTool extends Tool {
         BufferedImage img;
         boolean isMask = false;
         if (sampleLayerOnly.isSelected()) {
-            if (!ic.activeIsImageLayer()) {
+            if (!ic.activeIsImageLayerOrMask()) {
                 return;
             }
 

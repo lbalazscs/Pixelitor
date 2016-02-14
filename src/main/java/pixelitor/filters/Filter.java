@@ -22,6 +22,7 @@ import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
@@ -60,17 +61,31 @@ public abstract class Filter implements Serializable {
         BufferedImage dest;
 
         try {
-            BufferedImage src = comp.getFilterSource();
+            ImageLayer layer = comp.getActiveMaskOrImageLayerOrNull();
+            if (layer == null) {
+                if (changeReason == ChangeReason.REPEAT_LAST) {
+                    // TODO bug: the repeat last menu is not
+                    // always deactivated for text layers
+                    return;
+                } else {
+                    // all other cases should work
+                    throw new IllegalStateException("not image layer or mask");
+                }
+            }
+
+            BufferedImage src = layer.getFilterSourceImage();
             dest = executeForOneLayer(src);
         } catch (Exception e) {
-            Layer activeLayer = comp.getActiveLayer();
+            Layer layer = comp.getActiveLayer();
             String msg = String.format(
                     "Error while executing the filter '%s'\n" +
                             "composition = '%s'\n" +
-                            "layer = '%s'\n" +
+                            "layer = '%s' (%s)\n" +
+                            "hasMask = '%s'\n" +
                             "mask editing = '%b'",
                     getName(), comp.getName(),
-                    activeLayer.getName(), activeLayer.isMaskEditing());
+                    layer.getName(), layer.getClass().getSimpleName(),
+                    layer.hasMask(), layer.isMaskEditing());
             throw new IllegalStateException(msg, e);
         }
 
@@ -86,7 +101,7 @@ public abstract class Filter implements Serializable {
     public void execute() {
         ImageComponent ic = ImageComponents.getActiveIC();
         if (ic != null) {
-            if (!ic.activeIsImageLayer()) {
+            if (!ic.activeIsImageLayerOrMask()) {
                 Messages.showNotImageLayerError();
                 return;
             }

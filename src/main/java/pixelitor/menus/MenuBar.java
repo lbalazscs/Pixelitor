@@ -64,6 +64,7 @@ import pixelitor.layers.MaskViewMode;
 import pixelitor.layers.TextLayer;
 import pixelitor.menus.edit.CopyAction;
 import pixelitor.menus.edit.CopySource;
+import pixelitor.menus.edit.FadeMenuItem;
 import pixelitor.menus.edit.PasteAction;
 import pixelitor.menus.edit.PasteDestination;
 import pixelitor.menus.file.AnimGifExport;
@@ -114,11 +115,10 @@ import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.MOTION_BLUR;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
 import static pixelitor.menus.EnabledIf.ACTION_ENABLED;
 import static pixelitor.menus.EnabledIf.CAN_REPEAT_OPERATION;
-import static pixelitor.menus.EnabledIf.FADING_POSSIBLE;
 import static pixelitor.menus.EnabledIf.REDO_POSSIBLE;
 import static pixelitor.menus.EnabledIf.UNDO_POSSIBLE;
 import static pixelitor.menus.MenuAction.AllowedLayerType.HAS_LAYER_MASK;
-import static pixelitor.menus.MenuAction.AllowedLayerType.IS_IMAGE_LAYER;
+import static pixelitor.menus.MenuAction.AllowedLayerType.IS_IMAGE_LAYER_OR_MASK;
 import static pixelitor.menus.MenuAction.AllowedLayerType.IS_TEXT_LAYER;
 
 /**
@@ -126,6 +126,10 @@ import static pixelitor.menus.MenuAction.AllowedLayerType.IS_TEXT_LAYER;
  */
 public class MenuBar extends JMenuBar {
     public static final int MENU_SHORTCUT_KEY_MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+
+    public static final KeyStroke CTRL_1 = KeyStroke.getKeyStroke('1', MENU_SHORTCUT_KEY_MASK);
+    public static final KeyStroke CTRL_2 = KeyStroke.getKeyStroke('2', MENU_SHORTCUT_KEY_MASK);
+    public static final KeyStroke CTRL_3 = KeyStroke.getKeyStroke('3', MENU_SHORTCUT_KEY_MASK);
 
     private static final KeyStroke CTRL_B = KeyStroke.getKeyStroke('B', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_C = KeyStroke.getKeyStroke('C', MENU_SHORTCUT_KEY_MASK);
@@ -148,16 +152,13 @@ public class MenuBar extends JMenuBar {
     private static final KeyStroke CTRL_Z = KeyStroke.getKeyStroke('Z', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_W = KeyStroke.getKeyStroke('W', MENU_SHORTCUT_KEY_MASK);
 
-    private static final KeyStroke CTRL_1 = KeyStroke.getKeyStroke('1', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_2 = KeyStroke.getKeyStroke('2', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_3 = KeyStroke.getKeyStroke('3', MENU_SHORTCUT_KEY_MASK);
-
     private static final KeyStroke CTRL_SHIFT_S = KeyStroke.getKeyStroke('S', MENU_SHORTCUT_KEY_MASK + InputEvent.SHIFT_MASK);
     private static final KeyStroke CTRL_ALT_W = KeyStroke.getKeyStroke('W', MENU_SHORTCUT_KEY_MASK | InputEvent.ALT_MASK);
     private static final KeyStroke CTRL_SHIFT_Z = KeyStroke.getKeyStroke('Z', InputEvent.SHIFT_MASK + MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_SHIFT_F = KeyStroke.getKeyStroke('F', MENU_SHORTCUT_KEY_MASK + InputEvent.SHIFT_MASK);
     private static final KeyStroke CTRL_SHIFT_C = KeyStroke.getKeyStroke('C', MENU_SHORTCUT_KEY_MASK + InputEvent.SHIFT_MASK);
     private static final KeyStroke CTRL_SHIFT_V = KeyStroke.getKeyStroke('V', MENU_SHORTCUT_KEY_MASK + InputEvent.SHIFT_MASK);
+    private static final KeyStroke CTRL_ALT_V = KeyStroke.getKeyStroke('V', MENU_SHORTCUT_KEY_MASK + InputEvent.ALT_MASK);
     private static final KeyStroke CTRL_ALT_I = KeyStroke.getKeyStroke('I', MENU_SHORTCUT_KEY_MASK | InputEvent.ALT_MASK);
     private static final KeyStroke ALT_BACKSPACE = KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, InputEvent.ALT_MASK);
     private static final KeyStroke CTRL_BACKSPACE = KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, MENU_SHORTCUT_KEY_MASK);
@@ -180,8 +181,9 @@ public class MenuBar extends JMenuBar {
         this.add(createFileMenu(pw));
         this.add(createEditMenu());
         this.add(createLayerMenu(pw));
-        this.add(createSelectionMenu());
-        this.add(createColorsMenu());
+        this.add(createSelectMenu());
+        this.add(createImageMenu());
+        this.add(createColorMenu());
         this.add(createFilterMenu());
         this.add(createViewMenu());
 
@@ -253,7 +255,7 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        fileMenu.addAction(new MenuAction("Export Tweening Animation...") {
+        fileMenu.addAction(new MenuAction("Export Tweening Animation...", IS_IMAGE_LAYER_OR_MASK) {
             @Override
             public void onClick() {
                 new TweenWizard().start(pw);
@@ -332,7 +334,7 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        sub.addAction(new MenuAction("Auto Paint...", IS_IMAGE_LAYER) {
+        sub.addAction(new MenuAction("Auto Paint...", IS_IMAGE_LAYER_OR_MASK) {
             @Override
             public void onClick() {
                 AutoPaint.showDialog();
@@ -366,10 +368,8 @@ public class MenuBar extends JMenuBar {
                 .add();
 
         // fade
-        editMenu.buildFA("Fade", Fade::new)
-                .enableIf(FADING_POSSIBLE)
-                .withKey(CTRL_SHIFT_F)
-                .add();
+        FadeMenuItem.INSTANCE.setAccelerator(CTRL_SHIFT_F);
+        editMenu.add(FadeMenuItem.INSTANCE);
 
         editMenu.addSeparator();
 
@@ -379,21 +379,7 @@ public class MenuBar extends JMenuBar {
         // paste
         editMenu.buildAction(new PasteAction(PasteDestination.NEW_IMAGE)).enableIf(ACTION_ENABLED).withKey(CTRL_V).add();
         editMenu.addActionWithKey(new PasteAction(PasteDestination.NEW_LAYER), CTRL_SHIFT_V);
-
-        editMenu.addSeparator();
-
-        editMenu.buildAction(SelectionActions.getCropAction()).enableIf(ACTION_ENABLED).add();
-        editMenu.addAction(EnlargeCanvas.getAction());
-
-        // resize
-        editMenu.addActionWithKey(new MenuAction("Resize...") {
-            @Override
-            public void onClick() {
-                ResizePanel.resizeActiveImage();
-            }
-        }, CTRL_ALT_I);
-
-        editMenu.add(createRotateFlipSubmenu());
+        editMenu.addActionWithKey(new PasteAction(PasteDestination.MASK), CTRL_ALT_V);
 
         editMenu.addSeparator();
 
@@ -407,22 +393,6 @@ public class MenuBar extends JMenuBar {
         editMenu.add(preferencesAction);
 
         return editMenu;
-    }
-
-    private static JMenu createRotateFlipSubmenu() {
-        PMenu sub = new PMenu("Rotate/Flip");
-
-        // rotate
-        sub.addAction(new Rotate(ANGLE_90));
-        sub.addAction(new Rotate(ANGLE_180));
-        sub.addAction(new Rotate(ANGLE_270));
-        sub.addSeparator();
-
-        // flip
-        sub.addAction(new Flip(HORIZONTAL));
-        sub.addAction(new Flip(VERTICAL));
-
-        return sub;
     }
 
     private static JMenu createLayerMenu(PixelitorWindow pw) {
@@ -524,13 +494,13 @@ public class MenuBar extends JMenuBar {
     private static JMenu createLayerMaskSubmenu() {
         PMenu sub = new PMenu("Layer Mask");
 
-        sub.addActionWithKey(new MenuAction("Add White (Reveal All)") {
+        sub.addAction(new MenuAction("Add White (Reveal All)") {
             @Override
             public void onClick() {
                 Layer layer = ImageComponents.getActiveLayer().get();
                 layer.addMask(LayerMaskAddType.REVEAL_ALL);
             }
-        }, CTRL_G);
+        });
 
         sub.addAction(new MenuAction("Add Black (Hide All)") {
             @Override
@@ -580,11 +550,9 @@ public class MenuBar extends JMenuBar {
 
         sub.addSeparator();
 
-        sub.addActionWithKey(MaskViewMode.NORMAL.createMenuAction(), CTRL_1);
-
-        sub.addActionWithKey(MaskViewMode.SHOW_MASK.createMenuAction(), CTRL_2);
-
-        sub.addActionWithKey(MaskViewMode.EDIT_MASK.createMenuAction(), CTRL_3);
+        MaskViewMode.NORMAL.addToMenu(sub);
+        MaskViewMode.SHOW_MASK.addToMenu(sub);
+        MaskViewMode.EDIT_MASK.addToMenu(sub);
 
         return sub;
     }
@@ -633,8 +601,8 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createSelectionMenu() {
-        PMenu selectMenu = new PMenu("Selection", 'S');
+    private static JMenu createSelectMenu() {
+        PMenu selectMenu = new PMenu("Select", 'S');
 
         selectMenu.buildAction(SelectionActions.getDeselectAction()).enableIf(ACTION_ENABLED).withKey(CTRL_D).add();
 
@@ -648,8 +616,38 @@ public class MenuBar extends JMenuBar {
         return selectMenu;
     }
 
-    private static JMenu createColorsMenu() {
-        PMenu colorsMenu = new PMenu("Colors", 'C');
+    private static JMenu createImageMenu() {
+        PMenu imageMenu = new PMenu("Image", 'I');
+
+        imageMenu.buildAction(SelectionActions.getCropAction()).enableIf(ACTION_ENABLED).add();
+        imageMenu.addAction(EnlargeCanvas.getAction());
+
+        // resize
+        imageMenu.addActionWithKey(new MenuAction("Resize...") {
+            @Override
+            public void onClick() {
+                ResizePanel.resizeActiveImage();
+            }
+        }, CTRL_ALT_I);
+
+        imageMenu.addSeparator();
+
+        // rotate
+        imageMenu.addAction(new Rotate(ANGLE_90));
+        imageMenu.addAction(new Rotate(ANGLE_180));
+        imageMenu.addAction(new Rotate(ANGLE_270));
+
+        imageMenu.addSeparator();
+
+        // flip
+        imageMenu.addAction(new Flip(HORIZONTAL));
+        imageMenu.addAction(new Flip(VERTICAL));
+
+        return imageMenu;
+    }
+
+    private static JMenu createColorMenu() {
+        PMenu colorsMenu = new PMenu("Color", 'C');
 
         colorsMenu.buildFA("Color Balance", ColorBalance::new).withKey(CTRL_B).add();
         colorsMenu.buildFA(HueSat.NAME, HueSat::new).withKey(CTRL_U).add();
@@ -1065,12 +1063,13 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        developMenu.addAction(new MenuAction("Update from Mask") {
+        developMenu.addAction(new MenuAction("Mask update transparency from BW") {
             @Override
             public void onClick() {
                 ImageLayer imageLayer = (ImageLayer) ImageComponents.getActiveLayer().get();
                 if (imageLayer.hasMask()) {
                     imageLayer.getMask().updateFromBWImage();
+                    imageLayer.getComp().imageChanged(FULL);
                 } else {
                     Messages.showInfo("No Mask in Current image", "Error");
                 }
@@ -1162,7 +1161,7 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        sub.addActionWithKey(new MenuAction("Debug Translation", IS_IMAGE_LAYER) {
+        sub.addActionWithKey(new MenuAction("Debug Translation", IS_IMAGE_LAYER_OR_MASK) {
             @Override
             public void onClick() {
                 ImageLayer layer = ImageComponents.getActiveImageLayerOrMaskOrNull();

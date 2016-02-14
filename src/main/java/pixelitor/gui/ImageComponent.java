@@ -26,7 +26,6 @@ import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.CompositionReplacedEdit;
 import pixelitor.history.DeselectEdit;
-import pixelitor.history.History;
 import pixelitor.history.LinkedEdit;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.Layer;
@@ -35,12 +34,13 @@ import pixelitor.layers.LayerMask;
 import pixelitor.layers.LayersContainer;
 import pixelitor.layers.LayersPanel;
 import pixelitor.layers.MaskViewMode;
-import pixelitor.menus.view.ZoomComponent;
+import pixelitor.menus.view.ZoomControl;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Utils;
 import pixelitor.utils.debug.ImageComponentNode;
 
 import javax.swing.*;
@@ -105,8 +105,9 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         addListeners();
     }
 
-    public void replaceComp(Composition newComp, AddToHistory addToHistory, MaskViewMode newMaskViewMode) {
+    public PixelitorEdit replaceComp(Composition newComp, AddToHistory addToHistory, MaskViewMode newMaskViewMode) {
         assert newComp != null;
+        PixelitorEdit edit = null;
 
         MaskViewMode oldMode = maskViewMode;
 
@@ -116,7 +117,6 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         // do this here so that the old comp is deselected before
         // its ic is set to null
         if (addToHistory.isYes()) {
-            PixelitorEdit edit;
             PixelitorEdit replaceEdit = new CompositionReplacedEdit(
                     "Reload", this, oldComp, newComp, oldMode);
             if (oldComp.hasSelection()) {
@@ -126,7 +126,6 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
             } else {
                 edit = replaceEdit;
             }
-            History.addEdit(edit);
         }
 
         oldComp.setIC(null);
@@ -143,6 +142,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         LayersContainer.showLayersPanel(layersPanel);
 
         newMaskViewMode.activate(this, comp.getActiveLayer());
+        return edit;
     }
 
     private void addListeners() {
@@ -437,12 +437,20 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         return maskViewMode;
     }
 
-    public void setMaskViewMode(MaskViewMode maskViewMode) {
-        this.maskViewMode = maskViewMode;
-
+    public boolean setMaskViewMode(MaskViewMode maskViewMode) {
+        // it is important not to call this directly,
+        // it should be a part of a mask activation
+        assert Utils.callingClassIs("MaskViewMode");
         assert maskViewMode.checkOnAssignment(comp.getActiveLayer());
 
-        repaint();
+        MaskViewMode oldMode = this.maskViewMode;
+        this.maskViewMode = maskViewMode;
+
+        boolean change = oldMode != maskViewMode;
+        if (change) {
+            repaint();
+        }
+        return change;
     }
 
     public void canvasSizeChanged() {
@@ -540,7 +548,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         SwingUtilities.invokeLater(r);
 
         if (ImageComponents.getActiveIC() == this) {
-            ZoomComponent.INSTANCE.setToNewZoom(zoomLevel);
+            ZoomControl.INSTANCE.setToNewZoom(zoomLevel);
             zoomLevel.getMenuItem().setSelected(true);
         }
     }
@@ -656,11 +664,14 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         }
     }
 
-    public boolean activeIsImageLayer() {
-        return comp.activeIsImageLayer();
+    public boolean activeIsImageLayerOrMask() {
+        return comp.activeIsImageLayerOrMask();
     }
 
-    @SuppressWarnings("MethodMayBeStatic")
+    /**
+     * The return value is changed only in unit tests
+     */
+    @SuppressWarnings({"MethodMayBeStatic", "SameReturnValue"})
     public boolean isMock() {
         return false;
     }

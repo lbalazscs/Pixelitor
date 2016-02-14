@@ -20,6 +20,7 @@ package pixelitor.history;
 import pixelitor.Composition;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
+import pixelitor.layers.MaskViewMode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -30,9 +31,10 @@ import javax.swing.undo.CannotUndoException;
 public class AddLayerMaskEdit extends PixelitorEdit {
     private Layer layer;
     private LayerMask layerMask;
+    private MaskViewMode newMode;
 
-    public AddLayerMaskEdit(Composition comp, Layer layer) {
-        super(comp, "Add Layer Mask");
+    public AddLayerMaskEdit(Composition comp, Layer layer, String name) {
+        super(comp, name);
         comp.setDirty(true);
         this.layer = layer;
         this.layerMask = layer.getMask();
@@ -41,6 +43,10 @@ public class AddLayerMaskEdit extends PixelitorEdit {
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
+
+        // has to be saved here, because when the constructor is
+        // called, we do not know yet the mode before the undo
+        newMode = comp.getIC().getMaskViewMode();
 
         layer.deleteMask(AddToHistory.NO);
 
@@ -52,6 +58,9 @@ public class AddLayerMaskEdit extends PixelitorEdit {
         super.redo();
 
         layer.addMask(layerMask);
+
+        assert newMode != null;
+        newMode.activate(comp, layer);
 
         History.notifyMenus(this);
     }

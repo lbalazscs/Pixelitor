@@ -23,6 +23,7 @@ import pixelitor.Composition;
 import pixelitor.filters.comp.Crop;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
+import pixelitor.history.PixelitorEdit;
 import pixelitor.io.OpenSaveManager;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
@@ -318,7 +319,14 @@ public class ImageComponents {
         }
 
         Composition newComp = OpenSaveManager.createCompositionFromFile(file);
-        activeIC.replaceComp(newComp, AddToHistory.YES, MaskViewMode.NORMAL);
+
+        PixelitorEdit edit = activeIC.replaceComp(newComp, AddToHistory.YES, MaskViewMode.NORMAL);
+
+        // needs to be called before addEdit because of the consistency checks
+        newImageOpened(newComp);
+
+        assert edit != null;
+        History.addEdit(edit);
 
         String msg = String.format("The image '%s' was reloaded from the file %s.",
                 comp.getName(), file.getAbsolutePath());

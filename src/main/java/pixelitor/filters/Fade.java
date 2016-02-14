@@ -17,6 +17,7 @@
 
 package pixelitor.filters;
 
+import pixelitor.Composition;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
@@ -49,9 +50,11 @@ public class Fade extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        assert History.canFade();
         // the fade menu item must be active only if History.canFade()
+        assert History.canFade();
+
         BufferedImage previous = ImageComponents.getActiveComp()
+                .map(Composition::getActiveMaskOrImageLayerOrNull)
                 .flatMap(History::getPreviousEditForFade)
                 .orElseThrow(() -> new IllegalStateException("no FadeableEdit"))
                 .getBackupImage();
@@ -103,5 +106,10 @@ public class Fade extends FilterWithParametrizedGUI {
             destData[i] = (a << 24) | (r << 16) | (g << 8) | b;
         }
         return dest;
+    }
+
+    @Override
+    public boolean supportsGray() {
+        return false;
     }
 }

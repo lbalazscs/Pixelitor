@@ -31,42 +31,40 @@ import java.awt.geom.AffineTransform;
 import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
 
 public class Resize implements CompAction {
-    private int targetWidth;
-    private int targetHeight;
+    private int canvasTargetWidth;
+    private int canvasTargetHeight;
 
     // if true, resizes an image so that the proportions
     // are kept and the result fits into the given dimensions
     private final boolean resizeInBox;
 
-    public Resize(int targetWidth, int targetHeight, boolean resizeInBox) {
-        this.targetWidth = targetWidth;
-        this.targetHeight = targetHeight;
+    public Resize(int canvasTargetWidth, int canvasTargetHeight, boolean resizeInBox) {
+        this.canvasTargetWidth = canvasTargetWidth;
+        this.canvasTargetHeight = canvasTargetHeight;
         this.resizeInBox = resizeInBox;
     }
 
     @Override
     public void process(Composition comp) {
-        int actualWidth = comp.getCanvasWidth();
-        int actualHeight = comp.getCanvasHeight();
+        int canvasCurrWidth = comp.getCanvasWidth();
+        int canvasCurrHeight = comp.getCanvasHeight();
 
-        if ((actualWidth == targetWidth) && (actualHeight == targetHeight)) {
+        if ((canvasCurrWidth == canvasTargetWidth) && (canvasCurrHeight == canvasTargetHeight)) {
             return;
         }
 
         if (resizeInBox) {
-            int maxWidth = targetWidth;
-            int maxHeight = targetHeight;
-
-            double heightScale = maxHeight / (double) actualHeight;
-            double widthScale = maxWidth / (double) actualWidth;
+            double heightScale = canvasTargetHeight / (double) canvasCurrHeight;
+            double widthScale = canvasTargetWidth / (double) canvasCurrWidth;
             double scale = Math.min(heightScale, widthScale);
 
-            targetWidth = (int) (scale * (double) actualWidth);
-            targetHeight = (int) (scale * (double) actualHeight);
+            canvasTargetWidth = (int) (scale * (double) canvasCurrWidth);
+            canvasTargetHeight = (int) (scale * (double) canvasCurrHeight);
         }
 
         boolean progressiveBilinear = false;
-        if ((targetWidth < (actualWidth / 2)) || (targetHeight < (actualHeight / 2))) {
+        if ((canvasTargetWidth < (canvasCurrWidth / 2))
+                || (canvasTargetHeight < (canvasCurrHeight / 2))) {
             progressiveBilinear = true;
         }
 
@@ -76,8 +74,8 @@ public class Resize implements CompAction {
         if (comp.hasSelection()) {
             Selection selection = comp.getSelectionOrNull();
 
-            double sx = ((double) targetWidth) / actualWidth;
-            double sy = ((double) targetHeight) / actualHeight;
+            double sx = ((double) canvasTargetWidth) / canvasCurrWidth;
+            double sy = ((double) canvasTargetHeight) / canvasCurrHeight;
             AffineTransform tx = AffineTransform.getScaleInstance(sx, sy);
             selection.transform(tx);
         }
@@ -85,16 +83,16 @@ public class Resize implements CompAction {
         int nrLayers = comp.getNrLayers();
         for (int i = 0; i < nrLayers; i++) {
             Layer layer = comp.getLayer(i);
-            layer.resize(targetWidth, targetHeight, progressiveBilinear);
+            layer.resize(canvasTargetWidth, canvasTargetHeight, progressiveBilinear);
             if (layer.hasMask()) {
-                layer.getMask().resize(targetWidth, targetHeight, progressiveBilinear);
+                layer.getMask().resize(canvasTargetWidth, canvasTargetHeight, progressiveBilinear);
             }
         }
 
         MultiLayerEdit edit = new MultiLayerEdit(comp, editName, backup);
         History.addEdit(edit);
 
-        comp.getCanvas().updateSize(targetWidth, targetHeight);
+        comp.getCanvas().updateSize(canvasTargetWidth, canvasTargetHeight);
 
         // Only after the shared canvas size was updated
         // The icon image should change if the proportions were
@@ -107,6 +105,6 @@ public class Resize implements CompAction {
         AppLogic.activeCompSizeChanged(comp);
 
         Messages.showStatusMessage("Image resized to "
-                + targetWidth + " x " + targetHeight + " pixels.");
+                + canvasTargetWidth + " x " + canvasTargetHeight + " pixels.");
     }
 }

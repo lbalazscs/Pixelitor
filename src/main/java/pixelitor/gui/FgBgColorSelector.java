@@ -99,10 +99,15 @@ public class FgBgColorSelector extends JLayeredPane {
         swapColorsAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Color tmpFgColor = fgColor;
-
-                setFgColor(bgColor);
-                setBgColor(tmpFgColor);
+                if (layerMaskEditing) {
+                    Color tmpFgColor = maskFgColor;
+                    setFgColor(maskBgColor);
+                    setBgColor(tmpFgColor);
+                } else {
+                    Color tmpFgColor = fgColor;
+                    setFgColor(bgColor);
+                    setBgColor(tmpFgColor);
+                }
             }
         };
         swapButton.addActionListener(swapColorsAction);
@@ -205,15 +210,18 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     public void setLayerMaskEditing(boolean layerMaskEditing) {
+        boolean oldValue = this.layerMaskEditing;
         this.layerMaskEditing = layerMaskEditing;
 
-        // force the redrawing of colors
-        if (layerMaskEditing) {
-            setFgColor(maskFgColor);
-            setBgColor(maskBgColor);
-        } else {
-            setFgColor(fgColor);
-            setBgColor(bgColor);
+        if(oldValue != layerMaskEditing) {
+            // force the redrawing of colors
+            if (layerMaskEditing) {
+                setFgColor(maskFgColor);
+                setBgColor(maskBgColor);
+            } else {
+                setFgColor(fgColor);
+                setBgColor(bgColor);
+            }
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -91,7 +91,7 @@ public class FilterParamTest {
     }
 
     @Test
-    public void testCreateGUI() {
+    public void test_createGUI() {
         JComponent gui = param.createGUI();
         assertThat(gui).isNotNull();
         assertThat(gui.isEnabled()).isTrue();
@@ -114,21 +114,21 @@ public class FilterParamTest {
     }
 
     @Test
-    public void testGetNrOfGridBagCols() {
+    public void test_getNrOfGridBagCols() {
         int cols = param.getNrOfGridBagCols();
         assertThat(cols > 0 && cols < 3).isTrue();
         checkThatFilterWasNotCalled();
     }
 
     @Test
-    public void testRandomize() {
+    public void test_randomize() {
         param.randomize();
 
         checkThatFilterWasNotCalled();
     }
 
     @Test
-    public void testResetFalse() {
+    public void test_reset_false() {
         param.reset(false);
 
         checkThatFilterWasNotCalled();
@@ -136,15 +136,10 @@ public class FilterParamTest {
     }
 
     @Test
-    public void testResetTrue() {
-        if (param instanceof EffectsParam) {
-            return; // not fully implemented
-        }
-
+    public void test_reset_true() {
+        // we can change the value in a general way only
+        // through randomize
         if (param.ignoresRandomize()) {
-            // we can change the value in a general way only
-            // through randomize
-
             // in this case we don't know whether to expect
             // the calling of the filter
             param.reset(true);
@@ -167,7 +162,7 @@ public class FilterParamTest {
     }
 
     @Test
-    public void testCopyAndSetState() {
+    public void test_copyState_setState() {
         try {
             ParamState paramState = param.copyState();
             assertThat(paramState).isNotNull();

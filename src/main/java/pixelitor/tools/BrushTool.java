@@ -33,7 +33,7 @@ import java.awt.event.MouseEvent;
 /**
  * The brush tool
  */
-public class BrushTool extends TmpLayerBrushTool {
+public class BrushTool extends BlendingModeBrushTool {
     private Color drawingColor;
 
     public BrushTool() {

@@ -28,6 +28,7 @@ import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.TestHelper;
 import pixelitor.history.AddToHistory;
+import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
 import pixelitor.selection.IgnoreSelection;
 import pixelitor.selection.Selection;
@@ -57,8 +58,6 @@ import static pixelitor.layers.ImageLayer.State.PREVIEW;
 @RunWith(Parameterized.class)
 public class ImageLayerTest {
     private ImageLayer layer;
-    private LayerUI ui;
-    int layerIconUpdatesAtStart;
 
     @Parameter
     public WithMask withMask;
@@ -67,6 +66,8 @@ public class ImageLayerTest {
     public WithTranslation withTranslation;
 
     private Composition comp;
+
+    private IconUpdateChecker iconUpdates;
 
     @Parameters(name = "{index}: mask = {0}, translation = {1}")
     public static Collection<Object[]> instancesToTest() {
@@ -84,28 +85,34 @@ public class ImageLayerTest {
 
         layer = TestHelper.createImageLayer("layer 1", comp);
 
-        ui = mock(LayerUI.class);
+        LayerUI ui = mock(LayerUI.class);
         layer.setUI(ui);
 
         withMask.init(layer);
+        LayerMask mask = null;
+        if (withMask.isYes()) {
+            mask = layer.getMask();
+        }
 
         withTranslation.init(layer);
 
-        layerIconUpdatesAtStart = 0;
+        int layerIconUpdatesAtStart = 0;
         if (withTranslation.isYes()) {
             layerIconUpdatesAtStart = 1;
         }
+
+        iconUpdates = new IconUpdateChecker(ui, layer, mask, layerIconUpdatesAtStart, 1);
     }
 
     @Test
     public void test_getSetImage() {
         // setImage is called already in the ImageLayer constructor
         int expectedImageChangedCalls = 1;
-        if (withMask == WithMask.YES) {
+        if (withMask.isYes()) {
             // plus the mask constructor
             expectedImageChangedCalls++;
         }
-        if (withTranslation == WithTranslation.YES) {
+        if (withTranslation.isYes()) {
             expectedImageChangedCalls++;
         }
         verify(comp, times(expectedImageChangedCalls)).imageChanged(INVALIDATE_CACHE);
@@ -120,7 +127,7 @@ public class ImageLayerTest {
         verify(comp, times(expectedImageChangedCalls + 1)).imageChanged(INVALIDATE_CACHE);
 
         // actually setImage should not update the layer image
-        checkNumLayerIconUpdates(0);
+        iconUpdates.check(0, 0);
 
         assertThat(layer.getImage()).isSameAs(testImage);
     }
@@ -131,7 +138,7 @@ public class ImageLayerTest {
         layer.startPreviewing();
         assertThat(layer.getState()).isEqualTo(PREVIEW);
         assertThat(layer.getPreviewImage()).isSameAs(image);
-        checkNumLayerIconUpdates(0);
+        iconUpdates.check(0, 0);
     }
 
     @Test
@@ -141,7 +148,7 @@ public class ImageLayerTest {
         layer.startPreviewing();
         assertThat(layer.getState()).isEqualTo(PREVIEW);
         assertThat(layer.getPreviewImage()).isNotSameAs(image);
-        checkNumLayerIconUpdates(0);
+        iconUpdates.check(0, 0);
     }
 
     @Test
@@ -150,7 +157,7 @@ public class ImageLayerTest {
         layer.okPressedInDialog("filterName");
         assertThat(layer.getState()).isEqualTo(NORMAL);
         assertThat(layer.getPreviewImage()).isNull();
-        checkNumLayerIconUpdates(0);
+        iconUpdates.check(0, 0);
     }
 
     @Test(expected = AssertionError.class)
@@ -165,7 +172,7 @@ public class ImageLayerTest {
         layer.cancelPressedInDialog();
         assertThat(layer.getState()).isEqualTo(NORMAL);
         assertThat(layer.getPreviewImage()).isNull();
-        checkNumLayerIconUpdates(0);
+        iconUpdates.check(0, 0);
     }
 
     @Test
@@ -174,7 +181,7 @@ public class ImageLayerTest {
         layer.tweenCalculatingStarted();
         assertThat(layer.getState()).isEqualTo(PREVIEW);
         assertThat(layer.getPreviewImage()).isNotNull();
-        checkNumLayerIconUpdates(0);
+        iconUpdates.check(0, 0);
     }
 
     @Test(expected = AssertionError.class)
@@ -190,7 +197,7 @@ public class ImageLayerTest {
         layer.tweenCalculatingEnded();
         assertThat(layer.getState()).isEqualTo(NORMAL);
         assertThat(layer.getPreviewImage()).isNull();
-        checkNumLayerIconUpdates(0);
+        iconUpdates.check(0, 0);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -205,7 +212,7 @@ public class ImageLayerTest {
         layer.changePreviewImage(TestHelper.createImage(), "filterName", OP_PREVIEW);
         assertThat(layer.getState()).isEqualTo(PREVIEW);
         assertThat(layer.getPreviewImage()).isNotNull();
-        checkNumLayerIconUpdates(0);
+        iconUpdates.check(0, 0);
     }
 
     @Test
@@ -217,7 +224,7 @@ public class ImageLayerTest {
                 OP_WITHOUT_DIALOG, "opName");
         assertThat(layer.getState()).isEqualTo(NORMAL);
 
-        checkNumLayerIconUpdates(1);
+        iconUpdates.check(1, 0);
     }
 
     @Test
@@ -227,7 +234,7 @@ public class ImageLayerTest {
                 IgnoreSelection.NO);
         layer.changeImageUndoRedo(TestHelper.createImage(),
                 IgnoreSelection.YES);
-        checkNumLayerIconUpdates(0);
+        iconUpdates.check(0, 0);
     }
 
     @Test
@@ -240,7 +247,7 @@ public class ImageLayerTest {
         } else {
             assertThat(bounds).isNotEqualTo(layer.canvas.getBounds());
         }
-        checkNumLayerIconUpdates(0);
+        iconUpdates.check(0, 0);
     }
 
     @Test
@@ -250,7 +257,7 @@ public class ImageLayerTest {
         assertThat(image).isNotNull();
         // no selection, we expect it to return the image
         assertThat(image).isSameAs(layer.getImage());
-        checkNumLayerIconUpdates(0);
+        iconUpdates.check(0, 0);
     }
 
     @Test
@@ -263,7 +270,7 @@ public class ImageLayerTest {
         assertThat(image).isNotSameAs(layer.getImage());
         assertThat(image.getWidth()).isEqualTo(2);
         assertThat(image.getHeight()).isEqualTo(2);
-        checkNumLayerIconUpdates(0);
+        iconUpdates.check(0, 0);
     }
 
     @Test
@@ -275,7 +282,7 @@ public class ImageLayerTest {
         assertThat(tmpDrawingLayer.getHeight()).isEqualTo(layer.canvas.getHeight());
 
         layer.mergeTmpDrawingLayerDown();
-        checkNumLayerIconUpdates(0);
+        iconUpdates.check(0, 0);
     }
 
     @Test
@@ -284,25 +291,24 @@ public class ImageLayerTest {
         assertThat(image).isNotNull();
         assertThat(image.getWidth()).isEqualTo(layer.canvas.getWidth());
         assertThat(image.getHeight()).isEqualTo(layer.canvas.getHeight());
-        checkNumLayerIconUpdates(0);
+        iconUpdates.check(0, 0);
     }
 
     @Test
     public void test_getCanvasSizedSubImage() {
-        // TODO would be better with translation
         BufferedImage image = layer.getCanvasSizedSubImage();
         assertThat(image).isNotNull();
         Canvas canvas = layer.getComp().getCanvas();
         assert image.getWidth() == canvas.getWidth();
         assert image.getHeight() == canvas.getHeight();
-        checkNumLayerIconUpdates(0);
+        iconUpdates.check(0, 0);
     }
 
     @Test
     public void test_getFilterSourceImage() {
         BufferedImage image = layer.getFilterSourceImage();
         assertThat(image).isNotNull();
-        checkNumLayerIconUpdates(0);
+        iconUpdates.check(0, 0);
         // TODO
     }
 
@@ -320,7 +326,7 @@ public class ImageLayerTest {
         BufferedImage imageFF = layer.getImageOrSubImageIfSelected(false, false);
         assertThat(imageFF).isNotNull();
 
-        checkNumLayerIconUpdates(0);
+        iconUpdates.check(0, 0);
         // TODO
     }
 
@@ -335,7 +341,7 @@ public class ImageLayerTest {
         BufferedImage imageF = layer.getSelectionSizedPartFrom(TestHelper.createImage(), selection, false);
         assertThat(imageF).isNotNull();
 
-        checkNumLayerIconUpdates(0);
+        iconUpdates.check(0, 0);
     }
 
     @Test
@@ -346,7 +352,20 @@ public class ImageLayerTest {
         BufferedImage image = layer.getImage();
         assert image.getWidth() == canvas.getWidth();
         assert image.getHeight() == canvas.getHeight();
-        checkNumLayerIconUpdates(0);
+        iconUpdates.check(0, 0);
+    }
+
+    @Test
+    public void test_enlargeCanvas() {
+        layer.enlargeCanvas(5, 5, 5, 10);
+        iconUpdates.check(0, 0);
+    }
+
+    @Test
+    public void test_createMovementEdit() {
+        ContentLayerMoveEdit edit = layer.createMovementEdit(5, 5);
+        assertThat(edit).isNotNull();
+        iconUpdates.check(0, 0);
     }
 
     @Test
@@ -365,33 +384,30 @@ public class ImageLayerTest {
         assertSame(layer.getBlendingMode(), duplicate.getBlendingMode());
         assertThat(duplicate.getOpacity()).isEqualTo(layer.getOpacity());
 
-        checkNumLayerIconUpdates(0);
+        iconUpdates.check(0, 0);
     }
 
     @Test
     public void test_applyLayerMask() {
-        if (withMask == WithMask.YES) {
+        if (withMask.isYes()) {
             History.clear();
 
             assertThat(layer.hasMask()).isTrue();
 
             layer.applyLayerMask(AddToHistory.YES);
             assertThat(layer.hasMask()).isFalse();
-            checkNumLayerIconUpdates(1);
+            iconUpdates.checkLayer(1);
 
             History.assertNumEditsIs(1);
             History.assertLastEditNameIs("Apply Layer Mask");
 
             History.undo();
             assertThat(layer.hasMask()).isTrue();
+            iconUpdates.checkMask(1);
 
             History.redo();
             assertThat(layer.hasMask()).isFalse();
-            checkNumLayerIconUpdates(2);
+            iconUpdates.checkLayer(2);
         }
-    }
-
-    private void checkNumLayerIconUpdates(int num) {
-        verify(ui, times(layerIconUpdatesAtStart + num)).updateLayerIconImage(layer);
     }
 }

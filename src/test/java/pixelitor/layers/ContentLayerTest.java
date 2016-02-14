@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,6 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
-import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
 import pixelitor.testutils.WithMask;
 
@@ -35,6 +34,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * Tests the functionality common to all ContentLayer subclasses
@@ -49,6 +49,9 @@ public class ContentLayerTest {
     public WithMask withMask;
 
     private ContentLayer layer;
+    private Composition comp;
+
+    private IconUpdateChecker iconUpdates;
 
     @Parameters(name = "{index}: layer = {0}, mask = {1}")
     public static Collection<Object[]> instancesToTest() {
@@ -62,12 +65,21 @@ public class ContentLayerTest {
 
     @Before
     public void setUp() {
-        Composition comp = TestHelper.createEmptyComposition();
+        comp = TestHelper.createEmptyComposition();
         layer = (ContentLayer) TestHelper.createLayerOfClass(layerClass, comp);
 
         comp.addLayerNoGUI(layer);
 
+        LayerUI ui = mock(LayerUI.class);
+        layer.setUI(ui);
+
         withMask.init(layer);
+        LayerMask mask = null;
+        if (withMask.isYes()) {
+            mask = layer.getMask();
+        }
+
+        iconUpdates = new IconUpdateChecker(ui, layer, mask, 0, 1);
 
         assert comp.getNrLayers() == 1 : "found " + comp.getNrLayers() + " layers";
         History.clear();
@@ -93,29 +105,33 @@ public class ContentLayerTest {
         assertThat(layer.getTX()).isEqualTo(3);
         assertThat(layer.getTY()).isEqualTo(3);
 
-        layer.endMovement();
+        // endMovement is called on the composition
+        // so that we have history
+        comp.endMovement();
 
         checkTranslationAfterPositiveDrag();
+        iconUpdates.check(1, 1);
 
+        // start another drag to the negative direction
         layer.startMovement();
         layer.moveWhileDragging(-1, -2);
 
         checkTranslationAfterNegativeDrag();
 
-        layer.endMovement();
+        comp.endMovement();
 
         // No change:
         // ImageLayer: this time the layer was not enlarged
         // TextLayer: endMovement does not change the tmpTranslation + translation sum
         checkTranslationAfterNegativeDrag();
+        iconUpdates.check(2, 2);
 
-        // TODO should have undo
-//        History.assertNumEditsIs(2);
-//        History.undo();
-//        checkTranslationAfterPositiveDrag();
-//        History.undo();
-//        assertThat(layer.getTX()).isEqualTo(0);
-//        assertThat(layer.getTY()).isEqualTo(0);
+        History.assertNumEditsIs(2);
+        History.undo();
+        checkTranslationAfterPositiveDrag();
+        History.undo();
+        assertThat(layer.getTX()).isEqualTo(0);
+        assertThat(layer.getTY()).isEqualTo(0);
     }
 
     private void checkTranslationAfterPositiveDrag() {
@@ -143,36 +159,27 @@ public class ContentLayerTest {
     }
 
     @Test
-    // this method is abstract in ImageLayer, test separately for subclasses
-    public void testCreateTranslateEdit() {
-        ContentLayerMoveEdit edit = layer.createMovementEdit(5, 5);
-        assertThat(edit).isNotNull();
-    }
-
-    @Test
-    public void testEnlargeCanvas() {
-        layer.enlargeCanvas(5, 5, 5, 10);
-    }
-
-    @Test
-    public void testApplyLayer() {
+    public void test_applyLayer() {
         Graphics2D g2 = TestHelper.createGraphics();
         BufferedImage image = TestHelper.createImage();
 
         layer.applyLayer(g2, true, image);
         layer.applyLayer(g2, false, image);
+        iconUpdates.check(0, 0);
     }
 
     @Test
-    public void testPaintLayerOnGraphics() {
+    public void test_paintLayerOnGraphics() {
         Graphics2D g2 = TestHelper.createGraphics();
         layer.paintLayerOnGraphics(g2, false);
+        iconUpdates.check(0, 0);
     }
 
     @Test
-    public void testSetupDrawingComposite() {
+    public void test_setupDrawingComposite() {
         Graphics2D g = TestHelper.createGraphics();
         layer.setupDrawingComposite(g, true);
         layer.setupDrawingComposite(g, false);
+        iconUpdates.check(0, 0);
     }
 }

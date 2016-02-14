@@ -31,7 +31,7 @@ public class ImageLayerCheckHandler extends ToolHandler {
 
     @Override
     boolean mousePressed(MouseEvent e, ImageComponent ic) {
-        if (!ic.activeIsImageLayer()) {
+        if (!ic.activeIsImageLayerOrMask()) {
             Messages.showNotImageLayerError();
             return true;
         }
@@ -42,11 +42,11 @@ public class ImageLayerCheckHandler extends ToolHandler {
 
     @Override
     boolean mouseDragged(MouseEvent e, ImageComponent ic) {
-        return !ic.activeIsImageLayer();
+        return !ic.activeIsImageLayerOrMask();
     }
 
     @Override
     boolean mouseReleased(MouseEvent e, ImageComponent ic) {
-        return !ic.activeIsImageLayer();
+        return !ic.activeIsImageLayerOrMask();
     }
 }

@@ -23,17 +23,16 @@ import java.awt.Composite;
 import java.awt.Cursor;
 
 /**
- * A brush tool that draws each stroke into a temporary layer
- * and therefore has blending mode and opacity settings
+ * A brush tool that can have blending mode controls. The blending mode
+ * is disabled when editing layer masks.
  */
-public abstract class TmpLayerBrushTool extends AbstractBrushTool {
+public abstract class BlendingModeBrushTool extends AbstractBrushTool {
     private BlendingModePanel blendingModePanel;
 
-    protected TmpLayerBrushTool(char activationKeyChar, String name, String iconFileName, String toolMessage, Cursor cursor) {
+    protected BlendingModeBrushTool(char activationKeyChar, String name, String iconFileName, String toolMessage, Cursor cursor) {
         super(activationKeyChar, name, iconFileName, toolMessage, cursor);
         drawStrategy = DrawStrategy.TMP_LAYER;
     }
-
 
     public void setupMaskDrawing(boolean isMask) {
         if (isMask) {

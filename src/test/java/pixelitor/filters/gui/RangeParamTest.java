@@ -35,22 +35,22 @@ public class RangeParamTest {
     }
 
     @Test(expected = AssertionError.class)
-    public void testInvalidConstructorMinIsMax() {
+    public void invalidArgsMinIsMax() {
         new RangeParam("name", 10, 10, 10);
     }
 
     @Test(expected = AssertionError.class)
-    public void testInvalidConstructorMinBiggerThanMax() {
+    public void invalidArgsMinBiggerThanMax() {
         new RangeParam("name", 11, 10, 10);
     }
 
     @Test(expected = AssertionError.class)
-    public void testInvalidConstructorDefaultSmallerThanMin() {
+    public void invalidArgsDefaultSmallerThanMin() {
         new RangeParam("name", 5, 2, 10);
     }
 
     @Test(expected = AssertionError.class)
-    public void testInvalidConstructorDefaultBiggerThanMax() {
+    public void invalidArgsDefaultBiggerThanMax() {
         new RangeParam("name", 5, 15, 10);
     }
 }

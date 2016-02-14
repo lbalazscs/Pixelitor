@@ -164,7 +164,7 @@ public final class SelectionActions {
             }
             Composition comp = ic.getComp();
 
-            if (!comp.activeIsImageLayer()) {
+            if (!comp.activeIsImageLayerOrMask()) {
                 Messages.showNotImageLayerError();
                 return;
             }

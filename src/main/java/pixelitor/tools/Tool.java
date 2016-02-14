@@ -25,6 +25,7 @@ import pixelitor.gui.ImageComponents;
 import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.history.PartialImageEdit;
+import pixelitor.layers.ImageLayer;
 import pixelitor.selection.IgnoreSelection;
 import pixelitor.tools.toolhandlers.ColorPickerToolHandler;
 import pixelitor.tools.toolhandlers.CurrentToolHandler;
@@ -243,7 +244,8 @@ public abstract class Tool {
         );
 
         if (!saveRectangle.isEmpty()) {
-            PartialImageEdit edit = new PartialImageEdit(getName(), comp, originalImage, saveRectangle, false);
+            ImageLayer layer = comp.getActiveMaskOrImageLayer();
+            PartialImageEdit edit = new PartialImageEdit(getName(), comp, layer, originalImage, saveRectangle, false);
             History.addEdit(edit);
         }
     }

@@ -46,7 +46,7 @@ public class Flip extends SimpleCompAction {
     }
 
     @Override
-    protected void applyTx(ContentLayer contentLayer, AffineTransform tx) {
+    protected void applyTx(ContentLayer contentLayer) {
         contentLayer.flip(direction);
     }
 

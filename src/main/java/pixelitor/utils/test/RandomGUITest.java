@@ -110,6 +110,7 @@ public class RandomGUITest {
 
     private static final boolean singleImageTest = false;
     private static final boolean noHideShow = true; // no view operations if set to true
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
     private static boolean continueRunning = true;
 
@@ -157,7 +158,7 @@ public class RandomGUITest {
         });
 
         System.out.printf("RandomGUITest.runTest CALLED at %s, the '%s' key stops, the '%s' key exits.%n",
-                new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()),
+                DATE_FORMAT.format(new Date()),
                 stopKeyStroke.getKeyChar(), exitKeyStroke.getKeyChar());
 
         Robot r = null;
@@ -223,7 +224,7 @@ public class RandomGUITest {
                                 throw new IllegalStateException("no active composition");
                             }
                             ConsistencyChecks.checkAll(true);
-                        } catch (Exception e) {
+                        } catch (Throwable e) {
                             Messages.showException(e);
                         }
                     };
@@ -265,7 +266,7 @@ public class RandomGUITest {
     }
 
     private static void randomResize() {
-        log("random resize");
+        log("resize");
         OpTests.randomResize();
     }
 
@@ -278,7 +279,7 @@ public class RandomGUITest {
         Point randomPoint = generateRandomPoint();
         int x = randomPoint.x;
         int y = randomPoint.y;
-        log("random move to (" + x + ", " + y + ')');
+        log("move to (" + x + ", " + y + ')');
         r.mouseMove(x, y);
     }
 
@@ -286,7 +287,7 @@ public class RandomGUITest {
         Point randomPoint = generateRandomPoint();
         int x = randomPoint.x;
         int y = randomPoint.y;
-        log("random \"" + Tools.getCurrentTool().getName() + " Tool\" drag to (" + x + ", " + y + ')');
+        log(Tools.getCurrentTool().getName() + " Tool\" drag to (" + x + ", " + y + ')');
 
         r.mousePress(InputEvent.BUTTON1_MASK);
         r.mouseMove(x, y);
@@ -294,7 +295,7 @@ public class RandomGUITest {
     }
 
     private static void click(Robot r) {
-        log("random click");
+        log("click");
 
         r.mousePress(InputEvent.BUTTON1_MASK);
         r.delay(50);
@@ -302,7 +303,7 @@ public class RandomGUITest {
     }
 
     private static void randomRightClick(Robot r) {
-        log("random right click");
+        log("right click");
 
         r.mousePress(InputEvent.BUTTON3_MASK);
         r.delay(50);
@@ -310,61 +311,61 @@ public class RandomGUITest {
     }
 
     private static void randomColors() {
-        log("random colors");
+        log("randomize colors");
         FgBgColors.randomizeColors();
     }
 
-    private static void randomOperation() {
-        if (!ImageComponents.getActiveIC().activeIsImageLayer()) {
+    private static void randomFilter() {
+        if (!ImageComponents.getActiveIC().activeIsImageLayerOrMask()) {
             return;
         }
 
-        Filter op = FilterUtils.getRandomFilter(filter ->
+        Filter f = FilterUtils.getRandomFilter(filter ->
                 (!(filter instanceof Fade)) &&
                         (!(filter instanceof RandomFilter)));
 
-        String opName = op.getName();
-        log("random operation: " + opName);
+        String filterName = f.getName();
+        log("filter: " + filterName);
 
         long runCountBefore = Filter.runCount;
 
-        op.randomizeSettings();
+        f.randomizeSettings();
 
         ImageLayer layer = ImageComponents.getActiveImageLayerOrMask().get();
-        if (op instanceof FilterWithGUI) {
+        if (f instanceof FilterWithGUI) {
             layer.startPreviewing();
 
             try {
-                op.randomizeSettings();
-                op.execute(ChangeReason.OP_PREVIEW);
-            } catch (Exception e) {
+                f.randomizeSettings();
+                f.execute(ChangeReason.OP_PREVIEW);
+            } catch (Throwable e) {
                 BufferedImage src = layer.getFilterSourceImage();
-                if (op instanceof FilterWithParametrizedGUI) {
-                    ParamSet paramSet = ((FilterWithParametrizedGUI) op).getParamSet();
+                if (f instanceof FilterWithParametrizedGUI) {
+                    ParamSet paramSet = ((FilterWithParametrizedGUI) f).getParamSet();
                     System.out.println(String.format(
-                            "RandomGUITest::randomOperation: name = %s, width = %d, height = %d, params = %s",
-                            opName, src.getWidth(), src.getHeight(), paramSet.toString()));
+                            "RandomGUITest::randomFilter: name = %s, width = %d, height = %d, params = %s",
+                            filterName, src.getWidth(), src.getHeight(), paramSet.toString()));
                 } else {
                     System.out.println(String.format(
-                            "RandomGUITest::randomOperation: name = %s, width = %d, height = %d",
-                            opName, src.getWidth(), src.getHeight()));
+                            "RandomGUITest::randomFilter: name = %s, width = %d, height = %d",
+                            filterName, src.getWidth(), src.getHeight()));
                 }
                 throw e;
             }
 
             if (Math.random() > 0.3) {
-                layer.okPressedInDialog(opName);
+                layer.okPressedInDialog(filterName);
             } else {
                 layer.cancelPressedInDialog();
             }
         } else {
             BufferedImage src = layer.getFilterSourceImage();
             try {
-                op.execute(ChangeReason.OP_WITHOUT_DIALOG);
-            } catch (Exception e) {
+                f.execute(ChangeReason.OP_WITHOUT_DIALOG);
+            } catch (Throwable e) {
                 System.out.println(String.format(
-                        "RandomGUITest::randomOperation: name = %s, width = %d, height = %d",
-                        opName, src.getWidth(), src.getHeight()));
+                        "RandomGUITest::randomFilter: name = %s, width = %d, height = %d",
+                        filterName, src.getWidth(), src.getHeight()));
                 throw e;
             }
         }
@@ -375,12 +376,16 @@ public class RandomGUITest {
     }
 
     private static void randomTween() {
+        if (ImageComponents.getActiveImageLayerOrMaskOrNull() == null) {
+            return;
+        }
+
         long runCountBefore = Filter.runCount;
 
         FilterWithParametrizedGUI filter = getRandomTweenFilter();
         String filterName = filter.getName();
 
-        log("randomTween: " + filterName);
+        log("tween: " + filterName);
 
         TweenAnimation animation = new TweenAnimation();
         animation.setFilter(filter);
@@ -441,7 +446,6 @@ public class RandomGUITest {
 
     private static final int[] keyEvents = {KeyEvent.VK_1, KeyEvent.VK_A,
             KeyEvent.VK_ENTER, KeyEvent.VK_ESCAPE, KeyEvent.VK_BACK_SPACE,
-            KeyEvent.VK_F1, KeyEvent.VK_F2, KeyEvent.VK_F3, KeyEvent.VK_F4,
             KeyEvent.VK_M, KeyEvent.VK_C, KeyEvent.VK_Z,
             KeyEvent.VK_G, KeyEvent.VK_B,
             KeyEvent.VK_E, KeyEvent.VK_I,
@@ -459,8 +463,11 @@ public class RandomGUITest {
         int randomIndex = rand.nextInt(keyEvents.length);
         int keyEvent = keyEvents[randomIndex];
 
-        log("random key = " + keyEvent);
+        log("key = " + keyEvent);
+        pressKey(r, keyEvent);
+    }
 
+    private static void pressKey(Robot r, int keyEvent) {
         r.keyPress(keyEvent);
         r.delay(50);
         r.keyRelease(keyEvent);
@@ -477,7 +484,7 @@ public class RandomGUITest {
                 percentValue = randomZoomLevel.getPercentValue();
             }
 
-            log("random zoom zoomLevel = " + randomZoomLevel);
+            log("zoom zoomLevel = " + randomZoomLevel);
 
             if (rand.nextBoolean()) {
                 ic.setZoom(randomZoomLevel, false, null);
@@ -495,7 +502,7 @@ public class RandomGUITest {
     }
 
     private static void randomZoomOut() {
-        log("randomZoomOut");
+        log("zoomOut");
 
         ImageComponent ic = ImageComponents.getActiveIC();
         if (ic != null) {
@@ -518,7 +525,7 @@ public class RandomGUITest {
 
     private static void randomUndoRedo() {
         if (History.canUndo()) {
-            log("randomUndoRedo");
+            log("undo");
 
             History.undo();
 
@@ -532,6 +539,7 @@ public class RandomGUITest {
 
 //            assert History.canRedo();
             if (rand.nextInt(10) > 3) {
+                log("redo");
                 History.redo();
             }
         }
@@ -540,7 +548,7 @@ public class RandomGUITest {
     private static void randomCrop() {
         boolean enabled = SelectionActions.areEnabled();
         if (enabled) {
-            log("randomCrop");
+            log("crop");
             SelectionActions.getCropAction().actionPerformed(new ActionEvent("", 0, ""));
         }
     }
@@ -551,7 +559,7 @@ public class RandomGUITest {
         }
         int opacity = rand.nextInt(100);
 
-        log("randomFade, opacity = " + opacity + " %");
+        log("fade, opacity = " + opacity + " %");
 
         Fade fade = new Fade();
         fade.setOpacity(opacity);
@@ -703,29 +711,29 @@ public class RandomGUITest {
 
         int r = rand.nextInt(5);
         if (r == 0) {
-            log("random show-hide histograms");
+            log("show-hide histograms");
             new ShowHideHistogramsAction().actionPerformed(new ActionEvent("", 0, ""));
         } else if (r == 1) {
-            log("random show-hide layers");
+            log("show-hide layers");
             new ShowHideLayersAction().actionPerformed(new ActionEvent("", 0, ""));
         } else if (r == 2) {
-            log("random show-hide tools");
+            log("show-hide tools");
             new ShowHideToolsAction().actionPerformed(new ActionEvent("", 0, ""));
         } else if (r == 4) {
-            log("random show-hide status bar");
+            log("show-hide status bar");
             new ShowHideStatusBarAction().actionPerformed(new ActionEvent("", 0, ""));
         } else if (r == 5) {
-            log("random show-hide all");
+            log("show-hide all");
             ShowHideAllAction.INSTANCE.actionPerformed(new ActionEvent("", 0, ""));
         }
     }
 
     private static void randomCopy() {
         if (rand.nextBoolean()) {
-            log("random copy layer");
+            log("copy layer");
             new CopyAction(CopySource.LAYER).actionPerformed(new ActionEvent("", 0, ""));
         } else {
-            log("random copy composite");
+            log("copy composite");
             new CopyAction(CopySource.COMPOSITE).actionPerformed(new ActionEvent("", 0, ""));
         }
     }
@@ -739,11 +747,11 @@ public class RandomGUITest {
             if (singleImageTest) {
                 return;
             }
-            log("random paste as new image");
+            log("paste as new image");
             new PasteAction(PasteDestination.NEW_IMAGE).actionPerformed(new ActionEvent("", 0, ""));
             numPastedImages++;
         } else if (r == 1) {
-            log("random paste as new layer");
+            log("paste as new layer");
             new PasteAction(PasteDestination.NEW_LAYER).actionPerformed(new ActionEvent("", 0, ""));
             numPastedImages++;
         }
@@ -757,14 +765,14 @@ public class RandomGUITest {
 
             if (f > opacity) {
                 // always increase
-                log("random increase opacity");
+                log("increase opacity");
                 layer.setOpacity(f, UpdateGUI.YES, AddToHistory.YES, true);
             } else if (rand.nextFloat() > 0.75) { // sometimes decrease
-                log("random decrease opacity");
+                log("decrease opacity");
                 layer.setOpacity(f, UpdateGUI.YES, AddToHistory.YES, true);
             }
         } else {
-            log("random change layer blending mode");
+            log("change layer blending mode");
             BlendingMode[] blendingModes = BlendingMode.values();
             BlendingMode randomBlendingMode = blendingModes[rand.nextInt(blendingModes.length)];
             layer.setBlendingMode(randomBlendingMode, UpdateGUI.YES, AddToHistory.YES, true);
@@ -776,13 +784,13 @@ public class RandomGUITest {
         boolean visible = layer.isVisible();
         if (rand.nextBoolean()) {
             if (!visible) {
-                log("random showing layer");
+                log("show layer");
                 layer.setVisible(true, AddToHistory.YES);
             }
         } else {
             if (visible) {
                 if (rand.nextFloat() > 0.8) { // sometimes hide
-                    log("random hiding layer");
+                    log("hide layer");
                     layer.setVisible(false, AddToHistory.YES);
                 }
             }
@@ -803,7 +811,7 @@ public class RandomGUITest {
         }
         Tool currentTool = Tools.getCurrentTool();
         if (currentTool != tool) {
-            log("random tool click on " + currentTool);
+            log("tool click on " + currentTool);
             tool.getButton().doClick();
         }
     }
@@ -814,7 +822,7 @@ public class RandomGUITest {
     }
 
     private static void randomNewTextLayer() {
-        log("random new text layer");
+        log("new text layer");
         Composition comp = ImageComponents.getActiveComp().get();
         TextLayer textLayer = new TextLayer(comp);
         textLayer.setSettings(TextSettings.createRandomSettings(rand));
@@ -824,14 +832,14 @@ public class RandomGUITest {
     private static void randomTextLayerRasterize() {
         Layer layer = ImageComponents.getActiveLayer().get();
         if (layer instanceof TextLayer) {
-            log("random text layer rasterize");
+            log("text layer rasterize");
             Composition comp = ImageComponents.getActiveComp().get();
             TextLayer.replaceWithRasterized(comp);
         }
     }
 
     private static void randomNewAdjustmentLayer() {
-        log("random new adj layer");
+        log("new adj layer");
         Composition comp = ImageComponents.getActiveComp().get();
         AdjustmentLayer adjustmentLayer = new AdjustmentLayer(comp, "Invert", new Invert());
         comp.addLayer(adjustmentLayer, AddToHistory.YES, "New Random Adj Layer", true, false);
@@ -849,15 +857,15 @@ public class RandomGUITest {
         if (d < 0.33) {
             keyCode = KeyEvent.VK_1;
             keyChar = '1';
-            log("random Ctrl-1");
+            log("Ctrl-1");
         } else if (d < 0.66) {
             keyCode = KeyEvent.VK_2;
             keyChar = '2';
-            log("random Ctrl-2");
+            log("Ctrl-2");
         } else {
             keyCode = KeyEvent.VK_3;
             keyChar = '3';
-            log("random Ctrl-3");
+            log("Ctrl-3");
         }
 
         pw.dispatchEvent(new KeyEvent(pw, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), KeyEvent.CTRL_MASK, keyCode, keyChar));
@@ -867,29 +875,29 @@ public class RandomGUITest {
     private static void randomLayerMaskAction() {
         Layer layer = ImageComponents.getActiveLayer().get();
         if (!layer.hasMask()) {
-            log("random add layer mask");
+            log("add layer mask");
             AddLayerMaskAction.INSTANCE.actionPerformed(null);
         } else {
             if (rand.nextFloat() < 0.2 && layer instanceof ContentLayer) {
                 LayerMask mask = layer.getMask();
                 if (mask.isLinked()) {
-                    log("random unlink layer mask");
+                    log("unlink layer mask");
                     mask.setLinked(false, AddToHistory.YES);
                 } else {
-                    log("random re-link layer mask");
+                    log("re-link layer mask");
                     mask.setLinked(true, AddToHistory.YES);
                 }
             } else if (layer instanceof ImageLayer) {
                 double d = rand.nextDouble();
                 if (d > 0.5) {
-                    log("random apply layer mask");
+                    log("apply layer mask");
                     ((ImageLayer) layer).applyLayerMask(AddToHistory.YES);
                 } else {
-                    log("random delete layer mask");
+                    log("delete layer mask");
                     layer.deleteMask(AddToHistory.YES);
                 }
             } else {
-                log("random delete layer mask");
+                log("delete layer mask");
                 layer.deleteMask(AddToHistory.YES);
             }
         }
@@ -910,6 +918,16 @@ public class RandomGUITest {
                 north, east, south, west));
         Composition comp = ImageComponents.getActiveComp().get();
         new EnlargeCanvas(north, east, south, west).process(comp);
+    }
+
+    private static void reload(Robot r) {
+        if (rand.nextFloat() < 0.1) {
+            Composition comp = ImageComponents.getActiveCompOrNull();
+            if (comp.getFile() != null) {
+                log("f5 reload");
+                pressKey(r, KeyEvent.VK_F5);
+            }
+        }
     }
 
     private static void setupWeightedCaller(Robot r) {
@@ -938,13 +956,15 @@ public class RandomGUITest {
 
         weightedCaller.registerCallback(1, RandomGUITest::randomColors);
 
-        weightedCaller.registerCallback(5, RandomGUITest::randomOperation);
+        weightedCaller.registerCallback(5, RandomGUITest::randomFilter);
 
         weightedCaller.registerCallback(25, RandomGUITest::randomTween);
 
         weightedCaller.registerCallback(10, RandomGUITest::randomFitToScreen);
 
         weightedCaller.registerCallback(3, () -> randomKey(r));
+
+        weightedCaller.registerCallback(1, () -> reload(r));
 
         weightedCaller.registerCallback(1, RandomGUITest::randomZoom);
 

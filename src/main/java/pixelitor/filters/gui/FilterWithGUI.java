@@ -42,7 +42,7 @@ public abstract class FilterWithGUI extends Filter {
     public void execute() {
         ImageComponent ic = ImageComponents.getActiveIC();
         if(ic != null) {
-            if (!ic.activeIsImageLayer()) {
+            if (!ic.activeIsImageLayerOrMask()) {
                 Messages.showNotImageLayerError();
                 return;
             }

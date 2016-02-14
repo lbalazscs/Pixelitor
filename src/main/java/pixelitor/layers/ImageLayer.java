@@ -286,7 +286,9 @@ public class ImageLayer extends ContentLayer {
         comp.imageChanged(INVALIDATE_CACHE);
     }
 
-    // sets the image object ignoring the selection
+    /**
+     * Sets the image ignoring the selection
+     */
     public void setImage(BufferedImage newImage) {
         BufferedImage oldRef = image;
         image = requireNonNull(newImage);
@@ -299,6 +301,18 @@ public class ImageLayer extends ContentLayer {
         if (oldRef != null && oldRef != image) {
             oldRef.flush();
         }
+    }
+
+    /**
+     * Replaces the image with history and icon update
+     */
+    public void replaceImage(BufferedImage newImage, String editName) {
+        BufferedImage oldImage = image;
+        setImage(newImage);
+        ImageEdit edit = new ImageEdit(comp, editName, this, oldImage, IgnoreSelection.YES, false);
+        History.addEdit(edit);
+
+        updateIconImage();
     }
 
     /**
@@ -372,12 +386,9 @@ public class ImageLayer extends ContentLayer {
         startPreviewing();
     }
 
-    // currently the same as cancelPressedInDialog
     public void tweenCalculatingEnded() {
         assert state == PREVIEW;
-        setState(NORMAL);
-
-        comp.imageChanged(REPAINT); // TODO necessary?
+        stopPreviewing();
     }
 
     /**
@@ -665,11 +676,15 @@ public class ImageLayer extends ContentLayer {
         try {
             subImage = image.getSubimage(x, y, canvasWidth, canvasHeight);
         } catch (RasterFormatException e) {
-            System.out.println("ImageLayer.getCanvasSizedSubImage x = " + x + ", y = " + y + ", canvasWidth = " + canvasWidth + ", canvasHeight = " + canvasHeight);
+            System.out.printf("ImageLayer.getCanvasSizedSubImage x = %d, y = %d, " +
+                            "canvasWidth = %d, canvasHeight = %d, " +
+                            "imageWidth = %d, imageHeight = %d%n",
+                    x, y, canvasWidth, canvasHeight, image.getWidth(), image.getHeight());
             WritableRaster raster = image.getRaster();
-            int minX = raster.getMinX();
-            int minY = raster.getMinY();
-            System.out.println("ImageLayer.getCanvasSizedSubImage minX = " + minX + ", minY = " + minY);
+
+            System.out.printf("ImageLayer.getCanvasSizedSubImage " +
+                            "minX = %d, minY = %d, width = %d, height=%d %n",
+                    raster.getMinX(), raster.getMinY(), raster.getWidth(), raster.getHeight());
 
             throw e;
         }
@@ -690,9 +705,6 @@ public class ImageLayer extends ContentLayer {
      * If there is a selection, then the filters work on a subimage determined by the selection bounds.
      */
     public BufferedImage getImageOrSubImageIfSelected(boolean copyIfNoSelection, boolean copyAndTranslateIfSelected) {
-//        new Exception("copyIfNoSelection = " + copyIfNoSelection +
-//                ", copyAndTranslateIfSelected = " + copyAndTranslateIfSelected)
-//                .printStackTrace();
         Optional<Selection> selection = comp.getSelection();
         if (!selection.isPresent()) {
             if (copyIfNoSelection) {
@@ -791,30 +803,41 @@ public class ImageLayer extends ContentLayer {
     }
 
     @Override
-    public void resize(int targetWidth, int targetHeight, boolean progressiveBilinear) {
-        // the layer size can be bigger than the canvas size, and it can have a negative
-        // translation value
+    public void resize(int canvasTargetWidth, int canvasTargetHeight, boolean progressiveBilinear) {
         boolean bigLayer = isBigLayer();
-        int resizeWidth = targetWidth;
-        int resizeHeight = targetHeight;
+
+        int imgTargetWidth = canvasTargetWidth;
+        int imgTargetHeight = canvasTargetHeight;
 
         double horizontalResizeRatio = 1.0;
         double verticalResizeRatio = 1.0;
+
+        int newTx = 0, newTy = 0; // used only for big layers
+
         if (bigLayer) {
-            horizontalResizeRatio = ((double) targetWidth) / canvas.getWidth();
-            verticalResizeRatio = ((double) targetHeight) / canvas.getHeight();
-            resizeWidth = (int) (image.getWidth() * horizontalResizeRatio);
-            resizeHeight = (int) (image.getHeight() * verticalResizeRatio);
+            horizontalResizeRatio = ((double) canvasTargetWidth) / canvas.getWidth();
+            verticalResizeRatio = ((double) canvasTargetHeight) / canvas.getHeight();
+            imgTargetWidth = (int) (image.getWidth() * horizontalResizeRatio);
+            imgTargetHeight = (int) (image.getHeight() * verticalResizeRatio);
+
+            newTx = (int) (getTX() * horizontalResizeRatio);
+            newTy = (int) (getTY() * verticalResizeRatio);
+
+            // correct rounding problems that can cause
+            // "image does dot cover canvas" errors
+            if (imgTargetWidth + newTx < canvasTargetWidth) {
+                imgTargetWidth++;
+            }
+            if (imgTargetHeight + newTy < canvasTargetHeight) {
+                imgTargetHeight++;
+            }
         }
 
-        BufferedImage resizedImg = ImageUtils.getFasterScaledInstance(image, resizeWidth, resizeHeight, VALUE_INTERPOLATION_BICUBIC, progressiveBilinear);
+        BufferedImage resizedImg = ImageUtils.getFasterScaledInstance(image, imgTargetWidth, imgTargetHeight, VALUE_INTERPOLATION_BICUBIC, progressiveBilinear);
         setImage(resizedImg);
 
         if (bigLayer) {
-            setTranslation(
-                    (int) (getTX() * horizontalResizeRatio),
-                    (int) (getTY() * verticalResizeRatio)
-            );
+            setTranslation(newTx, newTy);
         }
     }
 

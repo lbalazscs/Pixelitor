@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,12 +44,12 @@ public class PartialImageEdit extends FadeableEdit {
 
     private final ImageLayer layer;
 
-    public PartialImageEdit(String name, Composition comp, BufferedImage image, Rectangle saveRect, boolean canRepeat) {
-        super(comp, name);
+    public PartialImageEdit(String name, Composition comp, ImageLayer layer, BufferedImage image, Rectangle saveRect, boolean canRepeat) {
+        super(comp, layer, name);
 
         this.canRepeat = canRepeat;
         comp.setDirty(true);
-        this.layer = comp.getActiveMaskOrImageLayer();
+        this.layer = layer;
 
         this.saveRect = saveRect;
         backupRaster = image.getData(this.saveRect);

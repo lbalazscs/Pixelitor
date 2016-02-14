@@ -61,6 +61,12 @@ public class Pixelitor {
 
         System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Pixelitor");
 
+        if (JVM.isLinux) {
+            // doesn't seem to pick up good defaults
+            System.setProperty("awt.useSystemAAFontSettings", "lcd");
+            System.setProperty("swing.aatext", "true");
+        }
+
         ExceptionHandler.INSTANCE.register();
         EventQueue.invokeLater(() -> {
             try {
@@ -101,19 +107,9 @@ public class Pixelitor {
         PixelitorWindow pw = PixelitorWindow.getInstance();
         Dialogs.setMainWindowInitialized(true);
 
-        if (JVM.isMac) {
-            JMenuBar menuBar = pw.getJMenuBar();
-            try {
-                // this property is respected only by the Aqua look-and-feel...
-                System.setProperty("apple.laf.useScreenMenuBar", "true");
-                // ...so set the look-and-feel for the menu only to Aqua
-
-                //noinspection ClassNewInstance
-                menuBar.setUI((MenuBarUI) Class.forName("com.apple.laf.AquaMenuBarUI").newInstance());
-            } catch (Exception e) {
-                // ignore
-            }
-        }
+//        if (JVM.isMac) {
+//            setupMacMenuBar(pw);
+//        }
 
         if (args.length > 0) {
             openFilesGivenAsProgramArguments(args);
@@ -126,6 +122,20 @@ public class Pixelitor {
         TipsOfTheDay.showTips(pw, false);
 
         afterStartTestActions(pw);
+    }
+
+    private static void setupMacMenuBar(PixelitorWindow pw) {
+        JMenuBar menuBar = pw.getJMenuBar();
+        try {
+            // this property is respected only by the Aqua look-and-feel...
+            System.setProperty("apple.laf.useScreenMenuBar", "true");
+            // ...so set the look-and-feel for the menu only to Aqua
+
+            //noinspection ClassNewInstance
+            menuBar.setUI((MenuBarUI) Class.forName("com.apple.laf.AquaMenuBarUI").newInstance());
+        } catch (Exception e) {
+            // ignore
+        }
     }
 
     private static void setLookAndFeel() {

@@ -26,7 +26,6 @@ import javax.swing.*;
 public enum Build {
     DEVELOPMENT {
         private boolean randomGUITest = false;
-        private boolean performanceTest = false;
 
         @Override
         public boolean isRandomGUITest() {
@@ -38,17 +37,6 @@ public enum Build {
             this.randomGUITest = randomGUITest;
             fixTitle = null;
         }
-
-        @Override
-        public void setPerformanceTest(boolean performanceTest) {
-            this.performanceTest = performanceTest;
-            fixTitle = null;
-        }
-
-        @Override
-        public boolean isPerformanceTest() {
-            return performanceTest;
-        }
     }, FINAL {
         @Override
         public boolean isRandomGUITest() {
@@ -56,17 +44,7 @@ public enum Build {
         }
 
         @Override
-        public boolean isPerformanceTest() {
-            return false;
-        }
-
-        @Override
         public void setRandomGUITest(boolean randomGUITest) {
-            // no way
-        }
-
-        @Override
-        public void setPerformanceTest(boolean performanceTest) {
             // no way
         }
     };
@@ -96,8 +74,6 @@ public enum Build {
     }
 
     public abstract boolean isRandomGUITest();
-    public abstract boolean isPerformanceTest();
 
     public abstract void setRandomGUITest(boolean randomGUITest);
-    public abstract void setPerformanceTest(boolean performanceTest);
 }

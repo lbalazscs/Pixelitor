@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -49,13 +49,13 @@ public class ParamSetTest {
     }
 
     @Test
-    public void testReset() {
+    public void test_reset() {
         params.reset();
         checkThatFilterWasNotCalled();
     }
 
     @Test
-    public void testRandomize() {
+    public void test_randomize() {
         params.randomize();
         checkThatFilterWasNotCalled();
     }
@@ -73,7 +73,7 @@ public class ParamSetTest {
     }
 
     @Test
-    public void testCopyAnSetState() {
+    public void test_copyState_setState() {
         ParamSetState state = params.copyState();
         params.setState(state);
 
@@ -81,12 +81,12 @@ public class ParamSetTest {
     }
 
     @Test
-    public void testCanBeAnimated() {
+    public void test_canBeAnimated() {
         assertThat(params.canBeAnimated()).isTrue();
     }
 
     @Test
-    public void testSetFinalAnimationSettingMode() {
+    public void test_setFinalAnimationSettingMode() {
         params.setFinalAnimationSettingMode(false);
         params.setFinalAnimationSettingMode(true);
 
@@ -94,7 +94,7 @@ public class ParamSetTest {
     }
 
     @Test
-    public void testHasGradient() {
+    public void test_hasGradient() {
         assertThat(params.hasGradient()).isTrue();
     }
 

@@ -33,7 +33,7 @@ public class NewLayerEdit extends PixelitorEdit {
     private Layer activeLayerBefore;
     private Layer newLayer;
     private final int newLayerIndex;
-    private MaskViewMode oldViewMode;
+    private final MaskViewMode oldViewMode;
 
     public NewLayerEdit(Composition comp, Layer newLayer, Layer activeLayerBefore, String historyName, MaskViewMode oldViewMode) {
         super(comp, historyName);
@@ -53,7 +53,7 @@ public class NewLayerEdit extends PixelitorEdit {
         comp.deleteLayer(newLayer, AddToHistory.NO, UpdateGUI.YES);
         comp.setActiveLayer(activeLayerBefore, AddToHistory.NO);
 
-        oldViewMode.activate(comp.getIC(), activeLayerBefore);
+        oldViewMode.activate(comp, activeLayerBefore);
 
         History.notifyMenus(this);
     }

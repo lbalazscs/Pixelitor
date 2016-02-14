@@ -23,7 +23,6 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.layers.ImageLayer;
-import pixelitor.tools.brushes.Brush;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.CopyBrushType;
 import pixelitor.tools.brushes.SmudgeBrush;
@@ -39,10 +38,11 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 /**
  * The Smudge Tool
  */
-public class SmudgeTool extends DirectBrushTool {
+public class SmudgeTool extends AbstractBrushTool {
     public SmudgeTool() {
         super('u', "Smudge", "smudge_tool_icon.png",
                 "click and drag to smudge. Click and Shift-click to smudge along a line.", Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        drawStrategy = DrawStrategy.DIRECT;
     }
 
     private final RangeParam strengthParam = new RangeParam("Strength", 1, 60, 100);
@@ -104,11 +104,6 @@ public class SmudgeTool extends DirectBrushTool {
     @Override
     protected Symmetry getSymmetry() {
         throw new UnsupportedOperationException("no symmetry");
-    }
-
-    @Override
-    protected Brush getPaintingBrush() {
-        return smudgeBrush;
     }
 
     @Override

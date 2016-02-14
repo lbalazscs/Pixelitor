@@ -17,12 +17,23 @@
 
 package pixelitor.layers;
 
+import pixelitor.Composition;
 import pixelitor.FgBgColors;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.history.History;
 import pixelitor.menus.MenuAction;
 import pixelitor.menus.MenuAction.AllowedLayerType;
+import pixelitor.menus.PMenu;
+import pixelitor.menus.edit.FadeMenuItem;
 import pixelitor.tools.Tools;
+
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+
+import static pixelitor.menus.MenuBar.CTRL_1;
+import static pixelitor.menus.MenuBar.CTRL_2;
+import static pixelitor.menus.MenuBar.CTRL_3;
 
 /**
  * Determines whether the layer or its mask is visible/edited.
@@ -30,25 +41,29 @@ import pixelitor.tools.Tools;
  * the layers don't.
  */
 public enum MaskViewMode {
-    NORMAL("Show and Edit Layer", false, false, AllowedLayerType.ANY) {
-    }, SHOW_MASK("Show and Edit Mask", true, true, AllowedLayerType.HAS_LAYER_MASK) {
-    }, EDIT_MASK("Show Layer, but Edit Mask", false, true, AllowedLayerType.HAS_LAYER_MASK) {
+
+    NORMAL("Show and Edit Layer", false, false, AllowedLayerType.ANY, CTRL_1) {
+    }, SHOW_MASK("Show and Edit Mask", true, true, AllowedLayerType.HAS_LAYER_MASK, CTRL_2) {
+    }, EDIT_MASK("Show Layer, but Edit Mask", false, true, AllowedLayerType.HAS_LAYER_MASK, CTRL_3) {
     };
+
 
     private final String guiName;
     private final AllowedLayerType allowedLayerType;
+    private final KeyStroke keyStroke;
     private final boolean showMask;
     private final boolean editMask;
 
-    MaskViewMode(String guiName, boolean showMask, boolean editMask, AllowedLayerType allowedLayerType) {
+    MaskViewMode(String guiName, boolean showMask, boolean editMask, AllowedLayerType allowedLayerType, KeyStroke keyStroke) {
         this.guiName = guiName;
         this.showMask = showMask;
         this.editMask = editMask;
         this.allowedLayerType = allowedLayerType;
+        this.keyStroke = keyStroke;
     }
 
-    public MenuAction createMenuAction() {
-        return new MenuAction(guiName, allowedLayerType) {
+    public void addToMenu(PMenu sub) {
+        Action action = new MenuAction(guiName, allowedLayerType) {
             @Override
             public void onClick() {
                 ImageComponent ic = ImageComponents.getActiveIC();
@@ -58,6 +73,19 @@ public enum MaskViewMode {
                 }
             }
         };
+        sub.addActionWithKey(action, keyStroke);
+    }
+
+    public JMenuItem createPopupMenuItem(Layer layer) {
+        AbstractAction action = new AbstractAction(guiName) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                activate(layer);
+            }
+        };
+        JMenuItem item = new JMenuItem(action);
+        item.setAccelerator(keyStroke);
+        return item;
     }
 
     public void activate(Layer activeLayer) {
@@ -65,16 +93,34 @@ public enum MaskViewMode {
         activate(ic, activeLayer);
     }
 
-    public void activate(ImageComponent ic, Layer activeLayer) {
-        if (ic != null) {
-            ic.setMaskViewMode(this);
-            FgBgColors.setLayerMaskEditing(editMask);
-            activeLayer.setMaskEditing(editMask);
+    public void activate(Composition comp, Layer activeLayer) {
+        activate(comp.getIC(), activeLayer);
+    }
 
-            if (!ic.isMock()) {
-                Tools.BRUSH.setupMaskDrawing(editMask);
-                Tools.CLONE.setupMaskDrawing(editMask);
-                Tools.GRADIENT.setupMaskDrawing(editMask);
+    public void activate(ImageComponent ic, Layer layer) {
+        if (ic != null) {
+            boolean change = ic.setMaskViewMode(this);
+            layer.setMaskEditing(editMask);
+            if (change) {
+                FgBgColors.setLayerMaskEditing(editMask);
+
+                if (!ic.isMock()) {
+                    Tools.BRUSH.setupMaskDrawing(editMask);
+                    Tools.CLONE.setupMaskDrawing(editMask);
+                    Tools.GRADIENT.setupMaskDrawing(editMask);
+                }
+
+                boolean canFade;
+                if (editMask) {
+                    canFade = History.canFade(layer.getMask());
+                } else {
+                    if (layer instanceof ImageLayer) {
+                        canFade = History.canFade((ImageLayer) layer);
+                    } else {
+                        canFade = false;
+                    }
+                }
+                FadeMenuItem.INSTANCE.refresh(canFade);
             }
         }
     }
@@ -89,7 +135,7 @@ public enum MaskViewMode {
 
     // used in asserts
     public boolean checkOnAssignment(Layer layer) {
-        if (editMask || showMask()) {
+        if (editMask || showMask) {
             return layer.hasMask();
         }
         return true;

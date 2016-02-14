@@ -217,13 +217,6 @@ public class CompositionTest {
     }
 
     @Test
-    public void testGetFilterSource() {
-        BufferedImage image = comp.getFilterSource();
-        assertThat(image).isNotNull();
-        comp.checkInvariant();
-    }
-
-    @Test
     public void testGetCanvas() {
         Canvas canvas = comp.getCanvas();
         assertThat(canvas).isNotNull();
@@ -625,8 +618,7 @@ public class CompositionTest {
     @Test
     public void testSimpleMethods() {
         assertThat(comp.getActiveLayerIndex()).isEqualTo(1);
-        assertThat(comp.activeIsImageLayer()).isTrue();
-        assertThat(comp.hasActiveImageLayerOrMask()).isTrue();
+        assertThat(comp.activeIsImageLayerOrMask()).isTrue();
 
         assertThat(comp.getName()).isEqualTo("Test");
         comp.setName("New Name");

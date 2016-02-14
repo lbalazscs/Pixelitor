@@ -17,6 +17,8 @@
 
 package pixelitor.layers;
 
+import com.bric.util.JVM;
+import pixelitor.gui.ImageComponent;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.history.AddToHistory;
 import pixelitor.utils.IconUtils;
@@ -26,7 +28,6 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
@@ -74,7 +75,18 @@ public class LayerButton extends JToggleButton {
             }
         };
 
-        private static final Border lightBorder = BorderFactory.createLineBorder(UNSELECTED_COLOR, 1);
+        private static final Border lightBorder;
+
+        static {
+            if (JVM.isMac) {
+                // seems to be a Mac-specific problem: with LineBorder,
+                // a one pixel wide line disappears
+                lightBorder = BorderFactory.createMatteBorder(1, 1, 1, 1, UNSELECTED_COLOR);
+            } else {
+                lightBorder = BorderFactory.createLineBorder(UNSELECTED_COLOR, 1);
+            }
+        }
+
         private static final Border darkBorder = BorderFactory.createLineBorder(SELECTED_COLOR, 1);
         private static final Border selectedBorder = BorderFactory.createCompoundBorder(lightBorder, darkBorder);
         private static final Border unSelectedIconOnSelectedLayerBorder = BorderFactory.createLineBorder(SELECTED_COLOR, BORDER_WIDTH);
@@ -109,6 +121,7 @@ public class LayerButton extends JToggleButton {
         if (layer instanceof TextLayer) {
             Icon textLayerIcon = IconUtils.getTextLayerIcon();
             layerIconLabel = new JLabel(textLayerIcon);
+            layerIconLabel.setToolTipText("Double-click to edit the text layer.");
         } else if (layer instanceof AdjustmentLayer) {
             Icon adjLayerIcon = IconUtils.getAdjLayerIcon();
             layerIconLabel = new JLabel(adjLayerIcon);
@@ -129,6 +142,12 @@ public class LayerButton extends JToggleButton {
                         ((AdjustmentLayer) layer).configure();
                     }
                 }
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                // by putting it into mouse pressed, it is consistent
+                // with the mask clicks
                 if (SwingUtilities.isLeftMouseButton(e)) {
                     selectLayerIfIconClicked(e);
                 }
@@ -143,16 +162,10 @@ public class LayerButton extends JToggleButton {
         wireSelectionWithLayerActivation(layer);
     }
 
-    private static void configureLayerIcon(JComponent layerIcon, String name) {
-        layerIcon.putClientProperty("JComponent.sizeVariant", "mini");
+    private static void configureLayerIcon(JLabel layerIcon, String name) {
+//        layerIcon.putClientProperty("JComponent.sizeVariant", "mini");
         layerIcon.setName(name);
-
-        if (layerIcon instanceof JButton) {
-            JButton layerButton = (JButton) layerIcon;
-//            layerButton.setMargin(new Insets(0, 0, 0, 0));
-//            layerButton.setBorderPainted(false);
-        }
-        layerIcon.setPreferredSize(new Dimension(LayerButtonLayout.LABEL_SIZE, LayerButtonLayout.LABEL_SIZE));
+//        layerIcon.setPreferredSize(new Dimension(LayerButtonLayout.LABEL_SIZE, LayerButtonLayout.LABEL_SIZE));
     }
 
     public static void selectLayerIfIconClicked(MouseEvent e) {
@@ -170,7 +183,7 @@ public class LayerButton extends JToggleButton {
         visibilityCB.setRolloverIcon(CLOSED_EYE_ICON);
 
         visibilityCB.setSelected(true);
-        visibilityCB.setToolTipText("Layer Visibility");
+        visibilityCB.setToolTipText("Click to hide/show this layer.");
         visibilityCB.setSelectedIcon(OPEN_EYE_ICON);
         add(visibilityCB, LayerButtonLayout.CHECKBOX);
 
@@ -296,16 +309,29 @@ public class LayerButton extends JToggleButton {
 
     public void addMaskIconLabel() {
         maskIconLabel = new JLabel("", null, CENTER);
+        maskIconLabel.setToolTipText("<html>Shift-click to disable/enable,<br>Alt-click to show mask/layer,<br>Right-click for more options");
+
         LayerMaskActions.addPopupMenu(maskIconLabel, layer);
         configureLayerIcon(maskIconLabel, "maskIcon");
         configureBorders(layer.isMaskEditing());
         add(maskIconLabel, LayerButtonLayout.MASK);
 
+        // there is another mouse listener for the right-click popups
         maskIconLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.isAltDown()) {
-                    MaskViewMode.SHOW_MASK.activate(layer);
+                    // alt-click switches to SHOW_MASK except when it
+                    // already is in SHOW_MASK
+                    ImageComponent ic = layer.getComp().getIC();
+                    if (ic.getMaskViewMode() == MaskViewMode.SHOW_MASK) {
+                        MaskViewMode.EDIT_MASK.activate(ic, layer);
+                    } else {
+                        MaskViewMode.SHOW_MASK.activate(ic, layer);
+                    }
+                } else if (e.isShiftDown()) {
+                    // shift-click disables except when it is already disabled
+                    layer.setMaskEnabled(!layer.isMaskEnabled(), AddToHistory.YES);
                 } else {
                     MaskViewMode.EDIT_MASK.activate(layer);
                 }

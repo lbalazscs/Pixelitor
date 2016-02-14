@@ -38,6 +38,7 @@ import java.util.Collection;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.spy;
 
 /**
  * Tests the functionality common to all Layer subclasses
@@ -48,10 +49,12 @@ public class LayerTest {
     private Layer layer;
 
     @Parameter
-    public Class layerClass;
+    public Class<Layer> layerClass;
 
     @Parameter(value = 1)
     public WithMask withMask;
+
+    private IconUpdateChecker iconUpdates;
 
     @Parameters(name = "{index}: {0}, mask = {1}")
     public static Collection<Object[]> instancesToTest() {
@@ -71,12 +74,22 @@ public class LayerTest {
         // make sure each test runs with a fresh Layer
         layer = TestHelper.createLayerOfClass(layerClass, comp);
 
+//        LayerUI ui = mock(LayerUI.class);
+        LayerUI ui = spy(layer.getUI());
+        layer.setUI(ui);
+
         comp.addLayerNoGUI(layer);
 
         ImageLayer layer2 = TestHelper.createImageLayer("LayerTest layer 2", comp);
         comp.addLayerNoGUI(layer2);
 
         withMask.init(layer);
+        LayerMask mask = null;
+        if (withMask.isYes()) {
+            mask = layer.getMask();
+        }
+
+        iconUpdates = new IconUpdateChecker(ui, layer, mask, 0, 1);
 
         comp.setActiveLayer(layer, AddToHistory.YES);
 
@@ -90,7 +103,7 @@ public class LayerTest {
     }
 
     @Test
-    public void testSetVisible() {
+    public void test_setVisible() {
         LayerUI layerUI = layer.getUI();
         assertThat(layer.isVisible()).isTrue();
         assertThat(layerUI.isVisibilityChecked()).isTrue();
@@ -109,10 +122,12 @@ public class LayerTest {
         History.redo();
         assertThat(layer.isVisible()).isFalse();
         assertThat(layerUI.isVisibilityChecked()).isFalse();
+
+        iconUpdates.check(0, 0);
     }
 
     @Test
-    public void testDuplicate() {
+    public void test_duplicate() {
         Layer copy = layer.duplicate(false);
         assertThat(copy.getName()).isEqualTo("layer 1 copy");
         assertThat(copy.getClass()).isEqualTo(layer.getClass());
@@ -125,6 +140,8 @@ public class LayerTest {
 
         Layer exactCopy = layer.duplicate(true);
         assertThat(exactCopy.getName()).isEqualTo("layer 1");
+
+        iconUpdates.check(0, 0);
     }
 
     @Test
@@ -147,6 +164,8 @@ public class LayerTest {
 
         History.redo();
         assertThat(layer.getOpacity()).isEqualTo(newValue);
+
+        iconUpdates.check(0, 0);
     }
 
     @Test
@@ -164,6 +183,8 @@ public class LayerTest {
 
         History.redo();
         assertSame(BlendingMode.DIFFERENCE, layer.getBlendingMode());
+
+        iconUpdates.check(0, 0);
     }
 
     @Test
@@ -184,16 +205,19 @@ public class LayerTest {
         History.redo();
         assertThat(layer.getName()).isEqualTo("newName");
         assertThat(layer.getUI().getLayerName()).isEqualTo("newName");
+
+        iconUpdates.check(0, 0);
     }
 
     @Test
-    public void testMergeDownOn() {
+    public void test_mergeDownOn() {
         ImageLayer lower = TestHelper.createImageLayer("lower", comp);
         layer.mergeDownOn(lower);
+        iconUpdates.check(0, 0);
     }
 
     @Test
-    public void testMakeActive() {
+    public void test_makeActive() {
         Layer layer2 = comp.getLayer(1);
         assertThat(layer2.isActive()).isFalse();
 
@@ -208,10 +232,12 @@ public class LayerTest {
 
         History.redo();
         assertThat(layer2.isActive()).isTrue();
+
+        iconUpdates.check(0, 0);
     }
 
     @Test
-    public void testResize() {
+    public void test_resize() {
         Canvas canvas = layer.getComp().getCanvas();
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
@@ -222,23 +248,26 @@ public class LayerTest {
         layer.resize(25, 30, false);
 
         layer.resize(canvasWidth, canvasHeight, true);
+        iconUpdates.check(0, 0);
     }
 
     @Test
-    public void testCrop() {
+    public void test_crop() {
         layer.crop(new Rectangle(3, 3, 5, 5));
+        iconUpdates.check(0, 0);
     }
 
     @Test
-    public void testDragFinished() {
+    public void test_dragFinished() {
         assertThat(comp.getLayerIndex(layer)).isEqualTo(0);
         layer.dragFinished(1);
         assertThat(comp.getLayerIndex(layer)).isEqualTo(1);
+        iconUpdates.check(0, 0);
     }
 
     @Test
-    public void testAddMask() {
-        if (withMask == WithMask.NO) {
+    public void test_addMask() {
+        if (!withMask.isYes()) {
             assertThat(layer.hasMask()).isFalse();
 
             layer.addMask(LayerMaskAddType.REVEAL_ALL);
@@ -252,30 +281,35 @@ public class LayerTest {
 
             History.redo();
             assertThat(layer.hasMask()).isTrue();
+
+            iconUpdates.check(0, 0);
         }
     }
 
     @Test
-    public void testDeleteMask() {
-        if (withMask == WithMask.YES) {
+    public void test_deleteMask() {
+        if (withMask.isYes()) {
             assertThat(layer.hasMask()).isTrue();
 
             layer.deleteMask(AddToHistory.YES);
             assertThat(layer.hasMask()).isFalse();
             History.assertNumEditsIs(1);
             History.assertLastEditNameIs("Delete Layer Mask");
+            iconUpdates.check(0, 0);
 
             History.undo();
             assertThat(layer.hasMask()).isTrue();
+            iconUpdates.check(0, 1);
 
             History.redo();
             assertThat(layer.hasMask()).isFalse();
+            iconUpdates.check(0, 1);
         }
     }
 
     @Test
-    public void testSetMaskEnabled() {
-        if (withMask == WithMask.YES) {
+    public void test_setMaskEnabled() {
+        if (withMask.isYes()) {
             assertThat(layer.hasMask()).isTrue();
             assertThat(layer.isMaskEnabled()).isTrue();
             LayerMaskActions.EnableDisableMaskAction enableAction = new LayerMaskActions.EnableDisableMaskAction(layer);
@@ -287,20 +321,23 @@ public class LayerTest {
             assertThat(enableAction.getName()).isEqualTo("Enable");
             History.assertNumEditsIs(1);
             History.assertLastEditNameIs("Disable Layer Mask");
+            iconUpdates.check(0, 1);
 
             History.undo();
             assertThat(layer.isMaskEnabled()).isTrue();
             assertThat(enableAction.getName()).isEqualTo("Disable");
+            iconUpdates.check(0, 2);
 
             History.redo();
             assertThat(layer.isMaskEnabled()).isFalse();
             assertThat(enableAction.getName()).isEqualTo("Enable");
+            iconUpdates.check(0, 3);
         }
     }
 
     @Test
     public void testMaskLinking() {
-        if (withMask == WithMask.YES) {
+        if (withMask.isYes()) {
             assertThat(layer.hasMask()).isTrue();
             LayerMask mask = layer.getMask();
             assertThat(mask.isLinked()).isTrue();
@@ -321,6 +358,8 @@ public class LayerTest {
             History.redo();
             assertThat(mask.isLinked()).isFalse();
             assertThat(linkAction.getName()).isEqualTo("Link");
+
+            iconUpdates.check(0, 0);
         }
     }
 }

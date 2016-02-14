@@ -1,3 +1,20 @@
+/*
+ * Copyright 2016 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.filters.comp;
 
 import org.junit.Before;
@@ -100,7 +117,7 @@ public class MultiLayerEditTest {
         withSelection.init(tester);
         withMask.init(comp);
 
-        if (withSelection == WithSelection.YES) {
+        if (withSelection.isYes()) {
             origSelection = tester.getStandardTestSelectionShape();
         }
         History.clear();
@@ -114,7 +131,7 @@ public class MultiLayerEditTest {
         tester.checkActiveLayerTranslation(
                 origTX,
                 origTY);
-        if (withSelection == WithSelection.YES) {
+        if (withSelection.isYes()) {
             tester.checkSelectionBounds(origSelection);
         }
 
@@ -165,7 +182,7 @@ public class MultiLayerEditTest {
                 origImageHeight + south + Math.max(0, origTY + north)
         );
 
-        if (withSelection == WithSelection.YES) {
+        if (withSelection.isYes()) {
             Rectangle newSelection = new Rectangle(origSelection.x + west,
                     origSelection.y + north, origSelection.width, origSelection.height);
             tester.checkSelectionBounds(newSelection);
@@ -198,7 +215,7 @@ public class MultiLayerEditTest {
     }
 
     private void checkStateAfterResize() {
-        if (withSelection == WithSelection.YES) {
+        if (withSelection.isYes()) {
             Rectangle halfOfOrigSelection = new Rectangle(
                     origSelection.x / 2,
                     origSelection.y / 2,
@@ -307,7 +324,7 @@ public class MultiLayerEditTest {
                     canvasDistFromImgRight);
         }
 
-        if (withSelection == WithSelection.YES) {
+        if (withSelection.isYes()) {
             Rectangle rotatedSelectionBounds = null;
 
             int distFromBottom = ORIG_CANVAS_HEIGHT - origSelection.height - origSelection.y;
@@ -404,7 +421,7 @@ public class MultiLayerEditTest {
             throw new IllegalStateException();
         }
 
-        if (withSelection == WithSelection.YES) {
+        if (withSelection.isYes()) {
             int flippedX, flippedY;
             if (direction == HORIZONTAL) {
                 flippedX = ORIG_CANVAS_WIDTH - origSelection.x - origSelection.width;

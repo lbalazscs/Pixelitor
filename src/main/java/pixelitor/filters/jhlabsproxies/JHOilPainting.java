@@ -49,8 +49,6 @@ public class JHOilPainting extends FilterWithParametrizedGUI {
             new IntChoiceParam.Value("Better", BETTER),
     }, IGNORE_RANDOMIZE);
 
-    private OilFilter filter;
-
     public JHOilPainting() {
         super(ShowOriginal.YES);
         setParamSet(new ParamSet(
@@ -68,9 +66,9 @@ public class JHOilPainting extends FilterWithParametrizedGUI {
             return src;
         }
 
-        if (filter == null) {
-            filter = new OilFilter(NAME);
-        }
+        // important to re-create because the progress tracker
+        // is different for big and small images
+        OilFilter filter = new OilFilter(NAME);
 
         filter.setLevels(coarseness.getValue());
 

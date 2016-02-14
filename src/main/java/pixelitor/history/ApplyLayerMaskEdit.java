@@ -52,7 +52,7 @@ public class ApplyLayerMaskEdit extends PixelitorEdit {
 
         layer.setImage(oldImage);
         layer.addMask(oldMask);
-        oldMode.activate(comp.getIC(), layer);
+        oldMode.activate(comp, layer);
 
         History.notifyMenus(this);
     }

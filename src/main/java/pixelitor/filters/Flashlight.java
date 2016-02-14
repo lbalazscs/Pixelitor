@@ -29,6 +29,8 @@ import pixelitor.utils.BlurredEllipse;
 
 import java.awt.image.BufferedImage;
 
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+
 /**
  * Flashlight filter
  */
@@ -37,12 +39,12 @@ public class Flashlight extends FilterWithParametrizedGUI {
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 1, 200, 1000, false);
-    private final RangeParam softness = new RangeParam("Softness", 0, 20, 100);
+    private final RangeParam softness = new RangeParam("Softness", 0, 20, 99);
     private final IntChoiceParam bg = new IntChoiceParam("Background",
             new IntChoiceParam.Value[]{
                     new IntChoiceParam.Value("Black", Impl.BG_BLACK),
                     new IntChoiceParam.Value("Transparent", Impl.BG_TRANSPARENT),
-            }
+            }, IGNORE_RANDOMIZE
     );
 
     private Impl filter;

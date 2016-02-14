@@ -17,17 +17,28 @@
 
 package pixelitor.utils.debug;
 
-import pixelitor.layers.ContentLayer;
+import pixelitor.layers.Layer;
+import pixelitor.layers.LayerMask;
 
-public class ContentLayerNode extends LayerNode {
-    public ContentLayerNode(ContentLayer layer) {
-        this("Content Layer", layer);
+public class LayerNode extends DebugNode {
+    LayerNode(Layer layer) {
+        this("Layer", layer);
     }
 
-    public ContentLayerNode(String name, ContentLayer layer) {
+    public LayerNode(String name, Layer layer) {
         super(name, layer);
 
-        addIntChild("translation X", layer.getTX());
-        addIntChild("translation Y", layer.getTY());
+        if (layer.hasMask()) {
+            LayerMask mask = layer.getMask();
+            add(new LayerMaskNode(mask));
+        }
+
+        addBooleanChild("mask enabled", layer.isMaskEnabled());
+        addBooleanChild("mask editing", layer.isMaskEditing());
+        addBooleanChild("visible", layer.isVisible());
+
+        addFloatChild("opacity", layer.getOpacity());
+        addQuotedStringChild("blending mode", layer.getBlendingMode().toString());
+        addQuotedStringChild("name", layer.getName());
     }
 }

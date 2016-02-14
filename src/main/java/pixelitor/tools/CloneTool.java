@@ -28,7 +28,6 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.OKDialog;
 import pixelitor.layers.ImageLayer;
-import pixelitor.tools.brushes.Brush;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.CloneBrush;
 import pixelitor.tools.brushes.CopyBrushType;
@@ -52,7 +51,7 @@ import static pixelitor.tools.CloneTool.State.SOURCE_DEFINED_FIRST_STROKE;
 /**
  * The Clone Stamp tool
  */
-public class CloneTool extends TmpLayerBrushTool {
+public class CloneTool extends BlendingModeBrushTool {
     enum State {
         NO_SOURCE,
         SOURCE_DEFINED_FIRST_STROKE,
@@ -96,6 +95,10 @@ public class CloneTool extends TmpLayerBrushTool {
 
         settingsPanel.addSeparator();
         settingsPanel.addButton("Transform", e -> {
+            if(Build.CURRENT.isRandomGUITest()) {
+                return;
+            }
+
             JPanel p = new JPanel(new GridBagLayout());
             GridBagHelper gbh = new GridBagHelper(p);
             gbh.addLabelWithControl("Scale (%):", scaleParam.createGUI());
@@ -200,14 +203,13 @@ public class CloneTool extends TmpLayerBrushTool {
     }
 
     @Override
-    protected Brush getPaintingBrush() {
-        return cloneBrush;
-    }
-
-    @Override
     protected void prepareProgrammaticBrushStroke(Composition comp, Point start) {
         super.prepareProgrammaticBrushStroke(comp, start);
 
+        setupRandomSource(comp, start);
+    }
+
+    private void setupRandomSource(Composition comp, Point start) {
         int canvasWidth = comp.getCanvasWidth();
         int canvasHeight = comp.getCanvasHeight();
         Random rand = new Random();
