@@ -144,14 +144,16 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void bgButtonPressed() {
-        Color c = ColorPicker.showDialog(PixelitorWindow.getInstance(), "Set background color", bgColor, false);
+        Color selectedColor = layerMaskEditing ? maskBgColor : bgColor;
+        Color c = ColorPicker.showDialog(PixelitorWindow.getInstance(), "Set background color", selectedColor, false);
         if (c != null) {
             setBgColor(c);
         }
     }
 
     private void fgButtonPressed() {
-        Color c = ColorPicker.showDialog(PixelitorWindow.getInstance(), "Set foreground color", fgColor, false);
+        Color selectedColor = layerMaskEditing ? maskFgColor : fgColor;
+        Color c = ColorPicker.showDialog(PixelitorWindow.getInstance(), "Set foreground color", selectedColor, false);
         if (c != null) {
             setFgColor(c);
         }

@@ -45,7 +45,7 @@ public enum DrawStrategy {
         }
 
         @Override
-        public BufferedImage getOriginalImage(Composition comp) {
+        public BufferedImage getOriginalImage(Composition comp, AbstractBrushTool tool) {
             // it can simply return the layer image because
             // the drawing was on the temporary layer
             return comp.getActiveMaskOrImageLayer().getImage();
@@ -76,9 +76,9 @@ public enum DrawStrategy {
         }
 
         @Override
-        public BufferedImage getOriginalImage(Composition comp) {
+        public BufferedImage getOriginalImage(Composition comp, AbstractBrushTool tool) {
             if (copyBeforeStart == null) {
-                throw new IllegalStateException("DirectBrushTool: copyBeforeStart == null");
+                throw new IllegalStateException("copyBeforeStart is null for " + tool.getName());
             }
 
             return copyBeforeStart;
@@ -94,5 +94,5 @@ public enum DrawStrategy {
     /**
      * Returns the original (untouched) image for undo
      */
-    public abstract BufferedImage getOriginalImage(Composition comp);
+    public abstract BufferedImage getOriginalImage(Composition comp, AbstractBrushTool tool);
 }

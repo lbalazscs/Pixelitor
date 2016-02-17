@@ -43,6 +43,7 @@ import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.PathIterator;
+import java.awt.image.BufferedImage;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
@@ -181,7 +182,8 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         int radius = getRadius();
         ToolAffectedArea affectedArea = new ToolAffectedArea(comp,
                 brushAffectedArea.getRectangleAffectedByBrush(radius), false);
-        saveSubImageForUndo(drawStrategy.getOriginalImage(comp), affectedArea);
+        BufferedImage originalImage = drawStrategy.getOriginalImage(comp, this);
+        saveSubImageForUndo(originalImage, affectedArea);
 
         if (graphics != null) {
             graphics.dispose();

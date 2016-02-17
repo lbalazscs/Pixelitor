@@ -32,7 +32,7 @@ public class LayerNameEditor extends JTextField {
     public LayerNameEditor(LayerButton layerButton, Layer layer) {
         super(layer.getName());
 
-        setToolTipText("Double-click to rename this layer.");
+//        setToolTipText("Double-click to rename this layer.");
 
         this.layerButton = layerButton;
         disableEditing();

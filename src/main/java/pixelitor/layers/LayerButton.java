@@ -333,7 +333,12 @@ public class LayerButton extends JToggleButton {
                     // shift-click disables except when it is already disabled
                     layer.setMaskEnabled(!layer.isMaskEnabled(), AddToHistory.YES);
                 } else {
-                    MaskViewMode.EDIT_MASK.activate(layer);
+                    ImageComponent ic = layer.getComp().getIC();
+
+                    // don't change SHOW_MASK into EDIT_MASK
+                    if (ic.getMaskViewMode() == MaskViewMode.NORMAL) {
+                        MaskViewMode.EDIT_MASK.activate(layer);
+                    }
                 }
             }
         });
@@ -345,6 +350,7 @@ public class LayerButton extends JToggleButton {
         // TODO remove the two mouse listeners?
         remove(maskIconLabel);
         revalidate();
+        repaint();
         maskIconLabel = null;
     }
 

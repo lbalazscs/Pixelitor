@@ -18,9 +18,11 @@
 package pixelitor.utils.test;
 
 import pixelitor.Composition;
+import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.Layer;
+import pixelitor.layers.MaskViewMode;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -69,6 +71,10 @@ public class Events {
     public static void postRedoEvent(PixelitorEdit editToBeRedone) {
         String editName = editToBeRedone.getDebugName();
         post(new PixelitorEvent("    [REDO " + editName + "]", null, null));
+    }
+
+    public static void postMaskViewActivate(MaskViewMode mode, ImageComponent ic, Layer layer) {
+        post(new PixelitorEvent("[MASK VIEW " + mode.toString() + "]", ic.getComp(), layer));
     }
 
     /**

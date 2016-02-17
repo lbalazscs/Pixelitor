@@ -17,6 +17,7 @@
 
 package pixelitor.layers;
 
+import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.FgBgColors;
 import pixelitor.gui.ImageComponent;
@@ -27,6 +28,7 @@ import pixelitor.menus.MenuAction.AllowedLayerType;
 import pixelitor.menus.PMenu;
 import pixelitor.menus.edit.FadeMenuItem;
 import pixelitor.tools.Tools;
+import pixelitor.utils.test.Events;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -99,6 +101,10 @@ public enum MaskViewMode {
 
     public void activate(ImageComponent ic, Layer layer) {
         if (ic != null) {
+            if (Build.CURRENT != Build.FINAL) {
+                Events.postMaskViewActivate(this, ic, layer);
+            }
+
             boolean change = ic.setMaskViewMode(this);
             layer.setMaskEditing(editMask);
             if (change) {

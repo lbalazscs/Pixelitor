@@ -323,8 +323,10 @@ public abstract class Layer implements Serializable {
             Selection selection = comp.getSelectionOrNull();
             Shape backupShape = selection.getShape();
             comp.deselect(AddToHistory.NO);
-            DeselectEdit deselectEdit = new DeselectEdit(comp, backupShape, "nested deselect");
-            edit = new LinkedEdit(comp, editName, edit, deselectEdit);
+            if (backupShape != null) { // TODO on Mac Random GUI test we can get null here
+                DeselectEdit deselectEdit = new DeselectEdit(comp, backupShape, "nested deselect");
+                edit = new LinkedEdit(comp, editName, edit, deselectEdit);
+            }
         }
 
         History.addEdit(edit);
@@ -552,17 +554,11 @@ public abstract class Layer implements Serializable {
         assert mask != null;
         this.maskEnabled = maskEnabled;
 
-        ImageComponent ic = comp.getIC();
-        MaskViewMode oldMode = ic.getMaskViewMode();
-        if (!maskEnabled) {
-            MaskViewMode.NORMAL.activate(ic, this);
-        }
-
         comp.imageChanged(FULL);
         mask.updateIconImage();
         notifyLayerChangeObservers();
 
-        History.addEdit(addToHistory, () -> new EnableLayerMaskEdit(comp, this, oldMode));
+        History.addEdit(addToHistory, () -> new EnableLayerMaskEdit(comp, this));
     }
 
     private boolean useMask() {

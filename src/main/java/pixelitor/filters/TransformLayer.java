@@ -45,7 +45,7 @@ public class TransformLayer extends FilterWithParametrizedGUI {
     private final AngleParam angleParam = new AngleParam("Rotate Angle", 0);
     private final ColorParam bgColorParam = new ColorParam("Background Color:", TRANSPARENT_COLOR, USER_ONLY_OPACITY);
     private final GroupedRangeParam scaleParam = new GroupedRangeParam("Scale (%)", 1, 100, 500);
-    private final GroupedRangeParam shearParam = new GroupedRangeParam("Shear", -500, 0, 500);
+    private final GroupedRangeParam shearParam = new GroupedRangeParam("Shear", -500, 0, 500, false);
 
     public TransformLayer() {
         super(ShowOriginal.YES);

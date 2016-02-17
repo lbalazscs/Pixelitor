@@ -62,7 +62,7 @@ public class ApplyLayerMaskEdit extends PixelitorEdit {
         super.redo();
 
         // the mask view mode is automatically set to normal
-        layer.applyLayerMask(AddToHistory.NO);
+        oldImage = layer.applyLayerMask(AddToHistory.NO);
 
         History.notifyMenus(this);
     }

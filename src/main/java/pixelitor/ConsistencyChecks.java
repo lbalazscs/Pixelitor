@@ -144,15 +144,22 @@ public final class ConsistencyChecks {
         Composition comp = layer.getComp();
         BufferedImage image = layer.getImage();
 
+        Canvas canvas = comp.getCanvas();
+        if (canvas == null) {
+            // can happen during the loading of pxc files
+            return true;
+        }
+        int canvasWidth = canvas.getWidth();
+        int canvasHeight = canvas.getHeight();
+
         int txAbs = -layer.getTX();
-        int canvasWidth = comp.getCanvasWidth();
+
         int imageWidth = image.getWidth();
         if (txAbs + canvasWidth > imageWidth) {
             return throwImageDoesNotCoverCanvasException(layer);
         }
 
         int tyAbs = -layer.getTY();
-        int canvasHeight = comp.getCanvasHeight();
         int imageHeight = image.getHeight();
 
         if (tyAbs + canvasHeight > imageHeight) {

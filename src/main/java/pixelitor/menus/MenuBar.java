@@ -400,14 +400,9 @@ public class MenuBar extends JMenuBar {
 
         layersMenu.add(AddNewLayerAction.INSTANCE);
         layersMenu.add(DeleteActiveLayerAction.INSTANCE);
+        layersMenu.addActionWithKey(DuplicateLayerAction.INSTANCE, CTRL_J);
 
-        layersMenu.addAction(new MenuAction("Flatten Image") {
-            @Override
-            public void onClick() {
-                Composition comp = ImageComponents.getActiveComp().get();
-                comp.flattenImage(UpdateGUI.YES);
-            }
-        });
+        layersMenu.addSeparator();
 
         layersMenu.addActionWithKey(new MenuAction("Merge Down") {
             @Override
@@ -417,7 +412,13 @@ public class MenuBar extends JMenuBar {
             }
         }, CTRL_E);
 
-        layersMenu.addActionWithKey(DuplicateLayerAction.INSTANCE, CTRL_J);
+        layersMenu.addAction(new MenuAction("Flatten Image") {
+            @Override
+            public void onClick() {
+                Composition comp = ImageComponents.getActiveComp().get();
+                comp.flattenImage(UpdateGUI.YES);
+            }
+        });
 
         layersMenu.addActionWithKey(new MenuAction("New Layer from Composite") {
             @Override
@@ -427,16 +428,7 @@ public class MenuBar extends JMenuBar {
             }
         }, CTRL_SHIFT_ALT_E);
 
-        layersMenu.addAction(new MenuAction("Layer to Canvas Size") {
-            @Override
-            public void onClick() {
-                Composition comp = ImageComponents.getActiveComp().get();
-                comp.activeLayerToCanvasSize();
-            }
-        });
-
         layersMenu.add(createLayerStackSubmenu());
-
         layersMenu.add(createLayerMaskSubmenu());
         layersMenu.add(createTextLayerSubmenu(pw));
 
@@ -620,7 +612,6 @@ public class MenuBar extends JMenuBar {
         PMenu imageMenu = new PMenu("Image", 'I');
 
         imageMenu.buildAction(SelectionActions.getCropAction()).enableIf(ACTION_ENABLED).add();
-        imageMenu.addAction(EnlargeCanvas.getAction());
 
         // resize
         imageMenu.addActionWithKey(new MenuAction("Resize...") {
@@ -629,6 +620,18 @@ public class MenuBar extends JMenuBar {
                 ResizePanel.resizeActiveImage();
             }
         }, CTRL_ALT_I);
+
+        imageMenu.addSeparator();
+
+        imageMenu.addAction(EnlargeCanvas.getAction());
+
+        imageMenu.addAction(new MenuAction("Layer to Canvas Size") {
+            @Override
+            public void onClick() {
+                Composition comp = ImageComponents.getActiveComp().get();
+                comp.activeLayerToCanvasSize();
+            }
+        });
 
         imageMenu.addSeparator();
 

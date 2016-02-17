@@ -909,12 +909,12 @@ public class RandomGUITest {
         return (FilterWithParametrizedGUI) filterAction.getFilter();
     }
 
-    private static void randomEnlargeLayer() {
+    private static void randomEnlargeCanvas() {
         int north = rand.nextInt(3);
         int east = rand.nextInt(3);
         int south = rand.nextInt(3);
         int west = rand.nextInt(3);
-        log(String.format("randomEnlargeLayer north = %d, east = %d, south = %d, west = %d",
+        log(String.format("enlargeCanvas north = %d, east = %d, south = %d, west = %d",
                 north, east, south, west));
         Composition comp = ImageComponents.getActiveComp().get();
         new EnlargeCanvas(north, east, south, west).process(comp);
@@ -1000,7 +1000,7 @@ public class RandomGUITest {
 
         weightedCaller.registerCallback(3, RandomGUITest::randomTool);
 
-        weightedCaller.registerCallback(1, RandomGUITest::randomEnlargeLayer);
+        weightedCaller.registerCallback(1, RandomGUITest::randomEnlargeCanvas);
 
         weightedCaller.registerCallback(7, RandomGUITest::randomNewTextLayer);
         weightedCaller.registerCallback(7, RandomGUITest::randomTextLayerRasterize);

@@ -1010,8 +1010,10 @@ public class ImageLayer extends ContentLayer {
         getUI().updateLayerIconImage(this);
     }
 
-    public void applyLayerMask(AddToHistory addToHistory) {
-        BufferedImage backupImage = ImageUtils.copyImage(image);
+    public BufferedImage applyLayerMask(AddToHistory addToHistory) {
+        // the image reference will not be replaced
+        BufferedImage oldImage = ImageUtils.copyImage(image);
+
         LayerMask oldMask = mask;
         MaskViewMode oldMode = comp.getIC().getMaskViewMode();
 
@@ -1019,9 +1021,10 @@ public class ImageLayer extends ContentLayer {
         deleteMask(AddToHistory.NO);
 
         History.addEdit(addToHistory, () ->
-                new ApplyLayerMaskEdit(comp, this, oldMask, backupImage, oldMode));
+                new ApplyLayerMaskEdit(comp, this, oldMask, oldImage, oldMode));
 
         updateIconImage();
+        return oldImage;
     }
 
     @Override
