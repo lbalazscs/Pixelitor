@@ -110,7 +110,7 @@ public class EnlargeCanvas implements CompAction {
         OKCancelDialog d = new OKCancelDialog(panel, "Enlarge Canvas") {
             @Override
             protected void dialogAccepted() {
-                Composition comp = ImageComponents.getActiveComp().get();
+                Composition comp = ImageComponents.getActiveCompOrNull();
                 new EnlargeCanvas(panel.getNorth(), panel.getEast(), panel.getSouth(), panel.getWest()).process(comp);
                 close();
             }

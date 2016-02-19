@@ -19,9 +19,7 @@ package pixelitor.utils;
 
 import pixelitor.AppLogic;
 import pixelitor.Build;
-import pixelitor.ChangeReason;
 import pixelitor.Composition;
-import pixelitor.filters.Filter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.FilterSetting;
 import pixelitor.gui.BlendingModePanel;
@@ -112,17 +110,9 @@ public final class Utils {
         }
     }
 
-    /**
-     * Executes the given filter with busy cursor
-     */
-    public static void executeFilterWithBusyCursor(Filter filter, ChangeReason changeReason, Component busyCursorParent) {
-        Composition comp = ImageComponents.getActiveComp().get();
-        comp.executeFilterWithBusyCursor(filter, changeReason, busyCursorParent);
-    }
-
     public static void setShowOriginal(boolean b) {
-        Composition comp = ImageComponents.getActiveComp().get();
-        comp.setShowOriginal(b);
+        Composition comp = ImageComponents.getActiveCompOrNull();
+        comp.getActiveMaskOrImageLayer().setShowOriginal(b);
     }
 
     /**

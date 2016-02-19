@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.filters.convolve;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.filters.gui.AdjustPanel;
+import pixelitor.layers.ImageLayer;
 import pixelitor.utils.Messages;
 import pixelitor.utils.NotANumberException;
 import pixelitor.utils.Utils;
@@ -43,8 +44,8 @@ public class CustomConvolveAdjustments extends AdjustPanel implements ActionList
     private Box presetsBox;
     private final int size;
 
-    public CustomConvolveAdjustments(Convolve filter) {
-        super(filter);
+    public CustomConvolveAdjustments(Convolve filter, ImageLayer layer) {
+        super(filter, layer);
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
         size = filter.getSize();
@@ -302,7 +303,7 @@ public class CustomConvolveAdjustments extends AdjustPanel implements ActionList
                 setValues(values);
             }
         }
-        Convolve kernelFilter = (Convolve) op;
+        Convolve kernelFilter = (Convolve) filter;
         kernelFilter.setKernelMatrix(values);
         super.executeFilterPreview();
     }

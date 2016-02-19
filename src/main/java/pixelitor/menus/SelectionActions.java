@@ -27,6 +27,7 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.history.AddToHistory;
+import pixelitor.layers.ImageLayer;
 import pixelitor.selection.Selection;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.Tools;
@@ -37,7 +38,7 @@ import java.awt.GridBagLayout;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
 
-import static pixelitor.gui.ImageComponents.getActiveComp;
+import static pixelitor.gui.ImageComponents.getActiveCompOrNull;
 
 /**
  * Static methods for managing the selection actions
@@ -54,14 +55,14 @@ public final class SelectionActions {
     private static final Action deselectAction = new MenuAction("Deselect") {
         @Override
         public void onClick() {
-            getActiveComp().get().deselect(AddToHistory.YES);
+            getActiveCompOrNull().deselect(AddToHistory.YES);
         }
     };
 
     private static final Action invertSelectionAction = new MenuAction("Invert Selection") {
         @Override
         public void onClick() {
-            getActiveComp().get().invertSelection();
+            getActiveCompOrNull().invertSelection();
         }
     };
 
@@ -82,7 +83,7 @@ public final class SelectionActions {
                     "Modify Selection", "Change!", "Close") {
                 @Override
                 protected void dialogAccepted() {
-                    Selection selection = getActiveComp().get().getSelection().get();
+                    Selection selection = getActiveCompOrNull().getSelectionOrNull();
                     SelectionModifyType selectionModifyType = type.getSelected();
                     selection.modify(selectionModifyType, amount.getValue());
                 }
@@ -169,14 +170,14 @@ public final class SelectionActions {
                 return;
             }
 
-            getActiveComp()
-                    .flatMap(Composition::getSelection)
-                    .ifPresent(selection -> {
-                        Shape shape = selection.getShape();
-                        if (shape != null) {
-                            brushTool.trace(getActiveComp().get(), shape);
-                        }
-                    });
+            if (comp.hasSelection()) {
+                Selection selection = comp.getSelectionOrNull();
+                Shape shape = selection.getShape();
+                if (shape != null) {
+                    ImageLayer layer = comp.getActiveMaskOrImageLayer();
+                    brushTool.trace(layer, shape);
+                }
+            }
         }
     }
 }

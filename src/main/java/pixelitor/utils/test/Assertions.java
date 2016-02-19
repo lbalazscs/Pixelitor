@@ -22,7 +22,6 @@ import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.layers.ContentLayer;
-import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 import pixelitor.menus.view.ZoomLevel;
@@ -102,7 +101,7 @@ public class Assertions {
     }
 
     public static boolean translationIs(int x, int y) {
-        ImageLayer layer = ImageComponents.getActiveImageLayerOrMaskOrNull();
+        ContentLayer layer = (ContentLayer) ImageComponents.getActiveLayerOrNull();
         return translationIs(layer, x, y);
     }
 

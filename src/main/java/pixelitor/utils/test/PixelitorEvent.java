@@ -79,7 +79,7 @@ public class PixelitorEvent {
 
         String selectionInfo = "no selection";
         if (comp.hasSelection()) {
-            Rectangle rect = comp.getSelection().get().getShapeBounds();
+            Rectangle rect = comp.getSelectionOrNull().getShapeBounds();
             selectionInfo = String.format("sel. bounds = '%s'", rect.toString());
         }
         String maskInfo = "no mask";

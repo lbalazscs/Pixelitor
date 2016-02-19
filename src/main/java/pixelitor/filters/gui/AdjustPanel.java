@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.filters.gui;
 
 import pixelitor.ChangeReason;
 import pixelitor.filters.Filter;
-import pixelitor.utils.Utils;
+import pixelitor.layers.ImageLayer;
 
 import javax.swing.*;
 
@@ -27,15 +27,17 @@ import javax.swing.*;
  * The superclass of all filter adjustment panels
  */
 public abstract class AdjustPanel extends JPanel implements PreviewExecutor {
-    protected Filter op;
+    protected Filter filter;
+    private final ImageLayer layer;
 
-    protected AdjustPanel(Filter filter) {
-        this.op = filter;
+    protected AdjustPanel(Filter filter, ImageLayer layer) {
+        this.filter = filter;
+        this.layer = layer;
     }
 
     @Override
     public void executeFilterPreview() {
-        Utils.executeFilterWithBusyCursor(op, ChangeReason.OP_PREVIEW, this);
+        filter.executeFilterWithBusyCursor(layer, ChangeReason.OP_PREVIEW, this);
     }
 
 }

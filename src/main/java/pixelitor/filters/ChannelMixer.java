@@ -26,6 +26,7 @@ import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.layers.ImageLayer;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
@@ -329,8 +330,8 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
     }
 
     @Override
-    public AdjustPanel createAdjustPanel() {
-        return new ChannelMixerAdjustments(this, actions);
+    public AdjustPanel createAdjustPanel(ImageLayer layer) {
+        return new ChannelMixerAdjustments(this, layer, actions);
     }
 
     private static RangeParam createParam(String first, String second, int defaultValue) {

@@ -26,6 +26,7 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
+import pixelitor.layers.ImageLayer;
 import pixelitor.tools.brushes.Brush;
 
 import java.awt.Point;
@@ -55,6 +56,7 @@ public class AbstractBrushToolTest {
     private Brush origBrush;
 
     private Composition comp;
+    private ImageLayer layer;
 
     @Parameters(name = "{index}: {0}, mask = {1}")
     public static Collection<Object[]> instancesToTest() {
@@ -75,6 +77,7 @@ public class AbstractBrushToolTest {
     @Before
     public void setUp() {
         comp = TestHelper.create2LayerComposition(false);
+        layer = comp.getActiveMaskOrImageLayer();
 
         origBrush = tool.getBrush();
         brushSpy = spy(origBrush);
@@ -93,7 +96,7 @@ public class AbstractBrushToolTest {
 
     @Test
     public void test_trace() {
-        tool.trace(comp, new Rectangle(2, 2, 2, 2));
+        tool.trace(layer, new Rectangle(2, 2, 2, 2));
 
         verify(brushSpy).setTarget(any(), any());
         verify(brushSpy).onDragStart(2.0, 2.0);
@@ -102,7 +105,7 @@ public class AbstractBrushToolTest {
 
     @Test
     public void test_drawBrushStrokeProgrammatically() {
-        tool.drawBrushStrokeProgrammatically(comp, new Point(2, 2), new Point(5, 5));
+        tool.drawBrushStrokeProgrammatically(layer, new Point(2, 2), new Point(5, 5));
 
         verify(brushSpy).onDragStart(2.0, 2.0);
         verify(brushSpy).onNewMousePoint(5.0, 5.0);

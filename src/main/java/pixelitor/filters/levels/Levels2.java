@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters.levels;
 
@@ -21,6 +21,7 @@ import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.levels.gui.LevelsPanel;
 import pixelitor.filters.lookup.FastLookupOp;
+import pixelitor.layers.ImageLayer;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
@@ -42,8 +43,8 @@ public class Levels2 extends FilterWithParametrizedGUI implements LookupFilter {
     }
 
     @Override
-    public AdjustPanel createAdjustPanel() {
-        return new LevelsPanel(this, model);
+    public AdjustPanel createAdjustPanel(ImageLayer layer) {
+        return new LevelsPanel(this, layer, model);
     }
 
     @Override

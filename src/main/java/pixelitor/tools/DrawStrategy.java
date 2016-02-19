@@ -17,7 +17,6 @@
 
 package pixelitor.tools;
 
-import pixelitor.Composition;
 import pixelitor.layers.ImageLayer;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
@@ -34,21 +33,20 @@ public enum DrawStrategy {
         }
 
         @Override
-        public void prepareBrushStroke(Composition comp) {
+        public void prepareBrushStroke(ImageLayer layer) {
 
         }
 
         @Override
-        public void finishBrushStroke(Composition comp) {
-            ImageLayer imageLayer = comp.getActiveMaskOrImageLayer();
-            imageLayer.mergeTmpDrawingLayerDown();
+        public void finishBrushStroke(ImageLayer layer) {
+            layer.mergeTmpDrawingLayerDown();
         }
 
         @Override
-        public BufferedImage getOriginalImage(Composition comp, AbstractBrushTool tool) {
+        public BufferedImage getOriginalImage(ImageLayer layer, AbstractBrushTool tool) {
             // it can simply return the layer image because
             // the drawing was on the temporary layer
-            return comp.getActiveMaskOrImageLayer().getImage();
+            return layer.getImage();
         }
     }, DIRECT {
         private BufferedImage copyBeforeStart;
@@ -61,8 +59,8 @@ public enum DrawStrategy {
         }
 
         @Override
-        public void prepareBrushStroke(Composition comp) {
-            BufferedImage image = comp.getActiveMaskOrImageLayer().getImage();
+        public void prepareBrushStroke(ImageLayer layer) {
+            BufferedImage image = layer.getImage();
 
             assert Utils.checkRasterMinimum(image);
 
@@ -70,13 +68,13 @@ public enum DrawStrategy {
         }
 
         @Override
-        public void finishBrushStroke(Composition comp) {
+        public void finishBrushStroke(ImageLayer layer) {
             copyBeforeStart.flush();
             copyBeforeStart = null;
         }
 
         @Override
-        public BufferedImage getOriginalImage(Composition comp, AbstractBrushTool tool) {
+        public BufferedImage getOriginalImage(ImageLayer layer, AbstractBrushTool tool) {
             if (copyBeforeStart == null) {
                 throw new IllegalStateException("copyBeforeStart is null for " + tool.getName());
             }
@@ -87,12 +85,12 @@ public enum DrawStrategy {
 
     public abstract Graphics2D createDrawGraphics(ImageLayer layer, Composite composite);
 
-    public abstract void prepareBrushStroke(Composition comp);
+    public abstract void prepareBrushStroke(ImageLayer layer);
 
-    public abstract void finishBrushStroke(Composition comp);
+    public abstract void finishBrushStroke(ImageLayer layer);
 
     /**
      * Returns the original (untouched) image for undo
      */
-    public abstract BufferedImage getOriginalImage(Composition comp, AbstractBrushTool tool);
+    public abstract BufferedImage getOriginalImage(ImageLayer layer, AbstractBrushTool tool);
 }

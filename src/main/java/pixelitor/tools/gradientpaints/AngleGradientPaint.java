@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -55,6 +55,12 @@ public class AngleGradientPaint implements Paint {
 
     @Override
     public PaintContext createContext(ColorModel cm, Rectangle deviceBounds, Rectangle2D userBounds, AffineTransform xform, RenderingHints hints) {
+        int numComponents = cm.getNumComponents();
+
+        if (numComponents == 1) {
+            return new GrayAngleGradientPaintContext(userDrag, startColor, endColor, cm, cycleMethod);
+        }
+
         return new AngleGradientPaintContext(userDrag, startColor, endColor, cm, cycleMethod);
     }
 
@@ -65,9 +71,9 @@ public class AngleGradientPaint implements Paint {
         return (((a1 & a2) == 0xFF) ? OPAQUE : TRANSLUCENT);
     }
 
-    static class AngleGradientPaintContext implements PaintContext {
-        private final UserDrag userDrag;
-        private final MultipleGradientPaint.CycleMethod cycleMethod;
+    private static class AngleGradientPaintContext implements PaintContext {
+        protected final UserDrag userDrag;
+        protected final MultipleGradientPaint.CycleMethod cycleMethod;
 
         private final int startAlpha;
         private final int startRed;
@@ -79,8 +85,8 @@ public class AngleGradientPaint implements Paint {
         private final int endGreen;
         private final int endBlue;
 
-        private final ColorModel cm;
-        private final double drawAngle;
+        protected final ColorModel cm;
+        protected final double drawAngle;
 
         private AngleGradientPaintContext(UserDrag userDrag, Color startColor, Color endColor, ColorModel cm, MultipleGradientPaint.CycleMethod cycleMethod) {
             this.userDrag = userDrag;
@@ -110,6 +116,7 @@ public class AngleGradientPaint implements Paint {
             return cm;
         }
 
+        // Warning: gray subclass has exact copy of the algorithm
         @Override
         public Raster getRaster(int startX, int startY, int width, int height) {
             WritableRaster raster = cm.createCompatibleWritableRaster(width, height);
@@ -129,42 +136,34 @@ public class AngleGradientPaint implements Paint {
                         needsAA = interpolationValue > (1.0 - threshold) || interpolationValue < threshold;
                     }
 
-                    final boolean debugAARegion = false;
                     if (needsAA) {
-                        if (debugAARegion) {
-                            rasterData[base] = 255;
-                            rasterData[base + 1] = 255;
-                            rasterData[base + 2] = 255;
-                            rasterData[base + 3] = 255;
-                        } else {
-                            int a = 0;
-                            int r = 0;
-                            int g = 0;
-                            int b = 0;
+                        int a = 0;
+                        int r = 0;
+                        int g = 0;
+                        int b = 0;
 
-                            for (int m = 0; m < AA_RES; m++) {
-                                double yy = y + 1.0 / AA_RES * m - 0.5;
-                                for (int n = 0; n < AA_RES; n++) {
-                                    double xx = x + 1.0 / AA_RES * n - 0.5;
+                        for (int m = 0; m < AA_RES; m++) {
+                            double yy = y + 1.0 / AA_RES * m - 0.5;
+                            for (int n = 0; n < AA_RES; n++) {
+                                double xx = x + 1.0 / AA_RES * n - 0.5;
 
-                                    double interpolationValueAA = getInterpolationValue(xx, yy);
+                                double interpolationValueAA = getInterpolationValue(xx, yy);
 
-                                    a += (int) (startAlpha + interpolationValueAA * (endAlpha - startAlpha));
-                                    r += (int) (startRed + interpolationValueAA * (endRed - startRed));
-                                    g += (int) (startGreen + interpolationValueAA * (endGreen - startGreen));
-                                    b += (int) (startBlue + interpolationValueAA * (endBlue - startBlue));
-                                }
+                                a += (int) (startAlpha + interpolationValueAA * (endAlpha - startAlpha));
+                                r += (int) (startRed + interpolationValueAA * (endRed - startRed));
+                                g += (int) (startGreen + interpolationValueAA * (endGreen - startGreen));
+                                b += (int) (startBlue + interpolationValueAA * (endBlue - startBlue));
                             }
-                            a /= AA_RES2;
-                            r /= AA_RES2;
-                            g /= AA_RES2;
-                            b /= AA_RES2;
-
-                            rasterData[base] = r;
-                            rasterData[base + 1] = g;
-                            rasterData[base + 2] = b;
-                            rasterData[base + 3] = a;
                         }
+                        a /= AA_RES2;
+                        r /= AA_RES2;
+                        g /= AA_RES2;
+                        b /= AA_RES2;
+
+                        rasterData[base] = r;
+                        rasterData[base + 1] = g;
+                        rasterData[base + 2] = b;
+                        rasterData[base + 3] = a;
                     } else { // no AA
                         int a = (int) (startAlpha + interpolationValue * (endAlpha - startAlpha));
                         int r = (int) (startRed + interpolationValue * (endRed - startRed));
@@ -205,6 +204,65 @@ public class AngleGradientPaint implements Paint {
                 }
             }
             return interpolationValue;
+        }
+    }
+
+    private static class GrayAngleGradientPaintContext extends AngleGradientPaintContext {
+        private final int startGray;
+        private final int endGray;
+
+        private GrayAngleGradientPaintContext(UserDrag userDrag, Color startColor, Color endColor, ColorModel cm, MultipleGradientPaint.CycleMethod cycleMethod) {
+            super(userDrag, startColor, endColor, cm, cycleMethod);
+
+            startGray = startColor.getRed();
+            endGray = endColor.getRed();
+        }
+
+        @Override
+        public Raster getRaster(int startX, int startY, int width, int height) {
+            WritableRaster raster = cm.createCompatibleWritableRaster(width, height);
+            int[] rasterData = new int[width * height];
+
+            for (int j = 0; j < height; j++) {
+                int y = startY + j;
+                for (int i = 0; i < width; i++) {
+                    int base = (j * width + i);
+                    int x = startX + i;
+                    double interpolationValue = getInterpolationValue(x, y);
+
+                    boolean needsAA = false;
+                    if (cycleMethod != REFLECT) {
+                        double distance = userDrag.taxiCabMetric(x, y);
+                        double threshold = 0.2 / distance;
+                        needsAA = interpolationValue > (1.0 - threshold) || interpolationValue < threshold;
+                    }
+
+                    if (needsAA) {
+                        int g = 0;
+
+                        for (int m = 0; m < AA_RES; m++) {
+                            double yy = y + 1.0 / AA_RES * m - 0.5;
+                            for (int n = 0; n < AA_RES; n++) {
+                                double xx = x + 1.0 / AA_RES * n - 0.5;
+
+                                double interpolationValueAA = getInterpolationValue(xx, yy);
+
+                                g += (int) (startGray + interpolationValueAA * (endGray - startGray));
+                            }
+                        }
+                        g /= AA_RES2;
+
+                        rasterData[base] = g;
+                    } else { // no AA
+                        int g = (int) (startGray + interpolationValue * (endGray - startGray));
+
+                        rasterData[base] = g;
+                    }
+                }
+            }
+
+            raster.setPixels(0, 0, width, height, rasterData);
+            return raster;
         }
     }
 }

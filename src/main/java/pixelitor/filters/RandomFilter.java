@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.FilterWithGUI;
+import pixelitor.layers.ImageLayer;
 
 import java.awt.image.BufferedImage;
 
@@ -26,8 +27,8 @@ import java.awt.image.BufferedImage;
  */
 public class RandomFilter extends FilterWithGUI {
     @Override
-    public AdjustPanel createAdjustPanel() {
-        return new RandomFilterAdjustPanel();
+    public AdjustPanel createAdjustPanel(ImageLayer layer) {
+        return new RandomFilterAdjustPanel(layer);
     }
 
     @Override

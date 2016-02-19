@@ -19,9 +19,11 @@ package pixelitor.automate;
 
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.OKCancelDialog;
+import pixelitor.layers.ImageLayer;
 
 import javax.swing.*;
 import java.awt.Component;
+import java.util.Objects;
 
 /**
  * A wizard. The individual pages implement the WizardPage interface.
@@ -33,13 +35,15 @@ public abstract class Wizard {
     private final String finishButtonText;
     private final int initialDialogWidth;
     private final int initialDialogHeight;
+    protected final ImageLayer layer;
 
-    protected Wizard(WizardPage initialWizardPage, String dialogTitle, String finishButtonText, int initialDialogWidth, int initialDialogHeight) {
+    protected Wizard(WizardPage initialWizardPage, String dialogTitle, String finishButtonText, int initialDialogWidth, int initialDialogHeight, ImageLayer layer) {
         this.wizardPage = initialWizardPage;
         this.dialogTitle = dialogTitle;
         this.finishButtonText = finishButtonText;
         this.initialDialogWidth = initialDialogWidth;
         this.initialDialogHeight = initialDialogHeight;
+        this.layer = Objects.requireNonNull(layer);
     }
 
     /**
@@ -57,14 +61,14 @@ public abstract class Wizard {
         assert dialog == null; // this should be called once per object
 
         dialog = new OKCancelDialog(
-                wizardPage.getPanel(Wizard.this),
+                wizardPage.getPanel(Wizard.this, layer),
                 dialogParent,
                 title,
                 "Next", "Cancel") {
 
             @Override
             protected void dialogCanceled() {
-                wizardPage.onWizardCancelled();
+                wizardPage.onWizardCancelled(layer);
                 super.dialogCanceled();
                 dispose();
             }
@@ -76,7 +80,7 @@ public abstract class Wizard {
                 }
 
                 // move forward
-                wizardPage.onMovingToTheNext(Wizard.this);
+                wizardPage.onMovingToTheNext(Wizard.this, layer);
 
                 if (!mayProceedAfterMovingForward(wizardPage, this)) {
                     return;
@@ -87,7 +91,7 @@ public abstract class Wizard {
                     dispose();
                     executeFinalAction();
                 } else {
-                    JComponent panel = nextPage.getPanel(Wizard.this);
+                    JComponent panel = nextPage.getPanel(Wizard.this, layer);
                     dialog.changeForm(panel);
                     dialog.setHeaderMessage(nextPage.getHeaderText(Wizard.this));
                     wizardPage = nextPage;

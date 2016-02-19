@@ -34,7 +34,7 @@ public class AnimGifExport {
     }
 
     public static void start(JFrame dialogParent) {
-        Composition activeComp = ImageComponents.getActiveComp().get();
+        Composition activeComp = ImageComponents.getActiveCompOrNull();
         int nrLayers = activeComp.getNrLayers();
         if(nrLayers < 2) {
             Messages.showInfo("Only one layer",

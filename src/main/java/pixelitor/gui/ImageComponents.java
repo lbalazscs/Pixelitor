@@ -93,6 +93,10 @@ public class ImageComponents {
         return activeIC;
     }
 
+    public static boolean hasActiveImage() {
+        return activeIC != null && !icList.isEmpty();
+    }
+
     public static Composition getActiveCompOrNull() {
         if (activeIC != null) {
             return activeIC.getComp();
@@ -145,8 +149,11 @@ public class ImageComponents {
         return icList.size();
     }
 
-    public static Optional<BufferedImage> getActiveCompositeImage() {
-        return getActiveComp().map(Composition::getCompositeImage);
+    public static BufferedImage getActiveCompositeImageOrNull() {
+        if (activeIC != null) {
+            return activeIC.getComp().getCompositeImage();
+        }
+        return null;
     }
 
     /**

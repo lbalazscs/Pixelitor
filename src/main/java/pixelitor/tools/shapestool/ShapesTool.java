@@ -180,6 +180,7 @@ public class ShapesTool extends Tool {
         userDrag.setStartFromCenter(e.isAltDown());
 
         Composition comp = ic.getComp();
+        ImageLayer layer = comp.getActiveMaskOrImageLayer();
 
         ShapesAction action = actionModel.getSelectedItem();
         boolean selectionMode = action.createSelection();
@@ -214,13 +215,13 @@ public class ShapesTool extends Tool {
             shapeBounds.grow(thickness, thickness);
 
             if (!shapeBounds.isEmpty()) {
-                ToolAffectedArea affectedArea = new ToolAffectedArea(comp, shapeBounds, false);
-                saveSubImageForUndo(comp.getActiveMaskOrImageLayer().getImage(), affectedArea);
+                ToolAffectedArea affectedArea = new ToolAffectedArea(layer, shapeBounds, false);
+                saveSubImageForUndo(layer.getImage(), affectedArea);
             }
-            paintShapeOnIC(comp, userDrag);
+            paintShapeOnIC(layer, userDrag);
 
             comp.imageChanged(FULL);
-            comp.getActiveMaskOrImageLayer().updateIconImage();
+            layer.updateIconImage();
         } else { // selection mode
             comp.getSelection().ifPresent((selection) -> {
                 selection.clipToCompSize(comp); // the selection can be too big
@@ -278,17 +279,19 @@ public class ShapesTool extends Tool {
     }
 
     /**
-     * Paint a shape on the given ImageComponent. Can be used programmatically.
+     * Paint a shape on the given image layer. Can be used programmatically.
      * The start and end point points are given relative to the Composition (not Layer)
      */
-    public void paintShapeOnIC(Composition comp, UserDrag userDrag) {
-        ImageLayer layer = comp.getActiveMaskOrImageLayer();
+    public void paintShapeOnIC(ImageLayer layer, UserDrag userDrag) {
         int tx = -layer.getTX();
         int ty = -layer.getTY();
 
         BufferedImage bi = layer.getImage();
         Graphics2D g2 = bi.createGraphics();
         g2.translate(tx, ty);
+
+        Composition comp = layer.getComp();
+
         comp.applySelectionClipping(g2, null);
 
         paintShape(g2, userDrag, comp);

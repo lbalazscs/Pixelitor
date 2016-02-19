@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.filters.gui;
 
 import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.layers.ImageLayer;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -34,8 +35,8 @@ public class GridAdjustmentPanel extends ParametrizedAdjustPanel {
     public static final int MAX_GRID_PARAMS = 4;
     private final boolean addGridLabels;
 
-    public GridAdjustmentPanel(FilterWithParametrizedGUI filter, boolean addGridLabels, ShowOriginal showOriginal) {
-        super(filter, showOriginal);
+    public GridAdjustmentPanel(FilterWithParametrizedGUI filter, ImageLayer layer, boolean addGridLabels, ShowOriginal showOriginal) {
+        super(filter, layer, showOriginal);
         this.addGridLabels = addGridLabels;
     }
 

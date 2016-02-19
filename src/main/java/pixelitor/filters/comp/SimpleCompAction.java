@@ -47,7 +47,7 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Composition comp = ImageComponents.getActiveComp().get();
+        Composition comp = ImageComponents.getActiveCompOrNull();
 
         process(comp);
     }

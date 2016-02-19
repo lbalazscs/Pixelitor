@@ -19,46 +19,36 @@ package pixelitor.filters;
 
 import com.jhlabs.image.AbstractBufferedImageOp;
 import pixelitor.history.History;
+import pixelitor.layers.ImageLayer;
+import pixelitor.layers.ImageLayerAction;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
 import java.util.function.Supplier;
 
 /**
  * An action that invokes a filter
  */
-public class FilterAction extends AbstractAction {
+public class FilterAction extends ImageLayerAction {
     private final Supplier<Filter> filterSupplier;
     private Filter filter;
     private String listNamePrefix = null;
-    private boolean noGUI = false;
-
-    private final String name;
-    private String menuName;
 
     public FilterAction(String name, Supplier<Filter> filterSupplier) {
-        assert name != null;
+        this(name, true, filterSupplier);
+    }
+
+    public FilterAction(String name, boolean hasDialog, Supplier<Filter> filterSupplier) {
+        super(name, hasDialog);
+
         assert filterSupplier != null;
 
-        this.name = name;
         this.filterSupplier = filterSupplier;
-
-        menuName = name + "...";
-        putValue(Action.NAME, menuName);
 
         FilterUtils.addFilter(this);
     }
 
     public FilterAction(String name, AbstractBufferedImageOp op) {
         this(name, () -> new SimpleForwardingFilter(op));
-    }
-
-    public String getMenuName() {
-        return menuName;
-    }
-
-    public String getName() {
-        return name;
     }
 
     /**
@@ -73,11 +63,12 @@ public class FilterAction extends AbstractAction {
         }
     }
 
+
     @Override
-    public void actionPerformed(ActionEvent e) {
+    protected void process(ImageLayer layer) {
         createFilter();
 
-        filter.execute();
+        filter.execute(layer);
     }
 
     private void createFilter() {
@@ -105,8 +96,10 @@ public class FilterAction extends AbstractAction {
         return withListNamePrefix("Extract Channel: ");
     }
 
+    // overrides the constructor parameter
+    // a bit ugly, but it simplifies the builders
     public FilterAction withoutGUI() {
-        noGUI = true;
+        hasDialog = false;
         menuName = name; // without the "..."
         putValue(Action.NAME, menuName);
 
@@ -114,7 +107,7 @@ public class FilterAction extends AbstractAction {
     }
 
     public boolean isAnimationFilter() {
-        if (noGUI) {
+        if (!hasDialog) {
             return false;
         }
 

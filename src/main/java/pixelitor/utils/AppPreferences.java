@@ -21,6 +21,7 @@ import pixelitor.FgBgColors;
 import pixelitor.NewImage;
 import pixelitor.Pixelitor;
 import pixelitor.TipsOfTheDay;
+import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.gui.Desktop;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GridBagHelper;
@@ -28,6 +29,7 @@ import pixelitor.gui.utils.IntTextField;
 import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.history.History;
 import pixelitor.io.FileChoosers;
+import pixelitor.layers.LayerButtonLayout;
 import pixelitor.menus.file.RecentFileInfo;
 import pixelitor.menus.file.RecentFilesMenu;
 
@@ -72,6 +74,8 @@ public final class AppPreferences {
     private static final String STATUS_BAR_SHOWN_KEY = "status_bar_shown";
 
     private static final String UNDO_LEVELS_KEY = "undo_levels";
+
+    private static final String THUMB_SIZE_KEY = "thumb_size";
 
     private AppPreferences() {
     }
@@ -223,7 +227,6 @@ public final class AppPreferences {
     public static int loadUndoLevels() {
         int retVal = mainUserNode.getInt(UNDO_LEVELS_KEY, -1);
         if (retVal == -1) {
-//            return getDefaultUndoLevels();
             return Math.min(5, getDefaultUndoLevels());
         }
         return retVal;
@@ -231,6 +234,15 @@ public final class AppPreferences {
 
     private static void saveUndoLevels() {
         mainUserNode.putInt(UNDO_LEVELS_KEY, History.getUndoLevels());
+    }
+
+    public static int loadThumbSize() {
+        int retVal = mainUserNode.getInt(THUMB_SIZE_KEY, LayerButtonLayout.SMALL_THUMB_SIZE);
+        return retVal;
+    }
+
+    private static void saveThumbSize() {
+        mainUserNode.putInt(THUMB_SIZE_KEY, LayerButtonLayout.getThumbSize());
     }
 
     private static void savePreferencesBeforeExit() {
@@ -241,6 +253,7 @@ public final class AppPreferences {
         saveFgBgColors();
         WorkSpace.saveVisibility();
         saveUndoLevels();
+        saveThumbSize();
         TipsOfTheDay.saveNextTipNr();
         saveNewImageSize();
     }
@@ -311,9 +324,7 @@ public final class AppPreferences {
             loaded = true;
         }
 
-        public static void setDefault() {
-            PixelitorWindow pw = PixelitorWindow.getInstance();
-
+        public static void setDefault(PixelitorWindow pw) {
             pw.setHistogramsVisibility(DEFAULT_HISTOGRAMS_VISIBILITY, false);
             pw.setToolsVisibility(DEFAULT_TOOLS_VISIBILITY, false);
             pw.setLayersVisibility(DEFAULT_LAYERS_VISIBILITY, false);
@@ -381,6 +392,7 @@ public final class AppPreferences {
 
     public static class Panel extends JPanel {
         private final JTextField undoLevelsTF;
+        private final JComboBox<IntChoiceParam.Value> thumbSizeCB;
 
         Panel() {
             setLayout(new GridBagLayout());
@@ -389,12 +401,31 @@ public final class AppPreferences {
             undoLevelsTF = new IntTextField(3);
             undoLevelsTF.setText(String.valueOf(History.getUndoLevels()));
             gridBagHelper.addLabelWithControl("Undo/Redo Levels: ", undoLevelsTF);
+
+            IntChoiceParam.Value[] thumbSizes = {
+                    new IntChoiceParam.Value("Small  (24x24)", 24),
+                    new IntChoiceParam.Value("Big    (48x48)", 48),
+                    new IntChoiceParam.Value("Bigger (72x72)", 72),
+                    new IntChoiceParam.Value("Huge   (96x96)", 96),
+            };
+            thumbSizeCB = new JComboBox<>(thumbSizes);
+
+            int currentSize = LayerButtonLayout.getThumbSize();
+            thumbSizeCB.setSelectedIndex(currentSize / 24 - 1);
+
+            gridBagHelper.addLabelWithControl("Layer/Mask Thumb Sizes: ", thumbSizeCB);
+            thumbSizeCB.addActionListener(e -> updateThumbSize());
         }
 
         private int getUndoLevels() {
             String s = undoLevelsTF.getText();
             int retVal = Integer.parseInt(s);
             return retVal;
+        }
+
+        private void updateThumbSize() {
+            int newSize = ((IntChoiceParam.Value) thumbSizeCB.getSelectedItem()).getIntValue();
+            LayerButtonLayout.setThumbSize(newSize);
         }
 
         public static void showInDialog() {
@@ -404,6 +435,9 @@ public final class AppPreferences {
                 protected void dialogAccepted() {
                     int undoLevels = p.getUndoLevels();
                     History.setUndoLevels(undoLevels);
+
+                    p.updateThumbSize();
+
                     close();
                 }
             };

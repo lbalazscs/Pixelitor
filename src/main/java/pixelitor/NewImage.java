@@ -44,9 +44,10 @@ public final class NewImage {
     private NewImage() {
     }
 
-    public static void addNewImage(FillType bg, int width, int height, String title) {
+    public static Composition addNewImage(FillType bg, int width, int height, String title) {
         Composition comp = createNewComposition(bg, width, height, title);
         AppLogic.addComposition(comp);
+        return comp;
     }
 
     public static Composition createNewComposition(FillType bg, int width, int height, String title) {

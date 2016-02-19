@@ -40,20 +40,20 @@ public final class ConsistencyChecks {
     private ConsistencyChecks() { // do not instantiate
     }
 
-    public static void checkAll(boolean checkImageCoversCanvas) {
-        getActiveComp().ifPresent(comp -> {
-            selectionCheck(comp);
-            fadeCheck(comp);
-            if (checkImageCoversCanvas) {
-                imageCoversCanvasCheck(comp);
-            }
-            layerDeleteActionEnabledCheck();
-        });
+    public static void checkAll(Composition comp, boolean checkImageCoversCanvas) {
+        assert comp != null;
+
+        selectionCheck(comp);
+        fadeCheck(comp);
+        if (checkImageCoversCanvas) {
+            imageCoversCanvasCheck(comp);
+        }
+        layerDeleteActionEnabledCheck();
     }
 
     public static boolean fadeCheck(Composition comp) {
         ImageLayer layer = comp.getActiveMaskOrImageLayerOrNull();
-        if(layer == null) {
+        if (layer == null) {
             // nothing to check
             return true;
         }
@@ -66,7 +66,7 @@ public final class ConsistencyChecks {
     @SuppressWarnings("SameReturnValue")
     public static boolean fadeCheck(ImageLayer layer) {
         assert layer != null;
-        if (!History.canFade()) {
+        if (!History.canFade(layer)) {
             return true;
         }
         Optional<FadeableEdit> edit = History.getPreviousEditForFade(layer);
@@ -92,10 +92,10 @@ public final class ConsistencyChecks {
                         + "\n current selected dimensions: " + current.getWidth() + "x" + current.getHeight() + ", "
                         + "history dimensions: " + previous.getWidth() + "x" + previous.getHeight()
                         + "\nchecked composition = " + comp.getName() + "(hasSelection = " + comp.hasSelection()
-                        + (comp.hasSelection() ? ", selection bounds = " + comp.getSelection().get().getShapeBounds() : "") + ")"
+                        + (comp.hasSelection() ? ", selection bounds = " + comp.getSelectionOrNull().getShapeBounds() : "") + ")"
                         + "\nchecked composition canvas = " + comp.getCanvas().getBounds()
                         + "\nhistory composition = " + fadeableEdit.getComp().getName()
-                        + "\nactive composition = " + ImageComponents.getActiveComp().get().getName()
+                        + "\nactive composition = " + ImageComponents.getActiveCompOrNull().getName()
                         + "\n"
 
 

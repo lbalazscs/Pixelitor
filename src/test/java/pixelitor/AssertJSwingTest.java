@@ -120,7 +120,19 @@ public class AssertJSwingTest {
 
     enum Randomize {YES, NO}
 
-    enum TestingMode {SIMPLE, WITH_MASK, ON_MASK_VIEW_LAYER, ON_MASK_VIEW_MASK}
+    enum TestingMode {
+        SIMPLE(false), WITH_MASK(false), ON_MASK_VIEW_LAYER(true), ON_MASK_VIEW_MASK(true);
+
+        private final boolean maskEditing;
+
+        TestingMode(boolean maskEditing) {
+            this.maskEditing = maskEditing;
+        }
+
+        public boolean isMaskEditing() {
+            return maskEditing;
+        }
+    }
 
     private TestingMode testingMode;
 
@@ -548,10 +560,14 @@ public class AssertJSwingTest {
         runMenuCommand("Copy Layer");
         runMenuCommand("Paste as New Layer");
 
-        applyTestingMode();
-
         runMenuCommand("Copy Composite");
         runMenuCommand("Paste as New Image");
+
+        // close the pasted image
+        runMenuCommand("Close");
+
+        // close the pasted layer
+        runMenuCommand("Delete Layer");
 
         applyTestingMode();
     }
@@ -643,7 +659,7 @@ public class AssertJSwingTest {
     }
 
     private void testExportTweeningAnimation() {
-        assertThat(ImageComponents.getActiveComp().isPresent()).isTrue();
+        assertThat(ImageComponents.hasActiveImage()).isTrue();
         runMenuCommand("Export Tweening Animation...");
         DialogFixture dialog = findDialogByTitle("Export Tweening Animation");
         dialog.comboBox().selectItem("Angular Waves");
@@ -698,7 +714,7 @@ public class AssertJSwingTest {
         FileChoosers.setLastOpenDir(inputDir);
         FileChoosers.setLastSaveDir(batchFilterOutputDir);
 
-        assertThat(ImageComponents.getActiveComp().isPresent()).isTrue();
+        assertThat(ImageComponents.hasActiveImage()).isTrue();
         runMenuCommand("Batch Filter...");
         DialogFixture dialog = findDialogByTitle("Batch Filter");
         dialog.comboBox("filtersCB").selectItem("Angular Waves");
@@ -1156,6 +1172,11 @@ public class AssertJSwingTest {
     }
 
     private void testGradientTool() {
+        if (testingMode.isMaskEditing()) {
+            // reset the default colors, otherwise it might be all gray
+            keyboardFgBgDefaults();
+        }
+
         window.toggleButton("Gradient Tool Button").click();
         randomAltClick();
 
@@ -1493,6 +1514,11 @@ public class AssertJSwingTest {
     private void keyboardDeselect() {
         // press Ctrl-D
         window.pressKey(VK_CONTROL).pressKey(VK_D).releaseKey(VK_D).releaseKey(VK_CONTROL);
+    }
+
+    private void keyboardFgBgDefaults() {
+        // press D
+        window.pressKey(VK_D).releaseKey(VK_D);
     }
 
     private void keyboardActualPixels() {

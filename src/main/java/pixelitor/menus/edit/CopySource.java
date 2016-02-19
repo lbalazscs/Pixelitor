@@ -17,7 +17,9 @@
 
 package pixelitor.menus.edit;
 
+import pixelitor.Composition;
 import pixelitor.gui.ImageComponents;
+import pixelitor.layers.ImageLayer;
 
 import java.awt.image.BufferedImage;
 
@@ -28,11 +30,17 @@ public enum CopySource {
     LAYER {
         @Override
         BufferedImage getImage() {
-//            return AppLogic.getActiveComp().getImageOrSubImageIfSelectedForActiveLayer(false, false);
-
-            // TODO this avoids the raster "has minX or minY not equal to zero" exception,
-            // but now it is copied twice
-            return ImageComponents.getActiveComp().get().getImageOrSubImageIfSelectedForActiveLayer(false, true);
+            Composition comp = ImageComponents.getActiveCompOrNull();
+            if (comp != null) {
+                ImageLayer layer = comp.getActiveMaskOrImageLayerOrNull();
+                if (layer != null) {
+                    // TODO calling with false, false results in
+                    // raster "has minX or minY not equal to zero" exception?
+                    // false, true avoids it, but now it is copied twice
+                    return layer.getImageOrSubImageIfSelected(false, true);
+                }
+            }
+            return null;
         }
 
         @Override
@@ -42,7 +50,7 @@ public enum CopySource {
     }, COMPOSITE {
         @Override
         BufferedImage getImage() {
-            return ImageComponents.getActiveCompositeImage().get();
+            return ImageComponents.getActiveCompositeImageOrNull();
         }
 
         @Override

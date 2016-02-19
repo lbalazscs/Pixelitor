@@ -18,15 +18,13 @@
 package pixelitor.filters.animation;
 
 import pixelitor.ChangeReason;
+import pixelitor.Composition;
 import pixelitor.filters.Filter;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.ParamSetState;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.layers.ImageLayer;
 import pixelitor.utils.Messages;
-import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.image.BufferedImage;
@@ -34,9 +32,11 @@ import java.io.IOException;
 
 class RenderFramesTask extends SwingWorker<Void, Void> {
     private final TweenAnimation animation;
+    private final ImageLayer layer;
 
-    public RenderFramesTask(TweenAnimation tweenAnimation) {
+    public RenderFramesTask(TweenAnimation tweenAnimation, ImageLayer layer) {
         this.animation = tweenAnimation;
+        this.layer = layer;
     }
 
     @SuppressWarnings("ProhibitedExceptionDeclared")
@@ -58,10 +58,9 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         AnimationWriter animationWriter = animation.createAnimationWriter();
         boolean canceled = false;
 
-        ImageLayer activeImageLayer = ImageComponents.getActiveImageLayerOrMask().get();
         PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
 
-        activeImageLayer.tweenCalculatingStarted();
+        layer.tweenCalculatingStarted();
 
         int numTotalFrames = numFrames;
         boolean pingPong = animation.isPingPong() && numFrames > 2;
@@ -101,7 +100,7 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         }
 
         setProgress(100);
-        activeImageLayer.tweenCalculatingEnded();
+        layer.tweenCalculatingEnded();
 
         if (canceled) {
             animationWriter.cancel();
@@ -116,15 +115,15 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         ParamSetState intermediateState = animation.tween(time);
         filter.getParamSet().setState(intermediateState);
 
-        Utils.executeFilterWithBusyCursor(filter, ChangeReason.TWEEN_PREVIEW, busyCursorParent);
+        filter.executeFilterWithBusyCursor(layer, ChangeReason.TWEEN_PREVIEW, busyCursorParent);
 
         long runCountAfter = Filter.runCount;
         assert runCountAfter == runCountBefore + 1;
 
-        ImageComponent ic = ImageComponents.getActiveIC();
-        ic.repaint();
+        Composition comp = layer.getComp();
+        comp.repaint();
 
-        return ImageComponents.getActiveCompositeImage().get();
+        return comp.getCompositeImage();
     }
 
     @Override

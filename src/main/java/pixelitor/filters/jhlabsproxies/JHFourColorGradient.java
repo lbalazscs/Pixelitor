@@ -24,6 +24,7 @@ import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.GridAdjustmentPanel;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.layers.ImageLayer;
 
 import java.awt.image.BufferedImage;
 
@@ -72,7 +73,7 @@ public class JHFourColorGradient extends FilterWithParametrizedGUI {
     }
 
     @Override
-    public AdjustPanel createAdjustPanel() {
-        return new GridAdjustmentPanel(this, true, ShowOriginal.NO);
+    public AdjustPanel createAdjustPanel(ImageLayer layer) {
+        return new GridAdjustmentPanel(this, layer, true, ShowOriginal.NO);
     }
 }

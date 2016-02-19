@@ -108,7 +108,7 @@ public class PaintBucketTool extends Tool {
         Rectangle replacedArea = scanlineFloodFill(workingCopy, (int) x, (int) y, newColor, toleranceParam.getValue());
 
         if (replacedArea != null) { // something was replaced
-            ToolAffectedArea affectedArea = new ToolAffectedArea(comp, replacedArea, true);
+            ToolAffectedArea affectedArea = new ToolAffectedArea(layer, replacedArea, true);
             saveSubImageForUndo(original, affectedArea);
 
             Graphics2D g = image.createGraphics();

@@ -17,40 +17,39 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.Composition;
 import pixelitor.filters.Filter;
-import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.OKCancelDialog;
+import pixelitor.layers.ImageLayer;
 
 /**
  * A dialog for the filter adjustments
  */
 public class AdjustDialog extends OKCancelDialog {
     private final Filter activeFilter;
+    private final ImageLayer layer;
 
-    private AdjustDialog(AdjustPanel adjustPanel, Filter activeFilter) {
+    private AdjustDialog(AdjustPanel adjustPanel, Filter activeFilter, ImageLayer layer) {
         super(adjustPanel, activeFilter.getName());
         this.activeFilter = activeFilter;
+        this.layer = layer;
         setName("filterDialog");
     }
 
-    public static void showDialog(AdjustPanel adjustPanel, Filter activeFilter) {
-        AdjustDialog dialog = new AdjustDialog(adjustPanel, activeFilter);
+    public static void showDialog(AdjustPanel adjustPanel, Filter activeFilter, ImageLayer layer) {
+        AdjustDialog dialog = new AdjustDialog(adjustPanel, activeFilter, layer);
         dialog.setVisible(true);
     }
 
     @Override
     public void dialogAccepted() {
-        Composition comp = ImageComponents.getActiveComp().get();
-        comp.okPressedInDialog(activeFilter.getName());
+        layer.okPressedInDialog(activeFilter.getName());
 
         close();
     }
 
     @Override
     public void dialogCanceled() {
-        Composition comp = ImageComponents.getActiveComp().get();
-        comp.getActiveMaskOrImageLayer().cancelPressedInDialog();
+        layer.cancelPressedInDialog();
 
         close();
     }

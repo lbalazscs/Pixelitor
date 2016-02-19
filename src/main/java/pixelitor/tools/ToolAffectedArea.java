@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools;
 
-import pixelitor.Composition;
-import pixelitor.layers.ContentLayer;
+import pixelitor.layers.ImageLayer;
 
 import java.awt.Rectangle;
 
@@ -26,19 +26,17 @@ import java.awt.Rectangle;
  * relative to the canvas
  */
 public class ToolAffectedArea {
-    private final Composition comp;
     private final Rectangle rectangle;
+    private final ImageLayer layer;
 
-    public ToolAffectedArea(Composition comp, Rectangle rectangle, boolean relativeToImage) {
-        this.comp = comp;
-
+    public ToolAffectedArea(ImageLayer layer, Rectangle rectangle, boolean relativeToImage) {
         assert rectangle.width > 0 : "rectangle.width = " + rectangle.width;
         assert rectangle.height > 0 : "rectangle.height = " + rectangle.height;
 
+        this.layer = layer;
         this.rectangle = rectangle;
 
         if (!relativeToImage) {
-            ContentLayer layer = comp.getActiveMaskOrImageLayer();
             int dx = -layer.getTX();
             int dy = -layer.getTY();
             this.rectangle.translate(dx, dy);
@@ -52,7 +50,7 @@ public class ToolAffectedArea {
         return rectangle;
     }
 
-    public Composition getComp() {
-        return comp;
+    public ImageLayer getLayer() {
+        return layer;
     }
 }

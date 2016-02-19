@@ -22,6 +22,7 @@ import pixelitor.filters.Filter;
 import pixelitor.filters.FilterAction;
 import pixelitor.filters.FilterUtils;
 import pixelitor.filters.gui.FilterWithGUI;
+import pixelitor.layers.ImageLayer;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -40,11 +41,13 @@ public class PerformanceTestingDialog extends JDialog implements ActionListener,
     private final JButton startButton;
     private final JButton stopButton;
     private final JButton closeButton;
+    private final ImageLayer layer;
     private TestingTask task;
     private final JTextField timesField;
 
-    public PerformanceTestingDialog(Frame parent) {
-        super(parent, "Performance testing");
+    public PerformanceTestingDialog(Frame parent, ImageLayer layer) {
+        super(parent, "Performance Testing");
+        this.layer = layer;
 
         setLayout(new BorderLayout());
         JPanel northPanel = new JPanel();
@@ -58,10 +61,10 @@ public class PerformanceTestingDialog extends JDialog implements ActionListener,
             Filter op = (Filter) opSelector.getSelectedItem();
             if (op instanceof FilterWithGUI) {
                 FilterWithGUI dialogOp = (FilterWithGUI) op;
-                dialogOp.execute();
+                dialogOp.execute(layer);
             }
         });
-        northPanel.add(new JLabel("Select op: "));
+        northPanel.add(new JLabel("Select filter: "));
         northPanel.add(opSelector);
 
         centralPanel.setLayout(new BorderLayout());
@@ -133,7 +136,7 @@ public class PerformanceTestingDialog extends JDialog implements ActionListener,
                 setEnabledWhileRunning();
                 setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-                task = new TestingTask(executions);
+                task = new TestingTask(layer, executions);
                 task.addPropertyChangeListener(this);
                 task.execute();
             }
@@ -156,11 +159,13 @@ public class PerformanceTestingDialog extends JDialog implements ActionListener,
     }
 
     class TestingTask extends SwingWorker<Void, Void> {
+        private final ImageLayer layer;
         private int executions = 0;
         private Filter op;
         private long totalTime;
 
-        private TestingTask(int testExecutions) {
+        private TestingTask(ImageLayer layer, int testExecutions) {
+            this.layer = layer;
             this.executions = testExecutions;
         }
 
@@ -179,7 +184,7 @@ public class PerformanceTestingDialog extends JDialog implements ActionListener,
             for (int i = 0; i < executions; i++) {
                 long individualStartTime = System.nanoTime();
 
-                op.execute(ChangeReason.TEST_NO_HISTORY_NO_PREVIEW);
+                op.execute(layer, ChangeReason.TEST_NO_HISTORY_NO_PREVIEW);
 
                 long individualTotalTime = (System.nanoTime() - individualStartTime) / 1000000;
                 if (individualTotalTime < shortestTime) {
@@ -226,9 +231,4 @@ public class PerformanceTestingDialog extends JDialog implements ActionListener,
             setEnabledAfterRunning();
         }
     }
-
-    public static void main(String[] args) {
-        GUIUtils.testJDialog(new PerformanceTestingDialog(null));
-    }
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,9 +17,7 @@
 
 package pixelitor.filters.gui;
 
-import javax.swing.*;
 import java.awt.Color;
-import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.Ellipse2D;
@@ -59,26 +57,5 @@ public class AngleSelectorComponent extends AbstractAngleSelectorComponent {
         float endY = (float) (cy + (radius * Math.sin(angle)));
 
         drawArrow(g2, angle, cx, cy, endX, endY);
-    }
-
-    public static void main(String[] args) {
-        EventQueue.invokeLater(AngleSelectorComponent::buildGUI);
-    }
-
-    private static void buildGUI() {
-        try {
-            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
-        }
-
-        JFrame f = new JFrame("Test");
-        f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
-        f.add(new AngleSelectorComponent(new AngleParam("name", 0)));
-
-        f.pack();
-        f.setLocationRelativeTo(null);
-        f.setVisible(true);
     }
 }

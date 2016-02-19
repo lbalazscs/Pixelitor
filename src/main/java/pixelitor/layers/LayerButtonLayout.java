@@ -17,6 +17,10 @@
 
 package pixelitor.layers;
 
+import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
+import pixelitor.utils.AppPreferences;
+
 import javax.swing.*;
 import java.awt.Component;
 import java.awt.Container;
@@ -33,23 +37,30 @@ public class LayerButtonLayout implements LayoutManager {
     private JLabel layerLabel;
     private JLabel maskLabel;
 
+    private boolean isImageLayer;
+
     public static final String CHECKBOX = "CHECKBOX";
     public static final String LAYER = "LAYER";
     public static final String MASK = "MASK";
     public static final String NAME_EDITOR = "NAME_EDITOR";
 
+    public static final int SMALL_THUMB_SIZE = 24;
     private static final int GAP = 7;
-    public static final int THUMB_SIZE = 24;
 
-    /**
-     * The labels will appear to have THUMB_SIZE, but in reality
-     * they must be larger in order to leave space to the borders
-     */
-    public static final int LABEL_SIZE = THUMB_SIZE + 2 * LayerButton.BORDER_WIDTH;
+    public static int thumbSize;
 
-    private static final int HEIGHT = THUMB_SIZE + 2 * GAP;
+    // The labels will appear to have thumbSize, but in reality
+    // they must be larger in order to leave space to the borders
+    public static int labelSize;
 
-    public LayerButtonLayout() {
+    private static int height;
+
+    static {
+        setThumbSize(AppPreferences.loadThumbSize());
+    }
+
+    public LayerButtonLayout(Layer layer) {
+        isImageLayer = layer instanceof ImageLayer;
     }
 
     @Override
@@ -79,7 +90,7 @@ public class LayerButtonLayout implements LayoutManager {
     @Override
     public Dimension preferredLayoutSize(Container parent) {
         synchronized (parent.getTreeLock()) {
-            return new Dimension(100, HEIGHT);
+            return new Dimension(100, height);
         }
     }
 
@@ -94,20 +105,26 @@ public class LayerButtonLayout implements LayoutManager {
             int startX = GAP;
 
             // lay out the checkbox
-            checkBox.setBounds(startX, GAP, THUMB_SIZE, THUMB_SIZE);
-            startX += (THUMB_SIZE + GAP - LayerButton.BORDER_WIDTH);
+            Dimension cbSize = checkBox.getPreferredSize();
+            checkBox.setBounds(startX, (height - cbSize.height) / 2, cbSize.width, cbSize.height);
+            startX += (cbSize.width + GAP - LayerButton.BORDER_WIDTH);
 
             // lay out the layer icon
             int labelStartY = GAP - LayerButton.BORDER_WIDTH;
-            layerLabel.setBounds(startX, labelStartY, LABEL_SIZE, LABEL_SIZE);
-            startX += LABEL_SIZE;
+            if (isImageLayer) {
+                layerLabel.setBounds(startX, labelStartY, labelSize, labelSize);
+                startX += labelSize;
+            } else {
+                layerLabel.setBounds(startX, (height - SMALL_THUMB_SIZE) / 2, SMALL_THUMB_SIZE, SMALL_THUMB_SIZE);
+                startX += SMALL_THUMB_SIZE;
+            }
 
             // lay out the mask
             if (maskLabel != null) {
                 // no need to add distance between layer and mask icons
                 // because there will be a visual distance because of the borders
-                maskLabel.setBounds(startX, labelStartY, LABEL_SIZE, LABEL_SIZE);
-                startX += (LABEL_SIZE + GAP);
+                maskLabel.setBounds(startX, labelStartY, labelSize, labelSize);
+                startX += (labelSize + GAP);
             } else {
                 startX += GAP; // distance between layer icon and text field
             }
@@ -115,8 +132,30 @@ public class LayerButtonLayout implements LayoutManager {
             int editorHeight = (int) nameEditor.getPreferredSize().getHeight();
 
             int remainingWidth = parent.getWidth() - startX;
-            int adjustment = 2; // seems that the textfield has two invisible pixels around it
-            nameEditor.setBounds(startX - adjustment, GAP - adjustment, remainingWidth - 3, editorHeight);
+            int adjustment = 2; // the textfield in Nimbus has two invisible pixels around it
+            nameEditor.setBounds(startX - adjustment, (height - editorHeight) / 2, remainingWidth - 3, editorHeight);
+        }
+    }
+
+    public static int getThumbSize() {
+        return thumbSize;
+    }
+
+    public static void setThumbSize(int newThumbSize) {
+        if (thumbSize == newThumbSize) {
+            return;
+        }
+
+        thumbSize = newThumbSize;
+
+        labelSize = newThumbSize + 2 * LayerButton.BORDER_WIDTH;
+
+        height = newThumbSize + 2 * GAP;
+
+        ImageComponent ic = ImageComponents.getActiveIC();
+        if (ic != null) {
+            LayersContainer.showLayersPanel(ic.getLayersPanel());
+            ic.getComp().updateAllIconImages();
         }
     }
 }

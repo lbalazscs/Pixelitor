@@ -120,7 +120,7 @@ public class Automate {
                                     File lastSaveDir,
                                     boolean closeImagesAfterProcessing) {
         OpenSaveManager.openFile(file);
-        Composition comp = ImageComponents.getActiveComp().get();
+        Composition comp = ImageComponents.getActiveCompOrNull();
 
         ImageComponent ic = comp.getIC();
         InternalImageFrame frame = ic.getInternalFrame();

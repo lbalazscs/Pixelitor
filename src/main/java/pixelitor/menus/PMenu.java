@@ -1,3 +1,20 @@
+/*
+ * Copyright 2016 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.menus;
 
 import com.jhlabs.image.AbstractBufferedImageOp;
@@ -40,8 +57,8 @@ public class PMenu extends JMenu {
     /**
      * Returns an action builder for non-filter actions
      */
-    public ActionBuilder buildAction(Action action) {
-        ActionBuilder builder = new ActionBuilder(this, action);
+    public MenuItemBuilder buildAction(Action action) {
+        MenuItemBuilder builder = new MenuItemBuilder(this, action);
         return builder;
     }
 
@@ -66,29 +83,26 @@ public class PMenu extends JMenu {
         add(menuItem);
     }
 
-    /**
-     * Returns a FilterAction builder
-     */
-    public FilterActionBuilder buildFA(String name, Supplier<Filter> supplier) {
+    public FilterMenuItemBuilder buildFA(String name, Supplier<Filter> supplier) {
         FilterAction fa = new FilterAction(name, supplier);
         return buildFA(fa);
     }
 
-    public FilterActionBuilder buildFA(FilterAction fa) {
-        FilterActionBuilder builder = new FilterActionBuilder(this, fa);
+    public FilterMenuItemBuilder buildFA(FilterAction fa) {
+        FilterMenuItemBuilder builder = new FilterMenuItemBuilder(this, fa);
         return builder;
     }
 
     /**
      * Action builder for non-filter actions
      */
-    public static class ActionBuilder {
+    public static class MenuItemBuilder {
         private final PMenu menu;
         protected final Action action;
         private KeyStroke keyStroke;
         private EnabledIf whenToEnable;
 
-        public ActionBuilder(PMenu menu, Action action) {
+        public MenuItemBuilder(PMenu menu, Action action) {
             this.action = action;
             this.menu = menu;
         }
@@ -104,13 +118,19 @@ public class PMenu extends JMenu {
             }
         }
 
-        public ActionBuilder withKey(KeyStroke keyStroke) {
+        public MenuItemBuilder withKey(KeyStroke keyStroke) {
             this.keyStroke = keyStroke;
             return this;
         }
 
-        public ActionBuilder enableIf(EnabledIf whenToEnable) {
+        public MenuItemBuilder enableIf(EnabledIf whenToEnable) {
             this.whenToEnable = whenToEnable;
+            return this;
+        }
+
+        public MenuItemBuilder alwaysEnabled() {
+            // used in cases when the action will be never disabled
+            this.whenToEnable = EnabledIf.ACTION_ENABLED;
             return this;
         }
     }
@@ -118,22 +138,22 @@ public class PMenu extends JMenu {
     /**
      * Filter action builder
      */
-    public static class FilterActionBuilder extends ActionBuilder {
-        public FilterActionBuilder(PMenu menu, FilterAction action) {
+    public static class FilterMenuItemBuilder extends MenuItemBuilder {
+        public FilterMenuItemBuilder(PMenu menu, FilterAction action) {
             super(menu, action);
         }
 
-        public FilterActionBuilder noGUI() {
+        public FilterMenuItemBuilder noGUI() {
             ((FilterAction) action).withoutGUI();
             return this;
         }
 
-        public FilterActionBuilder withFillListName() {
+        public FilterMenuItemBuilder withFillListName() {
             ((FilterAction) action).withFillListName();
             return this;
         }
 
-        public FilterActionBuilder extract() {
+        public FilterMenuItemBuilder extract() {
             ((FilterAction) action).withExtractChannelListName();
             return this;
         }

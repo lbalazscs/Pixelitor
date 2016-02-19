@@ -213,7 +213,8 @@ public abstract class Tool {
      * Saves the full image or the selected area only if there is a selection
      */
     void saveFullImageForUndo(Composition comp) {
-        BufferedImage copy = comp.getImageOrSubImageIfSelectedForActiveLayer(true, true);
+        BufferedImage copy = comp.getActiveMaskOrImageLayer()
+                .getImageOrSubImageIfSelected(true, true);
 
         ImageEdit edit = new ImageEdit(comp, getName(),
                 comp.getActiveMaskOrImageLayer(), copy,
@@ -233,7 +234,8 @@ public abstract class Tool {
             return;
         }
 
-        Composition comp = affectedArea.getComp();
+        ImageLayer layer = affectedArea.getLayer();
+        Composition comp = layer.getComp();
 
 //        Rectangle fullImageBounds = new Rectangle(0, 0, originalImage.getWidth(), originalImage.getHeight());
 //        Rectangle saveRectangle = rectangleAffectedByTool.intersection(fullImageBounds);
@@ -244,7 +246,6 @@ public abstract class Tool {
         );
 
         if (!saveRectangle.isEmpty()) {
-            ImageLayer layer = comp.getActiveMaskOrImageLayer();
             PartialImageEdit edit = new PartialImageEdit(getName(), comp, layer, originalImage, saveRectangle, false);
             History.addEdit(edit);
         }

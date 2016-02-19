@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.layers;
 
 import pixelitor.AppLogic;
@@ -43,7 +44,7 @@ public class AddLayerMaskAction extends AbstractAction implements ImageSwitchLis
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Composition comp = ImageComponents.getActiveComp().get();
+        Composition comp = ImageComponents.getActiveCompOrNull();
         Layer layer = comp.getActiveLayer();
         assert !layer.hasMask();
         boolean ctrlPressed = false;

@@ -203,13 +203,15 @@ public class CloneTool extends BlendingModeBrushTool {
     }
 
     @Override
-    protected void prepareProgrammaticBrushStroke(Composition comp, Point start) {
-        super.prepareProgrammaticBrushStroke(comp, start);
+    protected void prepareProgrammaticBrushStroke(ImageLayer layer, Point start) {
+        super.prepareProgrammaticBrushStroke(layer, start);
 
-        setupRandomSource(comp, start);
+        setupRandomSource(layer, start);
     }
 
-    private void setupRandomSource(Composition comp, Point start) {
+    private void setupRandomSource(ImageLayer layer, Point start) {
+        Composition comp = layer.getComp();
+
         int canvasWidth = comp.getCanvasWidth();
         int canvasHeight = comp.getCanvasHeight();
         Random rand = new Random();

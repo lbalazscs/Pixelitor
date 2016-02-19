@@ -24,6 +24,7 @@ import pixelitor.filters.gui.ParametrizedAdjustPanel;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.ValidatedForm;
+import pixelitor.layers.ImageLayer;
 
 import javax.swing.*;
 import java.awt.Component;
@@ -37,8 +38,8 @@ import static pixelitor.filters.animation.TweenWizardPage.SELECT_FILTER;
 public class TweenWizard extends Wizard {
     private final TweenAnimation animation = new TweenAnimation();
 
-    public TweenWizard() {
-        super(SELECT_FILTER, "Export Tweening Animation", "Render", 450, 380);
+    public TweenWizard(ImageLayer layer) {
+        super(SELECT_FILTER, "Export Tweening Animation", "Render", 450, 380, layer);
     }
 
     @Override
@@ -55,7 +56,7 @@ public class TweenWizard extends Wizard {
                 "Rendering Frames", "", 1, 100);
         progressMonitor.setProgress(0);
 
-        RenderFramesTask task = new RenderFramesTask(animation);
+        RenderFramesTask task = new RenderFramesTask(animation, layer);
         task.addPropertyChangeListener(evt -> {
             if ("progress".equals(evt.getPropertyName())) {
                 int progress = (Integer) evt.getNewValue();
@@ -84,7 +85,7 @@ public class TweenWizard extends Wizard {
     @Override
     protected boolean mayMoveForwardIfNextPressed(WizardPage currentPage, Component dialogParent) {
         if(currentPage == OUTPUT_SETTINGS) {
-            ValidatedForm settings = (ValidatedForm) currentPage.getPanel(this);
+            ValidatedForm settings = (ValidatedForm) currentPage.getPanel(this, layer);
             if (!settings.isDataValid()) {
                 Dialogs.showErrorDialog(dialogParent, "Error", settings.getErrorMessage());
                 return false;

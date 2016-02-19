@@ -14,12 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.levels;
 
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.levels.gui.LevelsPanel;
 import pixelitor.filters.lookup.FastLookupOp;
+import pixelitor.layers.ImageLayer;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
@@ -37,8 +39,8 @@ public class Levels extends FilterWithGUI implements LookupFilter {
     }
 
     @Override
-    public AdjustPanel createAdjustPanel() {
-        return new LevelsPanel(this, new LevelsModel(this));
+    public AdjustPanel createAdjustPanel(ImageLayer layer) {
+        return new LevelsPanel(this, layer, new LevelsModel(this));
     }
 
     @Override

@@ -675,4 +675,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     public boolean isMock() {
         return false;
     }
+
+    public LayersPanel getLayersPanel() {
+        return layersPanel;
+    }
 }

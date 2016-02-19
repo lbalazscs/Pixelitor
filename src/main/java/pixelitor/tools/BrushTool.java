@@ -17,9 +17,9 @@
 
 package pixelitor.tools;
 
-import pixelitor.Composition;
 import pixelitor.FgBgColors;
 import pixelitor.gui.ImageComponent;
+import pixelitor.layers.ImageLayer;
 import pixelitor.utils.ColorUtils;
 
 import javax.swing.*;
@@ -69,8 +69,8 @@ public class BrushTool extends BlendingModeBrushTool {
     }
 
     @Override
-    protected void prepareProgrammaticBrushStroke(Composition comp, Point start) {
-        super.prepareProgrammaticBrushStroke(comp, start);
+    protected void prepareProgrammaticBrushStroke(ImageLayer layer, Point start) {
+        super.prepareProgrammaticBrushStroke(layer, start);
         graphics.setColor(FgBgColors.getFG());
     }
 
@@ -93,8 +93,8 @@ public class BrushTool extends BlendingModeBrushTool {
     }
 
     @Override
-    public void trace(Composition comp, Shape shape) {
+    public void trace(ImageLayer layer, Shape shape) {
         drawingColor = FgBgColors.getFG();
-        super.trace(comp, shape);
+        super.trace(layer, shape);
     }
 }

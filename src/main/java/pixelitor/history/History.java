@@ -100,7 +100,7 @@ public class History {
 
         if (Build.CURRENT != Build.FINAL) {
             Events.postAddToHistoryEvent(edit);
-            ConsistencyChecks.checkAll(false);
+            ConsistencyChecks.checkAll(edit.getComp(), false);
         }
     }
 

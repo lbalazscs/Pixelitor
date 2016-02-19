@@ -99,9 +99,4 @@ public class UpdatesCheck {
         properties.load(conn.getInputStream());
         return properties;
     }
-
-    public static void main(String[] args) {
-        checkForUpdates();
-    }
-
 }

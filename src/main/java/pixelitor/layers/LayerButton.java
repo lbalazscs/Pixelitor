@@ -113,7 +113,7 @@ public class LayerButton extends JToggleButton {
     public LayerButton(Layer layer) {
         this.layer = layer;
 
-        setLayout(new LayerButtonLayout());
+        setLayout(new LayerButtonLayout(layer));
 
         initVisibilityControl(layer);
         initLayerNameEditor(layer);
@@ -165,7 +165,6 @@ public class LayerButton extends JToggleButton {
     private static void configureLayerIcon(JLabel layerIcon, String name) {
 //        layerIcon.putClientProperty("JComponent.sizeVariant", "mini");
         layerIcon.setName(name);
-//        layerIcon.setPreferredSize(new Dimension(LayerButtonLayout.LABEL_SIZE, LayerButtonLayout.LABEL_SIZE));
     }
 
     public static void selectLayerIfIconClicked(MouseEvent e) {
@@ -273,7 +272,7 @@ public class LayerButton extends JToggleButton {
         BufferedImage img = layer.getCanvasSizedSubImage();
 
         Runnable notEDT = () -> {
-            BufferedImage thumb = ImageUtils.createThumbnail(img, LayerButtonLayout.THUMB_SIZE);
+            BufferedImage thumb = ImageUtils.createThumbnail(img, LayerButtonLayout.thumbSize);
             Runnable edt = () -> {
                 if (updateMask) {
                     if (maskIconLabel == null) {

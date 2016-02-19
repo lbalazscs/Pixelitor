@@ -28,6 +28,7 @@ import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SliderSpinner;
+import pixelitor.layers.ImageLayer;
 import pixelitor.layers.TextLayer;
 
 import javax.swing.*;
@@ -75,8 +76,9 @@ public class TextAdjustmentsPanel extends AdjustPanel implements ParamAdjustment
     private Map<TextAttribute, Object> map;
     private AdvancedTextSettingsDialog advancedSettingsDialog;
 
-    public TextAdjustmentsPanel(TextFilter textFilter) {
-        super(textFilter);
+    // called for image layers
+    public TextAdjustmentsPanel(TextFilter textFilter, ImageLayer layer) {
+        super(textFilter, layer);
         createGUI(null);
 
         if(!textTF.getText().isEmpty()) {
@@ -85,8 +87,9 @@ public class TextAdjustmentsPanel extends AdjustPanel implements ParamAdjustment
         }
     }
 
+    // called for text layers
     public TextAdjustmentsPanel(TextLayer textLayer) {
-        super(null);
+        super(null, null);
         this.textLayer = textLayer;
         createGUI(textLayer.getSettings());
 
@@ -162,7 +165,7 @@ public class TextAdjustmentsPanel extends AdjustPanel implements ParamAdjustment
     private void createTextTF(TextSettings settings) {
         String defaultText;
         if (settings == null) {
-            if (op == null) { // layer mode
+            if (filter == null) { // layer mode
                 defaultText = ""; // no last text remembering when creating new text layers
             } else {
                 defaultText = lastText;
@@ -309,7 +312,7 @@ public class TextAdjustmentsPanel extends AdjustPanel implements ParamAdjustment
 
     @Override
     public void paramAdjusted() {
-        TextFilter textFilter = (TextFilter) op;
+        TextFilter textFilter = (TextFilter) filter;
         String text = textTF.getText();
         lastText = text;
 

@@ -79,7 +79,7 @@ public class TextLayerTest {
     public void testRasterize() {
         checkThereIsOnlyOneLayerOfType(TextLayer.class);
 
-        TextLayer.replaceWithRasterized(comp);
+        layer.replaceWithRasterized();
 
         checkThereIsOnlyOneLayerOfType(ImageLayer.class);
         History.assertNumEditsIs(1);

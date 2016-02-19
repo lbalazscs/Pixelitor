@@ -17,7 +17,6 @@
 
 package pixelitor.tools;
 
-import pixelitor.Composition;
 import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponent;
@@ -107,10 +106,9 @@ public class SmudgeTool extends AbstractBrushTool {
     }
 
     @Override
-    protected void prepareProgrammaticBrushStroke(Composition comp, Point start) {
-        super.prepareProgrammaticBrushStroke(comp, start);
+    protected void prepareProgrammaticBrushStroke(ImageLayer layer, Point start) {
+        super.prepareProgrammaticBrushStroke(layer, start);
 
-        ImageLayer layer = comp.getActiveMaskOrImageLayer();
         BufferedImage sourceImg = layer.getCanvasSizedSubImage();
         initStroke(sourceImg, start.x, start.y);
     }

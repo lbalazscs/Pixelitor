@@ -19,6 +19,7 @@ package pixelitor.filters.gui;
 
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.layers.ImageLayer;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -27,8 +28,8 @@ import java.awt.FlowLayout;
 
 public class ChannelMixerAdjustments extends ParametrizedAdjustPanel {
 
-    public ChannelMixerAdjustments(FilterWithParametrizedGUI filter, Action[] actions) {
-        super(filter, actions, ShowOriginal.YES);
+    public ChannelMixerAdjustments(FilterWithParametrizedGUI filter, ImageLayer layer, Action[] actions) {
+        super(filter, layer, actions, ShowOriginal.YES);
     }
 
     @Override

@@ -30,14 +30,16 @@ import java.awt.event.ActionListener;
 
 public class RandomFilterAdjustPanel extends AdjustPanel {
     private final JPanel realSettingsPanel;
+    private final ImageLayer layer;
     private JPanel lastFilterPanel;
     private final RandomFilterSource filterSource;
     private final JPanel northPanel;
     private final JButton backButton;
     private final JButton forwardButton;
 
-    protected RandomFilterAdjustPanel() {
-        super(null); // the actual filter will be determined bellow
+    protected RandomFilterAdjustPanel(ImageLayer layer) {
+        super(null, layer); // the actual filter will be determined bellow
+        this.layer = layer;
         filterSource = new RandomFilterSource();
 
         setLayout(new BorderLayout());
@@ -75,24 +77,24 @@ public class RandomFilterAdjustPanel extends AdjustPanel {
             realSettingsPanel.remove(lastFilterPanel);
         }
 
-        op = newFilter;
+        filter = newFilter;
         String filterName = newFilter.getListName();
         realSettingsPanel.setBorder(BorderFactory.createTitledBorder(filterName));
         if (newFilter instanceof FilterWithGUI) {
             if (filterSource.getLastFilter() != null) { // there was a filter before
                 // need to clear the preview of the previous filters
                 // so that the image position selectors show the original image
-                ImageLayer imageLayer = ImageComponents.getActiveImageLayerOrMask().get();
+                ImageLayer imageLayer = ImageComponents.getActiveImageLayerOrMaskOrNull();
                 imageLayer.stopPreviewing(); // stop the last one
                 imageLayer.startPreviewing(); // start the new one
             }
-            AdjustPanel adjustPanel = ((FilterWithGUI) newFilter).createAdjustPanel();
+            AdjustPanel adjustPanel = ((FilterWithGUI) newFilter).createAdjustPanel(layer);
             realSettingsPanel.add(adjustPanel);
             adjustPanel.revalidate();
             lastFilterPanel = adjustPanel;
         } else {
             lastFilterPanel = null;
-            op.execute(ChangeReason.OP_PREVIEW);
+            filter.execute(layer, ChangeReason.OP_PREVIEW);
         }
     }
 }

@@ -41,7 +41,7 @@ public class DuplicateLayerAction extends AbstractAction implements ImageSwitchL
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Composition comp = ImageComponents.getActiveComp().get();
+        Composition comp = ImageComponents.getActiveCompOrNull();
         comp.duplicateActiveLayer();
     }
 

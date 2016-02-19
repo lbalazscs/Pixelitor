@@ -224,17 +224,17 @@ public class TextLayer extends ContentLayer {
         d.setVisible(true);
     }
 
-    public static void replaceWithRasterized(Composition comp) {
-        Layer layer = comp.getActiveLayer();
-        TextLayer textLayer = (TextLayer) layer;
-        BufferedImage rasterizedImage = textLayer.createRasterizedImage();
+    public ImageLayer replaceWithRasterized() {
+        BufferedImage rasterizedImage = createRasterizedImage();
 
-        ImageLayer newLayer = new ImageLayer(comp, rasterizedImage, layer.getName(), null);
-        comp.addLayer(newLayer, AddToHistory.NO, null, false, false);
-        comp.deleteLayer(textLayer, AddToHistory.NO, UpdateGUI.YES);
+        ImageLayer newImageLayer = new ImageLayer(comp, rasterizedImage, getName(), null);
+        comp.addLayer(newImageLayer, AddToHistory.NO, null, false, false);
+        comp.deleteLayer(this, AddToHistory.NO, UpdateGUI.YES);
 
-        TextLayerRasterizeEdit edit = new TextLayerRasterizeEdit(comp, textLayer, newLayer);
+        TextLayerRasterizeEdit edit = new TextLayerRasterizeEdit(comp, this, newImageLayer);
         History.addEdit(edit);
+
+        return newImageLayer;
     }
 
     @Override

@@ -199,12 +199,12 @@ public class Pixelitor {
     }
 
     private static void startFilter(Filter filter) {
-        filter.execute();
+        filter.execute(ImageComponents.getActiveImageLayerOrMaskOrNull());
     }
 
     private static void addNewImage() {
         NewImage.addNewImage(FillType.WHITE, 600, 400, "Test");
-        ImageComponents.getActiveLayer().get()
+        ImageComponents.getActiveLayerOrNull()
                 .addMask(LayerMaskAddType.PATTERN);
     }
 }

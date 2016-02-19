@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.layers;
 
 import pixelitor.AppLogic;
@@ -44,7 +45,7 @@ public class LayerMoveAction extends AbstractAction implements ImageSwitchListen
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Composition comp = ImageComponents.getActiveComp().get();
+        Composition comp = ImageComponents.getActiveCompOrNull();
         if(up) {
             comp.moveActiveLayerUp();
         } else {

@@ -54,7 +54,7 @@ public class OpTests {
     private OpTests() {
     }
 
-    public static void saveTheResultOfEachFilter() {
+    public static void saveTheResultOfEachFilter(ImageLayer layer) {
 
         boolean cancelled = !SingleDirChooserPanel.selectOutputDir(true);
         if (cancelled) {
@@ -66,8 +66,7 @@ public class OpTests {
         ParametrizedAdjustPanel.setResetParams(false);
         ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("Saving the Results of Each Operation");
 
-        ImageLayer imageLayer = ImageComponents.getActiveImageLayerOrMask().get();
-        imageLayer.startPreviewing();
+        layer.startPreviewing();
 
         SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
             @Override
@@ -93,8 +92,8 @@ public class OpTests {
                         }
 
                         filter.randomizeSettings();
-                        filter.execute(ChangeReason.TEST_WITH_HISTORY_AND_PREVIEW);
-                        Composition comp = ImageComponents.getActiveComp().get();
+                        filter.execute(layer, ChangeReason.TEST_WITH_HISTORY_AND_PREVIEW);
+                        Composition comp = layer.getComp();
                         String fileName = "test_" + Utils.toFileName(filter.getName()) + '.' + outputFormat.toString();
                         File f = new File(selectedDir, fileName);
                         outputFormat.saveComposition(comp, f, false);
@@ -121,7 +120,7 @@ public class OpTests {
                 } catch (InterruptedException e) {
                     // Process e here
                 } finally {
-                    imageLayer.stopPreviewing(); // reset to NORMAL
+                    layer.stopPreviewing(); // reset to NORMAL
                     ParametrizedAdjustPanel.setResetParams(true);
                 }
             }
@@ -129,7 +128,7 @@ public class OpTests {
         worker.execute();
     }
 
-    public static void runAllFiltersOnCurrentLayer() {
+    public static void runAllFiltersOn(ImageLayer layer) {
         ParametrizedAdjustPanel.setResetParams(false);
         try {
             ProgressMonitor progressMonitor = new ProgressMonitor(PixelitorWindow.getInstance(),
@@ -155,7 +154,7 @@ public class OpTests {
                 }
 
                 op.randomizeSettings();
-                op.execute();
+                op.execute(layer);
             }
             progressMonitor.close();
         } finally {
@@ -164,7 +163,7 @@ public class OpTests {
     }
 
     public static void getCompositeImagePerformanceTest() {
-        Composition comp = ImageComponents.getActiveComp().get();
+        Composition comp = ImageComponents.getActiveCompOrNull();
 
         Runnable task = () -> {
             long startTime = System.nanoTime();
@@ -190,7 +189,7 @@ public class OpTests {
         });
     }
 
-    public static void findSlowestFilter() {
+    public static void findSlowestFilter(ImageLayer layer) {
         assert SwingUtilities.isEventDispatchThread();
 
         Filter[] filters = FilterUtils.getFiltersShuffled(
@@ -199,14 +198,13 @@ public class OpTests {
 
         Map<String, Double> results = new HashMap<>();
 
-        ImageLayer imageLayer = ImageComponents.getActiveImageLayerOrMask().get();
-        imageLayer.startPreviewing();
+        layer.startPreviewing();
 
         // warmup
         for (Filter filter : filters) {
             System.out.println("Warmup for " + filter.getName());
 
-            filter.execute(ChangeReason.TEST_WITH_HISTORY_AND_PREVIEW);
+            filter.execute(layer, ChangeReason.TEST_WITH_HISTORY_AND_PREVIEW);
         }
 
         // measuring
@@ -214,12 +212,12 @@ public class OpTests {
             long startTime = System.nanoTime();
             System.out.println("Testing " + filter.getName());
 
-            filter.execute(ChangeReason.TEST_WITH_HISTORY_AND_PREVIEW);
+            filter.execute(layer, ChangeReason.TEST_WITH_HISTORY_AND_PREVIEW);
 
             double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
             results.put(filter.getName(), estimatedSeconds);
         }
-        imageLayer.stopPreviewing();
+        layer.stopPreviewing();
 
         Arrays.sort(filters, (o1, o2) -> {
             double o1Time = results.get(o1.getName());

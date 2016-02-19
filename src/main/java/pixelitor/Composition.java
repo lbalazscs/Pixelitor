@@ -17,13 +17,9 @@
 
 package pixelitor;
 
-import pixelitor.filters.Filter;
-import pixelitor.filters.FilterUtils;
-import pixelitor.filters.RepeatLast;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
-import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.DeleteLayerEdit;
 import pixelitor.history.DeselectEdit;
@@ -52,9 +48,7 @@ import pixelitor.selection.SelectionType;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.UpdateGUI;
-import pixelitor.utils.Utils;
 
-import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -264,9 +258,10 @@ public class Composition implements Serializable {
         // this method is used when adding the base layer
     }
 
-    public void addNewEmptyLayer(String name, boolean bellowActive) {
+    public ImageLayer addNewEmptyLayer(String name, boolean bellowActive) {
         ImageLayer newLayer = new ImageLayer(this, name);
         addLayer(newLayer, AddToHistory.YES, "New Empty Layer", false, bellowActive);
+        return newLayer;
     }
 
     public void addLayer(Layer newLayer, AddToHistory addToHistory, String historyName,
@@ -439,21 +434,15 @@ public class Composition implements Serializable {
         return layerList.size();
     }
 
-    public void okPressedInDialog(String filterName) {
-        getActiveMaskOrImageLayer().okPressedInDialog(filterName);
-    }
-
-    public void filterWithoutDialogFinished(BufferedImage img, ChangeReason changeReason, String opName) {
-        setDirty(true);
-
-        getActiveMaskOrImageLayer().filterWithoutDialogFinished(img, changeReason, opName);
-
-        imageChanged(FULL);
-    }
-
-    public void changePreviewImage(BufferedImage img, String filterName, ChangeReason changeReason) {
-        ImageLayer layer = getActiveMaskOrImageLayer();
-        layer.changePreviewImage(img, filterName, changeReason);
+    public void updateAllLayerIconImages() {
+        for (Layer layer : layerList) {
+            if (layer instanceof ImageLayer) {
+                ((ImageLayer) layer).updateIconImage();
+            }
+            if (layer.hasMask()) {
+                layer.getMask().updateIconImage();
+            }
+        }
     }
 
     public boolean activeIsImageLayerOrMask() {
@@ -472,16 +461,6 @@ public class Composition implements Serializable {
             return activeLayer.getMask();
         }
         return activeLayer;
-    }
-
-    public ImageLayer getAnyImageLayer() {
-        for (Layer layer : layerList) {
-            if (layer instanceof ImageLayer) {
-                ImageLayer imageLayer = (ImageLayer) layer;
-                return imageLayer;
-            }
-        }
-        return null;
     }
 
     public ContentLayer getAnyContentLayer() {
@@ -527,11 +506,6 @@ public class Composition implements Serializable {
             return Optional.empty();
         }
         return Optional.of(layer);
-    }
-
-    public BufferedImage getImageOrSubImageIfSelectedForActiveLayer(boolean copyIfFull, boolean copyAndTranslateIfSelected) {
-        return getActiveMaskOrImageLayer()
-                .getImageOrSubImageIfSelected(copyIfFull, copyAndTranslateIfSelected);
     }
 
     public void startMovement(boolean duplicateLayer) {
@@ -854,7 +828,7 @@ public class Composition implements Serializable {
             // TODO hack
             return false;
         }
-        return (ImageComponents.getActiveComp().get() == this);
+        return (ImageComponents.getActiveCompOrNull() == this);
     }
 
     public void activeLayerToCanvasSize() {
@@ -915,44 +889,6 @@ public class Composition implements Serializable {
 
     public void repaint() {
         ic.repaint();
-    }
-
-    /**
-     * Executes the given filter with busy cursor
-     */
-    public void executeFilterWithBusyCursor(Filter filter, ChangeReason changeReason, Component busyCursorParent) {
-        String filterName = filter.getName();
-
-        try {
-            long startTime = System.nanoTime();
-
-            Runnable task = () -> filter.runit(this, changeReason);
-            Utils.executeWithBusyCursor(busyCursorParent, task);
-
-            long totalTime = (System.nanoTime() - startTime) / 1_000_000;
-            String performanceMessage;
-            if (totalTime < 1000) {
-                performanceMessage = filterName + " took " + totalTime + " ms";
-            } else {
-                float seconds = totalTime / 1000.0f;
-                performanceMessage = String.format("%s took %.1f s", filterName, seconds);
-            }
-            Messages.showStatusMessage(performanceMessage);
-        } catch (OutOfMemoryError e) {
-            Dialogs.showOutOfMemoryDialog(e);
-        } catch (Throwable e) { // make sure AssertionErrors are caught
-            if (Build.CURRENT.isRandomGUITest()) {
-                throw e; // we can debug the exact filter parameters only in RandomGUITest
-            }
-            Messages.showException(e);
-        }
-
-        FilterUtils.setLastExecutedFilter(filter);
-        RepeatLast.INSTANCE.setName("Repeat " + filterName);
-    }
-
-    public void setShowOriginal(boolean b) {
-        getActiveMaskOrImageLayer().setShowOriginal(b);
     }
 
     /**

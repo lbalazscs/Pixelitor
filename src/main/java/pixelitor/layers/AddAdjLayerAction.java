@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.layers;
 
 import pixelitor.Composition;
@@ -42,7 +43,7 @@ public class AddAdjLayerAction extends AbstractAction implements ImageSwitchList
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Composition comp = ImageComponents.getActiveComp().get();
+        Composition comp = ImageComponents.getActiveCompOrNull();
         AdjustmentLayer adjustmentLayer = new AdjustmentLayer(comp, "Invert", new Invert());
         comp.addLayer(adjustmentLayer, AddToHistory.YES, "New Adjustment Layer", true, false);
     }

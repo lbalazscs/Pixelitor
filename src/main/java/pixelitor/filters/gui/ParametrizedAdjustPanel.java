@@ -18,8 +18,8 @@
 package pixelitor.filters.gui;
 
 import pixelitor.filters.FilterWithParametrizedGUI;
-import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.layers.ImageLayer;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -36,17 +36,17 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
     private static boolean resetParams = true;
     private ShowOriginalCB showOriginalCB;
 
-    public ParametrizedAdjustPanel(FilterWithParametrizedGUI filter, ShowOriginal addShowOriginal) {
-        this(filter, null, addShowOriginal);
+    public ParametrizedAdjustPanel(FilterWithParametrizedGUI filter, ImageLayer layer, ShowOriginal addShowOriginal) {
+        this(filter, layer, null, addShowOriginal);
     }
 
-    public ParametrizedAdjustPanel(FilterWithParametrizedGUI filter, Object otherInfo, ShowOriginal addShowOriginal) {
-        super(filter);
+    public ParametrizedAdjustPanel(FilterWithParametrizedGUI filter, ImageLayer layer, Object otherInfo, ShowOriginal addShowOriginal) {
+        super(filter, layer);
 
         ParamSet params = filter.getParamSet();
         if (resetParams) {
             params.reset();
-            params.considerImageSize(ImageComponents.getActiveComp().get().getCanvas().getBounds());
+            params.considerImageSize(layer.getComp().getCanvas().getBounds());
         }
         params.setAdjustmentListener(this);
 

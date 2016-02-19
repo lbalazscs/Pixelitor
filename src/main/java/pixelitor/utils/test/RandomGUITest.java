@@ -74,7 +74,6 @@ import pixelitor.utils.AppPreferences;
 import pixelitor.utils.MemoryInfo;
 import pixelitor.utils.Messages;
 import pixelitor.utils.UpdateGUI;
-import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.AWTException;
@@ -220,10 +219,11 @@ public class RandomGUITest {
                     Runnable runnable = () -> {
                         try {
                             weightedCaller.callRandomAction();
-                            if (!ImageComponents.getActiveComp().isPresent()) {
-                                throw new IllegalStateException("no active composition");
-                            }
-                            ConsistencyChecks.checkAll(true);
+                            Composition comp = ImageComponents.getActiveComp().orElseThrow(() ->
+                                    new IllegalStateException("no active composition"));
+                            ConsistencyChecks.checkAll(
+                                    comp,
+                                    true);
                         } catch (Throwable e) {
                             Messages.showException(e);
                         }
@@ -261,7 +261,7 @@ public class RandomGUITest {
     }
 
     private static void cleanUp() {
-        AppPreferences.WorkSpace.setDefault();
+        AppPreferences.WorkSpace.setDefault(PixelitorWindow.getInstance());
         Build.CURRENT.setRandomGUITest(false);
     }
 
@@ -331,13 +331,13 @@ public class RandomGUITest {
 
         f.randomizeSettings();
 
-        ImageLayer layer = ImageComponents.getActiveImageLayerOrMask().get();
+        ImageLayer layer = ImageComponents.getActiveImageLayerOrMaskOrNull();
         if (f instanceof FilterWithGUI) {
             layer.startPreviewing();
 
             try {
                 f.randomizeSettings();
-                f.execute(ChangeReason.OP_PREVIEW);
+                f.execute(layer, ChangeReason.OP_PREVIEW);
             } catch (Throwable e) {
                 BufferedImage src = layer.getFilterSourceImage();
                 if (f instanceof FilterWithParametrizedGUI) {
@@ -361,7 +361,7 @@ public class RandomGUITest {
         } else {
             BufferedImage src = layer.getFilterSourceImage();
             try {
-                f.execute(ChangeReason.OP_WITHOUT_DIALOG);
+                f.execute(layer, ChangeReason.OP_WITHOUT_DIALOG);
             } catch (Throwable e) {
                 System.out.println(String.format(
                         "RandomGUITest::randomFilter: name = %s, width = %d, height = %d",
@@ -376,7 +376,8 @@ public class RandomGUITest {
     }
 
     private static void randomTween() {
-        if (ImageComponents.getActiveImageLayerOrMaskOrNull() == null) {
+        ImageLayer imageLayer = ImageComponents.getActiveImageLayerOrMaskOrNull();
+        if (imageLayer == null) {
             return;
         }
 
@@ -406,18 +407,12 @@ public class RandomGUITest {
         paramSet.setState(intermediateState);
 
         // execute everything without showing a modal dialog
-
-        ImageLayer imageLayer = ImageComponents.getActiveImageLayerOrMaskOrNull();
-        if (imageLayer == null) {
-            return;
-        }
-
         imageLayer.tweenCalculatingStarted();
 
         PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
 
         try {
-            Utils.executeFilterWithBusyCursor(filter, ChangeReason.OP_PREVIEW, busyCursorParent);
+            filter.executeFilterWithBusyCursor(imageLayer, ChangeReason.OP_PREVIEW, busyCursorParent);
         } catch (Throwable e) {
             BufferedImage src = imageLayer.getFilterSourceImage();
             String msg = String.format(
@@ -564,7 +559,8 @@ public class RandomGUITest {
         Fade fade = new Fade();
         fade.setOpacity(opacity);
 
-        fade.execute(ChangeReason.OP_WITHOUT_DIALOG);
+        ImageLayer layer = ImageComponents.getActiveImageLayerOrMaskOrNull();
+        fade.execute(layer, ChangeReason.OP_WITHOUT_DIALOG);
     }
 
     private static void randomizeToolSettings() {
@@ -592,7 +588,7 @@ public class RandomGUITest {
 
     private static void layerToCanvasSize() {
         log("layer to canvas size");
-        ImageComponents.getActiveComp().get().activeLayerToCanvasSize();
+        ImageComponents.getActiveCompOrNull().activeLayerToCanvasSize();
     }
 
     private static void invertSelection() {
@@ -648,7 +644,7 @@ public class RandomGUITest {
     }
 
     private static void layerOrderChange() {
-        Composition comp = ImageComponents.getActiveComp().get();
+        Composition comp = ImageComponents.getActiveCompOrNull();
         int r = rand.nextInt(6);
         switch (r) {
             case 0:
@@ -679,7 +675,7 @@ public class RandomGUITest {
     }
 
     private static void layerMerge() {
-        Composition comp = ImageComponents.getActiveComp().get();
+        Composition comp = ImageComponents.getActiveCompOrNull();
 
         if (rand.nextBoolean()) {
             log("layer merge down");
@@ -758,7 +754,7 @@ public class RandomGUITest {
     }
 
     private static void randomChangeLayerOpacityOrBlending() {
-        Layer layer = ImageComponents.getActiveLayer().get();
+        Layer layer = ImageComponents.getActiveLayerOrNull();
         if (rand.nextBoolean()) {
             float opacity = layer.getOpacity();
             float f = rand.nextFloat();
@@ -780,7 +776,7 @@ public class RandomGUITest {
     }
 
     private static void randomChangeLayerVisibility() {
-        Layer layer = ImageComponents.getActiveLayer().get();
+        Layer layer = ImageComponents.getActiveLayerOrNull();
         boolean visible = layer.isVisible();
         if (rand.nextBoolean()) {
             if (!visible) {
@@ -823,30 +819,30 @@ public class RandomGUITest {
 
     private static void randomNewTextLayer() {
         log("new text layer");
-        Composition comp = ImageComponents.getActiveComp().get();
+        Composition comp = ImageComponents.getActiveCompOrNull();
         TextLayer textLayer = new TextLayer(comp);
         textLayer.setSettings(TextSettings.createRandomSettings(rand));
         comp.addLayer(textLayer, AddToHistory.YES, "New Random Text Layer", true, false);
     }
 
     private static void randomTextLayerRasterize() {
-        Layer layer = ImageComponents.getActiveLayer().get();
+        Layer layer = ImageComponents.getActiveLayerOrNull();
         if (layer instanceof TextLayer) {
             log("text layer rasterize");
-            Composition comp = ImageComponents.getActiveComp().get();
-            TextLayer.replaceWithRasterized(comp);
+
+            ((TextLayer) layer).replaceWithRasterized();
         }
     }
 
     private static void randomNewAdjustmentLayer() {
         log("new adj layer");
-        Composition comp = ImageComponents.getActiveComp().get();
+        Composition comp = ImageComponents.getActiveCompOrNull();
         AdjustmentLayer adjustmentLayer = new AdjustmentLayer(comp, "Invert", new Invert());
         comp.addLayer(adjustmentLayer, AddToHistory.YES, "New Random Adj Layer", true, false);
     }
 
     private static void randomSetLayerMaskEditMode() {
-        Layer layer = ImageComponents.getActiveLayer().get();
+        Layer layer = ImageComponents.getActiveLayerOrNull();
         if (!layer.hasMask()) {
             return;
         }
@@ -873,7 +869,7 @@ public class RandomGUITest {
 
     // (add, delete, apply, link)
     private static void randomLayerMaskAction() {
-        Layer layer = ImageComponents.getActiveLayer().get();
+        Layer layer = ImageComponents.getActiveLayerOrNull();
         if (!layer.hasMask()) {
             log("add layer mask");
             AddLayerMaskAction.INSTANCE.actionPerformed(null);
@@ -916,7 +912,7 @@ public class RandomGUITest {
         int west = rand.nextInt(3);
         log(String.format("enlargeCanvas north = %d, east = %d, south = %d, west = %d",
                 north, east, south, west));
-        Composition comp = ImageComponents.getActiveComp().get();
+        Composition comp = ImageComponents.getActiveCompOrNull();
         new EnlargeCanvas(north, east, south, west).process(comp);
     }
 

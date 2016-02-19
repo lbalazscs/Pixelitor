@@ -159,7 +159,7 @@ public class Tests3x3 {
     }
 
     public static void dumpCompositeOfActive() {
-        BufferedImage img = ImageComponents.getActiveComp().get().calculateCompositeImage();
+        BufferedImage img = ImageComponents.getActiveCompOrNull().calculateCompositeImage();
         String actual = getExpectedFromActual(img);
         System.out.println(String.format("Tests3x3::dumpCompositeOfActive: \n%s\n", actual));
     }

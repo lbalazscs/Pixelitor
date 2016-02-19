@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import pixelitor.filters.Filter;
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.levels.LevelsModel;
 import pixelitor.filters.levels.OneChannelLevelsModel;
-import pixelitor.utils.Utils;
+import pixelitor.layers.ImageLayer;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -36,8 +36,8 @@ public class LevelsPanel extends AdjustPanel implements ItemListener {
     private final JPanel cardPanel;
     private final JCheckBox showOriginalCB;
 
-    public LevelsPanel(Filter filter, LevelsModel model) {
-        super(filter);
+    public LevelsPanel(Filter filter, ImageLayer layer, LevelsModel model) {
+        super(filter, layer);
 
         model.setExecutor(this);
 
@@ -68,7 +68,7 @@ public class LevelsPanel extends AdjustPanel implements ItemListener {
 
         showOriginalCB = new JCheckBox("Show Original");
         showOriginalCB.setName("show original");
-        showOriginalCB.addActionListener(e -> Utils.setShowOriginal(showOriginalCB.isSelected()));
+        showOriginalCB.addActionListener(e -> layer.setShowOriginal(showOriginalCB.isSelected()));
         add(showOriginalCB, BorderLayout.SOUTH);
     }
 

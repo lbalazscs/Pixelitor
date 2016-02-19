@@ -21,6 +21,7 @@ import org.jdesktop.swingx.painter.TextPainter;
 import pixelitor.filters.FilterAction;
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.FilterWithGUI;
+import pixelitor.layers.ImageLayer;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
@@ -64,8 +65,8 @@ public class TextFilter extends FilterWithGUI {
     }
 
     @Override
-    public AdjustPanel createAdjustPanel() {
-        return new TextAdjustmentsPanel(this);
+    public AdjustPanel createAdjustPanel(ImageLayer layer) {
+        return new TextAdjustmentsPanel(this, layer);
     }
 
     @Override

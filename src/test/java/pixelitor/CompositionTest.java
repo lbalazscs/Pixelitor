@@ -30,7 +30,6 @@ import pixelitor.utils.UpdateGUI;
 
 import java.awt.Rectangle;
 import java.awt.Shape;
-import java.awt.image.BufferedImage;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -188,32 +187,6 @@ public class CompositionTest {
 
         History.redo();
         tester.checkLayers("[layer 1, layer 2, ACTIVE layer 2 copy]");
-    }
-
-    @Test
-    public void testFilterWithoutDialogFinished() {
-        BufferedImage image = TestHelper.createImage();
-        comp.filterWithoutDialogFinished(image, ChangeReason.OP_WITHOUT_DIALOG, "opName");
-        comp.checkInvariant();
-    }
-
-    @Test
-    public void testGetActiveImageLayer() {
-        assertThat(comp.getActiveMaskOrImageLayerOpt().isPresent()).isTrue();
-        comp.checkInvariant();
-    }
-
-    @Test
-    public void testGetImageOrSubImageIfSelectedForActiveLayer() {
-        BufferedImage imageTT = comp.getImageOrSubImageIfSelectedForActiveLayer(true, true);
-        assertThat(imageTT).isNotNull();
-        BufferedImage imageTF = comp.getImageOrSubImageIfSelectedForActiveLayer(true, false);
-        assertThat(imageTF).isNotNull();
-        BufferedImage imageFT = comp.getImageOrSubImageIfSelectedForActiveLayer(false, true);
-        assertThat(imageFT).isNotNull();
-        BufferedImage imageFF = comp.getImageOrSubImageIfSelectedForActiveLayer(false, false);
-        assertThat(imageFF).isNotNull();
-        comp.checkInvariant();
     }
 
     @Test

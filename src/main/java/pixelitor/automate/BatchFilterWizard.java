@@ -20,6 +20,7 @@ package pixelitor.automate;
 import pixelitor.ChangeReason;
 import pixelitor.filters.Filter;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.layers.ImageLayer;
 
 import java.awt.Component;
 
@@ -31,8 +32,8 @@ import static pixelitor.automate.BatchFilterWizardPage.SELECT_FILTER_AND_DIRS;
 public class BatchFilterWizard extends Wizard {
     private final BatchFilterConfig config = new BatchFilterConfig();
 
-    public BatchFilterWizard() {
-        super(SELECT_FILTER_AND_DIRS, "Batch Filter", "Start Processing", 490, 380);
+    public BatchFilterWizard(ImageLayer layer) {
+        super(SELECT_FILTER_AND_DIRS, "Batch Filter", "Start Processing", 490, 380, layer);
     }
 
     @Override
@@ -51,8 +52,8 @@ public class BatchFilterWizard extends Wizard {
         PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
 
         Automate.processEachFile(comp -> {
-//                final ImageLayer layer = comp.getActiveMaskOrImageLayer();
-            comp.executeFilterWithBusyCursor(filter, ChangeReason.BATCH_AUTOMATE, busyCursorParent);
+            ImageLayer layer = comp.getActiveMaskOrImageLayer();
+            filter.executeFilterWithBusyCursor(layer, ChangeReason.BATCH_AUTOMATE, busyCursorParent);
         }, true, "Batch Filter Progress");
     }
 

@@ -20,6 +20,7 @@ package pixelitor.utils.test;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter;
 import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
 import pixelitor.Build;
+import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.FgBgColors;
 import pixelitor.FillType;
@@ -34,11 +35,9 @@ import pixelitor.filters.painters.TextFilter;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
-import pixelitor.gui.PixelitorWindow;
 import pixelitor.history.AddToHistory;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.OutputFormat;
-import pixelitor.layers.AddNewLayerAction;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.ImageLayer;
 import pixelitor.tools.GradientTool;
@@ -51,7 +50,6 @@ import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
 import java.io.File;
 
 import static java.awt.Color.WHITE;
@@ -107,64 +105,63 @@ public class SplashImageCreator {
     public static void createSplashImage() {
         assert EventQueue.isDispatchThread();
 
-        NewImage.addNewImage(FillType.WHITE, 400, 247, "Splash");
+        Composition comp = NewImage.addNewImage(FillType.WHITE, 400, 247, "Splash");
+        ImageLayer layer = (ImageLayer) comp.getLayer(0);
 
-        Composition ic = ImageComponents.getActiveComp().get();
-        ic.getActiveLayer().setName("Color Wheel", AddToHistory.YES);
-        new ColorWheel().execute(OP_WITHOUT_DIALOG);
+        layer.setName("Color Wheel", AddToHistory.YES);
+        new ColorWheel().execute(layer, OP_WITHOUT_DIALOG);
 
-        addNewLayer("Value Noise");
+        layer = addNewLayer(comp, "Value Noise");
         ValueNoise valueNoise = new ValueNoise();
         valueNoise.setDetails(7);
-        valueNoise.execute(OP_WITHOUT_DIALOG);
-        ImageLayer layer = (ImageLayer) ic.getActiveLayer();
+        valueNoise.execute(layer, OP_WITHOUT_DIALOG);
         layer.setOpacity(0.3f, UpdateGUI.YES, AddToHistory.YES, true);
         layer.setBlendingMode(BlendingMode.SCREEN, UpdateGUI.YES, AddToHistory.YES, true);
 
-        addNewLayer("Gradient");
-        addRadialBWGradientToActiveLayer(ic, true);
-        layer = (ImageLayer) ic.getActiveLayer();
+        layer = addNewLayer(comp, "Gradient");
+        addRadialBWGradientToActiveLayer(layer, true);
         layer.setOpacity(0.4f, UpdateGUI.YES, AddToHistory.YES, true);
         layer.setBlendingMode(BlendingMode.LUMINOSITY, UpdateGUI.YES, AddToHistory.YES, true);
 
         FgBgColors.setFG(WHITE);
         Font font = new Font(SPLASH_SCREEN_FONT, Font.BOLD, 48);
-        addRasterizedTextLayer(ic, "Pixelitor", WHITE, font, -17, BlendingMode.NORMAL, 0.9f, false);
-        addDropShadow();
+        layer = addRasterizedTextLayer(comp, "Pixelitor", WHITE, font, -17, BlendingMode.NORMAL, 0.9f, false);
+        addDropShadow(layer);
 
         font = new Font(SPLASH_SCREEN_FONT, Font.BOLD, 22);
-        addRasterizedTextLayer(ic, "Loading...", WHITE, font, -70, BlendingMode.NORMAL, 0.9f, false);
-        addDropShadow();
+        layer = addRasterizedTextLayer(comp, "Loading...", WHITE, font, -70, BlendingMode.NORMAL, 0.9f, false);
+        addDropShadow(layer);
 
         font = new Font(SPLASH_SCREEN_FONT, Font.PLAIN, 20);
-        addRasterizedTextLayer(ic, "version " + Build.VERSION_NUMBER, WHITE, font, 50, BlendingMode.NORMAL, 0.9f, false);
-        addDropShadow();
+        layer = addRasterizedTextLayer(comp, "version " + Build.VERSION_NUMBER, WHITE, font, 50, BlendingMode.NORMAL, 0.9f, false);
+        addDropShadow(layer);
 
 //        font = new Font(Font.SANS_SERIF, Font.PLAIN, 10);
 //        addRasterizedTextLayer(ic, new Date().toString(), font, 0.8f, 100, false);
 
     }
 
-    private static void addDropShadow() {
+    private static void addDropShadow(ImageLayer layer) {
         JHDropShadow dropShadow = new JHDropShadow();
         dropShadow.setDistance(5);
         dropShadow.setSoftness(5);
         dropShadow.setOpacity(0.7f);
-        dropShadow.execute(OP_WITHOUT_DIALOG);
+        dropShadow.execute(layer, OP_WITHOUT_DIALOG);
     }
 
-    private static void addNewLayer(String name) {
-        AddNewLayerAction.INSTANCE.actionPerformed(new ActionEvent(PixelitorWindow.getInstance(), 0, name));
-        ImageComponents.getActiveLayer().get().setName(name, AddToHistory.YES);
+    private static ImageLayer addNewLayer(Composition comp, String name) {
+        ImageLayer imageLayer = comp.addNewEmptyLayer(name, false);
+        imageLayer.setName(name, AddToHistory.YES);
+        return imageLayer;
     }
 
-    private static void addRasterizedTextLayer(Composition ic, String text, int translationY) {
+    private static void addRasterizedTextLayer(Composition comp, String text, int translationY) {
         Font font = new Font(Font.SANS_SERIF, Font.BOLD, 20);
-        addRasterizedTextLayer(ic, text, WHITE, font, translationY, BlendingMode.NORMAL, 1.0f, false);
+        addRasterizedTextLayer(comp, text, WHITE, font, translationY, BlendingMode.NORMAL, 1.0f, false);
     }
 
-    private static void addRasterizedTextLayer(Composition ic, String text, Color textColor, Font font, int translationY, BlendingMode blendingMode, float opacity, boolean dropShadow) {
-        addNewLayer(text);
+    private static ImageLayer addRasterizedTextLayer(Composition comp, String text, Color textColor, Font font, int translationY, BlendingMode blendingMode, float opacity, boolean dropShadow) {
+        ImageLayer layer = addNewLayer(comp, text);
         TextFilter textFilter = TextFilter.getInstance();
 
         AreaEffects effects = null;
@@ -178,19 +175,21 @@ public class SplashImageCreator {
                 AbstractLayoutPainter.VerticalAlignment.CENTER, false);
 
         textFilter.setSettings(settings);
-        textFilter.execute(OP_WITHOUT_DIALOG);
-        ImageLayer layer = (ImageLayer) ic.getActiveLayer();
+        textFilter.execute(layer, OP_WITHOUT_DIALOG);
         layer.setTranslation(0, translationY);
 
         layer.enlargeImage(layer.getComp().getCanvasBounds());
 
         layer.setOpacity(opacity, UpdateGUI.YES, AddToHistory.YES, true);
         layer.setBlendingMode(blendingMode, UpdateGUI.YES, AddToHistory.YES, true);
+
+        return layer;
     }
 
-    public static void addRadialBWGradientToActiveLayer(Composition comp, boolean radial) {
-        int canvasWidth = comp.getCanvasWidth();
-        int canvasHeight = comp.getCanvasHeight();
+    public static void addRadialBWGradientToActiveLayer(ImageLayer layer, boolean radial) {
+        Canvas canvas = layer.getComp().getCanvas();
+        int canvasWidth = canvas.getWidth();
+        int canvasHeight = canvas.getHeight();
 
         int startX = canvasWidth / 2;
         int startY = canvasHeight / 2;
@@ -211,7 +210,7 @@ public class SplashImageCreator {
             gradientType = GradientType.SPIRAL_CW;
         }
 
-        GradientTool.drawGradient(comp.getActiveMaskOrImageLayer(),
+        GradientTool.drawGradient(layer,
                 gradientType,
                 BLACK_TO_WHITE,
                 REFLECT,

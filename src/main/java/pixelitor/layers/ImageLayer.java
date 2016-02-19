@@ -438,6 +438,8 @@ public class ImageLayer extends ContentLayer {
     public void filterWithoutDialogFinished(BufferedImage transformedImage, ChangeReason changeReason, String opName) {
         requireNonNull(transformedImage);
 
+        comp.setDirty(true);
+
         // A filter without dialog should never return the original image...
         if (transformedImage == image) {
             // ...unless Repeat Last starts a filter that normally has a dialog without one
@@ -472,6 +474,7 @@ public class ImageLayer extends ContentLayer {
         // not the actual one
         filterSourceImage = null;
         updateIconImage();
+        comp.imageChanged(FULL);
     }
 
     public void changeImageUndoRedo(BufferedImage img, IgnoreSelection ignoreSelection) {

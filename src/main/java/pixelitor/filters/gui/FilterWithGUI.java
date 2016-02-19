@@ -18,10 +18,7 @@
 package pixelitor.filters.gui;
 
 import pixelitor.filters.Filter;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
 import pixelitor.layers.ImageLayer;
-import pixelitor.utils.Messages;
 
 /**
  * A filter that has a GUI for customization
@@ -35,23 +32,15 @@ public abstract class FilterWithGUI extends Filter {
      * The panel must be created at the moment of this call (cannot be cached)
      * Creating an adjustment panel should also automatically execute the first
      * preview run of this filter based on the default settings
+     * @param layer
      */
-    public abstract AdjustPanel createAdjustPanel();
+    public abstract AdjustPanel createAdjustPanel(ImageLayer layer);
 
     @Override
-    public void execute() {
-        ImageComponent ic = ImageComponents.getActiveIC();
-        if(ic != null) {
-            if (!ic.activeIsImageLayerOrMask()) {
-                Messages.showNotImageLayerError();
-                return;
-            }
+    public void execute(ImageLayer layer) {
+        layer.startPreviewing();
 
-            ImageLayer layer = ic.getComp().getActiveMaskOrImageLayer();
-            layer.startPreviewing();
-
-            AdjustPanel p = createAdjustPanel();
-            AdjustDialog.showDialog(p, this);
-        }
+        AdjustPanel p = createAdjustPanel(layer);
+        AdjustDialog.showDialog(p, this, layer);
     }
 }

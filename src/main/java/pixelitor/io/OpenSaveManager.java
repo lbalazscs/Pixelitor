@@ -121,7 +121,7 @@ public class OpenSaveManager {
     }
 
     public static boolean save(boolean saveAs) {
-        Composition comp = ImageComponents.getActiveComp().get();
+        Composition comp = ImageComponents.getActiveCompOrNull();
         return save(comp, saveAs);
     }
 
@@ -274,7 +274,7 @@ public class OpenSaveManager {
             return;
         }
 
-        Composition comp = ImageComponents.getActiveComp().get();
+        Composition comp = ImageComponents.getActiveCompOrNull();
         int nrLayers = comp.getNrLayers();
         for (int i = 0; i < nrLayers; i++) {
             Layer layer = comp.getLayer(i);
@@ -293,7 +293,7 @@ public class OpenSaveManager {
     }
 
     public static void saveCurrentImageInAllFormats() {
-        Composition comp = ImageComponents.getActiveComp().get();
+        Composition comp = ImageComponents.getActiveCompOrNull();
 
         boolean cancelled = !SingleDirChooserPanel.selectOutputDir(false);
         if (cancelled) {
@@ -351,7 +351,7 @@ public class OpenSaveManager {
             FileChoosers.setOnlyOneSaveExtension(FileChoosers.jpegFilter);
 
             jpegQuality = quality;
-            FileChoosers.showSaveFileChooserAndSaveComp(ImageComponents.getActiveComp().get());
+            FileChoosers.showSaveFileChooserAndSaveComp(ImageComponents.getActiveCompOrNull());
         } finally {
             FileChoosers.setDefaultSaveExtensions();
             jpegQuality = DEFAULT_JPEG_QUALITY;

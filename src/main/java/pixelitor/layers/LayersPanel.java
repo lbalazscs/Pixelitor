@@ -151,7 +151,7 @@ public class LayersPanel extends JLayeredPane {
         doLayout();
 
         // notify the raise/lower layer menu items
-        Composition comp = ImageComponents.getActiveComp().get();
+        Composition comp = ImageComponents.getActiveCompOrNull();
         LayerMoveAction.INSTANCE_UP.enableDisable(comp);
         LayerMoveAction.INSTANCE_DOWN.enableDisable(comp);
     }

@@ -21,6 +21,7 @@ import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.filters.FilterAction;
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.FilterWithGUI;
+import pixelitor.layers.ImageLayer;
 import pixelitor.utils.Messages;
 
 import java.awt.image.BufferedImage;
@@ -67,8 +68,8 @@ public class Convolve extends FilterWithGUI {
     }
 
     @Override
-    public AdjustPanel createAdjustPanel() {
-        return new CustomConvolveAdjustments(this);
+    public AdjustPanel createAdjustPanel(ImageLayer layer) {
+        return new CustomConvolveAdjustments(this, layer);
     }
 
     public EnumComboBoxModel<ConvolveMethod> getConvolveMethodModel() {

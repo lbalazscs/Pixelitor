@@ -23,7 +23,7 @@ import pixelitor.filters.FilterAction;
 import pixelitor.filters.FilterUtils;
 import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.FilterWithGUI;
-import pixelitor.gui.ImageComponents;
+import pixelitor.layers.ImageLayer;
 
 import javax.swing.*;
 import java.awt.FlowLayout;
@@ -50,7 +50,7 @@ public enum BatchFilterWizardPage implements WizardPage {
         }
 
         @Override
-        public JComponent getPanel(Wizard wizard) {
+        public JComponent getPanel(Wizard wizard, ImageLayer layer) {
             JPanel p = new JPanel(new FlowLayout());
             p.add(new JLabel("Select Filter:"));
             if (filtersCB == null) {
@@ -70,12 +70,12 @@ public enum BatchFilterWizardPage implements WizardPage {
         }
 
         @Override
-        public void onWizardCancelled() {
+        public void onWizardCancelled(ImageLayer layer) {
 
         }
 
         @Override
-        public void onMovingToTheNext(Wizard wizard) {
+        public void onMovingToTheNext(Wizard wizard, ImageLayer layer) {
             FilterAction selectedItem = (FilterAction) filtersCB.getSelectedItem();
             Filter filter = selectedItem.getFilter();
             BatchFilterConfig config = getConfig(wizard);
@@ -94,27 +94,27 @@ public enum BatchFilterWizardPage implements WizardPage {
         }
 
         @Override
-        public JComponent getPanel(Wizard wizard) {
+        public JComponent getPanel(Wizard wizard, ImageLayer layer) {
             // we get here only if the chosen filter is a filter with GUI
             FilterWithGUI filter = (FilterWithGUI) getConfig(wizard).getFilter();
 
-            ImageComponents.getActiveImageLayerOrMask().get().startPreviewing();
-            AdjustPanel adjustPanel = filter.createAdjustPanel();
+            layer.startPreviewing();
+            AdjustPanel adjustPanel = filter.createAdjustPanel(layer);
 
             return adjustPanel;
         }
 
         @Override
-        public void onWizardCancelled() {
+        public void onWizardCancelled(ImageLayer layer) {
             // we get here only if the chosen filter is a filter with GUI
 //            FilterWithGUI filter = (FilterWithGUI) getConfig(wizard).getFilter();
-            ImageComponents.getActiveImageLayerOrMask().get().cancelPressedInDialog();
+            layer.cancelPressedInDialog();
         }
 
         @Override
-        public void onMovingToTheNext(Wizard wizard) {
+        public void onMovingToTheNext(Wizard wizard, ImageLayer layer) {
             // cancel the previewing
-            onWizardCancelled();
+            onWizardCancelled(layer);
         }
     };
 
