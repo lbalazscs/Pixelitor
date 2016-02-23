@@ -18,7 +18,9 @@
 package pixelitor.tools.toolhandlers;
 
 import pixelitor.gui.ImageComponent;
-import pixelitor.utils.Messages;
+import pixelitor.layers.ImageLayer;
+import pixelitor.layers.ImageLayerAction;
+import pixelitor.tools.Tool;
 
 import java.awt.event.MouseEvent;
 
@@ -26,18 +28,31 @@ import java.awt.event.MouseEvent;
  * Checks whether the active layer is an image layer.
  */
 public class ImageLayerCheckHandler extends ToolHandler {
-    public ImageLayerCheckHandler() {
+    private final Tool currentTool;
+
+    public ImageLayerCheckHandler(Tool currentTool) {
+        this.currentTool = currentTool;
     }
 
     @Override
     boolean mousePressed(MouseEvent e, ImageComponent ic) {
-        if (!ic.activeIsImageLayerOrMask()) {
-            Messages.showNotImageLayerError();
-            return true;
+        if(ic.activeIsImageLayerOrMask()) {
+            // forwards the mouse event to the next handler
+            return false;
         }
 
-        // forwards the mouse event to the next handler
-        return false;
+        ImageLayerAction action = new ImageLayerAction(currentTool.getName() + " Tool") {
+            @Override
+            protected void process(ImageLayer layer) {
+                // do nothing
+            }
+        };
+        // call it only for the dialogs and auto-rasterization
+        action.actionPerformed(null);
+
+        // whatever happened, do not forward this event,
+        // the user should click again in order to use the tool
+        return true;
     }
 
     @Override

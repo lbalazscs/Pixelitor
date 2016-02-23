@@ -43,6 +43,7 @@ import pixelitor.gui.Desktop;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.gui.Navigator;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.PerformanceTestingDialog;
 import pixelitor.history.AddToHistory;
@@ -118,7 +119,6 @@ import static pixelitor.menus.EnabledIf.CAN_REPEAT_OPERATION;
 import static pixelitor.menus.EnabledIf.REDO_POSSIBLE;
 import static pixelitor.menus.EnabledIf.UNDO_POSSIBLE;
 import static pixelitor.menus.MenuAction.AllowedLayerType.HAS_LAYER_MASK;
-import static pixelitor.menus.MenuAction.AllowedLayerType.IS_IMAGE_LAYER_OR_MASK;
 import static pixelitor.menus.MenuAction.AllowedLayerType.IS_TEXT_LAYER;
 
 /**
@@ -136,11 +136,11 @@ public class MenuBar extends JMenuBar {
     private static final KeyStroke CTRL_D = KeyStroke.getKeyStroke('D', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_E = KeyStroke.getKeyStroke('E', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_F = KeyStroke.getKeyStroke('F', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_G = KeyStroke.getKeyStroke('G', MENU_SHORTCUT_KEY_MASK);
+//    private static final KeyStroke CTRL_G = KeyStroke.getKeyStroke('G', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_H = KeyStroke.getKeyStroke('H', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_I = KeyStroke.getKeyStroke('I', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_J = KeyStroke.getKeyStroke('J', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_K = KeyStroke.getKeyStroke('K', MENU_SHORTCUT_KEY_MASK);
+//    private static final KeyStroke CTRL_K = KeyStroke.getKeyStroke('K', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_L = KeyStroke.getKeyStroke('L', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_N = KeyStroke.getKeyStroke('N', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_O = KeyStroke.getKeyStroke('O', MENU_SHORTCUT_KEY_MASK);
@@ -860,8 +860,11 @@ public class MenuBar extends JMenuBar {
         sub.addFA(JHCaustics.NAME, JHCaustics::new);
         sub.addFA(JHCells.NAME, JHCells::new);
         sub.addFA(FractalTree.NAME, FractalTree::new);
+        sub.addFA(Marble.NAME, Marble::new);
         sub.addFA(Voronoi.NAME, Voronoi::new);
         sub.addFA(JHWood.NAME, JHWood::new);
+
+        sub.addSeparator();
 
         sub.add(createRenderShapesSubmenu());
 
@@ -942,6 +945,15 @@ public class MenuBar extends JMenuBar {
                 History.showHistory();
             }
         }, CTRL_H);
+
+        viewMenu.addAction(new MenuAction("Show Navigator...") {
+            @Override
+            public void onClick() {
+                Navigator.showInDialog(pw);
+            }
+        });
+
+        viewMenu.addSeparator();
 
         viewMenu.add(new ShowHideStatusBarAction());
         viewMenu.buildAction(new ShowHideHistogramsAction()).alwaysEnabled().withKey(F6).add();
@@ -1083,7 +1095,7 @@ public class MenuBar extends JMenuBar {
         developMenu.addAction(new MenuAction("imageChanged(FULL) on the active image") {
             @Override
             public void onClick() {
-                ImageComponents.getActiveCompOrNull().imageChanged(FULL);
+                ImageComponents.getActiveCompOrNull().imageChanged(FULL, true);
             }
         });
 
@@ -1165,14 +1177,6 @@ public class MenuBar extends JMenuBar {
                 comp.imageChanged(FULL);
             }
         });
-
-        sub.addActionWithKey(new MenuAction("Debug Translation", IS_IMAGE_LAYER_OR_MASK) {
-            @Override
-            public void onClick() {
-                ImageLayer layer = ImageComponents.getActiveImageLayerOrMaskOrNull();
-                layer.debugTranslation();
-            }
-        }, CTRL_K);
 
         sub.addAction(new MenuAction("Update Histograms") {
             @Override

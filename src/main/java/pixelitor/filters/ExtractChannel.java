@@ -72,7 +72,7 @@ public class ExtractChannel extends FilterWithParametrizedGUI {
         return dest;
     }
 
-    private BufferedImage bwExtractChannel(BufferedImage src, BufferedImage dest, int channel) {
+    private static BufferedImage bwExtractChannel(BufferedImage src, BufferedImage dest, int channel) {
         RGBPixelOp rgbOp;
         switch (channel) {
             case RED_CHANNEL:

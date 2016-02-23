@@ -100,7 +100,7 @@ public class Resize implements CompAction {
         comp.updateAllIconImages();
 
         comp.setDirty(true);
-        comp.imageChanged(INVALIDATE_CACHE);
+        comp.imageChanged(INVALIDATE_CACHE, true);
 
         AppLogic.activeCompSizeChanged(comp);
 

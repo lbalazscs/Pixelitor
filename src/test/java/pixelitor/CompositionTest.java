@@ -35,10 +35,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
-import static pixelitor.Composition.ImageChangeActions.FULL;
-import static pixelitor.Composition.ImageChangeActions.HISTOGRAM;
-import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
-import static pixelitor.Composition.ImageChangeActions.REPAINT;
 import static pixelitor.selection.SelectionInteraction.ADD;
 import static pixelitor.selection.SelectionType.ELLIPSE;
 
@@ -375,18 +371,6 @@ public class CompositionTest {
 
         assertThat(selection.isPresent()).isTrue();
         assertThat(comp.hasSelection()).isTrue();
-        comp.checkInvariant();
-    }
-
-    @Test
-    public void testImageChanged() {
-        comp.imageChanged(FULL);
-        comp.checkInvariant();
-        comp.imageChanged(REPAINT);
-        comp.checkInvariant();
-        comp.imageChanged(HISTOGRAM);
-        comp.checkInvariant();
-        comp.imageChanged(INVALIDATE_CACHE);
         comp.checkInvariant();
     }
 

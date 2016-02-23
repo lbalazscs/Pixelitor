@@ -37,7 +37,7 @@ public class LayerButtonLayout implements LayoutManager {
     private JLabel layerLabel;
     private JLabel maskLabel;
 
-    private boolean isImageLayer;
+    private final boolean isImageLayer;
 
     public static final String CHECKBOX = "CHECKBOX";
     public static final String LAYER = "LAYER";

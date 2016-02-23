@@ -94,7 +94,7 @@ public class Crop implements CompAction {
 
             ic.updateDrawStart();
         }
-        comp.imageChanged(FULL);
+        comp.imageChanged(FULL, true);
 
         AppLogic.activeCompSizeChanged(comp);
         Messages.showStatusMessage("Image cropped to "

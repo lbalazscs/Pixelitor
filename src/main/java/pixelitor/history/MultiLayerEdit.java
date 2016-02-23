@@ -175,7 +175,7 @@ public class MultiLayerEdit extends PixelitorEdit {
     }
 
     private void updateGUI() {
-        comp.imageChanged(FULL);
+        comp.imageChanged(FULL, true);
         if(layer instanceof ImageLayer) {
             ((ImageLayer)layer).updateIconImage();
         }

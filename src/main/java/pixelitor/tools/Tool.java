@@ -87,14 +87,14 @@ public abstract class Tool {
 
     private void initHandlerChain(Cursor cursor, boolean allowOnlyImageLayers, boolean handToolForwarding) {
         ToolHandler lastHandler = null;
-        if (allowOnlyImageLayers) {
-            lastHandler = addHandlerToChain(
-                    new ImageLayerCheckHandler(), lastHandler);
-        }
         if (handToolForwarding) {
             // most tools behave like the hand tool if the space is pressed
             handToolHandler = new HandToolHandler(cursor);
             lastHandler = addHandlerToChain(handToolHandler, lastHandler);
+        }
+        if (allowOnlyImageLayers) {
+            lastHandler = addHandlerToChain(
+                    new ImageLayerCheckHandler(this), lastHandler);
         }
         if(doColorPickerForwarding()) {
             // brush tools behave like the color picker if Alt is pressed

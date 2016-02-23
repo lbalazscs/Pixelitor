@@ -87,7 +87,6 @@ public abstract class OKCancelDialog extends JDialog {
         GlobalKeyboardWatch.setDialogActive(true);
 
         if (JVM.isMac) {
-//        if(2 > 1) {
             southPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
             southPanel.add(cancelButton);
             southPanel.add(okButton);

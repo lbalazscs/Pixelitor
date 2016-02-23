@@ -22,6 +22,7 @@ import com.jhlabs.composite.ScreenComposite;
 import com.jhlabs.image.BoxBlurFilter;
 import com.jhlabs.image.EmbossFilter;
 import org.jdesktop.swingx.graphics.BlendComposite;
+import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.filters.Invert;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.Dialogs;
@@ -31,6 +32,7 @@ import pixelitor.utils.debug.BufferedImageNode;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics;
@@ -58,7 +60,9 @@ import java.util.Random;
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
@@ -71,11 +75,16 @@ import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 public class ImageUtils {
     public static final double DEG_315_IN_RADIANS = 0.7853981634;
     public static final float[] FRACTIONS_2_COLOR_UNIFORM = {0.0f, 1.0f};
+    private static final Color CHECKERBOARD_GRAY = new Color(200, 200, 200);
 
     /**
      * Utility class with static methods
      */
     private ImageUtils() {
+    }
+
+    public static CheckerboardPainter createCheckerboardPainter() {
+          return new CheckerboardPainter(CHECKERBOARD_GRAY, Color.WHITE);
     }
 
     public static BufferedImage toSysCompatibleImage(BufferedImage input) {
@@ -546,7 +555,7 @@ public class ImageUtils {
         }
     }
 
-    public static BufferedImage createThumbnail(BufferedImage src, int size) {
+    public static BufferedImage createThumbnail(BufferedImage src, int size, CheckerboardPainter painter) {
         assert src != null;
 
         int width = src.getWidth();
@@ -571,13 +580,32 @@ public class ImageUtils {
             thumbHeight = 1;
         }
 
-        BufferedImage thumb = new BufferedImage(thumbWidth, thumbHeight, src.getType());
+        BufferedImage thumb = createSysCompatibleImage(thumbWidth, thumbHeight);
         Graphics2D g = thumb.createGraphics();
+
+        if(painter != null) {
+            painter.paint(g, null, thumbWidth, thumbHeight);
+        }
+
         g.setRenderingHint(KEY_INTERPOLATION,
                 VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
         g.drawImage(src, 0, 0, thumbWidth, thumbHeight, null);
         g.dispose();
         return thumb;
+    }
+
+    public static void paintRedXOnThumb(BufferedImage thumb) {
+        int thumbWidth = thumb.getWidth();
+        int thumbHeight = thumb.getHeight();
+
+        Graphics2D g = thumb.createGraphics();
+
+        g.setColor(new Color(200, 0, 0));
+        g.setStroke(new BasicStroke(2.5f));
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        g.drawLine(0, 0, thumbWidth, thumbHeight);
+        g.drawLine(thumbWidth - 1, 0, 0, thumbHeight - 1);
+        g.dispose();
     }
 
     public static BufferedImage copyImage(BufferedImage src) {

@@ -18,6 +18,7 @@
 package pixelitor.layers;
 
 import com.bric.util.JVM;
+import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.history.AddToHistory;
@@ -26,10 +27,7 @@ import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -40,6 +38,7 @@ import java.awt.image.BufferedImage;
 public class LayerButton extends JToggleButton {
     private static final Icon OPEN_EYE_ICON = IconUtils.loadIcon("eye_open.png");
     private static final Icon CLOSED_EYE_ICON = IconUtils.loadIcon("eye_closed.png");
+    private static final CheckerboardPainter checkerBoardPainter = ImageUtils.createCheckerboardPainter();
 
     private static final String uiClassID = "LayerButtonUI";
 
@@ -267,35 +266,28 @@ public class LayerButton extends JToggleButton {
     }
 
     public void updateLayerIconImage(ImageLayer layer) {
-        boolean updateMask = layer instanceof LayerMask;
+        boolean isMask = layer instanceof LayerMask;
 
         BufferedImage img = layer.getCanvasSizedSubImage();
 
         Runnable notEDT = () -> {
-            BufferedImage thumb = ImageUtils.createThumbnail(img, LayerButtonLayout.thumbSize);
+            CheckerboardPainter painter = null;
+            if(!isMask) {
+                painter = checkerBoardPainter;
+            }
+
+            BufferedImage thumb = ImageUtils.createThumbnail(img, LayerButtonLayout.thumbSize, painter);
+
             Runnable edt = () -> {
-                if (updateMask) {
+                if (isMask) {
                     if (maskIconLabel == null) {
                         return;
                     }
-                    BufferedImage iconImage = thumb;
                     boolean disabledMask = !layer.getParent().isMaskEnabled();
                     if (disabledMask) {
-                        int thumbWidth = thumb.getWidth();
-                        int thumbHeight = thumb.getHeight();
-                        // thumb is GRAY image, this one needs colors
-                        // TODO is is faster if thumb is created this way in createThumbnail?
-                        iconImage = ImageUtils.createSysCompatibleImage(thumbWidth, thumbHeight);
-                        Graphics2D g = iconImage.createGraphics();
-                        g.drawImage(thumb, 0, 0, null);
-                        g.setColor(new Color(200, 0, 0));
-                        g.setStroke(new BasicStroke(2.5f));
-                        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                        g.drawLine(0, 0, thumbWidth, thumbHeight);
-                        g.drawLine(thumbWidth - 1, 0, 0, thumbHeight - 1);
-                        g.dispose();
+                        ImageUtils.paintRedXOnThumb(thumb);
                     }
-                    maskIconLabel.setIcon(new ImageIcon(iconImage));
+                    maskIconLabel.setIcon(new ImageIcon(thumb));
                 } else {
                     layerIconLabel.setIcon(new ImageIcon(thumb));
                 }

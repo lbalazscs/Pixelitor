@@ -1047,19 +1047,6 @@ public class ImageLayer extends ContentLayer {
         return previewImage;
     }
 
-    public void debugTranslation() {
-        int tx = getTX();
-        int ty = getTY();
-        System.out.println("ImageLayer::debugTranslation: tx = " + tx + ", ty = " + ty);
-        int canvasWidth = canvas.getWidth();
-        int canvasHeight = canvas.getHeight();
-        System.out.println("ImageLayer::debugTranslation: canvasWidth = " + canvasWidth + ", canvasHeight = " + canvasHeight);
-        int imageWidth = image.getWidth();
-        int imageHeight = image.getHeight();
-        System.out.println("ImageLayer::debugTranslation: imageWidth = " + imageWidth + ", imageHeight = " + imageHeight);
-        System.out.println();
-    }
-
     public String toDebugCanvasString() {
         return "{canvasWidth=" + canvas.getWidth()
                 + ", canvasHeight=" + canvas.getHeight()

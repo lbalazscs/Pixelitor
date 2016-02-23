@@ -89,7 +89,7 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
         comp.updateAllIconImages();
 
         comp.setDirty(true);
-        comp.imageChanged(REPAINT);
+        comp.imageChanged(REPAINT, true);
     }
 
     protected abstract void changeCanvas(Composition comp);

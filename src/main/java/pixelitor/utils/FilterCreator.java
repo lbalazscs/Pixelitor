@@ -171,7 +171,7 @@ public class FilterCreator extends JPanel {
             maxTextField = new JTextField("100", 5);
             add(maxTextField);
             add(new JLabel("Default:"));
-            defaultTextField = new JTextField("0", 5);
+            defaultTextField = new JTextField("10", 5);
             add(defaultTextField);
         }
 
@@ -210,9 +210,13 @@ public class FilterCreator extends JPanel {
     }
 
     private static String getCode(FilterDescription desc) {
+
+
         String retVal = addImports(desc);
 
         retVal += addSuperClass(desc);
+
+        retVal += String.format("    public static final String NAME = \"%s\";\n\n", desc.getName());
 
         if (desc.isGui() && desc.isParametrizedGui()) {
             retVal += addParamsDeclaration(desc);
@@ -332,7 +336,7 @@ public class FilterCreator extends JPanel {
         String retVal = "";
         retVal += "\n    public " + desc.getClassName() + "() {\n";
 
-        if(desc.isParametrizedGui()) {
+        if (desc.isParametrizedGui()) {
             retVal += "        super(ShowOriginal.YES);\n";
         }
 

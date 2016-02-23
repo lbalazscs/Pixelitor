@@ -1,19 +1,23 @@
 /*
-Copyright 2014 Laszlo Balazs-Csiki
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * Copyright 2016 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.jhlabs.image;
+
+import com.jhlabs.math.Noise;
+import net.jafama.FastMath;
 
 /**
  * Constants for wave types
@@ -35,4 +39,20 @@ public class WaveType {
      * Noise.
      */
     public final static int NOISE = 3;
+
+    public static double wave(double in, int type) {
+        if (type == SINE) {
+            return FastMath.sin(in);
+        }
+        if (type == SAWTOOTH) {
+            return ImageMath.sinLikeSawtooth(in);
+        }
+        if (type == TRIANGLE) {
+            return ImageMath.sinLikeTriangle(in);
+        }
+        if (type == NOISE) {
+            return Noise.sinLikeNoise1((float) in);
+        }
+        throw new IllegalStateException("type == " + type);
+    }
 }

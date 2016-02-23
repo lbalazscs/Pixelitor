@@ -47,50 +47,35 @@ public class ZoomMenu extends PMenu {
     private static final KeyStroke CTRL_NUMPAD_0 = KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD0, InputEvent.CTRL_DOWN_MASK);
     private static final KeyStroke CTRL_ALT_NUMPAD_0 = KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD0, InputEvent.CTRL_DOWN_MASK + InputEvent.ALT_MASK);
 
-    // it is important to initialize this after the keystroke initializations!
+    private static final Action INCREASE_ACTION = new AbstractAction("Zoom In") {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            ImageComponents.getActiveIC().increaseZoom();
+        }
+    };
+    private static final Action DECREASE_ACTION = new AbstractAction("Zoom Out") {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            ImageComponents.getActiveIC().decreaseZoom();
+        }
+    };
+
+    // it is important to initialize this after other static fields
     public static final ZoomMenu INSTANCE = new ZoomMenu();
 
     private ZoomMenu() {
         super("Zoom");
 
-        Action increaseAction = new AbstractAction("Zoom In") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ImageComponents.increaseZoomForActiveIC();
-            }
-        };
-        addActionWithKey(increaseAction, CTRL_PLUS);
+        addActionWithKey(INCREASE_ACTION, CTRL_PLUS);
 
-        Action decreaseAction = new AbstractAction("Zoom Out") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ImageComponents.decreaseZoomForActiveIC();
-            }
-        };
-        addActionWithKey(decreaseAction, CTRL_MINUS);
+        addActionWithKey(DECREASE_ACTION, CTRL_MINUS);
 
         addActionWithKey(AutoZoomButtons.ACTUAL_PIXELS_ACTION, AutoZoomButtons.ACTUAL_PIXELS_KEY);
 
         addActionWithKey(AutoZoomButtons.FIT_SCREEN_ACTION, AutoZoomButtons.FIT_SCREEN_KEY);
 
         addSeparator();
-
-        // add other key bindings - see http://stackoverflow.com/questions/15605109/java-keybinding-plus-key
-        InputMap inputMap = getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-        ActionMap actionMap = getActionMap();
-        inputMap.put(CTRL_SHIFT_EQUALS, ACTION_MAP_KEY_INCREASE);  // + key in English keyboards
-        inputMap.put(CTRL_NUMPAD_PLUS, ACTION_MAP_KEY_INCREASE);  // + key on the numpad
-        inputMap.put(CTRL_NUMPAD_MINUS, ACTION_MAP_KEY_DECREASE); // - key on the numpad
-        actionMap.put(ACTION_MAP_KEY_INCREASE, increaseAction);
-        actionMap.put(ACTION_MAP_KEY_DECREASE, decreaseAction);
-
-        // ctrl + numpad 0 = actual pixels
-        inputMap.put(CTRL_NUMPAD_0, ACTION_MAP_KEY_ACTUAL_PIXELS);
-        actionMap.put(ACTION_MAP_KEY_ACTUAL_PIXELS, AutoZoomButtons.ACTUAL_PIXELS_ACTION);
-
-        // ctrl + alt + numpad 0 = fit screen
-        inputMap.put(CTRL_ALT_NUMPAD_0, ACTION_MAP_KEY_FIT_SCREEN);
-        actionMap.put(ACTION_MAP_KEY_FIT_SCREEN, AutoZoomButtons.FIT_SCREEN_ACTION);
+        setupZoomKeys(this);
 
         ZoomLevel[] zoomLevels = ZoomLevel.values();
         for (ZoomLevel level : zoomLevels) {
@@ -101,6 +86,25 @@ public class ZoomMenu extends PMenu {
             add(menuItem);
             radioGroup.add(menuItem);
         }
+    }
+
+    public static void setupZoomKeys(JComponent c) {
+        // add other key bindings - see http://stackoverflow.com/questions/15605109/java-keybinding-plus-key
+        InputMap inputMap = c.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = c.getActionMap();
+        inputMap.put(CTRL_SHIFT_EQUALS, ACTION_MAP_KEY_INCREASE);  // + key in English keyboards
+        inputMap.put(CTRL_NUMPAD_PLUS, ACTION_MAP_KEY_INCREASE);  // + key on the numpad
+        inputMap.put(CTRL_NUMPAD_MINUS, ACTION_MAP_KEY_DECREASE); // - key on the numpad
+        actionMap.put(ACTION_MAP_KEY_INCREASE, INCREASE_ACTION);
+        actionMap.put(ACTION_MAP_KEY_DECREASE, DECREASE_ACTION);
+
+        // ctrl + numpad 0 = actual pixels
+        inputMap.put(CTRL_NUMPAD_0, ACTION_MAP_KEY_ACTUAL_PIXELS);
+        actionMap.put(ACTION_MAP_KEY_ACTUAL_PIXELS, AutoZoomButtons.ACTUAL_PIXELS_ACTION);
+
+        // ctrl + alt + numpad 0 = fit screen
+        inputMap.put(CTRL_ALT_NUMPAD_0, ACTION_MAP_KEY_FIT_SCREEN);
+        actionMap.put(ACTION_MAP_KEY_FIT_SCREEN, AutoZoomButtons.FIT_SCREEN_ACTION);
     }
 
     /**

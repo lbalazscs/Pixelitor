@@ -64,6 +64,7 @@ public class GlobalKeyboardWatch {
             case KeyEvent.VK_SPACE:
                 Tools.getCurrentTool().spacePressed();
                 spaceDown = true;
+                e.consume();
                 break;
             case KeyEvent.VK_RIGHT:
             case KeyEvent.VK_KP_RIGHT:

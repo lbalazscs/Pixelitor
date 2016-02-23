@@ -446,10 +446,10 @@ public class Composition implements Serializable {
     }
 
     public boolean activeIsImageLayerOrMask() {
-        if(activeLayer instanceof ImageLayer) {
+        if (activeLayer instanceof ImageLayer) {
             return true;
         }
-        if(activeLayer.isMaskEditing()) {
+        if (activeLayer.isMaskEditing()) {
             return true;
         }
 
@@ -678,6 +678,7 @@ public class Composition implements Serializable {
     public void updateRegion(double startX, double startY, double endX, double endY, int thickness) {
         compositeImageUpToDate = false;
         ic.updateRegion(startX, startY, endX, endY, thickness);
+        ic.updateNavigator(false);
     }
 
     public void dispose() {
@@ -804,16 +805,21 @@ public class Composition implements Serializable {
         return cachedCompositeImage;
     }
 
+    public void imageChanged(ImageChangeActions actions) {
+        imageChanged(actions, false);
+    }
+
     /**
      * The contents of this composition have been changed, the cache is invalidated,
      * and additional actions might be necessary
      */
-    public void imageChanged(ImageChangeActions actions) {
+    public void imageChanged(ImageChangeActions actions, boolean sizeChanged) {
         compositeImageUpToDate = false;
 
         if (actions.isRepaint()) {
             if (ic != null) {
                 ic.repaint();
+                ic.updateNavigator(sizeChanged);
             }
         }
 
@@ -852,7 +858,7 @@ public class Composition implements Serializable {
                     maskBackupImage = mask.getImage();
                     maskChanged = mask.cropToCanvasSize();
                 }
-                if(maskChanged) {
+                if (maskChanged) {
                     imageEdit = new ImageAndMaskEdit(this, editName, layer, backupImage, maskBackupImage, false);
                 } else {
                     // no mask or no mask change, a simple ImageEdit will do

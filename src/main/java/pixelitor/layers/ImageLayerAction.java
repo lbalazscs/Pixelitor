@@ -87,11 +87,15 @@ public abstract class ImageLayerAction extends AbstractAction {
         } else if (layer instanceof ImageLayer) {
             process((ImageLayer) layer);
         } else if (layer instanceof TextLayer) {
-            String msg = String.format("The layer \"%s\" is a text layer.\n" +
-                            "%s needs pixels and cannot be used on text layers.\n" +
-                            "If you rasterize this text layer, you can use %s,\n" +
-                            "but the text will no longer be editable.",
-                    layer.getName(), name, name);
+            boolean isNoun = name.contains("Tool");
+            String firstName = isNoun ? "The " + name  : name;
+            String secondName = isNoun ? "the " + name  : name;
+
+            String msg = String.format("The active layer \"%s\" is a text layer.\n" +
+                                "%s needs pixels and cannot be used on text layers.\n" +
+                                "If you rasterize this text layer, you can use %s,\n" +
+                                "but the text will no longer be editable.",
+                        layer.getName(), firstName, secondName);
 
             String[] options = {"Rasterize", "Cancel"};
             int userAnswer = JOptionPane.showOptionDialog(PixelitorWindow.getInstance(), msg, "Text Layer",

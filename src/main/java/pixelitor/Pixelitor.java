@@ -167,12 +167,14 @@ public class Pixelitor {
             return;
         }
 
+//        startFilter(new Marble());
+
+//        Navigator.showInDialog(pw);
+
 //        clickTool(Tools.GRADIENT);
 //        addMaskAndShowIt();
 
 //        AddTextLayerAction.INSTANCE.actionPerformed(null);
-
-//        startFilter(new FlowerOfLife());
 
 //        AutoPaint.showDialog();
 

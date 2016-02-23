@@ -44,7 +44,6 @@ import pixelitor.utils.Utils;
 import pixelitor.utils.debug.ImageComponentNode;
 
 import javax.swing.*;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -74,8 +73,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
     private InternalImageFrame internalFrame = null;
 
-    private static final Color BG_GRAY = new Color(200, 200, 200);
-    private static final CheckerboardPainter checkerBoardPainter = new CheckerboardPainter(BG_GRAY, Color.WHITE);
+    private static final CheckerboardPainter checkerBoardPainter = ImageUtils.createCheckerboardPainter();
 
     private LayersPanel layersPanel;
 
@@ -87,6 +85,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     // than the canvas, and the image needs to be centralized
     private double drawStartX;
     private double drawStartY;
+
+    private Navigator navigator;
 
     public static boolean showPixelGrid = false;
 
@@ -142,6 +142,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         LayersContainer.showLayersPanel(layersPanel);
 
         newMaskViewMode.activate(this, comp.getActiveLayer());
+        updateNavigator(true);
+
         return edit;
     }
 
@@ -283,14 +285,9 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     @Override
     public void paint(Graphics g) {
         try {
-//            long startTime = System.nanoTime();
-
             // no borders, no children, double-buffering is happening
             // in the parent
             paintComponent(g);
-
-//            double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
-//            System.out.println(String.format("ImageComponent::paint: estimatedSeconds = '%.2f'", estimatedSeconds));
         } catch (OutOfMemoryError e) {
             Dialogs.showOutOfMemoryDialog(e);
         }
@@ -311,13 +308,14 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
         g2.translate(drawStartX, drawStartY);
 
-//        if (!showLayerMask) {
-        checkerBoardPainter.paint(g2, this, zoomedWidth, zoomedHeight);
-//        }
+        boolean showMask = maskViewMode.showMask();
+        if (!showMask) {
+            checkerBoardPainter.paint(g2, this, zoomedWidth, zoomedHeight);
+        }
 
         g2.scale(viewScale, viewScale);
 
-        if (maskViewMode.showMask()) {
+        if (showMask) {
             LayerMask layerMask = comp.getActiveLayer().getMask();
             assert layerMask != null : "no mask in " + maskViewMode;
             layerMask.paintLayerOnGraphics(g2, true);
@@ -494,21 +492,24 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
             updateTitle();
             internalFrame.setSize(canvas.getZoomedWidth(), canvas.getZoomedHeight(), -1, -1);
 
+            Rectangle viewRect = getViewRect();
+
             // Update the scrollbars.
             Point origin;
             if (mousePos != null) { // we had a mouse click
-                // the x, y coordinates were generated BEFORE the zooming
-                // so we need to find the corresponding coordinates after zooming
-                Point imageSpaceOrigin = fromComponentToImageSpace(mousePos, oldZoom);
-                origin = fromImageToComponentSpace(imageSpaceOrigin, newZoom);
+                origin = mousePos;
             } else {
-                int cx = canvas.getZoomedWidth() / 2;
-                int cy = canvas.getZoomedHeight() / 2;
+                int cx = viewRect.x + viewRect.width / 2;
+                int cy = viewRect.y + viewRect.height / 2;
 
                 origin = new Point(cx, cy);
             }
+            // the x, y coordinates were generated BEFORE the zooming
+            // so we need to find the corresponding coordinates after zooming
+            // TODO maybe this would not be necessary if we did this earlier?
+            Point imageSpaceOrigin = fromComponentToImageSpace(origin, oldZoom);
+            origin = fromImageToComponentSpace(imageSpaceOrigin, newZoom);
 
-            Rectangle viewRect = getViewRect();
             areaThatShouldBeVisible = new Rectangle(
                     origin.x - viewRect.width / 2,
                     origin.y - viewRect.height / 2,
@@ -516,18 +517,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
                     viewRect.height
             );
         }
-//        SwingUtilities.invokeLater(() -> {
-//            scrollRectToVisible(areaThatShouldBeVisible);
-//            repaint();
-//        });
-
-        //updateDrawStart();
 
         revalidate();
-//        validate(); // make sure the size is updated
-
-
-//        repaint();
 
         Rectangle finalRect = areaThatShouldBeVisible;
 
@@ -557,9 +548,17 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         setZoom(newZoom, false, null);
     }
 
+    public void increaseZoom() {
+        increaseZoom(null);
+    }
+
     public void increaseZoom(Point mousePos) {
         ZoomLevel newZoom = zoomLevel.zoomIn();
         setZoom(newZoom, false, mousePos);
+    }
+
+    public void decreaseZoom() {
+        decreaseZoom(null);
     }
 
     public void decreaseZoom(Point mousePos) {
@@ -678,5 +677,16 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
     public LayersPanel getLayersPanel() {
         return layersPanel;
+    }
+
+    public void setNavigator(Navigator navigator) {
+        this.navigator = navigator;
+    }
+
+    public void updateNavigator(boolean hasNewSize) {
+        if (navigator != null) {
+            SwingUtilities.invokeLater(() ->
+                    navigator.refreshSizeCalc(this, false, hasNewSize, false));
+        }
     }
 }

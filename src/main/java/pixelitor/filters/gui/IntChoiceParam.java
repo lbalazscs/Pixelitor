@@ -252,7 +252,7 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
             new Value("Triangles", CellularFilter.GR_TRIANGULAR),
     };
 
-    private static final IntChoiceParam.Value[] waveTypeChoices = {
+    public static final IntChoiceParam.Value[] waveTypeChoices = {
             new IntChoiceParam.Value("Sine", WaveType.SINE),
             new IntChoiceParam.Value("Triangle", WaveType.TRIANGLE),
             new IntChoiceParam.Value("Sawtooth", WaveType.SAWTOOTH),

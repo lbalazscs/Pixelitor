@@ -99,7 +99,7 @@ public class ColorPickerTool extends Tool {
         }
     }
 
-    private void showColorInStatusBar(int x, int y, int rgb, boolean isMask) {
+    private static void showColorInStatusBar(int x, int y, int rgb, boolean isMask) {
         int a = (rgb >>> 24) & 0xFF;
         int r = (rgb >>> 16) & 0xFF;
         int g = (rgb >>> 8) & 0xFF;

@@ -55,7 +55,7 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
         Optional<ImageLayer> imageLayer = ImageComponents.getActiveImageLayerOrMask();
         if (imageLayer.isPresent()) { // in unit tests it might not be present
             BufferedImage actualImage = imageLayer.get().getImageForFilterDialogs();
-            thumb = ImageUtils.createThumbnail(actualImage, size);
+            thumb = ImageUtils.createThumbnail(actualImage, size, null);
             setPreferredSize(new Dimension(thumb.getWidth(), thumb.getHeight()));
         }
     }

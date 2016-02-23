@@ -219,6 +219,10 @@ public class ImageComponents {
         imageSwitchListeners.add(listener);
     }
 
+    public static void removeImageSwitchListener(ImageSwitchListener listener) {
+        imageSwitchListeners.remove(listener);
+    }
+
     private static void onAllImagesClosed() {
         setActiveIC(null, false);
         imageSwitchListeners.forEach(ImageSwitchListener::noOpenImageAnymore);
@@ -279,24 +283,6 @@ public class ImageComponents {
         if (activeIC != null) {
             activeIC.setZoomAtCenter(ZoomLevel.Z100);
         }
-    }
-
-    /**
-     * Called by keyboard shortcuts via the menu
-     */
-    public static void increaseZoomForActiveIC() {
-        ZoomLevel currentZoom = activeIC.getZoomLevel();
-        ZoomLevel newZoomLevel = currentZoom.zoomIn();
-        activeIC.setZoomAtCenter(newZoomLevel);
-    }
-
-    /**
-     * Called by keyboard shortcuts via the menu
-     */
-    public static void decreaseZoomForActiveIC() {
-        ZoomLevel currentZoom = activeIC.getZoomLevel();
-        ZoomLevel newZoomLevel = currentZoom.zoomOut();
-        activeIC.setZoomAtCenter(newZoomLevel);
     }
 
     public static boolean isActive(ImageComponent ic) {

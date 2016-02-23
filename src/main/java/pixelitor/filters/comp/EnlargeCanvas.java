@@ -89,7 +89,7 @@ public class EnlargeCanvas implements CompAction {
         // enlarged, because they are based on the canvas-sized subimage
         comp.updateAllIconImages();
 
-        comp.imageChanged(REPAINT);
+        comp.imageChanged(REPAINT, true);
         comp.setDirty(true);
 
         Messages.showStatusMessage("Canvas enlarged to "

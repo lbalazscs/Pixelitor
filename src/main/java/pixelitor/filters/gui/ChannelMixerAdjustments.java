@@ -27,7 +27,6 @@ import java.awt.Component;
 import java.awt.FlowLayout;
 
 public class ChannelMixerAdjustments extends ParametrizedAdjustPanel {
-
     public ChannelMixerAdjustments(FilterWithParametrizedGUI filter, ImageLayer layer, Action[] actions) {
         super(filter, layer, actions, ShowOriginal.YES);
     }
@@ -47,7 +46,7 @@ public class ChannelMixerAdjustments extends ParametrizedAdjustPanel {
         add(buttonsPanel, BorderLayout.SOUTH);
     }
 
-    private JPanel createPresetsPanel(Action[] actions) {
+    private static JPanel createPresetsPanel(Action[] actions) {
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
         rightPanel.setBorder(BorderFactory.createTitledBorder("Presets"));
