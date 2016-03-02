@@ -37,7 +37,6 @@ public class TextLayerRasterizeEdit extends PixelitorEdit {
 
         this.before = before;
         this.after = after;
-        comp.setDirty(true);
     }
 
     @Override

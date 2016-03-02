@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.history;
 
 import pixelitor.Composition;
@@ -31,7 +32,6 @@ public class LayerOrderChangeEdit extends PixelitorEdit {
     public LayerOrderChangeEdit(Composition comp, int oldLayerIndex, int newLayerIndex) {
         super(comp, "Layer Order Change");
 
-        comp.setDirty(true);
         this.oldLayerIndex = oldLayerIndex;
         this.newLayerIndex = newLayerIndex;
     }

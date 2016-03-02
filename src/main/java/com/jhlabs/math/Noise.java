@@ -82,6 +82,18 @@ public class Noise implements Function1D, Function2D, Function3D {
     }
 
     /**
+     * Same as above but without abs, results in a smoother look
+     */
+    public static float turbulence2B(float x, float y, float octaves) {
+        float t = 0.0f;
+
+        for (float f = 1.0f; f <= octaves; f *= 2) {
+            t += noise2(f * x, f * y) / f;
+        }
+        return t;
+    }
+
+    /**
      * Compute turbulence using Perlin noise.
      *
      * @param x       the x value

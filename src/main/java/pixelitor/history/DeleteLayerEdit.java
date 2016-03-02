@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.history;
 
 import pixelitor.Composition;
@@ -32,7 +33,7 @@ public class DeleteLayerEdit extends PixelitorEdit {
 
     public DeleteLayerEdit(Composition comp, Layer layer, int layerIndex) {
         super(comp, "Delete Layer");
-        comp.setDirty(true);
+
         this.layer = layer;
         this.layerIndex = layerIndex;
     }

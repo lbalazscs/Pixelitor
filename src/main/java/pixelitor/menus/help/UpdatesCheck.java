@@ -23,7 +23,6 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.OpenInBrowserAction;
 
 import javax.swing.*;
-import java.awt.Frame;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -47,10 +46,10 @@ public class UpdatesCheck {
                 newVersionAlert(lastVersion, requiredJavaVersion);
             }
         } catch (IOException e) {
-            Frame frame = Dialogs.getParentForDialogs();
-            String msg = "Could not check for updates on the Pixelitor website.\nPress OK to see the details.";
-            int userAnswer = JOptionPane.showConfirmDialog(frame, msg, "Could not check for updates", JOptionPane.OK_CANCEL_OPTION, JOptionPane.ERROR_MESSAGE);
-            if(userAnswer == JOptionPane.OK_OPTION) {
+            String msg = "Could not check for updates on the Pixelitor website.";
+            String title = "Could not check for updates";
+            Object[] options = {"See Details", "Close"};
+            if(Dialogs.showOKCancelDialog(msg, title, options, 1, JOptionPane.ERROR_MESSAGE)) {
                 Messages.showException(e);
             }
         }
@@ -59,17 +58,16 @@ public class UpdatesCheck {
     private static void newVersionAlert(String lastVersion, String requiredJavaVersion) {
         // see http://stackoverflow.com/questions/2591083/getting-version-of-java-in-runtime
 
-        Frame frame = Dialogs.getParentForDialogs();
-        String msg = String.format("There is a newer version (%s) available.\nPress OK to go to the Pixelitor homepage.", lastVersion);
+        String msg = String.format("There is a newer version (%s) available.", lastVersion);
 
         if(needsJavaUpdate(requiredJavaVersion)) {
             msg += String.format("\nAlso note that the newest Pixelitor requires Java %s" +
                             "\n(It is currently running on Java %d)",
                     requiredJavaVersion, getCurrentMainJavaVersion());
         }
-
-        int userAnswer = JOptionPane.showConfirmDialog(frame, msg, "Pixelitor is not up to date", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
-        if(userAnswer == JOptionPane.OK_OPTION) {
+        String title = "Pixelitor is not up to date";
+        Object[] options = {"Go to the Pixelitor homepage", "Don't upgrade now"};
+        if(Dialogs.showOKCancelWarningDialog(msg, title, options, 0)) {
             new OpenInBrowserAction(null, AboutDialog.HOME_PAGE).actionPerformed(null);
         }
     }

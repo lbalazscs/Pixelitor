@@ -88,6 +88,7 @@ public class History {
         if (ignoreEdits) {
             return;
         }
+        edit.getComp().setDirty(true);
 
         if (edit.canUndo()) {
             undoManager.addEdit(edit);

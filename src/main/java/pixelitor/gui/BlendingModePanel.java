@@ -30,19 +30,23 @@ import java.util.Random;
  */
 public class BlendingModePanel extends JPanel {
     protected final DropDownSlider opacityDDSlider;
-    protected final JComboBox<BlendingMode> blendingModeCombo;
+    protected final JComboBox<BlendingMode> bmCombo;
     private final JLabel opacityLabel;
     private final JLabel bmLabel;
 
-    public BlendingModePanel(boolean longText) {
+    public BlendingModePanel(boolean forTools) {
         setLayout(new FlowLayout(FlowLayout.LEFT));
         opacityLabel = new JLabel("Opacity:");
         add(opacityLabel);
         opacityDDSlider = new DropDownSlider(100, 0, 100, true);
 
+        if (!forTools) {
+            opacityDDSlider.setTFName("layerOpacity");
+        }
+
         add(opacityDDSlider);
 
-        if (longText) {
+        if (forTools) {
             bmLabel = new JLabel("%, Blending Mode:", SwingConstants.LEFT);
         } else {
             bmLabel = new JLabel("%", SwingConstants.LEFT);
@@ -50,9 +54,12 @@ public class BlendingModePanel extends JPanel {
         add(bmLabel);
 
         BlendingMode[] blendingModes = BlendingMode.values();
-        blendingModeCombo = new JComboBox<>(blendingModes);
-        blendingModeCombo.setMaximumRowCount(blendingModes.length);
-        add(blendingModeCombo);
+        bmCombo = new JComboBox<>(blendingModes);
+        bmCombo.setMaximumRowCount(blendingModes.length);
+        if (!forTools) {
+            bmCombo.setName("layerBM");
+        }
+        add(bmCombo);
     }
 
     protected float getOpacity() {
@@ -60,7 +67,7 @@ public class BlendingModePanel extends JPanel {
     }
 
     protected BlendingMode getBlendingMode() {
-        return (BlendingMode) blendingModeCombo.getSelectedItem();
+        return (BlendingMode) bmCombo.getSelectedItem();
     }
 
     public Composite getComposite() {
@@ -72,7 +79,7 @@ public class BlendingModePanel extends JPanel {
         BlendingMode[] blendingModes = BlendingMode.values();
         Random r = new Random();
         int randomIndex = r.nextInt(blendingModes.length);
-        blendingModeCombo.setSelectedIndex(randomIndex);
+        bmCombo.setSelectedIndex(randomIndex);
 
         int newOpacity = r.nextInt(100);
         opacityDDSlider.setValue(newOpacity);
@@ -83,6 +90,6 @@ public class BlendingModePanel extends JPanel {
         opacityLabel.setEnabled(b);
         opacityDDSlider.setEnabled(b);
         bmLabel.setEnabled(b);
-        blendingModeCombo.setEnabled(b);
+        bmCombo.setEnabled(b);
     }
 }

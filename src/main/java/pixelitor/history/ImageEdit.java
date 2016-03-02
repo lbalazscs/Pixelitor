@@ -52,7 +52,6 @@ public class ImageEdit extends FadeableEdit {
         this.layer = layer;
         this.canRepeat = canRepeat;
 
-        comp.setDirty(true);
         checkBackupDifferentFromActive();
     }
 

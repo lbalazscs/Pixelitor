@@ -106,6 +106,7 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
                 .form(navigator)
                 .noOKButton()
                 .noCancelButton()
+                .noGlobalKeyChange()
                 .okAction(navigator::dispose)
                 .show();
     }

@@ -84,7 +84,6 @@ public class Crop implements CompAction {
         int cropRectHeight = (int) cropRect.getHeight();
         canvas.updateSize(cropRectWidth, cropRectHeight);
         comp.updateAllIconImages();
-        comp.setDirty(true);
 
         ImageComponent ic = comp.getIC();
         if (!ic.isMock()) { // not in a test

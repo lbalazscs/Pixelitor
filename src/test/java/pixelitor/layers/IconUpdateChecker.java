@@ -47,14 +47,14 @@ public class IconUpdateChecker {
         checkMask(numMask);
     }
 
-    public void checkLayer(int num) {
+    private void checkLayer(int num) {
         if (layer instanceof ImageLayer) {
             verify(ui, times(layerIconUpdatesAtStart + num))
                     .updateLayerIconImage((ImageLayer) layer);
         }
     }
 
-    public void checkMask(int num) {
+    private void checkMask(int num) {
         if (mask == null) {
             return;
         }

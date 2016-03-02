@@ -88,7 +88,6 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
         // Only after the shared canvas size was updated
         comp.updateAllIconImages();
 
-        comp.setDirty(true);
         comp.imageChanged(REPAINT, true);
     }
 

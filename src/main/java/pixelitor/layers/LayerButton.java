@@ -24,6 +24,7 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.history.AddToHistory;
 import pixelitor.utils.IconUtils;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.VisibleForTesting;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -46,6 +47,13 @@ public class LayerButton extends JToggleButton {
     public static final Color SELECTED_COLOR = new Color(48, 76, 111);
 
     public static final int BORDER_WIDTH = 2;
+    private DragReorderHandler dragReorderHandler;
+
+    /**
+     * In pxc files the mask might be added before the drag handler
+     * and in unit tests the drag handler is not added at all.
+     */
+    private boolean maskAddedBeforeDragHandler;
 
     private enum SelectionState {
         UNSELECTED {
@@ -215,22 +223,35 @@ public class LayerButton extends JToggleButton {
         visibilityCB.setSelected(newVisibility);
     }
 
+    @VisibleForTesting
+    public boolean hasOpenEye() {
+        return visibilityCB.isSelected();
+    }
+
     public void setUserInteraction(boolean userInteraction) {
         this.userInteraction = userInteraction;
     }
 
-    public void addMouseHandler(LayersMouseHandler mouseHandler) {
-        addMouseListener(mouseHandler);
-        addMouseMotionListener(mouseHandler);
-        nameEditor.addMouseListener(mouseHandler);
-        nameEditor.addMouseMotionListener(mouseHandler);
+    public void addDragReorderHandler(DragReorderHandler handler) {
+        dragReorderHandler = handler;
+        handler.attachToComponent(this);
+        handler.attachToComponent(nameEditor);
+        handler.attachToComponent(layerIconLabel);
+
+        if (maskAddedBeforeDragHandler) {
+            assert maskIconLabel != null;
+            handler.attachToComponent(maskIconLabel);
+        }
     }
 
-    public void removeMouseHandler(LayersMouseHandler mouseHandler) {
-        removeMouseListener(mouseHandler);
-        removeMouseMotionListener(mouseHandler);
-        nameEditor.removeMouseListener(mouseHandler);
-        nameEditor.removeMouseMotionListener(mouseHandler);
+    public void removeDragReorderHandler(DragReorderHandler handler) {
+        handler.detachFromComponent(this);
+        handler.detachFromComponent(nameEditor);
+        handler.detachFromComponent(layerIconLabel);
+
+        if (maskIconLabel != null) {
+            handler.detachFromComponent(maskIconLabel);
+        }
     }
 
     public int getStaticY() {
@@ -334,11 +355,23 @@ public class LayerButton extends JToggleButton {
             }
         });
 
+        if (dragReorderHandler != null) {
+            dragReorderHandler.attachToComponent(maskIconLabel);
+            this.maskAddedBeforeDragHandler = false;
+        } else {
+            this.maskAddedBeforeDragHandler = true;
+        }
+
         revalidate();
     }
 
     public void deleteMaskIconLabel() {
-        // TODO remove the two mouse listeners?
+        // TODO remove the two mouse listeners (left-click, right-click)?
+        // at least remove the drag reorder handler
+        if (dragReorderHandler != null) { // null in unit tests
+            dragReorderHandler.detachFromComponent(maskIconLabel);
+        }
+
         remove(maskIconLabel);
         revalidate();
         repaint();

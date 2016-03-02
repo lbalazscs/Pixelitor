@@ -35,7 +35,7 @@ public class AddLayerMaskEdit extends PixelitorEdit {
 
     public AddLayerMaskEdit(Composition comp, Layer layer, String name) {
         super(comp, name);
-        comp.setDirty(true);
+
         this.layer = layer;
         this.layerMask = layer.getMask();
     }

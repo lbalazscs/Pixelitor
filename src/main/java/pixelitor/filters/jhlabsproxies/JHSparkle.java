@@ -25,8 +25,10 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.utils.ReseedSupport;
 
 import java.awt.image.BufferedImage;
+import java.util.Random;
 
 import static java.awt.Color.WHITE;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
@@ -58,7 +60,7 @@ public class JHSparkle extends FilterWithParametrizedGUI {
                 radius.adjustRangeToImageSize(1.0),
                 shine,
                 randomness
-        ));
+        ).withAction(ReseedSupport.createAction()));
     }
 
     @Override
@@ -66,6 +68,9 @@ public class JHSparkle extends FilterWithParametrizedGUI {
         if (filter == null) {
             filter = new SparkleFilter(NAME);
         }
+
+        ReseedSupport.reInitialize();
+        Random rand = ReseedSupport.getRand();
 
         filter.setLightOnly(lightOnly.isChecked());
         filter.setRelativeCentreX(center.getRelativeX());
@@ -75,6 +80,7 @@ public class JHSparkle extends FilterWithParametrizedGUI {
         filter.setAmount(shine.getValue());
         filter.setRandomness(randomness.getValue());
         filter.setColor(color.getColor().getRGB());
+        filter.setRandom(rand);
 
         dest = filter.filter(src, dest);
         return dest;

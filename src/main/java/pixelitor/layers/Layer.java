@@ -116,8 +116,6 @@ public abstract class Layer implements Serializable {
 
             if (mask != null) {
                 mask.setUI(ui);
-                ui.addMaskIconLabel();
-                mask.updateIconImage();
             }
         }
     }
@@ -133,7 +131,6 @@ public abstract class Layer implements Serializable {
 
         this.visible = newVisibility;
         comp.imageChanged(FULL);
-        comp.setDirty(true);
         ui.setOpenEye(newVisibility);
 
         History.addEdit(addToHistory, () -> new LayerVisibilityChangeEdit(comp, this, newVisibility));

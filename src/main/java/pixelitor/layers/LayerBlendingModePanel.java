@@ -48,7 +48,7 @@ public class LayerBlendingModePanel extends BlendingModePanel implements ImageSw
             }
         });
 
-        blendingModeCombo.addActionListener(e -> {
+        bmCombo.addActionListener(e -> {
             if (userInteractionChange) {
                 blendingModeChanged();
             }
@@ -107,7 +107,7 @@ public class LayerBlendingModePanel extends BlendingModePanel implements ImageSw
         try {
             userInteractionChange = false;
             opacityDDSlider.setValue(intOpacity);
-            blendingModeCombo.setSelectedItem(bm);
+            bmCombo.setSelectedItem(bm);
         } finally {
             userInteractionChange = true;
         }
@@ -116,7 +116,7 @@ public class LayerBlendingModePanel extends BlendingModePanel implements ImageSw
     public void setBlendingModeFromModel(BlendingMode bm) {
         try {
             userInteractionChange = false;
-            blendingModeCombo.setSelectedItem(bm);
+            bmCombo.setSelectedItem(bm);
         } finally {
             userInteractionChange = true;
         }

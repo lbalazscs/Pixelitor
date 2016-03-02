@@ -19,7 +19,6 @@ package pixelitor.layers;
 
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
-import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.utils.Messages;
 
@@ -98,15 +97,10 @@ public abstract class ImageLayerAction extends AbstractAction {
                         layer.getName(), firstName, secondName);
 
             String[] options = {"Rasterize", "Cancel"};
-            int userAnswer = JOptionPane.showOptionDialog(PixelitorWindow.getInstance(), msg, "Text Layer",
-                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null,
-                    options, options[1]);
 
-            if (userAnswer == JOptionPane.OK_OPTION) {
+            if (Dialogs.showOKCancelWarningDialog(msg, "Text Layer", options, 1)) {
                 ImageLayer newImageLayer = ((TextLayer) layer).replaceWithRasterized();
                 process(newImageLayer);
-            } else {
-                // cancelled
             }
         } else if (layer instanceof AdjustmentLayer) {
             Dialogs.showErrorDialog("Adjustment Layer",

@@ -21,6 +21,7 @@ import org.xml.sax.SAXException;
 import pixelitor.AppLogic;
 import pixelitor.Composition;
 import pixelitor.automate.SingleDirChooserPanel;
+import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
@@ -174,8 +175,12 @@ public class OpenSaveManager {
                         "Cancel"};
                 String question = String.format("<html><b>Do you want to save the changes made to %s?</b>" +
                         "<br>Your changes will be lost if you don't save them.</html>", comp.getName());
+
+                GlobalKeyboardWatch.setDialogActive(true);
                 int answer = JOptionPane.showOptionDialog(PixelitorWindow.getInstance(), new JLabel(question),
                         "Unsaved changes", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
+                GlobalKeyboardWatch.setDialogActive(false);
+
                 if (answer == JOptionPane.YES_OPTION) { // save
                     boolean fileSaved = OpenSaveManager.save(comp, false);
                     if (fileSaved) {

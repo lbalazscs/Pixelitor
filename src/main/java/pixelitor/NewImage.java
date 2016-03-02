@@ -51,7 +51,6 @@ public final class NewImage {
     }
 
     public static Composition createNewComposition(FillType bg, int width, int height, String title) {
-//        BufferedImage newImage = new BufferedImage(width, height, TYPE_INT_ARGB_PRE);
         BufferedImage newImage = ImageUtils.createSysCompatibleImage(width, height);
         fillImage(newImage, bg);
         return Composition.fromImage(newImage, null, title);

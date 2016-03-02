@@ -99,7 +99,6 @@ public class Resize implements CompAction {
         // changed or if it was resized to a very small size
         comp.updateAllIconImages();
 
-        comp.setDirty(true);
         comp.imageChanged(INVALIDATE_CACHE, true);
 
         AppLogic.activeCompSizeChanged(comp);

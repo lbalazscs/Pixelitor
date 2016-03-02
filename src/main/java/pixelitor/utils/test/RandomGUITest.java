@@ -267,7 +267,7 @@ public class RandomGUITest {
 
     private static void randomResize() {
         log("resize");
-        OpTests.randomResize();
+        FilterTests.randomResize();
     }
 
     private static void log(String msg) {

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.history;
 
 import pixelitor.layers.BlendingMode;
@@ -35,8 +36,6 @@ public class LayerBlendingEdit extends PixelitorEdit {
 
         this.layer = layer;
         this.backupBlendingMode = backupBlendingMode;
-
-        layer.getComp().setDirty(true);
     }
 
     @Override

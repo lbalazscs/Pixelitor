@@ -396,18 +396,18 @@ public class ImageLayerTest {
 
             layer.applyLayerMask(AddToHistory.YES);
             assertThat(layer.hasMask()).isFalse();
-            iconUpdates.checkLayer(1);
+            iconUpdates.check(1, 0);
 
             History.assertNumEditsIs(1);
             History.assertLastEditNameIs("Apply Layer Mask");
 
             History.undo();
             assertThat(layer.hasMask()).isTrue();
-            iconUpdates.checkMask(1);
+            iconUpdates.check(2, 1);
 
             History.redo();
             assertThat(layer.hasMask()).isFalse();
-            iconUpdates.checkLayer(2);
+            iconUpdates.check(3, 1);
         }
     }
 }

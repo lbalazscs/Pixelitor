@@ -20,6 +20,7 @@ package pixelitor.gui.utils;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
 import pixelitor.Build;
+import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.history.History;
 import pixelitor.utils.test.Events;
@@ -56,7 +57,9 @@ public class Dialogs {
     }
 
     public static void showInfoDialog(String title, String msg) {
+        GlobalKeyboardWatch.setDialogActive(true);
         JOptionPane.showMessageDialog(getParentForDialogs(), msg, title, JOptionPane.INFORMATION_MESSAGE);
+        GlobalKeyboardWatch.setDialogActive(false);
     }
 
     public static boolean showYesNoQuestionDialog(String title, String msg) {
@@ -64,8 +67,7 @@ public class Dialogs {
     }
 
     public static boolean showYesNoQuestionDialog(Component parent, String title, String msg) {
-        int reply = JOptionPane.showConfirmDialog(parent, msg, title, JOptionPane.YES_NO_OPTION);
-        return (reply == JOptionPane.YES_OPTION);
+        return showYesNoDialog(parent, title, msg, JOptionPane.QUESTION_MESSAGE);
     }
 
     public static boolean showYesNoWarningDialog(String title, String msg) {
@@ -73,8 +75,27 @@ public class Dialogs {
     }
 
     public static boolean showYesNoWarningDialog(Component parent, String title, String msg) {
-        int reply = JOptionPane.showConfirmDialog(parent, msg, title, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        return showYesNoDialog(parent, title, msg, JOptionPane.WARNING_MESSAGE);
+    }
+
+    public static boolean showYesNoDialog(Component parent, String title, String msg, int messageType) {
+        GlobalKeyboardWatch.setDialogActive(true);
+        int reply = JOptionPane.showConfirmDialog(parent, msg, title, JOptionPane.YES_NO_OPTION, messageType);
+        GlobalKeyboardWatch.setDialogActive(false);
         return (reply == JOptionPane.YES_OPTION);
+    }
+
+    public static boolean showOKCancelWarningDialog(String msg, String title, Object[] options, int initialOptionIndex) {
+        return showOKCancelDialog(msg, title, options, initialOptionIndex, JOptionPane.WARNING_MESSAGE);
+    }
+
+    public static boolean showOKCancelDialog(String msg, String title, Object[] options, int initialOptionIndex, int messageType) {
+        GlobalKeyboardWatch.setDialogActive(true);
+        int userAnswer = JOptionPane.showOptionDialog(getParentForDialogs(), msg, title,
+                JOptionPane.OK_CANCEL_OPTION, messageType, null,
+                options, options[initialOptionIndex]);
+        GlobalKeyboardWatch.setDialogActive(false);
+        return userAnswer == JOptionPane.OK_OPTION;
     }
 
     public static void showErrorDialog(String title, String msg) {
@@ -82,7 +103,9 @@ public class Dialogs {
     }
 
     public static void showErrorDialog(Component parent, String title, String msg) {
+        GlobalKeyboardWatch.setDialogActive(true);
         JOptionPane.showMessageDialog(parent, msg, title, JOptionPane.ERROR_MESSAGE);
+        GlobalKeyboardWatch.setDialogActive(false);
     }
 
     public static void showWarningDialog(String title, String msg) {
@@ -90,7 +113,9 @@ public class Dialogs {
     }
 
     public static void showWarningDialog(Component parent, String title, String msg) {
+        GlobalKeyboardWatch.setDialogActive(true);
         JOptionPane.showMessageDialog(parent, msg, title, JOptionPane.WARNING_MESSAGE);
+        GlobalKeyboardWatch.setDialogActive(false);
     }
 
     public static void showNotImageLayerDialog() {

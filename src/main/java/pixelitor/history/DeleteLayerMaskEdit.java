@@ -37,7 +37,6 @@ public class DeleteLayerMaskEdit extends PixelitorEdit {
         super(comp, "Delete Layer Mask");
         this.oldMode = oldMode;
 
-        comp.setDirty(true);
         this.layer = layer;
         this.oldMask = oldMask;
     }

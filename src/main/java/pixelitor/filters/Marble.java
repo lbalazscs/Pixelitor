@@ -19,9 +19,8 @@ package pixelitor.filters;
 
 import com.jhlabs.image.Colormap;
 import com.jhlabs.image.PointFilter;
-import com.jhlabs.math.Noise;
-import net.jafama.FastMath;
 import pixelitor.filters.gui.AngleParam;
+import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
@@ -34,9 +33,14 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 import static com.jhlabs.image.WaveType.wave;
+import static com.jhlabs.math.Noise.noise2;
+import static com.jhlabs.math.Noise.turbulence2;
+import static com.jhlabs.math.Noise.turbulence2B;
+import static net.jafama.FastMath.atan2;
 import static net.jafama.FastMath.cos;
 import static net.jafama.FastMath.pow;
 import static net.jafama.FastMath.sin;
+import static net.jafama.FastMath.sqrt;
 
 /**
  * Marble filter
@@ -60,8 +64,10 @@ public class Marble extends FilterWithParametrizedGUI {
             new IntChoiceParam.Value("Star", Impl.TYPE_STAR),
     });
 
-    private final IntChoiceParam waveType = new IntChoiceParam("Function Type",
+    private final IntChoiceParam waveType = new IntChoiceParam("Wave Type",
             IntChoiceParam.waveTypeChoices);
+    private final BooleanParam smoothDetails = new BooleanParam("Smoother Details", false);
+
     private final GradientParam gradient = new GradientParam("Colors",
             new float[]{0.0f, 0.5f, 1.0f},
             new Color[]{
@@ -81,6 +87,7 @@ public class Marble extends FilterWithParametrizedGUI {
                 zoom.adjustRangeToImageSize(0.25),
                 distortion,
                 details.setShowLinkedCB(false),
+                smoothDetails,
                 gradient
         ).withAction(new ReseedNoiseActionSetting()));
     }
@@ -105,6 +112,7 @@ public class Marble extends FilterWithParametrizedGUI {
         filter.setDetails(detailsLevel.getValueAsFloat());
         filter.setDetailsStrength(detailsStrength.getValueAsFloat() / 4.0f);
         filter.setColormap(gradient.getValue());
+        filter.setSmoothDetails(smoothDetails.isChecked());
 
         dest = filter.filter(src, dest);
         return dest;
@@ -124,9 +132,10 @@ public class Marble extends FilterWithParametrizedGUI {
         private float strength;
         private float octaves;
         private int type;
-        private int waveType;
         private Colormap colormap;
         private float cx, cy;
+        private int waveType;
+        private boolean smoothDetails;
 
         protected Impl(String filterName) {
             super(filterName);
@@ -142,6 +151,10 @@ public class Marble extends FilterWithParametrizedGUI {
 
         public void setDetails(float f) {
             octaves = (float) pow(2.0, f - 1.0);
+        }
+
+        public void setSmoothDetails(boolean smoothDetails) {
+            this.smoothDetails = smoothDetails;
         }
 
         public void setType(int type) {
@@ -183,27 +196,40 @@ public class Marble extends FilterWithParametrizedGUI {
             ny /= zoom;
 
             float c;
-            float f = strength * (Noise.noise2(nx * 0.1f, ny * 0.1f));
-            f += detailsStrength * Noise.turbulence2(nx * 0.2f, ny * 0.2f, octaves);
-
-            if (type == TYPE_LINES) {
-                c = (float) ((1 + wave((nx + f), waveType)) / 2);
-            } else if (type == TYPE_GRID) {
-                float f2 = strength * (Noise.noise2(ny * 0.1f, nx * 0.1f) + 1);
-                f2 += detailsStrength * Noise.turbulence2(ny * 0.2f, nx * 0.2f, octaves);
-
-                c = ((float) (2.0f + wave(nx + f, waveType) + wave(ny + f2, waveType))) / 4.0f;
-            } else if (type == TYPE_RINGS) {
-                double dist = FastMath.sqrt(dx * dx + dy * dy) / zoom;
-                f += dist;
-
-                c = (float) ((1 + wave((f), waveType)) / 2);
-            } else if (type == TYPE_STAR) {
-                double pixelAngle = FastMath.atan2(dy, dx);
-                f += (pixelAngle - rotAngle) * 10.0f;
-                c = (float) ((1 + wave((f), waveType)) / 2);
+            float f = strength * (noise2(nx * 0.1f, ny * 0.1f));
+            if (smoothDetails) {
+                f += detailsStrength * turbulence2B(nx * 0.2f, ny * 0.2f, octaves);
             } else {
-                throw new IllegalStateException();
+                f += detailsStrength * turbulence2(nx * 0.2f, ny * 0.2f, octaves);
+            }
+
+            switch (type) {
+                case TYPE_LINES:
+                    c = (float) ((1 + wave((nx + f), waveType)) / 2);
+                    break;
+                case TYPE_GRID:
+                    float f2 = strength * (noise2(ny * -0.1f, nx * -0.1f));
+                    if (smoothDetails) {
+                        f2 += detailsStrength * turbulence2B(ny * -0.2f, nx * -0.2f, octaves);
+                    } else {
+                        f2 += detailsStrength * turbulence2(ny * -0.2f, nx * -0.2f, octaves);
+                    }
+
+                    c = ((float) (2.0f + wave(nx + f, waveType) + wave(ny + f2, waveType))) / 4.0f;
+                    break;
+                case TYPE_RINGS:
+                    double dist = sqrt(dx * dx + dy * dy) / zoom;
+                    f += dist;
+
+                    c = (float) ((1 + wave(f, waveType)) / 2);
+                    break;
+                case TYPE_STAR:
+                    double pixelAngle = atan2(dy, dx);
+                    f += (pixelAngle - rotAngle) * 10.0f;
+                    c = (float) ((1 + wave(f, waveType)) / 2);
+                    break;
+                default:
+                    throw new IllegalStateException();
             }
 
             return colormap.getColor(c);

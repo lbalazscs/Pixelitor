@@ -21,6 +21,7 @@ import pixelitor.gui.Desktop;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.Dialogs;
 import pixelitor.layers.GlobalLayerChangeListener;
 import pixelitor.layers.GlobalLayerMaskChangeListener;
 import pixelitor.layers.Layer;
@@ -30,7 +31,6 @@ import pixelitor.tools.Tools;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Messages;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -90,8 +90,8 @@ public class AppLogic {
 
     public static void exitApp(PixelitorWindow pw) {
         if (ImageComponents.thereAreUnsavedChanges()) {
-            int answer = JOptionPane.showConfirmDialog(null, "There are unsaved changes. Are you sure you want to exit?", "Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-            if (answer == JOptionPane.YES_OPTION) {
+            String msg = "There are unsaved changes. Are you sure you want to exit?";
+            if (Dialogs.showYesNoWarningDialog(pw, "Confirmation", msg)) {
                 pw.setVisible(false);
                 AppPreferences.savePrefsAndExit();
             }

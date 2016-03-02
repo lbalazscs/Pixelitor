@@ -619,6 +619,16 @@ public class ImageLayer extends ContentLayer {
         setImage(dest);
     }
 
+    private BufferedImage getMaskedImage() {
+        if(mask == null || !isMaskEnabled()) {
+            return image;
+        } else {
+            BufferedImage copy = ImageUtils.copyImage(image);
+            mask.applyToImage(copy);
+            return copy;
+        }
+    }
+
     @Override
     public void mergeDownOn(ImageLayer bellowImageLayer) {
         int aX = getTX();
@@ -626,13 +636,13 @@ public class ImageLayer extends ContentLayer {
         BufferedImage bellowImage = bellowImageLayer.getImage();
         int bX = bellowImageLayer.getTX();
         int bY = bellowImageLayer.getTY();
-        BufferedImage activeImage = getImage();
+        BufferedImage ourImage = getMaskedImage();
         Graphics2D g = bellowImage.createGraphics();
         int x = aX - bX;
         int y = aY - bY;
         Composite composite = blendingMode.getComposite(opacity);
         g.setComposite(composite);
-        g.drawImage(activeImage, x, y, null);
+        g.drawImage(ourImage, x, y, null);
         g.dispose();
     }
 

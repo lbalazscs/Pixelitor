@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.layers;
 
+import javax.swing.*;
 import javax.swing.event.MouseInputAdapter;
 import java.awt.Component;
 import java.awt.Cursor;
@@ -25,7 +26,7 @@ import java.awt.event.MouseEvent;
 /**
  * The MouseListener and MouseMotionListener for the layer buttons for the drag-reordering
  */
-public class LayersMouseHandler extends MouseInputAdapter {
+public class DragReorderHandler extends MouseInputAdapter {
     private static final Cursor MOVE_CURSOR = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
     private static final Cursor DEFAULT_CURSOR = Cursor.getDefaultCursor();
     private static final int DRAG_X_INDENT = 10;
@@ -34,7 +35,7 @@ public class LayersMouseHandler extends MouseInputAdapter {
     private boolean dragging = false;
     private long lastNameEditorPressesMillis;
 
-    public LayersMouseHandler(LayersPanel layersPanel) {
+    public DragReorderHandler(LayersPanel layersPanel) {
         this.layersPanel = layersPanel;
     }
 
@@ -107,9 +108,22 @@ public class LayersMouseHandler extends MouseInputAdapter {
             layerButton = nameEditor.getLayerButton();
             // translate into the LayerButton coordinate system
             e.translatePoint(nameEditor.getX(), nameEditor.getY());
+        } else if (c instanceof JLabel) {
+            layerButton = (LayerButton) c.getParent();
+            e.translatePoint(c.getX(), c.getY());
         } else {
             layerButton = (LayerButton) c;
         }
         return layerButton;
+    }
+
+    public void attachToComponent(Component c) {
+        c.addMouseListener(this);
+        c.addMouseMotionListener(this);
+    }
+
+    public void detachFromComponent(Component c) {
+        c.addMouseListener(this);
+        c.addMouseMotionListener(this);
     }
 }

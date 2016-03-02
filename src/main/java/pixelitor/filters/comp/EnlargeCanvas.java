@@ -90,7 +90,6 @@ public class EnlargeCanvas implements CompAction {
         comp.updateAllIconImages();
 
         comp.imageChanged(REPAINT, true);
-        comp.setDirty(true);
 
         Messages.showStatusMessage("Canvas enlarged to "
                 + newCanvasWidth + " x " + newCanvasHeight + " pixels.");

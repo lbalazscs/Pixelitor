@@ -21,6 +21,7 @@ import pixelitor.Composition;
 import pixelitor.gui.ImageComponents;
 
 import javax.swing.*;
+import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,11 +34,11 @@ import java.util.Objects;
 public class LayersPanel extends JLayeredPane {
     private final List<LayerButton> layerButtons = new ArrayList<>();
     private final ButtonGroup buttonGroup = new ButtonGroup();
-    private final LayersMouseHandler mouseHandler;
+    private final DragReorderHandler dragReorderHandler;
     private LayerButton draggedButton = null;
 
     public LayersPanel() {
-        mouseHandler = new LayersMouseHandler(this);
+        dragReorderHandler = new DragReorderHandler(this);
     }
 
     public void addLayerButton(LayerButton button, int newLayerIndex) {
@@ -54,7 +55,7 @@ public class LayersPanel extends JLayeredPane {
         revalidate();
         repaint();
 
-        button.addMouseHandler(mouseHandler);
+        button.addDragReorderHandler(dragReorderHandler);
     }
 
     public void deleteLayerButton(LayerButton button) {
@@ -64,7 +65,7 @@ public class LayersPanel extends JLayeredPane {
         revalidate();
         repaint();
 
-        button.removeMouseHandler(mouseHandler);
+        button.removeDragReorderHandler(dragReorderHandler);
     }
 
     public void changeLayerOrderInTheGUI(int oldIndex, int newIndex) {
@@ -96,8 +97,13 @@ public class LayersPanel extends JLayeredPane {
     @Override
     public void doLayout() {
         int parentHeight = getHeight();
-        int buttonHeight = layerButtons.get(0).getPreferredSize().height; // all buttons have the same height
-        for (int i = 0; i < layerButtons.size(); i++) {
+
+        // assumes that all buttons have the same height
+        int buttonHeight = layerButtons.get(0).getPreferredSize().height;
+
+        int numButtons = layerButtons.size();
+
+        for (int i = 0; i < numButtons; i++) {
             LayerButton button = layerButtons.get(i);
             int y = parentHeight - (i + 1) * buttonHeight;
             if (button != draggedButton) {
@@ -154,5 +160,14 @@ public class LayersPanel extends JLayeredPane {
         Composition comp = ImageComponents.getActiveCompOrNull();
         LayerMoveAction.INSTANCE_UP.enableDisable(comp);
         LayerMoveAction.INSTANCE_DOWN.enableDisable(comp);
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        // assumes that all buttons have the same height
+        int buttonHeight = layerButtons.get(0).getPreferredSize().height;
+        int numButtons = layerButtons.size();
+        int allButtonsHeight = numButtons * buttonHeight;
+        return new Dimension(10, allButtonsHeight);
     }
 }

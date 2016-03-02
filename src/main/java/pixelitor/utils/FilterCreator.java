@@ -258,7 +258,7 @@ public class FilterCreator extends JPanel {
 
         if (desc.isProxy()) {
             retVal += "       if(filter == null) {\n";
-            retVal += "           filter = new " + desc.getProxyName() + "();\n";
+            retVal += "           filter = new " + desc.getProxyName() + "(NAME);\n";
             retVal += "       }\n";
 
             retVal += '\n';

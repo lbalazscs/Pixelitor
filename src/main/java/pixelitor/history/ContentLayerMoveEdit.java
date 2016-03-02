@@ -52,8 +52,6 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
         }
 
         this.translationEdit = new TranslationEdit(comp, layer, oldTX, oldTY, false);
-
-        layer.getComp().setDirty(true);
     }
 
     @Override

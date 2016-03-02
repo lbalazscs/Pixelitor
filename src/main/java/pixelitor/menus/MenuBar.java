@@ -62,6 +62,7 @@ import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 import pixelitor.layers.LayerMaskAddType;
 import pixelitor.layers.LayerMoveAction;
+import pixelitor.layers.MaskFromColorRange;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.layers.TextLayer;
 import pixelitor.menus.edit.CopyAction;
@@ -89,7 +90,7 @@ import pixelitor.utils.Tests3x3;
 import pixelitor.utils.UpdateGUI;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.Events;
-import pixelitor.utils.test.OpTests;
+import pixelitor.utils.test.FilterTests;
 import pixelitor.utils.test.RandomGUITest;
 import pixelitor.utils.test.SplashImageCreator;
 import pixelitor.utils.test.ToolTests;
@@ -1142,6 +1143,8 @@ public class MenuBar extends JMenuBar {
             }
         });
 
+        developMenu.addFA(MaskFromColorRange.NAME, MaskFromColorRange::new);
+
         return developMenu;
     }
 
@@ -1212,7 +1215,7 @@ public class MenuBar extends JMenuBar {
         sub.addActionWithKey(new MenuAction("Random Resize") {
             @Override
             public void onClick() {
-                OpTests.randomResize();
+                FilterTests.randomResize();
             }
         }, CTRL_ALT_R);
 
@@ -1233,14 +1236,14 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new ImageLayerAction("Find Slowest Filter", false) {
             @Override
             protected void process(ImageLayer layer) {
-                OpTests.findSlowestFilter(layer);
+                FilterTests.findSlowestFilter(layer);
             }
         });
 
         sub.addAction(new MenuAction("getCompositeImage() Performance Test...") {
             @Override
             public void onClick() {
-                OpTests.getCompositeImagePerformanceTest();
+                FilterTests.getCompositeImagePerformanceTest();
             }
         });
 
@@ -1249,14 +1252,14 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new ImageLayerAction("Run All Filters on Current Layer/Mask", false) {
             @Override
             protected void process(ImageLayer layer) {
-                OpTests.runAllFiltersOn(layer);
+                FilterTests.runAllFiltersOn(layer);
             }
         });
 
         sub.addAction(new ImageLayerAction("Save the Result of Each Filter...") {
             @Override
             protected void process(ImageLayer layer) {
-                OpTests.saveTheResultOfEachFilter(layer);
+                FilterTests.saveTheResultOfEachFilter(layer);
             }
         });
 

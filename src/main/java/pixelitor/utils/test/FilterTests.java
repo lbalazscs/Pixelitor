@@ -47,11 +47,11 @@ import java.util.concurrent.ExecutionException;
 /**
  *
  */
-public class OpTests {
+public class FilterTests {
     /**
      * Utility class with static methods
      */
-    private OpTests() {
+    private FilterTests() {
     }
 
     public static void saveTheResultOfEachFilter(ImageLayer layer) {
@@ -64,7 +64,7 @@ public class OpTests {
         OutputFormat outputFormat = OutputFormat.getLastOutputFormat();
 
         ParametrizedAdjustPanel.setResetParams(false);
-        ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("Saving the Results of Each Operation");
+        ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("Saving the Results of Each Filter");
 
         layer.startPreviewing();
 
@@ -81,7 +81,7 @@ public class OpTests {
                     for (int i = 0; i < filters.length; i++) {
                         Filter filter = filters[i];
                         String filterName = filter.getName();
-                        System.out.println(String.format("OpTests::doInBackground: filterName = '%s'", filterName));
+                        System.out.println(String.format("FilterTests::doInBackground: filterName = '%s'", filterName));
 
                         progressMonitor.setProgress((int) ((float) i * 100 / filters.length));
 
@@ -139,22 +139,22 @@ public class OpTests {
 
             // It is best to run this on the current EDT thread, using SwingWorker leads to strange things here
 
-            Filter[] allOps = FilterUtils.getFiltersShuffled(
+            Filter[] allFilters = FilterUtils.getFiltersShuffled(
                     filter -> !(filter instanceof RandomFilter));
 
-            for (int i = 0, allOpsLength = allOps.length; i < allOpsLength; i++) {
-                progressMonitor.setProgress((int) ((float) i * 100 / allOpsLength));
-                Filter op = allOps[i];
+            for (int i = 0, count = allFilters.length; i < count; i++) {
+                progressMonitor.setProgress((int) ((float) i * 100 / count));
+                Filter filter = allFilters[i];
 
-                String msg = "Running " + op.getName();
+                String msg = "Running " + filter.getName();
 
                 progressMonitor.setNote(msg);
                 if (progressMonitor.isCanceled()) {
                     break;
                 }
 
-                op.randomizeSettings();
-                op.execute(layer);
+                filter.randomizeSettings();
+                filter.execute(layer);
             }
             progressMonitor.close();
         } finally {

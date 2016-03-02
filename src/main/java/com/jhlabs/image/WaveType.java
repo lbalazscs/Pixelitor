@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package com.jhlabs.image;
 
 import com.jhlabs.math.Noise;
@@ -41,18 +42,17 @@ public class WaveType {
     public final static int NOISE = 3;
 
     public static double wave(double in, int type) {
-        if (type == SINE) {
-            return FastMath.sin(in);
+        switch (type) {
+            case SINE:
+                return FastMath.sin(in);
+            case SAWTOOTH:
+                return ImageMath.sinLikeSawtooth(in);
+            case TRIANGLE:
+                return ImageMath.sinLikeTriangle(in);
+            case NOISE:
+                return Noise.sinLikeNoise1((float) in);
+            default:
+                throw new IllegalStateException("type == " + type);
         }
-        if (type == SAWTOOTH) {
-            return ImageMath.sinLikeSawtooth(in);
-        }
-        if (type == TRIANGLE) {
-            return ImageMath.sinLikeTriangle(in);
-        }
-        if (type == NOISE) {
-            return Noise.sinLikeNoise1((float) in);
-        }
-        throw new IllegalStateException("type == " + type);
     }
 }

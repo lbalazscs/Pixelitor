@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.history;
 
 import pixelitor.layers.Layer;
@@ -30,13 +31,11 @@ public class LayerRenameEdit extends PixelitorEdit {
     private final String nameAfter;
 
     public LayerRenameEdit(Layer layer, String nameBefore, String nameAfter) {
-        super(layer.getComp(), "Rename Layer to " + nameAfter);
+        super(layer.getComp(), String.format("Rename Layer to \"%s\"", nameAfter));
 
         this.layer = layer;
         this.nameBefore = nameBefore;
         this.nameAfter = nameAfter;
-
-        layer.getComp().setDirty(true);
     }
 
     @Override

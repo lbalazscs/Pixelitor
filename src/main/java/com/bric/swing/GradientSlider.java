@@ -19,6 +19,13 @@
  */
 package com.bric.swing;
 
+import com.bric.plaf.MultiThumbSliderUI;
+import com.jhlabs.image.ImageMath;
+
+import javax.swing.*;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
+import javax.swing.plaf.ComponentUI;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -30,16 +37,6 @@ import java.awt.event.KeyListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.Constructor;
-
-import javax.swing.JColorChooser;
-import javax.swing.JPopupMenu;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
-import javax.swing.plaf.ComponentUI;
-
-import com.bric.plaf.MultiThumbSliderUI;
 
 /** This component lets the user manipulate the colors in a gradient.
  * A <code>GradientSlider</code> can contain any number of thumbs.  The
@@ -128,14 +125,19 @@ public class GradientSlider extends MultiThumbSlider {
 			return c1;
 		if(p==1)
 			return c2;
-		
-		return new Color(
-				(int)(c1.getRed()*(1-p)+c2.getRed()*(p)),
-				(int)(c1.getGreen()*(1-p)+c2.getGreen()*(p)),
-				(int)(c1.getBlue()*(1-p)+c2.getBlue()*(p)),
-				(int)(c1.getAlpha()*(1-p)+c2.getAlpha()*(p))
-		);
-	}
+
+        int rgb1 = c1.getRGB();
+        int rgb2 = c2.getRGB();
+        int rgb = ImageMath.mixColors(p, rgb1, rgb2);
+        return new Color(rgb, true);
+
+//        return new Color(
+//				(int)(c1.getRed()*(1-p)+c2.getRed()*(p)),
+//				(int)(c1.getGreen()*(1-p)+c2.getGreen()*(p)),
+//				(int)(c1.getBlue()*(1-p)+c2.getBlue()*(p)),
+//				(int)(c1.getAlpha()*(1-p)+c2.getAlpha()*(p))
+//		);
+    }
 
 	/** This invokes a <code>ColorPicker</code> dialog to edit
 	 * the thumb at the selected index.

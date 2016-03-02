@@ -17,9 +17,15 @@ limitations under the License.
 package com.jhlabs.image;
 
 
-import net.jafama.FastMath;
-
 import java.util.Random;
+
+import static com.jhlabs.image.ImageMath.PI;
+import static com.jhlabs.image.ImageMath.TWO_PI;
+import static com.jhlabs.image.ImageMath.clamp;
+import static com.jhlabs.image.ImageMath.lerp;
+import static com.jhlabs.image.ImageMath.mixColors;
+import static net.jafama.FastMath.atan2;
+import static net.jafama.FastMath.powQuick;
 
 public class SparkleFilter extends PointFilter {
 
@@ -28,11 +34,11 @@ public class SparkleFilter extends PointFilter {
     private int amount = 50;
     private int color = 0xffffffff;
     private int randomness = 25;
-    private int width, height;
+    //    private int width, height;
     private int centreX, centreY;
-    private long seed = 371;
+    //    private long seed = 371;
     private float[] rayLengths;
-    private Random randomNumbers = new Random();
+    private Random random;
 
     private float relativeCentreX = 0.5f;
     private float relativeCentreY = 0.5f;
@@ -113,15 +119,15 @@ public class SparkleFilter extends PointFilter {
 
     @Override
     public void setDimensions(int width, int height) {
-        this.width = width;
-        this.height = height;
+//        this.width = width;
+//        this.height = height;
         centreX = (int) (width * relativeCentreX);
         centreY = (int) (height * relativeCentreY);
         super.setDimensions(width, height);
-        randomNumbers.setSeed(seed);
+//        random.setSeed(seed);
         rayLengths = new float[rays];
         for (int i = 0; i < rays; i++) {
-            rayLengths[i] = radius + randomness / 100.0f * radius * (float) randomNumbers.nextGaussian();
+            rayLengths[i] = radius + randomness / 100.0f * radius * (float) random.nextGaussian();
         }
         power = (100 - amount) / 50.0;
     }
@@ -131,17 +137,17 @@ public class SparkleFilter extends PointFilter {
         float dx = x - centreX;
         float dy = y - centreY;
         float distance = dx * dx + dy * dy;
-        float angle = (float) FastMath.atan2(dy, dx);
-        float d = (angle + ImageMath.PI) / (ImageMath.TWO_PI) * rays;
+        float angle = (float) atan2(dy, dx);
+        float d = (angle + PI) / (TWO_PI) * rays;
         int i = (int) d;
         float f = d - i;
 
         if (radius != 0) {
-            float length = ImageMath.lerp(f, rayLengths[i % rays], rayLengths[(i + 1) % rays]);
+            float length = lerp(f, rayLengths[i % rays], rayLengths[(i + 1) % rays]);
             float g = length * length / (distance + 0.0001f);
 
             if(amount != 50) { // if amount = 50 then power = 1, but safer to compare ints
-                g = (float) FastMath.powQuick(g, power);
+                g = (float) powQuick(g, power);
             }
 
             f -= 0.5f;
@@ -149,11 +155,11 @@ public class SparkleFilter extends PointFilter {
             f = 1 - f * f;
             f *= g;
         }
-        f = ImageMath.clamp(f, 0, 1);
+        f = clamp(f, 0, 1);
         if (lightOnly) {
-            return ImageMath.mixColors(f, 0, color);
+            return mixColors(f, 0, color);
         } else {
-            return ImageMath.mixColors(f, rgb, color);
+            return mixColors(f, rgb, color);
         }
     }
 
@@ -181,7 +187,11 @@ public class SparkleFilter extends PointFilter {
         this.lightOnly = lightOnly;
     }
 
-	public String toString() {
+    public void setRandom(Random random) {
+        this.random = random;
+    }
+
+    public String toString() {
 		return "Stylize/Sparkle...";
 	}
 

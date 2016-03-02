@@ -45,6 +45,7 @@ public class DialogBuilder {
     private JFrame frameParent;
     private JDialog dialogParent;
     private String title;
+    private boolean reconfigureGlobalKeyWatch = true;
 
     private Runnable okAction;
     private Runnable cancelAction;
@@ -94,6 +95,11 @@ public class DialogBuilder {
 
     public DialogBuilder noOKButton() {
         addOKButton = false;
+        return this;
+    }
+
+    public DialogBuilder noGlobalKeyChange() {
+        this.reconfigureGlobalKeyWatch = false;
         return this;
     }
 
@@ -169,8 +175,9 @@ public class DialogBuilder {
             }
         }
 
-
-        GlobalKeyboardWatch.setDialogActive(true);
+        if (reconfigureGlobalKeyWatch) {
+            GlobalKeyboardWatch.setDialogActive(true);
+        }
 
         // cancel when window is closed
         d.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -209,16 +216,18 @@ public class DialogBuilder {
         }
     }
 
-    private static void cancelDialog(JDialog d, Runnable cancelAction) {
+    private void cancelDialog(JDialog d, Runnable cancelAction) {
         closeDialog(d);
         if (cancelAction != null) {
             cancelAction.run();
         }
     }
 
-    private static void closeDialog(JDialog d) {
+    private void closeDialog(JDialog d) {
         d.setVisible(false);
-        GlobalKeyboardWatch.setDialogActive(false);
+        if (reconfigureGlobalKeyWatch) {
+            GlobalKeyboardWatch.setDialogActive(false);
+        }
         d.dispose();
     }
 }

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.gui.utils;
 
 import javax.swing.*;
@@ -32,10 +33,8 @@ public class ConfirmSaveFileChooser extends JFileChooser {
     public void approveSelection() {
         File f = getSelectedFile();
         if (f.exists()) {
-            int userResponse = JOptionPane.showConfirmDialog(
-                    this, f.getName() + " exists already. Overwrite?",
-                    "Confirmation", JOptionPane.YES_NO_OPTION);
-            if (userResponse != JOptionPane.OK_OPTION) {
+            String msg = f.getName() + " exists already. Overwrite?";
+            if (!Dialogs.showYesNoQuestionDialog(this, "Confirmation", msg)) {
                 return;
             }
         }

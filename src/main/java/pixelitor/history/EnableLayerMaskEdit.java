@@ -34,7 +34,6 @@ public class EnableLayerMaskEdit extends PixelitorEdit {
                 "Enable Layer Mask" : "Disable Layer Mask");
 
         this.layer = layer;
-        comp.setDirty(true);
     }
 
     @Override

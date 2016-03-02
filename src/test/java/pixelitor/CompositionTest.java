@@ -95,7 +95,7 @@ public class CompositionTest {
         comp.setActiveLayer(layer, AddToHistory.YES);
         assertSame(layer, comp.getActiveLayer());
         tester.checkLayers("[ACTIVE layer 1, layer 2]");
-        tester.checkDirty(false);
+        tester.checkDirty(true);
         History.assertNumEditsIs(1);
         History.assertLastEditNameIs("Layer Selection Change");
 
@@ -272,7 +272,7 @@ public class CompositionTest {
         comp.moveLayerSelectionUp();
         tester.checkLayers("[layer 1, ACTIVE layer 2]");
 
-        tester.checkDirty(false);
+        tester.checkDirty(true);
     }
 
     @Test

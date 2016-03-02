@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.gui.utils;
 
 import pixelitor.utils.IconUtils;
@@ -149,5 +150,9 @@ public class DropDownSlider extends JComponent {
                 popupMenu.show(this, size.width - popupSize.width, size.height);
             }
         }
+    }
+
+    public void setTFName(String name) {
+        textField.setName(name);
     }
 }

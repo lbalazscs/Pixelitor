@@ -173,6 +173,11 @@ public class Composition implements Serializable {
             if (layer instanceof ImageLayer) {
                 ((ImageLayer) layer).updateIconImage();
             }
+            if (layer.hasMask()) {
+                LayerMask mask = layer.getMask();
+                mask.getUI().addMaskIconLabel();
+                mask.updateIconImage();
+            }
         }
     }
 
@@ -261,6 +266,7 @@ public class Composition implements Serializable {
     public ImageLayer addNewEmptyLayer(String name, boolean bellowActive) {
         ImageLayer newLayer = new ImageLayer(this, name);
         addLayer(newLayer, AddToHistory.YES, "New Empty Layer", false, bellowActive);
+        newLayer.updateIconImage();
         return newLayer;
     }
 
@@ -695,11 +701,6 @@ public class Composition implements Serializable {
 
     public ImageComponent getIC() {
         return ic;
-    }
-
-    // we are not in a test, see method above
-    public boolean hasRealIC() {
-        return ic != null && !ic.isMock();
     }
 
     public void paintSelection(Graphics2D g) {

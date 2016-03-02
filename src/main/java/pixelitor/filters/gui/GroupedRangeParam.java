@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,7 +44,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements RangeBased
      * 2 linked params: "Horizontal" and "Vertical"
      */
     public GroupedRangeParam(String name, int minValue, int defaultValue, int maxValue, boolean linked) {
-        this(name, "Horizontal:", "Vertical:", minValue, defaultValue, maxValue, linked);
+        this(name, "Horizontal", "Vertical", minValue, defaultValue, maxValue, linked);
     }
 
     /**

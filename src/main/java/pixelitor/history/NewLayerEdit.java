@@ -42,8 +42,6 @@ public class NewLayerEdit extends PixelitorEdit {
         this.oldViewMode = oldViewMode;
         this.newLayer = newLayer;
         this.newLayerIndex = comp.getLayerIndex(newLayer);
-
-        comp.setDirty(true);
     }
 
     @Override

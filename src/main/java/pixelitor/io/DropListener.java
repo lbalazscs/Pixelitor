@@ -17,10 +17,9 @@
 
 package pixelitor.io;
 
-import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.Dialogs;
 import pixelitor.utils.Messages;
 
-import javax.swing.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -71,13 +70,9 @@ public class DropListener extends DropTargetAdapter {
             if (file.isDirectory()) {
                 String question = String.format("You have dropped the folder \"%s\". " +
                         "Do you want to open all image files inside it?", file.getName());
-                int answer = JOptionPane.showConfirmDialog(PixelitorWindow.getInstance(),
-                        question,
-                        "Question", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-                if (answer == JOptionPane.YES_OPTION) {
+
+                if (Dialogs.showYesNoQuestionDialog("Question", question)) {
                     OpenSaveManager.openAllImagesInDir(file);
-                } else if (answer == JOptionPane.NO_OPTION) {
-                    // do nothing
                 }
             } else if (file.isFile()) {
                 OpenSaveManager.openFile(file);

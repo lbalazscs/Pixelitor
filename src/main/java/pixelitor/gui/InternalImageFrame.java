@@ -77,10 +77,12 @@ public class InternalImageFrame extends JInternalFrame implements InternalFrameL
 
     @Override
     public void internalFrameDeiconified(InternalFrameEvent e) {
+        ic.updateNavigator(true);
     }
 
     @Override
     public void internalFrameIconified(InternalFrameEvent e) {
+        ic.updateNavigator(true);
     }
 
     @Override

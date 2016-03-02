@@ -196,7 +196,7 @@ public class LayerTest {
         assertThat(layer.getName()).isEqualTo("newName");
         assertThat(layer.getUI().getLayerName()).isEqualTo("newName");
         History.assertNumEditsIs(1);
-        History.assertLastEditNameIs("Rename Layer to newName");
+        History.assertLastEditNameIs("Rename Layer to \"newName\"");
 
         History.undo();
         assertThat(layer.getName()).isEqualTo("layer 1");
@@ -212,6 +212,7 @@ public class LayerTest {
     @Test
     public void test_mergeDownOn() {
         ImageLayer lower = TestHelper.createImageLayer("lower", comp);
+
         layer.mergeDownOn(lower);
         iconUpdates.check(0, 0);
     }

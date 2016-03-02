@@ -37,7 +37,6 @@ public class TextLayerChangeEdit extends PixelitorEdit {
         super(comp, "Text Layer Change");
 
         this.backupTextSettings = oldTextSettings;
-        comp.setDirty(true);
         this.layer = layer;
 
         if(oldTextSettings == layer.getSettings()) {

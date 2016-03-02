@@ -683,10 +683,10 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         this.navigator = navigator;
     }
 
-    public void updateNavigator(boolean hasNewSize) {
+    public void updateNavigator(boolean newICSize) {
         if (navigator != null) {
             SwingUtilities.invokeLater(() ->
-                    navigator.refreshSizeCalc(this, false, hasNewSize, false));
+                    navigator.refreshSizeCalc(this, false, newICSize, false));
         }
     }
 }
