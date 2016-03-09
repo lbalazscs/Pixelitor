@@ -300,13 +300,13 @@ public abstract class Layer implements Serializable {
             editName = "Layer Mask from Selection";
         }
 
-        addImageAsMask(bwMask, deselect, editName);
+        addImageAsMask(bwMask, deselect, editName, false);
     }
 
-    public void addImageAsMask(BufferedImage bwMask, boolean deselect, String editName) {
+    public void addImageAsMask(BufferedImage bwMask, boolean deselect, String editName, boolean inheritTranslation) {
         assert mask == null;
 
-        mask = new LayerMask(comp, bwMask, this);
+        mask = new LayerMask(comp, bwMask, this, inheritTranslation);
         maskEnabled = true;
 
         // needs to be added first, because the inherited layer
@@ -336,7 +336,7 @@ public abstract class Layer implements Serializable {
         if (hasMask()) {
             mask.replaceImage(bwMask, editName);
         } else {
-            addImageAsMask(bwMask, false, editName);
+            addImageAsMask(bwMask, false, editName, true);
         }
     }
 

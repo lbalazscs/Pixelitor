@@ -126,7 +126,7 @@ public class Tests3x3 {
         if(withMask) {
             BufferedImage maskImg = getStandardMaskImage();
             Layer layer = comp.getLayer(0);
-            LayerMask mask = new LayerMask(comp, maskImg, layer);
+            LayerMask mask = new LayerMask(comp, maskImg, layer, false);
             layer.addMask(mask);
         }
         AppLogic.addComposition(comp);

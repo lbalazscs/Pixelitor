@@ -28,6 +28,7 @@ import pixelitor.io.OpenSaveManager;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.MaskViewMode;
+import pixelitor.layers.TextLayer;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.menus.view.ZoomMenu;
 import pixelitor.selection.Selection;
@@ -45,7 +46,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Static methods for maintaining the list of open ImageComponent objects
@@ -163,8 +166,7 @@ public class ImageComponents {
      */
     public static void toolCropActiveImage(boolean allowGrowing) {
         try {
-            Optional<Composition> opt = getActiveComp();
-            opt.ifPresent(comp -> {
+            onActiveComp(comp -> {
                 Rectangle2D cropRect = Tools.CROP.getCropRect(comp.getIC());
                 new Crop(cropRect, false, allowGrowing).process(comp);
             });
@@ -211,7 +213,7 @@ public class ImageComponents {
     /**
      * When a new tool is activated, the cursor has to be changed for each image
      */
-    public static void setToolCursor(Cursor cursor) {
+    public static void setCursorForAll(Cursor cursor) {
         for (ImageComponent ic : icList) {
             ic.setCursor(cursor);
         }
@@ -238,7 +240,6 @@ public class ImageComponents {
      * Another image became active
      */
     public static void activeImageHasChanged(ImageComponent ic) {
-        // not called in unit tests
         ImageComponent oldIC = activeIC;
 
         setActiveIC(ic, false);
@@ -329,17 +330,63 @@ public class ImageComponents {
     }
 
     public static void onActiveIC(Consumer<ImageComponent> action) {
-        if(activeIC != null) {
+        if (activeIC != null) {
             action.accept(activeIC);
         }
     }
 
+    public static void onActiveICAndComp(BiConsumer<ImageComponent, Composition> action) {
+        if (activeIC != null) {
+            Composition comp = activeIC.getComp();
+            action.accept(activeIC, comp);
+        }
+    }
+
+    public static <T> T fromActiveIC(Function<ImageComponent, T> function) {
+        return function.apply(activeIC);
+    }
+
+    public static void onAllImages(Consumer<ImageComponent> action) {
+        //noinspection Convert2streamapi
+        for (ImageComponent ic : icList) {
+            action.accept(ic);
+        }
+    }
+
+    public static void onActiveComp(Consumer<Composition> action) {
+        if (activeIC != null) {
+            Composition comp = activeIC.getComp();
+            action.accept(comp);
+        }
+    }
+
     public static void onActiveSelection(Consumer<Selection> action) {
-        if(activeIC != null) {
+        if (activeIC != null) {
             Selection selection = activeIC.getComp().getSelectionOrNull();
-            if(selection != null) {
+            if (selection != null) {
                 action.accept(selection);
             }
+        }
+    }
+
+    public static void onActiveLayer(Consumer<Layer> action) {
+        if (activeIC != null) {
+            Layer activeLayer = activeIC.getComp().getActiveLayer();
+            action.accept(activeLayer);
+        }
+    }
+
+    public static void onActiveImageLayer(Consumer<ImageLayer> action) {
+        if (activeIC != null) {
+            ImageLayer activeLayer = (ImageLayer) activeIC.getComp().getActiveLayer();
+            action.accept(activeLayer);
+        }
+    }
+
+    public static void onActiveTextLayer(Consumer<TextLayer> action) {
+        if (activeIC != null) {
+            TextLayer activeLayer = (TextLayer) activeIC.getComp().getActiveLayer();
+            action.accept(activeLayer);
         }
     }
 }

@@ -30,8 +30,6 @@ import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.util.Optional;
 
-import static pixelitor.gui.ImageComponents.getActiveComp;
-
 /**
  * Consistency checks that run only in developer mode.
  * They are enabled by the Build setting or by the assertions
@@ -44,11 +42,11 @@ public final class ConsistencyChecks {
         assert comp != null;
 
         selectionCheck(comp);
-        fadeCheck(comp);
+        assert fadeCheck(comp);
         if (checkImageCoversCanvas) {
-            imageCoversCanvasCheck(comp);
+            assert imageCoversCanvasCheck(comp);
         }
-        layerDeleteActionEnabledCheck();
+        assert layerDeleteActionEnabledCheck();
     }
 
     public static boolean fadeCheck(Composition comp) {
@@ -87,6 +85,9 @@ public final class ConsistencyChecks {
                 Utils.debugImage(previous, "previous");
                 String lastFadeableOp = History.getLastEditName();
                 Composition comp = layer.getComp();
+
+                String historyCompName = fadeableEdit.getComp().getName();
+                String activeCompName = ImageComponents.getActiveCompOrNull().getName();
                 throw new IllegalStateException("'Fade " + lastFadeableOp + "' would not work now:"
                         + "\nFadeableEdit class = " + fadeableEdit.getClass().getName() + ", and name = " + fadeableEdit.getName()
                         + "\n current selected dimensions: " + current.getWidth() + "x" + current.getHeight() + ", "
@@ -94,8 +95,8 @@ public final class ConsistencyChecks {
                         + "\nchecked composition = " + comp.getName() + "(hasSelection = " + comp.hasSelection()
                         + (comp.hasSelection() ? ", selection bounds = " + comp.getSelectionOrNull().getShapeBounds() : "") + ")"
                         + "\nchecked composition canvas = " + comp.getCanvas().getBounds()
-                        + "\nhistory composition = " + fadeableEdit.getComp().getName()
-                        + "\nactive composition = " + ImageComponents.getActiveCompOrNull().getName()
+                        + "\nhistory composition = " + historyCompName
+                        + "\nactive composition = " + activeCompName
                         + "\n"
 
 
@@ -193,22 +194,21 @@ public final class ConsistencyChecks {
             return true;
         }
 
-        Optional<Composition> optComp = getActiveComp();
-        if (!optComp.isPresent()) {
+        Composition comp = ImageComponents.getActiveCompOrNull();
+        if (comp == null) {
             return true;
         }
-        Composition comp = optComp.get();
 
         boolean enabled = action.isEnabled();
 
         int nrLayers = comp.getNrLayers();
         if (enabled) {
             if (nrLayers <= 1) {
-                throw new IllegalStateException("enabled, but nrLayers = " + nrLayers);
+                throw new IllegalStateException("delete layer enabled for " + comp.getName() + ", but nrLayers = " + nrLayers);
             }
         } else { // disabled
             if (nrLayers >= 2) {
-                throw new IllegalStateException("disabled, but nrLayers = " + nrLayers);
+                throw new IllegalStateException("delete layer disabled for " + comp.getName() + ", but nrLayers = " + nrLayers);
             }
         }
         return true;

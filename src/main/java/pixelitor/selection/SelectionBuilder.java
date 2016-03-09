@@ -33,7 +33,6 @@ public class SelectionBuilder {
     private final SelectionType selectionType;
     private final SelectionInteraction selectionInteraction;
     private final Composition comp;
-    private Selection selection;
 
     private Shape replacedShape;
 
@@ -44,19 +43,19 @@ public class SelectionBuilder {
         this.selectionInteraction = selectionInteraction;
         this.selectionType = selectionType;
         this.comp = comp;
-        this.selection = comp.getSelectionOrNull();
+        Selection selection = comp.getSelectionOrNull();
 
         if (selection == null) {
             return;
         }
 
-        startNewShape(selectionInteraction);
+        startNewShape(selectionInteraction, selection);
     }
 
     /**
      * Called if there is already a selection in mousePressed
      */
-    private void startNewShape(SelectionInteraction selectionInteraction) {
+    private void startNewShape(SelectionInteraction selectionInteraction, Selection selection) {
         assert selection.isAlive() : "dead selection";
 
         if (selectionInteraction == SelectionInteraction.REPLACE) {
@@ -78,6 +77,7 @@ public class SelectionBuilder {
      * selection shape is continuously updated
      */
     public void updateSelection(Object mouseInfo) {
+        Selection selection = comp.getSelectionOrNull();
         boolean noPreviousSelection = selection == null;
 
         if (noPreviousSelection) {
@@ -85,6 +85,8 @@ public class SelectionBuilder {
             selection = new Selection(newShape, comp.getIC());
             comp.setNewSelection(selection);
         } else {
+            assert selection.isAlive() : "dead selection";
+
             Shape shape = selection.getShape();
             Shape newShape = selectionType.createShape(mouseInfo, shape);
             selection.setShape(newShape);
@@ -99,6 +101,7 @@ public class SelectionBuilder {
      * with the already existing shape according to the selection interaction type
      */
     public void combineShapes() {
+        Selection selection = comp.getSelectionOrNull();
         Shape lastShape = selection.getLastShape();
         Shape shape = selection.getShape();
         shape = comp.clipShapeToCanvasSize(shape);
@@ -111,6 +114,7 @@ public class SelectionBuilder {
             if (newBounds.isEmpty()) { // nothing after combine
                 selection.setShape(lastShape); // for the correct deselect undo
                 comp.deselect(AddToHistory.YES);
+                selection = null;
 
                 if (!RandomGUITest.isRunning()) {
                     Messages.showInfo("Nothing selected", "As a result of the "
@@ -130,6 +134,7 @@ public class SelectionBuilder {
             if (shape.getBounds().isEmpty()) {
                 // the new shape can be empty if it has width or height = 0
                 comp.deselect(AddToHistory.NO);
+                selection = null;
                 return;
             } else {
                 selection.setShape(shape);

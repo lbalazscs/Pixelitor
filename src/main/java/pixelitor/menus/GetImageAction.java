@@ -17,7 +17,6 @@
 
 package pixelitor.menus;
 
-import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.layers.AdjustmentLayer;
@@ -68,12 +67,7 @@ public abstract class GetImageAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
-            ImageComponent ic = ImageComponents.getActiveIC();
-            if (ic == null) {
-                return;
-            }
-            Layer activeLayer = ic.getComp().getActiveLayer();
-            startOnLayer(activeLayer);
+            ImageComponents.onActiveLayer(this::startOnLayer);
         } catch (Exception ex) {
             Messages.showException(ex);
         }

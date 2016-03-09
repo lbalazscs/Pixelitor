@@ -26,6 +26,7 @@ import pixelitor.selection.SelectionActions;
 import pixelitor.selection.SelectionBuilder;
 import pixelitor.selection.SelectionInteraction;
 import pixelitor.selection.SelectionType;
+import pixelitor.utils.ImageSwitchListener;
 
 import javax.swing.*;
 import java.awt.Cursor;
@@ -35,9 +36,9 @@ import java.util.Optional;
 /**
  * The selection tool
  */
-public class SelectionTool extends Tool {
+public class SelectionTool extends Tool implements ImageSwitchListener {
     public static final String HELP_TEXT = "Click and drag to select an area. Hold SPACE down to move the entire selection. Shift-drag adds to an existing selection, Alt-drag removes from it, Shift+Alt intersects.";
-    public static final String POLY_HELP_TEXT = "Polygonal selection: Click to add points, right-click to finish the selection.";
+    public static final String POLY_HELP_TEXT = "Polygonal selection: Click to add points, double-click (or right-click) to finish the selection.";
 
     private JComboBox<SelectionType> typeCombo;
     private JComboBox<SelectionInteraction> interactionCombo;
@@ -53,21 +54,19 @@ public class SelectionTool extends Tool {
                 HELP_TEXT,
                 Cursor.getDefaultCursor(), false, true, false, ClipStrategy.FULL_AREA);
         spaceDragBehavior = true;
+        ImageComponents.addImageSwitchListener(this);
     }
 
     @Override
     public void initSettingsPanel() {
         typeCombo = new JComboBox<>(SelectionType.values());
 //        typeCombo.addActionListener(e -> {
-//            boolean newPoly = typeCombo.getSelectedItem() == SelectionType.POLYGONAL_LASSO;
-//            boolean change = polygonal != newPoly;
-//            polygonal = newPoly;
-//            if (change) {
-//                if (polygonal) {
-//                    Messages.showStatusMessage(POLY_HELP_TEXT);
-//                } else {
-//                    Messages.showStatusMessage("Selection Tool:" + HELP_TEXT);
-//                }
+//            selectionBuilder = null;
+//            polygonal = typeCombo.getSelectedItem() == SelectionType.POLYGONAL_LASSO;
+//            if (polygonal) {
+//                Messages.showStatusMessage(POLY_HELP_TEXT);
+//            } else {
+//                Messages.showStatusMessage("Selection Tool: " + HELP_TEXT);
 //            }
 //        });
         settingsPanel.addWithLabel("Type:", typeCombo, "selectionTypeCombo");
@@ -80,9 +79,7 @@ public class SelectionTool extends Tool {
         settingsPanel.addSeparator();
 
         settingsPanel.addButton(SelectionActions.getTraceWithBrush());
-
         settingsPanel.addButton(SelectionActions.getTraceWithEraser());
-
         settingsPanel.addButton(SelectionActions.getCropAction());
     }
 
@@ -165,7 +162,17 @@ public class SelectionTool extends Tool {
     @Override
     public boolean dispatchMouseClicked(MouseEvent e, ImageComponent ic) {
         if (polygonal) {
-            return false;
+            if (selectionBuilder != null && e.getClickCount() > 1) {
+                // finish polygonal for double-click
+                PMouseEvent pe = new PMouseEvent(e, ic);
+                selectionBuilder.updateSelection(pe);
+                selectionBuilder.combineShapes();
+                selectionBuilder = null;
+                return false;
+            } else {
+                // ignore otherwise: will be handled in mouse released
+                return false;
+            }
         }
 
         super.dispatchMouseClicked(e, ic);
@@ -225,4 +232,34 @@ public class SelectionTool extends Tool {
             originalSelectionInteraction = null;
         }
     }
+
+    @Override
+    protected void toolStarted() {
+        super.toolStarted();
+        selectionBuilder = null;
+    }
+
+    @Override
+    public void noOpenImageAnymore() {
+        // ignore
+    }
+
+    @Override
+    public void newImageOpened(Composition comp) {
+        selectionBuilder = null;
+    }
+
+    @Override
+    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
+        selectionBuilder = null;
+    }
+
+    @Override
+    public String getStateInfo() {
+        Object type = typeCombo.getSelectedItem();
+        Object interaction = interactionCombo.getSelectedItem();
+
+        return "type = " + type + ", interaction = " + interaction;
+    }
+
 }

@@ -19,6 +19,7 @@ package pixelitor.layers;
 
 import pixelitor.Build;
 import pixelitor.Composition;
+import pixelitor.ConsistencyChecks;
 import pixelitor.FgBgColors;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
@@ -131,6 +132,10 @@ public enum MaskViewMode {
                     }
                 }
                 FadeMenuItem.INSTANCE.refresh(canFade);
+
+                if (Build.CURRENT.isDevelopment()) {
+                    assert ConsistencyChecks.fadeCheck(layer.getComp());
+                }
             }
         }
     }

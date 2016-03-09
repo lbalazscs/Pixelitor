@@ -41,7 +41,6 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.Optional;
 
 /**
  * A text layer
@@ -189,12 +188,11 @@ public class TextLayer extends ContentLayer {
     ///// from here static utility methods
 
     public static void createNew(PixelitorWindow pw) {
-        Optional<Composition> compOpt = ImageComponents.getActiveComp();
-        if (!compOpt.isPresent()) {
+        Composition comp = ImageComponents.getActiveCompOrNull();
+        if (comp == null) {
             // TODO dialog?
             return;
         }
-        Composition comp = compOpt.get();
         TextLayer textLayer = new TextLayer(comp);
 
         Layer activeLayerBefore = comp.getActiveLayer();

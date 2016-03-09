@@ -72,6 +72,7 @@ public class PixelitorEvent {
         message = saveState(type);
     }
 
+    // saves the actual state of the composition to a string
     private String saveState(String type) {
         if (comp == null) { // "all images are closed" is also an event
             return String.format("%s (%s) no composition", type, threadName);

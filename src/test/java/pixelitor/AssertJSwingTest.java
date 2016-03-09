@@ -1852,7 +1852,7 @@ public class AssertJSwingTest {
     }
 
     private void addNewLayer() {
-        int nrLayers = ImageComponents.getActiveComp().get().getNrLayers();
+        int nrLayers = ImageComponents.getActiveCompOrNull().getNrLayers();
         runMenuCommand("Duplicate Layer");
         assert numLayersIs(nrLayers + 1);
         keyboardInvert();

@@ -73,8 +73,14 @@ public class LayerMask extends ImageLayer {
 
     public static final Composite RUBYLITH_COMPOSITE = AlphaComposite.SrcOver.derive(0.5f);
 
-    public LayerMask(Composition comp, BufferedImage bwImage, Layer layer) {
+    public LayerMask(Composition comp, BufferedImage bwImage, Layer layer, boolean inheritTranslation) {
         super(comp, bwImage, layer.getName() + " MASK", layer);
+
+        if (inheritTranslation && layer instanceof ContentLayer) {
+            ContentLayer contentLayer = (ContentLayer) layer;
+            translationX = contentLayer.getTX();
+            translationY = contentLayer.getTY();
+        }
 
         assert bwImage.getType() == BufferedImage.TYPE_BYTE_GRAY;
     }
@@ -139,8 +145,9 @@ public class LayerMask extends ImageLayer {
      * to the given layer
      */
     public LayerMask duplicate(Layer master) {
-        LayerMask d = new LayerMask(comp, ImageUtils.copyImage(image), master);
+        BufferedImage maskImageCopy = ImageUtils.copyImage(image);
 
+        LayerMask d = new LayerMask(comp, maskImageCopy, master, false);
         d.setTranslation(getTX(), getTY());
 
         return d;

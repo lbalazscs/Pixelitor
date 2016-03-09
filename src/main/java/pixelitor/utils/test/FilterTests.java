@@ -182,7 +182,7 @@ public class FilterTests {
     }
 
     public static void randomResize() {
-        ImageComponents.getActiveComp().ifPresent(comp -> {
+        ImageComponents.onActiveComp(comp -> {
             int targetWidth = 10 + RandomGUITest.rand.nextInt(1200);
             int targetHeight = 10 + RandomGUITest.rand.nextInt(800);
             new Resize(targetWidth, targetHeight, false).process(comp);

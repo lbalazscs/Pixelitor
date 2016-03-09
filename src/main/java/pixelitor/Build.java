@@ -24,9 +24,19 @@ import javax.swing.*;
  * menus and runtime checks.
  */
 public enum Build {
-    DEVELOPMENT {
-    }, FINAL {
+    DEVELOPMENT(true) {
+    }, FINAL(false) {
     };
+
+    private final boolean development;
+
+    Build(boolean development) {
+        this.development = development;
+    }
+
+    public boolean isDevelopment() {
+        return development;
+    }
 
     public static final boolean enableAdjLayers = false;
 

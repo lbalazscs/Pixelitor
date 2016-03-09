@@ -17,6 +17,7 @@
 
 package pixelitor.utils.test;
 
+import com.bric.util.JVM;
 import pixelitor.Build;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
@@ -74,6 +75,7 @@ import pixelitor.utils.AppPreferences;
 import pixelitor.utils.MemoryInfo;
 import pixelitor.utils.Messages;
 import pixelitor.utils.UpdateGUI;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.AWTException;
@@ -91,6 +93,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
 import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
@@ -134,6 +137,8 @@ public class RandomGUITest {
         }
         running = true;
 
+        PixelitorWindow.getInstance().setAlwaysOnTop(true);
+
         new PixelitorEventListener().register();
 
         numPastedImages = 0;
@@ -143,7 +148,7 @@ public class RandomGUITest {
         GlobalKeyboardWatch.addKeyboardShortCut(stopKeyStroke, "stopTest", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("RandomGUITest: \"" + stopKeyStroke + "\" Pressed");
+                System.out.println("RandomGUITest: \"" + stopKeyStroke + "\" pressed");
                 continueRunning = false;
             }
         });
@@ -186,6 +191,11 @@ public class RandomGUITest {
         return running;
     }
 
+    public static void stop() {
+        continueRunning = false;
+        PixelitorWindow.getInstance().setAlwaysOnTop(false);
+    }
+
     private static SwingWorker<Void, Void> createOneRoundSwingWorker(Robot r, boolean forever) {
         return new SwingWorker<Void, Void>() {
             @Override
@@ -210,13 +220,19 @@ public class RandomGUITest {
                     }
 
                     if (!GUIUtils.appIsActive()) {
-                        System.out.println("\nRandomGUITest app focus lost");
-                        cleanUp();
-                        break;
+                        if (JVM.isWindows) { // might be some "upgrade to windows 10" window
+                            tryToActivateWindow(3);
+                        }
+
+                        if (!GUIUtils.appIsActive()) {
+                            System.out.println("\nRandomGUITest app focus lost.");
+                            cleanUp();
+                            break;
+                        }
                     }
 
                     if (!continueRunning) {
-                        System.out.println("\nStopped with \"" + stopKeyStroke + '"');
+                        System.out.println("\nRandomGUITest stopped.");
                         cleanUp();
                         break;
                     }
@@ -248,6 +264,30 @@ public class RandomGUITest {
                 return null;
             } // end of doInBackground()
         };
+    }
+
+    private static void tryToActivateWindow(int attempts) {
+        if (attempts <= 0) {
+            return;
+        }
+
+        System.out.println("RandomGUITest: trying to regain window focus");
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                PixelitorWindow pw = PixelitorWindow.getInstance();
+                pw.toFront();
+                pw.repaint();
+            });
+        } catch (InterruptedException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+
+        if (GUIUtils.appIsActive()) { // success
+            return;
+        } else {
+            Utils.sleep(1, TimeUnit.SECONDS);
+            tryToActivateWindow(attempts - 1);
+        }
     }
 
     private static Point generateRandomPoint() {
@@ -293,7 +333,15 @@ public class RandomGUITest {
         Point randomPoint = generateRandomPoint();
         int x = randomPoint.x;
         int y = randomPoint.y;
-        log(Tools.getCurrentTool().getName() + " Tool\" drag to (" + x + ", " + y + ')');
+        Tool tool = Tools.getCurrentTool();
+        String stateInfo = tool.getStateInfo();
+        if (stateInfo == null) {
+            stateInfo = "";
+        } else {
+            stateInfo = "(" + stateInfo + ")";
+        }
+
+        log(tool.getName() + " Tool " + stateInfo + " drag to (" + x + ", " + y + ')');
 
         r.mousePress(InputEvent.BUTTON1_MASK);
         r.mouseMove(x, y);

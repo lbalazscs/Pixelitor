@@ -52,7 +52,9 @@ public class FgBgColorSelector extends JLayeredPane {
 
     private boolean layerMaskEditing = false;
 
-    public FgBgColorSelector() {
+    public static FgBgColorSelector INSTANCE = new FgBgColorSelector();
+
+    private FgBgColorSelector() {
         setLayout(null);
 
         initFGButton();
@@ -236,5 +238,11 @@ public class FgBgColorSelector extends JLayeredPane {
                 setBgColor(bgColor);
             }
         }
+    }
+
+    public void dumpState() {
+        System.out.println("FgBgColorSelector::dumpState: layerMaskEditing = " + layerMaskEditing);
+        System.out.println("FgBgColorSelector::dumpState: fgColor = " + fgColor + ", bgColor = " + bgColor);
+        System.out.println("FgBgColorSelector::dumpState: maskFgColor = " + maskFgColor + ", maskBgColor = " + maskBgColor);
     }
 }

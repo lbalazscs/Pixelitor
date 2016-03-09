@@ -58,6 +58,10 @@ public class ImagePanel extends JPanel {
         g.setColor(getBackground());
         g.fillRect(0, 0, getWidth(), getHeight());
 
+        if (image == null) {
+            return;
+        }
+
         try {
             if (drawCheckerBoard) {
                 Graphics2D g2 = (Graphics2D) g;

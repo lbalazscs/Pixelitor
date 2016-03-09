@@ -259,10 +259,23 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     }
 
     private void setupDrawingRadius() {
-//        System.out.println("AbstractBrushTool::setupDrawingRadius: CALLED " +
-//                "for " + this.getClass().getName());
+        int newRadius = getRadius();
+        brush.setRadius(newRadius);
 
-        brush.setRadius(getRadius());
+//        int desiredImgSize = 2 * newRadius;
+//        Dimension cursorSize = Toolkit.getDefaultToolkit().getBestCursorSize(desiredImgSize, desiredImgSize);
+//
+//        BufferedImage cursorImage = ImageUtils.createSysCompatibleImage(cursorSize.width, cursorSize.height);
+//        Graphics2D g = cursorImage.createGraphics();
+//        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+//        g.setColor(Color.RED);
+//        g.drawOval(0, 0, cursorSize.width, cursorSize.height);
+//        g.dispose();
+//
+//        cursor = Toolkit.getDefaultToolkit().createCustomCursor(
+//                cursorImage,
+//                new Point(cursorSize.width / 2, cursorSize.height / 2), "brush");
+//        ImageComponents.onAllImages(ic -> ic.setCursor(cursor));
     }
 
     @Override

@@ -48,6 +48,8 @@ import java.awt.image.BufferedImage;
  */
 public abstract class Tool {
     private boolean mouseDown = false;
+    private boolean altDown = false;
+
     private ToolButton toolButton;
 
     private final String name;
@@ -253,7 +255,7 @@ public abstract class Tool {
 
     protected void toolStarted() {
         ended = false;
-        ImageComponents.setToolCursor(cursor);
+        ImageComponents.setCursorForAll(cursor);
     }
 
     protected void toolEnded() {
@@ -333,19 +335,26 @@ public abstract class Tool {
     }
 
     public void altPressed() {
-        if(doColorPickerForwarding()) {
-            ImageComponents.onActiveIC(ic -> ic.setCursor(Tools.COLOR_PICKER.getCursor()));
+        if (!altDown && doColorPickerForwarding()) {
+            ImageComponents.onAllImages(ic -> ic.setCursor(Tools.COLOR_PICKER.getCursor()));
         }
+        altDown = true;
     }
 
     public void altReleased() {
         if(doColorPickerForwarding()) {
-            ImageComponents.onActiveIC(ic -> ic.setCursor(cursor));
+            ImageComponents.onAllImages(ic -> ic.setCursor(cursor));
         }
+        altDown = false;
     }
 
     @Override
     public String toString() {
         return name; // so that they can be easily selected from a JComboBox
+    }
+
+    // used for debugging
+    public String getStateInfo() {
+        return null;
     }
 }

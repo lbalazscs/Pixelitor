@@ -24,7 +24,6 @@ import pixelitor.gui.ImageComponents;
 import javax.swing.*;
 import java.awt.Cursor;
 import java.awt.event.MouseEvent;
-import java.util.Optional;
 
 /**
  * The move tool.
@@ -70,9 +69,8 @@ public class MoveTool extends Tool {
 
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
-        Optional<Composition> optComp = ImageComponents.getActiveComp();
-        if (optComp.isPresent()) {
-            Composition comp = optComp.get();
+        Composition comp = ImageComponents.getActiveCompOrNull();
+        if (comp != null) {
             move(comp, key.getMoveX(), key.getMoveY());
             return true;
         }

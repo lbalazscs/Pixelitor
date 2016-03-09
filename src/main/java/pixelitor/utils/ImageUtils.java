@@ -35,6 +35,7 @@ import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Composite;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
@@ -557,6 +558,12 @@ public class ImageUtils {
     public static BufferedImage createThumbnail(BufferedImage src, int size, CheckerboardPainter painter) {
         assert src != null;
 
+        Dimension thumbDim = calcThumbDimensions(src, size);
+
+        return downSizeFast(src, painter, thumbDim.width, thumbDim.height);
+    }
+
+    public static Dimension calcThumbDimensions(BufferedImage src, int size) {
         int width = src.getWidth();
         int height = src.getHeight();
 
@@ -579,7 +586,7 @@ public class ImageUtils {
             thumbHeight = 1;
         }
 
-        return downSizeFast(src, painter, thumbWidth, thumbHeight);
+        return new Dimension(thumbWidth, thumbHeight);
     }
 
     public static BufferedImage createThumbnail(BufferedImage src, int maxWidth, int maxHeight, CheckerboardPainter painter) {

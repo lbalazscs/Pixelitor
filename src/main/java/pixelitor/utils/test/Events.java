@@ -45,6 +45,8 @@ public class Events {
         if (eventList.size() > MAX_SIZE) {
             eventList.remove(0);
         }
+
+
     }
 
     public static void postListenerEvent(String type, Composition comp, Layer layer) {
@@ -84,17 +86,21 @@ public class Events {
         post(new PixelitorEvent("[RAND] " + description, null, null));
     }
 
-    public static void dump() {
-        Composition comp = ImageComponents.getActiveCompOrNull();
-        dump(comp);
-    }
-
     /**
      * Dumps the last events for the given Composition.
      */
-    public static void dump(Composition comp) {
+    public static void dumpActive() {
+        Composition comp = ImageComponents.getActiveCompOrNull();
         eventList.stream()
                 .filter(e -> e.isComp(comp))
+                .forEach(System.out::println);
+    }
+
+    /**
+     * Dumps the last events.
+     */
+    public static void dumpAll() {
+        eventList.stream()
                 .forEach(System.out::println);
     }
 }

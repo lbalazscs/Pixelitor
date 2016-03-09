@@ -33,7 +33,6 @@ import pixelitor.filters.jhlabsproxies.JHDropShadow;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.TextFilter;
 import pixelitor.filters.painters.TextSettings;
-import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.history.AddToHistory;
 import pixelitor.io.FileChoosers;
@@ -87,16 +86,16 @@ public class SplashImageCreator {
             messageHandler.updateProgress(i);
 
             createSplashImage();
-            ImageComponent ic = ImageComponents.getActiveIC();
-            ic.paintImmediately(ic.getBounds());
 
-            File f = new File(lastSaveDir, fileName);
+            ImageComponents.onActiveICAndComp((ic, comp) -> {
+                ic.paintImmediately(ic.getBounds());
+                File f = new File(lastSaveDir, fileName);
 
-            Composition comp = ic.getComp();
-            outputFormat.saveComposition(comp, f, false);
+                outputFormat.saveComposition(comp, f, false);
 
-            ic.close();
-            ValueNoise.reseed();
+                ic.close();
+                ValueNoise.reseed();
+            });
         }
         messageHandler.stopProgress();
         messageHandler.showStatusMessage(String.format("Finished saving splash images to %s", lastSaveDir));

@@ -40,6 +40,7 @@ import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.filters.lookup.Luminosity;
 import pixelitor.filters.painters.TextFilter;
 import pixelitor.gui.Desktop;
+import pixelitor.gui.FgBgColorSelector;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
@@ -115,6 +116,8 @@ import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_270;
 import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_90;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.MOTION_BLUR;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
+import static pixelitor.gui.ImageComponents.getActiveCompOrNull;
+import static pixelitor.gui.ImageComponents.getActiveLayerOrNull;
 import static pixelitor.menus.EnabledIf.ACTION_ENABLED;
 import static pixelitor.menus.EnabledIf.CAN_REPEAT_OPERATION;
 import static pixelitor.menus.EnabledIf.REDO_POSSIBLE;
@@ -236,8 +239,7 @@ public class MenuBar extends JMenuBar {
         fileMenu.addAction(new MenuAction("Export Optimized JPEG...") {
             @Override
             public void onClick() {
-                Composition comp = ImageComponents.getActiveCompOrNull();
-                BufferedImage image = comp.getCompositeImage();
+                BufferedImage image = ImageComponents.getActiveCompositeImageOrNull();
                 OptimizedJpegSavePanel.showInDialog(image, pw);
             }
         });
@@ -410,24 +412,21 @@ public class MenuBar extends JMenuBar {
         layersMenu.addActionWithKey(new MenuAction("Merge Down") {
             @Override
             public void onClick() {
-                Composition comp = ImageComponents.getActiveCompOrNull();
-                comp.mergeDown(UpdateGUI.YES);
+                getActiveCompOrNull().mergeDown(UpdateGUI.YES);
             }
         }, CTRL_E);
 
         layersMenu.addAction(new MenuAction("Flatten Image") {
             @Override
             public void onClick() {
-                Composition comp = ImageComponents.getActiveCompOrNull();
-                comp.flattenImage(UpdateGUI.YES);
+                getActiveCompOrNull().flattenImage(UpdateGUI.YES);
             }
         });
 
         layersMenu.addActionWithKey(new MenuAction("New Layer from Composite") {
             @Override
             public void onClick() {
-                Composition comp = ImageComponents.getActiveCompOrNull();
-                comp.addNewLayerFromComposite("Composite");
+                getActiveCompOrNull().addNewLayerFromComposite("Composite");
             }
         }, CTRL_SHIFT_ALT_E);
 
@@ -452,16 +451,14 @@ public class MenuBar extends JMenuBar {
         sub.addActionWithKey(new MenuAction("Layer to Top") {
             @Override
             public void onClick() {
-                Composition comp = ImageComponents.getActiveCompOrNull();
-                comp.moveActiveLayerToTop();
+                getActiveCompOrNull().moveActiveLayerToTop();
             }
         }, CTRL_SHIFT_CLOSE_BRACKET);
 
         sub.addActionWithKey(new MenuAction("Layer to Bottom") {
             @Override
             public void onClick() {
-                Composition comp = ImageComponents.getActiveCompOrNull();
-                comp.moveActiveLayerToBottom();
+                getActiveCompOrNull().moveActiveLayerToBottom();
             }
         }, CTRL_SHIFT_OPEN_BRACKET);
 
@@ -470,7 +467,7 @@ public class MenuBar extends JMenuBar {
         sub.addActionWithKey(new MenuAction("Raise Layer Selection") {
             @Override
             public void onClick() {
-                Composition comp = ImageComponents.getActiveCompOrNull();
+                Composition comp = getActiveCompOrNull();
                 comp.moveLayerSelectionUp();
             }
         }, ALT_CLOSE_BRACKET);
@@ -478,8 +475,7 @@ public class MenuBar extends JMenuBar {
         sub.addActionWithKey(new MenuAction("Lower Layer Selection") {
             @Override
             public void onClick() {
-                Composition comp = ImageComponents.getActiveCompOrNull();
-                comp.moveLayerSelectionDown();
+                getActiveCompOrNull().moveLayerSelectionDown();
             }
         }, ALT_OPEN_BRACKET);
 
@@ -492,24 +488,21 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("Add White (Reveal All)") {
             @Override
             public void onClick() {
-                Layer layer = ImageComponents.getActiveLayerOrNull();
-                layer.addMask(LayerMaskAddType.REVEAL_ALL);
+                getActiveLayerOrNull().addMask(LayerMaskAddType.REVEAL_ALL);
             }
         });
 
         sub.addAction(new MenuAction("Add Black (Hide All)") {
             @Override
             public void onClick() {
-                Layer layer = ImageComponents.getActiveLayerOrNull();
-                layer.addMask(LayerMaskAddType.HIDE_ALL);
+                getActiveLayerOrNull().addMask(LayerMaskAddType.HIDE_ALL);
             }
         });
 
         sub.addAction(new MenuAction("Add from Selection") {
             @Override
             public void onClick() {
-                Layer layer = ImageComponents.getActiveLayerOrNull();
-                layer.addMask(LayerMaskAddType.REVEAL_SELECTION);
+                getActiveLayerOrNull().addMask(LayerMaskAddType.REVEAL_SELECTION);
             }
         });
 
@@ -574,18 +567,14 @@ public class MenuBar extends JMenuBar {
         sub.addActionWithKey(new MenuAction("Edit...", IS_TEXT_LAYER) {
             @Override
             public void onClick() {
-                Composition comp = ImageComponents.getActiveIC().getComp();
-                Layer layer = comp.getActiveLayer();
-                TextLayer textLayer = (TextLayer) layer;
-                textLayer.edit(pw);
+                ImageComponents.onActiveTextLayer(textLayer -> textLayer.edit(pw));
             }
         }, CTRL_T);
 
         sub.addAction(new MenuAction("Rasterize", IS_TEXT_LAYER) {
             @Override
             public void onClick() {
-                Layer activeLayer = ImageComponents.getActiveLayerOrNull();
-                ((TextLayer) activeLayer).replaceWithRasterized();
+                ImageComponents.onActiveTextLayer(TextLayer::replaceWithRasterized);
             }
         });
 
@@ -641,8 +630,7 @@ public class MenuBar extends JMenuBar {
         imageMenu.addAction(new MenuAction("Layer to Canvas Size") {
             @Override
             public void onClick() {
-                Composition comp = ImageComponents.getActiveCompOrNull();
-                comp.activeLayerToCanvasSize();
+                getActiveCompOrNull().activeLayerToCanvasSize();
             }
         });
 
@@ -1063,7 +1051,7 @@ public class MenuBar extends JMenuBar {
         developMenu.addAction(new MenuAction("Dump Event Queue") {
             @Override
             public void onClick() {
-                Events.dump();
+                Events.dumpAll();
             }
         });
 
@@ -1078,7 +1066,7 @@ public class MenuBar extends JMenuBar {
         developMenu.addAction(new MenuAction("Debug Layer Mask") {
             @Override
             public void onClick() {
-                ImageLayer imageLayer = (ImageLayer) ImageComponents.getActiveLayerOrNull();
+                ImageLayer imageLayer = (ImageLayer) getActiveLayerOrNull();
                 Utils.debugImage(imageLayer.getImage(), "layer image");
 
                 if (imageLayer.hasMask()) {
@@ -1095,7 +1083,7 @@ public class MenuBar extends JMenuBar {
         developMenu.addAction(new MenuAction("Mask update transparency from BW") {
             @Override
             public void onClick() {
-                ImageLayer imageLayer = (ImageLayer) ImageComponents.getActiveLayerOrNull();
+                ImageLayer imageLayer = (ImageLayer) getActiveLayerOrNull();
                 if (imageLayer.hasMask()) {
                     imageLayer.getMask().updateFromBWImage();
                     imageLayer.getComp().imageChanged(FULL);
@@ -1108,7 +1096,7 @@ public class MenuBar extends JMenuBar {
         developMenu.addAction(new MenuAction("imageChanged(FULL) on the active image") {
             @Override
             public void onClick() {
-                ImageComponents.getActiveCompOrNull().imageChanged(FULL, true);
+                getActiveCompOrNull().imageChanged(FULL, true);
             }
         });
 
@@ -1131,13 +1119,10 @@ public class MenuBar extends JMenuBar {
         developMenu.addAction(new MenuAction("Debug translation and canvas") {
             @Override
             public void onClick() {
-                Composition comp = ImageComponents.getActiveIC().getComp();
-                Layer layer = comp.getActiveLayer();
-                if (layer instanceof ImageLayer) {
-                    ImageLayer imageLayer = (ImageLayer) layer;
-                    String s = imageLayer.toDebugCanvasString();
+                ImageComponents.onActiveImageLayer(layer -> {
+                    String s = layer.toDebugCanvasString();
                     System.out.println(s);
-                }
+                });
             }
         });
 
@@ -1152,6 +1137,13 @@ public class MenuBar extends JMenuBar {
             @Override
             public void onClick() {
                 FilterUtils.createAllFilters();
+            }
+        });
+
+        developMenu.addAction(new MenuAction("debug FgBgColorSelector") {
+            @Override
+            public void onClick() {
+                FgBgColorSelector.INSTANCE.dumpState();
             }
         });
 
@@ -1178,7 +1170,7 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("reset the translation of current layer") {
             @Override
             public void onClick() {
-                Composition comp = ImageComponents.getActiveCompOrNull();
+                Composition comp = getActiveCompOrNull();
                 Layer layer = comp.getActiveLayer();
                 if (layer instanceof ContentLayer) {
                     ContentLayer contentLayer = (ContentLayer) layer;
@@ -1194,7 +1186,7 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("Update Histograms") {
             @Override
             public void onClick() {
-                Composition comp = ImageComponents.getActiveCompOrNull();
+                Composition comp = getActiveCompOrNull();
                 HistogramsPanel.INSTANCE.updateFromCompIfShown(comp);
             }
         });

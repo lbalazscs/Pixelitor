@@ -20,7 +20,6 @@ package pixelitor.selection;
 import pixelitor.Composition;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GridBagHelper;
@@ -168,12 +167,10 @@ public final class SelectionActions {
 
         @Override
         public void onClick() {
-            ImageComponent ic = ImageComponents.getActiveIC();
-            if(ic == null) {
-                return;
-            }
-            Composition comp = ic.getComp();
+            ImageComponents.onActiveComp(this::traceComp);
+        }
 
+        private void traceComp(Composition comp) {
             if (!comp.activeIsImageLayerOrMask()) {
                 Messages.showNotImageLayerError();
                 return;

@@ -150,13 +150,14 @@ public class Dialogs {
         }
 
         if (RandomGUITest.isRunning()) {
-            Events.dump();
+            Events.dumpAll();
             History.showHistory();
             Toolkit.getDefaultToolkit().beep();
-
             playWarningSound();
-        } else if(Build.CURRENT == Build.DEVELOPMENT) {
-            Events.dump();
+
+            RandomGUITest.stop();
+        } else if(Build.CURRENT.isDevelopment()) {
+            Events.dumpActive();
         }
 
         Frame parent = getParentForDialogs();
@@ -189,7 +190,7 @@ public class Dialogs {
     }
 
     public static void showOutOfMemoryDialog(OutOfMemoryError e) {
-        if (Build.CURRENT == Build.DEVELOPMENT) {
+        if (Build.CURRENT.isDevelopment()) {
             e.printStackTrace();
         }
         String message = "<html><b>Out of memory error.</b> You can try <ul>" +

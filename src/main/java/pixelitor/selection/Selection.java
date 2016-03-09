@@ -83,7 +83,8 @@ public class Selection {
     }
 
     public void startMarching() {
-        assert ic != null;
+        assert !dead : "dead selection";
+        assert ic != null : "no ic in selection";
 
         marchingAntsTimer = new Timer(100, null);
         marchingAntsTimer.addActionListener(evt -> {

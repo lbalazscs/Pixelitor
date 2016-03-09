@@ -74,7 +74,7 @@ public class HandToolHandler extends ToolHandler {
             Tools.HAND.mouseReleased(e, ic);
             handToolForwarding = false;
 
-            ImageComponents.setToolCursor(cursor);
+//            ImageComponents.setCursorForAll(cursor);
             return true;
         }
 
@@ -84,7 +84,7 @@ public class HandToolHandler extends ToolHandler {
     public void spacePressed() {
         if (!spaceDown) { // this is called all the time while the space is held down, but we are interested only in ist first call
             if (!normalToolUsage) {
-                ImageComponents.setToolCursor(Tools.HAND.getCursor());
+                ImageComponents.setCursorForAll(Tools.HAND.getCursor());
             }
         }
         spaceDown = true;
@@ -93,7 +93,7 @@ public class HandToolHandler extends ToolHandler {
     public void spaceReleased() {
         spaceDown = false;
         if (!handToolForwarding) {
-            ImageComponents.setToolCursor(cursor);
+            ImageComponents.setCursorForAll(cursor);
         }
     }
 }
