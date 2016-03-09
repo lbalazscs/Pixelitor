@@ -67,7 +67,7 @@ public class ColorPickerTool extends Tool {
         int y = (int) ic.componentYToImageSpace(e.getY());
 
         BufferedImage img;
-        boolean isMask = false;
+        boolean isGray = false;
         if (sampleLayerOnly.isSelected()) {
             if (!ic.activeIsImageLayerOrMask()) {
                 return;
@@ -75,7 +75,7 @@ public class ColorPickerTool extends Tool {
 
             ImageLayer layer = ic.getComp().getActiveMaskOrImageLayer();
             img = layer.getImage();
-            isMask = img.getType() == BufferedImage.TYPE_BYTE_GRAY;
+            isGray = img.getType() == BufferedImage.TYPE_BYTE_GRAY;
 
             x -= layer.getTX();
             y -= layer.getTY();
@@ -88,7 +88,7 @@ public class ColorPickerTool extends Tool {
         if (x < imgWidth && y < imgHeight && x >= 0 && y >= 0) {
             int rgb = img.getRGB(x, y);
 
-            showColorInStatusBar(x, y, rgb, isMask);
+            showColorInStatusBar(x, y, rgb, isGray);
 
             Color sampledColor = new Color(rgb);
             if (selectBackground) {
@@ -99,14 +99,14 @@ public class ColorPickerTool extends Tool {
         }
     }
 
-    private static void showColorInStatusBar(int x, int y, int rgb, boolean isMask) {
+    private static void showColorInStatusBar(int x, int y, int rgb, boolean isGray) {
         int a = (rgb >>> 24) & 0xFF;
         int r = (rgb >>> 16) & 0xFF;
         int g = (rgb >>> 8) & 0xFF;
-        int b = (rgb) & 0xFF;
+        int b = rgb & 0xFF;
 
         String msg = "x = " + x + ", y = " + y;
-        if (isMask) {
+        if (isGray) {
             msg += ", gray = " + r;
         } else {
             msg += ", alpha = " + a + ", red = " + r + ", green = " + g + ", blue = " + b;

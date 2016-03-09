@@ -15,9 +15,8 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.menus;
+package pixelitor.selection;
 
-import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
@@ -28,10 +27,13 @@ import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.history.AddToHistory;
 import pixelitor.layers.ImageLayer;
-import pixelitor.selection.Selection;
+import pixelitor.menus.MenuAction;
+import pixelitor.menus.view.ShowHideAction;
+import pixelitor.menus.view.ShowHideSelectionAction;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Messages;
+import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import java.awt.GridBagLayout;
@@ -65,6 +67,8 @@ public final class SelectionActions {
             getActiveCompOrNull().invertSelection();
         }
     };
+
+    private static final ShowHideAction showHideSelectionAction = new ShowHideSelectionAction();
 
     private static final Action traceWithBrush = new TraceAction("Stroke with Current Brush", Tools.BRUSH);
     private static final Action traceWithEraser = new TraceAction("Stroke with Current Eraser", Tools.ERASER);
@@ -102,7 +106,7 @@ public final class SelectionActions {
     public static void setEnabled(boolean b, Composition comp) {
         assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
 
-        if (Build.CURRENT.isRandomGUITest()) {
+        if (RandomGUITest.isRunning()) {
             if (comp != null) {
                 boolean hasSelection = comp.hasSelection();
                 if (hasSelection != b) {
@@ -118,6 +122,7 @@ public final class SelectionActions {
         traceWithEraser.setEnabled(b);
         deselectAction.setEnabled(b);
         invertSelectionAction.setEnabled(b);
+        showHideSelectionAction.setEnabled(b);
         modifyAction.setEnabled(b);
     }
 
@@ -143,6 +148,10 @@ public final class SelectionActions {
 
     public static Action getInvertSelectionAction() {
         return invertSelectionAction;
+    }
+
+    public static ShowHideAction getShowHideSelectionAction() {
+        return showHideSelectionAction;
     }
 
     public static Action getModifyAction() {

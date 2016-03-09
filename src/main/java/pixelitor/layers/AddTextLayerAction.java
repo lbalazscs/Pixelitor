@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.layers;
 
 import pixelitor.Composition;
@@ -22,6 +23,7 @@ import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.utils.IconUtils;
 import pixelitor.utils.ImageSwitchListener;
+import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -41,7 +43,9 @@ public class AddTextLayerAction extends AbstractAction implements ImageSwitchLis
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        TextLayer.createNew(PixelitorWindow.getInstance());
+        if(!RandomGUITest.isRunning()) {
+            TextLayer.createNew(PixelitorWindow.getInstance());
+        }
     }
 
     @Override

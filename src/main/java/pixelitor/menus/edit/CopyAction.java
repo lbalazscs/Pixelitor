@@ -17,10 +17,15 @@
 
 package pixelitor.menus.edit;
 
-import pixelitor.Build;
+import pixelitor.Composition;
+import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.gui.utils.Dialogs;
+import pixelitor.layers.AdjustmentLayer;
+import pixelitor.layers.Layer;
 import pixelitor.utils.Messages;
 import pixelitor.utils.debug.BufferedImageNode;
+import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import java.awt.Toolkit;
@@ -44,17 +49,21 @@ public class CopyAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
-            if(!ImageComponents.isActiveLayerImageLayer()) {
-                // TODO we could try to rasterize text layers
+            ImageComponent ic = ImageComponents.getActiveIC();
+            Composition comp = ic.getComp();
 
-                if(!Build.CURRENT.isRandomGUITest()) {
-                    Messages.showNotImageLayerError();
+            if (source == CopySource.LAYER) {
+                Layer layer = comp.getActiveLayer();
+                if (layer instanceof AdjustmentLayer) {
+                    if (!RandomGUITest.isRunning()) {
+                        Dialogs.showErrorDialog("Adjustment Layer", "Adjustment layers cannot be copied");
+                    }
+                    return;
                 }
-                return;
             }
 
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-            BufferedImage activeImage = source.getImage();
+            BufferedImage activeImage = source.getImage(comp);
             Transferable imageTransferable = new ImageTransferable(activeImage);
 
             try {

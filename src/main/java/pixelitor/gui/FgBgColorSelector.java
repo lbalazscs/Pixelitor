@@ -17,9 +17,9 @@
 
 package pixelitor.gui;
 
-import com.bric.swing.ColorPicker;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.ColorUtils;
+import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -28,6 +28,7 @@ import java.awt.event.ActionEvent;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
+import static pixelitor.utils.ColorUtils.showColorPickerDialog;
 
 /**
  * A panel that contains the buttons for selecting the foreground and background colors
@@ -144,17 +145,27 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void bgButtonPressed() {
+        if (RandomGUITest.isRunning()) {
+            return;
+        }
+
         Color selectedColor = layerMaskEditing ? maskBgColor : bgColor;
-        Color c = ColorPicker.showDialog(PixelitorWindow.getInstance(), "Set background color", selectedColor, false);
-        if (c != null) {
+        Color c = showColorPickerDialog("Set background color", selectedColor, false);
+
+        if (c != null) { // OK was pressed
             setBgColor(c);
         }
     }
 
     private void fgButtonPressed() {
+        if (RandomGUITest.isRunning()) {
+            return;
+        }
+
         Color selectedColor = layerMaskEditing ? maskFgColor : fgColor;
-        Color c = ColorPicker.showDialog(PixelitorWindow.getInstance(), "Set foreground color", selectedColor, false);
-        if (c != null) {
+        Color c = showColorPickerDialog("Set foreground color", selectedColor, false);
+
+        if (c != null) { // OK was pressed
             setFgColor(c);
         }
     }

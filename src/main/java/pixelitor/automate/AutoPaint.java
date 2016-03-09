@@ -21,13 +21,11 @@ import net.jafama.FastMath;
 import pixelitor.Composition;
 import pixelitor.FgBgColors;
 import pixelitor.MessageHandler;
-import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.IntTextField;
 import pixelitor.gui.utils.OKCancelDialog;
-import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.layers.ImageLayer;
@@ -187,12 +185,17 @@ public class AutoPaint {
             gbh.addLabelWithControl("Number of Strokes:", numStrokesTF);
 
             lengthTF = new IntTextField(String.valueOf(defaultLength));
-            gbh.addLabelWithControl("Stroke Length Average:", lengthTF);
 
-            lengthVariability.setValueNoTrigger(defaultLengthVariability);
-            gbh.addLabelWithControl("Stroke Length Variability:",
-                    new SliderSpinner(lengthVariability,
-                            SliderSpinner.TextPosition.NONE, AddDefaultButton.NO));
+            // TODO stroke length variability
+//            gbh.addLabelWithControl("Stroke Length Average:", lengthTF);
+            gbh.addLabelWithControl("Stroke Length:", lengthTF);
+//
+            // TODO stroke length variability
+
+//            lengthVariability.setValueNoTrigger(defaultLengthVariability);
+//            gbh.addLabelWithControl("Stroke Length Variability:",
+//                    new SliderSpinner(lengthVariability,
+//                            SliderSpinner.TextPosition.NONE, AddDefaultButton.NO));
 
             randomColorsLabel = new JLabel("Random Colors:");
             randomColorsCB = new JCheckBox();
@@ -232,7 +235,9 @@ public class AutoPaint {
             float lengthRandomnessPercentage = lengthVariability.getValueAsPercentage();
             defaultLengthVariability = lengthVariability.getValue();
 
-            return new Settings(tool, numStrokes, strokeLength, randomColors, lengthRandomnessPercentage);
+            // TODO stroke length variability
+//            return new Settings(tool, numStrokes, strokeLength, randomColors, lengthRandomnessPercentage);
+            return new Settings(tool, numStrokes, strokeLength, randomColors, 0);
         }
     }
 

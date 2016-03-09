@@ -17,7 +17,6 @@
 
 package pixelitor.layers;
 
-import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.utils.AppPreferences;
 
@@ -152,10 +151,9 @@ public class LayerButtonLayout implements LayoutManager {
 
         height = newThumbSize + 2 * GAP;
 
-        ImageComponent ic = ImageComponents.getActiveIC();
-        if (ic != null) {
+        ImageComponents.onActiveIC(ic -> {
             LayersContainer.showLayersPanel(ic.getLayersPanel());
             ic.getComp().updateAllIconImages();
-        }
+        });
     }
 }

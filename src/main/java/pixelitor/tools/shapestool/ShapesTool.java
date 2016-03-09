@@ -387,7 +387,7 @@ public class ShapesTool extends Tool {
             Optional<Selection> selection = comp.getSelection();
 
             if (selection.isPresent()) {
-                selection.get().setShape(selectionShape);
+                selection.get().setNewShape(selectionShape);
             } else {
                 comp.createSelectionFromShape(selectionShape);
             }

@@ -14,27 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
-package pixelitor.utils.debug;
 
-import pixelitor.selection.Selection;
+package pixelitor.gui.utils;
 
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.Color;
 
-/**
- * A debugging node for a selection
- */
-public class SelectionNode extends DebugNode {
-
-    public SelectionNode(Selection selection) {
-        super("Selection", selection);
-
-        Shape shape = selection.getShape();
-        addStringChild("Shape Class", shape.getClass().getName());
-
-        Rectangle bounds = selection.getShapeBounds();
-        addStringChild("Bounds", bounds.toString());
-    }
-
-
+public interface ColorSelectionListener {
+    void selectedColorChanged(Color c);
 }

@@ -18,8 +18,9 @@
 package pixelitor.menus.edit;
 
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponents;
 import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Layer;
+import pixelitor.layers.TextLayer;
 
 import java.awt.image.BufferedImage;
 
@@ -29,17 +30,23 @@ import java.awt.image.BufferedImage;
 public enum CopySource {
     LAYER {
         @Override
-        BufferedImage getImage() {
-            Composition comp = ImageComponents.getActiveCompOrNull();
-            if (comp != null) {
-                ImageLayer layer = comp.getActiveMaskOrImageLayerOrNull();
-                if (layer != null) {
-                    // TODO calling with false, false results in
-                    // raster "has minX or minY not equal to zero" exception?
-                    // false, true avoids it, but now it is copied twice
-                    return layer.getImageOrSubImageIfSelected(false, true);
-                }
+        BufferedImage getImage(Composition comp) {
+            Layer layer = comp.getActiveLayer();
+            if (layer.isMaskEditing()) {
+                layer = layer.getMask();
             }
+
+            if (layer instanceof ImageLayer) {
+                // TODO calling with "false, false" results in
+                // raster "has minX or minY not equal to zero" exception?
+                // "false, true" avoids it, but now it is copied twice
+                return ((ImageLayer) layer).getImageOrSubImageIfSelected(false, true);
+            }
+
+            if (layer instanceof TextLayer) {
+                return ((TextLayer) layer).createRasterizedImage();
+            }
+
             return null;
         }
 
@@ -49,8 +56,8 @@ public enum CopySource {
         }
     }, COMPOSITE {
         @Override
-        BufferedImage getImage() {
-            return ImageComponents.getActiveCompositeImageOrNull();
+        BufferedImage getImage(Composition comp) {
+            return comp.getCompositeImage();
         }
 
         @Override
@@ -59,5 +66,5 @@ public enum CopySource {
         }
     };
 
-    abstract BufferedImage getImage();
+    abstract BufferedImage getImage(Composition comp);
 }

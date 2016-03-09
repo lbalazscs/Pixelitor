@@ -1,6 +1,26 @@
+/*
+ * Copyright 2016 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.utils;
 
+import com.bric.swing.ColorPicker;
 import com.jhlabs.image.ImageMath;
+import pixelitor.gui.GlobalKeyboardWatch;
+import pixelitor.gui.PixelitorWindow;
 
 import java.awt.Color;
 import java.util.Random;
@@ -144,5 +164,13 @@ public class ColorUtils {
 
     public static int toPackedInt(int a, int r, int g, int b) {
         return (a << 24) | (r << 16) | (g << 8) | b;
+    }
+
+    // should not be called from dialogs because it sets dialogActive to false at the end
+    public static Color showColorPickerDialog(String title, Color selectedColor, boolean allowOpacity) {
+        GlobalKeyboardWatch.setDialogActive(true);
+        Color color = ColorPicker.showDialog(PixelitorWindow.getInstance(), title, selectedColor, allowOpacity);
+        GlobalKeyboardWatch.setDialogActive(false);
+        return color;
     }
 }

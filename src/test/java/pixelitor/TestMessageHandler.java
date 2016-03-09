@@ -52,6 +52,11 @@ public class TestMessageHandler implements MessageHandler {
     }
 
     @Override
+    public void showNotImageLayerOrMaskError() {
+        throw new AssertionError("not image layer or mask");
+    }
+
+    @Override
     public void showException(Throwable e) {
         throw new AssertionError(e);
     }

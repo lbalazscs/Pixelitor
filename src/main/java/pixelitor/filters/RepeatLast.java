@@ -18,7 +18,7 @@
 package pixelitor.filters;
 
 import pixelitor.layers.ImageLayer;
-import pixelitor.layers.ImageLayerAction;
+import pixelitor.menus.ImageLayerAction;
 
 import static pixelitor.ChangeReason.REPEAT_LAST;
 import static pixelitor.filters.FilterUtils.getLastExecutedFilter;

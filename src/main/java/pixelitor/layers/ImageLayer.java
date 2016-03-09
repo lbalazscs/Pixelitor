@@ -375,7 +375,7 @@ public class ImageLayer extends ContentLayer {
 
         // so that layer mask transparency image is regenerated
         // from the real image after the previews
-        visibleImageChanged();
+        imageRefChanged();
 
         previewImage = null;
         comp.imageChanged(FULL);
@@ -422,7 +422,7 @@ public class ImageLayer extends ContentLayer {
             previewImage = image;
 
             if (shouldRefresh) {
-                visibleImageChanged(); // so that layer mask previews work
+                imageRefChanged();
                 comp.imageChanged(FULL);
             }
         } else {
@@ -430,7 +430,7 @@ public class ImageLayer extends ContentLayer {
 
             setPreviewWithSelection(img);
             setState(PREVIEW);
-            visibleImageChanged(); // so that layer mask previews work
+            imageRefChanged();
             comp.imageChanged(FULL);
         }
     }
@@ -977,6 +977,7 @@ public class ImageLayer extends ContentLayer {
             }
             setState(PREVIEW);
         }
+        imageRefChanged();
         comp.imageChanged(REPAINT);
     }
 
@@ -1010,11 +1011,7 @@ public class ImageLayer extends ContentLayer {
     }
 
     protected void imageRefChanged() {
-//        updateIconImage();
-    }
-
-    protected void visibleImageChanged() {
-        // does something only in the LayerMask subclass
+        // overridden in LayerMask
     }
 
     public void updateIconImage() {

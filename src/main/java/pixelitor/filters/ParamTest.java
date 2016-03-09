@@ -34,6 +34,7 @@ import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.gui.TextParam;
 import pixelitor.layers.BlendingMode;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.test.RandomGUITest;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -55,7 +56,7 @@ public class ParamTest extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        if ((Build.CURRENT == Build.DEVELOPMENT) && (!Build.CURRENT.isRandomGUITest())) {
+        if ((Build.CURRENT == Build.DEVELOPMENT) && (!RandomGUITest.isRunning())) {
             System.out.println("ParamTest.doTransform CALLED");
         }
 

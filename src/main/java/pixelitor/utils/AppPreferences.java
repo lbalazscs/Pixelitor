@@ -403,10 +403,10 @@ public final class AppPreferences {
             gridBagHelper.addLabelWithControl("Undo/Redo Levels: ", undoLevelsTF);
 
             IntChoiceParam.Value[] thumbSizes = {
-                    new IntChoiceParam.Value("Small  (24x24)", 24),
-                    new IntChoiceParam.Value("Big    (48x48)", 48),
-                    new IntChoiceParam.Value("Bigger (72x72)", 72),
-                    new IntChoiceParam.Value("Huge   (96x96)", 96),
+                    new IntChoiceParam.Value("24x24 pixels", 24),
+                    new IntChoiceParam.Value("48x48 pixels", 48),
+                    new IntChoiceParam.Value("72x72 pixels", 72),
+                    new IntChoiceParam.Value("96x96 pixels", 96),
             };
             thumbSizeCB = new JComboBox<>(thumbSizes);
 

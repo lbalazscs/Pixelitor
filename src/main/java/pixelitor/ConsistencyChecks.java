@@ -23,7 +23,7 @@ import pixelitor.history.History;
 import pixelitor.layers.DeleteActiveLayerAction;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
-import pixelitor.menus.SelectionActions;
+import pixelitor.selection.SelectionActions;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;

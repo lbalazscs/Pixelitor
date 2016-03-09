@@ -23,6 +23,8 @@ import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.MorphologyFilter;
+import pixelitor.utils.BasicProgressTracker;
+import pixelitor.utils.ProgressTracker;
 
 import java.awt.image.BufferedImage;
 
@@ -34,8 +36,6 @@ import static pixelitor.filters.impl.MorphologyFilter.OP_ERODE;
  */
 public class Morphology extends FilterWithParametrizedGUI {
     public static final String NAME = "Morphology";
-
-    private final MorphologyFilter filter = new MorphologyFilter(NAME);
 
     private static final int OP_OPEN = 10;
     private static final int OP_CLOSE = 11;
@@ -59,7 +59,10 @@ public class Morphology extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        filter.setIterations(radius.getValue());
+        MorphologyFilter filter = new MorphologyFilter(NAME);
+
+        int iterations = radius.getValue();
+        filter.setIterations(iterations);
         filter.setKernel(kernel.getValue());
 
         int selectedOp = op.getValue();
@@ -67,17 +70,27 @@ public class Morphology extends FilterWithParametrizedGUI {
         if (selectedOp == OP_DILATE || selectedOp == OP_ERODE) {
             filter.setOp(selectedOp);
             dest = filter.filter(src, dest);
-        } else if (selectedOp == OP_OPEN) {
-            filter.setOp(OP_ERODE);
-            dest = filter.filter(src, dest);
-            filter.setOp(OP_DILATE);
-            dest = filter.filter(dest, dest);
-        } else if (selectedOp == OP_CLOSE) {
-            filter.setOp(OP_DILATE);
-            dest = filter.filter(src, dest);
-            filter.setOp(OP_ERODE);
-            dest = filter.filter(dest, dest);
+        } else {
+            ProgressTracker pt = new BasicProgressTracker(NAME, 2 * iterations);
+            filter.setProgressTracker(pt);
+
+            if (selectedOp == OP_OPEN) {
+                filter.setOp(OP_ERODE);
+                dest = filter.filter(src, dest);
+                filter.setOp(OP_DILATE);
+                dest = filter.filter(dest, dest);
+            } else if (selectedOp == OP_CLOSE) {
+                filter.setOp(OP_DILATE);
+                dest = filter.filter(src, dest);
+                filter.setOp(OP_ERODE);
+                dest = filter.filter(dest, dest);
+            } else {
+                throw new IllegalStateException("selectedOp = " + selectedOp);
+            }
+
+            pt.finish();
         }
+
         return dest;
     }
 }

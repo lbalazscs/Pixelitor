@@ -101,14 +101,26 @@ public class GlobalKeyboardWatch {
                     Tools.getCurrentTool().escPressed();
                 }
                 break;
+            case KeyEvent.VK_ALT:
+                if (!dialogActive) {
+                    Tools.getCurrentTool().altPressed();
+                }
+                break;
         }
     }
 
     private static void keyReleased(KeyEvent e) {
         int keyCode = e.getKeyCode();
-        if (keyCode == KeyEvent.VK_SPACE) {
-            Tools.getCurrentTool().spaceReleased();
-            spaceDown = false;
+        switch (keyCode) {
+            case KeyEvent.VK_SPACE:
+                Tools.getCurrentTool().spaceReleased();
+                spaceDown = false;
+                break;
+            case KeyEvent.VK_ALT:
+                if (!dialogActive) {
+                    Tools.getCurrentTool().altReleased();
+                }
+                break;
         }
     }
 

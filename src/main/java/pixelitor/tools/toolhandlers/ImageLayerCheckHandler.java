@@ -19,7 +19,7 @@ package pixelitor.tools.toolhandlers;
 
 import pixelitor.gui.ImageComponent;
 import pixelitor.layers.ImageLayer;
-import pixelitor.layers.ImageLayerAction;
+import pixelitor.menus.ImageLayerAction;
 import pixelitor.tools.Tool;
 
 import java.awt.event.MouseEvent;

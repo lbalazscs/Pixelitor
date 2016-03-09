@@ -28,9 +28,10 @@ import pixelitor.io.OpenSaveManager;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.MaskViewMode;
-import pixelitor.menus.SelectionActions;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.menus.view.ZoomMenu;
+import pixelitor.selection.Selection;
+import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tools;
 import pixelitor.utils.ImageSwitchListener;
 import pixelitor.utils.Messages;
@@ -44,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
  * Static methods for maintaining the list of open ImageComponent objects
@@ -324,5 +326,20 @@ public class ImageComponents {
         String msg = String.format("The image '%s' was reloaded from the file %s.",
                 comp.getName(), file.getAbsolutePath());
         Messages.showStatusMessage(msg);
+    }
+
+    public static void onActiveIC(Consumer<ImageComponent> action) {
+        if(activeIC != null) {
+            action.accept(activeIC);
+        }
+    }
+
+    public static void onActiveSelection(Consumer<Selection> action) {
+        if(activeIC != null) {
+            Selection selection = activeIC.getComp().getSelectionOrNull();
+            if(selection != null) {
+                action.accept(selection);
+            }
+        }
     }
 }

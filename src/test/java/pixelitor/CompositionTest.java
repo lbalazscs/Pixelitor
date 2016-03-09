@@ -23,20 +23,14 @@ import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
-import pixelitor.selection.Selection;
-import pixelitor.selection.SelectionInteraction;
-import pixelitor.selection.SelectionType;
 import pixelitor.utils.UpdateGUI;
 
 import java.awt.Rectangle;
 import java.awt.Shape;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
-import static pixelitor.selection.SelectionInteraction.ADD;
-import static pixelitor.selection.SelectionType.ELLIPSE;
 
 public class CompositionTest {
     private Composition comp;
@@ -360,21 +354,6 @@ public class CompositionTest {
     }
 
     @Test
-    public void testSelection() {
-        assertThat(comp.hasSelection()).isFalse();
-        Optional<Selection> selection = comp.getSelection();
-        assertThat(selection.isPresent()).isFalse();
-
-        comp.startSelection(ELLIPSE, ADD);
-
-        selection = comp.getSelection();
-
-        assertThat(selection.isPresent()).isTrue();
-        assertThat(comp.hasSelection()).isTrue();
-        comp.checkInvariant();
-    }
-
-    @Test
     public void testIsActiveLayer() {
         Layer layer1 = comp.getLayer(0);
         Layer layer2 = comp.getLayer(1);
@@ -409,19 +388,6 @@ public class CompositionTest {
 
         History.redo();
         tester.checkSelectionBounds(comp.getCanvasBounds());
-    }
-
-    @Test
-    public void testStartSelection() {
-        SelectionType[] selectionTypes = SelectionType.values();
-        SelectionInteraction[] selectionInteractions = SelectionInteraction.values();
-
-        for (SelectionType selectionType : selectionTypes) {
-            for (SelectionInteraction interaction : selectionInteractions) {
-                comp.startSelection(selectionType, interaction);
-                comp.checkInvariant();
-            }
-        }
     }
 
     @Test

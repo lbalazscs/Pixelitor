@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,10 @@
 
 package pixelitor.tools;
 
+import pixelitor.gui.ImageComponent;
+
+import java.awt.event.MouseEvent;
+
 /**
  * A MouseEvent replacement with scaled coordinates
  */
@@ -26,6 +30,21 @@ public class PMouseEvent {
     // event coordinates in image space
     private double x;
     private double y;
+
+    public PMouseEvent(MouseEvent e, ImageComponent ic) {
+        int mouseX = e.getX();
+        int mouseY = e.getY();
+        x = ic.componentXToImageSpace(mouseX);
+        y = ic.componentYToImageSpace(mouseY);
+    }
+
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
 
     boolean wasShiftDown() {
         return shiftDown;

@@ -275,14 +275,20 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
         return (PixelitorEdit) super.editToBeRedone();
     }
 
+    // this method is called whenever a not undoable edit was added
     @Override
     public synchronized void discardAllEdits() {
-        // this method is called whenever a not undoable edit was added
-        int maxIndex = edits.size() - 1;
+        int numEdits = edits.size();
+        if (numEdits == 0) {
+            return;
+        }
 
+        // discard form the history
         super.discardAllEdits();
 
+        // discard from the GUI
         manualSelectionChange = false;
+        int maxIndex = numEdits - 1;
         fireIntervalRemoved(this, 0, maxIndex);
         manualSelectionChange = true;
     }

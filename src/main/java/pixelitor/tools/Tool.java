@@ -332,6 +332,18 @@ public abstract class Tool {
         // empty by default
     }
 
+    public void altPressed() {
+        if(doColorPickerForwarding()) {
+            ImageComponents.onActiveIC(ic -> ic.setCursor(Tools.COLOR_PICKER.getCursor()));
+        }
+    }
+
+    public void altReleased() {
+        if(doColorPickerForwarding()) {
+            ImageComponents.onActiveIC(ic -> ic.setCursor(cursor));
+        }
+    }
+
     @Override
     public String toString() {
         return name; // so that they can be easily selected from a JComboBox

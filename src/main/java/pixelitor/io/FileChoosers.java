@@ -18,6 +18,7 @@
 package pixelitor.io;
 
 import pixelitor.Composition;
+import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.CustomFileChooser;
 import pixelitor.gui.utils.ImagePreviewPanel;
@@ -80,7 +81,9 @@ public class FileChoosers {
     public static void open() {
         initOpenFileChooser();
 
+        GlobalKeyboardWatch.setDialogActive(true);
         int status = openFileChooser.showOpenDialog(PixelitorWindow.getInstance());
+        GlobalKeyboardWatch.setDialogActive(false);
 
         if (status == JFileChooser.APPROVE_OPTION) {
             File selectedFile = openFileChooser.getSelectedFile();
@@ -110,7 +113,9 @@ public class FileChoosers {
     }
 
     public static boolean showSaveFileChooserAndSaveComp(Composition comp) {
+        GlobalKeyboardWatch.setDialogActive(true);
         int status = saveFileChooser.showSaveDialog(PixelitorWindow.getInstance());
+        GlobalKeyboardWatch.setDialogActive(false);
 
         if (status == JFileChooser.APPROVE_OPTION) {
             File selectedFile = saveFileChooser.getSelectedFile();
@@ -227,7 +232,9 @@ public class FileChoosers {
             initSaveFileChooser();
             setupFilterToOnlyOneFormat(saveFileChooser, fileFilter);
 
+            GlobalKeyboardWatch.setDialogActive(true);
             int status = saveFileChooser.showSaveDialog(PixelitorWindow.getInstance());
+            GlobalKeyboardWatch.setDialogActive(false);
 
             if (status == JFileChooser.APPROVE_OPTION) {
                 selectedFile = saveFileChooser.getSelectedFile();

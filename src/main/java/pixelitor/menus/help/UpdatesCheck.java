@@ -66,7 +66,7 @@ public class UpdatesCheck {
                     requiredJavaVersion, getCurrentMainJavaVersion());
         }
         String title = "Pixelitor is not up to date";
-        Object[] options = {"Go to the Pixelitor homepage", "Don't upgrade now"};
+        Object[] options = {"Go to the Pixelitor homepage", "Close"};
         if(Dialogs.showOKCancelWarningDialog(msg, title, options, 0)) {
             new OpenInBrowserAction(null, AboutDialog.HOME_PAGE).actionPerformed(null);
         }

@@ -17,9 +17,9 @@
 
 package pixelitor.gui;
 
-import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.io.OpenSaveManager;
+import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import javax.swing.event.InternalFrameEvent;
@@ -66,7 +66,7 @@ public class InternalImageFrame extends JInternalFrame implements InternalFrameL
 
     @Override
     public void internalFrameClosing(InternalFrameEvent e) {
-        if (!Build.CURRENT.isRandomGUITest()) {
+        if (!RandomGUITest.isRunning()) {
             OpenSaveManager.warnAndCloseImage(ic);
         }
     }

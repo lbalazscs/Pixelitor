@@ -36,6 +36,7 @@ import java.awt.event.ActionEvent;
 import static pixelitor.menus.MenuBar.CTRL_1;
 import static pixelitor.menus.MenuBar.CTRL_2;
 import static pixelitor.menus.MenuBar.CTRL_3;
+import static pixelitor.menus.MenuBar.CTRL_4;
 
 /**
  * Determines whether the layer or its mask is visible/edited.
@@ -44,22 +45,25 @@ import static pixelitor.menus.MenuBar.CTRL_3;
  */
 public enum MaskViewMode {
 
-    NORMAL("Show and Edit Layer", false, false, AllowedLayerType.ANY, CTRL_1) {
-    }, SHOW_MASK("Show and Edit Mask", true, true, AllowedLayerType.HAS_LAYER_MASK, CTRL_2) {
-    }, EDIT_MASK("Show Layer, but Edit Mask", false, true, AllowedLayerType.HAS_LAYER_MASK, CTRL_3) {
+    NORMAL("Show and Edit Layer", false, false, false, AllowedLayerType.ANY, CTRL_1) {
+    }, SHOW_MASK("Show and Edit Mask", true, true, false, AllowedLayerType.HAS_LAYER_MASK, CTRL_2) {
+    }, EDIT_MASK("Show Layer, but Edit Mask", false, true, false, AllowedLayerType.HAS_LAYER_MASK, CTRL_3) {
+    }, RUBYLITH("Show Mask as Rubylith, Edit Mask", false, true, true, AllowedLayerType.HAS_LAYER_MASK, CTRL_4) {
     };
 
 
     private final String guiName;
+    private final boolean showRuby;
     private final AllowedLayerType allowedLayerType;
     private final KeyStroke keyStroke;
     private final boolean showMask;
     private final boolean editMask;
 
-    MaskViewMode(String guiName, boolean showMask, boolean editMask, AllowedLayerType allowedLayerType, KeyStroke keyStroke) {
+    MaskViewMode(String guiName, boolean showMask, boolean editMask, boolean showRuby, AllowedLayerType allowedLayerType, KeyStroke keyStroke) {
         this.guiName = guiName;
         this.showMask = showMask;
         this.editMask = editMask;
+        this.showRuby = showRuby;
         this.allowedLayerType = allowedLayerType;
         this.keyStroke = keyStroke;
     }
@@ -137,6 +141,10 @@ public enum MaskViewMode {
 
     public boolean showMask() {
         return showMask;
+    }
+
+    public boolean showRuby() {
+        return showRuby;
     }
 
     // used in asserts

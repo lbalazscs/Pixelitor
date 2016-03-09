@@ -75,10 +75,22 @@ public final class OverlayComposite extends RGBComposite {
                 float a = alpha * sa / 255f;
                 float ac = 1 - a;
 
-                dst[i] = (int) (a * dor + ac * dir);
-                dst[i + 1] = (int) (a * dog + ac * dig);
-                dst[i + 2] = (int) (a * dob + ac * dib);
-                dst[i + 3] = (int) (sa * alpha + dia * ac);
+                int newRed = (int) (a * dor + ac * dir);
+                int newGreen = (int) (a * dog + ac * dig);
+                int newBlue = (int) (a * dob + ac * dib);
+                int newAlpha = (int) (sa * alpha + dia * ac);
+
+//                if(alpha == 1.0f) {
+                dst[i] = newRed;
+                dst[i + 1] = newGreen;
+                dst[i + 2] = newBlue;
+                dst[i + 3] = newAlpha;
+//                } else {
+//                    dst[i] = PixelUtils.clamp(newRed);
+//                    dst[i + 1] = PixelUtils.clamp(newGreen);
+//                    dst[i + 2] = PixelUtils.clamp(newBlue);
+//                    dst[i + 3] = PixelUtils.clamp(newAlpha);
+//                }
             }
         }
     }

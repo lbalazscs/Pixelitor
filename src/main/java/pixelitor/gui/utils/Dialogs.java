@@ -24,6 +24,7 @@ import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.history.History;
 import pixelitor.utils.test.Events;
+import pixelitor.utils.test.RandomGUITest;
 
 import javax.sound.midi.MidiChannel;
 import javax.sound.midi.MidiSystem;
@@ -57,8 +58,12 @@ public class Dialogs {
     }
 
     public static void showInfoDialog(String title, String msg) {
+        showInfoDialog(getParentForDialogs(), title, msg);
+    }
+
+    public static void showInfoDialog(Component parent, String title, String msg) {
         GlobalKeyboardWatch.setDialogActive(true);
-        JOptionPane.showMessageDialog(getParentForDialogs(), msg, title, JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(parent, msg, title, JOptionPane.INFORMATION_MESSAGE);
         GlobalKeyboardWatch.setDialogActive(false);
     }
 
@@ -119,12 +124,15 @@ public class Dialogs {
     }
 
     public static void showNotImageLayerDialog() {
-        if (!Build.CURRENT.isRandomGUITest()) {
+        if (!RandomGUITest.isRunning()) {
             showErrorDialog("Not an image layer", "The active layer is not an image layer.");
         }
-//        if(Build.CURRENT == Build.DEVELOPMENT) {
-//            Thread.dumpStack();
-//        }
+    }
+
+    public static void showNotImageLayerOrMaskDialog() {
+        if (!RandomGUITest.isRunning()) {
+            showErrorDialog("Not an image layer or mask", "The active layer is not an image layer or mask.");
+        }
     }
 
     public static void showExceptionDialog(Throwable e) {
@@ -141,7 +149,7 @@ public class Dialogs {
             e = e.getCause();
         }
 
-        if (Build.CURRENT.isRandomGUITest()) {
+        if (RandomGUITest.isRunning()) {
             Events.dump();
             History.showHistory();
             Toolkit.getDefaultToolkit().beep();

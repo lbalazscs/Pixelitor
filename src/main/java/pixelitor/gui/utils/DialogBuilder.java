@@ -19,6 +19,7 @@ package pixelitor.gui.utils;
 
 import com.bric.util.JVM;
 import pixelitor.gui.GlobalKeyboardWatch;
+import pixelitor.gui.PixelitorWindow;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -26,6 +27,7 @@ import java.awt.FlowLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.function.Predicate;
 
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 
@@ -36,19 +38,21 @@ public class DialogBuilder {
     public static final String DEFAULT_OK_TEXT = UIManager.getString("OptionPane.okButtonText");
     public static final String DEFAULT_CANCEL_TEXT = UIManager.getString("OptionPane.cancelButtonText");
 
-    private String cancelText;
     private String okText;
-    private boolean addCancelButton;
-    private boolean addOKButton;
+    private String cancelText;
+    private boolean addOKButton = true;
+    private boolean addCancelButton = true;
     private JComponent form;
     private boolean addScrollBars;
     private JFrame frameParent;
     private JDialog dialogParent;
     private String title;
     private boolean reconfigureGlobalKeyWatch = true;
+    private boolean modal = true;
 
     private Runnable okAction;
     private Runnable cancelAction;
+    private Predicate<JDialog> validator;
 
     public DialogBuilder() {
     }
@@ -73,13 +77,18 @@ public class DialogBuilder {
         return this;
     }
 
-    public DialogBuilder withCancelButtonText(String s) {
+    public DialogBuilder cancelText(String s) {
         this.cancelText = s;
         return this;
     }
 
     public DialogBuilder form(JComponent form) {
         this.form = form;
+        return this;
+    }
+
+    public DialogBuilder notModal() {
+        this.modal = false;
         return this;
     }
 
@@ -103,13 +112,18 @@ public class DialogBuilder {
         return this;
     }
 
-    public DialogBuilder okAction(Runnable okAction) {
-        this.okAction = okAction;
+    public DialogBuilder okAction(Runnable a) {
+        this.okAction = a;
         return this;
     }
 
-    public DialogBuilder cancelAction(Runnable cancelAction) {
-        this.cancelAction = cancelAction;
+    public DialogBuilder cancelAction(Runnable a) {
+        this.cancelAction = a;
+        return this;
+    }
+
+    public DialogBuilder validator(Predicate<JDialog> a) {
+        this.validator = a;
         return this;
     }
 
@@ -118,11 +132,12 @@ public class DialogBuilder {
 
         JDialog d;
         if (frameParent != null) {
-            d = new JDialog(frameParent, title);
+            d = new JDialog(frameParent, title, modal);
         } else if (dialogParent != null) {
-            d = new JDialog(dialogParent, title);
+            d = new JDialog(dialogParent, title, modal);
         } else {
-            throw new IllegalStateException("no parent");
+            PixelitorWindow pw = PixelitorWindow.getInstance();
+            d = new JDialog(pw, title, modal);
         }
         d.setLayout(new BorderLayout());
         if (addScrollBars) {
@@ -138,6 +153,12 @@ public class DialogBuilder {
             okButton = new JButton(okText);
             okButton.setName("ok");
             okButton.addActionListener(e -> {
+                if (validator != null) {
+                    if (!validator.test(d)) {
+                        return;
+                    }
+                }
+
                 closeDialog(d);
                 if (okAction != null) {
                     okAction.run();

@@ -20,7 +20,7 @@ package pixelitor.filters;
 import com.jhlabs.image.AbstractBufferedImageOp;
 import pixelitor.history.History;
 import pixelitor.layers.ImageLayer;
-import pixelitor.layers.ImageLayerAction;
+import pixelitor.menus.ImageLayerAction;
 
 import javax.swing.*;
 import java.util.function.Supplier;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,26 +8,15 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.layers;
 
-import com.jhlabs.composite.ColorBurnComposite;
-import com.jhlabs.composite.ColorComposite;
-import com.jhlabs.composite.DarkenComposite;
-import com.jhlabs.composite.HardLightComposite;
-import com.jhlabs.composite.HueComposite;
-import com.jhlabs.composite.MultiplyComposite;
-import com.jhlabs.composite.OverlayComposite;
-import com.jhlabs.composite.SaturationComposite;
-import com.jhlabs.composite.ScreenComposite;
-import com.jhlabs.composite.SoftLightComposite;
-import com.jhlabs.composite.ValueComposite;
-import org.jdesktop.swingx.graphics.BlendComposite;
+import com.jhlabs.composite.*;
 
 import java.awt.AlphaComposite;
 import java.awt.Composite;
@@ -63,7 +52,8 @@ public enum BlendingMode {
     }, LIGHTEN("Lighten", "svg:lighten") {
         @Override
         public Composite getComposite(float opacity) {
-            return BlendComposite.Lighten;
+//            return BlendComposite.Lighten;
+            return new LightenComposite(opacity);
         }
     }, SCREEN("Screen", "svg:screen") {
         @Override
@@ -74,12 +64,14 @@ public enum BlendingMode {
     }, COLOR_DODGE("Color Dodge", "svg:color-dodge") {
         @Override
         public Composite getComposite(float opacity) {
-            return BlendComposite.ColorDodge;
+//            return BlendComposite.ColorDodge;
+            return new ColorDodgeComposite(opacity);
         }
     }, LINEAR_DODGE("Linear Dodge (Add)", "svg:plus") {
         @Override
         public Composite getComposite(float opacity) {
-            return BlendComposite.Add;
+//            return BlendComposite.Add;
+            return new AddComposite(opacity);
         }
     }, OVERLAY("Overlay", "svg:overlay") {
         @Override
@@ -102,12 +94,14 @@ public enum BlendingMode {
     }, DIFFERENCE("Difference", "svg:difference") {
         @Override
         public Composite getComposite(float opacity) {
-            return BlendComposite.Difference;
+//            return BlendComposite.Difference;
+            return new DifferenceComposite(opacity);
         }
     }, EXCLUSION("Exclusion", "svg:exclusion") {
         @Override
         public Composite getComposite(float opacity) {
-            return BlendComposite.Exclusion;
+//            return BlendComposite.Exclusion;
+            return new ExclusionComposite(opacity);
         }
     }, HUE("Hue", "svg:hue") {
         @Override

@@ -24,6 +24,7 @@ import pixelitor.history.LinkLayerMaskEdit;
 import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics2D;
@@ -41,19 +42,36 @@ public class LayerMask extends ImageLayer {
     private static final long serialVersionUID = 1L;
 
     private transient BufferedImage transparencyImage;
-    private static final ColorModel transparencyColorModel;
+    public static final ColorModel TRANSPARENCY_COLOR_MODEL;
+    public static final ColorModel RUBYLITH_COLOR_MODEL;
     private boolean linked = true; // whether it moves together with its parent layer
 
     static {
         byte[] lookup = new byte[256];
-        for (int i = 0; i < lookup.length; i++) {
+        for (int i = 0; i < 256; i++) {
             lookup[i] = (byte) i;
         }
-        transparencyColorModel = new IndexColorModel(8, 256, lookup, lookup, lookup, lookup);
+        TRANSPARENCY_COLOR_MODEL = new IndexColorModel(8, 256,
+                lookup,  // red
+                lookup,  // green
+                lookup,  // blue
+                lookup); // alpha
+
+        byte[] invertedLookup = new byte[256];
+        byte[] allZeroLookup = new byte[256];
+
+        for (int i = 0; i < 256; i++) {
+            invertedLookup[i] = (byte) (255 - i);
+        }
+
+        RUBYLITH_COLOR_MODEL = new IndexColorModel(8, 256,
+                invertedLookup,  // red
+                allZeroLookup,   // green
+                allZeroLookup,   // blue
+                invertedLookup); // alpha
     }
 
-//    public static final ColorSpace GRAY_SPACE = new ICC_ColorSpace(ICC_Profile.getInstance(ColorSpace.CS_GRAY));
-//    public static final ColorModel GRAY_MODEL = new ComponentColorModel(GRAY_SPACE, false, false, Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
+    public static final Composite RUBYLITH_COMPOSITE = AlphaComposite.SrcOver.derive(0.5f);
 
     public LayerMask(Composition comp, BufferedImage bwImage, Layer layer) {
         super(comp, bwImage, layer.getName() + " MASK", layer);
@@ -69,18 +87,24 @@ public class LayerMask extends ImageLayer {
     }
 
     public void updateFromBWImage() {
-//        System.out.println("LayerMask::updateFromBWImage: CALLED");
-
         assert image.getType() == BufferedImage.TYPE_BYTE_GRAY;
-        assert image.getColorModel() != transparencyColorModel;
+        assert image.getColorModel() != TRANSPARENCY_COLOR_MODEL;
 
         // The transparency image shares the raster data with the BW image,
         // but interprets the bytes differently.
         // Therefore this method needs to be called only when
         // the visible image reference changes.
         WritableRaster raster = getVisibleImage().getRaster();
-//        WritableRaster raster = image.getRaster();
-        this.transparencyImage = new BufferedImage(transparencyColorModel, raster, false, null);
+        this.transparencyImage = new BufferedImage(TRANSPARENCY_COLOR_MODEL, raster, false, null);
+    }
+
+    public void paintAsRubylith(Graphics2D g) {
+        Composite oldComposite = g.getComposite();
+        WritableRaster raster = getVisibleImage().getRaster();
+        BufferedImage rubylithImage = new BufferedImage(RUBYLITH_COLOR_MODEL, raster, false, null);
+        g.setComposite(RUBYLITH_COMPOSITE);
+        g.drawImage(rubylithImage, 0, 0, null);
+        g.setComposite(oldComposite);
     }
 
     @Override
@@ -99,16 +123,6 @@ public class LayerMask extends ImageLayer {
 
     @Override
     protected void imageRefChanged() {
-        updateFromBWImage();
-        comp.imageChanged(Composition.ImageChangeActions.FULL);
-
-        // can't update the icon image here, this is low-level, and would be called too many times
-//        updateIconImage();
-    }
-
-    @Override
-    protected void visibleImageChanged() {
-        // so that we have previews in Ctrl-3 mode
         updateFromBWImage();
     }
 
@@ -183,7 +197,7 @@ public class LayerMask extends ImageLayer {
 
             // ... and return a transparency image based on it
             WritableRaster raster = tmp.getRaster();
-            BufferedImage tmpTransparency = new BufferedImage(transparencyColorModel, raster, false, null);
+            BufferedImage tmpTransparency = new BufferedImage(TRANSPARENCY_COLOR_MODEL, raster, false, null);
             return tmpTransparency;
         }
     }

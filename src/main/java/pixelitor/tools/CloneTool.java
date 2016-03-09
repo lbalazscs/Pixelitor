@@ -18,7 +18,6 @@
 package pixelitor.tools;
 
 import com.bric.util.JVM;
-import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.EnumParam;
@@ -34,6 +33,7 @@ import pixelitor.tools.brushes.CopyBrushType;
 import pixelitor.utils.Messages;
 import pixelitor.utils.ScalingMirror;
 import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import java.awt.Cursor;
@@ -95,7 +95,7 @@ public class CloneTool extends BlendingModeBrushTool {
 
         settingsPanel.addSeparator();
         settingsPanel.addButton("Transform", e -> {
-            if(Build.CURRENT.isRandomGUITest()) {
+            if (RandomGUITest.isRunning()) {
                 return;
             }
 
@@ -158,7 +158,7 @@ public class CloneTool extends BlendingModeBrushTool {
     }
 
     private void handleUndefinedSource(ImageComponent ic, double x, double y) {
-        if (Build.CURRENT.isRandomGUITest()) {
+        if (RandomGUITest.isRunning()) {
             // special case: do not show dialogs for RandomGUITest,
             // just act as if this was an alt-click
             setCloningSource(ic, x, y);

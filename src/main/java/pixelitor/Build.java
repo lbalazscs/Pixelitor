@@ -25,28 +25,7 @@ import javax.swing.*;
  */
 public enum Build {
     DEVELOPMENT {
-        private boolean randomGUITest = false;
-
-        @Override
-        public boolean isRandomGUITest() {
-            return randomGUITest;
-        }
-
-        @Override
-        public void setRandomGUITest(boolean randomGUITest) {
-            this.randomGUITest = randomGUITest;
-            fixTitle = null;
-        }
     }, FINAL {
-        @Override
-        public boolean isRandomGUITest() {
-            return false;
-        }
-
-        @Override
-        public void setRandomGUITest(boolean randomGUITest) {
-            // no way
-        }
     };
 
     public static final boolean enableAdjLayers = false;
@@ -65,15 +44,8 @@ public enum Build {
             if (CURRENT != FINAL) {
                 fixTitle += " DEVELOPMENT " + System.getProperty("java.version");
             }
-            if (CURRENT.isRandomGUITest()) {
-                fixTitle += " - RANDOM GUI TEST";
-            }
         }
 
         return fixTitle;
     }
-
-    public abstract boolean isRandomGUITest();
-
-    public abstract void setRandomGUITest(boolean randomGUITest);
 }

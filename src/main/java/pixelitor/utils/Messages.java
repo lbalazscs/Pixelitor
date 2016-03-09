@@ -73,6 +73,10 @@ public class Messages {
         messageHandler.showNotImageLayerError();
     }
 
+    public static void showNotImageLayerOrMaskError() {
+        messageHandler.showNotImageLayerOrMaskError();
+    }
+
     public static MessageHandler getMessageHandler() {
         return messageHandler;
     }

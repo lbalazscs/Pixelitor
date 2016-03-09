@@ -15,35 +15,41 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.layers;
+package pixelitor.menus;
 
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.layers.AdjustmentLayer;
+import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Layer;
+import pixelitor.layers.TextLayer;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.awt.image.BufferedImage;
 
 /**
- * An abstraction for a task that can be done only with image layers (or masks)
+ * An abstraction for a task that works with an "active image",
+ * which can be a rasterized text layer.
  */
-public abstract class ImageLayerAction extends AbstractAction {
+public abstract class GetImageAction extends AbstractAction {
     protected final String name;
     protected String menuName;
     protected boolean hasDialog;
 
     private final boolean allowMasks;
 
-    protected ImageLayerAction(String name) {
+    protected GetImageAction(String name) {
         this(name, true, true);
     }
 
-    protected ImageLayerAction(String name, boolean hasDialog) {
+    protected GetImageAction(String name, boolean hasDialog) {
         this(name, hasDialog, true);
     }
 
-    protected ImageLayerAction(String name, boolean hasDialog, boolean allowMasks) {
+    protected GetImageAction(String name, boolean hasDialog, boolean allowMasks) {
         this.hasDialog = hasDialog;
         assert name != null;
 
@@ -56,10 +62,8 @@ public abstract class ImageLayerAction extends AbstractAction {
 
     /**
      * This callback method represents the task that has to be done.
-     * It gets called only if we know that the active layer is
-     * an image layer or if it was rasterized into an image layer.
      */
-    protected abstract void process(ImageLayer layer);
+    protected abstract void process(Layer layer, BufferedImage image);
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -76,32 +80,15 @@ public abstract class ImageLayerAction extends AbstractAction {
     }
 
     private void startOnLayer(Layer layer) {
-        if (layer.isMaskEditing()) {
-            if (allowMasks) {
-                process(layer.getMask());
-            } else {
-                Dialogs.showErrorDialog("Mask is active",
-                        name + " cannot be applied to masks.");
-            }
+        if (layer.isMaskEditing() && allowMasks) {
+            BufferedImage image = layer.getMask().getImage();
+            process(layer, image);
         } else if (layer instanceof ImageLayer) {
-            process((ImageLayer) layer);
+            BufferedImage image = ((ImageLayer) layer).getImage();
+            process(layer, image);
         } else if (layer instanceof TextLayer) {
-            boolean isNoun = name.contains("Tool");
-            String firstName = isNoun ? "The " + name  : name;
-            String secondName = isNoun ? "the " + name  : name;
-
-            String msg = String.format("The active layer \"%s\" is a text layer.\n" +
-                                "%s needs pixels and cannot be used on text layers.\n" +
-                                "If you rasterize this text layer, you can use %s,\n" +
-                                "but the text will no longer be editable.",
-                        layer.getName(), firstName, secondName);
-
-            String[] options = {"Rasterize", "Cancel"};
-
-            if (Dialogs.showOKCancelWarningDialog(msg, "Text Layer", options, 1)) {
-                ImageLayer newImageLayer = ((TextLayer) layer).replaceWithRasterized();
-                process(newImageLayer);
-            }
+            BufferedImage image = ((TextLayer) layer).createRasterizedImage();
+            process(layer, image);
         } else if (layer instanceof AdjustmentLayer) {
             Dialogs.showErrorDialog("Adjustment Layer",
                     name + " cannot be applied to adjustment layers.");

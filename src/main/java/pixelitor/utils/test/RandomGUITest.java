@@ -56,7 +56,6 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 import pixelitor.layers.TextLayer;
-import pixelitor.menus.SelectionActions;
 import pixelitor.menus.edit.CopyAction;
 import pixelitor.menus.edit.CopySource;
 import pixelitor.menus.edit.PasteAction;
@@ -67,6 +66,7 @@ import pixelitor.menus.view.ShowHideLayersAction;
 import pixelitor.menus.view.ShowHideStatusBarAction;
 import pixelitor.menus.view.ShowHideToolsAction;
 import pixelitor.menus.view.ZoomLevel;
+import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tool;
 import pixelitor.tools.ToolSettingsPanelContainer;
 import pixelitor.tools.Tools;
@@ -119,6 +119,8 @@ public class RandomGUITest {
 
     private static int numPastedImages = 0;
 
+    private static boolean running = false;
+
     /**
      * Utility class with static methods
      */
@@ -130,7 +132,8 @@ public class RandomGUITest {
             Messages.showError("Error", "Build is not DEVELOPMENT");
             return;
         }
-        Build.CURRENT.setRandomGUITest(true);
+        running = true;
+
         new PixelitorEventListener().register();
 
         numPastedImages = 0;
@@ -177,6 +180,10 @@ public class RandomGUITest {
 
         SwingWorker<Void, Void> worker = createOneRoundSwingWorker(r, true);
         worker.execute();
+    }
+
+    public static boolean isRunning() {
+        return running;
     }
 
     private static SwingWorker<Void, Void> createOneRoundSwingWorker(Robot r, boolean forever) {
@@ -262,7 +269,7 @@ public class RandomGUITest {
 
     private static void cleanUp() {
         AppPreferences.WorkSpace.setDefault(PixelitorWindow.getInstance());
-        Build.CURRENT.setRandomGUITest(false);
+        running = false;
     }
 
     private static void randomResize() {
@@ -272,7 +279,6 @@ public class RandomGUITest {
 
     private static void log(String msg) {
         Events.postRandomTestEvent(msg);
-//        System.out.println(msg);
     }
 
     private static void randomMove(Robot r) {
@@ -468,6 +474,16 @@ public class RandomGUITest {
         r.keyRelease(keyEvent);
     }
 
+    private static void pressCtrlKey(Robot r, int keyEvent) {
+        r.keyPress(KeyEvent.VK_CONTROL);
+        r.delay(50);
+        r.keyPress(keyEvent);
+        r.delay(50);
+        r.keyRelease(keyEvent);
+        r.delay(50);
+        r.keyRelease(KeyEvent.VK_CONTROL);
+    }
+
     private static void randomZoom() {
         ImageComponent ic = ImageComponents.getActiveIC();
         if (ic != null) {
@@ -584,6 +600,11 @@ public class RandomGUITest {
             log("deselect");
             SelectionActions.getDeselectAction().actionPerformed(new ActionEvent("", 0, ""));
         }
+    }
+
+    private static void showHideSelection(Robot robot) {
+        log("showHideSelection");
+        pressCtrlKey(robot, KeyEvent.VK_H);
     }
 
     private static void layerToCanvasSize() {
@@ -821,8 +842,10 @@ public class RandomGUITest {
         log("new text layer");
         Composition comp = ImageComponents.getActiveCompOrNull();
         TextLayer textLayer = new TextLayer(comp);
-        textLayer.setSettings(TextSettings.createRandomSettings(rand));
+        TextSettings randomSettings = TextSettings.createRandomSettings(rand);
+        textLayer.setSettings(randomSettings);
         comp.addLayer(textLayer, AddToHistory.YES, "New Random Text Layer", true, false);
+        textLayer.setName(randomSettings.getText(), AddToHistory.YES);
     }
 
     private static void randomTextLayerRasterize() {
@@ -966,7 +989,9 @@ public class RandomGUITest {
 
         weightedCaller.registerCallback(1, RandomGUITest::randomZoomOut);
 
-        weightedCaller.registerCallback(5, RandomGUITest::deselect);
+        weightedCaller.registerCallback(3, RandomGUITest::deselect);
+
+        weightedCaller.registerCallback(1, () -> showHideSelection(r));
 
         weightedCaller.registerCallback(1, RandomGUITest::layerToCanvasSize);
 

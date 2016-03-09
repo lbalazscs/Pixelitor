@@ -27,6 +27,7 @@ import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.SliderSpinner;
+import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import javax.swing.event.ListDataEvent;
@@ -210,7 +211,7 @@ public final class Utils {
 
     @SuppressWarnings("SameReturnValue")  // used in asserts
     public static boolean checkRasterMinimum(BufferedImage newImage) {
-        if (Build.CURRENT.isRandomGUITest()) {
+        if (RandomGUITest.isRunning()) {
             WritableRaster raster = newImage.getRaster();
             if ((raster.getMinX() != 0) || (raster.getMinY() != 0)) {
                 throw new

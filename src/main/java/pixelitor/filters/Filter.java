@@ -17,7 +17,6 @@
 
 package pixelitor.filters;
 
-import pixelitor.Build;
 import pixelitor.ChangeReason;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
@@ -25,6 +24,7 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
+import pixelitor.utils.test.RandomGUITest;
 
 import java.awt.Component;
 import java.awt.image.BufferedImage;
@@ -163,7 +163,7 @@ public abstract class Filter implements Serializable {
         } catch (OutOfMemoryError e) {
             Dialogs.showOutOfMemoryDialog(e);
         } catch (Throwable e) { // make sure AssertionErrors are caught
-            if (Build.CURRENT.isRandomGUITest()) {
+            if (RandomGUITest.isRunning()) {
                 throw e; // we can debug the exact filter parameters only in RandomGUITest
             }
             Messages.showException(e);

@@ -19,7 +19,7 @@ package pixelitor.io;
 
 import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.utils.Dialogs;
+import pixelitor.gui.utils.ImagePanel;
 import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.tools.HandToolSupport;
@@ -30,7 +30,6 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
 
@@ -93,7 +92,9 @@ public class OptimizedJpegSavePanel extends JPanel {
     }
 
     private static ImagePanel createViewPanel(Dimension imageSize) {
-        ImagePanel view = new ImagePanel();
+        // no checkerboard, because here it is a black image
+        ImagePanel view = new ImagePanel(false);
+
         view.setPreferredSize(imageSize);
 
         return view;
@@ -144,35 +145,5 @@ public class OptimizedJpegSavePanel extends JPanel {
         d.setVisible(true);
     }
 
-    static class ImagePanel extends JPanel {
-        private BufferedImage image;
-
-        private ImagePanel() {
-        }
-
-        // used for the original
-        public void setImage(BufferedImage image) {
-            this.image = image;
-        }
-
-        // used for the preview
-        public void updateImage(BufferedImage newImage) {
-            if (image != null) {
-                image.flush();
-            }
-
-            image = newImage;
-            repaint();
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            try {
-                g.drawImage(image, 0, 0, null);
-            } catch (OutOfMemoryError e) {
-                Dialogs.showOutOfMemoryDialog(e);
-            }
-        }
-    }
 }
 

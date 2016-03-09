@@ -150,7 +150,7 @@ public class LayerBlendingModesTest {
     @Test
     public void testExclusion() {
         // PS: 134, 131, 128
-        testBlendingMode(BlendingMode.EXCLUSION, new Color(134, 133, 130));
+        testBlendingMode(BlendingMode.EXCLUSION, new Color(133, 132, 129));
     }
 
     @Test

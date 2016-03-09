@@ -44,7 +44,6 @@ import java.awt.Shape;
 import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorConvertOp;
 import java.awt.image.ColorModel;
 import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
@@ -580,6 +579,25 @@ public class ImageUtils {
             thumbHeight = 1;
         }
 
+        return downSizeFast(src, painter, thumbWidth, thumbHeight);
+    }
+
+    public static BufferedImage createThumbnail(BufferedImage src, int maxWidth, int maxHeight, CheckerboardPainter painter) {
+        assert src != null;
+
+        int imgWidth = src.getWidth();
+        int imgHeight = src.getHeight();
+
+        double xScaling = maxWidth / (double) imgWidth;
+        double yScaling = maxHeight / (double) imgHeight;
+        double scaling = Math.min(xScaling, yScaling);
+        int thumbWidth = (int) (imgWidth * scaling);
+        int thumbHeight = (int) (imgHeight * scaling);
+
+        return downSizeFast(src, painter, thumbWidth, thumbHeight);
+    }
+
+    private static BufferedImage downSizeFast(BufferedImage src, CheckerboardPainter painter, int thumbWidth, int thumbHeight) {
         BufferedImage thumb = createSysCompatibleImage(thumbWidth, thumbHeight);
         Graphics2D g = thumb.createGraphics();
 
@@ -977,12 +995,24 @@ public class ImageUtils {
         return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
+//    // TODO this method increases the contrast of the image - why?
+//    public static BufferedImage convertToGrayScaleImage(BufferedImage src) {
+//        BufferedImage dest = new BufferedImage(src.getWidth(),
+//                src.getHeight(),
+//                TYPE_BYTE_GRAY);
+//        ColorConvertOp colorConvertOp = new ColorConvertOp(null);
+//        dest = colorConvertOp.filter(src, dest);
+//        return dest;
+//    }
+
     public static BufferedImage convertToGrayScaleImage(BufferedImage src) {
         BufferedImage dest = new BufferedImage(src.getWidth(),
                 src.getHeight(),
                 TYPE_BYTE_GRAY);
-        ColorConvertOp colorConvertOp = new ColorConvertOp(null);
-        dest = colorConvertOp.filter(src, dest);
+        Graphics2D g2 = dest.createGraphics();
+        g2.drawImage(src, 0, 0, null);
+        g2.dispose();
+
         return dest;
     }
 

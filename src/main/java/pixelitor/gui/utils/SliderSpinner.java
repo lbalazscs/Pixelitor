@@ -262,4 +262,8 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         slider.setToolTipText(tip);
         spinner.setToolTipText(tip);
     }
+
+    public void addChangeListener(ChangeListener listener) {
+        slider.addChangeListener(listener);
+    }
 }

@@ -316,12 +316,18 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         g2.scale(viewScale, viewScale);
 
         if (showMask) {
-            LayerMask layerMask = comp.getActiveLayer().getMask();
-            assert layerMask != null : "no mask in " + maskViewMode;
-            layerMask.paintLayerOnGraphics(g2, true);
+            LayerMask mask = comp.getActiveLayer().getMask();
+            assert mask != null : "no mask in " + maskViewMode;
+            mask.paintLayerOnGraphics(g2, true);
         } else {
             BufferedImage drawnImage = comp.getCompositeImage();
             ImageUtils.drawImageWithClipping(g2, drawnImage);
+
+            if (maskViewMode.showRuby()) {
+                LayerMask mask = comp.getActiveLayer().getMask();
+                assert mask != null : "no mask in " + maskViewMode;
+                mask.paintAsRubylith(g2);
+            }
         }
 
         // possibly allow a larger clip for the selections and tools

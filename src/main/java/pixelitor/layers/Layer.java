@@ -304,6 +304,8 @@ public abstract class Layer implements Serializable {
     }
 
     public void addImageAsMask(BufferedImage bwMask, boolean deselect, String editName) {
+        assert mask == null;
+
         mask = new LayerMask(comp, bwMask, this);
         maskEnabled = true;
 
@@ -328,6 +330,14 @@ public abstract class Layer implements Serializable {
 
         History.addEdit(edit);
         MaskViewMode.EDIT_MASK.activate(comp, this);
+    }
+
+    public void addOrReplaceMaskImage(BufferedImage bwMask, String editName) {
+        if (hasMask()) {
+            mask.replaceImage(bwMask, editName);
+        } else {
+            addImageAsMask(bwMask, false, editName);
+        }
     }
 
     /**

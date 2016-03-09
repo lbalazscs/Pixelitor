@@ -31,6 +31,7 @@ import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMaskAddType;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.tools.Tool;
+import pixelitor.tools.Tools;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
@@ -171,7 +172,7 @@ public class Pixelitor {
 
 //        Navigator.showInDialog(pw);
 
-//        clickTool(Tools.GRADIENT);
+        clickTool(Tools.SELECTION);
 //        addMaskAndShowIt();
 
 //        AddTextLayerAction.INSTANCE.actionPerformed(null);

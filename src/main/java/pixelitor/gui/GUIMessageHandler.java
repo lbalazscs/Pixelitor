@@ -63,6 +63,11 @@ public class GUIMessageHandler implements MessageHandler {
     }
 
     @Override
+    public void showNotImageLayerOrMaskError() {
+        Dialogs.showNotImageLayerOrMaskDialog();
+    }
+
+    @Override
     public void showException(Throwable e) {
         Dialogs.showExceptionDialog(e);
     }

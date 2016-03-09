@@ -62,6 +62,7 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
     private int viewHeight;
     private JScrollPane scrollPane;
     private final AdjustmentListener adjListener;
+    private static JDialog dialog;
 
     private Navigator(ImageComponent ic) {
         adjListener = e ->
@@ -100,10 +101,16 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
         ImageComponent ic = ImageComponents.getActiveIC();
         Navigator navigator = new Navigator(ic);
 
-        new DialogBuilder()
+        if(dialog != null && dialog.isVisible()) {
+            dialog.setVisible(false);
+            dialog.dispose();
+        }
+
+        dialog = new DialogBuilder()
                 .title("Navigator")
                 .parent(pw)
                 .form(navigator)
+                .notModal()
                 .noOKButton()
                 .noCancelButton()
                 .noGlobalKeyChange()

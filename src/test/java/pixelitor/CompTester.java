@@ -1,3 +1,20 @@
+/*
+ * Copyright 2016 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor;
 
 import pixelitor.history.AddToHistory;
@@ -5,8 +22,6 @@ import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.selection.Selection;
-import pixelitor.selection.SelectionInteraction;
-import pixelitor.selection.SelectionType;
 import pixelitor.testutils.WithTranslation;
 import pixelitor.utils.UpdateGUI;
 import pixelitor.utils.test.Assertions;
@@ -84,8 +99,9 @@ public class CompTester {
     }
 
     public void addRectangleSelection(Rectangle rect) {
-        comp.startSelection(SelectionType.RECTANGLE, SelectionInteraction.ADD);
-        comp.getSelection().get().setShape(rect);
+//        comp.startSelection(SelectionType.RECTANGLE, SelectionInteraction.ADD);
+        Selection selection = new Selection(rect, comp.getIC());
+        comp.setNewSelection(selection);
     }
 
     public void setStandardTestTranslationToAllLayers(WithTranslation translation) {

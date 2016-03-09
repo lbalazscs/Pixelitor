@@ -72,7 +72,7 @@ public class ZoomControl extends JPanel implements ImageSwitchListener {
             }
         });
 
-        zoomLabel = new JLabel("Zoom: ");
+        zoomLabel = new JLabel("  Zoom: ");
 
         add(zoomLabel);
         add(zoomSlider);

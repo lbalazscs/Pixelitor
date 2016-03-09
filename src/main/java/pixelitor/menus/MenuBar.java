@@ -57,12 +57,11 @@ import pixelitor.layers.ContentLayer;
 import pixelitor.layers.DeleteActiveLayerAction;
 import pixelitor.layers.DuplicateLayerAction;
 import pixelitor.layers.ImageLayer;
-import pixelitor.layers.ImageLayerAction;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 import pixelitor.layers.LayerMaskAddType;
 import pixelitor.layers.LayerMoveAction;
-import pixelitor.layers.MaskFromColorRange;
+import pixelitor.layers.MaskFromColorRangePanel;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.layers.TextLayer;
 import pixelitor.menus.edit.CopyAction;
@@ -82,6 +81,7 @@ import pixelitor.menus.view.ShowHideLayersAction;
 import pixelitor.menus.view.ShowHideStatusBarAction;
 import pixelitor.menus.view.ShowHideToolsAction;
 import pixelitor.menus.view.ZoomMenu;
+import pixelitor.selection.SelectionActions;
 import pixelitor.tools.brushes.CopyBrush;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.FilterCreator;
@@ -131,6 +131,7 @@ public class MenuBar extends JMenuBar {
     public static final KeyStroke CTRL_1 = KeyStroke.getKeyStroke('1', MENU_SHORTCUT_KEY_MASK);
     public static final KeyStroke CTRL_2 = KeyStroke.getKeyStroke('2', MENU_SHORTCUT_KEY_MASK);
     public static final KeyStroke CTRL_3 = KeyStroke.getKeyStroke('3', MENU_SHORTCUT_KEY_MASK);
+    public static final KeyStroke CTRL_4 = KeyStroke.getKeyStroke('4', MENU_SHORTCUT_KEY_MASK);
 
     private static final KeyStroke CTRL_B = KeyStroke.getKeyStroke('B', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_C = KeyStroke.getKeyStroke('C', MENU_SHORTCUT_KEY_MASK);
@@ -143,6 +144,7 @@ public class MenuBar extends JMenuBar {
     private static final KeyStroke CTRL_J = KeyStroke.getKeyStroke('J', MENU_SHORTCUT_KEY_MASK);
 //    private static final KeyStroke CTRL_K = KeyStroke.getKeyStroke('K', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_L = KeyStroke.getKeyStroke('L', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_M = KeyStroke.getKeyStroke('M', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_N = KeyStroke.getKeyStroke('N', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_O = KeyStroke.getKeyStroke('O', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_R = KeyStroke.getKeyStroke('R', MENU_SHORTCUT_KEY_MASK);
@@ -511,6 +513,13 @@ public class MenuBar extends JMenuBar {
             }
         });
 
+        sub.addActionWithKey(new GetImageAction(MaskFromColorRangePanel.NAME, true, false) {
+            @Override
+            protected void process(Layer layer, BufferedImage image) {
+                MaskFromColorRangePanel.showInDialog(layer, image);
+            }
+        }, CTRL_M);
+
         sub.addAction(new MenuAction("Delete", HAS_LAYER_MASK) {
             @Override
             public void onClick() {
@@ -547,6 +556,7 @@ public class MenuBar extends JMenuBar {
         MaskViewMode.NORMAL.addToMenu(sub);
         MaskViewMode.SHOW_MASK.addToMenu(sub);
         MaskViewMode.EDIT_MASK.addToMenu(sub);
+//        MaskViewMode.RUBYLITH.addToMenu(sub);
 
         return sub;
     }
@@ -599,6 +609,7 @@ public class MenuBar extends JMenuBar {
         PMenu selectMenu = new PMenu("Select", 'S');
 
         selectMenu.buildAction(SelectionActions.getDeselectAction()).enableIf(ACTION_ENABLED).withKey(CTRL_D).add();
+        selectMenu.buildAction(SelectionActions.getShowHideSelectionAction()).enableIf(ACTION_ENABLED).withKey(CTRL_H).add();
 
         selectMenu.buildAction(SelectionActions.getInvertSelectionAction()).enableIf(ACTION_ENABLED).withKey(CTRL_SHIFT_I).add();
         selectMenu.buildAction(SelectionActions.getModifyAction()).enableIf(ACTION_ENABLED).add();
@@ -915,9 +926,10 @@ public class MenuBar extends JMenuBar {
     private static JMenu createOtherSubmenu() {
         PMenu sub = new PMenu("Other");
 
+        sub.addFA(JHDropShadow.NAME, JHDropShadow::new);
+        sub.addFA(Morphology.NAME, Morphology::new);
         sub.addFA("Random Filter", RandomFilter::new);
         sub.addFA("Transform Layer", TransformLayer::new);
-        sub.addFA(JHDropShadow.NAME, JHDropShadow::new);
         sub.addFA(Transition2D.NAME, Transition2D::new);
 
         sub.addSeparator();
@@ -940,12 +952,12 @@ public class MenuBar extends JMenuBar {
 
         viewMenu.addSeparator();
 
-        viewMenu.addActionWithKey(new MenuAction("Show History...") {
+        viewMenu.addAction(new MenuAction("Show History...") {
             @Override
             public void onClick() {
                 History.showHistory();
             }
-        }, CTRL_H);
+        });
 
         viewMenu.addAction(new MenuAction("Show Navigator...") {
             @Override
@@ -1143,8 +1155,6 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        developMenu.addFA(MaskFromColorRange.NAME, MaskFromColorRange::new);
-
         return developMenu;
     }
 
@@ -1306,7 +1316,6 @@ public class MenuBar extends JMenuBar {
         PMenu sub = new PMenu("Experimental");
 
         sub.addFA(Contours.NAME, Contours::new);
-        sub.addFA(Morphology.NAME, Morphology::new);
         sub.addSeparator();
 
         sub.addFA(Droste.NAME, Droste::new);

@@ -17,7 +17,6 @@
 
 package pixelitor.layers;
 
-import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.filters.comp.Flip;
 import pixelitor.filters.comp.Rotate;
@@ -35,6 +34,7 @@ import pixelitor.history.TextLayerChangeEdit;
 import pixelitor.history.TextLayerRasterizeEdit;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.UpdateGUI;
+import pixelitor.utils.test.RandomGUITest;
 
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
@@ -151,7 +151,7 @@ public class TextLayer extends ContentLayer {
     }
 
     public void edit(PixelitorWindow pw) {
-        if (Build.CURRENT.isRandomGUITest()) {
+        if (RandomGUITest.isRunning()) {
             return; // avoid dialogs
         }
 

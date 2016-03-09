@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,12 +8,13 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.selection;
 
 import pixelitor.tools.UserDrag;
@@ -29,23 +30,26 @@ import java.awt.geom.Rectangle2D;
 public enum SelectionType {
     RECTANGLE("Rectangle") {
         @Override
-        public Shape updateShape(UserDrag userDrag, Shape currentSelectionShape) {
+        public Shape createShape(Object mouseInfo, Shape oldShape) {
+            UserDrag userDrag = (UserDrag) mouseInfo;
             Rectangle2D dragRectangle = userDrag.createPositiveRect();
             return dragRectangle;
         }
     }, ELLIPSE("Ellipse") {
         @Override
-        public Shape updateShape(UserDrag userDrag, Shape currentSelectionShape) {
+        public Shape createShape(Object mouseInfo, Shape oldShape) {
+            UserDrag userDrag = (UserDrag) mouseInfo;
             Rectangle2D dr = userDrag.createPositiveRect();
             return new Ellipse2D.Double(dr.getX(), dr.getY(), dr.getWidth(), dr.getHeight());
         }
     }, LASSO("Freehand") {
         @Override
-        public Shape updateShape(UserDrag userDrag, Shape currentSelectionShape) {
+        public Shape createShape(Object mouseInfo, Shape oldShape) {
+            UserDrag userDrag = (UserDrag) mouseInfo;
             boolean createNew;
-            if (currentSelectionShape == null) {
+            if (oldShape == null) {
                 createNew = true;
-            } else if (currentSelectionShape instanceof GeneralPath) {
+            } else if (oldShape instanceof GeneralPath) {
                 createNew = false;
             } else { // it is an Area, meaning that a new shape has been started
                 createNew = true;
@@ -57,7 +61,7 @@ public enum SelectionType {
                 p.lineTo(userDrag.getEndX(), userDrag.getEndY());
                 return p;
             } else {
-                GeneralPath gp = (GeneralPath) currentSelectionShape;
+                GeneralPath gp = (GeneralPath) oldShape;
                 gp.lineTo(userDrag.getEndX(), userDrag.getEndY());
 
                 return gp;
@@ -65,29 +69,26 @@ public enum SelectionType {
         }
 //    }, POLYGONAL_LASSO("Polygonal") {
 //        @Override
-//        public Shape updateShape(UserDrag userDrag, Shape currentSelectionShape) {
-//            boolean createNew = false;
-//            if (currentSelectionShape == null) {
+//        public Shape createShape(Object mouseInfo, Shape oldShape) {
+//            PMouseEvent pe = (PMouseEvent) mouseInfo;
+//            boolean createNew;
+//            if (oldShape == null) {
 //                createNew = true;
-//            } else if (currentSelectionShape instanceof Polygon) {
+//            } else if (oldShape instanceof GeneralPath) {
 //                createNew = false;
 //            } else { // it is an Area, meaning that a new shape has been started
 //                createNew = true;
 //            }
 //
-//            if(createNew) {
-//                Polygon polygon = new Polygon();
-//                polygon.addPoint(userDrag.getStartX(), userDrag.getStartY());
-//                polygon.addPoint(userDrag.getEndX(), userDrag.getEndY());
-//                return polygon;
+//            if (createNew) {
+//                GeneralPath p = new GeneralPath();
+//                p.moveTo(pe.getX(), pe.getY());
+//                return p;
 //            } else {
-//                Polygon polygon = (Polygon) currentSelectionShape;
-//                int[] xPoints = polygon.xpoints;
-//                int[] yPoints = polygon.ypoints;
-//                int nrPoints = polygon.npoints;
-//                xPoints[nrPoints - 1] = userDrag.getEndX();
-//                yPoints[nrPoints - 1] = userDrag.getEndY();
-//                return polygon;
+//                GeneralPath gp = (GeneralPath) oldShape;
+//                gp.lineTo(pe.getX(), pe.getY());
+//
+//                return gp;
 //            }
 //        }
     };
@@ -98,7 +99,7 @@ public enum SelectionType {
         this.guiName = guiName;
     }
 
-    public abstract Shape updateShape(UserDrag userDrag, Shape currentSelectionShape);
+    public abstract Shape createShape(Object mouseInfo, Shape oldShape);
 
     @Override
     public String toString() {

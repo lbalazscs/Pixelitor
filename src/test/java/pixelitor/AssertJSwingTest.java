@@ -113,7 +113,7 @@ public class AssertJSwingTest {
         }
     }
 
-    private TestingMode testingMode;
+    private TestingMode testingMode = SIMPLE;
 
     // TODO for some reason, assertj-swing sees this dialog
     // only the first time it is shown, this flag is a workaround
@@ -127,12 +127,11 @@ public class AssertJSwingTest {
         AssertJSwingTest test = new AssertJSwingTest();
         test.setUp();
 
-        boolean testOneMethodSlowly = true;
+        boolean testOneMethodSlowly = false;
         if (testOneMethodSlowly) {
             test.robot.settings().delayBetweenEvents(ROBOT_DELAY_MILLIS_SLOW);
 
-            test.testLayers();
-
+            test.testMaskFromColorRange();
 
         } else {
             TestingMode[] testingModes = getTestingModes();
@@ -415,6 +414,7 @@ public class AssertJSwingTest {
 
         testLayerMasks();
         testTextLayers();
+        testMaskFromColorRange();
 
         if (Build.enableAdjLayers) {
             testAdjLayers();
@@ -457,6 +457,27 @@ public class AssertJSwingTest {
         popupMenu = pw.label("maskIcon").showPopupMenu();
         findPopupMenuFixtureByText(popupMenu, "Link").click();
         keyboardUndoRedo();
+    }
+
+    private void testMaskFromColorRange() {
+        if(testingMode != SIMPLE) {
+            return;
+        }
+
+        runMenuCommand("Mask from Color Range...");
+
+        DialogFixture dialog = findDialogByTitle("Mask from Color Range");
+
+        Point onScreen = dialog.target().getLocationOnScreen();
+        moveTo(onScreen.x + 100, onScreen.y + 100);
+        click();
+
+        // TODO
+
+        dialog.button("ok").click();
+
+        // delete the created layer mask
+        runMenuCommand("Delete");
     }
 
     private void testTextLayers() {
@@ -518,7 +539,8 @@ public class AssertJSwingTest {
     private void testCheckForUpdate() {
         findMenuItemByText("Check for Update...").click();
         try {
-            findJOptionPane().cancelButton().click();
+            JOptionPaneFixture optionPane = findJOptionPane();
+            optionPane.buttonWithText("Close").click();
         } catch (org.assertj.swing.exception.ComponentLookupException e) {
             // can happen if the current version is the same as the latest
             findJOptionPane().okButton().click();

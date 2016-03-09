@@ -40,11 +40,10 @@ import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
 import pixelitor.layers.LayerMask;
 import pixelitor.layers.MaskViewMode;
-import pixelitor.menus.SelectionActions;
 import pixelitor.selection.IgnoreSelection;
 import pixelitor.selection.Selection;
+import pixelitor.selection.SelectionActions;
 import pixelitor.selection.SelectionInteraction;
-import pixelitor.selection.SelectionType;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.UpdateGUI;
@@ -53,6 +52,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -718,15 +718,29 @@ public class Composition implements Serializable {
                 }
             }
 
+            boolean wasHidden = selection.isHidden();
             selection.deselectAndDispose();
             selection = null;
 
             if (isActiveComp()) {
+                if(wasHidden) {
+                    SelectionActions.getShowHideSelectionAction().setHideName();
+                }
                 SelectionActions.setEnabled(false, this);
             } else {
                 // we can get here from a DeselectEdit.redo on a non-active composition
             }
         }
+    }
+
+    public Shape clipShapeToCanvasSize(Shape shape) {
+        assert shape != null;
+
+        Area compBounds = new Area(new Rectangle(0, 0, canvas.getWidth(), canvas.getHeight()));
+        Area result = new Area(shape);
+        result.intersect(compBounds);
+
+        return result;
     }
 
     public DeselectEdit createDeselectEdit() {
@@ -774,10 +788,6 @@ public class Composition implements Serializable {
         }
     }
 
-    public void startSelection(SelectionType selectionType, SelectionInteraction selectionInteraction) {
-        setNewSelection(new Selection(ic, selectionType, selectionInteraction));
-    }
-
     public void createSelectionFromShape(Shape selectionShape) {
         if (selection != null) {
             throw new IllegalStateException("createSelectionFromShape called while there was a selection: " + selection.toString());
@@ -785,7 +795,8 @@ public class Composition implements Serializable {
         setNewSelection(new Selection(selectionShape, ic));
     }
 
-    private void setNewSelection(Selection selection) {
+    public void setNewSelection(Selection selection) {
+        assert selection != null;
         this.selection = selection;
         if (isActiveComp()) {
             SelectionActions.setEnabled(true, this);
@@ -914,7 +925,7 @@ public class Composition implements Serializable {
                 double txx = -cropRect.getX();
                 double txy = -cropRect.getY();
                 AffineTransform tx = AffineTransform.getTranslateInstance(txx, txy);
-                selection.setShape(tx.createTransformedShape(intersection));
+                selection.setNewShape(tx.createTransformedShape(intersection));
             }
         }
     }

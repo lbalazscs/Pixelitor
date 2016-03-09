@@ -17,20 +17,15 @@
 
 package pixelitor.selection;
 
-import pixelitor.Build;
-import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.history.History;
 import pixelitor.history.SelectionChangeEdit;
-import pixelitor.menus.SelectionModifyType;
-import pixelitor.tools.UserDrag;
-import pixelitor.utils.Messages;
+import pixelitor.menus.view.ShowHideAction;
 
 import javax.swing.*;
 import java.awt.BasicStroke;
 import java.awt.Graphics2D;
-import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.Stroke;
@@ -41,9 +36,6 @@ import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.JOIN_ROUND;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
-import static pixelitor.selection.Selection.State.DIED;
-import static pixelitor.selection.Selection.State.HAS_SHAPE;
-import static pixelitor.selection.Selection.State.NO_SHAPE_YET;
 
 /**
  * Represents a selection on an image.
@@ -54,78 +46,27 @@ public class Selection {
     private Timer marchingAntsTimer;
 
     // the shape that is currently drawn
-    private Shape currentSelectionShape;
+    private Shape currentShape;
 
     // the last shape (possibly null)
     // when the mouse is released, the two selections are
     // combined according to the SelectionInteraction
-    private Shape lastSelectionShape;
-
-    private SelectionType selectionType;
-    private SelectionInteraction selectionInteraction;
+    private Shape lastShape;
 
     private static final double DASH_WIDTH = 1.0;
     private static final float DASH_LENGTH = 4.0f;
     private static final float[] MARCHING_ANTS_DASH = {DASH_LENGTH, DASH_LENGTH};
 
-    public enum State {
-        NO_SHAPE_YET { // we had a mouse press, but no drag or mouse up
+    private boolean hidden = false;
+    private boolean dead = false;
 
-            @Override
-            Rectangle getShapeBounds(Shape currentSelectionShape) {
-//                throw new IllegalStateException("no shape yet");
-// TODO this should not be called, but it was on Linux during RandomGUITest
-                return new Rectangle(0, 0, 0, 0);
-            }
+    public Selection(Shape shape, ImageComponent ic) {
+        assert ic != null;
 
-            @Override
-            Shape getShape(Shape currentSelectionShape) {
-                // can be null, for a simple click without a previous selection
-                return currentSelectionShape;
-            }
-        }, HAS_SHAPE { // the normal state with marching ants
+        this.currentShape = shape;
+        this.ic = ic;
 
-            @Override
-            Rectangle getShapeBounds(Shape currentSelectionShape) {
-                return currentSelectionShape.getBounds(); // bounds are cached in Area;
-            }
-
-            @Override
-            Shape getShape(Shape currentSelectionShape) {
-                if (currentSelectionShape == null) {
-                    throw new IllegalStateException("null shape, while in HAS_SHAPE");
-                }
-                return currentSelectionShape;
-            }
-        }, DIED { // the selection is no longer there
-
-            @Override
-            Rectangle getShapeBounds(Shape currentSelectionShape) {
-                throw new IllegalStateException("died");
-            }
-
-            @Override
-            Shape getShape(Shape currentSelectionShape) {
-                throw new IllegalStateException("getShape() called, while in DIED");
-            }
-        };
-
-        abstract Rectangle getShapeBounds(Shape currentSelectionShape);
-
-        abstract Shape getShape(Shape currentSelectionShape);
-    }
-
-    private State state;
-
-    /**
-     * Called when a new selection is created with the marquee selection tool
-     */
-    public Selection(ImageComponent c, SelectionType selectionType, SelectionInteraction selectionInteraction) {
-        this.ic = c;
-        this.selectionType = selectionType;
-        this.selectionInteraction = selectionInteraction;
-
-        state = NO_SHAPE_YET;
+        startMarching();
     }
 
     // copy constructor
@@ -135,133 +76,52 @@ public class Selection {
         }
 
         // the shapes can be shared
-        this.currentSelectionShape = orig.currentSelectionShape;
-        this.lastSelectionShape = orig.lastSelectionShape;
-
-        this.selectionType = orig.selectionType;
-        this.selectionInteraction = orig.selectionInteraction;
-        this.state = orig.state;
+        this.currentShape = orig.currentShape;
+        this.lastShape = orig.lastShape;
 
         // the Timer is not copied! - setIC starts it
     }
 
-//    /**
-//     * Called when a new selection is created with the lasso selection tool
-//     */
-//    public Selection(Component c, LassoSelectionType lassoSelectionType, SelectionInteraction selectionInteraction) {
-//        this.component = c;
-//
-//        this.selectionInteraction = selectionInteraction;
-//
-//        state = State.NO_SHAPE_YET;
-//    }
-
-
-    /**
-     * Called when a selection is created from a shape:
-     * - when a deselect is undone (and when a  new selection is undone and then redone)
-     * - selections from the Shapes Tool
-     */
-    public Selection(Shape shape, ImageComponent c) {
-        assert c != null;
-
-        this.currentSelectionShape = shape;
-        this.ic = c;
-
-        // selectionType is not set, but this shouldn't be a problem
-
-        startMarching();
-        state = HAS_SHAPE;
-    }
-
-    /**
-     * As the mouse is dragged or released, the current selection shape is continuously updated
-     */
-    public void updateSelection(UserDrag userDrag) {
-        currentSelectionShape = selectionType.updateShape(userDrag, currentSelectionShape);
-
-        if (state == NO_SHAPE_YET) {
-            startMarching();
-            state = HAS_SHAPE;
-        }
-    }
-
-    /**
-     * We get here if there is already a selection when the user starts a new selection shape
-     */
-    public void startNewShape(SelectionType selectionType, SelectionInteraction selectionInteraction) {
-        if (state != HAS_SHAPE) {
-            throw new IllegalStateException("state = " + state);
-        }
-
-        this.selectionType = selectionType;
-        this.selectionInteraction = selectionInteraction;
-
-        if (selectionInteraction != SelectionInteraction.REPLACE) {
-            lastSelectionShape = currentSelectionShape;
-        }
-    }
-
-    /**
-     * The mouse has been released and the currently drawn shape must be combined
-     * with the already existing shape according to the selection interaction type
-     *
-     * @return true if something is still selected
-     */
-    public boolean combineShapes() {
-        boolean somethingSelected = true;
-        if (lastSelectionShape != null) {
-            currentSelectionShape = selectionInteraction.combine(lastSelectionShape, currentSelectionShape);
-
-            Rectangle newBounds = currentSelectionShape.getBounds();
-            if (newBounds.isEmpty()) {
-                currentSelectionShape = null;
-                updateComponent();
-                if (!Build.CURRENT.isRandomGUITest()) {
-                    Messages.showInfo("Nothing selected", "As a result of the "
-                            + selectionInteraction.toString().toLowerCase() + " operation, nothing is selected now.");
-                }
-                somethingSelected = false;
-            }
-
-            lastSelectionShape = null;
-        } else {
-            // there is the current selection only but it also can be empty if it has width or height = 0
-            if (currentSelectionShape.getBounds().isEmpty()) {
-                somethingSelected = false;
-            }
-        }
-        return somethingSelected;
-    }
-
-    private void startMarching() {
+    public void startMarching() {
         assert ic != null;
 
         marchingAntsTimer = new Timer(100, null);
         marchingAntsTimer.addActionListener(evt -> {
-            dashPhase += 1 / ic.getViewScale();
-
-            updateComponent();
+            if(!hidden) {
+                dashPhase += 1 / ic.getViewScale();
+                repaint();
+            }
         });
         marchingAntsTimer.start();
     }
 
+    public void stopMarching() {
+        if (marchingAntsTimer != null) {
+            marchingAntsTimer.stop();
+            marchingAntsTimer = null;
+        }
+    }
+
+    public boolean isMarching() {
+        return marchingAntsTimer != null;
+    }
+
     public void paintMarchingAnts(Graphics2D g2) {
-        if (currentSelectionShape == null) {
+        assert !dead : "dead selection";
+
+        if (currentShape == null || hidden) {
             return;
         }
 
         // while a new selection is drawn with marching ants, the
         // old selection is drawn frozen (phase is always 0)
-        paintAnts(g2, lastSelectionShape, 0);
-        paintAnts(g2, currentSelectionShape, dashPhase);
+        if (lastShape != null) {
+            paintAnts(g2, lastShape, 0);
+        }
+        paintAnts(g2, currentShape, dashPhase);
     }
 
     private void paintAnts(Graphics2D g2, Shape shape, float phase) {
-        if (shape == null) {
-            return;
-        }
-
         double viewScale = ic.getViewScale();
         float lineWidth = (float) (DASH_WIDTH / viewScale);
 
@@ -293,37 +153,26 @@ public class Selection {
      * Inverts the selection shape.
      */
     public void invert(Rectangle fullImage) {
-        if (currentSelectionShape != null) {
-            Area area = new Area(currentSelectionShape);
+        if (currentShape != null) {
+            Area area = new Area(currentShape);
             Area fullArea = new Area(fullImage);
             fullArea.subtract(area);
-            currentSelectionShape = fullArea;
+            currentShape = fullArea;
         }
     }
 
     public void deselectAndDispose() {
-        switch (state) {
-            case NO_SHAPE_YET:
-                state = DIED;
-                break;
-            case HAS_SHAPE:
-                if(marchingAntsTimer != null) { // can be null in unit tests
-                    marchingAntsTimer.stop();
-                }
-                updateComponent();
-                ic = null;
-                state = DIED;
-                break;
-            case DIED:
-                throw new IllegalStateException("died twice");
-        }
+        stopMarching();
+        repaint();
+        ic = null;
+        dead = true;
     }
 
-    private void updateComponent() {
-//        Rectangle selBounds = currentSelectionShape.getBounds();
+    public void repaint() {
+//        Rectangle selBounds = currentShape.getBounds();
 //
-//        if(lastSelectionShape != null) {
-//            Rectangle r = lastSelectionShape.getBounds();
+//        if(lastShape != null) {
+//            Rectangle r = lastShape.getBounds();
 //            selBounds = selBounds.union(r);
 //        }
 //
@@ -335,21 +184,17 @@ public class Selection {
         ic.repaint();
     }
 
-    /**
-     * The selection tool does not need this method, but sometimes the shape
-     * of the selection must be set directly
-     */
-    public void setShape(Shape selectionShape) {
-        currentSelectionShape = selectionShape;
-        lastSelectionShape = null;
-
-        if (state == NO_SHAPE_YET) {
-            state = HAS_SHAPE;
-        }
+    public void setNewShape(Shape selectionShape) {
+        currentShape = selectionShape;
+        lastShape = null;
     }
 
-    public SelectionInteraction getSelectionInteraction() {
-        return selectionInteraction;
+    public void setShape(Shape currentShape) {
+        this.currentShape = currentShape;
+    }
+
+    public void setLastShape(Shape lastSelectionShape) {
+        this.lastShape = lastSelectionShape;
     }
 
     /**
@@ -358,45 +203,22 @@ public class Selection {
      * @return true if something is still selected
      */
     public boolean clipToCompSize(Composition comp) {
-        if (currentSelectionShape != null) {
-            Canvas canvas = comp.getCanvas();
-            Area compBounds = new Area(new Rectangle(0, 0, canvas.getWidth(), canvas.getHeight()));
-            Area tmp = new Area(currentSelectionShape);
-            tmp.intersect(compBounds);
-            currentSelectionShape = tmp;
-            updateComponent();
+        if (currentShape != null) {
+            currentShape = comp.clipShapeToCanvasSize(currentShape);
 
-            return !currentSelectionShape.getBounds().isEmpty();
+            repaint();
+
+            return !currentShape.getBounds().isEmpty();
         }
         return false;
     }
 
-    public void addNewPolygonalLassoPoint(UserDrag userDrag) {
-        Polygon polygon = (Polygon) currentSelectionShape;
-        int[] xPoints = polygon.xpoints;
-        int[] yPoints = polygon.ypoints;
-        int nPoints = polygon.npoints;
-
-        int newNPoints = nPoints + 1;
-        int[] newXPoints = new int[newNPoints];
-        int[] newYPoints = new int[newNPoints];
-
-//        for (int i = 0; i < nPoints; i++) {
-//            newXPoints[i] = xPoints[i];
-//            newYPoints[i] = yPoints[i];
-//        }
-
-        System.arraycopy(xPoints, 0, newXPoints, 0, nPoints);
-        System.arraycopy(yPoints, 0, newXPoints, 0, nPoints);
-
-        newXPoints[newNPoints - 1] = (int) userDrag.getEndX();
-        newYPoints[newNPoints - 1] = (int) userDrag.getEndY();
-
-        currentSelectionShape = new Polygon(newXPoints, newYPoints, newNPoints);
+    public Shape getShape() {
+        return currentShape;
     }
 
-    public Shape getShape() {
-        return state.getShape(currentSelectionShape);
+    public Shape getLastShape() {
+        return lastShape;
     }
 
     /**
@@ -405,26 +227,26 @@ public class Selection {
      * (but relative to the composition, not to the image)
      */
     public Rectangle getShapeBounds() {
-        return state.getShapeBounds(currentSelectionShape);
+        return currentShape.getBounds();
     }
 
     public void modify(SelectionModifyType type, float amount) {
         BasicStroke outlineStroke = new BasicStroke(amount);
-        Shape outlineShape = outlineStroke.createStrokedShape(currentSelectionShape);
+        Shape outlineShape = outlineStroke.createStrokedShape(currentShape);
 
-        Area oldArea = new Area(currentSelectionShape);
+        Area oldArea = new Area(currentShape);
         Area outlineArea = new Area(outlineShape);
 
-        Shape backupShape = currentSelectionShape;
-        currentSelectionShape = type.createModifiedShape(oldArea, outlineArea);
+        Shape backupShape = currentShape;
+        currentShape = type.createModifiedShape(oldArea, outlineArea);
 
         SelectionChangeEdit edit = new SelectionChangeEdit(ic.getComp(), backupShape, "Modify Selection");
         History.addEdit(edit);
     }
 
     public Shape transform(AffineTransform at) {
-        Shape backupShape = currentSelectionShape;
-        currentSelectionShape = at.createTransformedShape(currentSelectionShape);
+        Shape backupShape = currentShape;
+        currentShape = at.createTransformedShape(currentShape);
         return backupShape;
     }
 
@@ -433,28 +255,59 @@ public class Selection {
         History.addEdit(new SelectionChangeEdit(ic.getComp(), backupShape, "Nudge Selection"));
     }
 
-    public State getState() {
-        return state;
+    public boolean isHidden() {
+        return hidden;
     }
 
+    public void setHidden(boolean hide, boolean fromMenu) {
+        assert !dead : "dead selection";
+
+        boolean change = this.hidden != hide;
+        if (!change) {
+            return;
+        }
+
+        this.hidden = hide;
+
+        if(hide) {
+            stopMarching();
+        } else {
+            if(marchingAntsTimer == null) {
+                startMarching();
+            }
+        }
+
+        repaint();
+
+        // if not called from the menu, update the menu name
+        if(!fromMenu) {
+            ShowHideAction action = SelectionActions.getShowHideSelectionAction();
+            if(hide) {
+                action.setShowName();
+            } else {
+                action.setHideName();
+            }
+        }
+    }
+
+    // called when the composition is duplicated
     public void setIC(ImageComponent ic) {
         assert ic != null;
         this.ic = ic;
-        if (state == HAS_SHAPE) {
-            startMarching();
-        }
+        startMarching();
+    }
+
+    public boolean isAlive() {
+        return !dead;
     }
 
     @Override
     public String toString() {
         return "Selection{" +
                 "composition=" + ic.getComp().getName() +
-                ", currentSelectionShape-class=" + (currentSelectionShape == null ? "null" : currentSelectionShape.getClass().getName()) +
-                ", currentSelectionShapeBounds=" + (currentSelectionShape == null ? "null" : currentSelectionShape.getBounds()) +
-                ", lastSelectionShape-class=" + (lastSelectionShape == null ? "null" : lastSelectionShape.getClass().getName()) +
-                ", selectionType=" + selectionType +
-                ", selectionInteraction=" + selectionInteraction +
-                ", state=" + state +
+                ", currentShape-class=" + (currentShape == null ? "null" : currentShape.getClass().getName()) +
+                ", currentSelectionShapeBounds=" + (currentShape == null ? "null" : currentShape.getBounds()) +
+                ", lastShape-class=" + (lastShape == null ? "null" : lastShape.getClass().getName()) +
                 '}';
     }
 }

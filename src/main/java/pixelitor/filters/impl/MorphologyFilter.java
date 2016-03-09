@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.filters.impl;
 
 import com.jhlabs.image.WholeImageFilter;
@@ -59,6 +60,7 @@ public class MorphologyFilter extends WholeImageFilter {
         short[] inG = new short[numPixels];
         short[] inB = new short[numPixels];
 
+        pt = createProgressTracker(iterations);
         for (int it = 0; it < iterations; it++) {
             if (it > 0) {
                 System.arraycopy(outPixels, 0, inPixels, 0, numPixels);
@@ -121,7 +123,9 @@ public class MorphologyFilter extends WholeImageFilter {
                     outPixels[index++] = (a << 24) | (r << 16) | (g << 8) | b;
                 }
             }
+            pt.unitDone();
         }
+        finishProgressTracker();
         return outPixels;
     }
 
