@@ -52,9 +52,7 @@ public class FgBgColorSelector extends JLayeredPane {
 
     private boolean layerMaskEditing = false;
 
-    public static FgBgColorSelector INSTANCE = new FgBgColorSelector();
-
-    private FgBgColorSelector() {
+    public FgBgColorSelector() {
         setLayout(null);
 
         initFGButton();

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.utils.debug;
 
 import pixelitor.Composition;
@@ -76,7 +77,7 @@ public class CompositionNode extends DebugNode {
         addBooleanChild("hasSelection", hasSelection);
 
         if (hasSelection) {
-            SelectionNode selectionNode = new SelectionNode(comp.getSelectionOrNull());
+            SelectionNode selectionNode = new SelectionNode(comp.getSelection());
             add(selectionNode);
         }
 

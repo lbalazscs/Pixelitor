@@ -63,6 +63,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
@@ -93,7 +94,9 @@ public class Composition implements Serializable {
     private transient boolean compositeImageUpToDate = false;
     private transient BufferedImage cachedCompositeImage = null;
     private transient ImageComponent ic;
+
     private transient Selection selection;
+    private transient Selection builtSelection;
 
     // A Composition can be created either with one of the following static
     // factory methods or through deserialization (pxc)
@@ -723,7 +726,7 @@ public class Composition implements Serializable {
             selection = null;
 
             if (isActiveComp()) {
-                if(wasHidden) {
+                if (wasHidden) {
                     SelectionActions.getShowHideSelectionAction().setHideName();
                 }
                 SelectionActions.setEnabled(false, this);
@@ -752,12 +755,35 @@ public class Composition implements Serializable {
         return edit;
     }
 
-    public Optional<Selection> getSelection() {
-        return Optional.ofNullable(selection);
+    public void onSelection(Consumer<Selection> action) {
+        if (selection != null) {
+            action.accept(selection);
+        }
     }
 
-    public Selection getSelectionOrNull() {
+    public Selection getSelection() {
         return selection;
+    }
+
+    public Shape getSelectionShape() {
+        if (selection != null) {
+            return selection.getShape();
+        }
+        return null;
+    }
+
+    public Selection getBuiltSelection() {
+        return builtSelection;
+    }
+
+    public void setBuiltSelection(Selection selection) {
+        this.builtSelection = selection;
+    }
+
+    public void promoteSelection() {
+        assert selection == null;
+        selection = builtSelection;
+        builtSelection = null;
     }
 
     public boolean hasSelection() {

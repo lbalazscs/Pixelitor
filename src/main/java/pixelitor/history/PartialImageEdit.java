@@ -29,7 +29,6 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
-import java.util.Optional;
 
 import static pixelitor.Composition.ImageChangeActions.FULL;
 
@@ -136,11 +135,11 @@ public class PartialImageEdit extends FadeableEdit {
         BufferedImage previousImage = ImageUtils.copyImage(fullImage);
         previousImage.setData(backupRaster);
 
-        Optional<Selection> selection = layer.getComp().getSelection();
-        if (selection.isPresent()) {
+        Selection selection = layer.getComp().getSelection();
+        if (selection != null) {
             // backupRaster is relative to the full image, but we need to return a selection-sized image
             // TODO this is another ugly hack
-            previousImage = layer.getSelectionSizedPartFrom(previousImage, selection.get(), true);
+            previousImage = layer.getSelectionSizedPartFrom(previousImage, selection, true);
         }
 
         return previousImage;

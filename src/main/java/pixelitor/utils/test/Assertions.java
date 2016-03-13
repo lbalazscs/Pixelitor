@@ -58,7 +58,7 @@ public class Assertions {
         if (!comp.hasSelection()) {
             throw new IllegalStateException();
         }
-        Shape shape = comp.getSelectionOrNull().getShape();
+        Shape shape = comp.getSelection().getShape();
         Rectangle expected = new Rectangle(x, y, w, h);
         Rectangle actual = shape.getBounds();
         if (actual.equals(expected)) {

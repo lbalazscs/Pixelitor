@@ -33,7 +33,7 @@ public class ShowHideSelectionAction extends ShowHideAction {
     public boolean getCurrentVisibility() {
         ImageComponent ic = ImageComponents.getActiveIC();
         if (ic != null) {
-            Selection selection = ic.getComp().getSelectionOrNull();
+            Selection selection = ic.getComp().getSelection();
             if (selection != null) {
                 return !selection.isHidden();
             }

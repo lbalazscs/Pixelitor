@@ -36,6 +36,8 @@ public class SelectionBuilder {
 
     private Shape replacedShape;
 
+    private boolean finished = false;
+
     /**
      * Called in mousePressed
      */
@@ -43,7 +45,7 @@ public class SelectionBuilder {
         this.selectionInteraction = selectionInteraction;
         this.selectionType = selectionType;
         this.comp = comp;
-        Selection selection = comp.getSelectionOrNull();
+        Selection selection = comp.getSelection();
 
         if (selection == null) {
             return;
@@ -77,7 +79,7 @@ public class SelectionBuilder {
      * selection shape is continuously updated
      */
     public void updateSelection(Object mouseInfo) {
-        Selection selection = comp.getSelectionOrNull();
+        Selection selection = comp.getSelection();
         boolean noPreviousSelection = selection == null;
 
         if (noPreviousSelection) {
@@ -101,7 +103,7 @@ public class SelectionBuilder {
      * with the already existing shape according to the selection interaction type
      */
     public void combineShapes() {
-        Selection selection = comp.getSelectionOrNull();
+        Selection selection = comp.getSelection();
         Shape lastShape = selection.getLastShape();
         Shape shape = selection.getShape();
         shape = comp.clipShapeToCanvasSize(shape);
@@ -120,12 +122,10 @@ public class SelectionBuilder {
                     Messages.showInfo("Nothing selected", "As a result of the "
                             + selectionInteraction.toString().toLowerCase() + " operation, nothing is selected now.");
                 }
-                return;
             } else {
                 selection.setNewShape(combinedShape);
                 PixelitorEdit edit = new SelectionChangeEdit(comp, lastShape, selectionInteraction.getNameForUndo());
                 History.addEdit(edit);
-                return;
             }
         } else {
             // we can get here if either (1) a new selection
@@ -135,7 +135,6 @@ public class SelectionBuilder {
                 // the new shape can be empty if it has width or height = 0
                 comp.deselect(AddToHistory.NO);
                 selection = null;
-                return;
             } else {
                 selection.setShape(shape);
 
@@ -146,8 +145,17 @@ public class SelectionBuilder {
                     edit = new NewSelectionEdit(comp, selection.getShape());
                 }
                 History.addEdit(edit);
-                return;
             }
+        }
+        finished = true;
+    }
+
+    public void cancelIfNotFinished() {
+        if(!finished) {
+            // must be added to history, otherwise there will be an inconsistency
+            // because when replacing it already creates a history entry
+            comp.deselect(AddToHistory.YES);
+            comp.repaint();
         }
     }
 }

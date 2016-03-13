@@ -22,6 +22,7 @@ import com.jhlabs.composite.MultiplyComposite;
 import pixelitor.AppLogic;
 import pixelitor.Build;
 import pixelitor.Composition;
+import pixelitor.FgBgColors;
 import pixelitor.NewImage;
 import pixelitor.TipsOfTheDay;
 import pixelitor.automate.AutoPaint;
@@ -40,7 +41,6 @@ import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.filters.lookup.Luminosity;
 import pixelitor.filters.painters.TextFilter;
 import pixelitor.gui.Desktop;
-import pixelitor.gui.FgBgColorSelector;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
@@ -1143,7 +1143,7 @@ public class MenuBar extends JMenuBar {
         developMenu.addAction(new MenuAction("debug FgBgColorSelector") {
             @Override
             public void onClick() {
-                FgBgColorSelector.INSTANCE.dumpState();
+                FgBgColors.getGUI().dumpState();
             }
         });
 

@@ -60,7 +60,7 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
         AffineTransform canvasTX = createTransform(canvas);
 
         if (comp.hasSelection()) {
-            Selection selection = comp.getSelectionOrNull();
+            Selection selection = comp.getSelection();
             selection.transform(canvasTX);
         }
 

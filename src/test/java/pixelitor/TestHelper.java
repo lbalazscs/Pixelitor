@@ -44,7 +44,6 @@ import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.util.Optional;
 import java.util.Random;
 
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
@@ -125,7 +124,7 @@ public class TestHelper {
         when(ic.getMaskViewMode()).thenReturn(NORMAL);
         when(comp.getIC()).thenReturn(ic);
 
-        when(comp.getSelection()).thenReturn(Optional.empty());
+        when(comp.getSelection()).thenReturn(null);
 
         return comp;
     }
@@ -240,7 +239,7 @@ public class TestHelper {
         MockingDetails mockingDetails = mockingDetails(comp);
         if (mockingDetails.isMock()) {
             Selection selection = new Selection(shape, comp.getIC());
-            when(comp.getSelection()).thenReturn(Optional.of(selection));
+            when(comp.getSelection()).thenReturn(selection);
             when(comp.hasSelection()).thenReturn(true);
         } else {
             comp.createSelectionFromShape(shape);

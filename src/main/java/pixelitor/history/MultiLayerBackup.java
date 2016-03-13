@@ -65,7 +65,7 @@ public class MultiLayerBackup {
 
         // save selection
         if (comp.hasSelection()) {
-            Selection selection = comp.getSelectionOrNull();
+            Selection selection = comp.getSelection();
             backupShape = selection.getShape();
             assert backupShape != null;
         }

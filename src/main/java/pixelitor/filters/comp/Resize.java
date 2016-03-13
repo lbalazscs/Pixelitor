@@ -72,7 +72,7 @@ public class Resize implements CompAction {
         MultiLayerBackup backup = new MultiLayerBackup(comp, editName, true);
 
         if (comp.hasSelection()) {
-            Selection selection = comp.getSelectionOrNull();
+            Selection selection = comp.getSelection();
 
             double sx = ((double) canvasTargetWidth) / canvasCurrWidth;
             double sy = ((double) canvasTargetHeight) / canvasCurrHeight;

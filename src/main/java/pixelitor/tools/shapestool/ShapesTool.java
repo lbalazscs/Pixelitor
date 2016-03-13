@@ -49,7 +49,6 @@ import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.util.Optional;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
@@ -139,9 +138,9 @@ public class ShapesTool extends Tool {
     @Override
     public void mousePressed(MouseEvent e, ImageComponent ic) {
         Composition comp = ic.getComp();
-        Optional<Selection> selection = comp.getSelection();
-        if (selection.isPresent()) {
-            backupSelectionShape = selection.get().getShape();
+        Selection selection = comp.getSelection();
+        if (selection != null) {
+            backupSelectionShape = selection.getShape();
         } else {
             backupSelectionShape = null;
         }
@@ -223,7 +222,7 @@ public class ShapesTool extends Tool {
             comp.imageChanged(FULL);
             layer.updateIconImage();
         } else { // selection mode
-            comp.getSelection().ifPresent((selection) -> {
+            comp.onSelection(selection -> {
                 selection.clipToCompSize(comp); // the selection can be too big
 
                 PixelitorEdit edit;
@@ -384,10 +383,10 @@ public class ShapesTool extends Tool {
                 selectionShape = currentShape;
             }
 
-            Optional<Selection> selection = comp.getSelection();
+            Selection selection = comp.getSelection();
 
-            if (selection.isPresent()) {
-                selection.get().setNewShape(selectionShape);
+            if (selection != null) {
+                selection.setNewShape(selectionShape);
             } else {
                 comp.createSelectionFromShape(selectionShape);
             }

@@ -71,7 +71,7 @@ public class EnlargeCanvas implements CompAction {
             }
         }
 
-        Selection selection = comp.getSelectionOrNull();
+        Selection selection = comp.getSelection();
         if (selection != null && (north > 0 || west > 0)) {
             selection.transform(
                     AffineTransform.getTranslateInstance(west, north));

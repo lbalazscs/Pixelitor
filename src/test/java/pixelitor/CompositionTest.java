@@ -395,7 +395,7 @@ public class CompositionTest {
         comp.createSelectionFromShape(new Rectangle(3, 3, 5, 5));
         comp.checkInvariant();
 
-        Shape shape = comp.getSelectionOrNull().getShape();
+        Shape shape = comp.getSelection().getShape();
         assertThat(shape).isEqualTo(new Rectangle(3, 3, 5, 5));
     }
 

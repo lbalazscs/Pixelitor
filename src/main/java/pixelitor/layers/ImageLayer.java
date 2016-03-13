@@ -52,7 +52,6 @@ import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.Optional;
 
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
@@ -254,24 +253,19 @@ public class ImageLayer extends ContentLayer {
         assert newImage != null;
         assert Utils.checkRasterMinimum(newImage);
 
-        Optional<Selection> selection = comp.getSelection();
-        if (!selection.isPresent()) {
+        Shape selectionShape = comp.getSelectionShape();
+        if (selectionShape == null) {
             return newImage;
         } else {
-            Shape selectionShape = selection.get().getShape();
-            if (selectionShape != null) {
-                // the argument image pixels will replace the old ones only where selected
-                Graphics2D g = src.createGraphics();
-                g.translate(-getTX(), -getTY());
-                g.setComposite(AlphaComposite.Src);
-                g.setClip(selectionShape);
-                Rectangle bounds = selectionShape.getBounds();
-                g.drawImage(newImage, bounds.x, bounds.y, null);
-                g.dispose();
-                return src;
-            } else {
-                return newImage;
-            }
+            // the argument image pixels will replace the old ones only where selected
+            Graphics2D g = src.createGraphics();
+            g.translate(-getTX(), -getTY());
+            g.setComposite(AlphaComposite.Src);
+            g.setClip(selectionShape);
+            Rectangle bounds = selectionShape.getBounds();
+            g.drawImage(newImage, bounds.x, bounds.y, null);
+            g.dispose();
+            return src;
         }
     }
 
@@ -533,12 +527,12 @@ public class ImageLayer extends ContentLayer {
      * The canvas size is not considered, only the selection.
      */
     public BufferedImage getImageForFilterDialogs() {
-        Optional<Selection> selection = comp.getSelection();
-        if (!selection.isPresent()) {
+        Selection selection = comp.getSelection();
+        if (selection == null) {
             return image;
         }
 
-        Rectangle selectionBounds = selection.get().getShapeBounds();
+        Rectangle selectionBounds = selection.getShapeBounds();
         return image.getSubimage(selectionBounds.x, selectionBounds.y, selectionBounds.width, selectionBounds.height);
     }
 
@@ -718,15 +712,15 @@ public class ImageLayer extends ContentLayer {
      * If there is a selection, then the filters work on a subimage determined by the selection bounds.
      */
     public BufferedImage getImageOrSubImageIfSelected(boolean copyIfNoSelection, boolean copyAndTranslateIfSelected) {
-        Optional<Selection> selection = comp.getSelection();
-        if (!selection.isPresent()) {
+        Selection selection = comp.getSelection();
+        if (selection == null) {
             if (copyIfNoSelection) {
                 return ImageUtils.copyImage(image);
             }
             return image;
         }
 
-        return getSelectionSizedPartFrom(image, selection.get(), copyAndTranslateIfSelected);
+        return getSelectionSizedPartFrom(image, selection, copyAndTranslateIfSelected);
     }
 
     public BufferedImage getSelectionSizedPartFrom(BufferedImage src, Selection selection, boolean copyAndTranslateIfSelected) {

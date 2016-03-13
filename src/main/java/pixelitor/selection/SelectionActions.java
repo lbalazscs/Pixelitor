@@ -86,7 +86,7 @@ public final class SelectionActions {
                     "Modify Selection", "Change!", "Close") {
                 @Override
                 protected void dialogAccepted() {
-                    Selection selection = getActiveCompOrNull().getSelectionOrNull();
+                    Selection selection = getActiveCompOrNull().getSelection();
                     SelectionModifyType selectionModifyType = type.getSelected();
                     selection.modify(selectionModifyType, amount.getValue());
                 }
@@ -177,7 +177,7 @@ public final class SelectionActions {
             }
 
             if (comp.hasSelection()) {
-                Selection selection = comp.getSelectionOrNull();
+                Selection selection = comp.getSelection();
                 Shape shape = selection.getShape();
                 if (shape != null) {
                     ImageLayer layer = comp.getActiveMaskOrImageLayer();

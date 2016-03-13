@@ -281,7 +281,7 @@ public abstract class Layer implements Serializable {
                     String.format("The layer \"%s\" already has a layer mask.", getName()));
             return;
         }
-        Selection selection = comp.getSelectionOrNull();
+        Selection selection = comp.getSelection();
         if (addType.missingSelection(selection)) {
             Messages.showInfo("No selection",
                     String.format("The composition \"%s\" has no selection.", comp.getName()));
@@ -319,7 +319,7 @@ public abstract class Layer implements Serializable {
 
         PixelitorEdit edit = new AddLayerMaskEdit(comp, this, editName);
         if (deselect) {
-            Selection selection = comp.getSelectionOrNull();
+            Selection selection = comp.getSelection();
             Shape backupShape = selection.getShape();
             comp.deselect(AddToHistory.NO);
             if (backupShape != null) { // TODO on Mac Random GUI test we can get null here

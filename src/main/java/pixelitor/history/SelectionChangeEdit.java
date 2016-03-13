@@ -54,9 +54,11 @@ public class SelectionChangeEdit extends PixelitorEdit {
     private void swapShapes() {
         Shape tmp;
 
-        Selection selection = comp.getSelection().orElseThrow(
-                () -> new IllegalStateException(
-                        "no selection in " + comp.getName()));
+        Selection selection = comp.getSelection();
+        if (selection == null) {
+            throw new IllegalStateException(
+                    "no selection in " + comp.getName());
+        }
 
         tmp = selection.getShape();
 

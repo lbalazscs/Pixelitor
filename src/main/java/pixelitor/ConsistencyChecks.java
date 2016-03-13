@@ -93,7 +93,7 @@ public final class ConsistencyChecks {
                         + "\n current selected dimensions: " + current.getWidth() + "x" + current.getHeight() + ", "
                         + "history dimensions: " + previous.getWidth() + "x" + previous.getHeight()
                         + "\nchecked composition = " + comp.getName() + "(hasSelection = " + comp.hasSelection()
-                        + (comp.hasSelection() ? ", selection bounds = " + comp.getSelectionOrNull().getShapeBounds() : "") + ")"
+                        + (comp.hasSelection() ? ", selection bounds = " + comp.getSelection().getShapeBounds() : "") + ")"
                         + "\nchecked composition canvas = " + comp.getCanvas().getBounds()
                         + "\nhistory composition = " + historyCompName
                         + "\nactive composition = " + activeCompName

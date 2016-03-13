@@ -31,7 +31,6 @@ import pixelitor.utils.ImageSwitchListener;
 import javax.swing.*;
 import java.awt.Cursor;
 import java.awt.event.MouseEvent;
-import java.util.Optional;
 
 /**
  * The selection tool
@@ -61,7 +60,7 @@ public class SelectionTool extends Tool implements ImageSwitchListener {
     public void initSettingsPanel() {
         typeCombo = new JComboBox<>(SelectionType.values());
 //        typeCombo.addActionListener(e -> {
-//            selectionBuilder = null;
+//            stopBuildingSelection();
 //            polygonal = typeCombo.getSelectedItem() == SelectionType.POLYGONAL_LASSO;
 //            if (polygonal) {
 //                Messages.showStatusMessage(POLY_HELP_TEXT);
@@ -122,7 +121,7 @@ public class SelectionTool extends Tool implements ImageSwitchListener {
         }
 
         Composition comp = ic.getComp();
-        Selection selection = comp.getSelectionOrNull();
+        Selection selection = comp.getSelection();
         if (selection == null && !polygonal) {
             System.err.println("SelectionTool::mouseReleased: no selection");
             return;
@@ -142,7 +141,7 @@ public class SelectionTool extends Tool implements ImageSwitchListener {
                 selectionBuilder.updateSelection(pe);
                 if (SwingUtilities.isRightMouseButton(e)) {
                     selectionBuilder.combineShapes();
-                    selectionBuilder = null;
+                    stopBuildingSelection();
                 }
             }
         } else {
@@ -153,7 +152,7 @@ public class SelectionTool extends Tool implements ImageSwitchListener {
 
             selectionBuilder.updateSelection(userDrag);
             selectionBuilder.combineShapes();
-            selectionBuilder = null;
+            stopBuildingSelection();
         }
 
         altMeansSubtract = false;
@@ -167,7 +166,7 @@ public class SelectionTool extends Tool implements ImageSwitchListener {
                 PMouseEvent pe = new PMouseEvent(e, ic);
                 selectionBuilder.updateSelection(pe);
                 selectionBuilder.combineShapes();
-                selectionBuilder = null;
+                stopBuildingSelection();
                 return false;
             } else {
                 // ignore otherwise: will be handled in mouse released
@@ -197,9 +196,9 @@ public class SelectionTool extends Tool implements ImageSwitchListener {
         ImageComponent ic = ImageComponents.getActiveIC();
         if (ic != null) {
             Composition comp = ic.getComp();
-            Optional<Selection> selection = comp.getSelection();
-            if (selection.isPresent()) {
-                selection.get().nudge(key.getTransform());
+            Selection selection = comp.getSelection();
+            if (selection != null) {
+                selection.nudge(key.getTransform());
                 return true;
             }
         }
@@ -234,9 +233,9 @@ public class SelectionTool extends Tool implements ImageSwitchListener {
     }
 
     @Override
-    protected void toolStarted() {
-        super.toolStarted();
-        selectionBuilder = null;
+    protected void toolEnded() {
+        super.toolEnded();
+        stopBuildingSelection();
     }
 
     @Override
@@ -246,12 +245,19 @@ public class SelectionTool extends Tool implements ImageSwitchListener {
 
     @Override
     public void newImageOpened(Composition comp) {
-        selectionBuilder = null;
+        stopBuildingSelection();
     }
 
     @Override
     public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
-        selectionBuilder = null;
+        stopBuildingSelection();
+    }
+
+    private void stopBuildingSelection() {
+        if (selectionBuilder != null) {
+            selectionBuilder.cancelIfNotFinished();
+            selectionBuilder = null;
+        }
     }
 
     @Override

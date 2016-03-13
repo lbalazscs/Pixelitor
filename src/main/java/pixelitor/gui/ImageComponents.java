@@ -180,10 +180,13 @@ public class ImageComponents {
      */
     public static void selectionCropActiveImage() {
         try {
-            getActiveComp().ifPresent(comp -> comp.getSelection().ifPresent(selection -> {
-                Rectangle selectionBounds = selection.getShapeBounds();
-                new Crop(selectionBounds, true, true).process(comp);
-            }));
+            Composition comp = getActiveCompOrNull();
+            if (comp != null) {
+                comp.onSelection(selection -> {
+                    Rectangle selectionBounds = selection.getShapeBounds();
+                    new Crop(selectionBounds, true, true).process(comp);
+                });
+            }
         } catch (Exception ex) {
             Messages.showException(ex);
         }
@@ -362,10 +365,7 @@ public class ImageComponents {
 
     public static void onActiveSelection(Consumer<Selection> action) {
         if (activeIC != null) {
-            Selection selection = activeIC.getComp().getSelectionOrNull();
-            if (selection != null) {
-                action.accept(selection);
-            }
+            activeIC.getComp().onSelection(action);
         }
     }
 

@@ -1448,7 +1448,7 @@ public class AssertJSwingTest {
         assert canvasSizeIs(origCanvasWidth, origCanvasHeight);
 
         assert hasSelection();
-        Selection selection = comp.getSelectionOrNull();
+        Selection selection = comp.getSelection();
         Rectangle selectionBounds = selection.getShapeBounds();
         int selectionWidth = selectionBounds.width;
         int selectionHeight = selectionBounds.height;

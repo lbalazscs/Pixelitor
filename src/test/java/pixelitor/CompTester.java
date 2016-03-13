@@ -51,7 +51,7 @@ public class CompTester {
     }
 
     public void checkSelectionBounds(Rectangle expected) {
-        Selection selection = comp.getSelectionOrNull();
+        Selection selection = comp.getSelection();
         Rectangle shapeBounds = selection.getShapeBounds();
         assertThat(shapeBounds).isEqualTo(expected);
     }
