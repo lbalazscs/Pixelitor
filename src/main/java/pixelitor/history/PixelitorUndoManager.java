@@ -178,7 +178,7 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
         listenerList.remove(ListDataListener.class, l);
     }
 
-    protected void fireIntervalAdded(Object source, int index0, int index1) {
+    private void fireIntervalAdded(Object source, int index0, int index1) {
         Object[] listeners = listenerList.getListenerList();
         ListDataEvent e = null;
 
@@ -192,7 +192,7 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
         }
     }
 
-    protected void fireIntervalRemoved(Object source, int index0, int index1) {
+    private void fireIntervalRemoved(Object source, int index0, int index1) {
         Object[] listeners = listenerList.getListenerList();
         ListDataEvent e = null;
 

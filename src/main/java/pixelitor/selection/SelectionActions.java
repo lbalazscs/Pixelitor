@@ -177,8 +177,7 @@ public final class SelectionActions {
             }
 
             if (comp.hasSelection()) {
-                Selection selection = comp.getSelection();
-                Shape shape = selection.getShape();
+                Shape shape = comp.getSelectionShape();
                 if (shape != null) {
                     ImageLayer layer = comp.getActiveMaskOrImageLayer();
                     brushTool.trace(layer, shape);

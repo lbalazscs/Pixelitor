@@ -22,7 +22,6 @@ import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.selection.IgnoreSelection;
-import pixelitor.selection.Selection;
 
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
@@ -36,7 +35,7 @@ public class MultiLayerBackup {
     private Layer layer;
     private CanvasChangeEdit canvasChangeEdit;
     private TranslationEdit translationEdit;
-    private Shape backupShape;
+    private final Shape backupShape;
 
     // Saved before the change, but the edit is
     // created after the change.
@@ -64,11 +63,7 @@ public class MultiLayerBackup {
         }
 
         // save selection
-        if (comp.hasSelection()) {
-            Selection selection = comp.getSelection();
-            backupShape = selection.getShape();
-            assert backupShape != null;
-        }
+        backupShape = comp.getSelectionShape();
 
         // save backup images
         boolean imageLayerFound = false;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,6 +35,9 @@ public class OnePixelBrush extends AbstractBrush {
     public void onDragStart(double x, double y) {
         updateComp(x, y);
         setPrevious(x, y);
+
+        // make sure a pixel is changed without dragging
+        onNewMousePoint(x, y);
     }
 
     @Override

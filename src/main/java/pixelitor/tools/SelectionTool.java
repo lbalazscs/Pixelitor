@@ -27,6 +27,7 @@ import pixelitor.selection.SelectionBuilder;
 import pixelitor.selection.SelectionInteraction;
 import pixelitor.selection.SelectionType;
 import pixelitor.utils.ImageSwitchListener;
+import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.Cursor;
@@ -51,7 +52,7 @@ public class SelectionTool extends Tool implements ImageSwitchListener {
     SelectionTool() {
         super('m', "Selection", "selection_tool_icon.png",
                 HELP_TEXT,
-                Cursor.getDefaultCursor(), false, true, false, ClipStrategy.FULL_AREA);
+                Cursor.getDefaultCursor(), false, true, false, ClipStrategy.INTERNAL_FRAME);
         spaceDragBehavior = true;
         ImageComponents.addImageSwitchListener(this);
     }
@@ -59,15 +60,15 @@ public class SelectionTool extends Tool implements ImageSwitchListener {
     @Override
     public void initSettingsPanel() {
         typeCombo = new JComboBox<>(SelectionType.values());
-//        typeCombo.addActionListener(e -> {
-//            stopBuildingSelection();
-//            polygonal = typeCombo.getSelectedItem() == SelectionType.POLYGONAL_LASSO;
-//            if (polygonal) {
-//                Messages.showStatusMessage(POLY_HELP_TEXT);
-//            } else {
-//                Messages.showStatusMessage("Selection Tool: " + HELP_TEXT);
-//            }
-//        });
+        typeCombo.addActionListener(e -> {
+            stopBuildingSelection();
+            polygonal = typeCombo.getSelectedItem() == SelectionType.POLYGONAL_LASSO;
+            if (polygonal) {
+                Messages.showStatusMessage(POLY_HELP_TEXT);
+            } else {
+                Messages.showStatusMessage("Selection Tool: " + HELP_TEXT);
+            }
+        });
         settingsPanel.addWithLabel("Type:", typeCombo, "selectionTypeCombo");
 
         settingsPanel.addSeparator();
@@ -121,9 +122,9 @@ public class SelectionTool extends Tool implements ImageSwitchListener {
         }
 
         Composition comp = ic.getComp();
-        Selection selection = comp.getSelection();
+        Selection selection = comp.getBuiltSelection();
         if (selection == null && !polygonal) {
-            System.err.println("SelectionTool::mouseReleased: no selection");
+            System.err.println("SelectionTool::mouseReleased: no built selection");
             return;
         }
 

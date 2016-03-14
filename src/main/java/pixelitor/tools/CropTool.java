@@ -29,8 +29,6 @@ import pixelitor.utils.ImageSwitchListener;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
@@ -75,23 +73,20 @@ public class CropTool extends Tool implements ImageSwitchListener {
     CropTool() {
         super('c', "Crop", "crop_tool_icon.png",
                 "Click and drag to define the crop area. Hold SPACE down to move the entire region.",
-                Cursor.getDefaultCursor(), false, true, true, ClipStrategy.FULL_AREA);
+                Cursor.getDefaultCursor(), false, true, true, ClipStrategy.IMAGE_ONLY);
         spaceDragBehavior = true;
-        maskOpacity.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                float alpha = maskOpacity.getValueAsPercentage();
-                // because of a swing bug, the slider can get out of range
-                if (alpha < 0.0f) {
-                    alpha = 0.0f;
-                    maskOpacity.setValue(0);
-                } else if (alpha > 1.0f) {
-                    alpha = 1.0f;
-                    maskOpacity.setValue(100);
-                }
-                hideComposite = AlphaComposite.getInstance(SRC_OVER, alpha);
-                ImageComponents.repaintActive();
+        maskOpacity.addChangeListener(e -> {
+            float alpha = maskOpacity.getValueAsPercentage();
+            // because of a swing bug, the slider can get out of range
+            if (alpha < 0.0f) {
+                alpha = 0.0f;
+                maskOpacity.setValue(0);
+            } else if (alpha > 1.0f) {
+                alpha = 1.0f;
+                maskOpacity.setValue(100);
             }
+            hideComposite = AlphaComposite.getInstance(SRC_OVER, alpha);
+            ImageComponents.repaintActive();
         });
         ImageComponents.addImageSwitchListener(this);
     }
@@ -206,11 +201,9 @@ public class CropTool extends Tool implements ImageSwitchListener {
         Shape previousClip = g2.getClip();  // save for later use
 
         Rectangle canvasBounds = canvas.getBounds();
-        // We are here in image space because g2 has the transforms applied.
-        // We are overriding the clip of g2, therefore we must manually
-        // make sure that we don't paint anything outside the internal frame.
-        // canvas.getBounds() is not reliable because the internal frame might be smaller
-        // so we have to intersect with the view rectangle...
+
+        // Similar to ClipStrategy.INTERNAL_FRAME, but we need intermediary some variables
+
         Rectangle componentSpaceViewRect = callingIC.getViewRect();
         // ...but first get this to image space...
         Rectangle2D imageSpaceViewRect = callingIC.fromComponentToImageSpace(componentSpaceViewRect);

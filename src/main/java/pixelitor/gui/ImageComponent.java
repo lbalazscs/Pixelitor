@@ -332,7 +332,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
         // possibly allow a larger clip for the selections and tools
         Tool currentTool = Tools.getCurrentTool();
-        currentTool.setClip(g2);
+        currentTool.setClip(g2, this);
 
         comp.paintSelection(g2);
 

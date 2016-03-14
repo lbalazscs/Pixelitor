@@ -28,8 +28,8 @@ public class PMouseEvent {
     private boolean shiftDown;
 
     // event coordinates in image space
-    private double x;
-    private double y;
+    private final double x;
+    private final double y;
 
     public PMouseEvent(MouseEvent e, ImageComponent ic) {
         int mouseX = e.getX();

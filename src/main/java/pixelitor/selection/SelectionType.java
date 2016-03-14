@@ -17,6 +17,7 @@
 
 package pixelitor.selection;
 
+import pixelitor.tools.PMouseEvent;
 import pixelitor.tools.UserDrag;
 
 import java.awt.Shape;
@@ -67,30 +68,30 @@ public enum SelectionType {
                 return gp;
             }
         }
-//    }, POLYGONAL_LASSO("Polygonal") {
-//        @Override
-//        public Shape createShape(Object mouseInfo, Shape oldShape) {
-//            PMouseEvent pe = (PMouseEvent) mouseInfo;
-//            boolean createNew;
-//            if (oldShape == null) {
-//                createNew = true;
-//            } else if (oldShape instanceof GeneralPath) {
-//                createNew = false;
-//            } else { // it is an Area, meaning that a new shape has been started
-//                createNew = true;
-//            }
-//
-//            if (createNew) {
-//                GeneralPath p = new GeneralPath();
-//                p.moveTo(pe.getX(), pe.getY());
-//                return p;
-//            } else {
-//                GeneralPath gp = (GeneralPath) oldShape;
-//                gp.lineTo(pe.getX(), pe.getY());
-//
-//                return gp;
-//            }
-//        }
+    }, POLYGONAL_LASSO("Polygonal") {
+        @Override
+        public Shape createShape(Object mouseInfo, Shape oldShape) {
+            PMouseEvent pe = (PMouseEvent) mouseInfo;
+            boolean createNew;
+            if (oldShape == null) {
+                createNew = true;
+            } else if (oldShape instanceof GeneralPath) {
+                createNew = false;
+            } else { // it is an Area, meaning that a new shape has been started
+                createNew = true;
+            }
+
+            if (createNew) {
+                GeneralPath p = new GeneralPath();
+                p.moveTo(pe.getX(), pe.getY());
+                return p;
+            } else {
+                GeneralPath gp = (GeneralPath) oldShape;
+                gp.lineTo(pe.getX(), pe.getY());
+
+                return gp;
+            }
+        }
     };
 
     private final String guiName;

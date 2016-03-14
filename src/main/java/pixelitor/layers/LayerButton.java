@@ -332,7 +332,18 @@ public class LayerButton extends JToggleButton {
         maskIconLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (e.isAltDown()) {
+                boolean altClick = e.isAltDown();
+                boolean shiftClick = e.isAltDown();
+                if (altClick && shiftClick) {
+                    // shift-alt-click switches to RUBYLITH except when
+                    // it is already RUBYLITH
+                    ImageComponent ic = layer.getComp().getIC();
+                    if (ic.getMaskViewMode() == MaskViewMode.RUBYLITH) {
+                        MaskViewMode.EDIT_MASK.activate(ic, layer);
+                    } else {
+                        MaskViewMode.RUBYLITH.activate(ic, layer);
+                    }
+                } else if (altClick) {
                     // alt-click switches to SHOW_MASK except when it
                     // already is in SHOW_MASK
                     ImageComponent ic = layer.getComp().getIC();
@@ -341,7 +352,7 @@ public class LayerButton extends JToggleButton {
                     } else {
                         MaskViewMode.SHOW_MASK.activate(ic, layer);
                     }
-                } else if (e.isShiftDown()) {
+                } else if (shiftClick) {
                     // shift-click disables except when it is already disabled
                     layer.setMaskEnabled(!layer.isMaskEnabled(), AddToHistory.YES);
                 } else {

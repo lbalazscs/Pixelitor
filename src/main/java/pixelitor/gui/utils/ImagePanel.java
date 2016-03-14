@@ -27,8 +27,8 @@ import java.awt.image.BufferedImage;
 
 public class ImagePanel extends JPanel {
     protected BufferedImage image;
-    private boolean drawCheckerBoard;
-    CheckerboardPainter checkerboardPainter;
+    private final boolean drawCheckerBoard;
+    private CheckerboardPainter checkerboardPainter;
 
     public ImagePanel(boolean drawCheckerBoard) {
         this.drawCheckerBoard = drawCheckerBoard;

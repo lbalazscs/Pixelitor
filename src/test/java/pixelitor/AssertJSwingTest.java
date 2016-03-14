@@ -38,6 +38,7 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.io.FileChoosers;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.LayerButton;
+import pixelitor.layers.MaskViewMode;
 import pixelitor.menus.view.ZoomControl;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.Selection;
@@ -71,6 +72,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static pixelitor.AssertJSwingTest.TestingMode.ON_MASK_VIEW_LAYER;
 import static pixelitor.AssertJSwingTest.TestingMode.ON_MASK_VIEW_MASK;
+import static pixelitor.AssertJSwingTest.TestingMode.RUBY;
 import static pixelitor.AssertJSwingTest.TestingMode.SIMPLE;
 import static pixelitor.AssertJSwingTest.TestingMode.WITH_MASK;
 import static pixelitor.utils.test.Assertions.canvasSizeIs;
@@ -100,16 +102,20 @@ public class AssertJSwingTest {
     enum Reseed {YES, NO}
 
     enum TestingMode {
-        SIMPLE(false), WITH_MASK(false), ON_MASK_VIEW_LAYER(true), ON_MASK_VIEW_MASK(true);
+        SIMPLE(MaskViewMode.NORMAL),
+        WITH_MASK(MaskViewMode.NORMAL),
+        ON_MASK_VIEW_LAYER(MaskViewMode.EDIT_MASK),
+        ON_MASK_VIEW_MASK(MaskViewMode.SHOW_MASK),
+        RUBY(MaskViewMode.RUBYLITH);
 
-        private final boolean maskEditing;
+        private final MaskViewMode viewMode;
 
-        TestingMode(boolean maskEditing) {
-            this.maskEditing = maskEditing;
+        TestingMode(MaskViewMode viewMode) {
+            this.viewMode = viewMode;
         }
 
         public boolean isMaskEditing() {
-            return maskEditing;
+            return viewMode.editMask();
         }
     }
 
@@ -1998,6 +2004,9 @@ public class AssertJSwingTest {
         } else if (testingMode == ON_MASK_VIEW_MASK) {
             addLayerMask(true);
             pressCtrlTwo();
+        } else if (testingMode == RUBY) {
+            addLayerMask(true);
+            pressCtrlFour();
         }
     }
 
@@ -2014,6 +2023,11 @@ public class AssertJSwingTest {
     private void pressCtrlThree() {
         pw.pressKey(VK_CONTROL).pressKey(VK_3)
                 .releaseKey(VK_3).releaseKey(VK_CONTROL);
+    }
+
+    private void pressCtrlFour() {
+        pw.pressKey(VK_CONTROL).pressKey(VK_4)
+                .releaseKey(VK_4).releaseKey(VK_CONTROL);
     }
 
     private void openFile(String fileName) {

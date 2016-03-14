@@ -309,8 +309,8 @@ public abstract class Tool {
         return userDrag;
     }
 
-    public void setClip(Graphics2D g) {
-        clipStrategy.setClip(g);
+    public void setClip(Graphics2D g, ImageComponent ic) {
+        clipStrategy.setClip(g, ic);
     }
 
     public void spacePressed() {

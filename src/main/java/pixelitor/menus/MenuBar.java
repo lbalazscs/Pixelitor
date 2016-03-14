@@ -40,6 +40,7 @@ import pixelitor.filters.levels.Levels;
 import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.filters.lookup.Luminosity;
 import pixelitor.filters.painters.TextFilter;
+import pixelitor.gui.ColorVariations;
 import pixelitor.gui.Desktop;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageComponent;
@@ -549,7 +550,7 @@ public class MenuBar extends JMenuBar {
         MaskViewMode.NORMAL.addToMenu(sub);
         MaskViewMode.SHOW_MASK.addToMenu(sub);
         MaskViewMode.EDIT_MASK.addToMenu(sub);
-//        MaskViewMode.RUBYLITH.addToMenu(sub);
+        MaskViewMode.RUBYLITH.addToMenu(sub);
 
         return sub;
     }
@@ -951,6 +952,13 @@ public class MenuBar extends JMenuBar {
             @Override
             public void onClick() {
                 Navigator.showInDialog(pw);
+            }
+        });
+
+        viewMenu.addAction(new MenuAction("Color Variations...") {
+            @Override
+            public void onClick() {
+                ColorVariations.showInDialog(pw);
             }
         });
 

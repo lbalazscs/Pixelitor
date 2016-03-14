@@ -62,7 +62,7 @@ public class SelectionChangeEdit extends PixelitorEdit {
 
         tmp = selection.getShape();
 
-        selection.setNewShape(backupShape);
+        selection.setShape(backupShape);
 
         backupShape = tmp;
 

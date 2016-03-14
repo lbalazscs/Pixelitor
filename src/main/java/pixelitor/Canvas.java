@@ -21,6 +21,8 @@ import pixelitor.gui.ImageComponent;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.geom.Area;
 import java.io.Serializable;
 
 /**
@@ -99,6 +101,13 @@ public class Canvas implements Serializable {
 
     public void setIc(ImageComponent ic) {
         this.ic = ic;
+    }
+
+    public Shape invertShape(Shape shape) {
+        Area area = new Area(shape);
+        Area fullArea = new Area(getBounds());
+        fullArea.subtract(area);
+        return fullArea;
     }
 
     @Override

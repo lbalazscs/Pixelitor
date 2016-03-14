@@ -319,8 +319,7 @@ public abstract class Layer implements Serializable {
 
         PixelitorEdit edit = new AddLayerMaskEdit(comp, this, editName);
         if (deselect) {
-            Selection selection = comp.getSelection();
-            Shape backupShape = selection.getShape();
+            Shape backupShape = comp.getSelectionShape();
             comp.deselect(AddToHistory.NO);
             if (backupShape != null) { // TODO on Mac Random GUI test we can get null here
                 DeselectEdit deselectEdit = new DeselectEdit(comp, backupShape, "nested deselect");

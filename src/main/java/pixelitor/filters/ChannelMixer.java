@@ -241,12 +241,9 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
 
         // add this extra action, but after the standard "Randomize Settings"
         ActionSetting randomizeAndNormalize = new ActionSetting("Randomize and Normalize",
-                new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        paramSet.randomize();
-                        normalizeAction.actionPerformed(null);
-                    }
+                e -> {
+                    paramSet.randomize();
+                    normalizeAction.actionPerformed(null);
                 }, "Randomizes settings and normalizes the brightness");
         // insert it right after "Randomize Settings"
         paramSet.insertAction(randomizeAndNormalize, 2);

@@ -35,8 +35,8 @@ import java.awt.image.BufferedImage;
  */
 public abstract class GetImageAction extends AbstractAction {
     protected final String name;
-    protected String menuName;
-    protected boolean hasDialog;
+    private String menuName;
+    private final boolean hasDialog;
 
     private final boolean allowMasks;
 

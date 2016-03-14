@@ -47,6 +47,7 @@ public class LayerMaskActions {
             showMenu.add(MaskViewMode.NORMAL.createPopupMenuItem(layer));
             showMenu.add(MaskViewMode.SHOW_MASK.createPopupMenuItem(layer));
             showMenu.add(MaskViewMode.EDIT_MASK.createPopupMenuItem(layer));
+            showMenu.add(MaskViewMode.RUBYLITH.createPopupMenuItem(layer));
             menu.addSeparator();
 
             menu.add(new JMenuItem(new DeleteMaskAction(layer)));

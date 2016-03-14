@@ -48,6 +48,8 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.UpdateGUI;
 
+import java.awt.AlphaComposite;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -693,7 +695,7 @@ public class Composition implements Serializable {
     public void dispose() {
         if (selection != null) {
             // stop the timer thread
-            selection.deselectAndDispose();
+            selection.die();
         }
     }
 
@@ -707,8 +709,32 @@ public class Composition implements Serializable {
     }
 
     public void paintSelection(Graphics2D g) {
-        if (selection != null) {
-            selection.paintMarchingAnts(g);
+        boolean ruby = false;
+        if (ruby) {
+            Shape allSelection = null;
+            if (builtSelection != null) {
+                allSelection = builtSelection.getShape();
+            }
+            if (selection != null) {
+                if (allSelection == null) {
+                    allSelection = selection.getShape();
+                } else {
+                    allSelection = SelectionInteraction.ADD.combine(allSelection, selection.getShape());
+                }
+            }
+            if (allSelection != null) {
+                Shape inverted = canvas.invertShape(allSelection);
+                g.setComposite(AlphaComposite.SrcOver.derive(0.5f));
+                g.setColor(Color.RED);
+                g.fill(inverted);
+            }
+        } else {
+            if (builtSelection != null) {
+                builtSelection.paintMarchingAnts(g);
+            }
+            if (selection != null) {
+                selection.paintMarchingAnts(g);
+            }
         }
     }
 
@@ -722,7 +748,7 @@ public class Composition implements Serializable {
             }
 
             boolean wasHidden = selection.isHidden();
-            selection.deselectAndDispose();
+            selection.die();
             selection = null;
 
             if (isActiveComp()) {
@@ -780,9 +806,13 @@ public class Composition implements Serializable {
         this.builtSelection = selection;
     }
 
+    public void setSelection(Selection selection) {
+        this.selection = selection;
+    }
+
     public void promoteSelection() {
-        assert selection == null;
-        selection = builtSelection;
+        assert selection == null || !selection.isAlive() : "selection = " + selection;
+        setNewSelection(builtSelection);
         builtSelection = null;
     }
 
@@ -807,8 +837,8 @@ public class Composition implements Serializable {
     public void invertSelection() {
         if (selection != null) {
             Shape backupShape = selection.getShape();
-            selection.invert(getCanvasBounds());
-
+            Shape inverted = canvas.invertShape(backupShape);
+            selection.setShape(inverted);
             SelectionChangeEdit edit = new SelectionChangeEdit(this, backupShape, "Invert Selection");
             History.addEdit(edit);
         }
@@ -943,7 +973,7 @@ public class Composition implements Serializable {
             Shape currentShape = selection.getShape();
             Shape intersection = SelectionInteraction.INTERSECT.combine(currentShape, cropRect);
             if (intersection.getBounds().isEmpty()) {
-                selection.deselectAndDispose();
+                selection.die();
                 selection = null;
             } else {
                 // the intersection needs to be translated
@@ -951,7 +981,7 @@ public class Composition implements Serializable {
                 double txx = -cropRect.getX();
                 double txy = -cropRect.getY();
                 AffineTransform tx = AffineTransform.getTranslateInstance(txx, txy);
-                selection.setNewShape(tx.createTransformedShape(intersection));
+                selection.setShape(tx.createTransformedShape(intersection));
             }
         }
     }

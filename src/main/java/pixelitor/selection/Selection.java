@@ -46,12 +46,7 @@ public class Selection {
     private Timer marchingAntsTimer;
 
     // the shape that is currently drawn
-    private Shape currentShape;
-
-    // the last shape (possibly null)
-    // when the mouse is released, the two selections are
-    // combined according to the SelectionInteraction
-    private Shape lastShape;
+    private Shape shape;
 
     private static final double DASH_WIDTH = 1.0;
     private static final float DASH_LENGTH = 4.0f;
@@ -59,11 +54,12 @@ public class Selection {
 
     private boolean hidden = false;
     private boolean dead = false;
+    private boolean frozen = false;
 
     public Selection(Shape shape, ImageComponent ic) {
         assert ic != null;
 
-        this.currentShape = shape;
+        this.shape = shape;
         this.ic = ic;
 
         startMarching();
@@ -76,13 +72,16 @@ public class Selection {
         }
 
         // the shapes can be shared
-        this.currentShape = orig.currentShape;
-        this.lastShape = orig.lastShape;
+        this.shape = orig.shape;
 
         // the Timer is not copied! - setIC starts it
     }
 
     public void startMarching() {
+        if (frozen) {
+            return;
+        }
+
         assert !dead : "dead selection";
         assert ic != null : "no ic in selection";
 
@@ -110,16 +109,11 @@ public class Selection {
     public void paintMarchingAnts(Graphics2D g2) {
         assert !dead : "dead selection";
 
-        if (currentShape == null || hidden) {
+        if (shape == null || hidden) {
             return;
         }
 
-        // while a new selection is drawn with marching ants, the
-        // old selection is drawn frozen (phase is always 0)
-        if (lastShape != null) {
-            paintAnts(g2, lastShape, 0);
-        }
-        paintAnts(g2, currentShape, dashPhase);
+        paintAnts(g2, shape, dashPhase);
     }
 
     private void paintAnts(Graphics2D g2, Shape shape, float phase) {
@@ -154,15 +148,15 @@ public class Selection {
      * Inverts the selection shape.
      */
     public void invert(Rectangle fullImage) {
-        if (currentShape != null) {
-            Area area = new Area(currentShape);
+        if (shape != null) {
+            Area area = new Area(shape);
             Area fullArea = new Area(fullImage);
             fullArea.subtract(area);
-            currentShape = fullArea;
+            shape = fullArea;
         }
     }
 
-    public void deselectAndDispose() {
+    public void die() {
         stopMarching();
         repaint();
         ic = null;
@@ -170,7 +164,7 @@ public class Selection {
     }
 
     public void repaint() {
-//        Rectangle selBounds = currentShape.getBounds();
+//        Rectangle selBounds = shape.getBounds();
 //
 //        if(lastShape != null) {
 //            Rectangle r = lastShape.getBounds();
@@ -185,17 +179,8 @@ public class Selection {
         ic.repaint();
     }
 
-    public void setNewShape(Shape selectionShape) {
-        currentShape = selectionShape;
-        lastShape = null;
-    }
-
     public void setShape(Shape currentShape) {
-        this.currentShape = currentShape;
-    }
-
-    public void setLastShape(Shape lastSelectionShape) {
-        this.lastShape = lastSelectionShape;
+        this.shape = currentShape;
     }
 
     /**
@@ -204,22 +189,18 @@ public class Selection {
      * @return true if something is still selected
      */
     public boolean clipToCompSize(Composition comp) {
-        if (currentShape != null) {
-            currentShape = comp.clipShapeToCanvasSize(currentShape);
+        if (shape != null) {
+            shape = comp.clipShapeToCanvasSize(shape);
 
             repaint();
 
-            return !currentShape.getBounds().isEmpty();
+            return !shape.getBounds().isEmpty();
         }
         return false;
     }
 
     public Shape getShape() {
-        return currentShape;
-    }
-
-    public Shape getLastShape() {
-        return lastShape;
+        return shape;
     }
 
     /**
@@ -228,26 +209,26 @@ public class Selection {
      * (but relative to the composition, not to the image)
      */
     public Rectangle getShapeBounds() {
-        return currentShape.getBounds();
+        return shape.getBounds();
     }
 
     public void modify(SelectionModifyType type, float amount) {
         BasicStroke outlineStroke = new BasicStroke(amount);
-        Shape outlineShape = outlineStroke.createStrokedShape(currentShape);
+        Shape outlineShape = outlineStroke.createStrokedShape(shape);
 
-        Area oldArea = new Area(currentShape);
+        Area oldArea = new Area(shape);
         Area outlineArea = new Area(outlineShape);
 
-        Shape backupShape = currentShape;
-        currentShape = type.createModifiedShape(oldArea, outlineArea);
+        Shape backupShape = shape;
+        shape = type.createModifiedShape(oldArea, outlineArea);
 
         SelectionChangeEdit edit = new SelectionChangeEdit(ic.getComp(), backupShape, "Modify Selection");
         History.addEdit(edit);
     }
 
     public Shape transform(AffineTransform at) {
-        Shape backupShape = currentShape;
-        currentShape = at.createTransformedShape(currentShape);
+        Shape backupShape = shape;
+        shape = at.createTransformedShape(shape);
         return backupShape;
     }
 
@@ -291,6 +272,19 @@ public class Selection {
         }
     }
 
+    public boolean isFrozen() {
+        return frozen;
+    }
+
+    public void setFrozen(boolean b) {
+        this.frozen = b;
+        if (b) {
+            stopMarching();
+        } else if (!hidden) {
+            startMarching();
+        }
+    }
+
     // called when the composition is duplicated
     public void setIC(ImageComponent ic) {
         assert ic != null;
@@ -306,9 +300,8 @@ public class Selection {
     public String toString() {
         return "Selection{" +
                 "composition=" + ic.getComp().getName() +
-                ", currentShape-class=" + (currentShape == null ? "null" : currentShape.getClass().getName()) +
-                ", currentSelectionShapeBounds=" + (currentShape == null ? "null" : currentShape.getBounds()) +
-                ", lastShape-class=" + (lastShape == null ? "null" : lastShape.getClass().getName()) +
+                ", shape-class=" + (shape == null ? "null" : shape.getClass().getName()) +
+                ", shapeBounds=" + (shape == null ? "null" : shape.getBounds()) +
                 '}';
     }
 }

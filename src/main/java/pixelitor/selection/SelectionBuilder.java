@@ -60,18 +60,23 @@ public class SelectionBuilder {
     private void startNewShape(SelectionInteraction selectionInteraction, Selection selection) {
         assert selection.isAlive() : "dead selection";
 
+        comp.setBuiltSelection(new Selection(null, comp.getIC()));
+
         if (selectionInteraction == SelectionInteraction.REPLACE) {
             replacedShape = selection.getShape();
-            selection.stopMarching();
-            selection.setNewShape(null);
-            selection.repaint();
+//            selection.stopMarching();
+//            selection.repaint();
+            comp.setSelection(null);
+            selection.die();
         } else {
-            // the current shape becomes the previous shape
-            // and will be replaced as mouse dragged events come
-            selection.setLastShape(selection.getShape());
-        }
+//            // the current shape becomes the previous shape
+//            // and will be replaced as mouse dragged events come
+//            selection.setLastShape(selection.getShape());
 
-        selection.setHidden(false, false);
+            selection.setFrozen(true);
+
+//            selection.setHidden(false, false); // unhide
+        }
     }
 
     /**
@@ -79,21 +84,21 @@ public class SelectionBuilder {
      * selection shape is continuously updated
      */
     public void updateSelection(Object mouseInfo) {
-        Selection selection = comp.getSelection();
-        boolean noPreviousSelection = selection == null;
+        Selection builtSelection = comp.getBuiltSelection();
+        boolean noPreviousSelection = builtSelection == null;
 
         if (noPreviousSelection) {
             Shape newShape = selectionType.createShape(mouseInfo, null);
-            selection = new Selection(newShape, comp.getIC());
-            comp.setNewSelection(selection);
+            builtSelection = new Selection(newShape, comp.getIC());
+            comp.setBuiltSelection(builtSelection);
         } else {
-            assert selection.isAlive() : "dead selection";
+            assert builtSelection.isAlive() : "dead selection";
 
-            Shape shape = selection.getShape();
+            Shape shape = builtSelection.getShape();
             Shape newShape = selectionType.createShape(mouseInfo, shape);
-            selection.setShape(newShape);
-            if (!selection.isMarching()) {
-                selection.startMarching();
+            builtSelection.setShape(newShape);
+            if (!builtSelection.isMarching()) {
+                builtSelection.startMarching();
             }
         }
     }
@@ -103,59 +108,74 @@ public class SelectionBuilder {
      * with the already existing shape according to the selection interaction type
      */
     public void combineShapes() {
-        Selection selection = comp.getSelection();
-        Shape lastShape = selection.getLastShape();
-        Shape shape = selection.getShape();
-        shape = comp.clipShapeToCanvasSize(shape);
+        Selection oldSelection = comp.getSelection();
+        Selection builtSelection = comp.getBuiltSelection();
 
-        if (lastShape != null) { // needs to combine the shapes
-            Shape combinedShape = selectionInteraction.combine(lastShape, shape);
+        Shape newShape = builtSelection.getShape();
+        newShape = comp.clipShapeToCanvasSize(newShape);
+
+        if (oldSelection != null) { // needs to combine the shapes
+            Shape oldShape = oldSelection.getShape();
+            Shape combinedShape = selectionInteraction.combine(oldShape, newShape);
 
             Rectangle newBounds = combinedShape.getBounds();
 
             if (newBounds.isEmpty()) { // nothing after combine
-                selection.setShape(lastShape); // for the correct deselect undo
+                builtSelection.setShape(oldShape); // for the correct deselect undo
+                oldSelection.die();
+                comp.promoteSelection();
                 comp.deselect(AddToHistory.YES);
-                selection = null;
 
                 if (!RandomGUITest.isRunning()) {
                     Messages.showInfo("Nothing selected", "As a result of the "
                             + selectionInteraction.toString().toLowerCase() + " operation, nothing is selected now.");
                 }
             } else {
-                selection.setNewShape(combinedShape);
-                PixelitorEdit edit = new SelectionChangeEdit(comp, lastShape, selectionInteraction.getNameForUndo());
+                oldSelection.die();
+                builtSelection.setShape(combinedShape);
+                comp.promoteSelection();
+
+                PixelitorEdit edit = new SelectionChangeEdit(comp, oldShape, selectionInteraction.getNameForUndo());
                 History.addEdit(edit);
             }
         } else {
             // we can get here if either (1) a new selection
             // was created or (2) a selection was replaced
 
-            if (shape.getBounds().isEmpty()) {
+            if (newShape.getBounds().isEmpty()) {
                 // the new shape can be empty if it has width or height = 0
                 comp.deselect(AddToHistory.NO);
-                selection = null;
+                oldSelection = null;
             } else {
-                selection.setShape(shape);
+                builtSelection.setShape(newShape);
+                comp.promoteSelection();
 
                 PixelitorEdit edit;
                 if (replacedShape != null) {
                     edit = new SelectionChangeEdit(comp, replacedShape, selectionInteraction.getNameForUndo());
                 } else {
-                    edit = new NewSelectionEdit(comp, selection.getShape());
+                    edit = new NewSelectionEdit(comp, builtSelection.getShape());
                 }
                 History.addEdit(edit);
             }
         }
+
         finished = true;
     }
 
     public void cancelIfNotFinished() {
         if(!finished) {
-            // must be added to history, otherwise there will be an inconsistency
-            // because when replacing it already creates a history entry
-            comp.deselect(AddToHistory.YES);
-            comp.repaint();
+            Selection builtSelection = comp.getBuiltSelection();
+            if (builtSelection != null) {
+                builtSelection.die();
+                comp.setBuiltSelection(null);
+            }
+
+            // if we had a frozen selection, unfreeze
+            Selection selection = comp.getSelection();
+            if (selection != null && selection.isFrozen()) {
+                selection.setFrozen(false);
+            }
         }
     }
 }

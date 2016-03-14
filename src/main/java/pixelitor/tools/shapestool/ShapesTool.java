@@ -138,12 +138,7 @@ public class ShapesTool extends Tool {
     @Override
     public void mousePressed(MouseEvent e, ImageComponent ic) {
         Composition comp = ic.getComp();
-        Selection selection = comp.getSelection();
-        if (selection != null) {
-            backupSelectionShape = selection.getShape();
-        } else {
-            backupSelectionShape = null;
-        }
+        backupSelectionShape = comp.getSelectionShape();
     }
 
     @Override
@@ -386,7 +381,7 @@ public class ShapesTool extends Tool {
             Selection selection = comp.getSelection();
 
             if (selection != null) {
-                selection.setNewShape(selectionShape);
+                selection.setShape(selectionShape);
             } else {
                 comp.createSelectionFromShape(selectionShape);
             }
