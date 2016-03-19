@@ -40,6 +40,7 @@ import pixelitor.filters.levels.Levels;
 import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.filters.lookup.Luminosity;
 import pixelitor.filters.painters.TextFilter;
+import pixelitor.gui.ColorPalette;
 import pixelitor.gui.ColorVariations;
 import pixelitor.gui.Desktop;
 import pixelitor.gui.HistogramsPanel;
@@ -955,10 +956,25 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        viewMenu.addAction(new MenuAction("Color Variations...") {
+        viewMenu.addSeparator();
+
+        viewMenu.addAction(new MenuAction("Foreground Color Variations...") {
             @Override
             public void onClick() {
-                ColorVariations.showInDialog(pw);
+                ColorVariations.showInDialog(pw, true);
+            }
+        });
+        viewMenu.addAction(new MenuAction("Background Color Variations...") {
+            @Override
+            public void onClick() {
+                ColorVariations.showInDialog(pw, false);
+            }
+        });
+
+        viewMenu.addAction(new MenuAction("Color Palette...") {
+            @Override
+            public void onClick() {
+                ColorPalette.showInDialog(pw);
             }
         });
 

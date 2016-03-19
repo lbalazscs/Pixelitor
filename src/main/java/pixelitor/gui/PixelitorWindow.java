@@ -105,7 +105,7 @@ public class PixelitorWindow extends JFrame {
         verticalBoxWest = Box.createVerticalBox();
         toolsPanel = new ToolsPanel();
 
-        FgBgColors.setGUI(new FgBgColorSelector());
+        FgBgColors.setGUI(new FgBgColorSelector(this));
         if (AppPreferences.WorkSpace.getToolsVisibility()) {
             verticalBoxWest.add(toolsPanel);
             verticalBoxWest.add(FgBgColors.getGUI());

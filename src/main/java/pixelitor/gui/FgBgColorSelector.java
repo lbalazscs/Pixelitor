@@ -25,6 +25,8 @@ import javax.swing.*;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
@@ -34,6 +36,7 @@ import static pixelitor.utils.ColorUtils.showColorPickerDialog;
  * A panel that contains the buttons for selecting the foreground and background colors
  */
 public class FgBgColorSelector extends JLayeredPane {
+    private final PixelitorWindow pw;
     private JButton fgButton;
     private JButton bgButton;
 
@@ -52,7 +55,8 @@ public class FgBgColorSelector extends JLayeredPane {
 
     private boolean layerMaskEditing = false;
 
-    public FgBgColorSelector() {
+    public FgBgColorSelector(PixelitorWindow pw) {
+        this.pw = pw;
         setLayout(null);
 
         initFGButton();
@@ -73,12 +77,30 @@ public class FgBgColorSelector extends JLayeredPane {
         fgButton = initButton("Set Foreground Color", BIG_BUTTON_SIZE, 2);
         fgButton.addActionListener(e -> fgButtonPressed());
         fgButton.setLocation(0, SMALL_BUTTON_VERTICAL_SPACE);
+
+        fgButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    fgButtonRightClicked();
+                }
+            }
+        });
     }
 
     private void initBGButton() {
         bgButton = initButton("Set Background Color", BIG_BUTTON_SIZE, 1);
         bgButton.addActionListener(e -> bgButtonPressed());
         bgButton.setLocation(BIG_BUTTON_SIZE / 2, SMALL_BUTTON_VERTICAL_SPACE + BIG_BUTTON_SIZE / 2);
+
+        bgButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    bgButtonRightClicked();
+                }
+            }
+        });
     }
 
     private void initResetDefaultsButton() {
@@ -150,7 +172,7 @@ public class FgBgColorSelector extends JLayeredPane {
         }
 
         Color selectedColor = layerMaskEditing ? maskBgColor : bgColor;
-        Color c = showColorPickerDialog("Set background color", selectedColor, false);
+        Color c = showColorPickerDialog(pw, "Set background color", selectedColor, false);
 
         if (c != null) { // OK was pressed
             setBgColor(c);
@@ -163,11 +185,19 @@ public class FgBgColorSelector extends JLayeredPane {
         }
 
         Color selectedColor = layerMaskEditing ? maskFgColor : fgColor;
-        Color c = showColorPickerDialog("Set foreground color", selectedColor, false);
+        Color c = showColorPickerDialog(pw, "Set foreground color", selectedColor, false);
 
         if (c != null) { // OK was pressed
             setFgColor(c);
         }
+    }
+
+    private void fgButtonRightClicked() {
+        ColorVariations.showInDialog(pw, true);
+    }
+
+    private void bgButtonRightClicked() {
+        ColorVariations.showInDialog(pw, false);
     }
 
     public static Color colorToGray(Color c) {
@@ -216,7 +246,7 @@ public class FgBgColorSelector extends JLayeredPane {
         bgButton.setBackground(newColor);
     }
 
-    protected void setupKeyboardShortcuts() {
+    private void setupKeyboardShortcuts() {
         GlobalKeyboardWatch.addKeyboardShortCut('d', true, "reset", resetToDefaultAction);
         GlobalKeyboardWatch.addKeyboardShortCut('x', true, "switch", swapColorsAction);
         GlobalKeyboardWatch.addKeyboardShortCut('r', true, "randomize", randomizeColorsAction);

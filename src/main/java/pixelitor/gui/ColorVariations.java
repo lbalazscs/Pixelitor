@@ -22,14 +22,22 @@ import pixelitor.gui.utils.DialogBuilder;
 
 import javax.swing.*;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 
 public class ColorVariations extends JPanel {
-    private ColorVariations() {
+    private final boolean fg;
+
+    private ColorVariations(boolean fg) {
+        this.fg = fg;
         setLayout(new FlowLayout());
 
-        Color color = FgBgColors.getFG();
+        Color color;
+        if (fg) {
+            color = FgBgColors.getFG();
+        } else {
+            color = FgBgColors.getBG();
+        }
+
         Color darker = color.darker();
         Color darker2 = darker.darker();
         Color darker3 = darker2.darker();
@@ -47,14 +55,17 @@ public class ColorVariations extends JPanel {
     }
 
     private void addButton(Color c) {
-        add(new ColorSwitchButton(c));
+        add(new ColorSwatchButton(c, fg));
     }
 
-    public static void showInDialog(PixelitorWindow pw) {
-        ColorVariations colorVariations = new ColorVariations();
+    public static void showInDialog(PixelitorWindow pw, boolean fg) {
+        ColorVariations colorVariations = new ColorVariations(fg);
+
+        String type = fg ? "Foreground" : "Background";
+        String title = type + " Color Variations";
 
         new DialogBuilder()
-                .title("Color Variations")
+                .title(title)
                 .parent(pw)
                 .form(colorVariations)
                 .notModal()
@@ -64,17 +75,6 @@ public class ColorVariations extends JPanel {
                 .show();
     }
 
-    private static class ColorSwitchButton extends JButton {
-        private static final Dimension size = new Dimension(32, 32);
-
-        public ColorSwitchButton(Color color) {
-            setBackground(color);
-            setPreferredSize(size);
-            setMinimumSize(size);
-
-            addActionListener(e -> FgBgColors.setFG(color));
-        }
-    }
 }
 
 
