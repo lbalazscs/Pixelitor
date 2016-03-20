@@ -174,8 +174,8 @@ public final class AppPreferences {
         }
     }
 
-    public static void removeRecentFiles(int maxNum) {
-        for (int i = 0; i < maxNum; i++) {
+    public static void removeRecentFiles() {
+        for (int i = 0; i < RecentFilesMenu.MAX_RECENT_FILES; i++) {
             recentFilesUserNode.remove(RECENT_FILE_PREFS_KEY + i);
         }
     }

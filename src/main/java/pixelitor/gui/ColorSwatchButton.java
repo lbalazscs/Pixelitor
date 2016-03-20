@@ -18,25 +18,71 @@
 package pixelitor.gui;
 
 import pixelitor.FgBgColors;
+import pixelitor.layers.LayerButton;
 
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
-public class ColorSwatchButton extends JButton {
-    private static final Dimension size = new Dimension(32, 32);
+public class ColorSwatchButton extends JComponent {
+    public static final int SIZE = 32;
+    private boolean marked = false;
+
+    private static final Dimension size = new Dimension(SIZE, SIZE);
+    private Color color;
+    private boolean raised = true;
 
     public ColorSwatchButton(Color color, boolean fg) {
-        setBackground(color);
+        setColor(color);
+
         setPreferredSize(size);
         setMinimumSize(size);
 
-        addActionListener(e -> {
-            if (fg) {
-                FgBgColors.setFG(color);
-            } else {
-                FgBgColors.setBG(color);
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (fg) {
+                    FgBgColors.setFG(ColorSwatchButton.this.color);
+                } else {
+                    FgBgColors.setBG(ColorSwatchButton.this.color);
+                }
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    marked = false;
+                } else {
+                    marked = true;
+                }
+
+                raised = false;
+                repaint();
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                raised = true;
+                repaint();
             }
         });
+    }
+
+    public void setColor(Color color) {
+        this.color = color;
+        setBackground(color);
+        setForeground(color);
+        marked = false;
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        g.setColor(color);
+        g.fill3DRect(0, 0, SIZE, SIZE, raised);
+        if (marked) {
+            g.setColor(LayerButton.SELECTED_COLOR);
+            g.fillRect(1, 1, 7, 7);
+            g.setColor(LayerButton.UNSELECTED_COLOR);
+            g.fillRect(3, 3, 3, 3);
+        }
     }
 }

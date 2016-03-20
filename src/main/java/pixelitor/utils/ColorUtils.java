@@ -91,16 +91,62 @@ public class ColorUtils {
         return Color.getHSBColor(hue, sat, bri);
     }
 
-    private static float calculateHueAverage(float f1, float f2) {
-        float delta = f1 - f2;
-        if (delta < 0.5f && delta > -0.5f) {
-            return (f1 + f2) / 2.0f;
-        } else if (delta >= 0.5f) { // f1 is bigger
-            float retVal = f1 + (1.0f - f1 + f2) / 2.0f;
+    private static float calculateHueAverage(float hue1, float hue2) {
+        float diff = hue1 - hue2;
+        if (diff < 0.5f && diff > -0.5f) {
+            return (hue1 + hue2) / 2.0f;
+        } else if (diff >= 0.5f) { // hue1 is bigger
+            float retVal = hue1 + (1.0f - hue1 + hue2) / 2.0f;
             return retVal;
-        } else if (delta <= 0.5f) { // f2 is bigger
-            float retVal = f2 + (1.0f - f2 + f1) / 2.0f;
+        } else if (diff <= 0.5f) { // hue2 is bigger
+            float retVal = hue2 + (1.0f - hue2 + hue1) / 2.0f;
             return retVal;
+        } else {
+            throw new IllegalStateException("should not get here");
+        }
+    }
+
+    public static float lerpHue(float mixFactor, float hue1, float hue2) {
+        float diff = hue1 - hue2;
+        if (diff < 0.5f && diff > -0.5f) {
+            return ImageMath.lerp(mixFactor, hue1, hue2);
+        } else if (diff >= 0.5f) { // hue1 is big, hue2 is small
+            hue2 += 1.0f;
+            float mix = ImageMath.lerp(mixFactor, hue1, hue2);
+            if (mix > 1.0f) {
+                mix -= 1.0f;
+            }
+            return mix;
+        } else if (diff <= 0.5f) { // hue2 is big, hue1 is small
+            hue1 += 1.0f;
+            float mix = ImageMath.lerp(mixFactor, hue1, hue2);
+            if (mix > 1.0f) {
+                mix -= 1.0f;
+            }
+            return mix;
+        } else {
+            throw new IllegalStateException("should not get here");
+        }
+    }
+
+    public static float lerpHueLong(float mixFactor, float hue1, float hue2) {
+        float diff = hue1 - hue2;
+        if (diff > 0.5f || diff < -0.5f) {
+            return ImageMath.lerp(mixFactor, hue1, hue2);
+        } else if (hue2 > hue1) { // hue2 is slightly bigger
+            hue1 += 1.0f;
+            float mix = ImageMath.lerp(mixFactor, hue1, hue2);
+            if (mix > 1.0f) {
+                mix -= 1.0f;
+            }
+            return mix;
+        } else if (hue1 >= hue2) { // hue1 is slightly bigger
+            hue2 += 1.0f;
+            float mix = ImageMath.lerp(mixFactor, hue1, hue2);
+            if (mix > 1.0f) {
+                mix -= 1.0f;
+            }
+            return mix;
         } else {
             throw new IllegalStateException("should not get here");
         }
@@ -172,5 +218,17 @@ public class ColorUtils {
         Color color = ColorPicker.showDialog(pw, title, selectedColor, allowOpacity);
         GlobalKeyboardWatch.setDialogActive(false);
         return color;
+    }
+
+    public static Color colorToGray(Color c) {
+        int rgb = c.getRGB();
+//        int a = (rgb >>> 24) & 0xFF;
+        int r = (rgb >>> 16) & 0xFF;
+        int g = (rgb >>> 8) & 0xFF;
+        int b = rgb & 0xFF;
+
+        int gray = (r + r + g + g + g + b) / 6;
+
+        return new Color(0xFF_00_00_00 | (gray << 16) | (gray << 8) | gray);
     }
 }

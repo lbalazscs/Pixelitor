@@ -118,6 +118,10 @@ import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_270;
 import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_90;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.MOTION_BLUR;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
+import static pixelitor.gui.ColorVariationsType.BG_MIX;
+import static pixelitor.gui.ColorVariationsType.BRIGHTNESS;
+import static pixelitor.gui.ColorVariationsType.FG_MIX;
+import static pixelitor.gui.ColorVariationsType.SATURATION;
 import static pixelitor.gui.ImageComponents.getActiveCompOrNull;
 import static pixelitor.gui.ImageComponents.getActiveLayerOrNull;
 import static pixelitor.menus.EnabledIf.ACTION_ENABLED;
@@ -147,7 +151,7 @@ public class MenuBar extends JMenuBar {
     private static final KeyStroke CTRL_H = KeyStroke.getKeyStroke('H', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_I = KeyStroke.getKeyStroke('I', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_J = KeyStroke.getKeyStroke('J', MENU_SHORTCUT_KEY_MASK);
-//    private static final KeyStroke CTRL_K = KeyStroke.getKeyStroke('K', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_K = KeyStroke.getKeyStroke('K', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_L = KeyStroke.getKeyStroke('L', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_M = KeyStroke.getKeyStroke('M', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_N = KeyStroke.getKeyStroke('N', MENU_SHORTCUT_KEY_MASK);
@@ -958,18 +962,7 @@ public class MenuBar extends JMenuBar {
 
         viewMenu.addSeparator();
 
-        viewMenu.addAction(new MenuAction("Foreground Color Variations...") {
-            @Override
-            public void onClick() {
-                ColorVariations.showInDialog(pw, true);
-            }
-        });
-        viewMenu.addAction(new MenuAction("Background Color Variations...") {
-            @Override
-            public void onClick() {
-                ColorVariations.showInDialog(pw, false);
-            }
-        });
+        viewMenu.add(createColorVariationsSubmenu(pw));
 
         viewMenu.addAction(new MenuAction("Color Palette...") {
             @Override
@@ -1005,6 +998,50 @@ public class MenuBar extends JMenuBar {
         viewMenu.add(createArrangeWindowsSubmenu());
 
         return viewMenu;
+    }
+
+    private static JMenu createColorVariationsSubmenu(PixelitorWindow pw) {
+        PMenu variations = new PMenu("Color Variations");
+        variations.addAction(new MenuAction("Foreground Brightness...") {
+            @Override
+            public void onClick() {
+                ColorVariations.showInDialog(pw, true, BRIGHTNESS);
+            }
+        });
+        variations.addAction(new MenuAction("Foreground Saturation...") {
+            @Override
+            public void onClick() {
+                ColorVariations.showInDialog(pw, true, SATURATION);
+            }
+        });
+        variations.addActionWithKey(new MenuAction("Foreground Mix with Background...") {
+            @Override
+            public void onClick() {
+                ColorVariations.showInDialog(pw, true, BG_MIX);
+            }
+        }, CTRL_K);
+
+        variations.addSeparator();
+
+        variations.addAction(new MenuAction("Background Brightness...") {
+            @Override
+            public void onClick() {
+                ColorVariations.showInDialog(pw, false, BRIGHTNESS);
+            }
+        });
+        variations.addAction(new MenuAction("Background Saturation...") {
+            @Override
+            public void onClick() {
+                ColorVariations.showInDialog(pw, false, SATURATION);
+            }
+        });
+        variations.addAction(new MenuAction("Background Mix with Foreground...") {
+            @Override
+            public void onClick() {
+                ColorVariations.showInDialog(pw, false, FG_MIX);
+            }
+        });
+        return variations;
     }
 
     private static JMenu createArrangeWindowsSubmenu() {

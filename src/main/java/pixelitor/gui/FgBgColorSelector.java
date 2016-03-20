@@ -17,6 +17,7 @@
 
 package pixelitor.gui;
 
+import pixelitor.menus.MenuAction;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.ColorUtils;
 import pixelitor.utils.test.RandomGUITest;
@@ -25,11 +26,13 @@ import javax.swing.*;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
+import static pixelitor.gui.ColorVariationsType.BG_MIX;
+import static pixelitor.gui.ColorVariationsType.BRIGHTNESS;
+import static pixelitor.gui.ColorVariationsType.FG_MIX;
+import static pixelitor.gui.ColorVariationsType.SATURATION;
 import static pixelitor.utils.ColorUtils.showColorPickerDialog;
 
 /**
@@ -78,14 +81,7 @@ public class FgBgColorSelector extends JLayeredPane {
         fgButton.addActionListener(e -> fgButtonPressed());
         fgButton.setLocation(0, SMALL_BUTTON_VERTICAL_SPACE);
 
-        fgButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (SwingUtilities.isRightMouseButton(e)) {
-                    fgButtonRightClicked();
-                }
-            }
-        });
+        fgButton.setComponentPopupMenu(createPopupMenu(true));
     }
 
     private void initBGButton() {
@@ -93,14 +89,38 @@ public class FgBgColorSelector extends JLayeredPane {
         bgButton.addActionListener(e -> bgButtonPressed());
         bgButton.setLocation(BIG_BUTTON_SIZE / 2, SMALL_BUTTON_VERTICAL_SPACE + BIG_BUTTON_SIZE / 2);
 
-        bgButton.addMouseListener(new MouseAdapter() {
+        bgButton.setComponentPopupMenu(createPopupMenu(false));
+    }
+
+    private JPopupMenu createPopupMenu(boolean fg) {
+        JPopupMenu menu = new JPopupMenu();
+
+        menu.add(new MenuAction("Color Variations") {
             @Override
-            public void mousePressed(MouseEvent e) {
-                if (SwingUtilities.isRightMouseButton(e)) {
-                    bgButtonRightClicked();
-                }
+            public void onClick() {
+                ColorVariations.showInDialog(pw, fg, BRIGHTNESS);
             }
         });
+
+        menu.add(new MenuAction("Saturation Variations") {
+            @Override
+            public void onClick() {
+                ColorVariations.showInDialog(pw, fg, SATURATION);
+            }
+        });
+
+        String mixTitle = fg
+                ? "Mix with Background Variations"
+                : "Mix with Foreground Variations";
+        menu.add(new MenuAction(mixTitle) {
+            @Override
+            public void onClick() {
+                ColorVariations.showInDialog(pw, fg,
+                        fg ? BG_MIX : FG_MIX);
+            }
+        });
+
+        return menu;
     }
 
     private void initResetDefaultsButton() {
@@ -192,26 +212,6 @@ public class FgBgColorSelector extends JLayeredPane {
         }
     }
 
-    private void fgButtonRightClicked() {
-        ColorVariations.showInDialog(pw, true);
-    }
-
-    private void bgButtonRightClicked() {
-        ColorVariations.showInDialog(pw, false);
-    }
-
-    public static Color colorToGray(Color c) {
-        int rgb = c.getRGB();
-//        int a = (rgb >>> 24) & 0xFF;
-        int r = (rgb >>> 16) & 0xFF;
-        int g = (rgb >>> 8) & 0xFF;
-        int b = rgb & 0xFF;
-
-        int gray = (r + r + g + g + g + b) / 6;
-
-        return new Color(0xFF_00_00_00 | (gray << 16) | (gray << 8) | gray);
-    }
-
     public Color getFgColor() {
         return layerMaskEditing ? maskFgColor : fgColor;
     }
@@ -223,7 +223,7 @@ public class FgBgColorSelector extends JLayeredPane {
     public void setFgColor(Color c) {
         Color newColor;
         if (layerMaskEditing) {
-            maskFgColor = colorToGray(c);
+            maskFgColor = ColorUtils.colorToGray(c);
             newColor = maskFgColor;
         } else {
             fgColor = c;
@@ -236,7 +236,7 @@ public class FgBgColorSelector extends JLayeredPane {
     public void setBgColor(Color c) {
         Color newColor;
         if (layerMaskEditing) {
-            maskBgColor = colorToGray(c);
+            maskBgColor = ColorUtils.colorToGray(c);
             newColor = maskBgColor;
         } else {
             bgColor = c;

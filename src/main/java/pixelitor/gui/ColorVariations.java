@@ -19,50 +19,91 @@ package pixelitor.gui;
 
 import pixelitor.FgBgColors;
 import pixelitor.gui.utils.DialogBuilder;
+import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ColorVariations extends JPanel {
+    private static final int LAYOUT_GAP = 2;
     private final boolean fg;
+    private final List<ColorSwatchButton> buttons;
+    private int numButtons;
 
-    private ColorVariations(boolean fg) {
+    private final ColorVariationsType type;
+
+    private ColorVariations(ColorVariationsType type, boolean fg) {
+        this.type = type;
         this.fg = fg;
-        setLayout(new FlowLayout());
+        setLayout(new FlowLayout(FlowLayout.LEFT, LAYOUT_GAP, LAYOUT_GAP));
+        buttons = new ArrayList<>();
 
         Color color;
+        Color otherColor;
         if (fg) {
             color = FgBgColors.getFG();
+            otherColor = FgBgColors.getBG();
         } else {
             color = FgBgColors.getBG();
+            otherColor = FgBgColors.getFG();
         }
 
-        Color darker = color.darker();
-        Color darker2 = darker.darker();
-        Color darker3 = darker2.darker();
-        Color brighter = color.brighter();
-        Color brighter2 = brighter.brighter();
-        Color brighter3 = brighter2.brighter();
+        regenerate(color, otherColor, 10);
 
-        addButton(darker3);
-        addButton(darker2);
-        addButton(darker);
-        addButton(color);
-        addButton(brighter);
-        addButton(brighter2);
-        addButton(brighter3);
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                int newNum = (getWidth() - LAYOUT_GAP) / (ColorSwatchButton.SIZE + LAYOUT_GAP);
+                if (newNum != numButtons) {
+                    numButtons = newNum;
+                    regenerate(color, otherColor, numButtons);
+                }
+            }
+        });
     }
 
-    private void addButton(Color c) {
-        add(new ColorSwatchButton(c, fg));
+    private void regenerate(Color color, Color otherColor, int num) {
+        removeAll();
+        Color[] colors = generateColors(color, otherColor, num);
+
+        for (int i = 0; i < num; i++) {
+            addButton(i, colors[i]);
+        }
+        repaint();
     }
 
-    public static void showInDialog(PixelitorWindow pw, boolean fg) {
-        ColorVariations colorVariations = new ColorVariations(fg);
+    private Color[] generateColors(Color orig, Color otherColor, int num) {
+        float[] hsb = Color.RGBtoHSB(orig.getRed(), orig.getGreen(), orig.getBlue(), null);
+        float hue = hsb[0];
+        float sat = hsb[1];
+        float bri = hsb[2];
 
-        String type = fg ? "Foreground" : "Background";
-        String title = type + " Color Variations";
+        return type.generate(hue, sat, bri, num, otherColor);
+    }
+
+    private void addButton(int index, Color color) {
+        ColorSwatchButton button;
+        if (buttons.size() - 1 < index) {
+            button = new ColorSwatchButton(color, fg);
+            buttons.add(button);
+        } else {
+            button = buttons.get(index);
+            button.setColor(color);
+        }
+        add(button);
+    }
+
+    public static void showInDialog(PixelitorWindow pw, boolean fg, ColorVariationsType type) {
+        ColorVariations colorVariations = new ColorVariations(type, fg);
+
+        String title = (fg ? "Foreground " : "Background ")
+                + type.getName()
+                + " Variations";
 
         new DialogBuilder()
                 .title(title)
@@ -73,8 +114,9 @@ public class ColorVariations extends JPanel {
                 .noCancelButton()
                 .noGlobalKeyChange()
                 .show();
-    }
 
+        Messages.showStatusMessage("Color Variations: enlarge for more colors, right-click to clear the marking");
+    }
 }
 
 
