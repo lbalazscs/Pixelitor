@@ -19,7 +19,7 @@ package pixelitor.filters.painters;
 
 import org.jdesktop.swingx.painter.AbstractLayoutPainter;
 import org.jdesktop.swingx.painter.TextPainter;
-import pixelitor.utils.ColorUtils;
+import pixelitor.colors.ColorUtils;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
 

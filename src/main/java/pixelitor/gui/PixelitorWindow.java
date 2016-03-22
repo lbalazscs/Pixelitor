@@ -19,7 +19,8 @@ package pixelitor.gui;
 
 import pixelitor.AppLogic;
 import pixelitor.Build;
-import pixelitor.FgBgColors;
+import pixelitor.colors.FgBgColorSelector;
+import pixelitor.colors.FgBgColors;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.layers.LayersContainer;
 import pixelitor.menus.MenuBar;

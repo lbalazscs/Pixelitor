@@ -17,7 +17,7 @@
 
 package pixelitor.filters;
 
-import pixelitor.FgBgColors;
+import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.DialogParam;
 import pixelitor.filters.gui.EffectsParam;
 import pixelitor.filters.gui.GroupedRangeParam;

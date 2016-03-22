@@ -18,7 +18,7 @@
 package pixelitor.filters;
 
 import org.jdesktop.swingx.painter.effects.InnerGlowPathEffect;
-import pixelitor.FgBgColors;
+import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ElevationAngleParam;

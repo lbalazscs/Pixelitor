@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -16,7 +16,7 @@
  */
 package pixelitor.tools;
 
-import pixelitor.FgBgColors;
+import pixelitor.colors.FgBgColors;
 
 import java.awt.Color;
 

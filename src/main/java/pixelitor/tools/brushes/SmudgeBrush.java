@@ -17,7 +17,7 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.FgBgColors;
+import pixelitor.colors.FgBgColors;
 
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;

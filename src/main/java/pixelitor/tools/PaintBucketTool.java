@@ -18,7 +18,7 @@
 package pixelitor.tools;
 
 import pixelitor.Composition;
-import pixelitor.FillType;
+import pixelitor.colors.FillType;
 import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponent;
@@ -40,9 +40,9 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 import static pixelitor.Composition.ImageChangeActions.FULL;
-import static pixelitor.FillType.BACKGROUND;
-import static pixelitor.FillType.FOREGROUND;
-import static pixelitor.FillType.TRANSPARENT;
+import static pixelitor.colors.FillType.BACKGROUND;
+import static pixelitor.colors.FillType.FOREGROUND;
+import static pixelitor.colors.FillType.TRANSPARENT;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 
 /**

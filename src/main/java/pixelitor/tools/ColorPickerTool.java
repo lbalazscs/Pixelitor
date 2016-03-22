@@ -17,7 +17,7 @@
 
 package pixelitor.tools;
 
-import pixelitor.FgBgColors;
+import pixelitor.colors.FgBgColors;
 import pixelitor.gui.ImageComponent;
 import pixelitor.layers.ImageLayer;
 import pixelitor.utils.Messages;

@@ -15,11 +15,13 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.gui;
+package pixelitor.colors;
 
+import pixelitor.colors.palette.VariationsPanel;
+import pixelitor.gui.GlobalKeyboardWatch;
+import pixelitor.gui.PixelitorWindow;
 import pixelitor.menus.MenuAction;
 import pixelitor.utils.AppPreferences;
-import pixelitor.utils.ColorUtils;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
@@ -29,11 +31,7 @@ import java.awt.event.ActionEvent;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
-import static pixelitor.gui.ColorVariationsType.BG_MIX;
-import static pixelitor.gui.ColorVariationsType.BRIGHTNESS;
-import static pixelitor.gui.ColorVariationsType.FG_MIX;
-import static pixelitor.gui.ColorVariationsType.SATURATION;
-import static pixelitor.utils.ColorUtils.showColorPickerDialog;
+import static pixelitor.colors.ColorUtils.showColorPickerDialog;
 
 /**
  * A panel that contains the buttons for selecting the foreground and background colors
@@ -95,28 +93,30 @@ public class FgBgColorSelector extends JLayeredPane {
     private JPopupMenu createPopupMenu(boolean fg) {
         JPopupMenu menu = new JPopupMenu();
 
-        menu.add(new MenuAction("Color Variations") {
+        menu.add(new MenuAction("Color Variations...") {
             @Override
             public void onClick() {
-                ColorVariations.showInDialog(pw, fg, BRIGHTNESS);
-            }
-        });
-
-        menu.add(new MenuAction("Saturation Variations") {
-            @Override
-            public void onClick() {
-                ColorVariations.showInDialog(pw, fg, SATURATION);
+                VariationsPanel.showVariationsDialog(pw, fg);
             }
         });
 
         String mixTitle = fg
-                ? "Mix with Background Variations"
-                : "Mix with Foreground Variations";
+                ? "Mix with Background Variations..."
+                : "Mix with Foreground Variations...";
         menu.add(new MenuAction(mixTitle) {
             @Override
             public void onClick() {
-                ColorVariations.showInDialog(pw, fg,
-                        fg ? BG_MIX : FG_MIX);
+                VariationsPanel.showMixDialog(pw, fg);
+            }
+        });
+
+        String rgbMixTitle = fg
+                ? "RGB Mix with Background Variations..."
+                : "RGB Mix with Foreground Variations...";
+        menu.add(new MenuAction(rgbMixTitle) {
+            @Override
+            public void onClick() {
+                VariationsPanel.showRGBMixDialog(pw, fg);
             }
         });
 

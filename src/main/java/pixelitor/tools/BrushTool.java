@@ -17,10 +17,10 @@
 
 package pixelitor.tools;
 
-import pixelitor.FgBgColors;
+import pixelitor.colors.ColorUtils;
+import pixelitor.colors.FgBgColors;
 import pixelitor.gui.ImageComponent;
 import pixelitor.layers.ImageLayer;
-import pixelitor.utils.ColorUtils;
 
 import javax.swing.*;
 import java.awt.Color;

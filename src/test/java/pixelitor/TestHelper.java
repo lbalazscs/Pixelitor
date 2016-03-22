@@ -18,9 +18,10 @@
 package pixelitor;
 
 import org.mockito.MockingDetails;
+import pixelitor.colors.FgBgColorSelector;
+import pixelitor.colors.FgBgColors;
 import pixelitor.filters.Invert;
 import pixelitor.filters.painters.TextSettings;
-import pixelitor.gui.FgBgColorSelector;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.history.History;

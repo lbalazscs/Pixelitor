@@ -17,10 +17,10 @@
 
 package pixelitor.utils;
 
-import pixelitor.FgBgColors;
 import pixelitor.NewImage;
 import pixelitor.Pixelitor;
 import pixelitor.TipsOfTheDay;
+import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.gui.Desktop;
 import pixelitor.gui.PixelitorWindow;

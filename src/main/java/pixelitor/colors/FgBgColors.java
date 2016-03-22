@@ -15,9 +15,7 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor;
-
-import pixelitor.gui.FgBgColorSelector;
+package pixelitor.colors;
 
 import java.awt.Color;
 

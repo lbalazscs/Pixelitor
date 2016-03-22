@@ -15,7 +15,7 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.utils;
+package pixelitor.colors;
 
 import com.bric.swing.ColorPicker;
 import com.jhlabs.image.ImageMath;
@@ -183,17 +183,17 @@ public class ColorUtils {
 
     public static float calcSaturation(int r, int g, int b) {
         float sat;
-        int cmax = (r > g) ? r : g;
-        if (b > cmax) {
-            cmax = b;
+        int cMax = (r > g) ? r : g;
+        if (b > cMax) {
+            cMax = b;
         }
-        int cmin = (r < g) ? r : g;
-        if (b < cmin) {
-            cmin = b;
+        int cMin = (r < g) ? r : g;
+        if (b < cMin) {
+            cMin = b;
         }
 
-        if (cmax != 0) {
-            sat = ((float) (cmax - cmin)) / ((float) cmax);
+        if (cMax != 0) {
+            sat = ((float) (cMax - cMin)) / ((float) cMax);
         } else {
             sat = 0;
         }
@@ -230,5 +230,9 @@ public class ColorUtils {
         int gray = (r + r + g + g + g + b) / 6;
 
         return new Color(0xFF_00_00_00 | (gray << 16) | (gray << 8) | gray);
+    }
+
+    public static float[] colorToHSB(Color c) {
+        return Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), null);
     }
 }

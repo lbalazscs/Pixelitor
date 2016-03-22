@@ -30,7 +30,7 @@ import pixelitor.tools.shapestool.ShapesTool;
 
 import java.awt.Point;
 
-import static pixelitor.FillType.WHITE;
+import static pixelitor.colors.FillType.WHITE;
 
 /**
  *

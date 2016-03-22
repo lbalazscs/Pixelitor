@@ -22,7 +22,7 @@ import pixelitor.Build;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
-import pixelitor.FgBgColors;
+import pixelitor.colors.FgBgColors;
 import pixelitor.filters.Fade;
 import pixelitor.filters.Filter;
 import pixelitor.filters.FilterAction;

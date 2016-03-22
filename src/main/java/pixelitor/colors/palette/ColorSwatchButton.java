@@ -15,9 +15,9 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.gui;
+package pixelitor.colors.palette;
 
-import pixelitor.FgBgColors;
+import pixelitor.colors.FgBgColors;
 import pixelitor.layers.LayerButton;
 
 import javax.swing.*;
@@ -29,13 +29,17 @@ import java.awt.event.MouseEvent;
 
 public class ColorSwatchButton extends JComponent {
     public static final int SIZE = 32;
+    private final int xPos;
+    private final int yPos;
     private boolean marked = false;
 
     private static final Dimension size = new Dimension(SIZE, SIZE);
     private Color color;
     private boolean raised = true;
 
-    public ColorSwatchButton(Color color, boolean fg) {
+    public ColorSwatchButton(Color color, int xPos, int yPos) {
+        this.xPos = xPos;
+        this.yPos = yPos;
         setColor(color);
 
         setPreferredSize(size);
@@ -44,19 +48,26 @@ public class ColorSwatchButton extends JComponent {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (fg) {
-                    FgBgColors.setFG(ColorSwatchButton.this.color);
-                } else {
-                    FgBgColors.setBG(ColorSwatchButton.this.color);
-                }
-                if (SwingUtilities.isRightMouseButton(e)) {
+                boolean ctrlClick = e.isControlDown();
+                if (ctrlClick) {
                     marked = false;
                 } else {
                     marked = true;
+                    regularClick(e);
                 }
-
                 raised = false;
                 repaint();
+            }
+
+            private void regularClick(MouseEvent e) {
+                boolean rightClick = SwingUtilities.isRightMouseButton(e);
+                Color newColor = ColorSwatchButton.this.color;
+
+                if (rightClick) {
+                    FgBgColors.setBG(newColor);
+                } else {
+                    FgBgColors.setFG(newColor);
+                }
             }
 
             @Override
@@ -84,5 +95,13 @@ public class ColorSwatchButton extends JComponent {
             g.setColor(LayerButton.UNSELECTED_COLOR);
             g.fillRect(3, 3, 3, 3);
         }
+    }
+
+    public int getXPos() {
+        return xPos;
+    }
+
+    public int getYPos() {
+        return yPos;
     }
 }

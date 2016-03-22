@@ -23,6 +23,7 @@ import com.jhlabs.image.BoxBlurFilter;
 import com.jhlabs.image.EmbossFilter;
 import org.jdesktop.swingx.graphics.BlendComposite;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
+import pixelitor.colors.ColorUtils;
 import pixelitor.filters.Invert;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.Dialogs;

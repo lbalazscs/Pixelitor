@@ -17,6 +17,7 @@
 
 package pixelitor;
 
+import pixelitor.colors.FillType;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.IntTextField;
 import pixelitor.gui.utils.OKCancelDialog;
@@ -31,7 +32,7 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 
-import static pixelitor.FillType.TRANSPARENT;
+import static pixelitor.colors.FillType.TRANSPARENT;
 
 /**
  * Static utility methods related to creating new images

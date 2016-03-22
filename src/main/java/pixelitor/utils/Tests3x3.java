@@ -19,6 +19,7 @@ package pixelitor.utils;
 
 import pixelitor.AppLogic;
 import pixelitor.Composition;
+import pixelitor.colors.ColorUtils;
 import pixelitor.gui.ImageComponents;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;

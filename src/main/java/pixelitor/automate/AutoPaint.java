@@ -19,8 +19,8 @@ package pixelitor.automate;
 
 import net.jafama.FastMath;
 import pixelitor.Composition;
-import pixelitor.FgBgColors;
 import pixelitor.MessageHandler;
+import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.utils.GridBagHelper;

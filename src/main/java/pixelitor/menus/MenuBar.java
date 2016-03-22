@@ -22,12 +22,14 @@ import com.jhlabs.composite.MultiplyComposite;
 import pixelitor.AppLogic;
 import pixelitor.Build;
 import pixelitor.Composition;
-import pixelitor.FgBgColors;
 import pixelitor.NewImage;
 import pixelitor.TipsOfTheDay;
 import pixelitor.automate.AutoPaint;
 import pixelitor.automate.BatchFilterWizard;
 import pixelitor.automate.BatchResize;
+import pixelitor.colors.FgBgColors;
+import pixelitor.colors.palette.FullPalette;
+import pixelitor.colors.palette.VariationsPanel;
 import pixelitor.filters.*;
 import pixelitor.filters.animation.TweenWizard;
 import pixelitor.filters.comp.EnlargeCanvas;
@@ -40,8 +42,6 @@ import pixelitor.filters.levels.Levels;
 import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.filters.lookup.Luminosity;
 import pixelitor.filters.painters.TextFilter;
-import pixelitor.gui.ColorPalette;
-import pixelitor.gui.ColorVariations;
 import pixelitor.gui.Desktop;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageComponent;
@@ -108,9 +108,9 @@ import java.awt.image.BufferedImage;
 import java.lang.management.ManagementFactory;
 
 import static pixelitor.Composition.ImageChangeActions.FULL;
-import static pixelitor.FillType.BACKGROUND;
-import static pixelitor.FillType.FOREGROUND;
-import static pixelitor.FillType.TRANSPARENT;
+import static pixelitor.colors.FillType.BACKGROUND;
+import static pixelitor.colors.FillType.FOREGROUND;
+import static pixelitor.colors.FillType.TRANSPARENT;
 import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
 import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
 import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_180;
@@ -118,10 +118,6 @@ import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_270;
 import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_90;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.MOTION_BLUR;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
-import static pixelitor.gui.ColorVariationsType.BG_MIX;
-import static pixelitor.gui.ColorVariationsType.BRIGHTNESS;
-import static pixelitor.gui.ColorVariationsType.FG_MIX;
-import static pixelitor.gui.ColorVariationsType.SATURATION;
 import static pixelitor.gui.ImageComponents.getActiveCompOrNull;
 import static pixelitor.gui.ImageComponents.getActiveLayerOrNull;
 import static pixelitor.menus.EnabledIf.ACTION_ENABLED;
@@ -151,7 +147,7 @@ public class MenuBar extends JMenuBar {
     private static final KeyStroke CTRL_H = KeyStroke.getKeyStroke('H', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_I = KeyStroke.getKeyStroke('I', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_J = KeyStroke.getKeyStroke('J', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_K = KeyStroke.getKeyStroke('K', MENU_SHORTCUT_KEY_MASK);
+    //    private static final KeyStroke CTRL_K = KeyStroke.getKeyStroke('K', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_L = KeyStroke.getKeyStroke('L', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_M = KeyStroke.getKeyStroke('M', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_N = KeyStroke.getKeyStroke('N', MENU_SHORTCUT_KEY_MASK);
@@ -967,7 +963,7 @@ public class MenuBar extends JMenuBar {
         viewMenu.addAction(new MenuAction("Color Palette...") {
             @Override
             public void onClick() {
-                ColorPalette.showInDialog(pw);
+                VariationsPanel.showInDialog(pw, new FullPalette(11, 7), true);
             }
         });
 
@@ -1002,43 +998,31 @@ public class MenuBar extends JMenuBar {
 
     private static JMenu createColorVariationsSubmenu(PixelitorWindow pw) {
         PMenu variations = new PMenu("Color Variations");
-        variations.addAction(new MenuAction("Foreground Brightness...") {
+        variations.addAction(new MenuAction("Foreground...") {
             @Override
             public void onClick() {
-                ColorVariations.showInDialog(pw, true, BRIGHTNESS);
+                VariationsPanel.showVariationsDialog(pw, true);
             }
         });
-        variations.addAction(new MenuAction("Foreground Saturation...") {
+        variations.addAction(new MenuAction("Foreground Mix with Background...") {
             @Override
             public void onClick() {
-                ColorVariations.showInDialog(pw, true, SATURATION);
+                VariationsPanel.showMixDialog(pw, true);
             }
         });
-        variations.addActionWithKey(new MenuAction("Foreground Mix with Background...") {
-            @Override
-            public void onClick() {
-                ColorVariations.showInDialog(pw, true, BG_MIX);
-            }
-        }, CTRL_K);
 
         variations.addSeparator();
 
-        variations.addAction(new MenuAction("Background Brightness...") {
+        variations.addAction(new MenuAction("Background...") {
             @Override
             public void onClick() {
-                ColorVariations.showInDialog(pw, false, BRIGHTNESS);
-            }
-        });
-        variations.addAction(new MenuAction("Background Saturation...") {
-            @Override
-            public void onClick() {
-                ColorVariations.showInDialog(pw, false, SATURATION);
+                VariationsPanel.showVariationsDialog(pw, false);
             }
         });
         variations.addAction(new MenuAction("Background Mix with Foreground...") {
             @Override
             public void onClick() {
-                ColorVariations.showInDialog(pw, false, FG_MIX);
+                VariationsPanel.showMixDialog(pw, false);
             }
         });
         return variations;

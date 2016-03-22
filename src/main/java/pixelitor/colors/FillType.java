@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
-package pixelitor;
+package pixelitor.colors;
 
 import pixelitor.filters.Fill;
 import pixelitor.filters.FilterAction;
 
 import java.awt.Color;
 
-import static pixelitor.utils.ColorUtils.TRANSPARENT_COLOR;
+import static pixelitor.colors.ColorUtils.TRANSPARENT_COLOR;
 
 /**
  * A fill color with a string description

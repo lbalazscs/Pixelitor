@@ -19,6 +19,8 @@ package pixelitor;
 
 import com.bric.util.JVM;
 import net.jafama.FastMath;
+import pixelitor.colors.FgBgColors;
+import pixelitor.colors.FillType;
 import pixelitor.filters.Filter;
 import pixelitor.gui.GUIMessageHandler;
 import pixelitor.gui.ImageComponent;
