@@ -62,14 +62,14 @@ public abstract class Layer implements Serializable {
     private static final long serialVersionUID = 2L;
 
     protected Canvas canvas;
-    private String name;
+    protected String name;
 
     // the real layer for layer masks,
     // null for real layers
     protected final Layer parent;
 
     private boolean visible = true;
-    final Composition comp;
+    protected Composition comp;
     protected LayerMask mask;
     private boolean maskEnabled = true;
 
@@ -77,7 +77,7 @@ public abstract class Layer implements Serializable {
     BlendingMode blendingMode = BlendingMode.NORMAL;
 
     // transient variables from here
-    private transient LayerUI ui;
+    private transient LayerGUI ui;
     protected transient boolean isAdjustment = false;
     private transient List<LayerChangeListener> layerChangeObservers;
 
@@ -136,49 +136,19 @@ public abstract class Layer implements Serializable {
         History.addEdit(addToHistory, () -> new LayerVisibilityChangeEdit(comp, this, newVisibility));
     }
 
-    public LayerUI getUI() {
+    public LayerGUI getUI() {
         return ui;
     }
 
-    public void setUI(LayerUI ui) {
+    public void setUI(LayerGUI ui) {
         this.ui = ui;
     }
 
-    protected String getDuplicateLayerName(boolean exact) {
-        if (exact) {
-            return name;
-        }
-        String copyString = "copy"; // could be longer or shorter in other languages
-        int copyStringLength = copyString.length();
-
-        int index = name.lastIndexOf(copyString);
-        if (index == -1) {
-            return name + ' ' + copyString;
-        }
-        if (index == name.length() - copyStringLength) {
-            // it ends with the copyString - this was the first copy
-            return name + " 2";
-        }
-        String afterCopyString = name.substring(index + copyStringLength);
-
-        int copyNr;
-        try {
-            copyNr = Integer.parseInt(afterCopyString.trim());
-        } catch (NumberFormatException e) {
-            // the part after copy was not a number...
-            return name + ' ' + copyString;
-        }
-
-        copyNr++;
-
-        return name.substring(0, index + copyStringLength) + ' ' + copyNr;
-    }
-
     /**
-     * If exact is true, then the duplicate layer will
+     * If sameName is true, then the duplicate layer will
      * have the same name, otherwise a new "copy name" is generated
      */
-    public abstract Layer duplicate(boolean exact);
+    public abstract Layer duplicate(boolean sameName);
 
     public float getOpacity() {
         return opacity;
@@ -249,6 +219,10 @@ public abstract class Layer implements Serializable {
 
     public Composition getComp() {
         return comp;
+    }
+
+    public void setComp(Composition comp) {
+        this.comp = comp;
     }
 
     public void mergeDownOn(ImageLayer bellow) {

@@ -332,6 +332,13 @@ public class ImageComponents {
         Messages.showStatusMessage(msg);
     }
 
+    public static void duplicateActive() {
+        assert activeIC != null;
+        Composition newComp = Composition.createCopy(activeIC.getComp(), false);
+
+        AppLogic.addComposition(newComp);
+    }
+
     public static void onActiveIC(Consumer<ImageComponent> action) {
         if (activeIC != null) {
             action.accept(activeIC);

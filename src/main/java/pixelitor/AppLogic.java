@@ -106,6 +106,8 @@ public class AppLogic {
      */
     public static void addComposition(Composition comp) {
         try {
+            assert comp.getIC() == null : "already has ic";
+
             ImageComponent ic = new ImageComponent(comp);
             ic.setCursor(Tools.getCurrentTool().getCursor());
             ImageComponents.setActiveIC(ic, false);

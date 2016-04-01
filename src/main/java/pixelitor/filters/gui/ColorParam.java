@@ -17,6 +17,7 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.colors.ColorHistory;
 import pixelitor.colors.ColorUtils;
 
 import javax.swing.*;
@@ -40,6 +41,8 @@ public class ColorParam extends AbstractFilterParam {
         this.defaultColor = defaultColor;
         this.color = defaultColor;
         this.opacitySetting = opacitySetting;
+
+        ColorHistory.FILTER.add(defaultColor);
     }
 
     @Override
@@ -80,6 +83,9 @@ public class ColorParam extends AbstractFilterParam {
         assert newColor != null;
         if (!color.equals(newColor)) {
             this.color = newColor;
+
+            ColorHistory.FILTER.add(newColor);
+
             if (paramGUI != null) {
                 paramGUI.updateGUI();
             }

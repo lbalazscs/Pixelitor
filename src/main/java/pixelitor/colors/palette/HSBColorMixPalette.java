@@ -23,7 +23,8 @@ import pixelitor.colors.FgBgColors;
 
 import java.awt.Color;
 
-public class ColorMixPalette extends Palette {
+public class HSBColorMixPalette extends Palette {
+    private final boolean fg;
     private float hue, otherHue;
     private final float sat, bri, otherSat, otherBri;
     private final float averageSat;
@@ -31,8 +32,9 @@ public class ColorMixPalette extends Palette {
 
     private static final float MAX_BRI_DEVIATION = 0.5f;
 
-    public ColorMixPalette(int numRows, int numCols, boolean fg) {
+    public HSBColorMixPalette(int numRows, int numCols, boolean fg) {
         super(numRows, numCols);
+        this.fg = fg;
 
         Color color, otherColor;
         if (fg) {
@@ -138,7 +140,7 @@ public class ColorMixPalette extends Palette {
     }
 
     @Override
-    public String getDialogTitle(boolean fg) {
-        return fg ? "Mix with Background" : "Mix with Foreground";
+    public String getDialogTitle() {
+        return fg ? "HSB Mix with Background" : "HSB Mix with Foreground";
     }
 }

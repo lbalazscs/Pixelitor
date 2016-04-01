@@ -550,4 +550,34 @@ public final class Utils {
             }
         });
     }
+
+    /**
+     * Creates the name of the duplicated layers and compositions
+     */
+    public static String createCopyName(String orig) {
+        String copyString = "copy"; // could be longer or shorter in other languages
+        int copyStringLength = copyString.length();
+
+        int index = orig.lastIndexOf(copyString);
+        if (index == -1) {
+            return orig + ' ' + copyString;
+        }
+        if (index == orig.length() - copyStringLength) {
+            // it ends with the copyString - this was the first copy
+            return orig + " 2";
+        }
+        String afterCopyString = orig.substring(index + copyStringLength);
+
+        int copyNr;
+        try {
+            copyNr = Integer.parseInt(afterCopyString.trim());
+        } catch (NumberFormatException e) {
+            // the part after copy was not a number...
+            return orig + ' ' + copyString;
+        }
+
+        copyNr++;
+
+        return orig.substring(0, index + copyStringLength) + ' ' + copyNr;
+    }
 }

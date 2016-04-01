@@ -17,6 +17,7 @@
 
 package pixelitor.colors;
 
+import pixelitor.colors.palette.ColorSwatchClickHandler;
 import pixelitor.colors.palette.VariationsPanel;
 import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.PixelitorWindow;
@@ -93,20 +94,27 @@ public class FgBgColorSelector extends JLayeredPane {
     private JPopupMenu createPopupMenu(boolean fg) {
         JPopupMenu menu = new JPopupMenu();
 
-        menu.add(new MenuAction("Color Variations...") {
+        String variationsTitle = fg
+                ? "Foreground Color Variations..."
+                : "Background Color Variations...";
+        menu.add(new MenuAction(variationsTitle) {
             @Override
             public void onClick() {
-                VariationsPanel.showVariationsDialog(pw, fg);
+                if (fg) {
+                    VariationsPanel.showFGVariationsDialog(pw);
+                } else {
+                    VariationsPanel.showBGVariationsDialog(pw);
+                }
             }
         });
 
         String mixTitle = fg
-                ? "Mix with Background Variations..."
-                : "Mix with Foreground Variations...";
+                ? "HSB Mix with Background Variations..."
+                : "HSB Mix with Foreground Variations...";
         menu.add(new MenuAction(mixTitle) {
             @Override
             public void onClick() {
-                VariationsPanel.showMixDialog(pw, fg);
+                VariationsPanel.showHSBMixDialog(pw, fg);
             }
         });
 
@@ -117,6 +125,19 @@ public class FgBgColorSelector extends JLayeredPane {
             @Override
             public void onClick() {
                 VariationsPanel.showRGBMixDialog(pw, fg);
+            }
+        });
+
+        menu.add(new MenuAction("Color History") {
+            @Override
+            public void onClick() {
+                if (fg) {
+                    ColorHistory.FOREGROUND.showDialog(pw,
+                            ColorSwatchClickHandler.STANDARD);
+                } else {
+                    ColorHistory.BACKGROUND.showDialog(pw,
+                            ColorSwatchClickHandler.STANDARD);
+                }
             }
         });
 
@@ -192,7 +213,7 @@ public class FgBgColorSelector extends JLayeredPane {
         }
 
         Color selectedColor = layerMaskEditing ? maskBgColor : bgColor;
-        Color c = showColorPickerDialog(pw, "Set background color", selectedColor, false);
+        Color c = showColorPickerDialog(pw, "Set Background Color", selectedColor, false);
 
         if (c != null) { // OK was pressed
             setBgColor(c);
@@ -205,7 +226,7 @@ public class FgBgColorSelector extends JLayeredPane {
         }
 
         Color selectedColor = layerMaskEditing ? maskFgColor : fgColor;
-        Color c = showColorPickerDialog(pw, "Set foreground color", selectedColor, false);
+        Color c = showColorPickerDialog(pw, "Set Foreground Color", selectedColor, false);
 
         if (c != null) { // OK was pressed
             setFgColor(c);
@@ -231,6 +252,7 @@ public class FgBgColorSelector extends JLayeredPane {
         }
 
         fgButton.setBackground(newColor);
+        ColorHistory.FOREGROUND.add(newColor);
     }
 
     public void setBgColor(Color c) {
@@ -244,6 +266,7 @@ public class FgBgColorSelector extends JLayeredPane {
         }
 
         bgButton.setBackground(newColor);
+        ColorHistory.BACKGROUND.add(newColor);
     }
 
     private void setupKeyboardShortcuts() {

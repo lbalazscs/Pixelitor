@@ -27,11 +27,11 @@ import static org.mockito.Mockito.verify;
 public class IconUpdateChecker {
     private final Layer layer;
     private final LayerMask mask;
-    private final LayerUI ui;
+    private final LayerGUI ui;
     private final int layerIconUpdatesAtStart;
     private final int maskIconUpdatesAtStart;
 
-    public IconUpdateChecker(LayerUI ui, Layer layer, LayerMask mask, int layerIconUpdatesAtStart, int maskIconUpdatesAtStart) {
+    public IconUpdateChecker(LayerGUI ui, Layer layer, LayerMask mask, int layerIconUpdatesAtStart, int maskIconUpdatesAtStart) {
         this.ui = ui;
         this.layer = layer;
         this.mask = mask;

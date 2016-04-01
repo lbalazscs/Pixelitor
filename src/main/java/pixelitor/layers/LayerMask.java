@@ -134,7 +134,7 @@ public class LayerMask extends ImageLayer {
 
     @Override
     public void updateIconImage() {
-        LayerUI button = getUI();
+        LayerGUI button = getUI();
         if(button != null) { // can be null while deserializing
             button.updateLayerIconImage(this);
         }

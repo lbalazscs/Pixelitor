@@ -65,7 +65,7 @@ public class FullPalette extends Palette {
     }
 
     @Override
-    public String getDialogTitle(boolean fg) {
+    public String getDialogTitle() {
         return "Color Palette";
     }
 }

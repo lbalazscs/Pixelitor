@@ -19,11 +19,16 @@ package pixelitor.filters.gui;
 
 import com.bric.swing.ColorPicker;
 import com.bric.swing.ColorSwatch;
+import pixelitor.colors.ColorHistory;
+import pixelitor.colors.palette.ColorSwatchClickHandler;
+import pixelitor.colors.palette.VariationsPanel;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.menus.MenuAction;
 
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -48,15 +53,39 @@ public class ColorSelector extends JPanel implements ParamGUI {
 //        button.addActionListener(e -> showColorDialog());
 //        add(button);
 
-        colorSwatch = new ColorSwatch(model.getColor(), BUTTON_SIZE);
+        Color color = model.getColor();
+        colorSwatch = new ColorSwatch(color, BUTTON_SIZE);
         add(colorSwatch);
 
         colorSwatch.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
-                showColorDialog();
+                if (!e.isPopupTrigger()) {
+                    showColorDialog();
+                }
             }
         });
+
+        JPopupMenu popup = new JPopupMenu();
+
+        ColorSwatchClickHandler clickHandler = (newColor, e) -> updateColor(newColor);
+
+        popup.add(new MenuAction("Color Variations") {
+            @Override
+            public void onClick() {
+                Window window = SwingUtilities.windowForComponent(ColorSelector.this);
+                VariationsPanel.showFilterVariationsDialog(window, model.getColor(), clickHandler);
+            }
+        });
+
+        popup.add(new MenuAction("Color History") {
+            @Override
+            public void onClick() {
+                Window window = SwingUtilities.windowForComponent(ColorSelector.this);
+                ColorHistory.FILTER.showDialog(window, clickHandler);
+            }
+        });
+        colorSwatch.setComponentPopupMenu(popup);
     }
 
     private void showColorDialog() {
@@ -65,14 +94,18 @@ public class ColorSelector extends JPanel implements ParamGUI {
         Color color = ColorPicker.showDialog(PixelitorWindow.getInstance(), "Select " + model.getName(), model.getColor(), model.allowOpacity());
 
         if (color != null) { // ok was pressed
-//            button.setBackground(color);
+            updateColor(color);
+        }
+    }
+
+    private void updateColor(Color color) {
+        //            button.setBackground(color);
 //            button.paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
 
-            colorSwatch.setForeground(color);
-            colorSwatch.paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
+        colorSwatch.setForeground(color);
+        colorSwatch.paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
 
-            model.setColor(color, true);
-        }
+        model.setColor(color, true);
     }
 
     @Override

@@ -17,7 +17,6 @@
 
 package pixelitor.colors.palette;
 
-import pixelitor.colors.FgBgColors;
 import pixelitor.layers.LayerButton;
 
 import javax.swing.*;
@@ -29,15 +28,22 @@ import java.awt.event.MouseEvent;
 
 public class ColorSwatchButton extends JComponent {
     public static final int SIZE = 32;
+
+    private final ColorSwatchClickHandler clickHandler;
+    // Grid positions.
     private final int xPos;
     private final int yPos;
+
     private boolean marked = false;
 
     private static final Dimension size = new Dimension(SIZE, SIZE);
     private Color color;
     private boolean raised = true;
 
-    public ColorSwatchButton(Color color, int xPos, int yPos) {
+    public ColorSwatchButton(Color color, ColorSwatchClickHandler clickHandler, int xPos, int yPos) {
+        assert clickHandler != null;
+
+        this.clickHandler = clickHandler;
         this.xPos = xPos;
         this.yPos = yPos;
         setColor(color);
@@ -60,14 +66,8 @@ public class ColorSwatchButton extends JComponent {
             }
 
             private void regularClick(MouseEvent e) {
-                boolean rightClick = SwingUtilities.isRightMouseButton(e);
                 Color newColor = ColorSwatchButton.this.color;
-
-                if (rightClick) {
-                    FgBgColors.setBG(newColor);
-                } else {
-                    FgBgColors.setFG(newColor);
-                }
+                clickHandler.onClick(newColor, e);
             }
 
             @Override

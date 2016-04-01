@@ -113,19 +113,36 @@ public class FileChoosers {
     }
 
     public static boolean showSaveFileChooserAndSaveComp(Composition comp) {
+        File customSaveDir = null;
+        File file = comp.getFile();
+        if (file != null) {
+            customSaveDir = file.getParentFile();
+            saveFileChooser.setCurrentDirectory(customSaveDir);
+        }
+
         GlobalKeyboardWatch.setDialogActive(true);
         int status = saveFileChooser.showSaveDialog(PixelitorWindow.getInstance());
         GlobalKeyboardWatch.setDialogActive(false);
 
         if (status == JFileChooser.APPROVE_OPTION) {
             File selectedFile = saveFileChooser.getSelectedFile();
-            lastSaveDir = selectedFile.getParentFile();
-//            OutputFormat outputFormat = saveFileChooser.getOutputFormat();
+
+            if (customSaveDir == null) {
+                // if the comp had no file, and lastSaveDir was used,
+                // then update lastSaveDir
+                lastSaveDir = selectedFile.getParentFile();
+            } else {
+                // if a custom save directory (the file dir) was used,
+                // reset the directory stored inside the chooser
+                saveFileChooser.setCurrentDirectory(lastSaveDir);
+            }
+
             String extension = saveFileChooser.getExtension();
             OutputFormat outputFormat =  OutputFormat.valueFromExtension(extension);
             outputFormat.saveComposition(comp, selectedFile, true);
             return true;
         }
+
         return false;
     }
 

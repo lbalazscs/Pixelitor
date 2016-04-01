@@ -75,7 +75,7 @@ public class LayerTest {
         layer = TestHelper.createLayerOfClass(layerClass, comp);
 
 //        LayerUI ui = mock(LayerUI.class);
-        LayerUI ui = spy(layer.getUI());
+        LayerGUI ui = spy(layer.getUI());
         layer.setUI(ui);
 
         comp.addLayerNoGUI(layer);
@@ -104,7 +104,7 @@ public class LayerTest {
 
     @Test
     public void test_setVisible() {
-        LayerUI layerUI = layer.getUI();
+        LayerGUI layerUI = layer.getUI();
         assertThat(layer.isVisible()).isTrue();
         assertThat(layerUI.isVisibilityChecked()).isTrue();
 

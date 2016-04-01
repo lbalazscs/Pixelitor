@@ -20,6 +20,7 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterWithGUI;
+import pixelitor.utils.Utils;
 
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
@@ -47,9 +48,10 @@ public class AdjustmentLayer extends Layer {
     }
 
     @Override
-    public Layer duplicate(boolean exact) {
+    public Layer duplicate(boolean sameName) {
         // TODO the filter should be copied so that it can be adjusted independently
-        AdjustmentLayer d = new AdjustmentLayer(comp, getDuplicateLayerName(exact), filter);
+        String duplicateName = sameName ? name : Utils.createCopyName(name);
+        AdjustmentLayer d = new AdjustmentLayer(comp, duplicateName, filter);
 
         if (hasMask()) {
             d.addMask(mask.duplicate(d));

@@ -24,6 +24,7 @@ import pixelitor.gui.PixelitorWindow;
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -62,13 +63,16 @@ public class DialogBuilder {
         return this;
     }
 
-    public DialogBuilder parent(JFrame f) {
-        frameParent = f;
-        return this;
-    }
-
-    public DialogBuilder parent(JDialog d) {
-        dialogParent = d;
+    public DialogBuilder parent(Window window) {
+        if (window instanceof JFrame) {
+            frameParent = (JFrame) window;
+        } else if (window instanceof JDialog) {
+            dialogParent = (JDialog) window;
+        } else {
+            throw new IllegalStateException(window == null
+                    ? "null window"
+                    : window.getClass().getName());
+        }
         return this;
     }
 

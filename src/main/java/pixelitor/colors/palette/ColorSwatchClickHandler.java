@@ -15,31 +15,23 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.layers;
+package pixelitor.colors.palette;
 
-public interface LayerUI {
-    void setOpenEye(boolean newVisibility);
+import pixelitor.colors.FgBgColors;
 
-    Layer getLayer();
+import javax.swing.*;
+import java.awt.Color;
+import java.awt.event.MouseEvent;
 
-    String getLayerName();
+public interface ColorSwatchClickHandler {
+    void onClick(Color newColor, MouseEvent e);
 
-    boolean isVisibilityChecked();
-
-    void changeNameProgrammatically(String newName);
-
-    // the argument can refer to either an image layer or a mask
-    void updateLayerIconImage(ImageLayer layer);
-
-    void addMaskIconLabel();
-
-    void deleteMaskIconLabel();
-
-    void setSelected(boolean b);
-
-    LayerButton getLayerButton();
-
-    void setOpacityFromModel(float newOpacity);
-
-    void setMaskEditing(boolean b);
+    public static final ColorSwatchClickHandler STANDARD = (newColor, e) -> {
+        boolean rightClick = SwingUtilities.isRightMouseButton(e);
+        if (rightClick) {
+            FgBgColors.setBG(newColor);
+        } else {
+            FgBgColors.setFG(newColor);
+        }
+    };
 }

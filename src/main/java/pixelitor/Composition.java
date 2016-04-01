@@ -71,6 +71,8 @@ import java.util.stream.Collectors;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
+import static pixelitor.io.FileExtensionUtils.getFileNameWOExtension;
+import static pixelitor.utils.Utils.createCopyName;
 
 /**
  * An image composition consisting of multiple layers
@@ -134,36 +136,45 @@ public class Composition implements Serializable {
         return comp;
     }
 
-    public static Composition createCopy(Composition orig, boolean shareIC) {
+    public static Composition createCopy(Composition orig, boolean forUndo) {
         Canvas canvasCopy = new Canvas(orig.getCanvas());
-        Composition comp = new Composition(canvasCopy);
+        Composition compCopy = new Composition(canvasCopy);
 
         // copy layers
         for (Layer layer : orig.layerList) {
             Layer layerCopy = layer.duplicate(true);
-            comp.layerList.add(layerCopy);
+            layerCopy.setComp(compCopy);
+
+            compCopy.layerList.add(layerCopy);
             if (layer == orig.activeLayer) {
-                comp.activeLayer = layerCopy;
+                compCopy.activeLayer = layerCopy;
             }
         }
 
-        comp.newLayerCount = orig.newLayerCount;
-        comp.name = orig.name;
-        comp.file = orig.file;
-        comp.dirty = orig.dirty;
+        compCopy.newLayerCount = orig.newLayerCount;
+
         if (orig.selection != null) {
-            comp.selection = new Selection(orig.selection, shareIC);
+            compCopy.selection = new Selection(orig.selection, forUndo);
         }
-        if (shareIC) {
-            comp.ic = orig.ic;
+        if (forUndo) {
+            compCopy.dirty = orig.dirty;
+            compCopy.file = orig.file;
+            compCopy.name = orig.name;
+            compCopy.ic = orig.ic;
+            compCopy.cachedCompositeImage = null;
+            compCopy.compositeImageUpToDate = false;
+        } else {
+            compCopy.dirty = true;
+            compCopy.file = null;
+            compCopy.name = createCopyName(getFileNameWOExtension(orig.name));
+            compCopy.ic = null;
+            compCopy.cachedCompositeImage = orig.cachedCompositeImage;
+            compCopy.compositeImageUpToDate = orig.compositeImageUpToDate;
         }
 
-        // cachedCompositeImage is not copied because
-        // this will be typically used in undo situations
-        comp.cachedCompositeImage = null;
-        comp.compositeImageUpToDate = false;
+        assert compCopy.checkInvariant();
 
-        return comp;
+        return compCopy;
     }
 
     private Composition(Canvas canvas) {
@@ -316,6 +327,8 @@ public class Composition implements Serializable {
     }
 
     public void addLayersToGUI() {
+        assert checkInvariant();
+
         // when adding layer buttons the last layer always gets active
         // but here we don't want to change the selected layer
         Layer previousActiveLayer = activeLayer;
@@ -408,6 +421,10 @@ public class Composition implements Serializable {
 
     public void setActiveLayer(Layer newActiveLayer, AddToHistory addToHistory) {
         if (activeLayer != newActiveLayer) {
+            assert layerList.contains(newActiveLayer)
+                    : String.format("new active layer '%s' (%s) not in the layer list of '%s'",
+                    newActiveLayer.getName(), System.identityHashCode(newActiveLayer), getName());
+
             Layer oldLayer = activeLayer;
             activeLayer = newActiveLayer;
 
@@ -417,8 +434,8 @@ public class Composition implements Serializable {
 
             // notify history
             History.addEdit(addToHistory, () -> new LayerSelectionChangeEdit(this, oldLayer, newActiveLayer));
+            assert checkInvariant();
         }
-        assert checkInvariant();
     }
 
     public boolean isActiveLayer(Layer layer) {
@@ -1028,7 +1045,7 @@ public class Composition implements Serializable {
     @Override
     public String toString() {
         return "Composition{name='" + name + '\''
-                + ", activeLayer=" + activeLayer.getName()
+                + ", activeLayer=" + (activeLayer == null ? "null" : activeLayer.getName())
                 + ", layerList=" + layerList
                 + ", canvas=" + canvas
                 + ", selection=" + selection

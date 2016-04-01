@@ -60,7 +60,7 @@ public class TextLayerTest {
         layer.updateLayerName();
         comp.addLayerNoGUI(layer);
 
-        LayerUI ui = mock(LayerUI.class);
+        LayerGUI ui = mock(LayerGUI.class);
         layer.setUI(ui);
 
         withMask.init(layer);

@@ -26,9 +26,11 @@ public class RGBColorMixPalette extends Palette {
     private static final float MAX_BRI_DEVIATION = 0.5f;
     private final int rgb;
     private final int otherRGB;
+    private final boolean fg;
 
     public RGBColorMixPalette(int numRows, int numCols, boolean fg) {
         super(numRows, numCols);
+        this.fg = fg;
 
         Color color, otherColor;
         if (fg) {
@@ -106,7 +108,7 @@ public class RGBColorMixPalette extends Palette {
     }
 
     @Override
-    public String getDialogTitle(boolean fg) {
+    public String getDialogTitle() {
         return fg ? "RGB Mix with Background" : "RGB Mix with Foreground";
     }
 

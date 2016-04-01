@@ -26,6 +26,7 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Window;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ import java.util.List;
 public class VariationsPanel extends JPanel {
     private static final int LAYOUT_GAP = 2;
     private final Palette palette;
+    private final ColorSwatchClickHandler clickHandler;
 
     private int numCols;
     private int numRows;
@@ -41,8 +43,9 @@ public class VariationsPanel extends JPanel {
     // vertical lists in a horizontal list
     private final List<List<ColorSwatchButton>> buttons;
 
-    private VariationsPanel(Palette palette) {
+    private VariationsPanel(Palette palette, ColorSwatchClickHandler clickHandler) {
         this.palette = palette;
+        this.clickHandler = clickHandler;
 
         this.numCols = palette.getNumCols();
         this.numRows = palette.getNumRows();
@@ -123,7 +126,7 @@ public class VariationsPanel extends JPanel {
     public void addButton(int hor, int ver, Color c) {
         ColorSwatchButton button = getButton(hor, ver);
         if (button == null) {
-            button = new ColorSwatchButton(c, hor, ver);
+            button = new ColorSwatchButton(c, clickHandler, hor, ver);
             addNewButtonToList(button, hor, ver);
         } else {
             button.setColor(c);
@@ -146,23 +149,37 @@ public class VariationsPanel extends JPanel {
         return new Dimension(width, height);
     }
 
-    public static void showVariationsDialog(PixelitorWindow pw, boolean fg) {
-        Color refColor = fg ? FgBgColors.getFG() : FgBgColors.getBG();
-        showInDialog(pw, new VariationsPalette(refColor, 7, 10), fg);
+    public static void showFGVariationsDialog(PixelitorWindow pw) {
+        Color refColor = FgBgColors.getFG();
+        VariationsPalette palette = new VariationsPalette(refColor, "Foreground Color Variations", 7, 10);
+        showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
     }
 
-    public static void showMixDialog(PixelitorWindow pw, boolean fg) {
-        ColorMixPalette palette = new ColorMixPalette(7, 10, fg);
-        showInDialog(pw, palette, fg);
+    public static void showBGVariationsDialog(PixelitorWindow pw) {
+        Color refColor = FgBgColors.getBG();
+        VariationsPalette palette = new VariationsPalette(refColor, "Background Color Variations", 7, 10);
+        showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
+    }
+
+    public static void showFilterVariationsDialog(Window window, Color refColor, ColorSwatchClickHandler clickHandler) {
+        VariationsPalette palette = new VariationsPalette(refColor, "Filter Color Variations", 7, 10);
+        showDialog(window, palette, clickHandler);
+    }
+
+    public static void showHSBMixDialog(PixelitorWindow pw, boolean fg) {
+        HSBColorMixPalette palette = new HSBColorMixPalette(7, 10, fg);
+        showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
     }
 
     public static void showRGBMixDialog(PixelitorWindow pw, boolean fg) {
         RGBColorMixPalette palette = new RGBColorMixPalette(7, 10, fg);
-        showInDialog(pw, palette, fg);
+        showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
     }
 
-    public static void showInDialog(PixelitorWindow pw, Palette palette, boolean fg) {
-        VariationsPanel variationsPanel = new VariationsPanel(palette);
+    public static void showDialog(Window window, Palette palette, ColorSwatchClickHandler clickHandler) {
+        assert window != null;
+
+        VariationsPanel variationsPanel = new VariationsPanel(palette, clickHandler);
 
         JPanel form = new JPanel(new BorderLayout());
 
@@ -170,8 +187,8 @@ public class VariationsPanel extends JPanel {
         form.add(variationsPanel, BorderLayout.CENTER);
 
         new DialogBuilder()
-                .title(palette.getDialogTitle(fg))
-                .parent(pw)
+                .title(palette.getDialogTitle())
+                .parent(window)
                 .form(form)
                 .notModal()
                 .noOKButton()
@@ -179,6 +196,6 @@ public class VariationsPanel extends JPanel {
                 .noGlobalKeyChange()
                 .show();
 
-        Messages.showStatusMessage(palette.getStatusHelp(fg));
+        Messages.showStatusMessage(palette.getStatusHelp());
     }
 }

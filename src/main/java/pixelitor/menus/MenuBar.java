@@ -28,6 +28,7 @@ import pixelitor.automate.AutoPaint;
 import pixelitor.automate.BatchFilterWizard;
 import pixelitor.automate.BatchResize;
 import pixelitor.colors.FgBgColors;
+import pixelitor.colors.palette.ColorSwatchClickHandler;
 import pixelitor.colors.palette.FullPalette;
 import pixelitor.colors.palette.VariationsPanel;
 import pixelitor.filters.*;
@@ -615,7 +616,9 @@ public class MenuBar extends JMenuBar {
     private static JMenu createImageMenu() {
         PMenu imageMenu = new PMenu("Image", 'I');
 
-        imageMenu.buildAction(SelectionActions.getCropAction()).enableIf(ACTION_ENABLED).add();
+        // crop
+        imageMenu.buildAction(SelectionActions.getCropAction())
+                .enableIf(ACTION_ENABLED).add();
 
         // resize
         imageMenu.addActionWithKey(new MenuAction("Resize...") {
@@ -624,6 +627,13 @@ public class MenuBar extends JMenuBar {
                 ResizePanel.resizeActiveImage();
             }
         }, CTRL_ALT_I);
+
+        imageMenu.addAction(new MenuAction("Duplicate") {
+            @Override
+            public void onClick() {
+                ImageComponents.duplicateActive();
+            }
+        });
 
         imageMenu.addSeparator();
 
@@ -963,7 +973,7 @@ public class MenuBar extends JMenuBar {
         viewMenu.addAction(new MenuAction("Color Palette...") {
             @Override
             public void onClick() {
-                VariationsPanel.showInDialog(pw, new FullPalette(11, 7), true);
+                VariationsPanel.showDialog(pw, new FullPalette(11, 7), ColorSwatchClickHandler.STANDARD);
             }
         });
 
@@ -1001,13 +1011,19 @@ public class MenuBar extends JMenuBar {
         variations.addAction(new MenuAction("Foreground...") {
             @Override
             public void onClick() {
-                VariationsPanel.showVariationsDialog(pw, true);
+                VariationsPanel.showFGVariationsDialog(pw);
             }
         });
-        variations.addAction(new MenuAction("Foreground Mix with Background...") {
+        variations.addAction(new MenuAction("HSB Mix Foreground with Background...") {
             @Override
             public void onClick() {
-                VariationsPanel.showMixDialog(pw, true);
+                VariationsPanel.showHSBMixDialog(pw, true);
+            }
+        });
+        variations.addAction(new MenuAction("RGB Mix Foreground with Background...") {
+            @Override
+            public void onClick() {
+                VariationsPanel.showRGBMixDialog(pw, true);
             }
         });
 
@@ -1016,13 +1032,19 @@ public class MenuBar extends JMenuBar {
         variations.addAction(new MenuAction("Background...") {
             @Override
             public void onClick() {
-                VariationsPanel.showVariationsDialog(pw, false);
+                VariationsPanel.showBGVariationsDialog(pw);
             }
         });
-        variations.addAction(new MenuAction("Background Mix with Foreground...") {
+        variations.addAction(new MenuAction("HSB Mix Background with Foreground...") {
             @Override
             public void onClick() {
-                VariationsPanel.showMixDialog(pw, false);
+                VariationsPanel.showHSBMixDialog(pw, false);
+            }
+        });
+        variations.addAction(new MenuAction("RGB Mix Background with Foreground...") {
+            @Override
+            public void onClick() {
+                VariationsPanel.showHSBMixDialog(pw, false);
             }
         });
         return variations;

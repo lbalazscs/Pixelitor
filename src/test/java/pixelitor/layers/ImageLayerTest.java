@@ -85,7 +85,7 @@ public class ImageLayerTest {
 
         layer = TestHelper.createImageLayer("layer 1", comp);
 
-        LayerUI ui = mock(LayerUI.class);
+        LayerGUI ui = mock(LayerGUI.class);
         layer.setUI(ui);
 
         withMask.init(layer);

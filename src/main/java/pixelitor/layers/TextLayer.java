@@ -34,6 +34,7 @@ import pixelitor.history.TextLayerChangeEdit;
 import pixelitor.history.TextLayerRasterizeEdit;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.UpdateGUI;
+import pixelitor.utils.Utils;
 import pixelitor.utils.test.RandomGUITest;
 
 import java.awt.Graphics2D;
@@ -97,8 +98,9 @@ public class TextLayer extends ContentLayer {
     }
 
     @Override
-    public Layer duplicate(boolean exact) {
-        TextLayer d = new TextLayer(comp, getDuplicateLayerName(exact));
+    public Layer duplicate(boolean sameName) {
+        String duplicateName = sameName ? name : Utils.createCopyName(name);
+        TextLayer d = new TextLayer(comp, duplicateName);
 
         d.translationX = translationX;
         d.translationY = translationY;

@@ -225,10 +225,10 @@ public class ImageLayer extends ContentLayer {
     }
 
     @Override
-    public ImageLayer duplicate(boolean exact) {
+    public ImageLayer duplicate(boolean sameName) {
         BufferedImage imageCopy = ImageUtils.copyImage(image);
-        String duplicateLayerName = getDuplicateLayerName(exact);
-        ImageLayer d = new ImageLayer(comp, imageCopy, duplicateLayerName, null);
+        String duplicateName = sameName ? name : Utils.createCopyName(name);
+        ImageLayer d = new ImageLayer(comp, imageCopy, duplicateName, null);
         d.setOpacity(opacity, UpdateGUI.NO, AddToHistory.NO, true);
         d.setTranslation(translationX, translationY);
         d.setBlendingMode(blendingMode, UpdateGUI.NO, AddToHistory.NO, true);

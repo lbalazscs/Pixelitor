@@ -53,10 +53,10 @@ public abstract class Palette {
         return numRows;
     }
 
-    public abstract String getDialogTitle(boolean fg);
+    public abstract String getDialogTitle();
 
-    public String getStatusHelp(boolean fg) {
-        return getDialogTitle(fg) + ": enlarge for more colors, "
+    public String getStatusHelp() {
+        return getDialogTitle() + ": enlarge for more colors, "
                 + "click to set the foreground color, "
                 + "right-click to set the background color, "
                 + "Ctrl-click to clear the marking";

@@ -24,9 +24,11 @@ import java.awt.Color;
 public class VariationsPalette extends Palette {
     private final float refHue;
     private static final float MAX_HUE_DEVIATION = 0.1f;
+    private final String dialogTitle;
 
-    public VariationsPalette(Color refColor, int numRows, int numCols) {
+    public VariationsPalette(Color refColor, String dialogTitle, int numRows, int numCols) {
         super(numRows, numCols);
+        this.dialogTitle = dialogTitle;
         assert refColor != null;
         float[] hsb = ColorUtils.colorToHSB(refColor);
         refHue = hsb[0];
@@ -75,11 +77,7 @@ public class VariationsPalette extends Palette {
     }
 
     @Override
-    public String getDialogTitle(boolean fg) {
-        if (fg) {
-            return "Foreground Color Variations";
-        } else {
-            return "Background Color Variations";
-        }
+    public String getDialogTitle() {
+        return dialogTitle;
     }
 }
