@@ -33,6 +33,7 @@ import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.SymmetryBrush;
 import pixelitor.utils.ImageSwitchListener;
 import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.Composite;
@@ -96,7 +97,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         typeSelector.addActionListener(e -> {
             closeToolDialog();
 
-            BrushType brushType = (BrushType) typeSelector.getSelectedItem();
+            BrushType brushType = getBrushType();
             symmetryBrush.brushTypeChanged(brushType, getRadius());
 
             brushRadiusParam.setEnabled(brushType.sizeCanBeSet(), FilterSetting.EnabledReason.APP_LOGIC);
@@ -125,7 +126,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     protected void addBrushSettingsButton() {
         brushSettingsButton = settingsPanel.addButton("Brush Settings",
                 e -> {
-                    BrushType brushType = (BrushType) typeSelector.getSelectedItem();
+                    BrushType brushType = getBrushType();
                     JPanel p = brushType.getSettingsPanel(this);
                     toolDialog = new OKDialog(PixelitorWindow.getInstance(), p, "Brush Settings");
                 });
@@ -395,5 +396,20 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     @VisibleForTesting
     protected void setBrush(Brush brush) {
         this.brush = brush;
+    }
+
+    private BrushType getBrushType() {
+        return (BrushType) typeSelector.getSelectedItem();
+    }
+
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = super.getDebugNode();
+
+        node.addStringChild("Brush Type", getBrushType().toString());
+        node.addIntChild("Radius", getRadius());
+        node.addStringChild("Symmetry", getSymmetry().toString());
+
+        return node;
     }
 }

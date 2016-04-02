@@ -23,6 +23,12 @@ import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.PixelitorWindow;
 
 import java.awt.Color;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.IOException;
 import java.util.Random;
 
 /**
@@ -234,5 +240,48 @@ public class ColorUtils {
 
     public static float[] colorToHSB(Color c) {
         return Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), null);
+    }
+
+    public static void copyColorToClipboard(Color c) {
+        String htmlHexString = String.format("%06X", (0xFFFFFF & c.getRGB()));
+        StringSelection stringSelection = new StringSelection(htmlHexString);
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        clipboard.setContents(stringSelection, null);
+    }
+
+    public static Color getColorFromClipboard() {
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        String text;
+        try {
+            text = (String) clipboard.getData(DataFlavor.stringFlavor);
+        } catch (UnsupportedFlavorException | IOException e) {
+            return null;
+        }
+
+        text = text.trim();
+
+        text = text.startsWith("#") ? text.substring(1) : text;
+
+        // try HTML hex format
+        if (text.length() == 6) {
+            return new Color(
+                    Integer.parseInt(text.substring(0, 2), 16),
+                    Integer.parseInt(text.substring(2, 4), 16),
+                    Integer.parseInt(text.substring(4, 6), 16));
+        }
+
+        // try rgb(163, 69, 151) format
+        if (text.startsWith("rgb(") && text.endsWith(")")) {
+            text = text.substring(4, text.length() - 1);
+            String[] strings = text.split("\\s*,\\s*");
+            if (strings.length == 3) {
+                return new Color(
+                        Integer.parseInt(strings[0]),
+                        Integer.parseInt(strings[1]),
+                        Integer.parseInt(strings[2]));
+            }
+        }
+
+        return null;
     }
 }

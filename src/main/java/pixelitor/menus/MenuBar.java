@@ -49,6 +49,7 @@ import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.Navigator;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.PerformanceTestingDialog;
 import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
@@ -93,6 +94,7 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.Tests3x3;
 import pixelitor.utils.UpdateGUI;
 import pixelitor.utils.Utils;
+import pixelitor.utils.debug.AppNode;
 import pixelitor.utils.test.Events;
 import pixelitor.utils.test.FilterTests;
 import pixelitor.utils.test.RandomGUITest;
@@ -973,7 +975,8 @@ public class MenuBar extends JMenuBar {
         viewMenu.addAction(new MenuAction("Color Palette...") {
             @Override
             public void onClick() {
-                VariationsPanel.showDialog(pw, new FullPalette(11, 7), ColorSwatchClickHandler.STANDARD);
+                FullPalette palette = new FullPalette();
+                VariationsPanel.showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
             }
         });
 
@@ -1403,6 +1406,19 @@ public class MenuBar extends JMenuBar {
 //        helpMenu.add(sub);
 
         helpMenu.addSeparator();
+
+        helpMenu.add(new MenuAction("Report a Bug...") {
+            @Override
+            public void onClick() {
+                AppNode node = new AppNode();
+                String title = "Pixelitor Internal State";
+
+                JTree tree = new JTree(node);
+                String text = node.toDetailedString();
+
+                GUIUtils.showTextDialog(tree, title, text);
+            }
+        });
 
         helpMenu.add(new MenuAction("Check for Update...") {
             @Override

@@ -34,6 +34,7 @@ import javax.swing.*;
 import java.awt.Component;
 import java.awt.Frame;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
 
@@ -115,6 +116,11 @@ public class Dialogs {
 
     public static void showWarningDialog(String title, String msg) {
         showWarningDialog(getParentForDialogs(), title, msg);
+    }
+
+    public static void showNotAColorOnClipboardDialog(Window parent) {
+        showWarningDialog(parent, "Not a Color",
+                "The clipboard contents could not be interpreted as a color");
     }
 
     public static void showWarningDialog(Component parent, String title, String msg) {

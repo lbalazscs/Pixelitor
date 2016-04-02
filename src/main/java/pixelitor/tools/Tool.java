@@ -33,6 +33,7 @@ import pixelitor.tools.toolhandlers.HandToolHandler;
 import pixelitor.tools.toolhandlers.ImageLayerCheckHandler;
 import pixelitor.tools.toolhandlers.ToolHandler;
 import pixelitor.utils.Utils;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.Component;
@@ -356,5 +357,11 @@ public abstract class Tool {
     // used for debugging
     public String getStateInfo() {
         return null;
+    }
+
+    public DebugNode getDebugNode() {
+        DebugNode toolNode = new DebugNode("Active Tool", this);
+        toolNode.addStringChild("Name", getName());
+        return toolNode;
     }
 }

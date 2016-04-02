@@ -20,10 +20,13 @@ package pixelitor.colors.palette;
 import java.awt.Color;
 
 public class FullPalette extends Palette {
+    private static int lastRows = 11;
+    private static int lastCols = 7;
+
     private int numHueLevels;
 
-    public FullPalette(int numRows, int numCols) {
-        super(numRows, numCols);
+    public FullPalette() {
+        super(lastRows, lastCols);
 
         config = new HueSatPaletteConfig(0, 0.9f); // default saturation is 90%
     }
@@ -32,6 +35,8 @@ public class FullPalette extends Palette {
     public void setSize(int numRows, int numCols) {
         super.setSize(numRows, numCols);
         numHueLevels = numRows - 1;
+        lastCols = numCols;
+        lastRows = numRows;
     }
 
     @Override

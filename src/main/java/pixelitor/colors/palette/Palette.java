@@ -34,8 +34,6 @@ public abstract class Palette {
     public void onConfigChange() {
     }
 
-    ;
-
     public PaletteConfig getConfig() {
         return config;
     }

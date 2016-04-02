@@ -22,12 +22,15 @@ import pixelitor.colors.ColorUtils;
 import java.awt.Color;
 
 public class VariationsPalette extends Palette {
+    private static int lastRows = 7;
+    private static int lastCols = 10;
+
     private final float refHue;
     private static final float MAX_HUE_DEVIATION = 0.1f;
     private final String dialogTitle;
 
-    public VariationsPalette(Color refColor, String dialogTitle, int numRows, int numCols) {
-        super(numRows, numCols);
+    public VariationsPalette(Color refColor, String dialogTitle) {
+        super(lastRows, lastCols);
         this.dialogTitle = dialogTitle;
         assert refColor != null;
         float[] hsb = ColorUtils.colorToHSB(refColor);
@@ -74,6 +77,13 @@ public class VariationsPalette extends Palette {
         // the total hue range (2 * MAX_HUE_DEVIATION) is
         // divided into numRows - 1 equal parts
         return 2 * MAX_HUE_DEVIATION / (numRows - 1);
+    }
+
+    @Override
+    public void setSize(int numRows, int numCols) {
+        super.setSize(numRows, numCols);
+        lastCols = numCols;
+        lastRows = numRows;
     }
 
     @Override

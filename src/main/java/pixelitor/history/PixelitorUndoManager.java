@@ -21,6 +21,7 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import javax.swing.event.EventListenerList;
@@ -291,5 +292,16 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
         int maxIndex = numEdits - 1;
         fireIntervalRemoved(this, 0, maxIndex);
         manualSelectionChange = true;
+    }
+
+    public DebugNode getDebugNode() {
+        DebugNode node = new DebugNode("Edits", this);
+
+        for (int i = 0; i < getSize(); i++) {
+            PixelitorEdit edit = getElementAt(i);
+            node.add(edit.getDebugNode());
+        }
+
+        return node;
     }
 }

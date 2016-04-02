@@ -14,9 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.history;
 
 import pixelitor.Composition;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.AbstractUndoableEdit;
 
@@ -81,5 +83,12 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
     public PixelitorEdit setEmbedded(boolean embedded) {
         this.embedded = embedded;
         return this;
+    }
+
+    public DebugNode getDebugNode() {
+        DebugNode node = new DebugNode(name, this);
+        node.addQuotedStringChild("comp", comp.getName());
+        node.addBooleanChild("embedded", embedded);
+        return node;
     }
 }

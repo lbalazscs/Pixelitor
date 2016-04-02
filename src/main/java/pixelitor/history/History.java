@@ -28,6 +28,7 @@ import pixelitor.utils.AppPreferences;
 import pixelitor.utils.IconUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.test.Events;
 
 import javax.swing.*;
@@ -272,5 +273,14 @@ public class History {
 
     public static void setIgnoreEdits(boolean ignoreEdits) {
         History.ignoreEdits = ignoreEdits;
+    }
+
+    public static DebugNode getDebugNode() {
+        DebugNode node = new DebugNode("History", undoManager);
+        node.addIntChild("Num undone edits", numUndoneEdits);
+        node.addBooleanChild("Ignore edits", ignoreEdits);
+        node.add(undoManager.getDebugNode());
+
+        return node;
     }
 }

@@ -63,8 +63,8 @@ public class VariationsPanel extends JPanel {
             @Override
             public void componentResized(ComponentEvent e) {
                 int newNumRows = (getHeight() - LAYOUT_GAP) / (ColorSwatchButton.SIZE + LAYOUT_GAP);
-                int newNumBrightnessLevels = (getWidth() - LAYOUT_GAP) / (ColorSwatchButton.SIZE + LAYOUT_GAP);
-                setNewSizes(newNumRows, newNumBrightnessLevels);
+                int newNumColumns = (getWidth() - LAYOUT_GAP) / (ColorSwatchButton.SIZE + LAYOUT_GAP);
+                setNewSizes(newNumRows, newNumColumns);
             }
         });
     }
@@ -151,28 +151,28 @@ public class VariationsPanel extends JPanel {
 
     public static void showFGVariationsDialog(PixelitorWindow pw) {
         Color refColor = FgBgColors.getFG();
-        VariationsPalette palette = new VariationsPalette(refColor, "Foreground Color Variations", 7, 10);
+        VariationsPalette palette = new VariationsPalette(refColor, "Foreground Color Variations");
         showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
     }
 
     public static void showBGVariationsDialog(PixelitorWindow pw) {
         Color refColor = FgBgColors.getBG();
-        VariationsPalette palette = new VariationsPalette(refColor, "Background Color Variations", 7, 10);
+        VariationsPalette palette = new VariationsPalette(refColor, "Background Color Variations");
         showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
     }
 
     public static void showFilterVariationsDialog(Window window, Color refColor, ColorSwatchClickHandler clickHandler) {
-        VariationsPalette palette = new VariationsPalette(refColor, "Filter Color Variations", 7, 10);
+        VariationsPalette palette = new VariationsPalette(refColor, "Filter Color Variations");
         showDialog(window, palette, clickHandler);
     }
 
     public static void showHSBMixDialog(PixelitorWindow pw, boolean fg) {
-        HSBColorMixPalette palette = new HSBColorMixPalette(7, 10, fg);
+        HSBColorMixPalette palette = new HSBColorMixPalette(fg);
         showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
     }
 
     public static void showRGBMixDialog(PixelitorWindow pw, boolean fg) {
-        RGBColorMixPalette palette = new RGBColorMixPalette(7, 10, fg);
+        RGBColorMixPalette palette = new RGBColorMixPalette(fg);
         showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
     }
 

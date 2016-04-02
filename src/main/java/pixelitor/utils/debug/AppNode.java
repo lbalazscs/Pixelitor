@@ -23,6 +23,8 @@ import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.history.History;
 import pixelitor.io.FileChoosers;
+import pixelitor.tools.Tool;
+import pixelitor.tools.Tools;
 
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -36,6 +38,9 @@ public class AppNode extends DebugNode {
         super("Pixelitor", PixelitorWindow.getInstance());
 
         addSystemNode();
+        addActiveToolNode();
+        addHistoryNode();
+
         addImageNodes();
 
         addStringChild("Pixelitor Version", Build.VERSION_NUMBER);
@@ -46,6 +51,17 @@ public class AppNode extends DebugNode {
         addBooleanChild("Can Redo", History.canRedo());
         addBooleanChild("Can Fade", History.canFade());
         addBooleanChild("Can Repeat", History.canRepeatOperation());
+    }
+
+    private void addActiveToolNode() {
+        Tool tool = Tools.getCurrentTool();
+        DebugNode toolNode = tool.getDebugNode();
+        add(toolNode);
+    }
+
+    private void addHistoryNode() {
+        DebugNode toolNode = History.getDebugNode();
+        add(toolNode);
     }
 
     private void addSystemNode() {

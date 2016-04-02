@@ -21,6 +21,7 @@ import pixelitor.colors.palette.ColorSwatchClickHandler;
 import pixelitor.colors.palette.VariationsPanel;
 import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.Dialogs;
 import pixelitor.menus.MenuAction;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.test.RandomGUITest;
@@ -128,7 +129,10 @@ public class FgBgColorSelector extends JLayeredPane {
             }
         });
 
-        menu.add(new MenuAction("Color History") {
+        String historyTitle = fg
+                ? "Foreground Color History..."
+                : "Background Color History...";
+        menu.add(new MenuAction(historyTitle) {
             @Override
             public void onClick() {
                 if (fg) {
@@ -137,6 +141,32 @@ public class FgBgColorSelector extends JLayeredPane {
                 } else {
                     ColorHistory.BACKGROUND.showDialog(pw,
                             ColorSwatchClickHandler.STANDARD);
+                }
+            }
+        });
+
+        menu.addSeparator();
+
+        menu.add(new MenuAction("Copy Color") {
+            @Override
+            public void onClick() {
+                Color copiedColor = fg ? getFgColor() : getBgColor();
+                ColorUtils.copyColorToClipboard(copiedColor);
+            }
+        });
+
+        menu.add(new MenuAction("Paste Color") {
+            @Override
+            public void onClick() {
+                Color color = ColorUtils.getColorFromClipboard();
+                if (color == null) {
+                    Dialogs.showNotAColorOnClipboardDialog(pw);
+                } else {
+                    if (fg) {
+                        setFgColor(color);
+                    } else {
+                        setBgColor(color);
+                    }
                 }
             }
         });

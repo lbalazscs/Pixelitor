@@ -24,6 +24,9 @@ import pixelitor.colors.FgBgColors;
 import java.awt.Color;
 
 public class HSBColorMixPalette extends Palette {
+    private static int lastRows = 7;
+    private static int lastCols = 10;
+
     private final boolean fg;
     private float hue, otherHue;
     private final float sat, bri, otherSat, otherBri;
@@ -32,8 +35,8 @@ public class HSBColorMixPalette extends Palette {
 
     private static final float MAX_BRI_DEVIATION = 0.5f;
 
-    public HSBColorMixPalette(int numRows, int numCols, boolean fg) {
-        super(numRows, numCols);
+    public HSBColorMixPalette(boolean fg) {
+        super(lastRows, lastCols);
         this.fg = fg;
 
         Color color, otherColor;
@@ -137,6 +140,13 @@ public class HSBColorMixPalette extends Palette {
             h = h - 1.0f;
         }
         return h;
+    }
+
+    @Override
+    public void setSize(int numRows, int numCols) {
+        super.setSize(numRows, numCols);
+        lastCols = numCols;
+        lastRows = numRows;
     }
 
     @Override

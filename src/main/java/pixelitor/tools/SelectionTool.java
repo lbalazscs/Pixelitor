@@ -28,6 +28,7 @@ import pixelitor.selection.SelectionInteraction;
 import pixelitor.selection.SelectionType;
 import pixelitor.utils.ImageSwitchListener;
 import pixelitor.utils.Messages;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.Cursor;
@@ -269,4 +270,13 @@ public class SelectionTool extends Tool implements ImageSwitchListener {
         return "type = " + type + ", interaction = " + interaction;
     }
 
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = super.getDebugNode();
+
+        node.addStringChild("Type", typeCombo.getSelectedItem().toString());
+        node.addStringChild("Interaction", interactionCombo.getSelectedItem().toString());
+
+        return node;
+    }
 }

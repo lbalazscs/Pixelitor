@@ -27,7 +27,7 @@ import java.util.Enumeration;
 public class DebugNode extends DefaultMutableTreeNode {
     private final String name;
 
-    DebugNode(String name, Object userObject) {
+    public DebugNode(String name, Object userObject) {
         super(userObject);
         this.name = name;
     }
@@ -72,27 +72,27 @@ public class DebugNode extends DefaultMutableTreeNode {
         return sb.toString();
     }
 
-    void addStringChild(String name, String s) {
+    public void addStringChild(String name, String s) {
         add(new DefaultMutableTreeNode(name + " = " + s));
     }
 
-    void addQuotedStringChild(String name, String s) {
+    public void addQuotedStringChild(String name, String s) {
         add(new DefaultMutableTreeNode(String.format("%s = \"%s\"", name, s)));
     }
 
-    void addIntChild(String name, int i) {
+    public void addIntChild(String name, int i) {
         add(new DefaultMutableTreeNode(name + " = " + i));
     }
 
-    void addFloatChild(String name, float f) {
+    public void addFloatChild(String name, float f) {
         add(new DefaultMutableTreeNode(name + " = " + f));
     }
 
-    void addBooleanChild(String name, boolean b) {
+    public void addBooleanChild(String name, boolean b) {
         add(new DefaultMutableTreeNode(name + " = " + b));
     }
 
-    void addClassChild() {
+    public void addClassChild() {
         add(new DefaultMutableTreeNode("class = " + userObject.getClass().getName()));
     }
 
