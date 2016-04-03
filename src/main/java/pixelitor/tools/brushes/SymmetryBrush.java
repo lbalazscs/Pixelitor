@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,7 @@ import pixelitor.Composition;
 import pixelitor.tools.BrushType;
 import pixelitor.tools.Symmetry;
 import pixelitor.tools.Tool;
+import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Graphics2D;
 
@@ -122,5 +123,21 @@ public class SymmetryBrush implements Brush {
     public void onNewMousePoint(int brushNo, double endX, double endY) {
         affectedArea.updateAffectedCoordinates(endX, endY);
         brushes[brushNo].onNewMousePoint(endX, endY);
+    }
+
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = new DebugNode("Symmetry Brush", this);
+
+        for (int i = 0; i < numInstantiatedBrushes; i++) {
+            node.add(brushes[i].getDebugNode());
+        }
+
+        node.addStringChild("Brush Type", brushType.toString());
+        node.addStringChild("Symmetry", symmetry.toString());
+
+        node.add(affectedArea.getDebugNode());
+
+        return node;
     }
 }

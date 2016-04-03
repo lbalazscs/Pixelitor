@@ -22,6 +22,7 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.selection.Selection;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.debug.DataBufferNode;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -143,5 +144,15 @@ public class PartialImageEdit extends FadeableEdit {
         }
 
         return previousImage;
+    }
+
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = super.getDebugNode();
+
+        node.addIntChild("Backup Image Width", backupRaster.getWidth());
+        node.addIntChild("Backup Image Height", backupRaster.getHeight());
+
+        return node;
     }
 }

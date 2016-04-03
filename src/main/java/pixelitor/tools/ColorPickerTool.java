@@ -21,6 +21,7 @@ import pixelitor.colors.FgBgColors;
 import pixelitor.gui.ImageComponent;
 import pixelitor.layers.ImageLayer;
 import pixelitor.utils.Messages;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -32,7 +33,8 @@ import java.awt.image.BufferedImage;
  * The color picker tool
  */
 public class ColorPickerTool extends Tool {
-    private final JCheckBox sampleLayerOnly = new JCheckBox("Sample Only the Active Layer/Mask");
+    private static final String SAMPLE_LABEL_TEXT = "Sample Only the Active Layer/Mask";
+    private final JCheckBox sampleLayerOnly = new JCheckBox(SAMPLE_LABEL_TEXT);
 
     public ColorPickerTool() {
         super('i', "Color Picker", "color_picker_tool_icon.png",
@@ -113,5 +115,14 @@ public class ColorPickerTool extends Tool {
         }
 
         Messages.showStatusMessage(msg);
+    }
+
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = super.getDebugNode();
+
+        node.addBooleanChild(SAMPLE_LABEL_TEXT, sampleLayerOnly.isSelected());
+
+        return node;
     }
 }

@@ -39,6 +39,7 @@ import pixelitor.tools.StrokeType;
 import pixelitor.tools.Tool;
 import pixelitor.tools.ToolAffectedArea;
 import pixelitor.tools.UserDrag;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.BasicStroke;
@@ -428,6 +429,19 @@ public class ShapesTool extends Tool {
      */
     public void setAction(ShapesAction action) {
         actionModel.setSelectedItem(action);
+    }
+
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = super.getDebugNode();
+
+        node.addStringChild("Type", typeModel.getSelectedItem().toString());
+        node.addStringChild("Action", actionModel.getSelectedItem().toString());
+        node.addStringChild("Fill", fillModel.getSelectedItem().toString());
+        node.addStringChild("Stroke", strokeFillModel.getSelectedItem().toString());
+        strokeParam.addDebugNodeInfo(node);
+
+        return node;
     }
 }
 

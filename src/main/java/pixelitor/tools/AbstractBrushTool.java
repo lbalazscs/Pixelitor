@@ -406,9 +406,19 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     public DebugNode getDebugNode() {
         DebugNode node = super.getDebugNode();
 
-        node.addStringChild("Brush Type", getBrushType().toString());
+        if (typeSelector != null) { // can be null, for example in Clone
+            node.addStringChild("Brush Type", getBrushType().toString());
+        }
         node.addIntChild("Radius", getRadius());
-        node.addStringChild("Symmetry", getSymmetry().toString());
+
+        node.add(brush.getDebugNode());
+
+        if (symmetryBrush != null) { // can be null, for example in Clone
+            node.addStringChild("Symmetry", getSymmetry().toString());
+            if (symmetryBrush != brush) {
+                node.add(symmetryBrush.getDebugNode());
+            }
+        }
 
         return node;
     }

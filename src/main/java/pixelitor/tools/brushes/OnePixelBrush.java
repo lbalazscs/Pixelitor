@@ -17,6 +17,8 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.utils.debug.DebugNode;
+
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_OFF;
 
@@ -49,5 +51,14 @@ public class OnePixelBrush extends AbstractBrush {
         targetG.drawLine((int) previousX, (int) previousY, (int) x, (int) y);
         updateComp(x, y);
         setPrevious(x, y);
+    }
+
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = super.getDebugNode();
+
+        node.addBooleanChild("Anti-aliasing", settings.hasAA());
+
+        return node;
     }
 }

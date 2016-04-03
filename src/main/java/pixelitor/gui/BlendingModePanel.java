@@ -62,11 +62,11 @@ public class BlendingModePanel extends JPanel {
         add(bmCombo);
     }
 
-    protected float getOpacity() {
+    public float getOpacity() {
         return opacityDDSlider.getValue() / 100.0f;
     }
 
-    protected BlendingMode getBlendingMode() {
+    public BlendingMode getBlendingMode() {
         return (BlendingMode) bmCombo.getSelectedItem();
     }
 

@@ -20,6 +20,7 @@ package pixelitor.history;
 import pixelitor.Composition;
 import pixelitor.layers.ImageLayer;
 import pixelitor.selection.IgnoreSelection;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -139,4 +140,18 @@ public class ImageEdit extends FadeableEdit {
     public boolean canRepeat() {
         return canRepeat;
     }
+
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = super.getDebugNode();
+
+        BufferedImage img = imgRef.get();
+        if (img != null) {
+            node.addIntChild("Backup Image Width", img.getWidth());
+            node.addIntChild("Backup Image Height", img.getHeight());
+        }
+
+        return node;
+    }
+
 }

@@ -33,6 +33,7 @@ import pixelitor.tools.brushes.CopyBrushType;
 import pixelitor.utils.Messages;
 import pixelitor.utils.ScalingMirror;
 import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
@@ -220,5 +221,21 @@ public class CloneTool extends BlendingModeBrushTool {
 
         setCloningSource(comp.getIC(), sourceX, sourceY);
         startNewCloningStroke(start.x, start.y, true);
+    }
+
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = super.getDebugNode();
+
+        node.addStringChild("Brush", cloneBrush.getType().toString());
+        node.addStringChild("State", state.toString());
+        node.addBooleanChild("Sample All Layers", sampleAllLayers);
+        node.addBooleanChild("Aligned", cloneBrush.isAligned());
+
+        node.addFloatChild("Scale", scaleParam.getValueAsPercentage());
+        node.addIntChild("Rotation", rotationParam.getValue());
+        node.addStringChild("Mirror", mirrorParam.getSelected().toString());
+
+        return node;
     }
 }

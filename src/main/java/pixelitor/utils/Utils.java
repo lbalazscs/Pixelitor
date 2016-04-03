@@ -226,10 +226,8 @@ public final class Utils {
     public static void copyStringToClipboard(String text) {
         Transferable stringSelection = new StringSelection(text);
 
-        Clipboard systemClipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-        systemClipboard.setContents(stringSelection, (clipboard, contents) -> {
-            //do nothing
-        });
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        clipboard.setContents(stringSelection, null);
     }
 
     public static ProgressMonitor createPercentageProgressMonitor(String message) {

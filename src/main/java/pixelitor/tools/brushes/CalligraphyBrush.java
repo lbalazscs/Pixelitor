@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -50,8 +50,8 @@ public class CalligraphyBrush extends StrokeBrush {
         // for some reasons (rounding errors previously?) these ones have to be added and subtracted
         targetG.drawLine(startX + 1, startY - 1, endX - 1, endY + 1);
 
-        if (lastStroke != null) {
-            targetG.setStroke(lastStroke);
+        if (currentStroke != null) {
+            targetG.setStroke(currentStroke);
         }
     }
 

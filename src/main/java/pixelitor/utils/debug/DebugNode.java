@@ -85,7 +85,11 @@ public class DebugNode extends DefaultMutableTreeNode {
     }
 
     public void addFloatChild(String name, float f) {
-        add(new DefaultMutableTreeNode(name + " = " + f));
+        add(new DefaultMutableTreeNode(String.format("%s = %.2f", name, f)));
+    }
+
+    public void addDoubleChild(String name, double f) {
+        add(new DefaultMutableTreeNode(String.format("%s = %.2f", name, f)));
     }
 
     public void addBooleanChild(String name, boolean b) {
@@ -93,7 +97,7 @@ public class DebugNode extends DefaultMutableTreeNode {
     }
 
     public void addClassChild() {
-        add(new DefaultMutableTreeNode("class = " + userObject.getClass().getName()));
+        add(new DefaultMutableTreeNode("Class = " + userObject.getClass().getSimpleName()));
     }
 
     private static void addIndent(StringBuilder sb, int indentLevel) {

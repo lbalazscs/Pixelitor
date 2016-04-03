@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -16,6 +16,8 @@
  */
 
 package pixelitor.tools.brushes;
+
+import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -115,5 +117,27 @@ public class CloneBrush extends CopyBrush {
 
     public void setRotate(double rotate) {
         this.rotate = rotate;
+    }
+
+    public boolean isAligned() {
+        return aligned;
+    }
+
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = super.getDebugNode();
+
+        node.addDoubleChild("srcX", srcX);
+        node.addDoubleChild("srcY", srcY);
+        node.addDoubleChild("dx", dx);
+        node.addDoubleChild("dy", dy);
+        node.addDoubleChild("scaleX", scaleX);
+        node.addDoubleChild("scaleY", scaleY);
+        node.addDoubleChild("rotate", rotate);
+
+        node.addBooleanChild("aligned", aligned);
+        node.addBooleanChild("firstCloningStart", firstCloningStart);
+
+        return node;
     }
 }

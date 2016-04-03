@@ -18,6 +18,7 @@
 package pixelitor.tools;
 
 import pixelitor.gui.BlendingModePanel;
+import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Composite;
 import java.awt.Cursor;
@@ -52,5 +53,15 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
     protected void addBlendingModePanel() {
         blendingModePanel = new BlendingModePanel(true);
         settingsPanel.add(blendingModePanel);
+    }
+
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = super.getDebugNode();
+
+        node.addFloatChild("Opacity", blendingModePanel.getOpacity());
+        node.addQuotedStringChild("Blending Mode", blendingModePanel.getBlendingMode().toString());
+
+        return node;
     }
 }

@@ -18,6 +18,7 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.colors.FgBgColors;
+import pixelitor.utils.debug.DebugNode;
 
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
@@ -100,5 +101,17 @@ public class SmudgeBrush extends CopyBrush {
 
     public void setFingerPainting(boolean fingerPainting) {
         this.fingerPainting = fingerPainting;
+    }
+
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = super.getDebugNode();
+
+        node.addDoubleChild("lastX", lastX);
+        node.addDoubleChild("lastY", lastY);
+        node.addFloatChild("strength", strength);
+        node.addBooleanChild("firstUsageInStroke", firstUsageInStroke);
+
+        return node;
     }
 }

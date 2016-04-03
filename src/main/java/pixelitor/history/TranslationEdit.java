@@ -20,6 +20,7 @@ package pixelitor.history;
 import pixelitor.Composition;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.LayerMask;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -106,5 +107,15 @@ public class TranslationEdit extends PixelitorEdit {
         if (maskEdit != null) {
             maskEdit.die();
         }
+    }
+
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = super.getDebugNode();
+
+        node.addIntChild("Backup TX", backupTX);
+        node.addIntChild("Backup TY", backupTY);
+
+        return node;
     }
 }

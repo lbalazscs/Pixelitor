@@ -104,15 +104,15 @@ public final class GUIUtils {
         return false;
     }
 
-    public static void showTextDialog(JComponent form, String title, String text) {
-        OKCancelDialog d = new OKCancelDialog(form, PixelitorWindow.getInstance(), title,
-                "Copy as Text to the Clipboard", "Close") {
-            @Override
-            protected void dialogAccepted() {   // "Copy as Text to Clipboard"
-                Utils.copyStringToClipboard(text);
-            }
-        };
-        d.setVisible(true);
+    public static void showClipboardTextDialog(JComponent form, String title, String text) {
+        new DialogBuilder()
+                .okText("Copy as Text to the Clipboard")
+                .cancelText("Close")
+                .okAction(() -> Utils.copyStringToClipboard(text))
+                .title(title)
+                .form(form)
+                .parent(PixelitorWindow.getInstance())
+                .show();
     }
 
     public static JPanel arrangeParamsInVerticalGridBag(Iterable<FilterParam> params) {

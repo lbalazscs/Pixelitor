@@ -132,6 +132,8 @@ public class DialogBuilder {
     }
 
     public JDialog show() {
+        assert form != null : "no form";
+
         setupDefaults();
 
         JDialog d;

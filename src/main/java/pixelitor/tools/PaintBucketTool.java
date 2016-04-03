@@ -25,6 +25,7 @@ import pixelitor.gui.ImageComponent;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.layers.ImageLayer;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.AlphaComposite;
@@ -66,8 +67,12 @@ public class PaintBucketTool extends Tool {
     }
 
     private Color getFillColor() {
-        FillType fillType = (FillType) fillComboBox.getSelectedItem();
+        FillType fillType = getFillType();
         return fillType.getColor();
+    }
+
+    private FillType getFillType() {
+        return (FillType) fillComboBox.getSelectedItem();
     }
 
     @Override
@@ -263,5 +268,15 @@ public class PaintBucketTool extends Tool {
         return (r2 <= r1 + tolerance) && (r2 >= r1 - tolerance) &&
                 (g2 <= g1 + tolerance) && (g2 >= g1 - tolerance) &&
                 (b2 <= b1 + tolerance) && (b2 >= b1 - tolerance);
+    }
+
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = super.getDebugNode();
+
+        node.addIntChild("Tolerance", toleranceParam.getValue());
+        node.addQuotedStringChild("Fill With", getFillType().toString());
+
+        return node;
     }
 }

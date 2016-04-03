@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.tools.brushes;
 
 import pixelitor.Composition;
 import pixelitor.tools.AbstractBrushTool;
+import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Graphics2D;
 
@@ -37,8 +38,6 @@ public abstract class AbstractBrush implements Brush {
 
     @Override
     public void setRadius(int radius) {
-//        System.out.println("AbstractBrush::setRadius: radius = " + radius
-//                + ", class = " + this.getClass().getName());
         this.radius = radius;
         this.diameter = 2 * radius;
     }
@@ -62,5 +61,16 @@ public abstract class AbstractBrush implements Brush {
 
     public int getRadius() {
         return radius;
+    }
+
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = new DebugNode("Brush", this);
+        node.addClassChild();
+        node.addIntChild("Radius", radius);
+        node.addDoubleChild("PreviousX", previousX);
+        node.addDoubleChild("PreviousY", previousY);
+
+        return node;
     }
 }

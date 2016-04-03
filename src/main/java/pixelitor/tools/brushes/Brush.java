@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.Composition;
+import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Graphics2D;
 
@@ -52,4 +53,6 @@ public interface Brush {
     void onNewMousePoint(double x, double y);
 
     default void dispose() {}
+
+    DebugNode getDebugNode();
 }

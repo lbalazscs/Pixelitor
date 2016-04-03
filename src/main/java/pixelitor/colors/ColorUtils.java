@@ -21,12 +21,12 @@ import com.bric.swing.ColorPicker;
 import com.jhlabs.image.ImageMath;
 import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.utils.Utils;
 
 import java.awt.Color;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.util.Random;
@@ -244,9 +244,8 @@ public class ColorUtils {
 
     public static void copyColorToClipboard(Color c) {
         String htmlHexString = String.format("%06X", (0xFFFFFF & c.getRGB()));
-        StringSelection stringSelection = new StringSelection(htmlHexString);
-        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-        clipboard.setContents(stringSelection, null);
+
+        Utils.copyStringToClipboard(htmlHexString);
     }
 
     public static Color getColorFromClipboard() {

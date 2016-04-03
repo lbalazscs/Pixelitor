@@ -102,6 +102,7 @@ import pixelitor.utils.test.SplashImageCreator;
 import pixelitor.utils.test.ToolTests;
 
 import javax.swing.*;
+import java.awt.BorderLayout;
 import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
@@ -1081,13 +1082,6 @@ public class MenuBar extends JMenuBar {
         developMenu.add(createSplashSubmenu());
         developMenu.add(createExperimentalSubmenu());
 
-        developMenu.buildAction(new MenuAction("Show Pixelitor Internal State...") {
-            @Override
-            public void onClick() {
-                Messages.showDebugAppDialog();
-            }
-        }).alwaysEnabled().add();
-
         developMenu.buildAction(new MenuAction("Filter Creator...") {
             @Override
             public void onClick() {
@@ -1407,16 +1401,25 @@ public class MenuBar extends JMenuBar {
 
         helpMenu.addSeparator();
 
-        helpMenu.add(new MenuAction("Report a Bug...") {
+        helpMenu.add(new MenuAction("Internal State...") {
             @Override
             public void onClick() {
                 AppNode node = new AppNode();
-                String title = "Pixelitor Internal State";
+                String title = "Internal State";
 
                 JTree tree = new JTree(node);
+
+                JLabel explainLabel = new JLabel("<html>If you are reporting a bug that cannot be reproduced," +
+                        "<br>please include the following information:");
+                explainLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+                JPanel form = new JPanel(new BorderLayout());
+                form.add(explainLabel, BorderLayout.NORTH);
+                form.add(new JScrollPane(tree), BorderLayout.CENTER);
+
                 String text = node.toDetailedString();
 
-                GUIUtils.showTextDialog(tree, title, text);
+                GUIUtils.showClipboardTextDialog(form, title, text);
             }
         });
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -16,6 +16,8 @@
  */
 
 package pixelitor.tools.brushes;
+
+import pixelitor.utils.debug.DebugNode;
 
 /**
  * A brush that works by putting down dabs
@@ -79,5 +81,20 @@ public abstract class DabsBrush extends AbstractBrush {
     @Override
     public void dispose() {
         settings.unregisterBrush(this);
+    }
+
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = super.getDebugNode();
+
+        node.addBooleanChild("Angle Aware", settings.isAngleAware());
+
+        AngleSettings angleSettings = settings.getAngleSettings();
+        node.addBooleanChild("Jitter Aware", angleSettings.shouldJitterAngle());
+
+        SpacingStrategy spacingStrategy = settings.getSpacingStrategy();
+        node.addDoubleChild("Spacing", spacingStrategy.getSpacing(radius));
+
+        return node;
     }
 }

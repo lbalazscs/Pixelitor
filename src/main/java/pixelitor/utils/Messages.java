@@ -18,10 +18,7 @@
 package pixelitor.utils;
 
 import pixelitor.MessageHandler;
-import pixelitor.gui.utils.GUIUtils;
-import pixelitor.utils.debug.AppNode;
 
-import javax.swing.*;
 import java.io.File;
 
 public class Messages {
@@ -48,16 +45,6 @@ public class Messages {
 
     public static void showException(Throwable e, Thread t) {
         messageHandler.showException(e, t);
-    }
-
-    public static void showDebugAppDialog() {
-        AppNode node = new AppNode();
-        String title = "Pixelitor Internal State";
-
-        JTree tree = new JTree(node);
-        String text = node.toDetailedString();
-
-        GUIUtils.showTextDialog(tree, title, text);
     }
 
     public static void showFileSavedMessage(File file) {

@@ -18,6 +18,7 @@
 package pixelitor.history;
 
 import pixelitor.Composition;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -84,5 +85,15 @@ public class LinkedEdit extends PixelitorEdit {
     @Override
     public boolean canRepeat() {
         return first.canRepeat() && second.canRepeat();
+    }
+
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = super.getDebugNode();
+
+        node.add(first.getDebugNode());
+        node.add(second.getDebugNode());
+
+        return node;
     }
 }

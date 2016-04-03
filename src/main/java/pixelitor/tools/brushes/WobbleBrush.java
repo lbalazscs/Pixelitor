@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,9 +38,9 @@ public class WobbleBrush extends StrokeBrush {
         float smallThickness = diameter / SIZE_DIVIDING_FACTOR;
 
         if(diameter != lastDiameter) {
-            lastStroke = new WobbleStroke(0.5f, smallThickness, smallThickness);
+            currentStroke = new WobbleStroke(0.5f, smallThickness, smallThickness);
         }
-        targetG.setStroke(lastStroke);
+        targetG.setStroke(currentStroke);
 
         Shape circle = new Ellipse2D.Double(x, y, 0.1, 0.1);
         targetG.draw(circle);

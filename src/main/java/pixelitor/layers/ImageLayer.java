@@ -743,7 +743,7 @@ public class ImageLayer extends ContentLayer {
         }
 
         if (copyAndTranslateIfSelected) {
-            return ImageUtils.copyAndTranslateSubimage(src, bounds);
+            return ImageUtils.getCopiedSubimage(src, bounds);
         } else {
             BufferedImage retVal = src.getSubimage(bounds.x, bounds.y, bounds.width, bounds.height);
             return retVal;

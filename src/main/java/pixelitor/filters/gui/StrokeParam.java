@@ -25,6 +25,7 @@ import pixelitor.tools.StrokeType;
 import pixelitor.tools.shapestool.BasicStrokeCap;
 import pixelitor.tools.shapestool.BasicStrokeJoin;
 import pixelitor.tools.shapestool.StrokeSettingsPanel;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.Rectangle;
@@ -198,5 +199,18 @@ public class StrokeParam extends AbstractFilterParam {
         if (defaultButton != null) {
             defaultButton.updateState();
         }
+    }
+
+    public void addDebugNodeInfo(DebugNode node) {
+        DebugNode strokeNode = new DebugNode("Stroke Settings", this);
+
+        strokeNode.addIntChild("Stroke Width", strokeWidthParam.getValue());
+        strokeNode.addStringChild("Stroke Cap", strokeCapParam.getSelected().toString());
+        strokeNode.addStringChild("Stroke Join", strokeJoinParam.getSelected().toString());
+        strokeNode.addStringChild("Stroke Type", strokeTypeParam.getSelected().toString());
+        strokeNode.addStringChild("Shape Type", shapeTypeParam.getSelected().toString());
+        strokeNode.addBooleanChild("Dashed", dashedParam.isChecked());
+
+        node.add(strokeNode);
     }
 }

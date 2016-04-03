@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.tools.StrokeType;
+import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Stroke;
 
@@ -32,8 +33,8 @@ public abstract class StrokeBrush extends AbstractBrush {
     private final int cap;
     private final int join;
 
-    int lastDiameter = -1;
-    Stroke lastStroke;
+    protected int lastDiameter = -1;
+    protected Stroke currentStroke;
 
     protected StrokeBrush(int radius, StrokeType strokeType) {
         this(radius, strokeType, CAP_ROUND, JOIN_ROUND);
@@ -65,12 +66,21 @@ public abstract class StrokeBrush extends AbstractBrush {
     protected void drawLine(double startX, double startY, double endX, double endY) {
         int thickness = 2*radius;
         if(thickness != lastDiameter) {
-            lastStroke = strokeType.getStroke(thickness, cap, join, null);
+            currentStroke = strokeType.getStroke(thickness, cap, join, null);
             lastDiameter = thickness;
         }
 
-        targetG.setStroke(lastStroke);
+        targetG.setStroke(currentStroke);
 
         targetG.drawLine((int) startX, (int) startY, (int) endX, (int) endY);
+    }
+
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = super.getDebugNode();
+
+        node.addStringChild("Stroke Type", strokeType.toString());
+
+        return node;
     }
 }

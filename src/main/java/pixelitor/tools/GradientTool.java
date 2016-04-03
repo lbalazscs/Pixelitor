@@ -25,6 +25,7 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.layers.LayerMask;
 import pixelitor.layers.TmpDrawingLayer;
 import pixelitor.menus.view.ZoomLevel;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -110,9 +111,9 @@ public class GradientTool extends Tool {
 
             saveFullImageForUndo(comp);
             drawGradient(comp.getActiveMaskOrImageLayer(),
-                    (GradientType) typeSelector.getSelectedItem(),
-                    (GradientColorType) colorTypeSelector.getSelectedItem(),
-                    getCycleMethodFromString((String) cycleMethodSelector.getSelectedItem()),
+                    getType(),
+                    getGradientColorType(),
+                    getCycleType(),
                     blendingModePanel.getComposite(),
                     userDrag,
                     invertCheckBox.isSelected()
@@ -121,6 +122,18 @@ public class GradientTool extends Tool {
             thereWasDragging = false;
             comp.imageChanged(FULL);
         }
+    }
+
+    private MultipleGradientPaint.CycleMethod getCycleType() {
+        return getCycleMethodFromString((String) cycleMethodSelector.getSelectedItem());
+    }
+
+    private GradientColorType getGradientColorType() {
+        return (GradientColorType) colorTypeSelector.getSelectedItem();
+    }
+
+    private GradientType getType() {
+        return (GradientType) typeSelector.getSelectedItem();
     }
 
     @Override
@@ -206,5 +219,19 @@ public class GradientTool extends Tool {
         } else {
             blendingModePanel.setEnabled(true);
         }
+    }
+
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = super.getDebugNode();
+
+        node.addStringChild("Type", getType().toString());
+        node.addStringChild("Cycling", getCycleType().toString());
+        node.addQuotedStringChild("Color", getGradientColorType().toString());
+        node.addBooleanChild("Invert", invertCheckBox.isSelected());
+        node.addFloatChild("Opacity", blendingModePanel.getOpacity());
+        node.addQuotedStringChild("Blending Mode", blendingModePanel.getBlendingMode().toString());
+
+        return node;
     }
 }

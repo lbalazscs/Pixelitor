@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.utils.Utils;
+import pixelitor.utils.debug.DebugNode;
 
 import java.awt.image.BufferedImage;
 
@@ -60,5 +61,18 @@ public abstract class CopyBrush extends DabsBrush {
 
     public static void setDebugBrushImage(boolean debugBrushImage) {
         CopyBrush.debugBrushImage = debugBrushImage;
+    }
+
+    public CopyBrushType getType() {
+        return type;
+    }
+
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = super.getDebugNode();
+
+        node.addStringChild("Type", type.toString());
+
+        return node;
     }
 }

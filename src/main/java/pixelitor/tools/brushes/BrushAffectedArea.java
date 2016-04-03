@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2016 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.Composition;
+import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -102,4 +103,21 @@ public class BrushAffectedArea implements Brush {
         delegate.onNewMousePoint(x, y);
     }
 
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = new DebugNode("Brush Affected Area", this);
+
+        node.addDoubleChild("minX", minX);
+        node.addDoubleChild("minY", minY);
+        node.addDoubleChild("maxX", maxX);
+        node.addDoubleChild("maxY", maxY);
+
+        if (delegate != null) {
+            node.add(delegate.getDebugNode());
+        } else {
+            node.addStringChild("delegate", "null");
+        }
+
+        return node;
+    }
 }

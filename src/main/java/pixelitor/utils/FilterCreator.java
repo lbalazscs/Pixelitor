@@ -147,7 +147,7 @@ public class FilterCreator extends JPanel {
                 JTextArea ta = new JTextArea(s);
                 JScrollPane sp = new JScrollPane(ta);
                 sp.setPreferredSize(new Dimension(sp.getPreferredSize().width + 50, 500));
-                GUIUtils.showTextDialog(sp, "Source", s);
+                GUIUtils.showClipboardTextDialog(sp, "Source", s);
             }
         };
         d.setVisible(true);

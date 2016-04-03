@@ -22,7 +22,6 @@ import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.history.History;
-import pixelitor.io.FileChoosers;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 
@@ -37,15 +36,15 @@ public class AppNode extends DebugNode {
     public AppNode() {
         super("Pixelitor", PixelitorWindow.getInstance());
 
+        addStringChild("Pixelitor Version", Build.VERSION_NUMBER);
         addSystemNode();
         addActiveToolNode();
         addHistoryNode();
 
         addImageNodes();
 
-        addStringChild("Pixelitor Version", Build.VERSION_NUMBER);
-        addQuotedStringChild("Opening Folder", FileChoosers.getLastOpenDir().getAbsolutePath());
-        addQuotedStringChild("Saving Folder", FileChoosers.getLastSaveDir().getAbsolutePath());
+//        addQuotedStringChild("Opening Folder", FileChoosers.getLastOpenDir().getAbsolutePath());
+//        addQuotedStringChild("Saving Folder", FileChoosers.getLastSaveDir().getAbsolutePath());
 
         addBooleanChild("Can Undo", History.canUndo());
         addBooleanChild("Can Redo", History.canRedo());

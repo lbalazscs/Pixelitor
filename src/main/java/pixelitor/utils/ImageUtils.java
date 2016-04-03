@@ -649,12 +649,9 @@ public class ImageUtils {
     /**
      * In contrast to BufferedImage.getSubimage, this method creates a copy of the data
      */
-    public static BufferedImage copyAndTranslateSubimage(BufferedImage src, Rectangle bounds) {
+    public static BufferedImage getCopiedSubimage(BufferedImage src, Rectangle bounds) {
         assert src != null;
         assert bounds != null;
-
-//        Rectangle imageBounds = new Rectangle(0, 0, src.getWidth(), src.getHeight());
-//        Rectangle intersection = bounds.intersection(imageBounds);
 
         Rectangle intersection = SwingUtilities.computeIntersection(
                 0, 0, src.getWidth(), src.getHeight(), // image bounds

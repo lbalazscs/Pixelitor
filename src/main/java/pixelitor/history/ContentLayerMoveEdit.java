@@ -20,6 +20,7 @@ package pixelitor.history;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.selection.IgnoreSelection;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -92,5 +93,14 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
             imageEdit.die();
         }
         layer = null;
+    }
+
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = super.getDebugNode();
+
+        node.add(translationEdit.getDebugNode());
+
+        return node;
     }
 }

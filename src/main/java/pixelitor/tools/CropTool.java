@@ -27,6 +27,7 @@ import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.transform.TransformSupport;
 import pixelitor.utils.ImageSwitchListener;
 import pixelitor.utils.Messages;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.AlphaComposite;
@@ -312,5 +313,16 @@ public class CropTool extends Tool implements ImageSwitchListener {
     @Override
     public void escPressed() {
         state.cancel(this);
+    }
+
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = super.getDebugNode();
+
+        node.addFloatChild("Mask Opacity", maskOpacity.getValueAsPercentage());
+        node.addBooleanChild("Allow Growing", allowGrowingCB.isSelected());
+        node.addStringChild("State", state.toString());
+
+        return node;
     }
 }
