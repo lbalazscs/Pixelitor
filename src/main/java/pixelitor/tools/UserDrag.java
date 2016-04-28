@@ -46,7 +46,7 @@ public class UserDrag {
     public UserDrag() {
     }
 
-    public UserDrag(int startX, int startY, int endX, int endY) {
+    public UserDrag(double startX, double startY, double endX, double endY) {
         this.startX = startX;
         this.startY = startY;
         this.endX = endX;

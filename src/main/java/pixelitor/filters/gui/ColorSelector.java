@@ -19,18 +19,12 @@ package pixelitor.filters.gui;
 
 import com.bric.swing.ColorPicker;
 import com.bric.swing.ColorSwatch;
-import pixelitor.colors.ColorHistory;
 import pixelitor.colors.ColorUtils;
-import pixelitor.colors.palette.ColorSwatchClickHandler;
-import pixelitor.colors.palette.VariationsPanel;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.utils.Dialogs;
-import pixelitor.menus.MenuAction;
 
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.FlowLayout;
-import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -68,49 +62,8 @@ public class ColorSelector extends JPanel implements ParamGUI {
             }
         });
 
-        JPopupMenu popup = new JPopupMenu();
-
-        ColorSwatchClickHandler clickHandler = (newColor, e) -> updateColor(newColor);
-
-        popup.add(new MenuAction("Color Variations...") {
-            @Override
-            public void onClick() {
-                Window window = SwingUtilities.windowForComponent(ColorSelector.this);
-                VariationsPanel.showFilterVariationsDialog(window, model.getColor(), clickHandler);
-            }
-        });
-
-        popup.add(new MenuAction("Filter Color History...") {
-            @Override
-            public void onClick() {
-                Window window = SwingUtilities.windowForComponent(ColorSelector.this);
-                ColorHistory.FILTER.showDialog(window, clickHandler);
-            }
-        });
-
-        popup.addSeparator();
-
-        popup.add(new MenuAction("Copy Color") {
-            @Override
-            public void onClick() {
-                ColorUtils.copyColorToClipboard(model.getColor());
-            }
-        });
-
-        popup.add(new MenuAction("Paste Color") {
-            @Override
-            public void onClick() {
-                Color color = ColorUtils.getColorFromClipboard();
-                if (color == null) {
-                    Window window = SwingUtilities.windowForComponent(ColorSelector.this);
-                    Dialogs.showNotAColorOnClipboardDialog(window);
-                } else {
-                    updateColor(color);
-                }
-            }
-        });
-
-        colorSwatch.setComponentPopupMenu(popup);
+        ColorUtils.setupFilterColorsPopupMenu(this, colorSwatch,
+                model::getColor, this::updateColor);
     }
 
     private void showColorDialog() {

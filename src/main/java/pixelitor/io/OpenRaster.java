@@ -104,7 +104,7 @@ public class OpenRaster {
                 layer.getOpacity(),
                 layerIndex,
                 imageLayer.getTX(),
-                imageLayer.getTX());
+                imageLayer.getTY());
         ZipEntry entry = new ZipEntry(String.format("data/%d.png", layerIndex));
         zos.putNextEntry(entry);
         BufferedImage image = imageLayer.getImage();

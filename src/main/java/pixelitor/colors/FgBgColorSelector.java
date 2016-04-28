@@ -21,7 +21,6 @@ import pixelitor.colors.palette.ColorSwatchClickHandler;
 import pixelitor.colors.palette.VariationsPanel;
 import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.utils.Dialogs;
 import pixelitor.menus.MenuAction;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.test.RandomGUITest;
@@ -147,27 +146,13 @@ public class FgBgColorSelector extends JLayeredPane {
 
         menu.addSeparator();
 
-        menu.add(new MenuAction("Copy Color") {
-            @Override
-            public void onClick() {
-                Color copiedColor = fg ? getFgColor() : getBgColor();
-                ColorUtils.copyColorToClipboard(copiedColor);
-            }
-        });
+        ColorUtils.setupCopyColorPopupMenu(menu, () -> fg ? getFgColor() : getBgColor());
 
-        menu.add(new MenuAction("Paste Color") {
-            @Override
-            public void onClick() {
-                Color color = ColorUtils.getColorFromClipboard();
-                if (color == null) {
-                    Dialogs.showNotAColorOnClipboardDialog(pw);
-                } else {
-                    if (fg) {
-                        setFgColor(color);
-                    } else {
-                        setBgColor(color);
-                    }
-                }
+        ColorUtils.setupPasteColorPopupMenu(menu, pw, color -> {
+            if (fg) {
+                setFgColor(color);
+            } else {
+                setBgColor(color);
             }
         });
 

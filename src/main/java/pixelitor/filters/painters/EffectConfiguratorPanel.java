@@ -20,6 +20,7 @@ package pixelitor.filters.painters;
 import com.bric.swing.ColorPicker;
 import com.bric.swing.ColorSwatch;
 import org.jdesktop.swingx.painter.effects.AbstractAreaEffect;
+import pixelitor.colors.ColorUtils;
 import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.DefaultButton;
 import pixelitor.filters.gui.ParamAdjustmentListener;
@@ -77,9 +78,14 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
         colorSwatch.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                changeColor();
+                if (!e.isPopupTrigger()) {
+                    showColorDialog();
+                }
             }
         });
+
+        ColorUtils.setupFilterColorsPopupMenu(this, colorSwatch,
+                this::getColor, c -> setColor(c, true));
 
         setLayout(new GridBagLayout());
 
@@ -89,7 +95,7 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
         gbHelper.addLabelWithControlNoFill("Opacity:", opacitySlider);
     }
 
-    private void changeColor() {
+    private void showColorDialog() {
         Color selectedColor = ColorPicker.showDialog(PixelitorWindow.getInstance(), "Select Color", color, true);
         if (selectedColor != null) { // ok was pressed
             setColor(selectedColor, true);

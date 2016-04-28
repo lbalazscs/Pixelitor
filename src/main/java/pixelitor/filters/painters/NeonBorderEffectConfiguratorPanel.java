@@ -19,6 +19,7 @@ package pixelitor.filters.painters;
 
 import com.bric.swing.ColorPicker;
 import com.bric.swing.ColorSwatch;
+import pixelitor.colors.ColorUtils;
 import pixelitor.gui.PixelitorWindow;
 
 import java.awt.Color;
@@ -43,12 +44,17 @@ public class NeonBorderEffectConfiguratorPanel extends SimpleEffectConfiguratorP
         innerColorSwatch.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                Color selectedColor = ColorPicker.showDialog(PixelitorWindow.getInstance(), "Select Color", NeonBorderEffectConfiguratorPanel.this.innerColor, true);
-                if (selectedColor != null) { // ok was pressed
-                    setNewInnerColor(selectedColor, true);
+                if (!e.isPopupTrigger()) {
+                    Color selectedColor = ColorPicker.showDialog(PixelitorWindow.getInstance(), "Select Color", NeonBorderEffectConfiguratorPanel.this.innerColor, true);
+                    if (selectedColor != null) { // ok was pressed
+                        setNewInnerColor(selectedColor, true);
+                    }
                 }
             }
         });
+
+        ColorUtils.setupFilterColorsPopupMenu(this, innerColorSwatch,
+                this::getInnerColor, c -> setNewInnerColor(c, true));
 
         gbHelper.addLabelWithControl("Inner Color:", innerColorSwatch);
     }

@@ -33,6 +33,8 @@ public class ColorHistory {
     public static final ColorHistory BACKGROUND = new ColorHistory("Background Color History");
     public static final ColorHistory FILTER = new ColorHistory("Filter Color History");
 
+    private static final int MAX_SIZE = 200;
+
     private final List<Color> colors;
     private final String dialogTitle;
 
@@ -43,6 +45,9 @@ public class ColorHistory {
 
     public void add(Color c) {
         colors.add(c);
+        if (colors.size() > MAX_SIZE) {
+            colors.remove(0);
+        }
     }
 
     public void showDialog(Window window, ColorSwatchClickHandler clickHandler) {

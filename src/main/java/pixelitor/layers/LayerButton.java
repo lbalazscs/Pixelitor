@@ -333,7 +333,7 @@ public class LayerButton extends JToggleButton {
             @Override
             public void mouseClicked(MouseEvent e) {
                 boolean altClick = e.isAltDown();
-                boolean shiftClick = e.isAltDown();
+                boolean shiftClick = e.isShiftDown();
                 if (altClick && shiftClick) {
                     // shift-alt-click switches to RUBYLITH except when
                     // it is already RUBYLITH

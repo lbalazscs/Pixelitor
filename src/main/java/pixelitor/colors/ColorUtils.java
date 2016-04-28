@@ -18,18 +18,27 @@
 package pixelitor.colors;
 
 import com.bric.swing.ColorPicker;
+import com.bric.swing.ColorSwatch;
 import com.jhlabs.image.ImageMath;
+import pixelitor.colors.palette.ColorSwatchClickHandler;
+import pixelitor.colors.palette.VariationsPanel;
 import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.Dialogs;
+import pixelitor.menus.MenuAction;
 import pixelitor.utils.Utils;
 
+import javax.swing.*;
 import java.awt.Color;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.util.Random;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Color-related static utility methods.
@@ -282,5 +291,61 @@ public class ColorUtils {
         }
 
         return null;
+    }
+
+    public static void setupFilterColorsPopupMenu(JComponent parent, ColorSwatch swatch,
+                                                  Supplier<Color> colorSupplier,
+                                                  Consumer<Color> colorSetter) {
+        JPopupMenu popup = new JPopupMenu();
+
+        ColorSwatchClickHandler clickHandler = (newColor, e) -> colorSetter.accept(newColor);
+
+        popup.add(new MenuAction("Color Variations...") {
+            @Override
+            public void onClick() {
+                Window window = SwingUtilities.windowForComponent(parent);
+                VariationsPanel.showFilterVariationsDialog(window, colorSupplier.get(), clickHandler);
+            }
+        });
+
+        popup.add(new MenuAction("Filter Color History...") {
+            @Override
+            public void onClick() {
+                Window window = SwingUtilities.windowForComponent(parent);
+                ColorHistory.FILTER.showDialog(window, clickHandler);
+            }
+        });
+
+        popup.addSeparator();
+
+        setupCopyColorPopupMenu(popup, colorSupplier);
+
+        Window window = SwingUtilities.windowForComponent(parent);
+        setupPasteColorPopupMenu(popup, window, colorSetter);
+
+        swatch.setComponentPopupMenu(popup);
+    }
+
+    public static void setupCopyColorPopupMenu(JPopupMenu popup, Supplier<Color> colorSupplier) {
+        popup.add(new MenuAction("Copy Color") {
+            @Override
+            public void onClick() {
+                ColorUtils.copyColorToClipboard(colorSupplier.get());
+            }
+        });
+    }
+
+    public static void setupPasteColorPopupMenu(JPopupMenu popup, Window window, Consumer<Color> colorSetter) {
+        popup.add(new MenuAction("Paste Color") {
+            @Override
+            public void onClick() {
+                Color color = ColorUtils.getColorFromClipboard();
+                if (color == null) {
+                    Dialogs.showNotAColorOnClipboardDialog(window);
+                } else {
+                    colorSetter.accept(color);
+                }
+            }
+        });
     }
 }

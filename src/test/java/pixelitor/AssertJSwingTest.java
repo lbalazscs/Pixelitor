@@ -95,11 +95,11 @@ public class AssertJSwingTest {
 
     private FrameFixture pw;
     private final Random random = new Random();
-    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss");
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss");
 
-    enum Randomize {YES, NO}
+    private enum Randomize {YES, NO}
 
-    enum Reseed {YES, NO}
+    private enum Reseed {YES, NO}
 
     enum TestingMode {
         SIMPLE(MaskViewMode.NORMAL),
@@ -123,7 +123,7 @@ public class AssertJSwingTest {
 
     // TODO for some reason, assertj-swing sees this dialog
     // only the first time it is shown, this flag is a workaround
-    boolean stokeSettingsSetup = false;
+    private boolean stokeSettingsSetup = false;
 
     public static void main(String[] args) {
         long startMillis = System.currentTimeMillis();
@@ -137,7 +137,7 @@ public class AssertJSwingTest {
         if (testOneMethodSlowly) {
             test.robot.settings().delayBetweenEvents(ROBOT_DELAY_MILLIS_SLOW);
 
-            test.testMaskFromColorRange();
+            test.testColors();
 
         } else {
             TestingMode[] testingModes = getTestingModes();
@@ -229,6 +229,9 @@ public class AssertJSwingTest {
             case "edit":
                 testEditMenu();
                 break;
+            case "image":
+                testImageMenu();
+                break;
             case "filters":
                 testFilters();
                 break;
@@ -241,6 +244,7 @@ public class AssertJSwingTest {
             case "rest":
                 testViewMenu();
                 testHelpMenu();
+                testColors();
                 break;
             default:
                 throw new IllegalStateException("Unknown target " + target);
@@ -257,11 +261,13 @@ public class AssertJSwingTest {
 
         testAutoPaint();
         testEditMenu();
+        testImageMenu();
         testFilters();
-        testViewMenu();
 
         if (testingMode == SIMPLE) {
+            testViewMenu();
             testHelpMenu();
+            testColors();
         }
 
         testLayers();
@@ -542,11 +548,33 @@ public class AssertJSwingTest {
         findButtonByText(dialog, "Close").click();
     }
 
+    private void testColors() {
+        testColorPalette("Foreground...", "Foreground Color Variations");
+        testColorPalette("Background...", "Background Color Variations");
+
+        testColorPalette("HSB Mix Foreground with Background...", "HSB Mix with Background");
+        testColorPalette("RGB Mix Foreground with Background...", "RGB Mix with Background");
+        testColorPalette("HSB Mix Background with Foreground...", "HSB Mix with Foreground");
+        testColorPalette("RGB Mix Background with Foreground...", "RGB Mix with Foreground");
+
+        testColorPalette("Color Palette...", "Color Palette");
+    }
+
+    private void testColorPalette(String menuName, String dialogTitle) {
+        runMenuCommand(menuName);
+        DialogFixture dialog = findDialogByTitle(dialogTitle);
+        if (dialogTitle.contains("Foreground")) {
+            dialog.resizeTo(new Dimension(500, 500));
+        } else {
+            dialog.resizeTo(new Dimension(700, 500));
+        }
+        dialog.close();
+    }
+
     private void testCheckForUpdate() {
         findMenuItemByText("Check for Update...").click();
         try {
-            JOptionPaneFixture optionPane = findJOptionPane();
-            optionPane.buttonWithText("Close").click();
+            findJOptionPane().buttonWithText("Close").click();
         } catch (org.assertj.swing.exception.ComponentLookupException e) {
             // can happen if the current version is the same as the latest
             findJOptionPane().okButton().click();
@@ -589,8 +617,6 @@ public class AssertJSwingTest {
 
         testCopyPaste();
 
-        testMultiLayerEdits();
-
         testPreferences();
     }
 
@@ -615,14 +641,24 @@ public class AssertJSwingTest {
         d.button("ok").click();
     }
 
-    private void testMultiLayerEdits() {
-        // crop is also a multilayer edit, but it is tested with the crop tool
+    private void testImageMenu() {
+        testDuplicateImage();
+
+        // crop is tested with the crop tool
 
         runWithSelectionAndTranslation(() -> {
             testResize();
             testEnlargeCanvas();
             testRotateFlip();
         });
+    }
+
+    private void testDuplicateImage() {
+        checkNumOpenImagesIs(1);
+        runMenuCommand("Duplicate");
+        checkNumOpenImagesIs(2);
+        closeOneOfTwo();
+        checkNumOpenImagesIs(1);
     }
 
     private void testResize() {
@@ -690,9 +726,9 @@ public class AssertJSwingTest {
     private void testFileMenu() {
         testNewImage();
         testSaveUnnamed();
-        testClose();
+        closeOneOfTwo();
         testFileOpen();
-        testClose();
+        closeOneOfTwo();
         testExportOptimizedJPEG();
         testExportOpenRaster();
         testExportLayerAnimation();
@@ -792,8 +828,8 @@ public class AssertJSwingTest {
         waitForProgressMonitorEnd();
     }
 
-    private void testClose() {
-        assertThat(ImageComponents.getNrOfOpenImages()).isEqualTo(2);
+    private void closeOneOfTwo() {
+        checkNumOpenImagesIs(2);
         boolean dirty = ImageComponents.getActiveCompOrNull().isDirty();
 
         runMenuCommand("Close");
@@ -805,7 +841,7 @@ public class AssertJSwingTest {
             optionPane.button(matcher).click();
         }
 
-        assertThat(ImageComponents.getNrOfOpenImages()).isEqualTo(1);
+        checkNumOpenImagesIs(1);
     }
 
     private void testCloseAll() {
@@ -1409,6 +1445,7 @@ public class AssertJSwingTest {
         pw.toggleButton("Selection Tool Button").click();
         randomAltClick();
 
+        // TODO test poly selection
         testWithSimpleSelection();
         testWithTwoEclipseSelections();
     }
@@ -2060,7 +2097,11 @@ public class AssertJSwingTest {
             }
         }
 
-        assertThat(ImageComponents.getNrOfOpenImages()).isEqualTo(0);
+        checkNumOpenImagesIs(0);
+    }
+
+    private static void checkNumOpenImagesIs(int expected) {
+        assertThat(ImageComponents.getNrOfOpenImages()).isEqualTo(expected);
     }
 
     private static void processCLArguments(String[] args) {

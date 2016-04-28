@@ -231,7 +231,7 @@ public class ImageLayer extends ContentLayer {
         ImageLayer d = new ImageLayer(comp, imageCopy, duplicateName, null);
         d.setOpacity(opacity, UpdateGUI.NO, AddToHistory.NO, true);
         d.setTranslation(translationX, translationY);
-        d.setBlendingMode(blendingMode, UpdateGUI.NO, AddToHistory.NO, true);
+        d.setBlendingMode(blendingMode, UpdateGUI.NO, AddToHistory.NO, false);
 
         if (hasMask()) {
             d.addMask(mask.duplicate(d));

@@ -38,10 +38,18 @@ public class PMenu extends JMenu {
     }
 
     /**
-     * Simple add for non-filter actions, no builder is needed in the simplest case
+     * Simple add without a builder
      */
     public void addAction(Action action) {
         JMenuItem menuItem = EnabledIf.THERE_IS_OPEN_IMAGE.getMenuItem(action);
+        add(menuItem);
+    }
+
+    /**
+     * Simple add without a builder
+     */
+    public void addAlwaysEnabledAction(Action action) {
+        JMenuItem menuItem = EnabledIf.ACTION_ENABLED.getMenuItem(action);
         add(menuItem);
     }
 

@@ -113,6 +113,9 @@ public class FileChoosers {
     }
 
     public static boolean showSaveFileChooserAndSaveComp(Composition comp) {
+        String defaultFileName = FileExtensionUtils.getFileNameWOExtension(comp.getName());
+        saveFileChooser.setSelectedFile(new File(defaultFileName));
+
         File customSaveDir = null;
         File file = comp.getFile();
         if (file != null) {
@@ -151,8 +154,7 @@ public class FileChoosers {
      */
     public static boolean saveWithFileChooser(Composition comp) {
         initSaveFileChooser();
-        String defaultFileName = FileExtensionUtils.getFileNameWOExtension(comp.getName());
-        saveFileChooser.setSelectedFile(new File(defaultFileName));
+
         String defaultExtension = FileExtensionUtils.getFileExtension(comp.getName());
         saveFileChooser.setFileFilter(getFileFilterForExtension(defaultExtension));
 

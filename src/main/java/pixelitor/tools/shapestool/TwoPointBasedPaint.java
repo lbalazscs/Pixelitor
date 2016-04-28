@@ -14,10 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.tools.shapestool;
 
 import pixelitor.colors.FgBgColors;
 import pixelitor.tools.UserDrag;
+import pixelitor.tools.gradientpaints.AngleGradientPaint;
+import pixelitor.tools.gradientpaints.DiamondGradientPaint;
+import pixelitor.tools.gradientpaints.SpiralGradientPaint;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -75,6 +79,57 @@ enum TwoPointBasedPaint {
         @Override
         public String toString() {
             return "Radial Gradient";
+        }
+    }, ANGLE_GRADIENT {
+        @Override
+        protected Paint getPaint(UserDrag userDrag) {
+            Color fgColor = FgBgColors.getFG();
+            Color bgColor = FgBgColors.getBG();
+
+            Point2D center = userDrag.getCenterPoint();
+            UserDrag centerUserDrag = new UserDrag(center.getX(), center.getY(), userDrag.getEndX(), userDrag.getEndY());
+
+            Paint paint = new AngleGradientPaint(centerUserDrag, fgColor, bgColor, MultipleGradientPaint.CycleMethod.NO_CYCLE);
+            return paint;
+        }
+
+        @Override
+        public String toString() {
+            return "Angle Gradient";
+        }
+    }, SPIRAL_GRADIENT {
+        @Override
+        protected Paint getPaint(UserDrag userDrag) {
+            Color fgColor = FgBgColors.getFG();
+            Color bgColor = FgBgColors.getBG();
+
+            Point2D center = userDrag.getCenterPoint();
+            UserDrag centerUserDrag = new UserDrag(center.getX(), center.getY(), userDrag.getEndX(), userDrag.getEndY());
+
+            Paint paint = new SpiralGradientPaint(true, centerUserDrag, fgColor, bgColor, MultipleGradientPaint.CycleMethod.NO_CYCLE);
+            return paint;
+        }
+
+        @Override
+        public String toString() {
+            return "Spiral Gradient";
+        }
+    }, DIAMOND_GRADIENT {
+        @Override
+        protected Paint getPaint(UserDrag userDrag) {
+            Color fgColor = FgBgColors.getFG();
+            Color bgColor = FgBgColors.getBG();
+
+            Point2D center = userDrag.getCenterPoint();
+            UserDrag centerUserDrag = new UserDrag(center.getX(), center.getY(), userDrag.getEndX(), userDrag.getEndY());
+
+            Paint paint = new DiamondGradientPaint(centerUserDrag, fgColor, bgColor, MultipleGradientPaint.CycleMethod.NO_CYCLE);
+            return paint;
+        }
+
+        @Override
+        public String toString() {
+            return "Diamond Gradient";
         }
     }, FOREGROUND {
         @Override
