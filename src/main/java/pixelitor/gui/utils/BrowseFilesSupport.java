@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -111,7 +111,7 @@ public class BrowseFilesSupport {
             String fileName = selectedFile.toString();
 
             if (mode == FILE) {
-                String extension = FileExtensionUtils.getFileExtension(selectedFile.getName());
+                String extension = FileExtensionUtils.getExt(selectedFile.getName());
                 if (extension == null) { // the user entered no extension
                     if (fileFilter != null) {
                         fileName = fileName + '.' + fileFilter.getExtensions()[0];
@@ -133,9 +133,8 @@ public class BrowseFilesSupport {
 
     public File getSelectedFile() {
         String s = nameTF.getText();
-        File f = new File(s);
 
-        return f;
+        return new File(s);
     }
 
     public void setDialogTitle(String dialogTitle) {

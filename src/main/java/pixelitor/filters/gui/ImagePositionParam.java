@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,6 @@
 package pixelitor.filters.gui;
 
 import com.jhlabs.image.ImageMath;
-import pixelitor.utils.UpdateGUI;
 
 import javax.swing.*;
 import java.awt.Rectangle;
@@ -52,11 +51,11 @@ public class ImagePositionParam extends AbstractFilterParam {
         int defaultX = (int) (100 * defaultRelativeX);
         int defaultY = (int) (100 * defaultRelativeX);
 
-        ImagePositionPanel selector = new ImagePositionPanel(this, defaultX, defaultY);
-        paramGUI = selector;
+        ImagePositionParamGUI gui = new ImagePositionParamGUI(this, defaultX, defaultY);
+        paramGUI = gui;
         setParamGUIEnabledState();
         paramGUI.updateGUI();
-        return selector;
+        return gui;
     }
 
     @Override
@@ -66,7 +65,7 @@ public class ImagePositionParam extends AbstractFilterParam {
 
     @Override
     public void reset(boolean triggerAction) {
-        setRelativeValues(defaultRelativeX, defaultRelativeY, UpdateGUI.YES, false, triggerAction);
+        setRelativeValues(defaultRelativeX, defaultRelativeY, true, false, triggerAction);
     }
 
     @Override
@@ -79,7 +78,7 @@ public class ImagePositionParam extends AbstractFilterParam {
         float rx = (float) Math.random();
         float ry = (float) Math.random();
 
-        setRelativeValues(rx, ry, UpdateGUI.YES, false, false);
+        setRelativeValues(rx, ry, true, false, false);
     }
 
     public float getRelativeX() {
@@ -90,10 +89,10 @@ public class ImagePositionParam extends AbstractFilterParam {
         return relativeY;
     }
 
-    public void setRelativeValues(float relativeX, float relativeY, UpdateGUI updateGUI, boolean isAdjusting, boolean trigger) {
+    public void setRelativeValues(float relativeX, float relativeY, boolean updateGUI, boolean isAdjusting, boolean trigger) {
         this.relativeX = relativeX;
         this.relativeY = relativeY;
-        if (updateGUI.isYes() && (paramGUI != null)) {
+        if (updateGUI && (paramGUI != null)) {
             paramGUI.updateGUI();
         }
         if (trigger && !isAdjusting) {
@@ -102,11 +101,11 @@ public class ImagePositionParam extends AbstractFilterParam {
     }
 
     public void setRelativeX(float newRelativeX, boolean isAdjusting) {
-        setRelativeValues(newRelativeX, relativeY, UpdateGUI.NO, isAdjusting, true);
+        setRelativeValues(newRelativeX, relativeY, false, isAdjusting, true);
     }
 
     public void setRelativeY(float newRelativeY, boolean isAdjusting) {
-        setRelativeValues(relativeX, newRelativeY, UpdateGUI.NO, isAdjusting, true);
+        setRelativeValues(relativeX, newRelativeY, false, isAdjusting, true);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.history;
 import pixelitor.Composition;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.TextLayer;
-import pixelitor.utils.UpdateGUI;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -43,8 +42,8 @@ public class TextLayerRasterizeEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        comp.addLayer(before, AddToHistory.NO, null, false, false);
-        comp.deleteLayer(after, AddToHistory.NO, UpdateGUI.YES);
+        comp.addLayer(before, false, null, false, false);
+        comp.deleteLayer(after, false, true);
 
         History.notifyMenus(this);
     }
@@ -53,8 +52,8 @@ public class TextLayerRasterizeEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        comp.addLayer(after, AddToHistory.NO, null, false, false);
-        comp.deleteLayer(before, AddToHistory.NO, UpdateGUI.YES);
+        comp.addLayer(after, false, null, false, false);
+        comp.deleteLayer(before, false, true);
 
         History.notifyMenus(this);
     }

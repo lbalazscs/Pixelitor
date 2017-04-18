@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,7 @@ import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
@@ -35,14 +36,14 @@ public class JHPolarCoordinates extends FilterWithParametrizedGUI {
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
 
-    private static final IntChoiceParam.Value[] gridTypeChoices = {
-            new IntChoiceParam.Value("Rectangular to Polar ", PolarFilter.RECT_TO_POLAR),
-            new IntChoiceParam.Value("Polar to Rectangular", PolarFilter.POLAR_TO_RECT),
-            new IntChoiceParam.Value("Invert in Circle", PolarFilter.INVERT_IN_CIRCLE),
+    private static final Value[] gridTypeChoices = {
+            new Value("Rectangular to Polar ", PolarFilter.RECT_TO_POLAR),
+            new Value("Polar to Rectangular", PolarFilter.POLAR_TO_RECT),
+            new Value("Invert in Circle", PolarFilter.INVERT_IN_CIRCLE),
     };
     private final IntChoiceParam type = new IntChoiceParam("Type", gridTypeChoices);
-    private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
-    private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
+    private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
+    private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
     private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 500);
     private final AngleParam angle = new AngleParam("Angle", 0);
 
@@ -50,6 +51,7 @@ public class JHPolarCoordinates extends FilterWithParametrizedGUI {
 
     public JHPolarCoordinates() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(center, type, zoom, angle, edgeAction, interpolation));
     }
 
@@ -58,6 +60,7 @@ public class JHPolarCoordinates extends FilterWithParametrizedGUI {
         if (filter == null) {
             filter = new PolarFilter(NAME);
         }
+
         filter.setType(type.getValue());
         filter.setEdgeAction(edgeAction.getValue());
         filter.setRelativeCentreX(center.getRelativeX());

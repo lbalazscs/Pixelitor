@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.RangeParam;
 
 import java.awt.geom.Path2D;
@@ -41,18 +42,17 @@ public class Spirograph extends ShapeFilter {
                     new RangeParam("R", 1, 114, 500),
                     new RangeParam("d", 0, 189, 500)
             }, false);
-    private final IntChoiceParam type = new IntChoiceParam("Type",
-            new IntChoiceParam.Value[]{
-                    new IntChoiceParam.Value("Hypotrochoid", TYPE_HYPOTROCHOID),
-                    new IntChoiceParam.Value("Epitrochoid", TYPE_EPITROCHOID),
-            }, IGNORE_RANDOMIZE);
+    private final IntChoiceParam type = new IntChoiceParam("Type", new Value[]{
+            new Value("Hypotrochoid", TYPE_HYPOTROCHOID),
+            new Value("Epitrochoid", TYPE_EPITROCHOID),
+    }, IGNORE_RANDOMIZE);
 
     private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 1000);
 
     public Spirograph() {
         addParamsToFront(
                 time,
-                radii.setShowLinkedCB(false),
+                radii.setLinkable(false),
                 type,
                 zoom
         );

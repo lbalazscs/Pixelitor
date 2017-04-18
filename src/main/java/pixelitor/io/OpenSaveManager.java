@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,7 @@ import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
+import pixelitor.layers.TextLayer;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
@@ -65,7 +66,7 @@ public class OpenSaveManager {
         Runnable r = () -> {
             Composition comp = createCompositionFromFile(file);
             if(comp != null) { // there was no decoding problem
-                AppLogic.addComposition(comp);
+                AppLogic.addCompAsNewImage(comp);
             }
         };
         Utils.executeWithBusyCursor(r);
@@ -74,7 +75,7 @@ public class OpenSaveManager {
     }
 
     public static Composition createCompositionFromFile(File file) {
-        String ext = FileExtensionUtils.getFileExtension(file.getName());
+        String ext = FileExtensionUtils.getExt(file.getName());
         if ("pxc".equals(ext)) {
             return openLayered(file, "pxc");
         } else if ("ora".equals(ext)) {
@@ -98,8 +99,7 @@ public class OpenSaveManager {
             return null;
         }
 
-        Composition comp = Composition.fromImage(img, file, null);
-        return comp;
+        return Composition.fromImage(img, file, null);
     }
 
     private static Composition openLayered(File selectedFile, String type) {
@@ -132,11 +132,11 @@ public class OpenSaveManager {
     private static boolean save(Composition comp, boolean saveAs) {
         boolean needsFileChooser = saveAs || (comp.getFile() == null);
         if (needsFileChooser) {
-            return FileChoosers.saveWithFileChooser(comp);
+            return FileChoosers.saveWithChooser(comp);
         } else {
             File file = comp.getFile();
-            OutputFormat outputFormat = OutputFormat.valueFromFile(file);
-            outputFormat.saveComposition(comp, file, true);
+            OutputFormat outputFormat = OutputFormat.fromFile(file);
+            outputFormat.saveComp(comp, file, true);
             return true;
         }
     }
@@ -265,7 +265,7 @@ public class OpenSaveManager {
     }
 
     public static void openAllImagesInDir(File dir) {
-        File[] files = FileExtensionUtils.getAllSupportedFilesInDir(dir);
+        File[] files = FileExtensionUtils.getAllSupportedInputFilesInDir(dir);
         if (files != null) {
             for (File file : files) {
                 openFile(file);
@@ -280,36 +280,45 @@ public class OpenSaveManager {
         }
 
         Composition comp = ImageComponents.getActiveCompOrNull();
-        int nrLayers = comp.getNrLayers();
-        for (int i = 0; i < nrLayers; i++) {
-            Layer layer = comp.getLayer(i);
+
+        for (int layerIndex = 0; layerIndex < comp.getNumLayers(); layerIndex++) {
+            Layer layer = comp.getLayer(layerIndex);
             if (layer instanceof ImageLayer) {
                 ImageLayer imageLayer = (ImageLayer) layer;
                 BufferedImage image = imageLayer.getImage();
 
-                File outputDir = FileChoosers.getLastSaveDir();
+                saveImage(layerIndex, layer, image);
+            } else if (layer instanceof TextLayer) {
+                TextLayer textLayer = (TextLayer) layer;
+                BufferedImage image = textLayer.createRasterizedImage();
 
-                String fileName = String.format("%03d_%s.%s", i, Utils.toFileName(layer.getName()), "png");
-
-                File file = new File(outputDir, fileName);
-                saveImageToFile(file, image, "png");
+                saveImage(layerIndex, layer, image);
             }
+            // TODO what about masks? Either they should be applied
+            // or they should be saved as images
         }
+    }
+
+    private static void saveImage(int layerIndex, Layer layer, BufferedImage image) {
+        File outputDir = Directories.getLastSaveDir();
+        String fileName = String.format("%03d_%s.%s", layerIndex, Utils.toFileName(layer.getName()), "png");
+        File file = new File(outputDir, fileName);
+        saveImageToFile(file, image, "png");
     }
 
     public static void saveCurrentImageInAllFormats() {
         Composition comp = ImageComponents.getActiveCompOrNull();
 
-        boolean cancelled = !SingleDirChooserPanel.selectOutputDir(false);
-        if (cancelled) {
+        boolean canceled = !SingleDirChooserPanel.selectOutputDir(false);
+        if (canceled) {
             return;
         }
-        File saveDir = FileChoosers.getLastSaveDir();
+        File saveDir = Directories.getLastSaveDir();
         if (saveDir != null) {
             OutputFormat[] outputFormats = OutputFormat.values();
             for (OutputFormat outputFormat : outputFormats) {
                 File f = new File(saveDir, "all_formats." + outputFormat.toString());
-                outputFormat.saveComposition(comp, f, false);
+                outputFormat.saveComp(comp, f, false);
             }
         }
     }
@@ -321,8 +330,8 @@ public class OpenSaveManager {
             return;
         }
 
-        OutputFormat outputFormat = OutputFormat.getLastOutputFormat();
-        File saveDir = FileChoosers.getLastSaveDir();
+        OutputFormat outputFormat = OutputFormat.getLastUsed();
+        File saveDir = Directories.getLastSaveDir();
         List<ImageComponent> imageComponents = ImageComponents.getICList();
 
         ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("Saving All Images to Folder");
@@ -341,7 +350,7 @@ public class OpenSaveManager {
                     String fileName = String.format("%04d_%s.%s", i, Utils.toFileName(comp.getName()), outputFormat.toString());
                     File f = new File(saveDir, fileName);
                     progressMonitor.setNote("Saving " + fileName);
-                    outputFormat.saveComposition(comp, f, false);
+                    outputFormat.saveComp(comp, f, false);
                 }
                 progressMonitor.close();
                 return null;
@@ -352,11 +361,11 @@ public class OpenSaveManager {
 
     public static void saveJpegWithQuality(float quality) {
         try {
-            FileChoosers.initSaveFileChooser();
+            FileChoosers.initSaveChooser();
             FileChoosers.setOnlyOneSaveExtension(FileChoosers.jpegFilter);
 
             jpegQuality = quality;
-            FileChoosers.showSaveFileChooserAndSaveComp(ImageComponents.getActiveCompOrNull());
+            FileChoosers.showSaveChooserAndSaveComp(ImageComponents.getActiveCompOrNull());
         } finally {
             FileChoosers.setDefaultSaveExtensions();
             jpegQuality = DEFAULT_JPEG_QUALITY;

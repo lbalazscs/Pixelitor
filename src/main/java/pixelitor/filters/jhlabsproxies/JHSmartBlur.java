@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,12 +35,13 @@ public class JHSmartBlur extends FilterWithParametrizedGUI {
 
     private final RangeParam radiusParam = new RangeParam("Radius", 0, 0, 100);
     private final RangeParam threshold = new RangeParam("Threshold", 0, 50, 255);
-    private final BooleanParam hpSharpening = BooleanParam.createParamForHPSharpening();
+    private final BooleanParam hpSharpening = BooleanParam.forHPSharpening();
 
     private SmartBlurFilter filter;
 
     public JHSmartBlur() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
                 radiusParam,
                 threshold,
@@ -50,8 +51,8 @@ public class JHSmartBlur extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        int horizontalValue = radiusParam.getValue();
-        if (horizontalValue == 0) {
+        int radius = radiusParam.getValue();
+        if (radius == 0) {
             return src;
         }
 
@@ -59,7 +60,7 @@ public class JHSmartBlur extends FilterWithParametrizedGUI {
             filter = new SmartBlurFilter(NAME);
         }
 
-        filter.setRadius(horizontalValue);
+        filter.setRadius(radius);
         filter.setThreshold(threshold.getValue());
 
         dest = filter.filter(src, dest);

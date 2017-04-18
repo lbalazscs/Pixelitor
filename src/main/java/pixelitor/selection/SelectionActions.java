@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,8 +24,7 @@ import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.OKCancelDialog;
-import pixelitor.history.AddToHistory;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.menus.MenuAction;
 import pixelitor.menus.view.ShowHideAction;
 import pixelitor.menus.view.ShowHideSelectionAction;
@@ -56,7 +55,7 @@ public final class SelectionActions {
     private static final Action deselectAction = new MenuAction("Deselect") {
         @Override
         public void onClick() {
-            getActiveCompOrNull().deselect(AddToHistory.YES);
+            getActiveCompOrNull().deselect(true);
         }
     };
 
@@ -171,7 +170,7 @@ public final class SelectionActions {
         }
 
         private void traceComp(Composition comp) {
-            if (!comp.activeIsImageLayerOrMask()) {
+            if (!comp.activeIsDrawable()) {
                 Messages.showNotImageLayerError();
                 return;
             }
@@ -179,8 +178,8 @@ public final class SelectionActions {
             if (comp.hasSelection()) {
                 Shape shape = comp.getSelectionShape();
                 if (shape != null) {
-                    ImageLayer layer = comp.getActiveMaskOrImageLayer();
-                    brushTool.trace(layer, shape);
+                    Drawable dr = comp.getActiveDrawable();
+                    brushTool.trace(dr, shape);
                 }
             }
         }

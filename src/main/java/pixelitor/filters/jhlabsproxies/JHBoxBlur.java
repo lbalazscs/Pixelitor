@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,12 +36,13 @@ public class JHBoxBlur extends FilterWithParametrizedGUI {
 
     private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 0, 0, 100);
     private final RangeParam numberOfIterations = new RangeParam("Iterations (Quality)", 1, 3, 10);
-    private final BooleanParam hpSharpening = BooleanParam.createParamForHPSharpening();
+    private final BooleanParam hpSharpening = BooleanParam.forHPSharpening();
 
     private BoxBlurFilter filter;
 
     public JHBoxBlur() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
                 radius,
                 numberOfIterations,

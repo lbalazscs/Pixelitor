@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import com.bric.swing.ColorPicker;
 import com.bric.swing.ColorSwatch;
 import org.jdesktop.swingx.painter.effects.AbstractAreaEffect;
 import pixelitor.colors.ColorUtils;
-import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.DefaultButton;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
@@ -65,7 +64,7 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
         setBorder(BorderFactory.createTitledBorder('"' + effectName + "\" Configuration"));
 
         opacityRange = new RangeParam("Width:", 1, 100, 100);
-        SliderSpinner opacitySlider = new SliderSpinner(opacityRange, NONE, AddDefaultButton.NO);
+        SliderSpinner opacitySlider = new SliderSpinner(opacityRange, NONE, false);
 
         enabledCB = new JCheckBox();
         enabledCB.setName("enabledCB");
@@ -153,8 +152,7 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
     }
 
     public static int calculateBrushSteps(int brushWidth) {
-        int brushSteps = 1 + brushWidth / 3;
-        return brushSteps;
+        return 1 + brushWidth / 3;
     }
 
     @Override

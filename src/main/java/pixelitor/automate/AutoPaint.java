@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -74,60 +74,59 @@ public class AutoPaint {
 
         Color origFg = null;
         Color origBg = null;
-        if (settings.withRandomColors()) {
+        if (settings.useRandomColors()) {
             origFg = FgBgColors.getFG();
             origBg = FgBgColors.getBG();
         }
 
         String msg = String.format("Auto Paint with %s Tool: ", settings.getTool());
 
-        MessageHandler messageHandler = Messages.getMessageHandler();
-        messageHandler.startProgress(msg, settings.getNumStrokes());
+        MessageHandler msgHandler = Messages.getMessageHandler();
+        msgHandler.startProgress(msg, settings.getNumStrokes());
 
         BufferedImage backupImage = layer.getImageOrSubImageIfSelected(true, true);
         History.setIgnoreEdits(true);
 
         try {
-            runStrokes(settings, layer, messageHandler);
+            runStrokes(settings, layer, msgHandler);
         } finally {
             History.setIgnoreEdits(false);
             ImageEdit edit = new ImageEdit(layer.getComp(), "Auto Paint",
                     layer, backupImage, IgnoreSelection.NO, false);
             History.addEdit(edit);
-            messageHandler.stopProgress();
-            messageHandler.showStatusMessage(msg + "finished.");
+            msgHandler.stopProgress();
+            msgHandler.showStatusMessage(msg + "finished.");
 
-            if (settings.withRandomColors()) {
+            if (settings.useRandomColors()) {
                 FgBgColors.setFG(origFg);
                 FgBgColors.setBG(origBg);
             }
         }
     }
 
-    private static void runStrokes(Settings settings, ImageLayer layer, MessageHandler messageHandler) {
+    private static void runStrokes(Settings settings, ImageLayer layer, MessageHandler msgHandler) {
         Random random = new Random();
 
         Composition comp = layer.getComp();
 
-        int canvasWidth = comp.getCanvasWidth();
-        int canvasHeight = comp.getCanvasHeight();
         ImageComponent ic = comp.getIC();
 
         int numStrokes = settings.getNumStrokes();
         for (int i = 0; i < numStrokes; i++) {
-            messageHandler.updateProgress(i);
+            msgHandler.updateProgress(i);
 
-            paintSingleStroke(layer, settings, canvasWidth, canvasHeight, random);
+            paintSingleStroke(layer, settings,
+                    comp.getCanvasWidth(), comp.getCanvasHeight(), random);
             ic.paintImmediately(ic.getBounds());
         }
     }
 
     private static void paintSingleStroke(ImageLayer layer, Settings settings, int canvasWidth, int canvasHeight, Random rand) {
-        if (settings.withRandomColors()) {
-            FgBgColors.randomizeColors();
+        if (settings.useRandomColors()) {
+            FgBgColors.randomize();
         }
 
-        int strokeLength = settings.generateStrokeLength();
+        int strokeLength = settings.genStrokeLength();
 
         Point start = new Point(rand.nextInt(canvasWidth), rand.nextInt(canvasHeight));
         double randomAngle = rand.nextDouble() * 2 * Math.PI;
@@ -195,7 +194,7 @@ public class AutoPaint {
 //            lengthVariability.setValueNoTrigger(defaultLengthVariability);
 //            gbh.addLabelWithControl("Stroke Length Variability:",
 //                    new SliderSpinner(lengthVariability,
-//                            SliderSpinner.TextPosition.NONE, AddDefaultButton.NO));
+//                            SliderSpinner.TextPosition.NONE, false));
 
             randomColorsLabel = new JLabel("Random Colors:");
             randomColorsCB = new JCheckBox();
@@ -271,7 +270,7 @@ public class AutoPaint {
             return numStrokes;
         }
 
-        public int generateStrokeLength() {
+        public int genStrokeLength() {
             if (minStrokeLength == maxStrokeLength) {
                 return minStrokeLength;
             } else {
@@ -279,7 +278,7 @@ public class AutoPaint {
             }
         }
 
-        public boolean withRandomColors() {
+        public boolean useRandomColors() {
             return randomColors;
         }
     }

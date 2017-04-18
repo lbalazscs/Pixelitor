@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.gui.utils;
 
-import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.DefaultButton;
 import pixelitor.filters.gui.ParamGUI;
 import pixelitor.filters.gui.RangeParam;
@@ -60,15 +59,15 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     private boolean sliderMoved = false;
     private boolean spinnerMoved = false;
 
-    public SliderSpinner(RangeParam model, TextPosition position, AddDefaultButton addDefaultButton) {
+    public SliderSpinner(RangeParam model, TextPosition position, boolean addDefaultButton) {
         this(model, null, null, position, addDefaultButton);
     }
 
     public SliderSpinner(RangeParam model, Color leftColor, Color rightColor) {
-        this(model, leftColor, rightColor, TextPosition.BORDER, AddDefaultButton.YES);
+        this(model, leftColor, rightColor, TextPosition.BORDER, true);
     }
 
-    private SliderSpinner(RangeParam model, Color leftColor, Color rightColor, TextPosition textPosition, AddDefaultButton addDefaultButton) {
+    private SliderSpinner(RangeParam model, Color leftColor, Color rightColor, TextPosition textPosition, boolean addDefaultButton) {
         setLayout(new BorderLayout());
         this.model = model;
 
@@ -111,7 +110,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         add(slider, BorderLayout.CENTER);
         p.add(spinner);
 
-        if (addDefaultButton.isYes()) {
+        if (addDefaultButton) {
             defaultButton = new DefaultButton(resettableParam == null ? model : resettableParam);
 //            int spinnerHeight = (int) spinner.getPreferredSize().getHeight();
 //            defaultButton.setPreferredSize(new Dimension(spinnerHeight, spinnerHeight));

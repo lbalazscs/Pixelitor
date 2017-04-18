@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ public class OutputFormatSelector {
 
     public OutputFormatSelector() {
         formatCombo = new JComboBox<>(OutputFormat.values());
-        formatCombo.setSelectedItem(OutputFormat.getLastOutputFormat());
+        formatCombo.setSelectedItem(OutputFormat.getLastUsed());
     }
 
     public JComboBox<OutputFormat> getFormatCombo() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,14 +26,12 @@ import pixelitor.filters.painters.TranslatedTextPainter;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.OKCancelDialog;
-import pixelitor.history.AddToHistory;
 import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
 import pixelitor.history.NewLayerEdit;
 import pixelitor.history.TextLayerChangeEdit;
 import pixelitor.history.TextLayerRasterizeEdit;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.UpdateGUI;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.RandomGUITest;
 
@@ -147,7 +145,7 @@ public class TextLayer extends ContentLayer {
 
     public void updateLayerName() {
         if (settings != null) {
-            setName(settings.getText(), AddToHistory.NO);
+            setName(settings.getText(), false);
         }
     }
 
@@ -201,7 +199,7 @@ public class TextLayer extends ContentLayer {
         MaskViewMode oldViewMode = comp.getIC().getMaskViewMode();
 
         // don't add it yet to history, only after the user chooses to press OK
-        comp.addLayer(textLayer, AddToHistory.NO, null, true, false);
+        comp.addLayer(textLayer, false, null, true, false);
 
         TextAdjustmentsPanel p = new TextAdjustmentsPanel(textLayer);
         OKCancelDialog d = new OKCancelDialog(p, pw, "Create Text Layer") {
@@ -218,7 +216,7 @@ public class TextLayer extends ContentLayer {
             @Override
             protected void dialogCanceled() {
                 close();
-                comp.deleteLayer(textLayer, AddToHistory.NO, UpdateGUI.YES);
+                comp.deleteLayer(textLayer, false, true);
             }
         };
         d.setVisible(true);
@@ -228,8 +226,8 @@ public class TextLayer extends ContentLayer {
         BufferedImage rasterizedImage = createRasterizedImage();
 
         ImageLayer newImageLayer = new ImageLayer(comp, rasterizedImage, getName(), null);
-        comp.addLayer(newImageLayer, AddToHistory.NO, null, false, false);
-        comp.deleteLayer(this, AddToHistory.NO, UpdateGUI.YES);
+        comp.addLayer(newImageLayer, false, null, false, false);
+        comp.deleteLayer(this, false, true);
 
         TextLayerRasterizeEdit edit = new TextLayerRasterizeEdit(comp, this, newImageLayer);
         History.addEdit(edit);

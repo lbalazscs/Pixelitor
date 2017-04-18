@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -66,8 +66,7 @@ public class PMenu extends JMenu {
      * Returns an action builder for non-filter actions
      */
     public MenuItemBuilder buildAction(Action action) {
-        MenuItemBuilder builder = new MenuItemBuilder(this, action);
-        return builder;
+        return new MenuItemBuilder(this, action);
     }
 
     /**
@@ -97,8 +96,7 @@ public class PMenu extends JMenu {
     }
 
     public FilterMenuItemBuilder buildFA(FilterAction fa) {
-        FilterMenuItemBuilder builder = new FilterMenuItemBuilder(this, fa);
-        return builder;
+        return new FilterMenuItemBuilder(this, fa);
     }
 
     /**

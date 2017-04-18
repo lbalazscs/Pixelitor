@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,7 +40,7 @@ public class LinkLayerMaskEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        mask.setLinked(!mask.isLinked(), AddToHistory.NO);
+        mask.setLinked(!mask.isLinked(), false);
 
         History.notifyMenus(this);
     }
@@ -49,7 +49,7 @@ public class LinkLayerMaskEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        mask.setLinked(!mask.isLinked(), AddToHistory.NO);
+        mask.setLinked(!mask.isLinked(), false);
 
         History.notifyMenus(this);
     }

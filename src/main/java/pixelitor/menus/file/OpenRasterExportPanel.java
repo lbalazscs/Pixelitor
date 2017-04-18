@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,10 +43,9 @@ public class OpenRasterExportPanel extends JPanel {
     }
 
     public static void showInDialog(JFrame parent) {
-        Composition activeComp = ImageComponents.getActiveCompOrNull();
-        int nrLayers = activeComp.getNrLayers();
-        if(nrLayers < 2) {
-            boolean exportAnyway = Dialogs.showYesNoQuestionDialog("Only one layer", activeComp.getName() + " has only one layer.\n" +
+        Composition comp = ImageComponents.getActiveCompOrNull();
+        if (comp.getNumLayers() < 2) {
+            boolean exportAnyway = Dialogs.showYesNoQuestionDialog("Only one layer", comp.getName() + " has only one layer.\n" +
                     "Are you sure that you want to export it in a layered format?");
             if(!exportAnyway) {
                 return;
@@ -62,8 +61,8 @@ public class OpenRasterExportPanel extends JPanel {
                 if(file != null) {
                     boolean addMergedImage = p.getExportMergedImage();
                     try {
-                        OpenRaster.writeOpenRaster(activeComp, file, addMergedImage);
-                        OpenSaveManager.afterSaveActions(activeComp, file, true);
+                        OpenRaster.writeOpenRaster(comp, file, addMergedImage);
+                        OpenSaveManager.afterSaveActions(comp, file, true);
                     } catch (IOException e) {
                         Messages.showException(e);
                     }

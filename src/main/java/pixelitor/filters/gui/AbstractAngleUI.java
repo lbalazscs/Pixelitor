@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,7 @@ import static java.awt.RenderingHints.VALUE_STROKE_PURE;
 /**
  * An abstract superclass for angle selectors and elevation angle selectors
  */
-public abstract class AbstractAngleSelectorComponent extends JComponent implements MouseListener, MouseMotionListener {
+public abstract class AbstractAngleUI extends JComponent implements MouseListener, MouseMotionListener {
     final AngleParam model;
     static final int SIZE = 50;
     private static final Stroke ARROW_STROKE = new BasicStroke(1.7f);
@@ -45,13 +45,13 @@ public abstract class AbstractAngleSelectorComponent extends JComponent implemen
     int cx;
     int cy;
 
-    AbstractAngleSelectorComponent(AngleParam angleParam) {
+    AbstractAngleUI(AngleParam angleParam) {
         this.model = angleParam;
 
-        Dimension sizeDim = new Dimension(SIZE + 1, SIZE + 1);
-        setSize(sizeDim);
-        setMinimumSize(sizeDim);
-        setPreferredSize(sizeDim);
+        Dimension size2D = new Dimension(SIZE + 1, SIZE + 1);
+        setSize(size2D);
+        setMinimumSize(size2D);
+        setPreferredSize(size2D);
 
         addMouseListener(this);
         addMouseMotionListener(this);

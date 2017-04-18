@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,6 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.utils.UpdateGUI;
-
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
 import java.awt.Rectangle;
@@ -34,45 +32,46 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 public class BooleanParam extends AbstractFilterParam {
     private final boolean defaultValue;
     private boolean currentValue;
-    private final AddDefaultButton addDefaultButton;
+    private final boolean addDefaultButton;
     private List<ChangeListener> changeListenerList;
 
-    public BooleanParam(String name, boolean defaultValue) {
-        this(name, defaultValue, ALLOW_RANDOMIZE);
+    public BooleanParam(String name, boolean defaultV) {
+        this(name, defaultV, ALLOW_RANDOMIZE);
     }
 
-    public BooleanParam(String name, boolean defaultValue, RandomizePolicy randomizePolicy) {
-        this(name, defaultValue, randomizePolicy, AddDefaultButton.NO);
+    public BooleanParam(String name, boolean defaultV, RandomizePolicy randomizePolicy) {
+        this(name, defaultV, randomizePolicy, false);
     }
 
-    public BooleanParam(String name, boolean defaultValue, RandomizePolicy randomizePolicy, AddDefaultButton addDefaultButton) {
+    public BooleanParam(String name, boolean defaultV, RandomizePolicy randomizePolicy, boolean addDefaultButton) {
         super(name, randomizePolicy);
-        this.defaultValue = defaultValue;
-        currentValue = defaultValue;
+        this.defaultValue = defaultV;
+        currentValue = defaultV;
         this.addDefaultButton = addDefaultButton;
     }
 
     @Override
     public JComponent createGUI() {
-        BooleanSelector selector = new BooleanSelector(this, addDefaultButton);
-        paramGUI = selector;
+        BooleanParamGUI gui = new BooleanParamGUI(this, addDefaultButton);
+        paramGUI = gui;
         setParamGUIEnabledState();
 
         if (changeListenerList != null) {
-            // some change listeners for the GUI were temporarily stored here
+            // some change listeners for the GUI
+            // were temporarily stored here
 
-            //noinspection Convert2streamapi
             for (ChangeListener listener : changeListenerList) {
-                selector.addChangeListener(listener);
+                gui.addChangeListener(listener);
             }
             changeListenerList.clear();
         }
 
-        return selector;
+        return gui;
     }
 
-    public static BooleanParam createParamForHPSharpening() {
-        return new BooleanParam("High-Pass Sharpening", false, IGNORE_RANDOMIZE);
+    public static BooleanParam forHPSharpening() {
+        return new BooleanParam("High-Pass Sharpening",
+                false, IGNORE_RANDOMIZE);
     }
 
     @Override
@@ -82,7 +81,7 @@ public class BooleanParam extends AbstractFilterParam {
 
     @Override
     public void reset(boolean triggerAction) {
-        setValue(defaultValue, UpdateGUI.YES, triggerAction);
+        setValue(defaultValue, true, triggerAction);
     }
 
     @Override
@@ -93,7 +92,8 @@ public class BooleanParam extends AbstractFilterParam {
     @Override
     public void randomize() {
         if (randomizePolicy.allowRandomize()) {
-            setValue(Math.random() > 0.5, UpdateGUI.YES, false);
+            boolean randomValue = Math.random() > 0.5;
+            setValue(randomValue, true, false);
         }
     }
 
@@ -101,14 +101,14 @@ public class BooleanParam extends AbstractFilterParam {
         return currentValue;
     }
 
-    public void setValue(boolean newValue, UpdateGUI updateGUI, boolean trigger) {
+    public void setValue(boolean newValue, boolean updateGUI, boolean trigger) {
         if (currentValue != newValue) {
             currentValue = newValue;
             if (trigger && adjustmentListener != null) {
                 adjustmentListener.paramAdjusted();
             }
         }
-        if (updateGUI.isYes() && (paramGUI != null)) {
+        if (updateGUI && (paramGUI != null)) {
             paramGUI.updateGUI();
         }
     }
@@ -141,7 +141,7 @@ public class BooleanParam extends AbstractFilterParam {
     public void addChangeListener(ChangeListener changeListener) {
         if (paramGUI != null) {
             // if a GUI was already created, pass the listener to it
-            BooleanSelector selector = (BooleanSelector) paramGUI;
+            BooleanParamGUI selector = (BooleanParamGUI) paramGUI;
             selector.addChangeListener(changeListener);
             return;
         }

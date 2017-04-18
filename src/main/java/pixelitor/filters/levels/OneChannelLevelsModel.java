@@ -1,3 +1,20 @@
+/*
+ * Copyright 2017 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.filters.levels;
 
 import pixelitor.filters.gui.ParamAdjustmentListener;
@@ -11,10 +28,10 @@ public class OneChannelLevelsModel implements ParamAdjustmentListener {
 
     private GrayScaleLookup adjustment = GrayScaleLookup.getDefault();
 
-    private final RangeParam inputBlackParam;
-    private final RangeParam inputWhiteParam;
-    private final RangeParam outputBlackParam;
-    private final RangeParam outputWhiteParam;
+    private final RangeParam inputBlack;
+    private final RangeParam inputWhite;
+    private final RangeParam outputBlack;
+    private final RangeParam outputWhite;
     private final LevelsAdjustmentType type;
     private final LevelsModel bigModel;
 
@@ -22,15 +39,15 @@ public class OneChannelLevelsModel implements ParamAdjustmentListener {
         this.type = type;
         this.bigModel = bigModel;
 
-        inputBlackParam = new RangeParam("Input Dark", 0, BLACK_DEFAULT, 254);
-        inputWhiteParam = new RangeParam("Input Light", 1, WHITE_DEFAULT, 255);
-        outputBlackParam = new RangeParam("Output Dark", 0, BLACK_DEFAULT, 254);
-        outputWhiteParam = new RangeParam("Output Light", 1, WHITE_DEFAULT, 255);
+        inputBlack = new RangeParam("Input Dark", 0, BLACK_DEFAULT, 254);
+        inputWhite = new RangeParam("Input Light", 1, WHITE_DEFAULT, 255);
+        outputBlack = new RangeParam("Output Dark", 0, BLACK_DEFAULT, 254);
+        outputWhite = new RangeParam("Output Light", 1, WHITE_DEFAULT, 255);
 
-        inputBlackParam.setAdjustmentListener(this);
-        inputWhiteParam.setAdjustmentListener(this);
-        outputBlackParam.setAdjustmentListener(this);
-        outputWhiteParam.setAdjustmentListener(this);
+        inputBlack.setAdjustmentListener(this);
+        inputWhite.setAdjustmentListener(this);
+        outputBlack.setAdjustmentListener(this);
+        outputWhite.setAdjustmentListener(this);
     }
 
     public Color getBackColor() {
@@ -41,26 +58,25 @@ public class OneChannelLevelsModel implements ParamAdjustmentListener {
         return type.getWhiteColor();
     }
 
-    public RangeParam getInputBlackParam() {
-        return inputBlackParam;
+    public RangeParam getInputBlack() {
+        return inputBlack;
     }
 
-    public RangeParam getInputWhiteParam() {
-        return inputWhiteParam;
+    public RangeParam getInputWhite() {
+        return inputWhite;
     }
 
-    public RangeParam getOutputBlackParam() {
-        return outputBlackParam;
+    public RangeParam getOutputBlack() {
+        return outputBlack;
     }
 
-    public RangeParam getOutputWhiteParam() {
-        return outputWhiteParam;
+    public RangeParam getOutputWhite() {
+        return outputWhite;
     }
 
     public String getName() {
         return type.getName();
     }
-
 
     public GrayScaleLookup getAdjustment() {
         return adjustment;
@@ -74,19 +90,18 @@ public class OneChannelLevelsModel implements ParamAdjustmentListener {
     }
 
     private void updateAdjustment() {
-        int inputBlackValue = inputBlackParam.getValue();
-        int inputWhiteValue = inputWhiteParam.getValue();
-        int outputBlackValue = outputBlackParam.getValue();
-        int outputWhiteValue = outputWhiteParam.getValue();
-
-        adjustment = new GrayScaleLookup(inputBlackValue, inputWhiteValue, outputBlackValue, outputWhiteValue);
+        adjustment = new GrayScaleLookup(
+                inputBlack.getValue(),
+                inputWhite.getValue(),
+                outputBlack.getValue(),
+                outputWhite.getValue());
     }
 
-    public void resetToDefaultSettings() {
-        inputBlackParam.reset(false);
-        inputWhiteParam.reset(false);
-        outputBlackParam.reset(false);
-        outputWhiteParam.reset(false);
+    public void resetToDefaults() {
+        inputBlack.reset(false);
+        inputWhite.reset(false);
+        outputBlack.reset(false);
+        outputWhite.reset(false);
 
         updateAdjustment();
     }

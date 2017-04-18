@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,7 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
@@ -49,7 +50,7 @@ public class JHMotionBlur extends FilterWithParametrizedGUI {
     private final RangeParam rotation = new RangeParam("Spin Blur Amount (Degrees)", -45, 0, 45);
     private final RangeParam zoom = new RangeParam("Zoom Blur Amount", 0, 0, 200);
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final BooleanParam hpSharpening = BooleanParam.createParamForHPSharpening();
+    private final BooleanParam hpSharpening = BooleanParam.forHPSharpening();
 
     private final Mode mode;
 
@@ -72,9 +73,9 @@ public class JHMotionBlur extends FilterWithParametrizedGUI {
         public abstract MotionBlur getImplementation(String filterName);
     }
 
-    private static final IntChoiceParam.Value[] methodChoices = {
-            new IntChoiceParam.Value("Faster", FASTER.ordinal()),
-            new IntChoiceParam.Value("High Quality (slow for large images)", BETTER.ordinal()),
+    private static final Value[] methodChoices = {
+            new Value("Faster", FASTER.ordinal()),
+            new Value("High Quality (slow for large images)", BETTER.ordinal()),
     };
 
     private final IntChoiceParam method = new IntChoiceParam("Quality", methodChoices, IGNORE_RANDOMIZE);
@@ -101,6 +102,7 @@ public class JHMotionBlur extends FilterWithParametrizedGUI {
 
     public JHMotionBlur(Mode mode) {
         super(ShowOriginal.YES);
+
         this.mode = mode;
 
         if(mode == MOTION_BLUR) {

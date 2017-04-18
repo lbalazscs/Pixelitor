@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.filters;
 
 import com.jhlabs.image.ImageMath;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
@@ -43,15 +44,16 @@ public class AddNoise extends FilterWithParametrizedGUI {
     private final RangeParam opacity = new RangeParam("Opacity (%)", 0, 100, 100);
     private final RangeParam coverage = new RangeParam("Coverage (%)", 0, 50, 100);
     private final RangeParam saturation = new RangeParam("Saturation (%)", 0, 100, 100);
-    private final IntChoiceParam method = new IntChoiceParam("Method", new IntChoiceParam.Value[]{
-            new IntChoiceParam.Value("Faster", METHOD_FASTER),
-            new IntChoiceParam.Value("Smooth Coverage Animation", METHOD_COVERAGE_ANIM),
+    private final IntChoiceParam method = new IntChoiceParam("Method", new Value[]{
+            new Value("Faster", METHOD_FASTER),
+            new Value("Smooth Coverage Animation", METHOD_COVERAGE_ANIM),
     });
 
     private final float[] tmpHSV = new float[3];
 
     public AddNoise() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
                 coverage,
                 saturation,

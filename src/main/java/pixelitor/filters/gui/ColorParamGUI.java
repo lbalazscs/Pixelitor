@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import java.awt.event.MouseEvent;
 /**
  * The GUI for a ColorParam
  */
-public class ColorSelector extends JPanel implements ParamGUI {
+public class ColorParamGUI extends JPanel implements ParamGUI {
     private final ColorParam model;
 //    private JButton button;
 
@@ -39,7 +39,7 @@ public class ColorSelector extends JPanel implements ParamGUI {
 
     private static final int BUTTON_SIZE = 30;
 
-    public ColorSelector(ColorParam model) {
+    public ColorParamGUI(ColorParam model) {
         this.model = model;
         setLayout(new FlowLayout(FlowLayout.LEFT));
 

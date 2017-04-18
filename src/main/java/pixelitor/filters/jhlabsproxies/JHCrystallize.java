@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,13 +20,12 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.CrystallizeFilter;
 import com.jhlabs.math.Noise;
 import pixelitor.filters.FilterWithParametrizedGUI;
-import pixelitor.filters.gui.ActionSetting;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseActionSetting;
+import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.CachedFloatRandom;
 
@@ -45,26 +44,25 @@ public class JHCrystallize extends FilterWithParametrizedGUI {
     private final RangeParam size = new RangeParam("Size", 1, 20, 200);
     private final ColorParam edgeColor = new ColorParam("Edge Color", BLACK, FREE_OPACITY);
     private final BooleanParam fadeEdges = new BooleanParam("Fade Edges", false);
-
     private final RangeParam randomness = new RangeParam("Shape Randomness (%)", 0, 0, 100);
-    private final IntChoiceParam gridType = IntChoiceParam.getGridTypeChoices("Shape", randomness);
+    private final IntChoiceParam gridType = IntChoiceParam.forGridType("Shape", randomness);
 
     private CrystallizeFilter filter;
 
     public JHCrystallize() {
         super(ShowOriginal.YES);
-        ActionSetting reseedAction = new ReseedNoiseActionSetting(e -> {
-            CachedFloatRandom.reseedCache();
-            Noise.reseed();
-        });
+
         setParamSet(new ParamSet(
-                size.adjustRangeToImageSize(0.2),
+                size.withAdjustedRange(0.2),
                 edgeThickness,
                 gridType,
                 randomness,
                 edgeColor,
                 fadeEdges
-        ).withAction(reseedAction));
+        ).withAction(new ReseedNoiseFilterAction(e -> {
+            CachedFloatRandom.reseedCache();
+            Noise.reseed();
+        })));
     }
 
     @Override

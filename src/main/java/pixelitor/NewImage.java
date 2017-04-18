@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -47,7 +47,7 @@ public final class NewImage {
 
     public static Composition addNewImage(FillType bg, int width, int height, String title) {
         Composition comp = createNewComposition(bg, width, height, title);
-        AppLogic.addComposition(comp);
+        AppLogic.addCompAsNewImage(comp);
         return comp;
     }
 
@@ -111,37 +111,37 @@ public final class NewImage {
     }
 
     private static class NewImagePanel extends JPanel {
-        private final JTextField widthTextField;
-        private final JTextField heightTextField;
+        private final JTextField widthTF;
+        private final JTextField heightTF;
 
         private static final int BORDER_WIDTH = 5;
         private final JComboBox<FillType> backgroundSelector;
 
         private NewImagePanel(int defaultWidth, int defaultHeight) {
             setLayout(new GridBagLayout());
-            GridBagHelper gridBagHelper = new GridBagHelper(this);
+            GridBagHelper gbh = new GridBagHelper(this);
 
             //noinspection SuspiciousNameCombination
             setBorder(BorderFactory.createEmptyBorder(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH));
 
-            widthTextField = new IntTextField(String.valueOf(defaultWidth));
-            widthTextField.setName("widthTF");
-            gridBagHelper.addLabelWithControl("Width:", widthTextField);
+            widthTF = new IntTextField(String.valueOf(defaultWidth));
+            widthTF.setName("widthTF");
+            gbh.addLabelWithControl("Width:", widthTF);
 
-            heightTextField = new IntTextField(String.valueOf(defaultHeight));
-            heightTextField.setName("heightTF");
-            gridBagHelper.addLabelWithControl("Height:", heightTextField);
+            heightTF = new IntTextField(String.valueOf(defaultHeight));
+            heightTF.setName("heightTF");
+            gbh.addLabelWithControl("Height:", heightTF);
 
             backgroundSelector = new JComboBox(FillType.values());
-            gridBagHelper.addLabelWithControl("Fill:", backgroundSelector);
+            gbh.addLabelWithControl("Fill:", backgroundSelector);
         }
 
         private int getSelectedWidth() {
-            return Integer.parseInt(widthTextField.getText());
+            return Integer.parseInt(widthTF.getText());
         }
 
         private int getSelectedHeight() {
-            return Integer.parseInt(heightTextField.getText());
+            return Integer.parseInt(heightTF.getText());
         }
 
         private FillType getSelectedBackground() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,14 +30,14 @@ import java.awt.Rectangle;
 /**
  * A JInternalFrame for displaying the compositions
  */
-public class InternalImageFrame extends JInternalFrame implements InternalFrameListener {
+public class ImageFrame extends JInternalFrame implements InternalFrameListener {
     private static final int NIMBUS_HORIZONTAL_ADJUSTMENT = 18;
     private static final int NIMBUS_VERTICAL_ADJUSTMENT = 38;
 
     private final ImageComponent ic;
     private final JScrollPane scrollPane;
 
-    public InternalImageFrame(ImageComponent ic, int locationX, int locationY) {
+    public ImageFrame(ImageComponent ic, int locX, int locY) {
         super(ic.createFrameTitle(), true, true, true, true);
         addInternalFrameListener(this);
         setFrameIcon(null);
@@ -47,9 +47,9 @@ public class InternalImageFrame extends JInternalFrame implements InternalFrameL
         scrollPane = new JScrollPane(this.ic);
         this.add(scrollPane);
 
-        Dimension preferredSize = ic.getPreferredSize();
-        setSize((int) preferredSize.getWidth(), (int) preferredSize.getHeight(), locationX, locationY);
-        setLocation(locationX, locationY);
+        Dimension ps = ic.getPreferredSize();
+        setSize((int) ps.getWidth(), (int) ps.getHeight(), locX, locY);
+        setLocation(locX, locY);
         this.setVisible(true);
     }
 
@@ -89,25 +89,25 @@ public class InternalImageFrame extends JInternalFrame implements InternalFrameL
     public void internalFrameOpened(InternalFrameEvent e) {
     }
 
-    public void setToNaturalSize(int locationX, int locationY) {
+    public void setToNaturalSize(int locX, int locY) {
         Canvas canvas = ic.getCanvas();
         int zoomedWidth = canvas.getZoomedWidth();
         int zoomedHeight = canvas.getZoomedHeight();
-        setSize(zoomedWidth, zoomedHeight, locationX, locationY);
+        setSize(zoomedWidth, zoomedHeight, locX, locY);
     }
 
-    public void setSize(int width, int height, int locationX, int locationY) {
-        // if this is a simple resize, then locationX and locationY are -1
-        if (locationX == -1) {
-            locationX = getLocation().x;
+    public void setSize(int width, int height, int locX, int locY) {
+        // if this is a simple resize, then locX and locY are -1
+        if (locX == -1) {
+            locX = getLocation().x;
         }
-        if (locationY == -1) {
-            locationY = getLocation().y;
+        if (locY == -1) {
+            locY = getLocation().y;
         }
 
         Dimension desktopSize = Desktop.INSTANCE.getDesktopSize();
-        int maxWidth = Math.max(0, desktopSize.width - 20 - locationX);
-        int maxHeight = Math.max(0, desktopSize.height - 40 - locationY);
+        int maxWidth = Math.max(0, desktopSize.width - 20 - locX);
+        int maxHeight = Math.max(0, desktopSize.height - 40 - locY);
 
         if (width > maxWidth) {
             width = maxWidth;

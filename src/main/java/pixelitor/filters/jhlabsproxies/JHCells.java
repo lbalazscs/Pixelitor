@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,13 +20,13 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.CellularFilter;
 import com.jhlabs.math.Noise;
 import pixelitor.filters.FilterWithParametrizedGUI;
-import pixelitor.filters.gui.ActionSetting;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseActionSetting;
+import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.CachedFloatRandom;
 
@@ -49,18 +49,14 @@ public class JHCells extends FilterWithParametrizedGUI {
 
     private final RangeParam scale = new RangeParam("Zoom", 1, 100, 500);
     private final RangeParam stretch = new RangeParam("Stretch (%)", 100, 100, 999);
-//    private RangeParam f1Param = new RangeParam("F1", -100, 100, -100);
-//    private RangeParam f2Param = new RangeParam("F2", -100, 100, -100);
-//    private RangeParam f3Param = new RangeParam("F3", -100, 100, 0);
 
     private final RangeParam gridRandomness = new RangeParam("Grid Randomness", 1, 1, 100);
-    private final IntChoiceParam gridType = IntChoiceParam.getGridTypeChoices("Grid Type", gridRandomness);
+    private final IntChoiceParam gridType = IntChoiceParam.forGridType("Grid Type", gridRandomness);
 
-    private final IntChoiceParam type = new IntChoiceParam("Type", new IntChoiceParam.Value[]{
-//            new IntChoiceParam.Value("Free", 0),
-            new IntChoiceParam.Value("Cells", TYPE_CELLS),
-            new IntChoiceParam.Value("Grid", TYPE_GRID),
-            new IntChoiceParam.Value("Grid 2", TYPE_STRANGE),
+    private final IntChoiceParam type = new IntChoiceParam("Type", new Value[]{
+            new Value("Cells", TYPE_CELLS),
+            new Value("Grid", TYPE_GRID),
+            new Value("Grid 2", TYPE_STRANGE),
     });
     private final RangeParam refineType = new RangeParam("Refine Type", 0, 0, 100);
     private final RangeParam darkLightBalance = new RangeParam("Dark/Light Balance", -20, 0, 20);
@@ -72,10 +68,6 @@ public class JHCells extends FilterWithParametrizedGUI {
     public JHCells() {
         super(ShowOriginal.NO);
 
-        ActionSetting reseedAction = new ReseedNoiseActionSetting(e -> {
-            CachedFloatRandom.reseedCache();
-            Noise.reseed();
-        });
         setParamSet(new ParamSet(
                 type,
                 refineType,
@@ -83,10 +75,13 @@ public class JHCells extends FilterWithParametrizedGUI {
                 gridRandomness,
                 gradient,
                 darkLightBalance,
-                scale.adjustRangeToImageSize(0.5),
+                scale.withAdjustedRange(0.5),
                 stretch,
                 angle
-        ).withAction(reseedAction));
+        ).withAction(new ReseedNoiseFilterAction(e -> {
+            CachedFloatRandom.reseedCache();
+            Noise.reseed();
+        })));
     }
 
     @Override

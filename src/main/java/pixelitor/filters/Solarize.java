@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
@@ -40,13 +41,14 @@ public class Solarize extends FilterWithParametrizedGUI {
     private final RangeParam greenThreshold = new RangeParam("Green Threshold", 0, 128, 255);
     private final RangeParam blueThreshold = new RangeParam("Blue Threshold", 0, 128, 255);
 
-    private final IntChoiceParam type = new IntChoiceParam("Type", new IntChoiceParam.Value[]{
-            new IntChoiceParam.Value("Classic", TYPE_CLASSIC),
-            new IntChoiceParam.Value("Upside Down Curve", TYPE_INVERTED)
+    private final IntChoiceParam type = new IntChoiceParam("Type", new Value[]{
+            new Value("Classic", TYPE_CLASSIC),
+            new Value("Upside Down Curve", TYPE_INVERTED)
     }, IGNORE_RANDOMIZE);
 
     public Solarize() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
                 type,
                 redThreshold,

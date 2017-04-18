@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ import pixelitor.filters.Filter;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.ParamSetState;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
@@ -32,11 +32,11 @@ import java.io.IOException;
 
 class RenderFramesTask extends SwingWorker<Void, Void> {
     private final TweenAnimation animation;
-    private final ImageLayer layer;
+    private final Drawable dr;
 
-    public RenderFramesTask(TweenAnimation tweenAnimation, ImageLayer layer) {
+    public RenderFramesTask(TweenAnimation tweenAnimation, Drawable dr) {
         this.animation = tweenAnimation;
-        this.layer = layer;
+        this.dr = dr;
     }
 
     @SuppressWarnings("ProhibitedExceptionDeclared")
@@ -60,7 +60,7 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
 
         PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
 
-        layer.tweenCalculatingStarted();
+        dr.tweenCalculatingStarted();
 
         int numTotalFrames = numFrames;
         boolean pingPong = animation.isPingPong() && numFrames > 2;
@@ -100,7 +100,7 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         }
 
         setProgress(100);
-        layer.tweenCalculatingEnded();
+        dr.tweenCalculatingEnded();
 
         if (canceled) {
             animationWriter.cancel();
@@ -115,12 +115,12 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         ParamSetState intermediateState = animation.tween(time);
         filter.getParamSet().setState(intermediateState);
 
-        filter.executeFilterWithBusyCursor(layer, ChangeReason.TWEEN_PREVIEW, busyCursorParent);
+        filter.executeWithBusyCursor(dr, ChangeReason.TWEEN_PREVIEW, busyCursorParent);
 
         long runCountAfter = Filter.runCount;
         assert runCountAfter == runCountBefore + 1;
 
-        Composition comp = layer.getComp();
+        Composition comp = dr.getComp();
         comp.repaint();
 
         return comp.getCompositeImage();

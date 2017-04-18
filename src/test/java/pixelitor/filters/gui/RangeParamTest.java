@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ public class RangeParamTest {
     @Test
     public void isIgnoreRandomizeWorking() {
         RangeParam param = new RangeParam("Test", 0, 100, 1000,
-                AddDefaultButton.YES, NONE, IGNORE_RANDOMIZE);
+                true, NONE, IGNORE_RANDOMIZE);
         for (int i = 0; i < 5; i++) {
             param.randomize();
             assertThat(param.getValue()).isEqualTo(100);

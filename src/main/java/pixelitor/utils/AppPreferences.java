@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,14 +21,14 @@ import pixelitor.NewImage;
 import pixelitor.Pixelitor;
 import pixelitor.TipsOfTheDay;
 import pixelitor.colors.FgBgColors;
-import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.gui.Desktop;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.IntTextField;
 import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.history.History;
-import pixelitor.io.FileChoosers;
+import pixelitor.io.Directories;
 import pixelitor.layers.LayerButtonLayout;
 import pixelitor.menus.file.RecentFileInfo;
 import pixelitor.menus.file.RecentFilesMenu;
@@ -209,11 +209,11 @@ public final class AppPreferences {
     }
 
     private static void saveLastOpenDir() {
-        saveDir(FileChoosers.getLastOpenDir(), LAST_OPEN_DIR_KEY);
+        saveDir(Directories.getLastOpenDir(), LAST_OPEN_DIR_KEY);
     }
 
     private static void saveLastSaveDir() {
-        saveDir(FileChoosers.getLastSaveDir(), LAST_SAVE_DIR_KEY);
+        saveDir(Directories.getLastSaveDir(), LAST_SAVE_DIR_KEY);
     }
 
     private static void saveDir(File f, String key) {
@@ -237,8 +237,7 @@ public final class AppPreferences {
     }
 
     public static int loadThumbSize() {
-        int retVal = mainUserNode.getInt(THUMB_SIZE_KEY, LayerButtonLayout.SMALL_THUMB_SIZE);
-        return retVal;
+        return mainUserNode.getInt(THUMB_SIZE_KEY, LayerButtonLayout.SMALL_THUMB_SIZE);
     }
 
     private static void saveThumbSize() {
@@ -392,39 +391,38 @@ public final class AppPreferences {
 
     public static class Panel extends JPanel {
         private final JTextField undoLevelsTF;
-        private final JComboBox<IntChoiceParam.Value> thumbSizeCB;
+        private final JComboBox<Value> thumbSizeCB;
 
         Panel() {
             setLayout(new GridBagLayout());
-            GridBagHelper gridBagHelper = new GridBagHelper(this);
+            GridBagHelper gbh = new GridBagHelper(this);
 
             undoLevelsTF = new IntTextField(3);
             undoLevelsTF.setText(String.valueOf(History.getUndoLevels()));
-            gridBagHelper.addLabelWithControl("Undo/Redo Levels: ", undoLevelsTF);
+            gbh.addLabelWithControl("Undo/Redo Levels: ", undoLevelsTF);
 
-            IntChoiceParam.Value[] thumbSizes = {
-                    new IntChoiceParam.Value("24x24 pixels", 24),
-                    new IntChoiceParam.Value("48x48 pixels", 48),
-                    new IntChoiceParam.Value("72x72 pixels", 72),
-                    new IntChoiceParam.Value("96x96 pixels", 96),
+            Value[] thumbSizes = {
+                    new Value("24x24 pixels", 24),
+                    new Value("48x48 pixels", 48),
+                    new Value("72x72 pixels", 72),
+                    new Value("96x96 pixels", 96),
             };
             thumbSizeCB = new JComboBox<>(thumbSizes);
 
             int currentSize = LayerButtonLayout.getThumbSize();
             thumbSizeCB.setSelectedIndex(currentSize / 24 - 1);
 
-            gridBagHelper.addLabelWithControl("Layer/Mask Thumb Sizes: ", thumbSizeCB);
+            gbh.addLabelWithControl("Layer/Mask Thumb Sizes: ", thumbSizeCB);
             thumbSizeCB.addActionListener(e -> updateThumbSize());
         }
 
         private int getUndoLevels() {
             String s = undoLevelsTF.getText();
-            int retVal = Integer.parseInt(s);
-            return retVal;
+            return Integer.parseInt(s);
         }
 
         private void updateThumbSize() {
-            int newSize = ((IntChoiceParam.Value) thumbSizeCB.getSelectedItem()).getIntValue();
+            int newSize = ((Value) thumbSizeCB.getSelectedItem()).getValue();
             LayerButtonLayout.setThumbSize(newSize);
         }
 

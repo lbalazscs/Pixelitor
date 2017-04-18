@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,6 @@ import java.awt.event.MouseEvent;
 public class ColorSwatchButton extends JComponent {
     public static final int SIZE = 32;
 
-    private final ColorSwatchClickHandler clickHandler;
     // Grid positions.
     private final int xPos;
     private final int yPos;
@@ -43,7 +42,6 @@ public class ColorSwatchButton extends JComponent {
     public ColorSwatchButton(Color color, ColorSwatchClickHandler clickHandler, int xPos, int yPos) {
         assert clickHandler != null;
 
-        this.clickHandler = clickHandler;
         this.xPos = xPos;
         this.yPos = yPos;
         setColor(color);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.RangeParam;
 
 import java.awt.Shape;
@@ -41,15 +42,15 @@ public class FlowerOfLife extends ShapeFilter {
 
     private final RangeParam radius = new RangeParam("Radius", 1, 50, 100);
     private final RangeParam iterations = new RangeParam("Iterations", 1, 3, 10);
-    private final IntChoiceParam grid = new IntChoiceParam("Grid Type", new IntChoiceParam.Value[]{
-            new IntChoiceParam.Value("Triangular", GRID_TYPE_TRIANGULAR),
-            new IntChoiceParam.Value("Square", GRID_TYPE_SQUARE),
-            new IntChoiceParam.Value("Square 2", GRID_TYPE_SQUARE_2)
+    private final IntChoiceParam grid = new IntChoiceParam("Grid Type", new Value[]{
+            new Value("Triangular", GRID_TYPE_TRIANGULAR),
+            new Value("Square", GRID_TYPE_SQUARE),
+            new Value("Square 2", GRID_TYPE_SQUARE_2)
     });
 
     public FlowerOfLife() {
         addParamsToFront(
-                radius.adjustRangeToImageSize(0.2),
+                radius.withAdjustedRange(0.2),
                 iterations,
                 grid);
     }

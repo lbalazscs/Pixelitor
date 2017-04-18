@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -83,7 +83,7 @@ public enum MaskViewMode {
         sub.addActionWithKey(action, keyStroke);
     }
 
-    public JMenuItem createPopupMenuItem(Layer layer) {
+    public void addToMenu(JMenu menu, Layer layer) {
         AbstractAction action = new AbstractAction(guiName) {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -92,7 +92,7 @@ public enum MaskViewMode {
         };
         JMenuItem item = new JMenuItem(action);
         item.setAccelerator(keyStroke);
-        return item;
+        menu.add(item);
     }
 
     public void activate(Layer activeLayer) {

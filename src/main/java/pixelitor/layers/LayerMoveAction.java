@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -67,8 +67,8 @@ public class LayerMoveAction extends AbstractAction implements ImageSwitchListen
         if (comp != null) {
             int activeLayerIndex = comp.getActiveLayerIndex();
             if (up) {
-                int nrLayers = comp.getNrLayers();
-                if (activeLayerIndex < nrLayers - 1) {
+                int numLayers = comp.getNumLayers();
+                if (activeLayerIndex < numLayers - 1) {
                     setEnabled(true);
                 } else {
                     setEnabled(false);

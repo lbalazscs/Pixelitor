@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,12 +36,13 @@ public class Sphere3D extends FilterWithParametrizedGUI {
     private final RangeParam beta = new RangeParam("beta", 0, 50, 100);
     private final RangeParam gamma = new RangeParam("gamma", 0, 50, 100);
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
+    private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
     private Sphere3DFilter filter;
 
     public Sphere3D() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
                 center,
                 alpha,
@@ -61,8 +62,7 @@ public class Sphere3D extends FilterWithParametrizedGUI {
         filter.setBeta(beta.getValueAsPercentage());
         filter.setGamma(gamma.getValueAsPercentage());
 
-        filter.setCenterX(center.getRelativeX());
-        filter.setCenterY(center.getRelativeY());
+        filter.setRelCenter(center.getRelativeX(), center.getRelativeY());
         filter.setInterpolation(interpolation.getValue());
         filter.setEdgeAction(TransformFilter.TRANSPARENT);
 

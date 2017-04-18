@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
  */
 public class ImageDabsBrush extends DabsBrush {
     private static final Map<ImageBrushType, BufferedImage> templateImages = new EnumMap<>(ImageBrushType.class);
-    private BufferedImage templateImage;
+    private final BufferedImage templateImage;
     private BufferedImage coloredBrushImage;
     private BufferedImage finalScaledImage;
     private Color lastColor;
@@ -45,11 +45,8 @@ public class ImageDabsBrush extends DabsBrush {
 
         // for each brush type multiple brush instances are created because of the symmetry
         // however the template image can be shared between them
-        templateImage = templateImages.get(imageBrushType);
-        if(templateImage == null) {
-            templateImage = imageBrushType.createBWBrushImage();
-            templateImages.put(imageBrushType, templateImage);
-        }
+        templateImage = templateImages.computeIfAbsent(imageBrushType,
+                ImageBrushType::createBWBrushImage);
     }
 
     @Override

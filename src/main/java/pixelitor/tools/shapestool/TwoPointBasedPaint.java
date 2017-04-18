@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -89,8 +89,7 @@ enum TwoPointBasedPaint {
             Point2D center = userDrag.getCenterPoint();
             UserDrag centerUserDrag = new UserDrag(center.getX(), center.getY(), userDrag.getEndX(), userDrag.getEndY());
 
-            Paint paint = new AngleGradientPaint(centerUserDrag, fgColor, bgColor, MultipleGradientPaint.CycleMethod.NO_CYCLE);
-            return paint;
+            return new AngleGradientPaint(centerUserDrag, fgColor, bgColor, MultipleGradientPaint.CycleMethod.NO_CYCLE);
         }
 
         @Override
@@ -106,8 +105,7 @@ enum TwoPointBasedPaint {
             Point2D center = userDrag.getCenterPoint();
             UserDrag centerUserDrag = new UserDrag(center.getX(), center.getY(), userDrag.getEndX(), userDrag.getEndY());
 
-            Paint paint = new SpiralGradientPaint(true, centerUserDrag, fgColor, bgColor, MultipleGradientPaint.CycleMethod.NO_CYCLE);
-            return paint;
+            return new SpiralGradientPaint(true, centerUserDrag, fgColor, bgColor, MultipleGradientPaint.CycleMethod.NO_CYCLE);
         }
 
         @Override
@@ -123,8 +121,7 @@ enum TwoPointBasedPaint {
             Point2D center = userDrag.getCenterPoint();
             UserDrag centerUserDrag = new UserDrag(center.getX(), center.getY(), userDrag.getEndX(), userDrag.getEndY());
 
-            Paint paint = new DiamondGradientPaint(centerUserDrag, fgColor, bgColor, MultipleGradientPaint.CycleMethod.NO_CYCLE);
-            return paint;
+            return new DiamondGradientPaint(centerUserDrag, fgColor, bgColor, MultipleGradientPaint.CycleMethod.NO_CYCLE);
         }
 
         @Override
@@ -134,8 +131,7 @@ enum TwoPointBasedPaint {
     }, FOREGROUND {
         @Override
         protected Paint getPaint(UserDrag userDrag) {
-            Color fgColor = FgBgColors.getFG();
-            return fgColor;
+            return FgBgColors.getFG();
         }
 
         @Override
@@ -145,8 +141,7 @@ enum TwoPointBasedPaint {
     }, BACKGROUND {
         @Override
         protected Paint getPaint(UserDrag userDrag) {
-            Color bgColor = FgBgColors.getBG();
-            return bgColor;
+            return FgBgColors.getBG();
         }
 
         @Override

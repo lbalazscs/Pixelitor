@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,7 @@ import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.RangeWithColorsParam;
@@ -51,6 +52,7 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
 public class ParamTest extends FilterWithParametrizedGUI {
     public ParamTest() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(getTestParams()));
     }
 
@@ -59,8 +61,6 @@ public class ParamTest extends FilterWithParametrizedGUI {
         if ((Build.CURRENT.isDevelopment()) && (!RandomGUITest.isRunning())) {
             System.out.println("ParamTest.doTransform CALLED");
         }
-
-//        Thread.dumpStack();
 
         dest = ImageUtils.copyImage(src);
         return dest;
@@ -75,9 +75,9 @@ public class ParamTest extends FilterWithParametrizedGUI {
                 new RangeParam("RangeParam", 0, 50, 100),
                 new RangeWithColorsParam(RED, BLUE, "RangeWithColorsParam", 0, 50, 100),
                 new ImagePositionParam("ImagePositionParam"),
-                new IntChoiceParam("IntChoiceParam", new IntChoiceParam.Value[]{
-                        new IntChoiceParam.Value("value 1", 1),
-                        new IntChoiceParam.Value("value 2", 2),
+                new IntChoiceParam("IntChoiceParam", new Value[]{
+                        new Value("value 1", 1),
+                        new Value("value 2", 2),
                 }),
                 new ColorParam("ColorParam:", WHITE, FREE_OPACITY),
                 new AngleParam("AngleParam", 0),

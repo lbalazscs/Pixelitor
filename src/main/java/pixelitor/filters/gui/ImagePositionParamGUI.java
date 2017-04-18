@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,7 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.NORTH;
 /**
  * The GUI component for an ImagePositionParam
  */
-public class ImagePositionPanel extends JPanel implements ParamGUI {
+public class ImagePositionParamGUI extends JPanel implements ParamGUI {
     private final ImagePositionParam model;
     private final RangeParam xSliderModel;
     private final RangeParam ySliderModel;
@@ -37,11 +37,11 @@ public class ImagePositionPanel extends JPanel implements ParamGUI {
     private final JComponent xSlider;
     private final JComponent ySlider;
 
-    public ImagePositionPanel(ImagePositionParam model, int defaultX, int defaultY) {
+    public ImagePositionParamGUI(ImagePositionParam model, int defaultX, int defaultY) {
         this.model = model;
 
-        xSliderModel = new RangeParam("Horizontal Position (%)", 0, defaultX, 100, AddDefaultButton.YES, NORTH);
-        ySliderModel = new RangeParam("Vertical Position (%)", 0, defaultY, 100, AddDefaultButton.YES, NORTH);
+        xSliderModel = new RangeParam("Horizontal Position (%)", 0, defaultX, 100, true, NORTH);
+        ySliderModel = new RangeParam("Vertical Position (%)", 0, defaultY, 100, true, NORTH);
 
         setBorder(BorderFactory.createTitledBorder(model.getName()));
         setLayout(new BorderLayout(10, 0));
@@ -52,17 +52,21 @@ public class ImagePositionPanel extends JPanel implements ParamGUI {
 
         // add the two sliders
         Box verticalBox = Box.createVerticalBox();
-        xSlider = new SliderSpinner(xSliderModel, NORTH, AddDefaultButton.YES);
+        xSlider = new SliderSpinner(xSliderModel, NORTH, true);
         verticalBox.add(xSlider);
-        ySlider = new SliderSpinner(ySliderModel, NORTH, AddDefaultButton.YES);
+        ySlider = new SliderSpinner(ySliderModel, NORTH, true);
         verticalBox.add(ySlider);
         add(verticalBox, BorderLayout.CENTER);
 
-        Dimension preferredSize = getPreferredSize();
-        Dimension sliderPreferredSize = xSlider.getPreferredSize();
-        setPreferredSize(new Dimension(sliderPreferredSize.width, preferredSize.height));
+        setupPreferredSize();
 
         linkSliderChangesToModel(model);
+    }
+
+    private void setupPreferredSize() {
+        Dimension origPS = getPreferredSize();
+        Dimension sliderPS = xSlider.getPreferredSize();
+        setPreferredSize(new Dimension(sliderPS.width, origPS.height));
     }
 
     // if one of the sliders was moved by the users, update the

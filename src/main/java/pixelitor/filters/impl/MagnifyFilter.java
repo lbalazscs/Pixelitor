@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 package pixelitor.filters.impl;
 
 import com.jhlabs.image.ImageMath;
-import com.jhlabs.image.TransformFilter;
 import pixelitor.utils.BlurredEllipse;
 
 import java.awt.Shape;
@@ -27,9 +26,7 @@ import java.awt.image.BufferedImage;
 /**
  * The Magnify filter.
  */
-public class MagnifyFilter extends TransformFilter {
-    private float centerX;
-    private float centerY;
+public class MagnifyFilter extends CenteredTransformFilter {
     private float magnification;
 
     private float innerRadiusX;
@@ -41,19 +38,8 @@ public class MagnifyFilter extends TransformFilter {
 
     private BlurredEllipse ellipse;
 
-    private double cx;
-    private double cy;
-
     public MagnifyFilter(String filterName) {
         super(filterName);
-    }
-
-    public void setCenterX(float centerX) {
-        this.centerX = centerX;
-    }
-
-    public void setCenterY(float centerY) {
-        this.centerY = centerY;
     }
 
     public void setInnerRadiusX(float radius) {
@@ -79,11 +65,10 @@ public class MagnifyFilter extends TransformFilter {
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        cx = centerX * src.getWidth();
-        cy = centerY * src.getHeight();
+        // called twice (also in super), but there is no better solution
+        calcAbsoluteCenter(src);
 
         ellipse = new BlurredEllipse(cx, cy, innerRadiusX, innerRadiusY, outerRadiusX, outerRadiusY);
-
         radiusRatio = 1 / magnification;
 
         return super.filter(src, dst);
@@ -98,8 +83,8 @@ public class MagnifyFilter extends TransformFilter {
             out[1] = y;
             return;
         } else if (outside == 0.0) { // innermost region
-            out[0] = (float) (radiusRatio * x + (1 - radiusRatio) * cx);
-            out[1] = (float) (radiusRatio * y + (1 - radiusRatio) * cy);
+            out[0] = radiusRatio * x + (1 - radiusRatio) * cx;
+            out[1] = radiusRatio * y + (1 - radiusRatio) * cy;
             return;
         } else { // between the inner and outer radius
             double simpleX = radiusRatio * x + (1 - radiusRatio) * cx;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.filters.gui;
 
 import pixelitor.filters.Filter;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 
 /**
  * A filter that has a GUI for customization
@@ -32,15 +32,14 @@ public abstract class FilterWithGUI extends Filter {
      * The panel must be created at the moment of this call (cannot be cached)
      * Creating an adjustment panel should also automatically execute the first
      * preview run of this filter based on the default settings
-     * @param layer
      */
-    public abstract AdjustPanel createAdjustPanel(ImageLayer layer);
+    public abstract FilterGUIPanel createGUIPanel(Drawable dr);
 
     @Override
-    public void execute(ImageLayer layer) {
-        layer.startPreviewing();
+    public void execute(Drawable dr) {
+        dr.startPreviewing();
 
-        AdjustPanel p = createAdjustPanel(layer);
-        AdjustDialog.showDialog(p, this, layer);
+        FilterGUIPanel p = createGUIPanel(dr);
+        FilterGUIDialog.showDialog(p, this, dr);
     }
 }

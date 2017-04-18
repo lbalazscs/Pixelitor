@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,9 +21,8 @@ import org.jdesktop.swingx.VerticalLayout;
 import pixelitor.filters.Filter;
 import pixelitor.filters.FilterAction;
 import pixelitor.filters.FilterUtils;
-import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.FilterWithGUI;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 
 import javax.swing.*;
 import java.awt.FlowLayout;
@@ -50,7 +49,7 @@ public enum BatchFilterWizardPage implements WizardPage {
         }
 
         @Override
-        public JComponent getPanel(Wizard wizard, ImageLayer layer) {
+        public JComponent getPanel(Wizard wizard, Drawable dr) {
             JPanel p = new JPanel(new FlowLayout());
             p.add(new JLabel("Select Filter:"));
             if (filtersCB == null) {
@@ -70,16 +69,17 @@ public enum BatchFilterWizardPage implements WizardPage {
         }
 
         @Override
-        public void onWizardCancelled(ImageLayer layer) {
+        public void onWizardCanceled(Drawable dr) {
 
         }
 
         @Override
-        public void onMovingToTheNext(Wizard wizard, ImageLayer layer) {
+        public void onMovingToTheNext(Wizard wizard, Drawable dr) {
             FilterAction selectedItem = (FilterAction) filtersCB.getSelectedItem();
             Filter filter = selectedItem.getFilter();
-            BatchFilterConfig config = getConfig(wizard);
-            config.setFilter(filter);
+
+            ((BatchFilterWizard) wizard).setFilter(filter);
+
             openSaveDirsPanel.saveValues();
         }
     }, FILTER_GUI {
@@ -94,32 +94,25 @@ public enum BatchFilterWizardPage implements WizardPage {
         }
 
         @Override
-        public JComponent getPanel(Wizard wizard, ImageLayer layer) {
+        public JComponent getPanel(Wizard wizard, Drawable dr) {
             // we get here only if the chosen filter is a filter with GUI
-            FilterWithGUI filter = (FilterWithGUI) getConfig(wizard).getFilter();
+            FilterWithGUI filter = (FilterWithGUI) ((BatchFilterWizard) wizard).getFilter();
 
-            layer.startPreviewing();
-            AdjustPanel adjustPanel = filter.createAdjustPanel(layer);
+            dr.startPreviewing();
 
-            return adjustPanel;
+            return filter.createGUIPanel(dr);
         }
 
         @Override
-        public void onWizardCancelled(ImageLayer layer) {
+        public void onWizardCanceled(Drawable dr) {
             // we get here only if the chosen filter is a filter with GUI
-//            FilterWithGUI filter = (FilterWithGUI) getConfig(wizard).getFilter();
-            layer.cancelPressedInDialog();
+            dr.onDialogCanceled();
         }
 
         @Override
-        public void onMovingToTheNext(Wizard wizard, ImageLayer layer) {
+        public void onMovingToTheNext(Wizard wizard, Drawable dr) {
             // cancel the previewing
-            onWizardCancelled(layer);
+            onWizardCanceled(dr);
         }
     };
-
-    private static BatchFilterConfig getConfig(Wizard wizard) {
-        // all wizards here can be casted to BatchFilterWizard
-        return ((BatchFilterWizard) wizard).getConfig();
-    }
 }

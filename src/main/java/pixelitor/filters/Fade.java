@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,6 +42,7 @@ public class Fade extends FilterWithParametrizedGUI {
 
     public Fade() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
                 opacityParam
 //                blendingModeParam
@@ -54,7 +55,7 @@ public class Fade extends FilterWithParametrizedGUI {
         assert History.canFade();
 
         BufferedImage previous = ImageComponents.getActiveComp()
-                .map(Composition::getActiveMaskOrImageLayerOrNull)
+                .map(Composition::getActiveDrawable)
                 .flatMap(History::getPreviousEditForFade)
                 .orElseThrow(() -> new IllegalStateException("no FadeableEdit"))
                 .getBackupImage();

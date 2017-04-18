@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,14 +41,15 @@ public class JHWrapAroundArc extends FilterWithParametrizedGUI {
     private final RangeParam spread = new RangeParam("Divide Angle", 1, 2, 24);
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
-    private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
+    private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
+    private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
     public JHWrapAroundArc() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
-                radius.adjustRangeToImageSize(1.0),
-                thickness.adjustRangeToImageSize(0.5),
+                radius.withAdjustedRange(1.0),
+                thickness.withAdjustedRange(0.5),
                 spread,
                 rotateResult,
                 center,

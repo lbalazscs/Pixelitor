@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -96,7 +96,7 @@ public class ScreenCaptureAction extends AbstractAction {
             String name = "Screen Capture " + captureCount;
             Composition comp = Composition.fromImage(screenCapture, null, name);
             comp.setDirty(true);
-            AppLogic.addComposition(comp);
+            AppLogic.addCompAsNewImage(comp);
 
             captureCount++;
         } catch (Exception ex) {

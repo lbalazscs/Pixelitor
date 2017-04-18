@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,8 +21,7 @@ import pixelitor.gui.ImageComponents;
 import pixelitor.history.FadeableEdit;
 import pixelitor.history.History;
 import pixelitor.layers.DeleteActiveLayerAction;
-import pixelitor.layers.ImageLayer;
-import pixelitor.layers.Layer;
+import pixelitor.layers.Drawable;
 import pixelitor.selection.SelectionActions;
 import pixelitor.utils.Utils;
 
@@ -50,26 +49,26 @@ public final class ConsistencyChecks {
     }
 
     public static boolean fadeCheck(Composition comp) {
-        ImageLayer layer = comp.getActiveMaskOrImageLayerOrNull();
-        if (layer == null) {
+        Drawable dr = comp.getActiveDrawableOrNull();
+        if (dr == null) {
             // nothing to check
             return true;
         }
-        return fadeCheck(layer);
+        return fadeCheck(dr);
     }
 
     /**
      * Checks whether Fade would work now
      */
     @SuppressWarnings("SameReturnValue")
-    public static boolean fadeCheck(ImageLayer layer) {
-        assert layer != null;
-        if (!History.canFade(layer)) {
+    public static boolean fadeCheck(Drawable dr) {
+        assert dr != null;
+        if (!History.canFade(dr)) {
             return true;
         }
-        Optional<FadeableEdit> edit = History.getPreviousEditForFade(layer);
+        Optional<FadeableEdit> edit = History.getPreviousEditForFade(dr);
         if (edit.isPresent()) {
-            BufferedImage current = layer.getImageOrSubImageIfSelected(false, true);
+            BufferedImage current = dr.getImageOrSubImageIfSelected(false, true);
 
             FadeableEdit fadeableEdit = edit.get();
             BufferedImage previous = fadeableEdit.getBackupImage();
@@ -84,7 +83,7 @@ public final class ConsistencyChecks {
                 Utils.debugImage(current, "current");
                 Utils.debugImage(previous, "previous");
                 String lastFadeableOp = History.getLastEditName();
-                Composition comp = layer.getComp();
+                Composition comp = dr.getComp();
 
                 String historyCompName = fadeableEdit.getComp().getName();
                 String activeCompName = ImageComponents.getActiveCompOrNull().getName();
@@ -122,28 +121,13 @@ public final class ConsistencyChecks {
     }
 
     public static boolean imageCoversCanvasCheck(Composition comp) {
-        int nrLayers = comp.getNrLayers();
-        for (int i = 0; i < nrLayers; i++) {
-            Layer layer = comp.getLayer(i);
-            if (layer instanceof ImageLayer) {
-                boolean b = imageCoversCanvasCheck((ImageLayer) layer);
-                if (!b) {
-                    return false;
-                }
-            }
-            if (layer.hasMask()) {
-                boolean b = imageCoversCanvasCheck(layer.getMask());
-                if (!b) {
-                    return false;
-                }
-            }
-        }
+        comp.forEachDrawable(ConsistencyChecks::imageCoversCanvasCheck);
         return true;
     }
 
-    public static boolean imageCoversCanvasCheck(ImageLayer layer) {
-        Composition comp = layer.getComp();
-        BufferedImage image = layer.getImage();
+    public static boolean imageCoversCanvasCheck(Drawable dr) {
+        Composition comp = dr.getComp();
+        BufferedImage image = dr.getImage();
 
         Canvas canvas = comp.getCanvas();
         if (canvas == null) {
@@ -153,33 +137,33 @@ public final class ConsistencyChecks {
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
 
-        int txAbs = -layer.getTX();
+        int txAbs = -dr.getTX();
 
         int imageWidth = image.getWidth();
         if (txAbs + canvasWidth > imageWidth) {
-            return throwImageDoesNotCoverCanvasException(layer);
+            return throwImageDoesNotCoverCanvasException(dr);
         }
 
-        int tyAbs = -layer.getTY();
+        int tyAbs = -dr.getTY();
         int imageHeight = image.getHeight();
 
         if (tyAbs + canvasHeight > imageHeight) {
-            return throwImageDoesNotCoverCanvasException(layer);
+            return throwImageDoesNotCoverCanvasException(dr);
         }
 
         return true;
     }
 
-    private static boolean throwImageDoesNotCoverCanvasException(ImageLayer layer) {
-        Composition comp = layer.getComp();
-        BufferedImage bufferedImage = layer.getImage();
+    private static boolean throwImageDoesNotCoverCanvasException(Drawable dr) {
+        Composition comp = dr.getComp();
+        BufferedImage bufferedImage = dr.getImage();
         int canvasWidth = comp.getCanvasWidth();
         int canvasHeight = comp.getCanvasHeight();
         int imageWidth = bufferedImage.getWidth();
         int imageHeight = bufferedImage.getHeight();
-        int tx = layer.getTX();
-        int ty = layer.getTY();
-        String className = layer.getClass().getSimpleName();
+        int tx = dr.getTX();
+        int ty = dr.getTY();
+        String className = dr.getClass().getSimpleName();
         String msg = String.format("canvasWidth = %d, canvasHeight = %d, " +
                         "imageWidth = %d, imageHeight = %d, tx = %d, ty = %d, class = %s",
                 canvasWidth, canvasHeight, imageWidth, imageHeight, tx, ty, className);
@@ -201,14 +185,14 @@ public final class ConsistencyChecks {
 
         boolean enabled = action.isEnabled();
 
-        int nrLayers = comp.getNrLayers();
+        int numLayers = comp.getNumLayers();
         if (enabled) {
-            if (nrLayers <= 1) {
-                throw new IllegalStateException("delete layer enabled for " + comp.getName() + ", but nrLayers = " + nrLayers);
+            if (numLayers <= 1) {
+                throw new IllegalStateException("delete layer enabled for " + comp.getName() + ", but numLayers = " + numLayers);
             }
         } else { // disabled
-            if (nrLayers >= 2) {
-                throw new IllegalStateException("delete layer disabled for " + comp.getName() + ", but nrLayers = " + nrLayers);
+            if (numLayers >= 2) {
+                throw new IllegalStateException("delete layer disabled for " + comp.getName() + ", but numLayers = " + numLayers);
             }
         }
         return true;

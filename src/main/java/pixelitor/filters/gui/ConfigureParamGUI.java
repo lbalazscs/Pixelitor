@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,21 +21,25 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.util.function.Function;
 
+/**
+ * A button with the "Configure..." text
+ */
 public class ConfigureParamGUI extends JPanel implements ParamGUI {
     private final JButton configureButton;
     private final DefaultButton defaultButton;
 
     public ConfigureParamGUI(Function<JDialog, JDialog> dialogFactory, DefaultButton defaultButton) {
         super(new BorderLayout());
+
         this.defaultButton = defaultButton;
         configureButton = new JButton("Configure...");
+        add(configureButton, BorderLayout.CENTER);
+        add(defaultButton, BorderLayout.EAST);
         configureButton.addActionListener(e -> {
             JDialog owner = (JDialog) SwingUtilities.getWindowAncestor(configureButton);
             JDialog dialog = dialogFactory.apply(owner);
             dialog.setVisible(true);
         });
-        add(configureButton, BorderLayout.CENTER);
-        add(defaultButton, BorderLayout.EAST);
     }
 
     @Override

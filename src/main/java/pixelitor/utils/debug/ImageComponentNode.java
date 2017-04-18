@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.utils.debug;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
-import pixelitor.gui.InternalImageFrame;
+import pixelitor.gui.ImageFrame;
 
 /**
  * A debugging node for an ImageComponent
@@ -41,11 +41,11 @@ public class ImageComponentNode extends DebugNode {
         int height = ic.getHeight();
         addIntChild("ic height", height);
 
-        InternalImageFrame internalFrame = ic.getInternalFrame();
-        int internalFrameWidth = internalFrame.getWidth();
-        addIntChild("internalFrameWidth", internalFrameWidth);
-        int internalFrameHeight = internalFrame.getHeight();
-        addIntChild("internalFrameHeight", internalFrameHeight);
+        ImageFrame frame = ic.getFrame();
+        int frameWidth = frame.getWidth();
+        addIntChild("frameWidth", frameWidth);
+        int frameHeight = frame.getHeight();
+        addIntChild("frameHeight", frameHeight);
 
         addStringChild("zoom level", ic.getZoomLevel().toString());
         Canvas canvas = ic.getCanvas();
@@ -55,7 +55,7 @@ public class ImageComponentNode extends DebugNode {
         addIntChild("zoomedCanvasHeight", zoomedCanvasHeight);
 //        boolean bigCanvas = ic.isBigCanvas();
 //        addBooleanChild("bigCanvas", bigCanvas);
-        boolean optimizedDrawingEnabled = ic.getInternalFrame().isOptimizedDrawingEnabled();
+        boolean optimizedDrawingEnabled = ic.getFrame().isOptimizedDrawingEnabled();
         addBooleanChild("optimizedDrawingEnabled", optimizedDrawingEnabled);
     }
 }

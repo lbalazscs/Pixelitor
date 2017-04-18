@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.filters.jhlabsproxies;
 
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
@@ -41,19 +42,20 @@ public class Morphology extends FilterWithParametrizedGUI {
     private static final int OP_CLOSE = 11;
 
     private final RangeParam radius = new RangeParam("Radius", 1, 1, 20);
-    private final IntChoiceParam kernel = new IntChoiceParam("Kernel Shape", new IntChoiceParam.Value[]{
-            new IntChoiceParam.Value("Diamond", MorphologyFilter.KERNEL_DIAMOND),
-            new IntChoiceParam.Value("Square", MorphologyFilter.KERNEL_SQUARE),
+    private final IntChoiceParam kernel = new IntChoiceParam("Kernel Shape", new Value[]{
+            new Value("Diamond", MorphologyFilter.KERNEL_DIAMOND),
+            new Value("Square", MorphologyFilter.KERNEL_SQUARE),
     });
-    private final IntChoiceParam op = new IntChoiceParam("Operation", new IntChoiceParam.Value[]{
-            new IntChoiceParam.Value("Maximum (Dilate)", OP_DILATE),
-            new IntChoiceParam.Value("Minimum (Erode)", OP_ERODE),
-            new IntChoiceParam.Value("Open (Erode, then Dilate)", OP_OPEN),
-            new IntChoiceParam.Value("Close (Dilate, then Erode)", OP_CLOSE),
+    private final IntChoiceParam op = new IntChoiceParam("Operation", new Value[]{
+            new Value("Maximum (Dilate)", OP_DILATE),
+            new Value("Minimum (Erode)", OP_ERODE),
+            new Value("Open (Erode, then Dilate)", OP_OPEN),
+            new Value("Close (Dilate, then Erode)", OP_CLOSE),
     });
 
     public Morphology() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(op, kernel, radius));
     }
 

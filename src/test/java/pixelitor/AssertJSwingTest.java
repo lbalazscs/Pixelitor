@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,8 +35,8 @@ import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.io.FileChoosers;
-import pixelitor.layers.ImageLayer;
+import pixelitor.io.Directories;
+import pixelitor.layers.Drawable;
 import pixelitor.layers.LayerButton;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.menus.view.ZoomControl;
@@ -163,7 +163,7 @@ public class AssertJSwingTest {
     }
 
     private void reinitializeTesting() {
-        if (ImageComponents.getNrOfOpenImages() > 0) {
+        if (ImageComponents.getNumOpenImages() > 0) {
             closeAll();
         }
         openFile("a.jpg");
@@ -845,14 +845,14 @@ public class AssertJSwingTest {
     }
 
     private void testCloseAll() {
-        assertThat(ImageComponents.getNrOfOpenImages() > 1);
+        assertThat(ImageComponents.getNumOpenImages() > 1);
 
         closeAll();
     }
 
     private void testBatchResize() {
-        FileChoosers.setLastOpenDir(inputDir);
-        FileChoosers.setLastSaveDir(batchResizeOutputDir);
+        Directories.setLastOpenDir(inputDir);
+        Directories.setLastSaveDir(batchResizeOutputDir);
         runMenuCommand("Batch Resize...");
         DialogFixture dialog = findDialogByTitle("Batch Resize");
 
@@ -862,8 +862,8 @@ public class AssertJSwingTest {
     }
 
     private void testBatchFilter() {
-        FileChoosers.setLastOpenDir(inputDir);
-        FileChoosers.setLastSaveDir(batchFilterOutputDir);
+        Directories.setLastOpenDir(inputDir);
+        Directories.setLastSaveDir(batchFilterOutputDir);
 
         assertThat(ImageComponents.hasActiveImage()).isTrue();
         runMenuCommand("Batch Filter...");
@@ -878,7 +878,7 @@ public class AssertJSwingTest {
     }
 
     private void testExportLayerToPNG() {
-        FileChoosers.setLastSaveDir(baseTestingDir);
+        Directories.setLastSaveDir(baseTestingDir);
         addNewLayer();
         runMenuCommand("Export Layers to PNG...");
         findDialogByTitle("Select Output Folder").button("ok").click();
@@ -917,7 +917,8 @@ public class AssertJSwingTest {
         testScreenCapture(true);
         testScreenCapture(false);
         try {
-            SwingUtilities.invokeAndWait(() -> ImageComponents.setActiveIC(activeIC, true));
+            SwingUtilities.invokeAndWait(
+                    () -> ImageComponents.setActiveIC(activeIC, true));
         } catch (InterruptedException | InvocationTargetException e) {
             e.printStackTrace();
         }
@@ -1573,16 +1574,16 @@ public class AssertJSwingTest {
             altDragTo(300, 300);
         } else {
             ImageComponent ic = ImageComponents.getActiveIC();
-            ImageLayer layer = ic.getComp().getActiveMaskOrImageLayer();
-            int tx = layer.getTX();
-            int ty = layer.getTY();
+            Drawable dr = ic.getComp().getActiveDrawable();
+            int tx = dr.getTX();
+            int ty = dr.getTY();
             assert tx == 0 : "tx = " + tx;
             assert ty == 0 : "ty = " + tx;
 
             dragTo(200, 300);
 
-            tx = layer.getTX();
-            ty = layer.getTY();
+            tx = dr.getTX();
+            ty = dr.getTY();
 
             // The translations will have these values only if we are at 100% zoom!
             assert ic.getZoomLevel() == ZoomLevel.Z100 : "zoom is " + ic.getZoomLevel();
@@ -1895,9 +1896,9 @@ public class AssertJSwingTest {
     }
 
     private void addNewLayer() {
-        int nrLayers = ImageComponents.getActiveCompOrNull().getNrLayers();
+        int numLayers = ImageComponents.getActiveCompOrNull().getNumLayers();
         runMenuCommand("Duplicate Layer");
-        assert numLayersIs(nrLayers + 1);
+        assert numLayersIs(numLayers + 1);
         keyboardInvert();
     }
 
@@ -2101,7 +2102,7 @@ public class AssertJSwingTest {
     }
 
     private static void checkNumOpenImagesIs(int expected) {
-        assertThat(ImageComponents.getNrOfOpenImages()).isEqualTo(expected);
+        assertThat(ImageComponents.getNumOpenImages()).isEqualTo(expected);
     }
 
     private static void processCLArguments(String[] args) {

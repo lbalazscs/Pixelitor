@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.io;
 
-import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.ImagePanel;
 import pixelitor.gui.utils.OKCancelDialog;
@@ -103,7 +102,7 @@ public class OptimizedJpegSavePanel extends JPanel {
     private JPanel createControlsPanel() {
         qualityParam = new RangeParam("JPEG Quality", 1, 60, 100);
         qualityParam.setAdjustmentListener(this::updateAfterPreview);
-        SliderSpinner qualitySpinner = new SliderSpinner(qualityParam, WEST, AddDefaultButton.NO);
+        SliderSpinner qualitySpinner = new SliderSpinner(qualityParam, WEST, false);
         JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         southPanel.add(qualitySpinner);
         sizeLabel = new JLabel();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,12 +19,12 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.FourColorFilter;
 import pixelitor.filters.FilterWithParametrizedGUI;
-import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.ColorParam;
+import pixelitor.filters.gui.FilterGUIPanel;
 import pixelitor.filters.gui.GridAdjustmentPanel;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 
 import java.awt.image.BufferedImage;
 
@@ -49,6 +49,7 @@ public class JHFourColorGradient extends FilterWithParametrizedGUI {
 
     public JHFourColorGradient() {
         super(ShowOriginal.NO);
+
         setParamSet(new ParamSet(
                 northWestParam,
                 northEastParam,
@@ -73,7 +74,7 @@ public class JHFourColorGradient extends FilterWithParametrizedGUI {
     }
 
     @Override
-    public AdjustPanel createAdjustPanel(ImageLayer layer) {
-        return new GridAdjustmentPanel(this, layer, true, ShowOriginal.NO);
+    public FilterGUIPanel createGUIPanel(Drawable dr) {
+        return new GridAdjustmentPanel(this, dr, true, ShowOriginal.NO);
     }
 }

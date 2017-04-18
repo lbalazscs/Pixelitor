@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,10 +37,9 @@ public enum StrokeType {
     BASIC("Basic") {
         @Override
         public Stroke getStroke(float width, int cap, int join, float[] dashFloats) {
-            Stroke stroke = new BasicStroke(width, cap, join, 1.5f,
+            return new BasicStroke(width, cap, join, 1.5f,
                     dashFloats,
                     0.0f);
-            return stroke;
         }
 
         @Override
@@ -53,8 +52,7 @@ public enum StrokeType {
         @Override
         public Stroke getStroke(float width, int cap, int join, float[] dashFloats) {
             tmp = BASIC.getStroke(width, cap, join, dashFloats);
-            Stroke stroke = new ZigzagStroke(tmp, width, width);
-            return stroke;
+            return new ZigzagStroke(tmp, width, width);
         }
 
         @Override
@@ -89,7 +87,6 @@ public enum StrokeType {
             }
         }
 
-        @SuppressWarnings("RedundantMethodOverride")
         @Override
         public Stroke getInnerStroke() {
             return null; // TODO this should have one
@@ -122,10 +119,9 @@ public enum StrokeType {
     }, OUTLINE("Outline") {
         @Override
         public Stroke getStroke(float width, int cap, int join, float[] dashFloats) {
-            Stroke stroke = new CompositeStroke(
+            return new CompositeStroke(
                     new BasicStroke(width, cap, join),
                     innerOutlineStroke);
-            return stroke;
         }
 
         @Override

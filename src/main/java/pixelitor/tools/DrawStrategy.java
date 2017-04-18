@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.tools;
 
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
 
@@ -28,39 +28,38 @@ import java.awt.image.BufferedImage;
 public enum DrawStrategy {
     TMP_LAYER {
         @Override
-        public Graphics2D createDrawGraphics(ImageLayer layer, Composite composite) {
-            return layer.createTmpDrawingLayer(composite).getGraphics();
+        public Graphics2D createDrawGraphics(Drawable dr, Composite composite) {
+            return dr.createTmpDrawingLayer(composite).getGraphics();
         }
 
         @Override
-        public void prepareBrushStroke(ImageLayer layer) {
+        public void prepareBrushStroke(Drawable dr) {
 
         }
 
         @Override
-        public void finishBrushStroke(ImageLayer layer) {
-            layer.mergeTmpDrawingLayerDown();
+        public void finishBrushStroke(Drawable dr) {
+            dr.mergeTmpDrawingLayerDown();
         }
 
         @Override
-        public BufferedImage getOriginalImage(ImageLayer layer, AbstractBrushTool tool) {
-            // it can simply return the layer image because
+        public BufferedImage getOriginalImage(Drawable dr, AbstractBrushTool tool) {
+            // it can simply return the drawable image because
             // the drawing was on the temporary layer
-            return layer.getImage();
+            return dr.getImage();
         }
     }, DIRECT {
         private BufferedImage copyBeforeStart;
 
         @Override
-        public Graphics2D createDrawGraphics(ImageLayer layer, Composite composite) {
-            BufferedImage drawImage = layer.getCanvasSizedSubImage();
-            Graphics2D g = drawImage.createGraphics();
-            return g;
+        public Graphics2D createDrawGraphics(Drawable dr, Composite composite) {
+            BufferedImage drawImage = dr.getCanvasSizedSubImage();
+            return drawImage.createGraphics();
         }
 
         @Override
-        public void prepareBrushStroke(ImageLayer layer) {
-            BufferedImage image = layer.getImage();
+        public void prepareBrushStroke(Drawable dr) {
+            BufferedImage image = dr.getImage();
 
             assert Utils.checkRasterMinimum(image);
 
@@ -68,13 +67,13 @@ public enum DrawStrategy {
         }
 
         @Override
-        public void finishBrushStroke(ImageLayer layer) {
+        public void finishBrushStroke(Drawable dr) {
             copyBeforeStart.flush();
             copyBeforeStart = null;
         }
 
         @Override
-        public BufferedImage getOriginalImage(ImageLayer layer, AbstractBrushTool tool) {
+        public BufferedImage getOriginalImage(Drawable dr, AbstractBrushTool tool) {
             if (copyBeforeStart == null) {
                 throw new IllegalStateException("copyBeforeStart is null for " + tool.getName());
             }
@@ -83,14 +82,14 @@ public enum DrawStrategy {
         }
     };
 
-    public abstract Graphics2D createDrawGraphics(ImageLayer layer, Composite composite);
+    public abstract Graphics2D createDrawGraphics(Drawable dr, Composite composite);
 
-    public abstract void prepareBrushStroke(ImageLayer layer);
+    public abstract void prepareBrushStroke(Drawable dr);
 
-    public abstract void finishBrushStroke(ImageLayer layer);
+    public abstract void finishBrushStroke(Drawable dr);
 
     /**
      * Returns the original (untouched) image for undo
      */
-    public abstract BufferedImage getOriginalImage(ImageLayer layer, AbstractBrushTool tool);
+    public abstract BufferedImage getOriginalImage(Drawable dr, AbstractBrushTool tool);
 }

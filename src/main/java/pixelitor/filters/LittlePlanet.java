@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,15 +39,14 @@ public class LittlePlanet extends FilterWithParametrizedGUI {
     private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 300);
     private final RangeParam innerZoom = new RangeParam("Inner Zoom (%)", 30, 100, 180);
     private final BooleanParam invert = new BooleanParam("Invert", false);
-
-    private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices(true);
-    private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
-
+    private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction(true);
+    private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
     private LittlePlanetFilter filter;
 
     public LittlePlanet() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
                 rotateResult,
                 zoom,
@@ -70,9 +69,7 @@ public class LittlePlanet extends FilterWithParametrizedGUI {
         filter.setRotateResult(rotateResult.getValueInIntuitiveRadians());
         filter.setInverted(invert.isChecked());
 
-        filter.setCenterX(center.getRelativeX());
-        filter.setCenterY(center.getRelativeY());
-
+        filter.setRelCenter(center.getRelativeX(), center.getRelativeY());
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 

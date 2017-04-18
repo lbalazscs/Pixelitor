@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,6 @@ import pixelitor.ConsistencyChecks;
 import pixelitor.filters.comp.Flip;
 import pixelitor.filters.comp.Rotate;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.history.AddToHistory;
 import pixelitor.history.ApplyLayerMaskEdit;
 import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
@@ -34,7 +33,6 @@ import pixelitor.selection.Selection;
 import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
-import pixelitor.utils.UpdateGUI;
 import pixelitor.utils.Utils;
 import pixelitor.utils.VisibleForTesting;
 
@@ -69,7 +67,7 @@ import static pixelitor.layers.ImageLayer.State.SHOW_ORIGINAL;
 /**
  * An image layer.
  * <p>
- * Filter without a dialog are executed as ChangeReason.OP_WITHOUT_DIALOG on the EDT.
+ * Filters without dialog are executed as ChangeReason.OP_WITHOUT_DIALOG on the EDT.
  * The filter asks getFilterSource() in the NORMAL state, and
  * (if there is no selection) the image (not a copy!) is returned as the filter source.
  * The filter transforms the image, and calls filterWithoutDialogFinished
@@ -81,10 +79,10 @@ import static pixelitor.layers.ImageLayer.State.SHOW_ORIGINAL;
  * Before executing a filter with dialog, startNewPreviewFromDialog() is called
  * (does nothing in the current implementation), then the filter is executed,
  * and each execution is followed by changePreviewImage().
- * At the end, depending on the user action, okPressedInDialog()
- * or cancelPressedInDialog() is called.
+ * At the end, depending on the user action, dialogAccepted()
+ * or dialogCanceled() is called.
  */
-public class ImageLayer extends ContentLayer {
+public class ImageLayer extends ContentLayer implements Drawable {
     enum State {
         /**
          * The layer is in normal state when no filter is running on it
@@ -229,9 +227,9 @@ public class ImageLayer extends ContentLayer {
         BufferedImage imageCopy = ImageUtils.copyImage(image);
         String duplicateName = sameName ? name : Utils.createCopyName(name);
         ImageLayer d = new ImageLayer(comp, imageCopy, duplicateName, null);
-        d.setOpacity(opacity, UpdateGUI.NO, AddToHistory.NO, true);
+        d.setOpacity(opacity, false, false, true);
         d.setTranslation(translationX, translationY);
-        d.setBlendingMode(blendingMode, UpdateGUI.NO, AddToHistory.NO, false);
+        d.setBlendingMode(blendingMode, false, false, false);
 
         if (hasMask()) {
             d.addMask(mask.duplicate(d));
@@ -240,22 +238,35 @@ public class ImageLayer extends ContentLayer {
         return d;
     }
 
+    @Override
     public BufferedImage getImage() {
         return image;
     }
 
+    private void setPreviewWithSelection(BufferedImage newImage) {
+        previewImage = replaceSelectedPart(previewImage, newImage);
+    }
+
+    private void setImageWithSelection(BufferedImage newImage) {
+        image = replaceSelectedPart(image, newImage);
+        imageRefChanged();
+
+        comp.imageChanged(INVALIDATE_CACHE);
+    }
+
     /**
      * If there is no selection, returns the newImage
-     * If there is a selection, copies newImage into src according to the selection, and returns src
+     * If there is a selection, copies newImage into src
+     * according to the selection, and returns src
      */
-    private BufferedImage replaceImageWithSelection(BufferedImage src, BufferedImage newImage) {
+    private BufferedImage replaceSelectedPart(BufferedImage src, BufferedImage newImg) {
         assert src != null;
-        assert newImage != null;
-        assert Utils.checkRasterMinimum(newImage);
+        assert newImg != null;
+        assert Utils.checkRasterMinimum(newImg);
 
         Shape selectionShape = comp.getSelectionShape();
         if (selectionShape == null) {
-            return newImage;
+            return newImg;
         } else {
             // the argument image pixels will replace the old ones only where selected
             Graphics2D g = src.createGraphics();
@@ -263,26 +274,16 @@ public class ImageLayer extends ContentLayer {
             g.setComposite(AlphaComposite.Src);
             g.setClip(selectionShape);
             Rectangle bounds = selectionShape.getBounds();
-            g.drawImage(newImage, bounds.x, bounds.y, null);
+            g.drawImage(newImg, bounds.x, bounds.y, null);
             g.dispose();
             return src;
         }
     }
 
-    private void setPreviewWithSelection(BufferedImage newImage) {
-        previewImage = replaceImageWithSelection(previewImage, newImage);
-    }
-
-    private void setImageWithSelection(BufferedImage newImage) {
-        image = replaceImageWithSelection(image, newImage);
-        imageRefChanged();
-
-        comp.imageChanged(INVALIDATE_CACHE);
-    }
-
     /**
      * Sets the image ignoring the selection
      */
+    @Override
     public void setImage(BufferedImage newImage) {
         BufferedImage oldRef = image;
         image = requireNonNull(newImage);
@@ -300,6 +301,7 @@ public class ImageLayer extends ContentLayer {
     /**
      * Replaces the image with history and icon update
      */
+    @Override
     public void replaceImage(BufferedImage newImage, String editName) {
         BufferedImage oldImage = image;
         setImage(newImage);
@@ -312,6 +314,7 @@ public class ImageLayer extends ContentLayer {
     /**
      * Initializes a preview session
      */
+    @Override
     public void startPreviewing() {
         assert state == NORMAL : "state was " + state;
 
@@ -328,7 +331,23 @@ public class ImageLayer extends ContentLayer {
         setState(PREVIEW);
     }
 
-    public void okPressedInDialog(String filterName) {
+    @Override
+    public void stopPreviewing() {
+        assert state == PREVIEW || state == SHOW_ORIGINAL;
+        assert previewImage != null;
+
+        setState(NORMAL);
+
+        // so that layer mask transparency image is regenerated
+        // from the real image after the previews
+        imageRefChanged();
+
+        previewImage = null;
+        comp.imageChanged(FULL);
+    }
+
+    @Override
+    public void onDialogAccepted(String filterName) {
         assert (state == PREVIEW) || (state == SHOW_ORIGINAL);
         assert previewImage != null;
 
@@ -352,34 +371,21 @@ public class ImageLayer extends ContentLayer {
 
         if (wasShowOriginal) {
             comp.imageChanged(FULL);
-//        } else {
-//            comp.imageChanged(INVALIDATE_CACHE);
         }
     }
 
-    public void cancelPressedInDialog() {
+    @Override
+    public void onDialogCanceled() {
         stopPreviewing();
     }
 
-    public void stopPreviewing() {
-        assert state == PREVIEW || state == SHOW_ORIGINAL;
-        assert previewImage != null;
-
-        setState(NORMAL);
-
-        // so that layer mask transparency image is regenerated
-        // from the real image after the previews
-        imageRefChanged();
-
-        previewImage = null;
-        comp.imageChanged(FULL);
-    }
-
+    @Override
     public void tweenCalculatingStarted() {
         assert state == NORMAL;
         startPreviewing();
     }
 
+    @Override
     public void tweenCalculatingEnded() {
         assert state == PREVIEW;
         stopPreviewing();
@@ -388,6 +394,7 @@ public class ImageLayer extends ContentLayer {
     /**
      * @return true if the image has to be repainted
      */
+    @Override
     public void changePreviewImage(BufferedImage img, String filterName, ChangeReason changeReason) {
         // typically we should be in PREVIEW mode
         if (state == SHOW_ORIGINAL) {
@@ -429,6 +436,7 @@ public class ImageLayer extends ContentLayer {
         }
     }
 
+    @Override
     public void filterWithoutDialogFinished(BufferedImage transformedImage, ChangeReason changeReason, String opName) {
         requireNonNull(transformedImage);
 
@@ -471,6 +479,7 @@ public class ImageLayer extends ContentLayer {
         comp.imageChanged(FULL);
     }
 
+    @Override
     public void changeImageUndoRedo(BufferedImage img, IgnoreSelection ignoreSelection) {
         requireNonNull(img);
         assert img != image; // simple filters always change something
@@ -484,10 +493,12 @@ public class ImageLayer extends ContentLayer {
     }
 
     // returns the image bounds relative to the canvas
+    @Override
     public Rectangle getImageBounds() {
         return new Rectangle(translationX, translationY, image.getWidth(), image.getHeight());
     }
 
+    @Override
     public boolean checkImageDoesNotCoverCanvas() {
         Rectangle canvasBounds = comp.getCanvasBounds();
         Rectangle imageBounds = getImageBounds();
@@ -498,23 +509,21 @@ public class ImageLayer extends ContentLayer {
     /**
      * Enlarges the image so that it covers the canvas completely.
      */
+    @Override
     public void enlargeImage(Rectangle canvasBounds) {
         try {
-            Rectangle imageBounds = getImageBounds();
-            Rectangle targetImageBounds = imageBounds.union(canvasBounds);
+            Rectangle current = getImageBounds();
+            Rectangle target = current.union(canvasBounds);
 
-            int newWidth = targetImageBounds.width;
-            int newHeight = targetImageBounds.height;
-
-            BufferedImage bi = createEmptyImageForLayer(newWidth, newHeight);
+            BufferedImage bi = createEmptyImageForLayer(target.width, target.height);
             Graphics2D g = bi.createGraphics();
-            int drawX = imageBounds.x - targetImageBounds.x;
-            int drawY = imageBounds.y - targetImageBounds.y;
+            int drawX = current.x - target.x;
+            int drawY = current.y - target.y;
             g.drawImage(image, drawX, drawY, null);
             g.dispose();
 
-            translationX = targetImageBounds.x - canvasBounds.x;
-            translationY = targetImageBounds.y - canvasBounds.y;
+            translationX = target.x - canvasBounds.x;
+            translationY = target.y - canvasBounds.y;
 
             setImage(bi);
         } catch (OutOfMemoryError e) {
@@ -526,14 +535,15 @@ public class ImageLayer extends ContentLayer {
      * Returns the image shown in the image selector in filter dialogs.
      * The canvas size is not considered, only the selection.
      */
+    @Override
     public BufferedImage getImageForFilterDialogs() {
         Selection selection = comp.getSelection();
         if (selection == null) {
             return image;
         }
 
-        Rectangle selectionBounds = selection.getShapeBounds();
-        return image.getSubimage(selectionBounds.x, selectionBounds.y, selectionBounds.width, selectionBounds.height);
+        Rectangle selBounds = selection.getShapeBounds();
+        return image.getSubimage(selBounds.x, selBounds.y, selBounds.width, selBounds.height);
     }
 
     @Override
@@ -640,11 +650,13 @@ public class ImageLayer extends ContentLayer {
         g.dispose();
     }
 
+    @Override
     public TmpDrawingLayer createTmpDrawingLayer(Composite c) {
         tmpDrawingLayer = new TmpDrawingLayer(this, c);
         return tmpDrawingLayer;
     }
 
+    @Override
     public void mergeTmpDrawingLayerDown() {
         if (tmpDrawingLayer == null) {
             return;
@@ -658,6 +670,7 @@ public class ImageLayer extends ContentLayer {
         tmpDrawingLayer = null;
     }
 
+    @Override
     public BufferedImage createCompositionSizedTmpImage() {
         int width = canvas.getWidth();
         int height = canvas.getHeight();
@@ -666,6 +679,7 @@ public class ImageLayer extends ContentLayer {
         return ImageUtils.createSysCompatibleImage(width, height);
     }
 
+    @Override
     public BufferedImage getCanvasSizedSubImage() {
         if (!isBigLayer()) {
             return image;
@@ -701,6 +715,7 @@ public class ImageLayer extends ContentLayer {
         return subImage;
     }
 
+    @Override
     public BufferedImage getFilterSourceImage() {
         if (filterSourceImage == null) {
             filterSourceImage = getImageOrSubImageIfSelected(false, true);
@@ -711,6 +726,7 @@ public class ImageLayer extends ContentLayer {
     /**
      * If there is a selection, then the filters work on a subimage determined by the selection bounds.
      */
+    @Override
     public BufferedImage getImageOrSubImageIfSelected(boolean copyIfNoSelection, boolean copyAndTranslateIfSelected) {
         Selection selection = comp.getSelection();
         if (selection == null) {
@@ -723,6 +739,7 @@ public class ImageLayer extends ContentLayer {
         return getSelectionSizedPartFrom(image, selection, copyAndTranslateIfSelected);
     }
 
+    @Override
     public BufferedImage getSelectionSizedPartFrom(BufferedImage src, Selection selection, boolean copyAndTranslateIfSelected) {
         assert selection != null;
 
@@ -745,14 +762,14 @@ public class ImageLayer extends ContentLayer {
         if (copyAndTranslateIfSelected) {
             return ImageUtils.getCopiedSubimage(src, bounds);
         } else {
-            BufferedImage retVal = src.getSubimage(bounds.x, bounds.y, bounds.width, bounds.height);
-            return retVal;
+            return src.getSubimage(bounds.x, bounds.y, bounds.width, bounds.height);
         }
     }
 
     /**
      * Returns true if something was changed
      */
+    @Override
     public boolean cropToCanvasSize() {
         int imageWidth = image.getWidth();
         int imageHeight = image.getHeight();
@@ -779,18 +796,18 @@ public class ImageLayer extends ContentLayer {
         Rectangle imageBounds = getImageBounds();
         Rectangle canvasBounds = comp.getCanvasBounds();
 
-        Rectangle transformedCanvasBounds = new Rectangle(
-                canvasBounds.x - west,
-                canvasBounds.y - north,
-                canvasBounds.width + west + east,
-                canvasBounds.height + north + south);
+        int newX = canvasBounds.x - west;
+        int newY = canvasBounds.y - north;
+        int newWidth = canvasBounds.width + west + east;
+        int newHeight = canvasBounds.height + north + south;
+        Rectangle newCanvasBounds = new Rectangle(newX, newY, newWidth, newHeight);
 
-        if (imageBounds.contains(transformedCanvasBounds)) {
+        if (imageBounds.contains(newCanvasBounds)) {
             // even after the canvas enlargement, the image does not need to be enlarged
             translationX += west;
             translationY += north;
         } else {
-            enlargeImage(transformedCanvasBounds);
+            enlargeImage(newCanvasBounds);
         }
     }
 
@@ -848,6 +865,7 @@ public class ImageLayer extends ContentLayer {
         }
     }
 
+    @Override
     public boolean isBigLayer() {
         Rectangle canvasBounds = canvas.getBounds();
         Rectangle layerBounds = getImageBounds();
@@ -959,6 +977,7 @@ public class ImageLayer extends ContentLayer {
         return visibleImage;
     }
 
+    @Override
     public void setShowOriginal(boolean b) {
         if (b) {
             if (state == SHOW_ORIGINAL) {
@@ -983,6 +1002,7 @@ public class ImageLayer extends ContentLayer {
         }
     }
 
+    @Override
     public void debugImages() {
         Utils.debugImage(image, "image");
         if (previewImage != null) {
@@ -1008,13 +1028,15 @@ public class ImageLayer extends ContentLayer {
         // overridden in LayerMask
     }
 
+    @Override
     public void updateIconImage() {
 //        Thread.dumpStack();
 
         getUI().updateLayerIconImage(this);
     }
 
-    public BufferedImage applyLayerMask(AddToHistory addToHistory) {
+    @Override
+    public BufferedImage applyLayerMask(boolean addToHistory) {
         // the image reference will not be replaced
         BufferedImage oldImage = ImageUtils.copyImage(image);
 
@@ -1022,7 +1044,7 @@ public class ImageLayer extends ContentLayer {
         MaskViewMode oldMode = comp.getIC().getMaskViewMode();
 
         mask.applyToImage(image);
-        deleteMask(AddToHistory.NO);
+        deleteMask(false);
 
         History.addEdit(addToHistory, () ->
                 new ApplyLayerMaskEdit(comp, this, oldMask, oldImage, oldMode));
@@ -1043,6 +1065,7 @@ public class ImageLayer extends ContentLayer {
         return edit;
     }
 
+    @Override
     @VisibleForTesting
     public BufferedImage getPreviewImage() {
         return previewImage;

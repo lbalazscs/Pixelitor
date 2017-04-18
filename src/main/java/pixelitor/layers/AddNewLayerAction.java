@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,8 @@ import pixelitor.utils.ImageSwitchListener;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
+import static java.awt.event.ActionEvent.CTRL_MASK;
+
 /**
  * An Action that adds a new layer
  */
@@ -34,7 +36,7 @@ public class AddNewLayerAction extends AbstractAction implements ImageSwitchList
 
     private AddNewLayerAction() {
         super("Add New Layer", IconUtils.loadIcon("add_layer.gif"));
-        putValue(Action.SHORT_DESCRIPTION, "<html>Adds a new empty image layer.<br>Ctrl-click to add the new layer bellow the active one.");
+        putValue(SHORT_DESCRIPTION, "<html>Adds a new empty image layer.<br>Ctrl-click to add the new layer bellow the active one.");
         setEnabled(false);
         ImageComponents.addImageSwitchListener(this);
     }
@@ -42,7 +44,7 @@ public class AddNewLayerAction extends AbstractAction implements ImageSwitchList
     @Override
     public void actionPerformed(ActionEvent e) {
         Composition comp = ImageComponents.getActiveCompOrNull();
-        boolean addBellowActive = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
+        boolean addBellowActive = ((e.getModifiers() & CTRL_MASK) == CTRL_MASK);
         comp.addNewEmptyLayer(null, addBellowActive);
     }
 

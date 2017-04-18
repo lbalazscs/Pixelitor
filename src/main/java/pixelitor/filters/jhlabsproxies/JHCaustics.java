@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,11 +19,10 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.CausticsFilter;
 import pixelitor.filters.FilterWithParametrizedGUI;
-import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseActionSetting;
+import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.Color;
@@ -47,7 +46,7 @@ public class JHCaustics extends FilterWithParametrizedGUI {
     private final RangeParam turbulence = new RangeParam("Turbulence", 0, 0, 8);
     private final RangeParam time = new RangeParam("Time", 0, 0, 999);
     private final RangeParam samples = new RangeParam("Samples (Quality)", 1, 1, 10,
-            AddDefaultButton.YES, BORDER, IGNORE_RANDOMIZE);
+            true, BORDER, IGNORE_RANDOMIZE);
 
     private CausticsFilter filter;
 
@@ -56,14 +55,14 @@ public class JHCaustics extends FilterWithParametrizedGUI {
 
         setParamSet(new ParamSet(
                 bgColor,
-                scale.adjustRangeToImageSize(0.5),
+                scale.withAdjustedRange(0.5),
                 brightness,
                 turbulence,
                 time,
                 focus,
                 dispersion,
                 samples
-        ).withAction(new ReseedNoiseActionSetting()));
+        ).withAction(new ReseedNoiseFilterAction()));
     }
 
     @Override

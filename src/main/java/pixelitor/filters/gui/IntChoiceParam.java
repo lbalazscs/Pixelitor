@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,7 +46,7 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
     private Value currentChoice;
 
     private final EventListenerList listenerList = new EventListenerList();
-    private ActionSetting action;
+    private FilterAction action;
 
     public IntChoiceParam(String name, Value[] choices) {
         this(name, choices, ALLOW_RANDOMIZE);
@@ -63,10 +63,10 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
 
     @Override
     public JComponent createGUI() {
-        ChoiceSelector choiceSelector = new ChoiceSelector(this, action);
-        paramGUI = choiceSelector;
+        ComboBoxParamGUI gui = new ComboBoxParamGUI(this, action);
+        paramGUI = gui;
         setParamGUIEnabledState();
-        return choiceSelector;
+        return gui;
     }
 
     @Override
@@ -102,15 +102,16 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
     }
 
     public int getValue() {
-        return currentChoice.getIntValue();
+        return currentChoice.getValue();
     }
 
     public void setCurrentChoice(Value currentChoice, boolean trigger) {
         setSelectedItem(currentChoice, trigger);
     }
 
-    public void setDefaultChoice(Value defaultChoice) {
+    public IntChoiceParam withDefaultChoice(Value defaultChoice) {
         this.defaultChoice = defaultChoice;
+        return this;
     }
 
     @Override
@@ -155,29 +156,25 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
         listenerList.remove(ListDataListener.class, l);
     }
 
-    public IntChoiceParam withAction(ActionSetting action) {
+    public IntChoiceParam withAction(FilterAction action) {
         this.action = action;
         return this;
     }
 
     /**
-     * Represents an integer value with a description
+     * Represents an integer value with a string description
      */
     public static class Value {
-        private final int intValue;
-        private final String description;
+        private final int value;
+        private final String name;
 
-        public Value(String description, int intValue) {
-            this.description = description;
-            this.intValue = intValue;
+        public Value(String name, int value) {
+            this.name = name;
+            this.value = value;
         }
 
-        public int getIntValue() {
-            return intValue;
-        }
-
-        public String getDescription() {
-            return description;
+        public int getValue() {
+            return value;
         }
 
         @Override
@@ -189,25 +186,25 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
                 return false;
             }
 
-            Value value = (Value) o;
+            Value other = (Value) o;
 
-            if (intValue != value.intValue) {
+            if (this.value != other.value) {
                 return false;
             }
-            return !(description != null ? !description.equals(value.description) : value.description != null);
+            return !(name != null ? !name.equals(other.name) : other.name != null);
 
         }
 
         @Override
         public int hashCode() {
-            int result = intValue;
-            result = 31 * result + (description != null ? description.hashCode() : 0);
+            int result = value;
+            result = 31 * result + (name != null ? name.hashCode() : 0);
             return result;
         }
 
         @Override
         public String toString() {
-            return description;
+            return name;
         }
     }
 
@@ -221,14 +218,14 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
             new Value("Transparent", TransformFilter.TRANSPARENT),
     };
 
-    public static IntChoiceParam getEdgeActionChoices() {
-        return getEdgeActionChoices(false);
+    public static IntChoiceParam forEdgeAction() {
+        return forEdgeAction(false);
     }
 
-    public static IntChoiceParam getEdgeActionChoices(boolean reflectFirst) {
+    public static IntChoiceParam forEdgeAction(boolean reflectFirst) {
         IntChoiceParam choice = new IntChoiceParam("Edge Action", edgeActions, ALLOW_RANDOMIZE);
         if(reflectFirst) {
-            choice.setDefaultChoice(EDGE_REFLECT);
+            return choice.withDefaultChoice(EDGE_REFLECT);
         }
         return choice;
     }
@@ -240,7 +237,7 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
 //            new Value("Bilinear (OLD)", TransformFilter.BILINEAR_OLD),
     };
 
-    public static IntChoiceParam getInterpolationChoices() {
+    public static IntChoiceParam forInterpolation() {
         return new IntChoiceParam("Interpolation", interpolationChoices, IGNORE_RANDOMIZE);
     }
 
@@ -253,26 +250,26 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
     };
 
     public static final IntChoiceParam.Value[] waveTypeChoices = {
-            new IntChoiceParam.Value("Sine", WaveType.SINE),
-            new IntChoiceParam.Value("Triangle", WaveType.TRIANGLE),
-            new IntChoiceParam.Value("Sawtooth", WaveType.SAWTOOTH),
-            new IntChoiceParam.Value("Noise", WaveType.NOISE),
+            new Value("Sine", WaveType.SINE),
+            new Value("Triangle", WaveType.TRIANGLE),
+            new Value("Sawtooth", WaveType.SAWTOOTH),
+            new Value("Noise", WaveType.NOISE),
     };
 
-    public static IntChoiceParam getWaveTypeChoices() {
-        ReseedNoiseActionSetting reseedNoise = new ReseedNoiseActionSetting("Reseed Noise",
+    public static IntChoiceParam forWaveType() {
+        ReseedNoiseFilterAction reseedNoise = new ReseedNoiseFilterAction("Reseed Noise",
                 "Reinitialize the randomness of the noise.");
         IntChoiceParam icp = new IntChoiceParam("Wave Type", waveTypeChoices);
         icp.withAction(reseedNoise);
 
         // The "Reseed Noise" button should be enabled only if the wave type is "Noise"
         Utils.setupEnableOtherIf(icp, reseedNoise,
-                selected -> selected.getIntValue() == WaveType.NOISE);
+                selected -> selected.getValue() == WaveType.NOISE);
 
         return icp;
     }
 
-    public static IntChoiceParam getGridTypeChoices(String name, RangeParam randomnessParam) {
+    public static IntChoiceParam forGridType(String name, RangeParam randomnessParam) {
         randomnessParam.setEnabled(false, APP_LOGIC);
         IntChoiceParam param = new IntChoiceParam(name, gridTypeChoices);
         param.addListDataListener(new ListDataListener() {

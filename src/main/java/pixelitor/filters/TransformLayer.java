@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.gui.ImageComponents;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
@@ -49,6 +49,7 @@ public class TransformLayer extends FilterWithParametrizedGUI {
 
     public TransformLayer() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
                 centerParam,
                 angleParam,
@@ -70,13 +71,13 @@ public class TransformLayer extends FilterWithParametrizedGUI {
 
         double theta = angleParam.getValueInRadians();
 
-        ImageLayer layer = ImageComponents.getActiveImageLayerOrMaskOrNull();
+        Drawable dr = ImageComponents.getActiveDrawableOrNull();
 
         float relativeX = centerParam.getRelativeX();
         float relativeY = centerParam.getRelativeY();
 
-        double centerShiftX = (-layer.getTX() + src.getWidth()) * relativeX;
-        double centerShiftY = (-layer.getTY() + src.getHeight()) * relativeY;
+        double centerShiftX = (-dr.getTX() + src.getWidth()) * relativeX;
+        double centerShiftY = (-dr.getTY() + src.getHeight()) * relativeY;
 
         AffineTransform transform = AffineTransform.getRotateInstance(theta, centerShiftX, centerShiftY);
 

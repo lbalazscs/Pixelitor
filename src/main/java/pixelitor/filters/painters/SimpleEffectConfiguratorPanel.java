@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.filters.painters;
 
-import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.SliderSpinner;
@@ -38,7 +37,7 @@ public class SimpleEffectConfiguratorPanel extends EffectConfiguratorPanel {
         super(effectName, defaultSelected, defaultColor);
 
         widthRange = new RangeParam("Width:", 1, defaultWidth, 100);
-        widthSlider = new SliderSpinner(widthRange, NONE, AddDefaultButton.NO);
+        widthSlider = new SliderSpinner(widthRange, NONE, false);
 
         gbHelper.addLabelWithControl("Width:", widthSlider);
 

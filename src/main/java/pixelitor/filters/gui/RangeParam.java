@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -50,7 +50,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     private double value;
 
     private boolean adjusting;
-    private final AddDefaultButton addDefaultButton;
+    private final boolean addDefaultButton;
     private final SliderSpinner.TextPosition textPosition;
 
     private ChangeEvent changeEvent = null;
@@ -58,25 +58,25 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     private boolean adjustMaxAccordingToImage = false;
     private double maxToImageSizeRatio;
 
-    public RangeParam(String name, int minValue, int defaultValue, int maxValue) {
-        this(name, minValue, defaultValue, maxValue, AddDefaultButton.YES, BORDER);
+    public RangeParam(String name, int min, int defaultV, int max) {
+        this(name, min, defaultV, max, true, BORDER);
     }
 
-    public RangeParam(String name, int minValue, int defaultValue, int maxValue, AddDefaultButton addDefaultButton, SliderSpinner.TextPosition position) {
-        this(name, minValue, defaultValue, maxValue, addDefaultButton, position, ALLOW_RANDOMIZE);
+    public RangeParam(String name, int min, int defaultV, int max, boolean addDefaultButton, SliderSpinner.TextPosition position) {
+        this(name, min, defaultV, max, addDefaultButton, position, ALLOW_RANDOMIZE);
     }
 
-    public RangeParam(String name, int minValue, int defaultValue, int maxValue, AddDefaultButton addDefaultButton, SliderSpinner.TextPosition position, RandomizePolicy randomizePolicy) {
+    public RangeParam(String name, int min, int defaultV, int max, boolean addDefaultButton, SliderSpinner.TextPosition position, RandomizePolicy randomizePolicy) {
         super(name, randomizePolicy);
 
-        assert minValue < maxValue : name + ": minValue (" + minValue + ") >= maxValue (" + maxValue + ')';
-        assert defaultValue >= minValue : name + ": defaultValue (" + defaultValue + ") < minValue (" + minValue + ')';
-        assert defaultValue <= maxValue : name + ": defaultValue (" + defaultValue + ") > maxValue (" + maxValue + ')';
+        assert min < max : name + ": min (" + min + ") >= max (" + max + ')';
+        assert defaultV >= min : name + ": defaultV (" + defaultV + ") < min (" + min + ')';
+        assert defaultV <= max : name + ": defaultV (" + defaultV + ") > max (" + max + ')';
 
-        this.minValue = minValue;
-        this.maxValue = maxValue;
-        this.defaultValue = defaultValue;
-        this.value = defaultValue;
+        this.minValue = min;
+        this.maxValue = max;
+        this.defaultValue = defaultV;
+        this.value = defaultV;
         this.addDefaultButton = addDefaultButton;
         this.textPosition = position;
     }
@@ -306,7 +306,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     @Override
-    public RangeParam adjustRangeToImageSize(double ratio) {
+    public RangeParam withAdjustedRange(double ratio) {
         maxToImageSizeRatio = ratio;
         this.adjustMaxAccordingToImage = true;
         return this;
@@ -324,8 +324,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     @Override
     public void setState(ParamState state) {
-        double doubleValue = ((RPState) state).getValue();
-        value = doubleValue;
+        value = ((RPState) state).getValue();
     }
 
     public RangeParam setRandomizePolicy(RandomizePolicy randomizePolicy) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -91,14 +91,14 @@ public class DropDownSlider extends JComponent {
     }
 
     private void setDropDownButtonSize() {
-        Dimension preferredSize = textField.getPreferredSize();
+        Dimension ps = textField.getPreferredSize();
 
-        int dropDownButtonWidth = 17;
-        int dropDownButtonHeight = 22;
+        int width = 17;
+        int height = 22;
 
-        int boundsX = preferredSize.width - dropDownButtonWidth;
-        int boundsY = (preferredSize.height - dropDownButtonHeight) / 2;
-        dropDownButton.setBounds(boundsX, boundsY, dropDownButtonWidth, dropDownButtonHeight); // Works only for the Nimbus L&F
+        int boundsX = ps.width - width;
+        int boundsY = (ps.height - height) / 2;
+        dropDownButton.setBounds(boundsX, boundsY, width, height); // Works only for the Nimbus L&F
     }
 
     private void connectSlideAndTextField() {
@@ -146,8 +146,8 @@ public class DropDownSlider extends JComponent {
                 popupMenu.setVisible(false);
             } else {
                 Dimension size = getSize();
-                Dimension popupSize = popupMenu.getPreferredSize();
-                popupMenu.show(this, size.width - popupSize.width, size.height);
+                Dimension preferredSize = popupMenu.getPreferredSize();
+                popupMenu.show(this, size.width - preferredSize.width, size.height);
             }
         }
     }

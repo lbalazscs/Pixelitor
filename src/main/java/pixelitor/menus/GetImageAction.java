@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,8 +35,7 @@ import java.awt.image.BufferedImage;
  */
 public abstract class GetImageAction extends AbstractAction {
     protected final String name;
-    private String menuName;
-    private final boolean hasDialog;
+    private final String menuName;
 
     private final boolean allowMasks;
 
@@ -49,7 +48,6 @@ public abstract class GetImageAction extends AbstractAction {
     }
 
     protected GetImageAction(String name, boolean hasDialog, boolean allowMasks) {
-        this.hasDialog = hasDialog;
         assert name != null;
 
         this.name = name;

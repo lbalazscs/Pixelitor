@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.lookup.FastLookupOp;
@@ -42,18 +43,19 @@ public class ExtractChannel extends FilterWithParametrizedGUI {
     private static final int BLUE_CHANNEL = 5;
     private static final int REMOVE_BLUE_CHANNEL = 6;
 
-    private final IntChoiceParam channelParam = new IntChoiceParam("Channel", new IntChoiceParam.Value[]{
-            new IntChoiceParam.Value("Red", RED_CHANNEL),
-            new IntChoiceParam.Value("Remove Red", REMOVE_RED_CHANNEL),
-            new IntChoiceParam.Value("Green", GREEN_CHANNEL),
-            new IntChoiceParam.Value("Remove Green", REMOVE_GREEN_CHANNEL),
-            new IntChoiceParam.Value("Blue", BLUE_CHANNEL),
-            new IntChoiceParam.Value("Remove Blue", REMOVE_BLUE_CHANNEL),
+    private final IntChoiceParam channelParam = new IntChoiceParam("Channel", new Value[]{
+            new Value("Red", RED_CHANNEL),
+            new Value("Remove Red", REMOVE_RED_CHANNEL),
+            new Value("Green", GREEN_CHANNEL),
+            new Value("Remove Green", REMOVE_GREEN_CHANNEL),
+            new Value("Blue", BLUE_CHANNEL),
+            new Value("Remove Blue", REMOVE_BLUE_CHANNEL),
     });
     private final BooleanParam bwParam = new BooleanParam("Black and White", false);
 
     public ExtractChannel() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
                 channelParam,
                 bwParam));

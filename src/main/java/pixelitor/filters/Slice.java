@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,15 +35,16 @@ public class Slice extends FilterWithParametrizedGUI {
     private final RangeParam offset = new RangeParam("Offset", 0, 10, 100);
     private final RangeParam shiftH = new RangeParam("Shift Effect Horizontal", 0, 0, 100);
     private final RangeParam shiftV = new RangeParam("Shift Effect Vertical", 0, 0, 100);
-    private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
+    private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
 
     private SliceFilter filter;
 
     public Slice() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
-                size.adjustRangeToImageSize(0.25),
-                offset.adjustRangeToImageSize(0.25),
+                size.withAdjustedRange(0.25),
+                offset.withAdjustedRange(0.25),
                 shiftH,
                 shiftV,
                 edgeAction

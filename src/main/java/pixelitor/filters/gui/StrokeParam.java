@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -100,8 +100,7 @@ public class StrokeParam extends AbstractFilterParam {
     public JDialog createSettingsDialogForShapesTool() {
         JFrame owner = PixelitorWindow.getInstance();
         JPanel p = createStrokeSettingsPanel();
-        JDialog d = new OKDialog(owner, p, "Stroke Settings", "Close");
-        return d;
+        return new OKDialog(owner, p, "Stroke Settings", "Close");
     }
 
     private JDialog createSettingsDialogForFilter(JDialog owner) {
@@ -112,9 +111,8 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     private JPanel createStrokeSettingsPanel() {
-        JPanel p = new StrokeSettingsPanel(strokeWidthParam, strokeCapParam,
+        return new StrokeSettingsPanel(strokeWidthParam, strokeCapParam,
                 strokeJoinParam, strokeTypeParam, dashedParam, shapeTypeParam);
-        return p;
     }
 
     public Stroke createStroke() {
@@ -125,18 +123,12 @@ public class StrokeParam extends AbstractFilterParam {
             dashFloats = new float[]{2 * strokeWidth, 2 * strokeWidth};
         }
 
-        StrokeType strokeType = getStrokeType();
-
-        BasicStrokeCap strokeCap = strokeCapParam.getSelected();
-        BasicStrokeJoin strokeJoin = strokeJoinParam.getSelected();
-        Stroke s = strokeType.getStroke(
+        return getStrokeType().getStroke(
                 strokeWidth,
-                strokeCap.getValue(),
-                strokeJoin.getValue(),
+                strokeCapParam.getSelected().getValue(),
+                strokeJoinParam.getSelected().getValue(),
                 dashFloats
         );
-
-        return s;
     }
 
     @Override

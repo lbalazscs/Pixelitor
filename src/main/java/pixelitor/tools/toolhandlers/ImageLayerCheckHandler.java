@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,7 @@ public class ImageLayerCheckHandler extends ToolHandler {
 
     @Override
     boolean mousePressed(MouseEvent e, ImageComponent ic) {
-        if(ic.activeIsImageLayerOrMask()) {
+        if (ic.activeIsDrawable()) {
             // forwards the mouse event to the next handler
             return false;
         }
@@ -57,11 +57,11 @@ public class ImageLayerCheckHandler extends ToolHandler {
 
     @Override
     boolean mouseDragged(MouseEvent e, ImageComponent ic) {
-        return !ic.activeIsImageLayerOrMask();
+        return !ic.activeIsDrawable();
     }
 
     @Override
     boolean mouseReleased(MouseEvent e, ImageComponent ic) {
-        return !ic.activeIsImageLayerOrMask();
+        return !ic.activeIsDrawable();
     }
 }

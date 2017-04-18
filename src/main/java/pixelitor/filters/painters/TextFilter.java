@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,9 +19,9 @@ package pixelitor.filters.painters;
 
 import org.jdesktop.swingx.painter.TextPainter;
 import pixelitor.filters.FilterAction;
-import pixelitor.filters.gui.AdjustPanel;
+import pixelitor.filters.gui.FilterGUIPanel;
 import pixelitor.filters.gui.FilterWithGUI;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
@@ -65,8 +65,8 @@ public class TextFilter extends FilterWithGUI {
     }
 
     @Override
-    public AdjustPanel createAdjustPanel(ImageLayer layer) {
-        return new TextAdjustmentsPanel(this, layer);
+    public FilterGUIPanel createGUIPanel(Drawable dr) {
+        return new TextAdjustmentsPanel(this, dr);
     }
 
     @Override
@@ -93,7 +93,6 @@ public class TextFilter extends FilterWithGUI {
     }
 
     public static FilterAction createFilterAction() {
-        FilterAction fa = new FilterAction("Text", TextFilter::getInstance);
-        return fa;
+        return new FilterAction("Text", TextFilter::getInstance);
     }
 }

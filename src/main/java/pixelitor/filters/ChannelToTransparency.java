@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package pixelitor.filters;
 import com.jhlabs.image.PointFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.lookup.LuminanceLookup;
@@ -37,19 +38,19 @@ public class ChannelToTransparency extends FilterWithParametrizedGUI {
     private static final int GREEN = 3;
     private static final int BLUE = 4;
 
-    private final IntChoiceParam channelParam = new IntChoiceParam("Channel",
-            new IntChoiceParam.Value[]{
-                    new IntChoiceParam.Value("Luminosity", LUMINOSITY),
-                    new IntChoiceParam.Value("Red", RED),
-                    new IntChoiceParam.Value("Green", GREEN),
-                    new IntChoiceParam.Value("Blue", BLUE)
-            });
+    private final IntChoiceParam channel = new IntChoiceParam("Channel", new Value[]{
+            new Value("Luminosity", LUMINOSITY),
+            new Value("Red", RED),
+            new Value("Green", GREEN),
+            new Value("Blue", BLUE)
+    });
     private final BooleanParam invertParam = new BooleanParam("Invert", false);
 
     public ChannelToTransparency() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
-                channelParam,
+                channel,
                 invertParam
         ));
     }
@@ -59,7 +60,7 @@ public class ChannelToTransparency extends FilterWithParametrizedGUI {
         ChannelToTransparencyFilter filter;
         boolean invert = invertParam.isChecked();
 
-        switch (channelParam.getValue()) {
+        switch (channel.getValue()) {
             case LUMINOSITY:
                 filter = new ChannelToTransparencyFilter(NAME, invert) {
                     @Override
@@ -96,7 +97,7 @@ public class ChannelToTransparency extends FilterWithParametrizedGUI {
                 };
                 break;
             default:
-                throw new IllegalStateException("unexpected value " + channelParam.getValue());
+                throw new IllegalStateException("unexpected value " + channel.getValue());
         }
 
         return filter.filter(src, dest);

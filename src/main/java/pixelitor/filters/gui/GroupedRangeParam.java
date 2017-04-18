@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,29 +36,29 @@ public class GroupedRangeParam extends AbstractFilterParam implements RangeBased
     /**
      * 2 linked params: "Horizontal" and "Vertical", linked by default
      */
-    public GroupedRangeParam(String name, int minValue, int defaultValue, int maxValue) {
-        this(name, minValue, defaultValue, maxValue, true);
+    public GroupedRangeParam(String name, int min, int defaultV, int max) {
+        this(name, min, defaultV, max, true);
     }
 
     /**
      * 2 linked params: "Horizontal" and "Vertical"
      */
-    public GroupedRangeParam(String name, int minValue, int defaultValue, int maxValue, boolean linked) {
-        this(name, "Horizontal", "Vertical", minValue, defaultValue, maxValue, linked);
+    public GroupedRangeParam(String name, int min, int defaultV, int max, boolean linked) {
+        this(name, "Horizontal", "Vertical", min, defaultV, max, linked);
     }
 
     /**
      * 2 linked params
      */
-    public GroupedRangeParam(String name, String firstRangeName, String secondRangeName, int minValue, int defaultValue, int maxValue, boolean linked) {
-        this(name, new String[]{firstRangeName, secondRangeName}, minValue, defaultValue, maxValue, linked);
+    public GroupedRangeParam(String name, String firstRangeName, String secondRangeName, int min, int defaultV, int max, boolean linked) {
+        this(name, new String[]{firstRangeName, secondRangeName}, min, defaultV, max, linked);
     }
 
     /**
      * Any number of linked params
      */
-    public GroupedRangeParam(String name, String[] rangeNames, int minValue, int defaultValue, int maxValue, boolean linked) {
-        this(name, createParams(rangeNames, minValue, defaultValue, maxValue), linked);
+    public GroupedRangeParam(String name, String[] rangeNames, int min, int defaultV, int max, boolean linked) {
+        this(name, createParams(rangeNames, min, defaultV, max), linked);
     }
 
     public GroupedRangeParam(String name, RangeParam[] params, boolean linked) {
@@ -75,10 +75,10 @@ public class GroupedRangeParam extends AbstractFilterParam implements RangeBased
 
     @Override
     public JComponent createGUI() {
-        GroupedRangeSelector selector = new GroupedRangeSelector(this);
-        paramGUI = selector;
+        GroupedRangeParamGUI gui = new GroupedRangeParamGUI(this);
+        paramGUI = gui;
         setParamGUIEnabledState();
-        return selector;
+        return gui;
     }
 
     private void linkParams() {
@@ -190,9 +190,9 @@ public class GroupedRangeParam extends AbstractFilterParam implements RangeBased
     }
 
     @Override
-    public GroupedRangeParam adjustRangeToImageSize(double ratio) {
+    public GroupedRangeParam withAdjustedRange(double ratio) {
         for (RangeParam param : rangeParams) {
-            param.adjustRangeToImageSize(ratio);
+            param.withAdjustedRange(ratio);
         }
         return this;
     }
@@ -205,7 +205,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements RangeBased
         return rangeParams.length;
     }
 
-    public GroupedRangeParam setShowLinkedCB(boolean linkable) {
+    public GroupedRangeParam setLinkable(boolean linkable) {
         this.linkable = linkable;
         return this;
     }
@@ -260,11 +260,11 @@ public class GroupedRangeParam extends AbstractFilterParam implements RangeBased
         }
     }
 
-    private static RangeParam[] createParams(String[] rangeNames, int minValue, int defaultValue, int maxValue) {
+    private static RangeParam[] createParams(String[] rangeNames, int min, int defaultV, int max) {
         RangeParam[] rangeParams = new RangeParam[rangeNames.length];
         for (int i = 0; i < rangeNames.length; i++) {
             String rangeName = rangeNames[i];
-            rangeParams[i] = new RangeParam(rangeName, minValue, defaultValue, maxValue);
+            rangeParams[i] = new RangeParam(rangeName, min, defaultV, max);
         }
         return rangeParams;
     }

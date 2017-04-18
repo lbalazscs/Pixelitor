@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,13 +20,12 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.PointillizeFilter;
 import com.jhlabs.math.Noise;
 import pixelitor.filters.FilterWithParametrizedGUI;
-import pixelitor.filters.gui.ActionSetting;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseActionSetting;
+import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.CachedFloatRandom;
 
@@ -48,25 +47,25 @@ public class JHPointillize extends FilterWithParametrizedGUI {
     private final BooleanParam fadeEdges = new BooleanParam("Fade Instead of Fill", true);
 
     private final RangeParam randomness = new RangeParam("Grid Randomness (%)", 0, 0, 100);
-    private final IntChoiceParam gridType = IntChoiceParam.getGridTypeChoices("Grid Type", randomness);
+    private final IntChoiceParam gridType = IntChoiceParam.forGridType("Grid Type", randomness);
 
     private PointillizeFilter filter;
 
     public JHPointillize() {
         super(ShowOriginal.YES);
-        ActionSetting reseedAction = new ReseedNoiseActionSetting(e -> {
-            CachedFloatRandom.reseedCache();
-            Noise.reseed();
-        });
+
         setParamSet(new ParamSet(
-                gridSize.adjustRangeToImageSize(0.2),
+                gridSize.withAdjustedRange(0.2),
                 gridType,
                 randomness,
                 fadeEdges,
                 edgeColor,
                 dotSize,
                 fuzziness
-        ).withAction(reseedAction));
+        ).withAction(new ReseedNoiseFilterAction(e -> {
+            CachedFloatRandom.reseedCache();
+            Noise.reseed();
+        })));
     }
 
     @Override

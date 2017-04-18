@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,8 @@
 package pixelitor.filters;
 
 import pixelitor.colors.ColorUtils;
-import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
@@ -38,19 +38,19 @@ public class Threshold extends FilterWithParametrizedGUI {
     private static final int CRIT_SATURATION = 5;
 
     private final RangeParam threshold = new RangeParam("Threshold", 0,
-            128, 255, AddDefaultButton.NO, BORDER);
+            128, 255, false, BORDER);
 
-    private final IntChoiceParam criterion = new IntChoiceParam("Based on",
-            new IntChoiceParam.Value[]{
-                    new IntChoiceParam.Value("Luminosity", CRIT_LUMINOSITY),
-                    new IntChoiceParam.Value("Red Channel", CRIT_RED),
-                    new IntChoiceParam.Value("Green Channel", CRIT_GREEN),
-                    new IntChoiceParam.Value("Blue Channel", CRIT_BLUE),
-                    new IntChoiceParam.Value("Saturation", CRIT_SATURATION),
-            });
+    private final IntChoiceParam criterion = new IntChoiceParam("Based on", new Value[]{
+            new Value("Luminosity", CRIT_LUMINOSITY),
+            new Value("Red Channel", CRIT_RED),
+            new Value("Green Channel", CRIT_GREEN),
+            new Value("Blue Channel", CRIT_BLUE),
+            new Value("Saturation", CRIT_SATURATION),
+    });
 
     public Threshold() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(threshold, criterion));
     }
 

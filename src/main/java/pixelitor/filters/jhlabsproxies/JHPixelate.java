@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.BlockFilter;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
@@ -46,15 +47,15 @@ public class JHPixelate extends FilterWithParametrizedGUI {
     private static final int TYPE_SQUARE = 0;
     private static final int TYPE_BRICK = 1;
 
-    private final IntChoiceParam typeParam = new IntChoiceParam("Type", new IntChoiceParam.Value[]{
-            new IntChoiceParam.Value("Squares", TYPE_SQUARE),
-            new IntChoiceParam.Value("Brick Wall", TYPE_BRICK),
+    private final IntChoiceParam typeParam = new IntChoiceParam("Type", new Value[]{
+            new Value("Squares", TYPE_SQUARE),
+            new Value("Brick Wall", TYPE_BRICK),
     });
 
-    private final IntChoiceParam styleParam = new IntChoiceParam("Style", new IntChoiceParam.Value[]{
-            new IntChoiceParam.Value("Flat", STYLE_FLAT),
-            new IntChoiceParam.Value("3D", STYLE_3D),
-            new IntChoiceParam.Value("Embedded", STYLE_EMBEDDED),
+    private final IntChoiceParam styleParam = new IntChoiceParam("Style", new Value[]{
+            new Value("Flat", STYLE_FLAT),
+            new Value("3D", STYLE_3D),
+            new Value("Embedded", STYLE_EMBEDDED),
 //            new IntChoiceParam.Value("Grid", STYLE_GRID_ONLY)
     });
 
@@ -65,8 +66,9 @@ public class JHPixelate extends FilterWithParametrizedGUI {
 
     public JHPixelate() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
-                cellSizeParam.adjustRangeToImageSize(0.2),
+                cellSizeParam.withAdjustedRange(0.2),
                 styleParam,
                 typeParam
         ));
@@ -74,7 +76,6 @@ public class JHPixelate extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-
         int style = styleParam.getValue();
         int type = typeParam.getValue();
 

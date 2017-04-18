@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.Brush;
 
 import java.awt.Point;
@@ -56,7 +56,7 @@ public class AbstractBrushToolTest {
     private Brush origBrush;
 
     private Composition comp;
-    private ImageLayer layer;
+    private Drawable dr;
 
     @Parameters(name = "{index}: {0}, mask = {1}")
     public static Collection<Object[]> instancesToTest() {
@@ -77,7 +77,7 @@ public class AbstractBrushToolTest {
     @Before
     public void setUp() {
         comp = TestHelper.create2LayerComposition(false);
-        layer = comp.getActiveMaskOrImageLayer();
+        dr = comp.getActiveDrawable();
 
         origBrush = tool.getBrush();
         brushSpy = spy(origBrush);
@@ -96,7 +96,7 @@ public class AbstractBrushToolTest {
 
     @Test
     public void test_trace() {
-        tool.trace(layer, new Rectangle(2, 2, 2, 2));
+        tool.trace(dr, new Rectangle(2, 2, 2, 2));
 
         verify(brushSpy).setTarget(any(), any());
         verify(brushSpy).onDragStart(2.0, 2.0);
@@ -105,7 +105,7 @@ public class AbstractBrushToolTest {
 
     @Test
     public void test_drawBrushStrokeProgrammatically() {
-        tool.drawBrushStrokeProgrammatically(layer, new Point(2, 2), new Point(5, 5));
+        tool.drawBrushStrokeProgrammatically(dr, new Point(2, 2), new Point(5, 5));
 
         verify(brushSpy).onDragStart(2.0, 2.0);
         verify(brushSpy).onNewMousePoint(5.0, 5.0);

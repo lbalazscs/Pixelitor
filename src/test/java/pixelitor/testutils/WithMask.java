@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,6 @@
 package pixelitor.testutils;
 
 import pixelitor.Composition;
-import pixelitor.history.AddToHistory;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMaskAddType;
 
@@ -34,7 +33,7 @@ public enum WithMask {
         @Override
         public void init(Layer layer) {
             if (layer.hasMask()) {
-                layer.deleteMask(AddToHistory.NO);
+                layer.deleteMask(false);
             }
         }
     };
@@ -42,11 +41,7 @@ public enum WithMask {
     public abstract void init(Layer layer);
 
     public void init(Composition comp) {
-        int nrLayers = comp.getNrLayers();
-        for (int i = 0; i < nrLayers; i++) {
-            Layer layer = comp.getLayer(i);
-            init(layer);
-        }
+        comp.forEachLayer(this::init);
     }
 
     public boolean isYes() {

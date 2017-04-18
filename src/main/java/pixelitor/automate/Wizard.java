@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.automate;
 
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.OKCancelDialog;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 
 import javax.swing.*;
 import java.awt.Component;
@@ -35,15 +35,15 @@ public abstract class Wizard {
     private final String finishButtonText;
     private final int initialDialogWidth;
     private final int initialDialogHeight;
-    protected final ImageLayer layer;
+    protected final Drawable dr;
 
-    protected Wizard(WizardPage initialWizardPage, String dialogTitle, String finishButtonText, int initialDialogWidth, int initialDialogHeight, ImageLayer layer) {
-        this.wizardPage = initialWizardPage;
+    protected Wizard(WizardPage initialPage, String dialogTitle, String finishButtonText, int initialDialogWidth, int initialDialogHeight, Drawable dr) {
+        this.wizardPage = initialPage;
         this.dialogTitle = dialogTitle;
         this.finishButtonText = finishButtonText;
         this.initialDialogWidth = initialDialogWidth;
         this.initialDialogHeight = initialDialogHeight;
-        this.layer = Objects.requireNonNull(layer);
+        this.dr = Objects.requireNonNull(dr);
     }
 
     /**
@@ -61,14 +61,14 @@ public abstract class Wizard {
         assert dialog == null; // this should be called once per object
 
         dialog = new OKCancelDialog(
-                wizardPage.getPanel(Wizard.this, layer),
+                wizardPage.getPanel(Wizard.this, dr),
                 dialogParent,
                 title,
                 "Next", "Cancel") {
 
             @Override
             protected void dialogCanceled() {
-                wizardPage.onWizardCancelled(layer);
+                wizardPage.onWizardCanceled(dr);
                 super.dialogCanceled();
                 dispose();
             }
@@ -80,7 +80,7 @@ public abstract class Wizard {
                 }
 
                 // move forward
-                wizardPage.onMovingToTheNext(Wizard.this, layer);
+                wizardPage.onMovingToTheNext(Wizard.this, dr);
 
                 if (!mayProceedAfterMovingForward(wizardPage, this)) {
                     return;
@@ -89,9 +89,9 @@ public abstract class Wizard {
                 WizardPage nextPage = wizardPage.getNext();
                 if (nextPage == null) { // dialog finished
                     dispose();
-                    executeFinalAction();
+                    finalAction();
                 } else {
-                    JComponent panel = nextPage.getPanel(Wizard.this, layer);
+                    JComponent panel = nextPage.getPanel(Wizard.this, dr);
                     dialog.changeForm(panel);
                     dialog.setHeaderMessage(nextPage.getHeaderText(Wizard.this));
                     wizardPage = nextPage;
@@ -116,7 +116,7 @@ public abstract class Wizard {
 
     protected abstract boolean mayProceedAfterMovingForward(WizardPage wizardPage, Component dialogParent);
 
-    protected abstract void executeFinalAction();
+    protected abstract void finalAction();
 
     protected abstract void finalCleanup();
 }

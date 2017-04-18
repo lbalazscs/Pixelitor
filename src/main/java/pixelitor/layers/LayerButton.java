@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import com.bric.util.JVM;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.history.AddToHistory;
 import pixelitor.utils.IconUtils;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.VisibleForTesting;
@@ -194,7 +193,7 @@ public class LayerButton extends JToggleButton {
         add(visibilityCB, LayerButtonLayout.CHECKBOX);
 
         visibilityCB.addItemListener(e ->
-                layer.setVisible(visibilityCB.isSelected(), AddToHistory.YES));
+                layer.setVisible(visibilityCB.isSelected(), true));
     }
 
     private void initLayerNameEditor(Layer layer) {
@@ -206,7 +205,7 @@ public class LayerButton extends JToggleButton {
     private void wireSelectionWithLayerActivation(Layer layer) {
         addItemListener(e -> {
             if (isSelected()) {
-                layer.makeActive(userInteraction ? AddToHistory.YES : AddToHistory.NO);
+                layer.makeActive(userInteraction ? true : false);
             } else {
                 nameEditor.disableEditing();
                 // Invoke later because we can get here in the middle
@@ -354,7 +353,7 @@ public class LayerButton extends JToggleButton {
                     }
                 } else if (shiftClick) {
                     // shift-click disables except when it is already disabled
-                    layer.setMaskEnabled(!layer.isMaskEnabled(), AddToHistory.YES);
+                    layer.setMaskEnabled(!layer.isMaskEnabled(), true);
                 } else {
                     ImageComponent ic = layer.getComp().getIC();
 

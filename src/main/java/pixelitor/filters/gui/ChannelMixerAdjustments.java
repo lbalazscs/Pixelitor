@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,16 +19,16 @@ package pixelitor.filters.gui;
 
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
 
-public class ChannelMixerAdjustments extends ParametrizedAdjustPanel {
-    public ChannelMixerAdjustments(FilterWithParametrizedGUI filter, ImageLayer layer, Action[] actions) {
-        super(filter, layer, actions, ShowOriginal.YES);
+public class ChannelMixerAdjustments extends ParametrizedFilterGUIPanel {
+    public ChannelMixerAdjustments(FilterWithParametrizedGUI filter, Drawable dr, Action[] actions) {
+        super(filter, dr, actions, ShowOriginal.YES);
     }
 
     @Override

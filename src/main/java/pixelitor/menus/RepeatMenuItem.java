@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -70,7 +70,7 @@ public class RepeatMenuItem extends JMenuItem implements UndoableEditListener, I
     }
 
     private void onNewComp(Composition comp) {
-        if (comp.activeIsImageLayerOrMask()) {
+        if (comp.activeIsDrawable()) {
             setEnabled(History.canRepeatOperation());
             getAction().putValue(Action.NAME, "Repeat " + History.getLastEditName());
         } else {

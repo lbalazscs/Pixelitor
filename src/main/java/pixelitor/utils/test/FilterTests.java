@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,11 +27,11 @@ import pixelitor.filters.FilterUtils;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.RandomFilter;
 import pixelitor.filters.comp.Resize;
-import pixelitor.filters.gui.ParametrizedAdjustPanel;
+import pixelitor.filters.gui.ParametrizedFilterGUIPanel;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.history.History;
-import pixelitor.io.FileChoosers;
+import pixelitor.io.Directories;
 import pixelitor.io.OutputFormat;
 import pixelitor.layers.ImageLayer;
 import pixelitor.utils.Messages;
@@ -55,15 +55,14 @@ public class FilterTests {
     }
 
     public static void saveTheResultOfEachFilter(ImageLayer layer) {
-
-        boolean cancelled = !SingleDirChooserPanel.selectOutputDir(true);
-        if (cancelled) {
+        boolean canceled = !SingleDirChooserPanel.selectOutputDir(true);
+        if (canceled) {
             return;
         }
-        File selectedDir = FileChoosers.getLastSaveDir();
-        OutputFormat outputFormat = OutputFormat.getLastOutputFormat();
+        File selectedDir = Directories.getLastSaveDir();
+        OutputFormat outputFormat = OutputFormat.getLastUsed();
 
-        ParametrizedAdjustPanel.setResetParams(false);
+        ParametrizedFilterGUIPanel.setResetParams(false);
         ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("Saving the Results of Each Filter");
 
         layer.startPreviewing();
@@ -96,7 +95,7 @@ public class FilterTests {
                         Composition comp = layer.getComp();
                         String fileName = "test_" + Utils.toFileName(filter.getName()) + '.' + outputFormat.toString();
                         File f = new File(selectedDir, fileName);
-                        outputFormat.saveComposition(comp, f, false);
+                        outputFormat.saveComp(comp, f, false);
 
                         if (History.canUndo()) {
                             History.undo();
@@ -121,7 +120,7 @@ public class FilterTests {
                     // Process e here
                 } finally {
                     layer.stopPreviewing(); // reset to NORMAL
-                    ParametrizedAdjustPanel.setResetParams(true);
+                    ParametrizedFilterGUIPanel.setResetParams(true);
                 }
             }
         };
@@ -129,7 +128,7 @@ public class FilterTests {
     }
 
     public static void runAllFiltersOn(ImageLayer layer) {
-        ParametrizedAdjustPanel.setResetParams(false);
+        ParametrizedFilterGUIPanel.setResetParams(false);
         try {
             ProgressMonitor progressMonitor = new ProgressMonitor(PixelitorWindow.getInstance(),
                     "Run All Filters on Current Layer",
@@ -158,7 +157,7 @@ public class FilterTests {
             }
             progressMonitor.close();
         } finally {
-            ParametrizedAdjustPanel.setResetParams(true);
+            ParametrizedFilterGUIPanel.setResetParams(true);
         }
     }
 

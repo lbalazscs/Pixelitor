@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,6 @@
 package pixelitor.selection;
 
 import pixelitor.Composition;
-import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.history.NewSelectionEdit;
 import pixelitor.history.PixelitorEdit;
@@ -124,7 +123,7 @@ public class SelectionBuilder {
                 builtSelection.setShape(oldShape); // for the correct deselect undo
                 oldSelection.die();
                 comp.promoteSelection();
-                comp.deselect(AddToHistory.YES);
+                comp.deselect(true);
 
                 if (!RandomGUITest.isRunning()) {
                     Messages.showInfo("Nothing selected", "As a result of the "
@@ -144,7 +143,7 @@ public class SelectionBuilder {
 
             if (newShape.getBounds().isEmpty()) {
                 // the new shape can be empty if it has width or height = 0
-                comp.deselect(AddToHistory.NO);
+                comp.deselect(false);
                 oldSelection = null;
             } else {
                 builtSelection.setShape(newShape);

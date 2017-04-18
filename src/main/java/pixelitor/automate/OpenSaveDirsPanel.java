@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.automate;
 import pixelitor.gui.utils.BrowseFilesSupport;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.ValidatedForm;
-import pixelitor.io.FileChoosers;
+import pixelitor.io.Directories;
 import pixelitor.io.OutputFormat;
 
 import java.awt.GridBagLayout;
@@ -32,8 +32,8 @@ import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
  * A panel for selecting the opening and the saving directory
  */
 class OpenSaveDirsPanel extends ValidatedForm {
-    private final BrowseFilesSupport inputChooser = new BrowseFilesSupport(FileChoosers.getLastOpenDir().getAbsolutePath(), "Select Input Folder", DIRECTORY);
-    private final BrowseFilesSupport outputChooser = new BrowseFilesSupport(FileChoosers.getLastSaveDir().getAbsolutePath(), "Select Output Folder", DIRECTORY);
+    private final BrowseFilesSupport inputChooser = new BrowseFilesSupport(Directories.getLastOpenDirPath(), "Select Input Folder", DIRECTORY);
+    private final BrowseFilesSupport outputChooser = new BrowseFilesSupport(Directories.getLastSaveDirPath(), "Select Output Folder", DIRECTORY);
     private final boolean allowToBeTheSame;
     private String errMessage;
 
@@ -42,16 +42,16 @@ class OpenSaveDirsPanel extends ValidatedForm {
     OpenSaveDirsPanel(boolean allowToBeTheSame) {
         this.allowToBeTheSame = allowToBeTheSame;
         setLayout(new GridBagLayout());
-        GridBagHelper gridBagHelper = new GridBagHelper(this);
+        GridBagHelper gbh = new GridBagHelper(this);
 
-        gridBagHelper.addLabelWithTwoControls("Input Folder:",
+        gbh.addLabelWithTwoControls("Input Folder:",
                 inputChooser.getNameTF(), inputChooser.getBrowseButton());
 
-        gridBagHelper.addLabelWithTwoControls("Output Folder:",
+        gbh.addLabelWithTwoControls("Output Folder:",
                 outputChooser.getNameTF(), outputChooser.getBrowseButton());
 
         outputFormatSelector = new OutputFormatSelector();
-        gridBagHelper.addLabelWithControlNoFill("Output Format:", outputFormatSelector.getFormatCombo());
+        gbh.addLabelWithControlNoFill("Output Format:", outputFormatSelector.getFormatCombo());
     }
 
     private OutputFormat getSelectedFormat() {
@@ -93,13 +93,13 @@ class OpenSaveDirsPanel extends ValidatedForm {
     public void saveValues() {
         File in = inputChooser.getSelectedFile();
         if (in != null) {
-            FileChoosers.setLastOpenDir(in);
+            Directories.setLastOpenDir(in);
         }
         File out = outputChooser.getSelectedFile();
         if (out != null) {
-            FileChoosers.setLastSaveDir(out);
+            Directories.setLastSaveDir(out);
         }
 
-        OutputFormat.setLastOutputFormat(getSelectedFormat());
+        OutputFormat.setLastUsed(getSelectedFormat());
     }
 }

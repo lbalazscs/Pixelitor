@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,11 +18,10 @@
 package pixelitor.filters;
 
 import pixelitor.ThreadPool;
-import pixelitor.filters.gui.ActionSetting;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseActionSetting;
+import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.BasicProgressTracker;
 import pixelitor.utils.ImageUtils;
@@ -55,10 +54,6 @@ public class ValueNoise extends FilterWithParametrizedGUI {
     private final RangeParam scale = new RangeParam("Zoom", 5, 100, 300);
     private final RangeParam details = new RangeParam("Octaves (Details)", 1, 5, 8);
 
-    private final ActionSetting reseedAction = new ReseedNoiseActionSetting(e -> {
-        reseed();
-    });
-
     private final ColorParam color1 = new ColorParam("Color 1", BLACK, USER_ONLY_OPACITY);
     private final ColorParam color2 = new ColorParam("Color 2", WHITE, USER_ONLY_OPACITY);
 
@@ -66,11 +61,11 @@ public class ValueNoise extends FilterWithParametrizedGUI {
         super(ShowOriginal.NO);
 
         setParamSet(new ParamSet(
-                scale.adjustRangeToImageSize(0.3),
+                scale.withAdjustedRange(0.3),
                 details,
                 color1,
                 color2
-        ).withAction(reseedAction));
+        ).withAction(new ReseedNoiseFilterAction(e -> reseed())));
     }
 
     @Override

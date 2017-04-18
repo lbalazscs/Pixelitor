@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,14 +25,14 @@ import java.awt.Rectangle;
 import java.util.Random;
 
 /**
- * Similar to IntChoiceParam, this is a model for a JComboBox,
+ * Just like IntChoiceParam, this is a model for a JComboBox,
  * but the values are coming from an enum
  */
 public class EnumParam<E extends Enum<E>> extends AbstractFilterParam implements ComboBoxModel<E> {
     private final EnumComboBoxModel<E> delegateModel;
     private final E[] enumConstants;
     private E defaultValue;
-    private ActionSetting action;
+    private FilterAction action;
 
     public EnumParam(String name, Class<E> enumClass) {
         super(name, RandomizePolicy.ALLOW_RANDOMIZE);
@@ -43,10 +43,10 @@ public class EnumParam<E extends Enum<E>> extends AbstractFilterParam implements
 
     @Override
     public JComponent createGUI() {
-        ChoiceSelector choiceSelector = new ChoiceSelector(this, action);
-        paramGUI = choiceSelector;
+        ComboBoxParamGUI gui = new ComboBoxParamGUI(this, action);
+        paramGUI = gui;
         setParamGUIEnabledState();
-        return choiceSelector;
+        return gui;
     }
 
     @Override
@@ -150,7 +150,7 @@ public class EnumParam<E extends Enum<E>> extends AbstractFilterParam implements
         }
     }
 
-    public EnumParam withAction(ActionSetting action) {
+    public EnumParam withAction(FilterAction action) {
         this.action = action;
         return this;
     }

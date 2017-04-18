@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,20 +24,20 @@ import javax.swing.*;
 import java.awt.GridBagLayout;
 
 class SystemInfoPanel extends JPanel {
-    private final GridBagHelper gridBagHelper;
+    private final GridBagHelper gbh;
 
     public SystemInfoPanel() {
         super(new GridBagLayout());
-        gridBagHelper = new GridBagHelper(this);
+        gbh = new GridBagHelper(this);
 
         addSystemProperties();
         addMemoryProperties();
     }
 
     private void addSystemProperties() {
-        gridBagHelper.addTwoLabels("Java Version:", System.getProperty("java.version"));
-        gridBagHelper.addTwoLabels("Java VM:", System.getProperty("java.vm.name"));
-        gridBagHelper.addTwoLabels("OS:", System.getProperty("os.name"));
+        gbh.addTwoLabels("Java Version:", System.getProperty("java.version"));
+        gbh.addTwoLabels("Java VM:", System.getProperty("java.vm.name"));
+        gbh.addTwoLabels("OS:", System.getProperty("os.name"));
     }
 
     private void addMemoryProperties() {
@@ -47,9 +47,9 @@ class SystemInfoPanel extends JPanel {
         long totalMemoryMB = memoryInfo.getTotalMemoryMB();
         long usedMemoryMB = memoryInfo.getUsedMemoryMB();
 
-        gridBagHelper.addTwoLabels("Allocated Memory:", totalMemoryMB + " megabytes");
-        gridBagHelper.addTwoLabels("Used Memory:", usedMemoryMB + " megabytes");
-        gridBagHelper.addTwoLabels("Free Memory:", freeMemoryMB + " megabytes");
-        gridBagHelper.addTwoLabels("Max Memory:", maxMemoryMB + " megabytes");
+        gbh.addTwoLabels("Allocated Memory:", totalMemoryMB + " megabytes");
+        gbh.addTwoLabels("Used Memory:", usedMemoryMB + " megabytes");
+        gbh.addTwoLabels("Free Memory:", freeMemoryMB + " megabytes");
+        gbh.addTwoLabels("Max Memory:", maxMemoryMB + " megabytes");
     }
 }

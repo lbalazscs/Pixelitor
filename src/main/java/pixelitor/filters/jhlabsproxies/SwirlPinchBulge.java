@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,19 +41,20 @@ public class SwirlPinchBulge extends FilterWithParametrizedGUI {
     private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 500);
     private final AngleParam rotateResult = new AngleParam("Rotate Result", 0);
 
-    private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
-    private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
+    private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
+    private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
     private PinchFilter filter;
 
     public SwirlPinchBulge() {
         super(ShowOriginal.YES);
+
         showAffectedArea();
 
         setParamSet(new ParamSet(
                 swirlAmount,
                 pinchBulgeAmount,
-                radius.adjustRangeToImageSize(1.0),
+                radius.withAdjustedRange(1.0),
                 center,
                 zoom,
                 rotateResult,

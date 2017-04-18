@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import pixelitor.gui.utils.BrowseFilesSupport;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.ValidatedDialog;
 import pixelitor.gui.utils.ValidatedForm;
-import pixelitor.io.FileChoosers;
+import pixelitor.io.Directories;
 import pixelitor.io.OutputFormat;
 
 import javax.swing.*;
@@ -46,17 +46,12 @@ public class SingleDirChooserPanel extends ValidatedForm {
 
         if (addOutputChooser) {
             setLayout(new GridBagLayout());
-            GridBagHelper gbHelper = new GridBagHelper(this);
-//            gbHelper.addLabel(dirLabel, 0, 0);
-//            gbHelper.addControl(dirTF);
-//            gbHelper.addNextControl(browseButton);
-            gbHelper.addLabelWithTwoControls(label, dirTF, browseButton);
+            GridBagHelper gbh = new GridBagHelper(this);
+            gbh.addLabelWithTwoControls(label, dirTF, browseButton);
 
             outputFormatSelector = new OutputFormatSelector();
 
-//            gbHelper.addLabel("Output Format:", 0, 1);
-//            gbHelper.addControlNoFill(outputFormatSelector.getFormatCombo());
-            gbHelper.addLabelWithControlNoFill("Output Format:", outputFormatSelector.getFormatCombo());
+            gbh.addLabelWithControlNoFill("Output Format:", outputFormatSelector.getFormatCombo());
         } else {
             setLayout(new FlowLayout(FlowLayout.LEFT));
             add(new JLabel(label));
@@ -66,8 +61,7 @@ public class SingleDirChooserPanel extends ValidatedForm {
     }
 
     private OutputFormat getSelectedFormat() {
-        OutputFormat outputFormat = outputFormatSelector.getSelectedFormat();
-        return outputFormat;
+        return outputFormatSelector.getSelectedFormat();
     }
 
     private File getSelectedDir() {
@@ -91,13 +85,13 @@ public class SingleDirChooserPanel extends ValidatedForm {
      * @return true if a selection was made, false if the operation was cancelled
      */
     public static boolean selectOutputDir(boolean addOutputChooser) {
-        SingleDirChooserPanel chooserPanel = new SingleDirChooserPanel("Output Folder:", "Select Output Folder", FileChoosers.getLastSaveDir().getAbsolutePath(), addOutputChooser);
+        SingleDirChooserPanel chooserPanel = new SingleDirChooserPanel("Output Folder:", "Select Output Folder", Directories.getLastSaveDir().getAbsolutePath(), addOutputChooser);
         ValidatedDialog chooser = new ValidatedDialog(chooserPanel, PixelitorWindow.getInstance(), "Select Output Folder");
         chooser.setVisible(true);
 
         if (addOutputChooser) {
             OutputFormat outputFormat = chooserPanel.getSelectedFormat();
-            OutputFormat.setLastOutputFormat(outputFormat);
+            OutputFormat.setLastUsed(outputFormat);
         }
 
         if (!chooser.isOkPressed()) {
@@ -105,7 +99,7 @@ public class SingleDirChooserPanel extends ValidatedForm {
         }
         File selectedDir = chooserPanel.getSelectedDir();
         if (selectedDir != null) {
-            FileChoosers.setLastSaveDir(selectedDir);
+            Directories.setLastSaveDir(selectedDir);
             return true;
         }
 

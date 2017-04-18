@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,10 +48,9 @@ public class AngleParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
-        AngleSelector angleSelector = new AngleSelector(this);
-        paramGUI = angleSelector;
+        paramGUI = new AngleParamGUI(this);
         setParamGUIEnabledState();
-        return angleSelector;
+        return (JComponent) paramGUI;
     }
 
     public void setValueInDegrees(int d, boolean trigger) {
@@ -77,9 +76,9 @@ public class AngleParam extends AbstractFilterParam {
         }
     }
 
+    @SuppressWarnings("unused")
     public int getValueInNonIntuitiveDegrees() {
-        int degrees = (int) Math.toDegrees(angleInRadians);
-        return degrees;
+        return (int) Math.toDegrees(angleInRadians);
     }
 
     public int getValueInDegrees() {
@@ -132,6 +131,7 @@ public class AngleParam extends AbstractFilterParam {
         listenerList.add(ChangeListener.class, x);
     }
 
+    @SuppressWarnings("unused")
     public void removeChangeListener(ChangeListener x) {
         listenerList.remove(ChangeListener.class, x);
     }
@@ -147,8 +147,8 @@ public class AngleParam extends AbstractFilterParam {
         setValueInRadians((random * 2 * Math.PI - Math.PI), false);
     }
 
-    public AbstractAngleSelectorComponent getAngleSelectorComponent() {
-        return new AngleSelectorComponent(this);
+    public AbstractAngleUI getAngleSelectorUI() {
+        return new AngleUI(this);
     }
 
     public int getMaxAngleInDegrees() {
@@ -156,7 +156,7 @@ public class AngleParam extends AbstractFilterParam {
     }
 
     public RangeParam createRangeParam() {
-        RangeParam rangeParam = new RangeParam(getName(), 0, getValueInDegrees(), getMaxAngleInDegrees()) {
+        return new RangeParam(AngleParam.this.getName(), 0, getValueInDegrees(), getMaxAngleInDegrees()) {
             // override reset so that the clicking on the default button resets this object
             // this is good because this object has greater precision than the RangeParam
             @Override
@@ -166,8 +166,6 @@ public class AngleParam extends AbstractFilterParam {
                 }
             }
         };
-
-        return rangeParam;
     }
 
     @Override

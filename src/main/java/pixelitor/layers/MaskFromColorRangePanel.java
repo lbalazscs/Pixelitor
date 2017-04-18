@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,7 @@
 
 package pixelitor.layers;
 
-import pixelitor.filters.gui.AddDefaultButton;
-import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.ColorPickerThumbnailPanel;
 import pixelitor.gui.utils.DialogBuilder;
@@ -59,10 +58,9 @@ public class MaskFromColorRangePanel extends JPanel {
     private static final String PREVIEW_MODE_WHITE_MATTE = "White Matte";
     private static final String PREVIEW_MODE_RUBYLITH = "Rubylith";
 
-    private final JComboBox<String> colorSpaceCB = new JComboBox(
-            new IntChoiceParam.Value[]{
-                    new IntChoiceParam.Value("HSB", MaskFromColorRangeFilter.MODE_HSB),
-                    new IntChoiceParam.Value("RGB", MaskFromColorRangeFilter.MODE_RGB),
+    private final JComboBox<String> colorSpaceCB = new JComboBox(new Value[]{
+            new Value("HSB", MaskFromColorRangeFilter.MODE_HSB),
+            new Value("RGB", MaskFromColorRangeFilter.MODE_RGB),
             });
     private final RangeParam tolerance = new RangeParam("Tolerance", 0, 10, 150);
     private final RangeParam softness = new RangeParam("   Softness", 0, 10, 100);
@@ -145,8 +143,8 @@ public class MaskFromColorRangePanel extends JPanel {
         southPanel.add(southCenterPanel, BorderLayout.CENTER);
         southPanel.add(southEastPanel, BorderLayout.EAST);
 
-        SliderSpinner toleranceSlider = new SliderSpinner(tolerance, WEST, AddDefaultButton.NO);
-        SliderSpinner softnessSlider = new SliderSpinner(softness, WEST, AddDefaultButton.NO);
+        SliderSpinner toleranceSlider = new SliderSpinner(tolerance, WEST, false);
+        SliderSpinner softnessSlider = new SliderSpinner(softness, WEST, false);
         southCenterPanel.add(toleranceSlider);
         southCenterPanel.add(softnessSlider);
         southCenterPanel.add(new JLabel("   Invert:"));
@@ -169,8 +167,8 @@ public class MaskFromColorRangePanel extends JPanel {
     private MaskFromColorRangeFilter createFilterFromSettings(Color c) {
         MaskFromColorRangeFilter filter = new MaskFromColorRangeFilter(NAME);
 
-        IntChoiceParam.Value colorSpace = (IntChoiceParam.Value) colorSpaceCB.getSelectedItem();
-        filter.setMode(colorSpace.getIntValue());
+        Value colorSpace = (Value) colorSpaceCB.getSelectedItem();
+        filter.setMode(colorSpace.getValue());
         filter.setColor(c);
         filter.setTolerance(tolerance.getValue(), softness.getValueAsPercentage());
         filter.setInvert(invertCB.isSelected());
@@ -186,44 +184,49 @@ public class MaskFromColorRangePanel extends JPanel {
 
         String previewMode = (String) previewModeCB.getSelectedItem();
 
-        if (previewMode.equals(PREVIEW_MODE_MASK)) {
-            previewPanel.updateImage(rgbMask);
-        } else if (previewMode.equals(PREVIEW_MODE_RUBYLITH)) {
-            BufferedImage grayMask = ImageUtils.convertToGrayScaleImage(rgbMask);
-            BufferedImage ruby = new BufferedImage(RUBYLITH_COLOR_MODEL, grayMask.getRaster(), false, null);
-            BufferedImage thumbWithRuby = ImageUtils.copyImage(thumb);
-            Graphics2D g = thumbWithRuby.createGraphics();
-            g.setComposite(RUBYLITH_COMPOSITE);
-            g.drawImage(ruby, 0, 0, null);
-            g.dispose();
-            previewPanel.updateImage(thumbWithRuby);
-        } else {
-            BufferedImage grayMask = ImageUtils.convertToGrayScaleImage(rgbMask);
-            BufferedImage transparencyImage = new BufferedImage(TRANSPARENCY_COLOR_MODEL, grayMask.getRaster(), false, null);
-
-            BufferedImage thumbWithTransparency = ImageUtils.copyImage(thumb);
-            Graphics2D g = thumbWithTransparency.createGraphics();
-            g.setComposite(DstIn);
-            g.drawImage(transparencyImage, 0, 0, null);
-            g.dispose();
-
-            BufferedImage preview = ImageUtils.createSysCompatibleImage(rgbMask.getWidth(), rgbMask.getHeight());
-            Graphics2D previewG = preview.createGraphics();
-            switch (previewMode) {
-                case PREVIEW_MODE_BLACK_MATTE:
-                    previewG.setColor(Color.BLACK);
-                    break;
-                case PREVIEW_MODE_WHITE_MATTE:
-                    previewG.setColor(Color.WHITE);
-                    break;
-                default:
-                    throw new IllegalStateException("previewMode = " + previewMode);
+        switch (previewMode) {
+            case PREVIEW_MODE_MASK:
+                previewPanel.updateImage(rgbMask);
+                break;
+            case PREVIEW_MODE_RUBYLITH: {
+                BufferedImage grayMask = ImageUtils.convertToGrayScaleImage(rgbMask);
+                BufferedImage ruby = new BufferedImage(RUBYLITH_COLOR_MODEL, grayMask.getRaster(), false, null);
+                BufferedImage thumbWithRuby = ImageUtils.copyImage(thumb);
+                Graphics2D g = thumbWithRuby.createGraphics();
+                g.setComposite(RUBYLITH_COMPOSITE);
+                g.drawImage(ruby, 0, 0, null);
+                g.dispose();
+                previewPanel.updateImage(thumbWithRuby);
+                break;
             }
-            previewG.fillRect(0, 0, preview.getWidth(), preview.getHeight());
-            previewG.drawImage(thumbWithTransparency, 0, 0, null);
-            previewG.dispose();
+            default:
+                BufferedImage grayMask = ImageUtils.convertToGrayScaleImage(rgbMask);
+                BufferedImage transparencyImage = new BufferedImage(TRANSPARENCY_COLOR_MODEL, grayMask.getRaster(), false, null);
 
-            previewPanel.updateImage(preview);
+                BufferedImage thumbWithTransparency = ImageUtils.copyImage(thumb);
+                Graphics2D g = thumbWithTransparency.createGraphics();
+                g.setComposite(DstIn);
+                g.drawImage(transparencyImage, 0, 0, null);
+                g.dispose();
+
+                BufferedImage preview = ImageUtils.createSysCompatibleImage(rgbMask.getWidth(), rgbMask.getHeight());
+                Graphics2D previewG = preview.createGraphics();
+                switch (previewMode) {
+                    case PREVIEW_MODE_BLACK_MATTE:
+                        previewG.setColor(Color.BLACK);
+                        break;
+                    case PREVIEW_MODE_WHITE_MATTE:
+                        previewG.setColor(Color.WHITE);
+                        break;
+                    default:
+                        throw new IllegalStateException("previewMode = " + previewMode);
+                }
+                previewG.fillRect(0, 0, preview.getWidth(), preview.getHeight());
+                previewG.drawImage(thumbWithTransparency, 0, 0, null);
+                previewG.dispose();
+
+                previewPanel.updateImage(preview);
+                break;
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,7 +51,6 @@ import pixelitor.gui.Navigator;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.PerformanceTestingDialog;
-import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.OpenSaveManager;
@@ -60,6 +59,7 @@ import pixelitor.layers.AddAdjLayerAction;
 import pixelitor.layers.AddNewLayerAction;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.DeleteActiveLayerAction;
+import pixelitor.layers.Drawable;
 import pixelitor.layers.DuplicateLayerAction;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
@@ -92,7 +92,6 @@ import pixelitor.utils.AppPreferences;
 import pixelitor.utils.FilterCreator;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Tests3x3;
-import pixelitor.utils.UpdateGUI;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.AppNode;
 import pixelitor.utils.test.Events;
@@ -147,7 +146,7 @@ public class MenuBar extends JMenuBar {
     private static final KeyStroke CTRL_D = KeyStroke.getKeyStroke('D', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_E = KeyStroke.getKeyStroke('E', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_F = KeyStroke.getKeyStroke('F', MENU_SHORTCUT_KEY_MASK);
-//    private static final KeyStroke CTRL_G = KeyStroke.getKeyStroke('G', MENU_SHORTCUT_KEY_MASK);
+    //    private static final KeyStroke CTRL_G = KeyStroke.getKeyStroke('G', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_H = KeyStroke.getKeyStroke('H', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_I = KeyStroke.getKeyStroke('I', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_J = KeyStroke.getKeyStroke('J', MENU_SHORTCUT_KEY_MASK);
@@ -245,7 +244,7 @@ public class MenuBar extends JMenuBar {
         fileMenu.addAction(new MenuAction("Export Optimized JPEG...") {
             @Override
             public void onClick() {
-                BufferedImage image = ImageComponents.getActiveCompositeImageOrNull();
+                BufferedImage image = ImageComponents.getActiveCompositeImage();
                 OptimizedJpegSavePanel.showInDialog(image, pw);
             }
         });
@@ -418,14 +417,14 @@ public class MenuBar extends JMenuBar {
         layersMenu.addActionWithKey(new MenuAction("Merge Down") {
             @Override
             public void onClick() {
-                getActiveCompOrNull().mergeDown(UpdateGUI.YES);
+                getActiveCompOrNull().mergeDown(true);
             }
         }, CTRL_E);
 
         layersMenu.addAction(new MenuAction("Flatten Image") {
             @Override
             public void onClick() {
-                getActiveCompOrNull().flattenImage(UpdateGUI.YES);
+                getActiveCompOrNull().flattenImage(true);
             }
         });
 
@@ -526,7 +525,7 @@ public class MenuBar extends JMenuBar {
                 Composition comp = ic.getComp();
                 Layer layer = comp.getActiveLayer();
 
-                layer.deleteMask(AddToHistory.YES);
+                layer.deleteMask(true);
 
                 comp.imageChanged(FULL);
             }
@@ -543,7 +542,7 @@ public class MenuBar extends JMenuBar {
                     return;
                 }
 
-                ((ImageLayer) layer).applyLayerMask(AddToHistory.YES);
+                ((ImageLayer) layer).applyLayerMask(true);
 
                 // TODO actually this should not be necessary
                 layer.getComp().imageChanged(FULL);
@@ -1092,7 +1091,7 @@ public class MenuBar extends JMenuBar {
         developMenu.addAlwaysEnabledAction(new MenuAction("Debug Special") {
             @Override
             public void onClick() {
-                BufferedImage img = ImageComponents.getActiveCompositeImageOrNull();
+                BufferedImage img = ImageComponents.getActiveCompositeImage();
 
                 Composite composite = new MultiplyComposite(1.0f);
 
@@ -1167,9 +1166,8 @@ public class MenuBar extends JMenuBar {
         developMenu.addAction(new MenuAction("Debug getCanvasSizedSubImage") {
             @Override
             public void onClick() {
-                ImageLayer imageLayer = ImageComponents.getActiveImageLayerOrMaskOrNull();
-                BufferedImage bi = imageLayer.getCanvasSizedSubImage();
-                Utils.debugImage(bi);
+                ImageComponents.onActiveDrawable(
+                        dr -> Utils.debugImage(dr.getCanvasSizedSubImage()));
             }
         });
 
@@ -1265,8 +1263,8 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("Debug ImageLayer Images") {
             @Override
             public void onClick() {
-                ImageLayer layer = ImageComponents.getActiveImageLayerOrMaskOrNull();
-                layer.debugImages();
+                ImageComponents.onActiveDrawable(
+                        Drawable::debugImages);
             }
         });
 

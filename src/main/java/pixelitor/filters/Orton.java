@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,8 +40,9 @@ public class Orton extends FilterWithParametrizedGUI {
 
     public Orton() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
-                blurRadius.adjustRangeToImageSize(0.01),
+                blurRadius.withAdjustedRange(0.01),
                 amount
         ));
     }

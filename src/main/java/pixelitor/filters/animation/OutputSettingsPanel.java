@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.TFValidationLayerUI;
 import pixelitor.gui.utils.TextFieldValidator;
 import pixelitor.gui.utils.ValidatedForm;
-import pixelitor.io.FileChoosers;
+import pixelitor.io.Directories;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
@@ -50,7 +50,7 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
     private JComboBox<Interpolation> ipCB;
     private JComboBox<TweenOutputType> outputTypeCB;
     private final JCheckBox pingPongCB = new JCheckBox();
-    private final BrowseFilesSupport browseFilesSupport = new BrowseFilesSupport(FileChoosers.getLastSaveDir().getAbsolutePath());
+    private final BrowseFilesSupport browseFilesSupport = new BrowseFilesSupport(Directories.getLastSaveDir().getAbsolutePath());
     private JTextField fileNameTF;
     private String errorMessage;
 
@@ -212,9 +212,9 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
         animation.setPingPong(pingPongCB.isSelected());
 
         if (output.isDirectory()) {
-            FileChoosers.setLastSaveDir(output);
+            Directories.setLastSaveDir(output);
         } else {
-            FileChoosers.setLastSaveDir(output.getParentFile());
+            Directories.setLastSaveDir(output.getParentFile());
         }
     }
 }

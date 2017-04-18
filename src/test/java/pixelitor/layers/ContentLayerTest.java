@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -81,7 +81,7 @@ public class ContentLayerTest {
 
         iconUpdates = new IconUpdateChecker(ui, layer, mask, 0, 1);
 
-        assert comp.getNrLayers() == 1 : "found " + comp.getNrLayers() + " layers";
+        assert comp.getNumLayers() == 1 : "found " + comp.getNumLayers() + " layers";
         History.clear();
     }
 

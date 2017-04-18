@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -78,9 +78,10 @@ public class ColorUtils {
     }
 
     /**
-     * Calculates the average of two colors in the HSB space. Full opacity is assumed.
+     * Calculates the average of two colors in the HSB space.
+     * Full opacity is assumed.
      */
-    public static Color getHSBAverageColor(Color c1, Color c2) {
+    public static Color calcHSBAverage(Color c1, Color c2) {
         assert c1 != null && c2 != null;
 
         int rgb1 = c1.getRGB();
@@ -99,23 +100,21 @@ public class ColorUtils {
 
         float hue1 = hsb1[0];
         float hue2 = hsb2[0];
-        float hue = calculateHueAverage(hue1, hue2);
+        float hue = hueAverage(hue1, hue2);
 
         float sat = (hsb1[1] + hsb2[1]) / 2.0f;
         float bri = (hsb1[2] + hsb2[2]) / 2.0f;
         return Color.getHSBColor(hue, sat, bri);
     }
 
-    private static float calculateHueAverage(float hue1, float hue2) {
+    private static float hueAverage(float hue1, float hue2) {
         float diff = hue1 - hue2;
         if (diff < 0.5f && diff > -0.5f) {
             return (hue1 + hue2) / 2.0f;
         } else if (diff >= 0.5f) { // hue1 is bigger
-            float retVal = hue1 + (1.0f - hue1 + hue2) / 2.0f;
-            return retVal;
+            return hue1 + (1.0f - hue1 + hue2) / 2.0f;
         } else if (diff <= 0.5f) { // hue2 is bigger
-            float retVal = hue2 + (1.0f - hue2 + hue1) / 2.0f;
-            return retVal;
+            return hue2 + (1.0f - hue2 + hue1) / 2.0f;
         } else {
             throw new IllegalStateException("should not get here");
         }
@@ -173,9 +172,10 @@ public class ColorUtils {
     }
 
     /**
-     * Calculates the average of two colors in the RGB space. Full opacity is assumed.
+     * Calculates the average of two colors in the RGB space.
+     * Full opacity is assumed.
      */
-    public static Color getRGBAverageColor(Color c1, Color c2) {
+    public static Color calcRGBAverage(Color c1, Color c2) {
         assert c1 != null && c2 != null;
 
         int rgb1 = c1.getRGB();

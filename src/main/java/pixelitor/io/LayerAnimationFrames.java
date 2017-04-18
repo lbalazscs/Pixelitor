@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,12 +40,12 @@ public class LayerAnimationFrames {
     }
 
     private void addComposition(Composition comp, boolean pingPong) {
-        int nrLayers = comp.getNrLayers();
-        for (int i = 0; i < nrLayers; i++) {
+        int numLayers = comp.getNumLayers();
+        for (int i = 0; i < numLayers; i++) {
             addLayerToAnimation(comp, i);
         }
-        if (pingPong && nrLayers > 2) {
-            for (int i = nrLayers - 2; i > 0; i--) {
+        if (pingPong && numLayers > 2) {
+            for (int i = numLayers - 2; i > 0; i--) {
                 addLayerToAnimation(comp, i);
             }
         }
@@ -65,6 +65,7 @@ public class LayerAnimationFrames {
 
             images.add(image);
         } else if (layer instanceof TextLayer) {
+            // TODO apply mask
             TextLayer textLayer = (TextLayer) layer;
             BufferedImage image = textLayer.createRasterizedImage();
             images.add(image);

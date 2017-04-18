@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.history;
 
 import pixelitor.Composition;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.selection.Selection;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.debug.DataBufferNode;
@@ -42,15 +42,15 @@ public class PartialImageEdit extends FadeableEdit {
     private final boolean canRepeat;
     private Raster backupRaster;
 
-    private final ImageLayer layer;
+    private final Drawable dr;
 
-    public PartialImageEdit(String name, Composition comp, ImageLayer layer, BufferedImage image, Rectangle saveRect, boolean canRepeat) {
-        super(comp, layer, name);
+    public PartialImageEdit(String name, Composition comp, Drawable dr, BufferedImage image, Rectangle saveRect, boolean canRepeat) {
+        super(comp, dr, name);
 
         this.canRepeat = canRepeat;
-        this.layer = layer;
-
+        this.dr = dr;
         this.saveRect = saveRect;
+
         backupRaster = image.getData(this.saveRect);
     }
 
@@ -69,7 +69,7 @@ public class PartialImageEdit extends FadeableEdit {
     }
 
     private void swapRasters() {
-        BufferedImage image = layer.getImage();
+        BufferedImage image = dr.getImage();
 
         Raster tmpRaster = null;
         try {
@@ -90,7 +90,7 @@ public class PartialImageEdit extends FadeableEdit {
         backupRaster = tmpRaster;
 
         comp.imageChanged(FULL);
-        layer.updateIconImage();
+        dr.updateIconImage();
 
         History.notifyMenus(this);
     }
@@ -132,15 +132,15 @@ public class PartialImageEdit extends FadeableEdit {
         // recreate the full image as if it was backed up entirely
         // because Fade expects to fade images of equal size
         // TODO this is not the optimal solution  - Fade should fade only the changed area
-        BufferedImage fullImage = layer.getImage();
+        BufferedImage fullImage = dr.getImage();
         BufferedImage previousImage = ImageUtils.copyImage(fullImage);
         previousImage.setData(backupRaster);
 
-        Selection selection = layer.getComp().getSelection();
+        Selection selection = dr.getComp().getSelection();
         if (selection != null) {
             // backupRaster is relative to the full image, but we need to return a selection-sized image
             // TODO this is another ugly hack
-            previousImage = layer.getSelectionSizedPartFrom(previousImage, selection, true);
+            previousImage = dr.getSelectionSizedPartFrom(previousImage, selection, true);
         }
 
         return previousImage;

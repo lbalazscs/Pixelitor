@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,19 +25,19 @@ import java.awt.event.ActionListener;
 /**
  * An ActionParam that deals with reseeding some randomness
  */
-public class ReseedNoiseActionSetting extends ActionSetting {
+public class ReseedNoiseFilterAction extends FilterAction {
     // the first group of constructors is called if
     // Noise.reseed() does the reseed...
 
-    public ReseedNoiseActionSetting() {
+    public ReseedNoiseFilterAction() {
         this("Reseed");
     }
 
-    public ReseedNoiseActionSetting(String name) {
+    public ReseedNoiseFilterAction(String name) {
         this(name, "<html>Reinitialize the randomness.<br>Has effect only if some randomness is enabled in the settings.");
     }
 
-    public ReseedNoiseActionSetting(String name, String toolTip) {
+    public ReseedNoiseFilterAction(String name, String toolTip) {
         super(name, e -> Noise.reseed(), IconUtils.getDice2Icon(), toolTip);
         setIgnoreFinalAnimationSettingMode(false);
     }
@@ -45,15 +45,15 @@ public class ReseedNoiseActionSetting extends ActionSetting {
         // ... and the second group of constructors is called if
     // the given ActionListener does the reseed
 
-    public ReseedNoiseActionSetting(ActionListener actionListener) {
+    public ReseedNoiseFilterAction(ActionListener actionListener) {
         this("Reseed", actionListener);
     }
 
-    public ReseedNoiseActionSetting(String name, ActionListener actionListener) {
+    public ReseedNoiseFilterAction(String name, ActionListener actionListener) {
         this(name, "Reinitialize the randomness", actionListener);
     }
 
-    public ReseedNoiseActionSetting(String name, String toolTipText, ActionListener actionListener) {
+    public ReseedNoiseFilterAction(String name, String toolTipText, ActionListener actionListener) {
         super(name, actionListener, IconUtils.getDice2Icon(), toolTipText);
         setIgnoreFinalAnimationSettingMode(false);
     }

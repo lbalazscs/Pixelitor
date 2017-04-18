@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ import java.awt.event.ActionListener;
 /**
  * Creates a button that executes an action when pushed
  */
-public class ActionSetting implements FilterSetting {
+public class FilterAction implements FilterSetting {
     private final ActionListener actionListener;
     private final Icon icon;
     private final String toolTipText;
@@ -37,11 +37,11 @@ public class ActionSetting implements FilterSetting {
     // most actions should be available in the final animation settings
     private boolean ignoreFinalAnimationSettingMode = true;
 
-    public ActionSetting(String name, ActionListener actionListener, String toolTipText) {
+    public FilterAction(String name, ActionListener actionListener, String toolTipText) {
         this(name, actionListener, null, toolTipText);
     }
 
-    public ActionSetting(String name, ActionListener actionListener, Icon icon, String toolTipText) {
+    public FilterAction(String name, ActionListener actionListener, Icon icon, String toolTipText) {
         this.name = name;
         this.actionListener = actionListener;
         this.icon = icon;
@@ -106,7 +106,8 @@ public class ActionSetting implements FilterSetting {
     }
 
     /**
-     * A button that executes first its ActionListener, and after then its ParamAdjustmentListener
+     * A button that executes first its ActionListener,
+     * and after then its ParamAdjustmentListener
      */
     private static class OrderedExecutionButton extends JButton {
         private OrderedExecutionButton(String name, ActionListener actionListener, ParamAdjustmentListener adjustmentListener, Icon icon) {

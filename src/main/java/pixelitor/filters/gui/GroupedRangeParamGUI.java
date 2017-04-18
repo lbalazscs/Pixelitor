@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,17 +28,17 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 /**
  * GUI for a GroupedRangeParam
  */
-public class GroupedRangeSelector extends JPanel implements ParamGUI {
+public class GroupedRangeParamGUI extends JPanel implements ParamGUI {
     private final int numParams;
     private final GroupedRangeParam model;
-    private final GridBagHelper gridBagHelper;
+    private final GridBagHelper gbh;
 
-    public GroupedRangeSelector(GroupedRangeParam model) {
+    public GroupedRangeParamGUI(GroupedRangeParam model) {
         this.model = model;
         numParams = model.getNumParams();
 
         setLayout(new GridBagLayout());
-        gridBagHelper = new GridBagHelper(this);
+        gbh = new GridBagHelper(this);
 
         addSliderSpinners();
 
@@ -53,16 +53,16 @@ public class GroupedRangeSelector extends JPanel implements ParamGUI {
         for (int i = 0; i < numParams; i++) {
             RangeParam param = model.getRangeParam(i);
             // doesn't call param.createGUI because we don't want another border
-            SliderSpinner slider = new SliderSpinner(param, NONE, AddDefaultButton.YES);
+            SliderSpinner slider = new SliderSpinner(param, NONE, true);
             slider.setupTicks();
-            gridBagHelper.addLabelWithControl(param.getName() + ":", slider, i);
+            gbh.addLabelWithControl(param.getName() + ":", slider, i);
         }
     }
 
     private void addLinkCheckBox() {
         JCheckBox linkedCB = new JCheckBox();
         linkedCB.setModel(model.getCheckBoxModel());
-        gridBagHelper.addLabelWithControl("Linked:", linkedCB, numParams);
+        gbh.addLabelWithControl("Linked:", linkedCB, numParams);
         linkedCB.addActionListener(e -> model.setLinked(linkedCB.isSelected()));
     }
 

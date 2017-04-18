@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,6 @@ import pixelitor.Composition;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageComponent;
 import pixelitor.history.AddLayerMaskEdit;
-import pixelitor.history.AddToHistory;
 import pixelitor.history.DeleteLayerMaskEdit;
 import pixelitor.history.DeselectEdit;
 import pixelitor.history.EnableLayerMaskEdit;
@@ -36,7 +35,6 @@ import pixelitor.history.LinkedEdit;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.selection.Selection;
 import pixelitor.utils.Messages;
-import pixelitor.utils.UpdateGUI;
 
 import java.awt.AlphaComposite;
 import java.awt.Composite;
@@ -124,7 +122,7 @@ public abstract class Layer implements Serializable {
         return visible;
     }
 
-    public void setVisible(boolean newVisibility, AddToHistory addToHistory) {
+    public void setVisible(boolean newVisibility, boolean addToHistory) {
         if (this.visible == newVisibility) {
             return;
         }
@@ -167,7 +165,7 @@ public abstract class Layer implements Serializable {
         }
     }
 
-    public void setOpacity(float newOpacity, UpdateGUI updateGUI, AddToHistory addToHistory, boolean updateImage) {
+    public void setOpacity(float newOpacity, boolean updateGUI, boolean addToHistory, boolean updateImage) {
         assert newOpacity <= 1.0f : "newOpacity = " + newOpacity;
         assert newOpacity >= 0.0f : "newOpacity = " + newOpacity;
 
@@ -179,7 +177,7 @@ public abstract class Layer implements Serializable {
 
         this.opacity = newOpacity;
 
-        if (updateGUI.isYes()) {
+        if (updateGUI) {
             ui.setOpacityFromModel(newOpacity);
         }
         if(updateImage) {
@@ -187,11 +185,11 @@ public abstract class Layer implements Serializable {
         }
     }
 
-    public void setBlendingMode(BlendingMode mode, UpdateGUI updateGUI, AddToHistory addToHistory, boolean updateImage) {
+    public void setBlendingMode(BlendingMode mode, boolean updateGUI, boolean addToHistory, boolean updateImage) {
         History.addEdit(addToHistory, () -> new LayerBlendingEdit(this, blendingMode));
 
         this.blendingMode = mode;
-        if (updateGUI.isYes()) {
+        if (updateGUI) {
             LayerBlendingModePanel.INSTANCE.setBlendingModeFromModel(mode);
         }
 
@@ -200,7 +198,7 @@ public abstract class Layer implements Serializable {
         }
     }
 
-    public void setName(String newName, AddToHistory addToHistory) {
+    public void setName(String newName, boolean addToHistory) {
         String previousName = name;
         this.name = newName;
 
@@ -237,7 +235,7 @@ public abstract class Layer implements Serializable {
         g.dispose();
     }
 
-    public void makeActive(AddToHistory addToHistory) {
+    public void makeActive(boolean addToHistory) {
         comp.setActiveLayer(this, addToHistory);
     }
 
@@ -267,7 +265,6 @@ public abstract class Layer implements Serializable {
 
         BufferedImage bwMask = addType.getBWImage(canvasWidth, canvasHeight, selection);
 
-
         String editName = "Add Layer Mask";
         boolean deselect = addType.needsSelection();
         if (deselect) {
@@ -294,7 +291,7 @@ public abstract class Layer implements Serializable {
         PixelitorEdit edit = new AddLayerMaskEdit(comp, this, editName);
         if (deselect) {
             Shape backupShape = comp.getSelectionShape();
-            comp.deselect(AddToHistory.NO);
+            comp.deselect(false);
             if (backupShape != null) { // TODO on Mac Random GUI test we can get null here
                 DeselectEdit deselectEdit = new DeselectEdit(comp, backupShape, "nested deselect");
                 edit = new LinkedEdit(comp, editName, edit, deselectEdit);
@@ -328,7 +325,7 @@ public abstract class Layer implements Serializable {
         mask.updateIconImage();
     }
 
-    public void deleteMask(AddToHistory addToHistory) {
+    public void deleteMask(boolean addToHistory) {
         LayerMask oldMask = mask;
         ImageComponent ic = comp.getIC();
         MaskViewMode oldMode = ic.getMaskViewMode();
@@ -497,7 +494,6 @@ public abstract class Layer implements Serializable {
         // and call super for the linked edit.
         Layer linked = getLinked();
         if (linked != null) {
-            //noinspection TailRecursion
             return linked.endMovement();
         }
         return null;
@@ -530,7 +526,7 @@ public abstract class Layer implements Serializable {
         return maskEnabled;
     }
 
-    public void setMaskEnabled(boolean maskEnabled, AddToHistory addToHistory) {
+    public void setMaskEnabled(boolean maskEnabled, boolean addToHistory) {
         assert mask != null;
         this.maskEnabled = maskEnabled;
 
@@ -558,7 +554,6 @@ public abstract class Layer implements Serializable {
     }
 
     protected void notifyLayerChangeObservers() {
-        //noinspection Convert2streamapi
         for (LayerChangeListener observer : layerChangeObservers) {
             observer.layerStateChanged();
         }

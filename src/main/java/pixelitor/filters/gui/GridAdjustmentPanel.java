@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.filters.gui;
 
 import pixelitor.filters.FilterWithParametrizedGUI;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -31,12 +31,12 @@ import java.util.List;
  * the four corners of the image) are added in a 2*2 grid.
  * Extra parameters are added in a row bellow the grid.
  */
-public class GridAdjustmentPanel extends ParametrizedAdjustPanel {
-    public static final int MAX_GRID_PARAMS = 4;
+public class GridAdjustmentPanel extends ParametrizedFilterGUIPanel {
+    private static final int MAX_GRID_PARAMS = 4;
     private final boolean addGridLabels;
 
-    public GridAdjustmentPanel(FilterWithParametrizedGUI filter, ImageLayer layer, boolean addGridLabels, ShowOriginal showOriginal) {
-        super(filter, layer, showOriginal);
+    public GridAdjustmentPanel(FilterWithParametrizedGUI filter, Drawable dr, boolean addGridLabels, ShowOriginal showOriginal) {
+        super(filter, dr, showOriginal);
         this.addGridLabels = addGridLabels;
     }
 

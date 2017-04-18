@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,14 +17,14 @@
 
 package pixelitor.filters;
 
-import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.BooleanParam;
+import pixelitor.filters.gui.FilterGUIPanel;
 import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.ParamSet;
-import pixelitor.filters.gui.ParametrizedAdjustPanel;
+import pixelitor.filters.gui.ParametrizedFilterGUIPanel;
 import pixelitor.filters.gui.ShowOriginal;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Shape;
@@ -58,8 +58,8 @@ public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
     }
 
     @Override
-    public AdjustPanel createAdjustPanel(ImageLayer layer) {
-        return new ParametrizedAdjustPanel(this, layer, addShowOriginal);
+    public FilterGUIPanel createGUIPanel(Drawable dr) {
+        return new ParametrizedFilterGUIPanel(this, dr, addShowOriginal);
     }
 
     @Override

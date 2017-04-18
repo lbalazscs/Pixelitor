@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,7 @@ import com.jhlabs.image.SmearFilter;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
@@ -41,11 +42,11 @@ public class JHSmear extends FilterWithParametrizedGUI {
     private final AngleParam angle = new AngleParam("Angle (only for lines)", 0);
     private final RangeParam mix = new RangeParam("Opacity (%)", 0, 50, 100);
 
-    private static final IntChoiceParam.Value[] shapeChoices = {
-            new IntChoiceParam.Value("Lines", SmearFilter.LINES),
-            new IntChoiceParam.Value("Crosses", SmearFilter.CROSSES),
-            new IntChoiceParam.Value("Circles", SmearFilter.CIRCLES),
-            new IntChoiceParam.Value("Squares", SmearFilter.SQUARES),
+    private static final Value[] shapeChoices = {
+            new Value("Lines", SmearFilter.LINES),
+            new Value("Crosses", SmearFilter.CROSSES),
+            new Value("Circles", SmearFilter.CIRCLES),
+            new Value("Squares", SmearFilter.SQUARES),
     };
     private final IntChoiceParam shape = new IntChoiceParam("Shape", shapeChoices);
 
@@ -53,8 +54,9 @@ public class JHSmear extends FilterWithParametrizedGUI {
 
     public JHSmear() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
-                distance.adjustRangeToImageSize(0.1),
+                distance.withAdjustedRange(0.1),
                 shape.withAction(ReseedSupport.createAction()),
                 density,
                 angle,
@@ -63,8 +65,7 @@ public class JHSmear extends FilterWithParametrizedGUI {
 
         // disable angle if the shape is not lines
         Utils.setupDisableOtherIf(shape, angle,
-                selected -> selected.getIntValue() != SmearFilter.LINES);
-
+                selected -> selected.getValue() != SmearFilter.LINES);
     }
 
     @Override

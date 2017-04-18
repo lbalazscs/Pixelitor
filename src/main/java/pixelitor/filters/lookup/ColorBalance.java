@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package pixelitor.filters.lookup;
 import com.jhlabs.image.PixelUtils;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.RangeWithColorsParam;
@@ -46,11 +47,11 @@ public class ColorBalance extends FilterWithParametrizedGUI {
     private static final int MIDTONES = 2;
     private static final int HIGHLIGHTS = 4;
 
-    private final IntChoiceParam affectParam = new IntChoiceParam("Affect", new IntChoiceParam.Value[]{
-            new IntChoiceParam.Value("Everything", EVERYTHING),
-            new IntChoiceParam.Value("Shadows", SHADOWS),
-            new IntChoiceParam.Value("Midtones", MIDTONES),
-            new IntChoiceParam.Value("Highlights", HIGHLIGHTS),
+    private final IntChoiceParam affect = new IntChoiceParam("Affect", new Value[]{
+            new Value("Everything", EVERYTHING),
+            new Value("Shadows", SHADOWS),
+            new Value("Midtones", MIDTONES),
+            new Value("Highlights", HIGHLIGHTS),
     });
 
     private final RangeParam cyanRed = new RangeWithColorsParam(CYAN, RED, "Cyan-Red", -100, 0, 100);
@@ -59,8 +60,9 @@ public class ColorBalance extends FilterWithParametrizedGUI {
 
     public ColorBalance() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
-                affectParam,
+                affect,
                 cyanRed,
                 magentaGreen,
                 yellowBlue
@@ -77,17 +79,18 @@ public class ColorBalance extends FilterWithParametrizedGUI {
             return src;
         }
 
-        int affect = affectParam.getValue();
+        RGBLookup rgbLookup = new LookupHelper(cr, mg, yb, affect.getValue())
+                .getLookup();
 
-        RGBLookup rgbLookup = new LookupCalculator(cr, mg, yb, affect).getLookup();
+        BufferedImageOp filterOp = new FastLookupOp(
+                (ShortLookupTable) rgbLookup.getLookupOp());
 
-        BufferedImageOp filterOp = new FastLookupOp((ShortLookupTable) rgbLookup.getLookupOp());
         filterOp.filter(src, dest);
 
         return dest;
     }
 
-    private static class LookupCalculator {
+    private static class LookupHelper {
         private final float cyanRed;
         private final float magentaGreen;
         private final float yellowBlue;
@@ -99,7 +102,7 @@ public class ColorBalance extends FilterWithParametrizedGUI {
         final short[] greenMapping = new short[LUT_TABLE_SIZE];
         final short[] blueMapping = new short[LUT_TABLE_SIZE];
 
-        public LookupCalculator(float cyanRed, float magentaGreen, float yellowBlue, int affect) {
+        public LookupHelper(float cyanRed, float magentaGreen, float yellowBlue, int affect) {
             this.cyanRed = cyanRed;
             this.magentaGreen = magentaGreen;
             this.yellowBlue = yellowBlue;

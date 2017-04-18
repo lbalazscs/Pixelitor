@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,8 @@
 package pixelitor.filters.convolve;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
-import pixelitor.filters.gui.AdjustPanel;
-import pixelitor.layers.ImageLayer;
+import pixelitor.filters.gui.FilterGUIPanel;
+import pixelitor.layers.Drawable;
 import pixelitor.utils.Messages;
 import pixelitor.utils.NotANumberException;
 import pixelitor.utils.Utils;
@@ -34,18 +34,18 @@ import java.awt.event.ActionListener;
 /**
  * An adjustment panel for customizable convolutions
  */
-public class CustomConvolveAdjustments extends AdjustPanel implements ActionListener {
+public class CustomConvolveAdjustments extends FilterGUIPanel implements ActionListener {
     private static final int TEXTFIELD_PREFERRED_WIDTH = 70;
 
     private JTextField[] textFields;
 
-    private JPanel textFieldsPanel;
+    private JPanel textFieldsP;
     private JButton normalizeButton;
     private Box presetsBox;
     private final int size;
 
-    public CustomConvolveAdjustments(Convolve filter, ImageLayer layer) {
-        super(filter, layer);
+    public CustomConvolveAdjustments(Convolve filter, Drawable dr) {
+        super(filter, dr);
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
         size = filter.getSize();
@@ -59,22 +59,22 @@ public class CustomConvolveAdjustments extends AdjustPanel implements ActionList
     private void initLeftVerticalBox(Convolve filter) {
         Box leftVerticalBox = Box.createVerticalBox();
 
-        textFieldsPanel = new JPanel();
+        textFieldsP = new JPanel();
         textFields = new JTextField[size * size];
         for (int i = 0; i < textFields.length; i++) {
             textFields[i] = new JTextField();
         }
-        textFieldsPanel.setLayout(new GridLayout(size, size));
+        textFieldsP.setLayout(new GridLayout(size, size));
         for (JTextField textField : textFields) {
             setupTextField(textField);
         }
-        textFieldsPanel.setBorder(BorderFactory.createTitledBorder("Kernel"));
-        textFieldsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        leftVerticalBox.add(textFieldsPanel);
+        textFieldsP.setBorder(BorderFactory.createTitledBorder("Kernel"));
+        textFieldsP.setAlignmentX(Component.LEFT_ALIGNMENT);
+        leftVerticalBox.add(textFieldsP);
 
-        // these two lines must come after adding the textFieldsPanel to the box
-        Dimension minimumSize = textFieldsPanel.getMinimumSize();
-        textFieldsPanel.setPreferredSize(new Dimension(size * TEXTFIELD_PREFERRED_WIDTH, minimumSize.height));
+        // these two lines must come after adding the textFieldsP to the box
+        Dimension minimumSize = textFieldsP.getMinimumSize();
+        textFieldsP.setPreferredSize(new Dimension(size * TEXTFIELD_PREFERRED_WIDTH, minimumSize.height));
 
         normalizeButton = new JButton("Normalize (preserve brightness)");
         normalizeButton.addActionListener(this);
@@ -275,7 +275,7 @@ public class CustomConvolveAdjustments extends AdjustPanel implements ActionList
     }
 
     private void setupTextField(JTextField textField) {
-        textFieldsPanel.add(textField);
+        textFieldsP.add(textField);
         textField.addActionListener(this);
     }
 

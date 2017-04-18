@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,37 +19,37 @@ package pixelitor.filters.gui;
 
 import pixelitor.filters.Filter;
 import pixelitor.gui.utils.OKCancelDialog;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 
 /**
  * A dialog for the filter adjustments
  */
-public class AdjustDialog extends OKCancelDialog {
+public class FilterGUIDialog extends OKCancelDialog {
     private final Filter activeFilter;
-    private final ImageLayer layer;
+    private final Drawable dr;
 
-    private AdjustDialog(AdjustPanel adjustPanel, Filter activeFilter, ImageLayer layer) {
-        super(adjustPanel, activeFilter.getName());
+    private FilterGUIDialog(FilterGUIPanel filterGUIPanel, Filter activeFilter, Drawable dr) {
+        super(filterGUIPanel, activeFilter.getName());
         this.activeFilter = activeFilter;
-        this.layer = layer;
+        this.dr = dr;
         setName("filterDialog");
     }
 
-    public static void showDialog(AdjustPanel adjustPanel, Filter activeFilter, ImageLayer layer) {
-        AdjustDialog dialog = new AdjustDialog(adjustPanel, activeFilter, layer);
+    public static void showDialog(FilterGUIPanel filterGUIPanel, Filter activeFilter, Drawable dr) {
+        FilterGUIDialog dialog = new FilterGUIDialog(filterGUIPanel, activeFilter, dr);
         dialog.setVisible(true);
     }
 
     @Override
     public void dialogAccepted() {
-        layer.okPressedInDialog(activeFilter.getName());
+        dr.onDialogAccepted(activeFilter.getName());
 
         close();
     }
 
     @Override
     public void dialogCanceled() {
-        layer.cancelPressedInDialog();
+        dr.onDialogCanceled();
 
         close();
     }

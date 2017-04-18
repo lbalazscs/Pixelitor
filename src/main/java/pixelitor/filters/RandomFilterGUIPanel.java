@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,28 +18,28 @@
 package pixelitor.filters;
 
 import pixelitor.ChangeReason;
-import pixelitor.filters.gui.AdjustPanel;
+import pixelitor.filters.gui.FilterGUIPanel;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.gui.ImageComponents;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 
-public class RandomFilterAdjustPanel extends AdjustPanel {
+public class RandomFilterGUIPanel extends FilterGUIPanel {
     private final JPanel realSettingsPanel;
-    private final ImageLayer layer;
+    private final Drawable dr;
     private JPanel lastFilterPanel;
     private final RandomFilterSource filterSource;
     private final JPanel northPanel;
     private final JButton backButton;
     private final JButton forwardButton;
 
-    protected RandomFilterAdjustPanel(ImageLayer layer) {
-        super(null, layer); // the actual filter will be determined bellow
-        this.layer = layer;
+    protected RandomFilterGUIPanel(Drawable dr) {
+        super(null, dr); // the actual filter will be determined bellow
+        this.dr = dr;
         filterSource = new RandomFilterSource();
 
         setLayout(new BorderLayout());
@@ -84,17 +84,17 @@ public class RandomFilterAdjustPanel extends AdjustPanel {
             if (filterSource.getLastFilter() != null) { // there was a filter before
                 // need to clear the preview of the previous filters
                 // so that the image position selectors show the original image
-                ImageLayer imageLayer = ImageComponents.getActiveImageLayerOrMaskOrNull();
-                imageLayer.stopPreviewing(); // stop the last one
-                imageLayer.startPreviewing(); // start the new one
+                Drawable dr = ImageComponents.getActiveDrawableOrNull();
+                dr.stopPreviewing(); // stop the last one
+                dr.startPreviewing(); // start the new one
             }
-            AdjustPanel adjustPanel = ((FilterWithGUI) newFilter).createAdjustPanel(layer);
-            realSettingsPanel.add(adjustPanel);
-            adjustPanel.revalidate();
-            lastFilterPanel = adjustPanel;
+            FilterGUIPanel filterGUIPanel = ((FilterWithGUI) newFilter).createGUIPanel(dr);
+            realSettingsPanel.add(filterGUIPanel);
+            filterGUIPanel.revalidate();
+            lastFilterPanel = filterGUIPanel;
         } else {
             lastFilterPanel = null;
-            filter.execute(layer, ChangeReason.OP_PREVIEW);
+            filter.execute(dr, ChangeReason.OP_PREVIEW);
         }
     }
 }

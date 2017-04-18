@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,6 +41,7 @@ public class Colorize extends FilterWithParametrizedGUI {
 
     public Colorize() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
                 colorParam,
                 adjustBrightness,

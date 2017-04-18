@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.ImageComponent;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.layers.LayerMask;
 import pixelitor.layers.TmpDrawingLayer;
 import pixelitor.menus.view.ZoomLevel;
@@ -110,7 +110,7 @@ public class GradientTool extends Tool {
             Composition comp = ic.getComp();
 
             saveFullImageForUndo(comp);
-            drawGradient(comp.getActiveMaskOrImageLayer(),
+            drawGradient(comp.getActiveDrawable(),
                     getType(),
                     getGradientColorType(),
                     getCycleType(),
@@ -145,7 +145,7 @@ public class GradientTool extends Tool {
         return false;
     }
 
-    public static void drawGradient(ImageLayer layer, GradientType gradientType, GradientColorType colorType, MultipleGradientPaint.CycleMethod cycleMethod, Composite composite, UserDrag userDrag, boolean invert) {
+    public static void drawGradient(Drawable dr, GradientType gradientType, GradientColorType colorType, MultipleGradientPaint.CycleMethod cycleMethod, Composite composite, UserDrag userDrag, boolean invert) {
         if (userDrag.isClick()) {
             return;
         }
@@ -153,18 +153,18 @@ public class GradientTool extends Tool {
         Graphics2D g;
         int width;
         int height;
-        if (layer instanceof LayerMask) {
-            BufferedImage subImage = layer.getCanvasSizedSubImage();
+        if (dr instanceof LayerMask) {
+            BufferedImage subImage = dr.getCanvasSizedSubImage();
             g = subImage.createGraphics();
             width = subImage.getWidth();
             height = subImage.getHeight();
         } else {
-            TmpDrawingLayer tmpDrawingLayer = layer.createTmpDrawingLayer(composite);
+            TmpDrawingLayer tmpDrawingLayer = dr.createTmpDrawingLayer(composite);
             g = tmpDrawingLayer.getGraphics();
             width = tmpDrawingLayer.getWidth();
             height = tmpDrawingLayer.getHeight();
         }
-        layer.getComp().applySelectionClipping(g, null);
+        dr.getComp().applySelectionClipping(g, null);
         // repeated gradients are still jaggy
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
@@ -180,8 +180,8 @@ public class GradientTool extends Tool {
 
         g.fillRect(0, 0, width, height);
         g.dispose();
-        layer.mergeTmpDrawingLayerDown();
-        layer.updateIconImage();
+        dr.mergeTmpDrawingLayerDown();
+        dr.updateIconImage();
     }
 
     @Override

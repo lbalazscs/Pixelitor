@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -108,7 +108,7 @@ public class TextLayerTest {
     }
 
     private void checkThereIsOnlyOneLayerOfType(Class<? extends Layer> type) {
-        assertThat(comp.getNrLayers()).isEqualTo(1);
+        assertThat(comp.getNumLayers()).isEqualTo(1);
         assertThat(comp.getActiveLayer()).isInstanceOf(type);
     }
 

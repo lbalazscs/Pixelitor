@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package pixelitor.filters;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
@@ -41,17 +42,17 @@ public class Voronoi extends FilterWithParametrizedGUI {
     private final EnumParam<Metric> distance = new EnumParam<>("Distance", Metric.class);
     private final BooleanParam showPoints = new BooleanParam("Show Points", false, IGNORE_RANDOMIZE);
     private final BooleanParam useImageColors = new BooleanParam("Use Image Colors", false, IGNORE_RANDOMIZE);
-    private final IntChoiceParam antiAliasing = new IntChoiceParam("Anti-aliasing",
-            new IntChoiceParam.Value[]{
-                    new IntChoiceParam.Value("None (Faster)", 0),
-                    new IntChoiceParam.Value("2x2 (Better, slower)", 2),
-                    new IntChoiceParam.Value("4x4 (Best, slowest)", 4),
-            }, IGNORE_RANDOMIZE);
+    private final IntChoiceParam antiAliasing = new IntChoiceParam("Anti-aliasing", new Value[]{
+            new Value("None (Faster)", 0),
+            new Value("2x2 (Better, slower)", 2),
+            new Value("4x4 (Best, slowest)", 4),
+    }, IGNORE_RANDOMIZE);
 
     private VoronoiFilter filter;
 
     public Voronoi() {
         super(ShowOriginal.NO);
+
         setParamSet(new ParamSet(
                 numberOfPoints,
                 distance,

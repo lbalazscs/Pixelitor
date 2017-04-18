@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,7 +42,7 @@ public class LayerRenameEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        layer.setName(nameBefore, AddToHistory.NO);
+        layer.setName(nameBefore, false);
 
         History.notifyMenus(this);
     }
@@ -51,7 +51,7 @@ public class LayerRenameEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        layer.setName(nameAfter, AddToHistory.NO);
+        layer.setName(nameAfter, false);
 
         History.notifyMenus(this);
     }

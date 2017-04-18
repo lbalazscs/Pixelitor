@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
@@ -51,34 +52,35 @@ public class ChannelInvert extends FilterWithParametrizedGUI {
     private static final int SAT_BRI = 13;
     private static final int HUE_SAT_BRI = 14;
 
-    private final IntChoiceParam.Value[] invertChoices = {
-            new IntChoiceParam.Value("Nothing", NOTHING),
+    private final Value[] invertChoices = {
+            new Value("Nothing", NOTHING),
 
-            new IntChoiceParam.Value("Hue", HUE_ONLY),
-            new IntChoiceParam.Value("Saturation", SATURATION_ONLY),
-            new IntChoiceParam.Value("Brightness", BRI_ONLY),
+            new Value("Hue", HUE_ONLY),
+            new Value("Saturation", SATURATION_ONLY),
+            new Value("Brightness", BRI_ONLY),
 
-            new IntChoiceParam.Value("Hue and Saturation", HUE_SAT),
-            new IntChoiceParam.Value("Hue and Brightness", HUE_BRI),
-            new IntChoiceParam.Value("Saturation and Brightness", SAT_BRI),
+            new Value("Hue and Saturation", HUE_SAT),
+            new Value("Hue and Brightness", HUE_BRI),
+            new Value("Saturation and Brightness", SAT_BRI),
 
-            new IntChoiceParam.Value("Hue, Saturation and Brightness", HUE_SAT_BRI),
+            new Value("Hue, Saturation and Brightness", HUE_SAT_BRI),
 
-            new IntChoiceParam.Value("Red", RED_ONLY),
-            new IntChoiceParam.Value("Green", GREEN_ONLY),
-            new IntChoiceParam.Value("Blue", BLUE_ONLY),
+            new Value("Red", RED_ONLY),
+            new Value("Green", GREEN_ONLY),
+            new Value("Blue", BLUE_ONLY),
 
-            new IntChoiceParam.Value("Red and Green", RED_GREEN),
-            new IntChoiceParam.Value("Red and Blue", RED_BLUE),
-            new IntChoiceParam.Value("Green and Blue", GREEN_BLUE),
+            new Value("Red and Green", RED_GREEN),
+            new Value("Red and Blue", RED_BLUE),
+            new Value("Green and Blue", GREEN_BLUE),
 
-            new IntChoiceParam.Value("Red, Green and Blue", RED_GREEN_BLUE),
+            new Value("Red, Green and Blue", RED_GREEN_BLUE),
     };
 
     private final IntChoiceParam invertTypeSelector = new IntChoiceParam("Invert Channel", invertChoices);
 
     public ChannelInvert() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(invertTypeSelector));
     }
 

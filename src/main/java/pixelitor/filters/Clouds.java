@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,11 +19,10 @@ package pixelitor.filters;
 
 import com.jhlabs.image.ImageMath;
 import pixelitor.ThreadPool;
-import pixelitor.filters.gui.ActionSetting;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseActionSetting;
+import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.BasicProgressTracker;
 import pixelitor.utils.ImageUtils;
@@ -56,19 +55,15 @@ public class Clouds extends FilterWithParametrizedGUI {
     private final ColorParam color1 = new ColorParam("Color 1", BLACK, USER_ONLY_OPACITY);
     private final ColorParam color2 = new ColorParam("Color 2", WHITE, USER_ONLY_OPACITY);
 
-    private final ActionSetting reseedAction = new ReseedNoiseActionSetting(e -> {
-        reseed();
-    });
-
     public Clouds() {
         super(ShowOriginal.NO);
 
         setParamSet(new ParamSet(
-                scale.adjustRangeToImageSize(0.3),
+                scale.withAdjustedRange(0.3),
                 roughness,
                 color1,
                 color2
-        ).withAction(reseedAction));
+        ).withAction(new ReseedNoiseFilterAction(e -> reseed())));
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -77,8 +77,9 @@ public class BrushAffectedArea implements Brush {
         double saveY = minY - radius2;
         double saveWidth = maxX - minX + radius4;
         double saveHeight = maxY - minY + radius4;
-        Rectangle rectangleAffectedByBrush = new Rectangle((int) saveX, (int) saveY, (int) saveWidth, (int) saveHeight);
-        return rectangleAffectedByBrush;
+
+        return new Rectangle((int) saveX, (int) saveY,
+                (int) saveWidth, (int) saveHeight);
     }
 
     @Override

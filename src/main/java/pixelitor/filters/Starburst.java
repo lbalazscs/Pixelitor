@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -47,16 +47,17 @@ public class Starburst extends FilterWithParametrizedGUI {
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final ColorParam bgColor = new ColorParam("Background Color:", WHITE, NO_OPACITY);
     private final ColorParam fgColor = new ColorParam("Rays Color:", BLACK, NO_OPACITY);
-    private final BooleanParam randomColorsParam = new BooleanParam("Use Random Colors for Rays", false, IGNORE_RANDOMIZE);
+    private final BooleanParam randomColors = new BooleanParam("Use Random Colors for Rays", false, IGNORE_RANDOMIZE);
     private final AngleParam rotate = new AngleParam("Rotate", 0);
 
     public Starburst() {
         super(ShowOriginal.NO);
+
         setParamSet(new ParamSet(
                 numberOfRaysParam,
                 bgColor,
                 fgColor,
-                randomColorsParam,
+                randomColors,
                 center,
                 rotate
         ).withAction(ReseedSupport.createAction("Reseed Colors", "Recalculates the random colors")));
@@ -81,11 +82,10 @@ public class Starburst extends FilterWithParametrizedGUI {
         g.setColor(fgColor.getColor());
 
         int numberOfRays = numberOfRaysParam.getValue();
-        boolean useRandomColors = randomColorsParam.isChecked();
+        boolean useRandomColors = randomColors.isChecked();
 
         double averageRayAngle = Math.PI / numberOfRays;
-        double startAngle = rotate.getValueInRadians();
-        double angle = startAngle;
+        double angle = rotate.getValueInRadians();
 
         double radius = width + height; // should be enough even if the center is outside the image
 

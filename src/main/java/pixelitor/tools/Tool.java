@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,7 @@ import pixelitor.gui.ImageComponents;
 import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.history.PartialImageEdit;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.selection.IgnoreSelection;
 import pixelitor.tools.toolhandlers.ColorPickerToolHandler;
 import pixelitor.tools.toolhandlers.CurrentToolHandler;
@@ -47,7 +47,7 @@ import java.awt.image.BufferedImage;
 /**
  * An abstract superclass for all tools
  */
-public abstract class Tool {
+public abstract class Tool implements KeyboardObserver {
     private boolean mouseDown = false;
     private boolean altDown = false;
 
@@ -216,11 +216,11 @@ public abstract class Tool {
      * Saves the full image or the selected area only if there is a selection
      */
     void saveFullImageForUndo(Composition comp) {
-        BufferedImage copy = comp.getActiveMaskOrImageLayer()
+        BufferedImage copy = comp.getActiveDrawable()
                 .getImageOrSubImageIfSelected(true, true);
 
         ImageEdit edit = new ImageEdit(comp, getName(),
-                comp.getActiveMaskOrImageLayer(), copy,
+                comp.getActiveDrawable(), copy,
                 IgnoreSelection.NO, false);
         History.addEdit(edit);
     }
@@ -237,8 +237,8 @@ public abstract class Tool {
             return;
         }
 
-        ImageLayer layer = affectedArea.getLayer();
-        Composition comp = layer.getComp();
+        Drawable dr = affectedArea.getDrawable();
+        Composition comp = dr.getComp();
 
 //        Rectangle fullImageBounds = new Rectangle(0, 0, originalImage.getWidth(), originalImage.getHeight());
 //        Rectangle saveRectangle = rectangleAffectedByTool.intersection(fullImageBounds);
@@ -249,13 +249,16 @@ public abstract class Tool {
         );
 
         if (!saveRectangle.isEmpty()) {
-            PartialImageEdit edit = new PartialImageEdit(getName(), comp, layer, originalImage, saveRectangle, false);
+            PartialImageEdit edit = new PartialImageEdit(getName(), comp, dr, originalImage, saveRectangle, false);
             History.addEdit(edit);
         }
     }
 
     protected void toolStarted() {
         ended = false;
+
+        GlobalKeyboardWatch.setObserver(this);
+        
         ImageComponents.setCursorForAll(cursor);
     }
 
@@ -314,37 +317,43 @@ public abstract class Tool {
         clipStrategy.setClip(g, ic);
     }
 
+    @Override
     public void spacePressed() {
         if (handToolHandler != null) { // there is hand tool forwarding
             handToolHandler.spacePressed();
         }
     }
 
+    @Override
     public void spaceReleased() {
         if (handToolHandler != null) { // there is hand tool forwarding
             handToolHandler.spaceReleased();
         }
     }
 
+    @Override
     public boolean arrowKeyPressed(ArrowKey key) {
         // empty for the convenience of subclasses
         return false; // not consumed
     }
 
+    @Override
     public void escPressed() {
         // empty by default
     }
 
+    @Override
     public void altPressed() {
         if (!altDown && doColorPickerForwarding()) {
-            ImageComponents.onAllImages(ic -> ic.setCursor(Tools.COLOR_PICKER.getCursor()));
+            ImageComponents.forAllImages(ic -> ic.setCursor(Tools.COLOR_PICKER.getCursor()));
         }
         altDown = true;
     }
 
+    @Override
     public void altReleased() {
         if(doColorPickerForwarding()) {
-            ImageComponents.onAllImages(ic -> ic.setCursor(cursor));
+            ImageComponents.forAllImages(ic -> ic.setCursor(cursor));
         }
         altDown = false;
     }

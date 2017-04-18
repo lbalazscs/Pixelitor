@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@ public class CustomFileChooser extends ConfirmSaveFileChooser {
         if (f == null) {
             return null;
         }
-        extension = FileExtensionUtils.getFileExtension(f.getName());
+        extension = FileExtensionUtils.getExt(f.getName());
 
         if (extension == null) {
             // the user has entered no extension
@@ -45,8 +45,8 @@ public class CustomFileChooser extends ConfirmSaveFileChooser {
             extension = getExtensionFromFileFilter();
             f = new File(f.getAbsolutePath() + '.' + extension);
         } else {
-            boolean supportedExtension = FileExtensionUtils.isSupportedExtension(f.getName(), FileExtensionUtils.SUPPORTED_OUTPUT_EXTENSIONS);
-            if (!supportedExtension) {
+            boolean supported = FileExtensionUtils.hasSupportedOutputExt(f.getName());
+            if (!supported) {
                 extension = getExtensionFromFileFilter();
                 f = new File(f.getAbsolutePath() + '.' + extension);
             }

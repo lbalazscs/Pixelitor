@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,7 +43,7 @@ public class CompositionReplacedEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        ic.replaceComp(comp, AddToHistory.NO, oldMode);
+        ic.replaceComp(comp, false, oldMode);
         History.notifyMenus(this);
     }
 
@@ -51,7 +51,7 @@ public class CompositionReplacedEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        ic.replaceComp(newComp, AddToHistory.NO, MaskViewMode.NORMAL);
+        ic.replaceComp(newComp, false, MaskViewMode.NORMAL);
         History.notifyMenus(this);
     }
 

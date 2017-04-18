@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.tools;
 import pixelitor.colors.ColorUtils;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.ImageComponent;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -69,8 +69,8 @@ public class BrushTool extends BlendingModeBrushTool {
     }
 
     @Override
-    protected void prepareProgrammaticBrushStroke(ImageLayer layer, Point start) {
-        super.prepareProgrammaticBrushStroke(layer, start);
+    protected void prepareProgrammaticBrushStroke(Drawable dr, Point start) {
+        super.prepareProgrammaticBrushStroke(dr, start);
         graphics.setColor(FgBgColors.getFG());
     }
 
@@ -83,9 +83,9 @@ public class BrushTool extends BlendingModeBrushTool {
             Color fg = FgBgColors.getFG();
             Color bg = FgBgColors.getBG();
             if (e.isControlDown()) {
-                drawingColor = ColorUtils.getHSBAverageColor(fg, bg);
+                drawingColor = ColorUtils.calcHSBAverage(fg, bg);
             } else {
-                drawingColor = ColorUtils.getRGBAverageColor(fg, bg);
+                drawingColor = ColorUtils.calcRGBAverage(fg, bg);
             }
         } else {
             drawingColor = FgBgColors.getFG();
@@ -93,8 +93,8 @@ public class BrushTool extends BlendingModeBrushTool {
     }
 
     @Override
-    public void trace(ImageLayer layer, Shape shape) {
+    public void trace(Drawable dr, Shape shape) {
         drawingColor = FgBgColors.getFG();
-        super.trace(layer, shape);
+        super.trace(dr, shape);
     }
 }

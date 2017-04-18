@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ import pixelitor.history.History;
 import pixelitor.history.NewSelectionEdit;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.history.SelectionChangeEdit;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.selection.Selection;
 import pixelitor.tools.ClipStrategy;
 import pixelitor.tools.ShapeType;
@@ -175,7 +175,7 @@ public class ShapesTool extends Tool {
         userDrag.setStartFromCenter(e.isAltDown());
 
         Composition comp = ic.getComp();
-        ImageLayer layer = comp.getActiveMaskOrImageLayer();
+        Drawable dr = comp.getActiveDrawable();
 
         ShapesAction action = actionModel.getSelectedItem();
         boolean selectionMode = action.createSelection();
@@ -210,13 +210,13 @@ public class ShapesTool extends Tool {
             shapeBounds.grow(thickness, thickness);
 
             if (!shapeBounds.isEmpty()) {
-                ToolAffectedArea affectedArea = new ToolAffectedArea(layer, shapeBounds, false);
-                saveSubImageForUndo(layer.getImage(), affectedArea);
+                ToolAffectedArea affectedArea = new ToolAffectedArea(dr, shapeBounds, false);
+                saveSubImageForUndo(dr.getImage(), affectedArea);
             }
-            paintShapeOnIC(layer, userDrag);
+            paintShapeOnIC(dr, userDrag);
 
             comp.imageChanged(FULL);
-            layer.updateIconImage();
+            dr.updateIconImage();
         } else { // selection mode
             comp.onSelection(selection -> {
                 selection.clipToCompSize(comp); // the selection can be too big
@@ -274,18 +274,18 @@ public class ShapesTool extends Tool {
     }
 
     /**
-     * Paint a shape on the given image layer. Can be used programmatically.
+     * Paint a shape on the given Drawable. Can be used programmatically.
      * The start and end point points are given relative to the Composition (not Layer)
      */
-    public void paintShapeOnIC(ImageLayer layer, UserDrag userDrag) {
-        int tx = -layer.getTX();
-        int ty = -layer.getTY();
+    public void paintShapeOnIC(Drawable dr, UserDrag userDrag) {
+        int tx = -dr.getTX();
+        int ty = -dr.getTY();
 
-        BufferedImage bi = layer.getImage();
+        BufferedImage bi = dr.getImage();
         Graphics2D g2 = bi.createGraphics();
         g2.translate(tx, ty);
 
-        Composition comp = layer.getComp();
+        Composition comp = dr.getComp();
 
         comp.applySelectionClipping(g2, null);
 

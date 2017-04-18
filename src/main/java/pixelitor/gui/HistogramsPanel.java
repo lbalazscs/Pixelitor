@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -67,9 +67,9 @@ public class HistogramsPanel extends JPanel implements ImageSwitchListener {
 
     @Override
     public void noOpenImageAnymore() {
-        red.updateWithNothing();
-        green.updateWithNothing();
-        blue.updateWithNothing();
+        red.setToNoImage();
+        green.setToNoImage();
+        blue.setToNoImage();
         repaint();
     }
 
@@ -89,9 +89,9 @@ public class HistogramsPanel extends JPanel implements ImageSwitchListener {
         }
         BufferedImage image = comp.getCompositeImage();
 
-        int[] redValues = new int[HISTOGRAM_RESOLUTION];
-        int[] blueValues = new int[HISTOGRAM_RESOLUTION];
-        int[] greenValues = new int[HISTOGRAM_RESOLUTION];
+        int[] reds = new int[HISTOGRAM_RESOLUTION];
+        int[] blues = new int[HISTOGRAM_RESOLUTION];
+        int[] greens = new int[HISTOGRAM_RESOLUTION];
 
         int[] data = ImageUtils.getPixelsAsArray(image);
         for (int rgb : data) {
@@ -100,23 +100,23 @@ public class HistogramsPanel extends JPanel implements ImageSwitchListener {
             int g = (rgb >>> 8) & 0xFF;
             int b = (rgb) & 0xFF;
 
-            redValues[r]++;
-            greenValues[g]++;
-            blueValues[b]++;
+            reds[r]++;
+            greens[g]++;
+            blues[b]++;
         }
 
         boolean useLogarithm = false;
         if (useLogarithm) {
             for (int i = 0; i < HISTOGRAM_RESOLUTION; i++) {
-                redValues[i] = (int) (1000.0 * Math.log(redValues[i]));
-                greenValues[i] = (int) (1000.0 * Math.log(greenValues[i]));
-                blueValues[i] = (int) (1000.0 * Math.log(blueValues[i]));
+                reds[i] = (int) (1000.0 * Math.log(reds[i]));
+                greens[i] = (int) (1000.0 * Math.log(greens[i]));
+                blues[i] = (int) (1000.0 * Math.log(blues[i]));
             }
         }
 
-        red.updateData(redValues);
-        green.updateData(greenValues);
-        blue.updateData(blueValues);
+        red.updateData(reds);
+        green.updateData(greens);
+        blue.updateData(blues);
         repaint();
     }
 }

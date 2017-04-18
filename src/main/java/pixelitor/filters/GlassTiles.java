@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,18 +33,18 @@ public class GlassTiles extends FilterWithParametrizedGUI {
     private final GroupedRangeParam size = new GroupedRangeParam("Tile Size", 5, 100, 500);
     private final GroupedRangeParam curvature = new GroupedRangeParam("Curvature", 0, 10, 20);
     private final GroupedRangeParam phase = new GroupedRangeParam("Shift Effect", 0, 0, 10, false);
-
-    private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices(true);
-    private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
+    private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction(true);
+    private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
     private TilesFilter filter;
 
     public GlassTiles() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
-                size.adjustRangeToImageSize(0.5),
+                size.withAdjustedRange(0.5),
                 curvature,
-                phase.setShowLinkedCB(false),
+                phase.setLinkable(false),
                 edgeAction,
                 interpolation
         ));
@@ -62,7 +62,6 @@ public class GlassTiles extends FilterWithParametrizedGUI {
         filter.setCurvatureY(curvature.getValue(1));
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
-
         filter.setShiftX(phase.getValueAsPercentage(0));
         filter.setShiftY(phase.getValueAsPercentage(1));
 

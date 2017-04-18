@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,7 @@ import static pixelitor.filters.gui.FilterSetting.EnabledReason.FINAL_ANIMATION_
  */
 public class ParamSet {
     private List<FilterParam> paramList = new ArrayList<>();
-    private final List<ActionSetting> actionList = new ArrayList<>(3);
+    private final List<FilterAction> actionList = new ArrayList<>(3);
     private ParamAdjustmentListener adjustmentListener;
 
     public ParamSet(FilterParam... params) {
@@ -49,19 +49,19 @@ public class ParamSet {
         paramList.addAll(params);
     }
 
-    public ParamSet withActions(ActionSetting... actions) {
+    public ParamSet withActions(FilterAction... actions) {
         actionList.addAll(Arrays.asList(actions));
         return this;
     }
 
-    public ParamSet withAction(ActionSetting action) {
+    public ParamSet withAction(FilterAction action) {
         actionList.add(action);
         return this;
     }
 
-    public ParamSet addCommonActions(ActionSetting... actions) {
+    public ParamSet addCommonActions(FilterAction... actions) {
         if (paramList.size() > 1) { // no need for "randomize"/"reset all" if the filter has only one parameter
-            for (ActionSetting action : actions) {
+            for (FilterAction action : actions) {
                 if(action != null) {
                     actionList.add(action);
                 }
@@ -73,7 +73,7 @@ public class ParamSet {
     }
 
     private void addRandomizeAction() {
-        ActionSetting randomizeAction = new ActionSetting("Randomize Settings",
+        FilterAction randomizeAction = new FilterAction("Randomize Settings",
                 e -> randomize(),
                 IconUtils.getDiceIcon(),
                 "Randomize the settings for this filter.");
@@ -81,7 +81,7 @@ public class ParamSet {
     }
 
     private void addResetAllAction() {
-        ActionSetting resetAllAction = new ActionSetting("Reset All",
+        FilterAction resetAllAction = new FilterAction("Reset All",
                 e -> reset(),
                 IconUtils.getWestArrowIcon(),
                 "Reset all settings to their default values.");
@@ -92,7 +92,7 @@ public class ParamSet {
         paramList.add(index, param);
     }
 
-    public void insertAction(ActionSetting action, int index) {
+    public void insertAction(FilterAction action, int index) {
         actionList.add(index, action);
     }
 
@@ -127,7 +127,7 @@ public class ParamSet {
         for (FilterParam param : paramList) {
             param.setAdjustmentListener(listener);
         }
-        for (ActionSetting action : actionList) {
+        for (FilterAction action : actionList) {
             action.setAdjustmentListener(listener);
         }
     }
@@ -168,7 +168,7 @@ public class ParamSet {
         for (FilterParam param : paramList) {
             param.setEnabled(!b, FINAL_ANIMATION_SETTING);
         }
-        for (ActionSetting action : actionList) {
+        for (FilterAction action : actionList) {
             action.setEnabled(!b, FINAL_ANIMATION_SETTING);
         }
     }
@@ -182,7 +182,7 @@ public class ParamSet {
         return false;
     }
 
-    public List<ActionSetting> getActionList() {
+    public List<FilterAction> getActionList() {
         return actionList;
     }
 

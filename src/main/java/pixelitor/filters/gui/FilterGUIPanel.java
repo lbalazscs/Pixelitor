@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -15,22 +15,29 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.utils;
+package pixelitor.filters.gui;
+
+import pixelitor.ChangeReason;
+import pixelitor.filters.Filter;
+import pixelitor.layers.Drawable;
+
+import javax.swing.*;
 
 /**
- * Determines whether some change should update the GUI.
- * (Typically tests don't update the GUI)
+ * The superclass of all filter adjustment panels
  */
-public enum UpdateGUI {
-    YES(true), NO(false);
+public abstract class FilterGUIPanel extends JPanel implements PreviewExecutor {
+    protected Filter filter;
+    private final Drawable dr;
 
-    private final boolean yes;
-
-    UpdateGUI(boolean yes) {
-        this.yes = yes;
+    protected FilterGUIPanel(Filter filter, Drawable dr) {
+        this.filter = filter;
+        this.dr = dr;
     }
 
-    public boolean isYes() {
-        return yes;
+    @Override
+    public void executeFilterPreview() {
+        filter.executeWithBusyCursor(dr, ChangeReason.OP_PREVIEW, this);
     }
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,7 @@ import net.jafama.FastMath;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
@@ -66,11 +67,10 @@ public class FractalTree extends FilterWithParametrizedGUI {
     private final RangeParam curvedness = new RangeParam("Curvedness", 0, 10, 50);
     private final GroupedRangeParam physics = new GroupedRangeParam("Physics",
             "Gravity", "Wind", -100, 0, 100, false);
-    private final IntChoiceParam quality = new IntChoiceParam("Quality",
-            new IntChoiceParam.Value[]{
-                    new IntChoiceParam.Value("Better", QUALITY_BETTER),
-                    new IntChoiceParam.Value("Faster", QUALITY_FASTER)
-            }, IGNORE_RANDOMIZE);
+    private final IntChoiceParam quality = new IntChoiceParam("Quality", new Value[]{
+            new Value("Better", QUALITY_BETTER),
+            new Value("Faster", QUALITY_FASTER)
+    }, IGNORE_RANDOMIZE);
 
     // precalculated objects for the various depths
     private Stroke[] widthLookup;
@@ -92,14 +92,15 @@ public class FractalTree extends FilterWithParametrizedGUI {
 
     public FractalTree() {
         super(ShowOriginal.NO);
+
         setParamSet(new ParamSet(
                 iterations,
                 zoom,
                 randomnessParam,
                 curvedness,
                 angle,
-                physics.setShowLinkedCB(false),
-                width.setShowLinkedCB(false),
+                physics.setLinkable(false),
+                width.setLinkable(false),
                 colors,
                 quality
         ).withAction(ReseedSupport.createAction()));
@@ -149,9 +150,8 @@ public class FractalTree extends FilterWithParametrizedGUI {
             int rgb = colors.getValue().getColor(1.0f - where);
             colorLookup[depth] = new Color(rgb);
 
-            float strokeWidth2 = strokeWidth;
             if (doPhysics) {
-                physicsLookup[depth] = new Physics(gravity, wind, strokeWidth2);
+                physicsLookup[depth] = new Physics(gravity, wind, strokeWidth);
             }
         }
 
@@ -161,7 +161,7 @@ public class FractalTree extends FilterWithParametrizedGUI {
         }
 
         int drawTreeCalls = 2;
-        for(int i = 1; i < maxDepth; i++) {
+        for (int i = 1; i < maxDepth; i++) {
             drawTreeCalls *= 2;
         }
         drawTreeCalls--;
@@ -282,9 +282,7 @@ public class FractalTree extends FilterWithParametrizedGUI {
             return 0;
         }
 
-        double retVal = -angleDeviation + rand.nextDouble() * 2 * angleDeviation;
-//        System.out.println(String.format("FractalTree::calcAngleRandomness: retVal = %.2f", retVal));
-        return retVal;
+        return -angleDeviation + rand.nextDouble() * 2 * angleDeviation;
     }
 
     private double calcRandomLength(Random rand) {

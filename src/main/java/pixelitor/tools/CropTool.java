@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,6 @@ package pixelitor.tools;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
@@ -94,7 +93,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
 
     @Override
     public void initSettingsPanel() {
-        SliderSpinner maskOpacitySpinner = new SliderSpinner(maskOpacity, WEST, AddDefaultButton.NO);
+        SliderSpinner maskOpacitySpinner = new SliderSpinner(maskOpacity, WEST, false);
         settingsPanel.add(maskOpacitySpinner);
 
         allowGrowingCB = new JCheckBox("Allow Growing", false);

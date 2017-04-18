@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,11 +21,9 @@ import pixelitor.AppLogic;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
-import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
-import pixelitor.layers.Layer;
 import pixelitor.utils.Messages;
 
 import java.awt.Dimension;
@@ -60,7 +58,7 @@ public class Crop implements CompAction {
 
         if (selectionCrop) {
             assert comp.hasSelection();
-            comp.deselect(AddToHistory.NO);
+            comp.deselect(false);
         } else {
             // if this is a crop started from the crop tool
             // we still could have a selection that needs to be
@@ -68,14 +66,12 @@ public class Crop implements CompAction {
             comp.cropSelection(cropRect);
         }
 
-        int nrLayers = comp.getNrLayers();
-        for (int i = 0; i < nrLayers; i++) {
-            Layer layer = comp.getLayer(i);
+        comp.forEachLayer(layer -> {
             layer.crop(cropRect);
             if (layer.hasMask()) {
                 layer.getMask().crop(cropRect);
             }
-        }
+        });
 
         MultiLayerEdit edit = new MultiLayerEdit(comp, "Crop", backup);
         History.addEdit(edit);

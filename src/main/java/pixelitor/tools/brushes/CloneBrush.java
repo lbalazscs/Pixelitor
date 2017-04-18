@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -55,7 +55,7 @@ public class CloneBrush extends CopyBrush {
         boolean reinitializeDistance = false;
         // aligned = forces the source point to follow the mouse, even after a stroke is completed
         // unaligned =  the cloning distance is reinitialized for each stroke
-        if ((aligned && firstCloningStart) || (!aligned)) {
+        if (!aligned || firstCloningStart) {
             reinitializeDistance = true;
         }
         firstCloningStart = false;

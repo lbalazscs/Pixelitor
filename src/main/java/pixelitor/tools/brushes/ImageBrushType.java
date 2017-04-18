@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,15 +45,13 @@ public enum ImageBrushType {
         @Override
         protected BufferedImage createImpl() {
             BufferedImage template = ImageUtils.loadBufferedImage("greek.png");
-            BufferedImage resizedImage = ImageUtils.resizeImage(SIZE, template);
-            return resizedImage;
+            return ImageUtils.resizeImage(SIZE, template);
         }
     }, ARROW {
         @Override
         protected BufferedImage createImpl() {
             BufferedImage template = ImageUtils.loadBufferedImage("arrow.png");
-            BufferedImage resizedImage = ImageUtils.resizeImage(SIZE, template);
-            return resizedImage;
+            return ImageUtils.resizeImage(SIZE, template);
         }
     };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,10 +18,10 @@
 package pixelitor.filters.levels.gui;
 
 import pixelitor.filters.Filter;
-import pixelitor.filters.gui.AdjustPanel;
+import pixelitor.filters.gui.FilterGUIPanel;
 import pixelitor.filters.levels.LevelsModel;
 import pixelitor.filters.levels.OneChannelLevelsModel;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -30,14 +30,14 @@ import java.awt.FlowLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
-public class LevelsPanel extends AdjustPanel implements ItemListener {
+public class LevelsPanel extends FilterGUIPanel implements ItemListener {
     private final DefaultComboBoxModel<String> selectorModel;
 
     private final JPanel cardPanel;
     private final JCheckBox showOriginalCB;
 
-    public LevelsPanel(Filter filter, ImageLayer layer, LevelsModel model) {
-        super(filter, layer);
+    public LevelsPanel(Filter filter, Drawable dr, LevelsModel model) {
+        super(filter, dr);
 
         model.setExecutor(this);
 
@@ -68,7 +68,7 @@ public class LevelsPanel extends AdjustPanel implements ItemListener {
 
         showOriginalCB = new JCheckBox("Show Original");
         showOriginalCB.setName("show original");
-        showOriginalCB.addActionListener(e -> layer.setShowOriginal(showOriginalCB.isSelected()));
+        showOriginalCB.addActionListener(e -> dr.setShowOriginal(showOriginalCB.isSelected()));
         add(showOriginalCB, BorderLayout.SOUTH);
     }
 

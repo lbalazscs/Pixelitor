@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,12 @@ import pixelitor.utils.ImageSwitchListener;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
+import static java.awt.event.ActionEvent.CTRL_MASK;
+import static pixelitor.layers.LayerMaskAddType.HIDE_ALL;
+import static pixelitor.layers.LayerMaskAddType.HIDE_SELECTION;
+import static pixelitor.layers.LayerMaskAddType.REVEAL_ALL;
+import static pixelitor.layers.LayerMaskAddType.REVEAL_SELECTION;
+
 /**
  * An Action that adds a new layer mask.
  */
@@ -49,20 +55,20 @@ public class AddLayerMaskAction extends AbstractAction implements ImageSwitchLis
         assert !layer.hasMask();
         boolean ctrlPressed = false;
         if(e != null) { // could be null in tests
-            ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
+            ctrlPressed = ((e.getModifiers() & CTRL_MASK) == CTRL_MASK);
         }
 
         if (comp.hasSelection()) {
             if (ctrlPressed) {
-                layer.addMask(LayerMaskAddType.HIDE_SELECTION);
+                layer.addMask(HIDE_SELECTION);
             } else {
-                layer.addMask(LayerMaskAddType.REVEAL_SELECTION);
+                layer.addMask(REVEAL_SELECTION);
             }
         } else { // there is no selection
             if (ctrlPressed) {
-                layer.addMask(LayerMaskAddType.HIDE_ALL);
+                layer.addMask(HIDE_ALL);
             } else {
-                layer.addMask(LayerMaskAddType.REVEAL_ALL);
+                layer.addMask(REVEAL_ALL);
             }
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import com.jhlabs.image.PointFilter;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
@@ -40,20 +41,19 @@ public class Flashlight extends FilterWithParametrizedGUI {
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 1, 200, 1000, false);
     private final RangeParam softness = new RangeParam("Softness", 0, 20, 99);
-    private final IntChoiceParam bg = new IntChoiceParam("Background",
-            new IntChoiceParam.Value[]{
-                    new IntChoiceParam.Value("Black", Impl.BG_BLACK),
-                    new IntChoiceParam.Value("Transparent", Impl.BG_TRANSPARENT),
-            }, IGNORE_RANDOMIZE
-    );
+    private final IntChoiceParam bg = new IntChoiceParam("Background", new Value[]{
+            new Value("Black", Impl.BG_BLACK),
+            new Value("Transparent", Impl.BG_TRANSPARENT),
+    }, IGNORE_RANDOMIZE);
 
     private Impl filter;
 
     public Flashlight() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
                 center,
-                radius.adjustRangeToImageSize(1.0),
+                radius.withAdjustedRange(1.0),
                 softness,
                 bg
         ));

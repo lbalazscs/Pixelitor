@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,8 +23,8 @@ import java.awt.image.BufferedImage;
 
 public abstract class CenteredTransformFilter extends TransformFilter {
     // relative center coordinates between 0 and 1
-    private float centerX;
-    private float centerY;
+    private float relCX;
+    private float relCY;
 
     // actual center coordinates in pixels
     protected float cx;
@@ -36,17 +36,18 @@ public abstract class CenteredTransformFilter extends TransformFilter {
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        cx = centerX * src.getWidth();
-        cy = centerY * src.getHeight();
+        calcAbsoluteCenter(src);
 
         return super.filter(src, dst);
     }
 
-    public void setCenterX(float centerX) {
-        this.centerX = centerX;
+    protected void calcAbsoluteCenter(BufferedImage src) {
+        cx = relCX * src.getWidth();
+        cy = relCY * src.getHeight();
     }
 
-    public void setCenterY(float centerY) {
-        this.centerY = centerY;
+    public void setRelCenter(float centerX, float centerY) {
+        this.relCX = centerX;
+        this.relCY = centerY;
     }
 }

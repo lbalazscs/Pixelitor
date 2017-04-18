@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -15,21 +15,18 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.history;
+package pixelitor.tools;
 
-/**
- * Determines whether some change should be added to the undo history
- */
-public enum AddToHistory {
-    YES(true), NO(false);
+public interface KeyboardObserver {
+    void spacePressed();
 
-    private final boolean yes;
+    void spaceReleased();
 
-    AddToHistory(boolean yes) {
-        this.yes = yes;
-    }
+    boolean arrowKeyPressed(ArrowKey key);
 
-    public boolean isYes() {
-        return yes;
-    }
+    void escPressed();
+
+    void altPressed();
+
+    void altReleased();
 }

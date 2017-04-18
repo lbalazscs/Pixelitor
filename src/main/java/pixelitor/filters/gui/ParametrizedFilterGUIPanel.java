@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.filters.gui;
 
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -28,7 +28,7 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.util.List;
 
-public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustmentListener {
+public class ParametrizedFilterGUIPanel extends FilterGUIPanel implements ParamAdjustmentListener {
     /**
      * Controls whether the params are reset to the default values when a new
      * ParametrizedAdjustPanel is created
@@ -36,17 +36,17 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
     private static boolean resetParams = true;
     private ShowOriginalCB showOriginalCB;
 
-    public ParametrizedAdjustPanel(FilterWithParametrizedGUI filter, ImageLayer layer, ShowOriginal addShowOriginal) {
-        this(filter, layer, null, addShowOriginal);
+    public ParametrizedFilterGUIPanel(FilterWithParametrizedGUI filter, Drawable dr, ShowOriginal addShowOriginal) {
+        this(filter, dr, null, addShowOriginal);
     }
 
-    public ParametrizedAdjustPanel(FilterWithParametrizedGUI filter, ImageLayer layer, Object otherInfo, ShowOriginal addShowOriginal) {
-        super(filter, layer);
+    public ParametrizedFilterGUIPanel(FilterWithParametrizedGUI filter, Drawable dr, Object otherInfo, ShowOriginal addShowOriginal) {
+        super(filter, dr);
 
         ParamSet params = filter.getParamSet();
         if (resetParams) {
             params.reset();
-            params.considerImageSize(layer.getComp().getCanvas().getBounds());
+            params.considerImageSize(dr.getComp().getCanvas().getBounds());
         }
         params.setAdjustmentListener(this);
 
@@ -71,7 +71,7 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
         return GUIUtils.arrangeParamsInVerticalGridBag(paramList);
     }
 
-    protected JPanel createFilterActionsPanel(List<ActionSetting> actionList, ShowOriginal addShowOriginal, int maxControlsInRow) {
+    protected JPanel createFilterActionsPanel(List<FilterAction> actionList, ShowOriginal addShowOriginal, int maxControlsInRow) {
         int numControls = actionList.size();
         if (addShowOriginal.isYes()) {
             numControls++;
@@ -88,7 +88,7 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
         if (addShowOriginal.isYes()) {
             faPanel.add(showOriginalCB);
         }
-        for (ActionSetting action : actionList) {
+        for (FilterAction action : actionList) {
             // all the buttons go in one row
             JButton button = (JButton) action.createGUI();
             faPanel.add(button);
@@ -110,7 +110,7 @@ public class ParametrizedAdjustPanel extends AdjustPanel implements ParamAdjustm
     }
 
     public static void setResetParams(boolean resetParams) {
-        ParametrizedAdjustPanel.resetParams = resetParams;
+        ParametrizedFilterGUIPanel.resetParams = resetParams;
     }
 
     private static class ShowOriginalCB extends JCheckBox {

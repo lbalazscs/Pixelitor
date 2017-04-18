@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,6 @@ package pixelitor.automate;
 
 import pixelitor.filters.comp.CompAction;
 import pixelitor.filters.comp.Resize;
-import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.IntTextField;
 import pixelitor.gui.utils.ValidatedDialog;
 import pixelitor.gui.utils.ValidatedForm;
@@ -34,16 +33,16 @@ public class BatchResize {
     }
 
     public static void start() {
-        BatchResizePanel batchResizePanel = new BatchResizePanel();
-        ValidatedDialog chooser = new ValidatedDialog(batchResizePanel, PixelitorWindow.getInstance(), "Batch Resize");
+        BatchResizePanel p = new BatchResizePanel();
+        ValidatedDialog chooser = new ValidatedDialog(p, "Batch Resize");
         chooser.setVisible(true);
         if (!chooser.isOkPressed()) {
             return;
         }
-        batchResizePanel.saveValues();
+        p.saveValues();
 
-        int maxWidth = batchResizePanel.getNewWidth();
-        int maxHeight = batchResizePanel.getNewHeight();
+        int maxWidth = p.getNewWidth();
+        int maxHeight = p.getNewHeight();
 
         CompAction resizeAction = new Resize(maxWidth, maxHeight, true);
         Automate.processEachFile(resizeAction, true, "Batch Resize...");

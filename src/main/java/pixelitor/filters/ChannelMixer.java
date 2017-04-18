@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,15 +18,14 @@
 package pixelitor.filters;
 
 import com.jhlabs.image.PixelUtils;
-import pixelitor.filters.gui.ActionSetting;
-import pixelitor.filters.gui.AddDefaultButton;
-import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.ChannelMixerAdjustments;
+import pixelitor.filters.gui.FilterAction;
+import pixelitor.filters.gui.FilterGUIPanel;
 import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
@@ -222,7 +221,8 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
 
     public ChannelMixer() {
         super(ShowOriginal.YES);
-        ActionSetting normalize = new ActionSetting("Normalize", normalizeAction, "Makes sure that the sum of the channel contributions is 100%");
+
+        FilterAction normalize = new FilterAction("Normalize", normalizeAction, "Makes sure that the sum of the channel contributions is 100%");
         FilterParam[] params = {
                 redFromRed,
                 redFromGreen,
@@ -240,7 +240,7 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
                 .withAction(normalize));
 
         // add this extra action, but after the standard "Randomize Settings"
-        ActionSetting randomizeAndNormalize = new ActionSetting("Randomize and Normalize",
+        FilterAction randomizeAndNormalize = new FilterAction("Randomize and Normalize",
                 e -> {
                     paramSet.randomize();
                     normalizeAction.actionPerformed(null);
@@ -327,14 +327,14 @@ public class ChannelMixer extends FilterWithParametrizedGUI {
     }
 
     @Override
-    public AdjustPanel createAdjustPanel(ImageLayer layer) {
-        return new ChannelMixerAdjustments(this, layer, actions);
+    public FilterGUIPanel createGUIPanel(Drawable dr) {
+        return new ChannelMixerAdjustments(this, dr, actions);
     }
 
     private static RangeParam createParam(String first, String second, int defaultValue) {
         String name = "<html><b><font color=" + first + ">" + first
                 + "</font></b> from <b><font color=" + second + ">" + second + "</font></b> (%):</html>";
-        return new RangeParam(name, MIN_PERCENT, defaultValue, MAX_PERCENT, AddDefaultButton.YES, NONE);
+        return new RangeParam(name, MIN_PERCENT, defaultValue, MAX_PERCENT, true, NONE);
     }
 
     @Override

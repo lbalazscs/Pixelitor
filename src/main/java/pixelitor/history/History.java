@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.gui.ImageComponents;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.menus.MenuAction;
 import pixelitor.menus.MenuAction.AllowedLayerType;
 import pixelitor.utils.AppPreferences;
@@ -78,8 +78,8 @@ public class History {
         undoableEditSupport.postEdit(edit);
     }
 
-    public static void addEdit(AddToHistory addToHistory, Supplier<PixelitorEdit> supplier) {
-        if (addToHistory.isYes()) {
+    public static void addEdit(boolean addToHistory, Supplier<PixelitorEdit> supplier) {
+        if (addToHistory) {
             addEdit(supplier.get());
         }
     }
@@ -188,8 +188,8 @@ public class History {
      * If the last edit in the history is a FadeableEdit for the given
      * image layer, return it, otherwise return empty Optional
      */
-    public static Optional<FadeableEdit> getPreviousEditForFade(ImageLayer layer) {
-        if (numUndoneEdits > 0 || layer == null) {
+    public static Optional<FadeableEdit> getPreviousEditForFade(Drawable dr) {
+        if (numUndoneEdits > 0 || dr == null) {
             return Optional.empty();
         }
         PixelitorEdit lastEdit = undoManager.getLastEdit();
@@ -200,8 +200,8 @@ public class History {
                     return Optional.empty();
                 }
 
-                ImageLayer lastLayer = fadeableEdit.getFadingLayer();
-                if (layer != lastLayer) {
+                Drawable lastLayer = fadeableEdit.getFadingLayer();
+                if (dr != lastLayer) {
                     // this happens if the active image layer has changed
                     // since the last edit, for example by going to mask edit
                     return Optional.empty();
@@ -217,16 +217,16 @@ public class History {
         if (comp == null) {
             return false;
         }
-        ImageLayer layer = comp.getActiveMaskOrImageLayerOrNull();
-        if (layer == null) {
+        Drawable dr = comp.getActiveDrawableOrNull();
+        if (dr == null) {
             return false;
         }
 
-        return canFade(layer);
+        return canFade(dr);
     }
 
-    public static boolean canFade(ImageLayer layer) {
-        return getPreviousEditForFade(layer).isPresent();
+    public static boolean canFade(Drawable dr) {
+        return getPreviousEditForFade(dr).isPresent();
     }
 
     public static void onAllImagesClosed() {

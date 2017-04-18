@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import pixelitor.filters.gui.EffectsParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.gui.StrokeParam;
@@ -65,39 +66,37 @@ public abstract class ShapeFilter extends FilterWithParametrizedGUI {
     private final StrokeParam strokeParam = new StrokeParam("Stroke Settings");
     private final EffectsParam effectsParam = new EffectsParam("Effects");
 
-    private final IntChoiceParam background = new IntChoiceParam("Background",
-            new IntChoiceParam.Value[]{
-                    new IntChoiceParam.Value("Black", BG_BLACK),
-                    new IntChoiceParam.Value("Original Image", BG_ORIGINAL),
-                    new IntChoiceParam.Value("Transparent", BG_TRANSPARENT),
-                    new IntChoiceParam.Value("Tool Background", BG_TOOL),
-            }, IGNORE_RANDOMIZE);
+    private final IntChoiceParam background = new IntChoiceParam("Background", new Value[]{
+            new Value("Black", BG_BLACK),
+            new Value("Original Image", BG_ORIGINAL),
+            new Value("Transparent", BG_TRANSPARENT),
+            new Value("Tool Background", BG_TOOL),
+    }, IGNORE_RANDOMIZE);
 
-    private final IntChoiceParam foreground = new IntChoiceParam("Foreground",
-            new IntChoiceParam.Value[]{
-                    new IntChoiceParam.Value("White", FG_WHITE),
-                    new IntChoiceParam.Value("Radial Gradient", FG_GRADIENT),
-                    new IntChoiceParam.Value("Tool Foreground", FG_TOOL),
-                    new IntChoiceParam.Value("Transparent", FG_TRANSPARENT),
-            }, IGNORE_RANDOMIZE);
+    private final IntChoiceParam foreground = new IntChoiceParam("Foreground", new Value[]{
+            new Value("White", FG_WHITE),
+            new Value("Radial Gradient", FG_GRADIENT),
+            new Value("Tool Foreground", FG_TOOL),
+            new Value("Transparent", FG_TRANSPARENT),
+    }, IGNORE_RANDOMIZE);
 
     protected final ImagePositionParam center = new ImagePositionParam("Center");
     private final GroupedRangeParam scale = new GroupedRangeParam("Scale (%)", 1, 100, 500, false);
-    private final DialogParam transformSettings = new DialogParam("Transform", center, scale);
 
     protected ShapeFilter() {
         super(ShowOriginal.NO);
+
         setParamSet(new ParamSet(
                 foreground,
                 background,
-                transformSettings,
+                new DialogParam("Transform", center, scale),
                 strokeParam,
                 effectsParam
         ));
 
         // disable effects if foreground is set to transparent
         Utils.setupDisableOtherIf(foreground, effectsParam,
-                selectedValue -> selectedValue.getIntValue() == FG_TRANSPARENT);
+                selectedValue -> selectedValue.getValue() == FG_TRANSPARENT);
     }
 
     @Override

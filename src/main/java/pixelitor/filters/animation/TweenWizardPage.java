@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,9 +22,8 @@ import pixelitor.automate.WizardPage;
 import pixelitor.filters.FilterAction;
 import pixelitor.filters.FilterUtils;
 import pixelitor.filters.FilterWithParametrizedGUI;
-import pixelitor.filters.gui.AdjustPanel;
-import pixelitor.filters.gui.ParametrizedAdjustPanel;
-import pixelitor.layers.ImageLayer;
+import pixelitor.filters.gui.ParametrizedFilterGUIPanel;
+import pixelitor.layers.Drawable;
 
 import javax.swing.*;
 import java.awt.FlowLayout;
@@ -47,7 +46,7 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public JComponent getPanel(Wizard wizard, ImageLayer layer) {
+        public JComponent getPanel(Wizard wizard, Drawable dr) {
             JPanel p = new JPanel(new FlowLayout());
             p.add(new JLabel("Select Filter:"));
             filtersCB = new JComboBox<>(FilterUtils.getAnimationFiltersSorted());
@@ -56,11 +55,11 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public void onWizardCancelled(ImageLayer layer) {
+        public void onWizardCanceled(Drawable dr) {
         }
 
         @Override
-        public void onMovingToTheNext(Wizard wizard, ImageLayer layer) {
+        public void onMovingToTheNext(Wizard wizard, Drawable dr) {
             FilterAction selectedItem = (FilterAction) filtersCB.getSelectedItem();
             FilterWithParametrizedGUI filter = (FilterWithParametrizedGUI) selectedItem.getFilter();
             getAnimation(wizard).setFilter(filter);
@@ -77,24 +76,23 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public JComponent getPanel(Wizard wizard, ImageLayer layer) {
+        public JComponent getPanel(Wizard wizard, Drawable dr) {
             FilterWithParametrizedGUI filter = getAnimation(wizard).getFilter();
-            layer.startPreviewing();
-            AdjustPanel adjustPanel = filter.createAdjustPanel(layer);
+            dr.startPreviewing();
 
-            return adjustPanel;
+            return filter.createGUIPanel(dr);
         }
 
         @Override
-        public void onWizardCancelled(ImageLayer layer) {
-            layer.cancelPressedInDialog();
+        public void onWizardCanceled(Drawable dr) {
+            dr.onDialogCanceled();
         }
 
         @Override
-        public void onMovingToTheNext(Wizard wizard, ImageLayer layer) {
+        public void onMovingToTheNext(Wizard wizard, Drawable dr) {
             getAnimation(wizard).copyInitialStateFromCurrent();
 
-            ParametrizedAdjustPanel.setResetParams(false);
+            ParametrizedFilterGUIPanel.setResetParams(false);
             getAnimation(wizard).getFilter().getParamSet().setFinalAnimationSettingMode(true);
         }
     }, FINAL_FILTER_SETTINGS {
@@ -114,27 +112,26 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public JComponent getPanel(Wizard wizard, ImageLayer layer) {
+        public JComponent getPanel(Wizard wizard, Drawable dr) {
             // the following 3 lines are necessary because otherwise the image position
             // selectors will show the result of the initial filter and not the original image
-            layer.stopPreviewing(); // stop the initial one
-            layer.startPreviewing(); // start the final one
+            dr.stopPreviewing(); // stop the initial one
+            dr.startPreviewing(); // start the final one
 
             FilterWithParametrizedGUI filter = getAnimation(wizard).getFilter();
-            AdjustPanel adjustPanel = filter.createAdjustPanel(layer);
 
-            return adjustPanel;
+            return filter.createGUIPanel(dr);
         }
 
         @Override
-        public void onWizardCancelled(ImageLayer layer) {
-            layer.cancelPressedInDialog();
+        public void onWizardCanceled(Drawable dr) {
+            dr.onDialogCanceled();
         }
 
         @Override
-        public void onMovingToTheNext(Wizard wizard, ImageLayer layer) {
+        public void onMovingToTheNext(Wizard wizard, Drawable dr) {
             // cancel the previewing
-            onWizardCancelled(layer);
+            onWizardCanceled(dr);
 
             // save final state
             getAnimation(wizard).copyFinalStateFromCurrent();
@@ -155,7 +152,7 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public JComponent getPanel(Wizard wizard, ImageLayer layer) {
+        public JComponent getPanel(Wizard wizard, Drawable dr) {
             if (outputSettingsPanel == null) {
                 outputSettingsPanel = new OutputSettingsPanel();
             }
@@ -163,13 +160,13 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public void onWizardCancelled(ImageLayer layer) {
+        public void onWizardCanceled(Drawable dr) {
 
         }
 
 
         @Override
-        public void onMovingToTheNext(Wizard wizard, ImageLayer layer) {
+        public void onMovingToTheNext(Wizard wizard, Drawable dr) {
             TweenAnimation animation = getAnimation(wizard);
             outputSettingsPanel.copySettingsInto(animation);
         }

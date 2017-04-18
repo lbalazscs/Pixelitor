@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,9 +18,8 @@
 package pixelitor.filters.gui;
 
 import pixelitor.gui.ImageComponents;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.UpdateGUI;
 
 import javax.swing.*;
 import java.awt.Dimension;
@@ -31,7 +30,6 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.util.Optional;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
@@ -40,21 +38,21 @@ import static java.awt.Color.WHITE;
  * The image selector part of an ImagePositionPanel
  */
 public class ImagePositionSelector extends JComponent implements MouseMotionListener, MouseListener {
-    private final ImagePositionPanel parentGUI;
+    private final ImagePositionParamGUI parentGUI;
     private final ImagePositionParam model;
     private BufferedImage thumb;
     private static final int CENTRAL_SQUARE_SIZE = 5;
     private boolean enabled = true;
 
-    public ImagePositionSelector(ImagePositionPanel parentGUI, ImagePositionParam model, int size) {
+    public ImagePositionSelector(ImagePositionParamGUI parentGUI, ImagePositionParam model, int size) {
         this.parentGUI = parentGUI;
         this.model = model;
         addMouseListener(this);
         addMouseMotionListener(this);
 
-        Optional<ImageLayer> imageLayer = ImageComponents.getActiveImageLayerOrMask();
-        if (imageLayer.isPresent()) { // in unit tests it might not be present
-            BufferedImage actualImage = imageLayer.get().getImageForFilterDialogs();
+        Drawable dr = ImageComponents.getActiveDrawableOrNull();
+        if (dr != null) { // in unit tests it might be null
+            BufferedImage actualImage = dr.getImageForFilterDialogs();
             thumb = ImageUtils.createThumbnail(actualImage, size, null);
             setPreferredSize(new Dimension(thumb.getWidth(), thumb.getHeight()));
         }
@@ -114,7 +112,7 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
 
         float relativeX = ((float) mouseX) / thumb.getWidth();
         float relativeY = ((float) mouseY) / thumb.getHeight();
-        model.setRelativeValues(relativeX, relativeY, UpdateGUI.NO, isAdjusting, true);
+        model.setRelativeValues(relativeX, relativeY, false, isAdjusting, true);
 
         parentGUI.updateSlidersFromModel();
 

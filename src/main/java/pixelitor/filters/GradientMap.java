@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,16 +34,17 @@ import static java.awt.Color.WHITE;
 public class GradientMap extends FilterWithParametrizedGUI {
     public static final String NAME = "Gradient Map";
 
-    private final GradientParam gradientParam = new GradientParam("Colors", BLACK, WHITE);
+    private final GradientParam gradient = new GradientParam("Colors", BLACK, WHITE);
 
     public GradientMap() {
         super(ShowOriginal.YES);
-        setParamSet(new ParamSet(gradientParam));
+
+        setParamSet(new ParamSet(gradient));
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        Colormap colormap = gradientParam.getValue();
+        Colormap colormap = gradient.getValue();
 
         int[] gradientLookup = new int[256];
         for (int i = 0; i < gradientLookup.length; i++) {

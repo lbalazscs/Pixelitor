@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,9 +17,8 @@
 
 package pixelitor.filters.painters;
 
-import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.AngleSelectorComponent;
+import pixelitor.filters.gui.AngleUI;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.SliderSpinner;
@@ -45,15 +44,15 @@ public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
         super("Drop Shadow", defaultEnabled, defaultColor);
 
         distanceParam = new RangeParam("Distance:", 1, defaultDistance, 100);
-        SliderSpinner distanceSlider = new SliderSpinner(distanceParam, NONE, AddDefaultButton.NO);
+        SliderSpinner distanceSlider = new SliderSpinner(distanceParam, NONE, false);
         gbHelper.addLabelWithControl("Distance:", distanceSlider);
 
         angleParam = new AngleParam("Angle", defaultAngle);
-        AngleSelectorComponent angleSelectorComponent = new AngleSelectorComponent(angleParam);
-        gbHelper.addLabelWithControl("Angle:", angleSelectorComponent);
+        AngleUI angleSelector = new AngleUI(angleParam);
+        gbHelper.addLabelWithControl("Angle:", angleSelector);
 
         spreadParam = new RangeParam("Spread:", 1, defaultSpread, 100);
-        SliderSpinner spreadSlider = new SliderSpinner(spreadParam, NONE, AddDefaultButton.NO);
+        SliderSpinner spreadSlider = new SliderSpinner(spreadParam, NONE, false);
         gbHelper.addLabelWithControl("Spread:", spreadSlider);
 
         ChangeListener changeListener = e -> updateDefaultButtonState();

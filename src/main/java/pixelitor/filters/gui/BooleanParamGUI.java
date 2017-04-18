@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,6 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.utils.UpdateGUI;
-
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
 import java.awt.FlowLayout;
@@ -26,21 +24,21 @@ import java.awt.FlowLayout;
 /**
  * The GUI for a BooleanParam.
  */
-public class BooleanSelector extends JPanel implements ParamGUI {
+public class BooleanParamGUI extends JPanel implements ParamGUI {
     private final BooleanParam model;
     private final JCheckBox checkBox;
     private DefaultButton defaultButton;
 
-    public BooleanSelector(BooleanParam model, AddDefaultButton addDefaultButton) {
+    public BooleanParamGUI(BooleanParam model, boolean addDefaultButton) {
         this.model = model;
         setLayout(new FlowLayout(FlowLayout.LEFT));
         checkBox = new JCheckBox();
         checkBox.setSelected(model.isChecked());
         add(checkBox);
 
-        checkBox.addActionListener(e -> model.setValue(checkBox.isSelected(), UpdateGUI.NO, true));
+        checkBox.addActionListener(e -> model.setValue(checkBox.isSelected(), false, true));
 
-        if (addDefaultButton.isYes()) {
+        if (addDefaultButton) {
             add(Box.createHorizontalStrut(50));
             defaultButton = new DefaultButton(model);
             add(defaultButton);

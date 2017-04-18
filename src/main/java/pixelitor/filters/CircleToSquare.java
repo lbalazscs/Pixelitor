@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,12 +34,11 @@ public class CircleToSquare extends FilterWithParametrizedGUI {
 
     // private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 0, 500, 200);
     private final RangeParam radius = new RangeParam("Radius", 0, 200, 500);
-
     private final RangeParam amount = new RangeParam("Amount (%)", -200, 100, 200);
     private final ImagePositionParam center = new ImagePositionParam("Center");
 
-    private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
-    private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
+    private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
+    private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
     private CircleToSquareFilter filter;
 
@@ -47,9 +46,10 @@ public class CircleToSquare extends FilterWithParametrizedGUI {
         super(ShowOriginal.YES);
         showAffectedArea();
 
+
         setParamSet(new ParamSet(
                 center,
-                radius.adjustRangeToImageSize(1.0),
+                radius.withAdjustedRange(1.0),
                 amount,
                 edgeAction,
                 interpolation
@@ -62,8 +62,7 @@ public class CircleToSquare extends FilterWithParametrizedGUI {
             filter = new CircleToSquareFilter();
         }
 
-        filter.setCenterX(center.getRelativeX());
-        filter.setCenterY(center.getRelativeY());
+        filter.setRelCenter(center.getRelativeX(), center.getRelativeY());
 
 // ellipse
 //        filter.setRadiusX(radius.getValue(0));

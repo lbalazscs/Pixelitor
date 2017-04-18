@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,11 +17,10 @@
 
 package pixelitor.tools;
 
-import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.utils.SliderSpinner;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.CopyBrushType;
 import pixelitor.tools.brushes.SmudgeBrush;
@@ -67,7 +66,7 @@ public class SmudgeTool extends AbstractBrushTool {
     }
 
     private void addStrengthSelector() {
-        SliderSpinner strengthSelector = new SliderSpinner(strengthParam, WEST, AddDefaultButton.NO);
+        SliderSpinner strengthSelector = new SliderSpinner(strengthParam, WEST, false);
         settingsPanel.add(strengthSelector);
     }
 
@@ -81,12 +80,12 @@ public class SmudgeTool extends AbstractBrushTool {
 
     @Override
     public void mousePressed(MouseEvent e, ImageComponent ic) {
-        ImageLayer layer = ic.getComp().getActiveMaskOrImageLayer();
+        Drawable dr = ic.getComp().getActiveDrawable();
 
         // We could also pass the full image and the translation
         // and the smudge brush could always adjust the last sampling point
         // with the translation.
-        BufferedImage sourceImage = layer.getCanvasSizedSubImage();
+        BufferedImage sourceImage = dr.getCanvasSizedSubImage();
 
         double x = userDrag.getStartX();
         double y = userDrag.getStartY();
@@ -106,10 +105,10 @@ public class SmudgeTool extends AbstractBrushTool {
     }
 
     @Override
-    protected void prepareProgrammaticBrushStroke(ImageLayer layer, Point start) {
-        super.prepareProgrammaticBrushStroke(layer, start);
+    protected void prepareProgrammaticBrushStroke(Drawable dr, Point start) {
+        super.prepareProgrammaticBrushStroke(dr, start);
 
-        BufferedImage sourceImg = layer.getCanvasSizedSubImage();
+        BufferedImage sourceImg = dr.getCanvasSizedSubImage();
         initStroke(sourceImg, start.x, start.y);
     }
 }

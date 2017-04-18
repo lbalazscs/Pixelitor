@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,6 @@ package pixelitor.tools;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.Composition;
-import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.FilterSetting;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponent;
@@ -27,7 +26,7 @@ import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.OKDialog;
 import pixelitor.gui.utils.SliderSpinner;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.Brush;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.SymmetryBrush;
@@ -64,7 +63,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     private JComboBox<BrushType> typeSelector;
 
     protected Graphics2D graphics;
-    private final RangeParam brushRadiusParam = new RangeParam("Radius", MIN_BRUSH_RADIUS, DEFAULT_BRUSH_RADIUS, MAX_BRUSH_RADIUS, AddDefaultButton.NO, WEST);
+    private final RangeParam brushRadiusParam = new RangeParam("Radius", MIN_BRUSH_RADIUS, DEFAULT_BRUSH_RADIUS, MAX_BRUSH_RADIUS, false, WEST);
 
     private final EnumComboBoxModel<Symmetry> symmetryModel = new EnumComboBoxModel<>(Symmetry.class);
 
@@ -140,7 +139,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         double x = userDrag.getStartX();
         double y = userDrag.getStartY();
 
-        newMousePoint(ic.getComp().getActiveMaskOrImageLayer(), x, y, withLine);
+        newMousePoint(ic.getComp().getActiveDrawable(), x, y, withLine);
         firstMouseDown = false;
 
         if (withLine) {
@@ -162,7 +161,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         // at this point x and y are already scaled according to the zoom level
         // (unlike e.getX(), e.getY())
 
-        newMousePoint(ic.getComp().getActiveMaskOrImageLayer(), x, y, false);
+        newMousePoint(ic.getComp().getActiveDrawable(), x, y, false);
     }
 
     @Override
@@ -176,14 +175,14 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         }
 
         Composition comp = ic.getComp();
-        finishBrushStroke(comp.getActiveMaskOrImageLayer());
+        finishBrushStroke(comp.getActiveDrawable());
     }
 
-    private void finishBrushStroke(ImageLayer layer) {
+    private void finishBrushStroke(Drawable dr) {
         int radius = getRadius();
-        ToolAffectedArea affectedArea = new ToolAffectedArea(layer,
+        ToolAffectedArea affectedArea = new ToolAffectedArea(dr,
                 brushAffectedArea.getRectangleAffectedByBrush(radius), false);
-        BufferedImage originalImage = drawStrategy.getOriginalImage(layer, this);
+        BufferedImage originalImage = drawStrategy.getOriginalImage(dr, this);
         saveSubImageForUndo(originalImage, affectedArea);
 
         if (graphics != null) {
@@ -191,34 +190,34 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
         }
         graphics = null;
 
-        drawStrategy.finishBrushStroke(layer);
+        drawStrategy.finishBrushStroke(dr);
 
-        layer.updateIconImage();
+        dr.updateIconImage();
 
-        layer.getComp().imageChanged(HISTOGRAM);
+        dr.getComp().imageChanged(HISTOGRAM);
     }
 
-    public void drawBrushStrokeProgrammatically(ImageLayer layer, Point start, Point end) {
-        prepareProgrammaticBrushStroke(layer, start);
+    public void drawBrushStrokeProgrammatically(Drawable dr, Point start, Point end) {
+        prepareProgrammaticBrushStroke(dr, start);
 
         brush.onDragStart(start.x, start.y);
         brush.onNewMousePoint(end.x, end.y);
 
-        finishBrushStroke(layer);
+        finishBrushStroke(dr);
     }
 
-    protected void prepareProgrammaticBrushStroke(ImageLayer layer, Point start) {
-        drawStrategy.prepareBrushStroke(layer);
-        graphics = createGraphicsForNewBrushStroke(layer);
+    protected void prepareProgrammaticBrushStroke(Drawable dr, Point start) {
+        drawStrategy.prepareBrushStroke(dr);
+        graphics = createGraphicsForNewBrushStroke(dr);
     }
 
     /**
      * Creates the global Graphics2D object graphics.
      */
-    private Graphics2D createGraphicsForNewBrushStroke(ImageLayer layer) {
-        Composition comp = layer.getComp();
+    private Graphics2D createGraphicsForNewBrushStroke(Drawable dr) {
+        Composition comp = dr.getComp();
         Composite composite = getComposite();
-        Graphics2D g = drawStrategy.createDrawGraphics(layer, composite);
+        Graphics2D g = drawStrategy.createDrawGraphics(dr, composite);
         initializeGraphics(g);
         if (respectSelection) {
             comp.applySelectionClipping(g, null);
@@ -243,10 +242,10 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     /**
      * Called from mousePressed, mouseDragged
      */
-    private void newMousePoint(ImageLayer layer, double x, double y, boolean connectClickWithLine) {
+    private void newMousePoint(Drawable dr, double x, double y, boolean connectClickWithLine) {
         if (graphics == null) { // a new brush stroke has to be initialized
-            drawStrategy.prepareBrushStroke(layer);
-            graphics = createGraphicsForNewBrushStroke(layer);
+            drawStrategy.prepareBrushStroke(dr);
+            graphics = createGraphicsForNewBrushStroke(dr);
             graphics.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
             if (connectClickWithLine) {
@@ -308,17 +307,17 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     /**
      * Traces the given shape with the current brush tool
      */
-    public void trace(ImageLayer layer, Shape shape) {
+    public void trace(Drawable dr, Shape shape) {
         try {
             respectSelection = false;
 
-            drawStrategy.prepareBrushStroke(layer);
+            drawStrategy.prepareBrushStroke(dr);
 
-            graphics = createGraphicsForNewBrushStroke(layer);
+            graphics = createGraphicsForNewBrushStroke(dr);
 
             doTraceAfterSetup(shape);
 
-            finishBrushStroke(layer);
+            finishBrushStroke(dr);
         } finally {
             resetState();
         }

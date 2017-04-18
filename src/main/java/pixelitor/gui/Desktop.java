@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -89,98 +89,100 @@ public class Desktop {
         return desktopPane;
     }
 
-    public void activateInternalImageFrame(InternalImageFrame frame) {
+    public void activateImageFrame(ImageFrame frame) {
         assert frame != null;
         desktopPane.getDesktopManager().activateFrame(frame);
     }
 
     public void cascadeWindows() {
-        List<ImageComponent> imageComponents = ImageComponents.getICList();
-        int locationX = 0;
-        int locationY = 0;
-        for (ImageComponent ic : imageComponents) {
-            InternalImageFrame internalFrame = ic.getInternalFrame();
-            internalFrame.setLocation(locationX, locationY);
-            internalFrame.setToNaturalSize(locationX, locationY);
-            try {
-                internalFrame.setIcon(false);
-                internalFrame.setMaximum(false);
-            } catch (PropertyVetoException e) {
-                e.printStackTrace();
-            }
-
-            locationX += CASCADE_HORIZONTAL_SHIFT;
-            locationY += CASCADE_VERTICAL_SHIFT;
-
-            // wrap
-            int maxWidth = desktopPane.getWidth() - CASCADE_HORIZONTAL_SHIFT;
-            int maxHeight = desktopPane.getHeight() - CASCADE_VERTICAL_SHIFT;
-
-            if (locationX > maxWidth) {
-                locationX = 0;
-            }
-            if (locationY > maxHeight) {
-                locationY = 0;
-            }
-        }
-    }
-
-    public void tileWindows() {
-        List<ImageComponent> imageComponents = ImageComponents.getICList();
-        int numComponents = imageComponents.size();
-
-        int rows = (int) Math.sqrt(numComponents);
-        int cols = numComponents / rows;
-        int extra = numComponents % rows;
-
-        int width = desktopPane.getWidth() / cols;
-        int height = desktopPane.getHeight() / rows;
-        int currentRow = 0;
-        int currentColumn = 0;
-
-        for (ImageComponent ic : imageComponents) {
-            InternalImageFrame frame = ic.getInternalFrame();
+        List<ImageComponent> icList = ImageComponents.getICList();
+        int locX = 0;
+        int locY = 0;
+        for (ImageComponent ic : icList) {
+            ImageFrame frame = ic.getFrame();
+            frame.setLocation(locX, locY);
+            frame.setToNaturalSize(locX, locY);
             try {
                 frame.setIcon(false);
                 frame.setMaximum(false);
             } catch (PropertyVetoException e) {
                 e.printStackTrace();
             }
-            frame.reshape(currentColumn * width, currentRow * height, width, height);
-            currentRow++;
-            if (currentRow == rows) {
-                currentRow = 0;
-                currentColumn++;
-                if (currentColumn == cols - extra) {
-                    rows++;
-                    height = desktopPane.getHeight() / rows;
+
+            locX += CASCADE_HORIZONTAL_SHIFT;
+            locY += CASCADE_VERTICAL_SHIFT;
+
+            // wrap
+            int maxWidth = desktopPane.getWidth() - CASCADE_HORIZONTAL_SHIFT;
+            int maxHeight = desktopPane.getHeight() - CASCADE_VERTICAL_SHIFT;
+
+            if (locX > maxWidth) {
+                locX = 0;
+            }
+            if (locY > maxHeight) {
+                locY = 0;
+            }
+        }
+    }
+
+    public void tileWindows() {
+        List<ImageComponent> icList = ImageComponents.getICList();
+        int numWindows = icList.size();
+
+        int numRows = (int) Math.sqrt(numWindows);
+        int numCols = numWindows / numRows;
+        int extra = numWindows % numRows;
+
+        int frameWidth = desktopPane.getWidth() / numCols;
+        int frameHeight = desktopPane.getHeight() / numRows;
+        int currRow = 0;
+        int currCol = 0;
+
+        for (ImageComponent ic : icList) {
+            ImageFrame frame = ic.getFrame();
+            try {
+                frame.setIcon(false);
+                frame.setMaximum(false);
+            } catch (PropertyVetoException e) {
+                e.printStackTrace();
+            }
+            int frameX = currCol * frameWidth;
+            int frameY = currRow * frameHeight;
+            frame.reshape(frameX, frameY, frameWidth, frameHeight);
+            currRow++;
+            if (currRow == numRows) {
+                currRow = 0;
+                currCol++;
+                if (currCol == numCols - extra) {
+                    numRows++;
+                    frameHeight = desktopPane.getHeight() / numRows;
                 }
             }
         }
     }
 
     public void addNewImageComponent(ImageComponent ic) {
-        int nrOfOpenImages = ImageComponents.getNrOfOpenImages();
+        int numImages = ImageComponents.getNumOpenImages();
 
-        // called deliberately after nrOfOpenImages is set
+        // called deliberately after numImages is set
         ImageComponents.addIC(ic);
 
-        int locationX = CASCADE_HORIZONTAL_SHIFT * nrOfOpenImages;
-        int locationY = CASCADE_VERTICAL_SHIFT * nrOfOpenImages;
+        int locX = CASCADE_HORIZONTAL_SHIFT * numImages;
+        int locY = CASCADE_VERTICAL_SHIFT * numImages;
 
         int maxWidth = desktopPane.getWidth() - CASCADE_HORIZONTAL_SHIFT;
-        locationX %= maxWidth;
+        locX %= maxWidth;
 
         int maxHeight = desktopPane.getHeight() - CASCADE_VERTICAL_SHIFT;
-        locationY %= maxHeight;
+        locY %= maxHeight;
 
-        InternalImageFrame internalFrame = new InternalImageFrame(ic, locationX, locationY);
-        ic.setInternalFrame(internalFrame);
+        ImageFrame frame = new ImageFrame(ic, locX, locY);
+        ic.setFrame(frame);
 
-        desktopPane.add(internalFrame);
+        desktopPane.add(frame);
         try {
-            internalFrame.setSelected(true);
-            desktopPane.getDesktopManager().activateFrame(internalFrame);
+            frame.setSelected(true);
+            desktopPane.getDesktopManager().activateFrame(frame);
             ImageComponents.newImageOpened(ic.getComp());
         } catch (PropertyVetoException e) {
             Messages.showException(e);

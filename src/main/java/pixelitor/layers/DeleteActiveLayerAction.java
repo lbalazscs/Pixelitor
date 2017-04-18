@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,10 +22,8 @@ import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
-import pixelitor.history.AddToHistory;
 import pixelitor.utils.IconUtils;
 import pixelitor.utils.ImageSwitchListener;
-import pixelitor.utils.UpdateGUI;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -38,7 +36,7 @@ public class DeleteActiveLayerAction extends AbstractAction implements ImageSwit
 
     private DeleteActiveLayerAction() {
         super("Delete Layer", IconUtils.loadIcon("delete_layer.gif"));
-        putValue(Action.SHORT_DESCRIPTION, "Deletes the active layer.");
+        putValue(SHORT_DESCRIPTION, "Deletes the active layer.");
         setEnabled(false);
         ImageComponents.addImageSwitchListener(this);
         AppLogic.addLayerChangeListener(this);
@@ -47,7 +45,7 @@ public class DeleteActiveLayerAction extends AbstractAction implements ImageSwit
     @Override
     public void actionPerformed(ActionEvent e) {
         Composition comp = ImageComponents.getActiveCompOrNull();
-        comp.deleteActiveLayer(UpdateGUI.YES, AddToHistory.YES);
+        comp.deleteActiveLayer(true, true);
     }
 
     @Override
@@ -57,8 +55,7 @@ public class DeleteActiveLayerAction extends AbstractAction implements ImageSwit
 
     @Override
     public void newImageOpened(Composition comp) {
-        int nrLayers = comp.getNrLayers();
-        if (nrLayers <= 1) {
+        if (comp.getNumLayers() <= 1) {
             setEnabled(false);
         } else {
             setEnabled(true);
@@ -67,7 +64,7 @@ public class DeleteActiveLayerAction extends AbstractAction implements ImageSwit
 
     @Override
     public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
-        if (newIC.getComp().getNrLayers() <= 1) { // no more deletion is possible
+        if (newIC.getComp().getNumLayers() <= 1) { // no more deletion is possible
             setEnabled(false);
         } else {
             setEnabled(true);

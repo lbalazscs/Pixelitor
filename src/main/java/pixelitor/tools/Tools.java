@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -58,19 +58,19 @@ public class Tools {
                     SMUDGE,
                     GRADIENT, PAINT_BUCKET, COLOR_PICKER, SHAPES, HAND, ZOOM};
 
-    public static Tool[] getTools() {
+    public static Tool[] getAll() {
         return allTools;
     }
 
-    public static Tool getCurrentTool() {
+    public static Tool getCurrent() {
         return currentTool;
     }
 
-    public static void setCurrentTool(Tool currentTool) {
+    public static void setCurrent(Tool newCurrentTool) {
         Tools.currentTool.toolEnded();
-        Tools.currentTool = currentTool;
-        currentTool.toolStarted();
-        ToolSettingsPanelContainer.INSTANCE.showSettingsFor(currentTool);
+        Tools.currentTool = newCurrentTool;
+        newCurrentTool.toolStarted();
+        ToolSettingsPanelContainer.INSTANCE.showSettingsFor(newCurrentTool);
     }
 
     public static boolean isShapesDrawing() {

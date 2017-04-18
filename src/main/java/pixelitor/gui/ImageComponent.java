@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,6 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.history.AddToHistory;
 import pixelitor.history.CompositionReplacedEdit;
 import pixelitor.history.DeselectEdit;
 import pixelitor.history.LinkedEdit;
@@ -71,7 +70,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     private Canvas canvas;
     private ZoomLevel zoomLevel = ZoomLevel.Z100;
 
-    private InternalImageFrame internalFrame = null;
+    private ImageFrame frame = null;
 
     private static final CheckerboardPainter checkerBoardPainter = ImageUtils.createCheckerboardPainter();
 
@@ -105,7 +104,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         addListeners();
     }
 
-    public PixelitorEdit replaceComp(Composition newComp, AddToHistory addToHistory, MaskViewMode newMaskViewMode) {
+    public PixelitorEdit replaceComp(Composition newComp, boolean addToHistory, MaskViewMode newMaskViewMode) {
         assert newComp != null;
         PixelitorEdit edit = null;
 
@@ -116,13 +115,13 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
         // do this here so that the old comp is deselected before
         // its ic is set to null
-        if (addToHistory.isYes()) {
+        if (addToHistory) {
             PixelitorEdit replaceEdit = new CompositionReplacedEdit(
                     "Reload", this, oldComp, newComp, oldMode);
             if (oldComp.hasSelection()) {
                 DeselectEdit deselectEdit = oldComp.createDeselectEdit();
                 edit = new LinkedEdit(oldComp, "Reload", deselectEdit, replaceEdit);
-                oldComp.deselect(AddToHistory.NO);
+                oldComp.deselect(false);
             } else {
                 edit = replaceEdit;
             }
@@ -167,7 +166,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
             public void componentResized(ComponentEvent e) {
                 updateDrawStart();
 
-                if (Tools.getCurrentTool() == Tools.CROP) {
+                if (Tools.getCurrent() == Tools.CROP) {
                     Tools.CROP.icResized(ImageComponent.this);
                 }
                 repaint();
@@ -219,32 +218,26 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         Tools.EventDispatcher.mouseMoved(e, this);
     }
 
-    @Override
-    public String toString() {
-        ImageComponentNode node = new ImageComponentNode("ImageComponent", this);
-        return node.toDetailedString();
+    public void setFrame(ImageFrame frame) {
+        this.frame = frame;
     }
 
-    public void setInternalFrame(InternalImageFrame internalFrame) {
-        this.internalFrame = internalFrame;
-    }
-
-    public InternalImageFrame getInternalFrame() {
-        return internalFrame;
+    public ImageFrame getFrame() {
+        return frame;
     }
 
     public void close() {
-        if (internalFrame != null) {
+        if (frame != null) {
             // this will also cause the calling of AppLogic.imageClosed via
             // InternalImageFrame.internalFrameClosed
-            internalFrame.dispose();
+            frame.dispose();
         }
         comp.dispose();
     }
 
     public void onActivation() {
         try {
-            getInternalFrame().setSelected(true);
+            getFrame().setSelected(true);
         } catch (PropertyVetoException e) {
             Messages.showException(e);
         }
@@ -256,9 +249,9 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     }
 
     public void updateTitle() {
-        if (internalFrame != null) {
+        if (frame != null) {
             String frameTitle = createFrameTitle();
-            internalFrame.setTitle(frameTitle);
+            frame.setTitle(frameTitle);
         }
     }
 
@@ -331,7 +324,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         }
 
         // possibly allow a larger clip for the selections and tools
-        Tool currentTool = Tools.getCurrentTool();
+        Tool currentTool = Tools.getCurrent();
         currentTool.setClip(g2, this);
 
         comp.paintSelection(g2);
@@ -432,8 +425,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     }
 
     public void makeSureItIsVisible() {
-        if (internalFrame != null) {
-            internalFrame.makeSureItIsVisible();
+        if (frame != null) {
+            frame.makeSureItIsVisible();
         }
     }
 
@@ -460,8 +453,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     public void canvasSizeChanged() {
         assert ConsistencyChecks.imageCoversCanvasCheck(comp);
 
-        if (internalFrame != null) {
-            internalFrame.setSize(canvas.getZoomedWidth(), canvas.getZoomedHeight(), -1, -1);
+        if (frame != null) {
+            frame.setSize(canvas.getZoomedWidth(), canvas.getZoomedHeight(), -1, -1);
         }
         revalidate();
     }
@@ -494,9 +487,9 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         canvas.updateForZoom(viewScale);
 
         Rectangle areaThatShouldBeVisible = null;
-        if (internalFrame != null) {
+        if (frame != null) {
             updateTitle();
-            internalFrame.setSize(canvas.getZoomedWidth(), canvas.getZoomedHeight(), -1, -1);
+            frame.setSize(canvas.getZoomedWidth(), canvas.getZoomedHeight(), -1, -1);
 
             Rectangle viewRect = getViewRect();
 
@@ -535,14 +528,13 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         // only after all pending AWT events have been processed
         // because then this component will have the final size
         // and updateDrawStart can calculate correct results
-        Runnable r = () -> {
+        SwingUtilities.invokeLater(() -> {
             updateDrawStart();
             if (finalRect != null) {
                 scrollRectToVisible(finalRect);
             }
             repaint();
-        };
-        SwingUtilities.invokeLater(r);
+        });
 
         if (ImageComponents.getActiveIC() == this) {
             ZoomControl.INSTANCE.setToNewZoom(zoomLevel);
@@ -657,7 +649,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
      * the JScrollPane might show only a part of it
      */
     public Rectangle getViewRect() {
-        return internalFrame.getScrollPane().getViewport().getViewRect();
+        return frame.getScrollPane().getViewport().getViewRect();
     }
 
     public void addLayerToGUI(Layer newLayer, int newLayerIndex) {
@@ -665,12 +657,12 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         layersPanel.addLayerButton(layerButton, newLayerIndex);
 
         if (ImageComponents.isActive(this)) {
-            AppLogic.activeCompLayerCountChanged(comp, comp.getNrLayers());
+            AppLogic.activeCompLayerCountChanged(comp, comp.getNumLayers());
         }
     }
 
-    public boolean activeIsImageLayerOrMask() {
-        return comp.activeIsImageLayerOrMask();
+    public boolean activeIsDrawable() {
+        return comp.activeIsDrawable();
     }
 
     /**
@@ -694,5 +686,11 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
             SwingUtilities.invokeLater(() ->
                     navigator.refreshSizeCalc(this, false, newICSize, false));
         }
+    }
+
+    @Override
+    public String toString() {
+        ImageComponentNode node = new ImageComponentNode("ImageComponent", this);
+        return node.toDetailedString();
     }
 }

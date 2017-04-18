@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,6 @@ import pixelitor.Composition;
 import pixelitor.history.History;
 import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
-import pixelitor.layers.Layer;
 import pixelitor.selection.Selection;
 import pixelitor.utils.Messages;
 
@@ -80,14 +79,7 @@ public class Resize implements CompAction {
             selection.transform(tx);
         }
 
-        int nrLayers = comp.getNrLayers();
-        for (int i = 0; i < nrLayers; i++) {
-            Layer layer = comp.getLayer(i);
-            layer.resize(canvasTargetWidth, canvasTargetHeight, progressiveBilinear);
-            if (layer.hasMask()) {
-                layer.getMask().resize(canvasTargetWidth, canvasTargetHeight, progressiveBilinear);
-            }
-        }
+        resizeLayers(comp, progressiveBilinear);
 
         MultiLayerEdit edit = new MultiLayerEdit(comp, editName, backup);
         History.addEdit(edit);
@@ -105,5 +97,14 @@ public class Resize implements CompAction {
 
         Messages.showStatusMessage("Image resized to "
                 + canvasTargetWidth + " x " + canvasTargetHeight + " pixels.");
+    }
+
+    private void resizeLayers(Composition comp, boolean progressiveBilinear) {
+        comp.forEachLayer(layer -> {
+            layer.resize(canvasTargetWidth, canvasTargetHeight, progressiveBilinear);
+            if (layer.hasMask()) {
+                layer.getMask().resize(canvasTargetWidth, canvasTargetHeight, progressiveBilinear);
+            }
+        });
     }
 }

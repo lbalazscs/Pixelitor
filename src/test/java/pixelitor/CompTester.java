@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,13 +17,11 @@
 
 package pixelitor;
 
-import pixelitor.history.AddToHistory;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.selection.Selection;
 import pixelitor.testutils.WithTranslation;
-import pixelitor.utils.UpdateGUI;
 import pixelitor.utils.test.Assertions;
 
 import java.awt.Rectangle;
@@ -105,21 +103,15 @@ public class CompTester {
     }
 
     public void setStandardTestTranslationToAllLayers(WithTranslation translation) {
-        int nrLayers = comp.getNrLayers();
-        for (int i = 0; i < nrLayers; i++) {
-            Layer layer = comp.getLayer(i);
-            if (layer instanceof ContentLayer) {
-                ContentLayer contentLayer = (ContentLayer) layer;
+        comp.forEachContentLayer(contentLayer -> {
+            // should be used on layers without translation
+            int tx = contentLayer.getTX();
+            assert tx == 0 : "tx = " + tx + " on " + contentLayer.getName();
+            int ty = contentLayer.getTY();
+            assert ty == 0 : "ty = " + ty + " on " + contentLayer.getName();
 
-                // should be used on layers without translation
-                int tx = contentLayer.getTX();
-                assert tx == 0 : "tx = " + tx + " on " + contentLayer.getName();
-                int ty = contentLayer.getTY();
-                assert ty == 0 : "ty = " + ty + " on " + contentLayer.getName();
-
-                setStandardTestTranslation(contentLayer, translation);
-            }
-        }
+            setStandardTestTranslation(contentLayer, translation);
+        });
     }
 
     public void setStandardTestTranslation(ContentLayer layer, WithTranslation translation) {
@@ -128,7 +120,7 @@ public class CompTester {
         Layer activeLayerBefore = comp.getActiveLayer();
         boolean activeLayerChanged = false;
         if (layer != activeLayerBefore) {
-            comp.setActiveLayer(layer, AddToHistory.NO);
+            comp.setActiveLayer(layer, false);
             activeLayerChanged = true;
         }
 
@@ -141,7 +133,7 @@ public class CompTester {
         assert Assertions.translationIs(layer, expectedTX, expectedTY);
 
         if (activeLayerChanged) {
-            comp.setActiveLayer(activeLayerBefore, AddToHistory.NO);
+            comp.setActiveLayer(activeLayerBefore, false);
         }
     }
 
@@ -154,6 +146,6 @@ public class CompTester {
     }
 
     public void deleteActiveLayer() {
-        comp.deleteLayer(comp.getActiveLayer(), AddToHistory.YES, UpdateGUI.NO);
+        comp.deleteLayer(comp.getActiveLayer(), true, false);
     }
 }

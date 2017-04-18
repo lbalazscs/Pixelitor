@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,24 +34,22 @@ public class RadialWaves extends FilterWithParametrizedGUI {
 
     private final RangeParam angularDivision = new RangeParam("Angular Division", 1, 10, 100);
     private final RangeParam radialAmplitude = new RangeParam("Radial Amplitude", 0, 20, 100);
-
     private final RangeParam phase = new RangeParam("Phase (time)", 0, 0, 360);
-
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 500);
-    private final IntChoiceParam waveType = IntChoiceParam.getWaveTypeChoices();
-
-    private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
-    private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
+    private final IntChoiceParam waveType = IntChoiceParam.forWaveType();
+    private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
+    private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
     private RadialWavesFilter filter;
 
     public RadialWaves() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
                 center,
                 angularDivision,
-                radialAmplitude.adjustRangeToImageSize(1.0),
+                radialAmplitude.withAdjustedRange(1.0),
                 waveType,
                 phase,
                 zoom,
@@ -66,16 +64,12 @@ public class RadialWaves extends FilterWithParametrizedGUI {
             filter = new RadialWavesFilter();
         }
 
-        filter.setCenterX(center.getRelativeX());
-        filter.setCenterY(center.getRelativeY());
+        filter.setRelCenter(center.getRelativeX(), center.getRelativeY());
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
-
         filter.setPhase(phase.getValueAsPercentage());
-
         filter.setAngularDivision(angularDivision.getValue());
         filter.setRadialAmplitude(radialAmplitude.getValueAsDouble());
-
         filter.setZoom(zoom.getValueAsPercentage());
         filter.setWaveType(waveType.getValue());
 

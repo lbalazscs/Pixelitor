@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,11 +20,11 @@ package pixelitor.filters.animation;
 import pixelitor.automate.Wizard;
 import pixelitor.automate.WizardPage;
 import pixelitor.filters.FilterWithParametrizedGUI;
-import pixelitor.filters.gui.ParametrizedAdjustPanel;
+import pixelitor.filters.gui.ParametrizedFilterGUIPanel;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.ValidatedForm;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 
 import javax.swing.*;
 import java.awt.Component;
@@ -38,13 +38,13 @@ import static pixelitor.filters.animation.TweenWizardPage.SELECT_FILTER;
 public class TweenWizard extends Wizard {
     private final TweenAnimation animation = new TweenAnimation();
 
-    public TweenWizard(ImageLayer layer) {
-        super(SELECT_FILTER, "Export Tweening Animation", "Render", 450, 380, layer);
+    public TweenWizard(Drawable dr) {
+        super(SELECT_FILTER, "Export Tweening Animation", "Render", 450, 380, dr);
     }
 
     @Override
     protected void finalCleanup() {
-        ParametrizedAdjustPanel.setResetParams(true);
+        ParametrizedFilterGUIPanel.setResetParams(true);
         FilterWithParametrizedGUI filter = animation.getFilter();
         if (filter != null) { // a filter was already selected
             filter.getParamSet().setFinalAnimationSettingMode(false);
@@ -56,7 +56,7 @@ public class TweenWizard extends Wizard {
                 "Rendering Frames", "", 1, 100);
         progressMonitor.setProgress(0);
 
-        RenderFramesTask task = new RenderFramesTask(animation, layer);
+        RenderFramesTask task = new RenderFramesTask(animation, dr);
         task.addPropertyChangeListener(evt -> {
             if ("progress".equals(evt.getPropertyName())) {
                 int progress = (Integer) evt.getNewValue();
@@ -85,7 +85,7 @@ public class TweenWizard extends Wizard {
     @Override
     protected boolean mayMoveForwardIfNextPressed(WizardPage currentPage, Component dialogParent) {
         if(currentPage == OUTPUT_SETTINGS) {
-            ValidatedForm settings = (ValidatedForm) currentPage.getPanel(this, layer);
+            ValidatedForm settings = (ValidatedForm) currentPage.getPanel(this, dr);
             if (!settings.isDataValid()) {
                 Dialogs.showErrorDialog(dialogParent, "Error", settings.getErrorMessage());
                 return false;
@@ -105,7 +105,7 @@ public class TweenWizard extends Wizard {
     }
 
     @Override
-    protected void executeFinalAction() {
+    protected void finalAction() {
         calculateAnimation();
     }
 }

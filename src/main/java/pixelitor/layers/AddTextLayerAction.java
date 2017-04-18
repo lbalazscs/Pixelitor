@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,7 @@ public class AddTextLayerAction extends AbstractAction implements ImageSwitchLis
 
     private AddTextLayerAction() {
         super("Add Text Layer", IconUtils.loadIcon("add_text_layer.png"));
-        putValue(Action.SHORT_DESCRIPTION, "Adds a new text layer.");
+        putValue(SHORT_DESCRIPTION, "Adds a new text layer.");
         setEnabled(false);
         ImageComponents.addImageSwitchListener(this);
     }

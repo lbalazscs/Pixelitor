@@ -1,3 +1,20 @@
+/*
+ * Copyright 2017 Laszlo Balazs-Csiki
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.filters.levels;
 
 import pixelitor.filters.gui.FilterParam;
@@ -69,7 +86,7 @@ public class LevelsModel {
 
     public void resetToDefaultSettings() {
         for (OneChannelLevelsModel model : subModels) {
-            model.resetToDefaultSettings();
+            model.resetToDefaults();
         }
 
         adjustmentChanged();
@@ -82,13 +99,12 @@ public class LevelsModel {
     public ParamSet getParamSet() {
         List<FilterParam> params = new ArrayList<>();
         for (OneChannelLevelsModel subModel : subModels) {
-            params.add(subModel.getInputBlackParam());
-            params.add(subModel.getInputWhiteParam());
-            params.add(subModel.getOutputBlackParam());
-            params.add(subModel.getOutputWhiteParam());
+            params.add(subModel.getInputBlack());
+            params.add(subModel.getInputWhite());
+            params.add(subModel.getOutputBlack());
+            params.add(subModel.getOutputWhite());
         }
 
-        ParamSet ps = new ParamSet(params);
-        return ps;
+        return new ParamSet(params);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.history;
 import pixelitor.Composition;
 import pixelitor.layers.Layer;
 import pixelitor.layers.MaskViewMode;
-import pixelitor.utils.UpdateGUI;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -48,8 +47,8 @@ public class NewLayerEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        comp.deleteLayer(newLayer, AddToHistory.NO, UpdateGUI.YES);
-        comp.setActiveLayer(activeLayerBefore, AddToHistory.NO);
+        comp.deleteLayer(newLayer, false, true);
+        comp.setActiveLayer(activeLayerBefore, false);
 
         oldViewMode.activate(comp, activeLayerBefore);
 
@@ -60,7 +59,7 @@ public class NewLayerEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        comp.addLayer(newLayer, AddToHistory.NO, null, true, newLayerIndex);
+        comp.addLayer(newLayer, false, null, true, newLayerIndex);
 
         History.notifyMenus(this);
     }

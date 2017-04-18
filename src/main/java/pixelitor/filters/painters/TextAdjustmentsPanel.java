@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,15 +20,14 @@ package pixelitor.filters.painters;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import pixelitor.Composition;
-import pixelitor.filters.gui.AddDefaultButton;
-import pixelitor.filters.gui.AdjustPanel;
 import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.ColorSelector;
+import pixelitor.filters.gui.ColorParamGUI;
+import pixelitor.filters.gui.FilterGUIPanel;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SliderSpinner;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.layers.TextLayer;
 
 import javax.swing.*;
@@ -53,7 +52,7 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 /**
  * Customization panel for the text filters and text layers
  */
-public class TextAdjustmentsPanel extends AdjustPanel implements ParamAdjustmentListener, ActionListener {
+public class TextAdjustmentsPanel extends FilterGUIPanel implements ParamAdjustmentListener, ActionListener {
     private TextLayer textLayer;
 
     private JTextField textTF;
@@ -77,8 +76,8 @@ public class TextAdjustmentsPanel extends AdjustPanel implements ParamAdjustment
     private AdvancedTextSettingsDialog advancedSettingsDialog;
 
     // called for image layers
-    public TextAdjustmentsPanel(TextFilter textFilter, ImageLayer layer) {
-        super(textFilter, layer);
+    public TextAdjustmentsPanel(TextFilter textFilter, Drawable dr) {
+        super(textFilter, dr);
         createGUI(null);
 
         if(!textTF.getText().isEmpty()) {
@@ -140,8 +139,8 @@ public class TextAdjustmentsPanel extends AdjustPanel implements ParamAdjustment
         gbh.addLabel("Color", 0, 1);
         Color defaultColor = settings == null ? BLACK : settings.getColor();
         color = new ColorParam("Color", defaultColor, USER_ONLY_OPACITY);
-        ColorSelector colorSelector = new ColorSelector(color);
-        gbh.addLastControl(colorSelector);
+        ColorParamGUI colorParamGUI = new ColorParamGUI(color);
+        gbh.addLastControl(colorParamGUI);
         color.setAdjustmentListener(this);
 
         verticalAlignmentCombo = new JComboBox(VerticalAlignment.values());
@@ -206,7 +205,7 @@ public class TextAdjustmentsPanel extends AdjustPanel implements ParamAdjustment
         int defaultFontSize = settings == null ? 100 : settings.getFont().getSize();
 
         RangeParam fontSizeParam = new RangeParam("", 1, defaultFontSize, 1000);
-        fontSizeSlider = new SliderSpinner(fontSizeParam, NONE, AddDefaultButton.NO);
+        fontSizeSlider = new SliderSpinner(fontSizeParam, NONE, false);
         fontSizeSlider.setSliderName("fontSize");
         fontSizeParam.setAdjustmentListener(this);
         gbh.addLastControl(fontSizeSlider);

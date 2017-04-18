@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,13 +19,13 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.PerspectiveFilter;
 import pixelitor.filters.FilterWithParametrizedGUI;
-import pixelitor.filters.gui.AdjustPanel;
+import pixelitor.filters.gui.FilterGUIPanel;
 import pixelitor.filters.gui.GridAdjustmentPanel;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 
 import java.awt.image.BufferedImage;
 
@@ -39,12 +39,12 @@ public class JHPerspective extends FilterWithParametrizedGUI {
     private final ImagePositionParam northEast = new ImagePositionParam("North East", 0.95f, 0.05f);
     private final ImagePositionParam southWest = new ImagePositionParam("South West", 0.05f, 0.95f);
     private final ImagePositionParam southEast = new ImagePositionParam("South East", 0.95f, 0.95f);
-
-    private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
-    private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
+    private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
+    private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
     public JHPerspective() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
                 northWest, northEast, southWest, southEast,
                 edgeAction, interpolation
@@ -73,7 +73,7 @@ public class JHPerspective extends FilterWithParametrizedGUI {
     }
 
     @Override
-    public AdjustPanel createAdjustPanel(ImageLayer layer) {
-        return new GridAdjustmentPanel(this, layer, false, ShowOriginal.YES);
+    public FilterGUIPanel createGUIPanel(Drawable dr) {
+        return new GridAdjustmentPanel(this, dr, false, ShowOriginal.YES);
     }
 }

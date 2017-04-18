@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,10 +21,10 @@ import pixelitor.Composition;
 import pixelitor.filters.comp.CompAction;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
-import pixelitor.gui.InternalImageFrame;
+import pixelitor.gui.ImageFrame;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.ValidatedDialog;
-import pixelitor.io.FileChoosers;
+import pixelitor.io.Directories;
 import pixelitor.io.FileExtensionUtils;
 import pixelitor.io.OpenSaveManager;
 import pixelitor.io.OutputFormat;
@@ -52,12 +52,12 @@ public class Automate {
     }
 
     /**
-     * Processes each file in the input directory with the given CompositionAction
+     * Processes each file in the input directory with the given CompAction
      */
     public static void processEachFile(CompAction action,
-                                       boolean closeImagesAfterProcessing,
-                                       String progressMonitorTitle) {
-        File lastOpenDir = FileChoosers.getLastOpenDir();
+                                       boolean closeImagesAfterDone,
+                                       String dialogTitle) {
+        File lastOpenDir = Directories.getLastOpenDir();
         if (lastOpenDir == null) {
             throw new IllegalStateException("lastOpenDir is null");
         }
@@ -65,7 +65,7 @@ public class Automate {
             throw new IllegalStateException("Last open dir " + lastOpenDir.getAbsolutePath() + " does not exist");
         }
 
-        File lastSaveDir = FileChoosers.getLastSaveDir();
+        File lastSaveDir = Directories.getLastSaveDir();
         if (lastSaveDir == null) {
             throw new IllegalStateException("lastSaveDir is null");
         }
@@ -73,13 +73,13 @@ public class Automate {
             throw new IllegalStateException("Last save dir " + lastSaveDir.getAbsolutePath() + " does not exist");
         }
 
-        File[] inputFiles = FileExtensionUtils.getAllSupportedFilesInDir(lastOpenDir);
+        File[] inputFiles = FileExtensionUtils.getAllSupportedInputFilesInDir(lastOpenDir);
         if (inputFiles.length == 0) {
             Messages.showInfo("No files", "There are no supported files in " + lastOpenDir.getAbsolutePath());
             return;
         }
 
-        ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor(progressMonitorTitle);
+        ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor(dialogTitle);
         SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
             @Override
             public Void doInBackground() {
@@ -96,7 +96,7 @@ public class Automate {
 
                     System.out.println("Processing " + file.getName());
 
-                    Runnable edtTask = () -> processFile(file, action, lastSaveDir, closeImagesAfterProcessing);
+                    Runnable edtTask = () -> processFile(file, action, lastSaveDir, closeImagesAfterDone);
                     try {
                         EventQueue.invokeAndWait(edtTask);
                     } catch (InterruptedException | InvocationTargetException e) {
@@ -118,20 +118,20 @@ public class Automate {
     private static void processFile(File file,
                                     CompAction action,
                                     File lastSaveDir,
-                                    boolean closeImagesAfterProcessing) {
+                                    boolean closeImagesAfterDone) {
         OpenSaveManager.openFile(file);
         Composition comp = ImageComponents.getActiveCompOrNull();
 
         ImageComponent ic = comp.getIC();
-        InternalImageFrame frame = ic.getInternalFrame();
+        ImageFrame frame = ic.getFrame();
         frame.paintImmediately(frame.getBounds());
 
         action.process(comp);
 
-        OutputFormat outputFormat = OutputFormat.getLastOutputFormat();
+        OutputFormat outputFormat = OutputFormat.getLastUsed();
 
         String inputFileName = file.getName();
-        String outFileName = FileExtensionUtils.replaceExtension(inputFileName, outputFormat.toString());
+        String outFileName = FileExtensionUtils.replaceExt(inputFileName, outputFormat.toString());
 
         File outputFile = new File(lastSaveDir, outFileName);
 
@@ -155,17 +155,17 @@ public class Automate {
 
             switch (answer) {
                 case OVERWRITE_YES:
-                    outputFormat.saveComposition(comp, outputFile, false);
+                    outputFormat.saveComp(comp, outputFile, false);
                     break;
                 case OVERWRITE_YES_ALL:
-                    outputFormat.saveComposition(comp, outputFile, false);
+                    outputFormat.saveComp(comp, outputFile, false);
                     overwriteAll = true;
                     break;
                 case OVERWRITE_NO:
                     // do nothing
                     break;
                 case OVERWRITE_CANCEL:
-                    if (closeImagesAfterProcessing) {
+                    if (closeImagesAfterDone) {
                         OpenSaveManager.warnAndCloseImage(ic);
                     }
                     stopProcessing = true;
@@ -173,9 +173,9 @@ public class Automate {
             }
         } else { // the file does not exist or overwrite all was pressed previously
             frame.paintImmediately(frame.getBounds());
-            outputFormat.saveComposition(comp, outputFile, false);
+            outputFormat.saveComp(comp, outputFile, false);
         }
-        if (closeImagesAfterProcessing) {
+        if (closeImagesAfterDone) {
             OpenSaveManager.warnAndCloseImage(ic);
         }
         stopProcessing = false;

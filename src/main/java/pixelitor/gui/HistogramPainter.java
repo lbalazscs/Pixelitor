@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,7 +39,14 @@ public class HistogramPainter extends JComponent {
     public HistogramPainter(Color color) {
         this.color = color;
         insets = getInsets();
-        setPreferredSize(new Dimension(256 + insets.left + insets.right, PREFERRED_HEIGHT + insets.top + insets.bottom));
+
+        setupPreferredSize();
+    }
+
+    private void setupPreferredSize() {
+        int width = 256 + insets.left + insets.right;
+        int height = PREFERRED_HEIGHT + insets.top + insets.bottom;
+        setPreferredSize(new Dimension(width, height));
     }
 
     /**
@@ -58,7 +65,7 @@ public class HistogramPainter extends JComponent {
     /**
      * Called when all images have been closed
      */
-    public void updateWithNothing() {
+    public void setToNoImage() {
         maxValue = 0;
     }
 

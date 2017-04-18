@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ public class ToolsPanel extends JPanel {
         Box verticalBox = Box.createVerticalBox();
         ButtonGroup group = new ButtonGroup();
 
-        Tool[] tools = Tools.getTools();
+        Tool[] tools = Tools.getAll();
         for (Tool tool : tools) {
             ToolButton toolButton = new ToolButton(tool);
             verticalBox.add(toolButton);
@@ -72,7 +72,7 @@ public class ToolsPanel extends JPanel {
     }
 
     private static void setDefaultTool() {
-        Tools.setCurrentTool(Tools.BRUSH);
+        Tools.setCurrent(Tools.BRUSH);
         Tools.currentTool.getButton().setSelected(true);
     }
 }

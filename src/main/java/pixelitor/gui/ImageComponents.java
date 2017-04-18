@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,10 +21,10 @@ import pixelitor.AppLogic;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.filters.comp.Crop;
-import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.io.OpenSaveManager;
+import pixelitor.layers.Drawable;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.MaskViewMode;
@@ -107,6 +107,7 @@ public class ImageComponents {
             return activeIC.getComp();
         }
 
+        // there is no open image
         return null;
     }
 
@@ -115,6 +116,7 @@ public class ImageComponents {
             return Optional.of(activeIC.getComp());
         }
 
+        // there is no open image
         return Optional.empty();
     }
 
@@ -137,24 +139,20 @@ public class ImageComponents {
         return getActiveComp().map(Composition::getActiveLayer);
     }
 
-    public static ImageLayer getActiveImageLayerOrMaskOrNull() {
+    public static Drawable getActiveDrawableOrNull() {
         if (activeIC != null) {
             Composition comp = activeIC.getComp();
-            return comp.getActiveMaskOrImageLayerOrNull();
+            return comp.getActiveDrawableOrNull();
         }
 
         return null;
     }
 
-    public static Optional<ImageLayer> getActiveImageLayerOrMask() {
-        return getActiveComp().flatMap(Composition::getActiveMaskOrImageLayerOpt);
-    }
-
-    public static int getNrOfOpenImages() {
+    public static int getNumOpenImages() {
         return icList.size();
     }
 
-    public static BufferedImage getActiveCompositeImageOrNull() {
+    public static BufferedImage getActiveCompositeImage() {
         if (activeIC != null) {
             return activeIC.getComp().getCompositeImage();
         }
@@ -207,8 +205,8 @@ public class ImageComponents {
                 throw new IllegalStateException("cannot activate null imageComponent");
             }
             // activate is always false in unit tests
-            InternalImageFrame internalFrame = ic.getInternalFrame();
-            Desktop.INSTANCE.activateInternalImageFrame(internalFrame);
+            ImageFrame frame = ic.getFrame();
+            Desktop.INSTANCE.activateImageFrame(frame);
             ic.onActivation();
         }
     }
@@ -262,7 +260,6 @@ public class ImageComponents {
     }
 
     public static void newImageOpened(Composition comp) {
-//        numFramesOpen++;
         imageSwitchListeners.forEach((imageSwitchListener) -> imageSwitchListener.newImageOpened(comp));
     }
 
@@ -295,11 +292,6 @@ public class ImageComponents {
         return ic == activeIC;
     }
 
-    public static boolean isActiveLayerImageLayer() {
-        Layer activeLayer = activeIC.getComp().getActiveLayer();
-        return activeLayer instanceof ImageLayer;
-    }
-
     public static void reloadActiveFromFile() {
         Composition comp = activeIC.getComp();
         File file = comp.getFile();
@@ -319,7 +311,7 @@ public class ImageComponents {
 
         Composition newComp = OpenSaveManager.createCompositionFromFile(file);
 
-        PixelitorEdit edit = activeIC.replaceComp(newComp, AddToHistory.YES, MaskViewMode.NORMAL);
+        PixelitorEdit edit = activeIC.replaceComp(newComp, true, MaskViewMode.NORMAL);
 
         // needs to be called before addEdit because of the consistency checks
         newImageOpened(newComp);
@@ -336,7 +328,7 @@ public class ImageComponents {
         assert activeIC != null;
         Composition newComp = Composition.createCopy(activeIC.getComp(), false);
 
-        AppLogic.addComposition(newComp);
+        AppLogic.addCompAsNewImage(newComp);
     }
 
     public static void onActiveIC(Consumer<ImageComponent> action) {
@@ -356,7 +348,7 @@ public class ImageComponents {
         return function.apply(activeIC);
     }
 
-    public static void onAllImages(Consumer<ImageComponent> action) {
+    public static void forAllImages(Consumer<ImageComponent> action) {
         //noinspection Convert2streamapi
         for (ImageComponent ic : icList) {
             action.accept(ic);
@@ -394,6 +386,13 @@ public class ImageComponents {
         if (activeIC != null) {
             TextLayer activeLayer = (TextLayer) activeIC.getComp().getActiveLayer();
             action.accept(activeLayer);
+        }
+    }
+
+    public static void onActiveDrawable(Consumer<Drawable> action) {
+        Drawable dr = getActiveDrawableOrNull();
+        if (dr != null) {
+            action.accept(dr);
         }
     }
 }

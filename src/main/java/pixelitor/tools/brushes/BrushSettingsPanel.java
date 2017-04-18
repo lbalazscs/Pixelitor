@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,6 @@
 package pixelitor.tools.brushes;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
-import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.GridBagHelper;
@@ -48,7 +47,7 @@ public class BrushSettingsPanel extends JPanel {
     }
 
     protected void addAngleSettingsSelector() {
-        angleJitter = new RangeParam("", 0, 0, 180, AddDefaultButton.YES, NONE);
+        angleJitter = new RangeParam("", 0, 0, 180, true, NONE);
         gbh.addLabelWithControlNoFill("  Angle Jitter (degrees):", angleJitter.createGUI());
         angleJitter.setAdjustmentListener(this::changeAngleSettings);
 
@@ -59,7 +58,7 @@ public class BrushSettingsPanel extends JPanel {
 
     protected void addSpacingSelector(DabsBrushSettings settings) {
         RangeParam spacingSelector = new RangeParam("", 1, (int) Math.round(DEFAULT_SPACING_RATIO * 100), 1000,
-                AddDefaultButton.YES, NONE);
+                true, NONE);
         gbh.addLabelWithControlNoFill("Spacing (radius %):", spacingSelector.createGUI());
         spacingSelector.setAdjustmentListener(
                 () -> settings.changeSpacing(new RadiusRatioSpacing(spacingSelector.getValueAsPercentage())));

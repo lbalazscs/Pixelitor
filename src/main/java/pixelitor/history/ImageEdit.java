@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.history;
 
 import pixelitor.Composition;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.selection.IgnoreSelection;
 import pixelitor.utils.debug.DebugNode;
 
@@ -35,22 +35,22 @@ import static pixelitor.Composition.ImageChangeActions.FULL;
 public class ImageEdit extends FadeableEdit {
     private final IgnoreSelection ignoreSelection;
     private SoftReference<BufferedImage> imgRef;
-    protected ImageLayer layer;
+    protected Drawable dr;
 
     private final boolean canRepeat;
 
-    public ImageEdit(Composition comp, String name, ImageLayer layer,
+    public ImageEdit(Composition comp, String name, Drawable dr,
                      BufferedImage backupImage,
                      IgnoreSelection ignoreSelection, boolean canRepeat) {
-        super(comp, layer, name);
+        super(comp, dr, name);
         this.ignoreSelection = ignoreSelection;
 
-        assert layer != null;
+        assert dr != null;
         assert backupImage != null;
 
         // the backup image is stored in an SoftReference
         this.imgRef = new SoftReference<>(backupImage);
-        this.layer = layer;
+        this.dr = dr;
         this.canRepeat = canRepeat;
 
         checkBackupDifferentFromActive();
@@ -59,7 +59,7 @@ public class ImageEdit extends FadeableEdit {
     private void checkBackupDifferentFromActive() {
         // the backup should never be identical to the active image
         // otherwise the backup might be also edited
-        BufferedImage layerImage = layer.getImage();
+        BufferedImage layerImage = dr.getImage();
         if (layerImage == imgRef.get()) {
             throw new IllegalStateException("backup BufferedImage is identical to the active one");
         }
@@ -94,18 +94,18 @@ public class ImageEdit extends FadeableEdit {
 
         BufferedImage tmp;
         if(ignoreSelection.isYes()) {
-            tmp = layer.getImage();
+            tmp = dr.getImage();
         } else {
-            tmp = layer.getImageOrSubImageIfSelected(false, true);
+            tmp = dr.getImageOrSubImageIfSelected(false, true);
         }
-        layer.changeImageUndoRedo(backupImage, ignoreSelection);
+        dr.changeImageUndoRedo(backupImage, ignoreSelection);
 
         // create new backup image from tmp
         imgRef = new SoftReference<>(tmp);
 
         if(!embedded) {
             comp.imageChanged(FULL);
-            layer.updateIconImage();
+            dr.updateIconImage();
             History.notifyMenus(this);
         }
 
@@ -123,15 +123,14 @@ public class ImageEdit extends FadeableEdit {
         }
 
         imgRef = null;
-        layer = null;
+        dr = null;
     }
 
     @Override
     public BufferedImage getBackupImage() {
         if(imgRef != null) {
-            BufferedImage backupImage = imgRef.get();
             // this still could be null
-            return backupImage;
+            return imgRef.get();
         }
         return null;
     }

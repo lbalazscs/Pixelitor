@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,11 +19,9 @@ package pixelitor;
 
 import org.junit.Before;
 import org.junit.Test;
-import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
-import pixelitor.utils.UpdateGUI;
 
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -86,7 +84,7 @@ public class CompositionTest {
         tester.checkLayers("[layer 1, ACTIVE layer 2]");
 
         Layer layer = comp.getLayer(0);
-        comp.setActiveLayer(layer, AddToHistory.YES);
+        comp.setActiveLayer(layer, true);
         assertSame(layer, comp.getActiveLayer());
         tester.checkLayers("[ACTIVE layer 1, layer 2]");
         tester.checkDirty(true);
@@ -114,23 +112,23 @@ public class CompositionTest {
     public void testAddLayer() {
         // add bellow active
         comp.addLayer(TestHelper.createImageLayer("layer A", comp),
-                AddToHistory.YES, "New Test Layer", true, true);
+                true, "New Test Layer", true, true);
         tester.checkLayers("[layer 1, ACTIVE layer A, layer 2]");
         tester.checkDirty(true);
 
         // add above active
         comp.addLayer(TestHelper.createImageLayer("layer B", comp),
-                AddToHistory.YES, "New Test Layer", true, false);
+                true, "New Test Layer", true, false);
         tester.checkLayers("[layer 1, layer A, ACTIVE layer B, layer 2]");
 
         // add to position 0
         comp.addLayer(TestHelper.createImageLayer("layer C", comp),
-                AddToHistory.YES, "New Test Layer", true, 0);
+                true, "New Test Layer", true, 0);
         tester.checkLayers("[ACTIVE layer C, layer 1, layer A, layer B, layer 2]");
 
         // add to position 2
         comp.addLayer(TestHelper.createImageLayer("layer D", comp),
-                AddToHistory.YES, "New Test Layer", true, 2);
+                true, "New Test Layer", true, 2);
         tester.checkLayers("[layer C, layer 1, ACTIVE layer D, layer A, layer B, layer 2]");
 
         History.assertNumEditsIs(4);
@@ -209,7 +207,7 @@ public class CompositionTest {
     @Test
     public void testFlattenImage() {
         tester.checkLayers("[layer 1, ACTIVE layer 2]");
-        comp.flattenImage(UpdateGUI.NO);
+        comp.flattenImage(false);
         tester.checkLayers("[ACTIVE flattened]");
         tester.checkDirty(true);
 
@@ -219,9 +217,9 @@ public class CompositionTest {
     @Test
     public void testMergeDown() {
         tester.checkLayers("[layer 1, ACTIVE layer 2]");
-        comp.setActiveLayer(comp.getLayer(1), AddToHistory.YES);
+        comp.setActiveLayer(comp.getLayer(1), true);
 
-        comp.mergeDown(UpdateGUI.NO);
+        comp.mergeDown(false);
 
         tester.checkLayers("[ACTIVE layer 1]");
         tester.checkDirty(true);
@@ -254,7 +252,7 @@ public class CompositionTest {
         comp.moveActiveLayerToTop();
         tester.checkLayers("[layer 1, ACTIVE layer 2]");
 
-        comp.swapLayers(0, 1, AddToHistory.YES);
+        comp.swapLayers(0, 1, true);
         tester.checkLayers("[ACTIVE layer 2, layer 1]");
     }
 
@@ -287,7 +285,7 @@ public class CompositionTest {
     @Test
     public void testDeleteActiveLayer() {
         tester.checkLayers("[layer 1, ACTIVE layer 2]");
-        comp.deleteActiveLayer(UpdateGUI.NO, AddToHistory.YES);
+        comp.deleteActiveLayer(false, true);
         tester.checkLayers("[ACTIVE layer 1]");
         tester.checkDirty(true);
         History.assertNumEditsIs(1);
@@ -305,7 +303,7 @@ public class CompositionTest {
         tester.checkLayers("[layer 1, ACTIVE layer 2]");
         Layer layer2 = comp.getLayer(1);
 
-        comp.deleteLayer(layer2, AddToHistory.YES, UpdateGUI.NO);
+        comp.deleteLayer(layer2, true, false);
         tester.checkLayers("[ACTIVE layer 1]");
         tester.checkDirty(true);
         History.assertNumEditsIs(1);
@@ -322,10 +320,10 @@ public class CompositionTest {
 
         // now delete layer 1
         Layer layer1 = comp.getLayer(0);
-        comp.setActiveLayer(layer1, AddToHistory.YES);
+        comp.setActiveLayer(layer1, true);
         tester.checkLayers("[ACTIVE layer 1, layer 2]");
 
-        comp.deleteLayer(layer1, AddToHistory.YES, UpdateGUI.NO);
+        comp.deleteLayer(layer1, true, false);
         tester.checkLayers("[ACTIVE layer 2]");
 
         History.undo();
@@ -363,7 +361,7 @@ public class CompositionTest {
 
         comp.checkInvariant();
 
-        comp.setActiveLayer(layer1, AddToHistory.YES);
+        comp.setActiveLayer(layer1, true);
         assertThat(comp.isActiveLayer(layer1)).isTrue();
         assertThat(comp.isActiveLayer(layer2)).isFalse();
 
@@ -409,7 +407,7 @@ public class CompositionTest {
     private void testTranslation(boolean makeDuplicateLayer) {
         tester.checkLayers("[layer 1, ACTIVE layer 2]");
         // delete one layer so that we have undo
-        comp.deleteLayer(comp.getActiveLayer(), AddToHistory.YES, UpdateGUI.NO);
+        comp.deleteLayer(comp.getActiveLayer(), true, false);
         tester.checkLayers("[ACTIVE layer 1]");
         History.assertNumEditsIs(1);
 
@@ -516,7 +514,7 @@ public class CompositionTest {
         assertThat(comp.hasSelection()).isTrue();
         tester.checkSelectionBounds(tester.getStandardTestSelectionShape());
 
-        comp.deselect(AddToHistory.YES);
+        comp.deselect(true);
 
         assertThat(comp.hasSelection()).isFalse();
         History.assertNumEditsIs(1);
@@ -541,7 +539,7 @@ public class CompositionTest {
     @Test
     public void testSimpleMethods() {
         assertThat(comp.getActiveLayerIndex()).isEqualTo(1);
-        assertThat(comp.activeIsImageLayerOrMask()).isTrue();
+        assertThat(comp.activeIsDrawable()).isTrue();
 
         assertThat(comp.getName()).isEqualTo("Test");
         comp.setName("New Name");

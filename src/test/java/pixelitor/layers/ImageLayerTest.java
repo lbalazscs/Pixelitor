@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,6 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.TestHelper;
-import pixelitor.history.AddToHistory;
 import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
 import pixelitor.selection.IgnoreSelection;
@@ -154,7 +153,7 @@ public class ImageLayerTest {
     @Test
     public void test_okPressedInDialog() {
         layer.startPreviewing(); // make sure that the layer is in PREVIEW mode
-        layer.okPressedInDialog("filterName");
+        layer.onDialogAccepted("filterName");
         assertThat(layer.getState()).isEqualTo(NORMAL);
         assertThat(layer.getPreviewImage()).isNull();
         iconUpdates.check(0, 0);
@@ -162,14 +161,14 @@ public class ImageLayerTest {
 
     @Test(expected = AssertionError.class)
     public void test_cancelPressedInDialog_Fail() {
-        layer.cancelPressedInDialog();
+        layer.onDialogCanceled();
     }
 
     @Test
     public void test_cancelPressedInDialog_OK() {
         layer.startPreviewing(); // make sure that the layer is in PREVIEW mode
 
-        layer.cancelPressedInDialog();
+        layer.onDialogCanceled();
         assertThat(layer.getState()).isEqualTo(NORMAL);
         assertThat(layer.getPreviewImage()).isNull();
         iconUpdates.check(0, 0);
@@ -394,7 +393,7 @@ public class ImageLayerTest {
 
             assertThat(layer.hasMask()).isTrue();
 
-            layer.applyLayerMask(AddToHistory.YES);
+            layer.applyLayerMask(true);
             assertThat(layer.hasMask()).isFalse();
             iconUpdates.check(1, 0);
 

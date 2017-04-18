@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,24 +32,23 @@ import java.awt.image.BufferedImage;
 public class EmptyPolar extends FilterWithParametrizedGUI {
     public static final String NAME = "Empty Polar";
 
-    private final ImagePositionParam centerParam = new ImagePositionParam("Center");
-
-    private final RangeParam zoomParam = new RangeParam("Zoom (%)", 1, 100, 500);
-    private final AngleParam rotateResultParam = new AngleParam("Rotate Result", 0);
-
-    private final IntChoiceParam edgeActionParam = IntChoiceParam.getEdgeActionChoices();
-    private final IntChoiceParam interpolationParam = IntChoiceParam.getInterpolationChoices();
+    private final ImagePositionParam center = new ImagePositionParam("Center");
+    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 500);
+    private final AngleParam rotateResult = new AngleParam("Rotate Result", 0);
+    private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
+    private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
     private EmptyPolarFilter filter;
 
     public EmptyPolar() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
-                centerParam,
-                zoomParam,
-                rotateResultParam,
-                edgeActionParam,
-                interpolationParam
+                center,
+                zoom,
+                rotateResult,
+                edgeAction,
+                interpolation
         ));
     }
 
@@ -59,12 +58,11 @@ public class EmptyPolar extends FilterWithParametrizedGUI {
             filter = new EmptyPolarFilter();
         }
 
-        filter.setCenterX(centerParam.getRelativeX());
-        filter.setCenterY(centerParam.getRelativeY());
-        filter.setEdgeAction(edgeActionParam.getValue());
-        filter.setInterpolation(interpolationParam.getValue());
-        filter.setRotateResult((float) rotateResultParam.getValueInIntuitiveRadians());
-        filter.setZoom(zoomParam.getValueAsPercentage());
+        filter.setRelCenter(center.getRelativeX(), center.getRelativeY());
+        filter.setEdgeAction(edgeAction.getValue());
+        filter.setInterpolation(interpolation.getValue());
+        filter.setRotateResult((float) rotateResult.getValueInIntuitiveRadians());
+        filter.setZoom(zoom.getValueAsPercentage());
 
         dest = filter.filter(src, dest);
         return dest;

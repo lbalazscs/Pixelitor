@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,9 +24,10 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseActionSetting;
+import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.Color;
@@ -54,14 +55,12 @@ public class Marble extends FilterWithParametrizedGUI {
 
     private final RangeParam detailsLevel = new RangeParam("Level", 0, 3, 8);
     private final RangeParam detailsStrength = new RangeParam("Strength", 0, 12, 50);
-    private final GroupedRangeParam details = new GroupedRangeParam("Details",
-            new RangeParam[]{detailsLevel, detailsStrength}, false);
 
-    private final IntChoiceParam type = new IntChoiceParam("Type", new IntChoiceParam.Value[]{
-            new IntChoiceParam.Value("Lines", Impl.TYPE_LINES),
-            new IntChoiceParam.Value("Rings", Impl.TYPE_RINGS),
-            new IntChoiceParam.Value("Grid", Impl.TYPE_GRID),
-            new IntChoiceParam.Value("Star", Impl.TYPE_STAR),
+    private final IntChoiceParam type = new IntChoiceParam("Type", new Value[]{
+            new Value("Lines", Impl.TYPE_LINES),
+            new Value("Rings", Impl.TYPE_RINGS),
+            new Value("Grid", Impl.TYPE_GRID),
+            new Value("Star", Impl.TYPE_STAR),
     });
 
     private final IntChoiceParam waveType = new IntChoiceParam("Wave Type",
@@ -80,16 +79,20 @@ public class Marble extends FilterWithParametrizedGUI {
 
     public Marble() {
         super(ShowOriginal.NO);
+
+        GroupedRangeParam details = new GroupedRangeParam("Details",
+                new RangeParam[]{detailsLevel, detailsStrength}, false);
+
         setParamSet(new ParamSet(
                 type,
                 waveType,
                 angle,
-                zoom.adjustRangeToImageSize(0.25),
+                zoom.withAdjustedRange(0.25),
                 distortion,
-                details.setShowLinkedCB(false),
+                details.setLinkable(false),
                 smoothDetails,
                 gradient
-        ).withAction(new ReseedNoiseActionSetting()));
+        ).withAction(new ReseedNoiseFilterAction()));
     }
 
     @Override

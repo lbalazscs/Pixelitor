@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.tools;
 
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 
 import java.awt.Rectangle;
 
@@ -27,18 +27,18 @@ import java.awt.Rectangle;
  */
 public class ToolAffectedArea {
     private final Rectangle rectangle;
-    private final ImageLayer layer;
+    private final Drawable dr;
 
-    public ToolAffectedArea(ImageLayer layer, Rectangle rectangle, boolean relativeToImage) {
+    public ToolAffectedArea(Drawable dr, Rectangle rectangle, boolean relativeToImage) {
         assert rectangle.width > 0 : "rectangle.width = " + rectangle.width;
         assert rectangle.height > 0 : "rectangle.height = " + rectangle.height;
 
-        this.layer = layer;
+        this.dr = dr;
         this.rectangle = rectangle;
 
         if (!relativeToImage) {
-            int dx = -layer.getTX();
-            int dy = -layer.getTY();
+            int dx = -dr.getTX();
+            int dy = -dr.getTY();
             this.rectangle.translate(dx, dy);
         }
     }
@@ -50,7 +50,7 @@ public class ToolAffectedArea {
         return rectangle;
     }
 
-    public ImageLayer getLayer() {
-        return layer;
+    public Drawable getDrawable() {
+        return dr;
     }
 }

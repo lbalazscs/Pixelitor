@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,7 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- *
+ * The output file format
  */
 public enum OutputFormat {
     JPG {
@@ -78,13 +78,13 @@ public enum OutputFormat {
         return super.toString().toLowerCase();
     }
 
-    public static OutputFormat valueFromFile(File file) {
+    public static OutputFormat fromFile(File file) {
         String fileName = file.getName();
-        String extension = FileExtensionUtils.getFileExtension(fileName);
-        return valueFromExtension(extension);
+        String extension = FileExtensionUtils.getExt(fileName);
+        return fromExtension(extension);
     }
 
-    public static OutputFormat valueFromExtension(String extension) {
+    public static OutputFormat fromExtension(String extension) {
         String extLC = extension.toLowerCase();
         switch (extLC) {
             case "jpg":
@@ -105,7 +105,7 @@ public enum OutputFormat {
         }
     }
 
-    public void saveComposition(Composition comp, File file, boolean addToRecentMenus) {
+    public void saveComp(Composition comp, File file, boolean addToRecentMenus) {
         doSaveComposition(comp, file);
         OpenSaveManager.afterSaveActions(comp, file, addToRecentMenus);
     }
@@ -114,11 +114,11 @@ public enum OutputFormat {
 
     private static OutputFormat lastOutputFormat = JPG;
 
-    public static OutputFormat getLastOutputFormat() {
+    public static OutputFormat getLastUsed() {
         return lastOutputFormat;
     }
 
-    public static void setLastOutputFormat(OutputFormat lastOutputFormat) {
+    public static void setLastUsed(OutputFormat lastOutputFormat) {
         OutputFormat.lastOutputFormat = lastOutputFormat;
     }
 }

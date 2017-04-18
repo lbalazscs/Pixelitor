@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,10 +21,12 @@ import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseActionSetting;
+import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
+
+import static pixelitor.filters.gui.IntChoiceParam.EDGE_REPEAT_PIXELS;
 
 /**
  * Turbulent Distortion based on the JHLabs MarbleFilter
@@ -36,22 +38,21 @@ public class JHTurbulentDistortion extends FilterWithParametrizedGUI {
     private final RangeParam amount = new RangeParam("Amount", 1, 10, 100);
     private final RangeParam turbulence = new RangeParam("Turbulence", 1, 50, 100);
 
-    private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
-    private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
+    private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
+    private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
     private MarbleFilter filter;
 
     public JHTurbulentDistortion() {
         super(ShowOriginal.YES);
 
-        edgeAction.setDefaultChoice(IntChoiceParam.EDGE_REPEAT_PIXELS);
         setParamSet(new ParamSet(
-                scale.adjustRangeToImageSize(0.1),
-                amount.adjustRangeToImageSize(0.07),
+                scale.withAdjustedRange(0.1),
+                amount.withAdjustedRange(0.07),
                 turbulence,
-                edgeAction,
+                edgeAction.withDefaultChoice(EDGE_REPEAT_PIXELS),
                 interpolation
-        ).withAction(new ReseedNoiseActionSetting()));
+        ).withAction(new ReseedNoiseFilterAction()));
     }
 
     @Override

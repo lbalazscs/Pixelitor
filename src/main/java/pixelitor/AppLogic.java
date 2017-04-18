@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -101,15 +101,12 @@ public class AppLogic {
         }
     }
 
-    /**
-     * Adds a composition to the app.
-     */
-    public static void addComposition(Composition comp) {
+    public static void addCompAsNewImage(Composition comp) {
         try {
             assert comp.getIC() == null : "already has ic";
 
             ImageComponent ic = new ImageComponent(comp);
-            ic.setCursor(Tools.getCurrentTool().getCursor());
+            ic.setCursor(Tools.getCurrent().getCursor());
             ImageComponents.setActiveIC(ic, false);
             comp.addLayersToGUI();
 

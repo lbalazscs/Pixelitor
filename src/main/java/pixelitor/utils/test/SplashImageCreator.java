@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,8 +34,7 @@ import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.TextFilter;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.ImageComponents;
-import pixelitor.history.AddToHistory;
-import pixelitor.io.FileChoosers;
+import pixelitor.io.Directories;
 import pixelitor.io.OutputFormat;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.ImageLayer;
@@ -43,7 +42,6 @@ import pixelitor.tools.GradientTool;
 import pixelitor.tools.GradientType;
 import pixelitor.tools.UserDrag;
 import pixelitor.utils.Messages;
-import pixelitor.utils.UpdateGUI;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -76,10 +74,10 @@ public class SplashImageCreator {
         MessageHandler messageHandler = Messages.getMessageHandler();
         String msg = String.format("Save %d Splash Images: ", numCreatedImages);
         messageHandler.startProgress(msg, numCreatedImages);
-        File lastSaveDir = FileChoosers.getLastSaveDir();
+        File lastSaveDir = Directories.getLastSaveDir();
 
         for (int i = 0; i < numCreatedImages; i++) {
-            OutputFormat outputFormat = OutputFormat.getLastOutputFormat();
+            OutputFormat outputFormat = OutputFormat.getLastUsed();
 
             String fileName = String.format("splash%04d.%s", i, outputFormat.toString());
 
@@ -91,7 +89,7 @@ public class SplashImageCreator {
                 ic.paintImmediately(ic.getBounds());
                 File f = new File(lastSaveDir, fileName);
 
-                outputFormat.saveComposition(comp, f, false);
+                outputFormat.saveComp(comp, f, false);
 
                 ic.close();
                 ValueNoise.reseed();
@@ -107,20 +105,20 @@ public class SplashImageCreator {
         Composition comp = NewImage.addNewImage(FillType.WHITE, 400, 247, "Splash");
         ImageLayer layer = (ImageLayer) comp.getLayer(0);
 
-        layer.setName("Color Wheel", AddToHistory.YES);
+        layer.setName("Color Wheel", true);
         new ColorWheel().execute(layer, OP_WITHOUT_DIALOG);
 
         layer = addNewLayer(comp, "Value Noise");
         ValueNoise valueNoise = new ValueNoise();
         valueNoise.setDetails(7);
         valueNoise.execute(layer, OP_WITHOUT_DIALOG);
-        layer.setOpacity(0.3f, UpdateGUI.YES, AddToHistory.YES, true);
-        layer.setBlendingMode(BlendingMode.SCREEN, UpdateGUI.YES, AddToHistory.YES, true);
+        layer.setOpacity(0.3f, true, true, true);
+        layer.setBlendingMode(BlendingMode.SCREEN, true, true, true);
 
         layer = addNewLayer(comp, "Gradient");
         addRadialBWGradientToActiveLayer(layer, true);
-        layer.setOpacity(0.4f, UpdateGUI.YES, AddToHistory.YES, true);
-        layer.setBlendingMode(BlendingMode.LUMINOSITY, UpdateGUI.YES, AddToHistory.YES, true);
+        layer.setOpacity(0.4f, true, true, true);
+        layer.setBlendingMode(BlendingMode.LUMINOSITY, true, true, true);
 
         FgBgColors.setFG(WHITE);
         Font font = new Font(SPLASH_SCREEN_FONT, Font.BOLD, 48);
@@ -150,7 +148,7 @@ public class SplashImageCreator {
 
     private static ImageLayer addNewLayer(Composition comp, String name) {
         ImageLayer imageLayer = comp.addNewEmptyLayer(name, false);
-        imageLayer.setName(name, AddToHistory.YES);
+        imageLayer.setName(name, true);
         return imageLayer;
     }
 
@@ -179,8 +177,8 @@ public class SplashImageCreator {
 
         layer.enlargeImage(layer.getComp().getCanvasBounds());
 
-        layer.setOpacity(opacity, UpdateGUI.YES, AddToHistory.YES, true);
-        layer.setBlendingMode(blendingMode, UpdateGUI.YES, AddToHistory.YES, true);
+        layer.setOpacity(opacity, true, true, true);
+        layer.setBlendingMode(blendingMode, true, true, true);
 
         return layer;
     }

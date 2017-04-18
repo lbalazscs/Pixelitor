@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ElevationAngleParam;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
@@ -62,9 +63,9 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
     private final RangeParam radius = new RangeParam("Radius", 2, 10, 100);
     private final RangeParam density = new RangeParam("Density (%)", 1, 50, 200);
 
-    private final IntChoiceParam colorSource = new IntChoiceParam("Colors Source", new IntChoiceParam.Value[]{
-            new IntChoiceParam.Value("Sample Image", COLORS_SAMPLE_IMAGE),
-            new IntChoiceParam.Value("Use FG, BG Colors", COLORS_FG_BG),
+    private final IntChoiceParam colorSource = new IntChoiceParam("Colors Source", new Value[]{
+            new Value("Sample Image", COLORS_SAMPLE_IMAGE),
+            new Value("Use FG, BG Colors", COLORS_FG_BG),
     });
 //    private final IntChoiceParam typeParam = new IntChoiceParam("Type", new IntChoiceParam.Value[]{
 //            new IntChoiceParam.Value("Spheres", TYPE_SPHERES),
@@ -79,8 +80,9 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
 
     public RandomSpheres() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
-                radius.adjustRangeToImageSize(0.1),
+                radius.withAdjustedRange(0.1),
                 density,
 //                typeParam,
                 opacity,

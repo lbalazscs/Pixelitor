@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,7 @@ public class MysticRose extends ShapeFilter {
         addParamsToFront(
                 nrPoints,
                 rotate,
-                radius.adjustRangeToImageSize(0.6)
+                radius.withAdjustedRange(0.6)
         );
     }
 
@@ -71,7 +71,6 @@ public class MysticRose extends ShapeFilter {
 
     @Override
     protected float getGradientRadius(float cx, float cy) {
-        float r = radius.getValueAsFloat();
-        return r;
+        return radius.getValueAsFloat();
     }
 }

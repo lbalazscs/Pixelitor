@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -76,25 +76,25 @@ public class RGBPaletteConfig implements PaletteConfig {
         });
 
         Insets insets = new Insets(2, 4, 2, 4);
-        GridBagConstraints labelConstraint = new GridBagConstraints(0, 0, 1, 1, 0, 0,
+        GridBagConstraints labelCtr = new GridBagConstraints(0, 0, 1, 1, 0, 0,
                 GridBagConstraints.CENTER,
                 GridBagConstraints.NONE, insets, 0, 0);
-        GridBagConstraints sliderConstraint = new GridBagConstraints(1, 0, 1, 1, 1.0, 0,
+        GridBagConstraints sliderCtr = new GridBagConstraints(1, 0, 1, 1, 1.0, 0,
                 GridBagConstraints.EAST,
                 GridBagConstraints.HORIZONTAL, insets, 0, 0);
 
-        p.add(new JLabel("C-R:"), labelConstraint);
-        p.add(redSlider, sliderConstraint);
+        p.add(new JLabel("C-R:"), labelCtr);
+        p.add(redSlider, sliderCtr);
 
-        labelConstraint.gridy = 1;
-        p.add(new JLabel("M-G:"), labelConstraint);
-        sliderConstraint.gridy = 1;
-        p.add(greenSlider, sliderConstraint);
+        labelCtr.gridy = 1;
+        p.add(new JLabel("M-G:"), labelCtr);
+        sliderCtr.gridy = 1;
+        p.add(greenSlider, sliderCtr);
 
-        labelConstraint.gridy = 2;
-        p.add(new JLabel("Y-B:"), labelConstraint);
-        sliderConstraint.gridy = 2;
-        p.add(blueSlider, sliderConstraint);
+        labelCtr.gridy = 2;
+        p.add(new JLabel("Y-B:"), labelCtr);
+        sliderCtr.gridy = 2;
+        p.add(blueSlider, sliderCtr);
 
         return p;
     }

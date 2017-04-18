@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import java.awt.event.MouseEvent;
 public interface ColorSwatchClickHandler {
     void onClick(Color newColor, MouseEvent e);
 
-    public static final ColorSwatchClickHandler STANDARD = (newColor, e) -> {
+    ColorSwatchClickHandler STANDARD = (newColor, e) -> {
         boolean rightClick = SwingUtilities.isRightMouseButton(e);
         if (rightClick) {
             FgBgColors.setBG(newColor);

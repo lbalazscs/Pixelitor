@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,11 +22,16 @@ import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
+import static com.jhlabs.image.WeaveFilter.BASKET_PATTERN;
+import static com.jhlabs.image.WeaveFilter.CROWFOOT_PATTERN;
+import static com.jhlabs.image.WeaveFilter.PLAIN_PATTERN;
+import static com.jhlabs.image.WeaveFilter.TWILL_PATTERN;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
@@ -35,11 +40,11 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 public class JHWeave extends FilterWithParametrizedGUI {
     public static final String NAME = "Weave";
 
-    private final IntChoiceParam pattern = new IntChoiceParam("Pattern", new IntChoiceParam.Value[]{
-            new IntChoiceParam.Value("Plain", WeaveFilter.PLAIN_PATTERN),
-            new IntChoiceParam.Value("Basket", WeaveFilter.BASKET_PATTERN),
-            new IntChoiceParam.Value("Twill", WeaveFilter.TWILL_PATTERN),
-            new IntChoiceParam.Value("Crowfoot", WeaveFilter.CROWFOOT_PATTERN),
+    private final IntChoiceParam pattern = new IntChoiceParam("Pattern", new Value[]{
+            new Value("Plain", PLAIN_PATTERN),
+            new Value("Basket", BASKET_PATTERN),
+            new Value("Twill", TWILL_PATTERN),
+            new Value("Crowfoot", CROWFOOT_PATTERN),
     });
     private final GroupedRangeParam size = new GroupedRangeParam("Size", "Width", "Height", 0, 16, 100, true);
     private final GroupedRangeParam gap = new GroupedRangeParam("Gap", 0, 6, 100);
@@ -51,10 +56,11 @@ public class JHWeave extends FilterWithParametrizedGUI {
 
     public JHWeave() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
                 pattern,
-                size.adjustRangeToImageSize(0.4),
-                gap.adjustRangeToImageSize(0.4),
+                size.withAdjustedRange(0.4),
+                gap.withAdjustedRange(0.4),
                 roundThreads,
                 shadeCrossings,
                 useImageColors

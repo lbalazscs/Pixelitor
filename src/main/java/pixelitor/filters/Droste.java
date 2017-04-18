@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,13 +42,14 @@ public class Droste extends FilterWithParametrizedGUI {
     private final RangeParam startingLevel = new RangeParam("Starting Level", 0, 0, 100);
     private final RangeParam fractalPoints = new RangeParam("Fractal Points", 1, 1, 10);
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
-    private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
+    private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
+    private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
     private DrosteFilter filter;
 
     public Droste() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
                 innerRadius,
                 outerRadius,

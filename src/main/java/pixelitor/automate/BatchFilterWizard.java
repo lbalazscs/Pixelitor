@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.automate;
 import pixelitor.ChangeReason;
 import pixelitor.filters.Filter;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 
 import java.awt.Component;
 
@@ -30,10 +30,10 @@ import static pixelitor.automate.BatchFilterWizardPage.SELECT_FILTER_AND_DIRS;
  * The batch filter wizard
  */
 public class BatchFilterWizard extends Wizard {
-    private final BatchFilterConfig config = new BatchFilterConfig();
+    private Filter filter;
 
-    public BatchFilterWizard(ImageLayer layer) {
-        super(SELECT_FILTER_AND_DIRS, "Batch Filter", "Start Processing", 490, 380, layer);
+    public BatchFilterWizard(Drawable dr) {
+        super(SELECT_FILTER_AND_DIRS, "Batch Filter", "Start Processing", 490, 380, dr);
     }
 
     @Override
@@ -47,13 +47,14 @@ public class BatchFilterWizard extends Wizard {
     }
 
     @Override
-    protected void executeFinalAction() {
-        Filter filter = config.getFilter();
+    protected void finalAction() {
         PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
 
         Automate.processEachFile(comp -> {
-            ImageLayer layer = comp.getActiveMaskOrImageLayer();
-            filter.executeFilterWithBusyCursor(layer, ChangeReason.BATCH_AUTOMATE, busyCursorParent);
+            filter.executeWithBusyCursor(
+                    comp.getActiveDrawable(),
+                    ChangeReason.BATCH_AUTOMATE,
+                    busyCursorParent);
         }, true, "Batch Filter Progress");
     }
 
@@ -62,7 +63,11 @@ public class BatchFilterWizard extends Wizard {
 
     }
 
-    public BatchFilterConfig getConfig() {
-        return config;
+    public Filter getFilter() {
+        return filter;
+    }
+
+    public void setFilter(Filter filter) {
+        this.filter = filter;
     }
 }

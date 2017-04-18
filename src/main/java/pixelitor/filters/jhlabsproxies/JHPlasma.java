@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,17 +19,15 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.PlasmaFilter;
 import pixelitor.filters.FilterWithParametrizedGUI;
-import pixelitor.filters.gui.ActionSetting;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseActionSetting;
+import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 
 import static java.awt.Color.BLACK;
@@ -50,27 +48,17 @@ public class JHPlasma extends FilterWithParametrizedGUI {
     private static final int MORE_COLORS = 1;
     private static final int GRADIENT_COLORS = 2;
 
-    private final IntChoiceParam type = new IntChoiceParam("Colors", new IntChoiceParam.Value[]{
-            new IntChoiceParam.Value("Less", LESS_COLORS),
-            new IntChoiceParam.Value("More", MORE_COLORS),
-            new IntChoiceParam.Value("Use Gradient", GRADIENT_COLORS),
+    private final IntChoiceParam type = new IntChoiceParam("Colors", new Value[]{
+            new Value("Less", LESS_COLORS),
+            new Value("More", MORE_COLORS),
+            new Value("Use Gradient", GRADIENT_COLORS),
     }, IGNORE_RANDOMIZE);
-
-    private final ActionSetting reseedAction = new ReseedNoiseActionSetting(new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if (filter != null) {
-                filter.randomize();
-            }
-        }
-    });
 
     private PlasmaFilter filter;
 
     private final float[] defaultThumbPositions = {0.0f, 0.3f, 0.7f, 1.0f};
     private final Color[] defaultValues = {BLACK, RED, ORANGE, YELLOW};
     private final GradientParam gradient = new GradientParam("Gradient", defaultThumbPositions, defaultValues);
-
 
     public JHPlasma() {
         super(ShowOriginal.NO);
@@ -79,7 +67,11 @@ public class JHPlasma extends FilterWithParametrizedGUI {
                 turbulence,
                 type,
                 gradient
-        ).withAction(reseedAction));
+        ).withAction(new ReseedNoiseFilterAction(e -> {
+            if (filter != null) {
+                filter.randomize();
+            }
+        })));
     }
 
     @Override

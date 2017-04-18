@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -50,12 +50,11 @@ public class JHRays extends FilterWithParametrizedGUI {
     private final RangeParam threshold = new RangeParam("Threshold (%)", 0, 25, 100);
     private final BooleanParam raysOnly = new BooleanParam("Rays Only", false, IGNORE_RANDOMIZE);
 
-    // setting a ColorMap does not work properly
-
     private RaysFilter filter;
 
     public JHRays() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
                 center,
                 length,

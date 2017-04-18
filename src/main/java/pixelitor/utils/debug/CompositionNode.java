@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,11 +32,9 @@ public class CompositionNode extends DebugNode {
     public CompositionNode(Composition comp) {
         super("Composition", comp);
 
-        int nrLayers = comp.getNrLayers();
-
         Layer activeLayer = comp.getActiveLayer();
-        for (int i = 0; i < nrLayers; i++) {
-            Layer layer = comp.getLayer(i);
+
+        comp.forEachLayer(layer -> {
             if (layer instanceof ImageLayer) {
                 ImageLayer imageLayer = (ImageLayer) layer;
                 ImageLayerNode node;
@@ -53,13 +51,13 @@ public class CompositionNode extends DebugNode {
             } else {
                 addQuotedStringChild("Layer of class", layer.getClass().getName());
             }
-        }
+        });
 
         BufferedImage compositeImage = comp.getCompositeImage();
         BufferedImageNode imageNode = new BufferedImageNode("Composite Image", compositeImage);
         add(imageNode);
 
-        addIntChild("nrLayers", nrLayers);
+        addIntChild("numLayers", comp.getNumLayers());
         addQuotedStringChild("name", comp.getName());
 
         String filePath = "";

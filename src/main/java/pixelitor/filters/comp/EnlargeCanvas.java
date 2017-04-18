@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,6 @@ package pixelitor.filters.comp;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.OKCancelDialog;
@@ -28,7 +27,6 @@ import pixelitor.history.History;
 import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
 import pixelitor.layers.ContentLayer;
-import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 import pixelitor.selection.Selection;
 import pixelitor.utils.Messages;
@@ -58,9 +56,7 @@ public class EnlargeCanvas implements CompAction {
         String editName = "Enlarge Canvas";
         MultiLayerBackup backup = new MultiLayerBackup(comp, editName, true);
 
-        int nrLayers = comp.getNrLayers();
-        for (int i = 0; i < nrLayers; i++) {
-            Layer layer = comp.getLayer(i);
+        comp.forEachLayer(layer -> {
             if (layer instanceof ContentLayer) {
                 ContentLayer contentLayer = (ContentLayer) layer;
                 contentLayer.enlargeCanvas(north, east, south, west);
@@ -69,7 +65,7 @@ public class EnlargeCanvas implements CompAction {
                 LayerMask mask = layer.getMask();
                 mask.enlargeCanvas(north, east, south, west);
             }
-        }
+        });
 
         Selection selection = comp.getSelection();
         if (selection != null && (north > 0 || west > 0)) {
@@ -133,7 +129,7 @@ public class EnlargeCanvas implements CompAction {
         }
 
         private void addSliderSpinner(RangeParam range, String sliderName) {
-            SliderSpinner s = new SliderSpinner(range, BORDER, AddDefaultButton.NO);
+            SliderSpinner s = new SliderSpinner(range, BORDER, false);
             s.setSliderName(sliderName);
             add(s);
         }

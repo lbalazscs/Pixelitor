@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -55,7 +55,7 @@ enum CropToolState {
         @Override
         public void cancel(CropTool cropTool) {
             cropTool.resetStateToInitial();
-            Messages.showStatusMessage("Crop cancelled.");
+            Messages.showStatusMessage("Crop canceled.");
         }
     };
 

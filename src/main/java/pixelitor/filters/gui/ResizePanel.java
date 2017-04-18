@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,11 +40,11 @@ import java.text.ParseException;
 public class ResizePanel extends JPanel implements KeyListener, ItemListener {
     private static final NumberFormat doubleFormatter = new DecimalFormat("#0.00");
 
-    private final JCheckBox constrainProportionsCheckBox;
+    private final JCheckBox constrainProportionsCB;
     private final JComboBox<String> pixelPercentChooser1;
-    private final JTextField heightTextField;
-    private final JTextField widthTextField;
-    private final double originalProportion;
+    private final JTextField heightTF;
+    private final JTextField widthTF;
+    private final double origProportion;
     private int newWidth;
     private int newHeight;
     private double newWidthInPercent;
@@ -59,7 +59,7 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
         oldWidth = comp.getCanvasWidth();
         oldHeight = comp.getCanvasHeight();
 
-        originalProportion = ((double) oldWidth) / oldHeight;
+        origProportion = ((double) oldWidth) / oldHeight;
         newWidth = oldWidth;
         newHeight = oldHeight;
         newWidthInPercent = 100.0;
@@ -72,28 +72,28 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
 
         GridBagHelper gbHelper = new GridBagHelper(p);
 
-        widthTextField = new JTextField(NR_OF_COLUMNS);
-        widthTextField.setName("widthTF");
-        widthTextField.addKeyListener(this);
-        widthTextField.setText(String.valueOf(oldWidth));
+        widthTF = new JTextField(NR_OF_COLUMNS);
+        widthTF.setName("widthTF");
+        widthTF.addKeyListener(this);
+        widthTF.setText(String.valueOf(oldWidth));
         pixelPercentChooser1 = new JComboBox<>(comboBoxModel);
-        gbHelper.addLabelWithTwoControls("Width:", widthTextField, pixelPercentChooser1);
+        gbHelper.addLabelWithTwoControls("Width:", widthTF, pixelPercentChooser1);
 
-        heightTextField = new JTextField(NR_OF_COLUMNS);
-        heightTextField.setName("heightTF");
-        heightTextField.setText(String.valueOf(oldHeight));
-        heightTextField.addKeyListener(this);
+        heightTF = new JTextField(NR_OF_COLUMNS);
+        heightTF.setName("heightTF");
+        heightTF.setText(String.valueOf(oldHeight));
+        heightTF.addKeyListener(this);
         JComboBox<String> pixelPercentChooser2 = new JComboBox<>(comboBoxModel);
-        gbHelper.addLabelWithTwoControls("Height:", heightTextField, pixelPercentChooser2);
+        gbHelper.addLabelWithTwoControls("Height:", heightTF, pixelPercentChooser2);
 
         p.setBorder(BorderFactory.createTitledBorder("Resize from " + oldWidth + 'x' + oldHeight));
         Box verticalBox = Box.createVerticalBox();
         verticalBox.add(p);
 
         JPanel p2 = new JPanel();
-        constrainProportionsCheckBox = new JCheckBox("Constrain Proportions");
-        constrainProportionsCheckBox.setSelected(true);
-        p2.add(constrainProportionsCheckBox);
+        constrainProportionsCB = new JCheckBox("Constrain Proportions");
+        constrainProportionsCB.setSelected(true);
+        p2.add(constrainProportionsCB);
         p2.setLayout(new FlowLayout(FlowLayout.LEFT));
         verticalBox.add(p2);
         add(verticalBox);
@@ -101,7 +101,7 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
         pixelPercentChooser1.addItemListener(this);
         pixelPercentChooser2.addItemListener(this);
 
-        constrainProportionsCheckBox.addItemListener(this);
+        constrainProportionsCB.addItemListener(this);
     }
 
     private boolean pixelsSelected() {
@@ -109,7 +109,7 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
     }
 
     private boolean constrainProportions() {
-        return constrainProportionsCheckBox.isSelected();
+        return constrainProportionsCB.isSelected();
     }
 
     private static double parseLocalizedDouble(String s) {
@@ -126,25 +126,25 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
     // a combo box or a checkbox was used
     @Override
     public void itemStateChanged(ItemEvent e) {
-        if (e.getSource() == constrainProportionsCheckBox) {
+        if (e.getSource() == constrainProportionsCB) {
             if (constrainProportions()) {
                 // it just got selected, adjust the height to the width
-                newHeight = (int) (newWidth / originalProportion);
+                newHeight = (int) (newWidth / origProportion);
                 //noinspection SuspiciousNameCombination
                 newHeightInPercent = newWidthInPercent;
                 if (pixelsSelected()) {
-                    heightTextField.setText(String.valueOf(newHeight));
+                    heightTF.setText(String.valueOf(newHeight));
                 } else {
-                    heightTextField.setText(doubleFormatter.format(newHeightInPercent));
+                    heightTF.setText(doubleFormatter.format(newHeightInPercent));
                 }
             }
         } else { // one of the combo boxes was selected
             if (pixelsSelected()) {
-                widthTextField.setText(String.valueOf(newWidth));
-                heightTextField.setText(String.valueOf(newHeight));
+                widthTF.setText(String.valueOf(newWidth));
+                heightTF.setText(String.valueOf(newHeight));
             } else {
-                widthTextField.setText(doubleFormatter.format(newWidthInPercent));
-                heightTextField.setText(doubleFormatter.format(newHeightInPercent));
+                widthTF.setText(doubleFormatter.format(newWidthInPercent));
+                heightTF.setText(doubleFormatter.format(newHeightInPercent));
             }
         }
 //        updateFilter();
@@ -162,74 +162,75 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
     public void keyReleased(KeyEvent e) {
         validData = true;
         errorMessage = null;
-        if (e.getSource() == widthTextField) {
+        if (e.getSource() == widthTF) {
             if (pixelsSelected()) {
                 try {
-                    newWidth = Integer.parseInt(widthTextField.getText());
+                    newWidth = Integer.parseInt(widthTF.getText());
                     if (constrainProportions()) {
-                        newHeight = (int) (newWidth / originalProportion);
+                        newHeight = (int) (newWidth / origProportion);
                         if (newHeight == 0) {
                             newHeight = 1;
                         }
-                        heightTextField.setText(String.valueOf(newHeight));
+                        heightTF.setText(String.valueOf(newHeight));
                         newHeightInPercent = ((double) newHeight) * 100 / oldHeight;
                     }
                     newWidthInPercent = ((double) newWidth) * 100 / oldWidth;
                 } catch (NumberFormatException ex) {
-                    if (widthTextField.getText().trim().isEmpty()) {
+                    if (widthTF.getText().trim().isEmpty()) {
                         validData = false;
                         errorMessage = "the 'width' field is empty";
                     } else {
-                        widthTextField.setText(String.valueOf(newWidth)); // reset
+                        widthTF.setText(String.valueOf(newWidth)); // reset
                         Toolkit.getDefaultToolkit().beep();
                     }
                 }
             } else { // percent was selected
-                newWidthInPercent = parseLocalizedDouble(widthTextField.getText());
+                newWidthInPercent = parseLocalizedDouble(widthTF.getText());
                 newWidth = (int) (oldWidth * newWidthInPercent / 100);
                 if (constrainProportions()) {
-                    newHeight = (int) (newWidth / originalProportion);
+                    newHeight = (int) (newWidth / origProportion);
+                    //noinspection SuspiciousNameCombination
                     newHeightInPercent = newWidthInPercent;
-                    heightTextField.setText(doubleFormatter.format(newHeightInPercent));
+                    heightTF.setText(doubleFormatter.format(newHeightInPercent));
                 }
             }
-        } else if (e.getSource() == heightTextField) {
+        } else if (e.getSource() == heightTF) {
             if (pixelsSelected()) {
                 try {
-                    newHeight = Integer.parseInt(heightTextField.getText());
+                    newHeight = Integer.parseInt(heightTF.getText());
                     if (constrainProportions()) {
-                        newWidth = (int) (newHeight * originalProportion);
+                        newWidth = (int) (newHeight * origProportion);
                         if (newWidth == 0) {
                             newWidth = 1;
                         }
-                        widthTextField.setText(String.valueOf(newWidth));
-                        newWidthInPercent = parseLocalizedDouble(widthTextField.getText());
+                        widthTF.setText(String.valueOf(newWidth));
+                        newWidthInPercent = parseLocalizedDouble(widthTF.getText());
                     }
                     newHeightInPercent = ((double) newHeight) * 100 / oldHeight;
                 } catch (NumberFormatException ex) {
-                    if (heightTextField.getText().trim().isEmpty()) {
+                    if (heightTF.getText().trim().isEmpty()) {
                         validData = false;
                         errorMessage = "the 'height' field is empty";
                     } else {
-                        heightTextField.setText(String.valueOf(newHeight)); // reset
+                        heightTF.setText(String.valueOf(newHeight)); // reset
                         Toolkit.getDefaultToolkit().beep();
                     }
                 }
             } else {  // percent was selected
-                newHeightInPercent = parseLocalizedDouble(heightTextField.getText());
+                newHeightInPercent = parseLocalizedDouble(heightTF.getText());
                 newHeight = (int) (oldHeight * newHeightInPercent / 100);
                 if (constrainProportions()) {
-                    newWidth = (int) (newHeight * originalProportion);
+                    newWidth = (int) (newHeight * origProportion);
                     //noinspection SuspiciousNameCombination
                     newWidthInPercent = newHeightInPercent;
-                    widthTextField.setText(doubleFormatter.format(newWidthInPercent));
+                    widthTF.setText(doubleFormatter.format(newWidthInPercent));
                 }
             }
         }
 //        updateFilter();
     }
 
-    public boolean validData() {
+    private boolean validData() {
         if (getNewWidth() == 0 || getNewHeight() == 0) {
             validData = false;
             errorMessage = "Width and height cannot be 0";
@@ -238,7 +239,7 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
         return validData;
     }
 
-    public String getErrorMessage() {
+    private String getErrorMessage() {
         return errorMessage;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -67,16 +67,14 @@ public enum BrushType {
             if (settings == null) {
                 ShapeType shapeType = BrushSettingsPanel.SHAPE_SELECTED_BY_DEFAULT;
                 double spacingRatio = BrushSettingsPanel.DEFAULT_SPACING_RATIO;
-                AngleSettings angleSettings = ANGLE_AWARE_NO_JITTER;
                 RadiusRatioSpacing spacing = new RadiusRatioSpacing(spacingRatio);
 
-                ShapeDabsBrush shapeDabsBrush = new ShapeDabsBrush(radius, shapeType, spacing, angleSettings);
+                ShapeDabsBrush shapeDabsBrush = new ShapeDabsBrush(radius, shapeType, spacing, ANGLE_AWARE_NO_JITTER);
                 settings = (ShapeDabsBrushSettings) shapeDabsBrush.getSettings();
                 settingsByTool.put(tool, settings);
                 return shapeDabsBrush;
             } else {
-                Brush shapeDabsBrush = new ShapeDabsBrush(radius, settings);
-                return shapeDabsBrush;
+                return new ShapeDabsBrush(radius, settings);
             }
         }
 
@@ -111,8 +109,6 @@ public enum BrushType {
             } else {
                 return new OnePixelBrush(settings);
             }
-
-
         }
 
         @Override

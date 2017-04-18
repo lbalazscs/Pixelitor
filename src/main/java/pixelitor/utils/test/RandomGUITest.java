@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,7 +45,6 @@ import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.layers.AddLayerMaskAction;
 import pixelitor.layers.AddNewLayerAction;
@@ -53,6 +52,7 @@ import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.DeleteActiveLayerAction;
+import pixelitor.layers.Drawable;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
@@ -74,7 +74,6 @@ import pixelitor.tools.Tools;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.MemoryInfo;
 import pixelitor.utils.Messages;
-import pixelitor.utils.UpdateGUI;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -333,7 +332,7 @@ public class RandomGUITest {
         Point randomPoint = generateRandomPoint();
         int x = randomPoint.x;
         int y = randomPoint.y;
-        Tool tool = Tools.getCurrentTool();
+        Tool tool = Tools.getCurrent();
         String stateInfo = tool.getStateInfo();
         if (stateInfo == null) {
             stateInfo = "";
@@ -366,11 +365,11 @@ public class RandomGUITest {
 
     private static void randomColors() {
         log("randomize colors");
-        FgBgColors.randomizeColors();
+        FgBgColors.randomize();
     }
 
     private static void randomFilter() {
-        if (!ImageComponents.getActiveIC().activeIsImageLayerOrMask()) {
+        if (!ImageComponents.getActiveIC().activeIsDrawable()) {
             return;
         }
 
@@ -385,15 +384,15 @@ public class RandomGUITest {
 
         f.randomizeSettings();
 
-        ImageLayer layer = ImageComponents.getActiveImageLayerOrMaskOrNull();
+        Drawable dr = ImageComponents.getActiveDrawableOrNull();
         if (f instanceof FilterWithGUI) {
-            layer.startPreviewing();
+            dr.startPreviewing();
 
             try {
                 f.randomizeSettings();
-                f.execute(layer, ChangeReason.OP_PREVIEW);
+                f.execute(dr, ChangeReason.OP_PREVIEW);
             } catch (Throwable e) {
-                BufferedImage src = layer.getFilterSourceImage();
+                BufferedImage src = dr.getFilterSourceImage();
                 if (f instanceof FilterWithParametrizedGUI) {
                     ParamSet paramSet = ((FilterWithParametrizedGUI) f).getParamSet();
                     System.out.println(String.format(
@@ -408,14 +407,14 @@ public class RandomGUITest {
             }
 
             if (Math.random() > 0.3) {
-                layer.okPressedInDialog(filterName);
+                dr.onDialogAccepted(filterName);
             } else {
-                layer.cancelPressedInDialog();
+                dr.onDialogCanceled();
             }
         } else {
-            BufferedImage src = layer.getFilterSourceImage();
+            BufferedImage src = dr.getFilterSourceImage();
             try {
-                f.execute(layer, ChangeReason.OP_WITHOUT_DIALOG);
+                f.execute(dr, ChangeReason.OP_WITHOUT_DIALOG);
             } catch (Throwable e) {
                 System.out.println(String.format(
                         "RandomGUITest::randomFilter: name = %s, width = %d, height = %d",
@@ -430,8 +429,8 @@ public class RandomGUITest {
     }
 
     private static void randomTween() {
-        ImageLayer imageLayer = ImageComponents.getActiveImageLayerOrMaskOrNull();
-        if (imageLayer == null) {
+        Drawable dr = ImageComponents.getActiveDrawableOrNull();
+        if (dr == null) {
             return;
         }
 
@@ -461,21 +460,21 @@ public class RandomGUITest {
         paramSet.setState(intermediateState);
 
         // execute everything without showing a modal dialog
-        imageLayer.tweenCalculatingStarted();
+        dr.tweenCalculatingStarted();
 
         PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
 
         try {
-            filter.executeFilterWithBusyCursor(imageLayer, ChangeReason.OP_PREVIEW, busyCursorParent);
+            filter.executeWithBusyCursor(dr, ChangeReason.OP_PREVIEW, busyCursorParent);
         } catch (Throwable e) {
-            BufferedImage src = imageLayer.getFilterSourceImage();
+            BufferedImage src = dr.getFilterSourceImage();
             String msg = String.format(
                     "Exception in random tween: filter name = %s, srcWidth = %d, srcHeight = %d, isMaskEditing = %b, params = %s",
-                    filterName, src.getWidth(), src.getHeight(), imageLayer.isMaskEditing(), paramSet.toString());
+                    filterName, src.getWidth(), src.getHeight(), dr.isMaskEditing(), paramSet.toString());
             throw new IllegalStateException(msg, e);
         }
 
-        imageLayer.tweenCalculatingEnded();
+        dr.tweenCalculatingEnded();
 
         long runCountAfter = Filter.runCount;
         if (runCountAfter != (runCountBefore + 1)) {
@@ -623,8 +622,8 @@ public class RandomGUITest {
         Fade fade = new Fade();
         fade.setOpacity(opacity);
 
-        ImageLayer layer = ImageComponents.getActiveImageLayerOrMaskOrNull();
-        fade.execute(layer, ChangeReason.OP_WITHOUT_DIALOG);
+        Drawable dr = ImageComponents.getActiveDrawableOrNull();
+        fade.execute(dr, ChangeReason.OP_WITHOUT_DIALOG);
     }
 
     private static void randomizeToolSettings() {
@@ -748,10 +747,10 @@ public class RandomGUITest {
 
         if (rand.nextBoolean()) {
             log("layer merge down");
-            comp.mergeDown(UpdateGUI.YES);
+            comp.mergeDown(true);
         } else {
             log("layer flatten image");
-            comp.flattenImage(UpdateGUI.YES);
+            comp.flattenImage(true);
         }
     }
 
@@ -831,16 +830,16 @@ public class RandomGUITest {
             if (f > opacity) {
                 // always increase
                 log("increase opacity");
-                layer.setOpacity(f, UpdateGUI.YES, AddToHistory.YES, true);
+                layer.setOpacity(f, true, true, true);
             } else if (rand.nextFloat() > 0.75) { // sometimes decrease
                 log("decrease opacity");
-                layer.setOpacity(f, UpdateGUI.YES, AddToHistory.YES, true);
+                layer.setOpacity(f, true, true, true);
             }
         } else {
             log("change layer blending mode");
             BlendingMode[] blendingModes = BlendingMode.values();
             BlendingMode randomBlendingMode = blendingModes[rand.nextInt(blendingModes.length)];
-            layer.setBlendingMode(randomBlendingMode, UpdateGUI.YES, AddToHistory.YES, true);
+            layer.setBlendingMode(randomBlendingMode, true, true, true);
         }
     }
 
@@ -850,13 +849,13 @@ public class RandomGUITest {
         if (rand.nextBoolean()) {
             if (!visible) {
                 log("show layer");
-                layer.setVisible(true, AddToHistory.YES);
+                layer.setVisible(true, true);
             }
         } else {
             if (visible) {
                 if (rand.nextFloat() > 0.8) { // sometimes hide
                     log("hide layer");
-                    layer.setVisible(false, AddToHistory.YES);
+                    layer.setVisible(false, true);
                 }
             }
         }
@@ -874,7 +873,7 @@ public class RandomGUITest {
                 return;
             }
         }
-        Tool currentTool = Tools.getCurrentTool();
+        Tool currentTool = Tools.getCurrent();
         if (currentTool != tool) {
             log("tool click on " + currentTool);
             tool.getButton().doClick();
@@ -892,8 +891,8 @@ public class RandomGUITest {
         TextLayer textLayer = new TextLayer(comp);
         TextSettings randomSettings = TextSettings.createRandomSettings(rand);
         textLayer.setSettings(randomSettings);
-        comp.addLayer(textLayer, AddToHistory.YES, "New Random Text Layer", true, false);
-        textLayer.setName(randomSettings.getText(), AddToHistory.YES);
+        comp.addLayer(textLayer, true, "New Random Text Layer", true, false);
+        textLayer.setName(randomSettings.getText(), true);
     }
 
     private static void randomTextLayerRasterize() {
@@ -909,7 +908,7 @@ public class RandomGUITest {
         log("new adj layer");
         Composition comp = ImageComponents.getActiveCompOrNull();
         AdjustmentLayer adjustmentLayer = new AdjustmentLayer(comp, "Invert", new Invert());
-        comp.addLayer(adjustmentLayer, AddToHistory.YES, "New Random Adj Layer", true, false);
+        comp.addLayer(adjustmentLayer, true, "New Random Adj Layer", true, false);
     }
 
     private static void randomSetLayerMaskEditMode() {
@@ -949,23 +948,23 @@ public class RandomGUITest {
                 LayerMask mask = layer.getMask();
                 if (mask.isLinked()) {
                     log("unlink layer mask");
-                    mask.setLinked(false, AddToHistory.YES);
+                    mask.setLinked(false, true);
                 } else {
                     log("re-link layer mask");
-                    mask.setLinked(true, AddToHistory.YES);
+                    mask.setLinked(true, true);
                 }
             } else if (layer instanceof ImageLayer) {
                 double d = rand.nextDouble();
                 if (d > 0.5) {
                     log("apply layer mask");
-                    ((ImageLayer) layer).applyLayerMask(AddToHistory.YES);
+                    ((ImageLayer) layer).applyLayerMask(true);
                 } else {
                     log("delete layer mask");
-                    layer.deleteMask(AddToHistory.YES);
+                    layer.deleteMask(true);
                 }
             } else {
                 log("delete layer mask");
-                layer.deleteMask(AddToHistory.YES);
+                layer.deleteMask(true);
             }
         }
     }

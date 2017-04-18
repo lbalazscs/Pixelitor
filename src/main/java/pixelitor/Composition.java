@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
-import pixelitor.history.AddToHistory;
 import pixelitor.history.DeleteLayerEdit;
 import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;
@@ -35,6 +34,7 @@ import pixelitor.history.PixelitorEdit;
 import pixelitor.history.SelectionChangeEdit;
 import pixelitor.history.TranslationEdit;
 import pixelitor.layers.ContentLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
@@ -46,7 +46,6 @@ import pixelitor.selection.SelectionActions;
 import pixelitor.selection.SelectionInteraction;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
-import pixelitor.utils.UpdateGUI;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -64,14 +63,13 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
-import static pixelitor.io.FileExtensionUtils.getFileNameWOExtension;
+import static pixelitor.io.FileExtensionUtils.stripExtension;
 import static pixelitor.utils.Utils.createCopyName;
 
 /**
@@ -132,8 +130,7 @@ public class Composition implements Serializable {
      */
     public static Composition createEmpty(int width, int height) {
         Canvas canvas = new Canvas(width, height);
-        Composition comp = new Composition(canvas);
-        return comp;
+        return new Composition(canvas);
     }
 
     public static Composition createCopy(Composition orig, boolean forUndo) {
@@ -166,7 +163,7 @@ public class Composition implements Serializable {
         } else {
             compCopy.dirty = true;
             compCopy.file = null;
-            compCopy.name = createCopyName(getFileNameWOExtension(orig.name));
+            compCopy.name = createCopyName(stripExtension(orig.name));
             compCopy.ic = null;
             compCopy.cachedCompositeImage = orig.cachedCompositeImage;
             compCopy.compositeImageUpToDate = orig.compositeImageUpToDate;
@@ -273,7 +270,7 @@ public class Composition implements Serializable {
      */
     public void addLayerNoGUI(Layer newLayer) {
         layerList.add(newLayer); // adds it to top, ignoring the active layer position
-        setActiveLayer(newLayer, AddToHistory.NO);
+        setActiveLayer(newLayer, false);
 
         // doesn't set the dirty flag because
         // this method is used when adding the base layer
@@ -281,12 +278,12 @@ public class Composition implements Serializable {
 
     public ImageLayer addNewEmptyLayer(String name, boolean bellowActive) {
         ImageLayer newLayer = new ImageLayer(this, name);
-        addLayer(newLayer, AddToHistory.YES, "New Empty Layer", false, bellowActive);
+        addLayer(newLayer, true, "New Empty Layer", false, bellowActive);
         newLayer.updateIconImage();
         return newLayer;
     }
 
-    public void addLayer(Layer newLayer, AddToHistory addToHistory, String historyName,
+    public void addLayer(Layer newLayer, boolean addToHistory, String historyName,
                          boolean updateHistogram, boolean bellowActive) {
         int activeLayerIndex = layerList.indexOf(activeLayer);
         int newLayerIndex;
@@ -308,12 +305,12 @@ public class Composition implements Serializable {
     /**
      * Adds the specified layer at the specified layer position
      */
-    public void addLayer(Layer newLayer, AddToHistory addToHistory, String historyName, boolean updateHistogram, int newLayerIndex) {
+    public void addLayer(Layer newLayer, boolean addToHistory, String historyName, boolean updateHistogram, int newLayerIndex) {
         Layer activeLayerBefore = activeLayer;
         MaskViewMode oldViewMode = ic.getMaskViewMode();
 
         layerList.add(newLayerIndex, newLayer);
-        setActiveLayer(newLayer, AddToHistory.NO);
+        setActiveLayer(newLayer, false);
         ic.addLayerToGUI(newLayer, newLayerIndex);
 
         History.addEdit(addToHistory, () -> new NewLayerEdit(this, newLayer, activeLayerBefore, historyName, oldViewMode));
@@ -335,7 +332,7 @@ public class Composition implements Serializable {
 
         layerList.forEach(this::addLayerToGUI);
 
-        setActiveLayer(previousActiveLayer, AddToHistory.NO);
+        setActiveLayer(previousActiveLayer, false);
     }
 
     private void addLayerToGUI(Layer layer) {
@@ -346,11 +343,11 @@ public class Composition implements Serializable {
 
     public void duplicateActiveLayer() {
         Layer duplicate = activeLayer.duplicate(false);
-        addLayer(duplicate, AddToHistory.YES, "Duplicate Layer", true, false);
+        addLayer(duplicate, true, "Duplicate Layer", true, false);
         assert checkInvariant();
     }
 
-    public void mergeDown(UpdateGUI updateGUI) {
+    public void mergeDown(boolean updateGUI) {
         assert checkInvariant();
 
         int activeIndex = layerList.indexOf(activeLayer);
@@ -366,7 +363,7 @@ public class Composition implements Serializable {
                     imageLayerBellow.updateIconImage();
                     Layer mergedLayer = activeLayer;
 
-                    deleteActiveLayer(updateGUI, AddToHistory.NO);
+                    deleteActiveLayer(updateGUI, false);
 
                     PixelitorEdit edit = new LinkedEdit(this, "Merge Down",
                             new ImageEdit(this, "", imageLayerBellow, backupImage, IgnoreSelection.YES, false),
@@ -381,14 +378,14 @@ public class Composition implements Serializable {
 
     private void deleteLayer(int layerIndex) {
         Layer layer = layerList.get(layerIndex);
-        deleteLayer(layer, AddToHistory.YES, UpdateGUI.YES);
+        deleteLayer(layer, true, true);
     }
 
-    public void deleteActiveLayer(UpdateGUI updateGUI, AddToHistory addToHistory) {
+    public void deleteActiveLayer(boolean updateGUI, boolean addToHistory) {
         deleteLayer(activeLayer, addToHistory, updateGUI);
     }
 
-    public void deleteLayer(Layer layerToBeDeleted, AddToHistory addToHistory, UpdateGUI updateGUI) {
+    public void deleteLayer(Layer layerToBeDeleted, boolean addToHistory, boolean updateGUI) {
         if (layerList.size() < 2) {
             throw new IllegalStateException("there are " + layerList.size() + " layers");
         }
@@ -401,13 +398,13 @@ public class Composition implements Serializable {
 
         if (layerToBeDeleted == activeLayer) {
             if (layerIndex > 0) {
-                setActiveLayer(layerList.get(layerIndex - 1), AddToHistory.NO);
+                setActiveLayer(layerList.get(layerIndex - 1), false);
             } else {  // deleted the fist layer, set the new first layer as active
-                setActiveLayer(layerList.get(0), AddToHistory.NO);
+                setActiveLayer(layerList.get(0), false);
             }
         }
 
-        if (updateGUI.isYes()) {
+        if (updateGUI) {
             LayerButton button = layerToBeDeleted.getUI().getLayerButton();
             ic.deleteLayerButton(button);
 
@@ -419,7 +416,7 @@ public class Composition implements Serializable {
         }
     }
 
-    public void setActiveLayer(Layer newActiveLayer, AddToHistory addToHistory) {
+    public void setActiveLayer(Layer newActiveLayer, boolean addToHistory) {
         if (activeLayer != newActiveLayer) {
             assert layerList.contains(newActiveLayer)
                     : String.format("new active layer '%s' (%s) not in the layer list of '%s'",
@@ -458,22 +455,39 @@ public class Composition implements Serializable {
         return layerList.get(i);
     }
 
-    public int getNrLayers() {
+    public int getNumLayers() {
         return layerList.size();
     }
 
-    public void updateAllLayerIconImages() {
+    public void forEachLayer(Consumer<Layer> action) {
+        layerList.forEach(action);
+    }
+
+    public void forEachContentLayer(Consumer<ContentLayer> action) {
         for (Layer layer : layerList) {
-            if (layer instanceof ImageLayer) {
-                ((ImageLayer) layer).updateIconImage();
-            }
-            if (layer.hasMask()) {
-                layer.getMask().updateIconImage();
+            if (layer instanceof ContentLayer) {
+                ContentLayer contentLayer = (ContentLayer) layer;
+                action.accept(contentLayer);
             }
         }
     }
 
-    public boolean activeIsImageLayerOrMask() {
+    public void forEachDrawable(Consumer<Drawable> action) {
+        for (Layer layer : layerList) {
+            if (layer instanceof ImageLayer) {
+                action.accept((ImageLayer) layer);
+            }
+            if (layer.hasMask()) {
+                action.accept(layer.getMask());
+            }
+        }
+    }
+
+    public void updateAllIconImages() {
+        forEachDrawable(Drawable::updateIconImage);
+    }
+
+    public boolean activeIsDrawable() {
         if (activeLayer instanceof ImageLayer) {
             return true;
         }
@@ -484,7 +498,7 @@ public class Composition implements Serializable {
         return false;
     }
 
-    public Layer getActiveMaskOrLayer() {
+    private Layer getActiveMaskOrLayer() {
         if (activeLayer.isMaskEditing()) {
             return activeLayer.getMask();
         }
@@ -494,46 +508,37 @@ public class Composition implements Serializable {
     public ContentLayer getAnyContentLayer() {
         for (Layer layer : layerList) {
             if (layer instanceof ContentLayer) {
-                ContentLayer contentLayer = (ContentLayer) layer;
-                return contentLayer;
+                return (ContentLayer) layer;
             }
         }
         return null;
     }
 
-    public ImageLayer getActiveMaskOrImageLayerOrNull() {
+    /**
+     * Returns the active mask or image layer or null
+     */
+    public Drawable getActiveDrawableOrNull() {
         assert checkInvariant();
         if (activeLayer.isMaskEditing()) {
             return activeLayer.getMask();
         }
         if (activeLayer instanceof ImageLayer) {
-            ImageLayer imageLayer = (ImageLayer) activeLayer;
-            return imageLayer;
+            return (ImageLayer) activeLayer;
         }
         return null;
     }
 
     /**
+     * Returns the active mask or image layer
      * This method assumes that the active layer is an image layer
      */
-    public ImageLayer getActiveMaskOrImageLayer() {
-        ImageLayer layer = getActiveMaskOrImageLayerOrNull();
-        if (layer == null) {
-            throw new IllegalStateException("active layer is not image layer or mask, it is "
+    public Drawable getActiveDrawable() {
+        Drawable dr = getActiveDrawableOrNull();
+        if (dr == null) {
+            throw new IllegalStateException("The active layer is not an image layer or a mask, it is "
                     + activeLayer.getClass().getSimpleName());
         }
-        return layer;
-    }
-
-    /**
-     * This should be called if the active layer might not be an image layer
-     */
-    public Optional<ImageLayer> getActiveMaskOrImageLayerOpt() {
-        ImageLayer layer = getActiveMaskOrImageLayerOrNull();
-        if (layer == null) {
-            return Optional.empty();
-        }
-        return Optional.of(layer);
+        return dr;
     }
 
     public void startMovement(boolean duplicateLayer) {
@@ -563,8 +568,8 @@ public class Composition implements Serializable {
         }
     }
 
-    public void flattenImage(UpdateGUI updateGUI) {
-        if (updateGUI.isYes()) {
+    public void flattenImage(boolean updateGUI) {
+        if (updateGUI) {
             assert isActiveComp();
         }
 
@@ -572,16 +577,16 @@ public class Composition implements Serializable {
             return;
         }
 
-        int nrLayers = getNrLayers();
+        int numLayers = getNumLayers();
         BufferedImage bi = getCompositeImage();
 
         Layer flattenedLayer = new ImageLayer(this, bi, "flattened", null);
-        addLayer(flattenedLayer, AddToHistory.NO, null, false, nrLayers); // add to the top
+        addLayer(flattenedLayer, false, null, false, numLayers); // add to the top
 
-        for (int i = nrLayers - 1; i >= 0; i--) { // delete the rest
+        for (int i = numLayers - 1; i >= 0; i--) { // delete the rest
             deleteLayer(i);
         }
-        if (updateGUI.isYes()) {
+        if (updateGUI) {
             AppLogic.activeCompLayerCountChanged(this, 1);
 
             // TODO should have a separate add to history argument?
@@ -593,14 +598,14 @@ public class Composition implements Serializable {
         assert checkInvariant();
 
         int oldIndex = layerList.indexOf(activeLayer);
-        swapLayers(oldIndex, oldIndex + 1, AddToHistory.YES);
+        swapLayers(oldIndex, oldIndex + 1, true);
     }
 
     public void moveActiveLayerDown() {
         assert checkInvariant();
 
         int oldIndex = layerList.indexOf(activeLayer);
-        swapLayers(oldIndex, oldIndex - 1, AddToHistory.YES);
+        swapLayers(oldIndex, oldIndex - 1, true);
     }
 
     public void moveActiveLayerToTop() {
@@ -608,17 +613,17 @@ public class Composition implements Serializable {
 
         int oldIndex = layerList.indexOf(activeLayer);
         int newIndex = layerList.size() - 1;
-        swapLayers(oldIndex, newIndex, AddToHistory.YES);
+        swapLayers(oldIndex, newIndex, true);
     }
 
     public void moveActiveLayerToBottom() {
         assert checkInvariant();
 
         int oldIndex = layerList.indexOf(activeLayer);
-        swapLayers(oldIndex, 0, AddToHistory.YES);
+        swapLayers(oldIndex, 0, true);
     }
 
-    public void swapLayers(int oldIndex, int newIndex, AddToHistory addHistory) {
+    public void swapLayers(int oldIndex, int newIndex, boolean addToHistory) {
         if (newIndex < 0) {
             return;
         }
@@ -637,7 +642,7 @@ public class Composition implements Serializable {
         imageChanged(FULL);
         AppLogic.layerOrderChanged(this);
 
-        History.addEdit(addHistory, () -> new LayerOrderChangeEdit(this, oldIndex, newIndex));
+        History.addEdit(addToHistory, () -> new LayerOrderChangeEdit(this, oldIndex, newIndex));
     }
 
     public void moveLayerSelectionUp() {
@@ -647,7 +652,7 @@ public class Composition implements Serializable {
         if (newIndex >= layerList.size()) {
             return;
         }
-        setActiveLayer(layerList.get(newIndex), AddToHistory.YES);
+        setActiveLayer(layerList.get(newIndex), true);
 
         assert ConsistencyChecks.fadeCheck(this);
     }
@@ -659,7 +664,7 @@ public class Composition implements Serializable {
             return;
         }
 
-        setActiveLayer(layerList.get(newIndex), AddToHistory.YES);
+        setActiveLayer(layerList.get(newIndex), true);
 
         assert ConsistencyChecks.fadeCheck(this);
     }
@@ -718,7 +723,7 @@ public class Composition implements Serializable {
 
     public void addNewLayerFromComposite(String newLayerName) {
         ImageLayer newLayer = new ImageLayer(this, getCompositeImage(), newLayerName, null);
-        addLayer(newLayer, AddToHistory.YES, "New Layer from Composite", false, false);
+        addLayer(newLayer, true, "New Layer from Composite", false, false);
     }
 
     public ImageComponent getIC() {
@@ -755,9 +760,9 @@ public class Composition implements Serializable {
         }
     }
 
-    public void deselect(AddToHistory addToHistory) {
+    public void deselect(boolean addToHistory) {
         if (selection != null) {
-            if (addToHistory.isYes()) {
+            if (addToHistory) {
                 DeselectEdit edit = createDeselectEdit();
                 if (edit != null) {
                     History.addEdit(edit);
@@ -954,18 +959,6 @@ public class Composition implements Serializable {
             }
         } else {
             Messages.showNotImageLayerError();
-        }
-    }
-
-    public void updateAllIconImages() {
-        for (Layer layer : layerList) {
-            if (layer instanceof ImageLayer) {
-                ((ImageLayer) layer).updateIconImage();
-            }
-            if (layer.hasMask()) {
-                LayerMask mask = layer.getMask();
-                mask.updateIconImage();
-            }
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,14 +19,13 @@ package pixelitor.tools;
 
 import com.bric.util.JVM;
 import pixelitor.Composition;
-import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.OKDialog;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.CloneBrush;
 import pixelitor.tools.brushes.CopyBrushType;
@@ -64,8 +63,8 @@ public class CloneTool extends BlendingModeBrushTool {
 
     private CloneBrush cloneBrush;
 
-    private final RangeParam scaleParam = new RangeParam("", 10, 100, 400, AddDefaultButton.YES, NONE);
-    private final RangeParam rotationParam = new RangeParam("", -180, 0, 180, AddDefaultButton.YES, NONE);
+    private final RangeParam scaleParam = new RangeParam("", 10, 100, 400, true, NONE);
+    private final RangeParam rotationParam = new RangeParam("", -180, 0, 180, true, NONE);
     private final EnumParam<ScalingMirror> mirrorParam = new EnumParam<>("", ScalingMirror.class);
 
     protected CloneTool() {
@@ -179,10 +178,10 @@ public class CloneTool extends BlendingModeBrushTool {
         if (sampleAllLayers) {
             sourceImage = ic.getComp().getCompositeImage();
         } else {
-            ImageLayer imageLayer = ic.getComp().getActiveMaskOrImageLayer();
-            sourceImage = imageLayer.getImage();
-            dx = -imageLayer.getTX();
-            dy = -imageLayer.getTY();
+            Drawable dr = ic.getComp().getActiveDrawable();
+            sourceImage = dr.getImage();
+            dx = -dr.getTX();
+            dy = -dr.getTY();
         }
         cloneBrush.setSource(sourceImage, x + dx, y + dy);
         state = SOURCE_DEFINED_FIRST_STROKE;
@@ -204,14 +203,14 @@ public class CloneTool extends BlendingModeBrushTool {
     }
 
     @Override
-    protected void prepareProgrammaticBrushStroke(ImageLayer layer, Point start) {
-        super.prepareProgrammaticBrushStroke(layer, start);
+    protected void prepareProgrammaticBrushStroke(Drawable dr, Point start) {
+        super.prepareProgrammaticBrushStroke(dr, start);
 
-        setupRandomSource(layer, start);
+        setupRandomSource(dr, start);
     }
 
-    private void setupRandomSource(ImageLayer layer, Point start) {
-        Composition comp = layer.getComp();
+    private void setupRandomSource(Drawable dr, Point start) {
+        Composition comp = dr.getComp();
 
         int canvasWidth = comp.getCanvasWidth();
         int canvasHeight = comp.getCanvasHeight();

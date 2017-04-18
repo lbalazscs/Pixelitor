@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,7 @@ import java.util.List;
  * (used only for development)
  */
 public class FilterCreator extends JPanel {
-    private final JTextField nameTextField;
+    private final JTextField nameTF;
     private final JCheckBox guiCB;
     private final JCheckBox parametrizedGuiCB;
     private final JCheckBox copySrcCB;
@@ -42,7 +42,6 @@ public class FilterCreator extends JPanel {
     private final ParamPanel[] paramPanels = new ParamPanel[10];
     private final JCheckBox pixelLoopCB;
     private final JCheckBox proxyCB;
-    @SuppressWarnings("FieldMayBeFinal")
     private JTextField proxyNameTF;
     private final JCheckBox edgeActionCB;
     private final JCheckBox interpolationCB;
@@ -54,18 +53,18 @@ public class FilterCreator extends JPanel {
     private FilterCreator() {
         setLayout(new GridBagLayout());
 
-        GridBagHelper gridBagHelper = new GridBagHelper(this);
+        GridBagHelper gbh = new GridBagHelper(this);
 
-        gridBagHelper.addLabel("Name:", 0, 0);
-        nameTextField = new JTextField(20);
-        gridBagHelper.addLastControl(nameTextField);
+        gbh.addLabel("Name:", 0, 0);
+        nameTF = new JTextField(20);
+        gbh.addLastControl(nameTF);
 
-        gridBagHelper.addLabel("GUI:", 0, 1);
+        gbh.addLabel("GUI:", 0, 1);
         guiCB = new JCheckBox();
         guiCB.setSelected(true);
-        gridBagHelper.addControl(guiCB);
+        gbh.addControl(guiCB);
 
-        gridBagHelper.addLabel("Parametrized GUI:", 2, 1);
+        gbh.addLabel("Parametrized GUI:", 2, 1);
         parametrizedGuiCB = new JCheckBox();
         parametrizedGuiCB.setSelected(true);
         parametrizedGuiCB.addChangeListener(e -> {
@@ -73,56 +72,56 @@ public class FilterCreator extends JPanel {
                 guiCB.setSelected(true);
             }
         });
-        gridBagHelper.addControl(parametrizedGuiCB);
+        gbh.addControl(parametrizedGuiCB);
 
-        gridBagHelper.addLabel("Copy Src -> Dest:", 4, 1);
+        gbh.addLabel("Copy Src -> Dest:", 4, 1);
         copySrcCB = new JCheckBox();
-        gridBagHelper.addControl(copySrcCB);
+        gbh.addControl(copySrcCB);
 
-        gridBagHelper.addLabel("Angle Param:", 6, 1);
+        gbh.addLabel("Angle Param:", 6, 1);
         angleParamCB = new JCheckBox();
-        gridBagHelper.addControl(angleParamCB);
+        gbh.addControl(angleParamCB);
 
-        gridBagHelper.addLabel("Pixel Loop:", 0, 2);
+        gbh.addLabel("Pixel Loop:", 0, 2);
         pixelLoopCB = new JCheckBox();
-        gridBagHelper.addControl(pixelLoopCB);
+        gbh.addControl(pixelLoopCB);
 
-        gridBagHelper.addLabel("Proxy Filter:", 2, 2);
+        gbh.addLabel("Proxy Filter:", 2, 2);
         proxyCB = new JCheckBox();
 //        proxyCB.setSelected(true);
         proxyCB.addChangeListener(e -> proxyNameTF.setEnabled(proxyCB.isSelected()));
-        gridBagHelper.addControl(proxyCB);
+        gbh.addControl(proxyCB);
 
-        gridBagHelper.addLabel("Proxy Name:", 4, 2);
+        gbh.addLabel("Proxy Name:", 4, 2);
         proxyNameTF = new JTextField(10);
         proxyNameTF.setEnabled(proxyCB.isSelected());
-        gridBagHelper.addControl(proxyNameTF);
+        gbh.addControl(proxyNameTF);
 
-        gridBagHelper.addLabel("Center Selector:", 0, 3);
+        gbh.addLabel("Center Selector:", 0, 3);
         centerSelectorCB = new JCheckBox();
-        gridBagHelper.addControl(centerSelectorCB);
+        gbh.addControl(centerSelectorCB);
 
-        gridBagHelper.addLabel("Edge Action:", 2, 3);
+        gbh.addLabel("Edge Action:", 2, 3);
         edgeActionCB = new JCheckBox();
-        gridBagHelper.addControl(edgeActionCB);
+        gbh.addControl(edgeActionCB);
 
-        gridBagHelper.addLabel("Interpolation:", 4, 3);
+        gbh.addLabel("Interpolation:", 4, 3);
         interpolationCB = new JCheckBox();
-        gridBagHelper.addControl(interpolationCB);
+        gbh.addControl(interpolationCB);
 
-        gridBagHelper.addLabel("Color:", 6, 3);
+        gbh.addLabel("Color:", 6, 3);
         colorCB = new JCheckBox();
-        gridBagHelper.addControl(colorCB);
+        gbh.addControl(colorCB);
 
-        gridBagHelper.addLabel("Gradient:", 8, 3);
+        gbh.addLabel("Gradient:", 8, 3);
         gradientCB = new JCheckBox();
-        gridBagHelper.addControl(gradientCB);
+        gbh.addControl(gradientCB);
 
         for (int i = 0; i < paramPanels.length; i++) {
-            gridBagHelper.addLabel("Param " + (i + 1) + ':', 0, i + 4);
+            gbh.addLabel("Param " + (i + 1) + ':', 0, i + 4);
             ParamPanel pp = new ParamPanel();
             paramPanels[i] = pp;
-            gridBagHelper.addLastControl(pp);
+            gbh.addLastControl(pp);
         }
     }
 
@@ -192,7 +191,7 @@ public class FilterCreator extends JPanel {
         boolean parametrizedGui = parametrizedGuiCB.isSelected();
         boolean gui = guiCB.isSelected();
         boolean copySrc = copySrcCB.isSelected();
-        String name = nameTextField.getText();
+        String name = nameTF.getText();
         boolean pixelLoop = pixelLoopCB.isSelected();
         boolean proxy = proxyCB.isSelected();
         String proxyName = proxyNameTF.getText();

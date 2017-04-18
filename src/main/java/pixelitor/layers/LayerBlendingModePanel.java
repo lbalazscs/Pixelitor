@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,9 +22,7 @@ import pixelitor.Composition;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
-import pixelitor.history.AddToHistory;
 import pixelitor.utils.ImageSwitchListener;
-import pixelitor.utils.UpdateGUI;
 
 import static pixelitor.gui.ImageComponents.onActiveLayer;
 
@@ -60,14 +58,14 @@ public class LayerBlendingModePanel extends BlendingModePanel implements ImageSw
     private void opacityChanged() {
         onActiveLayer(layer -> {
             float floatValue = getOpacity();
-            layer.setOpacity(floatValue, UpdateGUI.NO, AddToHistory.YES, true);
+            layer.setOpacity(floatValue, false, true, true);
         });
     }
 
     private void blendingModeChanged() {
         onActiveLayer(layer -> {
             BlendingMode blendingMode = getBlendingMode();
-            layer.setBlendingMode(blendingMode, UpdateGUI.NO, AddToHistory.YES, true);
+            layer.setBlendingMode(blendingMode, false, true, true);
         });
     }
 

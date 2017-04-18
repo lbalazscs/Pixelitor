@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.automate;
 
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 
 import javax.swing.*;
 
@@ -26,15 +26,15 @@ public interface WizardPage {
 
     WizardPage getNext();
 
-    JComponent getPanel(Wizard wizard, ImageLayer layer);
+    JComponent getPanel(Wizard wizard, Drawable dr);
 
     /**
-     * Called if the wizard was cancelled while in this state
+     * Called if the wizard was canceled while in this state
      */
-    void onWizardCancelled(ImageLayer layer);
+    void onWizardCanceled(Drawable dr);
 
     /**
      * Called if next was pressed while in this state before moving to the next
      */
-    void onMovingToTheNext(Wizard wizard, ImageLayer layer);
+    void onMovingToTheNext(Wizard wizard, Drawable dr);
 }

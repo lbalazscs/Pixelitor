@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.tools;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
-import pixelitor.history.AddToHistory;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.selection.SelectionBuilder;
@@ -178,14 +177,14 @@ public class SelectionTool extends Tool implements ImageSwitchListener {
 
         super.dispatchMouseClicked(e, ic);
 
-        deselect(ic, AddToHistory.YES);
+        deselect(ic, true);
 
         altMeansSubtract = false;
 
         return false;
     }
 
-    private static void deselect(ImageComponent ic, AddToHistory addToHistory) {
+    private static void deselect(ImageComponent ic, boolean addToHistory) {
         Composition comp = ic.getComp();
 
         if (comp.hasSelection()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,27 +28,33 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 /**
  * Contains an AbstractAngleSelectorComponent and a SliderSpinner
  */
-public class AngleSelector extends JPanel implements ParamGUI {
+public class AngleParamGUI extends JPanel implements ParamGUI {
     private boolean userChangedSpinner = true;
     private final SliderSpinner sliderSpinner;
-    private final AbstractAngleSelectorComponent selectorGUI;
+    private final AbstractAngleUI selectorUI;
 
-    public AngleSelector(AngleParam angleParam) {
+    public AngleParamGUI(AngleParam angleParam) {
         setLayout(new BorderLayout(10, 0));
-        selectorGUI = angleParam.getAngleSelectorComponent();
-        add(selectorGUI, BorderLayout.WEST);
+        selectorUI = angleParam.getAngleSelectorUI();
+        add(selectorUI, BorderLayout.WEST);
 
-        sliderSpinner = createSliderSpinner(angleParam, selectorGUI);
+        sliderSpinner = createSliderSpinner(angleParam, selectorUI);
         add(sliderSpinner, BorderLayout.CENTER);
 
         setBorder(BorderFactory.createTitledBorder(angleParam.getName()));
 
-        Dimension preferredSize = getPreferredSize();
-        Dimension sliderPreferredSize = sliderSpinner.getPreferredSize();
-        setPreferredSize(new Dimension(sliderPreferredSize.width, preferredSize.height));
+        setupPreferredSize();
     }
 
-    private SliderSpinner createSliderSpinner(AngleParam angleParam, AbstractAngleSelectorComponent asc) {
+    private void setupPreferredSize() {
+        Dimension origPS = getPreferredSize();
+        Dimension sliderPS = sliderSpinner.getPreferredSize();
+        setPreferredSize(new Dimension(
+                sliderPS.width,
+                origPS.height));
+    }
+
+    private SliderSpinner createSliderSpinner(AngleParam angleParam, AbstractAngleUI asc) {
         RangeParam spinnerModel = angleParam.createRangeParam();
         spinnerModel.addChangeListener(e -> {
             if (userChangedSpinner) {
@@ -59,7 +65,7 @@ public class AngleSelector extends JPanel implements ParamGUI {
             }
         });
 
-        SliderSpinner retVal = new SliderSpinner(spinnerModel, NONE, AddDefaultButton.YES);
+        SliderSpinner retVal = new SliderSpinner(spinnerModel, NONE, true);
 
         retVal.setResettable(angleParam);
         int maxAngleInDegrees = angleParam.getMaxAngleInDegrees();
@@ -84,7 +90,7 @@ public class AngleSelector extends JPanel implements ParamGUI {
 
     @Override
     public void setEnabled(boolean enabled) {
-        selectorGUI.setEnabled(enabled);
+        selectorUI.setEnabled(enabled);
         sliderSpinner.setEnabled(enabled);
         super.setEnabled(enabled);
     }

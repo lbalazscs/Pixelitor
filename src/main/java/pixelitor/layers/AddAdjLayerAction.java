@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import pixelitor.Composition;
 import pixelitor.filters.Invert;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
-import pixelitor.history.AddToHistory;
 import pixelitor.utils.IconUtils;
 import pixelitor.utils.ImageSwitchListener;
 
@@ -45,7 +44,7 @@ public class AddAdjLayerAction extends AbstractAction implements ImageSwitchList
     public void actionPerformed(ActionEvent e) {
         Composition comp = ImageComponents.getActiveCompOrNull();
         AdjustmentLayer adjustmentLayer = new AdjustmentLayer(comp, "Invert", new Invert());
-        comp.addLayer(adjustmentLayer, AddToHistory.YES, "New Adjustment Layer", true, false);
+        comp.addLayer(adjustmentLayer, true, "New Adjustment Layer", true, false);
     }
 
     @Override

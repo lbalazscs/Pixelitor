@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,6 @@ import pixelitor.history.History;
 import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
 import pixelitor.layers.ContentLayer;
-import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 import pixelitor.selection.Selection;
 
@@ -64,9 +63,7 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
             selection.transform(canvasTX);
         }
 
-        int nrLayers = comp.getNrLayers();
-        for (int i = 0; i < nrLayers; i++) {
-            Layer layer = comp.getLayer(i);
+        comp.forEachLayer(layer -> {
             if (layer instanceof ContentLayer) {
                 ContentLayer contentLayer = (ContentLayer) layer;
                 applyTx(contentLayer);
@@ -75,7 +72,7 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
                 LayerMask mask = layer.getMask();
                 applyTx(mask);
             }
-        }
+        });
 
         MultiLayerEdit edit = new MultiLayerEdit(comp, getEditName(), backup);
         History.addEdit(edit);

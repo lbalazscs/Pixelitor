@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseActionSetting;
+import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.Color;
@@ -52,14 +52,14 @@ public class JHWood extends FilterWithParametrizedGUI {
 
         setParamSet(new ParamSet(
                 angle,
-                scale.adjustRangeToImageSize(0.5),
+                scale.withAdjustedRange(0.5),
                 stretch,
                 gradient,
                 rings,
                 turbulence,
                 fibres,
                 gain
-        ).withAction(new ReseedNoiseActionSetting()));
+        ).withAction(new ReseedNoiseFilterAction()));
     }
 
     @Override

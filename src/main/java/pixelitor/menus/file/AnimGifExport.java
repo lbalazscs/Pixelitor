@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,21 +34,20 @@ public class AnimGifExport {
     }
 
     public static void start(JFrame dialogParent) {
-        Composition activeComp = ImageComponents.getActiveCompOrNull();
-        int nrLayers = activeComp.getNrLayers();
-        if(nrLayers < 2) {
+        Composition comp = ImageComponents.getActiveCompOrNull();
+        if (comp.getNumLayers() < 2) {
             Messages.showInfo("Only one layer",
                     "Animation frames are based on the layers of the image.\n" +
-                            activeComp.getName() + " has only one layer.");
+                            comp.getName() + " has only one layer.");
             return;
         }
 
-        ExportPanel p = new ExportPanel(activeComp.getNrLayers());
+        ExportPanel p = new ExportPanel(comp.getNumLayers());
         OKCancelDialog d = new OKCancelDialog(p, dialogParent, "Export Animated GIF", "Export", "Cancel", false) {
             @Override
             protected void dialogAccepted() {
                 close();
-                export(activeComp, p.getDelayMillis(), p.isPingPong());
+                export(comp, p.getDelayMillis(), p.isPingPong());
             }
         };
         d.setVisible(true);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -70,8 +70,8 @@ import java.util.function.Predicate;
 import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR_PRE;
 
 public final class Utils {
-    private static final int BYTES_IN_1_MEGABYTE = 1048576;
-    private static final int BYTES_IN_1_KILOBYTE = 1024;
+    private static final int BYTES_IN_1_KILOBYTE = 1_024;
+    private static final int BYTES_IN_1_MEGABYTE = 1_048_576;
 
     private static final Cursor BUSY_CURSOR = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR);
     private static final Cursor DEFAULT_CURSOR = Cursor.getDefaultCursor();
@@ -113,7 +113,7 @@ public final class Utils {
 
     public static void setShowOriginal(boolean b) {
         Composition comp = ImageComponents.getActiveCompOrNull();
-        comp.getActiveMaskOrImageLayer().setShowOriginal(b);
+        comp.getActiveDrawable().setShowOriginal(b);
     }
 
     /**
@@ -199,14 +199,12 @@ public final class Utils {
 
     public static int getMaxHeapInMegabytes() {
         long heapMaxSize = Runtime.getRuntime().maxMemory();
-        int sizeInMegaBytes = (int) (heapMaxSize / BYTES_IN_1_MEGABYTE);
-        return sizeInMegaBytes;
+        return (int) (heapMaxSize / BYTES_IN_1_MEGABYTE);
     }
 
     public static int getUsedMemoryInMegabytes() {
         long usedMemory = Runtime.getRuntime().totalMemory();
-        int sizeInMegaBytes = (int) (usedMemory / BYTES_IN_1_MEGABYTE);
-        return sizeInMegaBytes;
+        return (int) (usedMemory / BYTES_IN_1_MEGABYTE);
     }
 
     @SuppressWarnings("SameReturnValue")  // used in asserts
@@ -279,8 +277,7 @@ public final class Utils {
             height = y1 - y2;
         }
 
-        Rectangle retVal = new Rectangle(topX, topY, width, height);
-        return retVal;
+        return new Rectangle(topX, topY, width, height);
     }
 
     // makes sure that the returned rectangle has positive width, height
@@ -337,11 +334,11 @@ public final class Utils {
         if (debugCompOpt.isPresent()) {
             // if we already have a debug composition, simply replace the image
             Composition comp = debugCompOpt.get();
-            comp.getActiveMaskOrImageLayer().setImage(copy);
+            comp.getActiveDrawable().setImage(copy);
             comp.repaint();
         } else {
             Composition comp = Composition.fromImage(copy, null, name);
-            AppLogic.addComposition(comp);
+            AppLogic.addCompAsNewImage(comp);
         }
 
         if (savedIC != null) {
@@ -431,8 +428,7 @@ public final class Utils {
             char c = chars[random.nextInt(chars.length)];
             sb.append(c);
         }
-        String output = sb.toString();
-        return output;
+        return sb.toString();
     }
 
     public static void checkThatAssertionsAreEnabled() {

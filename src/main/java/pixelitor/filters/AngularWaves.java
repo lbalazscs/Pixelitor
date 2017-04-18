@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,31 +32,30 @@ import java.awt.image.BufferedImage;
 public class AngularWaves extends FilterWithParametrizedGUI {
     public static final String NAME = "Angular Waves";
 
-    private final RangeParam radialWLParam = new RangeParam("Radial Wavelength", 1, 20, 100);
-    private final RangeParam amountParam = new RangeParam("Angular Amount (Degrees)", 0, 20, 90);
+    private final RangeParam radialWL = new RangeParam("Radial Wavelength", 1, 20, 100);
+    private final RangeParam amount = new RangeParam("Angular Amount (Degrees)", 0, 20, 90);
+    private final RangeParam phase = new RangeParam("Phase (time)", 0, 0, 360);
+    private final ImagePositionParam center = new ImagePositionParam("Center");
+    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 500);
+    private final IntChoiceParam waveType = IntChoiceParam.forWaveType();
 
-    private final RangeParam phaseParam = new RangeParam("Phase (time)", 0, 0, 360);
-
-    private final ImagePositionParam centerParam = new ImagePositionParam("Center");
-    private final RangeParam zoomParam = new RangeParam("Zoom (%)", 1, 100, 500);
-    private final IntChoiceParam waveType = IntChoiceParam.getWaveTypeChoices();
-
-    private final IntChoiceParam edgeActionParam = IntChoiceParam.getEdgeActionChoices();
-    private final IntChoiceParam interpolationParam = IntChoiceParam.getInterpolationChoices();
+    private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
+    private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
     private AngularWavesFilter filter;
 
     public AngularWaves() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
-                centerParam,
-                radialWLParam.adjustRangeToImageSize(0.05),
-                amountParam,
+                center,
+                radialWL.withAdjustedRange(0.05),
+                amount,
                 waveType,
-                phaseParam,
-                zoomParam,
-                edgeActionParam,
-                interpolationParam
+                phase,
+                zoom,
+                edgeAction,
+                interpolation
         ));
     }
 
@@ -66,16 +65,15 @@ public class AngularWaves extends FilterWithParametrizedGUI {
             filter = new AngularWavesFilter();
         }
 
-        filter.setCenterX(centerParam.getRelativeX());
-        filter.setCenterY(centerParam.getRelativeY());
-        filter.setEdgeAction(edgeActionParam.getValue());
-        filter.setInterpolation(interpolationParam.getValue());
+        filter.setRelCenter(center.getRelativeX(), center.getRelativeY());
+        filter.setEdgeAction(edgeAction.getValue());
+        filter.setInterpolation(interpolation.getValue());
 
-        filter.setPhase(phaseParam.getValueAsPercentage());
-        filter.setRadialWL(radialWLParam.getValueAsDouble());
+        filter.setPhase(phase.getValueAsPercentage());
+        filter.setRadialWL(radialWL.getValueAsDouble());
 
-        filter.setZoom(zoomParam.getValueAsPercentage());
-        filter.setAmount(amountParam.getValueAsPercentage());
+        filter.setZoom(zoom.getValueAsPercentage());
+        filter.setAmount(amount.getValueAsPercentage());
         filter.setWaveType(waveType.getValue());
 
         dest = filter.filter(src, dest);

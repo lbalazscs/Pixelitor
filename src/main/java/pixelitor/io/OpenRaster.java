@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,12 +24,10 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import pixelitor.Composition;
-import pixelitor.history.AddToHistory;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.UpdateGUI;
 import pixelitor.utils.Utils;
 
 import javax.imageio.ImageIO;
@@ -63,10 +61,10 @@ public class OpenRaster {
                 "<image w=\"%d\" h=\"%d\">\n" +
                 "<stack>\n", comp.getCanvasWidth(), comp.getCanvasHeight());
 
-        int nrLayers = comp.getNrLayers();
+        int numLayers = comp.getNumLayers();
 
         // Reverse iteration: in stack.xml the first element in a stack is the uppermost.
-        for (int i = nrLayers - 1; i >= 0; i--) {
+        for (int i = numLayers - 1; i >= 0; i--) {
             Layer layer = comp.getLayer(i);
             stackXML += writeLayer(zos, i, layer);
         }
@@ -129,7 +127,7 @@ public class OpenRaster {
                 } else if (name.equalsIgnoreCase("mergedimage.png")) {
                     // no need for that
                 } else {
-                    String extension = FileExtensionUtils.getFileExtension(name);
+                    String extension = FileExtensionUtils.getExt(name);
                     if ("png".equalsIgnoreCase(extension)) {
                         BufferedImage image = ImageIO.read(zipFile.getInputStream(entry));
                         images.put(name, image);
@@ -201,16 +199,16 @@ public class OpenRaster {
             boolean visibility = layerVisibility == null ? true : layerVisibility.equals("visible");
 
             ImageLayer layer = new ImageLayer(comp, image, layerName, null);
-            layer.setVisible(visibility, AddToHistory.NO);
+            layer.setVisible(visibility, false);
             BlendingMode blendingMode = BlendingMode.fromSVGName(layerBlendingMode);
 
             if(DEBUG) {
                 System.out.println("OpenRaster::readOpenRaster: blendingMode = " + blendingMode);
             }
 
-            layer.setBlendingMode(blendingMode, UpdateGUI.NO, AddToHistory.NO, false);
+            layer.setBlendingMode(blendingMode, false, false, false);
             float opacity = Utils.parseFloat(layerOpacity, 1.0f);
-            layer.setOpacity(opacity, UpdateGUI.NO, AddToHistory.NO, false);
+            layer.setOpacity(opacity, false, false, false);
             int tX = Utils.parseInt(layerX, 0);
             int tY = Utils.parseInt(layerY, 0);
             // TODO assuming that there is no layer mask
@@ -222,7 +220,7 @@ public class OpenRaster {
 
             comp.addLayerNoGUI(layer);
         }
-        comp.setActiveLayer(comp.getLayer(0), AddToHistory.NO);
+        comp.setActiveLayer(comp.getLayer(0), false);
         return comp;
     }
 

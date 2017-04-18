@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,9 +19,9 @@ package pixelitor.filters.convolve;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.filters.FilterAction;
-import pixelitor.filters.gui.AdjustPanel;
+import pixelitor.filters.gui.FilterGUIPanel;
 import pixelitor.filters.gui.FilterWithGUI;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.utils.Messages;
 
 import java.awt.image.BufferedImage;
@@ -56,8 +56,8 @@ public class Convolve extends FilterWithGUI {
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         Kernel kernel = new Kernel(size, size, kernelMatrix);
-        ConvolveMethod convolveMethod = convolveMethodModel.getSelectedItem();
-        BufferedImageOp convolveOp = convolveMethod.getConvolveOp(kernel, filterName);
+        ConvolveMethod method = convolveMethodModel.getSelectedItem();
+        BufferedImageOp convolveOp = method.getConvolveOp(kernel, filterName);
         try {
             convolveOp.filter(src, dest);
         } catch (ImagingOpException e) {
@@ -68,8 +68,8 @@ public class Convolve extends FilterWithGUI {
     }
 
     @Override
-    public AdjustPanel createAdjustPanel(ImageLayer layer) {
-        return new CustomConvolveAdjustments(this, layer);
+    public FilterGUIPanel createGUIPanel(Drawable dr) {
+        return new CustomConvolveAdjustments(this, dr);
     }
 
     public EnumComboBoxModel<ConvolveMethod> getConvolveMethodModel() {
@@ -101,8 +101,7 @@ public class Convolve extends FilterWithGUI {
 
     public static FilterAction createFilterAction(int size) {
         String name = getFilterName(size, size);
-        FilterAction fa = new FilterAction(name, () -> new Convolve(size, name));
-        return fa;
+        return new FilterAction(name, () -> new Convolve(size, name));
     }
 
     public static String getFilterName(int width, int height) {

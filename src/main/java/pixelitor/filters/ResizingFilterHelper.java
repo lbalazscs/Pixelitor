@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -161,8 +161,7 @@ public class ResizingFilterHelper {
     @SuppressWarnings("MethodMayBeStatic")
     public ProgressTracker createFilterTracker(ProgressTracker realTracker, int allocatedFilterUnits, double realFilterUnits) {
         double ratio = allocatedFilterUnits / realFilterUnits;
-        ProgressTracker filterTracker = new SubtaskProgressTracker(ratio, realTracker);
-        return filterTracker;
+        return new SubtaskProgressTracker(ratio, realTracker);
     }
 
     private static boolean onlyNullTrackersHaveFilterUnits(BufferedImageOp filter, int filterUnits) {

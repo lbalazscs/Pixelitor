@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -52,7 +52,7 @@ public class ToolTest {
     public static Collection<Object[]> instancesToTest() throws InvocationTargetException, InterruptedException {
         Tools.CLONE.setState(CloneTool.State.CLONING);
 
-        Tool[] tools = Tools.getTools();
+        Tool[] tools = Tools.getAll();
 //        Tool[] tools = {Tools.BRUSH};
 
         List<Object[]> instances = new ArrayList<>();

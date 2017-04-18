@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,20 +35,20 @@ public class Magnify extends FilterWithParametrizedGUI {
     private final RangeParam magnification = new RangeParam("Magnification (%)", 1, 150, 500);
     private final GroupedRangeParam outerRadius = new GroupedRangeParam("Outer Radius", 0, 200, 999);
     private final RangeParam outerInnerRadiusRatio = new RangeParam("Outer/Inner Radius Ratio (%)", 100, 200, 999);
-
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
-    private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
+    private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
+    private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
     private MagnifyFilter filter;
 
     public Magnify() {
         super(ShowOriginal.YES);
+
         showAffectedArea();
 
         setParamSet(new ParamSet(
                 magnification,
-                outerRadius.adjustRangeToImageSize(1.0),
+                outerRadius.withAdjustedRange(1.0),
                 outerInnerRadiusRatio,
                 center,
                 edgeAction,
@@ -61,9 +61,6 @@ public class Magnify extends FilterWithParametrizedGUI {
         if (filter == null) {
             filter = new MagnifyFilter(NAME);
         }
-
-        filter.setCenterX(center.getRelativeX());
-        filter.setCenterY(center.getRelativeY());
 
         int outerRadiusX = outerRadius.getValue(0);
         int outerRadiusY = outerRadius.getValue(1);
@@ -81,6 +78,7 @@ public class Magnify extends FilterWithParametrizedGUI {
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 
+        filter.setRelCenter(center.getRelativeX(), center.getRelativeY());
         dest = filter.filter(src, dest);
 
         setAffectedAreaShapes(filter.getAffectedAreaShapes());

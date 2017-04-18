@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,10 @@ public class ValidatedDialog extends OKCancelDialog {
     // otherwise isOkPressed returns false even if it was previously set to true
     // (must be some thread stuff related to modal dialogs and dispose)
     private static boolean okPressed = false;
+
+    public ValidatedDialog(ValidatedForm formPanel, String title) {
+        super(formPanel, title);
+    }
 
     public ValidatedDialog(ValidatedForm formPanel, Frame owner, String title) {
         super(formPanel, owner, title);

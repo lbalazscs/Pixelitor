@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -55,11 +55,12 @@ public class JHDropShadow extends FilterWithParametrizedGUI {
 
     public JHDropShadow() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
                 angle,
-                distance.adjustRangeToImageSize(0.1),
+                distance.withAdjustedRange(0.1),
                 opacity,
-                softness.adjustRangeToImageSize(0.025),
+                softness.withAdjustedRange(0.025),
                 color,
                 shadowOnly
         ));

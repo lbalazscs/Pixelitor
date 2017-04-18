@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,8 +29,8 @@ public class RangeWithColorsParam extends RangeParam {
     private final Color leftColor;
     private final Color rightColor;
 
-    public RangeWithColorsParam(Color leftColor, Color rightColor, String name, int minValue, int defaultValue, int maxValue) {
-        super(name, minValue, defaultValue, maxValue);
+    public RangeWithColorsParam(Color leftColor, Color rightColor, String name, int min, int defaultV, int max) {
+        super(name, min, defaultV, max);
         this.leftColor = leftColor;
         this.rightColor = rightColor;
     }

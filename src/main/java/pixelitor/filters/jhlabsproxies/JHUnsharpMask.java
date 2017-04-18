@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,6 +39,7 @@ public class JHUnsharpMask extends FilterWithParametrizedGUI {
 
     public JHUnsharpMask() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
                 amount,
                 radius,
@@ -48,7 +49,6 @@ public class JHUnsharpMask extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-
         if (filter == null) {
             filter = new UnsharpFilter(NAME);
         }

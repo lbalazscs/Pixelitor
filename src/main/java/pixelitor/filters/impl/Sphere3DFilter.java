@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,8 +39,6 @@ public class Sphere3DFilter extends CenteredTransformFilter {
         double theta = FastMath.atan2(dy, dx) + Math.PI;
         double rd = 0.45 * Math.min(srcWidth, srcHeight);
 
-//        System.out.println(String.format("Sphere3DFilter::transformInverse: r = %.2f, rd = %.2f", r, rd));
-
         if (r > rd) {
             out[0] = -1;
             out[1] = -1;
@@ -60,21 +58,14 @@ public class Sphere3DFilter extends CenteredTransformFilter {
         double x1 = ca * x0 + sa * y0;
         double z1 = -sa * -sb * x0 + ca * -sb * y0 + cb * z0;
         double y1 = cb * -sa * x0 + cb * ca * y0 + sb * z0;
-//        double theta1 = Math.atan(-x1 / y1) + (y1 > 0 ? Math.PI / 2 : 3 * Math.PI / 2);
         double theta1 = FastMath.atan(-x1 / y1);
         double phi1 = FastMath.asin(z1);
 
         int X = srcWidth / 2;
         int Y = srcHeight / 2;
 
-//        out[0] = Math.abs((float) (((theta1 * 2 + gamma) % (2 * Math.PI) - Math.PI) / Math.PI * X));
-//        out[1] = Math.abs((float) (-phi1 / (Math.PI / 2) * Y));
-
         out[0] = (float) ((((((theta1 * 2) + gamma) % (2 * Math.PI)) - Math.PI) / Math.PI) * X);
         out[1] = (float) (-phi1 / (Math.PI / 2) * Y);
-
-
-//        System.out.println(String.format("Sphere3DFilter::transformInverse: out[0] = %.2f, out[1] = %.2f", out[0], out[1]));
     }
 
     public void setAlpha(float alpha) {

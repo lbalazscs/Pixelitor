@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,11 +26,9 @@ import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
-import pixelitor.history.AddToHistory;
 import pixelitor.history.History;
 import pixelitor.history.LayerOpacityEdit;
 import pixelitor.testutils.WithMask;
-import pixelitor.utils.UpdateGUI;
 
 import java.awt.Rectangle;
 import java.util.Arrays;
@@ -91,9 +89,9 @@ public class LayerTest {
 
         iconUpdates = new IconUpdateChecker(ui, layer, mask, 0, 1);
 
-        comp.setActiveLayer(layer, AddToHistory.YES);
+        comp.setActiveLayer(layer, true);
 
-        assert comp.getNrLayers() == 2 : "found " + comp.getNrLayers() + " layers";
+        assert comp.getNumLayers() == 2 : "found " + comp.getNumLayers() + " layers";
 
         // TODO this should be automatic for all tests
         // or should be avoidable
@@ -108,7 +106,7 @@ public class LayerTest {
         assertThat(layer.isVisible()).isTrue();
         assertThat(layerUI.isVisibilityChecked()).isTrue();
 
-        layer.setVisible(false, AddToHistory.YES);
+        layer.setVisible(false, true);
 
         assertThat(layer.isVisible()).isFalse();
         assertThat(layerUI.isVisibilityChecked()).isFalse();
@@ -150,7 +148,7 @@ public class LayerTest {
         float newValue = 0.7f;
         assertThat(layer.getOpacity()).isEqualTo(oldValue);
 
-        layer.setOpacity(newValue, UpdateGUI.YES, AddToHistory.YES, true);
+        layer.setOpacity(newValue, true, true, true);
 
         assertThat(layer.getOpacity()).isEqualTo(newValue);
         History.assertNumEditsIs(1);
@@ -172,7 +170,7 @@ public class LayerTest {
     public void testBlendingModeChange() {
         assertSame(BlendingMode.NORMAL, layer.getBlendingMode());
 
-        layer.setBlendingMode(BlendingMode.DIFFERENCE, UpdateGUI.YES, AddToHistory.YES, true);
+        layer.setBlendingMode(BlendingMode.DIFFERENCE, true, true, true);
 
         assertSame(BlendingMode.DIFFERENCE, layer.getBlendingMode());
         History.assertNumEditsIs(1);
@@ -191,7 +189,7 @@ public class LayerTest {
     public void testNameChange() {
         assertThat(layer.getName()).isEqualTo("layer 1");
 
-        layer.setName("newName", AddToHistory.YES);
+        layer.setName("newName", true);
 
         assertThat(layer.getName()).isEqualTo("newName");
         assertThat(layer.getUI().getLayerName()).isEqualTo("newName");
@@ -222,7 +220,7 @@ public class LayerTest {
         Layer layer2 = comp.getLayer(1);
         assertThat(layer2.isActive()).isFalse();
 
-        layer2.makeActive(AddToHistory.YES);
+        layer2.makeActive(true);
 
         assertThat(layer2.isActive()).isTrue();
         History.assertNumEditsIs(1);
@@ -292,7 +290,7 @@ public class LayerTest {
         if (withMask.isYes()) {
             assertThat(layer.hasMask()).isTrue();
 
-            layer.deleteMask(AddToHistory.YES);
+            layer.deleteMask(true);
             assertThat(layer.hasMask()).isFalse();
             History.assertNumEditsIs(1);
             History.assertLastEditNameIs("Delete Layer Mask");
@@ -316,7 +314,7 @@ public class LayerTest {
             LayerMaskActions.EnableDisableMaskAction enableAction = new LayerMaskActions.EnableDisableMaskAction(layer);
             assertThat(enableAction.getName()).isEqualTo("Disable");
 
-            layer.setMaskEnabled(false, AddToHistory.YES);
+            layer.setMaskEnabled(false, true);
 
             assertThat(layer.isMaskEnabled()).isFalse();
             assertThat(enableAction.getName()).isEqualTo("Enable");
@@ -345,7 +343,7 @@ public class LayerTest {
             LayerMaskActions.LinkUnlinkMaskAction linkAction = new LayerMaskActions.LinkUnlinkMaskAction(layer);
             assertThat(linkAction.getName()).isEqualTo("Unlink");
 
-            mask.setLinked(false, AddToHistory.YES);
+            mask.setLinked(false, true);
 
             assertThat(mask.isLinked()).isFalse();
             assertThat(linkAction.getName()).isEqualTo("Link");

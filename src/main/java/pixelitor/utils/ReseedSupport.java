@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,8 @@
 
 package pixelitor.utils;
 
-import pixelitor.filters.gui.ActionSetting;
-import pixelitor.filters.gui.ReseedNoiseActionSetting;
+import pixelitor.filters.gui.FilterAction;
+import pixelitor.filters.gui.ReseedNoiseFilterAction;
 
 import java.util.Random;
 
@@ -42,15 +42,13 @@ public class ReseedSupport {
     }
 
 
-    public static ActionSetting createAction() {
-        return new ReseedNoiseActionSetting(
-                e -> {
-                    reseed();
-                });
+    public static FilterAction createAction() {
+        return new ReseedNoiseFilterAction(
+                e -> reseed());
     }
 
-    public static ActionSetting createAction(String name, String toolTipText) {
-        return new ReseedNoiseActionSetting(
+    public static FilterAction createAction(String name, String toolTipText) {
+        return new ReseedNoiseFilterAction(
                 name, toolTipText,
                 e -> reseed());
     }

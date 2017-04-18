@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,12 +42,13 @@ public class JHFocus extends FilterWithParametrizedGUI {
     private final GroupedRangeParam blurRadius = new GroupedRangeParam("Blur Radius", 0, 10, 50);
     private final RangeParam numberOfIterations = new RangeParam("Blur Iterations (Quality)", 1, 3, 10);
     private final BooleanParam invert = new BooleanParam("Invert", false);
-    private final BooleanParam hpSharpening = BooleanParam.createParamForHPSharpening();
+    private final BooleanParam hpSharpening = BooleanParam.forHPSharpening();
 
     private FocusImpl filter;
 
     public JHFocus() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
                 center,
                 radius,

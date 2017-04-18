@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,25 +26,23 @@ import java.awt.event.ActionListener;
 /**
  * Displays a JComboBox as the GUI for an IntChoiceParam or an EnumParam
  */
-public class ChoiceSelector extends JPanel implements ActionListener, ParamGUI {
+public class ComboBoxParamGUI extends JPanel implements ActionListener, ParamGUI {
     private final JComboBox<IntChoiceParam.Value> comboBox;
     private final DefaultButton defaultButton;
 
-    public ChoiceSelector(ComboBoxModel model, ActionSetting action) {
+    public ComboBoxParamGUI(ComboBoxModel model, FilterAction action) {
         assert model instanceof Resettable;
-
-
 
         comboBox = new JComboBox<>(model);
         comboBox.addActionListener(this);
-        // workaround for nimbus bug
-        Dimension comboPreferredSize = comboBox.getPreferredSize();
-        comboBox.setPreferredSize(new Dimension(comboPreferredSize.width + 3, comboPreferredSize.height));
 
+        // workaround for nimbus bug
+        Dimension origPS = comboBox.getPreferredSize();
+        comboBox.setPreferredSize(new Dimension(
+                origPS.width + 3,
+                origPS.height));
 
         defaultButton = new DefaultButton((Resettable) model);
-//        int buttonSize = comboBox.getPreferredSize().height;
-//        defaultButton.setPreferredSize(new Dimension(buttonSize, buttonSize));
 
         if (action != null) {
             JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT));

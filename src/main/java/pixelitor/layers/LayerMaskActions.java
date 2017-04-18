@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.layers;
 
-import pixelitor.history.AddToHistory;
 import pixelitor.menus.NamedAction;
 import pixelitor.utils.Messages;
 
@@ -44,10 +43,10 @@ public class LayerMaskActions {
 
             JMenu showMenu = new JMenu("Show/Edit");
             menu.add(showMenu);
-            showMenu.add(MaskViewMode.NORMAL.createPopupMenuItem(layer));
-            showMenu.add(MaskViewMode.SHOW_MASK.createPopupMenuItem(layer));
-            showMenu.add(MaskViewMode.EDIT_MASK.createPopupMenuItem(layer));
-            showMenu.add(MaskViewMode.RUBYLITH.createPopupMenuItem(layer));
+            MaskViewMode.NORMAL.addToMenu(showMenu, layer);
+            MaskViewMode.SHOW_MASK.addToMenu(showMenu, layer);
+            MaskViewMode.EDIT_MASK.addToMenu(showMenu, layer);
+            MaskViewMode.RUBYLITH.addToMenu(showMenu, layer);
             menu.addSeparator();
 
             menu.add(new JMenuItem(new DeleteMaskAction(layer)));
@@ -96,7 +95,7 @@ public class LayerMaskActions {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            layer.deleteMask(AddToHistory.YES);
+            layer.deleteMask(true);
         }
     }
 
@@ -117,7 +116,7 @@ public class LayerMaskActions {
                 return;
             }
 
-            ((ImageLayer) layer).applyLayerMask(AddToHistory.YES);
+            ((ImageLayer) layer).applyLayerMask(true);
 
             layer.getComp().imageChanged(FULL);
         }
@@ -134,7 +133,7 @@ public class LayerMaskActions {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            layer.setMaskEnabled(!layer.isMaskEnabled(), AddToHistory.YES);
+            layer.setMaskEnabled(!layer.isMaskEnabled(), true);
             refreshName();
         }
 
@@ -164,7 +163,7 @@ public class LayerMaskActions {
         @Override
         public void actionPerformed(ActionEvent e) {
             LayerMask mask = layer.getMask();
-            mask.setLinked(!mask.isLinked(), AddToHistory.YES);
+            mask.setLinked(!mask.isLinked(), true);
             refreshName();
         }
 

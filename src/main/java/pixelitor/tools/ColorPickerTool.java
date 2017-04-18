@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.tools;
 
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.ImageComponent;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
 
@@ -71,16 +71,16 @@ public class ColorPickerTool extends Tool {
         BufferedImage img;
         boolean isGray = false;
         if (sampleLayerOnly.isSelected()) {
-            if (!ic.activeIsImageLayerOrMask()) {
+            if (!ic.activeIsDrawable()) {
                 return;
             }
 
-            ImageLayer layer = ic.getComp().getActiveMaskOrImageLayer();
-            img = layer.getImage();
+            Drawable dr = ic.getComp().getActiveDrawable();
+            img = dr.getImage();
             isGray = img.getType() == BufferedImage.TYPE_BYTE_GRAY;
 
-            x -= layer.getTX();
-            y -= layer.getTY();
+            x -= dr.getTX();
+            y -= dr.getTY();
         } else {
             img = ic.getComp().getCompositeImage();
         }

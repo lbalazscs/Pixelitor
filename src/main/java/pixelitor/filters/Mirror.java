@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ import com.jhlabs.image.TransformFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.MirrorFilter;
@@ -34,19 +35,20 @@ public class Mirror extends FilterWithParametrizedGUI {
 
     private final AngleParam angle = new AngleParam("Angle", 0);
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices(true);
+    private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction(true);
 
-    private final IntChoiceParam type = new IntChoiceParam("Type", new IntChoiceParam.Value[]{
-            new IntChoiceParam.Value("Left Over Right", MirrorFilter.LEFT_OVER_RIGHT),
-            new IntChoiceParam.Value("Right Over Left", MirrorFilter.RIGHT_OVER_LEFT),
-            new IntChoiceParam.Value("Bottom Over Top", MirrorFilter.BOTTOM_OVER_TOP),
-            new IntChoiceParam.Value("Top Over Bottom", MirrorFilter.TOP_OVER_BOTTOM),
+    private final IntChoiceParam type = new IntChoiceParam("Type", new Value[]{
+            new Value("Left Over Right", MirrorFilter.LEFT_OVER_RIGHT),
+            new Value("Right Over Left", MirrorFilter.RIGHT_OVER_LEFT),
+            new Value("Bottom Over Top", MirrorFilter.BOTTOM_OVER_TOP),
+            new Value("Top Over Bottom", MirrorFilter.TOP_OVER_BOTTOM),
     });
 
     private MirrorFilter filter;
 
     public Mirror() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
                 type,
                 center,
@@ -62,9 +64,7 @@ public class Mirror extends FilterWithParametrizedGUI {
         }
 
         filter.setType(type.getValue());
-        filter.setCenterX(center.getRelativeX());
-        filter.setCenterY(center.getRelativeY());
-
+        filter.setRelCenter(center.getRelativeX(), center.getRelativeY());
         filter.setEdgeAction(edgeAction.getValue());
 //        filter.setInterpolation(interpolation.getValue());
 

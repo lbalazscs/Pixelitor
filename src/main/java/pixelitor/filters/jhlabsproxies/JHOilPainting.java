@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.ResizingFilterHelper;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
@@ -44,15 +45,16 @@ public class JHOilPainting extends FilterWithParametrizedGUI {
 
     private final GroupedRangeParam brushSize = new GroupedRangeParam("Brush Size", 0, 1, 10, false);
     private final RangeParam coarseness = new RangeParam("Coarseness", 2, 25, 255);
-    private final IntChoiceParam detailQuality = new IntChoiceParam("Detail Quality", new IntChoiceParam.Value[]{
-            new IntChoiceParam.Value("Faster", FASTER),
-            new IntChoiceParam.Value("Better", BETTER),
+    private final IntChoiceParam detailQuality = new IntChoiceParam("Detail Quality", new Value[]{
+            new Value("Faster", FASTER),
+            new Value("Better", BETTER),
     }, IGNORE_RANDOMIZE);
 
     public JHOilPainting() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
-                brushSize.adjustRangeToImageSize(0.04),
+                brushSize.withAdjustedRange(0.04),
                 coarseness,
                 detailQuality
         ));

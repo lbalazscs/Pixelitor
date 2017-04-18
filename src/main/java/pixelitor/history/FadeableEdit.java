@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 package pixelitor.history;
 
 import pixelitor.Composition;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 
 import java.awt.image.BufferedImage;
 
@@ -25,13 +25,13 @@ import java.awt.image.BufferedImage;
  * Abstract superclass of all PixelitorEdits that can be faded
  */
 public abstract class FadeableEdit extends PixelitorEdit {
-    private final ImageLayer fadingLayer;
+    private final Drawable fadingLayer;
     private boolean died = false;  // the variable "alive" in AbstractUndoableEdit is private...
 
     // actually some ImageEdits are possibly not fadeable
     protected boolean fadeable = true;
 
-    FadeableEdit(Composition comp, ImageLayer fadingLayer, String name) {
+    FadeableEdit(Composition comp, Drawable fadingLayer, String name) {
         super(comp, name);
         this.fadingLayer = fadingLayer;
     }
@@ -57,7 +57,7 @@ public abstract class FadeableEdit extends PixelitorEdit {
         this.fadeable = fadeable;
     }
 
-    public ImageLayer getFadingLayer() {
+    public Drawable getFadingLayer() {
         return fadingLayer;
     }
 }

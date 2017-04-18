@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,7 +43,7 @@ public class CompositionCreationTest {
     public void testNewImage() {
         Composition comp = NewImage.createNewComposition(FillType.WHITE, 20, 20, "New Image");
         comp.checkInvariant();
-        assertThat(comp.getNrLayers()).isEqualTo(1);
+        assertThat(comp.getNumLayers()).isEqualTo(1);
         assertThat(comp.getCanvasWidth()).isEqualTo(20);
         assertThat(comp.getCanvasHeight()).isEqualTo(20);
         assertThat(comp.getCompositeImage()).isNotNull();
@@ -52,22 +52,22 @@ public class CompositionCreationTest {
     private static void testSingleLayerRead(File f) {
         Composition comp = OpenSaveManager.createCompositionFromFile(f);
         comp.checkInvariant();
-        assertThat(comp.getNrLayers()).isEqualTo(1);
+        assertThat(comp.getNumLayers()).isEqualTo(1);
         assertThat(comp.getCanvasWidth()).isEqualTo(10);
         assertThat(comp.getCanvasHeight()).isEqualTo(10);
         assertThat(comp.getCompositeImage()).isNotNull();
     }
 
-    private static Composition testMultiLayerRead(File f, Consumer<Layer> checkSecondLayer) {
+    private static Composition testMultiLayerRead(File f, Consumer<Layer> secondLayerChecker) {
         Composition comp = OpenSaveManager.createCompositionFromFile(f);
         comp.checkInvariant();
-        assertThat(comp.getNrLayers()).isEqualTo(2);
+        assertThat(comp.getNumLayers()).isEqualTo(2);
         assertThat(comp.getCanvasWidth()).isEqualTo(10);
         assertThat(comp.getCanvasHeight()).isEqualTo(10);
         assertThat(comp.getCompositeImage()).isNotNull();
 
         Layer secondLayer = comp.getLayer(1);
-        checkSecondLayer.accept(secondLayer);
+        secondLayerChecker.accept(secondLayer);
 
         return comp;
     }

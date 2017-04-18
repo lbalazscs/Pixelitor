@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -125,7 +125,7 @@ public class Assertions {
     }
 
     public static boolean selectedToolIs(Tool tool) {
-        return Tools.getCurrentTool() == tool;
+        return Tools.getCurrent() == tool;
     }
 
     public static boolean pixelColorIs(int x, int y, int a, int r, int g, int b) {
@@ -152,10 +152,10 @@ public class Assertions {
         if (comp == null) {
             throw new IllegalStateException();
         }
-        return comp.getNrLayers() == number;
+        return comp.getNumLayers() == number;
     }
 
     public static boolean numOpenImagesIs(int number) {
-        return ImageComponents.getNrOfOpenImages() == number;
+        return ImageComponents.getNumOpenImages() == number;
     }
 }

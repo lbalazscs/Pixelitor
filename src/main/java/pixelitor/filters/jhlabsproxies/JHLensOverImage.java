@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,18 +39,18 @@ public class JHLensOverImage extends FilterWithParametrizedGUI {
     // less than 100% doesn't create anything usable
     private final RangeParam refractionIndex = new RangeParam("Refraction Index (%)", 100, 150, 300);
 
-    //    private IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices();
-    private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
+    private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
     private SphereFilter filter;
 
     public JHLensOverImage() {
         super(ShowOriginal.YES);
+
         showAffectedArea();
 
         setParamSet(new ParamSet(
                 center,
-                radius.adjustRangeToImageSize(1.0),
+                radius.withAdjustedRange(1.0),
                 refractionIndex,
 //                edgeAction,  // edge action doesn't create anything usable in this case
                 interpolation

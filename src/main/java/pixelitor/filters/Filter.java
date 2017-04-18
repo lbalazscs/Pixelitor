@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,9 @@ package pixelitor.filters;
 import pixelitor.ChangeReason;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.layers.Drawable;
 import pixelitor.layers.ImageLayer;
+import pixelitor.layers.LayerMask;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
@@ -61,11 +63,11 @@ public abstract class Filter implements Serializable {
     /**
      * This code is executed with busy cursor
      */
-    public void runit(ImageLayer layer, ChangeReason changeReason) {
+    public void runit(Drawable dr, ChangeReason changeReason) {
         BufferedImage dest;
 
         try {
-            if (layer == null) {
+            if (dr == null) {
                 if (changeReason == ChangeReason.REPEAT_LAST) {
                     // TODO bug: the repeat last menu is not
                     // always deactivated for text layers
@@ -76,17 +78,21 @@ public abstract class Filter implements Serializable {
                 }
             }
 
-            BufferedImage src = layer.getFilterSourceImage();
+            BufferedImage src = dr.getFilterSourceImage();
             dest = executeForOneLayer(src);
 
             assert dest != null;
 
             if (changeReason.isPreview()) {
-                layer.changePreviewImage(dest, getName(), changeReason);
+                dr.changePreviewImage(dest, getName(), changeReason);
             } else {
-                layer.filterWithoutDialogFinished(dest, changeReason, getName());
+                dr.filterWithoutDialogFinished(dest, changeReason, getName());
             }
         } catch (Exception e) {
+            ImageLayer layer = (ImageLayer) dr;
+            if (layer instanceof LayerMask) {
+                layer = (ImageLayer) layer.getParent();
+            }
             String msg = String.format(
                     "Error while executing the filter '%s'\n" +
                             "composition = '%s'\n" +
@@ -101,14 +107,14 @@ public abstract class Filter implements Serializable {
     }
 
 
-    public void execute(ImageLayer layer) {
-         execute(layer, ChangeReason.OP_WITHOUT_DIALOG);
+    public void execute(Drawable dr) {
+        execute(dr, ChangeReason.OP_WITHOUT_DIALOG);
     }
 
-    public void execute(ImageLayer layer, ChangeReason changeReason) {
+    public void execute(Drawable dr, ChangeReason changeReason) {
         // only filters without a GUI call this
 
-        executeFilterWithBusyCursor(layer, changeReason, PixelitorWindow.getInstance());
+        executeWithBusyCursor(dr, changeReason, PixelitorWindow.getInstance());
     }
 
     public BufferedImage executeForOneLayer(BufferedImage src) {
@@ -142,13 +148,13 @@ public abstract class Filter implements Serializable {
     /**
      * Executes the given filter with busy cursor
      */
-    public void executeFilterWithBusyCursor(ImageLayer layer, ChangeReason changeReason, Component busyCursorParent) {
+    public void executeWithBusyCursor(Drawable dr, ChangeReason changeReason, Component busyCursorParent) {
         String filterName = getName();
 
         try {
             long startTime = System.nanoTime();
 
-            Runnable task = () -> runit(layer, changeReason);
+            Runnable task = () -> runit(dr, changeReason);
             Utils.executeWithBusyCursor(busyCursorParent, task);
 
             long totalTime = (System.nanoTime() - startTime) / 1_000_000;

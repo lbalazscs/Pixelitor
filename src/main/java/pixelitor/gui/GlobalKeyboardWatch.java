@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.gui;
 
 import pixelitor.menus.view.ShowHideAllAction;
 import pixelitor.tools.ArrowKey;
+import pixelitor.tools.KeyboardObserver;
 import pixelitor.tools.Tools;
 
 import javax.swing.*;
@@ -36,6 +37,7 @@ public class GlobalKeyboardWatch {
     private static boolean spaceDown = false;
     private static boolean dialogActive = false;
     private static JComponent alwaysVisibleComponent;
+    private static KeyboardObserver observer;
 
     private GlobalKeyboardWatch() {
     }
@@ -63,7 +65,7 @@ public class GlobalKeyboardWatch {
                 break;
             case KeyEvent.VK_SPACE:
                 if (!dialogActive) {
-                    Tools.getCurrentTool().spacePressed();
+                    observer.spacePressed();
                     spaceDown = true;
                     e.consume();
                 }
@@ -74,36 +76,36 @@ public class GlobalKeyboardWatch {
                 // checking for VK_KP_RIGHT and other KP keys does not seem to be necessary
                 // because at least on windows actually VK_RIGHT is sent by the keypad keys
                 // but let's check them in order to be on the safe side
-                if (!dialogActive && Tools.getCurrentTool().arrowKeyPressed(new ArrowKey.RIGHT(e.isShiftDown()))) {
+                if (!dialogActive && observer.arrowKeyPressed(new ArrowKey.RIGHT(e.isShiftDown()))) {
                     e.consume();
                 }
                 break;
             case KeyEvent.VK_LEFT:
             case KeyEvent.VK_KP_LEFT:
-                if (!dialogActive && Tools.getCurrentTool().arrowKeyPressed(new ArrowKey.LEFT(e.isShiftDown()))) {
+                if (!dialogActive && observer.arrowKeyPressed(new ArrowKey.LEFT(e.isShiftDown()))) {
                     e.consume();
                 }
                 break;
             case KeyEvent.VK_UP:
             case KeyEvent.VK_KP_UP:
-                if (!dialogActive && Tools.getCurrentTool().arrowKeyPressed(new ArrowKey.UP(e.isShiftDown()))) {
+                if (!dialogActive && observer.arrowKeyPressed(new ArrowKey.UP(e.isShiftDown()))) {
                     e.consume();
                 }
                 break;
             case KeyEvent.VK_DOWN:
             case KeyEvent.VK_KP_DOWN:
-                if (!dialogActive && Tools.getCurrentTool().arrowKeyPressed(new ArrowKey.DOWN(e.isShiftDown()))) {
+                if (!dialogActive && observer.arrowKeyPressed(new ArrowKey.DOWN(e.isShiftDown()))) {
                     e.consume();
                 }
                 break;
             case KeyEvent.VK_ESCAPE:
                 if (!dialogActive) {
-                    Tools.getCurrentTool().escPressed();
+                    observer.escPressed();
                 }
                 break;
             case KeyEvent.VK_ALT:
                 if (!dialogActive) {
-                    Tools.getCurrentTool().altPressed();
+                    observer.altPressed();
                 }
                 break;
         }
@@ -113,12 +115,12 @@ public class GlobalKeyboardWatch {
         int keyCode = e.getKeyCode();
         switch (keyCode) {
             case KeyEvent.VK_SPACE:
-                Tools.getCurrentTool().spaceReleased();
+                observer.spaceReleased();
                 spaceDown = false;
                 break;
             case KeyEvent.VK_ALT:
                 if (!dialogActive) {
-                    Tools.getCurrentTool().altReleased();
+                    observer.altReleased();
                 }
                 break;
         }
@@ -205,4 +207,9 @@ public class GlobalKeyboardWatch {
 //            }
 //        }, AWTEvent.MOUSE_WHEEL_EVENT_MASK);
 //    }
+
+
+    public static void setObserver(KeyboardObserver observer) {
+        GlobalKeyboardWatch.observer = observer;
+    }
 }

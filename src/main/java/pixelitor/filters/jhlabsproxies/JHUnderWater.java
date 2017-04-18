@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseActionSetting;
+import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
@@ -39,22 +39,23 @@ public class JHUnderWater extends FilterWithParametrizedGUI {
     private final RangeParam stretch = new RangeParam("Stretch", 1, 1, 50);
     private final RangeParam time = new RangeParam("Time", 100, 100, 1000);
     private final AngleParam angle = new AngleParam("Angle", 0);
-    private final IntChoiceParam edgeAction = IntChoiceParam.getEdgeActionChoices(true);
-    private final IntChoiceParam interpolation = IntChoiceParam.getInterpolationChoices();
+    private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction(true);
+    private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
     private SwimFilter filter;
 
     public JHUnderWater() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
-                amount.adjustRangeToImageSize(0.1),
-                scale.adjustRangeToImageSize(0.3),
+                amount.withAdjustedRange(0.1),
+                scale.withAdjustedRange(0.3),
                 stretch,
                 angle,
                 time,
                 edgeAction,
                 interpolation
-        ).withAction(new ReseedNoiseActionSetting()));
+        ).withAction(new ReseedNoiseFilterAction()));
     }
 
     @Override

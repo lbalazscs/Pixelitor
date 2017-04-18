@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -68,18 +68,18 @@ public class HueSatPaletteConfig implements PaletteConfig {
         });
 
         Insets insets = new Insets(2, 4, 2, 4);
-        GridBagConstraints labelConstraint = new GridBagConstraints(0, 0, 1, 1, 0, 0,
+        GridBagConstraints labelCtr = new GridBagConstraints(0, 0, 1, 1, 0, 0,
                 GridBagConstraints.CENTER,
                 GridBagConstraints.NONE, insets, 0, 0);
-        GridBagConstraints sliderConstraint = new GridBagConstraints(1, 0, 1, 1, 1.0, 0,
+        GridBagConstraints sliderCtr = new GridBagConstraints(1, 0, 1, 1, 1.0, 0,
                 GridBagConstraints.EAST,
                 GridBagConstraints.HORIZONTAL, insets, 0, 0);
-        p.add(new JLabel("Sat:"), labelConstraint);
-        p.add(satSlider, sliderConstraint);
-        labelConstraint.gridy = 1;
-        p.add(new JLabel("Hue:"), labelConstraint);
-        sliderConstraint.gridy = 1;
-        p.add(hueSlider, sliderConstraint);
+        p.add(new JLabel("Sat:"), labelCtr);
+        p.add(satSlider, sliderCtr);
+        labelCtr.gridy = 1;
+        p.add(new JLabel("Hue:"), labelCtr);
+        sliderCtr.gridy = 1;
+        p.add(hueSlider, sliderCtr);
 
         return p;
     }

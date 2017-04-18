@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,7 @@ import com.jhlabs.image.StampFilter;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
@@ -45,19 +46,20 @@ public class JHStamp extends FilterWithParametrizedGUI {
     private final ColorParam brightColor = new ColorParam("Bright Color", WHITE, USER_ONLY_OPACITY);
 
     private final IntChoiceParam blurMethod = new IntChoiceParam("Blur Method",
-            new IntChoiceParam.Value[] {
+            new Value[]{
                     // this is calculated with floats, but the animation is still not smooth
-                    new IntChoiceParam.Value("Fast", StampFilter.BOX3_BLUR),
-                    new IntChoiceParam.Value("Gaussian (slow for large images!)", StampFilter.GAUSSIAN_BLUR)
+                    new Value("Fast", StampFilter.BOX3_BLUR),
+                    new Value("Gaussian (slow for large images!)", StampFilter.GAUSSIAN_BLUR)
             }, IGNORE_RANDOMIZE);
 
     private StampFilter filter;
 
     public JHStamp() {
         super(ShowOriginal.YES);
+
         setParamSet(new ParamSet(
                 lightDarkBalance,
-                smoothness.adjustRangeToImageSize(0.05),
+                smoothness.withAdjustedRange(0.05),
                 soften,
                 brightColor,
                 darkColor,

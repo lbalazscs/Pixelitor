@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,11 +19,10 @@ package pixelitor.tools;
 
 import pixelitor.Composition;
 import pixelitor.colors.FillType;
-import pixelitor.filters.gui.AddDefaultButton;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.utils.SliderSpinner;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.debug.DebugNode;
 
@@ -60,7 +59,7 @@ public class PaintBucketTool extends Tool {
 
     @Override
     public void initSettingsPanel() {
-        settingsPanel.add(new SliderSpinner(toleranceParam, WEST, AddDefaultButton.NO));
+        settingsPanel.add(new SliderSpinner(toleranceParam, WEST, false));
 
         fillComboBox = new JComboBox<>(new FillType[]{FOREGROUND, BACKGROUND, TRANSPARENT});
         settingsPanel.addWithLabel("Fill With:", fillComboBox);
@@ -91,10 +90,10 @@ public class PaintBucketTool extends Tool {
         double y = userDrag.getEndY();
 
         Composition comp = ic.getComp();
-        ImageLayer layer = comp.getActiveMaskOrImageLayer();
+        Drawable dr = comp.getActiveDrawable();
 
-        int tx = layer.getTX();
-        int ty = layer.getTY();
+        int tx = dr.getTX();
+        int ty = dr.getTY();
 
         x -= tx;
         y -= ty;
@@ -104,7 +103,7 @@ public class PaintBucketTool extends Tool {
             translationTransform = AffineTransform.getTranslateInstance(-tx, -ty);
         }
 
-        BufferedImage image = layer.getImage();
+        BufferedImage image = dr.getImage();
         BufferedImage original = ImageUtils.copyImage(image);
         BufferedImage workingCopy = ImageUtils.copyImage(image);
 
@@ -113,7 +112,7 @@ public class PaintBucketTool extends Tool {
         Rectangle replacedArea = scanlineFloodFill(workingCopy, (int) x, (int) y, newColor, toleranceParam.getValue());
 
         if (replacedArea != null) { // something was replaced
-            ToolAffectedArea affectedArea = new ToolAffectedArea(layer, replacedArea, true);
+            ToolAffectedArea affectedArea = new ToolAffectedArea(dr, replacedArea, true);
             saveSubImageForUndo(original, affectedArea);
 
             Graphics2D g = image.createGraphics();
@@ -123,7 +122,7 @@ public class PaintBucketTool extends Tool {
             g.dispose();
 
             comp.imageChanged(FULL);
-            layer.updateIconImage();
+            dr.updateIconImage();
         }
 
         workingCopy.flush();
