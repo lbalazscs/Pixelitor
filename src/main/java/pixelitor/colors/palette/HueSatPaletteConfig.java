@@ -27,6 +27,8 @@ import static pixelitor.colors.palette.PaletteConfig.createSlider;
 public class HueSatPaletteConfig implements PaletteConfig {
     private float saturation = 0.9f;
     private float hueShift = 0.0f;
+    private JSlider satSlider;
+    private JSlider hueSlider;
 
     public HueSatPaletteConfig(float hueShift, float saturation) {
         this.hueShift = hueShift;
@@ -49,23 +51,11 @@ public class HueSatPaletteConfig implements PaletteConfig {
     public JPanel createConfigPanel(VariationsPanel variationsPanel) {
         JPanel p = new JPanel(new GridBagLayout());
 
-        JSlider satSlider = createSlider(saturation, "Saturation of the colors");
-        satSlider.addChangeListener(e -> {
-            float oldSat = saturation;
-            saturation = satSlider.getValue() / 100.0f;
-            if (oldSat != saturation) {
-                variationsPanel.configChanged();
-            }
-        });
+        satSlider = createSlider(saturation, "Saturation of the colors");
+        satSlider.addChangeListener(e -> onNewSat(variationsPanel));
 
-        JSlider hueSlider = createSlider(hueShift, "Rotate the hue of the colors");
-        hueSlider.addChangeListener(e -> {
-            float oldHueShift = hueShift;
-            hueShift = hueSlider.getValue() / 100.0f;
-            if (oldHueShift != hueShift) {
-                variationsPanel.configChanged();
-            }
-        });
+        hueSlider = createSlider(hueShift, "Rotate the hue of the colors");
+        hueSlider.addChangeListener(e -> onNewHue(variationsPanel));
 
         Insets insets = new Insets(2, 4, 2, 4);
         GridBagConstraints labelCtr = new GridBagConstraints(0, 0, 1, 1, 0, 0,
@@ -82,5 +72,21 @@ public class HueSatPaletteConfig implements PaletteConfig {
         p.add(hueSlider, sliderCtr);
 
         return p;
+    }
+
+    private void onNewSat(VariationsPanel variationsPanel) {
+        float oldSat = saturation;
+        saturation = satSlider.getValue() / 100.0f;
+        if (oldSat != saturation) {
+            variationsPanel.configChanged();
+        }
+    }
+
+    private void onNewHue(VariationsPanel variationsPanel) {
+        float oldHueShift = hueShift;
+        hueShift = hueSlider.getValue() / 100.0f;
+        if (oldHueShift != hueShift) {
+            variationsPanel.configChanged();
+        }
     }
 }

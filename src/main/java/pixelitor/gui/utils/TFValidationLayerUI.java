@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,7 +44,8 @@ public class TFValidationLayerUI extends LayerUI<JTextField> {
 
         JLayer<JTextField> jLayer = (JLayer<JTextField>) c;
         JTextField textField = jLayer.getView();
-        if (!validator.isValid(textField)) {
+        if (!validator.check(textField)
+                .isOK()) {
             Graphics2D g2 = (Graphics2D) g.create();
 
             // Paint the red X.

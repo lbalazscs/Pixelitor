@@ -17,7 +17,6 @@
 
 package pixelitor.filters;
 
-import pixelitor.ChangeReason;
 import pixelitor.filters.gui.FilterGUIPanel;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.gui.ImageComponents;
@@ -27,6 +26,8 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
+
+import static pixelitor.ChangeReason.OP_PREVIEW;
 
 public class RandomFilterGUIPanel extends FilterGUIPanel {
     private final JPanel realSettingsPanel;
@@ -94,7 +95,7 @@ public class RandomFilterGUIPanel extends FilterGUIPanel {
             lastFilterPanel = filterGUIPanel;
         } else {
             lastFilterPanel = null;
-            filter.execute(dr, ChangeReason.OP_PREVIEW);
+            filter.startOn(dr, OP_PREVIEW);
         }
     }
 }

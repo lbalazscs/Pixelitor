@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@ import java.awt.event.WindowEvent;
  */
 public abstract class OKCancelDialog extends JDialog {
     protected JComponent formPanel;
-    private JLabel messageLabel;
+    private JLabel msgLabel;
     private JScrollPane scrollPane;
     private JButton okButton;
 
@@ -156,13 +156,13 @@ public abstract class OKCancelDialog extends JDialog {
         close();
     }
 
-    public void setHeaderMessage(String message) {
-        if(messageLabel != null) { // there was a message before
-            remove(messageLabel);
+    public void setHeaderMessage(String msg) {
+        if (msgLabel != null) { // there was a message before
+            remove(msgLabel);
         }
-        messageLabel = new JLabel(message);
-        messageLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
-        add(messageLabel, BorderLayout.NORTH);
+        msgLabel = new JLabel(msg);
+        msgLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+        add(msgLabel, BorderLayout.NORTH);
         revalidate();
     }
 

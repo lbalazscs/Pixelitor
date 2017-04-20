@@ -20,6 +20,8 @@
  */
 package org.jdesktop.swingx.graphics;
 
+import org.jdesktop.swingx.util.GraphicsUtilities;
+
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeListener;

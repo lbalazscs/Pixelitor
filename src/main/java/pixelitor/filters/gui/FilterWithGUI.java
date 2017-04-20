@@ -36,7 +36,7 @@ public abstract class FilterWithGUI extends Filter {
     public abstract FilterGUIPanel createGUIPanel(Drawable dr);
 
     @Override
-    public void execute(Drawable dr) {
+    public void startOn(Drawable dr) {
         dr.startPreviewing();
 
         FilterGUIPanel p = createGUIPanel(dr);

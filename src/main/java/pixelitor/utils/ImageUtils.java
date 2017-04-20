@@ -78,6 +78,12 @@ public class ImageUtils {
     public static final float[] FRACTIONS_2_COLOR_UNIFORM = {0.0f, 1.0f};
     private static final Color CHECKERBOARD_GRAY = new Color(200, 200, 200);
 
+    private static final GraphicsConfiguration graphicsConfiguration = GraphicsEnvironment
+            .getLocalGraphicsEnvironment()
+            .getDefaultScreenDevice()
+            .getDefaultConfiguration();
+    private static final ColorModel defaultColorModel = graphicsConfiguration.getColorModel();
+
     /**
      * Utility class with static methods
      */
@@ -91,16 +97,14 @@ public class ImageUtils {
     public static BufferedImage toSysCompatibleImage(BufferedImage input) {
         assert input != null;
 
-        GraphicsConfiguration gc = GraphicsEnvironment.getLocalGraphicsEnvironment()
-                .getDefaultScreenDevice().getDefaultConfiguration();
-
-        if (input.getColorModel().equals(gc.getColorModel())) {
+        if (input.getColorModel()
+                .equals(defaultColorModel)) {
             // already compatible
             return input;
         }
 
         int transparency = Transparency.TRANSLUCENT;
-        BufferedImage output = gc.createCompatibleImage(input.getWidth(), input.getHeight(), transparency);
+        BufferedImage output = graphicsConfiguration.createCompatibleImage(input.getWidth(), input.getHeight(), transparency);
         Graphics2D g = output.createGraphics();
         g.drawImage(input, 0, 0, null);
         g.dispose();
@@ -111,8 +115,7 @@ public class ImageUtils {
     public static BufferedImage createSysCompatibleImage(int width, int height) {
         assert (width > 0) && (height > 0);
 
-        GraphicsConfiguration gc = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
-        return gc.createCompatibleImage(width, height, Transparency.TRANSLUCENT);
+        return graphicsConfiguration.createCompatibleImage(width, height, Transparency.TRANSLUCENT);
     }
 
     public static BufferedImage createImageWithSameColorModel(BufferedImage src) {
@@ -433,8 +436,7 @@ public class ImageUtils {
         String iconPath = "/images/" + fileName;
         URL imgURL = ImageUtils.class.getResource(iconPath);
         if (imgURL == null) {
-            String message = iconPath + " not found";
-            Messages.showError("Error", message);
+            Messages.showError("Error", iconPath + " not found");
         }
         return imgURL;
     }
@@ -648,7 +650,7 @@ public class ImageUtils {
     /**
      * In contrast to BufferedImage.getSubimage, this method creates a copy of the data
      */
-    public static BufferedImage getCopiedSubimage(BufferedImage src, Rectangle bounds) {
+    public static BufferedImage getUnSharedSubimage(BufferedImage src, Rectangle bounds) {
         assert src != null;
         assert bounds != null;
 

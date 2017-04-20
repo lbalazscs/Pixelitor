@@ -71,9 +71,9 @@ public class SplashImageCreator {
         }
         int numCreatedImages = 32;
 
-        MessageHandler messageHandler = Messages.getMessageHandler();
+        MessageHandler msgHandler = Messages.getMessageHandler();
         String msg = String.format("Save %d Splash Images: ", numCreatedImages);
-        messageHandler.startProgress(msg, numCreatedImages);
+        msgHandler.startProgress(msg, numCreatedImages);
         File lastSaveDir = Directories.getLastSaveDir();
 
         for (int i = 0; i < numCreatedImages; i++) {
@@ -81,7 +81,7 @@ public class SplashImageCreator {
 
             String fileName = String.format("splash%04d.%s", i, outputFormat.toString());
 
-            messageHandler.updateProgress(i);
+            msgHandler.updateProgress(i);
 
             createSplashImage();
 
@@ -95,8 +95,8 @@ public class SplashImageCreator {
                 ValueNoise.reseed();
             });
         }
-        messageHandler.stopProgress();
-        messageHandler.showStatusMessage(String.format("Finished saving splash images to %s", lastSaveDir));
+        msgHandler.stopProgress();
+        msgHandler.showStatusMessage(String.format("Finished saving splash images to %s", lastSaveDir));
     }
 
     public static void createSplashImage() {
@@ -106,12 +106,12 @@ public class SplashImageCreator {
         ImageLayer layer = (ImageLayer) comp.getLayer(0);
 
         layer.setName("Color Wheel", true);
-        new ColorWheel().execute(layer, OP_WITHOUT_DIALOG);
+        new ColorWheel().startOn(layer, OP_WITHOUT_DIALOG);
 
         layer = addNewLayer(comp, "Value Noise");
         ValueNoise valueNoise = new ValueNoise();
         valueNoise.setDetails(7);
-        valueNoise.execute(layer, OP_WITHOUT_DIALOG);
+        valueNoise.startOn(layer, OP_WITHOUT_DIALOG);
         layer.setOpacity(0.3f, true, true, true);
         layer.setBlendingMode(BlendingMode.SCREEN, true, true, true);
 
@@ -143,7 +143,7 @@ public class SplashImageCreator {
         dropShadow.setDistance(5);
         dropShadow.setSoftness(5);
         dropShadow.setOpacity(0.7f);
-        dropShadow.execute(layer, OP_WITHOUT_DIALOG);
+        dropShadow.startOn(layer, OP_WITHOUT_DIALOG);
     }
 
     private static ImageLayer addNewLayer(Composition comp, String name) {
@@ -172,7 +172,7 @@ public class SplashImageCreator {
                 AbstractLayoutPainter.VerticalAlignment.CENTER, false);
 
         textFilter.setSettings(settings);
-        textFilter.execute(layer, OP_WITHOUT_DIALOG);
+        textFilter.startOn(layer, OP_WITHOUT_DIALOG);
         layer.setTranslation(0, translationY);
 
         layer.enlargeImage(layer.getComp().getCanvasBounds());

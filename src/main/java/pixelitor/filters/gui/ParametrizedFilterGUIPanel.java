@@ -18,9 +18,9 @@
 package pixelitor.filters.gui;
 
 import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Drawable;
-import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -120,7 +120,8 @@ public class ParametrizedFilterGUIPanel extends FilterGUIPanel implements ParamA
             super(text);
             addActionListener(e -> {
                 if (trigger) {
-                    Utils.setShowOriginal(isSelected());
+                    ImageComponents.getActiveDrawableOrNull()
+                            .setShowOriginal(isSelected());
                 }
             });
             setName("show original");

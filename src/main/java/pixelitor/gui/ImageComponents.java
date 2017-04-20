@@ -38,7 +38,6 @@ import pixelitor.utils.ImageSwitchListener;
 import pixelitor.utils.Messages;
 
 import java.awt.Cursor;
-import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -66,28 +65,19 @@ public class ImageComponents {
     }
 
     public static boolean thereAreUnsavedChanges() {
-        for (ImageComponent ic : icList) {
-            if (ic.getComp().isDirty()) {
-                return true;
-            }
-        }
-        return false;
+        return icList.stream()
+                .anyMatch(ImageComponent::isDirty);
     }
 
     public static List<ImageComponent> getICList() {
         return icList;
     }
 
-    private static void setNewImageAsActiveIfNecessary() {
+    private static void setAnImageAsActiveIfNoneIs() {
         if (!icList.isEmpty()) {
-            boolean activeFound = false;
+            boolean activeFound = icList.stream()
+                    .anyMatch(ic -> ic == activeIC);
 
-            for (ImageComponent ic : icList) {
-                if (ic == activeIC) {
-                    activeFound = true;
-                    break;
-                }
-            }
             if (!activeFound) {
                 setActiveIC(icList.get(0), true);
             }
@@ -123,13 +113,15 @@ public class ImageComponents {
     public static Optional<Composition> findCompositionByName(String name) {
         return icList.stream()
                 .map(ImageComponent::getComp)
-                .filter(c -> c.getName().equals(name))
+                .filter(c -> c.getName()
+                        .equals(name))
                 .findFirst();
     }
 
     public static Layer getActiveLayerOrNull() {
         if (activeIC != null) {
-            return activeIC.getComp().getActiveLayer();
+            return activeIC.getComp()
+                    .getActiveLayer();
         }
 
         return null;
@@ -154,7 +146,8 @@ public class ImageComponents {
 
     public static BufferedImage getActiveCompositeImage() {
         if (activeIC != null) {
-            return activeIC.getComp().getCompositeImage();
+            return activeIC.getComp()
+                    .getCompositeImage();
         }
         return null;
     }
@@ -180,9 +173,9 @@ public class ImageComponents {
         try {
             Composition comp = getActiveCompOrNull();
             if (comp != null) {
-                comp.onSelection(selection -> {
-                    Rectangle selectionBounds = selection.getShapeBounds();
-                    new Crop(selectionBounds, true, true).process(comp);
+                comp.onSelection(sel -> {
+                    new Crop(sel.getShapeBounds(), true, true)
+                            .process(comp);
                 });
             }
         } catch (Exception ex) {
@@ -195,7 +188,7 @@ public class ImageComponents {
         if (icList.isEmpty()) {
             onAllImagesClosed();
         }
-        setNewImageAsActiveIfNecessary();
+        setAnImageAsActiveIfNoneIs();
     }
 
     public static void setActiveIC(ImageComponent ic, boolean activate) {
@@ -234,7 +227,8 @@ public class ImageComponents {
         History.onAllImagesClosed();
         SelectionActions.setEnabled(false, null);
 
-        PixelitorWindow.getInstance().setTitle(Build.getPixelitorWindowFixTitle());
+        PixelitorWindow.getInstance()
+                .setTitle(Build.getPixelitorWindowFixTitle());
     }
 
     /**
@@ -256,7 +250,9 @@ public class ImageComponents {
         ZoomMenu.zoomChanged(ic.getZoomLevel());
 
         AppLogic.activeCompSizeChanged(newActiveComp);
-        PixelitorWindow.getInstance().setTitle(ic.getComp().getName() + " - " + Build.getPixelitorWindowFixTitle());
+        PixelitorWindow.getInstance()
+                .setTitle(ic.getComp()
+                        .getName() + " - " + Build.getPixelitorWindowFixTitle());
     }
 
     public static void newImageOpened(Composition comp) {
@@ -364,27 +360,31 @@ public class ImageComponents {
 
     public static void onActiveSelection(Consumer<Selection> action) {
         if (activeIC != null) {
-            activeIC.getComp().onSelection(action);
+            activeIC.getComp()
+                    .onSelection(action);
         }
     }
 
     public static void onActiveLayer(Consumer<Layer> action) {
         if (activeIC != null) {
-            Layer activeLayer = activeIC.getComp().getActiveLayer();
+            Layer activeLayer = activeIC.getComp()
+                    .getActiveLayer();
             action.accept(activeLayer);
         }
     }
 
     public static void onActiveImageLayer(Consumer<ImageLayer> action) {
         if (activeIC != null) {
-            ImageLayer activeLayer = (ImageLayer) activeIC.getComp().getActiveLayer();
+            ImageLayer activeLayer = (ImageLayer) activeIC.getComp()
+                    .getActiveLayer();
             action.accept(activeLayer);
         }
     }
 
     public static void onActiveTextLayer(Consumer<TextLayer> action) {
         if (activeIC != null) {
-            TextLayer activeLayer = (TextLayer) activeIC.getComp().getActiveLayer();
+            TextLayer activeLayer = (TextLayer) activeIC.getComp()
+                    .getActiveLayer();
             action.accept(activeLayer);
         }
     }

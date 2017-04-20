@@ -29,8 +29,8 @@ public class RangeWithColorsParam extends RangeParam {
     private final Color leftColor;
     private final Color rightColor;
 
-    public RangeWithColorsParam(Color leftColor, Color rightColor, String name, int min, int defaultV, int max) {
-        super(name, min, defaultV, max);
+    public RangeWithColorsParam(Color leftColor, Color rightColor, String name, int min, int def, int max) {
+        super(name, min, def, max);
         this.leftColor = leftColor;
         this.rightColor = rightColor;
     }

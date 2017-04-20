@@ -29,7 +29,6 @@ import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.layers.ImageLayer;
-import pixelitor.selection.IgnoreSelection;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.Tool;
 import pixelitor.tools.UserDrag;
@@ -92,7 +91,7 @@ public class AutoPaint {
         } finally {
             History.setIgnoreEdits(false);
             ImageEdit edit = new ImageEdit(layer.getComp(), "Auto Paint",
-                    layer, backupImage, IgnoreSelection.NO, false);
+                    layer, backupImage, false, false);
             History.addEdit(edit);
             msgHandler.stopProgress();
             msgHandler.showStatusMessage(msg + "finished.");

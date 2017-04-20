@@ -17,11 +17,12 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.ChangeReason;
 import pixelitor.filters.Filter;
 import pixelitor.layers.Drawable;
 
 import javax.swing.*;
+
+import static pixelitor.ChangeReason.OP_PREVIEW;
 
 /**
  * The superclass of all filter adjustment panels
@@ -37,7 +38,7 @@ public abstract class FilterGUIPanel extends JPanel implements PreviewExecutor {
 
     @Override
     public void executeFilterPreview() {
-        filter.executeWithBusyCursor(dr, ChangeReason.OP_PREVIEW, this);
+        filter.execute(dr, OP_PREVIEW, this);
     }
 
 }

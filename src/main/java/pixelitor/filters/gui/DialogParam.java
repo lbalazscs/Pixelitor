@@ -46,11 +46,7 @@ public class DialogParam extends AbstractFilterParam {
     public JComponent createGUI() {
         defaultButton = new DefaultButton(this);
 
-        paramGUI = new ConfigureParamGUI(owner -> {
-            JDialog dialog = createDialog(owner);
-            GUIUtils.centerOnScreen(dialog);
-            return dialog;
-        }, defaultButton);
+        paramGUI = new ConfigureParamGUI(this::createDialog, defaultButton);
 
         setParamGUIEnabledState();
         return (JComponent) paramGUI;
@@ -60,6 +56,7 @@ public class DialogParam extends AbstractFilterParam {
         JPanel p = GUIUtils.arrangeParamsInVerticalGridBag(Arrays.asList(children));
         OKDialog d = new OKDialog(owner, getName(), "Close");
         d.setupGUI(p);
+        GUIUtils.centerOnScreen(d);
         return d;
     }
 
@@ -94,12 +91,8 @@ public class DialogParam extends AbstractFilterParam {
 
     @Override
     public boolean isSetToDefault() {
-        for (FilterParam child : children) {
-            if (!child.isSetToDefault()) {
-                return false;
-            }
-        }
-        return true;
+        return Arrays.stream(children)
+                .allMatch(Resettable::isSetToDefault);
     }
 
     @Override

@@ -21,8 +21,6 @@ import pixelitor.ChangeReason;
 import pixelitor.Composition;
 import pixelitor.filters.comp.Flip;
 import pixelitor.filters.comp.Rotate;
-import pixelitor.history.PixelitorEdit;
-import pixelitor.selection.IgnoreSelection;
 import pixelitor.selection.Selection;
 import pixelitor.utils.VisibleForTesting;
 
@@ -57,11 +55,11 @@ public interface Drawable {
 
     void tweenCalculatingEnded();
 
-    void changePreviewImage(BufferedImage img, String filterName, ChangeReason changeReason);
+    void changePreviewImage(BufferedImage img, String filterName, ChangeReason cr);
 
-    void filterWithoutDialogFinished(BufferedImage transformedImage, ChangeReason changeReason, String opName);
+    void filterWithoutDialogFinished(BufferedImage transformedImage, ChangeReason cr, String filterName);
 
-    void changeImageUndoRedo(BufferedImage img, IgnoreSelection ignoreSelection);
+    void changeImageUndoRedo(BufferedImage img, boolean ignoreSelection);
 
     // returns the image bounds relative to the canvas
     Rectangle getImageBounds();
@@ -75,8 +73,6 @@ public interface Drawable {
     void flip(Flip.Direction direction);
 
     void rotate(Rotate.SpecialAngle angle);
-
-    void mergeDownOn(ImageLayer bellowImageLayer);
 
     TmpDrawingLayer createTmpDrawingLayer(Composite c);
 
@@ -111,10 +107,6 @@ public interface Drawable {
     void updateIconImage();
 
     BufferedImage applyLayerMask(boolean addToHistory);
-
-    BufferedImage adjustImage(BufferedImage src);
-
-    PixelitorEdit endMovement();
 
     @VisibleForTesting
     BufferedImage getPreviewImage();

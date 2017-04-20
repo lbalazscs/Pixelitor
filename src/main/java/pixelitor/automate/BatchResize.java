@@ -22,6 +22,7 @@ import pixelitor.filters.comp.Resize;
 import pixelitor.gui.utils.IntTextField;
 import pixelitor.gui.utils.ValidatedDialog;
 import pixelitor.gui.utils.ValidatedForm;
+import pixelitor.gui.utils.Validation;
 
 import javax.swing.*;
 
@@ -49,7 +50,6 @@ public class BatchResize {
     }
 
     static class BatchResizePanel extends ValidatedForm {
-        private String errorMessage;
         private final OpenSaveDirsPanel openSaveDirsPanel = new OpenSaveDirsPanel(false);
         private final IntTextField widthTF;
         private final IntTextField heightTF;
@@ -73,26 +73,16 @@ public class BatchResize {
         }
 
         @Override
-        public String getErrorMessage() {
-            return errorMessage;
-        }
-
-        @Override
-        public boolean isDataValid() {
-            if (!openSaveDirsPanel.isDataValid()) {
-                errorMessage = openSaveDirsPanel.getErrorMessage();
-                return false;
-            }
-            if (widthTF.getText().trim().isEmpty()) {
-                errorMessage = "The 'width' field is empty";
-                return false;
-            }
-            if (heightTF.getText().trim().isEmpty()) {
-                errorMessage = "The 'height' field is empty";
-                return false;
-            }
-
-            return true;
+        public Validation checkValidity() {
+            return openSaveDirsPanel.checkValidity()
+                    .andFalse(widthTF.getText()
+                                    .trim()
+                                    .isEmpty(),
+                            "The 'width' field is empty")
+                    .andFalse(heightTF.getText()
+                                    .trim()
+                                    .isEmpty(),
+                            "The 'height' field is empty");
         }
 
         private void saveValues() {

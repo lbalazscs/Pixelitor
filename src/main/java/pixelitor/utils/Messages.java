@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,29 +22,29 @@ import pixelitor.MessageHandler;
 import java.io.File;
 
 public class Messages {
-    private static MessageHandler messageHandler;
+    private static MessageHandler msgHandler;
 
     private Messages() { // should not be instantiated
     }
 
     public static void setMessageHandler(MessageHandler messageHandler) {
-        Messages.messageHandler = messageHandler;
+        Messages.msgHandler = messageHandler;
     }
 
     public static void showInfo(String title, String message) {
-        messageHandler.showInfo(title, message);
+        msgHandler.showInfo(title, message);
     }
 
     public static void showError(String title, String message) {
-        messageHandler.showError(title, message);
+        msgHandler.showError(title, message);
     }
 
     public static void showException(Throwable e) {
-        messageHandler.showException(e);
+        msgHandler.showException(e);
     }
 
     public static void showException(Throwable e, Thread t) {
-        messageHandler.showException(e, t);
+        msgHandler.showException(e, t);
     }
 
     public static void showFileSavedMessage(File file) {
@@ -53,18 +53,29 @@ public class Messages {
     }
 
     public static void showStatusMessage(String msg) {
-        messageHandler.showStatusMessage(msg);
+        msgHandler.showStatusMessage(msg);
     }
 
     public static void showNotImageLayerError() {
-        messageHandler.showNotImageLayerError();
+        msgHandler.showNotImageLayerError();
     }
 
     public static void showNotImageLayerOrMaskError() {
-        messageHandler.showNotImageLayerOrMaskError();
+        msgHandler.showNotImageLayerOrMaskError();
     }
 
     public static MessageHandler getMessageHandler() {
-        return messageHandler;
+        return msgHandler;
+    }
+
+    public static void showPerformanceMessage(String filterName, long totalTime) {
+        String msg;
+        if (totalTime < 1000) {
+            msg = filterName + " took " + totalTime + " ms";
+        } else {
+            float seconds = totalTime / 1000.0f;
+            msg = String.format("%s took %.1f s", filterName, seconds);
+        }
+        showStatusMessage(msg);
     }
 }

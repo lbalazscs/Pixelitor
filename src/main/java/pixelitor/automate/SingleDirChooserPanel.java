@@ -22,6 +22,7 @@ import pixelitor.gui.utils.BrowseFilesSupport;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.ValidatedDialog;
 import pixelitor.gui.utils.ValidatedForm;
+import pixelitor.gui.utils.Validation;
 import pixelitor.io.Directories;
 import pixelitor.io.OutputFormat;
 
@@ -69,13 +70,8 @@ public class SingleDirChooserPanel extends ValidatedForm {
     }
 
     @Override
-    public String getErrorMessage() {
-        return null;
-    }
-
-    @Override
-    public boolean isDataValid() {
-        return true;
+    public Validation checkValidity() {
+        return Validation.ok();
     }
 
     /**

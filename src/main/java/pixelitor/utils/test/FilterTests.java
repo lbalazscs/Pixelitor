@@ -17,7 +17,6 @@
 
 package pixelitor.utils.test;
 
-import pixelitor.ChangeReason;
 import pixelitor.Composition;
 import pixelitor.automate.SingleDirChooserPanel;
 import pixelitor.filters.Canny;
@@ -43,6 +42,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+
+import static pixelitor.ChangeReason.TEST_WITH_HISTORY_AND_PREVIEW;
 
 /**
  *
@@ -91,7 +92,7 @@ public class FilterTests {
                         }
 
                         filter.randomizeSettings();
-                        filter.execute(layer, ChangeReason.TEST_WITH_HISTORY_AND_PREVIEW);
+                        filter.startOn(layer, TEST_WITH_HISTORY_AND_PREVIEW);
                         Composition comp = layer.getComp();
                         String fileName = "test_" + Utils.toFileName(filter.getName()) + '.' + outputFormat.toString();
                         File f = new File(selectedDir, fileName);
@@ -153,7 +154,7 @@ public class FilterTests {
                 }
 
                 filter.randomizeSettings();
-                filter.execute(layer);
+                filter.startOn(layer);
             }
             progressMonitor.close();
         } finally {
@@ -203,7 +204,7 @@ public class FilterTests {
         for (Filter filter : filters) {
             System.out.println("Warmup for " + filter.getName());
 
-            filter.execute(layer, ChangeReason.TEST_WITH_HISTORY_AND_PREVIEW);
+            filter.startOn(layer, TEST_WITH_HISTORY_AND_PREVIEW);
         }
 
         // measuring
@@ -211,7 +212,7 @@ public class FilterTests {
             long startTime = System.nanoTime();
             System.out.println("Testing " + filter.getName());
 
-            filter.execute(layer, ChangeReason.TEST_WITH_HISTORY_AND_PREVIEW);
+            filter.startOn(layer, TEST_WITH_HISTORY_AND_PREVIEW);
 
             double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
             results.put(filter.getName(), estimatedSeconds);

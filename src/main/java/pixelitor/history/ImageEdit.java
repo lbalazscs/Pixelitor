@@ -19,7 +19,6 @@ package pixelitor.history;
 
 import pixelitor.Composition;
 import pixelitor.layers.Drawable;
-import pixelitor.selection.IgnoreSelection;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
@@ -33,7 +32,7 @@ import static pixelitor.Composition.ImageChangeActions.FULL;
  * A PixelitorEdit that represents the changes made to an image.
  */
 public class ImageEdit extends FadeableEdit {
-    private final IgnoreSelection ignoreSelection;
+    private final boolean ignoreSelection;
     private SoftReference<BufferedImage> imgRef;
     protected Drawable dr;
 
@@ -41,7 +40,7 @@ public class ImageEdit extends FadeableEdit {
 
     public ImageEdit(Composition comp, String name, Drawable dr,
                      BufferedImage backupImage,
-                     IgnoreSelection ignoreSelection, boolean canRepeat) {
+                     boolean ignoreSelection, boolean canRepeat) {
         super(comp, dr, name);
         this.ignoreSelection = ignoreSelection;
 
@@ -93,7 +92,7 @@ public class ImageEdit extends FadeableEdit {
         }
 
         BufferedImage tmp;
-        if(ignoreSelection.isYes()) {
+        if (ignoreSelection) {
             tmp = dr.getImage();
         } else {
             tmp = dr.getImageOrSubImageIfSelected(false, true);

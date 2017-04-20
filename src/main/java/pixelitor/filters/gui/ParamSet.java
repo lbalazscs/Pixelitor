@@ -19,6 +19,7 @@ package pixelitor.filters.gui;
 
 import pixelitor.filters.Filter;
 import pixelitor.utils.IconUtils;
+import pixelitor.utils.Utils;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -153,15 +154,11 @@ public class ParamSet {
     }
 
     /**
-     * A ParamSet can be animated if at least one contained filter parameter can be
+     * A ParamSet can be animated if at least
+     * one contained filter parameter can be
      */
     public boolean canBeAnimated() {
-        for (FilterParam param : paramList) {
-            if (param.canBeAnimated()) {
-                return true;
-            }
-        }
-        return false;
+        return Utils.anyMatch(paramList, FilterParam::canBeAnimated);
     }
 
     public void setFinalAnimationSettingMode(boolean b) {
@@ -174,12 +171,7 @@ public class ParamSet {
     }
 
     public boolean hasGradient() {
-        for (FilterParam param : paramList) {
-            if (param instanceof GradientParam) {
-                return true;
-            }
-        }
-        return false;
+        return Utils.anyMatch(paramList, p -> p instanceof GradientParam);
     }
 
     public List<FilterAction> getActionList() {

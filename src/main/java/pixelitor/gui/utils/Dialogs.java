@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -199,11 +199,11 @@ public class Dialogs {
         if (Build.CURRENT.isDevelopment()) {
             e.printStackTrace();
         }
-        String message = "<html><b>Out of memory error.</b> You can try <ul>" +
+        String msg = "<html><b>Out of memory error.</b> You can try <ul>" +
                 "<li>decreasing the undo levels" +
                 "<li>decreasing the number of layers" +
                 "<li>working with smaller images";
         String title = "Out of memory error.";
-        Dialogs.showErrorDialog(title, message);
+        Dialogs.showErrorDialog(title, msg);
     }
 }

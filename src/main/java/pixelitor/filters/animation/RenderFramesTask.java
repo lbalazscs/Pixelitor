@@ -17,7 +17,6 @@
 
 package pixelitor.filters.animation;
 
-import pixelitor.ChangeReason;
 import pixelitor.Composition;
 import pixelitor.filters.Filter;
 import pixelitor.filters.FilterWithParametrizedGUI;
@@ -29,6 +28,8 @@ import pixelitor.utils.Messages;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+
+import static pixelitor.ChangeReason.TWEEN_PREVIEW;
 
 class RenderFramesTask extends SwingWorker<Void, Void> {
     private final TweenAnimation animation;
@@ -115,7 +116,7 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         ParamSetState intermediateState = animation.tween(time);
         filter.getParamSet().setState(intermediateState);
 
-        filter.executeWithBusyCursor(dr, ChangeReason.TWEEN_PREVIEW, busyCursorParent);
+        filter.execute(dr, TWEEN_PREVIEW, busyCursorParent);
 
         long runCountAfter = Filter.runCount;
         assert runCountAfter == runCountBefore + 1;

@@ -42,12 +42,12 @@ public class ValidatedDialog extends OKCancelDialog {
     @Override
     protected void dialogAccepted() {
         ValidatedForm validatedForm = (ValidatedForm) formPanel;
-        if (validatedForm.isDataValid()) {
+        Validation validity = validatedForm.checkValidity();
+        if (validity.isOK()) {
             setOkPressed(true);
             close();
         } else {
-            String message = validatedForm.getErrorMessage();
-            Dialogs.showErrorDialog(this, "Error", message);
+            validity.showErrorDialog(this);
         }
     }
 

@@ -18,9 +18,11 @@
 package pixelitor.filters.gui;
 
 import com.jhlabs.image.ImageMath;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.Rectangle;
+import java.util.Arrays;
 
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
@@ -36,29 +38,29 @@ public class GroupedRangeParam extends AbstractFilterParam implements RangeBased
     /**
      * 2 linked params: "Horizontal" and "Vertical", linked by default
      */
-    public GroupedRangeParam(String name, int min, int defaultV, int max) {
-        this(name, min, defaultV, max, true);
+    public GroupedRangeParam(String name, int min, int def, int max) {
+        this(name, min, def, max, true);
     }
 
     /**
      * 2 linked params: "Horizontal" and "Vertical"
      */
-    public GroupedRangeParam(String name, int min, int defaultV, int max, boolean linked) {
-        this(name, "Horizontal", "Vertical", min, defaultV, max, linked);
+    public GroupedRangeParam(String name, int min, int def, int max, boolean linked) {
+        this(name, "Horizontal", "Vertical", min, def, max, linked);
     }
 
     /**
      * 2 linked params
      */
-    public GroupedRangeParam(String name, String firstRangeName, String secondRangeName, int min, int defaultV, int max, boolean linked) {
-        this(name, new String[]{firstRangeName, secondRangeName}, min, defaultV, max, linked);
+    public GroupedRangeParam(String name, String firstRangeName, String secondRangeName, int min, int def, int max, boolean linked) {
+        this(name, new String[]{firstRangeName, secondRangeName}, min, def, max, linked);
     }
 
     /**
      * Any number of linked params
      */
-    public GroupedRangeParam(String name, String[] rangeNames, int min, int defaultV, int max, boolean linked) {
-        this(name, createParams(rangeNames, min, defaultV, max), linked);
+    public GroupedRangeParam(String name, String[] rangeNames, int min, int def, int max, boolean linked) {
+        this(name, createParams(rangeNames, min, def, max), linked);
     }
 
     public GroupedRangeParam(String name, RangeParam[] params, boolean linked) {
@@ -83,17 +85,19 @@ public class GroupedRangeParam extends AbstractFilterParam implements RangeBased
 
     private void linkParams() {
         for (RangeParam param : rangeParams) {
-            param.addChangeListener(e -> {
-                if (isLinked()) {
-                    // set the value of every other param to the value of the current param
-                    for (RangeParam otherParam : rangeParams) {
-                        if (otherParam != param) {
-                            int newValue = param.getValue();
-                            otherParam.setValueNoTrigger(newValue);
-                        }
-                    }
+            param.addChangeListener(e -> onParamChange(param));
+        }
+    }
+
+    private void onParamChange(RangeParam param) {
+        if (isLinked()) {
+            // set the value of every other param to the value of the current param
+            for (RangeParam other : rangeParams) {
+                if (other != param) {
+                    int newValue = param.getValue();
+                    other.setValueNoTrigger(newValue);
                 }
-            });
+            }
         }
     }
 
@@ -155,12 +159,8 @@ public class GroupedRangeParam extends AbstractFilterParam implements RangeBased
         if (isLinked() != linkedByDefault) {
             return false;
         }
-        for (RangeParam param : rangeParams) {
-            if (!param.isSetToDefault()) {
-                return false;
-            }
-        }
-        return true;
+        return Utils.allMatch(rangeParams,
+                RangeParam::isSetToDefault);
     }
 
     @Override
@@ -221,11 +221,9 @@ public class GroupedRangeParam extends AbstractFilterParam implements RangeBased
 
     @Override
     public ParamState copyState() {
-        int numParams = rangeParams.length;
-        double[] values = new double[numParams];
-        for (int i = 0; i < numParams; i++) {
-            values[i] = rangeParams[i].getValue();
-        }
+        double[] values = Arrays.stream(rangeParams)
+                .mapToDouble(RangeParam::getValue)
+                .toArray();
 
         return new GRState(values);
     }
@@ -260,11 +258,11 @@ public class GroupedRangeParam extends AbstractFilterParam implements RangeBased
         }
     }
 
-    private static RangeParam[] createParams(String[] rangeNames, int min, int defaultV, int max) {
-        RangeParam[] rangeParams = new RangeParam[rangeNames.length];
-        for (int i = 0; i < rangeNames.length; i++) {
-            String rangeName = rangeNames[i];
-            rangeParams[i] = new RangeParam(rangeName, min, defaultV, max);
+    private static RangeParam[] createParams(String[] names, int min, int def, int max) {
+        RangeParam[] rangeParams = new RangeParam[names.length];
+        for (int i = 0; i < names.length; i++) {
+            String name = names[i];
+            rangeParams[i] = new RangeParam(name, min, def, max);
         }
         return rangeParams;
     }

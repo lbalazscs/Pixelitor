@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -97,13 +97,15 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     public Colormap getValue() {
-        return v -> {
-            Color c = (Color) gradientSlider.getValue(v);
-            if (c == null) {
-                throw new IllegalStateException("null color for v = " + v);
-            }
-            return c.getRGB();
-        };
+        return this::rgbIntFromValue;
+    }
+
+    private int rgbIntFromValue(float v) {
+        Color c = (Color) gradientSlider.getValue(v);
+        if (c == null) {
+            throw new IllegalStateException("null color for v = " + v);
+        }
+        return c.getRGB();
     }
 
     @Override

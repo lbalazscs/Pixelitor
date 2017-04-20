@@ -23,6 +23,7 @@ import pixelitor.colors.ColorUtils;
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.util.Objects;
 
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
@@ -56,7 +57,7 @@ public class ColorParam extends AbstractFilterParam {
 
     @Override
     public boolean isSetToDefault() {
-        return color.equals(defaultColor);
+        return Objects.equals(color, defaultColor);
     }
 
     @Override
@@ -81,19 +82,20 @@ public class ColorParam extends AbstractFilterParam {
 
     public void setColor(Color newColor, boolean trigger) {
         assert newColor != null;
-        if (!color.equals(newColor)) {
-            this.color = newColor;
+        if (Objects.equals(color, newColor)) {
+            return;
+        }
+        this.color = newColor;
 
-            ColorHistory.FILTER.add(newColor);
+        ColorHistory.FILTER.add(newColor);
 
-            if (paramGUI != null) {
-                paramGUI.updateGUI();
-            }
+        if (paramGUI != null) {
+            paramGUI.updateGUI();
+        }
 
-            if (trigger) {
-                if (adjustmentListener != null) {  // when called from randomize, this is null
-                    adjustmentListener.paramAdjusted();
-                }
+        if (trigger) {
+            if (adjustmentListener != null) {  // when called from randomize, this is null
+                adjustmentListener.paramAdjusted();
             }
         }
     }

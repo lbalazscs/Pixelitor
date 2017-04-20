@@ -174,6 +174,10 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         });
     }
 
+    public boolean isDirty() {
+        return comp.isDirty();
+    }
+
     @Override
     public Dimension getPreferredSize() {
         if (comp.isEmpty()) {

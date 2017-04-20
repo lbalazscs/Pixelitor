@@ -242,18 +242,20 @@ public class TextAdjustmentsPanel extends FilterGUIPanel implements ParamAdjustm
         italicCB = createAndAddEmphasisCheckBox("italicCB", gbh, defaultItalic);
 
         JButton showAdvancedSettingsButton = new JButton("Advanced...");
-        showAdvancedSettingsButton.addActionListener(e -> {
-            if (advancedSettingsDialog == null) {
-                Dialog parentDialog = (Dialog) SwingUtilities.getWindowAncestor(this);
-                advancedSettingsDialog = new AdvancedTextSettingsDialog(parentDialog, this, map);
-            }
-            advancedSettingsDialog.setVisible(true);
-        });
+        showAdvancedSettingsButton.addActionListener(e -> onAdvancedSettingsClick());
 
         gbh.addLabel("      ", 4, 2);
         gbh.addControl(showAdvancedSettingsButton);
 
         return fontPanel;
+    }
+
+    private void onAdvancedSettingsClick() {
+        if (advancedSettingsDialog == null) {
+            Dialog parentDialog = (Dialog) SwingUtilities.getWindowAncestor(this);
+            advancedSettingsDialog = new AdvancedTextSettingsDialog(parentDialog, this, map);
+        }
+        advancedSettingsDialog.setVisible(true);
     }
 
     private JCheckBox createAndAddEmphasisCheckBox(String name, GridBagHelper gbh, boolean selected) {

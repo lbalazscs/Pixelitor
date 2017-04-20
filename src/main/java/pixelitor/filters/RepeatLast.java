@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,6 +34,6 @@ public class RepeatLast extends ImageLayerAction {
     @Override
     protected void process(ImageLayer layer) {
         getLastExecutedFilter()
-                .ifPresent(filter -> filter.execute(layer, REPEAT_LAST));
+                .ifPresent(filter -> filter.startOn(layer, REPEAT_LAST));
     }
 }

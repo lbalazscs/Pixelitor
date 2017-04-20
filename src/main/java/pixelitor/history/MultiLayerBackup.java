@@ -21,7 +21,6 @@ import pixelitor.Composition;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
-import pixelitor.selection.IgnoreSelection;
 
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
@@ -128,7 +127,7 @@ public class MultiLayerBackup {
                     backupImage, backupMaskImage, false);
         } else {
             edit = new ImageEdit(comp, editName, imageLayer,
-                    backupImage, IgnoreSelection.YES, false);
+                    backupImage, true, false);
         }
         edit.setEmbedded(true);
         return edit;
@@ -139,7 +138,7 @@ public class MultiLayerBackup {
             return null;
         }
         ImageEdit edit = new ImageEdit(comp, editName, layer.getMask(),
-                backupMaskImage, IgnoreSelection.YES, false);
+                backupMaskImage, true, false);
         edit.setEmbedded(true);
         return edit;
     }

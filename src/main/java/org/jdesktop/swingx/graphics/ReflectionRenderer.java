@@ -34,6 +34,7 @@
 package org.jdesktop.swingx.graphics;
 
 import org.jdesktop.swingx.image.StackBlurFilter;
+import org.jdesktop.swingx.util.GraphicsUtilities;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;

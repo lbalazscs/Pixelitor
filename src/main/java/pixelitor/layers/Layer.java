@@ -397,7 +397,7 @@ public abstract class Layer implements Serializable {
         if (isFirstVisibleLayer) {
             return imgSoFar; // there's nothing we can do
         }
-        BufferedImage transformed = adjustImage(imgSoFar);
+        BufferedImage transformed = actOnImageFromLayerBellow(imgSoFar);
         if (useMask()) {
             mask.applyToImage(transformed);
         }
@@ -415,7 +415,7 @@ public abstract class Layer implements Serializable {
     /**
      * Used by adjustment layers and watermarked text layers
      */
-    protected abstract BufferedImage adjustImage(BufferedImage src);
+    protected abstract BufferedImage actOnImageFromLayerBellow(BufferedImage src);
 
     public abstract void resize(int targetWidth, int targetHeight, boolean progressiveBilinear);
 

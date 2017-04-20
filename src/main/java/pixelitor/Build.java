@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,10 +34,6 @@ public enum Build {
         this.development = development;
     }
 
-    public boolean isDevelopment() {
-        return development;
-    }
-
     public static final boolean enableAdjLayers = false;
 
     public static Build CURRENT = FINAL;
@@ -45,6 +41,10 @@ public enum Build {
     public static final String VERSION_NUMBER = "4.0.2";
 
     private static String fixTitle = null;
+
+    public boolean isDevelopment() {
+        return development;
+    }
 
     public static String getPixelitorWindowFixTitle() {
         assert SwingUtilities.isEventDispatchThread();

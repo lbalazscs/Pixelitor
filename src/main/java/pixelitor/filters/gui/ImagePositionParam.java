@@ -100,12 +100,12 @@ public class ImagePositionParam extends AbstractFilterParam {
         }
     }
 
-    public void setRelativeX(float newRelativeX, boolean isAdjusting) {
-        setRelativeValues(newRelativeX, relativeY, false, isAdjusting, true);
+    public void setRelativeX(float x, boolean isAdjusting) {
+        setRelativeValues(x, relativeY, false, isAdjusting, true);
     }
 
-    public void setRelativeY(float newRelativeY, boolean isAdjusting) {
-        setRelativeValues(relativeX, newRelativeY, false, isAdjusting, true);
+    public void setRelativeY(float y, boolean isAdjusting) {
+        setRelativeValues(relativeX, y, false, isAdjusting, true);
     }
 
     @Override

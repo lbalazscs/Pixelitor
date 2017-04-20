@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -95,13 +95,7 @@ public final class GUIUtils {
      * @return true if any app window has focus
      */
     public static boolean appIsActive() {
-        Window[] windows = Window.getWindows();
-        for (Window window : windows) {
-            if (window.isActive()) {
-                return true;
-            }
-        }
-        return false;
+        return Utils.anyMatch(Window.getWindows(), Window::isActive);
     }
 
     public static void showClipboardTextDialog(JComponent form, String title, String text) {

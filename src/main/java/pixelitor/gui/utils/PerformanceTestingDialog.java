@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.gui.utils;
 
-import pixelitor.ChangeReason;
 import pixelitor.filters.Filter;
 import pixelitor.filters.FilterAction;
 import pixelitor.filters.FilterUtils;
@@ -34,6 +33,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+
+import static pixelitor.ChangeReason.TEST_NO_HISTORY_NO_PREVIEW;
 
 public class PerformanceTestingDialog extends JDialog implements ActionListener, PropertyChangeListener {
     private final JComboBox<FilterAction> opSelector;
@@ -61,7 +62,7 @@ public class PerformanceTestingDialog extends JDialog implements ActionListener,
             Filter op = (Filter) opSelector.getSelectedItem();
             if (op instanceof FilterWithGUI) {
                 FilterWithGUI dialogOp = (FilterWithGUI) op;
-                dialogOp.execute(layer);
+                dialogOp.startOn(layer);
             }
         });
         northPanel.add(new JLabel("Select filter: "));
@@ -128,8 +129,9 @@ public class PerformanceTestingDialog extends JDialog implements ActionListener,
             try {
                 executions = Integer.parseInt(timesField.getText().trim());
             } catch (NumberFormatException e1) {
-                String message = String.format("\"%s\" is not an integer number.", timesField.getText());
-                Dialogs.showErrorDialog(this, "Error", message);
+                Dialogs.showErrorDialog(this, "Error",
+                        String.format("\"%s\" is not an integer number.",
+                                timesField.getText()));
             }
 
             if (executions > 0) {
@@ -184,7 +186,7 @@ public class PerformanceTestingDialog extends JDialog implements ActionListener,
             for (int i = 0; i < executions; i++) {
                 long individualStartTime = System.nanoTime();
 
-                op.execute(layer, ChangeReason.TEST_NO_HISTORY_NO_PREVIEW);
+                op.startOn(layer, TEST_NO_HISTORY_NO_PREVIEW);
 
                 long individualTotalTime = (System.nanoTime() - individualStartTime) / 1000000;
                 if (individualTotalTime < shortestTime) {
@@ -214,8 +216,8 @@ public class PerformanceTestingDialog extends JDialog implements ActionListener,
             EventQueue.invokeLater(() -> JOptionPane.showMessageDialog(PerformanceTestingDialog.this, results, "Performance Testing Results", JOptionPane.INFORMATION_MESSAGE));
         }
 
-        private String getReport(String opName, int executions, long totalTime, long shortestTime) {
-            return ("Executing \"" + opName
+        private String getReport(String filterName, int executions, long totalTime, long shortestTime) {
+            return ("Executing \"" + filterName
                     + "\" " + executions + " times took " + totalTime
                     + " ms, average time = " + totalTime / executions + " ms, shortest time = " + shortestTime + "ms.");
         }

@@ -26,8 +26,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.GridBagLayout;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Creates a skeleton of source code for a filter
@@ -126,14 +126,10 @@ public class FilterCreator extends JPanel {
     }
 
     private ParameterInfo[] getParameterInfoArray() {
-        List<ParameterInfo> piList = new ArrayList<>();
-        for (ParamPanel panel : paramPanels) {
-            ParameterInfo pi = panel.getParameterInfo();
-            if (pi != null) {
-                piList.add(pi);
-            }
-        }
-        return piList.toArray(new ParameterInfo[piList.size()]);
+        return Arrays.stream(paramPanels)
+                .map(ParamPanel::getParameterInfo)
+                .filter(Objects::nonNull)
+                .toArray(ParameterInfo[]::new);
     }
 
     public static void showInDialog(Frame owner) {
@@ -514,11 +510,11 @@ public class FilterCreator extends JPanel {
         final int max;
         final int defaultValue;
 
-        public ParameterInfo(String name, int min, int max, int defaultValue) {
+        public ParameterInfo(String name, int min, int max, int def) {
             this.name = name;
             this.min = min;
             this.max = max;
-            this.defaultValue = defaultValue;
+            this.defaultValue = def;
 
             String tmp = name.replaceAll(" ", "");
             this.variableName = tmp.substring(0, 1).toLowerCase() + tmp.substring(1);

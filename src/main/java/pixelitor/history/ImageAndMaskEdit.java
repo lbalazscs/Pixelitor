@@ -19,7 +19,6 @@ package pixelitor.history;
 
 import pixelitor.Composition;
 import pixelitor.layers.ImageLayer;
-import pixelitor.selection.IgnoreSelection;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -41,13 +40,13 @@ public class ImageAndMaskEdit extends ImageEdit {
                             BufferedImage backupImage,
                             BufferedImage maskBackupImage,
                             boolean canRepeat) {
-        super(comp, name, layer, backupImage, IgnoreSelection.YES, canRepeat);
+        super(comp, name, layer, backupImage, true, canRepeat);
         this.canRepeat = canRepeat;
 
         assert layer.hasMask();
 
         maskImageEdit = new ImageEdit(comp, name,
-                layer.getMask(), maskBackupImage, IgnoreSelection.YES, canRepeat);
+                layer.getMask(), maskBackupImage, true, canRepeat);
 
         fadeable = false;
         embedded = true;

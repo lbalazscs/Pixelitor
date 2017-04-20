@@ -219,7 +219,7 @@ public class CompositionTest {
         tester.checkLayers("[layer 1, ACTIVE layer 2]");
         comp.setActiveLayer(comp.getLayer(1), true);
 
-        comp.mergeDown(false);
+        comp.mergeActiveLayerDown(false);
 
         tester.checkLayers("[ACTIVE layer 1]");
         tester.checkDirty(true);

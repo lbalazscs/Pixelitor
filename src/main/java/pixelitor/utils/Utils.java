@@ -59,6 +59,7 @@ import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Random;
@@ -87,9 +88,6 @@ public final class Utils {
         executeWithBusyCursor(PixelitorWindow.getInstance(), task);
     }
 
-    /**
-     * Executes a task with busy cursor
-     */
     public static void executeWithBusyCursor(Component parent, Runnable task) {
         Timer timer = new Timer();
         TimerTask startBusyCursorTask = new TimerTask() {
@@ -109,11 +107,6 @@ public final class Utils {
             timer.cancel();
             parent.setCursor(DEFAULT_CURSOR);
         }
-    }
-
-    public static void setShowOriginal(boolean b) {
-        Composition comp = ImageComponents.getActiveCompOrNull();
-        comp.getActiveDrawable().setShowOriginal(b);
     }
 
     /**
@@ -228,14 +221,14 @@ public final class Utils {
         clipboard.setContents(stringSelection, null);
     }
 
-    public static ProgressMonitor createPercentageProgressMonitor(String message) {
-        return new ProgressMonitor(PixelitorWindow.getInstance(), message, "", 0, 100);
+    public static ProgressMonitor createPercentageProgressMonitor(String msg) {
+        return new ProgressMonitor(PixelitorWindow.getInstance(), msg, "", 0, 100);
     }
 
-    public static ProgressMonitor createPercentageProgressMonitor(String message, String cancelButtonText) {
+    public static ProgressMonitor createPercentageProgressMonitor(String msg, String cancelButtonText) {
         String oldText = UIManager.getString("OptionPane.cancelButtonText");
         UIManager.put("OptionPane.cancelButtonText", cancelButtonText);
-        ProgressMonitor pm = new ProgressMonitor(PixelitorWindow.getInstance(), message, "", 0, 100);
+        ProgressMonitor pm = new ProgressMonitor(PixelitorWindow.getInstance(), msg, "", 0, 100);
         UIManager.put("OptionPane.cancelButtonText", oldText);
         return pm;
     }
@@ -574,4 +567,54 @@ public final class Utils {
 
         return orig.substring(0, index + copyStringLength) + ' ' + copyNr;
     }
+
+    /**
+     * Quick allMatch for arrays (without creating Streams)
+     */
+    public static <T> boolean allMatch(T[] array, Predicate<T> predicate) {
+        for (T element : array) {
+            if (!predicate.test(element)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Quick allMatch for lists (without creating Streams)
+     */
+    public static <T> boolean allMatch(List<T> list, Predicate<T> predicate) {
+        for (T element : list) {
+            if (!predicate.test(element)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Quick anyMatch for arrays (without creating Streams)
+     */
+    public static <T> boolean anyMatch(T[] array, Predicate<T> predicate) {
+        for (T element : array) {
+            if (predicate.test(element)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * Quick anyMatch for lists (without creating Streams)
+     */
+    public static <T> boolean anyMatch(List<T> list, Predicate<T> predicate) {
+        for (T element : list) {
+            if (predicate.test(element)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
+

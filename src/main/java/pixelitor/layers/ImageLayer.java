@@ -28,7 +28,6 @@ import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.history.PixelitorEdit;
-import pixelitor.selection.IgnoreSelection;
 import pixelitor.selection.Selection;
 import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
@@ -305,7 +304,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     public void replaceImage(BufferedImage newImage, String editName) {
         BufferedImage oldImage = image;
         setImage(newImage);
-        ImageEdit edit = new ImageEdit(comp, editName, this, oldImage, IgnoreSelection.YES, false);
+        ImageEdit edit = new ImageEdit(comp, editName, this, oldImage, true, false);
         History.addEdit(edit);
 
         updateIconImage();
@@ -353,7 +352,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         if (imageContentChanged) {
             ImageEdit edit = new ImageEdit(comp, filterName, this, getImageOrSubImageIfSelected(true, true),
-                    IgnoreSelection.NO, true);
+                    false, true);
             History.addEdit(edit);
         }
 
@@ -395,19 +394,21 @@ public class ImageLayer extends ContentLayer implements Drawable {
      * @return true if the image has to be repainted
      */
     @Override
-    public void changePreviewImage(BufferedImage img, String filterName, ChangeReason changeReason) {
+    public void changePreviewImage(BufferedImage img, String filterName, ChangeReason cr) {
         // typically we should be in PREVIEW mode
         if (state == SHOW_ORIGINAL) {
             // this is OK, something was adjusted while in show original mode
         } else if (state == NORMAL) {
             throw new IllegalStateException(String.format(
                     "change preview in normal state, filter = %s, changeReason = %s, class = %s)",
-                    filterName, changeReason, this.getClass().getSimpleName()));
+                    filterName, cr, this.getClass()
+                            .getSimpleName()));
         }
 
         assert previewImage != null :
                 String.format("previewImage was null with %s, changeReason = %s, class = %s",
-                        filterName, changeReason, this.getClass().getSimpleName());
+                        filterName, cr, this.getClass()
+                                .getSimpleName());
         assert img != null;
 
         if (img == image) {
@@ -437,7 +438,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public void filterWithoutDialogFinished(BufferedImage transformedImage, ChangeReason changeReason, String opName) {
+    public void filterWithoutDialogFinished(BufferedImage transformedImage, ChangeReason cr, String filterName) {
         requireNonNull(transformedImage);
 
         comp.setDirty(true);
@@ -445,8 +446,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
         // A filter without dialog should never return the original image...
         if (transformedImage == image) {
             // ...unless Repeat Last starts a filter that normally has a dialog without one
-            if (changeReason != REPEAT_LAST) {
-                throw new IllegalStateException(opName + " returned the original image, changeReason = " + changeReason);
+            if (cr != REPEAT_LAST) {
+                throw new IllegalStateException(filterName + " returned the original image, changeReason = " + cr);
             } else {
                 return;
             }
@@ -458,7 +459,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         BufferedImage imageForUndo = getFilterSourceImage();
         setImageWithSelection(transformedImage);
 
-        if (!changeReason.needsUndo()) {
+        if (!cr.needsUndo()) {
             return;
         }
 
@@ -468,8 +469,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
             throw new IllegalStateException("imageForUndo == image");
         }
         assert imageForUndo != null;
-        ImageEdit edit = new ImageEdit(comp, opName, this,
-                imageForUndo, IgnoreSelection.NO, true);
+        ImageEdit edit = new ImageEdit(comp, filterName, this,
+                imageForUndo, false, true);
         History.addEdit(edit);
 
         // otherwise the next filter run will take the old image source,
@@ -480,12 +481,12 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public void changeImageUndoRedo(BufferedImage img, IgnoreSelection ignoreSelection) {
+    public void changeImageUndoRedo(BufferedImage img, boolean ignoreSelection) {
         requireNonNull(img);
         assert img != image; // simple filters always change something
         assert state == NORMAL;
 
-        if (ignoreSelection.isYes()) {
+        if (ignoreSelection) {
             setImage(img);
         } else {
             setImageWithSelection(img);
@@ -760,7 +761,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
 
         if (copyAndTranslateIfSelected) {
-            return ImageUtils.getCopiedSubimage(src, bounds);
+            return ImageUtils.getUnSharedSubimage(src, bounds);
         } else {
             return src.getSubimage(bounds.x, bounds.y, bounds.width, bounds.height);
         }
@@ -1054,7 +1055,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public BufferedImage adjustImage(BufferedImage src) {
+    public BufferedImage actOnImageFromLayerBellow(BufferedImage src) {
         throw new UnsupportedOperationException();
     }
 

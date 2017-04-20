@@ -28,6 +28,9 @@ public class RGBPaletteConfig implements PaletteConfig {
     private float cyanRed = 0.5f;
     private float magentaGreen = 0.5f;
     private float yellowBlue = 0.5f;
+    private JSlider redSlider;
+    private JSlider greenSlider;
+    private JSlider blueSlider;
 
     public RGBPaletteConfig() {
     }
@@ -48,32 +51,14 @@ public class RGBPaletteConfig implements PaletteConfig {
     public JPanel createConfigPanel(VariationsPanel variationsPanel) {
         JPanel p = new JPanel(new GridBagLayout());
 
-        JSlider redSlider = createSlider(cyanRed, "Cyan-red shift");
-        redSlider.addChangeListener(e -> {
-            float oldValue = cyanRed;
-            cyanRed = redSlider.getValue() / 100.0f;
-            if (oldValue != cyanRed) {
-                variationsPanel.configChanged();
-            }
-        });
+        redSlider = createSlider(cyanRed, "Cyan-red shift");
+        redSlider.addChangeListener(e -> onNewRed(variationsPanel));
 
-        JSlider greenSlider = createSlider(magentaGreen, "Magenta-green shift");
-        greenSlider.addChangeListener(e -> {
-            float oldValue = magentaGreen;
-            magentaGreen = greenSlider.getValue() / 100.0f;
-            if (oldValue != magentaGreen) {
-                variationsPanel.configChanged();
-            }
-        });
+        greenSlider = createSlider(magentaGreen, "Magenta-green shift");
+        greenSlider.addChangeListener(e -> onNewGreen(variationsPanel));
 
-        JSlider blueSlider = createSlider(yellowBlue, "Yellow-Blue shift");
-        blueSlider.addChangeListener(e -> {
-            float oldValue = yellowBlue;
-            yellowBlue = blueSlider.getValue() / 100.0f;
-            if (oldValue != yellowBlue) {
-                variationsPanel.configChanged();
-            }
-        });
+        blueSlider = createSlider(yellowBlue, "Yellow-Blue shift");
+        blueSlider.addChangeListener(e -> onNewBlue(variationsPanel));
 
         Insets insets = new Insets(2, 4, 2, 4);
         GridBagConstraints labelCtr = new GridBagConstraints(0, 0, 1, 1, 0, 0,
@@ -97,5 +82,29 @@ public class RGBPaletteConfig implements PaletteConfig {
         p.add(blueSlider, sliderCtr);
 
         return p;
+    }
+
+    private void onNewRed(VariationsPanel variationsPanel) {
+        float oldValue = cyanRed;
+        cyanRed = redSlider.getValue() / 100.0f;
+        if (oldValue != cyanRed) {
+            variationsPanel.configChanged();
+        }
+    }
+
+    private void onNewGreen(VariationsPanel variationsPanel) {
+        float oldValue = magentaGreen;
+        magentaGreen = greenSlider.getValue() / 100.0f;
+        if (oldValue != magentaGreen) {
+            variationsPanel.configChanged();
+        }
+    }
+
+    private void onNewBlue(VariationsPanel variationsPanel) {
+        float oldValue = yellowBlue;
+        yellowBlue = blueSlider.getValue() / 100.0f;
+        if (oldValue != yellowBlue) {
+            variationsPanel.configChanged();
+        }
     }
 }

@@ -82,7 +82,7 @@ public class TextLayer extends ContentLayer {
     }
 
     @Override
-    public BufferedImage adjustImage(BufferedImage src) {
+    public BufferedImage actOnImageFromLayerBellow(BufferedImage src) {
         assert settings.isWatermark(); // should be called only in this case
         return settings.watermarkImage(src, painter);
     }

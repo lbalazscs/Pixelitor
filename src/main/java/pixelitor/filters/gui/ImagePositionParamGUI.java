@@ -72,18 +72,22 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
     // if one of the sliders was moved by the users, update the
     // image position selector and run the filter
     private void linkSliderChangesToModel(ImagePositionParam model) {
-        xSliderModel.addChangeListener(e -> {
-            if (slidersMovedByUser) {
-                model.setRelativeX(xSliderModel.getValue() / 100.0f, xSliderModel.getValueIsAdjusting());
-                imagePositionSelector.repaint();
-            }
-        });
-        ySliderModel.addChangeListener(e -> {
-            if (slidersMovedByUser) {
-                model.setRelativeY(ySliderModel.getValue() / 100.0f, ySliderModel.getValueIsAdjusting());
-                imagePositionSelector.repaint();
-            }
-        });
+        xSliderModel.addChangeListener(e -> onXSliderChange(model));
+        ySliderModel.addChangeListener(e -> onYSliderChange(model));
+    }
+
+    private void onXSliderChange(ImagePositionParam model) {
+        if (slidersMovedByUser) {
+            model.setRelativeX(xSliderModel.getValue() / 100.0f, xSliderModel.getValueIsAdjusting());
+            imagePositionSelector.repaint();
+        }
+    }
+
+    private void onYSliderChange(ImagePositionParam model) {
+        if (slidersMovedByUser) {
+            model.setRelativeY(ySliderModel.getValue() / 100.0f, ySliderModel.getValueIsAdjusting());
+            imagePositionSelector.repaint();
+        }
     }
 
     /**

@@ -23,6 +23,7 @@ import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.TFValidationLayerUI;
 import pixelitor.gui.utils.TextFieldValidator;
 import pixelitor.gui.utils.ValidatedForm;
+import pixelitor.gui.utils.Validation;
 import pixelitor.io.Directories;
 import pixelitor.utils.Messages;
 
@@ -52,7 +53,6 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
     private final JCheckBox pingPongCB = new JCheckBox();
     private final BrowseFilesSupport browseFilesSupport = new BrowseFilesSupport(Directories.getLastSaveDir().getAbsolutePath());
     private JTextField fileNameTF;
-    private String errorMessage;
 
     public OutputSettingsPanel() {
         super(new GridBagLayout());
@@ -164,39 +164,39 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
     }
 
     @Override
-    public boolean isDataValid() {
-        return isValid(nrSecondsTF) && isValid(fpsTF) && isValid(fileNameTF);
+    public Validation checkValidity() {
+        return check(nrSecondsTF)
+                .and(check(fpsTF))
+                .and(check(fileNameTF));
     }
 
     @Override
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    @Override
-    public boolean isValid(JTextField textField) {
+    public Validation check(JTextField textField) {
         if (textField == nrSecondsTF || textField == fpsTF) {
             return isTextFieldWithDoubleValid(textField);
         } else if (textField == fileNameTF) {
             TweenOutputType outputType = (TweenOutputType) outputTypeCB.getSelectedItem();
-            errorMessage = outputType.checkFile(new File(textField.getText().trim()));
-            return (errorMessage == null);
+            String errorMessage = outputType.checkFile(new File(textField.getText()
+                    .trim()));
+            if (errorMessage == null) {
+                return Validation.ok();
+            } else {
+                return Validation.error(errorMessage);
+            }
         } else {
             throw new IllegalStateException("unexpected JTextField");
         }
     }
 
-    private boolean isTextFieldWithDoubleValid(JTextField textField) {
-        boolean valid = true;
+    private static Validation isTextFieldWithDoubleValid(JTextField textField) {
         String text = textField.getText().trim();
         try {
             //noinspection ResultOfMethodCallIgnored
             Double.parseDouble(text);
         } catch (NumberFormatException ex) {
-            valid = false;
-            errorMessage = text + " is not a valid number.";
+            return Validation.error(text + " is not a valid number.");
         }
-        return valid;
+        return Validation.ok();
     }
 
     public void copySettingsInto(TweenAnimation animation) {

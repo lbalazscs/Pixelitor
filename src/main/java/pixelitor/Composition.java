@@ -40,7 +40,6 @@ import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
 import pixelitor.layers.LayerMask;
 import pixelitor.layers.MaskViewMode;
-import pixelitor.selection.IgnoreSelection;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.selection.SelectionInteraction;
@@ -347,33 +346,34 @@ public class Composition implements Serializable {
         assert checkInvariant();
     }
 
-    public void mergeDown(boolean updateGUI) {
+    public void mergeActiveLayerDown(boolean updateGUI) {
         assert checkInvariant();
 
         int activeIndex = layerList.indexOf(activeLayer);
         if (activeIndex > 0 && activeLayer.isVisible()) {
             Layer bellow = layerList.get(activeIndex - 1);
-            if (bellow instanceof ImageLayer) {
-                ImageLayer imageLayerBellow = (ImageLayer) bellow;
-                if (imageLayerBellow.isVisible()) {
-                    // TODO for adjustment effects it is not necessary to copy
-                    BufferedImage backupImage = ImageUtils.copyImage(imageLayerBellow.getImage());
-
-                    activeLayer.mergeDownOn(imageLayerBellow);
-                    imageLayerBellow.updateIconImage();
-                    Layer mergedLayer = activeLayer;
-
-                    deleteActiveLayer(updateGUI, false);
-
-                    PixelitorEdit edit = new LinkedEdit(this, "Merge Down",
-                            new ImageEdit(this, "", imageLayerBellow, backupImage, IgnoreSelection.YES, false),
-                            new DeleteLayerEdit(this, mergedLayer, activeIndex)
-                    );
-
-                    History.addEdit(edit);
-                }
+            if (bellow instanceof ImageLayer && bellow.isVisible()) {
+                mergeActiveLayerToImageLayer(updateGUI, activeIndex, (ImageLayer) bellow);
             }
         }
+    }
+
+    private void mergeActiveLayerToImageLayer(boolean updateGUI, int activeIndex, ImageLayer target) {
+        // TODO for adjustment effects it is not necessary to copy
+        BufferedImage backupImage = ImageUtils.copyImage(target.getImage());
+
+        activeLayer.mergeDownOn(target);
+        target.updateIconImage();
+        Layer mergedLayer = activeLayer;
+
+        deleteActiveLayer(updateGUI, false);
+
+        PixelitorEdit edit = new LinkedEdit(this, "Merge Down",
+                new ImageEdit(this, "", target, backupImage, true, false),
+                new DeleteLayerEdit(this, mergedLayer, activeIndex)
+        );
+
+        History.addEdit(edit);
     }
 
     private void deleteLayer(int layerIndex) {
@@ -506,12 +506,10 @@ public class Composition implements Serializable {
     }
 
     public ContentLayer getAnyContentLayer() {
-        for (Layer layer : layerList) {
-            if (layer instanceof ContentLayer) {
-                return (ContentLayer) layer;
-            }
-        }
-        return null;
+        return (ContentLayer) layerList.stream()
+                .filter(layer -> layer instanceof ContentLayer)
+                .findFirst()
+                .orElse(null);
     }
 
     /**
@@ -952,7 +950,7 @@ public class Composition implements Serializable {
                     imageEdit = new ImageAndMaskEdit(this, editName, layer, backupImage, maskBackupImage, false);
                 } else {
                     // no mask or no mask change, a simple ImageEdit will do
-                    imageEdit = new ImageEdit(this, editName, layer, backupImage, IgnoreSelection.YES, false);
+                    imageEdit = new ImageEdit(this, editName, layer, backupImage, true, false);
                     imageEdit.setFadeable(false);
                 }
                 History.addEdit(new LinkedEdit(this, editName, translationEdit, imageEdit));

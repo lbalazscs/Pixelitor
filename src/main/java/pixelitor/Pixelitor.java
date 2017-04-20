@@ -74,10 +74,10 @@ public class Pixelitor {
             try {
                 createAndShowGUI(args);
 
-                // this will run on a different thread, but call it
-                // here because it is IO-intensive and it should not
-                // slow down the loading of the GUI
-                preloadFontNames();
+                // Call it here because it is IO-intensive and
+                // it should not slow down the loading of the GUI
+                new Thread(Pixelitor::preloadFontNames)
+                        .start();
             } catch (Exception e) {
                 Dialogs.showExceptionDialog(e);
             }
@@ -90,14 +90,9 @@ public class Pixelitor {
     }
 
     private static void preloadFontNames() {
-        // The initial loading of font names can take some noticeable time.
-        // Preload them to speed up the first start of the text creation dialog
-        Runnable loadFontsTask = () -> {
-            GraphicsEnvironment localGE = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            // the results are cached, no need to cached them here
-            localGE.getAvailableFontFamilyNames();
-        };
-        new Thread(loadFontsTask).start();
+        GraphicsEnvironment localGE = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        // the results are cached, no need to cached them here
+        localGE.getAvailableFontFamilyNames();
     }
 
     private static void createAndShowGUI(String[] args) {
@@ -118,7 +113,8 @@ public class Pixelitor {
         } else {
             // ensure that the focus is not grabbed by a textfield
             // so that the keyboard shortcuts work properly
-            FgBgColors.getGUI().requestFocus();
+            FgBgColors.getGUI()
+                    .requestFocus();
         }
 
         TipsOfTheDay.showTips(pw, false);
@@ -134,7 +130,8 @@ public class Pixelitor {
             // ...so set the look-and-feel for the menu only to Aqua
 
             //noinspection ClassNewInstance
-            menuBar.setUI((MenuBarUI) Class.forName("com.apple.laf.AquaMenuBarUI").newInstance());
+            menuBar.setUI((MenuBarUI) Class.forName("com.apple.laf.AquaMenuBarUI")
+                    .newInstance());
         } catch (Exception e) {
             // ignore
         }
@@ -194,16 +191,18 @@ public class Pixelitor {
     private static void addMaskAndShowIt() {
         AddLayerMaskAction.INSTANCE.actionPerformed(null);
         ImageComponent ic = ImageComponents.getActiveIC();
-        Layer layer = ic.getComp().getActiveLayer();
+        Layer layer = ic.getComp()
+                .getActiveLayer();
         MaskViewMode.SHOW_MASK.activate(ic, layer);
     }
 
     private static void clickTool(Tool tool) {
-        tool.getButton().doClick();
+        tool.getButton()
+                .doClick();
     }
 
     private static void startFilter(Filter filter) {
-        filter.execute(ImageComponents.getActiveDrawableOrNull());
+        filter.startOn(ImageComponents.getActiveDrawableOrNull());
     }
 
     private static void addNewImage() {

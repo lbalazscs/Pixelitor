@@ -22,8 +22,8 @@ import pixelitor.automate.WizardPage;
 import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.gui.ParametrizedFilterGUIPanel;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.ValidatedForm;
+import pixelitor.gui.utils.Validation;
 import pixelitor.layers.Drawable;
 
 import javax.swing.*;
@@ -62,17 +62,13 @@ public class TweenWizard extends Wizard {
                 int progress = (Integer) evt.getNewValue();
 
                 progressMonitor.setProgress(progress);
-                String message =
-                        String.format("Completed %d%%.\n", progress);
-                progressMonitor.setNote(message);
+                progressMonitor.setNote(String.format("Completed %d%%.\n", progress));
                 if (progressMonitor.isCanceled()) {
                     // Probably nothing bad happens if the current frame rendering is
                     // interrupted, but to be on the safe side, let the current frame
                     // finish by passing false to cancel
                     task.cancel(false);
                 }
-//                    if( task.isDone()) {
-//                    }
             }
         });
         task.execute();
@@ -86,8 +82,9 @@ public class TweenWizard extends Wizard {
     protected boolean mayMoveForwardIfNextPressed(WizardPage currentPage, Component dialogParent) {
         if(currentPage == OUTPUT_SETTINGS) {
             ValidatedForm settings = (ValidatedForm) currentPage.getPanel(this, dr);
-            if (!settings.isDataValid()) {
-                Dialogs.showErrorDialog(dialogParent, "Error", settings.getErrorMessage());
+            Validation validity = settings.checkValidity();
+            if (!validity.isOK()) {
+                validity.showErrorDialog(dialogParent);
                 return false;
             }
         }

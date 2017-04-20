@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,8 +43,8 @@ public final class RecentFilesMenu extends JMenu {
                 OpenSaveManager.openFile(f);
             } else {
                 // the file was deleted since Pixelitor started
-                String message = String.format("The file %s does not exist.", f.toString());
-                Messages.showError("Problem", message);
+                Messages.showError("Problem",
+                        String.format("The file %s does not exist.", f.toString()));
             }
         } catch (Exception ex) {
             Messages.showException(ex);

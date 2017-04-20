@@ -29,7 +29,6 @@ import pixelitor.ConsistencyChecks;
 import pixelitor.TestHelper;
 import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
-import pixelitor.selection.IgnoreSelection;
 import pixelitor.selection.Selection;
 import pixelitor.testutils.WithMask;
 import pixelitor.testutils.WithTranslation;
@@ -230,9 +229,9 @@ public class ImageLayerTest {
     public void test_changeImageUndoRedo() {
         TestHelper.addSelectionRectTo(comp, 2, 2, 2, 2);
         layer.changeImageUndoRedo(TestHelper.createImage(),
-                IgnoreSelection.NO);
+                false);
         layer.changeImageUndoRedo(TestHelper.createImage(),
-                IgnoreSelection.YES);
+                true);
         iconUpdates.check(0, 0);
     }
 

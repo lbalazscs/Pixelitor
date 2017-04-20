@@ -20,6 +20,7 @@ package pixelitor.automate;
 import pixelitor.gui.utils.BrowseFilesSupport;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.ValidatedForm;
+import pixelitor.gui.utils.Validation;
 import pixelitor.io.Directories;
 import pixelitor.io.OutputFormat;
 
@@ -35,7 +36,6 @@ class OpenSaveDirsPanel extends ValidatedForm {
     private final BrowseFilesSupport inputChooser = new BrowseFilesSupport(Directories.getLastOpenDirPath(), "Select Input Folder", DIRECTORY);
     private final BrowseFilesSupport outputChooser = new BrowseFilesSupport(Directories.getLastSaveDirPath(), "Select Output Folder", DIRECTORY);
     private final boolean allowToBeTheSame;
-    private String errMessage;
 
     private final OutputFormatSelector outputFormatSelector;
 
@@ -58,36 +58,25 @@ class OpenSaveDirsPanel extends ValidatedForm {
         return outputFormatSelector.getSelectedFormat();
     }
 
-    @Override
-    public String getErrorMessage() {
-        return errMessage;
-    }
-
     /**
      * @return true if the data is valid
      */
     @Override
-    public boolean isDataValid() {
+    public Validation checkValidity() {
         File selectedInputDir = inputChooser.getSelectedFile();
         File selectedOutDir = outputChooser.getSelectedFile();
 
-        if (!selectedInputDir.exists()) {
-            errMessage = "The selected input folder " + selectedInputDir.getAbsolutePath() + " does not exist.";
-            return false;
-        }
-        if (!selectedOutDir.exists()) {
-            errMessage = "The selected output folder " + selectedInputDir.getAbsolutePath() + " does not exist.";
-            return false;
-        }
+        Validation v = Validation.ok()
+                .andTrue(selectedInputDir.exists(),
+                        "The selected input folder " + selectedInputDir.getAbsolutePath() + " does not exist.")
+                .andTrue(selectedOutDir.exists(),
+                        "The selected output folder " + selectedInputDir.getAbsolutePath() + " does not exist.");
 
-        if (allowToBeTheSame) {
-            return true;
+        if (!allowToBeTheSame && selectedInputDir.equals(selectedOutDir)) {
+            Validation err = Validation.error("The input and output folders must be different.");
+            return v.and(err);
         }
-        if (selectedInputDir.equals(selectedOutDir)) {
-            errMessage = "The input and output folders must be different";
-            return false;
-        }
-        return true;
+        return v;
     }
 
     public void saveValues() {

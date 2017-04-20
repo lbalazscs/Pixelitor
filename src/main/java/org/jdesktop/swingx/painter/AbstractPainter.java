@@ -22,7 +22,7 @@
 package org.jdesktop.swingx.painter;
 
 import org.jdesktop.beans.AbstractBean;
-import org.jdesktop.swingx.graphics.GraphicsUtilities;
+import org.jdesktop.swingx.util.GraphicsUtilities;
 
 import java.awt.AlphaComposite;
 import java.awt.Composite;

@@ -32,6 +32,9 @@ import java.awt.Component;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
 
+import static pixelitor.ChangeReason.OP_WITHOUT_DIALOG;
+import static pixelitor.ChangeReason.REPEAT_LAST;
+
 /**
  * The superclass of all Pixelitor filters and color adjustments
  */
@@ -52,8 +55,8 @@ public abstract class Filter implements Serializable {
     protected abstract BufferedImage transform(BufferedImage src, BufferedImage dest);
 
     /**
-     * Should a default destination buffer be created before running the op or null can be passed and the
-     * op will take care of that
+     * Should a default destination buffer be created before
+     * running the op or null can be passed and the op will take care of that
      */
     @SuppressWarnings("WeakerAccess")
     protected boolean createDefaultDestBuffer() {
@@ -61,14 +64,38 @@ public abstract class Filter implements Serializable {
     }
 
     /**
-     * This code is executed with busy cursor
+     * The normal starting point, used when called in the menu
+     * Overwritten for filters with GUI
      */
-    public void runit(Drawable dr, ChangeReason changeReason) {
+    public void startOn(Drawable dr) {
+        startOn(dr, OP_WITHOUT_DIALOG);
+    }
+
+    public void startOn(Drawable dr, ChangeReason cr) {
+        execute(dr, cr, PixelitorWindow.getInstance());
+    }
+
+    public void execute(Drawable dr, ChangeReason cr, Component busyCursorParent) {
+        String filterName = getName();
+
+        long startTime = System.nanoTime();
+
+        Runnable task = () -> transformAndHandleExceptions(dr, cr);
+        Utils.executeWithBusyCursor(busyCursorParent, task);
+
+        long totalTime = (System.nanoTime() - startTime) / 1_000_000;
+        Messages.showPerformanceMessage(filterName, totalTime);
+
+        FilterUtils.setLastExecutedFilter(this);
+        RepeatLast.INSTANCE.setActionName("Repeat " + filterName);
+    }
+
+    private void transformAndHandleExceptions(Drawable dr, ChangeReason cr) {
         BufferedImage dest;
 
         try {
             if (dr == null) {
-                if (changeReason == ChangeReason.REPEAT_LAST) {
+                if (cr == REPEAT_LAST) {
                     // TODO bug: the repeat last menu is not
                     // always deactivated for text layers
                     return;
@@ -79,16 +106,18 @@ public abstract class Filter implements Serializable {
             }
 
             BufferedImage src = dr.getFilterSourceImage();
-            dest = executeForOneLayer(src);
+            dest = transformImage(src);
 
             assert dest != null;
 
-            if (changeReason.isPreview()) {
-                dr.changePreviewImage(dest, getName(), changeReason);
+            if (cr.isPreview()) {
+                dr.changePreviewImage(dest, getName(), cr);
             } else {
-                dr.filterWithoutDialogFinished(dest, changeReason, getName());
+                dr.filterWithoutDialogFinished(dest, cr, getName());
             }
-        } catch (Exception e) {
+        } catch (OutOfMemoryError e) {
+            Dialogs.showOutOfMemoryDialog(e);
+        } catch (Throwable e) {
             ImageLayer layer = (ImageLayer) dr;
             if (layer instanceof LayerMask) {
                 layer = (ImageLayer) layer.getParent();
@@ -99,29 +128,25 @@ public abstract class Filter implements Serializable {
                             "layer = '%s' (%s)\n" +
                             "hasMask = '%s'\n" +
                             "mask editing = '%b'",
-                    getName(), layer.getComp().getName(),
-                    layer.getName(), layer.getClass().getSimpleName(),
+                    getName(), layer.getComp()
+                            .getName(),
+                    layer.getName(), layer.getClass()
+                            .getSimpleName(),
                     layer.hasMask(), layer.isMaskEditing());
-            throw new IllegalStateException(msg, e);
+
+
+            IllegalStateException ise = new IllegalStateException(msg, e);
+            if (RandomGUITest.isRunning()) {
+                throw ise; // we can debug the exact filter parameters only in RandomGUITest
+            }
+            Messages.showException(ise);
         }
     }
 
-
-    public void execute(Drawable dr) {
-        execute(dr, ChangeReason.OP_WITHOUT_DIALOG);
-    }
-
-    public void execute(Drawable dr, ChangeReason changeReason) {
-        // only filters without a GUI call this
-
-        executeWithBusyCursor(dr, changeReason, PixelitorWindow.getInstance());
-    }
-
-    public BufferedImage executeForOneLayer(BufferedImage src) {
+    public BufferedImage transformImage(BufferedImage src) {
         boolean convertFromGray = false;
         if (src.getType() == BufferedImage.TYPE_BYTE_GRAY) { // editing a mask
             if (!supportsGray()) {
-//                System.out.println("Filter::executeForOneLayer: converting to RGB for " + getName());
                 convertFromGray = true;
                 src = ImageUtils.toSysCompatibleImage(src);
             }
@@ -145,40 +170,6 @@ public abstract class Filter implements Serializable {
         return dest;
     }
 
-    /**
-     * Executes the given filter with busy cursor
-     */
-    public void executeWithBusyCursor(Drawable dr, ChangeReason changeReason, Component busyCursorParent) {
-        String filterName = getName();
-
-        try {
-            long startTime = System.nanoTime();
-
-            Runnable task = () -> runit(dr, changeReason);
-            Utils.executeWithBusyCursor(busyCursorParent, task);
-
-            long totalTime = (System.nanoTime() - startTime) / 1_000_000;
-            String performanceMessage;
-            if (totalTime < 1000) {
-                performanceMessage = filterName + " took " + totalTime + " ms";
-            } else {
-                float seconds = totalTime / 1000.0f;
-                performanceMessage = String.format("%s took %.1f s", filterName, seconds);
-            }
-            Messages.showStatusMessage(performanceMessage);
-        } catch (OutOfMemoryError e) {
-            Dialogs.showOutOfMemoryDialog(e);
-        } catch (Throwable e) { // make sure AssertionErrors are caught
-            if (RandomGUITest.isRunning()) {
-                throw e; // we can debug the exact filter parameters only in RandomGUITest
-            }
-            Messages.showException(e);
-        }
-
-        FilterUtils.setLastExecutedFilter(this);
-        RepeatLast.INSTANCE.setActionName("Repeat " + filterName);
-    }
-
     public abstract void randomizeSettings();
 
     public void setFilterAction(FilterAction filterAction) {
@@ -186,7 +177,7 @@ public abstract class Filter implements Serializable {
     }
 
     public String getName() {
-        if(filterAction != null) {
+        if (filterAction != null) {
             return filterAction.getName();
         }
         // We cannot assume that a FilterAction always exists because the

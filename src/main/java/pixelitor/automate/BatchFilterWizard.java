@@ -17,13 +17,13 @@
 
 package pixelitor.automate;
 
-import pixelitor.ChangeReason;
 import pixelitor.filters.Filter;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.layers.Drawable;
 
 import java.awt.Component;
 
+import static pixelitor.ChangeReason.BATCH_AUTOMATE;
 import static pixelitor.automate.BatchFilterWizardPage.SELECT_FILTER_AND_DIRS;
 
 /**
@@ -50,12 +50,11 @@ public class BatchFilterWizard extends Wizard {
     protected void finalAction() {
         PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
 
-        Automate.processEachFile(comp -> {
-            filter.executeWithBusyCursor(
-                    comp.getActiveDrawable(),
-                    ChangeReason.BATCH_AUTOMATE,
-                    busyCursorParent);
-        }, true, "Batch Filter Progress");
+        Automate.processEachFile(comp -> filter.execute(
+                comp.getActiveDrawable(),
+                BATCH_AUTOMATE,
+                busyCursorParent),
+                true, "Batch Filter Progress");
     }
 
     @Override

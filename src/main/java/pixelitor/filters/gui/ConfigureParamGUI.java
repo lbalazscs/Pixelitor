@@ -35,11 +35,13 @@ public class ConfigureParamGUI extends JPanel implements ParamGUI {
         configureButton = new JButton("Configure...");
         add(configureButton, BorderLayout.CENTER);
         add(defaultButton, BorderLayout.EAST);
-        configureButton.addActionListener(e -> {
-            JDialog owner = (JDialog) SwingUtilities.getWindowAncestor(configureButton);
-            JDialog dialog = dialogFactory.apply(owner);
-            dialog.setVisible(true);
-        });
+        configureButton.addActionListener(e -> createAndShowDialog(dialogFactory));
+    }
+
+    private void createAndShowDialog(Function<JDialog, JDialog> dialogFactory) {
+        JDialog owner = (JDialog) SwingUtilities.getWindowAncestor(configureButton);
+        JDialog dialog = dialogFactory.apply(owner);
+        dialog.setVisible(true);
     }
 
     @Override

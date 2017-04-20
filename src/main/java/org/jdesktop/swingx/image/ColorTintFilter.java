@@ -34,7 +34,7 @@
 
 package org.jdesktop.swingx.image;
 
-import org.jdesktop.swingx.graphics.GraphicsUtilities;
+import org.jdesktop.swingx.util.GraphicsUtilities;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;

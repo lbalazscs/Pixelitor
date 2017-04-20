@@ -19,7 +19,6 @@ package pixelitor.utils.test;
 
 import com.bric.util.JVM;
 import pixelitor.Build;
-import pixelitor.ChangeReason;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.colors.FgBgColors;
@@ -94,6 +93,8 @@ import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import static pixelitor.ChangeReason.OP_PREVIEW;
+import static pixelitor.ChangeReason.OP_WITHOUT_DIALOG;
 import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
 import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
 import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_180;
@@ -390,7 +391,7 @@ public class RandomGUITest {
 
             try {
                 f.randomizeSettings();
-                f.execute(dr, ChangeReason.OP_PREVIEW);
+                f.startOn(dr, OP_PREVIEW);
             } catch (Throwable e) {
                 BufferedImage src = dr.getFilterSourceImage();
                 if (f instanceof FilterWithParametrizedGUI) {
@@ -414,7 +415,7 @@ public class RandomGUITest {
         } else {
             BufferedImage src = dr.getFilterSourceImage();
             try {
-                f.execute(dr, ChangeReason.OP_WITHOUT_DIALOG);
+                f.startOn(dr, OP_WITHOUT_DIALOG);
             } catch (Throwable e) {
                 System.out.println(String.format(
                         "RandomGUITest::randomFilter: name = %s, width = %d, height = %d",
@@ -465,7 +466,7 @@ public class RandomGUITest {
         PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
 
         try {
-            filter.executeWithBusyCursor(dr, ChangeReason.OP_PREVIEW, busyCursorParent);
+            filter.execute(dr, OP_PREVIEW, busyCursorParent);
         } catch (Throwable e) {
             BufferedImage src = dr.getFilterSourceImage();
             String msg = String.format(
@@ -623,7 +624,7 @@ public class RandomGUITest {
         fade.setOpacity(opacity);
 
         Drawable dr = ImageComponents.getActiveDrawableOrNull();
-        fade.execute(dr, ChangeReason.OP_WITHOUT_DIALOG);
+        fade.startOn(dr, OP_WITHOUT_DIALOG);
     }
 
     private static void randomizeToolSettings() {
@@ -747,7 +748,7 @@ public class RandomGUITest {
 
         if (rand.nextBoolean()) {
             log("layer merge down");
-            comp.mergeDown(true);
+            comp.mergeActiveLayerDown(true);
         } else {
             log("layer flatten image");
             comp.flattenImage(true);

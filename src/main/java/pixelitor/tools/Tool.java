@@ -26,7 +26,6 @@ import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.history.PartialImageEdit;
 import pixelitor.layers.Drawable;
-import pixelitor.selection.IgnoreSelection;
 import pixelitor.tools.toolhandlers.ColorPickerToolHandler;
 import pixelitor.tools.toolhandlers.CurrentToolHandler;
 import pixelitor.tools.toolhandlers.HandToolHandler;
@@ -221,7 +220,7 @@ public abstract class Tool implements KeyboardObserver {
 
         ImageEdit edit = new ImageEdit(comp, getName(),
                 comp.getActiveDrawable(), copy,
-                IgnoreSelection.NO, false);
+                false, false);
         History.addEdit(edit);
     }
 

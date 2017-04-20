@@ -210,7 +210,7 @@ public class LayerBlendingModesTest {
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // merging down the invert adjustment with black mask should have no effect
-        comp.mergeDown(false);
+        comp.mergeActiveLayerDown(false);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // adding a no-op adjustment layer should change nothing
@@ -219,7 +219,7 @@ public class LayerBlendingModesTest {
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // merging down the no-op adjustment with black mask should have no effect
-        comp.mergeDown(false);
+        comp.mergeActiveLayerDown(false);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // delete the upper layer
@@ -241,7 +241,7 @@ public class LayerBlendingModesTest {
         assertThat(getResultingColor()).isEqualTo(lowerColor);
 
         // merging down the adjustment with black mask should have no effect
-        comp.mergeDown(false);
+        comp.mergeActiveLayerDown(false);
         assertThat(getResultingColor()).isEqualTo(lowerColor);
         assertThat(comp.getNumLayers()).isEqualTo(1);
 
@@ -260,7 +260,7 @@ public class LayerBlendingModesTest {
         assertThat(getResultingColor()).isEqualTo(lowerColor);
 
         // merging down the text layer with black mask should have no effect
-        comp.mergeDown(false);
+        comp.mergeActiveLayerDown(false);
         assertThat(getResultingColor()).isEqualTo(lowerColor);
         assertThat(comp.getNumLayers()).isEqualTo(1);
 
@@ -269,7 +269,7 @@ public class LayerBlendingModesTest {
         assertThat(comp.getNumLayers()).isEqualTo(2);
         upperLayer.setBlendingMode(blendingMode, false, true, true);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
-        comp.mergeDown(false);
+        comp.mergeActiveLayerDown(false);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
         assertThat(comp.getNumLayers()).isEqualTo(1);
     }

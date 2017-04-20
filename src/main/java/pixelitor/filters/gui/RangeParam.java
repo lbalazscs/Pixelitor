@@ -58,25 +58,25 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     private boolean adjustMaxAccordingToImage = false;
     private double maxToImageSizeRatio;
 
-    public RangeParam(String name, int min, int defaultV, int max) {
-        this(name, min, defaultV, max, true, BORDER);
+    public RangeParam(String name, int min, int def, int max) {
+        this(name, min, def, max, true, BORDER);
     }
 
-    public RangeParam(String name, int min, int defaultV, int max, boolean addDefaultButton, SliderSpinner.TextPosition position) {
-        this(name, min, defaultV, max, addDefaultButton, position, ALLOW_RANDOMIZE);
+    public RangeParam(String name, int min, int def, int max, boolean addDefaultButton, SliderSpinner.TextPosition position) {
+        this(name, min, def, max, addDefaultButton, position, ALLOW_RANDOMIZE);
     }
 
-    public RangeParam(String name, int min, int defaultV, int max, boolean addDefaultButton, SliderSpinner.TextPosition position, RandomizePolicy randomizePolicy) {
+    public RangeParam(String name, int min, int def, int max, boolean addDefaultButton, SliderSpinner.TextPosition position, RandomizePolicy randomizePolicy) {
         super(name, randomizePolicy);
 
         assert min < max : name + ": min (" + min + ") >= max (" + max + ')';
-        assert defaultV >= min : name + ": defaultV (" + defaultV + ") < min (" + min + ')';
-        assert defaultV <= max : name + ": defaultV (" + defaultV + ") > max (" + max + ')';
+        assert def >= min : name + ": def (" + def + ") < min (" + min + ')';
+        assert def <= max : name + ": def (" + def + ") > max (" + max + ')';
 
         this.minValue = min;
         this.maxValue = max;
-        this.defaultValue = defaultV;
-        this.value = defaultV;
+        this.defaultValue = def;
+        this.value = def;
         this.addDefaultButton = addDefaultButton;
         this.textPosition = position;
     }

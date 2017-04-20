@@ -34,6 +34,7 @@ import java.awt.Color;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Objects;
 
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
@@ -160,7 +161,7 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
         boolean enabled = enabledCB.isSelected();
 
         return (enabled == defaultEnabled)
-                && color.equals(defaultColor);
+                && Objects.equals(color, defaultColor);
     }
 
     @Override

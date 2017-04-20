@@ -97,7 +97,9 @@ public class AngleParamGUI extends JPanel implements ParamGUI {
 
     @Override
     public void setToolTip(String tip) {
-        // TODO should have some generic tooltip
+        setToolTipText(tip);
+        selectorUI.setToolTipText(tip);
+        sliderSpinner.setToolTip(tip);
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -88,7 +88,7 @@ public class Selection {
         marchingAntsTimer = new Timer(100, null);
         marchingAntsTimer.addActionListener(evt -> {
             if(!hidden) {
-                dashPhase += 1 / ic.getViewScale();
+                dashPhase += 1.0f / ic.getViewScale();
                 repaint();
             }
         });

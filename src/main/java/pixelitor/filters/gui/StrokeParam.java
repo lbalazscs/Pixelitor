@@ -30,6 +30,7 @@ import pixelitor.utils.debug.DebugNode;
 import javax.swing.*;
 import java.awt.Rectangle;
 import java.awt.Stroke;
+import java.util.Arrays;
 
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
@@ -163,13 +164,8 @@ public class StrokeParam extends AbstractFilterParam {
 
     @Override
     public boolean isSetToDefault() {
-        for (FilterParam param : allParams) {
-            if (!param.isSetToDefault()) {
-                return false;
-            }
-        }
-
-        return true;
+        return Arrays.stream(allParams)
+                .allMatch(Resettable::isSetToDefault);
     }
 
     @Override

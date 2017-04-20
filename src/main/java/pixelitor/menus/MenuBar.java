@@ -417,7 +417,7 @@ public class MenuBar extends JMenuBar {
         layersMenu.addActionWithKey(new MenuAction("Merge Down") {
             @Override
             public void onClick() {
-                getActiveCompOrNull().mergeDown(true);
+                getActiveCompOrNull().mergeActiveLayerDown(true);
             }
         }, CTRL_E);
 
