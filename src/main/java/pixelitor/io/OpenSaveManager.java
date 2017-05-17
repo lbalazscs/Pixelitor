@@ -52,8 +52,7 @@ import java.util.zip.GZIPOutputStream;
 
 public class OpenSaveManager {
     private static final int CURRENT_PXC_VERSION_NUMBER = 0x03;
-    private static final float DEFAULT_JPEG_QUALITY = 0.87f;
-    private static float jpegQuality = DEFAULT_JPEG_QUALITY;
+    private static JpegSettings jpegSettings = JpegSettings.getDefaults();
 
     /**
      * Utility class with static methods
@@ -149,7 +148,7 @@ public class OpenSaveManager {
         Runnable r = () -> {
             try {
                 if ("jpg".equals(format)) {
-                    JpegOutput.writeJPG(image, selectedFile, jpegQuality);
+                    JpegOutput.writeJPG(image, selectedFile, jpegSettings);
                 } else {
                     ImageIO.write(image, format, selectedFile);
                 }
@@ -359,16 +358,16 @@ public class OpenSaveManager {
         worker.execute();
     }
 
-    public static void saveJpegWithQuality(float quality) {
+    public static void saveJpegWithQuality(JpegSettings settings) {
         try {
             FileChoosers.initSaveChooser();
             FileChoosers.setOnlyOneSaveExtension(FileChoosers.jpegFilter);
 
-            jpegQuality = quality;
+            jpegSettings = settings;
             FileChoosers.showSaveChooserAndSaveComp(ImageComponents.getActiveCompOrNull());
         } finally {
             FileChoosers.setDefaultSaveExtensions();
-            jpegQuality = DEFAULT_JPEG_QUALITY;
+            jpegSettings = JpegSettings.getDefaults();
         }
     }
 

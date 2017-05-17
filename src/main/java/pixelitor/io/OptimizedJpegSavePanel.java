@@ -43,6 +43,7 @@ public class OptimizedJpegSavePanel extends JPanel {
     private RangeParam qualityParam;
     private JLabel sizeLabel;
     private ImagePanel original;
+    private JCheckBox progressiveCB;
 
     private OptimizedJpegSavePanel(BufferedImage image) {
         this.image = image;
@@ -102,20 +103,27 @@ public class OptimizedJpegSavePanel extends JPanel {
     private JPanel createControlsPanel() {
         qualityParam = new RangeParam("JPEG Quality", 1, 60, 100);
         qualityParam.setAdjustmentListener(this::updateAfterPreview);
+
+
         SliderSpinner qualitySpinner = new SliderSpinner(qualityParam, WEST, false);
         JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         southPanel.add(qualitySpinner);
+
         sizeLabel = new JLabel();
         southPanel.add(sizeLabel);
+
+        progressiveCB = new JCheckBox("Progressive", false);
+        progressiveCB.addActionListener(e -> updateAfterPreview());
+        southPanel.add(progressiveCB);
 
         return southPanel;
     }
 
     private void updateAfterPreview() {
-        float quality = getSelectedQuality();
+        JpegSettings settings = getSelectedSettings();
 
         JpegOutput.ImageWithSize[] imageWithSize = new JpegOutput.ImageWithSize[1];
-        Runnable task = () -> imageWithSize[0] = JpegOutput.writeJPGtoPreviewImage(this.image, quality);
+        Runnable task = () -> imageWithSize[0] = JpegOutput.writeJPGtoPreviewImage(this.image, settings);
         Utils.executeWithBusyCursor(this, task);
 
         BufferedImage newPreview = imageWithSize[0].getImage();
@@ -125,8 +133,9 @@ public class OptimizedJpegSavePanel extends JPanel {
         sizeLabel.setText("Size: " + Utils.bytesToString(numBytes));
     }
 
-    private float getSelectedQuality() {
-        return qualityParam.getValueAsPercentage();
+    private JpegSettings getSelectedSettings() {
+        return new JpegSettings(qualityParam.getValueAsPercentage(),
+                progressiveCB.isSelected());
     }
 
     public static void showInDialog(BufferedImage image, JFrame frame) {
@@ -137,8 +146,8 @@ public class OptimizedJpegSavePanel extends JPanel {
             @Override
             protected void dialogAccepted() {
                 close();
-                float quality = p.getSelectedQuality();
-                OpenSaveManager.saveJpegWithQuality(quality);
+                JpegSettings settings = p.getSelectedSettings();
+                OpenSaveManager.saveJpegWithQuality(settings);
             }
         };
         d.setVisible(true);

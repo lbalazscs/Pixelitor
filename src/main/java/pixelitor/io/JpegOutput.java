@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,20 +42,20 @@ public final class JpegOutput {
     private JpegOutput() {
     }
 
-    public static void writeJPG(BufferedImage image, File file, float quality) throws IOException {
+    public static void writeJPG(BufferedImage image, File file, JpegSettings settings) throws IOException {
         ImageOutputStream ios = ImageIO.createImageOutputStream(file);
         if (ios != null) {
-            writeJPGtoStream(image, ios, quality);
+            writeJPGtoStream(image, ios, settings);
         }
     }
 
-    public static ImageWithSize writeJPGtoPreviewImage(BufferedImage image, float quality) {
+    public static ImageWithSize writeJPGtoPreviewImage(BufferedImage image, JpegSettings settings) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream(32768);
         BufferedImage previewImage = null;
         byte[] bytes = null;
         try {
             ImageOutputStream ios = ImageIO.createImageOutputStream(bos);
-            writeJPGtoStream(image, ios, quality);
+            writeJPGtoStream(image, ios, settings);
 
             bytes = bos.toByteArray();
             ByteArrayInputStream in = new ByteArrayInputStream(bytes);
@@ -69,7 +69,7 @@ public final class JpegOutput {
         return new ImageWithSize(previewImage, sizeInBytes);
     }
 
-    private static void writeJPGtoStream(BufferedImage image, ImageInputStream ios, float quality) throws IOException {
+    private static void writeJPGtoStream(BufferedImage image, ImageInputStream ios, JpegSettings jpegSettings) throws IOException {
         Iterator<ImageWriter> jpgWriters = ImageIO.getImageWritersByFormatName("jpg");
         if (!jpgWriters.hasNext()) {
             throw new IllegalStateException("No JPG writers found");
@@ -78,8 +78,14 @@ public final class JpegOutput {
 
         ImageWriteParam imageWriteParam = writer.getDefaultWriteParam();
 
+        if (jpegSettings.isProgressive()) {
+            imageWriteParam.setProgressiveMode(ImageWriteParam.MODE_DEFAULT);
+        } else {
+            imageWriteParam.setProgressiveMode(ImageWriteParam.MODE_DISABLED);
+        }
+
         imageWriteParam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-        imageWriteParam.setCompressionQuality(quality);
+        imageWriteParam.setCompressionQuality(jpegSettings.getQuality());
 
         IIOImage iioImage = new IIOImage(image, null, null);
 
