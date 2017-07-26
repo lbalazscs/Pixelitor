@@ -120,6 +120,7 @@ public final class ConsistencyChecks {
         }
     }
 
+    @SuppressWarnings("SameReturnValue")
     public static boolean imageCoversCanvasCheck(Composition comp) {
         comp.forEachDrawable(ConsistencyChecks::imageCoversCanvasCheck);
         return true;

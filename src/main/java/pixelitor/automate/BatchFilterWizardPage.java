@@ -114,5 +114,5 @@ public enum BatchFilterWizardPage implements WizardPage {
             // cancel the previewing
             onWizardCanceled(dr);
         }
-    };
+    }
 }

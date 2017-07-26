@@ -25,6 +25,9 @@ public class Directories {
     private static File lastOpenDir = AppPreferences.loadLastOpenDir();
     private static File lastSaveDir = AppPreferences.loadLastSaveDir();
 
+    private Directories() {
+    }
+
     public static File getLastOpenDir() {
         return lastOpenDir;
     }

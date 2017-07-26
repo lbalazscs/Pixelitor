@@ -205,7 +205,7 @@ public class LayerButton extends JToggleButton {
     private void wireSelectionWithLayerActivation(Layer layer) {
         addItemListener(e -> {
             if (isSelected()) {
-                layer.makeActive(userInteraction ? true : false);
+                layer.makeActive(userInteraction);
             } else {
                 nameEditor.disableEditing();
                 // Invoke later because we can get here in the middle

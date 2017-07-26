@@ -173,6 +173,7 @@ public class ImageComponents {
         try {
             Composition comp = getActiveCompOrNull();
             if (comp != null) {
+                //noinspection CodeBlock2Expr
                 comp.onSelection(sel -> {
                     new Crop(sel.getShapeBounds(), true, true)
                             .process(comp);

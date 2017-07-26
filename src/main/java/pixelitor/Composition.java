@@ -180,7 +180,6 @@ public class Composition implements Serializable {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
 
-        //noinspection Convert2streamapi
         for (Layer layer : layerList) {
             if (layer instanceof ImageLayer) {
                 ((ImageLayer) layer).updateIconImage();

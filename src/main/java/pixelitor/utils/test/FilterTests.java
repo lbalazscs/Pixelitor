@@ -222,7 +222,7 @@ public class FilterTests {
         Arrays.sort(filters, (o1, o2) -> {
             double o1Time = results.get(o1.getName());
             double o2Time = results.get(o2.getName());
-            return (o1Time - o2Time) > 0 ? 1 : -1;
+            return Double.compare(o1Time, o2Time);
         });
         for (Filter filter : filters) {
             String name = filter.getName();
