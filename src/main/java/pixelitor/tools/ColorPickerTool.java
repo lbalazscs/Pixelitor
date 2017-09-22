@@ -111,7 +111,9 @@ public class ColorPickerTool extends Tool {
         if (isGray) {
             msg += ", gray = " + r;
         } else {
-            msg += ", alpha = " + a + ", red = " + r + ", green = " + g + ", blue = " + b;
+            float[] hsbValues = Color.RGBtoHSB(r, g, b, null);
+
+            msg += String.format(", alpha = %d, red = %d, green = %d, blue = %d, hue = %.2f, saturation = %.2f, brightness = %.2f", a, r, g, b, hsbValues[0], hsbValues[1], hsbValues[2]);
         }
 
         Messages.showStatusMessage(msg);
