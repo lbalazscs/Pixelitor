@@ -147,28 +147,21 @@ public class OpenRaster {
             System.out.println(String.format("OpenRaster::readOpenRaster: stackXML = '%s'", stackXML));
         }
 
-        Document doc = loadXMLFromString(stackXML);
-        Element docElement = doc.getDocumentElement();
-        docElement.normalize();
-        String documentElementNodeName = docElement.getNodeName();
+        Element doc = loadXMLFromString(stackXML).getDocumentElement();
+        doc.normalize();
+        String documentElementNodeName = doc.getNodeName();
         if(!documentElementNodeName.equals("image")) {
             throw new IllegalStateException(String.format("stack.xml root element is '%s', expected: 'image'",
                     documentElementNodeName));
         }
 
-        String w = docElement.getAttribute("w");
-        int compWidth = Integer.parseInt(w);
-        String h = docElement.getAttribute("h");
-        int compHeight = Integer.parseInt(h);
-
-        if(DEBUG) {
-            System.out.println(String.format("OpenRaster::readOpenRaster: w = '%s', h = '%s', compWidth = %d, compHeight = %d", w, h, compWidth, compHeight));
-        }
+        int compWidth = Integer.parseInt(doc.getAttribute("w"));
+        int compHeight = Integer.parseInt(doc.getAttribute("h"));
 
         Composition comp = Composition.createEmpty(compWidth, compHeight);
         comp.setFile(file);
 
-        NodeList layers = docElement.getElementsByTagName("layer");
+        NodeList layers = doc.getElementsByTagName("layer");
         for (int i = layers.getLength() - 1; i >= 0; i--) { // stack.xml contains layers in reverse order
             Node node = layers.item(i);
             Element element = (Element) node;
@@ -238,7 +231,10 @@ public class OpenRaster {
     }
 
     private static String extractString(InputStream is) {
-        Scanner s = new Scanner(is).useDelimiter("\\A");
-        return s.hasNext() ? s.next() : "";
+        String retVal;
+        try (Scanner s = new Scanner(is).useDelimiter("\\A")) {
+            retVal = s.hasNext() ? s.next() : "";
+        }
+        return retVal;
     }
 }

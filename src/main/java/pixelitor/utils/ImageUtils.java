@@ -1083,7 +1083,7 @@ public class ImageUtils {
     public static String debugSmallImage(BufferedImage im) {
         int width = im.getWidth();
         int height = im.getHeight();
-        StringBuilder s = new StringBuilder();
+        StringBuilder s = new StringBuilder(100);
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int rgb = im.getRGB(x, y);

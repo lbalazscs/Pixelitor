@@ -205,7 +205,7 @@ public class CustomConvolveAdjustments extends FilterGUIPanel implements ActionL
     }
 
     private void init3x3Presets() {
-        initPreset("\"Corner\" Blur", (new float[]{
+        initPreset("Corner Blur", (new float[]{
                 0.25f, 0.0f, 0.25f,
                 0.0f, 0.0f, 0.0f,
                 0.25f, 0.0f, 0.25f}));
@@ -215,7 +215,7 @@ public class CustomConvolveAdjustments extends FilterGUIPanel implements ActionL
                 2 / 16.0f, 4 / 16.0f, 2 / 16.0f,
                 1 / 16.0f, 2 / 16.0f, 1 / 16.0f});
 
-        initPreset("Mean Filter", new float[]{
+        initPreset("Mean Blur", new float[]{
                 0.1115f, 0.1115f, 0.1115f,
                 0.1115f, 0.1115f, 0.1115f,
                 0.1115f, 0.1115f, 0.1115f});

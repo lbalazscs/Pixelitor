@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,8 +31,6 @@ import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 
-import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
-import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
 import static java.awt.MultipleGradientPaint.CycleMethod.REPEAT;
 
 /**
@@ -199,24 +197,28 @@ public class DiamondGradientPaint implements Paint {
 
             double interpolationValue = v1 + v2;
 
-            if (cycleMethod == NO_CYCLE) {
-                if (interpolationValue > 1.0) {
-                    interpolationValue = 1.0f;
-                }
-            } else if (cycleMethod == REFLECT) {
-                interpolationValue %= 1.0;
-                if (interpolationValue < 0.5) {
-                    interpolationValue = 2.0f * interpolationValue;
-                } else {
-                    interpolationValue = 2.0f * (1 - interpolationValue);
-                }
-            } else if (cycleMethod == REPEAT) {
-                interpolationValue %= 1.0;
-                if (interpolationValue < 0.5) {
-                    interpolationValue = 2.0f * interpolationValue;
-                } else {
-                    interpolationValue = 2.0f * (interpolationValue - 0.5f);
-                }
+            switch (cycleMethod) {
+                case NO_CYCLE:
+                    if (interpolationValue > 1.0) {
+                        interpolationValue = 1.0f;
+                    }
+                    break;
+                case REFLECT:
+                    interpolationValue %= 1.0;
+                    if (interpolationValue < 0.5) {
+                        interpolationValue = 2.0f * interpolationValue;
+                    } else {
+                        interpolationValue = 2.0f * (1 - interpolationValue);
+                    }
+                    break;
+                case REPEAT:
+                    interpolationValue %= 1.0;
+                    if (interpolationValue < 0.5) {
+                        interpolationValue = 2.0f * interpolationValue;
+                    } else {
+                        interpolationValue = 2.0f * (interpolationValue - 0.5f);
+                    }
+                    break;
             }
             return interpolationValue;
         }

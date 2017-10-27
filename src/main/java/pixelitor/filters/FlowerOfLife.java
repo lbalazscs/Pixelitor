@@ -38,7 +38,7 @@ public class FlowerOfLife extends ShapeFilter {
     private final static int GRID_TYPE_SQUARE = 2;
     private final static int GRID_TYPE_SQUARE_2 = 3;
 
-    public static final double SQRT_2 = 1.4142135623730950488016887242097;
+    private static final double SQRT_2 = 1.4142135623730950488016887242097;
 
     private final RangeParam radius = new RangeParam("Radius", 1, 50, 100);
     private final RangeParam iterations = new RangeParam("Iterations", 1, 3, 10);

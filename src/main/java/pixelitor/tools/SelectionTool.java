@@ -37,8 +37,8 @@ import java.awt.event.MouseEvent;
  * The selection tool
  */
 public class SelectionTool extends Tool implements ImageSwitchListener {
-    public static final String HELP_TEXT = "Click and drag to select an area. Hold SPACE down to move the entire selection. Shift-drag adds to an existing selection, Alt-drag removes from it, Shift+Alt intersects.";
-    public static final String POLY_HELP_TEXT = "Polygonal selection: Click to add points, double-click (or right-click) to finish the selection.";
+    private static final String HELP_TEXT = "Click and drag to select an area. Hold SPACE down to move the entire selection. Shift-drag adds to an existing selection, Alt-drag removes from it, Shift+Alt intersects.";
+    private static final String POLY_HELP_TEXT = "Polygonal selection: Click to add points, double-click (or right-click) to finish the selection.";
 
     private JComboBox<SelectionType> typeCombo;
     private JComboBox<SelectionInteraction> interactionCombo;

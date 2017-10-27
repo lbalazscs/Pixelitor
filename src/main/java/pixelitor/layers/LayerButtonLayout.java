@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2017 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -65,16 +65,21 @@ public class LayerButtonLayout implements LayoutManager {
     @Override
     public void addLayoutComponent(String name, Component comp) {
         synchronized (comp.getTreeLock()) {
-            if (CHECKBOX.equals(name)) {
-                checkBox = (JCheckBox) comp;
-            } else if (LAYER.equals(name)) {
-                layerLabel = (JLabel) comp;
-            } else if (MASK.equals(name)) {
-                maskLabel = (JLabel) comp;
-            } else if (NAME_EDITOR.equals(name)) {
-                nameEditor = comp;
-            } else {
-                throw new IllegalStateException();
+            switch (name) {
+                case CHECKBOX:
+                    checkBox = (JCheckBox) comp;
+                    break;
+                case LAYER:
+                    layerLabel = (JLabel) comp;
+                    break;
+                case MASK:
+                    maskLabel = (JLabel) comp;
+                    break;
+                case NAME_EDITOR:
+                    nameEditor = comp;
+                    break;
+                default:
+                    throw new IllegalStateException();
             }
         }
     }

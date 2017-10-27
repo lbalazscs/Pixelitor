@@ -267,7 +267,6 @@ public class ImageComponents {
     }
 
     public static void repaintAll() {
-        //noinspection Convert2streamapi
         for (ImageComponent ic : icList) {
             ic.repaint();
         }
@@ -346,7 +345,6 @@ public class ImageComponents {
     }
 
     public static void forAllImages(Consumer<ImageComponent> action) {
-        //noinspection Convert2streamapi
         for (ImageComponent ic : icList) {
             action.accept(ic);
         }

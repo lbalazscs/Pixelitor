@@ -55,7 +55,6 @@ public class AbstractBrushToolTest {
     private Brush brushSpy;
     private Brush origBrush;
 
-    private Composition comp;
     private Drawable dr;
 
     @Parameters(name = "{index}: {0}, mask = {1}")
@@ -76,7 +75,7 @@ public class AbstractBrushToolTest {
 
     @Before
     public void setUp() {
-        comp = TestHelper.create2LayerComposition(false);
+        Composition comp = TestHelper.create2LayerComposition(false);
         dr = comp.getActiveDrawable();
 
         origBrush = tool.getBrush();

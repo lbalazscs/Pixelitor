@@ -34,7 +34,7 @@ import java.awt.image.BufferedImage;
  * which can be a rasterized text layer.
  */
 public abstract class GetImageAction extends AbstractAction {
-    protected final String name;
+    private final String name;
     private final String menuName;
 
     private final boolean allowMasks;

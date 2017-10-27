@@ -41,7 +41,7 @@ public class Convolve extends FilterWithGUI {
     private float[] kernelMatrix;
     private final int size;
 
-    public Convolve(int size, String filterName) {
+    private Convolve(int size, String filterName) {
         this.size = size;
         this.filterName = filterName;
     }
@@ -104,7 +104,7 @@ public class Convolve extends FilterWithGUI {
         return new FilterAction(name, () -> new Convolve(size, name));
     }
 
-    public static String getFilterName(int width, int height) {
+    private static String getFilterName(int width, int height) {
         return "Custom " + width + 'x' + height + " Convolution";
     }
 }

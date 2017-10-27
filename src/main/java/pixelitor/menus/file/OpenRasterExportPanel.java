@@ -38,7 +38,7 @@ public class OpenRasterExportPanel extends JPanel {
         add(mergedLayersCB);
     }
 
-    public boolean getExportMergedImage() {
+    private boolean shouldExportMergedImage() {
         return mergedLayersCB.isSelected();
     }
 
@@ -59,7 +59,7 @@ public class OpenRasterExportPanel extends JPanel {
                 close();
                 File file = FileChoosers.selectSaveFileForSpecificFormat(FileChoosers.oraFilter);
                 if(file != null) {
-                    boolean addMergedImage = p.getExportMergedImage();
+                    boolean addMergedImage = p.shouldExportMergedImage();
                     try {
                         OpenRaster.writeOpenRaster(comp, file, addMergedImage);
                         OpenSaveManager.afterSaveActions(comp, file, true);

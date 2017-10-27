@@ -58,7 +58,7 @@ public class ScreenCaptureAction extends AbstractAction {
         d.setVisible(true);
     }
 
-    public JPanel getSettingsPanel() {
+    private JPanel getSettingsPanel() {
         JPanel p = new JPanel();
         p.setLayout(new GridBagLayout());
         GridBagHelper gbHelper = new GridBagHelper(p);

@@ -292,7 +292,7 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
         return param;
     }
 
-    protected void fireContentsChanged(Object source, int index0, int index1) {
+    private void fireContentsChanged(Object source, int index0, int index1) {
         Object[] listeners = listenerList.getListenerList();
         ListDataEvent e = null;
 

@@ -32,7 +32,7 @@ public class GlassTiles extends FilterWithParametrizedGUI {
 
     private final GroupedRangeParam size = new GroupedRangeParam("Tile Size", 5, 100, 500);
     private final GroupedRangeParam curvature = new GroupedRangeParam("Curvature", 0, 10, 20);
-    private final GroupedRangeParam phase = new GroupedRangeParam("Shift Effect", 0, 0, 10, false);
+    private final GroupedRangeParam phase = new GroupedRangeParam("Move Tiles", 0, 0, 10, false);
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction(true);
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 

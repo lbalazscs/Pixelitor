@@ -243,11 +243,11 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
         return errorMessage;
     }
 
-    public int getNewWidth() {
+    private int getNewWidth() {
         return newWidth;
     }
 
-    public int getNewHeight() {
+    private int getNewHeight() {
         return newHeight;
     }
 
