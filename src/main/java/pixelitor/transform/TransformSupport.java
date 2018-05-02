@@ -135,6 +135,26 @@ public class TransformSupport {
         handles.updateRect(compSpaceRect);
     }
 
+    /**
+     * Set size of selection in image space
+     */
+    public void setSize(int width, int height, ImageComponent ic) {
+
+        this.imageSpaceRect.setRect(this.imageSpaceRect.getX(), this.imageSpaceRect.getY(), width, height);
+
+        double viewScale = ic.getZoomLevel().getViewScale();
+        this.compSpaceRect.setSize((int) (width * viewScale), (int) (height * viewScale));
+        handles.updateRect(compSpaceRect);
+        ic.repaint();
+    }
+
+    /**
+     * Return true while the user is adjusting the handles
+     */
+    public boolean isAdjusting() {
+        return adjusting;
+    }
+
     private void recalculateImageSpaceRect(ImageComponent ic) {
         Rectangle2D possiblyNegativeRect = ic.fromComponentToImageSpace(compSpaceRect);
         this.imageSpaceRect = Utils.toPositiveRect(possiblyNegativeRect);
