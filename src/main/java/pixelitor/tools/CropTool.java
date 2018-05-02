@@ -25,10 +25,10 @@ import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.transform.TransformSupport;
 import pixelitor.utils.ImageSwitchListener;
-import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
+import javax.swing.event.ChangeListener;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
@@ -64,6 +64,9 @@ public class CropTool extends Tool implements ImageSwitchListener {
     private final JButton cancelButton = new JButton("Cancel");
     private JButton cropButton;
 
+    private JSpinner wSizeSpinner;
+    private JSpinner hSizeSpinner;
+
     // The crop rectangle in image space.
     // This variable is used only while the image component is resized
     private Rectangle2D lastCropRect;
@@ -91,15 +94,45 @@ public class CropTool extends Tool implements ImageSwitchListener {
         ImageComponents.addImageSwitchListener(this);
     }
 
+
+    /**
+     * Initialize settings panel controls
+     */
     @Override
     public void initSettingsPanel() {
         SliderSpinner maskOpacitySpinner = new SliderSpinner(maskOpacity, WEST, false);
         settingsPanel.add(maskOpacitySpinner);
 
+        ChangeListener whChangeListener = e -> {
+            if (state == TRANSFORM && !transformSupport.isAdjusting()) {
+                transformSupport.setSize(
+                    (int) wSizeSpinner.getValue(),
+                    (int) hSizeSpinner.getValue(),
+                    ImageComponents.getActiveIC()
+                );
+            }
+        };
+
+        // add crop width spinner
+        wSizeSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 300000, 1));
+        wSizeSpinner.setEnabled(false);
+        wSizeSpinner.addChangeListener(whChangeListener);
+        wSizeSpinner.setToolTipText("Width of the cropped image (px)");
+        settingsPanel.add(wSizeSpinner);
+
+        // add crop height spinner
+        hSizeSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 300000, 1));
+        hSizeSpinner.setEnabled(false);
+        hSizeSpinner.addChangeListener(whChangeListener);
+        hSizeSpinner.setToolTipText("Height of the cropped image (px)");
+        settingsPanel.add(hSizeSpinner);
+
+        // add growing check box
         allowGrowingCB = new JCheckBox("Allow Growing", false);
         allowGrowingCB.setToolTipText("Enables the enlargement of the canvas");
         settingsPanel.add(allowGrowingCB);
 
+        // add crop button
         cropButton = settingsPanel.addButton("Crop",
                 e -> {
                     ImageComponents.toolCropActiveImage(allowGrowingCB.isSelected());
@@ -108,6 +141,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
                 });
         cropButton.setEnabled(false);
 
+        // add cancel button
         cancelButton.addActionListener(e -> state.cancel(this));
         cancelButton.setEnabled(false);
         settingsPanel.add(cancelButton);
@@ -126,9 +160,13 @@ public class CropTool extends Tool implements ImageSwitchListener {
             transformSupport.mousePressed(e);
             cropButton.setEnabled(true);
             cancelButton.setEnabled(true);
+            hSizeSpinner.setEnabled(true);
+            wSizeSpinner.setEnabled(true);
         } else if (state == USER_DRAG) {
             cropButton.setEnabled(true);
             cancelButton.setEnabled(true);
+            hSizeSpinner.setEnabled(true);
+            wSizeSpinner.setEnabled(true);
         }
     }
 
@@ -193,9 +231,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
         // here we have the cropping rectangle in image space, therefore
         // this is a good opportunity to update the status bar message
         // even if it has nothing to do with painting
-        int width = (int) cropRect.getWidth();
-        int height = (int) cropRect.getHeight();
-        Messages.showStatusMessage("Cropping area is " + width + " x " + height + " pixels.");
+        updateSettingsPanel(cropRect);
 
         // paint the semi-transparent dark area outside the crop rectangle
         Shape previousClip = g2.getClip();  // save for later use
@@ -238,6 +274,18 @@ public class CropTool extends Tool implements ImageSwitchListener {
         }
 
         g2.setClip(previousClip);
+    }
+
+    /**
+     * Update settings panel after crop dimension change
+     */
+    private void updateSettingsPanel(Rectangle2D cropRect)
+    {
+        int width = (int) cropRect.getWidth();
+        int height = (int) cropRect.getHeight();
+
+        wSizeSpinner.setValue(width);
+        hSizeSpinner.setValue(height);
     }
 
     /**
@@ -287,6 +335,8 @@ public class CropTool extends Tool implements ImageSwitchListener {
         state = INITIAL;
         cancelButton.setEnabled(false);
         cropButton.setEnabled(false);
+        hSizeSpinner.setEnabled(false);
+        wSizeSpinner.setEnabled(false);
 
         ImageComponents.repaintActive();
     }
