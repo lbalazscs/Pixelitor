@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,9 @@ import java.io.Serializable;
  * A layer can be bigger than the canvas if it is partially hidden.
  */
 public class Canvas implements Serializable {
+    public static final int MAX_WIDTH = 9_999;
+    public static final int MAX_HEIGHT = 9_999;
+
     private int width;
     private int height;
 

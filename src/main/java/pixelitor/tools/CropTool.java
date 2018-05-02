@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -113,24 +113,32 @@ public class CropTool extends Tool implements ImageSwitchListener {
             }
         };
 
+        settingsPanel.addSeparator();
+
         // add crop width spinner
-        wSizeSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 300000, 1));
+        wSizeSpinner = new JSpinner(new SpinnerNumberModel(0, 0, Canvas.MAX_WIDTH, 1));
         wSizeSpinner.setEnabled(false);
         wSizeSpinner.addChangeListener(whChangeListener);
         wSizeSpinner.setToolTipText("Width of the cropped image (px)");
+        settingsPanel.add(new JLabel("Width:"));
         settingsPanel.add(wSizeSpinner);
 
         // add crop height spinner
-        hSizeSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 300000, 1));
+        hSizeSpinner = new JSpinner(new SpinnerNumberModel(0, 0, Canvas.MAX_HEIGHT, 1));
         hSizeSpinner.setEnabled(false);
         hSizeSpinner.addChangeListener(whChangeListener);
         hSizeSpinner.setToolTipText("Height of the cropped image (px)");
+        settingsPanel.add(new JLabel("Height:"));
         settingsPanel.add(hSizeSpinner);
+
+        settingsPanel.addSeparator();
 
         // add growing check box
         allowGrowingCB = new JCheckBox("Allow Growing", false);
         allowGrowingCB.setToolTipText("Enables the enlargement of the canvas");
         settingsPanel.add(allowGrowingCB);
+
+        settingsPanel.addSeparator();
 
         // add crop button
         cropButton = settingsPanel.addButton("Crop",
