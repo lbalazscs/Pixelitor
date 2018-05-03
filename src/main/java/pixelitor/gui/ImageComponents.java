@@ -158,7 +158,7 @@ public class ImageComponents {
     public static void toolCropActiveImage(boolean allowGrowing) {
         try {
             onActiveComp(comp -> {
-                Rectangle2D cropRect = Tools.CROP.getCropRect(comp.getIC());
+                Rectangle2D cropRect = Tools.CROP.getCropRect();
                 new Crop(cropRect, false, allowGrowing).process(comp);
             });
         } catch (Exception ex) {

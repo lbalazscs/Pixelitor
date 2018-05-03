@@ -299,6 +299,34 @@ public final class Utils {
         }
     }
 
+    // makes sure that the returned rectangle has positive width, height
+    public static Rectangle toPositiveRect(Rectangle rect) {
+        int width = rect.width;
+        int height = rect.height;
+
+        if (width >= 0) {
+            if (height >= 0) {
+                return rect;
+            } else {
+                rect.y += height;
+                rect.height = -height;
+                return rect;
+            }
+        } else {
+            if (height >= 0) {
+                rect.x += width;
+                rect.width = -width;
+                return rect;
+            } else {
+                rect.x += width;
+                rect.y += height;
+                rect.width = -width;
+                rect.height = -height;
+                return rect;
+            }
+        }
+    }
+
     public static float parseFloat(String input, float defaultValue) {
         if ((input != null) && !input.isEmpty()) {
             return Float.parseFloat(input);
