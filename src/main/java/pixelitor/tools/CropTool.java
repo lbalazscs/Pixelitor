@@ -218,7 +218,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
                 if (transformSupport == null) {
                     throw new IllegalStateException();
                 }
-                transformSupport.mouseReleased();
+                transformSupport.mouseReleased(e, ic);
                 break;
         }
     }
@@ -231,7 +231,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
         if (callingIC != ImageComponents.getActiveIC()) {
             return;
         }
-        Rectangle2D cropRect = getCropRect(callingIC);
+        Rectangle2D cropRect = getCropRect();
         if (cropRect == null) {
             return;
         }
@@ -299,7 +299,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
     /**
      * Returns the crop rectangle in image space
      */
-    public Rectangle2D getCropRect(ImageComponent ic) {
+    public Rectangle2D getCropRect() {
         switch (state) {
             case INITIAL:
                 lastCropRect = null;
@@ -308,7 +308,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
                 lastCropRect = userDrag.createPositiveRect();
                 break;
             case TRANSFORM:
-                lastCropRect = transformSupport.getImageSpaceRect(ic);
+                lastCropRect = transformSupport.getImageSpaceRect();
                 break;
         }
 
@@ -344,7 +344,9 @@ public class CropTool extends Tool implements ImageSwitchListener {
         cancelButton.setEnabled(false);
         cropButton.setEnabled(false);
         hSizeSpinner.setEnabled(false);
+        hSizeSpinner.setValue(0);
         wSizeSpinner.setEnabled(false);
+        wSizeSpinner.setValue(0);
 
         ImageComponents.repaintActive();
     }

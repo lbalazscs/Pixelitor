@@ -24,6 +24,7 @@ import pixelitor.utils.Utils;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 
@@ -38,9 +39,13 @@ public class TransformSupport {
     private int dragStartY;
     private int dragStartRectWidth;
     private int dragStartRectHeight;
+    private Point dragStartLocation;
 
     // true while the user is adjusting the handles
     private boolean adjusting;
+
+    // true if user can relocate selected area
+    private boolean canRelocate;
 
     public TransformSupport(Rectangle compSpaceRect, Rectangle2D imageSpaceRect) {
         this.compSpaceRect = compSpaceRect;
@@ -57,6 +62,12 @@ public class TransformSupport {
         dragStartY = e.getY();
         dragStartRectWidth = (int) compSpaceRect.getWidth();
         dragStartRectHeight = (int) compSpaceRect.getHeight();
+        dragStartLocation = compSpaceRect.getLocation();
+
+        // if user clicked inside selection allow relocate it
+        if (compSpaceRect.contains(e.getPoint())) {
+            canRelocate = true;
+        }
     }
 
     public void mouseDragged(MouseEvent e, ImageComponent ic) {
@@ -94,24 +105,37 @@ public class TransformSupport {
                 compSpaceRect.setSize(dragStartRectWidth + (dragStartX - mouseX), compSpaceRect.height);
                 break;
             default:
-                return;
+                if (canRelocate) {
+                    compSpaceRect.setLocation(
+                        (dragStartLocation.x - (dragStartX - mouseX)),
+                        (dragStartLocation.y - (dragStartY - mouseY))
+                    );
+                } else {
+                    return;
+                }
         }
+
         adjusting = true;
         handles.updateRect(compSpaceRect);
+        recalculateImageSpaceRect(ic);
     }
 
-    public void mouseReleased() {
+    public void mouseReleased(MouseEvent e, ImageComponent ic) {
+        // we need to ensure that after resize rectangle has
+        // positive width and height (required for Rectangle.contain testing)
+        compSpaceRect = Utils.toPositiveRect(compSpaceRect);
+        handles.updateRect(compSpaceRect);
+        handles.setCursorForPoint(e.getX(), e.getY(), ic);
+
         adjusting = false;
+        canRelocate = false;
     }
 
     public void mouseMoved(MouseEvent e, ImageComponent ic) {
         handles.setCursorForPoint(e.getX(), e.getY(), ic);
     }
 
-    public Rectangle2D getImageSpaceRect(ImageComponent ic) {
-        if(adjusting) {
-            recalculateImageSpaceRect(ic);
-        }
+    public Rectangle2D getImageSpaceRect() {
         return imageSpaceRect;
     }
 
