@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,6 +48,9 @@ import static pixelitor.tools.Tools.CLONE;
 import static pixelitor.tools.Tools.ERASER;
 import static pixelitor.tools.Tools.SMUDGE;
 
+/**
+ * The "Auto Paint" functionality
+ */
 public class AutoPaint {
     //    public static final Tool[] ALLOWED_TOOLS = {SMUDGE, BRUSH, CLONE, ERASER, SHAPES};
     public static final Tool[] ALLOWED_TOOLS = {SMUDGE, BRUSH, CLONE, ERASER};

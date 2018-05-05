@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.menus.view;
 
 import pixelitor.gui.ImageComponents;
 import pixelitor.menus.PMenu;
-import pixelitor.tools.AutoZoomButtons;
+import pixelitor.tools.AutoZoomActions;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -70,9 +70,9 @@ public class ZoomMenu extends PMenu {
 
         addActionWithKey(DECREASE_ACTION, CTRL_MINUS);
 
-        addActionWithKey(AutoZoomButtons.ACTUAL_PIXELS_ACTION, AutoZoomButtons.ACTUAL_PIXELS_KEY);
+        addActionWithKey(AutoZoomActions.ACTUAL_PIXELS_ACTION, AutoZoomActions.ACTUAL_PIXELS_KEY);
 
-        addActionWithKey(AutoZoomButtons.FIT_SCREEN_ACTION, AutoZoomButtons.FIT_SCREEN_KEY);
+        addActionWithKey(AutoZoomActions.FIT_SCREEN_ACTION, AutoZoomActions.FIT_SCREEN_KEY);
 
         addSeparator();
         setupZoomKeys(this);
@@ -100,11 +100,11 @@ public class ZoomMenu extends PMenu {
 
         // ctrl + numpad 0 = actual pixels
         inputMap.put(CTRL_NUMPAD_0, ACTION_MAP_KEY_ACTUAL_PIXELS);
-        actionMap.put(ACTION_MAP_KEY_ACTUAL_PIXELS, AutoZoomButtons.ACTUAL_PIXELS_ACTION);
+        actionMap.put(ACTION_MAP_KEY_ACTUAL_PIXELS, AutoZoomActions.ACTUAL_PIXELS_ACTION);
 
         // ctrl + alt + numpad 0 = fit screen
         inputMap.put(CTRL_ALT_NUMPAD_0, ACTION_MAP_KEY_FIT_SCREEN);
-        actionMap.put(ACTION_MAP_KEY_FIT_SCREEN, AutoZoomButtons.FIT_SCREEN_ACTION);
+        actionMap.put(ACTION_MAP_KEY_FIT_SCREEN, AutoZoomActions.FIT_SCREEN_ACTION);
     }
 
     /**

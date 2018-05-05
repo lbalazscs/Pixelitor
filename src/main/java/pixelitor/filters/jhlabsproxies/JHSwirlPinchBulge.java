@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,9 +29,9 @@ import pixelitor.filters.gui.ShowOriginal;
 import java.awt.image.BufferedImage;
 
 /**
- * Swirl-Pinch-Bulge filter
+ * A Swirl, Pinch, Bulge filter based on the JHLabs PinchFilter
  */
-public class SwirlPinchBulge extends FilterWithParametrizedGUI {
+public class JHSwirlPinchBulge extends FilterWithParametrizedGUI {
     public static final String NAME = "Swirl, Pinch, Bulge";
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
@@ -46,7 +46,7 @@ public class SwirlPinchBulge extends FilterWithParametrizedGUI {
 
     private PinchFilter filter;
 
-    public SwirlPinchBulge() {
+    public JHSwirlPinchBulge() {
         super(ShowOriginal.YES);
 
         showAffectedArea();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -672,12 +672,14 @@ public class MenuBar extends JMenuBar {
         colorsMenu.buildFA(Colorize.NAME, Colorize::new).add();
         colorsMenu.buildFA("Levels", Levels::new).withKey(CTRL_L).add();
 //        colorsMenu.buildFA("Levels 2", Levels2::new).add();
-        colorsMenu.buildFA(Brightness.NAME, Brightness::new).add();
+        colorsMenu.buildFA(BrightnessContrast.NAME, BrightnessContrast::new)
+                .add();
         colorsMenu.buildFA(Solarize.NAME, Solarize::new).add();
         colorsMenu.buildFA(Sepia.NAME, Sepia::new).add();
         colorsMenu.buildFA("Invert", Invert::new).noGUI().withKey(CTRL_I).add();
         colorsMenu.buildFA(ChannelInvert.NAME, ChannelInvert::new).add();
-        colorsMenu.buildFA("Channel Mixer", ChannelMixer::new).add();
+        colorsMenu.buildFA(ChannelMixer.NAME, ChannelMixer::new)
+                .add();
 
         colorsMenu.add(createExtractChannelsSubmenu());
 
@@ -789,7 +791,7 @@ public class MenuBar extends JMenuBar {
     private static JMenu createDistortSubmenu() {
         PMenu sub = new PMenu("Distort");
 
-        sub.addFA(SwirlPinchBulge.NAME, SwirlPinchBulge::new);
+        sub.addFA(JHSwirlPinchBulge.NAME, JHSwirlPinchBulge::new);
         sub.addFA(CircleToSquare.NAME, CircleToSquare::new);
         sub.addFA(JHPerspective.NAME, JHPerspective::new);
 

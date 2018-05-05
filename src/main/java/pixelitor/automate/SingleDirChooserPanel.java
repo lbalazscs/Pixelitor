@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import pixelitor.gui.utils.BrowseFilesSupport;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.ValidatedDialog;
 import pixelitor.gui.utils.ValidatedForm;
-import pixelitor.gui.utils.Validation;
+import pixelitor.gui.utils.ValidationResult;
 import pixelitor.io.Directories;
 import pixelitor.io.OutputFormat;
 
@@ -70,8 +70,8 @@ public class SingleDirChooserPanel extends ValidatedForm {
     }
 
     @Override
-    public Validation checkValidity() {
-        return Validation.ok();
+    public ValidationResult checkValidity() {
+        return ValidationResult.ok();
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -89,10 +89,10 @@ public class ToolSettingsPanel extends JPanel {
     }
 
     public void addAutoZoomButtons() {
-        JButton actualPixelsButton = new JButton(AutoZoomButtons.ACTUAL_PIXELS_ACTION);
+        JButton actualPixelsButton = new JButton(AutoZoomActions.ACTUAL_PIXELS_ACTION);
         add(actualPixelsButton);
 
-        JButton fitScreenButton = new JButton(AutoZoomButtons.FIT_SCREEN_ACTION);
+        JButton fitScreenButton = new JButton(AutoZoomActions.FIT_SCREEN_ACTION);
         add(fitScreenButton);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import pixelitor.filters.comp.Resize;
 import pixelitor.gui.utils.IntTextField;
 import pixelitor.gui.utils.ValidatedDialog;
 import pixelitor.gui.utils.ValidatedForm;
-import pixelitor.gui.utils.Validation;
+import pixelitor.gui.utils.ValidationResult;
 
 import javax.swing.*;
 
@@ -73,7 +73,7 @@ public class BatchResize {
         }
 
         @Override
-        public Validation checkValidity() {
+        public ValidationResult checkValidity() {
             return openSaveDirsPanel.checkValidity()
                     .andFalse(widthTF.getText()
                                     .trim()

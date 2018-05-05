@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,6 +28,9 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.util.List;
 
+/**
+ * A GUI for parametrized filters
+ */
 public class ParametrizedFilterGUIPanel extends FilterGUIPanel implements ParamAdjustmentListener {
     /**
      * Controls whether the params are reset to the default values when a new

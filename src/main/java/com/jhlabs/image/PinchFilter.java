@@ -17,7 +17,7 @@ limitations under the License.
 package com.jhlabs.image;
 
 import net.jafama.FastMath;
-import pixelitor.filters.jhlabsproxies.SwirlPinchBulge;
+import pixelitor.filters.jhlabsproxies.JHSwirlPinchBulge;
 
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
@@ -43,7 +43,7 @@ public class PinchFilter extends TransformFilter implements SwirlMethod {
     private float rotateResultAngle;
 
     public PinchFilter() {
-        super(SwirlPinchBulge.NAME);
+        super(JHSwirlPinchBulge.NAME);
     }
 
     /**

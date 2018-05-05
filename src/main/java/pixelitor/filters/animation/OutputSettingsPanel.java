@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.TFValidationLayerUI;
 import pixelitor.gui.utils.TextFieldValidator;
 import pixelitor.gui.utils.ValidatedForm;
-import pixelitor.gui.utils.Validation;
+import pixelitor.gui.utils.ValidationResult;
 import pixelitor.io.Directories;
 import pixelitor.utils.Messages;
 
@@ -164,14 +164,14 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
     }
 
     @Override
-    public Validation checkValidity() {
+    public ValidationResult checkValidity() {
         return check(nrSecondsTF)
                 .and(check(fpsTF))
                 .and(check(fileNameTF));
     }
 
     @Override
-    public Validation check(JTextField textField) {
+    public ValidationResult check(JTextField textField) {
         if (textField == nrSecondsTF || textField == fpsTF) {
             return isTextFieldWithDoubleValid(textField);
         } else if (textField == fileNameTF) {
@@ -179,24 +179,24 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
             String errorMessage = outputType.checkFile(new File(textField.getText()
                     .trim()));
             if (errorMessage == null) {
-                return Validation.ok();
+                return ValidationResult.ok();
             } else {
-                return Validation.error(errorMessage);
+                return ValidationResult.error(errorMessage);
             }
         } else {
             throw new IllegalStateException("unexpected JTextField");
         }
     }
 
-    private static Validation isTextFieldWithDoubleValid(JTextField textField) {
+    private static ValidationResult isTextFieldWithDoubleValid(JTextField textField) {
         String text = textField.getText().trim();
         try {
             //noinspection ResultOfMethodCallIgnored
             Double.parseDouble(text);
         } catch (NumberFormatException ex) {
-            return Validation.error(text + " is not a valid number.");
+            return ValidationResult.error(text + " is not a valid number.");
         }
-        return Validation.ok();
+        return ValidationResult.ok();
     }
 
     public void copySettingsInto(TweenAnimation animation) {

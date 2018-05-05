@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,6 +31,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * A collection of 4 area effects,
+ * each of which can be enabled or disabled
+ */
 public class AreaEffects implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -73,7 +77,7 @@ public class AreaEffects implements Serializable {
         return effects.toArray(new AreaEffect[effects.size()]);
     }
 
-    public void apply(Graphics2D g2, Shape shape) {
+    public void drawEffects(Graphics2D g2, Shape shape) {
         AreaEffect[] areaEffects = asArray();
         for (AreaEffect effect : areaEffects) {
             effect.apply(g2, shape, 0, 0);

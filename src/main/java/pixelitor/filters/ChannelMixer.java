@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,7 +39,12 @@ import java.awt.image.WritableRaster;
 
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
+/**
+ * The Channel Mixer filter
+ */
 public class ChannelMixer extends FilterWithParametrizedGUI {
+    public static final String NAME = "Channel Mixer";
+
     private static final int MIN_PERCENT = -200;
     private static final int MAX_PERCENT = 200;
 

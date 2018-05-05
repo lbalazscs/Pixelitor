@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,10 @@ import java.awt.event.KeyEvent;
 
 import static pixelitor.menus.MenuBar.MENU_SHORTCUT_KEY_MASK;
 
-public class AutoZoomButtons {
+/**
+ * The actions for automatic zooming: "Fit Screen" and "100%"
+ */
+public class AutoZoomActions {
     public static final KeyStroke ACTUAL_PIXELS_KEY = KeyStroke.getKeyStroke(KeyEvent.VK_0, MENU_SHORTCUT_KEY_MASK);
     public static final KeyStroke FIT_SCREEN_KEY = KeyStroke.getKeyStroke(KeyEvent.VK_0, MENU_SHORTCUT_KEY_MASK + InputEvent.ALT_MASK);
 
@@ -36,7 +39,7 @@ public class AutoZoomButtons {
     public static final String ACTUAL_PIXELS_TOOLTIP = String.format("Set the zoom level to 100%% (%s)",
             Utils.keystrokeAsText(ACTUAL_PIXELS_KEY));
 
-    private AutoZoomButtons() {
+    private AutoZoomActions() {
     }
 
     public static final Action FIT_SCREEN_ACTION = new AbstractAction("Fit Screen") {

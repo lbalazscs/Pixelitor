@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,11 +30,14 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LayerAnimationFrames {
+/**
+ * A layer animation (an animation based on the layers of a composition)
+ */
+public class LayerAnimation {
     private final int delayMillis;
     private final List<BufferedImage> images = new ArrayList<>();
 
-    public LayerAnimationFrames(Composition comp, int delayMillis, boolean pingPong) {
+    public LayerAnimation(Composition comp, int delayMillis, boolean pingPong) {
         this.delayMillis = delayMillis;
         addComposition(comp, pingPong);
     }

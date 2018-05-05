@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,12 +19,17 @@ package pixelitor.gui.utils;
 
 import java.awt.Component;
 
-public class Validation {
+/**
+ * Represents the result of a validation
+ */
+public class ValidationResult {
     private final boolean valid;
     private final String errorMsg;
-    private static final Validation okInstance = new Validation(true, null);
 
-    private Validation(boolean valid, String errorMsg) {
+    // The OK result has no error message, therefore it can be shared
+    private static final ValidationResult okInstance = new ValidationResult(true, null);
+
+    private ValidationResult(boolean valid, String errorMsg) {
         this.valid = valid;
         this.errorMsg = errorMsg;
 
@@ -35,15 +40,21 @@ public class Validation {
         }
     }
 
-    public static Validation ok() {
+    /**
+     * Factory method for the OK result
+     */
+    public static ValidationResult ok() {
         return okInstance;
     }
 
-    public static Validation error(String msg) {
-        return new Validation(false, msg);
+    /**
+     * Factory method for an error
+     */
+    public static ValidationResult error(String msg) {
+        return new ValidationResult(false, msg);
     }
 
-    public Validation and(Validation other) {
+    public ValidationResult and(ValidationResult other) {
         if (valid) {
             assert this == okInstance;
             if (other.isOK()) {
@@ -60,11 +71,11 @@ public class Validation {
         }
     }
 
-    public Validation andTrue(boolean condition, String msg) {
+    public ValidationResult andTrue(boolean condition, String msg) {
         return andFalse(!condition, msg);
     }
 
-    public Validation andFalse(boolean condition, String msg) {
+    public ValidationResult andFalse(boolean condition, String msg) {
         if (valid) {
             assert this == okInstance;
             if (condition) {

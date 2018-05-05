@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,10 +26,10 @@ import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 
-import static pixelitor.tools.AutoZoomButtons.ACTUAL_PIXELS_ACTION;
-import static pixelitor.tools.AutoZoomButtons.ACTUAL_PIXELS_TOOLTIP;
-import static pixelitor.tools.AutoZoomButtons.FIT_SCREEN_ACTION;
-import static pixelitor.tools.AutoZoomButtons.FIT_SCREEN_TOOLTIP;
+import static pixelitor.tools.AutoZoomActions.ACTUAL_PIXELS_ACTION;
+import static pixelitor.tools.AutoZoomActions.ACTUAL_PIXELS_TOOLTIP;
+import static pixelitor.tools.AutoZoomActions.FIT_SCREEN_ACTION;
+import static pixelitor.tools.AutoZoomActions.FIT_SCREEN_TOOLTIP;
 
 /**
  * The zoom widget in the status bar

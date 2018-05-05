@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.automate;
 import pixelitor.gui.utils.BrowseFilesSupport;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.ValidatedForm;
-import pixelitor.gui.utils.Validation;
+import pixelitor.gui.utils.ValidationResult;
 import pixelitor.io.Directories;
 import pixelitor.io.OutputFormat;
 
@@ -62,18 +62,18 @@ class OpenSaveDirsPanel extends ValidatedForm {
      * @return true if the data is valid
      */
     @Override
-    public Validation checkValidity() {
+    public ValidationResult checkValidity() {
         File selectedInputDir = inputChooser.getSelectedFile();
         File selectedOutDir = outputChooser.getSelectedFile();
 
-        Validation v = Validation.ok()
+        ValidationResult v = ValidationResult.ok()
                 .andTrue(selectedInputDir.exists(),
                         "The selected input folder " + selectedInputDir.getAbsolutePath() + " does not exist.")
                 .andTrue(selectedOutDir.exists(),
                         "The selected output folder " + selectedInputDir.getAbsolutePath() + " does not exist.");
 
         if (!allowToBeTheSame && selectedInputDir.equals(selectedOutDir)) {
-            Validation err = Validation.error("The input and output folders must be different.");
+            ValidationResult err = ValidationResult.error("The input and output folders must be different.");
             return v.and(err);
         }
         return v;

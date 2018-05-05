@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import pixelitor.Composition;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.io.FileChoosers;
-import pixelitor.io.LayerAnimationFrames;
+import pixelitor.io.LayerAnimation;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
@@ -56,7 +56,7 @@ public class AnimGifExport {
     private static void export(Composition activeComp, int delayMillis, boolean pingPong) {
         File file = FileChoosers.selectSaveFileForSpecificFormat(FileChoosers.gifFilter);
         if (file != null) {
-            LayerAnimationFrames animation = new LayerAnimationFrames(activeComp,
+            LayerAnimation animation = new LayerAnimation(activeComp,
                     delayMillis, pingPong);
             animation.saveToFile(file);
             Messages.showFileSavedMessage(file);
