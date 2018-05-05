@@ -21,7 +21,6 @@ import pixelitor.gui.ImageComponent;
 import pixelitor.tools.ArrowKey;
 import pixelitor.utils.Utils;
 
-import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Point;
@@ -32,20 +31,29 @@ import java.awt.geom.Rectangle2D;
  * Helps with interactive manipulation of selections/transforms
  */
 public class TransformSupport {
+
+    private static final int MODE_NONE = 0;
+    private static final int MODE_RELOCATE = 1;
+    private static final int MODE_RESIZE = 2;
+
     private final Handles handles;
     private Rectangle compSpaceRect;
     private Rectangle2D imageSpaceRect;
-    private int dragStartX;
-    private int dragStartY;
-    private int dragStartRectWidth;
-    private int dragStartRectHeight;
-    private Point dragStartLocation;
+    private int dragStartCursorType;
+    private Rectangle dragStartRect;
+    private Point dragStart;
 
     // true while the user is adjusting the handles
     private boolean adjusting;
 
-    // true if user can relocate selected area
-    private boolean canRelocate;
+    // type of user transform
+    private int transformMode = MODE_NONE;
+
+    // keep the aspect ratio of the selected area
+    private boolean useAspectRatio = false;
+
+    // ratio width/height of the selected area
+    private double aspectRatio = 0;
 
     public TransformSupport(Rectangle compSpaceRect, Rectangle2D imageSpaceRect) {
         this.compSpaceRect = compSpaceRect;
@@ -53,66 +61,48 @@ public class TransformSupport {
         handles = new Handles(compSpaceRect);
     }
 
+    public void setUseAspectRatio(boolean useAspectRatio) {
+        this.useAspectRatio = useAspectRatio;
+    }
+
     public void paintHandles(Graphics2D g) {
         handles.paint(g);
     }
 
-    public void mousePressed(MouseEvent e) {
-        dragStartX = e.getX();
-        dragStartY = e.getY();
-        dragStartRectWidth = (int) compSpaceRect.getWidth();
-        dragStartRectHeight = (int) compSpaceRect.getHeight();
-        dragStartLocation = compSpaceRect.getLocation();
+    public void mousePressed(MouseEvent e, ImageComponent ic) {
+        dragStart = e.getPoint();
+        dragStartRect = new Rectangle(compSpaceRect);
+        dragStartCursorType = ic.getCursor().getType();
+        aspectRatio = TransformHelper.calcAspectRatio(dragStartRect);
 
-        // if user clicked inside selection allow relocate it
-        if (compSpaceRect.contains(e.getPoint())) {
-            canRelocate = true;
+        if (TransformHelper.isResizeMode(dragStartCursorType)) {
+            // if user clicked on the handle allow resize it
+            transformMode = MODE_RESIZE;
+        } else if (compSpaceRect.contains(e.getPoint())) {
+            // if user clicked inside selection allow relocate it
+            transformMode = MODE_RELOCATE;
+        } else {
+            transformMode = MODE_NONE;
         }
     }
 
     public void mouseDragged(MouseEvent e, ImageComponent ic) {
-        int cursorType = ic.getCursor().getType();
-        int mouseX = e.getX();
-        int mouseY = e.getY();
-        switch (cursorType) {
-            case Cursor.NW_RESIZE_CURSOR:
-                compSpaceRect.setLocation(mouseX, mouseY);
-                compSpaceRect.setSize(dragStartRectWidth + (dragStartX - mouseX), dragStartRectHeight + (dragStartY) - mouseY);
-                break;
-            case Cursor.SE_RESIZE_CURSOR:
-                compSpaceRect.setSize(dragStartRectWidth + (mouseX - dragStartX), dragStartRectHeight + (mouseY - dragStartY));
-                break;
-            case Cursor.SW_RESIZE_CURSOR:
-                compSpaceRect.setLocation(mouseX, compSpaceRect.getLocation().y);
-                compSpaceRect.setSize(dragStartRectWidth + (dragStartX - mouseX), dragStartRectHeight + (mouseY - dragStartY));
-                break;
-            case Cursor.NE_RESIZE_CURSOR:
-                compSpaceRect.setLocation(compSpaceRect.getLocation().x, mouseY);
-                compSpaceRect.setSize(dragStartRectWidth + (mouseX - dragStartX), dragStartRectHeight + (dragStartY - mouseY));
-                break;
-            case Cursor.N_RESIZE_CURSOR:
-                compSpaceRect.setLocation(compSpaceRect.getLocation().x, mouseY);
-                compSpaceRect.setSize(compSpaceRect.width, dragStartRectHeight + (dragStartY - mouseY));
-                break;
-            case Cursor.S_RESIZE_CURSOR:
-                compSpaceRect.setSize(dragStartRectWidth, dragStartRectHeight + (mouseY - dragStartY));
-                break;
-            case Cursor.E_RESIZE_CURSOR:
-                compSpaceRect.setSize(dragStartRectWidth + (mouseX - dragStartX), compSpaceRect.height);
-                break;
-            case Cursor.W_RESIZE_CURSOR:
-                compSpaceRect.setLocation(mouseX, compSpaceRect.y);
-                compSpaceRect.setSize(dragStartRectWidth + (dragStartX - mouseX), compSpaceRect.height);
-                break;
-            default:
-                if (canRelocate) {
-                    compSpaceRect.setLocation(
-                        (dragStartLocation.x - (dragStartX - mouseX)),
-                        (dragStartLocation.y - (dragStartY - mouseY))
-                    );
-                } else {
-                    return;
-                }
+        if (transformMode == MODE_NONE) {
+            return;
+        }
+
+        // reset rect
+        compSpaceRect.setRect(dragStartRect);
+        Point mouseOffset = new Point(e.getX() - dragStart.x, e.getY() - dragStart.y);
+
+        if (transformMode == MODE_RESIZE) {
+            TransformHelper.resize(compSpaceRect, dragStartCursorType, mouseOffset);
+
+            if (useAspectRatio && aspectRatio > 0) {
+                TransformHelper.keepAspectRatio(compSpaceRect, dragStartCursorType, aspectRatio);
+            }
+        } else if (transformMode == MODE_RELOCATE) {
+            compSpaceRect.translate(mouseOffset.x, mouseOffset.y);
         }
 
         adjusting = true;
@@ -128,7 +118,7 @@ public class TransformSupport {
         handles.setCursorForPoint(e.getX(), e.getY(), ic);
 
         adjusting = false;
-        canRelocate = false;
+        transformMode = MODE_NONE;
     }
 
     public void mouseMoved(MouseEvent e, ImageComponent ic) {
@@ -144,10 +134,8 @@ public class TransformSupport {
         return "TransformSupport{" +
                 "handles=" + handles +
                 ", compSpaceRect=" + compSpaceRect +
-                ", dragStartX=" + dragStartX +
-                ", dragStartY=" + dragStartY +
-                ", dragStartRectWidth=" + dragStartRectWidth +
-                ", dragStartRectHeight=" + dragStartRectHeight +
+                ", dragStart=" + dragStart +
+                ", dragStartRect=" + dragStartRect +
                 '}';
     }
 

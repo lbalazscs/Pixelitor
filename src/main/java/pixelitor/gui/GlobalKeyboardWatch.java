@@ -108,6 +108,11 @@ public class GlobalKeyboardWatch {
                     observer.altPressed();
                 }
                 break;
+            case KeyEvent.VK_SHIFT:
+                if (!dialogActive) {
+                    observer.shiftPressed();
+                }
+                break;
         }
     }
 
@@ -121,6 +126,11 @@ public class GlobalKeyboardWatch {
             case KeyEvent.VK_ALT:
                 if (!dialogActive) {
                     observer.altReleased();
+                }
+                break;
+            case KeyEvent.VK_SHIFT:
+                if (!dialogActive) {
+                    observer.shiftReleased();
                 }
                 break;
         }
