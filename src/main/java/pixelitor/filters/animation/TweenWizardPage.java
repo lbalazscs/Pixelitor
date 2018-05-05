@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import javax.swing.*;
 import java.awt.FlowLayout;
 
 /**
- * The pages of the tweening animation export dialog
+ * A page in the tweening animation wizard
  */
 public enum TweenWizardPage implements WizardPage {
     SELECT_FILTER {

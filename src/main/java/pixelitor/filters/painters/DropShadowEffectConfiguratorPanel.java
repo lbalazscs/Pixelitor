@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import java.awt.geom.Point2D;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
 /**
- *
+ * A GUI for configuring the "drop shadow" effect
  */
 public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
     private final AngleParam angleParam;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,9 @@
 
 package pixelitor.io;
 
+/**
+ * Settings for writing JPEG images
+ */
 public class JpegSettings {
     private final float quality;
     private final boolean progressive;

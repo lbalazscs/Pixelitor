@@ -18,6 +18,9 @@ package pixelitor.filters.impl;
 
 import com.jhlabs.image.PointFilter;
 
+/**
+ * Sepia filter implementation
+ */
 public class SepiaFilter extends PointFilter {
     private int intensity = 20;
 

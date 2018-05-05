@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,6 +31,9 @@ import java.io.IOException;
 
 import static pixelitor.ChangeReason.TWEEN_PREVIEW;
 
+/**
+ * A SwingWorker for rendering the frames of a tween animation
+ */
 class RenderFramesTask extends SwingWorker<Void, Void> {
     private final TweenAnimation animation;
     private final Drawable dr;

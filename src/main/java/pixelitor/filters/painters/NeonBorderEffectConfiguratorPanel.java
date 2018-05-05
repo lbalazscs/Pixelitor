@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- *
+ * A GUI for configuring the "neon border" effect
  */
 public class NeonBorderEffectConfiguratorPanel extends SimpleEffectConfiguratorPanel {
     private Color innerColor;

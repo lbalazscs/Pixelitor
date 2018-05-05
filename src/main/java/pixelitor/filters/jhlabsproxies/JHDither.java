@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,7 +40,7 @@ import static com.jhlabs.image.DitherFilter.MATRIX_CLUSTER4;
 import static com.jhlabs.image.DitherFilter.MATRIX_CLUSTER8;
 
 /**
- * Dither based on the JHLabs DitherFilter
+ * Dither filter based on the JHLabs DitherFilter
  */
 public class JHDither extends FilterWithParametrizedGUI {
     public static final String NAME = "Dither";

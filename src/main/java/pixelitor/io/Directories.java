@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,10 @@ import pixelitor.utils.AppPreferences;
 
 import java.io.File;
 
+/**
+ * Utility class with static methods
+ * for keeping track of the last open and save directories
+ */
 public class Directories {
     private static File lastOpenDir = AppPreferences.loadLastOpenDir();
     private static File lastSaveDir = AppPreferences.loadLastSaveDir();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ import static java.awt.Color.GRAY;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
 
 /**
- * BrushedMetal based on the JHLabs BrushedMetalFilter
+ * Brushed Metal filter based on the JHLabs BrushedMetalFilter
  */
 public class JHBrushedMetal extends FilterWithParametrizedGUI {
     public static final String NAME = "Brushed Metal";

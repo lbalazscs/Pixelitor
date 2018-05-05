@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import pixelitor.utils.ImageUtils;
 import java.awt.image.BufferedImage;
 
 /**
- * JH Focus filter based on the JHLabs VariableBlurFilter
+ * Focus filter based on the JHLabs VariableBlurFilter
  */
 public class JHFocus extends FilterWithParametrizedGUI {
     public static final String NAME = "Focus";

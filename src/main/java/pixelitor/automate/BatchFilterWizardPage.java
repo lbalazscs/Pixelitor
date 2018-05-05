@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,9 @@ import pixelitor.layers.Drawable;
 import javax.swing.*;
 import java.awt.FlowLayout;
 
+/**
+ * A page in the batch filter wizard
+ */
 public enum BatchFilterWizardPage implements WizardPage {
     SELECT_FILTER_AND_DIRS {
         private OpenSaveDirsPanel openSaveDirsPanel;

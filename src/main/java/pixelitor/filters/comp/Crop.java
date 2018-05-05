@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,6 +31,9 @@ import java.awt.geom.Rectangle2D;
 
 import static pixelitor.Composition.ImageChangeActions.FULL;
 
+/**
+ * A cropping action on all layers of a composition
+ */
 public class Crop implements CompAction {
     private Rectangle2D cropRect;
     private final boolean selectionCrop;

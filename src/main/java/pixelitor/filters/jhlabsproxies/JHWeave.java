@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ import static com.jhlabs.image.WeaveFilter.TWILL_PATTERN;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
- * Weave based on the JHLabs WeaveFilter
+ * Weave filter based on the JHLabs WeaveFilter
  */
 public class JHWeave extends FilterWithParametrizedGUI {
     public static final String NAME = "Weave";

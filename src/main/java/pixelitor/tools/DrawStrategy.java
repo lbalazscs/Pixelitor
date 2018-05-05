@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,11 @@ import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
+/**
+ * AbstractBrushTool subclasses either draw into a temporary layer
+ * (so that the tool can have blending mode and opacity)
+ * or directly into the layer image
+ */
 public enum DrawStrategy {
     TMP_LAYER {
         @Override

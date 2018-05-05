@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,7 +39,7 @@ import java.util.Objects;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
 /**
- * An effect configurator panel...
+ * A GUI for configuring an area effect
  */
 public abstract class EffectConfiguratorPanel extends JPanel implements Resettable {
     private final JCheckBox enabledCB;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ import pixelitor.filters.gui.ShowOriginal;
 import java.awt.image.BufferedImage;
 
 /**
- * Water Ripple based on the JHLabs WaterFilter
+ * Water Ripple filter based on the JHLabs WaterFilter
  */
 public class JHWaterRipple extends FilterWithParametrizedGUI {
     public static final String NAME = "Water Ripple";

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ import java.awt.BasicStroke;
 import java.awt.Stroke;
 
 /**
- *
+ * The calligraphy brush based on CalligraphyStroke
  */
 public class CalligraphyBrush extends StrokeBrush {
     private static final Stroke pointStroke = new BasicStroke(1.2f);

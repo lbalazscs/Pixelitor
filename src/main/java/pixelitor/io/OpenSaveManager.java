@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -50,13 +50,13 @@ import java.util.Objects;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+/**
+ * Utility class with static methods related to opening and saving files.
+ */
 public class OpenSaveManager {
     private static final int CURRENT_PXC_VERSION_NUMBER = 0x03;
     private static JpegSettings jpegSettings = JpegSettings.getDefaults();
 
-    /**
-     * Utility class with static methods
-     */
     private OpenSaveManager() {
     }
 

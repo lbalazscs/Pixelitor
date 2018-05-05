@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import pixelitor.utils.ImageUtils;
 import java.awt.image.BufferedImage;
 
 /**
- * Gaussian Blur based on JHLabs GaussianFilter
+ * Gaussian Blur filter based on JHLabs GaussianFilter
  */
 public class JHGaussianBlur extends FilterWithParametrizedGUI {
     public static final String NAME = "Gaussian Blur";

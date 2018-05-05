@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,9 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
 
+/**
+ * The GUI for the "Channel Mixer"
+ */
 public class ChannelMixerAdjustments extends ParametrizedFilterGUIPanel {
     public ChannelMixerAdjustments(FilterWithParametrizedGUI filter, Drawable dr, Action[] actions) {
         super(filter, dr, actions, ShowOriginal.YES);

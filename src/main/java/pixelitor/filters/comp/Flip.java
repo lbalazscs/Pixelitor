@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,7 @@ import pixelitor.layers.ImageLayer;
 import java.awt.geom.AffineTransform;
 
 /**
- * Flips a ContentLayer horizontally or vertically
+ * Flips all content layers of a composition horizontally or vertically
  */
 public class Flip extends SimpleCompAction {
     private final Flip.Direction direction;

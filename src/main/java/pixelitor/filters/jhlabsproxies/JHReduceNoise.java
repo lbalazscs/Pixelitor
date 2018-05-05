@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ import pixelitor.filters.Filter;
 import java.awt.image.BufferedImage;
 
 /**
- * Reduce Noise based on the JHLabs ReduceNoiseFilter
+ * Reduce Single Pixel Noise filter based on the JHLabs ReduceNoiseFilter
  */
 public class JHReduceNoise extends Filter {
     public static final String NAME = "Reduce Single Pixel Noise";

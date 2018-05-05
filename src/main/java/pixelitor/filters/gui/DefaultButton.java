@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ import javax.swing.*;
 import java.awt.Dimension;
 
 /**
- * A button that resets a Resettable, and displays and arrow when the
+ * A button that resets a Resettable, and displays an arrow when the
  * Resettable is not set to its default value
  */
 public class DefaultButton extends JButton {

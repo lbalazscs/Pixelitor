@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,7 +39,7 @@ import static pixelitor.filters.ResizingFilterHelper.ScaleUpQuality.BILINEAR_FAS
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
 
 /**
- * Drop Shadow based on the JHLabs ShadowFilter
+ * Drop Shadow filter based on the JHLabs ShadowFilter
  */
 public class JHDropShadow extends FilterWithParametrizedGUI {
     public static final String NAME = "Drop Shadow";

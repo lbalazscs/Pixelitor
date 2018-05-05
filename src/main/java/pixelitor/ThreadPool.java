@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+/**
+ * A thread pool for parallel execution on multiple CPU cores
+ */
 public class ThreadPool {
     private static final int NUM_AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,9 @@ import java.awt.Graphics2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 
+/**
+ * The brush type ("hard" and "soft") for the Clone Stamp and Smudge tools.
+ */
 public enum CopyBrushType {
     SOFT("Soft") {
         private BufferedImage transparencyImage;

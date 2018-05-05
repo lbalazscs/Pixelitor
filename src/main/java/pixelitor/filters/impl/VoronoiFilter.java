@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,6 +29,9 @@ import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
+/**
+ * Voronoi Diagram filter implementation
+ */
 public class VoronoiFilter extends PointFilter {
     private int numPoints = 10;
     private int[] xCoords;

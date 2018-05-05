@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 
 /**
- *
+ * A brush based on the JHLabs WobbleStroke
  */
 public class WobbleBrush extends StrokeBrush {
     private static final float SIZE_DIVIDING_FACTOR = 4.0f;

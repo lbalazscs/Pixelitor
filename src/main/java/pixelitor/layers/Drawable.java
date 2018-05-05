@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ import java.awt.image.BufferedImage;
 
 /**
  * A bunch of pixels.
- * Practically always an image layer of layer mask.
+ * Practically always an image layer or a layer mask.
  */
 public interface Drawable {
     ImageLayer duplicate(boolean sameName);

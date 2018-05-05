@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import java.awt.image.BufferedImage;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
- * ConvolutionEdge based on the JHLabs EdgeFilter
+ * Convolution Edge Detection filter based on the JHLabs EdgeFilter
  */
 public class JHConvolutionEdge extends FilterWithParametrizedGUI {
     public static final String NAME = "Convolution Edge Detection";

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,10 @@ import java.awt.geom.AffineTransform;
 
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
 
-
+/**
+ * A CompAction where the processing can be simplified
+ * by using the template method pattern
+ */
 public abstract class SimpleCompAction extends AbstractAction implements CompAction {
     private final boolean changesCanvasDimensions;
 

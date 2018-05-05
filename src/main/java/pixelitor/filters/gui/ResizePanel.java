@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,6 +37,9 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
+/**
+ * The GUI for the resize dialog
+ */
 public class ResizePanel extends JPanel implements KeyListener, ItemListener {
     private static final NumberFormat doubleFormatter = new DecimalFormat("#0.00");
 

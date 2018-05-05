@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,7 @@ import static java.awt.Color.GRAY;
 import static java.awt.Color.WHITE;
 
 /**
- * Pixelate based on the JHLabs BlockFilter
+ * Pixelate filter based on the JHLabs BlockFilter
  */
 public class JHPixelate extends FilterWithParametrizedGUI {
     public static final String NAME = "Pixelate";

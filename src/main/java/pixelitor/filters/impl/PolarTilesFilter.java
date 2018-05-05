@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import net.jafama.FastMath;
 import pixelitor.filters.PolarTiles;
 
 /**
- *
+ * The implementation for the polar glass tiles filter
  */
 public class PolarTilesFilter extends CenteredTransformFilter {
     private float zoom;

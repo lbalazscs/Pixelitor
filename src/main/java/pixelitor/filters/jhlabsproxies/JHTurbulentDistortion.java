@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import java.awt.image.BufferedImage;
 import static pixelitor.filters.gui.IntChoiceParam.EDGE_REPEAT_PIXELS;
 
 /**
- * Turbulent Distortion based on the JHLabs MarbleFilter
+ * Turbulent Distortion filter based on the JHLabs MarbleFilter
  */
 public class JHTurbulentDistortion extends FilterWithParametrizedGUI {
     public static final String NAME = "Turbulent Distortion";

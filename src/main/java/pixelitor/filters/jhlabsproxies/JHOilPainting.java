@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ import static pixelitor.filters.ResizingFilterHelper.ScaleUpQuality;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
- * Oil Painting based on the JHLabs OilFilter
+ * Oil Painting filter based on the JHLabs OilFilter
  */
 public class JHOilPainting extends FilterWithParametrizedGUI {
     public static final String NAME = "Oil Painting";

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.io;
 import java.io.File;
 
 /**
- * Utility class with static methods
+ * Utility class with static methods related to file extensions
  */
 public class FileExtensionUtils {
     private static final String[] SUPPORTED_EXTENSIONS = {"jpg", "jpeg", "png", "gif", "bmp", "pxc", "ora"};
