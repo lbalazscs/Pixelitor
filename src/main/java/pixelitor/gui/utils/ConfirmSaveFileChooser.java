@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,9 @@ package pixelitor.gui.utils;
 import javax.swing.*;
 import java.io.File;
 
+/**
+ * A save file chooser that confirms before overwriting a file
+ */
 public class ConfirmSaveFileChooser extends JFileChooser {
     public ConfirmSaveFileChooser(File currentDirectory) {
         super(currentDirectory);
@@ -40,5 +43,4 @@ public class ConfirmSaveFileChooser extends JFileChooser {
         }
         super.approveSelection();
     }
-
 }

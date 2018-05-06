@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,10 @@ import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VariationsPanel extends JPanel {
+/**
+ * The panel containing the color swatch buttons in rows and columns
+ */
+public class PalettePanel extends JPanel {
     private static final int LAYOUT_GAP = 2;
     private final Palette palette;
     private final ColorSwatchClickHandler clickHandler;
@@ -43,7 +46,7 @@ public class VariationsPanel extends JPanel {
     // vertical lists in a horizontal list
     private final List<List<ColorSwatchButton>> buttons;
 
-    private VariationsPanel(Palette palette, ColorSwatchClickHandler clickHandler) {
+    private PalettePanel(Palette palette, ColorSwatchClickHandler clickHandler) {
         this.palette = palette;
         this.clickHandler = clickHandler;
 
@@ -179,12 +182,13 @@ public class VariationsPanel extends JPanel {
     public static void showDialog(Window window, Palette palette, ColorSwatchClickHandler clickHandler) {
         assert window != null;
 
-        VariationsPanel variationsPanel = new VariationsPanel(palette, clickHandler);
+        PalettePanel palettePanel = new PalettePanel(palette, clickHandler);
 
         JPanel form = new JPanel(new BorderLayout());
 
-        form.add(palette.getConfig().createConfigPanel(variationsPanel), BorderLayout.NORTH);
-        form.add(variationsPanel, BorderLayout.CENTER);
+        form.add(palette.getConfig()
+                .createConfigPanel(palettePanel), BorderLayout.NORTH);
+        form.add(palettePanel, BorderLayout.CENTER);
 
         new DialogBuilder()
                 .title(palette.getDialogTitle())

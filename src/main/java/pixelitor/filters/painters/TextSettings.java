@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -139,7 +139,7 @@ public class TextSettings implements Serializable {
     public static TextSettings createRandomSettings(Random rand) {
         return new TextSettings(Utils.getRandomString(10),
                 new Font(Font.SANS_SERIF, Font.BOLD, 100),
-                ColorUtils.getRandomColor(false),
+                ColorUtils.createRandomColor(false),
                 AreaEffects.createRandom(rand),
                 AbstractLayoutPainter.HorizontalAlignment.CENTER,
                 AbstractLayoutPainter.VerticalAlignment.CENTER,

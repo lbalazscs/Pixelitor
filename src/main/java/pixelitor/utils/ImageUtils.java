@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -71,7 +71,7 @@ import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 
 /**
- * Image utility methods
+ * Static image-related utility methods
  */
 public class ImageUtils {
     public static final double DEG_315_IN_RADIANS = 0.7853981634;
@@ -84,9 +84,6 @@ public class ImageUtils {
             .getDefaultConfiguration();
     private static final ColorModel defaultColorModel = graphicsConfiguration.getColorModel();
 
-    /**
-     * Utility class with static methods
-     */
     private ImageUtils() {
     }
 
@@ -296,8 +293,7 @@ public class ImageUtils {
     }
 
     /**
-     * Returns the number of steps necessary for
-     * For progress tracking
+     * Returns the number of steps necessary for progress tracking
      */
     public static int getNumStepsForEnlargeSmooth(double resizeFactor, double step) {
         double progress = 1.0;
@@ -446,7 +442,8 @@ public class ImageUtils {
      */
     public static BufferedImage loadBufferedImage(String fileName) {
         // consider caching
-        // for image brushes this is not necessary because the template brush always has the max size
+        // for image brushes this is not necessary because
+        // the template brush always has the max size
 
         assert fileName != null;
 
@@ -621,7 +618,7 @@ public class ImageUtils {
         return thumb;
     }
 
-    public static void paintRedXOnThumb(BufferedImage thumb) {
+    public static void paintRedXOn(BufferedImage thumb) {
         int thumbWidth = thumb.getWidth();
         int thumbHeight = thumb.getHeight();
 
@@ -709,7 +706,6 @@ public class ImageUtils {
         return output;
     }
 
-
     public static int lerpAndPremultiplyColorWithAlpha(float t, int[] color1, int[] color2) {
         int alpha = color1[0] + (int) (t * (color2[0] - color1[0]));
         int red;
@@ -794,8 +790,6 @@ public class ImageUtils {
                 }
             }
         }
-
-//        Fill.fillImage(brushImage, Color.BLACK);
 
         return brushImage;
     }
@@ -883,7 +877,6 @@ public class ImageUtils {
         if (emptyIntersections) {
             g.setComposite(savedComposite);
         }
-
     }
 
     public static void drawBrickGrid(Color color, Graphics2D g, int size, int maxX, int maxY) {
@@ -910,7 +903,6 @@ public class ImageUtils {
             g.drawLine(0, y, maxX, y);
             y += size;
             verticalCount++;
-
         }
     }
 
@@ -950,12 +942,6 @@ public class ImageUtils {
         int[] pixels = getPixelsAsArray(img);
 
         int fillColor = c.getRGB();
-
-//        int red = c.getRed();
-//        int green = c.getGreen();
-//        int blue = c.getBlue();
-//
-//        int fillColor = (0xFF000000 | (red << 16) | (green << 8) | blue);
 
         for (int i = 0; i < pixels.length; i++) {
             pixels[i] = fillColor;
@@ -1000,16 +986,6 @@ public class ImageUtils {
         }
         return (a << 24) | (r << 16) | (g << 8) | b;
     }
-
-//    // TODO this method increases the contrast of the image - why?
-//    public static BufferedImage convertToGrayScaleImage(BufferedImage src) {
-//        BufferedImage dest = new BufferedImage(src.getWidth(),
-//                src.getHeight(),
-//                TYPE_BYTE_GRAY);
-//        ColorConvertOp colorConvertOp = new ColorConvertOp(null);
-//        dest = colorConvertOp.filter(src, dest);
-//        return dest;
-//    }
 
     public static BufferedImage convertToGrayScaleImage(BufferedImage src) {
         BufferedImage dest = new BufferedImage(src.getWidth(),
@@ -1070,7 +1046,7 @@ public class ImageUtils {
                 int rgb2 = img2.getRGB(x, y);
                 if (rgb1 != rgb2) {
                     String msg = String.format("at (%d, %d) rgb1 is %s and rgb2 is %s",
-                            x, y, ColorUtils.intColorToString(rgb1), ColorUtils.intColorToString(rgb2));
+                            x, y, ColorUtils.rgbIntToString(rgb1), ColorUtils.rgbIntToString(rgb2));
                     System.out.println(String.format("ImageUtils::compareSmallImages: %s", msg));
                     return false;
                 }
@@ -1087,7 +1063,7 @@ public class ImageUtils {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int rgb = im.getRGB(x, y);
-                String asString = ColorUtils.intColorToString(rgb);
+                String asString = ColorUtils.rgbIntToString(rgb);
                 s.append(asString);
                 if(x == width - 1) {
                     s.append("\n");

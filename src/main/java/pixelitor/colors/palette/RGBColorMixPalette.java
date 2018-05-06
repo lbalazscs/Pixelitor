@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,10 @@ import pixelitor.colors.FgBgColors;
 
 import java.awt.Color;
 
+/**
+ * A palette that mixes the foreground color with the background color
+ * using the RGB color space to interpolate between them
+ */
 public class RGBColorMixPalette extends Palette {
     private static int lastRows = 7;
     private static int lastCols = 10;
@@ -51,7 +55,7 @@ public class RGBColorMixPalette extends Palette {
     }
 
     @Override
-    public void addButtons(VariationsPanel panel) {
+    public void addButtons(PalettePanel panel) {
         for (int y = 0; y < numRows; y++) {
             for (int x = 0; x < numCols; x++) {
                 Color c;

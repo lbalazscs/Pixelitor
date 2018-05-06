@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 /**
- * An action that opens an URL in an external browser
+ * An action that opens a URL in an external browser
  */
 public class OpenInBrowserAction extends AbstractAction {
     private URI uri;

@@ -20,8 +20,8 @@ package pixelitor.io;
 import pixelitor.Composition;
 import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.utils.CustomFileChooser;
 import pixelitor.gui.utils.ImagePreviewPanel;
+import pixelitor.gui.utils.SaveFileChooser;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
@@ -34,7 +34,7 @@ import java.io.File;
  */
 public class FileChoosers {
     private static JFileChooser openChooser;
-    private static CustomFileChooser saveChooser;
+    private static SaveFileChooser saveChooser;
 
     public static final FileFilter jpegFilter = new FileNameExtensionFilter("JPEG files", "jpg", "jpeg");
     private static final FileFilter pngFilter = new FileNameExtensionFilter("PNG files", "png");
@@ -69,7 +69,7 @@ public class FileChoosers {
         assert SwingUtilities.isEventDispatchThread();
         if (saveChooser == null) {
             //noinspection NonThreadSafeLazyInitialization
-            saveChooser = new CustomFileChooser(Directories.getLastSaveDir());
+            saveChooser = new SaveFileChooser(Directories.getLastSaveDir());
             saveChooser.setName("save");
             saveChooser.setDialogTitle("Save As");
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,10 +23,14 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 
-public class CustomFileChooser extends ConfirmSaveFileChooser {
+/**
+ * The file chooser used for saving files. It tries to
+ * handle file extensions intelligently.
+ */
+public class SaveFileChooser extends ConfirmSaveFileChooser {
     private String extension;
 
-    public CustomFileChooser(File currentDirectoryPath) {
+    public SaveFileChooser(File currentDirectoryPath) {
         super(currentDirectoryPath);
         setAcceptAllFileFilterUsed(false);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,9 @@ package pixelitor.colors.palette;
 
 import java.awt.Color;
 
+/**
+ * A full palette tries to show as many colors as possible
+ */
 public class FullPalette extends Palette {
     private static int lastRows = 11;
     private static int lastCols = 7;
@@ -40,7 +43,7 @@ public class FullPalette extends Palette {
     }
 
     @Override
-    public void addButtons(VariationsPanel panel) {
+    public void addButtons(PalettePanel panel) {
         HueSatPaletteConfig hsp = (HueSatPaletteConfig) config;
         float hueShift = hsp.getHueShift();
         float saturation = hsp.getSaturation();

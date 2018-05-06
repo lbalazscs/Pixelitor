@@ -30,7 +30,7 @@ import pixelitor.automate.BatchResize;
 import pixelitor.colors.FgBgColors;
 import pixelitor.colors.palette.ColorSwatchClickHandler;
 import pixelitor.colors.palette.FullPalette;
-import pixelitor.colors.palette.VariationsPanel;
+import pixelitor.colors.palette.PalettePanel;
 import pixelitor.filters.*;
 import pixelitor.filters.animation.TweenWizard;
 import pixelitor.filters.comp.EnlargeCanvas;
@@ -978,7 +978,7 @@ public class MenuBar extends JMenuBar {
             @Override
             public void onClick() {
                 FullPalette palette = new FullPalette();
-                VariationsPanel.showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
+                PalettePanel.showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
             }
         });
 
@@ -1016,19 +1016,19 @@ public class MenuBar extends JMenuBar {
         variations.addAlwaysEnabledAction(new MenuAction("Foreground...") {
             @Override
             public void onClick() {
-                VariationsPanel.showFGVariationsDialog(pw);
+                PalettePanel.showFGVariationsDialog(pw);
             }
         });
         variations.addAlwaysEnabledAction(new MenuAction("HSB Mix Foreground with Background...") {
             @Override
             public void onClick() {
-                VariationsPanel.showHSBMixDialog(pw, true);
+                PalettePanel.showHSBMixDialog(pw, true);
             }
         });
         variations.addAlwaysEnabledAction(new MenuAction("RGB Mix Foreground with Background...") {
             @Override
             public void onClick() {
-                VariationsPanel.showRGBMixDialog(pw, true);
+                PalettePanel.showRGBMixDialog(pw, true);
             }
         });
 
@@ -1037,19 +1037,19 @@ public class MenuBar extends JMenuBar {
         variations.addAlwaysEnabledAction(new MenuAction("Background...") {
             @Override
             public void onClick() {
-                VariationsPanel.showBGVariationsDialog(pw);
+                PalettePanel.showBGVariationsDialog(pw);
             }
         });
         variations.addAlwaysEnabledAction(new MenuAction("HSB Mix Background with Foreground...") {
             @Override
             public void onClick() {
-                VariationsPanel.showHSBMixDialog(pw, false);
+                PalettePanel.showHSBMixDialog(pw, false);
             }
         });
         variations.addAlwaysEnabledAction(new MenuAction("RGB Mix Background with Foreground...") {
             @Override
             public void onClick() {
-                VariationsPanel.showRGBMixDialog(pw, false);
+                PalettePanel.showRGBMixDialog(pw, false);
             }
         });
         return variations;

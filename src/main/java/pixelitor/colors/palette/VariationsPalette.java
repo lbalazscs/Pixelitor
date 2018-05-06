@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,9 @@ import pixelitor.colors.ColorUtils;
 
 import java.awt.Color;
 
+/**
+ * A palette that produces variations around a single color
+ */
 public class VariationsPalette extends Palette {
     private static int lastRows = 7;
     private static int lastCols = 10;
@@ -39,7 +42,7 @@ public class VariationsPalette extends Palette {
     }
 
     @Override
-    public void addButtons(VariationsPanel panel) {
+    public void addButtons(PalettePanel panel) {
         HueSatPaletteConfig hsp = (HueSatPaletteConfig) config;
         float hueShift = hsp.getHueShift();
         float saturation = hsp.getSaturation();

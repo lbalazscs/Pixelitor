@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -118,7 +118,7 @@ public class GradientParam extends AbstractFilterParam {
         if (randomizePolicy.allowRandomize()) {
             Color[] randomColors = new Color[defaultThumbPositions.length];
             for (int i = 0; i < randomColors.length; i++) {
-                randomColors[i] = ColorUtils.getRandomColor(false);
+                randomColors[i] = ColorUtils.createRandomColor(false);
             }
 
             trigger = false;

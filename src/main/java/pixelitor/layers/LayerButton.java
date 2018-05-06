@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,10 +48,8 @@ public class LayerButton extends JToggleButton {
     public static final int BORDER_WIDTH = 2;
     private DragReorderHandler dragReorderHandler;
 
-    /**
-     * In pxc files the mask might be added before the drag handler
-     * and in unit tests the drag handler is not added at all.
-     */
+    // In pxc files the mask might be added before the drag handler
+    // and in unit tests the drag handler is not added at all.
     private boolean maskAddedBeforeDragHandler;
 
     private enum SelectionState {
@@ -305,7 +303,7 @@ public class LayerButton extends JToggleButton {
                     }
                     boolean disabledMask = !layer.getParent().isMaskEnabled();
                     if (disabledMask) {
-                        ImageUtils.paintRedXOnThumb(thumb);
+                        ImageUtils.paintRedXOn(thumb);
                     }
                     maskIconLabel.setIcon(new ImageIcon(thumb));
                 } else {

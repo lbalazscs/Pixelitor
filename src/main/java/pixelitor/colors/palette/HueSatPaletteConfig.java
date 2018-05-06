@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,10 @@ import java.awt.Insets;
 
 import static pixelitor.colors.palette.PaletteConfig.createSlider;
 
+/**
+ * A palette configuration with a hue slider and
+ * a saturation slider
+ */
 public class HueSatPaletteConfig implements PaletteConfig {
     private float saturation = 0.9f;
     private float hueShift = 0.0f;
@@ -48,14 +52,14 @@ public class HueSatPaletteConfig implements PaletteConfig {
     }
 
     @Override
-    public JPanel createConfigPanel(VariationsPanel variationsPanel) {
+    public JPanel createConfigPanel(PalettePanel palettePanel) {
         JPanel p = new JPanel(new GridBagLayout());
 
         satSlider = createSlider(saturation, "Saturation of the colors");
-        satSlider.addChangeListener(e -> onNewSat(variationsPanel));
+        satSlider.addChangeListener(e -> onNewSat(palettePanel));
 
         hueSlider = createSlider(hueShift, "Rotate the hue of the colors");
-        hueSlider.addChangeListener(e -> onNewHue(variationsPanel));
+        hueSlider.addChangeListener(e -> onNewHue(palettePanel));
 
         Insets insets = new Insets(2, 4, 2, 4);
         GridBagConstraints labelCtr = new GridBagConstraints(0, 0, 1, 1, 0, 0,
@@ -74,19 +78,19 @@ public class HueSatPaletteConfig implements PaletteConfig {
         return p;
     }
 
-    private void onNewSat(VariationsPanel variationsPanel) {
+    private void onNewSat(PalettePanel palettePanel) {
         float oldSat = saturation;
         saturation = satSlider.getValue() / 100.0f;
         if (oldSat != saturation) {
-            variationsPanel.configChanged();
+            palettePanel.configChanged();
         }
     }
 
-    private void onNewHue(VariationsPanel variationsPanel) {
+    private void onNewHue(PalettePanel palettePanel) {
         float oldHueShift = hueShift;
         hueShift = hueSlider.getValue() / 100.0f;
         if (oldHueShift != hueShift) {
-            variationsPanel.configChanged();
+            palettePanel.configChanged();
         }
     }
 }

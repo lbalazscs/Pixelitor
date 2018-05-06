@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.colors;
 
 import pixelitor.colors.palette.ColorSwatchClickHandler;
-import pixelitor.colors.palette.VariationsPanel;
+import pixelitor.colors.palette.PalettePanel;
 import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.menus.MenuAction;
@@ -35,7 +35,8 @@ import static java.awt.Color.WHITE;
 import static pixelitor.colors.ColorUtils.showColorPickerDialog;
 
 /**
- * A panel that contains the buttons for selecting the foreground and background colors
+ * A panel that contains the buttons for selecting
+ * the foreground and background colors
  */
 public class FgBgColorSelector extends JLayeredPane {
     private final PixelitorWindow pw;
@@ -55,6 +56,7 @@ public class FgBgColorSelector extends JLayeredPane {
     private Action resetToDefaultAction;
     private Action swapColorsAction;
 
+    // in layer mask editing mode we should show only grayscale colors
     private boolean layerMaskEditing = false;
 
     public FgBgColorSelector(PixelitorWindow pw) {
@@ -101,9 +103,9 @@ public class FgBgColorSelector extends JLayeredPane {
             @Override
             public void onClick() {
                 if (fg) {
-                    VariationsPanel.showFGVariationsDialog(pw);
+                    PalettePanel.showFGVariationsDialog(pw);
                 } else {
-                    VariationsPanel.showBGVariationsDialog(pw);
+                    PalettePanel.showBGVariationsDialog(pw);
                 }
             }
         });
@@ -114,7 +116,7 @@ public class FgBgColorSelector extends JLayeredPane {
         menu.add(new MenuAction(mixTitle) {
             @Override
             public void onClick() {
-                VariationsPanel.showHSBMixDialog(pw, fg);
+                PalettePanel.showHSBMixDialog(pw, fg);
             }
         });
 
@@ -124,7 +126,7 @@ public class FgBgColorSelector extends JLayeredPane {
         menu.add(new MenuAction(rgbMixTitle) {
             @Override
             public void onClick() {
-                VariationsPanel.showRGBMixDialog(pw, fg);
+                PalettePanel.showRGBMixDialog(pw, fg);
             }
         });
 
@@ -198,8 +200,8 @@ public class FgBgColorSelector extends JLayeredPane {
         randomizeColorsAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                setFgColor(ColorUtils.getRandomColor(false));
-                setBgColor(ColorUtils.getRandomColor(false));
+                setFgColor(ColorUtils.createRandomColor(false));
+                setBgColor(ColorUtils.createRandomColor(false));
             }
         };
         randomizeButton.addActionListener(randomizeColorsAction);
@@ -214,11 +216,11 @@ public class FgBgColorSelector extends JLayeredPane {
         setMaximumSize(preferredDim);
     }
 
-    private JButton initButton(String toolTipText, int size, int addLayer) {
+    private JButton initButton(String toolTip, int size, int layer) {
         JButton button = new JButton();
-        button.setToolTipText(toolTipText);
+        button.setToolTipText(toolTip);
         button.setSize(size, size);
-        add(button, Integer.valueOf(addLayer));
+        add(button, Integer.valueOf(layer));
         return button;
     }
 

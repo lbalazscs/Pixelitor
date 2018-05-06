@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,20 +26,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
 
 /**
- * An utility class for managing filters
+ * A utility class with static methods for managing filters
  */
 public class FilterUtils {
     private static final List<FilterAction> allFilters = new ArrayList<>();
     private static Filter lastExecutedFilter = null;
 
-    /**
-     * Utility class with static methods
-     */
     private FilterUtils() {
     }
 
@@ -51,12 +47,10 @@ public class FilterUtils {
     }
 
     public static FilterAction[] getAnimationFiltersSorted() {
-        List<FilterAction> animFilters = allFilters.stream()
+        return allFilters.stream()
                 .filter(FilterAction::isAnimationFilter)
                 .sorted(comparing(FilterAction::getListName))
-                .collect(Collectors.toList());
-
-        return animFilters.toArray(new FilterAction[animFilters.size()]);
+                .toArray(FilterAction[]::new);
     }
 
     public static Filter getRandomFilter(Predicate<Filter> conditions) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,8 @@
 package pixelitor.colors.palette;
 
 /**
- * Generates colors for a 2D palette
+ * The abstract superclass for a number of classes
+ * that generate colors for a 2D color palette
  */
 public abstract class Palette {
     protected int numRows;
@@ -29,7 +30,7 @@ public abstract class Palette {
         setSize(numRows, numCols);
     }
 
-    public abstract void addButtons(VariationsPanel panel);
+    public abstract void addButtons(PalettePanel panel);
 
     public void onConfigChange() {
     }

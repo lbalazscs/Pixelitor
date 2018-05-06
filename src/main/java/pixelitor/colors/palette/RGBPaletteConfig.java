@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,10 @@ import java.awt.Insets;
 
 import static pixelitor.colors.palette.PaletteConfig.createSlider;
 
+/**
+ * A palette configuration for RGB color mixing, containing
+ * a cyan-red, a magenta-green and a yellow-blue slider.
+ */
 public class RGBPaletteConfig implements PaletteConfig {
     private float cyanRed = 0.5f;
     private float magentaGreen = 0.5f;
@@ -48,17 +52,17 @@ public class RGBPaletteConfig implements PaletteConfig {
     }
 
     @Override
-    public JPanel createConfigPanel(VariationsPanel variationsPanel) {
+    public JPanel createConfigPanel(PalettePanel palettePanel) {
         JPanel p = new JPanel(new GridBagLayout());
 
         redSlider = createSlider(cyanRed, "Cyan-red shift");
-        redSlider.addChangeListener(e -> onNewRed(variationsPanel));
+        redSlider.addChangeListener(e -> onNewRed(palettePanel));
 
         greenSlider = createSlider(magentaGreen, "Magenta-green shift");
-        greenSlider.addChangeListener(e -> onNewGreen(variationsPanel));
+        greenSlider.addChangeListener(e -> onNewGreen(palettePanel));
 
         blueSlider = createSlider(yellowBlue, "Yellow-Blue shift");
-        blueSlider.addChangeListener(e -> onNewBlue(variationsPanel));
+        blueSlider.addChangeListener(e -> onNewBlue(palettePanel));
 
         Insets insets = new Insets(2, 4, 2, 4);
         GridBagConstraints labelCtr = new GridBagConstraints(0, 0, 1, 1, 0, 0,
@@ -84,27 +88,27 @@ public class RGBPaletteConfig implements PaletteConfig {
         return p;
     }
 
-    private void onNewRed(VariationsPanel variationsPanel) {
+    private void onNewRed(PalettePanel palettePanel) {
         float oldValue = cyanRed;
         cyanRed = redSlider.getValue() / 100.0f;
         if (oldValue != cyanRed) {
-            variationsPanel.configChanged();
+            palettePanel.configChanged();
         }
     }
 
-    private void onNewGreen(VariationsPanel variationsPanel) {
+    private void onNewGreen(PalettePanel palettePanel) {
         float oldValue = magentaGreen;
         magentaGreen = greenSlider.getValue() / 100.0f;
         if (oldValue != magentaGreen) {
-            variationsPanel.configChanged();
+            palettePanel.configChanged();
         }
     }
 
-    private void onNewBlue(VariationsPanel variationsPanel) {
+    private void onNewBlue(PalettePanel palettePanel) {
         float oldValue = yellowBlue;
         yellowBlue = blueSlider.getValue() / 100.0f;
         if (oldValue != yellowBlue) {
-            variationsPanel.configChanged();
+            palettePanel.configChanged();
         }
     }
 }

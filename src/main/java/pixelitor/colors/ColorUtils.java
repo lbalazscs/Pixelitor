@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import com.bric.swing.ColorPicker;
 import com.bric.swing.ColorSwatch;
 import com.jhlabs.image.ImageMath;
 import pixelitor.colors.palette.ColorSwatchClickHandler;
-import pixelitor.colors.palette.VariationsPanel;
+import pixelitor.colors.palette.PalettePanel;
 import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
@@ -59,20 +59,27 @@ public class ColorUtils {
         return new Color(interpolatedRGB);
     }
 
-    public static Color getRandomColor(boolean randomAlpha) {
-        Random rnd = new Random();
-        return getRandomColor(rnd, randomAlpha);
-    }
+    /**
+     * Calculates the average of two colors in the RGB space.
+     * Full opacity is assumed.
+     */
+    public static Color calcRGBAverage(Color c1, Color c2) {
+        assert c1 != null && c2 != null;
 
-    public static Color getRandomColor(Random rnd, boolean randomAlpha) {
-        int r = rnd.nextInt(256);
-        int g = rnd.nextInt(256);
-        int b = rnd.nextInt(256);
+        int rgb1 = c1.getRGB();
+        int rgb2 = c2.getRGB();
 
-        if (randomAlpha) {
-            int a = rnd.nextInt(256);
-            return new Color(r, g, b, a);
-        }
+        int r1 = (rgb1 >>> 16) & 0xFF;
+        int g1 = (rgb1 >>> 8) & 0xFF;
+        int b1 = (rgb1) & 0xFF;
+
+        int r2 = (rgb2 >>> 16) & 0xFF;
+        int g2 = (rgb2 >>> 8) & 0xFF;
+        int b2 = (rgb2) & 0xFF;
+
+        int r = (r1 + r2) / 2;
+        int g = (g1 + g2) / 2;
+        int b = (b1 + b2) / 2;
 
         return new Color(r, g, b);
     }
@@ -120,6 +127,10 @@ public class ColorUtils {
         }
     }
 
+    /**
+     * A linear interpolation for hue values,
+     * taking their circular nature into account
+     */
     public static float lerpHue(float mixFactor, float hue1, float hue2) {
         float diff = hue1 - hue2;
         if (diff < 0.5f && diff > -0.5f) {
@@ -143,6 +154,10 @@ public class ColorUtils {
         }
     }
 
+    /**
+     * Just like the above lerpHue method, but taking the average
+     * that is on the opposite side of the circle. Not very useful.
+     */
     public static float lerpHueLong(float mixFactor, float hue1, float hue2) {
         float diff = hue1 - hue2;
         if (diff > 0.5f || diff < -0.5f) {
@@ -166,34 +181,30 @@ public class ColorUtils {
         }
     }
 
-    public static String intColorToString(int color) {
-        Color c = new Color(color);
-        return "[r=" + c.getRed() + ", g=" + c.getGreen() + ", b=" + c.getBlue() + ']';
+    public static Color createRandomColor(boolean randomAlpha) {
+        Random rnd = new Random();
+        return createRandomColor(rnd, randomAlpha);
     }
 
-    /**
-     * Calculates the average of two colors in the RGB space.
-     * Full opacity is assumed.
-     */
-    public static Color calcRGBAverage(Color c1, Color c2) {
-        assert c1 != null && c2 != null;
+    public static Color createRandomColor(Random rnd, boolean randomAlpha) {
+        int r = rnd.nextInt(256);
+        int g = rnd.nextInt(256);
+        int b = rnd.nextInt(256);
 
-        int rgb1 = c1.getRGB();
-        int rgb2 = c2.getRGB();
-
-        int r1 = (rgb1 >>> 16) & 0xFF;
-        int g1 = (rgb1 >>> 8) & 0xFF;
-        int b1 = (rgb1) & 0xFF;
-
-        int r2 = (rgb2 >>> 16) & 0xFF;
-        int g2 = (rgb2 >>> 8) & 0xFF;
-        int b2 = (rgb2) & 0xFF;
-
-        int r = (r1 + r2) / 2;
-        int g = (g1 + g2) / 2;
-        int b = (b1 + b2) / 2;
+        if (randomAlpha) {
+            int a = rnd.nextInt(256);
+            return new Color(r, g, b, a);
+        }
 
         return new Color(r, g, b);
+    }
+
+    public static String rgbIntToString(int rgb) {
+        int a = (rgb >>> 24) & 0xFF;
+        int r = (rgb >>> 16) & 0xFF;
+        int g = (rgb >>> 8) & 0xFF;
+        int b = rgb & 0xFF;
+        return String.format("(%d, %d, %d, %d)", a, r, g, b);
     }
 
     public static float calcSaturation(int r, int g, int b) {
@@ -213,14 +224,6 @@ public class ColorUtils {
             sat = 0;
         }
         return sat;
-    }
-
-    public static String colorIntToString(int rgb) {
-        int a = (rgb >>> 24) & 0xFF;
-        int r = (rgb >>> 16) & 0xFF;
-        int g = (rgb >>> 8) & 0xFF;
-        int b = rgb & 0xFF;
-        return String.format("(%d, %d, %d, %d)", a, r, g, b);
     }
 
     public static int toPackedInt(int a, int r, int g, int b) {
@@ -304,7 +307,7 @@ public class ColorUtils {
             @Override
             public void onClick() {
                 Window window = SwingUtilities.windowForComponent(parent);
-                VariationsPanel.showFilterVariationsDialog(window, colorSupplier.get(), clickHandler);
+                PalettePanel.showFilterVariationsDialog(window, colorSupplier.get(), clickHandler);
             }
         });
 

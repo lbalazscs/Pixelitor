@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -72,7 +72,7 @@ public class ColorParam extends AbstractFilterParam {
 
     @Override
     public void randomize() {
-        Color c = ColorUtils.getRandomColor(opacitySetting.allowOpacityAtRandomize);
+        Color c = ColorUtils.createRandomColor(opacitySetting.allowOpacityAtRandomize);
         setColor(c, false);
     }
 

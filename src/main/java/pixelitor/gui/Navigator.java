@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,6 +43,9 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
 
+/**
+ * The navigator component that allows the user to pan a zoomed-in image.
+ */
 public class Navigator extends JComponent implements MouseListener, MouseMotionListener, ImageSwitchListener {
     private static final BasicStroke STROKE = new BasicStroke(3);
     private static final CheckerboardPainter checkerBoardPainter = ImageUtils.createCheckerboardPainter();

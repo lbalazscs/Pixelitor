@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.tools.brushes;
 
 /**
  * The simplest dabs strategy: it places the dabs along the lines
- * connecting the mouse events with an uniform spacing between them
+ * connecting the mouse events with a uniform spacing between them
  */
 public class LinearDabsStrategy implements DabsStrategy {
     private final DabsBrush brush;

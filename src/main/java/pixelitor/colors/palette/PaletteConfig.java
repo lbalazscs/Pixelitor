@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,10 +20,13 @@ package pixelitor.colors.palette;
 import javax.swing.*;
 
 /**
- * Represents the values set in the palette sliders
+ * An interactive configuration for a palette with sliders
  */
 public interface PaletteConfig {
-    JPanel createConfigPanel(VariationsPanel variationsPanel);
+    /**
+     * Creates the actual configuration GUI with the sliders
+     */
+    JPanel createConfigPanel(PalettePanel palettePanel);
 
     static JSlider createSlider(float value, String toolTip) {
         int intValue = (int) (value * 100);

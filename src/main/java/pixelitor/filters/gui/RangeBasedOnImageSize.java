@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,12 +17,10 @@
 
 package pixelitor.filters.gui;
 
+/**
+ * A filter param can implement this to indicate that it can adjust
+ * the maximum and default parameters according to the image size
+ */
 public interface RangeBasedOnImageSize {
-    /**
-     * Sets the maximum and default parameters according to the image size
-     *
-     * @param ratio the new maximum will be
-     * @return itself
-     */
     AbstractFilterParam withAdjustedRange(double ratio);
 }
