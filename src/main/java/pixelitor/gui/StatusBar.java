@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,6 +56,8 @@ public class StatusBar extends JPanel {
     }
 
     public void startProgress(String msg, int max) {
+        assert SwingUtilities.isEventDispatchThread();
+
         statusBarLabel.setText(msg);
         progressBar = new JProgressBar(0, max);
 //        progressBar.setStringPainted(true);
@@ -73,12 +75,16 @@ public class StatusBar extends JPanel {
     }
 
     public void updateProgress(int value) {
+        assert SwingUtilities.isEventDispatchThread();
         assert inProgress;
+
         progressBar.setValue(value);
         leftPanel.paintImmediately(progressBar.getBounds());
     }
 
     public void stopProgress() {
+        assert SwingUtilities.isEventDispatchThread();
+
         leftPanel.remove(progressBar);
         leftPanel.revalidate();
         repaint();

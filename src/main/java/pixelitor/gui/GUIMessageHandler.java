@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,8 @@ package pixelitor.gui;
 import pixelitor.MessageHandler;
 import pixelitor.gui.utils.Dialogs;
 
+import javax.swing.*;
+
 /**
  * The MessageHandler that is normally used in non-testing code
  */
@@ -34,17 +36,35 @@ public class GUIMessageHandler implements MessageHandler {
 
     @Override
     public void startProgress(String msg, int max) {
-        StatusBar.INSTANCE.startProgress(msg, max);
+        if (SwingUtilities.isEventDispatchThread()) {
+            StatusBar.INSTANCE.startProgress(msg, max);
+        } else {
+            // for example in the tweening animation export
+            // this code runs in the swing worker background thread
+            SwingUtilities.invokeLater(
+                    () -> StatusBar.INSTANCE.startProgress(msg, max));
+        }
     }
 
     @Override
     public void updateProgress(int value) {
-        StatusBar.INSTANCE.updateProgress(value);
+        if (SwingUtilities.isEventDispatchThread()) {
+            StatusBar.INSTANCE.updateProgress(value);
+        } else {
+            SwingUtilities.invokeLater(
+                    () -> StatusBar.INSTANCE.updateProgress(value));
+        }
+
     }
 
     @Override
     public void stopProgress() {
-        StatusBar.INSTANCE.stopProgress();
+        if (SwingUtilities.isEventDispatchThread()) {
+            StatusBar.INSTANCE.stopProgress();
+        } else {
+            SwingUtilities.invokeLater(
+                    StatusBar.INSTANCE::stopProgress);
+        }
     }
 
     @Override
