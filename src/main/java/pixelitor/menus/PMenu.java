@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -72,30 +72,30 @@ public class PMenu extends JMenu {
     /**
      * Simple add for filter actions, no builder is needed in the simplest case
      */
-    public void addFA(String name, Supplier<Filter> supplier) {
+    public void addFilter(String name, Supplier<Filter> supplier) {
         FilterAction fa = new FilterAction(name, supplier);
-        addFA(fa);
+        addFilter(fa);
     }
 
     /**
      * Simple add for simple filters
      */
-    public void addFA(String name, AbstractBufferedImageOp op) {
+    public void addFilter(String name, AbstractBufferedImageOp op) {
         FilterAction fa = new FilterAction(name, op);
-        addFA(fa);
+        addFilter(fa);
     }
 
-    public void addFA(FilterAction fa) {
+    public void addFilter(FilterAction fa) {
         JMenuItem menuItem = EnabledIf.THERE_IS_OPEN_IMAGE.getMenuItem(fa);
         add(menuItem);
     }
 
-    public FilterMenuItemBuilder buildFA(String name, Supplier<Filter> supplier) {
+    public FilterMenuItemBuilder buildFilter(String name, Supplier<Filter> supplier) {
         FilterAction fa = new FilterAction(name, supplier);
-        return buildFA(fa);
+        return buildFilter(fa);
     }
 
-    public FilterMenuItemBuilder buildFA(FilterAction fa) {
+    public FilterMenuItemBuilder buildFilter(FilterAction fa) {
         return new FilterMenuItemBuilder(this, fa);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -66,8 +66,7 @@ public class DrunkVision extends FilterWithParametrizedGUI {
 
         Graphics2D g = dest.createGraphics();
 
-        ReseedSupport.reInitialize();
-        Random rand = ReseedSupport.getRand();
+        Random rand = ReseedSupport.reInitialize();
 
         int maxDistance = (int) (drunkenness.getValueAsPercentage() * 0.2 * (src.getWidth() + src.getHeight()));
 

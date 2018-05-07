@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,11 +21,13 @@ import pixelitor.colors.ColorUtils;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
+import pixelitor.filters.gui.FilterAction;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ReseedSupport;
+import pixelitor.utils.Utils;
 
 import java.awt.Graphics2D;
 import java.awt.geom.GeneralPath;
@@ -40,7 +42,7 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
- * Starburst
+ * Fill with Starburst filter
  */
 public class Starburst extends FilterWithParametrizedGUI {
     private final RangeParam numberOfRaysParam = new RangeParam("Number of Rays", 2, 10, 100);
@@ -50,8 +52,13 @@ public class Starburst extends FilterWithParametrizedGUI {
     private final BooleanParam randomColors = new BooleanParam("Use Random Colors for Rays", false, IGNORE_RANDOMIZE);
     private final AngleParam rotate = new AngleParam("Rotate", 0);
 
+    public static String NAME = "Starburst";
+
     public Starburst() {
         super(ShowOriginal.NO);
+
+        FilterAction reseedColorsAction = ReseedSupport.createAction(
+                "Reseed Colors", "Recalculates the random colors");
 
         setParamSet(new ParamSet(
                 numberOfRaysParam,
@@ -60,13 +67,16 @@ public class Starburst extends FilterWithParametrizedGUI {
                 randomColors,
                 center,
                 rotate
-        ).withAction(ReseedSupport.createAction("Reseed Colors", "Recalculates the random colors")));
+        ).withAction(reseedColorsAction));
+
+        // enable the "Reseed Colors" button only if
+        // the "Use Random Colors for Rays" checkbox is checked
+        Utils.setupEnableOtherIf(randomColors, reseedColorsAction, checked -> checked);
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        ReseedSupport.reInitialize();
-        Random rand = ReseedSupport.getRand();
+        Random rand = ReseedSupport.reInitialize();
 
         int width = dest.getWidth();
         int height = dest.getHeight();

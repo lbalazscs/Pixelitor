@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -75,8 +75,7 @@ public class JHSmear extends FilterWithParametrizedGUI {
             return src;
         }
 
-        ReseedSupport.reInitialize();
-        Random rand = ReseedSupport.getRand();
+        Random rand = ReseedSupport.reInitialize();
 
         if (filter == null) {
             filter = new SmearFilter(NAME);

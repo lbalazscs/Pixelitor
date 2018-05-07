@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,11 +31,10 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 /**
- * A bunch of pixels.
- * Practically always an image layer or a layer mask.
+ * A bunch of pixels: an image layer or a layer mask.
  */
 public interface Drawable {
-    ImageLayer duplicate(boolean sameName);
+    Drawable duplicate(boolean sameName);
 
     BufferedImage getImage();
 

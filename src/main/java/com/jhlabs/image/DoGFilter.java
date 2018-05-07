@@ -134,7 +134,7 @@ public class DoGFilter extends AbstractBufferedImageOp {
         g2d.drawImage( image1, 0, 0, null );
         g2d.dispose();
 
-        pt.addUnits(singleBlurUnit / 2);
+        pt.unitsDone(singleBlurUnit / 2);
 
         if (doNormalize()) {
             int[] pixels = null;

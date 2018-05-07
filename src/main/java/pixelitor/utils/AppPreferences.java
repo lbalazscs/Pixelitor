@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -60,8 +60,8 @@ public final class AppPreferences {
 
     private static final String RECENT_FILE_PREFS_KEY = "recent_file_";
 
-    private static final Preferences mainUserNode = Preferences.userNodeForPackage(Pixelitor.class);
-    private static final Preferences recentFilesUserNode = Preferences.userNodeForPackage(RecentFilesMenu.class);
+    private static final Preferences mainNode = Preferences.userNodeForPackage(Pixelitor.class);
+    private static final Preferences recentFilesNode = Preferences.userNodeForPackage(RecentFilesMenu.class);
 
     private static final String FG_COLOR_KEY = "fg_color";
     private static final String BG_COLOR_KEY = "bg_color";
@@ -86,10 +86,10 @@ public final class AppPreferences {
         int width = window.getWidth();
         int height = window.getHeight();
 
-        mainUserNode.putInt(FRAME_X_KEY, x);
-        mainUserNode.putInt(FRAME_Y_KEY, y);
-        mainUserNode.putInt(FRAME_WIDTH_KEY, width);
-        mainUserNode.putInt(FRAME_HEIGHT_KEY, height);
+        mainNode.putInt(FRAME_X_KEY, x);
+        mainNode.putInt(FRAME_Y_KEY, y);
+        mainNode.putInt(FRAME_WIDTH_KEY, width);
+        mainNode.putInt(FRAME_HEIGHT_KEY, height);
     }
 
     public static Dimension getNewImageSize() {
@@ -107,36 +107,37 @@ public final class AppPreferences {
             defaultWidth = Math.max(600, desktopSize.width - 30);
             defaultHeight = Math.max(400, desktopSize.height - 50);
         }
-        int width = mainUserNode.getInt(NEW_IMAGE_WIDTH, defaultWidth);
-        int height = mainUserNode.getInt(NEW_IMAGE_HEIGHT, defaultHeight);
+        int width = mainNode.getInt(NEW_IMAGE_WIDTH, defaultWidth);
+        int height = mainNode.getInt(NEW_IMAGE_HEIGHT, defaultHeight);
         newImageSize = new Dimension(width, height);
     }
 
     private static void saveNewImageSize() {
         Dimension lastNew = NewImage.getLastNew();
         if (lastNew != null) {
-            mainUserNode.putInt(NEW_IMAGE_WIDTH, lastNew.width);
-            mainUserNode.putInt(NEW_IMAGE_HEIGHT, lastNew.height);
+            mainNode.putInt(NEW_IMAGE_WIDTH, lastNew.width);
+            mainNode.putInt(NEW_IMAGE_HEIGHT, lastNew.height);
         }
     }
 
     public static void loadFramePosition(Window window) {
-        int x = mainUserNode.getInt(FRAME_X_KEY, 0);
-        int y = mainUserNode.getInt(FRAME_Y_KEY, 0);
-        int width = mainUserNode.getInt(FRAME_WIDTH_KEY, 0);
-        int height = mainUserNode.getInt(FRAME_HEIGHT_KEY, 0);
+        int x = mainNode.getInt(FRAME_X_KEY, 0);
+        int y = mainNode.getInt(FRAME_Y_KEY, 0);
+        int width = mainNode.getInt(FRAME_WIDTH_KEY, 0);
+        int height = mainNode.getInt(FRAME_HEIGHT_KEY, 0);
 
-        Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+        Rectangle screen = GraphicsEnvironment.getLocalGraphicsEnvironment()
+                .getMaximumWindowBounds();
 
         if ((width <= 0) || (height <= 0)) {
-            width = screenBounds.width;
-            height = screenBounds.height;
+            width = screen.width;
+            height = screen.height;
         }
-        if (width > screenBounds.width) {
-            width = screenBounds.width;
+        if (width > screen.width) {
+            width = screen.width;
         }
-        if (height > screenBounds.height) {
-            height = screenBounds.height;
+        if (height > screen.height) {
+            height = screen.height;
         }
 
         if ((x < 0) || (y < 0)) {
@@ -152,7 +153,7 @@ public final class AppPreferences {
         BoundedUniqueList<RecentFileInfo> retVal = new BoundedUniqueList<>(RecentFilesMenu.MAX_RECENT_FILES);
         for (int i = 0; i < RecentFilesMenu.MAX_RECENT_FILES; i++) {
             String key = RECENT_FILE_PREFS_KEY + i;
-            String fileName = recentFilesUserNode.get(key, null);
+            String fileName = recentFilesNode.get(key, null);
             if (fileName == null) {
                 break;
             }
@@ -170,13 +171,13 @@ public final class AppPreferences {
         for (int i = 0; i < fileInfos.size(); i++) {
             String key = RECENT_FILE_PREFS_KEY + i;
             String value = fileInfos.get(i).getSavedName();
-            recentFilesUserNode.put(key, value);
+            recentFilesNode.put(key, value);
         }
     }
 
     public static void removeRecentFiles() {
         for (int i = 0; i < RecentFilesMenu.MAX_RECENT_FILES; i++) {
-            recentFilesUserNode.remove(RECENT_FILE_PREFS_KEY + i);
+            recentFilesNode.remove(RECENT_FILE_PREFS_KEY + i);
         }
     }
 
@@ -189,7 +190,7 @@ public final class AppPreferences {
     }
 
     private static File loadDir(String key) {
-        String s = mainUserNode.get(key, null);
+        String s = mainNode.get(key, null);
 
         if (s == null) {
             return getDocumentsDir();
@@ -218,14 +219,14 @@ public final class AppPreferences {
 
     private static void saveDir(File f, String key) {
         if (f != null) {
-            mainUserNode.put(key, f.getAbsolutePath());
+            mainNode.put(key, f.getAbsolutePath());
         } else {
-            mainUserNode.put(key, null);
+            mainNode.put(key, null);
         }
     }
 
     public static int loadUndoLevels() {
-        int retVal = mainUserNode.getInt(UNDO_LEVELS_KEY, -1);
+        int retVal = mainNode.getInt(UNDO_LEVELS_KEY, -1);
         if (retVal == -1) {
             return Math.min(5, getDefaultUndoLevels());
         }
@@ -233,15 +234,20 @@ public final class AppPreferences {
     }
 
     private static void saveUndoLevels() {
-        mainUserNode.putInt(UNDO_LEVELS_KEY, History.getUndoLevels());
+        mainNode.putInt(UNDO_LEVELS_KEY, History.getUndoLevels());
     }
 
     public static int loadThumbSize() {
-        return mainUserNode.getInt(THUMB_SIZE_KEY, LayerButtonLayout.SMALL_THUMB_SIZE);
+        return mainNode.getInt(THUMB_SIZE_KEY, LayerButtonLayout.SMALL_THUMB_SIZE);
     }
 
     private static void saveThumbSize() {
-        mainUserNode.putInt(THUMB_SIZE_KEY, LayerButtonLayout.getThumbSize());
+        mainNode.putInt(THUMB_SIZE_KEY, LayerButtonLayout.getThumbSize());
+    }
+
+    public static void savePrefsAndExit() {
+        savePreferencesBeforeExit();
+        System.exit(0);
     }
 
     private static void savePreferencesBeforeExit() {
@@ -258,46 +264,56 @@ public final class AppPreferences {
     }
 
     public static Color loadFgColor() {
-        int fgInt = mainUserNode.getInt(FG_COLOR_KEY, 0xFF000000);
+        int fgInt = mainNode.getInt(FG_COLOR_KEY, 0xFF000000);
         return new Color(fgInt);
     }
 
     public static Color loadBgColor() {
-        int bgInt = mainUserNode.getInt(BG_COLOR_KEY, 0xFFFFFFFF);
+        int bgInt = mainNode.getInt(BG_COLOR_KEY, 0xFFFFFFFF);
         return new Color(bgInt);
     }
 
     private static void saveFgBgColors() {
         Color fgColor = FgBgColors.getFG();
         if (fgColor != null) {
-            mainUserNode.putInt(FG_COLOR_KEY, fgColor.getRGB());
+            mainNode.putInt(FG_COLOR_KEY, fgColor.getRGB());
         }
 
         Color bgColor = FgBgColors.getBG();
         if (bgColor != null) {
-            mainUserNode.putInt(BG_COLOR_KEY, bgColor.getRGB());
+            mainNode.putInt(BG_COLOR_KEY, bgColor.getRGB());
         }
     }
 
     public static String getLookAndFeelClass() {
-        UIManager.LookAndFeelInfo[] lookAndFeels = UIManager.getInstalledLookAndFeels();
-        for (UIManager.LookAndFeelInfo lookAndFeel : lookAndFeels) {
-            if (lookAndFeel.getName().equals("Nimbus")) {
-                return lookAndFeel.getClassName();
-            }
-        }
-        return UIManager.getSystemLookAndFeelClassName();
+        return "javax.swing.plaf.nimbus.NimbusLookAndFeel";
+
+//        UIManager.LookAndFeelInfo[] lookAndFeels = UIManager.getInstalledLookAndFeels();
+//        for (UIManager.LookAndFeelInfo lookAndFeel : lookAndFeels) {
+//            if (lookAndFeel.getName().equals("Nimbus")) {
+//                return lookAndFeel.getClassName();
+//            }
+//        }
+//        return UIManager.getSystemLookAndFeelClassName();
     }
 
-    public static void savePrefsAndExit() {
-        savePreferencesBeforeExit();
-        System.exit(0);
+    public static Preferences getMainNode() {
+        return mainNode;
     }
 
+    private static int getDefaultUndoLevels() {
+        int sizeInMegaBytes = Utils.getMaxHeapInMegabytes();
+        int retVal = 1 + (sizeInMegaBytes / 50);
+
+        // rounds up to the nearest multiple of 5
+        return ((retVal + 4) / 5) * 5;
+    }
+
+    /**
+     * Static utility methods for managing the visibility of
+     * various UI areas
+     */
     public static class WorkSpace {
-        /**
-         * Utility class with static methods
-         */
         private WorkSpace() {
         }
 
@@ -316,14 +332,14 @@ public final class AppPreferences {
             if (loaded) {
                 return;
             }
-            histogramsVisibility = mainUserNode.getBoolean(HISTOGRAMS_SHOWN_KEY, DEFAULT_HISTOGRAMS_VISIBILITY);
-            toolsVisibility = mainUserNode.getBoolean(TOOLS_SHOWN_KEY, DEFAULT_TOOLS_VISIBILITY);
-            layersVisibility = mainUserNode.getBoolean(LAYERS_SHOWN_KEY, DEFAULT_LAYERS_VISIBILITY);
-            statusBarVisibility = mainUserNode.getBoolean(STATUS_BAR_SHOWN_KEY, DEFAULT_STATUS_BAR_VISIBILITY);
+            histogramsVisibility = mainNode.getBoolean(HISTOGRAMS_SHOWN_KEY, DEFAULT_HISTOGRAMS_VISIBILITY);
+            toolsVisibility = mainNode.getBoolean(TOOLS_SHOWN_KEY, DEFAULT_TOOLS_VISIBILITY);
+            layersVisibility = mainNode.getBoolean(LAYERS_SHOWN_KEY, DEFAULT_LAYERS_VISIBILITY);
+            statusBarVisibility = mainNode.getBoolean(STATUS_BAR_SHOWN_KEY, DEFAULT_STATUS_BAR_VISIBILITY);
             loaded = true;
         }
 
-        public static void setDefault(PixelitorWindow pw) {
+        public static void resetDefaults(PixelitorWindow pw) {
             pw.setHistogramsVisibility(DEFAULT_HISTOGRAMS_VISIBILITY, false);
             pw.setToolsVisibility(DEFAULT_TOOLS_VISIBILITY, false);
             pw.setLayersVisibility(DEFAULT_LAYERS_VISIBILITY, false);
@@ -358,10 +374,10 @@ public final class AppPreferences {
         }
 
         private static void saveVisibility() {
-            mainUserNode.putBoolean(HISTOGRAMS_SHOWN_KEY, histogramsVisibility);
-            mainUserNode.putBoolean(LAYERS_SHOWN_KEY, layersVisibility);
-            mainUserNode.putBoolean(TOOLS_SHOWN_KEY, toolsVisibility);
-            mainUserNode.putBoolean(STATUS_BAR_SHOWN_KEY, statusBarVisibility);
+            mainNode.putBoolean(HISTOGRAMS_SHOWN_KEY, histogramsVisibility);
+            mainNode.putBoolean(LAYERS_SHOWN_KEY, layersVisibility);
+            mainNode.putBoolean(TOOLS_SHOWN_KEY, toolsVisibility);
+            mainNode.putBoolean(STATUS_BAR_SHOWN_KEY, statusBarVisibility);
         }
 
         public static void setLayersVisibility(boolean v) {
@@ -389,6 +405,9 @@ public final class AppPreferences {
         }
     }
 
+    /**
+     * The GUI for the preferences dialog
+     */
     public static class Panel extends JPanel {
         private final JTextField undoLevelsTF;
         private final JComboBox<Value> thumbSizeCB;
@@ -441,17 +460,5 @@ public final class AppPreferences {
             };
             d.setVisible(true);
         }
-    }
-
-    public static Preferences getMainUserNode() {
-        return mainUserNode;
-    }
-
-    private static int getDefaultUndoLevels() {
-        int sizeInMegaBytes = Utils.getMaxHeapInMegabytes();
-        int retVal = 1 + (sizeInMegaBytes / 50);
-
-        // rounds up to the nearest multiple of 5
-        return ((retVal + 4) / 5) * 5;
     }
 }

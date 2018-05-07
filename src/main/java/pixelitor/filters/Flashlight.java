@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -82,6 +82,9 @@ public class Flashlight extends FilterWithParametrizedGUI {
         return dest;
     }
 
+    /**
+     * Flashlight implementation
+     */
     private static class Impl extends PointFilter {
         private double cx;
         private double cy;

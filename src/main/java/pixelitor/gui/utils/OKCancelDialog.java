@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,6 +34,9 @@ import java.awt.event.WindowEvent;
 
 /**
  * A dialog with OK and Cancel buttons at the bottom
+ *
+ * This is kind of deprecated.
+ * A better alternative for creating dialogs is {@link DialogBuilder}.
  */
 public abstract class OKCancelDialog extends JDialog {
     protected JComponent formPanel;

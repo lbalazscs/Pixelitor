@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -88,28 +88,28 @@ public class ToolTest {
     }
 
     private void strokeMouseLeftRight() {
-        strokeAltYesNo(Mouse.LEFT);
-        strokeAltYesNo(Mouse.RIGHT);
+        strokeAltYesNo(MouseButton.LEFT);
+        strokeAltYesNo(MouseButton.RIGHT);
     }
 
-    private void strokeAltYesNo(Mouse mouse) {
-        strokeCtrlYesNo(Alt.NO, mouse);
-        strokeCtrlYesNo(Alt.YES, mouse);
+    private void strokeAltYesNo(MouseButton mouseButton) {
+        strokeCtrlYesNo(Alt.NO, mouseButton);
+        strokeCtrlYesNo(Alt.YES, mouseButton);
     }
 
-    private void strokeCtrlYesNo(Alt alt, Mouse mouse) {
-        strokeShiftYesNo(alt, Ctrl.NO, mouse);
-        strokeShiftYesNo(alt, Ctrl.YES, mouse);
+    private void strokeCtrlYesNo(Alt alt, MouseButton mouseButton) {
+        strokeShiftYesNo(alt, Ctrl.NO, mouseButton);
+        strokeShiftYesNo(alt, Ctrl.YES, mouseButton);
     }
 
-    private void strokeShiftYesNo(Alt alt, Ctrl ctrl, Mouse mouse) {
-        stroke(alt, ctrl, Shift.NO, mouse);
-        stroke(alt, ctrl, Shift.YES, mouse);
+    private void strokeShiftYesNo(Alt alt, Ctrl ctrl, MouseButton mouseButton) {
+        stroke(alt, ctrl, Shift.NO, mouseButton);
+        stroke(alt, ctrl, Shift.YES, mouseButton);
     }
 
-    private void stroke(Alt alt, Ctrl ctrl, Shift shift, Mouse mouse) {
-        tool.dispatchMousePressed(TestHelper.createEvent(MOUSE_PRESSED, alt, ctrl, shift, mouse, 2, 2), ic);
-        tool.dispatchMouseDragged(TestHelper.createEvent(MOUSE_DRAGGED, alt, ctrl, shift, mouse, 4, 4), ic);
-        tool.dispatchMouseReleased(TestHelper.createEvent(MOUSE_RELEASED, alt, ctrl, shift, mouse, 6, 6), ic);
+    private void stroke(Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton) {
+        tool.dispatchMousePressed(TestHelper.createEvent(MOUSE_PRESSED, alt, ctrl, shift, mouseButton, 2, 2), ic);
+        tool.dispatchMouseDragged(TestHelper.createEvent(MOUSE_DRAGGED, alt, ctrl, shift, mouseButton, 4, 4), ic);
+        tool.dispatchMouseReleased(TestHelper.createEvent(MOUSE_RELEASED, alt, ctrl, shift, mouseButton, 6, 6), ic);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -72,7 +72,7 @@ public class AutoPaint {
     }
 
     private static void paintStrokes(ImageLayer layer, Settings settings) {
-        assert SwingUtilities.isEventDispatchThread();
+        assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
 
         Color origFg = null;
         Color origBg = null;
@@ -154,6 +154,9 @@ public class AutoPaint {
         }
     }
 
+    /**
+     * The GUI of the "Auto Paint" dialog
+     */
     private static class ConfigPanel extends JPanel {
         private final JComboBox<Tool> toolSelector;
         private static Tool defaultTool = SMUDGE;
@@ -242,6 +245,9 @@ public class AutoPaint {
         }
     }
 
+    /**
+     * The settings of Auto Paint
+     */
     private static class Settings {
         private final Tool tool;
         private final int numStrokes;

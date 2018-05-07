@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,7 +51,7 @@ public class Dialogs {
         Dialogs.mainWindowInitialized = mainWindowInitialized;
     }
 
-    public static Frame getParentForDialogs() {
+    private static Frame getParent() {
         if (mainWindowInitialized) {
             return PixelitorWindow.getInstance();
         }
@@ -59,7 +59,7 @@ public class Dialogs {
     }
 
     public static void showInfoDialog(String title, String msg) {
-        showInfoDialog(getParentForDialogs(), title, msg);
+        showInfoDialog(getParent(), title, msg);
     }
 
     public static void showInfoDialog(Component parent, String title, String msg) {
@@ -69,7 +69,7 @@ public class Dialogs {
     }
 
     public static boolean showYesNoQuestionDialog(String title, String msg) {
-        return showYesNoQuestionDialog(getParentForDialogs(), title, msg);
+        return showYesNoQuestionDialog(getParent(), title, msg);
     }
 
     public static boolean showYesNoQuestionDialog(Component parent, String title, String msg) {
@@ -77,7 +77,7 @@ public class Dialogs {
     }
 
     public static boolean showYesNoWarningDialog(String title, String msg) {
-        return showYesNoWarningDialog(getParentForDialogs(), title, msg);
+        return showYesNoWarningDialog(getParent(), title, msg);
     }
 
     public static boolean showYesNoWarningDialog(Component parent, String title, String msg) {
@@ -97,7 +97,7 @@ public class Dialogs {
 
     public static boolean showOKCancelDialog(String msg, String title, Object[] options, int initialOptionIndex, int messageType) {
         GlobalKeyboardWatch.setDialogActive(true);
-        int userAnswer = JOptionPane.showOptionDialog(getParentForDialogs(), msg, title,
+        int userAnswer = JOptionPane.showOptionDialog(getParent(), msg, title,
                 JOptionPane.OK_CANCEL_OPTION, messageType, null,
                 options, options[initialOptionIndex]);
         GlobalKeyboardWatch.setDialogActive(false);
@@ -105,7 +105,7 @@ public class Dialogs {
     }
 
     public static void showErrorDialog(String title, String msg) {
-        showErrorDialog(getParentForDialogs(), title, msg);
+        showErrorDialog(getParent(), title, msg);
     }
 
     public static void showErrorDialog(Component parent, String title, String msg) {
@@ -115,7 +115,7 @@ public class Dialogs {
     }
 
     public static void showWarningDialog(String title, String msg) {
-        showWarningDialog(getParentForDialogs(), title, msg);
+        showWarningDialog(getParent(), title, msg);
     }
 
     public static void showNotAColorOnClipboardDialog(Window parent) {
@@ -166,7 +166,7 @@ public class Dialogs {
             Events.dumpActive();
         }
 
-        Frame parent = getParentForDialogs();
+        Frame parent = getParent();
         String basicErrorMessage = "An exception occurred: " + e.getMessage();
         ErrorInfo ii = new ErrorInfo("Program error", basicErrorMessage, null, null, e, Level.SEVERE, null);
         JXErrorPane.showDialog(parent, ii);

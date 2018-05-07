@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,7 +51,8 @@ public class FileChoosers {
     }
 
     private static void initOpenChooser() {
-        assert SwingUtilities.isEventDispatchThread();
+        assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
+
         if (openChooser == null) {
             //noinspection NonThreadSafeLazyInitialization
             openChooser = new JFileChooser(Directories.getLastOpenDir());
@@ -66,7 +67,8 @@ public class FileChoosers {
     }
 
     public static void initSaveChooser() {
-        assert SwingUtilities.isEventDispatchThread();
+        assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
+
         if (saveChooser == null) {
             //noinspection NonThreadSafeLazyInitialization
             saveChooser = new SaveFileChooser(Directories.getLastSaveDir());

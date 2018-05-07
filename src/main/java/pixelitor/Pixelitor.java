@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,13 +48,13 @@ import java.io.File;
  */
 public class Pixelitor {
     /**
-     * Utility class with static methods
+     * Should not be instantiated
      */
     private Pixelitor() {
     }
 
     public static void main(String[] args) {
-        // allows to put the app into development mode by
+        // the app can be put into development mode by
         // adding -Dpixelitor.development=true to the command line
         if ("true".equals(System.getProperty("pixelitor.development"))) {
             Utils.checkThatAssertionsAreEnabled();
@@ -69,12 +69,12 @@ public class Pixelitor {
             System.setProperty("swing.aatext", "true");
         }
 
-        ExceptionHandler.INSTANCE.register();
+        ExceptionHandler.INSTANCE.initialize();
         EventQueue.invokeLater(() -> {
             try {
                 createAndShowGUI(args);
 
-                // Call it here because it is IO-intensive and
+                // Start this thread here because it is IO-intensive and
                 // it should not slow down the loading of the GUI
                 new Thread(Pixelitor::preloadFontNames)
                         .start();
@@ -84,19 +84,19 @@ public class Pixelitor {
         });
 
         // Force the initialization of FastMath look-up tables now
-        // so that later no unexpected delays happen.
+        // on the main thread, so that later no unexpected delays happen.
         // This is OK because static initializers are thread safe.
         FastMath.cos(0.1);
     }
 
     private static void preloadFontNames() {
         GraphicsEnvironment localGE = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        // the results are cached, no need to cached them here
+        // the results are cached, no need to cache them here
         localGE.getAvailableFontFamilyNames();
     }
 
     private static void createAndShowGUI(String[] args) {
-        assert SwingUtilities.isEventDispatchThread();
+        assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
 
         setLookAndFeel();
         Messages.setMessageHandler(new GUIMessageHandler());
@@ -109,19 +109,21 @@ public class Pixelitor {
 //        }
 
         if (args.length > 0) {
-            openFilesGivenAsProgramArguments(args);
-        } else {
-            // ensure that the focus is not grabbed by a textfield
-            // so that the keyboard shortcuts work properly
-            FgBgColors.getGUI()
-                    .requestFocus();
+            openFilesGivenAsCLArguments(args);
         }
+
+        // Just to make 100% sure that at the end of GUI
+        // initialization the focus is not grabbed by
+        // a textfield and the keyboard shortcuts work properly
+        FgBgColors.getGUI()
+                .requestFocus();
 
         TipsOfTheDay.showTips(pw, false);
 
         afterStartTestActions(pw);
     }
 
+    // used to work but in newer Macs it doesn't
     private static void setupMacMenuBar(PixelitorWindow pw) {
         JMenuBar menuBar = pw.getJMenuBar();
         try {
@@ -139,13 +141,14 @@ public class Pixelitor {
 
     private static void setLookAndFeel() {
         try {
-            UIManager.setLookAndFeel(AppPreferences.getLookAndFeelClass());
+            String lfClass = AppPreferences.getLookAndFeelClass();
+            UIManager.setLookAndFeel(lfClass);
         } catch (Exception e) {
             Dialogs.showExceptionDialog(e);
         }
     }
 
-    private static void openFilesGivenAsProgramArguments(String[] args) {
+    private static void openFilesGivenAsCLArguments(String[] args) {
         for (String fileName : args) {
             File f = new File(fileName);
             if (f.exists()) {

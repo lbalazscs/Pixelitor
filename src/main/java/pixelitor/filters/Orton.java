@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -65,7 +65,7 @@ public class Orton extends FilterWithParametrizedGUI {
         ImageUtils.screenWithItself(dest, opacity);
         BufferedImage blurredMultiplied = ImageUtils.copyImage(dest);
 
-        pt.addUnits(blurWorkUnits / 2);
+        pt.unitsDone(blurWorkUnits / 2);
 
         if (radius > 0) {
             if ((width == 1) || (height == 1)) {

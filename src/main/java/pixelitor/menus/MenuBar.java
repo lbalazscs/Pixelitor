@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -602,11 +602,22 @@ public class MenuBar extends JMenuBar {
     private static JMenu createSelectMenu() {
         PMenu selectMenu = new PMenu("Select", 'S');
 
-        selectMenu.buildAction(SelectionActions.getDeselectAction()).enableIf(ACTION_ENABLED).withKey(CTRL_D).add();
-        selectMenu.buildAction(SelectionActions.getShowHideSelectionAction()).enableIf(ACTION_ENABLED).withKey(CTRL_H).add();
+        selectMenu.buildAction(SelectionActions.getDeselect())
+                .enableIf(ACTION_ENABLED)
+                .withKey(CTRL_D)
+                .add();
+        selectMenu.buildAction(SelectionActions.getShowHide())
+                .enableIf(ACTION_ENABLED)
+                .withKey(CTRL_H)
+                .add();
 
-        selectMenu.buildAction(SelectionActions.getInvertSelectionAction()).enableIf(ACTION_ENABLED).withKey(CTRL_SHIFT_I).add();
-        selectMenu.buildAction(SelectionActions.getModifyAction()).enableIf(ACTION_ENABLED).add();
+        selectMenu.buildAction(SelectionActions.getInvert())
+                .enableIf(ACTION_ENABLED)
+                .withKey(CTRL_SHIFT_I)
+                .add();
+        selectMenu.buildAction(SelectionActions.getModify())
+                .enableIf(ACTION_ENABLED)
+                .add();
 
         selectMenu.addSeparator();
         selectMenu.buildAction(SelectionActions.getTraceWithBrush()).enableIf(ACTION_ENABLED).add();
@@ -619,7 +630,7 @@ public class MenuBar extends JMenuBar {
         PMenu imageMenu = new PMenu("Image", 'I');
 
         // crop
-        imageMenu.buildAction(SelectionActions.getCropAction())
+        imageMenu.buildAction(SelectionActions.getCrop())
                 .enableIf(ACTION_ENABLED).add();
 
         // resize
@@ -667,18 +678,31 @@ public class MenuBar extends JMenuBar {
     private static JMenu createColorMenu() {
         PMenu colorsMenu = new PMenu("Color", 'C');
 
-        colorsMenu.buildFA("Color Balance", ColorBalance::new).withKey(CTRL_B).add();
-        colorsMenu.buildFA(HueSat.NAME, HueSat::new).withKey(CTRL_U).add();
-        colorsMenu.buildFA(Colorize.NAME, Colorize::new).add();
-        colorsMenu.buildFA("Levels", Levels::new).withKey(CTRL_L).add();
-//        colorsMenu.buildFA("Levels 2", Levels2::new).add();
-        colorsMenu.buildFA(BrightnessContrast.NAME, BrightnessContrast::new)
+        colorsMenu.buildFilter("Color Balance", ColorBalance::new)
+                .withKey(CTRL_B)
                 .add();
-        colorsMenu.buildFA(Solarize.NAME, Solarize::new).add();
-        colorsMenu.buildFA(Sepia.NAME, Sepia::new).add();
-        colorsMenu.buildFA("Invert", Invert::new).noGUI().withKey(CTRL_I).add();
-        colorsMenu.buildFA(ChannelInvert.NAME, ChannelInvert::new).add();
-        colorsMenu.buildFA(ChannelMixer.NAME, ChannelMixer::new)
+        colorsMenu.buildFilter(HueSat.NAME, HueSat::new)
+                .withKey(CTRL_U)
+                .add();
+        colorsMenu.buildFilter(Colorize.NAME, Colorize::new)
+                .add();
+        colorsMenu.buildFilter("Levels", Levels::new)
+                .withKey(CTRL_L)
+                .add();
+//        colorsMenu.buildFilter("Levels 2", Levels2::new).add();
+        colorsMenu.buildFilter(BrightnessContrast.NAME, BrightnessContrast::new)
+                .add();
+        colorsMenu.buildFilter(Solarize.NAME, Solarize::new)
+                .add();
+        colorsMenu.buildFilter(Sepia.NAME, Sepia::new)
+                .add();
+        colorsMenu.buildFilter("Invert", Invert::new)
+                .noGUI()
+                .withKey(CTRL_I)
+                .add();
+        colorsMenu.buildFilter(ChannelInvert.NAME, ChannelInvert::new)
+                .add();
+        colorsMenu.buildFilter(ChannelMixer.NAME, ChannelMixer::new)
                 .add();
 
         colorsMenu.add(createExtractChannelsSubmenu());
@@ -693,28 +717,31 @@ public class MenuBar extends JMenuBar {
     private static JMenu createExtractChannelsSubmenu() {
         PMenu sub = new PMenu("Extract Channels");
 
-        sub.addFA("Extract Channel", ExtractChannel::new);
+        sub.addFilter("Extract Channel", ExtractChannel::new);
 
         sub.addSeparator();
 
-        sub.buildFA(Luminosity.NAME, Luminosity::new).noGUI().extract().add();
+        sub.buildFilter(Luminosity.NAME, Luminosity::new)
+                .noGUI()
+                .extract()
+                .add();
 
         FilterAction extractValueChannel = ExtractChannelFilter.getValueChannelFA();
-        sub.addFA(extractValueChannel);
+        sub.addFilter(extractValueChannel);
 
         FilterAction desaturateChannel = ExtractChannelFilter.getDesaturateChannelFA();
-        sub.addFA(desaturateChannel);
+        sub.addFilter(desaturateChannel);
 
         sub.addSeparator();
 
         FilterAction getHue = ExtractChannelFilter.getHueChannelFA();
-        sub.addFA(getHue);
+        sub.addFilter(getHue);
 
         FilterAction getHuiInColors = ExtractChannelFilter.getHueInColorsChannelFA();
-        sub.addFA(getHuiInColors);
+        sub.addFilter(getHuiInColors);
 
         FilterAction getSat = ExtractChannelFilter.getSaturationChannelFA();
-        sub.addFA(getSat);
+        sub.addFilter(getSat);
 
         return sub;
     }
@@ -722,19 +749,19 @@ public class MenuBar extends JMenuBar {
     private static JMenu createReduceColorsSubmenu() {
         PMenu sub = new PMenu("Reduce Colors");
 
-        sub.addFA(JHQuantize.NAME, JHQuantize::new);
-        sub.addFA("Posterize", Posterize::new);
-        sub.addFA(Threshold.NAME, Threshold::new);
+        sub.addFilter(JHQuantize.NAME, JHQuantize::new);
+        sub.addFilter("Posterize", Posterize::new);
+        sub.addFilter(Threshold.NAME, Threshold::new);
 
         sub.addSeparator();
 
-        sub.addFA(JHTriTone.NAME, JHTriTone::new);
-        sub.addFA(GradientMap.NAME, GradientMap::new);
+        sub.addFilter(JHTriTone.NAME, JHTriTone::new);
+        sub.addFilter(GradientMap.NAME, GradientMap::new);
 
         sub.addSeparator();
 
-        sub.addFA(JHColorHalftone.NAME, JHColorHalftone::new);
-        sub.addFA(JHDither.NAME, JHDither::new);
+        sub.addFilter(JHColorHalftone.NAME, JHColorHalftone::new);
+        sub.addFilter(JHDither.NAME, JHDither::new);
 
         return sub;
     }
@@ -742,14 +769,22 @@ public class MenuBar extends JMenuBar {
     private static JMenu createFillSubmenu() {
         PMenu sub = new PMenu("Fill with");
 
-        sub.buildFA(FOREGROUND.createFillFilterAction()).withKey(ALT_BACKSPACE).add();
-        sub.buildFA(BACKGROUND.createFillFilterAction()).withKey(CTRL_BACKSPACE).add();
-        sub.addFA(TRANSPARENT.createFillFilterAction());
+        sub.buildFilter(FOREGROUND.createFillFilterAction())
+                .withKey(ALT_BACKSPACE)
+                .add();
+        sub.buildFilter(BACKGROUND.createFillFilterAction())
+                .withKey(CTRL_BACKSPACE)
+                .add();
+        sub.addFilter(TRANSPARENT.createFillFilterAction());
 
-        sub.buildFA(ColorWheel.NAME, ColorWheel::new).withFillListName().add();
-        sub.buildFA(JHFourColorGradient.NAME, JHFourColorGradient::new)
+        sub.buildFilter(ColorWheel.NAME, ColorWheel::new)
+                .withFillListName()
+                .add();
+        sub.buildFilter(JHFourColorGradient.NAME, JHFourColorGradient::new)
                 .withFillListName().add();
-        sub.buildFA("Starburst", Starburst::new).withFillListName().add();
+        sub.buildFilter(Starburst.NAME, Starburst::new)
+                .withFillListName()
+                .add();
 
         return sub;
     }
@@ -768,58 +803,59 @@ public class MenuBar extends JMenuBar {
         filterMenu.add(createOtherSubmenu());
 
         // TODO does it still make sense to add the old text filter?
-        filterMenu.buildFA(TextFilter.createFilterAction()).add();
+        filterMenu.buildFilter(TextFilter.createFilterAction())
+                .add();
 
         return filterMenu;
     }
 
     private static JMenu createBlurSharpenSubmenu() {
         PMenu sub = new PMenu("Blur/Sharpen");
-        sub.addFA(JHBoxBlur.NAME, JHBoxBlur::new);
+        sub.addFilter(JHBoxBlur.NAME, JHBoxBlur::new);
 //        sub.addFA(FastBlur.NAME, FastBlur::new);
-        sub.addFA(JHFocus.NAME, JHFocus::new);
-        sub.addFA(JHGaussianBlur.NAME, JHGaussianBlur::new);
-        sub.addFA(JHLensBlur.NAME, JHLensBlur::new);
-        sub.addFA(MOTION_BLUR.createFilterAction());
-        sub.addFA(JHSmartBlur.NAME, JHSmartBlur::new);
-        sub.addFA(SPIN_ZOOM_BLUR.createFilterAction());
+        sub.addFilter(JHFocus.NAME, JHFocus::new);
+        sub.addFilter(JHGaussianBlur.NAME, JHGaussianBlur::new);
+        sub.addFilter(JHLensBlur.NAME, JHLensBlur::new);
+        sub.addFilter(MOTION_BLUR.createFilterAction());
+        sub.addFilter(JHSmartBlur.NAME, JHSmartBlur::new);
+        sub.addFilter(SPIN_ZOOM_BLUR.createFilterAction());
         sub.addSeparator();
-        sub.addFA(JHUnsharpMask.NAME, JHUnsharpMask::new);
+        sub.addFilter(JHUnsharpMask.NAME, JHUnsharpMask::new);
         return sub;
     }
 
     private static JMenu createDistortSubmenu() {
         PMenu sub = new PMenu("Distort");
 
-        sub.addFA(JHSwirlPinchBulge.NAME, JHSwirlPinchBulge::new);
-        sub.addFA(CircleToSquare.NAME, CircleToSquare::new);
-        sub.addFA(JHPerspective.NAME, JHPerspective::new);
+        sub.addFilter(JHSwirlPinchBulge.NAME, JHSwirlPinchBulge::new);
+        sub.addFilter(CircleToSquare.NAME, CircleToSquare::new);
+        sub.addFilter(JHPerspective.NAME, JHPerspective::new);
 
         sub.addSeparator();
 
-        sub.addFA(JHLensOverImage.NAME, JHLensOverImage::new);
-        sub.addFA(Magnify.NAME, Magnify::new);
+        sub.addFilter(JHLensOverImage.NAME, JHLensOverImage::new);
+        sub.addFilter(Magnify.NAME, Magnify::new);
 
         sub.addSeparator();
 
-        sub.addFA(JHTurbulentDistortion.NAME, JHTurbulentDistortion::new);
-        sub.addFA(JHUnderWater.NAME, JHUnderWater::new);
-        sub.addFA(JHWaterRipple.NAME, JHWaterRipple::new);
-        sub.addFA(JHWaves.NAME, JHWaves::new);
-        sub.addFA(AngularWaves.NAME, AngularWaves::new);
-        sub.addFA(RadialWaves.NAME, RadialWaves::new);
+        sub.addFilter(JHTurbulentDistortion.NAME, JHTurbulentDistortion::new);
+        sub.addFilter(JHUnderWater.NAME, JHUnderWater::new);
+        sub.addFilter(JHWaterRipple.NAME, JHWaterRipple::new);
+        sub.addFilter(JHWaves.NAME, JHWaves::new);
+        sub.addFilter(AngularWaves.NAME, AngularWaves::new);
+        sub.addFilter(RadialWaves.NAME, RadialWaves::new);
 
         sub.addSeparator();
 
-        sub.addFA(GlassTiles.NAME, GlassTiles::new);
-        sub.addFA(PolarTiles.NAME, PolarTiles::new);
-        sub.addFA(JHFrostedGlass.NAME, JHFrostedGlass::new);
+        sub.addFilter(GlassTiles.NAME, GlassTiles::new);
+        sub.addFilter(PolarTiles.NAME, PolarTiles::new);
+        sub.addFilter(JHFrostedGlass.NAME, JHFrostedGlass::new);
 
         sub.addSeparator();
 
-        sub.addFA(LittlePlanet.NAME, LittlePlanet::new);
-        sub.addFA(JHPolarCoordinates.NAME, JHPolarCoordinates::new);
-        sub.addFA(JHWrapAroundArc.NAME, JHWrapAroundArc::new);
+        sub.addFilter(LittlePlanet.NAME, LittlePlanet::new);
+        sub.addFilter(JHPolarCoordinates.NAME, JHPolarCoordinates::new);
+        sub.addFilter(JHWrapAroundArc.NAME, JHWrapAroundArc::new);
 
         return sub;
     }
@@ -827,12 +863,12 @@ public class MenuBar extends JMenuBar {
     private static JMenu createDislocateSubmenu() {
         PMenu sub = new PMenu("Dislocate");
 
-        sub.addFA(DrunkVision.NAME, DrunkVision::new);
-        sub.addFA(JHKaleidoscope.NAME, JHKaleidoscope::new);
-        sub.addFA(JHOffset.NAME, JHOffset::new);
-        sub.addFA(Mirror.NAME, Mirror::new);
-        sub.addFA(Slice.NAME, Slice::new);
-        sub.addFA(JHVideoFeedback.NAME, JHVideoFeedback::new);
+        sub.addFilter(DrunkVision.NAME, DrunkVision::new);
+        sub.addFilter(JHKaleidoscope.NAME, JHKaleidoscope::new);
+        sub.addFilter(JHOffset.NAME, JHOffset::new);
+        sub.addFilter(Mirror.NAME, Mirror::new);
+        sub.addFilter(Slice.NAME, Slice::new);
+        sub.addFilter(JHVideoFeedback.NAME, JHVideoFeedback::new);
 
         return sub;
     }
@@ -840,11 +876,11 @@ public class MenuBar extends JMenuBar {
     private static JMenu createLightSubmenu() {
         PMenu sub = new PMenu("Light");
 
-        sub.addFA(Flashlight.NAME, Flashlight::new);
-        sub.addFA(JHGlint.NAME, JHGlint::new);
-        sub.addFA(JHGlow.NAME, JHGlow::new);
-        sub.addFA(JHRays.NAME, JHRays::new);
-        sub.addFA(JHSparkle.NAME, JHSparkle::new);
+        sub.addFilter(Flashlight.NAME, Flashlight::new);
+        sub.addFilter(JHGlint.NAME, JHGlint::new);
+        sub.addFilter(JHGlow.NAME, JHGlow::new);
+        sub.addFilter(JHRays.NAME, JHRays::new);
+        sub.addFilter(JHSparkle.NAME, JHSparkle::new);
 
         return sub;
     }
@@ -852,13 +888,17 @@ public class MenuBar extends JMenuBar {
     private static JMenu createNoiseSubmenu() {
         PMenu sub = new PMenu("Noise");
 
-        sub.buildFA(JHReduceNoise.NAME, JHReduceNoise::new).noGUI().add();
-        sub.buildFA(JHMedian.NAME, JHMedian::new).noGUI().add();
+        sub.buildFilter(JHReduceNoise.NAME, JHReduceNoise::new)
+                .noGUI()
+                .add();
+        sub.buildFilter(JHMedian.NAME, JHMedian::new)
+                .noGUI()
+                .add();
 
         sub.addSeparator();
 
-        sub.addFA(AddNoise.NAME, AddNoise::new);
-        sub.addFA(JHPixelate.NAME, JHPixelate::new);
+        sub.addFilter(AddNoise.NAME, AddNoise::new);
+        sub.addFilter(JHPixelate.NAME, JHPixelate::new);
 
         return sub;
     }
@@ -866,19 +906,19 @@ public class MenuBar extends JMenuBar {
     private static JMenu createRenderSubmenu() {
         PMenu sub = new PMenu("Render");
 
-        sub.addFA(Clouds.NAME, Clouds::new);
-        sub.addFA(JHPlasma.NAME, JHPlasma::new);
-        sub.addFA(ValueNoise.NAME, ValueNoise::new);
+        sub.addFilter(Clouds.NAME, Clouds::new);
+        sub.addFilter(JHPlasma.NAME, JHPlasma::new);
+        sub.addFilter(ValueNoise.NAME, ValueNoise::new);
 
         sub.addSeparator();
 
-        sub.addFA(JHBrushedMetal.NAME, JHBrushedMetal::new);
-        sub.addFA(JHCaustics.NAME, JHCaustics::new);
-        sub.addFA(JHCells.NAME, JHCells::new);
-        sub.addFA(FractalTree.NAME, FractalTree::new);
-        sub.addFA(Marble.NAME, Marble::new);
-        sub.addFA(Voronoi.NAME, Voronoi::new);
-        sub.addFA(JHWood.NAME, JHWood::new);
+        sub.addFilter(JHBrushedMetal.NAME, JHBrushedMetal::new);
+        sub.addFilter(JHCaustics.NAME, JHCaustics::new);
+        sub.addFilter(JHCells.NAME, JHCells::new);
+        sub.addFilter(FractalTree.NAME, FractalTree::new);
+        sub.addFilter(Marble.NAME, Marble::new);
+        sub.addFilter(Voronoi.NAME, Voronoi::new);
+        sub.addFilter(JHWood.NAME, JHWood::new);
 
         sub.addSeparator();
 
@@ -889,26 +929,26 @@ public class MenuBar extends JMenuBar {
 
     private static JMenu createRenderShapesSubmenu() {
         PMenu sub = new PMenu("Shapes");
-        sub.addFA("Flower of Life", FlowerOfLife::new);
-        sub.addFA("Lissajous Curve", Lissajous::new);
-        sub.addFA("Mystic Rose", MysticRose::new);
-        sub.addFA("Spirograph", Spirograph::new);
+        sub.addFilter("Flower of Life", FlowerOfLife::new);
+        sub.addFilter("Lissajous Curve", Lissajous::new);
+        sub.addFilter("Mystic Rose", MysticRose::new);
+        sub.addFilter("Spirograph", Spirograph::new);
         return sub;
     }
 
     private static JMenu createArtisticSubmenu() {
         PMenu sub = new PMenu("Artistic");
 
-        sub.addFA(JHCrystallize.NAME, JHCrystallize::new);
-        sub.addFA(JHEmboss.NAME, JHEmboss::new);
-        sub.addFA(JHOilPainting.NAME, JHOilPainting::new);
-        sub.addFA(Orton.NAME, Orton::new);
-        sub.addFA(PhotoCollage.NAME, PhotoCollage::new);
-        sub.addFA(JHPointillize.NAME, JHPointillize::new);
-        sub.addFA(RandomSpheres.NAME, RandomSpheres::new);
-        sub.addFA(JHSmear.NAME, JHSmear::new);
-        sub.addFA(JHStamp.NAME, JHStamp::new);
-        sub.addFA(JHWeave.NAME, JHWeave::new);
+        sub.addFilter(JHCrystallize.NAME, JHCrystallize::new);
+        sub.addFilter(JHEmboss.NAME, JHEmboss::new);
+        sub.addFilter(JHOilPainting.NAME, JHOilPainting::new);
+        sub.addFilter(Orton.NAME, Orton::new);
+        sub.addFilter(PhotoCollage.NAME, PhotoCollage::new);
+        sub.addFilter(JHPointillize.NAME, JHPointillize::new);
+        sub.addFilter(RandomSpheres.NAME, RandomSpheres::new);
+        sub.addFilter(JHSmear.NAME, JHSmear::new);
+        sub.addFilter(JHStamp.NAME, JHStamp::new);
+        sub.addFilter(JHWeave.NAME, JHWeave::new);
 
         return sub;
     }
@@ -916,13 +956,13 @@ public class MenuBar extends JMenuBar {
     private static JMenu createFindEdgesSubmenu() {
         PMenu sub = new PMenu("Find Edges");
 
-        sub.addFA(JHConvolutionEdge.NAME, JHConvolutionEdge::new);
+        sub.addFilter(JHConvolutionEdge.NAME, JHConvolutionEdge::new);
 
         sub.addAction(new FilterAction(JHLaplacian.NAME, JHLaplacian::new)
                 .withoutGUI());
 
-        sub.addFA(JHDifferenceOfGaussians.NAME, JHDifferenceOfGaussians::new);
-        sub.addFA("Canny", Canny::new);
+        sub.addFilter(JHDifferenceOfGaussians.NAME, JHDifferenceOfGaussians::new);
+        sub.addFilter("Canny", Canny::new);
 
         return sub;
     }
@@ -930,21 +970,23 @@ public class MenuBar extends JMenuBar {
     private static JMenu createOtherSubmenu() {
         PMenu sub = new PMenu("Other");
 
-        sub.addFA(JHDropShadow.NAME, JHDropShadow::new);
-        sub.addFA(Morphology.NAME, Morphology::new);
-        sub.addFA("Random Filter", RandomFilter::new);
-        sub.addFA("Transform Layer", TransformLayer::new);
-        sub.addFA(Transition2D.NAME, Transition2D::new);
+        sub.addFilter(JHDropShadow.NAME, JHDropShadow::new);
+        sub.addFilter(Morphology.NAME, Morphology::new);
+        sub.addFilter("Random Filter", RandomFilter::new);
+        sub.addFilter("Transform Layer", TransformLayer::new);
+        sub.addFilter(Transition2D.NAME, Transition2D::new);
 
         sub.addSeparator();
 
-        sub.addFA(Convolve.createFilterAction(3));
-        sub.addFA(Convolve.createFilterAction(5));
+        sub.addFilter(Convolve.createFilterAction(3));
+        sub.addFilter(Convolve.createFilterAction(5));
 
         sub.addSeparator();
 
-        sub.addFA(ChannelToTransparency.NAME, ChannelToTransparency::new);
-        sub.buildFA(InvertTransparency.NAME, InvertTransparency::new).noGUI().add();
+        sub.addFilter(ChannelToTransparency.NAME, ChannelToTransparency::new);
+        sub.buildFilter(InvertTransparency.NAME, InvertTransparency::new)
+                .noGUI()
+                .add();
 
         return sub;
     }
@@ -993,7 +1035,7 @@ public class MenuBar extends JMenuBar {
         viewMenu.addAlwaysEnabledAction(new MenuAction("Set Default Workspace") {
             @Override
             public void onClick() {
-                AppPreferences.WorkSpace.setDefault(pw);
+                AppPreferences.WorkSpace.resetDefaults(pw);
             }
         });
 
@@ -1276,7 +1318,7 @@ public class MenuBar extends JMenuBar {
     private static JMenu createTestSubmenu(PixelitorWindow pw) {
         PMenu sub = new PMenu("Test");
 
-        sub.addFA("ParamTest", ParamTest::new);
+        sub.addFilter("ParamTest", ParamTest::new);
 
         sub.addActionWithKey(new MenuAction("Random Resize") {
             @Override
@@ -1371,14 +1413,14 @@ public class MenuBar extends JMenuBar {
     private static JMenu createExperimentalSubmenu() {
         PMenu sub = new PMenu("Experimental");
 
-        sub.addFA(Contours.NAME, Contours::new);
+        sub.addFilter(Contours.NAME, Contours::new);
         sub.addSeparator();
 
-        sub.addFA(Droste.NAME, Droste::new);
-        sub.addFA(Sphere3D.NAME, Sphere3D::new);
-        sub.addFA("Grid", RenderGrid::new);
-        sub.addFA(EmptyPolar.NAME, EmptyPolar::new);
-        sub.addFA(JHCheckerFilter.NAME, JHCheckerFilter::new);
+        sub.addFilter(Droste.NAME, Droste::new);
+        sub.addFilter(Sphere3D.NAME, Sphere3D::new);
+        sub.addFilter("Grid", RenderGrid::new);
+        sub.addFilter(EmptyPolar.NAME, EmptyPolar::new);
+        sub.addFilter(JHCheckerFilter.NAME, JHCheckerFilter::new);
 
         return sub;
     }

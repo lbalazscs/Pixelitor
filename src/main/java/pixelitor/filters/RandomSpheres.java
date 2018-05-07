@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -102,8 +102,7 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
 
         ProgressTracker pt = new BasicProgressTracker(NAME, numCircles);
 
-        ReseedSupport.reInitialize();
-        Random rand = ReseedSupport.getRand();
+        Random rand = ReseedSupport.reInitialize();
 
         Graphics2D g = dest.createGraphics();
         g.setComposite(AlphaComposite.SrcOver.derive(opacity.getValueAsPercentage()));

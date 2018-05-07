@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ import pixelitor.layers.TextLayer;
 import pixelitor.selection.Selection;
 import pixelitor.tools.Alt;
 import pixelitor.tools.Ctrl;
-import pixelitor.tools.Mouse;
+import pixelitor.tools.MouseButton;
 import pixelitor.tools.Shift;
 import pixelitor.utils.Messages;
 
@@ -180,14 +180,14 @@ public class TestHelper {
         return layer;
     }
 
-    public static MouseEvent createEvent(int id, Alt alt, Ctrl ctrl, Shift shift, Mouse mouse, int x, int y) {
+    public static MouseEvent createEvent(int id, Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton, int x, int y) {
         int modifiers = 0;
         modifiers = alt.modify(modifiers);
         modifiers = ctrl.modify(modifiers);
         modifiers = shift.modify(modifiers);
-        modifiers = mouse.modify(modifiers);
+        modifiers = mouseButton.modify(modifiers);
         boolean popupTrigger = false;
-        if (mouse == Mouse.RIGHT) {
+        if (mouseButton == MouseButton.RIGHT) {
             popupTrigger = true;
         }
         //noinspection MagicConstant

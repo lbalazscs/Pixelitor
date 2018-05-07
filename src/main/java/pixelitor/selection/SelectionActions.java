@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,33 +45,33 @@ import static pixelitor.gui.ImageComponents.getActiveCompOrNull;
  */
 public final class SelectionActions {
 
-    private static final Action cropAction = new AbstractAction("Crop") {
+    private static final Action crop = new AbstractAction("Crop") {
         @Override
         public void actionPerformed(ActionEvent e) {
             ImageComponents.selectionCropActiveImage();
         }
     };
 
-    private static final Action deselectAction = new MenuAction("Deselect") {
+    private static final Action deselect = new MenuAction("Deselect") {
         @Override
         public void onClick() {
             getActiveCompOrNull().deselect(true);
         }
     };
 
-    private static final Action invertSelectionAction = new MenuAction("Invert Selection") {
+    private static final Action invert = new MenuAction("Invert Selection") {
         @Override
         public void onClick() {
             getActiveCompOrNull().invertSelection();
         }
     };
 
-    private static final ShowHideAction showHideSelectionAction = new ShowHideSelectionAction();
+    private static final ShowHideAction showHide = new ShowHideSelectionAction();
 
     private static final Action traceWithBrush = new TraceAction("Stroke with Current Brush", Tools.BRUSH);
     private static final Action traceWithEraser = new TraceAction("Stroke with Current Eraser", Tools.ERASER);
 
-    private static final Action modifyAction = new MenuAction("Modify...") {
+    private static final Action modify = new MenuAction("Modify...") {
         @Override
         public void onClick() {
             JPanel p = new JPanel(new GridBagLayout());
@@ -101,6 +101,10 @@ public final class SelectionActions {
     private SelectionActions() {
     }
 
+    /**
+     * All selection actions must be enabled only if
+     * the active composition has a selection
+     */
     public static void setEnabled(boolean b, Composition comp) {
         assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
 
@@ -115,21 +119,21 @@ public final class SelectionActions {
             }
         }
 
-        cropAction.setEnabled(b);
+        crop.setEnabled(b);
         traceWithBrush.setEnabled(b);
         traceWithEraser.setEnabled(b);
-        deselectAction.setEnabled(b);
-        invertSelectionAction.setEnabled(b);
-        showHideSelectionAction.setEnabled(b);
-        modifyAction.setEnabled(b);
+        deselect.setEnabled(b);
+        invert.setEnabled(b);
+        showHide.setEnabled(b);
+        modify.setEnabled(b);
     }
 
     public static boolean areEnabled() {
-        return cropAction.isEnabled();
+        return crop.isEnabled();
     }
 
-    public static Action getCropAction() {
-        return cropAction;
+    public static Action getCrop() {
+        return crop;
     }
 
     public static Action getTraceWithBrush() {
@@ -140,22 +144,25 @@ public final class SelectionActions {
         return traceWithEraser;
     }
 
-    public static Action getDeselectAction() {
-        return deselectAction;
+    public static Action getDeselect() {
+        return deselect;
     }
 
-    public static Action getInvertSelectionAction() {
-        return invertSelectionAction;
+    public static Action getInvert() {
+        return invert;
     }
 
-    public static ShowHideAction getShowHideSelectionAction() {
-        return showHideSelectionAction;
+    public static ShowHideAction getShowHide() {
+        return showHide;
     }
 
-    public static Action getModifyAction() {
-        return modifyAction;
+    public static Action getModify() {
+        return modify;
     }
 
+    /**
+     * Strokes a selection with the current brush or eraser
+     */
     private static class TraceAction extends MenuAction {
         private final AbstractBrushTool brushTool;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -71,30 +71,30 @@ public final class GUIUtils {
     }
 
     public static void centerOnScreen(Component component) {
-        Rectangle bounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+        Rectangle screen = GraphicsEnvironment.getLocalGraphicsEnvironment()
+                .getMaximumWindowBounds();
+        Dimension window = component.getSize();
 
-        int maxHeight = bounds.height;
-        int maxWidth = bounds.width;
-
-        Dimension frameSize = component.getSize();
-
-        if (frameSize.height > maxHeight) {
-            frameSize.height = maxHeight;
+        if (window.height > screen.height) {
+            window.height = screen.height;
         }
 
-        if (frameSize.width > maxWidth) {
-            frameSize.width = maxWidth;
+        if (window.width > screen.width) {
+            window.width = screen.width;
         }
 
-        component.setLocation((maxWidth - frameSize.width) / 2,
-                (maxHeight - frameSize.height) / 2);
-        component.setSize(frameSize); // maximize to the available screen space!
+        // center it
+        component.setLocation((screen.width - window.width) / 2,
+                (screen.height - window.height) / 2);
+
+        // if it was bigger than the screen, restrict it to screen size
+        component.setSize(window);
     }
 
     /**
      * @return true if any app window has focus
      */
-    public static boolean appIsActive() {
+    public static boolean appHasFocus() {
         return Utils.anyMatch(Window.getWindows(), Window::isActive);
     }
 

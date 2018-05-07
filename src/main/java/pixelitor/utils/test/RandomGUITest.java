@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -102,8 +102,11 @@ import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_270;
 import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_90;
 
 /**
- * An automatic test using java.awt.Robot.
- * Can be dangerous because of the random native mouse events that can control other apps as well if they escape.
+ * An automatic test using java.awt.Robot, which performs
+ * random mouse movements and actions.
+ *
+ * Can be dangerous because the random native mouse events
+ * can control other apps as well if they escape.
  */
 public class RandomGUITest {
     final static Random rand = new Random();
@@ -143,23 +146,23 @@ public class RandomGUITest {
 
         numPastedImages = 0;
 
-        // make sure it can be stopped by pressing the u key
+        // make sure it can be stopped by pressing a key
         stopKeyStroke = KeyStroke.getKeyStroke('w');
         GlobalKeyboardWatch.addKeyboardShortCut(stopKeyStroke, "stopTest", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("RandomGUITest: \"" + stopKeyStroke + "\" pressed");
+                System.err.println("RandomGUITest: \"" + stopKeyStroke + "\" pressed");
                 continueRunning = false;
             }
         });
         continueRunning = true;
 
-        // and the j key exits the app
+        // This key not only stops the testing, but also exits the app
         KeyStroke exitKeyStroke = KeyStroke.getKeyStroke('j');
         GlobalKeyboardWatch.addKeyboardShortCut(exitKeyStroke, "exit", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("RandomGUITest: exiting app because '" + exitKeyStroke.getKeyChar() + "' was pressed");
+                System.err.println("RandomGUITest: exiting app because '" + exitKeyStroke.getKeyChar() + "' was pressed");
                 System.exit(1);
             }
         });
@@ -219,12 +222,12 @@ public class RandomGUITest {
                         }
                     }
 
-                    if (!GUIUtils.appIsActive()) {
+                    if (!GUIUtils.appHasFocus()) {
                         if (JVM.isWindows) { // might be some "upgrade to windows 10" window
                             tryToActivateWindow(3);
                         }
 
-                        if (!GUIUtils.appIsActive()) {
+                        if (!GUIUtils.appHasFocus()) {
                             System.out.println("\nRandomGUITest app focus lost.");
                             cleanUp();
                             break;
@@ -282,7 +285,7 @@ public class RandomGUITest {
             e.printStackTrace();
         }
 
-        if (GUIUtils.appIsActive()) { // success
+        if (GUIUtils.appHasFocus()) { // success
             return;
         } else {
             Utils.sleep(1, TimeUnit.SECONDS);
@@ -308,7 +311,7 @@ public class RandomGUITest {
     }
 
     private static void cleanUp() {
-        AppPreferences.WorkSpace.setDefault(PixelitorWindow.getInstance());
+        AppPreferences.WorkSpace.resetDefaults(PixelitorWindow.getInstance());
         running = false;
     }
 
@@ -608,7 +611,8 @@ public class RandomGUITest {
         boolean enabled = SelectionActions.areEnabled();
         if (enabled) {
             log("crop");
-            SelectionActions.getCropAction().actionPerformed(new ActionEvent("", 0, ""));
+            SelectionActions.getCrop()
+                    .actionPerformed(new ActionEvent("", 0, ""));
         }
     }
 
@@ -646,7 +650,8 @@ public class RandomGUITest {
     private static void deselect() {
         if (SelectionActions.areEnabled()) {
             log("deselect");
-            SelectionActions.getDeselectAction().actionPerformed(new ActionEvent("", 0, ""));
+            SelectionActions.getDeselect()
+                    .actionPerformed(new ActionEvent("", 0, ""));
         }
     }
 
@@ -663,7 +668,8 @@ public class RandomGUITest {
     private static void invertSelection() {
         if (SelectionActions.areEnabled()) {
             log("invert selection");
-            SelectionActions.getInvertSelectionAction().actionPerformed(new ActionEvent("", 0, ""));
+            SelectionActions.getInvert()
+                    .actionPerformed(new ActionEvent("", 0, ""));
         }
     }
 
@@ -1000,77 +1006,41 @@ public class RandomGUITest {
     private static void setupWeightedCaller(Robot r) {
         // random move
         weightedCaller.registerCallback(10, () -> randomMove(r));
-
         weightedCaller.registerCallback(70, () -> randomDrag(r));
-
         weightedCaller.registerCallback(5, () -> click(r));
-
         weightedCaller.registerCallback(1, () -> randomRightClick(r));
-
         weightedCaller.registerCallback(3, RandomGUITest::randomResize);
-
         weightedCaller.registerCallback(2, RandomGUITest::repeat);
-
         weightedCaller.registerCallback(1, RandomGUITest::randomUndoRedo);
-
         weightedCaller.registerCallback(1, RandomGUITest::randomCrop);
-
         weightedCaller.registerCallback(1, RandomGUITest::randomFade);
-
         weightedCaller.registerCallback(2, RandomGUITest::randomizeToolSettings);
-
         weightedCaller.registerCallback(1, RandomGUITest::arrangeWindows);
-
         weightedCaller.registerCallback(1, RandomGUITest::randomColors);
-
         weightedCaller.registerCallback(5, RandomGUITest::randomFilter);
-
         weightedCaller.registerCallback(25, RandomGUITest::randomTween);
-
         weightedCaller.registerCallback(10, RandomGUITest::randomFitToScreen);
-
         weightedCaller.registerCallback(3, () -> randomKey(r));
-
         weightedCaller.registerCallback(1, () -> reload(r));
-
         weightedCaller.registerCallback(1, RandomGUITest::randomZoom);
-
         weightedCaller.registerCallback(1, RandomGUITest::randomZoomOut);
-
         weightedCaller.registerCallback(3, RandomGUITest::deselect);
-
         weightedCaller.registerCallback(1, () -> showHideSelection(r));
-
         weightedCaller.registerCallback(1, RandomGUITest::layerToCanvasSize);
-
         weightedCaller.registerCallback(1, RandomGUITest::invertSelection);
-
         weightedCaller.registerCallback(1, RandomGUITest::traceWithCurrentBrush);
-
         weightedCaller.registerCallback(1, RandomGUITest::traceWithCurrentEraser);
-
         weightedCaller.registerCallback(1, RandomGUITest::randomRotateFlip);
-
         weightedCaller.registerCallback(1, RandomGUITest::layerOrderChange);
-
         weightedCaller.registerCallback(5, RandomGUITest::layerMerge);
-
         weightedCaller.registerCallback(3, RandomGUITest::layerAddDelete);
-
         weightedCaller.registerCallback(1, RandomGUITest::randomHideShow);
-
         weightedCaller.registerCallback(1, RandomGUITest::randomCopy);
-
         weightedCaller.registerCallback(1, RandomGUITest::randomPaste);
-
         weightedCaller.registerCallback(1, RandomGUITest::randomChangeLayerOpacityOrBlending);
-
         weightedCaller.registerCallback(1, RandomGUITest::randomChangeLayerVisibility);
-
         weightedCaller.registerCallback(3, RandomGUITest::randomTool);
-
         weightedCaller.registerCallback(1, RandomGUITest::randomEnlargeCanvas);
-
         weightedCaller.registerCallback(7, RandomGUITest::randomNewTextLayer);
         weightedCaller.registerCallback(7, RandomGUITest::randomTextLayerRasterize);
 

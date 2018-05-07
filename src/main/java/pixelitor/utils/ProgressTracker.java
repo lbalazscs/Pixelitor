@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ public interface ProgressTracker {
     /**
      * Multiple work units were finished
      */
-    void addUnits(int units);
+    void unitsDone(int units);
 
     /**
      * All the work is done
@@ -42,7 +42,7 @@ public interface ProgressTracker {
      */
     ProgressTracker NULL_TRACKER = new ProgressTracker() {
         @Override
-        public void addUnits(int units) {
+        public void unitsDone(int units) {
         }
 
         @Override

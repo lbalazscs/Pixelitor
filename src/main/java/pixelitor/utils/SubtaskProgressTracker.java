@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,7 +45,7 @@ public class SubtaskProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void addUnits(int units) {
+    public void unitsDone(int units) {
         progress += (units * ratio);
         update();
     }
@@ -68,7 +68,7 @@ public class SubtaskProgressTracker implements ProgressTracker {
         int doneUnits = (int) progress;
 
         progress -= doneUnits;
-        superTask.addUnits(doneUnits);
+        superTask.unitsDone(doneUnits);
     }
 
     @Override

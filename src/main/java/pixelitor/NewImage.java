@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -71,7 +71,8 @@ public final class NewImage {
     }
 
     private static void showInDialog() {
-        assert SwingUtilities.isEventDispatchThread();
+        assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
+
         if(lastNew == null) {
             //noinspection NonThreadSafeLazyInitialization
             lastNew = AppPreferences.getNewImageSize();
@@ -110,6 +111,9 @@ public final class NewImage {
         return lastNew;
     }
 
+    /**
+     * The GUI of the "New Image" dialog
+     */
     private static class NewImagePanel extends JPanel {
         private final JTextField widthTF;
         private final JTextField heightTF;

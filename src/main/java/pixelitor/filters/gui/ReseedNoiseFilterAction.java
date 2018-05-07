@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,11 +23,11 @@ import pixelitor.utils.IconUtils;
 import java.awt.event.ActionListener;
 
 /**
- * An ActionParam that deals with reseeding some randomness
+ * A {@link FilterAction} that deals with reseeding some randomness
  */
 public class ReseedNoiseFilterAction extends FilterAction {
     // the first group of constructors is called if
-    // Noise.reseed() does the reseed...
+    // Noise.reseed() does the reseeding...
 
     public ReseedNoiseFilterAction() {
         this("Reseed");
@@ -42,8 +42,8 @@ public class ReseedNoiseFilterAction extends FilterAction {
         setIgnoreFinalAnimationSettingMode(false);
     }
 
-        // ... and the second group of constructors is called if
-    // the given ActionListener does the reseed
+    // ... and the second group of constructors is called if
+    // the given ActionListener does the reseeding
 
     public ReseedNoiseFilterAction(ActionListener actionListener) {
         this("Reseed", actionListener);

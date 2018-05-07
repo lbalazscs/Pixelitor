@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -64,8 +64,7 @@ public class AddNoise extends FilterWithParametrizedGUI {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        ReseedSupport.reInitialize();
-        Random rand = ReseedSupport.getRand();
+        Random rand = ReseedSupport.reInitialize();
 
         float opacityValueAsPercentage = opacity.getValueAsPercentage();
         int opacityValue = opacity.getValue();

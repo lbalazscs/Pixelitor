@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -80,7 +80,7 @@ public class SelectionTool extends Tool implements ImageSwitchListener {
 
         settingsPanel.addButton(SelectionActions.getTraceWithBrush());
         settingsPanel.addButton(SelectionActions.getTraceWithEraser());
-        settingsPanel.addButton(SelectionActions.getCropAction());
+        settingsPanel.addButton(SelectionActions.getCrop());
     }
 
     @Override

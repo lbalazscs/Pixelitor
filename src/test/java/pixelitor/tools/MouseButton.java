@@ -15,28 +15,30 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor;
+package pixelitor.tools;
 
-import pixelitor.utils.Messages;
+import java.awt.event.MouseEvent;
 
 /**
- * Handles uncaught exceptions and other errors
+ * Whether we simulate the pressing of the
+ * left or right mouse button during testing
  */
-public class ExceptionHandler implements Thread.UncaughtExceptionHandler {
-    public static final ExceptionHandler INSTANCE = new ExceptionHandler();
+public enum MouseButton implements EventMaskModifier {
+    LEFT {
+        @Override
+        public int modify(int in) {
+            in |= MouseEvent.BUTTON1_DOWN_MASK;
+            in |= MouseEvent.BUTTON1_MASK;
 
-    private ExceptionHandler() {
-    }
+            return in;
+        }
+    }, RIGHT {
+        @Override
+        public int modify(int in) {
+            in |= MouseEvent.BUTTON3_DOWN_MASK;
+            in |= MouseEvent.BUTTON3_MASK;
 
-    /**
-     * Should be called once, at startup
-     */
-    public void initialize() {
-        Thread.setDefaultUncaughtExceptionHandler(this);
-    }
-
-    @Override
-    public void uncaughtException(Thread t, Throwable e) {
-        Messages.showException(e, t);
+            return in;
+        }
     }
 }

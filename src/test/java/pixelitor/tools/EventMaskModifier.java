@@ -15,28 +15,12 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor;
+package pixelitor.tools;
 
-import pixelitor.utils.Messages;
-
-/**
- * Handles uncaught exceptions and other errors
- */
-public class ExceptionHandler implements Thread.UncaughtExceptionHandler {
-    public static final ExceptionHandler INSTANCE = new ExceptionHandler();
-
-    private ExceptionHandler() {
-    }
-
+public interface EventMaskModifier {
     /**
-     * Should be called once, at startup
+     * Modify a modifier mask describing the modifier keys
+     * and mouse buttons that are down during an event.
      */
-    public void initialize() {
-        Thread.setDefaultUncaughtExceptionHandler(this);
-    }
-
-    @Override
-    public void uncaughtException(Thread t, Throwable e) {
-        Messages.showException(e, t);
-    }
+    int modify(int in);
 }
