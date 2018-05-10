@@ -25,6 +25,7 @@ import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.transform.TransformSupport;
 import pixelitor.utils.ImageSwitchListener;
+import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
@@ -165,7 +166,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
 
         if (state == TRANSFORM) {
             assert transformSupport != null;
-            transformSupport.mousePressed(e);
+            transformSupport.mousePressed(e, ic);
             cropButton.setEnabled(true);
             cancelButton.setEnabled(true);
             hSizeSpinner.setEnabled(true);
@@ -372,6 +373,24 @@ public class CropTool extends Tool implements ImageSwitchListener {
     @Override
     public void escPressed() {
         state.cancel(this);
+    }
+
+    @Override
+    public void shiftPressed() {
+        if (state != TRANSFORM) {
+            return;
+        }
+
+        transformSupport.setUseAspectRatio(true);
+    }
+
+    @Override
+    public void shiftReleased() {
+        if (state != TRANSFORM) {
+            return;
+        }
+
+        transformSupport.setUseAspectRatio(false);
     }
 
     @Override
