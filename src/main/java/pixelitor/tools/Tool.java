@@ -342,6 +342,16 @@ public abstract class Tool implements KeyboardObserver {
     }
 
     @Override
+    public void shiftPressed() {
+        // empty by default
+    }
+
+    @Override
+    public void shiftReleased() {
+        // empty by default
+    }
+
+    @Override
     public void altPressed() {
         if (!altDown && doColorPickerForwarding()) {
             ImageComponents.forAllImages(ic -> ic.setCursor(Tools.COLOR_PICKER.getCursor()));

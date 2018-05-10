@@ -29,4 +29,8 @@ public interface KeyboardObserver {
     void altPressed();
 
     void altReleased();
+
+    void shiftPressed();
+
+    void shiftReleased();
 }
