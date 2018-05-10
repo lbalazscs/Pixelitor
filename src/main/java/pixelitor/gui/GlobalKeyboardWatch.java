@@ -110,7 +110,7 @@ public class GlobalKeyboardWatch {
                 break;
             case KeyEvent.VK_SHIFT:
                 if (!dialogActive) {
-                    observer.shiftPressed();
+                    keyListener.shiftPressed();
                 }
                 break;
         }
@@ -130,7 +130,7 @@ public class GlobalKeyboardWatch {
                 break;
             case KeyEvent.VK_SHIFT:
                 if (!dialogActive) {
-                    observer.shiftReleased();
+                    keyListener.shiftReleased();
                 }
                 break;
         }
