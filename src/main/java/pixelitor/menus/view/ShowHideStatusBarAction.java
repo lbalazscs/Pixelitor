@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,10 +21,13 @@ import pixelitor.gui.StatusBar;
 import pixelitor.utils.AppPreferences;
 
 /**
- * The action that either shows or hides the status bar, depending on the current visibility
+ * The action that either shows or hides the status bar,
+ * depending on the current visibility
  */
 public class ShowHideStatusBarAction extends ShowHideAction {
-    public ShowHideStatusBarAction() {
+    public static final ShowHideAction INSTANCE = new ShowHideStatusBarAction();
+
+    private ShowHideStatusBarAction() {
         super("Show Status Bar", "Hide Status Bar");
     }
 
@@ -39,7 +42,7 @@ public class ShowHideStatusBarAction extends ShowHideAction {
     }
 
     @Override
-    public void setVisibilityAction(boolean value) {
+    public void setVisibility(boolean value) {
         AppPreferences.WorkSpace.setStatusBarVisibility(value);
     }
 }

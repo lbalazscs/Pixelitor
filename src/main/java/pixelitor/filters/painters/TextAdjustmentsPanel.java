@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -50,7 +50,7 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
 /**
- * Customization panel for the text filters and text layers
+ * Customization panel for the text filter and for text layers
  */
 public class TextAdjustmentsPanel extends FilterGUIPanel implements ParamAdjustmentListener, ActionListener {
     private TextLayer textLayer;
@@ -99,9 +99,7 @@ public class TextAdjustmentsPanel extends FilterGUIPanel implements ParamAdjustm
 
     private void createGUI(TextSettings settings) {
         Box verticalBox = Box.createVerticalBox();
-
         verticalBox.add(createTextPanel(settings));
-
         verticalBox.add(createFontPanel(settings));
 
         AreaEffects areaEffects = null;

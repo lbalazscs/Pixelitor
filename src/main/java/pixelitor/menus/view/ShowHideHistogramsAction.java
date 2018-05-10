@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,17 +20,19 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.utils.AppPreferences;
 
 /**
- * The action that either shows or hides the histogram, depending on the current visibility
+ * The action that either shows or hides the histogram,
+ * depending on the current visibility
  */
 public class ShowHideHistogramsAction extends ShowHideAction {
-    public ShowHideHistogramsAction() {
+    public static final ShowHideAction INSTANCE = new ShowHideHistogramsAction();
+
+    private ShowHideHistogramsAction() {
         super("Show Histograms", "Hide Histograms");
     }
 
     @Override
     public boolean getCurrentVisibility() {
-        PixelitorWindow pixelitorWindow = PixelitorWindow.getInstance();
-        return pixelitorWindow.areHistogramsShown();
+        return PixelitorWindow.getInstance().areHistogramsShown();
     }
 
     @Override
@@ -39,7 +41,7 @@ public class ShowHideHistogramsAction extends ShowHideAction {
     }
 
     @Override
-    public void setVisibilityAction(boolean value) {
+    public void setVisibility(boolean value) {
         AppPreferences.WorkSpace.setHistogramsVisibility(value);
     }
 }

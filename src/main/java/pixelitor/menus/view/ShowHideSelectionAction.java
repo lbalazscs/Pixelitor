@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,8 @@ import pixelitor.gui.ImageComponents;
 import pixelitor.selection.Selection;
 
 /**
- * The action that either shows or hides the selection, depending on the current visibility
+ * The action that either shows or hides the selection,
+ * depending on the current visibility
  */
 public class ShowHideSelectionAction extends ShowHideAction {
     public ShowHideSelectionAction() {
@@ -48,7 +49,7 @@ public class ShowHideSelectionAction extends ShowHideAction {
     }
 
     @Override
-    public void setVisibilityAction(boolean value) {
+    public void setVisibility(boolean value) {
         ImageComponents.onActiveSelection(
                 selection -> selection.setHidden(!value, true));
     }

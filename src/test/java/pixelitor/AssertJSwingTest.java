@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -70,15 +70,15 @@ import java.util.Random;
 import static java.awt.event.KeyEvent.*;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static pixelitor.AssertJSwingTest.TestingMode.NO_MASK;
 import static pixelitor.AssertJSwingTest.TestingMode.ON_MASK_VIEW_LAYER;
 import static pixelitor.AssertJSwingTest.TestingMode.ON_MASK_VIEW_MASK;
 import static pixelitor.AssertJSwingTest.TestingMode.RUBY;
-import static pixelitor.AssertJSwingTest.TestingMode.SIMPLE;
 import static pixelitor.AssertJSwingTest.TestingMode.WITH_MASK;
 import static pixelitor.utils.test.Assertions.canvasSizeIs;
-import static pixelitor.utils.test.Assertions.hasSelection;
-import static pixelitor.utils.test.Assertions.noSelection;
 import static pixelitor.utils.test.Assertions.numLayersIs;
+import static pixelitor.utils.test.Assertions.thereIsNoSelection;
+import static pixelitor.utils.test.Assertions.thereIsSelection;
 
 
 public class AssertJSwingTest {
@@ -102,7 +102,7 @@ public class AssertJSwingTest {
     private enum Reseed {YES, NO}
 
     enum TestingMode {
-        SIMPLE(MaskViewMode.NORMAL),
+        NO_MASK(MaskViewMode.NORMAL),
         WITH_MASK(MaskViewMode.NORMAL),
         ON_MASK_VIEW_LAYER(MaskViewMode.EDIT_MASK),
         ON_MASK_VIEW_MASK(MaskViewMode.SHOW_MASK),
@@ -119,7 +119,7 @@ public class AssertJSwingTest {
         }
     }
 
-    private TestingMode testingMode = SIMPLE;
+    private TestingMode testingMode = NO_MASK;
 
     // TODO for some reason, assertj-swing sees this dialog
     // only the first time it is shown, this flag is a workaround
@@ -160,6 +160,13 @@ public class AssertJSwingTest {
                 Utils.formatMillis(totalTimeMillis));
         Utils.sleep(5, SECONDS);
         test.exit();
+    }
+
+    private static void initialize(String[] args) {
+        processCLArguments(args);
+        cleanOutputs();
+        checkTestingDirs();
+        Utils.checkThatAssertionsAreEnabled();
     }
 
     private void reinitializeTesting() {
@@ -255,7 +262,7 @@ public class AssertJSwingTest {
         testDevelopMenu();
         testTools();
 
-        if (testingMode == SIMPLE) {
+        if (testingMode == NO_MASK) {
             testFileMenu();
         }
 
@@ -264,7 +271,7 @@ public class AssertJSwingTest {
         testImageMenu();
         testFilters();
 
-        if (testingMode == SIMPLE) {
+        if (testingMode == NO_MASK) {
             testViewMenu();
             testHelpMenu();
             testColors();
@@ -472,7 +479,7 @@ public class AssertJSwingTest {
     }
 
     private void testMaskFromColorRange() {
-        if(testingMode != SIMPLE) {
+        if (testingMode != NO_MASK) {
             return;
         }
 
@@ -1142,7 +1149,7 @@ public class AssertJSwingTest {
         testFilterWithDialog("2D Transitions...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
 
         testFilterWithDialog("Custom 3x3 Convolution...", Randomize.NO,
-                Reseed.NO, ShowOriginal.NO, "\"Corner\" Blur", "\"Gaussian\" Blur", "Mean Filter", "Sharpen",
+                Reseed.NO, ShowOriginal.NO, "Corner Blur", "\"Gaussian\" Blur", "Mean Blur", "Sharpen",
                 "Edge Detection", "Edge Detection 2", "Horizontal Edge Detection",
                 "Vertical Edge Detection", "Emboss", "Emboss 2", "Color Emboss",
                 "Do Nothing", "Randomize");
@@ -1491,7 +1498,7 @@ public class AssertJSwingTest {
         int origCanvasHeight = canvas.getHeight();
         assert canvasSizeIs(origCanvasWidth, origCanvasHeight);
 
-        assert hasSelection();
+        assert thereIsSelection();
         Selection selection = comp.getSelection();
         Rectangle selectionBounds = selection.getShapeBounds();
         int selectionWidth = selectionBounds.width;
@@ -1501,31 +1508,31 @@ public class AssertJSwingTest {
         findButtonByText(pw, "Stroke with Current Eraser").click();
 
         // crop using the "Crop" button in the selection tool
-        assert hasSelection();
+        assert thereIsSelection();
         findButtonByText(pw, "Crop").click();
         assert canvasSizeIs(selectionWidth, selectionHeight);
-        assert noSelection() : "selected after crop";
+        assert thereIsNoSelection() : "selected after crop";
         keyboardUndoRedoUndo();
-        assert hasSelection() : "no selection after crop undo";
+        assert thereIsSelection() : "no selection after crop undo";
         assert canvasSizeIs(origCanvasWidth, origCanvasHeight);
 
         // crop from the menu
         runMenuCommand("Crop");
-        assert noSelection();
+        assert thereIsNoSelection();
         assert canvasSizeIs(selectionWidth, selectionHeight);
         keyboardUndoRedoUndo();
-        assert hasSelection();
+        assert thereIsSelection();
         assert canvasSizeIs(origCanvasWidth, origCanvasHeight);
 
         testSelectionModifyMenu();
-        assert hasSelection();
+        assert thereIsSelection();
 
         runMenuCommand("Invert Selection");
         runMenuCommand("Stroke with Current Brush");
         runMenuCommand("Stroke with Current Eraser");
-        assert hasSelection();
+        assert thereIsSelection();
         runMenuCommand("Deselect");
-        assert noSelection();
+        assert thereIsNoSelection();
     }
 
     private void testSelectionModifyMenu() {
@@ -2029,7 +2036,7 @@ public class AssertJSwingTest {
      * in order to set up the mask testing mode
      */
     private void applyTestingMode() {
-        if (testingMode == SIMPLE) {
+        if (testingMode == NO_MASK) {
             // do nothing
         } else if (testingMode == WITH_MASK) {
             // existing masks are allowed because even if they result
@@ -2134,13 +2141,6 @@ public class AssertJSwingTest {
             System.err.printf("Cleaner script %s not found.%n", cleanerScript.getName());
             System.exit(1);
         }
-    }
-
-    private static void initialize(String[] args) {
-        processCLArguments(args);
-        cleanOutputs();
-        checkTestingDirs();
-        Utils.checkThatAssertionsAreEnabled();
     }
 
     public void setUp() {

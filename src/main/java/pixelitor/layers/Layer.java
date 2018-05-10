@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -77,7 +77,7 @@ public abstract class Layer implements Serializable {
     // transient variables from here
     private transient LayerGUI ui;
     protected transient boolean isAdjustment = false;
-    private transient List<LayerChangeListener> layerChangeObservers;
+    private transient List<LayerChangeListener> layerChangeListeners;
 
     /**
      * Whether the edited image is the layer image or
@@ -100,12 +100,12 @@ public abstract class Layer implements Serializable {
         } else { // normal layer
             ui = new LayerGUI(this);
         }
-        layerChangeObservers = new ArrayList<>();
+        layerChangeListeners = new ArrayList<>();
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        layerChangeObservers = new ArrayList<>();
+        layerChangeListeners = new ArrayList<>();
 
         // We create a layer button only for real layers.
         // For layer masks, we share the button of the real layer.
@@ -532,7 +532,7 @@ public abstract class Layer implements Serializable {
 
         comp.imageChanged(FULL);
         mask.updateIconImage();
-        notifyLayerChangeObservers();
+        notifyLayerChangeListeners();
 
         History.addEdit(addToHistory, () -> new EnableLayerMaskEdit(comp, this));
     }
@@ -549,13 +549,13 @@ public abstract class Layer implements Serializable {
         ui.setSelected(true);
     }
 
-    public void addLayerChangeObserver(LayerChangeListener listener) {
-        layerChangeObservers.add(listener);
+    public void addLayerChangeListener(LayerChangeListener listener) {
+        layerChangeListeners.add(listener);
     }
 
-    protected void notifyLayerChangeObservers() {
-        for (LayerChangeListener observer : layerChangeObservers) {
-            observer.layerStateChanged();
+    protected void notifyLayerChangeListeners() {
+        for (LayerChangeListener listener : layerChangeListeners) {
+            listener.layerStateChanged();
         }
     }
 

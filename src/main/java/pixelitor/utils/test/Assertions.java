@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@ public class Assertions {
     private Assertions() {
     }
 
-    public static boolean hasSelection() {
+    public static boolean thereIsSelection() {
         Composition comp = ImageComponents.getActiveCompOrNull();
         if (comp == null) {
             throw new IllegalStateException();
@@ -45,8 +45,8 @@ public class Assertions {
         return comp.hasSelection();
     }
 
-    public static boolean noSelection() {
-        return !hasSelection();
+    public static boolean thereIsNoSelection() {
+        return !thereIsSelection();
     }
 
     @SuppressWarnings("SameReturnValue")
@@ -84,7 +84,7 @@ public class Assertions {
     }
 
     @SuppressWarnings("SameReturnValue")
-    public static boolean canvasSizeIs(int w, int h) {
+    public static boolean canvasSizeIs(int width, int height) {
         Composition comp = ImageComponents.getActiveCompOrNull();
         if (comp == null) {
             throw new IllegalStateException();
@@ -92,11 +92,11 @@ public class Assertions {
         Canvas canvas = comp.getCanvas();
         int actualWidth = canvas.getWidth();
         int actualHeight = canvas.getHeight();
-        if (actualWidth == w && actualHeight == h) {
+        if (actualWidth == width && actualHeight == height) {
             return true;
         } else {
-            throw new AssertionError("Expected w = " + w + ", h = " + h +
-                    ", actual w = " + actualWidth + ", h = " + actualHeight);
+            throw new AssertionError("Expected width = " + width + ", height = " + height +
+                    ", actual width = " + actualWidth + ", height = " + actualHeight);
         }
     }
 
@@ -124,8 +124,8 @@ public class Assertions {
         return Tools.CROP.getCropRect().equals(new Rectangle(x, y, w, h));
     }
 
-    public static boolean selectedToolIs(Tool tool) {
-        return Tools.getCurrent() == tool;
+    public static boolean selectedToolIs(Tool expected) {
+        return Tools.getCurrent() == expected;
     }
 
     public static boolean pixelColorIs(int x, int y, int a, int r, int g, int b) {
@@ -139,23 +139,23 @@ public class Assertions {
         return c.getAlpha() == a && c.getRed() == r && c.getGreen() == g && c.getBlue() == b;
     }
 
-    public static boolean zoomIs(ZoomLevel zoom) {
+    public static boolean zoomIs(ZoomLevel expected) {
         ImageComponent ic = ImageComponents.getActiveIC();
         if (ic == null) {
             throw new IllegalStateException();
         }
-        return ic.getZoomLevel() == zoom;
+        return ic.getZoomLevel() == expected;
     }
 
-    public static boolean numLayersIs(int number) {
+    public static boolean numLayersIs(int expected) {
         Composition comp = ImageComponents.getActiveCompOrNull();
         if (comp == null) {
             throw new IllegalStateException();
         }
-        return comp.getNumLayers() == number;
+        return comp.getNumLayers() == expected;
     }
 
-    public static boolean numOpenImagesIs(int number) {
-        return ImageComponents.getNumOpenImages() == number;
+    public static boolean numOpenImagesIs(int expected) {
+        return ImageComponents.getNumOpenImages() == expected;
     }
 }

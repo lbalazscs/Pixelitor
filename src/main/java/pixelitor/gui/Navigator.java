@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -47,14 +47,14 @@ import java.awt.geom.AffineTransform;
  * The navigator component that allows the user to pan a zoomed-in image.
  */
 public class Navigator extends JComponent implements MouseListener, MouseMotionListener, ImageSwitchListener {
-    private static final BasicStroke STROKE = new BasicStroke(3);
+    private static final BasicStroke RED_RECT_STROKE = new BasicStroke(3);
     private static final CheckerboardPainter checkerBoardPainter = ImageUtils.createCheckerboardPainter();
-    private static final int DEFAULT_SIZE = 300;
+    private static final int DEFAULT_NAVIGATOR_SIZE = 300;
 
     private ImageComponent ic; // can be null if all images are closed
 
     private boolean dragging = false;
-    private double scaling;
+    private double imgScalingRatio;
 
     private Rectangle redRect;
     private Point dragStartPoint;
@@ -67,6 +67,9 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
     private final AdjustmentListener adjListener;
     private static JDialog dialog;
 
+    private static final Cursor INSIDE_RECT_CURSOR = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
+    private static final Cursor OUTSIDE_RECT_CURSOR = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR);
+
     private Navigator(ImageComponent ic) {
         adjListener = e ->
                 SwingUtilities.invokeLater(this::updateRedRectanglePosition);
@@ -75,9 +78,17 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
 
         addMouseListener(this);
         addMouseMotionListener(this);
-        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         ImageComponents.addImageSwitchListener(this);
 
+        addNavigatorResizedListener();
+        addMouseWheelZoomingSupport();
+
+        ZoomMenu.setupZoomKeys(this);
+    }
+
+    private void addNavigatorResizedListener() {
+        // if the navigator is resized, then the size calculations
+        // have to be refreshed
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -86,18 +97,19 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
                 }
             }
         });
+    }
 
+    private void addMouseWheelZoomingSupport() {
         addMouseWheelListener(e -> {
             if (e.isControlDown()) {
                 if (e.getWheelRotation() < 0) { // up, away from the user
+                    // this.ic will be always the active image
                     this.ic.increaseZoom();
                 } else {  // down, towards the user
                     this.ic.decreaseZoom();
                 }
             }
         });
-
-        ZoomMenu.setupZoomKeys(this);
     }
 
     public static void showInDialog(PixelitorWindow pw) {
@@ -131,7 +143,7 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
         scrollPane = ic.getFrame().getScrollPane();
 
         if (newIC) {
-            reCalcScaling(ic, DEFAULT_SIZE, DEFAULT_SIZE);
+            reCalcScaling(ic, DEFAULT_NAVIGATOR_SIZE, DEFAULT_NAVIGATOR_SIZE);
         } else if (newICSize || newOwnSize) {
             reCalcScaling(ic, getWidth(), getHeight());
         }
@@ -213,11 +225,11 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
         checkerBoardPainter.paint(g2, null, thumbWidth, thumbHeight);
 
         AffineTransform origTX = g2.getTransform();
-        g2.scale(scaling, scaling);
+        g2.scale(imgScalingRatio, imgScalingRatio);
         g2.drawImage(ic.getComp().getCompositeImage(), 0, 0, null);
         g2.setTransform(origTX);
 
-        g2.setStroke(STROKE);
+        g2.setStroke(RED_RECT_STROKE);
         g2.setColor(Color.RED);
         g2.draw(redRect);
     }
@@ -284,9 +296,9 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
         double xScaling = width / (double) imgWidth;
         double yScaling = height / (double) imgHeight;
 
-        scaling = Math.min(xScaling, yScaling);
-        thumbWidth = (int) (imgWidth * scaling);
-        thumbHeight = (int) (imgHeight * scaling);
+        imgScalingRatio = Math.min(xScaling, yScaling);
+        thumbWidth = (int) (imgWidth * imgScalingRatio);
+        thumbHeight = (int) (imgHeight * imgScalingRatio);
     }
 
     @Override
@@ -306,7 +318,15 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        // not interested
+        resetCursor(e.getX(), e.getY());
+    }
+
+    private void resetCursor(int x, int y) {
+        if (redRect.contains(x, y)) {
+            setCursor(INSIDE_RECT_CURSOR);
+        } else {
+            setCursor(OUTSIDE_RECT_CURSOR);
+        }
     }
 
     @Override

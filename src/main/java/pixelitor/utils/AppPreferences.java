@@ -32,6 +32,10 @@ import pixelitor.io.Directories;
 import pixelitor.layers.LayerButtonLayout;
 import pixelitor.menus.file.RecentFileInfo;
 import pixelitor.menus.file.RecentFilesMenu;
+import pixelitor.menus.view.ShowHideHistogramsAction;
+import pixelitor.menus.view.ShowHideLayersAction;
+import pixelitor.menus.view.ShowHideStatusBarAction;
+import pixelitor.menus.view.ShowHideToolsAction;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
@@ -285,18 +289,6 @@ public final class AppPreferences {
         }
     }
 
-    public static String getLookAndFeelClass() {
-        return "javax.swing.plaf.nimbus.NimbusLookAndFeel";
-
-//        UIManager.LookAndFeelInfo[] lookAndFeels = UIManager.getInstalledLookAndFeels();
-//        for (UIManager.LookAndFeelInfo lookAndFeel : lookAndFeels) {
-//            if (lookAndFeel.getName().equals("Nimbus")) {
-//                return lookAndFeel.getClassName();
-//            }
-//        }
-//        return UIManager.getSystemLookAndFeelClassName();
-    }
-
     public static Preferences getMainNode() {
         return mainNode;
     }
@@ -351,6 +343,11 @@ public final class AppPreferences {
             toolsVisibility = DEFAULT_TOOLS_VISIBILITY;
             layersVisibility = DEFAULT_LAYERS_VISIBILITY;
             statusBarVisibility = DEFAULT_STATUS_BAR_VISIBILITY;
+
+            ShowHideHistogramsAction.INSTANCE.updateName(DEFAULT_HISTOGRAMS_VISIBILITY);
+            ShowHideToolsAction.INSTANCE.updateName(DEFAULT_TOOLS_VISIBILITY);
+            ShowHideLayersAction.INSTANCE.updateName(DEFAULT_LAYERS_VISIBILITY);
+            ShowHideStatusBarAction.INSTANCE.updateName(DEFAULT_STATUS_BAR_VISIBILITY);
         }
 
         public static boolean getHistogramsVisibility() {
@@ -382,26 +379,22 @@ public final class AppPreferences {
 
         public static void setLayersVisibility(boolean v) {
             layersVisibility = v;
-            PixelitorWindow pixelitorWindow = PixelitorWindow.getInstance();
-            pixelitorWindow.setLayersVisibility(v, true);
+            PixelitorWindow.getInstance().setLayersVisibility(v, true);
         }
 
         public static void setHistogramsVisibility(boolean v) {
             histogramsVisibility = v;
-            PixelitorWindow pixelitorWindow = PixelitorWindow.getInstance();
-            pixelitorWindow.setHistogramsVisibility(v, true);
+            PixelitorWindow.getInstance().setHistogramsVisibility(v, true);
         }
 
         public static void setToolsVisibility(boolean v) {
             toolsVisibility = v;
-            PixelitorWindow pixelitorWindow = PixelitorWindow.getInstance();
-            pixelitorWindow.setToolsVisibility(v, true);
+            PixelitorWindow.getInstance().setToolsVisibility(v, true);
         }
 
         public static void setStatusBarVisibility(boolean v) {
             statusBarVisibility = v;
-            PixelitorWindow pixelitorWindow = PixelitorWindow.getInstance();
-            pixelitorWindow.setStatusBarVisibility(v, true);
+            PixelitorWindow.getInstance().setStatusBarVisibility(v, true);
         }
     }
 

@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2017 Laszlo Balazs-Csiki
+  ~ Copyright 2018 Laszlo Balazs-Csiki and Contributors
   ~
   ~ This file is part of Pixelitor. Pixelitor is free software: you
   ~ can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@
     <groupId>pixelitor</groupId>
     <artifactId>Pixelitor</artifactId>
     <packaging>jar</packaging>
-    <version>4.0.2</version>
+    <version>4.0.3</version>
     <name>pixelitor</name>
     <url>http://pixelitor.sourceforge.net</url>
 
@@ -62,6 +62,12 @@
     </build>
 
     <dependencies>
+        <!--<dependency>-->
+        <!--<groupId>com.drewnoakes</groupId>-->
+        <!--<artifactId>metadata-extractor</artifactId>-->
+        <!--<version>2.11.0</version>-->
+        <!--</dependency>-->
+
         <!--there are only test dependencies-->
 
         <dependency>
@@ -75,13 +81,18 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>1.10.19</version>
+            <!--<version>2.18.3</version>-->
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.assertj</groupId>
-            <artifactId>assertj-swing-junit-4.5</artifactId>
-            <version>1.2.0</version>
+
+            <!--<artifactId>assertj-swing-junit-4.5</artifactId>-->
+            <!--<version>1.2.0</version>-->
+            <artifactId>assertj-swing-junit</artifactId>
+            <version>3.8.0</version>
+
             <scope>test</scope>
         </dependency>
     </dependencies>

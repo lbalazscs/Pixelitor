@@ -31,7 +31,9 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 /**
- * A bunch of pixels: an image layer or a layer mask.
+ * Something that (unlike text and adjustment layers)
+ * consists of a bunch of pixels: an image layer or a layer mask.
+ * Can be used with brush tools and filters.
  */
 public interface Drawable {
     Drawable duplicate(boolean sameName);

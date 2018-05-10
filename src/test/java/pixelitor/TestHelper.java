@@ -26,15 +26,18 @@ import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.history.History;
 import pixelitor.layers.AdjustmentLayer;
+import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.TextLayer;
 import pixelitor.selection.Selection;
+import pixelitor.testutils.WithTranslation;
 import pixelitor.tools.Alt;
 import pixelitor.tools.Ctrl;
 import pixelitor.tools.MouseButton;
 import pixelitor.tools.Shift;
 import pixelitor.utils.Messages;
+import pixelitor.utils.test.Assertions;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -47,6 +50,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
@@ -60,6 +64,9 @@ public class TestHelper {
     private static final int TEST_HEIGHT = 10;
     private static final Component eventSource = new JPanel();
     private static boolean initialized = false;
+
+    // all coordinates and distances must be even here because of the resize test
+    private static final Rectangle standardTestSelectionShape = new Rectangle(4, 4, 8, 4);
 
     static {
         initTesting();
@@ -84,7 +91,7 @@ public class TestHelper {
         FgBgColorSelector fgBgColorSelector = mock(FgBgColorSelector.class);
         when(fgBgColorSelector.getFgColor()).thenReturn(Color.BLACK);
         when(fgBgColorSelector.getBgColor()).thenReturn(Color.WHITE);
-        FgBgColors.setGUI(fgBgColorSelector);
+        FgBgColors.setSelector(fgBgColorSelector);
     }
 
     public static ImageLayer createImageLayer(String layerName, Composition comp) {
@@ -244,6 +251,67 @@ public class TestHelper {
             when(comp.hasSelection()).thenReturn(true);
         } else {
             comp.createSelectionFromShape(shape);
+        }
+    }
+
+    public static void moveLayer(Composition comp, boolean makeDuplicateLayer, int relativeX, int relativeY) {
+        comp.startMovement(makeDuplicateLayer);
+        comp.moveActiveContentRelative(relativeX, relativeY);
+        comp.endMovement();
+    }
+
+    public static void addRectangleSelection(Composition comp, Rectangle rect) {
+//        comp.startSelection(SelectionType.RECTANGLE, SelectionInteraction.ADD);
+        Selection selection = new Selection(rect, comp.getIC());
+        comp.setNewSelection(selection);
+    }
+
+    public static void setStandardTestSelection(Composition comp) {
+        addRectangleSelection(comp, standardTestSelectionShape);
+    }
+
+    public static Rectangle getStandardTestSelectionShape() {
+        return standardTestSelectionShape;
+    }
+
+    public static void checkSelectionBounds(Composition comp, Rectangle expected) {
+        Selection selection = comp.getSelection();
+        Rectangle shapeBounds = selection.getShapeBounds();
+        assertThat(shapeBounds).isEqualTo(expected);
+    }
+
+    public static void setStandardTestTranslationToAllLayers(Composition comp, WithTranslation translation) {
+        comp.forEachContentLayer(contentLayer -> {
+            // should be used on layers without translation
+            int tx = contentLayer.getTX();
+            assert tx == 0 : "tx = " + tx + " on " + contentLayer.getName();
+            int ty = contentLayer.getTY();
+            assert ty == 0 : "ty = " + ty + " on " + contentLayer.getName();
+
+            setStandardTestTranslation(comp, contentLayer, translation);
+        });
+    }
+
+    public static void setStandardTestTranslation(Composition comp, ContentLayer layer, WithTranslation translation) {
+        // Composition only allows to move the active layer
+        // so if the given layer is not active, we need to activate it temporarily
+        Layer activeLayerBefore = comp.getActiveLayer();
+        boolean activeLayerChanged = false;
+        if (layer != activeLayerBefore) {
+            comp.setActiveLayer(layer, false);
+            activeLayerChanged = true;
+        }
+
+        assert Assertions.translationIs(layer, 0, 0);
+
+        translation.moveLayer(comp);
+
+        int expectedTX = translation.getExpectedTX();
+        int expectedTY = translation.getExpectedTY();
+        assert Assertions.translationIs(layer, expectedTX, expectedTY);
+
+        if (activeLayerChanged) {
+            comp.setActiveLayer(activeLayerBefore, false);
         }
     }
 }

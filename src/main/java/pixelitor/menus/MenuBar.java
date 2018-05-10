@@ -27,7 +27,6 @@ import pixelitor.TipsOfTheDay;
 import pixelitor.automate.AutoPaint;
 import pixelitor.automate.BatchFilterWizard;
 import pixelitor.automate.BatchResize;
-import pixelitor.colors.FgBgColors;
 import pixelitor.colors.palette.ColorSwatchClickHandler;
 import pixelitor.colors.palette.FullPalette;
 import pixelitor.colors.palette.PalettePanel;
@@ -49,6 +48,7 @@ import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.Navigator;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.PerformanceTestingDialog;
 import pixelitor.history.History;
@@ -265,10 +265,10 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        fileMenu.addAction(new ImageLayerAction("Export Tweening Animation") {
+        fileMenu.addAction(new DrawableAction("Export Tweening Animation") {
             @Override
-            protected void process(ImageLayer layer) {
-                new TweenWizard(layer).start(pw);
+            protected void process(Drawable dr) {
+                new TweenWizard(dr).start(pw);
             }
         });
 
@@ -330,10 +330,10 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        sub.buildAction(new ImageLayerAction("Batch Filter") {
+        sub.buildAction(new DrawableAction("Batch Filter") {
             @Override
-            protected void process(ImageLayer layer) {
-                new BatchFilterWizard(layer).start(pw);
+            protected void process(Drawable dr) {
+                new BatchFilterWizard(dr).start(pw);
             }
         }).add();
 
@@ -344,10 +344,10 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        sub.addAction(new ImageLayerAction("Auto Paint") {
+        sub.addAction(new DrawableAction("Auto Paint") {
             @Override
-            protected void process(ImageLayer layer) {
-                AutoPaint.showDialog(layer);
+            protected void process(Drawable dr) {
+                AutoPaint.showDialog(dr);
             }
         });
 
@@ -1026,10 +1026,10 @@ public class MenuBar extends JMenuBar {
 
         viewMenu.addSeparator();
 
-        viewMenu.add(new ShowHideStatusBarAction());
-        viewMenu.buildAction(new ShowHideHistogramsAction()).alwaysEnabled().withKey(F6).add();
-        viewMenu.buildAction(new ShowHideLayersAction()).alwaysEnabled().withKey(F7).add();
-        viewMenu.add(new ShowHideToolsAction());
+        viewMenu.add(ShowHideStatusBarAction.INSTANCE);
+        viewMenu.buildAction(ShowHideHistogramsAction.INSTANCE).alwaysEnabled().withKey(F6).add();
+        viewMenu.buildAction(ShowHideLayersAction.INSTANCE).alwaysEnabled().withKey(F7).add();
+        viewMenu.add(ShowHideToolsAction.INSTANCE);
         viewMenu.buildAction(ShowHideAllAction.INSTANCE).alwaysEnabled().withKey(TAB).add();
 
         viewMenu.addAlwaysEnabledAction(new MenuAction("Set Default Workspace") {
@@ -1246,10 +1246,11 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        developMenu.addAction(new MenuAction("debug FgBgColorSelector") {
+        developMenu.addAlwaysEnabledAction(new MenuAction("Debug Java Main Version") {
             @Override
             public void onClick() {
-                FgBgColors.getGUI().dumpState();
+                int version = Utils.getCurrentMainJavaVersion();
+                Dialogs.showInfoDialog(pw, "Debug", "Java Main Version = " + version);
             }
         });
 
@@ -1334,17 +1335,17 @@ public class MenuBar extends JMenuBar {
             }
         }).alwaysEnabled().withKey(CTRL_R).add();
 
-        sub.addAction(new ImageLayerAction("Filter Performance Test") {
+        sub.addAction(new DrawableAction("Filter Performance Test") {
             @Override
-            protected void process(ImageLayer layer) {
-                new PerformanceTestingDialog(pw, layer);
+            protected void process(Drawable dr) {
+                new PerformanceTestingDialog(pw, dr);
             }
         });
 
-        sub.addAction(new ImageLayerAction("Find Slowest Filter", false) {
+        sub.addAction(new DrawableAction("Find Slowest Filter", false) {
             @Override
-            protected void process(ImageLayer layer) {
-                FilterTests.findSlowestFilter(layer);
+            protected void process(Drawable dr) {
+                FilterTests.findSlowestFilter(dr);
             }
         });
 
@@ -1357,17 +1358,17 @@ public class MenuBar extends JMenuBar {
 
         sub.addSeparator();
 
-        sub.addAction(new ImageLayerAction("Run All Filters on Current Layer/Mask", false) {
+        sub.addAction(new DrawableAction("Run All Filters on Current Layer/Mask", false) {
             @Override
-            protected void process(ImageLayer layer) {
-                FilterTests.runAllFiltersOn(layer);
+            protected void process(Drawable dr) {
+                FilterTests.runAllFiltersOn(dr);
             }
         });
 
-        sub.addAction(new ImageLayerAction("Save the Result of Each Filter...") {
+        sub.addAction(new DrawableAction("Save the Result of Each Filter...") {
             @Override
-            protected void process(ImageLayer layer) {
-                FilterTests.saveTheResultOfEachFilter(layer);
+            protected void process(Drawable dr) {
+                FilterTests.saveTheResultOfEachFilter(dr);
             }
         });
 
@@ -1380,10 +1381,10 @@ public class MenuBar extends JMenuBar {
 
         sub.addSeparator();
 
-        sub.addAlwaysEnabledAction(new ImageLayerAction("Test Tools", false) {
+        sub.addAlwaysEnabledAction(new DrawableAction("Test Tools", false) {
             @Override
-            protected void process(ImageLayer layer) {
-                ToolTests.testTools(layer);
+            protected void process(Drawable dr) {
+                ToolTests.testTools(dr);
             }
         });
 

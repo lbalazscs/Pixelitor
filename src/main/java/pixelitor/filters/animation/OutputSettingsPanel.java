@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -126,10 +126,10 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
         TweenOutputType selected = (TweenOutputType) outputTypeCB.getSelectedItem();
         if(selected.needsDirectory()) {
             browseFilesSupport.setSelectionMode(DIRECTORY);
-            browseFilesSupport.setDialogTitle("Select Output Folder");
+            browseFilesSupport.setFileChooserTitle("Select Output Folder");
         } else {
             browseFilesSupport.setSelectionMode(FILE);
-            browseFilesSupport.setDialogTitle("Select Output File");
+            browseFilesSupport.setFileChooserTitle("Select Output File");
             browseFilesSupport.setFileFilter(selected.getFileFilter());
         }
         if (fileNameTF != null) { // not the initial setup

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,6 +28,10 @@ import java.awt.Window;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A color history. There are separate histories
+ * for the foreground, background and filter colors.
+ */
 public class ColorHistory {
     public static final ColorHistory FOREGROUND = new ColorHistory("Foreground Color History");
     public static final ColorHistory BACKGROUND = new ColorHistory("Background Color History");

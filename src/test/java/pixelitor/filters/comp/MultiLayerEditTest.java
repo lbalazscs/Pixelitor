@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import pixelitor.CompTester;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.history.History;
@@ -37,7 +36,7 @@ import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
 import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
 import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_180;
@@ -50,7 +49,6 @@ public class MultiLayerEditTest {
     private static final int ORIG_CANVAS_HEIGHT = 10;
 
     private Composition comp;
-    private CompTester tester;
 
     private ImageLayer layer1;
     private ImageLayer layer2;
@@ -66,7 +64,6 @@ public class MultiLayerEditTest {
     private final WithTranslation withTranslation;
     private final WithSelection withSelection;
     private final WithMask withMask;
-
 
     public MultiLayerEditTest(NumLayers numLayers, WithTranslation withTranslation, WithSelection withSelection, WithMask withMask) {
         this.numLayers = numLayers;
@@ -100,39 +97,41 @@ public class MultiLayerEditTest {
     @Before
     public void setUp() {
         comp = TestHelper.create2LayerComposition(true);
-        assertThat(comp.toString()).isEqualTo("Composition{name='Test', activeLayer=layer 2, layerList=[" +
-                "ImageLayer{state=NORMAL, super={tx=0, ty=0, super={name='layer 1', visible=true, " +
-                "mask=LayerMask{state=NORMAL, super={tx=0, ty=0, super={name='layer 1 MASK', visible=true, mask=null, maskEditing=false, maskEnabled=true, isAdjustment=false}}}, maskEditing=false, maskEnabled=true, isAdjustment=false}}}, " +
-                "ImageLayer{state=NORMAL, super={tx=0, ty=0, super={name='layer 2', visible=true, " +
-                "mask=LayerMask{state=NORMAL, super={tx=0, ty=0, super={name='layer 2 MASK', visible=true, mask=null, maskEditing=false, maskEnabled=true, isAdjustment=false}}}, maskEditing=false, maskEnabled=true, isAdjustment=false}}}], " +
-                "canvas=Canvas{width=20, height=10}, selection=null, dirty=false}");
-        tester = new CompTester(comp);
-        tester.checkDirty(false);
+        assertThat(comp)
+                .isNotDirty()
+                .isNotEmpty()
+                .hasName("Test")
+                .numLayersIs(2)
+                .layerNamesAre("layer 1", "layer 2")
+                .activeLayerNameIs("layer 2")
+                .doesNotHaveSelection()
+                .firstLayerHasMask()
+                .secondLayerHasMask();
 
         layer1 = (ImageLayer) comp.getLayer(0);
         layer2 = (ImageLayer) comp.getLayer(1);
 
-        numLayers.init(tester);
-        withTranslation.init(tester);
-        withSelection.init(tester);
+        numLayers.init(comp);
+        withTranslation.init(comp);
+        withSelection.init(comp);
         withMask.init(comp);
 
         if (withSelection.isYes()) {
-            origSelection = tester.getStandardTestSelectionShape();
+            origSelection = TestHelper.getStandardTestSelectionShape();
         }
         History.clear();
     }
 
     private void checkOriginalState() {
-        tester.checkCanvasSize(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT);
-        tester.checkActiveLayerAndMaskImageSize(
-                origImageWidth,
-                origImageHeight);
-        tester.checkActiveLayerTranslation(
-                origTX,
-                origTY);
+        assertThat(comp)
+                .hasCanvasWidth(ORIG_CANVAS_WIDTH)
+                .hasCanvasHeight(ORIG_CANVAS_HEIGHT)
+                .activeLayerAndMaskImageSizeIs(origImageWidth, origImageHeight)
+                .activeLayerTranslationIs(origTX, origTY)
+                .invariantIsOK();
+
         if (withSelection.isYes()) {
-            tester.checkSelectionBounds(origSelection);
+            TestHelper.checkSelectionBounds(comp, origSelection);
         }
 
         if (numLayers == NumLayers.MORE) {
@@ -140,8 +139,6 @@ public class MultiLayerEditTest {
             assertThat(layer2.getTX()).isEqualTo(0);
             assertThat(layer2.getTY()).isEqualTo(0);
         }
-
-        comp.checkInvariant();
     }
 
     @Test
@@ -171,25 +168,23 @@ public class MultiLayerEditTest {
     private void checkEnlargeCanvasAfterState(int north, int east, int south, int west) {
         int newCanvasWidth = ORIG_CANVAS_WIDTH + west + east;
         int newCanvasHeight = ORIG_CANVAS_HEIGHT + north + south;
-        tester.checkCanvasSize(newCanvasWidth, newCanvasHeight);
 
-        tester.checkActiveLayerTranslation(
-                Math.min(0, origTX + west),
-                Math.min(0, origTY + north));
-
-        tester.checkActiveLayerAndMaskImageSize(
-                origImageWidth + east + Math.max(0, origTX + west),
-                origImageHeight + south + Math.max(0, origTY + north)
-        );
+        assertThat(comp)
+                .isDirty()
+                .invariantIsOK()
+                .canvasSizeIs(newCanvasWidth, newCanvasHeight)
+                .activeLayerTranslationIs(
+                        Math.min(0, origTX + west),
+                        Math.min(0, origTY + north))
+                .activeLayerAndMaskImageSizeIs(
+                        origImageWidth + east + Math.max(0, origTX + west),
+                        origImageHeight + south + Math.max(0, origTY + north));
 
         if (withSelection.isYes()) {
             Rectangle newSelection = new Rectangle(origSelection.x + west,
                     origSelection.y + north, origSelection.width, origSelection.height);
-            tester.checkSelectionBounds(newSelection);
+            assertThat(comp).selectionBoundsIs(newSelection);
         }
-
-        comp.checkInvariant();
-        tester.checkDirty(true);
     }
 
     @Test
@@ -221,23 +216,22 @@ public class MultiLayerEditTest {
                     origSelection.y / 2,
                     origSelection.width / 2,
                     origSelection.height / 2);
-            tester.checkSelectionBounds(halfOfOrigSelection);
+            assertThat(comp).selectionBoundsIs(halfOfOrigSelection);
         }
 
         int newCanvasWidth = ORIG_CANVAS_WIDTH / 2;
         int newCanvasHeight = ORIG_CANVAS_HEIGHT / 2;
-        tester.checkCanvasSize(newCanvasWidth, newCanvasHeight);
 
-        tester.checkActiveLayerAndMaskImageSize(
-                newCanvasWidth - origTX / 2,
-                newCanvasHeight - origTY / 2);
-
-        tester.checkActiveLayerTranslation(
-                Math.min(0, origTX / 2),
-                Math.min(0, origTY / 2));
-
-        comp.checkInvariant();
-        tester.checkDirty(true);
+        assertThat(comp)
+                .isDirty()
+                .invariantIsOK()
+                .canvasSizeIs(newCanvasWidth, newCanvasHeight)
+                .activeLayerAndMaskImageSizeIs(
+                        newCanvasWidth - origTX / 2,
+                        newCanvasHeight - origTY / 2)
+                .activeLayerTranslationIs(
+                        Math.min(0, origTX / 2),
+                        Math.min(0, origTY / 2));
     }
 
     @Test
@@ -297,29 +291,31 @@ public class MultiLayerEditTest {
     @SuppressWarnings("SuspiciousNameCombination")
     private void checkStateAfterRotate(Rotate.SpecialAngle angle) {
         if (angle == ANGLE_180) {
-            tester.checkCanvasSize(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT);
-            tester.checkActiveLayerAndMaskImageSize(
-                    origImageWidth,
-                    origImageHeight);
+            assertThat(comp)
+                    .canvasSizeIs(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT)
+                    .activeLayerAndMaskImageSizeIs(
+                            origImageWidth,
+                            origImageHeight);
         } else {
-            tester.checkCanvasSize(ORIG_CANVAS_HEIGHT, ORIG_CANVAS_WIDTH);
-            tester.checkActiveLayerAndMaskImageSize(
-                    origImageHeight,
-                    origImageWidth);
+            assertThat(comp)
+                    .canvasSizeIs(ORIG_CANVAS_HEIGHT, ORIG_CANVAS_WIDTH)
+                    .activeLayerAndMaskImageSizeIs(
+                            origImageHeight,
+                            origImageWidth);
         }
 
         int canvasDistFromImgBottom = origImageHeight - ORIG_CANVAS_HEIGHT + withTranslation.getExpectedTY();
         int canvasDistFromImgRight = origImageWidth - ORIG_CANVAS_WIDTH + withTranslation.getExpectedTX();
         if (angle == ANGLE_90) {
-            tester.checkActiveLayerTranslation(
+            assertThat(comp).activeLayerTranslationIs(
                     canvasDistFromImgBottom,
                     withTranslation.getExpectedTX());
         } else if (angle == ANGLE_180) {
-            tester.checkActiveLayerTranslation(
+            assertThat(comp).activeLayerTranslationIs(
                     canvasDistFromImgRight,
                     canvasDistFromImgBottom);
         } else if (angle == ANGLE_270) {
-            tester.checkActiveLayerTranslation(
+            assertThat(comp).activeLayerTranslationIs(
                     withTranslation.getExpectedTY(),
                     canvasDistFromImgRight);
         }
@@ -352,7 +348,7 @@ public class MultiLayerEditTest {
                         origSelection.width);
             }
 
-            tester.checkSelectionBounds(rotatedSelectionBounds);
+            assertThat(comp).selectionBoundsIs(rotatedSelectionBounds);
         }
 
         if (numLayers == NumLayers.MORE) {
@@ -361,8 +357,7 @@ public class MultiLayerEditTest {
             assertThat(layer2.getTY()).isEqualTo(0);
         }
 
-        comp.checkInvariant();
-        tester.checkDirty(true);
+        assertThat(comp).isDirty().invariantIsOK();
     }
 
     @Test
@@ -404,17 +399,18 @@ public class MultiLayerEditTest {
     }
 
     private void checkStateAfterFlip(Flip.Direction direction) {
-        tester.checkCanvasSize(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT);
-        tester.checkActiveLayerAndMaskImageSize(
-                origImageWidth,
-                origImageHeight);
+        assertThat(comp)
+                .isDirty()
+                .invariantIsOK()
+                .canvasSizeIs(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT)
+                .activeLayerAndMaskImageSizeIs(origImageWidth, origImageHeight);
 
         if (direction == HORIZONTAL) {
-            tester.checkActiveLayerTranslation(
+            assertThat(comp).activeLayerTranslationIs(
                     -(origImageWidth - ORIG_CANVAS_WIDTH + origTX),
                     origTY);
         } else if (direction == VERTICAL) {
-            tester.checkActiveLayerTranslation(
+            assertThat(comp).activeLayerTranslationIs(
                     origTX,
                     -(origImageHeight - ORIG_CANVAS_HEIGHT + origTY));
         } else {
@@ -435,7 +431,7 @@ public class MultiLayerEditTest {
             Rectangle flippedSelection = new Rectangle(
                     flippedX, flippedY, origSelection.width, origSelection.height
             );
-            tester.checkSelectionBounds(flippedSelection);
+            assertThat(comp).selectionBoundsIs(flippedSelection);
         }
 
         if (numLayers == NumLayers.MORE) {
@@ -443,9 +439,6 @@ public class MultiLayerEditTest {
             assertThat(layer2.getTX()).isEqualTo(0);
             assertThat(layer2.getTY()).isEqualTo(0);
         }
-
-        comp.checkInvariant();
-        tester.checkDirty(true);
     }
 
     @Test

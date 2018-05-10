@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,8 @@ import java.awt.Component;
 import java.util.Objects;
 
 /**
- * A wizard. The individual pages implement the WizardPage interface.
+ * A wizard. The individual pages implement
+ * the {@link WizardPage} interface.
  */
 public abstract class Wizard {
     private OKCancelDialog dialog = null;

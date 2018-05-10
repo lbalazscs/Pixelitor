@@ -15,34 +15,27 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.testutils;
+package pixelitor.assertions;
 
+import org.assertj.core.api.Assertions;
+import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.TestHelper;
+import pixelitor.selection.Selection;
 
-import java.awt.Rectangle;
-
-/**
- * Whether there is a selection present when a test runs
- */
-public enum WithSelection {
-    YES {
-        @Override
-        public void init(Composition comp) {
-            TestHelper.setStandardTestSelection(comp);
-            Rectangle selectionShape = TestHelper.getStandardTestSelectionShape();
-            TestHelper.checkSelectionBounds(comp, selectionShape);
-        }
-    }, NO {
-        @Override
-        public void init(Composition comp) {
-            // do nothing
-        }
-    };
-
-    public abstract void init(Composition comp);
-
-    public boolean isYes() {
-        return this == YES;
+public class PixelitorAssertions extends Assertions {
+    // @org.assertj.core.util.CheckReturnValue
+    public static CompositionAssert assertThat(Composition actual) {
+        return new CompositionAssert(actual);
     }
+
+    //@org.assertj.core.util.CheckReturnValue
+    public static CanvasAssert assertThat(Canvas actual) {
+        return new CanvasAssert(actual);
+    }
+
+    // @org.assertj.core.util.CheckReturnValue
+    public static SelectionAssert assertThat(Selection actual) {
+        return new SelectionAssert(actual);
+    }
+
 }

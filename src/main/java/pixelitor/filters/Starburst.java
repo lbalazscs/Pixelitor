@@ -52,7 +52,7 @@ public class Starburst extends FilterWithParametrizedGUI {
     private final BooleanParam randomColors = new BooleanParam("Use Random Colors for Rays", false, IGNORE_RANDOMIZE);
     private final AngleParam rotate = new AngleParam("Rotate", 0);
 
-    public static String NAME = "Starburst";
+    public static final String NAME = "Starburst";
 
     public Starburst() {
         super(ShowOriginal.NO);

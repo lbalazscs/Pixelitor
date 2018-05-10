@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,11 +20,13 @@ import pixelitor.layers.LayersContainer;
 import pixelitor.utils.AppPreferences;
 
 /**
- * The action that either shows or hides the layers, depending on the current visibility
+ * The action that either shows or hides the layers,
+ * depending on the current visibility
  */
 public class ShowHideLayersAction extends ShowHideAction {
+    public static final ShowHideAction INSTANCE = new ShowHideLayersAction();
 
-    public ShowHideLayersAction() {
+    private ShowHideLayersAction() {
         super("Show Layers", "Hide Layers");
     }
 
@@ -39,7 +41,7 @@ public class ShowHideLayersAction extends ShowHideAction {
     }
 
     @Override
-    public void setVisibilityAction(boolean value) {
+    public void setVisibility(boolean value) {
         AppPreferences.WorkSpace.setLayersVisibility(value);
     }
 }

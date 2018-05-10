@@ -28,7 +28,7 @@ import pixelitor.gui.utils.IntTextField;
 import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.Tool;
 import pixelitor.tools.UserDrag;
@@ -58,20 +58,20 @@ public class AutoPaint {
     private AutoPaint() {
     }
 
-    public static void showDialog(ImageLayer imageLayer) {
+    public static void showDialog(Drawable dr) {
         ConfigPanel configPanel = new ConfigPanel();
         JDialog d = new OKCancelDialog(configPanel, "Auto Paint") {
             @Override
             protected void dialogAccepted() {
                 close();
                 Settings settings = configPanel.getSettings();
-                paintStrokes(imageLayer, settings);
+                paintStrokes(dr, settings);
             }
         };
         d.setVisible(true);
     }
 
-    private static void paintStrokes(ImageLayer layer, Settings settings) {
+    private static void paintStrokes(Drawable dr, Settings settings) {
         assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
 
         Color origFg = null;
@@ -86,15 +86,15 @@ public class AutoPaint {
         MessageHandler msgHandler = Messages.getMessageHandler();
         msgHandler.startProgress(msg, settings.getNumStrokes());
 
-        BufferedImage backupImage = layer.getImageOrSubImageIfSelected(true, true);
+        BufferedImage backupImage = dr.getImageOrSubImageIfSelected(true, true);
         History.setIgnoreEdits(true);
 
         try {
-            runStrokes(settings, layer, msgHandler);
+            runStrokes(settings, dr, msgHandler);
         } finally {
             History.setIgnoreEdits(false);
-            ImageEdit edit = new ImageEdit(layer.getComp(), "Auto Paint",
-                    layer, backupImage, false, false);
+            ImageEdit edit = new ImageEdit(dr.getComp(), "Auto Paint",
+                    dr, backupImage, false, false);
             History.addEdit(edit);
             msgHandler.stopProgress();
             msgHandler.showStatusMessage(msg + "finished.");
@@ -106,10 +106,10 @@ public class AutoPaint {
         }
     }
 
-    private static void runStrokes(Settings settings, ImageLayer layer, MessageHandler msgHandler) {
+    private static void runStrokes(Settings settings, Drawable dr, MessageHandler msgHandler) {
         Random random = new Random();
 
-        Composition comp = layer.getComp();
+        Composition comp = dr.getComp();
 
         ImageComponent ic = comp.getIC();
 
@@ -117,13 +117,13 @@ public class AutoPaint {
         for (int i = 0; i < numStrokes; i++) {
             msgHandler.updateProgress(i);
 
-            paintSingleStroke(layer, settings,
+            paintSingleStroke(dr, settings,
                     comp.getCanvasWidth(), comp.getCanvasHeight(), random);
             ic.paintImmediately(ic.getBounds());
         }
     }
 
-    private static void paintSingleStroke(ImageLayer layer, Settings settings, int canvasWidth, int canvasHeight, Random rand) {
+    private static void paintSingleStroke(Drawable dr, Settings settings, int canvasWidth, int canvasHeight, Random rand) {
         if (settings.useRandomColors()) {
             FgBgColors.randomize();
         }
@@ -142,10 +142,10 @@ public class AutoPaint {
             // tool.randomize();
             if (tool instanceof AbstractBrushTool) {
                 AbstractBrushTool abt = (AbstractBrushTool) tool;
-                abt.drawBrushStrokeProgrammatically(layer, start, end);
+                abt.drawBrushStrokeProgrammatically(dr, start, end);
             } else if (tool instanceof ShapesTool) {
                 ShapesTool st = (ShapesTool) tool;
-                st.paintShapeOnIC(layer, new UserDrag(start.x, start.y, end.x, end.y));
+                st.paintShapeOnIC(dr, new UserDrag(start.x, start.y, end.x, end.y));
             } else {
                 throw new IllegalStateException("tool = " + tool.getClass().getName());
             }

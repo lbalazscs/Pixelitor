@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
@@ -50,9 +52,12 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
     private static final int MSG_STRING_X = 20;
     private static final int MSG_STRING_Y = 31;
 
+    private final Map<String, Image> thumbsCache;
+
     public ImagePreviewPanel() {
         setPreferredSize(new Dimension(SIZE, SIZE));
         backgroundColor = getBackground();
+        thumbsCache = new HashMap<>();
     }
 
     // the property change events form the JFileChooser
@@ -65,34 +70,44 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
             return;
         }
 
-        String fileName = file.getAbsolutePath();
+        String filePath = file.getAbsolutePath();
 
         if (FileExtensionUtils.hasSupportedInputExt(file)) {
-            createThumbImage(file, fileName);
+            createThumbImage(file, filePath);
             repaint();
         }
     }
 
-    private void createThumbImage(File file, String fileName) {
+    private void createThumbImage(File file, String filePath) {
+        if (thumbsCache.containsKey(filePath)) {
+            smallImage = thumbsCache.get(filePath);
+            return;
+        }
         // we read the whole image and downscale it to a thumb
-        // TODO perhaps it is possible to read a thumb directly
+
+        // TODO the might be already a thumb on the file system
+        // in some special directory
+        // and also the image format might contain an embedded thumbnail
 
         // TODO another problem is that ora and pxc files are reported as "Unrecognized"
         Image bigImage = null;
-        if (fileName.toLowerCase().endsWith(".bmp")) {
+        if (filePath.toLowerCase().endsWith(".bmp")) {
             try {
                 bigImage = ImageIO.read(file);
             } catch (IOException ex) {
                 Messages.showException(ex);
             }
         } else {
-            // TODO: load all with ImageIO and cache
-            // it seems that ImageIcon loads slower but it is cached
-            ImageIcon icon = new ImageIcon(fileName);
+            // TODO: load all types with ImageIO?
+            // it seems that ImageIcon loads slower
+            // maybe it caches the big image, but we need
+            // to cache the small one
+            ImageIcon icon = new ImageIcon(filePath);
             bigImage = icon.getImage();
         }
 
         smallImage = scaleImage(bigImage);
+        thumbsCache.put(filePath, smallImage);
     }
 
     private static File getFileFromFileChooserEvent(PropertyChangeEvent e) {
@@ -124,13 +139,13 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
 
         double heightScale = availableHeight / (double) imgHeight;
         double widthScale = availableWidth / (double) imgWidth;
-
         double scale = Math.min(heightScale, widthScale);
 
         newImgWidth = (int) (scale * (double) imgWidth);
         newImgHeight = (int) (scale * (double) imgHeight);
 
-        return img.getScaledInstance(newImgWidth, newImgHeight, Image.SCALE_FAST);
+        return img.getScaledInstance(
+                newImgWidth, newImgHeight, Image.SCALE_FAST);
     }
 
     @Override
@@ -159,9 +174,7 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
                 g.setColor(WHITE);
                 g.drawString(msg, MSG_STRING_X - 1, MSG_STRING_Y - 1);
             }
-
         }
     }
-
 }
 

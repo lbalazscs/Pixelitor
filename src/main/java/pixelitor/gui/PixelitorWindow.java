@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -106,7 +106,7 @@ public class PixelitorWindow extends JFrame {
         verticalBoxWest = Box.createVerticalBox();
         toolsPanel = new ToolsPanel();
 
-        FgBgColors.setGUI(new FgBgColorSelector(this));
+        FgBgColors.setSelector(new FgBgColorSelector(this));
         if (AppPreferences.WorkSpace.getToolsVisibility()) {
             verticalBoxWest.add(toolsPanel);
             verticalBoxWest.add(FgBgColors.getGUI());

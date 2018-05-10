@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,19 +18,20 @@
 package pixelitor.tools.toolhandlers;
 
 import pixelitor.gui.ImageComponent;
-import pixelitor.layers.ImageLayer;
-import pixelitor.menus.ImageLayerAction;
+import pixelitor.layers.Drawable;
+import pixelitor.menus.DrawableAction;
 import pixelitor.tools.Tool;
 
 import java.awt.event.MouseEvent;
 
 /**
- * Checks whether the active layer is an image layer.
+ * Checks whether the active edited object is
+ * a Drawable (image layer or mask)
  */
-public class ImageLayerCheckHandler extends ToolHandler {
+public class DrawableCheckHandler extends ToolHandler {
     private final Tool currentTool;
 
-    public ImageLayerCheckHandler(Tool currentTool) {
+    public DrawableCheckHandler(Tool currentTool) {
         this.currentTool = currentTool;
     }
 
@@ -41,9 +42,9 @@ public class ImageLayerCheckHandler extends ToolHandler {
             return false;
         }
 
-        ImageLayerAction action = new ImageLayerAction(currentTool.getName() + " Tool") {
+        DrawableAction action = new DrawableAction(currentTool.getName() + " Tool") {
             @Override
-            protected void process(ImageLayer layer) {
+            protected void process(Drawable dr) {
                 // do nothing
             }
         };

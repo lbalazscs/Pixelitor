@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ import java.awt.image.BufferedImageOp;
 import java.awt.image.ShortLookupTable;
 
 /**
- * Posterize
+ * Posterize filter
  */
 public class Posterize extends FilterWithParametrizedGUI {
     private final RangeParam levels = new RangeParam("Levels", 2, 2, 255);
@@ -51,7 +51,7 @@ public class Posterize extends FilterWithParametrizedGUI {
     }
 
     @Override
-    public boolean excludeFromAnimation() {
+    public boolean excludedFromAnimation() {
         return true;
     }
 

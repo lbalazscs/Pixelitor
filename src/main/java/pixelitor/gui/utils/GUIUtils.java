@@ -17,9 +17,9 @@
 
 package pixelitor.gui.utils;
 
+import pixelitor.Pixelitor;
 import pixelitor.filters.gui.FilterParam;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
@@ -48,7 +48,7 @@ public final class GUIUtils {
     public static void testJComponent(JComponent p) {
         Runnable runnable = () -> {
             try {
-                String lookAndFeelClass = AppPreferences.getLookAndFeelClass();
+                String lookAndFeelClass = Pixelitor.getLFClassName();
                 UIManager.setLookAndFeel(lookAndFeelClass);
             } catch (Exception e) {
                 Messages.showException(e);

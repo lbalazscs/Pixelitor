@@ -33,7 +33,6 @@ import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMaskAddType;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.tools.Tool;
-import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
@@ -141,7 +140,7 @@ public class Pixelitor {
 
     private static void setLookAndFeel() {
         try {
-            String lfClass = AppPreferences.getLookAndFeelClass();
+            String lfClass = getLFClassName();
             UIManager.setLookAndFeel(lfClass);
         } catch (Exception e) {
             Dialogs.showExceptionDialog(e);
@@ -212,5 +211,17 @@ public class Pixelitor {
         NewImage.addNewImage(FillType.WHITE, 600, 400, "Test");
         ImageComponents.getActiveLayerOrNull()
                 .addMask(LayerMaskAddType.PATTERN);
+    }
+
+    public static String getLFClassName() {
+        return "javax.swing.plaf.nimbus.NimbusLookAndFeel";
+
+//        UIManager.LookAndFeelInfo[] lookAndFeels = UIManager.getInstalledLookAndFeels();
+//        for (UIManager.LookAndFeelInfo lookAndFeel : lookAndFeels) {
+//            if (lookAndFeel.getName().equals("Nimbus")) {
+//                return lookAndFeel.getClassName();
+//            }
+//        }
+//        return UIManager.getSystemLookAndFeelClassName();
     }
 }

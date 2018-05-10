@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,41 +19,47 @@ package pixelitor.colors;
 
 import java.awt.Color;
 
+/**
+ * This class is used for global access to foreground
+ * and background colors, and also for separating the
+ * GUI code from the testing code.
+ */
 public class FgBgColors {
-    private static FgBgColorSelector gui;
+    private static FgBgColorSelector selector;
 
     private FgBgColors() {
     }
 
-    public static void setGUI(FgBgColorSelector gui) {
-        FgBgColors.gui = gui;
+    // during testing this is set to a mocked value
+    public static void setSelector(FgBgColorSelector selector) {
+        FgBgColors.selector = selector;
     }
 
     public static FgBgColorSelector getGUI() {
-        return gui;
+        return selector;
     }
 
     public static Color getFG() {
-        return gui.getFgColor();
+        return selector.getFgColor();
     }
 
     public static Color getBG() {
-        return gui.getBgColor();
+        return selector.getBgColor();
     }
 
     public static void setFG(Color c) {
-        gui.setFgColor(c);
+        selector.setFgColor(c);
     }
 
     public static void setBG(Color c) {
-        gui.setBgColor(c);
+        selector.setBgColor(c);
     }
 
     public static void randomize() {
-        gui.randomizeColorsAction.actionPerformed(null);
+        selector.randomize();
     }
 
     public static void setLayerMaskEditing(boolean b) {
-        gui.setLayerMaskEditing(b);
+        selector.setLayerMaskEditing(b);
     }
 }

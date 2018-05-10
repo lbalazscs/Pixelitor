@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,8 @@ import pixelitor.menus.NamedAction;
 import java.awt.event.ActionEvent;
 
 /**
- * An abstract action that either shows or hides something, depending on the current visibility
+ * An abstract action that either shows or hides something,
+ * depending on the current visibility
  */
 public abstract class ShowHideAction extends NamedAction {
     private final String showName;
@@ -51,18 +52,36 @@ public abstract class ShowHideAction extends NamedAction {
     public void actionPerformed(ActionEvent e) {
         String newName;
         if (getCurrentVisibility()) {
-            setVisibilityAction(false);
+            setVisibility(false);
             newName = showName;
         } else {
-            setVisibilityAction(true);
+            setVisibility(true);
             newName = hideName;
         }
         setName(newName);
+    }
+
+    /**
+     * The name is updated automatically when the visibility
+     * changes due to the direct menu action.
+     * However, the visibility can change in indirect ways
+     * (for example by resetting the workspace), and then this
+     * must be called.
+     */
+    public void updateName(boolean newVisibility) {
+        if (newVisibility) {
+            setName(hideName);
+        } else {
+            setName(showName);
+        }
     }
 
     public abstract boolean getVisibilityAtStartUp();
 
     public abstract boolean getCurrentVisibility();
 
-    public abstract void setVisibilityAction(boolean value);
+    /**
+     * Hides or shows the controlled GUI area
+     */
+    public abstract void setVisibility(boolean value);
 }

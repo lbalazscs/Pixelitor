@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package pixelitor.menus;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.layers.AdjustmentLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.TextLayer;
@@ -30,24 +31,25 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /**
- * An abstraction for a task that can be done only with image layers (or masks)
+ * An {@link Action} that can be done with {@link Drawable}
+ * objects (image layers or masks)
  */
-public abstract class ImageLayerAction extends AbstractAction {
+public abstract class DrawableAction extends AbstractAction {
     protected final String name;
     protected String menuName;
     protected boolean hasDialog;
 
     private final boolean allowMasks;
 
-    protected ImageLayerAction(String name) {
+    protected DrawableAction(String name) {
         this(name, true, true);
     }
 
-    protected ImageLayerAction(String name, boolean hasDialog) {
+    protected DrawableAction(String name, boolean hasDialog) {
         this(name, hasDialog, true);
     }
 
-    protected ImageLayerAction(String name, boolean hasDialog, boolean allowMasks) {
+    protected DrawableAction(String name, boolean hasDialog, boolean allowMasks) {
         this.hasDialog = hasDialog;
         assert name != null;
 
@@ -61,9 +63,9 @@ public abstract class ImageLayerAction extends AbstractAction {
     /**
      * This callback method represents the task that has to be done.
      * It gets called only if we know that the active layer is
-     * an image layer or if it was rasterized into an image layer.
+     * a {@link Drawable} or if it was rasterized into a {@link Drawable}.
      */
-    protected abstract void process(ImageLayer layer);
+    protected abstract void process(Drawable dr);
 
     @Override
     public void actionPerformed(ActionEvent e) {

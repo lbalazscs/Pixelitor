@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,8 +19,8 @@ package pixelitor.filters;
 
 import com.jhlabs.image.AbstractBufferedImageOp;
 import pixelitor.history.History;
-import pixelitor.layers.ImageLayer;
-import pixelitor.menus.ImageLayerAction;
+import pixelitor.layers.Drawable;
+import pixelitor.menus.DrawableAction;
 
 import javax.swing.*;
 import java.util.function.Supplier;
@@ -28,7 +28,7 @@ import java.util.function.Supplier;
 /**
  * An action that invokes a filter
  */
-public class FilterAction extends ImageLayerAction {
+public class FilterAction extends DrawableAction {
     private final Supplier<Filter> filterSupplier;
     private Filter filter;
     private String listNamePrefix = null;
@@ -65,10 +65,10 @@ public class FilterAction extends ImageLayerAction {
 
 
     @Override
-    protected void process(ImageLayer layer) {
+    protected void process(Drawable dr) {
         createFilter();
 
-        filter.startOn(layer);
+        filter.startOn(dr);
     }
 
     private void createFilter() {
@@ -116,7 +116,7 @@ public class FilterAction extends ImageLayerAction {
             return false;
         }
         FilterWithParametrizedGUI fpg = (FilterWithParametrizedGUI) filter;
-        if (fpg.excludeFromAnimation()) {
+        if (fpg.excludedFromAnimation()) {
             return false;
         }
         if (!fpg.getParamSet().canBeAnimated()) {

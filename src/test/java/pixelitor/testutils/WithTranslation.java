@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,8 @@
 
 package pixelitor.testutils;
 
-import pixelitor.CompTester;
+import pixelitor.Composition;
+import pixelitor.TestHelper;
 import pixelitor.layers.ContentLayer;
 
 /**
@@ -26,12 +27,12 @@ import pixelitor.layers.ContentLayer;
 public enum WithTranslation {
     NO(0, 0) {
         @Override
-        public void init(CompTester tester) {
+        public void init(Composition comp) {
             // do nothing
         }
 
         @Override
-        public void moveLayer(CompTester compTester) {
+        public void moveLayer(Composition comp) {
             // do nothing
         }
 
@@ -41,14 +42,14 @@ public enum WithTranslation {
         }
     }, YES(-4, -4) {
         @Override
-        public void init(CompTester tester) {
-            tester.setStandardTestTranslationToAllLayers(this);
+        public void init(Composition comp) {
+            TestHelper.setStandardTestTranslationToAllLayers(comp, this);
         }
 
         @Override
-        public void moveLayer(CompTester compTester) {
-            compTester.moveLayer(false, 2, 2);
-            compTester.moveLayer(false, -4, -4);
+        public void moveLayer(Composition comp) {
+            TestHelper.moveLayer(comp, false, 2, 2);
+            TestHelper.moveLayer(comp, false, -4, -4);
         }
 
         @Override
@@ -67,11 +68,11 @@ public enum WithTranslation {
         this.expectedTY = expectedTY;
     }
 
-    public abstract void init(CompTester tester);
+    public abstract void init(Composition comp);
 
     public abstract void init(ContentLayer layer);
 
-    public abstract void moveLayer(CompTester compTester);
+    public abstract void moveLayer(Composition comp);
 
     public int getExpectedTX() {
         return expectedTX;

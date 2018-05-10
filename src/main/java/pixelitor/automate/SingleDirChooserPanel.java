@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,14 +34,15 @@ import java.io.File;
 import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
 
 /**
- * A panel that can be used to select a single directory and optionally an output format
+ * A panel that can be used to select a single directory
+ * and optionally an output format
  */
 public class SingleDirChooserPanel extends ValidatedForm {
     private final BrowseFilesSupport directoryChooser;
     private OutputFormatSelector outputFormatSelector;
 
-    private SingleDirChooserPanel(String label, String dialogTitle, String initialPath, boolean addOutputChooser) {
-        directoryChooser = new BrowseFilesSupport(initialPath, dialogTitle, DIRECTORY);
+    private SingleDirChooserPanel(String label, String initialPath, String fileChooserTitle, boolean addOutputChooser) {
+        directoryChooser = new BrowseFilesSupport(initialPath, fileChooserTitle, DIRECTORY);
         JTextField dirTF = directoryChooser.getNameTF();
         JButton browseButton = directoryChooser.getBrowseButton();
 
@@ -52,7 +53,7 @@ public class SingleDirChooserPanel extends ValidatedForm {
 
             outputFormatSelector = new OutputFormatSelector();
 
-            gbh.addLabelWithControlNoFill("Output Format:", outputFormatSelector.getFormatCombo());
+            gbh.addLabelWithControlNoFill("Output Format:", outputFormatSelector);
         } else {
             setLayout(new FlowLayout(FlowLayout.LEFT));
             add(new JLabel(label));
@@ -81,7 +82,8 @@ public class SingleDirChooserPanel extends ValidatedForm {
      * @return true if a selection was made, false if the operation was cancelled
      */
     public static boolean selectOutputDir(boolean addOutputChooser) {
-        SingleDirChooserPanel chooserPanel = new SingleDirChooserPanel("Output Folder:", "Select Output Folder", Directories.getLastSaveDir().getAbsolutePath(), addOutputChooser);
+        SingleDirChooserPanel chooserPanel = new SingleDirChooserPanel("Output Folder:", Directories.getLastSaveDir()
+                .getAbsolutePath(), "Select Output Folder", addOutputChooser);
         ValidatedDialog chooser = new ValidatedDialog(chooserPanel, PixelitorWindow.getInstance(), "Select Output Folder");
         chooser.setVisible(true);
 

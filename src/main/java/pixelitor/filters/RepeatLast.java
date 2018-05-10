@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,8 @@
 
 package pixelitor.filters;
 
-import pixelitor.layers.ImageLayer;
-import pixelitor.menus.ImageLayerAction;
+import pixelitor.layers.Drawable;
+import pixelitor.menus.DrawableAction;
 
 import static pixelitor.ChangeReason.REPEAT_LAST;
 import static pixelitor.filters.FilterUtils.getLastExecutedFilter;
@@ -27,7 +27,7 @@ import static pixelitor.filters.FilterUtils.getLastExecutedFilter;
  * The "Repeat" action, which repeats the last edit.
  * Currently only the filters can be repeated.
  */
-public class RepeatLast extends ImageLayerAction {
+public class RepeatLast extends DrawableAction {
     public static final RepeatLast INSTANCE = new RepeatLast();
 
     private RepeatLast() {
@@ -36,8 +36,8 @@ public class RepeatLast extends ImageLayerAction {
     }
 
     @Override
-    protected void process(ImageLayer layer) {
+    protected void process(Drawable dr) {
         getLastExecutedFilter()
-                .ifPresent(filter -> filter.startOn(layer, REPEAT_LAST));
+                .ifPresent(filter -> filter.startOn(dr, REPEAT_LAST));
     }
 }

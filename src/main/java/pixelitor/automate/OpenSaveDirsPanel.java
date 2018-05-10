@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,8 @@ import java.io.File;
 import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
 
 /**
- * A panel for selecting the opening and the saving directory
+ * A panel for selecting an opening directory,
+ * a saving directory, and a saving format
  */
 class OpenSaveDirsPanel extends ValidatedForm {
     private final BrowseFilesSupport inputChooser = new BrowseFilesSupport(Directories.getLastOpenDirPath(), "Select Input Folder", DIRECTORY);
@@ -51,7 +52,7 @@ class OpenSaveDirsPanel extends ValidatedForm {
                 outputChooser.getNameTF(), outputChooser.getBrowseButton());
 
         outputFormatSelector = new OutputFormatSelector();
-        gbh.addLabelWithControlNoFill("Output Format:", outputFormatSelector.getFormatCombo());
+        gbh.addLabelWithControlNoFill("Output Format:", outputFormatSelector);
     }
 
     private OutputFormat getSelectedFormat() {

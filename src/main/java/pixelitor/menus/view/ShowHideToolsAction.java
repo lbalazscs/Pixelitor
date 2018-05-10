@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,17 +20,19 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.utils.AppPreferences;
 
 /**
- * The action that either shows or hides the tools, depending on the current visibility
+ * The action that either shows or hides the tools,
+ * depending on the current visibility
  */
 public class ShowHideToolsAction extends ShowHideAction {
-    public ShowHideToolsAction() {
+    public static final ShowHideAction INSTANCE = new ShowHideToolsAction();
+
+    private ShowHideToolsAction() {
         super("Show Tools", "Hide Tools");
     }
 
     @Override
     public boolean getCurrentVisibility() {
-        PixelitorWindow pixelitorWindow = PixelitorWindow.getInstance();
-        return pixelitorWindow.areToolsShown();
+        return PixelitorWindow.getInstance().areToolsShown();
     }
 
     @Override
@@ -39,7 +41,7 @@ public class ShowHideToolsAction extends ShowHideAction {
     }
 
     @Override
-    public void setVisibilityAction(boolean value) {
+    public void setVisibility(boolean value) {
         AppPreferences.WorkSpace.setToolsVisibility(value);
     }
 }

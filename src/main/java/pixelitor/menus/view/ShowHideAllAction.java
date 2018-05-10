@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,8 @@ import pixelitor.layers.LayersContainer;
 import javax.swing.*;
 
 /**
- * An either "Show Hidden" or "Hide All" action, depending on the current visibility
+ * An either "Show Hidden" or "Hide All" action,
+ * depending on the current visibility
  */
 public class ShowHideAllAction extends ShowHideAction {
     public static final Action INSTANCE = new ShowHideAllAction();
@@ -51,31 +52,31 @@ public class ShowHideAllAction extends ShowHideAction {
     }
 
     @Override
-    public void setVisibilityAction(boolean value) {
-        PixelitorWindow pixelitorWindow = PixelitorWindow.getInstance();
+    public void setVisibility(boolean value) {
+        PixelitorWindow pw = PixelitorWindow.getInstance();
         if (!value) {
-            histogramsWereShown = pixelitorWindow.areHistogramsShown();
+            histogramsWereShown = pw.areHistogramsShown();
             layersWereShown = LayersContainer.areLayersShown();
             statusBarWasShown = StatusBar.INSTANCE.isShown();
-            toolsWereShown = pixelitorWindow.areToolsShown();
+            toolsWereShown = pw.areToolsShown();
         }
         if (histogramsWereShown) {
-            pixelitorWindow.setHistogramsVisibility(value, false);
+            pw.setHistogramsVisibility(value, false);
         }
 
         if (layersWereShown) {
-            pixelitorWindow.setLayersVisibility(value, false);
+            pw.setLayersVisibility(value, false);
         }
 
         if (statusBarWasShown) {
-            pixelitorWindow.setStatusBarVisibility(value, false);
+            pw.setStatusBarVisibility(value, false);
         }
 
         if (toolsWereShown) {
-            pixelitorWindow.setToolsVisibility(value, false);
+            pw.setToolsVisibility(value, false);
         }
 
-        pixelitorWindow.getContentPane().revalidate();
+        pw.getContentPane().revalidate();
 
         allHidden = !value;
     }

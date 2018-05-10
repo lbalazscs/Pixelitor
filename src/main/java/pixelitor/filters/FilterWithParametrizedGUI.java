@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -95,7 +95,7 @@ public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
      * Some filters cannot be animated well, they can return true
      * here in order to be excluded from the list of animation filters
      */
-    public boolean excludeFromAnimation() {
+    public boolean excludedFromAnimation() {
         return false;
     }
 

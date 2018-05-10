@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -252,22 +252,22 @@ public class History {
     }
 
     @VisibleForTesting
-    public static void assertNumEditsIs(int expectedEdits) {
+    public static void assertNumEditsIs(int expected) {
         int numEdits = undoManager.getSize();
-        if (numEdits != expectedEdits) {
+        if (numEdits != expected) {
             throw new AssertionError(String.format(
                     "Expected %d edits, but found %d",
-                    expectedEdits, numEdits));
+                    expected, numEdits));
         }
     }
 
     @VisibleForTesting
-    public static void assertLastEditNameIs(String expectedName) {
+    public static void assertLastEditNameIs(String expected) {
         String lastEditName = undoManager.getLastEdit().getName();
-        if (!lastEditName.equals(expectedName)) {
+        if (!lastEditName.equals(expected)) {
             throw new AssertionError(String.format(
                     "Expected '%s' as the last edit name, but found '%s'",
-                    expectedName, lastEditName));
+                    expected, lastEditName));
         }
     }
 

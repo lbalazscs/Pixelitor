@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.utils.test;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.NewImage;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.MoveTool;
 import pixelitor.tools.ShapeType;
@@ -43,64 +43,64 @@ public class ToolTests {
     private ToolTests() {
     }
 
-    public static void testTools(ImageLayer layer) {
+    public static void testTools(Drawable dr) {
         NewImage.addNewImage(WHITE, 400, 400, "Tool Tests");
 
-        SplashImageCreator.addRadialBWGradientToActiveLayer(layer, true);
+        SplashImageCreator.addRadialBWGradientToActiveDrawable(dr, true);
 
         int xDistanceFormEdge = 20;
         int yDistanceFormEdge = 20;
 
         // erase diagonally
-        paintDiagonals(Tools.ERASER, layer, xDistanceFormEdge, yDistanceFormEdge);
+        paintDiagonals(Tools.ERASER, dr, xDistanceFormEdge, yDistanceFormEdge);
 
         // paint a frame
-        paintImageFrame(Tools.BRUSH, layer, xDistanceFormEdge, yDistanceFormEdge);
+        paintImageFrame(Tools.BRUSH, dr, xDistanceFormEdge, yDistanceFormEdge);
 
-        paintHeartShape(layer);
+        paintHeartShape(dr);
 
-        Composition comp = layer.getComp();
+        Composition comp = dr.getComp();
 
         MoveTool.move(comp, 40, 40);
 
         comp.repaint();
     }
 
-    private static void paintHeartShape(ImageLayer layer) {
+    private static void paintHeartShape(Drawable dr) {
         ShapesTool shapesTool = Tools.SHAPES;
-        Canvas canvas = layer.getComp().getCanvas();
+        Canvas canvas = dr.getComp().getCanvas();
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
 
         UserDrag userDrag = new UserDrag((int) (canvasWidth * 0.25), (int) (canvasHeight * 0.25), (int) (canvasWidth * 0.75), (int) (canvasHeight * 0.75));
 
         shapesTool.setShapeType(ShapeType.HEART);
-        shapesTool.paintShapeOnIC(layer, userDrag);
+        shapesTool.paintShapeOnIC(dr, userDrag);
     }
 
-    private static void paintDiagonals(AbstractBrushTool eraseTool, ImageLayer layer, int xDistanceFormEdge, int yDistanceFormEdge) {
-        Canvas canvas = layer.getComp().getCanvas();
+    private static void paintDiagonals(AbstractBrushTool eraseTool, Drawable dr, int xDistanceFormEdge, int yDistanceFormEdge) {
+        Canvas canvas = dr.getComp().getCanvas();
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
         Point topLeft = new Point(xDistanceFormEdge, yDistanceFormEdge);
         Point topRight = new Point(canvasWidth - xDistanceFormEdge, yDistanceFormEdge);
         Point bottomRight = new Point(canvasWidth - xDistanceFormEdge, canvasHeight - yDistanceFormEdge);
         Point bottomLeft = new Point(xDistanceFormEdge, canvasHeight - yDistanceFormEdge);
-        eraseTool.drawBrushStrokeProgrammatically(layer, topLeft, bottomRight);
-        eraseTool.drawBrushStrokeProgrammatically(layer, topRight, bottomLeft);
+        eraseTool.drawBrushStrokeProgrammatically(dr, topLeft, bottomRight);
+        eraseTool.drawBrushStrokeProgrammatically(dr, topRight, bottomLeft);
     }
 
-    private static void paintImageFrame(AbstractBrushTool brushTool, ImageLayer layer, int xDistanceFormEdge, int yDistanceFormEdge) {
-        Canvas canvas = layer.getComp().getCanvas();
+    private static void paintImageFrame(AbstractBrushTool brushTool, Drawable dr, int xDistanceFormEdge, int yDistanceFormEdge) {
+        Canvas canvas = dr.getComp().getCanvas();
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
         Point topLeft = new Point(xDistanceFormEdge, yDistanceFormEdge);
         Point topRight = new Point(canvasWidth - xDistanceFormEdge, yDistanceFormEdge);
         Point bottomRight = new Point(canvasWidth - xDistanceFormEdge, canvasHeight - yDistanceFormEdge);
         Point bottomLeft = new Point(xDistanceFormEdge, canvasHeight - yDistanceFormEdge);
-        brushTool.drawBrushStrokeProgrammatically(layer, topLeft, topRight);
-        brushTool.drawBrushStrokeProgrammatically(layer, topRight, bottomRight);
-        brushTool.drawBrushStrokeProgrammatically(layer, bottomRight, bottomLeft);
-        brushTool.drawBrushStrokeProgrammatically(layer, bottomLeft, topLeft);
+        brushTool.drawBrushStrokeProgrammatically(dr, topLeft, topRight);
+        brushTool.drawBrushStrokeProgrammatically(dr, topRight, bottomRight);
+        brushTool.drawBrushStrokeProgrammatically(dr, bottomRight, bottomLeft);
+        brushTool.drawBrushStrokeProgrammatically(dr, bottomLeft, topLeft);
     }
 }

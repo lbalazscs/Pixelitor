@@ -37,7 +37,5 @@ public enum Shift implements EventMaskModifier {
         public int modify(int in) {
             return in;
         }
-    };
-
-    public abstract int modify(int in);
+    }
 }

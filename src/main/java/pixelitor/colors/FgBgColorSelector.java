@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -52,7 +52,7 @@ public class FgBgColorSelector extends JLayeredPane {
     private static final int SMALL_BUTTON_SIZE = 15;
     private static final int SMALL_BUTTON_VERTICAL_SPACE = 15;
 
-    public Action randomizeColorsAction;
+    private Action randomizeColorsAction;
     private Action resetToDefaultAction;
     private Action swapColorsAction;
 
@@ -308,9 +308,7 @@ public class FgBgColorSelector extends JLayeredPane {
         }
     }
 
-    public void dumpState() {
-        System.out.println("FgBgColorSelector::dumpState: layerMaskEditing = " + layerMaskEditing);
-        System.out.println("FgBgColorSelector::dumpState: fgColor = " + fgColor + ", bgColor = " + bgColor);
-        System.out.println("FgBgColorSelector::dumpState: maskFgColor = " + maskFgColor + ", maskBgColor = " + maskBgColor);
+    public void randomize() {
+        randomizeColorsAction.actionPerformed(null);
     }
 }

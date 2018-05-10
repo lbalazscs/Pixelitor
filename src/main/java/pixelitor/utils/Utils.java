@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -643,6 +643,23 @@ public final class Utils {
             }
         }
         return false;
+    }
+
+    public static int getCurrentMainJavaVersion() {
+        return parseJavaVersion(System.getProperty("java.version"));
+    }
+
+    public static int parseJavaVersion(String versionProp) {
+        // handles version strings like: "1.8.0_161", "9.0.1", "10.0.1"
+        int firstDotPos = versionProp.indexOf('.');
+        String beforeFirstDot = versionProp.substring(0, firstDotPos);
+        int asInt = Integer.parseInt(beforeFirstDot);
+        if (asInt == 1) {
+            // the minimum requirement as of writing
+            // this code is Java 8 anyway
+            return 8;
+        }
+        return asInt;
     }
 }
 

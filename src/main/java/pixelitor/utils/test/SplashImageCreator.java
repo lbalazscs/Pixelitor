@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,6 +37,7 @@ import pixelitor.gui.ImageComponents;
 import pixelitor.io.Directories;
 import pixelitor.io.OutputFormat;
 import pixelitor.layers.BlendingMode;
+import pixelitor.layers.Drawable;
 import pixelitor.layers.ImageLayer;
 import pixelitor.tools.GradientTool;
 import pixelitor.tools.GradientType;
@@ -116,7 +117,7 @@ public class SplashImageCreator {
         layer.setBlendingMode(BlendingMode.SCREEN, true, true, true);
 
         layer = addNewLayer(comp, "Gradient");
-        addRadialBWGradientToActiveLayer(layer, true);
+        addRadialBWGradientToActiveDrawable(layer, true);
         layer.setOpacity(0.4f, true, true, true);
         layer.setBlendingMode(BlendingMode.LUMINOSITY, true, true, true);
 
@@ -183,8 +184,8 @@ public class SplashImageCreator {
         return layer;
     }
 
-    public static void addRadialBWGradientToActiveLayer(ImageLayer layer, boolean radial) {
-        Canvas canvas = layer.getComp().getCanvas();
+    public static void addRadialBWGradientToActiveDrawable(Drawable dr, boolean radial) {
+        Canvas canvas = dr.getComp().getCanvas();
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
 
@@ -207,7 +208,7 @@ public class SplashImageCreator {
             gradientType = GradientType.SPIRAL_CW;
         }
 
-        GradientTool.drawGradient(layer,
+        GradientTool.drawGradient(dr,
                 gradientType,
                 BLACK_TO_WHITE,
                 REFLECT,

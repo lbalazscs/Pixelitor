@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,22 +21,15 @@ import pixelitor.io.OutputFormat;
 import javax.swing.*;
 
 /**
- * The GUI components of an output format selector are separated into this
- * non-component class so that they can be reused with different layout managers
+ * A combo box for selecting an output format
  */
-public class OutputFormatSelector {
-    private final JComboBox<OutputFormat> formatCombo;
-
+public class OutputFormatSelector extends JComboBox {
     public OutputFormatSelector() {
-        formatCombo = new JComboBox<>(OutputFormat.values());
-        formatCombo.setSelectedItem(OutputFormat.getLastUsed());
-    }
-
-    public JComboBox<OutputFormat> getFormatCombo() {
-        return formatCombo;
+        super(OutputFormat.values());
+        setSelectedItem(OutputFormat.getLastUsed());
     }
 
     public OutputFormat getSelectedFormat() {
-        return (OutputFormat) formatCombo.getSelectedItem();
+        return (OutputFormat) getSelectedItem();
     }
 }

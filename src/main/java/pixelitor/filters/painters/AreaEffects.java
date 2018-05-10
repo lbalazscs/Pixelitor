@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,6 +37,7 @@ import java.util.Random;
  */
 public class AreaEffects implements Serializable {
     private static final long serialVersionUID = 1L;
+    private static final AreaEffect[] EMPTY_ARRAY = new AreaEffect[0];
 
     private GlowPathEffect glowEffect;
     private InnerGlowPathEffect innerGlowEffect;
@@ -74,7 +75,7 @@ public class AreaEffects implements Serializable {
         if (neonBorderEffect != null) {
             effects.add(neonBorderEffect);
         }
-        return effects.toArray(new AreaEffect[effects.size()]);
+        return effects.toArray(EMPTY_ARRAY);
     }
 
     public void drawEffects(Graphics2D g2, Shape shape) {

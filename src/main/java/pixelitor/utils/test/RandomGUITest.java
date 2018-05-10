@@ -783,16 +783,16 @@ public class RandomGUITest {
         int r = rand.nextInt(5);
         if (r == 0) {
             log("show-hide histograms");
-            new ShowHideHistogramsAction().actionPerformed(new ActionEvent("", 0, ""));
+            ShowHideHistogramsAction.INSTANCE.actionPerformed(new ActionEvent("", 0, ""));
         } else if (r == 1) {
             log("show-hide layers");
-            new ShowHideLayersAction().actionPerformed(new ActionEvent("", 0, ""));
+            ShowHideLayersAction.INSTANCE.actionPerformed(new ActionEvent("", 0, ""));
         } else if (r == 2) {
             log("show-hide tools");
-            new ShowHideToolsAction().actionPerformed(new ActionEvent("", 0, ""));
+            ShowHideToolsAction.INSTANCE.actionPerformed(new ActionEvent("", 0, ""));
         } else if (r == 4) {
             log("show-hide status bar");
-            new ShowHideStatusBarAction().actionPerformed(new ActionEvent("", 0, ""));
+            ShowHideStatusBarAction.INSTANCE.actionPerformed(new ActionEvent("", 0, ""));
         } else if (r == 5) {
             log("show-hide all");
             ShowHideAllAction.INSTANCE.actionPerformed(new ActionEvent("", 0, ""));

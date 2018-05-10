@@ -32,7 +32,7 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.history.History;
 import pixelitor.io.Directories;
 import pixelitor.io.OutputFormat;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Drawable;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
@@ -55,7 +55,7 @@ public class FilterTests {
     private FilterTests() {
     }
 
-    public static void saveTheResultOfEachFilter(ImageLayer layer) {
+    public static void saveTheResultOfEachFilter(Drawable dr) {
         boolean canceled = !SingleDirChooserPanel.selectOutputDir(true);
         if (canceled) {
             return;
@@ -66,7 +66,7 @@ public class FilterTests {
         ParametrizedFilterGUIPanel.setResetParams(false);
         ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("Saving the Results of Each Filter");
 
-        layer.startPreviewing();
+        dr.startPreviewing();
 
         SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
             @Override
@@ -92,8 +92,8 @@ public class FilterTests {
                         }
 
                         filter.randomizeSettings();
-                        filter.startOn(layer, TEST_WITH_HISTORY_AND_PREVIEW);
-                        Composition comp = layer.getComp();
+                        filter.startOn(dr, TEST_WITH_HISTORY_AND_PREVIEW);
+                        Composition comp = dr.getComp();
                         String fileName = "test_" + Utils.toFileName(filter.getName()) + '.' + outputFormat.toString();
                         File f = new File(selectedDir, fileName);
                         outputFormat.saveComp(comp, f, false);
@@ -120,7 +120,7 @@ public class FilterTests {
                 } catch (InterruptedException e) {
                     // ignore
                 } finally {
-                    layer.stopPreviewing(); // reset to NORMAL
+                    dr.stopPreviewing(); // reset to NORMAL
                     ParametrizedFilterGUIPanel.setResetParams(true);
                 }
             }
@@ -128,7 +128,7 @@ public class FilterTests {
         worker.execute();
     }
 
-    public static void runAllFiltersOn(ImageLayer layer) {
+    public static void runAllFiltersOn(Drawable dr) {
         ParametrizedFilterGUIPanel.setResetParams(false);
         try {
             ProgressMonitor progressMonitor = new ProgressMonitor(PixelitorWindow.getInstance(),
@@ -154,7 +154,7 @@ public class FilterTests {
                 }
 
                 filter.randomizeSettings();
-                filter.startOn(layer);
+                filter.startOn(dr);
             }
             progressMonitor.close();
         } finally {
@@ -189,7 +189,7 @@ public class FilterTests {
         });
     }
 
-    public static void findSlowestFilter(ImageLayer layer) {
+    public static void findSlowestFilter(Drawable dr) {
         assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
 
         Filter[] filters = FilterUtils.getFiltersShuffled(
@@ -198,13 +198,13 @@ public class FilterTests {
 
         Map<String, Double> results = new HashMap<>();
 
-        layer.startPreviewing();
+        dr.startPreviewing();
 
         // warmup
         for (Filter filter : filters) {
             System.out.println("Warmup for " + filter.getName());
 
-            filter.startOn(layer, TEST_WITH_HISTORY_AND_PREVIEW);
+            filter.startOn(dr, TEST_WITH_HISTORY_AND_PREVIEW);
         }
 
         // measuring
@@ -212,12 +212,12 @@ public class FilterTests {
             long startTime = System.nanoTime();
             System.out.println("Testing " + filter.getName());
 
-            filter.startOn(layer, TEST_WITH_HISTORY_AND_PREVIEW);
+            filter.startOn(dr, TEST_WITH_HISTORY_AND_PREVIEW);
 
             double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
             results.put(filter.getName(), estimatedSeconds);
         }
-        layer.stopPreviewing();
+        dr.stopPreviewing();
 
         Arrays.sort(filters, (o1, o2) -> {
             double o1Time = results.get(o1.getName());
