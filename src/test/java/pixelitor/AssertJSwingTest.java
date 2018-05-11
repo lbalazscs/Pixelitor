@@ -37,8 +37,8 @@ import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.io.Directories;
 import pixelitor.layers.Drawable;
+import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
-import pixelitor.layers.MaskViewMode;
 import pixelitor.menus.view.ZoomControl;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.Selection;
@@ -70,11 +70,7 @@ import java.util.Random;
 import static java.awt.event.KeyEvent.*;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static pixelitor.AssertJSwingTest.TestingMode.NO_MASK;
-import static pixelitor.AssertJSwingTest.TestingMode.ON_MASK_VIEW_LAYER;
-import static pixelitor.AssertJSwingTest.TestingMode.ON_MASK_VIEW_MASK;
-import static pixelitor.AssertJSwingTest.TestingMode.RUBY;
-import static pixelitor.AssertJSwingTest.TestingMode.WITH_MASK;
+import static pixelitor.TestingMode.NO_MASK;
 import static pixelitor.utils.test.Assertions.canvasSizeIs;
 import static pixelitor.utils.test.Assertions.numLayersIs;
 import static pixelitor.utils.test.Assertions.thereIsNoSelection;
@@ -82,6 +78,9 @@ import static pixelitor.utils.test.Assertions.thereIsSelection;
 
 
 public class AssertJSwingTest {
+    private static final boolean verbose = true;
+    private static final boolean quick = true;
+
     private static File baseTestingDir;
     private static File cleanerScript;
 
@@ -95,29 +94,11 @@ public class AssertJSwingTest {
 
     private FrameFixture pw;
     private final Random random = new Random();
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss");
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm");
 
     private enum Randomize {YES, NO}
 
     private enum Reseed {YES, NO}
-
-    enum TestingMode {
-        NO_MASK(MaskViewMode.NORMAL),
-        WITH_MASK(MaskViewMode.NORMAL),
-        ON_MASK_VIEW_LAYER(MaskViewMode.EDIT_MASK),
-        ON_MASK_VIEW_MASK(MaskViewMode.SHOW_MASK),
-        RUBY(MaskViewMode.RUBYLITH);
-
-        private final MaskViewMode viewMode;
-
-        TestingMode(MaskViewMode viewMode) {
-            this.viewMode = viewMode;
-        }
-
-        public boolean isMaskEditing() {
-            return viewMode.editMask();
-        }
-    }
 
     private TestingMode testingMode = NO_MASK;
 
@@ -137,7 +118,7 @@ public class AssertJSwingTest {
         if (testOneMethodSlowly) {
             test.robot.settings().delayBetweenEvents(ROBOT_DELAY_MILLIS_SLOW);
 
-            test.testColors();
+            test.testFilterWithDialog("Hue/Saturation...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
 
         } else {
             TestingMode[] testingModes = getTestingModes();
@@ -156,7 +137,7 @@ public class AssertJSwingTest {
 
         long totalTimeMillis = System.currentTimeMillis() - startMillis;
         System.out.printf("AssertJSwingTest: finished at %s after %s, exiting in 5 seconds",
-                DATE_FORMAT.format(new Date()),
+                getCurrentTime(),
                 Utils.formatMillis(totalTimeMillis));
         Utils.sleep(5, SECONDS);
         test.exit();
@@ -214,11 +195,11 @@ public class AssertJSwingTest {
      */
     private void testTarget(TestingMode testingMode, String target) {
         this.testingMode = testingMode;
-        applyTestingMode();
+        testingMode.set(this);
         setupRobotSpeed();
 
         System.out.printf("AssertJSwingTest: target = %s, testingMode = %s, started at %s%n",
-                target, testingMode, DATE_FORMAT.format(new Date()));
+                target, testingMode, getCurrentTime());
 
         switch (target) {
             case "all":
@@ -293,9 +274,14 @@ public class AssertJSwingTest {
     }
 
     private void testDevelopMenu() {
+        // TODO
+
+        assert checkConsistency();
     }
 
     private void testTools() {
+        log(0, "testing the tools");
+
         // make sure we have a big internal frame for the tool tests
         keyboardActualPixels();
 
@@ -315,9 +301,14 @@ public class AssertJSwingTest {
         testReload(); // file menu, but better here
         testHandTool();
         testZoomTool();
+
+        assert checkConsistency();
     }
 
     private void testLayers() {
+        log(0, "testing the layers");
+        testingMode.set(this);
+
         LayerButtonFixture layer1Button = findLayerButton("layer 1");
         layer1Button.requireSelected();
 
@@ -333,6 +324,7 @@ public class AssertJSwingTest {
         layer1Button.requireSelected();
         keyboardRedo();
         layer2Button.requireSelected();
+        testingMode.set(this);
 
         // add some content
         pw.toggleButton("Gradient Tool Button").click();
@@ -350,6 +342,7 @@ public class AssertJSwingTest {
         pw.textBox("layerOpacity").requireText("100");
         keyboardRedo();
         pw.textBox("layerOpacity").requireText("75");
+        assert checkConsistency();
 
         // test change blending mode
         pw.comboBox("layerBM")
@@ -359,6 +352,7 @@ public class AssertJSwingTest {
         pw.comboBox("layerBM").requireSelection(0);
         keyboardRedo();
         pw.comboBox("layerBM").requireSelection(2);
+        assert checkConsistency();
 
         // test delete layer
         deleteLayerButton.click();
@@ -367,6 +361,7 @@ public class AssertJSwingTest {
         layer2Button.requireSelected();
         keyboardRedo();
         layer1Button.requireSelected();
+        testingMode.set(this);
 
         // test duplicate
         duplicateLayerButton.click();
@@ -376,7 +371,7 @@ public class AssertJSwingTest {
         keyboardRedo();
         findLayerButton("layer 1 copy").requireSelected();
 
-        applyTestingMode();
+        testingMode.set(this);
 
         // test visibility change
         LayerButtonFixture layer1CopyButton = findLayerButton("layer 1 copy");
@@ -413,7 +408,7 @@ public class AssertJSwingTest {
 
         findMenuItemByText("New Layer from Composite").click();
         keyboardUndoRedo();
-        applyTestingMode();
+        testingMode.set(this);
 
         findMenuItemByText("Duplicate Layer").click();
         keyboardUndoRedo();
@@ -422,14 +417,17 @@ public class AssertJSwingTest {
         keyboardUndoRedo();
 
         findMenuItemByText("Duplicate Layer").click();
-        applyTestingMode();
+        testingMode.set(this);
 
         findMenuItemByText("Add New Layer").click();
-        applyTestingMode();
+        testingMode.set(this);
 
         findMenuItemByText("Delete Layer").click();
+        testingMode.set(this);
 
         findMenuItemByText("Flatten Image").click();
+        testingMode.set(this);
+        assert checkConsistency();
 
         testLayerMasks();
         testTextLayers();
@@ -438,12 +436,21 @@ public class AssertJSwingTest {
         if (Build.enableAdjLayers) {
             testAdjLayers();
         }
+
+        assert checkConsistency();
     }
 
     private void testLayerMasks() {
-        addLayerMask(false);
+        boolean allowExistingMask = testingMode != NO_MASK;
+        addLayerMask(allowExistingMask);
 
         testLayerMaskIconPopupMenus();
+
+        deleteLayerMask();
+
+        testingMode.set(this);
+
+        assert checkConsistency();
     }
 
     private void testLayerMaskIconPopupMenus() {
@@ -497,14 +504,19 @@ public class AssertJSwingTest {
 
         // delete the created layer mask
         runMenuCommand("Delete");
+
+        assert checkConsistency();
     }
 
     private void testTextLayers() {
+        assert checkConsistency();
+
         addTextLayer();
-        addLayerMask(false);
+        testingMode.set(this);
 
         // press Ctrl-T
         pw.pressKey(VK_CONTROL).pressKey(VK_T);
+        assert checkConsistency();
 
         DialogFixture dialog = findDialogByTitle("Edit Text Layer");
 
@@ -518,32 +530,44 @@ public class AssertJSwingTest {
 
         dialog.button("ok").click();
         keyboardUndoRedo();
+        assert checkConsistency();
 
         runMenuCommand("Rasterize");
         keyboardUndoRedoUndo();
+        assert checkConsistency();
 
         runMenuCommand("Merge Down");
         keyboardUndoRedoUndo();
+        testingMode.set(this);
+
+        assert checkConsistency();
     }
 
     private void testAdjLayers() {
         addAdjustmentLayer();
         // TODO
+
+        assert checkConsistency();
     }
 
     private LayerButtonFixture findLayerButton(String layerName) {
-        return new LayerButtonFixture(robot, robot.finder().find(new GenericTypeMatcher<LayerButton>(LayerButton.class) {
-            @Override
-            protected boolean isMatching(LayerButton layerButton) {
-                return layerButton.getLayerName().equals(layerName);
-            }
-        }));
+        return new LayerButtonFixture(robot, robot.finder()
+                .find(new GenericTypeMatcher<LayerButton>(LayerButton.class) {
+                    @Override
+                    protected boolean isMatching(LayerButton layerButton) {
+                        return layerButton.getLayerName().equals(layerName);
+                    }
+                }));
     }
 
     private void testHelpMenu() {
+        log(0, "testing the help menu");
+
         testTipOfTheDay();
         testCheckForUpdate();
         testAbout();
+
+        assert checkConsistency();
     }
 
     private void testTipOfTheDay() {
@@ -556,6 +580,8 @@ public class AssertJSwingTest {
     }
 
     private void testColors() {
+        log(0, "testing the colors");
+
         testColorPalette("Foreground...", "Foreground Color Variations");
         testColorPalette("Background...", "Background Color Variations");
 
@@ -565,6 +591,8 @@ public class AssertJSwingTest {
         testColorPalette("RGB Mix Background with Foreground...", "RGB Mix with Foreground");
 
         testColorPalette("Color Palette...", "Color Palette");
+
+        assert checkConsistency();
     }
 
     private void testColorPalette(String menuName, String dialogTitle) {
@@ -608,6 +636,8 @@ public class AssertJSwingTest {
     }
 
     private void testEditMenu() {
+        log(0, "testing the edit menu");
+
         keyboardInvert();
         runMenuCommand("Repeat Invert");
         runMenuCommand("Undo Invert");
@@ -625,6 +655,8 @@ public class AssertJSwingTest {
         testCopyPaste();
 
         testPreferences();
+
+        assert checkConsistency();
     }
 
     private void testFade() {
@@ -649,6 +681,8 @@ public class AssertJSwingTest {
     }
 
     private void testImageMenu() {
+        log(0, "testing the image menu");
+
         testDuplicateImage();
 
         // crop is tested with the crop tool
@@ -658,6 +692,8 @@ public class AssertJSwingTest {
             testEnlargeCanvas();
             testRotateFlip();
         });
+
+        assert checkConsistency();
     }
 
     private void testDuplicateImage() {
@@ -727,10 +763,12 @@ public class AssertJSwingTest {
         // close the pasted layer
         runMenuCommand("Delete Layer");
 
-        applyTestingMode();
+        testingMode.set(this);
     }
 
     private void testFileMenu() {
+        log(0, "testing the file menu");
+
         testNewImage();
         testSaveUnnamed();
         closeOneOfTwo();
@@ -751,23 +789,32 @@ public class AssertJSwingTest {
     }
 
     private void testNewImage() {
+        log(1, "testing new image");
+
         findMenuItemByText("New Image...").click();
         DialogFixture newImageDialog = findDialogByTitle("New Image");
         newImageDialog.textBox("widthTF").deleteText().enterText("611");
         newImageDialog.textBox("heightTF").deleteText().enterText("411");
         newImageDialog.button("ok").click();
-        applyTestingMode();
+
+        testingMode.set(this);
     }
 
     private void testFileOpen() {
+        log(1, "testing file open");
+
         findMenuItemByText("Open...").click();
         JFileChooserFixture openDialog = JFileChooserFinder.findFileChooser("open").using(robot);
         openDialog.cancel();
 
         openFile("b.jpg");
+
+        assert checkConsistency();
     }
 
     private void testSaveUnnamed() {
+        log(1, "testing save unnamed");
+
         // new unsaved image, will be saved as save as
         runMenuCommand("Save");
         JFileChooserFixture saveDialog = findSaveFileChooser();
@@ -778,15 +825,23 @@ public class AssertJSwingTest {
         findJOptionPane().yesButton().click();
 
         // TODO test save as menuitem and simple save (without file chooser)
+
+        assert checkConsistency();
     }
 
     private void testExportOptimizedJPEG() {
+        log(1, "testing export optimized jpeg");
+
         runMenuCommand("Export Optimized JPEG...");
         findDialogByTitle("Save Optimized JPEG").button("ok").click();
         saveWithOverwrite("saved.png");
+
+        assert checkConsistency();
     }
 
     private void testExportOpenRaster() {
+        log(1, "testing export openraster");
+
         // precondition: the active image has only 1 layer
         assert numLayersIs(1);
 
@@ -799,9 +854,13 @@ public class AssertJSwingTest {
         saveWithOverwrite("saved.ora");
 
         // TODO test multi-layer save
+
+        assert checkConsistency();
     }
 
     private void testExportLayerAnimation() {
+        log(1, "testing exporting layer animation");
+
         // precondition: the active image has only 1 layer
         assert numLayersIs(1);
 
@@ -814,9 +873,13 @@ public class AssertJSwingTest {
         findDialogByTitle("Export Animated GIF").button("ok").click();
 
         saveWithOverwrite("layeranim.gif");
+
+        assert checkConsistency();
     }
 
     private void testExportTweeningAnimation() {
+        log(1, "testing export tweening animation");
+
         assertThat(ImageComponents.hasActiveImage()).isTrue();
         runMenuCommand("Export Tweening Animation...");
         DialogFixture dialog = findDialogByTitle("Export Tweening Animation");
@@ -833,9 +896,13 @@ public class AssertJSwingTest {
         optionPane.yesButton().click();
 
         waitForProgressMonitorEnd();
+
+        assert checkConsistency();
     }
 
     private void closeOneOfTwo() {
+        log(1, "testing close one of two");
+
         checkNumOpenImagesIs(2);
         boolean dirty = ImageComponents.getActiveCompOrNull().isDirty();
 
@@ -849,15 +916,26 @@ public class AssertJSwingTest {
         }
 
         checkNumOpenImagesIs(1);
+
+        testingMode.set(this);
+        assert checkConsistency();
     }
 
     private void testCloseAll() {
+        log(1, "testing close all");
+
         assertThat(ImageComponents.getNumOpenImages() > 1);
 
         closeAll();
+
+        assertThat(ImageComponents.getNumOpenImages() == 0);
+
+        assert checkConsistency();
     }
 
     private void testBatchResize() {
+        log(1, "testing batch resize");
+
         Directories.setLastOpenDir(inputDir);
         Directories.setLastSaveDir(batchResizeOutputDir);
         runMenuCommand("Batch Resize...");
@@ -866,9 +944,13 @@ public class AssertJSwingTest {
         dialog.textBox("widthTF").setText("200");
         dialog.textBox("heightTF").setText("200");
         dialog.button("ok").click();
+
+        assert checkConsistency();
     }
 
     private void testBatchFilter() {
+        log(1, "testing batch filter");
+
         Directories.setLastOpenDir(inputDir);
         Directories.setLastSaveDir(batchFilterOutputDir);
 
@@ -882,23 +964,36 @@ public class AssertJSwingTest {
         dialog.button("ok").click(); // start processing
 
         waitForProgressMonitorEnd();
+
+        assert checkConsistency();
     }
 
     private void testExportLayerToPNG() {
+        log(1, "testing export layer to png");
+
         Directories.setLastSaveDir(baseTestingDir);
         addNewLayer();
         runMenuCommand("Export Layers to PNG...");
         findDialogByTitle("Select Output Folder").button("ok").click();
         Utils.sleep(2, SECONDS);
+
+        assert checkConsistency();
     }
 
     private void testAutoPaint() {
+        log(0, "testing AutoPaint");
+
         runWithSelectionAndTranslation(() -> {
             for (Tool tool : AutoPaint.ALLOWED_TOOLS) {
+                if (skipThis()) {
+                    continue;
+                }
                 Events.postAssertJEvent("auto paint with " + tool);
                 testAutoPaintWithTool(tool);
             }
         });
+
+        assert checkConsistency();
     }
 
     private void testAutoPaintWithTool(Tool tool) {
@@ -920,6 +1015,8 @@ public class AssertJSwingTest {
     }
 
     private void testScreenCapture() {
+        log(1, "testing screen capture");
+
         ImageComponent activeIC = ImageComponents.getActiveIC();
         testScreenCapture(true);
         testScreenCapture(false);
@@ -929,6 +1026,8 @@ public class AssertJSwingTest {
         } catch (InterruptedException | InvocationTargetException e) {
             e.printStackTrace();
         }
+
+        assert checkConsistency();
     }
 
     private void testScreenCapture(boolean hidePixelitor) {
@@ -941,16 +1040,24 @@ public class AssertJSwingTest {
             cb.uncheck();
         }
         dialog.button("ok").click();
-        applyTestingMode();
+        testingMode.set(this);
+
+        assert checkConsistency();
     }
 
     private void testReload() {
+        log(1, "testing reload");
+
         runMenuCommand("Reload");
         keyboardUndoRedo();
-        applyTestingMode();
+        testingMode.set(this);
+
+        assert checkConsistency();
     }
 
     private void testViewMenu() {
+        log(0, "testing the view menu");
+
         testZoomCommands();
 
         testHistory();
@@ -971,6 +1078,8 @@ public class AssertJSwingTest {
 
         runMenuCommand("Cascade");
         runMenuCommand("Tile");
+
+        assert checkConsistency();
     }
 
     private void testZoomCommands() {
@@ -1035,6 +1144,8 @@ public class AssertJSwingTest {
     }
 
     private void testFilters() {
+        log(0, "testing the filters");
+
         testColorBalance();
         testFilterWithDialog("Hue/Saturation...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Colorize...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
@@ -1165,6 +1276,7 @@ public class AssertJSwingTest {
         testNoDialogFilter("Invert Transparency");
 
         testText();
+        assert checkConsistency();
     }
 
     private void testColorBalance() {
@@ -1226,12 +1338,25 @@ public class AssertJSwingTest {
     }
 
     private void testNoDialogFilter(String name) {
+        if (skipThis()) {
+            return;
+        }
+        log(1, "testing the filter " + name);
+
         runMenuCommand(name);
 
         keyboardUndoRedoUndo();
+
+        assert checkConsistency();
     }
 
     private void testFilterWithDialog(String name, Randomize randomize, Reseed reseed, ShowOriginal checkShowOriginal, String... extraButtonsToClick) {
+        if (skipThis()) {
+            return;
+        }
+        String nameWithoutDots = name.substring(0, name.length() - 3);
+        log(1, "testing the filter " + nameWithoutDots);
+
         findMenuItemByText(name).click();
         DialogFixture dialog = WindowFinder.findDialog("filterDialog").using(robot);
 
@@ -1257,17 +1382,25 @@ public class AssertJSwingTest {
         dialog.button("ok").click();
 
         keyboardUndoRedoUndo();
+
+        assert checkConsistency();
     }
 
     private void testHandTool() {
+        log(1, "testing the hand tool");
+
         pw.toggleButton("Hand Tool Button").click();
         randomAltClick();
 
         moveRandom();
         dragRandom();
+
+        assert checkConsistency();
     }
 
     private void testShapesTool() {
+        log(1, "testing the shapes tool");
+
         pw.toggleButton("Shapes Tool Button").click();
         randomAltClick();
 
@@ -1276,6 +1409,9 @@ public class AssertJSwingTest {
         for (ShapeType shapeType : ShapeType.values()) {
             pw.comboBox("shapeTypeCB").selectItem(shapeType.toString());
             for (ShapesAction shapesAction : ShapesAction.values()) {
+                if (skipThis()) {
+                    continue;
+                }
                 pw.comboBox("actionCB").selectItem(shapesAction.toString());
                 pw.pressAndReleaseKeys(KeyEvent.VK_R);
 
@@ -1296,6 +1432,7 @@ public class AssertJSwingTest {
         }
 
         keyboardUndoRedoUndo();
+        assert checkConsistency();
     }
 
     private void setupEffectsDialog() {
@@ -1328,15 +1465,21 @@ public class AssertJSwingTest {
     }
 
     private void testColorPickerTool() {
+        log(1, "testing the color picker tool");
+
         pw.toggleButton("Color Picker Tool Button").click();
         randomAltClick();
 
         moveTo(300, 300);
         pw.click();
         dragTo(400, 400);
+
+        assert checkConsistency();
     }
 
     private void testPaintBucketTool() {
+        log(1, "testing the paint bucket tool");
+
         pw.toggleButton("Paint Bucket Tool Button").click();
         randomAltClick();
 
@@ -1344,9 +1487,12 @@ public class AssertJSwingTest {
         pw.click();
 
         keyboardUndoRedoUndo();
+        assert checkConsistency();
     }
 
     private void testGradientTool() {
+        log(1, "testing the gradient tool");
+
         if (testingMode.isMaskEditing()) {
             // reset the default colors, otherwise it might be all gray
             keyboardFgBgDefaults();
@@ -1361,6 +1507,9 @@ public class AssertJSwingTest {
                 pw.comboBox("gradientCycleMethodSelector").selectItem(cycleMethod);
                 GradientColorType[] gradientColorTypes = GradientColorType.values();
                 for (GradientColorType colorType : gradientColorTypes) {
+                    if (skipThis()) {
+                        continue;
+                    }
                     pw.comboBox("gradientColorTypeSelector").selectItem(colorType.toString());
                     pw.checkBox("gradientInvert").uncheck();
                     moveTo(200, 200);
@@ -1372,34 +1521,52 @@ public class AssertJSwingTest {
             }
         }
         keyboardUndoRedo();
+        assert checkConsistency();
     }
 
     private void testEraserTool() {
+        log(1, "testing the eraser tool");
+
         pw.toggleButton("Eraser Tool Button").click();
         testBrushStrokes();
+
+        assert checkConsistency();
     }
 
     private void testBrushTool() {
+        log(1, "testing the brush tool");
+
         pw.toggleButton("Brush Tool Button").click();
         testBrushStrokes();
+
+        assert checkConsistency();
     }
 
     private void testBrushStrokes() {
         randomAltClick();
 
+        boolean tested = false;
         for (BrushType brushType : BrushType.values()) {
             pw.comboBox("brushTypeSelector").selectItem(brushType.toString());
             for (Symmetry symmetry : Symmetry.values()) {
+                if (skipThis()) {
+                    continue;
+                }
                 pw.comboBox("symmetrySelector").selectItem(symmetry.toString());
                 pw.pressAndReleaseKeys(KeyEvent.VK_R);
                 moveRandom();
                 dragRandom();
+                tested = true;
             }
         }
-        keyboardUndoRedo();
+        if (tested) {
+            keyboardUndoRedo();
+        }
     }
 
     private void testSmudgeTool() {
+        log(1, "testing the smudge tool");
+
         pw.toggleButton("Smudge Tool Button").click();
         randomAltClick();
 
@@ -1409,15 +1576,21 @@ public class AssertJSwingTest {
             moveRandom();
             dragRandom();
         }
+
+        assert checkConsistency();
     }
 
     private void testCloneTool() {
+        log(1, "testing the clone tool");
+
         pw.toggleButton("Clone Stamp Tool Button").click();
 
         testClone(false, false, 100);
         testClone(false, true, 200);
         testClone(true, false, 300);
         testClone(true, true, 400);
+
+        assert checkConsistency();
     }
 
     private void testClone(boolean aligned, boolean sampleAllLayers, int startX) {
@@ -1447,6 +1620,8 @@ public class AssertJSwingTest {
     }
 
     private void testSelectionToolAndMenus() {
+        log(1, "testing the selection tool and the selection menus");
+
         // make sure we are at 100%
         keyboardActualPixels();
 
@@ -1547,6 +1722,8 @@ public class AssertJSwingTest {
     }
 
     private void testCropTool() {
+        log(1, "testing the crop tool");
+
         pw.toggleButton("Crop Tool Button").click();
         moveTo(200, 200);
         dragTo(400, 400);
@@ -1563,15 +1740,21 @@ public class AssertJSwingTest {
         findButtonByText(pw, "Crop").click();
 
         keyboardUndoRedoUndo();
+
+        assert checkConsistency();
     }
 
     private void testMoveTool() {
+        log(1, "testing the move tool");
+
         pw.toggleButton("Move Tool Button").click();
         testMoveToolImpl(false);
         testMoveToolImpl(true);
 
         keyboardNudge();
         keyboardUndoRedoUndo();
+
+        assert checkConsistency();
     }
 
     private void testMoveToolImpl(boolean altDrag) {
@@ -1606,6 +1789,8 @@ public class AssertJSwingTest {
     }
 
     private void testZoomTool() {
+        log(1, "testing the zoom tool");
+
         pw.toggleButton("Zoom Tool Button").click();
         moveTo(300, 300);
 
@@ -1617,6 +1802,8 @@ public class AssertJSwingTest {
         testMouseWheelZooming();
         testControlPlusMinusZooming();
         testZoomControlAndNavigatorZooming();
+
+        assert checkConsistency();
     }
 
     private void testControlPlusMinusZooming() {
@@ -1845,7 +2032,6 @@ public class AssertJSwingTest {
         return buttonFixture;
     }
 
-
     private static JButtonFixture findButtonByToolTip(ComponentContainerFixture container, String toolTip) {
         JButtonFixture buttonFixture = container.button(
                 new GenericTypeMatcher<JButton>(JButton.class) {
@@ -1964,6 +2150,10 @@ public class AssertJSwingTest {
     }
 
     private void runWithSelectionAndTranslation(Runnable task) {
+        if (skipThis()) {
+            return;
+        }
+
         // simple run
         Events.postAssertJEvent("simple run");
         keyboardDeselect();
@@ -1988,7 +2178,7 @@ public class AssertJSwingTest {
         keyboardUndo(); // undo translation
     }
 
-    private void addLayerMask(boolean allowExistingMask) {
+    public void addLayerMask(boolean allowExistingMask) {
         boolean hasMask = ImageComponents.getActiveLayerOrNull().hasMask();
         if (hasMask) {
             if (!allowExistingMask) {
@@ -2003,7 +2193,7 @@ public class AssertJSwingTest {
             pw.checkBox("gradientInvert").check();
 
             ImageComponent ic = ImageComponents.getActiveIC();
-            if(ic.getZoomLevel() != ZoomLevel.Z100) {
+            if (ic.getZoomLevel() != ZoomLevel.Z100) {
                 // otherwise location on screen can lead to crazy results
                 runMenuCommand("100 %");
             }
@@ -2015,6 +2205,10 @@ public class AssertJSwingTest {
             moveTo(onScreen.x + width / 2, onScreen.y + height / 2);
             dragTo(onScreen.x + width, onScreen.y + height / 2);
         }
+    }
+
+    public void deleteLayerMask() {
+        runMenuCommand("Delete");
     }
 
     private void addTextLayer() {
@@ -2031,46 +2225,22 @@ public class AssertJSwingTest {
         pw.button("addAdjLayer").click();
     }
 
-    /**
-     * This method should be called whenever a new layer is created
-     * in order to set up the mask testing mode
-     */
-    private void applyTestingMode() {
-        if (testingMode == NO_MASK) {
-            // do nothing
-        } else if (testingMode == WITH_MASK) {
-            // existing masks are allowed because even if they result
-            // from a layer duplication, a correct mask tate must be set up
-            addLayerMask(true);
-            pressCtrlOne();
-        } else if (testingMode == ON_MASK_VIEW_LAYER) {
-            addLayerMask(true);
-            pressCtrlThree();
-        } else if (testingMode == ON_MASK_VIEW_MASK) {
-            addLayerMask(true);
-            pressCtrlTwo();
-        } else if (testingMode == RUBY) {
-            addLayerMask(true);
-            pressCtrlFour();
-        }
-    }
-
-    private void pressCtrlOne() {
+    public void pressCtrlOne() {
         pw.pressKey(VK_CONTROL).pressKey(VK_1)
                 .releaseKey(VK_1).releaseKey(VK_CONTROL);
     }
 
-    private void pressCtrlTwo() {
+    public void pressCtrlTwo() {
         pw.pressKey(VK_CONTROL).pressKey(VK_2)
                 .releaseKey(KeyEvent.VK_2).releaseKey(VK_CONTROL);
     }
 
-    private void pressCtrlThree() {
+    public void pressCtrlThree() {
         pw.pressKey(VK_CONTROL).pressKey(VK_3)
                 .releaseKey(VK_3).releaseKey(VK_CONTROL);
     }
 
-    private void pressCtrlFour() {
+    public void pressCtrlFour() {
         pw.pressKey(VK_CONTROL).pressKey(VK_4)
                 .releaseKey(VK_4).releaseKey(VK_CONTROL);
     }
@@ -2082,7 +2252,7 @@ public class AssertJSwingTest {
         openDialog.selectFile(new File(inputDir, fileName));
         openDialog.approve();
 
-        applyTestingMode();
+        testingMode.set(this);
     }
 
     private void closeAll() {
@@ -2157,5 +2327,35 @@ public class AssertJSwingTest {
                 .withTimeout(15, SECONDS)
                 .using(robot);
         PixelitorWindow.getInstance().setLocation(0, 0);
+    }
+
+    private void log(int indentLevel, String msg) {
+        if (verbose) {
+            for (int i = 0; i < indentLevel; i++) {
+                System.out.print("    ");
+            }
+            System.out.println(getCurrentTime() + ": " + msg + " (" + testingMode.toString() + ")");
+        }
+    }
+
+    private static String getCurrentTime() {
+        return DATE_FORMAT.format(new Date());
+    }
+
+    public boolean checkConsistency() {
+        Layer layer = ImageComponents.getActiveLayerOrNull();
+        if (layer == null) { // no open image
+            return true;
+        }
+
+        return testingMode.isSet(layer);
+    }
+
+    private boolean skipThis() {
+        if (quick) {
+            return random.nextDouble() > 0.1;
+        } else {
+            return false;
+        }
     }
 }
