@@ -154,8 +154,7 @@ public class TransformSupport {
 
         this.imageSpaceRect.setRect(this.imageSpaceRect.getX(), this.imageSpaceRect.getY(), width, height);
 
-        double viewScale = ic.getZoomLevel().getViewScale();
-        this.compSpaceRect.setSize((int) (width * viewScale), (int) (height * viewScale));
+        compSpaceRect = ic.fromImageToComponentSpace(imageSpaceRect);
         handles.updateRect(compSpaceRect);
         ic.repaint();
     }
@@ -173,10 +172,25 @@ public class TransformSupport {
     }
 
     public void arrowKeyPressed(ArrowKey key, ImageComponent ic) {
+
+        // two situation we need to take into consideration
+        // 1. user zoom level is >= 100% then we always move rect by 1px
+        //    user is in pixel perfect precision mode
+        // 2. user zoom level is < 100% then we scale up to ensure that user always see
+        //    rect movement
+
         double viewScale = ic.getZoomLevel().getViewScale();
-        compSpaceRect.translate((int) (key.getMoveX() * viewScale), (int) (key.getMoveY() * viewScale));
+        int moveScale = viewScale >= 1 ? 1: (int) Math.ceil(1/viewScale);
+
+        imageSpaceRect.setRect(
+            this.imageSpaceRect.getX() + (key.getMoveX() * moveScale),
+            this.imageSpaceRect.getY() + (key.getMoveY() * moveScale),
+            this.imageSpaceRect.getWidth(),
+            this.imageSpaceRect.getHeight()
+        );
+
+        compSpaceRect = ic.fromImageToComponentSpace(imageSpaceRect);
         handles.updateRect(compSpaceRect);
-        recalculateImageSpaceRect(ic);
         ic.repaint();
     }
 }
