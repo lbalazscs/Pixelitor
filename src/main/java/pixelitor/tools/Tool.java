@@ -256,7 +256,7 @@ public abstract class Tool implements KeyboardObserver {
     protected void toolStarted() {
         ended = false;
 
-        GlobalKeyboardWatch.setKeyListener(this);
+        GlobalKeyboardWatch.setObserver(this);
         
         ImageComponents.setCursorForAll(cursor);
     }

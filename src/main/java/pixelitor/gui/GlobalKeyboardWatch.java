@@ -37,7 +37,7 @@ public class GlobalKeyboardWatch {
     private static boolean spaceDown = false;
     private static boolean dialogActive = false;
     private static JComponent alwaysVisibleComponent;
-    private static KeyboardObserver keyListener;
+    private static KeyboardObserver observer;
 
     private GlobalKeyboardWatch() {
     }
@@ -65,7 +65,7 @@ public class GlobalKeyboardWatch {
                 break;
             case KeyEvent.VK_SPACE:
                 if (!dialogActive) {
-                    keyListener.spacePressed();
+                    observer.spacePressed();
                     spaceDown = true;
                     e.consume();
                 }
@@ -76,41 +76,41 @@ public class GlobalKeyboardWatch {
                 // checking for VK_KP_RIGHT and other KP keys does not seem to be necessary
                 // because at least on windows actually VK_RIGHT is sent by the keypad keys
                 // but let's check them in order to be on the safe side
-                if (!dialogActive && keyListener.arrowKeyPressed(new ArrowKey.RIGHT(e.isShiftDown()))) {
+                if (!dialogActive && observer.arrowKeyPressed(new ArrowKey.RIGHT(e.isShiftDown()))) {
                     e.consume();
                 }
                 break;
             case KeyEvent.VK_LEFT:
             case KeyEvent.VK_KP_LEFT:
-                if (!dialogActive && keyListener.arrowKeyPressed(new ArrowKey.LEFT(e.isShiftDown()))) {
+                if (!dialogActive && observer.arrowKeyPressed(new ArrowKey.LEFT(e.isShiftDown()))) {
                     e.consume();
                 }
                 break;
             case KeyEvent.VK_UP:
             case KeyEvent.VK_KP_UP:
-                if (!dialogActive && keyListener.arrowKeyPressed(new ArrowKey.UP(e.isShiftDown()))) {
+                if (!dialogActive && observer.arrowKeyPressed(new ArrowKey.UP(e.isShiftDown()))) {
                     e.consume();
                 }
                 break;
             case KeyEvent.VK_DOWN:
             case KeyEvent.VK_KP_DOWN:
-                if (!dialogActive && keyListener.arrowKeyPressed(new ArrowKey.DOWN(e.isShiftDown()))) {
+                if (!dialogActive && observer.arrowKeyPressed(new ArrowKey.DOWN(e.isShiftDown()))) {
                     e.consume();
                 }
                 break;
             case KeyEvent.VK_ESCAPE:
                 if (!dialogActive) {
-                    keyListener.escPressed();
+                    observer.escPressed();
                 }
                 break;
             case KeyEvent.VK_ALT:
                 if (!dialogActive) {
-                    keyListener.altPressed();
+                    observer.altPressed();
                 }
                 break;
             case KeyEvent.VK_SHIFT:
                 if (!dialogActive) {
-                    keyListener.shiftPressed();
+                    observer.shiftPressed();
                 }
                 break;
         }
@@ -120,17 +120,17 @@ public class GlobalKeyboardWatch {
         int keyCode = e.getKeyCode();
         switch (keyCode) {
             case KeyEvent.VK_SPACE:
-                keyListener.spaceReleased();
+                observer.spaceReleased();
                 spaceDown = false;
                 break;
             case KeyEvent.VK_ALT:
                 if (!dialogActive) {
-                    keyListener.altReleased();
+                    observer.altReleased();
                 }
                 break;
             case KeyEvent.VK_SHIFT:
                 if (!dialogActive) {
-                    keyListener.shiftReleased();
+                    observer.shiftReleased();
                 }
                 break;
         }
@@ -219,7 +219,7 @@ public class GlobalKeyboardWatch {
 //    }
 
 
-    public static void setKeyListener(KeyboardObserver keyListener) {
-        GlobalKeyboardWatch.keyListener = keyListener;
+    public static void setObserver(KeyboardObserver observer) {
+        GlobalKeyboardWatch.observer = observer;
     }
 }
