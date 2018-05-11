@@ -52,7 +52,7 @@ import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.when;
@@ -218,9 +218,12 @@ public class TestHelper {
     public static ImageComponent setupAnICFor(Composition comp) {
         ImageComponent ic = mock(ImageComponent.class);
 
-        when(ic.fromComponentToImageSpace(anyObject())).then(returnsFirstArg());
-        when(ic.fromImageToComponentSpace(anyObject())).thenAnswer(invocation -> {
-            Rectangle2D in = invocation.getArgumentAt(0, Rectangle2D.class);
+        when(ic.fromComponentToImageSpace(any())).then(returnsFirstArg());
+
+        // can't just return the argument because this method returns a
+        // Rectangle (subclass) from a Rectangle2D (superclass)
+        when(ic.fromImageToComponentSpace(any())).thenAnswer(invocation -> {
+            Rectangle2D in = invocation.getArgument(0);
             return new Rectangle((int) in.getX(), (int) in.getY(), (int) in.getWidth(), (int) in.getHeight());
         });
 
