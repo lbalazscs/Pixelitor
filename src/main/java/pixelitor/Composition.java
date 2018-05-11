@@ -367,6 +367,7 @@ public class Composition implements Serializable {
 
         deleteActiveLayer(updateGUI, false);
 
+        // TODO the MaskViewMode should be restored like in TextLayerRasterizeEdit
         PixelitorEdit edit = new LinkedEdit(this, "Merge Down",
                 new ImageEdit(this, "", target, backupImage, true, false),
                 new DeleteLayerEdit(this, mergedLayer, activeIndex)

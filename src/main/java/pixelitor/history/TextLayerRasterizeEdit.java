@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.history;
 
 import pixelitor.Composition;
 import pixelitor.layers.ImageLayer;
+import pixelitor.layers.MaskViewMode;
 import pixelitor.layers.TextLayer;
 
 import javax.swing.undo.CannotRedoException;
@@ -30,12 +31,17 @@ import javax.swing.undo.CannotUndoException;
 public class TextLayerRasterizeEdit extends PixelitorEdit {
     private TextLayer before;
     private ImageLayer after;
+    private MaskViewMode maskViewMode = null;
 
     public TextLayerRasterizeEdit(Composition comp, TextLayer before, ImageLayer after) {
         super(comp, "Text Layer Rasterize");
 
         this.before = before;
         this.after = after;
+
+        if (before.hasMask()) {
+            maskViewMode = comp.getIC().getMaskViewMode();
+        }
     }
 
     @Override
@@ -44,6 +50,11 @@ public class TextLayerRasterizeEdit extends PixelitorEdit {
 
         comp.addLayer(before, false, null, false, false);
         comp.deleteLayer(after, false, true);
+
+        // restore the original mask view mode of the text layer
+        if (before.hasMask()) {
+            maskViewMode.activate(before);
+        }
 
         History.notifyMenus(this);
     }

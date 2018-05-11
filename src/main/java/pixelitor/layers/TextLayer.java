@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -222,15 +222,21 @@ public class TextLayer extends ContentLayer {
         d.setVisible(true);
     }
 
+    // TODO if a text layer has a mask, then this will apply the
+    // mask to the layer, resulting in an image layer without a mask.
+    // This probably should be considered a bug, and instead the mask
+    // should be kept, and the rasterized pixels should not be affected
+    // by the mask.
     public ImageLayer replaceWithRasterized() {
         BufferedImage rasterizedImage = createRasterizedImage();
 
         ImageLayer newImageLayer = new ImageLayer(comp, rasterizedImage, getName(), null);
-        comp.addLayer(newImageLayer, false, null, false, false);
-        comp.deleteLayer(this, false, true);
 
         TextLayerRasterizeEdit edit = new TextLayerRasterizeEdit(comp, this, newImageLayer);
         History.addEdit(edit);
+
+        comp.addLayer(newImageLayer, false, null, false, false);
+        comp.deleteLayer(this, false, true);
 
         return newImageLayer;
     }
