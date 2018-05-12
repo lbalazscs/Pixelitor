@@ -33,20 +33,20 @@ public enum OutputFormat {
         public void doSaveComposition(Composition comp, File file) {
             BufferedImage img = comp.getCompositeImage();
             BufferedImage finalImage = ImageUtils.convertToRGB(img, false); // no alpha support, convert first to RGB
-            OpenSaveManager.saveImageToFile(file, finalImage, toString());
+            OpenSaveManager.saveImageToFile(file, finalImage, this);
         }
     }, PNG {
         @Override
         public void doSaveComposition(Composition comp, File file) {
             BufferedImage finalImage = comp.getCompositeImage(); // the format supports alpha, no need to convert ARGB to RGB
-            OpenSaveManager.saveImageToFile(file, finalImage, toString());
+            OpenSaveManager.saveImageToFile(file, finalImage, this);
         }
     }, TIFF {
         @Override
         public void doSaveComposition(Composition comp, File file) {
             BufferedImage finalImage = comp
                     .getCompositeImage(); // the format supports alpha, no need to convert ARGB to RGB
-            OpenSaveManager.saveImageToFile(file, finalImage, toString());
+            OpenSaveManager.saveImageToFile(file, finalImage, this);
         }
     }, GIF {
         @Override
@@ -55,14 +55,14 @@ public enum OutputFormat {
             // the format supports alpha, but the default encoder has bugs
             BufferedImage finalImage = ImageUtils.convertToRGB(img, false);
 
-            OpenSaveManager.saveImageToFile(file, finalImage, toString());
+            OpenSaveManager.saveImageToFile(file, finalImage, this);
         }
     }, BMP {
         @Override
         public void doSaveComposition(Composition comp, File file) {
             BufferedImage compositeImage = comp.getCompositeImage();
             BufferedImage finalImage = ImageUtils.convertToRGB(compositeImage, false); // no alpha support, convert first to RGB
-            OpenSaveManager.saveImageToFile(file, finalImage, toString());
+            OpenSaveManager.saveImageToFile(file, finalImage, this);
         }
     }, PXC {
         @Override

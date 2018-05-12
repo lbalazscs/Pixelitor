@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,6 +31,9 @@ import pixelitor.menus.view.ZoomLevel;
 import pixelitor.utils.debug.BufferedImageNode;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import javax.swing.*;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
@@ -52,10 +55,12 @@ import java.awt.image.DataBufferInt;
 import java.awt.image.PixelGrabber;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URL;
+import java.util.Iterator;
 import java.util.Random;
 
 import static java.awt.AlphaComposite.SRC_OVER;
@@ -437,10 +442,7 @@ public class ImageUtils {
         return imgURL;
     }
 
-    /**
-     * Loads an image from the images folder
-     */
-    public static BufferedImage loadBufferedImage(String fileName) {
+    public static BufferedImage loadImageFromImagesFolder(String fileName) {
         // consider caching
         // for image brushes this is not necessary because
         // the template brush always has the max size
@@ -453,6 +455,33 @@ public class ImageUtils {
             image = ImageIO.read(imgURL);
         } catch (IOException e) {
             Messages.showException(e);
+        }
+        return image;
+    }
+
+    public static BufferedImage loadImageWithStatusBarProgressTracking(File file) throws IOException {
+        BufferedImage image;
+
+        try (ImageInputStream input = ImageIO.createImageInputStream(file)) {
+            Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
+
+            if (!readers.hasNext()) {
+                return null;
+            }
+
+            ImageReader reader = readers.next();
+
+            try {
+                reader.setInput(input);
+
+                // register the status bar progress tracking
+                reader.addIIOReadProgressListener(new StatusBarReadProgressListener(file));
+
+                ImageReadParam param = reader.getDefaultReadParam();
+                image = reader.read(0, param);
+            } finally {
+                reader.dispose();
+            }
         }
         return image;
     }

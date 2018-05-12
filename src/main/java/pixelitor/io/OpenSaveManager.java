@@ -29,6 +29,7 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.TextLayer;
 import pixelitor.menus.file.RecentFilesMenu;
+import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
@@ -89,7 +90,8 @@ public class OpenSaveManager {
     private static Composition openSimpleFile(File file) {
         BufferedImage img = null;
         try {
-            img = ImageIO.read(file);
+//            img = ImageIO.read(file);
+            img = ImageUtils.loadImageWithStatusBarProgressTracking(file);
         } catch (IOException ex) {
             Messages.showException(ex);
         }
@@ -148,17 +150,17 @@ public class OpenSaveManager {
         }
     }
 
-    public static void saveImageToFile(File selectedFile, BufferedImage image, String format) {
+    public static void saveImageToFile(File selectedFile, BufferedImage image, OutputFormat format) {
         Objects.requireNonNull(selectedFile);
         Objects.requireNonNull(image);
         Objects.requireNonNull(format);
 
         Runnable r = () -> {
             try {
-                if ("jpg".equals(format)) {
+                if (format == OutputFormat.JPG) {
                     JpegOutput.writeJPG(image, selectedFile, jpegSettings);
                 } else {
-                    ImageIO.write(image, format, selectedFile);
+                    ImageIO.write(image, format.toString(), selectedFile);
                 }
             } catch (IOException e) {
                 if (e.getMessage().contains("another process")) {
@@ -310,7 +312,7 @@ public class OpenSaveManager {
         File outputDir = Directories.getLastSaveDir();
         String fileName = String.format("%03d_%s.%s", layerIndex, Utils.toFileName(layer.getName()), "png");
         File file = new File(outputDir, fileName);
-        saveImageToFile(file, image, "png");
+        saveImageToFile(file, image, OutputFormat.PNG);
     }
 
     public static void saveCurrentImageInAllFormats() {
