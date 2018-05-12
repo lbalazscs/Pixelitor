@@ -43,16 +43,16 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
     private static final int SIZE = 200;
     private static final int EMPTY_SPACE_AT_LEFT = 5;
 
-    private Image smallImage;
     private final Color backgroundColor;
     private int newImgWidth;
     private int newImgHeight;
-    private int imgWidth;
-    private int imgHeight;
-    private static final int MSG_STRING_X = 20;
-    private static final int MSG_STRING_Y = 31;
 
-    private final Map<String, Image> thumbsCache;
+    private ImageInfo imageInfo;
+
+    private static final int MSG_X = 20;
+    private static final int MSG_Y = 10;
+
+    private final Map<String, ImageInfo> thumbsCache;
 
     public ImagePreviewPanel() {
         setPreferredSize(new Dimension(SIZE, SIZE));
@@ -65,7 +65,7 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
     public void propertyChange(PropertyChangeEvent e) {
         File file = getFileFromFileChooserEvent(e);
         if (file == null) {
-            smallImage = null;
+            imageInfo = null;
             repaint();
             return;
         }
@@ -80,34 +80,34 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
 
     private void createThumbImage(File file, String filePath) {
         if (thumbsCache.containsKey(filePath)) {
-            smallImage = thumbsCache.get(filePath);
+            imageInfo = thumbsCache.get(filePath);
             return;
         }
         // we read the whole image and downscale it to a thumb
+        // which is annoyingly slow for large images
+        // TODO the image format might contain an embedded thumbnail
 
-        // TODO the might be already a thumb on the file system
+        // TODO or subsampling while reading!!
+        // https://stackoverflow.com/questions/3294388/make-a-bufferedimage-use-less-ram
+
+        // TODO or there might be already a thumb on the file system
         // in some special directory
-        // and also the image format might contain an embedded thumbnail
+
+        // TODO or there could be a progress bar like
+        // https://stackoverflow.com/questions/24815494/using-jprogressbar-while-converting-image-to-byte-array
+        // https://stackoverflow.com/questions/24835638/issues-with-swingworker-and-jprogressbar
+        // http://www.java2s.com/Code/JavaAPI/javax.imageio.event/implementsIIOReadProgressListener.htm
 
         // TODO another problem is that ora and pxc files are reported as "Unrecognized"
         Image bigImage = null;
-        if (filePath.toLowerCase().endsWith(".bmp")) {
-            try {
-                bigImage = ImageIO.read(file);
-            } catch (IOException ex) {
-                Messages.showException(ex);
-            }
-        } else {
-            // TODO: load all types with ImageIO?
-            // it seems that ImageIcon loads slower
-            // maybe it caches the big image, but we need
-            // to cache the small one
-            ImageIcon icon = new ImageIcon(filePath);
-            bigImage = icon.getImage();
+        try {
+            bigImage = ImageIO.read(file);
+        } catch (IOException ex) {
+            Messages.showException(ex);
         }
 
-        smallImage = scaleImage(bigImage);
-        thumbsCache.put(filePath, smallImage);
+        imageInfo = scaleImage(bigImage);
+        thumbsCache.put(filePath, imageInfo);
     }
 
     private static File getFileFromFileChooserEvent(PropertyChangeEvent e) {
@@ -126,13 +126,13 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
         return file;
     }
 
-    private Image scaleImage(Image img) {
+    private ImageInfo scaleImage(Image img) {
         if (img == null) {
             return null;
         }
 
-        imgWidth = img.getWidth(null);
-        imgHeight = img.getHeight(null);
+        int imgWidth = img.getWidth(null);
+        int imgHeight = img.getHeight(null);
 
         int availableWidth = getWidth() - EMPTY_SPACE_AT_LEFT;
         int availableHeight = getHeight();
@@ -144,8 +144,10 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
         newImgWidth = (int) (scale * (double) imgWidth);
         newImgHeight = (int) (scale * (double) imgHeight);
 
-        return img.getScaledInstance(
+        // perhaps the imgscalr library would be faster
+        Image thumb = img.getScaledInstance(
                 newImgWidth, newImgHeight, Image.SCALE_FAST);
+        return new ImageInfo(thumb, imgWidth, imgHeight);
     }
 
     @Override
@@ -155,25 +157,41 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
         int panelHeight = getHeight();
         g.fillRect(0, 0, panelWidth, panelHeight);
 
-        if (smallImage != null) {
+        if (imageInfo != null) {
             int x = (panelWidth - newImgWidth) / 2 + EMPTY_SPACE_AT_LEFT;
             int y = (panelHeight - newImgHeight) / 2;
-            g.drawImage(smallImage, x, y, this);
+            g.drawImage(imageInfo.thumb, x, y, this);
 
-            boolean doubleDrawMsg = y < MSG_STRING_Y - 10;
+//            boolean doubleDrawMsg = y < MSG_STRING_Y - 10;
 
+            int imgWidth = imageInfo.origWidth;
+            int imgHeight = imageInfo.origHeight;
             String msg = "Size: " + imgWidth + " x " + imgHeight + " pixels";
             if (imgWidth == -1 || imgHeight == -1) {
                 msg = "Unrecognized!";
-                doubleDrawMsg = false;
+//                doubleDrawMsg = false;
             }
 
             g.setColor(BLACK);
-            g.drawString(msg, MSG_STRING_X, MSG_STRING_Y);
-            if (doubleDrawMsg) {
+            g.drawString(msg, MSG_X, MSG_Y);
+//            if (doubleDrawMsg) {
                 g.setColor(WHITE);
-                g.drawString(msg, MSG_STRING_X - 1, MSG_STRING_Y - 1);
-            }
+            g.drawString(msg, MSG_X - 1, MSG_Y - 1);
+//            }
+        }
+    }
+
+    private static class ImageInfo {
+        public Image thumb;
+
+        // these sizes refer to the original, not to the thumb!
+        public int origWidth;
+        public int origHeight;
+
+        public ImageInfo(Image thumb, int origWidth, int origHeight) {
+            this.thumb = thumb;
+            this.origWidth = origWidth;
+            this.origHeight = origHeight;
         }
     }
 }
