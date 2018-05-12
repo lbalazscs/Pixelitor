@@ -23,9 +23,10 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.SliderSpinner;
+import pixelitor.tools.guidelines.RectGuideline;
+import pixelitor.tools.guidelines.RectGuidelineType;
 import pixelitor.transform.TransformSupport;
 import pixelitor.utils.ImageSwitchListener;
-import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
@@ -67,12 +68,15 @@ public class CropTool extends Tool implements ImageSwitchListener {
 
     private JSpinner wSizeSpinner;
     private JSpinner hSizeSpinner;
+    private JComboBox guidelinesSelector;
 
     // The crop rectangle in image space.
     // This variable is used only while the image component is resized
     private Rectangle2D lastCropRect;
 
     private JCheckBox allowGrowingCB;
+
+    private RectGuideline rectGuideline = new RectGuideline();
 
     CropTool() {
         super('c', "Crop", "crop_tool_icon.png",
@@ -113,6 +117,16 @@ public class CropTool extends Tool implements ImageSwitchListener {
                 );
             }
         };
+        settingsPanel.addSeparator();
+
+        // add crop guidelines type selector
+        guidelinesSelector = new JComboBox<>(RectGuidelineType.values());
+        guidelinesSelector.setMaximumRowCount(guidelinesSelector.getItemCount());
+        guidelinesSelector.setSelectedItem(RectGuidelineType.RULE_OF_THIRDS);
+        guidelinesSelector.addActionListener(e -> ImageComponents.repaintActive());
+
+        settingsPanel.add(new JLabel("Guidelines:"));
+        settingsPanel.add(guidelinesSelector);
 
         settingsPanel.addSeparator();
 
@@ -278,7 +292,13 @@ public class CropTool extends Tool implements ImageSwitchListener {
             // prevents drawing outside the InternalImageFrame/ImageComponent
             // it is important to call this AFTER setting the unscaled transform
             g2.setClip(componentSpaceViewRect);
+
+            // draw guidelines
+            RectGuidelineType guidelineType = (RectGuidelineType) guidelinesSelector.getSelectedItem();
+            rectGuideline.draw(callingIC.fromImageToComponentSpace(cropRect), guidelineType, g2);
+
             transformSupport.paintHandles(g2);
+
             g2.setTransform(scaledTransform);
         }
 
