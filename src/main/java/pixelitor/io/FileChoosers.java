@@ -23,6 +23,7 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.ImagePreviewPanel;
 import pixelitor.gui.utils.SaveFileChooser;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -40,12 +41,20 @@ public class FileChoosers {
     private static final FileFilter pngFilter = new FileNameExtensionFilter("PNG files", "png");
     private static final FileFilter bmpFilter = new FileNameExtensionFilter("BMP files", "bmp");
     public static final FileNameExtensionFilter gifFilter = new FileNameExtensionFilter("GIF files", "gif");
+    private static final FileFilter tiffFilter = new FileNameExtensionFilter("TIFF files", "tiff", "tif");
     private static final FileFilter pxcFilter = new FileNameExtensionFilter("PXC files", "pxc");
     public static final FileFilter oraFilter = new FileNameExtensionFilter("OpenRaster files", "ora");
 
-    private static final FileFilter[] DEFAULT_OPEN_SAVE_FILTERS = {bmpFilter, gifFilter, jpegFilter, oraFilter, pngFilter, pxcFilter};
+    private static FileFilter[] OPEN_SAVE_FILTERS;
 
-    private static final FileFilter[] NON_DEFAULT_OPEN_SAVE_FILTERS = {};
+    static {
+        if (Utils.getCurrentMainJavaVersion() == 8) {
+            OPEN_SAVE_FILTERS = new FileFilter[]{bmpFilter, gifFilter, jpegFilter, oraFilter, pngFilter, pxcFilter};
+        } else {
+            OPEN_SAVE_FILTERS = new FileFilter[]{bmpFilter, gifFilter, jpegFilter, oraFilter, pngFilter, pxcFilter, tiffFilter};
+        }
+    }
+
 
     private FileChoosers() {
     }
@@ -169,7 +178,6 @@ public class FileChoosers {
         ext = ext.toLowerCase();
         switch (ext) {
             case "jpg":
-                return jpegFilter;
             case "jpeg":
                 return jpegFilter;
             case "png":
@@ -180,6 +188,9 @@ public class FileChoosers {
                 return gifFilter;
             case "pxc":
                 return pxcFilter;
+            case "tif":
+            case "tiff":
+                return tiffFilter;
         }
         return jpegFilter; // default
     }
@@ -201,27 +212,15 @@ public class FileChoosers {
     }
 
     private static void addDefaultFilters(JFileChooser chooser) {
-        // remove first the non-default filters in case they are there
-        for (FileFilter filter : NON_DEFAULT_OPEN_SAVE_FILTERS) {
-            chooser.removeChoosableFileFilter(filter);
-        }
-
-        for (FileFilter filter : DEFAULT_OPEN_SAVE_FILTERS) {
+        for (FileFilter filter : OPEN_SAVE_FILTERS) {
             chooser.addChoosableFileFilter(filter);
         }
     }
 
     private static void setupFilterToOnlyOneFormat(JFileChooser chooser, FileFilter chosenFilter) {
-        for (FileFilter filter : DEFAULT_OPEN_SAVE_FILTERS) {
+        for (FileFilter filter : OPEN_SAVE_FILTERS) {
             if(filter != chosenFilter) {
                 chooser.removeChoosableFileFilter(filter);
-            }
-        }
-
-        // if we want to set up a non-default filter, it has to be added now
-        for (FileFilter filter : NON_DEFAULT_OPEN_SAVE_FILTERS) {
-            if(chosenFilter == filter) {
-                chooser.addChoosableFileFilter(chosenFilter);
             }
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,6 +39,13 @@ public enum OutputFormat {
         @Override
         public void doSaveComposition(Composition comp, File file) {
             BufferedImage finalImage = comp.getCompositeImage(); // the format supports alpha, no need to convert ARGB to RGB
+            OpenSaveManager.saveImageToFile(file, finalImage, toString());
+        }
+    }, TIFF {
+        @Override
+        public void doSaveComposition(Composition comp, File file) {
+            BufferedImage finalImage = comp
+                    .getCompositeImage(); // the format supports alpha, no need to convert ARGB to RGB
             OpenSaveManager.saveImageToFile(file, finalImage, toString());
         }
     }, GIF {
@@ -100,6 +107,9 @@ public enum OutputFormat {
                 return PXC;
             case "ora":
                 return ORA;
+            case "tif":
+            case "tiff":
+                return TIFF;
             default:
                 throw new IllegalArgumentException("extension = " + extension);
         }

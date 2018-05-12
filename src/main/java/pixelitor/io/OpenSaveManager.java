@@ -94,7 +94,14 @@ public class OpenSaveManager {
             Messages.showException(ex);
         }
         if (img == null) {
-            String message = String.format("Could not load \"%s\" as an image file", file.getName());
+            String message = String.format("Could not load \"%s\" as an image file.", file.getName());
+
+            String ext = FileExtensionUtils.getExt(file.getName());
+            if (ext.startsWith("tif") && Utils.getCurrentMainJavaVersion() == 8) {
+                message += "\nNote that TIFF files are supported only when Pixelitor is running on Java 9+.";
+                message += "\nCurrently it is running on Java 8.";
+            }
+
             Messages.showError("Error", message);
             return null;
         }
