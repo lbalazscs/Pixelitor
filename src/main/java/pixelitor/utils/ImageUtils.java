@@ -27,6 +27,7 @@ import pixelitor.colors.ColorUtils;
 import pixelitor.filters.Invert;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.gui.utils.ThumbInfo;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.utils.debug.BufferedImageNode;
 
@@ -93,7 +94,7 @@ public class ImageUtils {
     }
 
     public static CheckerboardPainter createCheckerboardPainter() {
-          return new CheckerboardPainter(CHECKERBOARD_GRAY, Color.WHITE);
+        return new CheckerboardPainter(CHECKERBOARD_GRAY, Color.WHITE);
     }
 
     public static BufferedImage toSysCompatibleImage(BufferedImage input) {
@@ -106,7 +107,8 @@ public class ImageUtils {
         }
 
         int transparency = Transparency.TRANSLUCENT;
-        BufferedImage output = graphicsConfiguration.createCompatibleImage(input.getWidth(), input.getHeight(), transparency);
+        BufferedImage output = graphicsConfiguration
+                .createCompatibleImage(input.getWidth(), input.getHeight(), transparency);
         Graphics2D g = output.createGraphics();
         g.drawImage(input, 0, 0, null);
         g.dispose();
@@ -122,13 +124,15 @@ public class ImageUtils {
 
     public static BufferedImage createImageWithSameColorModel(BufferedImage src) {
         ColorModel dstCM = src.getColorModel();
-        return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(src.getWidth(), src.getHeight()), dstCM.isAlphaPremultiplied(), null);
+        return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(src.getWidth(), src.getHeight()), dstCM
+                .isAlphaPremultiplied(), null);
     }
 
     // like the above but instead of src width and height, it uses the arguments
     public static BufferedImage createImageWithSameColorModel(BufferedImage src, int width, int height) {
         ColorModel dstCM = src.getColorModel();
-        return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(width, height), dstCM.isAlphaPremultiplied(), null);
+        return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(width, height), dstCM
+                .isAlphaPremultiplied(), null);
     }
 
 
@@ -462,8 +466,8 @@ public class ImageUtils {
     public static BufferedImage loadImageWithStatusBarProgressTracking(File file) throws IOException {
         BufferedImage image;
 
-        try (ImageInputStream input = ImageIO.createImageInputStream(file)) {
-            Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
+        try (ImageInputStream iis = ImageIO.createImageInputStream(file)) {
+            Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
 
             if (!readers.hasNext()) {
                 return null;
@@ -472,7 +476,7 @@ public class ImageUtils {
             ImageReader reader = readers.next();
 
             try {
-                reader.setInput(input);
+                reader.setInput(iis);
 
                 // register the status bar progress tracking
                 reader.addIIOReadProgressListener(new StatusBarReadProgressListener(file));
@@ -484,6 +488,78 @@ public class ImageUtils {
             }
         }
         return image;
+    }
+
+    /**
+     * Reads a subsampled image. It requires far less memory,
+     * can be almost twice as fast as reading all pixels,
+     * and it does not need to be resized later.
+     * <p>
+     * Idea from https://stackoverflow.com/questions/3294388/make-a-bufferedimage-use-less-ram
+     */
+    public static ThumbInfo readSubsampledThumb(File file, int thumbMaxWidth, int thumbMaxHeight) throws IOException {
+        ThumbInfo thumbInfo;
+        try (ImageInputStream iis = ImageIO.createImageInputStream(file)) {
+            Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
+
+            if (!readers.hasNext()) {
+                return null;
+            }
+
+            ImageReader reader = readers.next();
+
+            try {
+                reader.setInput(iis, true);
+
+                // Once the reader has its input source set,
+                // we can use it to obtain information about
+                // the image without necessarily causing image data
+                // to be read into memory
+                int imgWidth = reader.getWidth(0);
+                int imgHeight = reader.getHeight(0);
+
+                if (imgWidth < 2 * thumbMaxWidth || imgHeight < 2 * thumbMaxHeight) {
+                    // subsampling only makes sense when
+                    // the image is shrunk by 2x or greater
+                    BufferedImage image = reader.read(0);
+                    BufferedImage thumb = createThumbnail(image, Math.min(thumbMaxWidth, thumbMaxHeight), null);
+                    return new ThumbInfo(thumb, imgWidth, imgHeight);
+                }
+
+// TODO in principle a thumbnail could be in the file already
+// see https://docs.oracle.com/javase/7/docs/technotes/guides/imageio/spec/apps.fm3.html
+//                boolean hasThumbs = reader.hasThumbnails(0);
+//                if(hasThumbs) {
+//                    BufferedImage bi = reader.readThumbnail(0, 0);
+//                }
+
+                ImageReadParam imageReaderParams = reader.getDefaultReadParam();
+                int subsampling = calcSubsamplingCols(imgWidth, imgHeight, thumbMaxWidth, thumbMaxHeight);
+
+                imageReaderParams.setSourceSubsampling(subsampling, subsampling, 0, 0);
+                BufferedImage image = reader.read(0, imageReaderParams);
+                thumbInfo = new ThumbInfo(image, imgWidth, imgHeight);
+            } finally {
+                reader.dispose();
+            }
+        }
+        return thumbInfo;
+    }
+
+    /**
+     * Calculates the number of columns to advance between pixels while subsampling.
+     * In order to preserve the aspect ratio, the same number is used
+     * for the horizontal and vertical subsampling.
+     */
+    @VisibleForTesting
+    public static int calcSubsamplingCols(int imgWidth, int imgHeight, int thumbMaxWidth, int thumbMaxHeight) {
+        assert imgWidth >= thumbMaxWidth * 2;
+        assert imgHeight >= thumbMaxHeight * 2;
+
+        int columnsX = (int) Math.ceil(imgWidth / (double) thumbMaxWidth);
+        int columnsY = (int) Math.ceil(imgHeight / (double) thumbMaxHeight);
+
+        return Math.max(columnsX, columnsY);
     }
 
     public static BufferedImage convertToARGB_PRE(BufferedImage src, boolean oldCanBeFlushed) {
@@ -636,7 +712,7 @@ public class ImageUtils {
         BufferedImage thumb = createSysCompatibleImage(thumbWidth, thumbHeight);
         Graphics2D g = thumb.createGraphics();
 
-        if(painter != null) {
+        if (painter != null) {
             painter.paint(g, null, thumbWidth, thumbHeight);
         }
 
@@ -693,8 +769,10 @@ public class ImageUtils {
         }
 
         Raster copyRaster = src.getData(intersection);  // a copy
-        Raster startingFrom00 = copyRaster.createChild(intersection.x, intersection.y, intersection.width, intersection.height, 0, 0, null);
-        return new BufferedImage(src.getColorModel(), (WritableRaster) startingFrom00, src.isAlphaPremultiplied(), null);
+        Raster startingFrom00 = copyRaster
+                .createChild(intersection.x, intersection.y, intersection.width, intersection.height, 0, 0, null);
+        return new BufferedImage(src.getColorModel(), (WritableRaster) startingFrom00, src
+                .isAlphaPremultiplied(), null);
     }
 
     /**
@@ -1094,7 +1172,7 @@ public class ImageUtils {
                 int rgb = im.getRGB(x, y);
                 String asString = ColorUtils.rgbIntToString(rgb);
                 s.append(asString);
-                if(x == width - 1) {
+                if (x == width - 1) {
                     s.append("\n");
                 } else {
                     s.append(" ");
