@@ -95,19 +95,18 @@ public class Handles {
     /**
      * Iterates over all the handles and if finds one that is over the point, its cursor is set
      * The coordinates are in image space
+     *
+     * @return true if cursor was set on any handle, false otherwise
      */
-    public void setCursorForPoint(int x, int y, ImageComponent c) {
-        boolean handleFound = false;
+    public boolean setCursorForPoint(int x, int y, ImageComponent c) {
         for (Handle handle : handles) {
             if(handle.isOver(x, y)) {
                 c.setCursor(handle.getCursor());
-                handleFound = true;
-                break;
+                return true;
             }
         }
-        if(!handleFound) {
-            c.setCursor(Cursor.getDefaultCursor());
-        }
+
+        return false;
     }
 
     // here rect must be given in component-space ("mouse") coordinates
