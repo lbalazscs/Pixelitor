@@ -24,6 +24,7 @@ import pixelitor.utils.Utils;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Point;
+import java.awt.Cursor;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 
@@ -122,7 +123,14 @@ public class TransformSupport {
     }
 
     public void mouseMoved(MouseEvent e, ImageComponent ic) {
-        handles.setCursorForPoint(e.getX(), e.getY(), ic);
+        boolean isCursorSet = handles.setCursorForPoint(e.getX(), e.getY(), ic);
+        if (!isCursorSet) {
+            if (compSpaceRect.contains(e.getX(), e.getY())) {
+                ic.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+            } else {
+                ic.setCursor(Cursor.getDefaultCursor());
+            }
+        }
     }
 
     public Rectangle2D getImageSpaceRect() {
