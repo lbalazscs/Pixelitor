@@ -17,18 +17,11 @@
 
 package pixelitor.tools;
 
-import pixelitor.utils.Messages;
-
 enum CropToolState {
     INITIAL {
         @Override
         public CropToolState getNextAfterMousePressed() {
             return USER_DRAG;
-        }
-
-        @Override
-        public void cancel(CropTool cropTool) {
-            // do nothing
         }
     }, USER_DRAG {
         // the transform handles are not shown
@@ -38,11 +31,6 @@ enum CropToolState {
         public CropToolState getNextAfterMousePressed() {
             throw new IllegalStateException();
         }
-
-        @Override
-        public void cancel(CropTool cropTool) {
-            // do nothing
-        }
     }, TRANSFORM {
         // the handles are shown
         // from the first mouse release until crop or cancel
@@ -51,16 +39,7 @@ enum CropToolState {
         public CropToolState getNextAfterMousePressed() {
             return TRANSFORM;
         }
-
-        @Override
-        public void cancel(CropTool cropTool) {
-            cropTool.resetStateToInitial();
-            Messages.showStatusMessage("Crop canceled.");
-        }
     };
 
     public abstract CropToolState getNextAfterMousePressed();
-
-    public abstract void cancel(CropTool cropTool);
-
 }
