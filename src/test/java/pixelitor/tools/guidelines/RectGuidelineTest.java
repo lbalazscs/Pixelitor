@@ -1,7 +1,7 @@
 package pixelitor.tools.guidelines;
 
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import java.awt.*;
@@ -34,10 +34,10 @@ public class RectGuidelineTest {
         rectGuideline = new RectGuideline();
         rectGuideline.draw(rect, RectGuidelineType.RULE_OF_THIRDS, g2);
 
-        Mockito.verify(g2, Mockito.times(2)).draw(Matchers.refEq(new Line2D.Double(30, 0, 30, 12)));
-        Mockito.verify(g2, Mockito.times(2)).draw(Matchers.refEq(new Line2D.Double(60, 0, 60, 12)));
-        Mockito.verify(g2, Mockito.times(2)).draw(Matchers.refEq(new Line2D.Double(0, 4, 90, 4)));
-        Mockito.verify(g2, Mockito.times(2)).draw(Matchers.refEq(new Line2D.Double(0, 8, 90, 8)));
+        Mockito.verify(g2, Mockito.times(2)).draw(ArgumentMatchers.refEq(new Line2D.Double(30, 0, 30, 12)));
+        Mockito.verify(g2, Mockito.times(2)).draw(ArgumentMatchers.refEq(new Line2D.Double(60, 0, 60, 12)));
+        Mockito.verify(g2, Mockito.times(2)).draw(ArgumentMatchers.refEq(new Line2D.Double(0, 4, 90, 4)));
+        Mockito.verify(g2, Mockito.times(2)).draw(ArgumentMatchers.refEq(new Line2D.Double(0, 8, 90, 8)));
     }
 
     @Test
@@ -53,10 +53,10 @@ public class RectGuidelineTest {
         double sectionWidth = rect.getWidth() / phi;
         double sectionHeight = rect.getHeight() / phi;
 
-        Mockito.verify(g2, Mockito.times(2)).draw(Matchers.refEq(new Line2D.Double(sectionWidth, 0, sectionWidth, 12)));
-        Mockito.verify(g2, Mockito.times(2)).draw(Matchers.refEq(new Line2D.Double(90-sectionWidth, 0, 90-sectionWidth, 12)));
-        Mockito.verify(g2, Mockito.times(2)).draw(Matchers.refEq(new Line2D.Double(0, sectionHeight, 90, sectionHeight)));
-        Mockito.verify(g2, Mockito.times(2)).draw(Matchers.refEq(new Line2D.Double(0, 12-sectionHeight, 90, 12-sectionHeight)));
+        Mockito.verify(g2, Mockito.times(2)).draw(ArgumentMatchers.refEq(new Line2D.Double(sectionWidth, 0, sectionWidth, 12)));
+        Mockito.verify(g2, Mockito.times(2)).draw(ArgumentMatchers.refEq(new Line2D.Double(90-sectionWidth, 0, 90-sectionWidth, 12)));
+        Mockito.verify(g2, Mockito.times(2)).draw(ArgumentMatchers.refEq(new Line2D.Double(0, sectionHeight, 90, sectionHeight)));
+        Mockito.verify(g2, Mockito.times(2)).draw(ArgumentMatchers.refEq(new Line2D.Double(0, 12-sectionHeight, 90, 12-sectionHeight)));
     }
 
     @Test
@@ -69,10 +69,10 @@ public class RectGuidelineTest {
         rectGuideline = new RectGuideline();
         rectGuideline.draw(rect, RectGuidelineType.DIAGONALS, g2);
 
-        Mockito.verify(g2, Mockito.times(2)).draw(Matchers.refEq(new Line2D.Double(0, 0, 12, 12)));
-        Mockito.verify(g2, Mockito.times(2)).draw(Matchers.refEq(new Line2D.Double(0, 12, 12, 0)));
-        Mockito.verify(g2, Mockito.times(2)).draw(Matchers.refEq(new Line2D.Double(90, 0, 90-12, 12)));
-        Mockito.verify(g2, Mockito.times(2)).draw(Matchers.refEq(new Line2D.Double(90, 12, 90-12, 0)));
+        Mockito.verify(g2, Mockito.times(2)).draw(ArgumentMatchers.refEq(new Line2D.Double(0, 0, 12, 12)));
+        Mockito.verify(g2, Mockito.times(2)).draw(ArgumentMatchers.refEq(new Line2D.Double(0, 12, 12, 0)));
+        Mockito.verify(g2, Mockito.times(2)).draw(ArgumentMatchers.refEq(new Line2D.Double(90, 0, 90-12, 12)));
+        Mockito.verify(g2, Mockito.times(2)).draw(ArgumentMatchers.refEq(new Line2D.Double(90, 12, 90-12, 0)));
     }
 
     @Test
@@ -85,9 +85,9 @@ public class RectGuidelineTest {
         rectGuideline = new RectGuideline();
         rectGuideline.draw(rect, RectGuidelineType.DIAGONALS, g2);
 
-        Mockito.verify(g2, Mockito.times(2)).draw(Matchers.refEq(new Line2D.Double(0, 0, 12, 12)));
-        Mockito.verify(g2, Mockito.times(2)).draw(Matchers.refEq(new Line2D.Double(0, 12, 12, 0)));
-        Mockito.verify(g2, Mockito.times(2)).draw(Matchers.refEq(new Line2D.Double(0, 90, 12, 90-12)));
-        Mockito.verify(g2, Mockito.times(2)).draw(Matchers.refEq(new Line2D.Double(0, 90-12, 12, 90)));
+        Mockito.verify(g2, Mockito.times(2)).draw(ArgumentMatchers.refEq(new Line2D.Double(0, 0, 12, 12)));
+        Mockito.verify(g2, Mockito.times(2)).draw(ArgumentMatchers.refEq(new Line2D.Double(0, 12, 12, 0)));
+        Mockito.verify(g2, Mockito.times(2)).draw(ArgumentMatchers.refEq(new Line2D.Double(0, 90, 12, 90-12)));
+        Mockito.verify(g2, Mockito.times(2)).draw(ArgumentMatchers.refEq(new Line2D.Double(0, 90-12, 12, 90)));
     }
 }
