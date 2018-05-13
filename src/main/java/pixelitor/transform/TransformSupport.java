@@ -129,6 +129,10 @@ public class TransformSupport {
         return imageSpaceRect;
     }
 
+    public Rectangle getComponentSpaceRect() {
+        return compSpaceRect;
+    }
+
     @Override
     public String toString() {
         return "TransformSupport{" +

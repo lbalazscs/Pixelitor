@@ -27,6 +27,7 @@ import pixelitor.tools.guidelines.RectGuideline;
 import pixelitor.tools.guidelines.RectGuidelineType;
 import pixelitor.transform.TransformSupport;
 import pixelitor.utils.ImageSwitchListener;
+import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
@@ -156,18 +157,40 @@ public class CropTool extends Tool implements ImageSwitchListener {
         settingsPanel.addSeparator();
 
         // add crop button
-        cropButton = settingsPanel.addButton("Crop",
-                e -> {
-                    ImageComponents.toolCropActiveImage(allowGrowingCB.isSelected());
-                    ImageComponents.repaintActive();
-                    resetStateToInitial();
-                });
+        cropButton = new JButton("Crop");
+        cropButton.addActionListener(e -> executeCropCommand());
         cropButton.setEnabled(false);
+        settingsPanel.add(cropButton);
 
         // add cancel button
-        cancelButton.addActionListener(e -> state.cancel(this));
+        cancelButton.addActionListener(e -> executeCloseCommand());
         cancelButton.setEnabled(false);
         settingsPanel.add(cancelButton);
+    }
+
+    @Override
+    public boolean dispatchMouseClicked(MouseEvent e, ImageComponent ic) {
+        if (e.getClickCount() == 2 && !e.isConsumed()) {
+            return mouseDoubleClicked(e);
+        }
+
+        return false;
+    }
+
+    private boolean mouseDoubleClicked(MouseEvent e) {
+        // if user double clicked inside selection then accept cropping
+
+        if (state != TRANSFORM) {
+            return false;
+        }
+
+        if (!transformSupport.getComponentSpaceRect().contains(e.getPoint())) {
+            return false;
+        }
+
+        e.consume();
+        executeCropCommand();
+        return true;
     }
 
     @Override
@@ -358,7 +381,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
         resetStateToInitial();
     }
 
-    public void resetStateToInitial() {
+    private void resetStateToInitial() {
         ended = true;
         transformSupport = null;
         state = INITIAL;
@@ -370,6 +393,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
         wSizeSpinner.setValue(0);
 
         ImageComponents.repaintActive();
+        ImageComponents.setCursorForAll(Cursor.getDefaultCursor());
     }
 
     public void icResized(ImageComponent ic) {
@@ -392,7 +416,26 @@ public class CropTool extends Tool implements ImageSwitchListener {
 
     @Override
     public void escPressed() {
-        state.cancel(this);
+        executeCloseCommand();
+    }
+
+    private void executeCropCommand() {
+        if (state != TRANSFORM) {
+            return;
+        }
+
+        ImageComponents.toolCropActiveImage(allowGrowingCB.isSelected());
+        ImageComponents.repaintActive();
+        resetStateToInitial();
+    }
+
+    private void executeCloseCommand() {
+        if (state != TRANSFORM) {
+            return;
+        }
+
+        resetStateToInitial();
+        Messages.showStatusMessage("Crop canceled.");
     }
 
     @Override
