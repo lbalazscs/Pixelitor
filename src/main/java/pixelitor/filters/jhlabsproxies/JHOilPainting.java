@@ -26,8 +26,8 @@ import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
-import pixelitor.utils.BasicProgressTracker;
 import pixelitor.utils.ProgressTracker;
+import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.image.BufferedImage;
 
@@ -95,7 +95,7 @@ public class JHOilPainting extends FilterWithParametrizedGUI {
             int filterUnits = (int) (filterWorkAmount / 4);
             int workUnits = resizeUnits + filterUnits;
 
-            ProgressTracker pt = new BasicProgressTracker(NAME, workUnits);
+            ProgressTracker pt = new StatusBarProgressTracker(NAME, workUnits);
 //            ProgressTracker pt = new DebugProgressTracker("Oil, brushX = " + downScaledBrushX + ", brushY = " + downScaledBrushY, workUnits);
 
             ProgressTracker filterTracker = r.createFilterTracker(pt, filterUnits);

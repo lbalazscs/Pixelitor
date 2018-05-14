@@ -17,26 +17,22 @@
 
 package pixelitor.utils;
 
-import pixelitor.MessageHandler;
-
 /**
- * Tracks the progress of some operation and shows a
- * status bar update if it takes a long time.
+ * An abstract superclass for progress tracking classes which
+ * show progress information after a time threshold has been exceeded.
  */
-public class BasicProgressTracker implements ProgressTracker {
+public abstract class ThresholdProgressTracker implements ProgressTracker {
     private static final int THRESHOLD_MILLIS = 200;
-    private static final MessageHandler messageHandler = Messages.getMessageHandler();
 
     private final long startTime;
-    private final String name;
     private final int numComputationUnits;
 
     private int finished = 0;
     private int lastPercent = 0;
-    private boolean progressBar = false;
 
-    public BasicProgressTracker(String name, int numComputationUnits) {
-        this.name = name + ":";
+    private boolean showingProgress = false;
+
+    protected ThresholdProgressTracker(int numComputationUnits) {
         this.numComputationUnits = numComputationUnits;
         startTime = System.currentTimeMillis();
     }
@@ -58,11 +54,11 @@ public class BasicProgressTracker implements ProgressTracker {
         if (millis > THRESHOLD_MILLIS) {
             int percent = ((int) (finished * 100.0 / numComputationUnits));
             if (percent != lastPercent) {
-                if (!progressBar) {
-                    messageHandler.startProgress(name, 100);
-                    progressBar = true;
+                if (!showingProgress) {
+                    startProgressTracking();
+                    showingProgress = true;
                 }
-                messageHandler.updateProgress(percent);
+                updateProgressTracking(percent);
                 lastPercent = percent;
             }
         }
@@ -70,8 +66,15 @@ public class BasicProgressTracker implements ProgressTracker {
 
     @Override
     public void finish() {
-        if (progressBar) {
-            messageHandler.stopProgress();
+        if (showingProgress) {
+            finishProgressTracking();
+            showingProgress = false;
         }
     }
+
+    abstract void startProgressTracking();
+
+    abstract void updateProgressTracking(int percent);
+
+    abstract void finishProgressTracking();
 }

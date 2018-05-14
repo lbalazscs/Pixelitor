@@ -26,9 +26,9 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
-import pixelitor.utils.BasicProgressTracker;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ProgressTracker;
+import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -93,7 +93,7 @@ public class JHRays extends FilterWithParametrizedGUI {
             int resizeUnits = r.getResizeWorkUnits(BILINEAR_FAST);
             workUnits += resizeUnits;
         }
-        ProgressTracker pt = new BasicProgressTracker(NAME, workUnits);
+        ProgressTracker pt = new StatusBarProgressTracker(NAME, workUnits);
 //        ProgressTracker pt = new DebugProgressTracker(NAME, workUnits);
         filter.setProgressTracker(pt);
 

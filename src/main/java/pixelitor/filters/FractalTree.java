@@ -25,9 +25,9 @@ import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
-import pixelitor.utils.BasicProgressTracker;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.ReseedSupport;
+import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -164,7 +164,7 @@ public class FractalTree extends FilterWithParametrizedGUI {
             drawTreeCalls *= 2;
         }
         drawTreeCalls--;
-        pt = new BasicProgressTracker(NAME, drawTreeCalls);
+        pt = new StatusBarProgressTracker(NAME, drawTreeCalls);
 
         drawTree(g, src.getWidth() / 2.0, src.getHeight(), 270 + calcAngleRandomness(rand), maxDepth, rand, c);
 

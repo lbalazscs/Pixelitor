@@ -26,13 +26,13 @@ import java.io.File;
  * the reading of a large file.
  */
 public class StatusBarReadProgressListener implements IIOReadProgressListener {
-    private final BasicProgressTracker tracker;
+    private final ProgressTracker tracker;
     private int workDone = 0;
     private final String fileName;
 
     public StatusBarReadProgressListener(File file) {
         fileName = file.getName();
-        tracker = new BasicProgressTracker("Reading " + fileName, 100);
+        tracker = new StatusBarProgressTracker("Reading " + fileName, 100);
     }
 
     @Override

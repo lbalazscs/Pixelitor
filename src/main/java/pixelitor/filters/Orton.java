@@ -22,9 +22,9 @@ import com.jhlabs.image.BoxBlurFilter;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
-import pixelitor.utils.BasicProgressTracker;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ProgressTracker;
+import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -59,7 +59,7 @@ public class Orton extends FilterWithParametrizedGUI {
         int blurWorkUnits = 3 * (width + height);
         int totalWorkUnits = 2 * blurWorkUnits;
 
-        ProgressTracker pt = new BasicProgressTracker(NAME, totalWorkUnits);
+        ProgressTracker pt = new StatusBarProgressTracker(NAME, totalWorkUnits);
 
         dest = ImageUtils.copyImage(src);
         ImageUtils.screenWithItself(dest, opacity);

@@ -16,8 +16,8 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import pixelitor.utils.BasicProgressTracker;
 import pixelitor.utils.ProgressTracker;
+import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
@@ -60,7 +60,7 @@ public abstract class AbstractBufferedImageOp implements BufferedImageOp, Clonea
 
     protected ProgressTracker createProgressTracker(int workUnits) {
         if (!usedAsHelper) {
-            pt = new BasicProgressTracker(filterName, workUnits);
+            pt = new StatusBarProgressTracker(filterName, workUnits);
         }
         return pt;
     }

@@ -25,10 +25,10 @@ import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
-import pixelitor.utils.BasicProgressTracker;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.ReseedSupport;
+import pixelitor.utils.StatusBarProgressTracker;
 import pixelitor.utils.Utils;
 
 import java.awt.AlphaComposite;
@@ -90,7 +90,7 @@ public class PhotoCollage extends FilterWithParametrizedGUI {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         int numImages = imageNumber.getValue();
-        ProgressTracker pt = new BasicProgressTracker(NAME, numImages);
+        ProgressTracker pt = new StatusBarProgressTracker(NAME, numImages);
 
         Random rand = ReseedSupport.reInitialize();
 

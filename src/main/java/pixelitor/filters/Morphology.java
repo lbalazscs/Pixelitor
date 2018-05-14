@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,8 +23,8 @@ import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.MorphologyFilter;
-import pixelitor.utils.BasicProgressTracker;
 import pixelitor.utils.ProgressTracker;
+import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.image.BufferedImage;
 
@@ -72,7 +72,7 @@ public class Morphology extends FilterWithParametrizedGUI {
             filter.setOp(selectedOp);
             dest = filter.filter(src, dest);
         } else {
-            ProgressTracker pt = new BasicProgressTracker(NAME, 2 * iterations);
+            ProgressTracker pt = new StatusBarProgressTracker(NAME, 2 * iterations);
             filter.setProgressTracker(pt);
 
             if (selectedOp == OP_OPEN) {

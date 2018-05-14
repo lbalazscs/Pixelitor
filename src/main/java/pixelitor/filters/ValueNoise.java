@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,9 +23,9 @@ import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
-import pixelitor.utils.BasicProgressTracker;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ProgressTracker;
+import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -88,7 +88,7 @@ public class ValueNoise extends FilterWithParametrizedGUI {
         float persistence = 0.6f;
         float amplitude = 1.0f;
 
-        ProgressTracker pt = new BasicProgressTracker(NAME, height);
+        ProgressTracker pt = new StatusBarProgressTracker(NAME, height);
 
         Future<?>[] futures = new Future[height];
         for (int y = 0; y < height; y++) {

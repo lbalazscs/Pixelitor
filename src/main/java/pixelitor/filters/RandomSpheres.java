@@ -28,9 +28,9 @@ import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.painters.EffectConfiguratorPanel;
-import pixelitor.utils.BasicProgressTracker;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.ReseedSupport;
+import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -100,7 +100,7 @@ public class RandomSpheres extends FilterWithParametrizedGUI {
         float r = radius.getValueAsFloat();
         int numCircles = (int) ((width * height * density.getValueAsPercentage()) / (r * r));
 
-        ProgressTracker pt = new BasicProgressTracker(NAME, numCircles);
+        ProgressTracker pt = new StatusBarProgressTracker(NAME, numCircles);
 
         Random rand = ReseedSupport.reInitialize();
 
