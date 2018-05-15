@@ -23,11 +23,13 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.ImagePreviewPanel;
 import pixelitor.gui.utils.SaveFileChooser;
 import pixelitor.utils.Messages;
+import pixelitor.utils.ProgressPanel;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.BorderLayout;
 import java.io.File;
 
 /**
@@ -69,8 +71,14 @@ public class FileChoosers {
 
             setDefaultOpenExtensions();
 
-            ImagePreviewPanel preview = new ImagePreviewPanel();
-            openChooser.setAccessory(preview);
+            JPanel p = new JPanel();
+            p.setLayout(new BorderLayout());
+            ProgressPanel progressPanel = new ProgressPanel();
+            ImagePreviewPanel preview = new ImagePreviewPanel(progressPanel);
+            p.add(preview, BorderLayout.CENTER);
+            p.add(progressPanel, BorderLayout.SOUTH);
+
+            openChooser.setAccessory(p);
             openChooser.addPropertyChangeListener(preview);
         }
     }

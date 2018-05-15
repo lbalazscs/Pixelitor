@@ -19,20 +19,17 @@ package pixelitor.utils;
 
 import javax.imageio.ImageReader;
 import javax.imageio.event.IIOReadProgressListener;
-import java.io.File;
 
 /**
  * Displays a progress bar in the status bar to track
  * the reading of a large file.
  */
-public class StatusBarReadProgressListener implements IIOReadProgressListener {
+public class TrackerReadProgressListener implements IIOReadProgressListener {
     private final ProgressTracker tracker;
     private int workDone = 0;
-    private final String fileName;
 
-    public StatusBarReadProgressListener(File file) {
-        fileName = file.getName();
-        tracker = new StatusBarProgressTracker("Reading " + fileName, 100);
+    public TrackerReadProgressListener(ProgressTracker tracker) {
+        this.tracker = tracker;
     }
 
     @Override
@@ -61,7 +58,6 @@ public class StatusBarReadProgressListener implements IIOReadProgressListener {
     @Override
     public void imageComplete(ImageReader source) {
         tracker.finish();
-        Messages.showStatusMessage(fileName + " opened.");
     }
 
     @Override

@@ -19,7 +19,10 @@ package pixelitor.gui.utils;
 
 import pixelitor.io.FileExtensionUtils;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.JProgressBarTracker;
 import pixelitor.utils.Messages;
+import pixelitor.utils.ProgressPanel;
+import pixelitor.utils.ProgressTracker;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -29,7 +32,6 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,10 +53,15 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
 
     private final Map<String, ThumbInfo> thumbsCache;
 
-    public ImagePreviewPanel() {
+    private ProgressPanel progressPanel;
+
+    public ImagePreviewPanel(ProgressPanel progressPanel) {
+        this.progressPanel = progressPanel;
         setPreferredSize(new Dimension(SIZE, SIZE));
         backgroundColor = getBackground();
         thumbsCache = new HashMap<>();
+
+        this.progressPanel.setVisible(true);
     }
 
     // the property change events form the JFileChooser
@@ -81,18 +88,18 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
         }
 
         // TODO A problem is that ora and pxc files are reported as "Unrecognized"
-
-        int availableWidth = getWidth() - EMPTY_SPACE_AT_LEFT;
-        int availableHeight = getHeight();
         try {
+            int availableWidth = getWidth() - EMPTY_SPACE_AT_LEFT;
+            int availableHeight = getHeight();
+
             // TODO even the subsampled reading is slow for large
             // images - there could be a progress bar
-            thumbInfo = ImageUtils.readSubsampledThumb(file, availableWidth, availableHeight);
-        } catch (IOException ex) {
+            ProgressTracker pt = new JProgressBarTracker(progressPanel);
+            thumbInfo = ImageUtils.readSubsampledThumb(file, availableWidth, availableHeight, pt);
+            thumbsCache.put(filePath, thumbInfo);
+        } catch (Exception ex) {
             Messages.showException(ex);
         }
-
-        thumbsCache.put(filePath, thumbInfo);
     }
 
     private static File getFileFromFileChooserEvent(PropertyChangeEvent e) {

@@ -91,7 +91,7 @@ public class OpenSaveManager {
         BufferedImage img = null;
         try {
 //            img = ImageIO.read(file);
-            img = ImageUtils.loadImageWithStatusBarProgressTracking(file);
+            img = ImageUtils.readImageWithStatusBarProgressTracking(file);
         } catch (IOException ex) {
             Messages.showException(ex);
         }

@@ -463,7 +463,7 @@ public class ImageUtils {
         return image;
     }
 
-    public static BufferedImage loadImageWithStatusBarProgressTracking(File file) throws IOException {
+    public static BufferedImage readImageWithStatusBarProgressTracking(File file) throws IOException {
         BufferedImage image;
 
         try (ImageInputStream iis = ImageIO.createImageInputStream(file)) {
@@ -479,7 +479,8 @@ public class ImageUtils {
                 reader.setInput(iis);
 
                 // register the status bar progress tracking
-                reader.addIIOReadProgressListener(new StatusBarReadProgressListener(file));
+                ProgressTracker tracker = new StatusBarProgressTracker("Reading " + file.getName(), 100);
+                reader.addIIOReadProgressListener(new TrackerReadProgressListener(tracker));
 
                 ImageReadParam param = reader.getDefaultReadParam();
                 image = reader.read(0, param);
@@ -487,6 +488,7 @@ public class ImageUtils {
                 reader.dispose();
             }
         }
+        Messages.showStatusMessage(file.getName() + " opened.");
         return image;
     }
 
@@ -497,7 +499,7 @@ public class ImageUtils {
      * <p>
      * Idea from https://stackoverflow.com/questions/3294388/make-a-bufferedimage-use-less-ram
      */
-    public static ThumbInfo readSubsampledThumb(File file, int thumbMaxWidth, int thumbMaxHeight) throws IOException {
+    public static ThumbInfo readSubsampledThumb(File file, int thumbMaxWidth, int thumbMaxHeight, ProgressTracker tracker) throws IOException {
         ThumbInfo thumbInfo;
         try (ImageInputStream iis = ImageIO.createImageInputStream(file)) {
             Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
@@ -510,6 +512,11 @@ public class ImageUtils {
 
             try {
                 reader.setInput(iis, true);
+
+                if (tracker != null) {
+                    // register the progress tracking
+                    reader.addIIOReadProgressListener(new TrackerReadProgressListener(tracker));
+                }
 
                 // Once the reader has its input source set,
                 // we can use it to obtain information about
