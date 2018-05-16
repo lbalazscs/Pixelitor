@@ -50,14 +50,17 @@ public abstract class ThresholdProgressTracker implements ProgressTracker {
     }
 
     private void update() {
-        double millis = System.currentTimeMillis() - startTime;
-        if (millis > THRESHOLD_MILLIS) {
+        if (!showingProgress) {
+            double millis = System.currentTimeMillis() - startTime;
+            if (millis > THRESHOLD_MILLIS) {
+                startProgressTracking();
+                showingProgress = true;
+            }
+        }
+
+        if (showingProgress) {
             int percent = ((int) (finished * 100.0 / numComputationUnits));
-            if (percent != lastPercent) {
-                if (!showingProgress) {
-                    startProgressTracking();
-                    showingProgress = true;
-                }
+            if (percent > lastPercent) {
                 updateProgressTracking(percent);
                 lastPercent = percent;
             }
@@ -69,6 +72,7 @@ public abstract class ThresholdProgressTracker implements ProgressTracker {
         if (showingProgress) {
             finishProgressTracking();
             showingProgress = false;
+            lastPercent = 0;
         }
     }
 
