@@ -21,8 +21,8 @@ import javax.imageio.ImageReader;
 import javax.imageio.event.IIOReadProgressListener;
 
 /**
- * Displays a progress bar in the status bar to track
- * the reading of a large file.
+ * Tracks the reading of a large file
+ * with the help of a {@link ProgressTracker}
  */
 public class TrackerReadProgressListener implements IIOReadProgressListener {
     private final ProgressTracker tracker;
