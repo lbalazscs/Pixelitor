@@ -50,6 +50,7 @@ import pixelitor.tools.ShapeType;
 import pixelitor.tools.ShapesAction;
 import pixelitor.tools.Symmetry;
 import pixelitor.tools.Tool;
+import pixelitor.tools.Tools;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.Events;
 import pixelitor.utils.test.PixelitorEventListener;
@@ -79,7 +80,7 @@ import static pixelitor.utils.test.Assertions.thereIsSelection;
 
 public class AssertJSwingTest {
     private static final boolean verbose = true;
-    private static final boolean quick = true;
+    private static final boolean quick = false;
 
     private static File baseTestingDir;
     private static File cleanerScript;
@@ -988,15 +989,22 @@ public class AssertJSwingTest {
                 if (skipThis()) {
                     continue;
                 }
-                Events.postAssertJEvent("auto paint with " + tool);
-                testAutoPaintWithTool(tool);
+                if (tool == Tools.BRUSH) {
+                    for (String colorSetting : AutoPaint.ConfigPanel.COLOR_SETTINGS) {
+                        Events.postAssertJEvent("auto paint with Brush, colorSetting = " + colorSetting);
+                        testAutoPaintWithTool(tool, colorSetting);
+                    }
+                } else {
+                    Events.postAssertJEvent("auto paint with " + tool);
+                    testAutoPaintWithTool(tool, null);
+                }
             }
         });
 
         assert checkConsistency();
     }
 
-    private void testAutoPaintWithTool(Tool tool) {
+    private void testAutoPaintWithTool(Tool tool, String colorsSetting) {
         runMenuCommand("Auto Paint...");
         DialogFixture dialog = findDialogByTitle("Auto Paint");
 
@@ -1008,6 +1016,14 @@ public class AssertJSwingTest {
         if (!numStrokesTF.text().equals(testNumStrokes)) {
             numStrokesTF.deleteText();
             numStrokesTF.enterText(testNumStrokes);
+        }
+
+        JComboBoxFixture colorsCB = dialog.comboBox("colorsCB");
+        if (colorsSetting != null) {
+            colorsCB.requireEnabled();
+            colorsCB.selectItem(colorsSetting);
+        } else {
+            colorsCB.requireDisabled();
         }
 
         dialog.button("ok").click();

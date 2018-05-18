@@ -18,14 +18,18 @@
 package pixelitor.automate;
 
 import net.jafama.FastMath;
+import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.MessageHandler;
+import pixelitor.colors.ColorUtils;
 import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.IntTextField;
 import pixelitor.gui.utils.OKCancelDialog;
+import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.layers.Drawable;
@@ -54,8 +58,14 @@ import static pixelitor.tools.Tools.SMUDGE;
 public class AutoPaint {
     //    public static final Tool[] ALLOWED_TOOLS = {SMUDGE, BRUSH, CLONE, ERASER, SHAPES};
     public static final Tool[] ALLOWED_TOOLS = {SMUDGE, BRUSH, CLONE, ERASER};
+    private static Color origFg;
+    private static Color origBg;
 
     private AutoPaint() {
+    }
+
+    public static void showDialog() {
+        showDialog(ImageComponents.getActiveDrawableOrNull());
     }
 
     public static void showDialog(Drawable dr) {
@@ -74,12 +84,8 @@ public class AutoPaint {
     private static void paintStrokes(Drawable dr, Settings settings) {
         assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
 
-        Color origFg = null;
-        Color origBg = null;
-        if (settings.useRandomColors()) {
-            origFg = FgBgColors.getFG();
-            origBg = FgBgColors.getBG();
-        }
+        origFg = FgBgColors.getFG();
+        origBg = FgBgColors.getBG();
 
         String msg = String.format("Auto Paint with %s Tool: ", settings.getTool());
 
@@ -99,7 +105,8 @@ public class AutoPaint {
             msgHandler.stopProgress();
             msgHandler.showStatusMessage(msg + "finished.");
 
-            if (settings.useRandomColors()) {
+            // if colors were changed, restore the original
+            if (settings.changeColors()) {
                 FgBgColors.setFG(origFg);
                 FgBgColors.setBG(origBg);
             }
@@ -117,19 +124,24 @@ public class AutoPaint {
         for (int i = 0; i < numStrokes; i++) {
             msgHandler.updateProgress(i);
 
-            paintSingleStroke(dr, settings,
-                    comp.getCanvasWidth(), comp.getCanvasHeight(), random);
+            paintSingleStroke(dr, settings, comp.getCanvas(), random);
             ic.paintImmediately(ic.getBounds());
         }
     }
 
-    private static void paintSingleStroke(Drawable dr, Settings settings, int canvasWidth, int canvasHeight, Random rand) {
+    private static void paintSingleStroke(Drawable dr, Settings settings, Canvas canvas, Random rand) {
         if (settings.useRandomColors()) {
             FgBgColors.randomize();
+        } else if (settings.useInterpolatedColors()) {
+            float interpolationRatio = rand.nextFloat();
+            Color interpolated = ColorUtils.interpolateColor(origFg, origBg, interpolationRatio);
+            FgBgColors.setFG(interpolated);
         }
 
         int strokeLength = settings.genStrokeLength();
 
+        int canvasWidth = canvas.getWidth();
+        int canvasHeight = canvas.getHeight();
         Point start = new Point(rand.nextInt(canvasWidth), rand.nextInt(canvasHeight));
         double randomAngle = rand.nextDouble() * 2 * Math.PI;
         int endX = (int) (start.x + strokeLength * FastMath.cos(randomAngle));
@@ -157,7 +169,13 @@ public class AutoPaint {
     /**
      * The GUI of the "Auto Paint" dialog
      */
-    private static class ConfigPanel extends JPanel {
+    public static class ConfigPanel extends JPanel {
+
+        private static final String COL_FOREGROUND = "Foreground";
+        private static final String COL_INTERPOLATED = "Foreground-Background Mix";
+        private static final String COL_RANDOM = "Random";
+        public static final String[] COLOR_SETTINGS = {COL_FOREGROUND, COL_INTERPOLATED, COL_RANDOM};
+
         private final JComboBox<Tool> toolSelector;
         private static Tool defaultTool = SMUDGE;
 
@@ -167,13 +185,13 @@ public class AutoPaint {
         private final IntTextField lengthTF;
         private static int defaultLength = 100;
 
-        private final JCheckBox randomColorsCB;
-        private final JLabel randomColorsLabel;
+        private final JComboBox<String> colorsCB;
+        private final JLabel colorsLabel;
 
         private static int defaultLengthVariability = 50;
         private final RangeParam lengthVariability = new RangeParam("", 0, defaultLengthVariability, 100);
 
-        private static boolean defaultRandomColors = true;
+        private static String defaultColors = COL_INTERPOLATED;
 
         private ConfigPanel() {
             super(new GridBagLayout());
@@ -189,22 +207,19 @@ public class AutoPaint {
             gbh.addLabelWithControl("Number of Strokes:", numStrokesTF);
 
             lengthTF = new IntTextField(String.valueOf(defaultLength));
+            gbh.addLabelWithControl("Stroke Length Average:", lengthTF);
 
-            // TODO stroke length variability
-//            gbh.addLabelWithControl("Stroke Length Average:", lengthTF);
-            gbh.addLabelWithControl("Stroke Length:", lengthTF);
-//
-            // TODO stroke length variability
+            lengthVariability.setValueNoTrigger(defaultLengthVariability);
+            gbh.addLabelWithControl("Stroke Length Variability:",
+                    new SliderSpinner(lengthVariability,
+                            SliderSpinner.TextPosition.NONE, false));
 
-//            lengthVariability.setValueNoTrigger(defaultLengthVariability);
-//            gbh.addLabelWithControl("Stroke Length Variability:",
-//                    new SliderSpinner(lengthVariability,
-//                            SliderSpinner.TextPosition.NONE, false));
 
-            randomColorsLabel = new JLabel("Random Colors:");
-            randomColorsCB = new JCheckBox();
-            randomColorsCB.setSelected(defaultRandomColors);
-            gbh.addTwoControls(randomColorsLabel, randomColorsCB);
+            colorsLabel = new JLabel("Random Colors:");
+            colorsCB = new JComboBox(COLOR_SETTINGS);
+            colorsCB.setName("colorsCB");
+            colorsCB.setSelectedItem(defaultColors);
+            gbh.addTwoControls(colorsLabel, colorsCB);
 
             toolSelector.addActionListener(e -> updateRandomColorsEnabledState());
             updateRandomColorsEnabledState();
@@ -213,11 +228,11 @@ public class AutoPaint {
         private void updateRandomColorsEnabledState() {
             Tool tool = (Tool) toolSelector.getSelectedItem();
             if (tool == BRUSH) {
-                randomColorsLabel.setEnabled(true);
-                randomColorsCB.setEnabled(true);
+                colorsLabel.setEnabled(true);
+                colorsCB.setEnabled(true);
             } else {
-                randomColorsLabel.setEnabled(false);
-                randomColorsCB.setEnabled(false);
+                colorsLabel.setEnabled(false);
+                colorsCB.setEnabled(false);
             }
         }
 
@@ -231,17 +246,16 @@ public class AutoPaint {
             Tool tool = (Tool) toolSelector.getSelectedItem();
             defaultTool = tool;
 
-            boolean randomColorsEnabled = randomColorsCB.isEnabled();
-            boolean randomColorsSelected = randomColorsCB.isSelected();
-            boolean randomColors = randomColorsEnabled && randomColorsSelected;
-            defaultRandomColors = randomColorsSelected;
+            boolean colorsEnabled = colorsCB.isEnabled();
+            String colorsSelected = (String) colorsCB.getSelectedItem();
+            boolean randomColors = colorsEnabled && colorsSelected.equals(COL_RANDOM);
+            boolean interpolatedColors = colorsEnabled && colorsSelected.equals(COL_INTERPOLATED);
+            defaultColors = colorsSelected;
 
             float lengthRandomnessPercentage = lengthVariability.getValueAsPercentage();
             defaultLengthVariability = lengthVariability.getValue();
 
-            // TODO stroke length variability
-//            return new Settings(tool, numStrokes, strokeLength, randomColors, lengthRandomnessPercentage);
-            return new Settings(tool, numStrokes, strokeLength, randomColors, 0);
+            return new Settings(tool, numStrokes, strokeLength, randomColors, lengthRandomnessPercentage, interpolatedColors);
         }
     }
 
@@ -254,8 +268,9 @@ public class AutoPaint {
         private final int minStrokeLength;
         private final int maxStrokeLength;
         private final boolean randomColors;
+        private final boolean interpolatedColors;
 
-        private Settings(Tool tool, int numStrokes, int strokeLength, boolean randomColors, float lengthVariability) {
+        private Settings(Tool tool, int numStrokes, int strokeLength, boolean randomColors, float lengthVariability, boolean interpolatedColors) {
             this.tool = tool;
             this.numStrokes = numStrokes;
 
@@ -268,6 +283,7 @@ public class AutoPaint {
             }
 
             this.randomColors = randomColors;
+            this.interpolatedColors = interpolatedColors;
         }
 
         public Tool getTool() {
@@ -288,6 +304,14 @@ public class AutoPaint {
 
         public boolean useRandomColors() {
             return randomColors;
+        }
+
+        public boolean useInterpolatedColors() {
+            return interpolatedColors;
+        }
+
+        public boolean changeColors() {
+            return randomColors || interpolatedColors;
         }
     }
 }
