@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,22 +22,27 @@ import java.util.List;
 
 /**
  * Supplies random filters for the "Random Filter" filter
+ * It is not reused across "Random Filter" dialog sessions
  */
 public class RandomFilterSource {
+    // the history of the random filters generated so far
     private List<Filter> history = new ArrayList<>();
 
-    // the index of the previous filter in history, or -1 if there isn't one
+    // the index of the previous filter in history,
+    // or -1 if there isn't one
     private int previousIndex = -1;
 
-    // the index of the next filter in history, or the size of the history if there isn't one
+    // the index of the next filter in history,
+    // or the size of the history if there isn't one
     private int nextIndex = 0;
 
     private Filter lastFilter;
 
     /**
-     * Returns the next filter form the history
+     * Returns the next filter from the history
      */
     public Filter getNext() {
+        // makes sense only if we already went back in history
         assert hasNext();
 
         Filter filter = history.get(nextIndex);
@@ -49,11 +54,12 @@ public class RandomFilterSource {
         return filter;
     }
 
-
     /**
-     * Returns the previous filter form the history
+     * Returns the previous filter from the history
      */
     public Filter getPrevious() {
+        // makes sense only if we already picked
+        // a second random filter
         assert previousIndex >= 0;
         assert previousIndex < history.size();
         assert hasPrevious();

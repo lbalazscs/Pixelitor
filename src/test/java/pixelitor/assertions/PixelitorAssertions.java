@@ -20,22 +20,28 @@ package pixelitor.assertions;
 import org.assertj.core.api.Assertions;
 import pixelitor.Canvas;
 import pixelitor.Composition;
+import pixelitor.filters.RandomFilterSource;
 import pixelitor.selection.Selection;
 
 public class PixelitorAssertions extends Assertions {
-    // @org.assertj.core.util.CheckReturnValue
+    @org.assertj.core.util.CheckReturnValue
     public static CompositionAssert assertThat(Composition actual) {
         return new CompositionAssert(actual);
     }
 
-    //@org.assertj.core.util.CheckReturnValue
+    @org.assertj.core.util.CheckReturnValue
     public static CanvasAssert assertThat(Canvas actual) {
         return new CanvasAssert(actual);
     }
 
-    // @org.assertj.core.util.CheckReturnValue
+    @org.assertj.core.util.CheckReturnValue
     public static SelectionAssert assertThat(Selection actual) {
         return new SelectionAssert(actual);
+    }
+
+    @org.assertj.core.util.CheckReturnValue
+    public static RandomFilterSourceAssert assertThat(RandomFilterSource actual) {
+        return new RandomFilterSourceAssert(actual);
     }
 
 }

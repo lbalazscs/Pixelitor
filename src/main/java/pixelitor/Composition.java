@@ -918,11 +918,6 @@ public class Composition implements Serializable {
     }
 
     private boolean isActiveComp() {
-        if (ic.isMock()) {
-            // we are in a unit test
-            // TODO hack
-            return false;
-        }
         return (ImageComponents.getActiveCompOrNull() == this);
     }
 

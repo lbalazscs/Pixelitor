@@ -19,18 +19,18 @@ package pixelitor.filters;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 public class RandomFilterSourceTest {
     private RandomFilterSource source;
 
     @BeforeClass
     public static void globalInit() {
+        // generate mock filters with the names "A", "B" ... "Z"
         for (int i = 'A'; i < 'Z' + 1; i++) {
             char[] charsInFilterName = {(char) i};
             String filterName = new String(charsInFilterName);
@@ -52,109 +52,91 @@ public class RandomFilterSourceTest {
 
     @Test
     public void testNewSource() {
-        checkHasNeitherPreviousOrNext();
-
-        assertThat(source.getLastFilter()).isNull();
+        assertThat(source)
+                .doesNotHavePrevious()
+                .doesNotHaveNext()
+                .lastFilterIsNull();
     }
 
-    @Test(timeout=1000)
+    @Test(timeout = 1000) // make sure there is no infinite loop
     public void testAfterOne() {
         Filter one = source.getRandom();
-        checkHasNeitherPreviousOrNext();
 
-        Filter lastFilter = source.getLastFilter();
-        assertThat(lastFilter).isNotNull();
-        assertThat(one).isEqualTo(lastFilter);
+        assertThat(source)
+                .doesNotHavePrevious()
+                .doesNotHaveNext()
+                .lastFilterIsNotNull()
+                .lastFilterIs(one);
     }
 
-    @Test(timeout=1000)
+    @Test(timeout = 1000) // make sure there is no infinite loop
     public void testAfterTwo() {
         Filter one = source.getRandom();
         Filter two = source.getRandom();
 
-        checkHasPreviousButNoNext();
-
-        checkPreviousIs(one);
-        checkHasNextButNoPrevious();
-
-        checkNextIs(two);
-        checkHasPreviousButNoNext();
+        assertThat(source)
+                .hasPrevious()
+                .doesNotHaveNext()
+                .previousFilterIs(one) // this calls getPrevious, and changes the state
+                .doesNotHavePrevious()
+                .hasNext()
+                .nextFilterIs(two) // this calls getNext, and changes the state
+                .hasPrevious()
+                .doesNotHaveNext();
 
         source.getRandom(); // three
-        checkHasPreviousButNoNext();
-
-        checkPreviousIs(two);
-        checkHasBothPreviousAndNext();
+        assertThat(source)
+                .hasPrevious()
+                .doesNotHaveNext()
+                .previousFilterIs(two) // this calls getPrevious, and changes the state
+                .hasPrevious()
+                .hasNext();
     }
 
-    @Ignore // TODO
-    @Test(timeout=1000)
+    @Test(timeout = 1000) // make sure there is no infinite loop
     public void testMultipleBackForward() {
         Filter one = source.getRandom();
         Filter two = source.getRandom();
 
         for (int i = 0; i < 3; i++) {
-            checkPreviousIs(one);
-            checkHasNextButNoPrevious();
-
-            checkNextIs(two);
-            checkHasPreviousButNoNext();
+            assertThat(source)
+                    .previousFilterIs(one) // this calls getPrevious, and changes the state
+                    .doesNotHavePrevious()
+                    .hasNext()
+                    .nextFilterIs(two) // this calls getNext, and changes the state
+                    .hasPrevious()
+                    .doesNotHaveNext();
         }
     }
 
-    @Ignore // TODO
-    @Test(timeout=1000)
+    @Test(timeout = 1000) // make sure there is no infinite loop
     public void testGenerateWhenBackInHistory() {
         Filter one = source.getRandom();
         Filter two = source.getRandom();
         Filter three = source.getRandom();
         source.getRandom(); // four
 
-        checkPreviousIs(three);
-        checkPreviousIs(two);
+        assertThat(source)
+                .previousFilterIs(three)
+                .previousFilterIs(two);
 
         // after going back a while start generating new filters
         Filter five = source.getRandom();
-        checkHasPreviousButNoNext();
+        assertThat(source)
+                .hasPrevious()
+                .doesNotHaveNext();
 
         source.getRandom(); // six
-        checkHasPreviousButNoNext();
+        assertThat(source)
+                .hasPrevious()
+                .doesNotHaveNext();
 
         // and now go back to verify the history
-        checkPreviousIs(five);
-        checkPreviousIs(two);
-        checkPreviousIs(one);
-
-        checkHasNextButNoPrevious();
-    }
-
-    private void checkPreviousIs(Filter filter) {
-        Filter prev = source.getPrevious();
-        assertThat(prev).isEqualTo(filter);
-    }
-
-    private void checkNextIs(Filter filter) {
-        Filter next = source.getNext();
-        assertThat(next).isEqualTo(filter);
-    }
-
-    private void checkHasNextButNoPrevious() {
-        assertThat(source.hasPrevious()).isFalse();
-        assertThat(source.hasNext()).isTrue();
-    }
-
-    private void checkHasNeitherPreviousOrNext() {
-        assertThat(source.hasPrevious()).isFalse();
-        assertThat(source.hasNext()).isFalse();
-    }
-
-    private void checkHasPreviousButNoNext() {
-        assertThat(source.hasPrevious()).isTrue();
-        assertThat(source.hasNext()).isFalse();
-    }
-
-    private void checkHasBothPreviousAndNext() {
-        assertThat(source.hasPrevious()).isTrue();
-        assertThat(source.hasNext()).isTrue();
+        assertThat(source)
+                .previousFilterIs(five)
+                .previousFilterIs(two)
+                .previousFilterIs(one)
+                .doesNotHavePrevious()
+                .hasNext();
     }
 }
