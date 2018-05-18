@@ -53,7 +53,7 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
 
     private final Map<String, ThumbInfo> thumbsCache;
 
-    private ProgressPanel progressPanel;
+    private final ProgressPanel progressPanel;
 
     public ImagePreviewPanel(ProgressPanel progressPanel) {
         this.progressPanel = progressPanel;

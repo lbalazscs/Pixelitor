@@ -26,7 +26,7 @@ import java.awt.Dimension;
  * The setVisibility method wouldn't work because of layout problems.
  */
 public class ProgressPanel extends JPanel {
-    private JProgressBar progressBar;
+    private final JProgressBar progressBar;
     private final CardLayout cardLayout;
 
     public ProgressPanel() {

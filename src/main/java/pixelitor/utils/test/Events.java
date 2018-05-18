@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,6 +31,8 @@ import java.util.List;
  * Events happening inside the app - used for debugging
  */
 public class Events {
+    private static final boolean VERBOSE = false;
+
     private Events() {
         // Utility class
     }
@@ -40,13 +42,14 @@ public class Events {
     private static final List<PixelitorEvent> eventList = new LinkedList<>();
 
     public static void post(PixelitorEvent event) {
+        if (VERBOSE) {
+            System.err.println("Events::post: " + event);
+        }
         eventList.add(event);
 
         if (eventList.size() > MAX_SIZE) {
             eventList.remove(0);
         }
-
-
     }
 
     public static void postListenerEvent(String type, Composition comp, Layer layer) {
