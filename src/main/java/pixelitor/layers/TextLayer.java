@@ -287,16 +287,17 @@ public class TextLayer extends ContentLayer {
 
     @Override
     public void crop(Rectangle2D cropRect) {
-//        Rectangle textBounds = painter.getTextBounds();
-//        int currentX = textBounds.x;
-//        int currentY = textBounds.y;
-//        int newX = currentX - selectionBounds.x;
-//        int newY = currentY - selectionBounds.y;
+        // the text will not be cropped, but the translations have to be adjusted
 
-        // TODO this still doesn't work probably because
-        // the alignment has not been taken into account
-//        setTranslationX(getTX() - selectionBounds.x);
-//        setTranslationY(getTY() - selectionBounds.y);
+        // as the cropping is the exact opposite of "enlarge canvas",
+        // calculate the corresponding margins...
+        int northMargin = (int) cropRect.getY();
+        int westMargin = (int) cropRect.getX();
+        int southMargin = (int) (canvas.getHeight() - cropRect.getHeight() - cropRect.getY());
+        int eastMargin = (int) (canvas.getWidth() - cropRect.getWidth() - cropRect.getX());
+
+        // ...and do a negative enlargement
+        enlargeCanvas(-northMargin, -eastMargin, -southMargin, -westMargin);
     }
 
     @Override
