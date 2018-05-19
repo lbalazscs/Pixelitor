@@ -136,7 +136,6 @@ public class History {
             numUndoneEdits--; // after redo we should be fadeable again
             undoManager.redo();
         } catch (CannotRedoException e) {
-            // TODO is a "No redo available" scenario possible?
             Messages.showException(e);
         }
     }

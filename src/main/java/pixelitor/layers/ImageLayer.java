@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -741,7 +741,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public BufferedImage getSelectionSizedPartFrom(BufferedImage src, Selection selection, boolean copyAndTranslateIfSelected) {
+    public BufferedImage getSelectionSizedPartFrom(BufferedImage src, Selection selection, boolean copy) {
         assert selection != null;
 
         Rectangle bounds = selection.getShapeBounds(); // relative to the composition
@@ -752,15 +752,15 @@ public class ImageLayer extends ContentLayer implements Drawable {
                 0, 0, src.getWidth(), src.getHeight(), // image bounds
                 bounds);
 
-        if (bounds.isEmpty()) { // TODO if the selection is outside the image?
-            if (copyAndTranslateIfSelected) {
+        if (bounds.isEmpty()) { // the selection is outside the image
+            if (copy) {
                 return ImageUtils.copyImage(src);
             } else {
                 return src;
             }
         }
 
-        if (copyAndTranslateIfSelected) {
+        if (copy) {
             return ImageUtils.getUnSharedSubimage(src, bounds);
         } else {
             return src.getSubimage(bounds.x, bounds.y, bounds.width, bounds.height);

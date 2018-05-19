@@ -171,15 +171,6 @@ public class ImageUtils {
             progressiveBilinear = false;
         }
 
-//        // TODO in these two cases the original method from the Filthy Rich Clients book goes into infinite loop!
-//        if ((prevH <= targetHeight) && (prevW >= targetWidth)) {
-//            return simpleResize(img, targetWidth, targetHeight, hint);
-//        }
-//        if ((prevH > targetHeight) && (prevW < targetWidth)) {
-//            return simpleResize(img, targetWidth, targetHeight, hint);
-//        }
-
-
 //        int type = (img.getTransparency() == Transparency.OPAQUE) ?
 //                BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB;
         int type = img.getType();

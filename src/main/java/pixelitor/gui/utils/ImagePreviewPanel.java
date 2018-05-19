@@ -92,8 +92,6 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
             int availableWidth = getWidth() - EMPTY_SPACE_AT_LEFT;
             int availableHeight = getHeight();
 
-            // TODO even the subsampled reading is slow for large
-            // images - there could be a progress bar
             ProgressTracker pt = new JProgressBarTracker(progressPanel);
             thumbInfo = ImageUtils.readSubsampledThumb(file, availableWidth, availableHeight, pt);
             thumbsCache.put(filePath, thumbInfo);

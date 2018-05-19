@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,10 +32,12 @@ public class GroupedRangeParamGUI extends JPanel implements ParamGUI {
     private final int numParams;
     private final GroupedRangeParam model;
     private final GridBagHelper gbh;
+    private final SliderSpinner[] sliders;
 
     public GroupedRangeParamGUI(GroupedRangeParam model) {
         this.model = model;
         numParams = model.getNumParams();
+        sliders = new SliderSpinner[numParams];
 
         setLayout(new GridBagLayout());
         gbh = new GridBagHelper(this);
@@ -53,9 +55,9 @@ public class GroupedRangeParamGUI extends JPanel implements ParamGUI {
         for (int i = 0; i < numParams; i++) {
             RangeParam param = model.getRangeParam(i);
             // doesn't call param.createGUI because we don't want another border
-            SliderSpinner slider = new SliderSpinner(param, NONE, true);
-            slider.setupTicks();
-            gbh.addLabelWithControl(param.getName() + ":", slider, i);
+            sliders[i] = new SliderSpinner(param, NONE, true);
+            sliders[i].setupTicks();
+            gbh.addLabelWithControl(param.getName() + ":", sliders[i], i);
         }
     }
 
@@ -73,6 +75,8 @@ public class GroupedRangeParamGUI extends JPanel implements ParamGUI {
 
     @Override
     public void setToolTip(String tip) {
-        // TODO
+        for (SliderSpinner slider : sliders) {
+            slider.setToolTip(tip);
+        }
     }
 }

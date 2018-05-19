@@ -64,89 +64,38 @@ public class TextLayer extends ContentLayer {
         isAdjustment = settings.isWatermark();
     }
 
-    @Override
-    public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
-        painter.setFillPaint(settings.getColor());
-        painter.paint(g, null, comp.getCanvasWidth(), comp.getCanvasHeight());
-    }
-
-    @Override
-    public BufferedImage applyLayer(Graphics2D g, boolean firstVisibleLayer, BufferedImage imageSoFar) {
-        if (settings == null) {
-            // the layer was just created, nothing to paint yet
-            return imageSoFar;
+    public static void createNew(PixelitorWindow pw) {
+        Composition comp = ImageComponents.getActiveCompOrNull();
+        if (comp == null) {
+            throw new IllegalStateException("no open image");
         }
+        TextLayer textLayer = new TextLayer(comp);
 
-        // the text will be painted normally
-        return super.applyLayer(g, firstVisibleLayer, imageSoFar);
-    }
+        Layer activeLayerBefore = comp.getActiveLayer();
+        MaskViewMode oldViewMode = comp.getIC().getMaskViewMode();
 
-    @Override
-    public BufferedImage actOnImageFromLayerBellow(BufferedImage src) {
-        assert settings.isWatermark(); // should be called only in this case
-        return settings.watermarkImage(src, painter);
-    }
+        // don't add it yet to history, only after the user chooses to press OK
+        comp.addLayer(textLayer, false, null, true, false);
 
-    public BufferedImage createRasterizedImage() {
-        BufferedImage img = ImageUtils.createSysCompatibleImage(canvas.getWidth(), canvas.getHeight());
-        Graphics2D g = img.createGraphics();
-        applyLayer(g, true, img);
-        g.dispose();
-        return img;
-    }
+        TextAdjustmentsPanel p = new TextAdjustmentsPanel(textLayer);
+        OKCancelDialog d = new OKCancelDialog(p, pw, "Create Text Layer") {
+            @Override
+            protected void dialogAccepted() {
+                close();
+                textLayer.updateLayerName();
 
-    @Override
-    public Layer duplicate(boolean sameName) {
-        String duplicateName = sameName ? name : Utils.createCopyName(name);
-        TextLayer d = new TextLayer(comp, duplicateName);
+                // now it is safe to add it to the history
+                NewLayerEdit newLayerEdit = new NewLayerEdit(comp, textLayer, activeLayerBefore, "New Text Layer", oldViewMode);
+                History.addEdit(newLayerEdit);
+            }
 
-        d.translationX = translationX;
-        d.translationY = translationY;
-        d.painter.setTranslation(
-                painter.getTX(),
-                painter.getTY());
-
-        d.setSettings(new TextSettings(settings));
-
-        if (hasMask()) {
-            d.addMask(mask.duplicate(d));
-        }
-
-        return d;
-    }
-
-    @Override
-    public void moveWhileDragging(double x, double y) {
-        super.moveWhileDragging(x, y);
-        painter.setTranslation(getTX(), getTY());
-    }
-
-    @Override
-    ContentLayerMoveEdit createMovementEdit(int oldTX, int oldTY) {
-        return new ContentLayerMoveEdit(this, null, oldTX, oldTY);
-    }
-
-    @Override
-    public void setTranslation(int x, int y) {
-        super.setTranslation(x, y);
-        painter.setTranslation(x, y);
-    }
-
-    public void setSettings(TextSettings settings) {
-        this.settings = settings;
-
-        isAdjustment = settings.isWatermark();
-        settings.configurePainter(painter);
-    }
-
-    public TextSettings getSettings() {
-        return settings;
-    }
-
-    public void updateLayerName() {
-        if (settings != null) {
-            setName(settings.getText(), false);
-        }
+            @Override
+            protected void dialogCanceled() {
+                close();
+                comp.deleteLayer(textLayer, false, true);
+            }
+        };
+        d.setVisible(true);
     }
 
     public void edit(PixelitorWindow pw) {
@@ -185,41 +134,24 @@ public class TextLayer extends ContentLayer {
         History.addEdit(edit);
     }
 
-    ///// from here static utility methods
+    @Override
+    public TextLayer duplicate(boolean sameName) {
+        String duplicateName = sameName ? name : Utils.createCopyName(name);
+        TextLayer d = new TextLayer(comp, duplicateName);
 
-    public static void createNew(PixelitorWindow pw) {
-        Composition comp = ImageComponents.getActiveCompOrNull();
-        if (comp == null) {
-            // TODO dialog?
-            return;
+        d.translationX = translationX;
+        d.translationY = translationY;
+        d.painter.setTranslation(
+                painter.getTX(),
+                painter.getTY());
+
+        d.setSettings(new TextSettings(settings));
+
+        if (hasMask()) {
+            d.addMask(mask.duplicate(d));
         }
-        TextLayer textLayer = new TextLayer(comp);
 
-        Layer activeLayerBefore = comp.getActiveLayer();
-        MaskViewMode oldViewMode = comp.getIC().getMaskViewMode();
-
-        // don't add it yet to history, only after the user chooses to press OK
-        comp.addLayer(textLayer, false, null, true, false);
-
-        TextAdjustmentsPanel p = new TextAdjustmentsPanel(textLayer);
-        OKCancelDialog d = new OKCancelDialog(p, pw, "Create Text Layer") {
-            @Override
-            protected void dialogAccepted() {
-                close();
-                textLayer.updateLayerName();
-
-                // now it is safe to add it to the history
-                NewLayerEdit newLayerEdit = new NewLayerEdit(comp, textLayer, activeLayerBefore, "New Text Layer", oldViewMode);
-                History.addEdit(newLayerEdit);
-            }
-
-            @Override
-            protected void dialogCanceled() {
-                close();
-                comp.deleteLayer(textLayer, false, true);
-            }
-        };
-        d.setVisible(true);
+        return d;
     }
 
     // TODO if a text layer has a mask, then this will apply the
@@ -239,6 +171,71 @@ public class TextLayer extends ContentLayer {
         comp.deleteLayer(this, false, true);
 
         return newImageLayer;
+    }
+
+    public BufferedImage createRasterizedImage() {
+        BufferedImage img = ImageUtils.createSysCompatibleImage(canvas.getWidth(), canvas.getHeight());
+        Graphics2D g = img.createGraphics();
+        applyLayer(g, true, img);
+        g.dispose();
+        return img;
+    }
+
+    @Override
+    public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
+        painter.setFillPaint(settings.getColor());
+        painter.paint(g, null, comp.getCanvasWidth(), comp.getCanvasHeight());
+    }
+
+    @Override
+    public BufferedImage applyLayer(Graphics2D g, boolean firstVisibleLayer, BufferedImage imageSoFar) {
+        if (settings == null) {
+            // the layer was just created, nothing to paint yet
+            return imageSoFar;
+        }
+
+        // the text will be painted normally
+        return super.applyLayer(g, firstVisibleLayer, imageSoFar);
+    }
+
+    @Override
+    public BufferedImage actOnImageFromLayerBellow(BufferedImage src) {
+        assert settings.isWatermark(); // should be called only in this case
+        return settings.watermarkImage(src, painter);
+    }
+
+    @Override
+    public void moveWhileDragging(double x, double y) {
+        super.moveWhileDragging(x, y);
+        painter.setTranslation(getTX(), getTY());
+    }
+
+    @Override
+    ContentLayerMoveEdit createMovementEdit(int oldTX, int oldTY) {
+        return new ContentLayerMoveEdit(this, null, oldTX, oldTY);
+    }
+
+    @Override
+    public void setTranslation(int x, int y) {
+        super.setTranslation(x, y);
+        painter.setTranslation(x, y);
+    }
+
+    public void setSettings(TextSettings settings) {
+        this.settings = settings;
+
+        isAdjustment = settings.isWatermark();
+        settings.configurePainter(painter);
+    }
+
+    public TextSettings getSettings() {
+        return settings;
+    }
+
+    public void updateLayerName() {
+        if (settings != null) {
+            setName(settings.getText(), false);
+        }
     }
 
     @Override
@@ -281,5 +278,4 @@ public class TextLayer extends ContentLayer {
                 + "{text=" + (settings == null ? "null settings" : settings.getText())
                 + ", super=" + super.toString() + '}';
     }
-
 }

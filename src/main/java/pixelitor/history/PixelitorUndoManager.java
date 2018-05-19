@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -249,15 +249,6 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
 
         if (!historyDialog.isVisible()) {
             historyDialog.setVisible(true);
-        }
-    }
-
-    public void dumpHistory() {
-        int numEdits = edits.size();
-        System.out.println("PixelitorUndoManager.dumpHistory:");
-        for (int i = 0; i < numEdits; i++) {
-            PixelitorEdit edit = (PixelitorEdit) edits.get(i);
-            System.out.println("edit [" + i + "] = " + edit.dump());
         }
     }
 

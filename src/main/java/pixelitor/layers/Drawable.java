@@ -87,7 +87,7 @@ public interface Drawable {
 
     BufferedImage getImageOrSubImageIfSelected(boolean copyIfNoSelection, boolean copyAndTranslateIfSelected);
 
-    BufferedImage getSelectionSizedPartFrom(BufferedImage src, Selection selection, boolean copyAndTranslateIfSelected);
+    BufferedImage getSelectionSizedPartFrom(BufferedImage src, Selection selection, boolean copy);
 
     boolean cropToCanvasSize();
 
