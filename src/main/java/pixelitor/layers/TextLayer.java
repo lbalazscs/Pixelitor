@@ -17,6 +17,8 @@
 
 package pixelitor.layers;
 
+import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
+import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import pixelitor.Composition;
 import pixelitor.filters.comp.Flip;
 import pixelitor.filters.comp.Rotate;
@@ -40,6 +42,10 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+
+import static org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment.CENTER;
+import static org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment.LEFT;
+import static org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment.TOP;
 
 /**
  * A text layer
@@ -240,7 +246,28 @@ public class TextLayer extends ContentLayer {
 
     @Override
     public void enlargeCanvas(int north, int east, int south, int west) {
-        // TODO
+        VerticalAlignment verticalAlignment = painter.getVerticalAlignment();
+        HorizontalAlignment horizontalAlignment = painter.getHorizontalAlignment();
+        int newTX = translationX;
+        int newTY = translationY;
+
+        if (horizontalAlignment == LEFT) {
+            newTX += west;
+        } else if (horizontalAlignment == CENTER) {
+            newTX += (west - east) / 2;
+        } else { // RIGHT
+            newTX -= east;
+        }
+
+        if (verticalAlignment == TOP) {
+            newTY += north;
+        } else if (verticalAlignment == VerticalAlignment.CENTER) {
+            newTY += (north - south) / 2;
+        } else { // BOTTOM
+            newTY -= south;
+        }
+
+        setTranslation(newTX, newTY);
     }
 
     @Override

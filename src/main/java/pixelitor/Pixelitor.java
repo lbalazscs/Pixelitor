@@ -29,6 +29,7 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.OpenSaveManager;
 import pixelitor.layers.AddLayerMaskAction;
+import pixelitor.layers.AddTextLayerAction;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMaskAddType;
 import pixelitor.layers.MaskViewMode;
@@ -175,7 +176,7 @@ public class Pixelitor {
 //        clickTool(Tools.SELECTION);
 //        addMaskAndShowIt();
 
-//        AddTextLayerAction.INSTANCE.actionPerformed(null);
+//        showAddTextLayerDialog();
 
 //        AutoPaint.showDialog();
 
@@ -188,6 +189,10 @@ public class Pixelitor {
 //        new TweenWizard().start(pw);
 
 //        pw.dispatchEvent(new KeyEvent(pw, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), KeyEvent.CTRL_MASK, KeyEvent.VK_T, 'T'));
+    }
+
+    private static void showAddTextLayerDialog() {
+        AddTextLayerAction.INSTANCE.actionPerformed(null);
     }
 
     private static void addMaskAndShowIt() {
