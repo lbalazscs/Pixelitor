@@ -20,6 +20,7 @@ package pixelitor.filters.painters;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import pixelitor.Composition;
+import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ColorParamGUI;
 import pixelitor.filters.gui.FilterGUIPanel;
@@ -58,6 +59,7 @@ public class TextAdjustmentsPanel extends FilterGUIPanel implements ParamAdjustm
     private JTextField textTF;
     private JComboBox<String> fontFamilyChooserCB;
     private SliderSpinner fontSizeSlider;
+    private AngleParam rotationParam;
 
     private JCheckBox boldCB;
     private JCheckBox italicCB;
@@ -134,12 +136,22 @@ public class TextAdjustmentsPanel extends FilterGUIPanel implements ParamAdjustm
         createTextTF(settings);
         gbh.addLastControl(textTF);
 
-        gbh.addLabel("Color", 0, 1);
+        gbh.addLabel("Color:", 0, 1);
         Color defaultColor = settings == null ? BLACK : settings.getColor();
         color = new ColorParam("Color", defaultColor, USER_ONLY_OPACITY);
         ColorParamGUI colorParamGUI = new ColorParamGUI(color);
-        gbh.addLastControl(colorParamGUI);
+        gbh.addControl(colorParamGUI);
         color.setAdjustmentListener(this);
+
+        gbh.addLabel("Rotation:", 2, 1);
+        double defaultRotation = 0;
+        if (settings != null) {
+            defaultRotation = settings.getRotation();
+        }
+        rotationParam = new AngleParam("", defaultRotation);
+
+        rotationParam.setAdjustmentListener(this);
+        gbh.addControl(rotationParam.createGUI());
 
         verticalAlignmentCombo = new JComboBox(VerticalAlignment.values());
         horizontalAlignmentCombo = new JComboBox(HorizontalAlignment.values());
@@ -148,13 +160,13 @@ public class TextAdjustmentsPanel extends FilterGUIPanel implements ParamAdjustm
             horizontalAlignmentCombo.setSelectedItem(settings.getHorizontalAlignment());
         }
 
-        gbh.addLabel("Vertical Alignment", 0, 2);
-        verticalAlignmentCombo.addActionListener(this);
-        gbh.addControl(verticalAlignmentCombo);
-
-        gbh.addLabel("Horizontal Alignment", 2, 2);
+        gbh.addLabel("Horizontal Alignment:", 0, 2);
         horizontalAlignmentCombo.addActionListener(this);
         gbh.addControl(horizontalAlignmentCombo);
+
+        gbh.addLabel("Vertical Alignment:", 0, 3);
+        verticalAlignmentCombo.addActionListener(this);
+        gbh.addControl(verticalAlignmentCombo);
 
         return textPanel;
     }
@@ -162,8 +174,8 @@ public class TextAdjustmentsPanel extends FilterGUIPanel implements ParamAdjustm
     private void createTextTF(TextSettings settings) {
         String defaultText;
         if (settings == null) {
-            if (filter == null) { // layer mode
-                defaultText = ""; // no last text remembering when creating new text layers
+            if (filter == null) { // text layer mode
+                defaultText = "Pixelitor"; // no last text remembering when creating new text layers
             } else {
                 defaultText = lastText;
             }
@@ -327,7 +339,7 @@ public class TextAdjustmentsPanel extends FilterGUIPanel implements ParamAdjustm
                 text, selectedFont, color.getColor(), areaEffects,
                 (HorizontalAlignment) horizontalAlignmentCombo.getSelectedItem(),
                 (VerticalAlignment) verticalAlignmentCombo.getSelectedItem(),
-                watermarkCB.isSelected());
+                watermarkCB.isSelected(), rotationParam.getValueInRadians());
 
         if (textFilter != null) { // filter mode
             textFilter.setSettings(settings);

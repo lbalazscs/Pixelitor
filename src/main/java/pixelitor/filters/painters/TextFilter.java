@@ -17,7 +17,6 @@
 
 package pixelitor.filters.painters;
 
-import org.jdesktop.swingx.painter.TextPainter;
 import pixelitor.filters.FilterAction;
 import pixelitor.filters.gui.FilterGUIPanel;
 import pixelitor.filters.gui.FilterWithGUI;
@@ -44,7 +43,7 @@ public class TextFilter extends FilterWithGUI {
             return src;
         }
 
-        TextPainter textPainter = new TextPainter();
+        TranslatedTextPainter textPainter = new TranslatedTextPainter();
         settings.configurePainter(textPainter);
 
         if (settings.isWatermark()) {

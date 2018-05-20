@@ -170,7 +170,7 @@ public class SplashImageCreator {
 
         TextSettings settings = new TextSettings(text, font, textColor, effects,
                 AbstractLayoutPainter.HorizontalAlignment.CENTER,
-                AbstractLayoutPainter.VerticalAlignment.CENTER, false);
+                AbstractLayoutPainter.VerticalAlignment.CENTER, false, 0);
 
         textFilter.setSettings(settings);
         textFilter.startOn(layer, OP_WITHOUT_DIALOG);

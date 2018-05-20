@@ -52,7 +52,7 @@ import static org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignmen
  */
 public class TextLayer extends ContentLayer {
     private static final long serialVersionUID = 2L;
-    private final TranslatedTextPainter painter;
+    private transient TranslatedTextPainter painter;
     private TextSettings settings;
 
     public TextLayer(Composition comp) {
@@ -68,6 +68,10 @@ public class TextLayer extends ContentLayer {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         isAdjustment = settings.isWatermark();
+
+        painter = new TranslatedTextPainter();
+        settings.configurePainter(painter);
+        painter.setTranslation(getTX(), getTY());
     }
 
     public static void createNew(PixelitorWindow pw) {

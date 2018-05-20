@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -47,8 +47,9 @@ public class TextSettings implements Serializable {
     private final AbstractLayoutPainter.VerticalAlignment verticalAlignment;
     private final AbstractLayoutPainter.HorizontalAlignment horizontalAlignment;
     private final boolean watermark;
+    private final double rotation;
 
-    public TextSettings(String text, Font font, Color color, AreaEffects areaEffects, AbstractLayoutPainter.HorizontalAlignment horizontalAlignment, AbstractLayoutPainter.VerticalAlignment verticalAlignment, boolean watermark) {
+    public TextSettings(String text, Font font, Color color, AreaEffects areaEffects, AbstractLayoutPainter.HorizontalAlignment horizontalAlignment, AbstractLayoutPainter.VerticalAlignment verticalAlignment, boolean watermark, double rotation) {
         this.areaEffects = areaEffects;
         this.color = color;
         this.font = font;
@@ -56,6 +57,7 @@ public class TextSettings implements Serializable {
         this.text = text;
         this.verticalAlignment = verticalAlignment;
         this.watermark = watermark;
+        this.rotation = rotation;
     }
 
     // copy constructor
@@ -69,6 +71,7 @@ public class TextSettings implements Serializable {
         verticalAlignment = other.verticalAlignment;
         horizontalAlignment = other.horizontalAlignment;
         watermark = other.watermark;
+        rotation = other.rotation;
     }
 
     public AreaEffects getAreaEffects() {
@@ -103,12 +106,16 @@ public class TextSettings implements Serializable {
         return watermark;
     }
 
+    public double getRotation() {
+        return rotation;
+    }
+
     public void randomizeText() {
         Random random = new Random();
         text = Long.toHexString(random.nextLong());
     }
 
-    public void configurePainter(TextPainter painter) {
+    public void configurePainter(TranslatedTextPainter painter) {
         painter.setAntialiasing(true);
         painter.setText(text);
         painter.setFont(font);
@@ -117,6 +124,7 @@ public class TextSettings implements Serializable {
         }
         painter.setHorizontalAlignment(horizontalAlignment);
         painter.setVerticalAlignment(verticalAlignment);
+        painter.setRotation(rotation);
     }
 
     public BufferedImage watermarkImage(BufferedImage src, TextPainter textPainter) {
@@ -143,6 +151,6 @@ public class TextSettings implements Serializable {
                 AreaEffects.createRandom(rand),
                 AbstractLayoutPainter.HorizontalAlignment.CENTER,
                 AbstractLayoutPainter.VerticalAlignment.CENTER,
-                rand.nextBoolean());
+                rand.nextBoolean(), rand.nextDouble() * Math.PI * 2);
     }
 }
