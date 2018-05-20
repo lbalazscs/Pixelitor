@@ -115,11 +115,11 @@ public class FilterAction extends DrawableAction {
         if (!(filter instanceof ParametrizedFilter)) {
             return false;
         }
-        ParametrizedFilter fpg = (ParametrizedFilter) filter;
-        if (fpg.excludedFromAnimation()) {
+        ParametrizedFilter pf = (ParametrizedFilter) filter;
+        if (pf.excludedFromAnimation()) {
             return false;
         }
-        if (!fpg.getParamSet().canBeAnimated()) {
+        if (!pf.getParamSet().canBeAnimated()) {
             return false;
         }
         if (filter instanceof Fade) {

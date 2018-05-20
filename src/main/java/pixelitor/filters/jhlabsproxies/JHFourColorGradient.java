@@ -20,7 +20,7 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.FourColorFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.FilterGUIPanel;
+import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.GridAdjustmentPanel;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
@@ -74,7 +74,7 @@ public class JHFourColorGradient extends ParametrizedFilter {
     }
 
     @Override
-    public FilterGUIPanel createGUIPanel(Drawable dr) {
+    public FilterGUI createGUI(Drawable dr) {
         return new GridAdjustmentPanel(this, dr, true, ShowOriginal.NO);
     }
 }

@@ -31,7 +31,7 @@ import java.util.List;
  * the four corners of the image) are added in a 2*2 grid.
  * Extra parameters are added in a row bellow the grid.
  */
-public class GridAdjustmentPanel extends ParametrizedFilterGUIPanel {
+public class GridAdjustmentPanel extends ParametrizedFilterGUI {
     private static final int MAX_GRID_PARAMS = 4;
     private final boolean addGridLabels;
 

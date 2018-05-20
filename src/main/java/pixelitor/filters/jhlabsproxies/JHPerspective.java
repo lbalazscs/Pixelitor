@@ -19,7 +19,7 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.PerspectiveFilter;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.FilterGUIPanel;
+import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.GridAdjustmentPanel;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
@@ -73,7 +73,7 @@ public class JHPerspective extends ParametrizedFilter {
     }
 
     @Override
-    public FilterGUIPanel createGUIPanel(Drawable dr) {
+    public FilterGUI createGUI(Drawable dr) {
         return new GridAdjustmentPanel(this, dr, false, ShowOriginal.YES);
     }
 }

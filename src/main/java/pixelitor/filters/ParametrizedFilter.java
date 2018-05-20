@@ -18,11 +18,11 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.FilterGUIPanel;
+import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.ParamSet;
-import pixelitor.filters.gui.ParametrizedFilterGUIPanel;
+import pixelitor.filters.gui.ParametrizedFilterGUI;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.ImageUtils;
@@ -58,8 +58,8 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     }
 
     @Override
-    public FilterGUIPanel createGUIPanel(Drawable dr) {
-        return new ParametrizedFilterGUIPanel(this, dr, addShowOriginal);
+    public FilterGUI createGUI(Drawable dr) {
+        return new ParametrizedFilterGUI(this, dr, addShowOriginal);
     }
 
     @Override

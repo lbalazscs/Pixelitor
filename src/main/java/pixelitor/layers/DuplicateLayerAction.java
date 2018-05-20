@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,8 +20,8 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.utils.ActiveImageChangeListener;
 import pixelitor.utils.IconUtils;
-import pixelitor.utils.ImageSwitchListener;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -29,14 +29,14 @@ import java.awt.event.ActionEvent;
 /**
  * An Action that duplicates a layer
  */
-public class DuplicateLayerAction extends AbstractAction implements ImageSwitchListener {
+public class DuplicateLayerAction extends AbstractAction implements ActiveImageChangeListener {
     public static final DuplicateLayerAction INSTANCE = new DuplicateLayerAction();
 
     private DuplicateLayerAction() {
         super("Duplicate Layer", IconUtils.loadIcon("duplicate_layer.png"));
         putValue(SHORT_DESCRIPTION, "Duplicates the active layer.");
         setEnabled(false);
-        ImageComponents.addImageSwitchListener(this);
+        ImageComponents.addActiveImageChangeListener(this);
     }
 
     @Override

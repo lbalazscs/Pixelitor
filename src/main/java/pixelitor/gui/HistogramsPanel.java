@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.gui;
 
 import pixelitor.Composition;
-import pixelitor.utils.ImageSwitchListener;
+import pixelitor.utils.ActiveImageChangeListener;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
@@ -34,7 +34,7 @@ import static java.awt.Color.RED;
 /**
  * The panel that shows the histograms
  */
-public class HistogramsPanel extends JPanel implements ImageSwitchListener {
+public class HistogramsPanel extends JPanel implements ActiveImageChangeListener {
     public static final HistogramsPanel INSTANCE = new HistogramsPanel();
 
     private final HistogramPainter red;

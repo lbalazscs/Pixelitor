@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,15 +28,15 @@ public class FilterGUIDialog extends OKCancelDialog {
     private final Filter activeFilter;
     private final Drawable dr;
 
-    private FilterGUIDialog(FilterGUIPanel filterGUIPanel, Filter activeFilter, Drawable dr) {
-        super(filterGUIPanel, activeFilter.getName());
+    private FilterGUIDialog(FilterGUI filterGUI, Filter activeFilter, Drawable dr) {
+        super(filterGUI, activeFilter.getName());
         this.activeFilter = activeFilter;
         this.dr = dr;
         setName("filterDialog");
     }
 
-    public static void showDialog(FilterGUIPanel filterGUIPanel, Filter activeFilter, Drawable dr) {
-        FilterGUIDialog dialog = new FilterGUIDialog(filterGUIPanel, activeFilter, dr);
+    public static void showDialog(FilterGUI filterGUI, Filter activeFilter, Drawable dr) {
+        FilterGUIDialog dialog = new FilterGUIDialog(filterGUI, activeFilter, dr);
         dialog.setVisible(true);
     }
 

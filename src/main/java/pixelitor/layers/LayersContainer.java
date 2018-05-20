@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
-import pixelitor.utils.ImageSwitchListener;
+import pixelitor.utils.ActiveImageChangeListener;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -29,7 +29,7 @@ import java.awt.BorderLayout;
 /**
  * The part of the GUI that manages the layers of an image.
  */
-public class LayersContainer extends JPanel implements ImageSwitchListener {
+public class LayersContainer extends JPanel implements ActiveImageChangeListener {
     private LayersPanel layersPanel;
     private final JScrollPane scrollPane;
 
@@ -48,7 +48,7 @@ public class LayersContainer extends JPanel implements ImageSwitchListener {
 
         setBorder(BorderFactory.createTitledBorder("Layers"));
 
-        ImageComponents.addImageSwitchListener(this);
+        ImageComponents.addActiveImageChangeListener(this);
     }
 
     private static JPanel initSouthPanel() {

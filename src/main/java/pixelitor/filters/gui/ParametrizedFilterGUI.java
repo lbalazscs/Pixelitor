@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * A GUI for parametrized filters
  */
-public class ParametrizedFilterGUIPanel extends FilterGUIPanel implements ParamAdjustmentListener {
+public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentListener {
     /**
      * Controls whether the params are reset to the default values when a new
      * ParametrizedAdjustPanel is created
@@ -39,11 +39,11 @@ public class ParametrizedFilterGUIPanel extends FilterGUIPanel implements ParamA
     private static boolean resetParams = true;
     private ShowOriginalCB showOriginalCB;
 
-    public ParametrizedFilterGUIPanel(ParametrizedFilter filter, Drawable dr, ShowOriginal addShowOriginal) {
+    public ParametrizedFilterGUI(ParametrizedFilter filter, Drawable dr, ShowOriginal addShowOriginal) {
         this(filter, dr, null, addShowOriginal);
     }
 
-    public ParametrizedFilterGUIPanel(ParametrizedFilter filter, Drawable dr, Object otherInfo, ShowOriginal addShowOriginal) {
+    public ParametrizedFilterGUI(ParametrizedFilter filter, Drawable dr, Object otherInfo, ShowOriginal addShowOriginal) {
         super(filter, dr);
 
         ParamSet params = filter.getParamSet();
@@ -113,7 +113,7 @@ public class ParametrizedFilterGUIPanel extends FilterGUIPanel implements ParamA
     }
 
     public static void setResetParams(boolean resetParams) {
-        ParametrizedFilterGUIPanel.resetParams = resetParams;
+        ParametrizedFilterGUI.resetParams = resetParams;
     }
 
     private static class ShowOriginalCB extends JCheckBox {

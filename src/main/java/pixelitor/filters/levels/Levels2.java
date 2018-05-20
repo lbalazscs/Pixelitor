@@ -17,9 +17,9 @@
 package pixelitor.filters.levels;
 
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.FilterGUIPanel;
+import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.ShowOriginal;
-import pixelitor.filters.levels.gui.LevelsPanel;
+import pixelitor.filters.levels.gui.LevelsGUI;
 import pixelitor.filters.lookup.FastLookupOp;
 import pixelitor.layers.Drawable;
 
@@ -44,8 +44,8 @@ public class Levels2 extends ParametrizedFilter implements LookupFilter {
     }
 
     @Override
-    public FilterGUIPanel createGUIPanel(Drawable dr) {
-        return new LevelsPanel(this, dr, model);
+    public FilterGUI createGUI(Drawable dr) {
+        return new LevelsGUI(this, dr, model);
     }
 
     @Override

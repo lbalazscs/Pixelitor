@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,8 +22,8 @@ import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.utils.ActiveImageChangeListener;
 import pixelitor.utils.IconUtils;
-import pixelitor.utils.ImageSwitchListener;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -31,14 +31,14 @@ import java.awt.event.ActionEvent;
 /**
  * An Action that deletes the active layer
  */
-public class DeleteActiveLayerAction extends AbstractAction implements ImageSwitchListener, GlobalLayerChangeListener {
+public class DeleteActiveLayerAction extends AbstractAction implements ActiveImageChangeListener, GlobalLayerChangeListener {
     public static final DeleteActiveLayerAction INSTANCE = new DeleteActiveLayerAction();
 
     private DeleteActiveLayerAction() {
         super("Delete Layer", IconUtils.loadIcon("delete_layer.gif"));
         putValue(SHORT_DESCRIPTION, "Deletes the active layer.");
         setEnabled(false);
-        ImageComponents.addImageSwitchListener(this);
+        ImageComponents.addActiveImageChangeListener(this);
         AppLogic.addLayerChangeListener(this);
     }
 

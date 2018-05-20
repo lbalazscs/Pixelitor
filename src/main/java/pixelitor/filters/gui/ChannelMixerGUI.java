@@ -29,8 +29,8 @@ import java.awt.FlowLayout;
 /**
  * The GUI for the "Channel Mixer"
  */
-public class ChannelMixerAdjustments extends ParametrizedFilterGUIPanel {
-    public ChannelMixerAdjustments(ParametrizedFilter filter, Drawable dr, Action[] actions) {
+public class ChannelMixerGUI extends ParametrizedFilterGUI {
+    public ChannelMixerGUI(ParametrizedFilter filter, Drawable dr, Action[] actions) {
         super(filter, dr, actions, ShowOriginal.YES);
     }
 

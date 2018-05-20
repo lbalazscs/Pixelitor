@@ -23,7 +23,7 @@ import pixelitor.Composition;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ColorParamGUI;
-import pixelitor.filters.gui.FilterGUIPanel;
+import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.GridBagHelper;
@@ -53,7 +53,7 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 /**
  * Customization panel for the text filter and for text layers
  */
-public class TextAdjustmentsPanel extends FilterGUIPanel implements ParamAdjustmentListener, ActionListener {
+public class TextAdjustmentsPanel extends FilterGUI implements ParamAdjustmentListener, ActionListener {
     private TextLayer textLayer;
 
     private JTextField textTF;

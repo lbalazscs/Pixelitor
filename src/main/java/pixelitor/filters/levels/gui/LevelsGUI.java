@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.filters.levels.gui;
 
 import pixelitor.filters.Filter;
-import pixelitor.filters.gui.FilterGUIPanel;
+import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.levels.LevelsModel;
 import pixelitor.filters.levels.OneChannelLevelsModel;
 import pixelitor.layers.Drawable;
@@ -33,13 +33,13 @@ import java.awt.event.ItemListener;
 /**
  * The GUI for the levels filter
  */
-public class LevelsPanel extends FilterGUIPanel implements ItemListener {
+public class LevelsGUI extends FilterGUI implements ItemListener {
     private final DefaultComboBoxModel<String> selectorModel;
 
     private final JPanel cardPanel;
     private final JCheckBox showOriginalCB;
 
-    public LevelsPanel(Filter filter, Drawable dr, LevelsModel model) {
+    public LevelsGUI(Filter filter, Drawable dr, LevelsModel model) {
         super(filter, dr);
 
         model.setExecutor(this);

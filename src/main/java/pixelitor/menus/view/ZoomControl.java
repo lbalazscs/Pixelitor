@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.menus.view;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
-import pixelitor.utils.ImageSwitchListener;
+import pixelitor.utils.ActiveImageChangeListener;
 
 import javax.swing.*;
 import java.awt.Dimension;
@@ -34,7 +34,7 @@ import static pixelitor.tools.AutoZoomActions.FIT_SCREEN_TOOLTIP;
 /**
  * The zoom widget in the status bar
  */
-public class ZoomControl extends JPanel implements ImageSwitchListener {
+public class ZoomControl extends JPanel implements ActiveImageChangeListener {
     public static final ZoomControl INSTANCE = new ZoomControl();
 
     private static final int PREFERRED_HEIGHT = 17;
@@ -83,7 +83,7 @@ public class ZoomControl extends JPanel implements ImageSwitchListener {
         actualPixelsButton = addZoomButton(buttonSize, "100%", ACTUAL_PIXELS_ACTION, ACTUAL_PIXELS_TOOLTIP);
 
         setLookIfNoImage();
-        ImageComponents.addImageSwitchListener(this);
+        ImageComponents.addActiveImageChangeListener(this);
     }
 
     private JButton addZoomButton(Dimension buttonSize, String text, Action action, String tooltip) {

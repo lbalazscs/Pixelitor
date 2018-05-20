@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,13 +33,13 @@ public abstract class FilterWithGUI extends Filter {
      * Creating an adjustment panel should also automatically execute the first
      * preview run of this filter based on the default settings
      */
-    public abstract FilterGUIPanel createGUIPanel(Drawable dr);
+    public abstract FilterGUI createGUI(Drawable dr);
 
     @Override
     public void startOn(Drawable dr) {
         dr.startPreviewing();
 
-        FilterGUIPanel p = createGUIPanel(dr);
+        FilterGUI p = createGUI(dr);
         FilterGUIDialog.showDialog(p, this, dr);
     }
 }

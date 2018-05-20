@@ -22,7 +22,7 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.menus.view.ZoomMenu;
-import pixelitor.utils.ImageSwitchListener;
+import pixelitor.utils.ActiveImageChangeListener;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
@@ -46,7 +46,7 @@ import java.awt.geom.AffineTransform;
 /**
  * The navigator component that allows the user to pan a zoomed-in image.
  */
-public class Navigator extends JComponent implements MouseListener, MouseMotionListener, ImageSwitchListener {
+public class Navigator extends JComponent implements MouseListener, MouseMotionListener, ActiveImageChangeListener {
     private static final BasicStroke RED_RECT_STROKE = new BasicStroke(3);
     private static final CheckerboardPainter checkerBoardPainter = ImageUtils.createCheckerboardPainter();
     private static final int DEFAULT_NAVIGATOR_SIZE = 300;
@@ -78,7 +78,7 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
 
         addMouseListener(this);
         addMouseMotionListener(this);
-        ImageComponents.addImageSwitchListener(this);
+        ImageComponents.addActiveImageChangeListener(this);
 
         addNavigatorResizedListener();
         addMouseWheelZoomingSupport();
@@ -347,7 +347,7 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
 
     // called when this navigator instance is no longer needed
     private void dispose() {
-        ImageComponents.removeImageSwitchListener(this);
+        ImageComponents.removeActiveImageChangeListener(this);
     }
 }
 

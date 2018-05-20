@@ -26,7 +26,7 @@ import pixelitor.filters.FilterUtils;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.RandomFilter;
 import pixelitor.filters.comp.Resize;
-import pixelitor.filters.gui.ParametrizedFilterGUIPanel;
+import pixelitor.filters.gui.ParametrizedFilterGUI;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.history.History;
@@ -63,7 +63,7 @@ public class FilterTests {
         File selectedDir = Directories.getLastSaveDir();
         OutputFormat outputFormat = OutputFormat.getLastUsed();
 
-        ParametrizedFilterGUIPanel.setResetParams(false);
+        ParametrizedFilterGUI.setResetParams(false);
         ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor("Saving the Results of Each Filter");
 
         dr.startPreviewing();
@@ -121,7 +121,7 @@ public class FilterTests {
                     // ignore
                 } finally {
                     dr.stopPreviewing(); // reset to NORMAL
-                    ParametrizedFilterGUIPanel.setResetParams(true);
+                    ParametrizedFilterGUI.setResetParams(true);
                 }
             }
         };
@@ -129,7 +129,7 @@ public class FilterTests {
     }
 
     public static void runAllFiltersOn(Drawable dr) {
-        ParametrizedFilterGUIPanel.setResetParams(false);
+        ParametrizedFilterGUI.setResetParams(false);
         try {
             ProgressMonitor progressMonitor = new ProgressMonitor(PixelitorWindow.getInstance(),
                     "Run All Filters on Current Layer",
@@ -158,7 +158,7 @@ public class FilterTests {
             }
             progressMonitor.close();
         } finally {
-            ParametrizedFilterGUIPanel.setResetParams(true);
+            ParametrizedFilterGUI.setResetParams(true);
         }
     }
 

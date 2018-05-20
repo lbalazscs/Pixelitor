@@ -20,7 +20,7 @@ package pixelitor.filters.animation;
 import pixelitor.automate.Wizard;
 import pixelitor.automate.WizardPage;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.ParametrizedFilterGUIPanel;
+import pixelitor.filters.gui.ParametrizedFilterGUI;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.ValidatedForm;
 import pixelitor.gui.utils.ValidationResult;
@@ -44,7 +44,7 @@ public class TweenWizard extends Wizard {
 
     @Override
     protected void finalCleanup() {
-        ParametrizedFilterGUIPanel.setResetParams(true);
+        ParametrizedFilterGUI.setResetParams(true);
         ParametrizedFilter filter = animation.getFilter();
         if (filter != null) { // a filter was already selected
             filter.getParamSet().setFinalAnimationSettingMode(false);

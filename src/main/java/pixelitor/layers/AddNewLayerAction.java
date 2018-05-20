@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,8 +20,8 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.utils.ActiveImageChangeListener;
 import pixelitor.utils.IconUtils;
-import pixelitor.utils.ImageSwitchListener;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -31,14 +31,14 @@ import static java.awt.event.ActionEvent.CTRL_MASK;
 /**
  * An Action that adds a new layer
  */
-public class AddNewLayerAction extends AbstractAction implements ImageSwitchListener {
+public class AddNewLayerAction extends AbstractAction implements ActiveImageChangeListener {
     public static final AddNewLayerAction INSTANCE = new AddNewLayerAction();
 
     private AddNewLayerAction() {
         super("Add New Layer", IconUtils.loadIcon("add_layer.gif"));
         putValue(SHORT_DESCRIPTION, "<html>Adds a new empty image layer.<br>Ctrl-click to add the new layer bellow the active one.");
         setEnabled(false);
-        ImageComponents.addImageSwitchListener(this);
+        ImageComponents.addActiveImageChangeListener(this);
     }
 
     @Override

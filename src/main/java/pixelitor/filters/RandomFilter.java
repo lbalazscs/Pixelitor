@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -16,7 +16,7 @@
  */
 package pixelitor.filters;
 
-import pixelitor.filters.gui.FilterGUIPanel;
+import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.layers.Drawable;
 
@@ -27,8 +27,8 @@ import java.awt.image.BufferedImage;
  */
 public class RandomFilter extends FilterWithGUI {
     @Override
-    public FilterGUIPanel createGUIPanel(Drawable dr) {
-        return new RandomFilterGUIPanel(dr);
+    public FilterGUI createGUI(Drawable dr) {
+        return new RandomFilterGUI(dr);
     }
 
     @Override

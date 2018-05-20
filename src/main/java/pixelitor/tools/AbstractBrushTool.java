@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.Brush;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.SymmetryBrush;
-import pixelitor.utils.ImageSwitchListener;
+import pixelitor.utils.ActiveImageChangeListener;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
@@ -53,7 +53,7 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 /**
  * Abstract superclass for tools like brush, erase, clone.
  */
-public abstract class AbstractBrushTool extends Tool implements ImageSwitchListener {
+public abstract class AbstractBrushTool extends Tool implements ActiveImageChangeListener {
     private static final int MIN_BRUSH_RADIUS = 1;
     public static final int MAX_BRUSH_RADIUS = 100;
     public static final int DEFAULT_BRUSH_RADIUS = 10;
@@ -79,7 +79,7 @@ public abstract class AbstractBrushTool extends Tool implements ImageSwitchListe
     AbstractBrushTool(char activationKeyChar, String name, String iconFileName, String toolMessage, Cursor cursor) {
         super(activationKeyChar, name, iconFileName, toolMessage,
                 cursor, true, true, false, ClipStrategy.IMAGE_ONLY);
-        ImageComponents.addImageSwitchListener(this);
+        ImageComponents.addActiveImageChangeListener(this);
         initBrushVariables();
     }
 

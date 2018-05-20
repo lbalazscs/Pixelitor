@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.filters;
 
-import pixelitor.filters.gui.FilterGUIPanel;
+import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.gui.ImageComponents;
 import pixelitor.layers.Drawable;
@@ -32,7 +32,7 @@ import static pixelitor.ChangeReason.OP_PREVIEW;
 /**
  * The GUI for the Random Filter
  */
-public class RandomFilterGUIPanel extends FilterGUIPanel {
+public class RandomFilterGUI extends FilterGUI {
     private final JPanel realSettingsPanel;
     private final Drawable dr;
     private JPanel lastFilterPanel;
@@ -41,7 +41,7 @@ public class RandomFilterGUIPanel extends FilterGUIPanel {
     private final JButton backButton;
     private final JButton forwardButton;
 
-    protected RandomFilterGUIPanel(Drawable dr) {
+    protected RandomFilterGUI(Drawable dr) {
         super(null, dr); // the actual filter will be determined bellow
         this.dr = dr;
         filterSource = new RandomFilterSource();
@@ -92,10 +92,10 @@ public class RandomFilterGUIPanel extends FilterGUIPanel {
                 dr.stopPreviewing(); // stop the last one
                 dr.startPreviewing(); // start the new one
             }
-            FilterGUIPanel filterGUIPanel = ((FilterWithGUI) newFilter).createGUIPanel(dr);
-            realSettingsPanel.add(filterGUIPanel);
-            filterGUIPanel.revalidate();
-            lastFilterPanel = filterGUIPanel;
+            FilterGUI filterGUI = ((FilterWithGUI) newFilter).createGUI(dr);
+            realSettingsPanel.add(filterGUI);
+            filterGUI.revalidate();
+            lastFilterPanel = filterGUI;
         } else {
             lastFilterPanel = null;
             filter.startOn(dr, OP_PREVIEW);

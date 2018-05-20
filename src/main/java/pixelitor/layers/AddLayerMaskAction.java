@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,8 +21,8 @@ import pixelitor.AppLogic;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.utils.ActiveImageChangeListener;
 import pixelitor.utils.IconUtils;
-import pixelitor.utils.ImageSwitchListener;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -36,14 +36,14 @@ import static pixelitor.layers.LayerMaskAddType.REVEAL_SELECTION;
 /**
  * An Action that adds a new layer mask.
  */
-public class AddLayerMaskAction extends AbstractAction implements ImageSwitchListener, GlobalLayerMaskChangeListener, GlobalLayerChangeListener {
+public class AddLayerMaskAction extends AbstractAction implements ActiveImageChangeListener, GlobalLayerMaskChangeListener, GlobalLayerChangeListener {
     public static final AddLayerMaskAction INSTANCE = new AddLayerMaskAction();
 
     private AddLayerMaskAction() {
         super("Add Layer Mask", IconUtils.loadIcon("add_layer_mask.png"));
         putValue(Action.SHORT_DESCRIPTION, "<html>Adds a layer mask to the active layer. <br>Ctrl-click to add an inverted layer mask.");
         setEnabled(false);
-        ImageComponents.addImageSwitchListener(this);
+        ImageComponents.addActiveImageChangeListener(this);
         AppLogic.addLayerChangeListener(this);
         AppLogic.addLayerMaskChangeListener(this);
     }

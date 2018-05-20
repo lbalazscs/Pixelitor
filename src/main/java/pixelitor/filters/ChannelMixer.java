@@ -18,9 +18,9 @@
 package pixelitor.filters;
 
 import com.jhlabs.image.PixelUtils;
-import pixelitor.filters.gui.ChannelMixerAdjustments;
+import pixelitor.filters.gui.ChannelMixerGUI;
 import pixelitor.filters.gui.FilterAction;
-import pixelitor.filters.gui.FilterGUIPanel;
+import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
@@ -332,8 +332,8 @@ public class ChannelMixer extends ParametrizedFilter {
     }
 
     @Override
-    public FilterGUIPanel createGUIPanel(Drawable dr) {
-        return new ChannelMixerAdjustments(this, dr, actions);
+    public FilterGUI createGUI(Drawable dr) {
+        return new ChannelMixerGUI(this, dr, actions);
     }
 
     private static RangeParam createParam(String first, String second, int defaultValue) {

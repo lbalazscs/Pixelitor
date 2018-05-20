@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,10 @@ package pixelitor.utils;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 
-public interface ImageSwitchListener {
+/**
+ * Listens to the events related to changing the active image
+ */
+public interface ActiveImageChangeListener {
     /**
      * Called when the user has closed all the images
      */

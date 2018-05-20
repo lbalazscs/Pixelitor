@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,14 +22,14 @@ import pixelitor.Composition;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
-import pixelitor.utils.ImageSwitchListener;
+import pixelitor.utils.ActiveImageChangeListener;
 
 import static pixelitor.gui.ImageComponents.onActiveLayer;
 
 /**
  * The GUI selector for the opacity and blending mode of the layers
  */
-public class LayerBlendingModePanel extends BlendingModePanel implements ImageSwitchListener, GlobalLayerChangeListener {
+public class LayerBlendingModePanel extends BlendingModePanel implements ActiveImageChangeListener, GlobalLayerChangeListener {
     private boolean userInteractionChange = true;
 
     public static final LayerBlendingModePanel INSTANCE = new LayerBlendingModePanel();
@@ -37,7 +37,7 @@ public class LayerBlendingModePanel extends BlendingModePanel implements ImageSw
     private LayerBlendingModePanel() {
         super(false);
 
-        ImageComponents.addImageSwitchListener(this);
+        ImageComponents.addActiveImageChangeListener(this);
         AppLogic.addLayerChangeListener(this);
 
         opacityDDSlider.addActionListener(e -> {

@@ -18,7 +18,7 @@
 package pixelitor.filters.painters;
 
 import pixelitor.filters.FilterAction;
-import pixelitor.filters.gui.FilterGUIPanel;
+import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.ImageUtils;
@@ -64,7 +64,7 @@ public class TextFilter extends FilterWithGUI {
     }
 
     @Override
-    public FilterGUIPanel createGUIPanel(Drawable dr) {
+    public FilterGUI createGUI(Drawable dr) {
         return new TextAdjustmentsPanel(this, dr);
     }
 

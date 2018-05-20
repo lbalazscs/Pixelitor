@@ -26,7 +26,7 @@ import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.tools.guidelines.RectGuideline;
 import pixelitor.tools.guidelines.RectGuidelineType;
 import pixelitor.transform.TransformSupport;
-import pixelitor.utils.ImageSwitchListener;
+import pixelitor.utils.ActiveImageChangeListener;
 import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
 
@@ -55,7 +55,7 @@ import static pixelitor.tools.CropToolState.USER_DRAG;
 /**
  * The crop tool
  */
-public class CropTool extends Tool implements ImageSwitchListener {
+public class CropTool extends Tool implements ActiveImageChangeListener {
     private CropToolState state = INITIAL;
 
     private TransformSupport transformSupport;
@@ -97,7 +97,7 @@ public class CropTool extends Tool implements ImageSwitchListener {
             hideComposite = AlphaComposite.getInstance(SRC_OVER, alpha);
             ImageComponents.repaintActive();
         });
-        ImageComponents.addImageSwitchListener(this);
+        ImageComponents.addActiveImageChangeListener(this);
     }
 
 

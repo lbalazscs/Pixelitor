@@ -25,7 +25,7 @@ import pixelitor.gui.ImageComponents;
 import pixelitor.layers.GlobalLayerChangeListener;
 import pixelitor.layers.GlobalLayerMaskChangeListener;
 import pixelitor.layers.Layer;
-import pixelitor.utils.ImageSwitchListener;
+import pixelitor.utils.ActiveImageChangeListener;
 
 /**
  * This class is used for tracking what happens is long-running
@@ -33,7 +33,7 @@ import pixelitor.utils.ImageSwitchListener;
  * It listens to changes and generates events
  */
 public class PixelitorEventListener implements GlobalLayerChangeListener,
-        GlobalLayerMaskChangeListener, ImageSwitchListener {
+        GlobalLayerMaskChangeListener, ActiveImageChangeListener {
 
     public PixelitorEventListener() {
         if (Build.CURRENT == Build.FINAL) {
@@ -44,7 +44,7 @@ public class PixelitorEventListener implements GlobalLayerChangeListener,
     public void register() {
         AppLogic.addLayerChangeListener(this);
         AppLogic.addLayerMaskChangeListener(this);
-        ImageComponents.addImageSwitchListener(this);
+        ImageComponents.addActiveImageChangeListener(this);
     }
 
     @Override

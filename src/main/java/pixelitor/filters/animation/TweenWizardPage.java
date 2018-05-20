@@ -22,7 +22,7 @@ import pixelitor.automate.WizardPage;
 import pixelitor.filters.FilterAction;
 import pixelitor.filters.FilterUtils;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.ParametrizedFilterGUIPanel;
+import pixelitor.filters.gui.ParametrizedFilterGUI;
 import pixelitor.layers.Drawable;
 
 import javax.swing.*;
@@ -80,7 +80,7 @@ public enum TweenWizardPage implements WizardPage {
             ParametrizedFilter filter = getAnimation(wizard).getFilter();
             dr.startPreviewing();
 
-            return filter.createGUIPanel(dr);
+            return filter.createGUI(dr);
         }
 
         @Override
@@ -92,7 +92,7 @@ public enum TweenWizardPage implements WizardPage {
         public void onMovingToTheNext(Wizard wizard, Drawable dr) {
             getAnimation(wizard).copyInitialStateFromCurrent();
 
-            ParametrizedFilterGUIPanel.setResetParams(false);
+            ParametrizedFilterGUI.setResetParams(false);
             getAnimation(wizard).getFilter().getParamSet().setFinalAnimationSettingMode(true);
         }
     }, FINAL_FILTER_SETTINGS {
@@ -120,7 +120,7 @@ public enum TweenWizardPage implements WizardPage {
 
             ParametrizedFilter filter = getAnimation(wizard).getFilter();
 
-            return filter.createGUIPanel(dr);
+            return filter.createGUI(dr);
         }
 
         @Override

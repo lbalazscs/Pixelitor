@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,9 +17,9 @@
 
 package pixelitor.filters.levels;
 
-import pixelitor.filters.gui.FilterGUIPanel;
+import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterWithGUI;
-import pixelitor.filters.levels.gui.LevelsPanel;
+import pixelitor.filters.levels.gui.LevelsGUI;
 import pixelitor.filters.lookup.FastLookupOp;
 import pixelitor.layers.Drawable;
 
@@ -39,8 +39,8 @@ public class Levels extends FilterWithGUI implements LookupFilter {
     }
 
     @Override
-    public FilterGUIPanel createGUIPanel(Drawable dr) {
-        return new LevelsPanel(this, dr, new LevelsModel(this));
+    public FilterGUI createGUI(Drawable dr) {
+        return new LevelsGUI(this, dr, new LevelsModel(this));
     }
 
     @Override

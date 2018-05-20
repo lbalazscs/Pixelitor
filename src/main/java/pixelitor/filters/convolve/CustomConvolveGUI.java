@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.filters.convolve;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
-import pixelitor.filters.gui.FilterGUIPanel;
+import pixelitor.filters.gui.FilterGUI;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.Messages;
 import pixelitor.utils.NotANumberException;
@@ -34,7 +34,7 @@ import java.awt.event.ActionListener;
 /**
  * An adjustment panel for customizable convolutions
  */
-public class CustomConvolveAdjustments extends FilterGUIPanel implements ActionListener {
+public class CustomConvolveGUI extends FilterGUI implements ActionListener {
     private static final int TEXTFIELD_PREFERRED_WIDTH = 70;
 
     private JTextField[] textFields;
@@ -44,7 +44,7 @@ public class CustomConvolveAdjustments extends FilterGUIPanel implements ActionL
     private Box presetsBox;
     private final int size;
 
-    public CustomConvolveAdjustments(Convolve filter, Drawable dr) {
+    public CustomConvolveGUI(Convolve filter, Drawable dr) {
         super(filter, dr);
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 

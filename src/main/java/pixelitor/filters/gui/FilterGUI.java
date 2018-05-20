@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,11 +27,11 @@ import static pixelitor.ChangeReason.OP_PREVIEW;
 /**
  * The superclass of all filter adjustment panels
  */
-public abstract class FilterGUIPanel extends JPanel implements PreviewExecutor {
+public abstract class FilterGUI extends JPanel implements PreviewExecutor {
     protected Filter filter;
     private final Drawable dr;
 
-    protected FilterGUIPanel(Filter filter, Drawable dr) {
+    protected FilterGUI(Filter filter, Drawable dr) {
         this.filter = filter;
         this.dr = dr;
     }

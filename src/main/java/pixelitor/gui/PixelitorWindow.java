@@ -90,7 +90,7 @@ public class PixelitorWindow extends JFrame {
     private void addLayersAndHistograms() {
         verticalBoxEast = Box.createVerticalBox();
         histogramsPanel = HistogramsPanel.INSTANCE;
-        ImageComponents.addImageSwitchListener(histogramsPanel);
+        ImageComponents.addActiveImageChangeListener(histogramsPanel);
 
         if (AppPreferences.WorkSpace.getHistogramsVisibility()) {
             verticalBoxEast.add(histogramsPanel);

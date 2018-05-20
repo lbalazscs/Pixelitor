@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ import pixelitor.filters.FilterAction;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.history.History;
-import pixelitor.utils.ImageSwitchListener;
+import pixelitor.utils.ActiveImageChangeListener;
 
 import javax.swing.*;
 import javax.swing.event.UndoableEditEvent;
@@ -32,13 +32,13 @@ import javax.swing.event.UndoableEditListener;
 /**
  * The Fade menu item. It is enabled only if fading is possible.
  */
-public class FadeMenuItem extends JMenuItem implements UndoableEditListener, ImageSwitchListener {
+public class FadeMenuItem extends JMenuItem implements UndoableEditListener, ActiveImageChangeListener {
     public static final FadeMenuItem INSTANCE = new FadeMenuItem();
 
     private FadeMenuItem() {
         super(new FilterAction("Fade", Fade::new));
         History.addUndoableEditListener(this);
-        ImageComponents.addImageSwitchListener(this);
+        ImageComponents.addActiveImageChangeListener(this);
         setEnabled(false);
     }
 

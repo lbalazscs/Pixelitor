@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
-import pixelitor.utils.ImageSwitchListener;
+import pixelitor.utils.ActiveImageChangeListener;
 
 import javax.swing.*;
 import javax.swing.event.UndoableEditEvent;
@@ -32,11 +32,11 @@ import javax.swing.event.UndoableEditListener;
  * A menu item that is enabled only when the last edit can be repeated.
  * Currently only the filters can be repeated.
  */
-public class RepeatMenuItem extends JMenuItem implements UndoableEditListener, ImageSwitchListener {
+public class RepeatMenuItem extends JMenuItem implements UndoableEditListener, ActiveImageChangeListener {
     public RepeatMenuItem(Action a) {
         super(a);
         History.addUndoableEditListener(this);
-        ImageComponents.addImageSwitchListener(this);
+        ImageComponents.addActiveImageChangeListener(this);
         setEnabled(false);
     }
 

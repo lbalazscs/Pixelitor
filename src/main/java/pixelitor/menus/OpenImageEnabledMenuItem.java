@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,18 +19,18 @@ package pixelitor.menus;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
-import pixelitor.utils.ImageSwitchListener;
+import pixelitor.utils.ActiveImageChangeListener;
 
 import javax.swing.*;
 
 /**
  * A menu item that is enabled only if there is an open image
  */
-public class OpenImageEnabledMenuItem extends JMenuItem implements ImageSwitchListener {
+public class OpenImageEnabledMenuItem extends JMenuItem implements ActiveImageChangeListener {
     public OpenImageEnabledMenuItem(Action a) {
         super(a);
         setEnabled(false);
-        ImageComponents.addImageSwitchListener(this);
+        ImageComponents.addActiveImageChangeListener(this);
     }
 
     @Override

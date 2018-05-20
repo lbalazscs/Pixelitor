@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,19 +20,19 @@ package pixelitor.menus;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
-import pixelitor.utils.ImageSwitchListener;
+import pixelitor.utils.ActiveImageChangeListener;
 
 import javax.swing.*;
 
 /**
  * A JRadioButtonMenuItem that becomes enabled only if there is an open image
  */
-public class OpenImageEnabledRadioButtonMenuItem extends JRadioButtonMenuItem implements ImageSwitchListener {
+public class OpenImageEnabledRadioButtonMenuItem extends JRadioButtonMenuItem implements ActiveImageChangeListener {
     public OpenImageEnabledRadioButtonMenuItem(String name) {
         super(name);
         setName(name);
         setEnabled(false);
-        ImageComponents.addImageSwitchListener(this);
+        ImageComponents.addActiveImageChangeListener(this);
     }
 
     @Override

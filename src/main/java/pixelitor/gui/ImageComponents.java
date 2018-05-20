@@ -34,7 +34,7 @@ import pixelitor.menus.view.ZoomMenu;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tools;
-import pixelitor.utils.ImageSwitchListener;
+import pixelitor.utils.ActiveImageChangeListener;
 import pixelitor.utils.Messages;
 
 import java.awt.Cursor;
@@ -55,7 +55,7 @@ import java.util.function.Function;
 public class ImageComponents {
     private static final List<ImageComponent> icList = new ArrayList<>();
     private static ImageComponent activeIC;
-    private static final Collection<ImageSwitchListener> imageSwitchListeners = new ArrayList<>();
+    private static final Collection<ActiveImageChangeListener> activeICChangeListeners = new ArrayList<>();
 
     private ImageComponents() {
     }
@@ -214,17 +214,17 @@ public class ImageComponents {
         }
     }
 
-    public static void addImageSwitchListener(ImageSwitchListener listener) {
-        imageSwitchListeners.add(listener);
+    public static void addActiveImageChangeListener(ActiveImageChangeListener listener) {
+        activeICChangeListeners.add(listener);
     }
 
-    public static void removeImageSwitchListener(ImageSwitchListener listener) {
-        imageSwitchListeners.remove(listener);
+    public static void removeActiveImageChangeListener(ActiveImageChangeListener listener) {
+        activeICChangeListeners.remove(listener);
     }
 
     private static void onAllImagesClosed() {
         setActiveIC(null, false);
-        imageSwitchListeners.forEach(ImageSwitchListener::noOpenImageAnymore);
+        activeICChangeListeners.forEach(ActiveImageChangeListener::noOpenImageAnymore);
         History.onAllImagesClosed();
         SelectionActions.setEnabled(false, null);
 
@@ -239,7 +239,7 @@ public class ImageComponents {
         ImageComponent oldIC = activeIC;
 
         setActiveIC(ic, false);
-        for (ImageSwitchListener listener : imageSwitchListeners) {
+        for (ActiveImageChangeListener listener : activeICChangeListeners) {
             listener.activeImageHasChanged(oldIC, ic);
         }
 
@@ -257,7 +257,7 @@ public class ImageComponents {
     }
 
     public static void newImageOpened(Composition comp) {
-        imageSwitchListeners.forEach((imageSwitchListener) -> imageSwitchListener.newImageOpened(comp));
+        activeICChangeListeners.forEach((imageSwitchListener) -> imageSwitchListener.newImageOpened(comp));
     }
 
     public static void repaintActive() {

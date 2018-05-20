@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,8 +21,8 @@ import pixelitor.Composition;
 import pixelitor.filters.Invert;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.utils.ActiveImageChangeListener;
 import pixelitor.utils.IconUtils;
-import pixelitor.utils.ImageSwitchListener;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -30,14 +30,14 @@ import java.awt.event.ActionEvent;
 /**
  * An Action that adds a new adjustment layer.
  */
-public class AddAdjLayerAction extends AbstractAction implements ImageSwitchListener {
+public class AddAdjLayerAction extends AbstractAction implements ActiveImageChangeListener {
     public static final AddAdjLayerAction INSTANCE = new AddAdjLayerAction();
 
     private AddAdjLayerAction() {
         super("Add Adjustment Layer", IconUtils.loadIcon("add_adj_layer.png"));
         putValue(Action.SHORT_DESCRIPTION, "Adds a new adjustment layer.");
         setEnabled(false);
-        ImageComponents.addImageSwitchListener(this);
+        ImageComponents.addActiveImageChangeListener(this);
     }
 
     @Override
