@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import com.jhlabs.image.MotionBlur;
 import com.jhlabs.image.MotionBlurFilter;
 import com.jhlabs.image.MotionBlurOp;
 import pixelitor.filters.FilterAction;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ImagePositionParam;
@@ -44,7 +44,7 @@ import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
  * "Motion Blur" and "Spin and Zoom Blur" filters based on the JHLabs
  * MotionBlurOp/MotionBlurFilter classes
  */
-public class JHMotionBlur extends FilterWithParametrizedGUI {
+public class JHMotionBlur extends ParametrizedFilter {
     private final AngleParam angle = new AngleParam("Direction", 0);
     private final RangeParam distance = new RangeParam("Distance", 0, 0, 200);
     private final RangeParam rotation = new RangeParam("Spin Blur Amount (Degrees)", -45, 0, 45);

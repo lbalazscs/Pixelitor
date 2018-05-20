@@ -44,7 +44,7 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 /**
  * Fill with Starburst filter
  */
-public class Starburst extends FilterWithParametrizedGUI {
+public class Starburst extends ParametrizedFilter {
     private final RangeParam numberOfRaysParam = new RangeParam("Number of Rays", 2, 10, 100);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final ColorParam bgColor = new ColorParam("Background Color:", WHITE, NO_OPACITY);

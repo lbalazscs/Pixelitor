@@ -867,7 +867,8 @@ public class Composition implements Serializable {
 
     public void createSelectionFromShape(Shape selectionShape) {
         if (selection != null) {
-            throw new IllegalStateException("createSelectionFromShape called while there was a selection: " + selection.toString());
+            throw new IllegalStateException("createSelectionFromShape called while there was a selection: " + selection
+                    .toString());
         }
         setNewSelection(new Selection(selectionShape, ic));
     }
@@ -922,37 +923,36 @@ public class Composition implements Serializable {
     }
 
     public void activeLayerToCanvasSize() {
-        // TODO actually this should work with any layer
-        if (activeLayer instanceof ImageLayer) {
-
-            ImageLayer layer = (ImageLayer) this.activeLayer;
-            BufferedImage backupImage = layer.getImage();
-
-            TranslationEdit translationEdit = new TranslationEdit(this, layer, true);
-            boolean changed = layer.cropToCanvasSize();
-
-            if (changed) {
-                ImageEdit imageEdit;
-                String editName = "Layer to Canvas Size";
-
-                boolean maskChanged = false;
-                BufferedImage maskBackupImage = null;
-                if (layer.hasMask()) {
-                    LayerMask mask = layer.getMask();
-                    maskBackupImage = mask.getImage();
-                    maskChanged = mask.cropToCanvasSize();
-                }
-                if (maskChanged) {
-                    imageEdit = new ImageAndMaskEdit(this, editName, layer, backupImage, maskBackupImage, false);
-                } else {
-                    // no mask or no mask change, a simple ImageEdit will do
-                    imageEdit = new ImageEdit(this, editName, layer, backupImage, true, false);
-                    imageEdit.setFadeable(false);
-                }
-                History.addEdit(new LinkedEdit(this, editName, translationEdit, imageEdit));
-            }
-        } else {
+        if (!(activeLayer instanceof ImageLayer)) {
             Messages.showNotImageLayerError();
+            return;
+        }
+
+        ImageLayer layer = (ImageLayer) this.activeLayer;
+        BufferedImage backupImage = layer.getImage();
+
+        TranslationEdit translationEdit = new TranslationEdit(this, layer, true);
+        boolean changed = layer.cropToCanvasSize();
+
+        if (changed) {
+            ImageEdit imageEdit;
+            String editName = "Layer to Canvas Size";
+
+            boolean maskChanged = false;
+            BufferedImage maskBackupImage = null;
+            if (layer.hasMask()) {
+                LayerMask mask = layer.getMask();
+                maskBackupImage = mask.getImage();
+                maskChanged = mask.cropToCanvasSize();
+            }
+            if (maskChanged) {
+                imageEdit = new ImageAndMaskEdit(this, editName, layer, backupImage, maskBackupImage, false);
+            } else {
+                // no mask or no mask change, a simple ImageEdit will do
+                imageEdit = new ImageEdit(this, editName, layer, backupImage, true, false);
+                imageEdit.setFadeable(false);
+            }
+            History.addEdit(new LinkedEdit(this, editName, translationEdit, imageEdit));
         }
     }
 
@@ -1000,7 +1000,8 @@ public class Composition implements Serializable {
             throw new IllegalStateException("no active layer in " + getName());
         }
         if (!layerList.contains(activeLayer)) {
-            throw new IllegalStateException("active layer (" + activeLayer.getName() + ") not in list (" + layerList.toString() + ")");
+            throw new IllegalStateException("active layer (" + activeLayer.getName() + ") not in list (" + layerList
+                    .toString() + ")");
         }
         return true;
     }

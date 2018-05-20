@@ -26,8 +26,8 @@ import pixelitor.filters.Fade;
 import pixelitor.filters.Filter;
 import pixelitor.filters.FilterAction;
 import pixelitor.filters.FilterUtils;
-import pixelitor.filters.FilterWithParametrizedGUI;
 import pixelitor.filters.Invert;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.RandomFilter;
 import pixelitor.filters.animation.Interpolation;
 import pixelitor.filters.animation.TweenAnimation;
@@ -138,6 +138,10 @@ public class RandomGUITest {
             Messages.showError("Error", "Build is not DEVELOPMENT");
             return;
         }
+        if (running) {
+            System.out.println("RandomGUITest::runTest: already running");
+            return;
+        }
         running = true;
 
         PixelitorWindow.getInstance().setAlwaysOnTop(true);
@@ -229,14 +233,14 @@ public class RandomGUITest {
 
                         if (!GUIUtils.appHasFocus()) {
                             System.out.println("\nRandomGUITest app focus lost.");
-                            cleanUp();
+                            finishRunning();
                             break;
                         }
                     }
 
                     if (!continueRunning) {
                         System.out.println("\nRandomGUITest stopped.");
-                        cleanUp();
+                        finishRunning();
                         break;
                     }
 
@@ -261,7 +265,7 @@ public class RandomGUITest {
                     }
                 }
                 System.out.println("\nRandomGUITest.runTest FINISHED at " + new Date());
-                cleanUp();
+                finishRunning();
                 Toolkit.getDefaultToolkit().beep();
 
                 return null;
@@ -310,8 +314,9 @@ public class RandomGUITest {
         return randomPoint;
     }
 
-    private static void cleanUp() {
+    private static void finishRunning() {
         AppPreferences.WorkSpace.resetDefaults(PixelitorWindow.getInstance());
+        PixelitorWindow.getInstance().setAlwaysOnTop(false);
         running = false;
     }
 
@@ -397,8 +402,8 @@ public class RandomGUITest {
                 f.startOn(dr, OP_PREVIEW);
             } catch (Throwable e) {
                 BufferedImage src = dr.getFilterSourceImage();
-                if (f instanceof FilterWithParametrizedGUI) {
-                    ParamSet paramSet = ((FilterWithParametrizedGUI) f).getParamSet();
+                if (f instanceof ParametrizedFilter) {
+                    ParamSet paramSet = ((ParametrizedFilter) f).getParamSet();
                     System.out.println(String.format(
                             "RandomGUITest::randomFilter: name = %s, width = %d, height = %d, params = %s",
                             filterName, src.getWidth(), src.getHeight(), paramSet.toString()));
@@ -440,7 +445,7 @@ public class RandomGUITest {
 
         long runCountBefore = Filter.runCount;
 
-        FilterWithParametrizedGUI filter = getRandomTweenFilter();
+        ParametrizedFilter filter = getRandomTweenFilter();
         String filterName = filter.getName();
 
         log("tween: " + filterName);
@@ -976,10 +981,10 @@ public class RandomGUITest {
         }
     }
 
-    private static FilterWithParametrizedGUI getRandomTweenFilter() {
+    private static ParametrizedFilter getRandomTweenFilter() {
         FilterAction[] filterActions = FilterUtils.getAnimationFiltersSorted();
         FilterAction filterAction = filterActions[(int) (Math.random() * filterActions.length)];
-        return (FilterWithParametrizedGUI) filterAction.getFilter();
+        return (ParametrizedFilter) filterAction.getFilter();
     }
 
     private static void randomEnlargeCanvas() {

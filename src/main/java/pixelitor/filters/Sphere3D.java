@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import java.awt.image.BufferedImage;
 /**
  * Sphere3D based on Sphere3DFilter
  */
-public class Sphere3D extends FilterWithParametrizedGUI {
+public class Sphere3D extends ParametrizedFilter {
     public static final String NAME = "Sphere3D";
 
     private final RangeParam alpha = new RangeParam("alpha", 0, 50, 100);

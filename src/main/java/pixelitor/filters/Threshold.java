@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 /**
  * The Threshold filter
  */
-public class Threshold extends FilterWithParametrizedGUI {
+public class Threshold extends ParametrizedFilter {
     public static final String NAME = "Threshold";
 
     private static final int CRIT_LUMINOSITY = 1;

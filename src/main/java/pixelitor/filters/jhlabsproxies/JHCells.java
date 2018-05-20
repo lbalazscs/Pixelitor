@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.CellularFilter;
 import com.jhlabs.math.Noise;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.IntChoiceParam;
@@ -38,7 +38,7 @@ import static java.awt.Color.WHITE;
 /**
  * Cells filter based on the JHLabs CellularFilter
  */
-public class JHCells extends FilterWithParametrizedGUI {
+public class JHCells extends ParametrizedFilter {
     public static final String NAME = "Cells";
 
     private static final int TYPE_CELLS = 1;

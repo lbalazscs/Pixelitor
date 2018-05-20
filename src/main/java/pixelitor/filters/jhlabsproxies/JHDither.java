@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.DitherFilter;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
@@ -42,7 +42,7 @@ import static com.jhlabs.image.DitherFilter.MATRIX_CLUSTER8;
 /**
  * Dither filter based on the JHLabs DitherFilter
  */
-public class JHDither extends FilterWithParametrizedGUI {
+public class JHDither extends ParametrizedFilter {
     public static final String NAME = "Dither";
 
     private final RangeParam levels = new RangeParam("Levels", 2, 8, 100);

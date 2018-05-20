@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,7 +41,7 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
 /**
  * Draw Grid
  */
-public class RenderGrid extends FilterWithParametrizedGUI {
+public class RenderGrid extends ParametrizedFilter {
     private final RangeParam spacingParam = new RangeParam("Spacing", 1, 40, 100);
     private final RangeParam widthParam = new RangeParam("Width", 1, 20, 100);
     private final ColorParam colorParam = new ColorParam("Color", BLACK, FREE_OPACITY);

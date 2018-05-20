@@ -64,9 +64,9 @@ public class SelectionTool extends Tool implements ImageSwitchListener {
             stopBuildingSelection();
             polygonal = typeCombo.getSelectedItem() == SelectionType.POLYGONAL_LASSO;
             if (polygonal) {
-                Messages.showStatusMessage(POLY_HELP_TEXT);
+                Messages.showInStatusBar(POLY_HELP_TEXT);
             } else {
-                Messages.showStatusMessage("Selection Tool: " + HELP_TEXT);
+                Messages.showInStatusBar("Selection Tool: " + HELP_TEXT);
             }
         });
         settingsPanel.addWithLabel("Type:", typeCombo, "selectionTypeCombo");

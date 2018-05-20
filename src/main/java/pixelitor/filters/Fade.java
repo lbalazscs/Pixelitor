@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ import java.awt.image.BufferedImage;
 /**
  * The Fade filter
  */
-public class Fade extends FilterWithParametrizedGUI {
+public class Fade extends ParametrizedFilter {
     private static final int FADE_MIN = 0;
     private static final int FADE_MAX = 100;
     private static final int FADE_INIT = 100;

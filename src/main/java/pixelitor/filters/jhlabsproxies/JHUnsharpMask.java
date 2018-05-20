@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.UnsharpFilter;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
@@ -28,7 +28,7 @@ import java.awt.image.BufferedImage;
 /**
  * Unsharp Mask filter based on the JHLabs UnsharpFilter
  */
-public class JHUnsharpMask extends FilterWithParametrizedGUI {
+public class JHUnsharpMask extends ParametrizedFilter {
     public static final String NAME = "Unsharp Mask";
 
     private final RangeParam amount = new RangeParam("Amount", 1, 50, 100);

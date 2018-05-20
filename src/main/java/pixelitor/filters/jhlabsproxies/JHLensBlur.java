@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.LensBlurFilter;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
@@ -29,7 +29,7 @@ import java.awt.image.BufferedImage;
 /**
  * Lens Blur filter based on the JHLabs LensBlurFilter
  */
-public class JHLensBlur extends FilterWithParametrizedGUI {
+public class JHLensBlur extends ParametrizedFilter {
     public static final String NAME = "Lens Blur";
 
     private final RangeParam amount = new RangeParam("Amount (Radius)", 0, 0, 100);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.CrystallizeFilter;
 import com.jhlabs.math.Noise;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.IntChoiceParam;
@@ -37,7 +37,7 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
 /**
  * Crystallize filter based on the JHLabs CrystallizeFilter
  */
-public class JHCrystallize extends FilterWithParametrizedGUI {
+public class JHCrystallize extends ParametrizedFilter {
     public static final String NAME = "Crystallize";
 
     private final RangeParam edgeThickness = new RangeParam("Edge Thickness", 0, 40, 100);

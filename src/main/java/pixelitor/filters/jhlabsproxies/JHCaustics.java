@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.CausticsFilter;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
@@ -35,7 +35,7 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 /**
  * Renders caustics based on the JHLabs CausticsFilter
  */
-public class JHCaustics extends FilterWithParametrizedGUI {
+public class JHCaustics extends ParametrizedFilter {
     public static final String NAME = "Caustics";
 
     private final ColorParam bgColor = new ColorParam("Background Color", new Color(0, 200, 175), NO_OPACITY);

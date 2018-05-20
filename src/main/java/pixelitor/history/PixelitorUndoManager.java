@@ -120,7 +120,7 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
         manualSelectionChange = true;
 
         // 3. show status message
-        Messages.showStatusMessage(editName + " undone.");
+        Messages.showInStatusBar(editName + " undone.");
     }
 
     @Override
@@ -146,7 +146,7 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
         String editName = selectedEdit.getName();
 
         // 3. show status message
-        Messages.showStatusMessage(editName + " redone.");
+        Messages.showInStatusBar(editName + " redone.");
     }
 
     public int getSelectedIndex() {

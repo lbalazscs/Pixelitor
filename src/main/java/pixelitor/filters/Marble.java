@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,7 +46,7 @@ import static net.jafama.FastMath.sqrt;
 /**
  * Marble filter
  */
-public class Marble extends FilterWithParametrizedGUI {
+public class Marble extends ParametrizedFilter {
     public static final String NAME = "Marble";
 
     private final RangeParam zoom = new RangeParam("Zoom", 1, 10, 200);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -52,8 +52,8 @@ public class HSBColorMixPalette extends Palette {
             otherColor = FgBgColors.getFG();
         }
 
-        float[] hsb = ColorUtils.colorToHSB(color);
-        float[] hsb2 = ColorUtils.colorToHSB(otherColor);
+        float[] hsb = ColorUtils.toHSB(color);
+        float[] hsb2 = ColorUtils.toHSB(otherColor);
 
         hue = hsb[0];
         sat = hsb[1];

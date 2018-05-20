@@ -18,7 +18,7 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.SmartBlurFilter;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
@@ -30,7 +30,7 @@ import java.awt.image.BufferedImage;
 /**
  * Smart Blur filter based on the JHLabs SmartBlurFilter
  */
-public class JHSmartBlur extends FilterWithParametrizedGUI {
+public class JHSmartBlur extends ParametrizedFilter {
     public static final String NAME = "Smart Blur";
 
     private final RangeParam radiusParam = new RangeParam("Radius", 0, 0, 100);

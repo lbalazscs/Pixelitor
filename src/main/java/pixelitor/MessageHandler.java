@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,12 +19,12 @@ package pixelitor;
 
 /**
  * Abstracts away messages sent through the GUI
- * in order to enable GUI-independent testability.
+ * in order to enable GUI-independent testing.
  */
 public interface MessageHandler {
     // *** status bar messages ***
 
-    void showStatusMessage(String msg);
+    void showInStatusBar(String msg);
 
     void startProgress(String msg, int max);
 

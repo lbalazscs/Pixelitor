@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.filters.lookup;
 
 import com.jhlabs.image.PixelUtils;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
@@ -41,7 +41,7 @@ import static java.awt.Color.YELLOW;
 /**
  * Color balance filter
  */
-public class ColorBalance extends FilterWithParametrizedGUI {
+public class ColorBalance extends ParametrizedFilter {
     private static final int EVERYTHING = 0;
     private static final int SHADOWS = 1;
     private static final int MIDTONES = 2;

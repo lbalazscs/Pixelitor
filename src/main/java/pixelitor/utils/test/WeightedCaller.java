@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,11 +28,13 @@ import java.util.Random;
 public class WeightedCaller {
     private final Random random = new Random();
     private final List<Runnable> tasks = new ArrayList<>();
+    private static final boolean RANDOMIZE_WEIGHTS = false;
 
     public void registerCallback(int weight, Runnable r) {
         int realWeight = weight;
-        boolean randomizeWeights = false;
-        if (randomizeWeights) {
+
+        if (RANDOMIZE_WEIGHTS) {
+            // an extra level of randomness
             realWeight = random.nextInt(2*weight);
         }
 

@@ -18,7 +18,7 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.QuantizeFilter;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
@@ -30,7 +30,7 @@ import java.awt.image.BufferedImage;
 /**
  * Quantize filter based on the JHLabs QuantizeFilter
  */
-public class JHQuantize extends FilterWithParametrizedGUI {
+public class JHQuantize extends ParametrizedFilter {
     public static final String NAME = "Quantize";
 
     private final RangeParam numberOfColors = new RangeParam("Number of Colors", 2, 2, 256);

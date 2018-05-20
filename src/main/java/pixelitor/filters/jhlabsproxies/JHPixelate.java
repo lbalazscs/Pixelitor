@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.BlockFilter;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
@@ -36,7 +36,7 @@ import static java.awt.Color.WHITE;
 /**
  * Pixelate filter based on the JHLabs BlockFilter
  */
-public class JHPixelate extends FilterWithParametrizedGUI {
+public class JHPixelate extends ParametrizedFilter {
     public static final String NAME = "Pixelate";
 
     private static final int STYLE_FLAT = 0;

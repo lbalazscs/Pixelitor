@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.PolarFilter;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
@@ -31,7 +31,7 @@ import java.awt.image.BufferedImage;
 /**
  * Polar Coordinates filter based on the JHLabs PolarFilter
  */
-public class JHPolarCoordinates extends FilterWithParametrizedGUI {
+public class JHPolarCoordinates extends ParametrizedFilter {
     public static final String NAME = "Polar Coordinates";
 
     private final ImagePositionParam center = new ImagePositionParam("Center");

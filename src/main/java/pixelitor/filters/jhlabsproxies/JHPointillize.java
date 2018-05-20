@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.PointillizeFilter;
 import com.jhlabs.math.Noise;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.IntChoiceParam;
@@ -37,7 +37,7 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
 /**
  * Pointillize filter based on the JHLabs PointillizeFilter
  */
-public class JHPointillize extends FilterWithParametrizedGUI {
+public class JHPointillize extends ParametrizedFilter {
     public static final String NAME = "Pointillize";
 
     private final RangeParam gridSize = new RangeParam("Grid Size", 1, 15, 200);

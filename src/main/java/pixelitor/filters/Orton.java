@@ -32,7 +32,7 @@ import java.awt.image.BufferedImage;
 /**
  * Orton effect - based on http://pcin.net/update/2006/11/01/the-orton-effect-digital-photography-tip-of-the-week/
  */
-public class Orton extends FilterWithParametrizedGUI {
+public class Orton extends ParametrizedFilter {
     public static final String NAME = "Orton Effect";
 
     private final RangeParam blurRadius = new RangeParam("Blur Radius", 0, 3, 10);

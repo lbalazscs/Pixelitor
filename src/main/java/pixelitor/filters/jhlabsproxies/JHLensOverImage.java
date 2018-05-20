@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.SphereFilter;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
@@ -30,7 +30,7 @@ import java.awt.image.BufferedImage;
 /**
  * "Lens over image" filter based on the JHLabs SphereFilter
  */
-public class JHLensOverImage extends FilterWithParametrizedGUI {
+public class JHLensOverImage extends ParametrizedFilter {
     public static final String NAME = "Lens Over Image";
 
     private final ImagePositionParam center = new ImagePositionParam("Center");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.ColorHalftoneFilter;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
@@ -29,7 +29,7 @@ import java.awt.image.BufferedImage;
 /**
  * Color Halftone filter based on the JHLabs ColorHalftoneFilter
  */
-public class JHColorHalftone extends FilterWithParametrizedGUI {
+public class JHColorHalftone extends ParametrizedFilter {
     public static final String NAME = "Color Halftone";
 
     private final RangeParam dotRadius = new RangeParam("Dot Radius (pixel %)", 10, 100, 1000);

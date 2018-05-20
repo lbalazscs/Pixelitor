@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -245,7 +245,7 @@ public class GradientParam extends AbstractFilterParam {
             for (int i = 0; i < colors.length; i++) {
                 Color initial = colors[i];
                 Color end = grEndState.colors[i];
-                Color interpolated = ColorUtils.interpolateColor(initial, end, progress);
+                Color interpolated = ColorUtils.interpolateInRGB(initial, end, progress);
                 interpolatedColors[i] = interpolated;
             }
             return interpolatedColors;

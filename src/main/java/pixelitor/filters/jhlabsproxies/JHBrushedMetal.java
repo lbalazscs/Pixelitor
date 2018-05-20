@@ -18,7 +18,7 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.BrushedMetalFilter;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
@@ -34,7 +34,7 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
 /**
  * Brushed Metal filter based on the JHLabs BrushedMetalFilter
  */
-public class JHBrushedMetal extends FilterWithParametrizedGUI {
+public class JHBrushedMetal extends ParametrizedFilter {
     public static final String NAME = "Brushed Metal";
 
     private final ColorParam color = new ColorParam("Color", GRAY, NO_OPACITY);

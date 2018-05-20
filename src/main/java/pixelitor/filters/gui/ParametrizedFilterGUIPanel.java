@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Drawable;
@@ -39,11 +39,11 @@ public class ParametrizedFilterGUIPanel extends FilterGUIPanel implements ParamA
     private static boolean resetParams = true;
     private ShowOriginalCB showOriginalCB;
 
-    public ParametrizedFilterGUIPanel(FilterWithParametrizedGUI filter, Drawable dr, ShowOriginal addShowOriginal) {
+    public ParametrizedFilterGUIPanel(ParametrizedFilter filter, Drawable dr, ShowOriginal addShowOriginal) {
         this(filter, dr, null, addShowOriginal);
     }
 
-    public ParametrizedFilterGUIPanel(FilterWithParametrizedGUI filter, Drawable dr, Object otherInfo, ShowOriginal addShowOriginal) {
+    public ParametrizedFilterGUIPanel(ParametrizedFilter filter, Drawable dr, Object otherInfo, ShowOriginal addShowOriginal) {
         super(filter, dr);
 
         ParamSet params = filter.getParamSet();

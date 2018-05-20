@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import java.awt.image.BufferedImage;
 /**
  * Magnify filter
  */
-public class Magnify extends FilterWithParametrizedGUI {
+public class Magnify extends ParametrizedFilter {
     public static final String NAME = "Magnify";
 
     private final RangeParam magnification = new RangeParam("Magnification (%)", 1, 150, 500);

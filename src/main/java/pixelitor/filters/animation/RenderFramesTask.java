@@ -19,7 +19,7 @@ package pixelitor.filters.animation;
 
 import pixelitor.Composition;
 import pixelitor.filters.Filter;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ParamSetState;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.layers.Drawable;
@@ -57,7 +57,7 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
 
     private void renderFrames() {
         int numFrames = animation.getNumFrames();
-        FilterWithParametrizedGUI filter = animation.getFilter();
+        ParametrizedFilter filter = animation.getFilter();
 
         AnimationWriter animationWriter = animation.createAnimationWriter();
         boolean canceled = false;
@@ -113,7 +113,7 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         }
     }
 
-    private BufferedImage renderFrame(FilterWithParametrizedGUI filter, double time, PixelitorWindow busyCursorParent) {
+    private BufferedImage renderFrame(ParametrizedFilter filter, double time, PixelitorWindow busyCursorParent) {
         long runCountBefore = Filter.runCount;
 
         ParamSetState intermediateState = animation.tween(time);

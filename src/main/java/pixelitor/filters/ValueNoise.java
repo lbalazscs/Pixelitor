@@ -39,7 +39,7 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
 /**
  * Renders value noise
  */
-public class ValueNoise extends FilterWithParametrizedGUI {
+public class ValueNoise extends ParametrizedFilter {
     public static final String NAME = "Value Noise";
 
     private static final Random rand = new Random();

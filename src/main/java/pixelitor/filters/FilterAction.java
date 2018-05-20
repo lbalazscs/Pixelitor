@@ -112,10 +112,10 @@ public class FilterAction extends DrawableAction {
         }
 
         createFilter();
-        if (!(filter instanceof FilterWithParametrizedGUI)) {
+        if (!(filter instanceof ParametrizedFilter)) {
             return false;
         }
-        FilterWithParametrizedGUI fpg = (FilterWithParametrizedGUI) filter;
+        ParametrizedFilter fpg = (ParametrizedFilter) filter;
         if (fpg.excludedFromAnimation()) {
             return false;
         }

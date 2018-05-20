@@ -103,7 +103,7 @@ public class AutoPaint {
                     dr, backupImage, false, false);
             History.addEdit(edit);
             msgHandler.stopProgress();
-            msgHandler.showStatusMessage(msg + "finished.");
+            msgHandler.showInStatusBar(msg + "finished.");
 
             // if colors were changed, restore the original
             if (settings.changeColors()) {
@@ -134,7 +134,7 @@ public class AutoPaint {
             FgBgColors.randomize();
         } else if (settings.useInterpolatedColors()) {
             float interpolationRatio = rand.nextFloat();
-            Color interpolated = ColorUtils.interpolateColor(origFg, origBg, interpolationRatio);
+            Color interpolated = ColorUtils.interpolateInRGB(origFg, origBg, interpolationRatio);
             FgBgColors.setFG(interpolated);
         }
 

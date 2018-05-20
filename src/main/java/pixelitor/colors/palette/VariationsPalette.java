@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,7 @@ public class VariationsPalette extends Palette {
         super(lastRows, lastCols);
         this.dialogTitle = dialogTitle;
         assert refColor != null;
-        float[] hsb = ColorUtils.colorToHSB(refColor);
+        float[] hsb = ColorUtils.toHSB(refColor);
         refHue = hsb[0];
         config = new HueSatPaletteConfig(0, hsb[1]);
     }

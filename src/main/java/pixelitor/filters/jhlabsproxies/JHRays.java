@@ -19,7 +19,7 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.composite.MiscComposite;
 import com.jhlabs.image.RaysFilter;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.ResizingFilterHelper;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ImagePositionParam;
@@ -39,7 +39,7 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 /**
  * Rays filter based on the JHLabs RaysFilter
  */
-public class JHRays extends FilterWithParametrizedGUI {
+public class JHRays extends ParametrizedFilter {
     public static final String NAME = "Rays";
 
     private final ImagePositionParam center = new ImagePositionParam("Light Source");

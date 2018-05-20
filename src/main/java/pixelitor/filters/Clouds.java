@@ -40,7 +40,7 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
 /**
  * Clouds filter based on multiple Perlin noise iterations, inspired by the Paint.net clouds
  */
-public class Clouds extends FilterWithParametrizedGUI {
+public class Clouds extends ParametrizedFilter {
     public static final String NAME = "Clouds";
 
     private static int[] p;

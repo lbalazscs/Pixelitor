@@ -35,7 +35,7 @@ import java.util.concurrent.Future;
 /**
  * Renders a color wheel
  */
-public class ColorWheel extends FilterWithParametrizedGUI {
+public class ColorWheel extends ParametrizedFilter {
     public static final String NAME = "Color Wheel";
 
     private final ImagePositionParam center = new ImagePositionParam("Center");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -116,7 +116,7 @@ public class ColorPickerTool extends Tool {
             msg += String.format(", alpha = %d, red = %d, green = %d, blue = %d, hue = %.2f, saturation = %.2f, brightness = %.2f", a, r, g, b, hsbValues[0], hsbValues[1], hsbValues[2]);
         }
 
-        Messages.showStatusMessage(msg);
+        Messages.showInStatusBar(msg);
     }
 
     @Override

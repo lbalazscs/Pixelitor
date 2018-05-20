@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.OffsetFilter;
 import com.jhlabs.image.TransformFilter;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
@@ -28,7 +28,7 @@ import java.awt.image.BufferedImage;
 /**
  * Offset filter based on the JHLabs OffsetFilter
  */
-public class JHOffset extends FilterWithParametrizedGUI {
+public class JHOffset extends ParametrizedFilter {
     public static final String NAME = "Offset";
 
     private final ImagePositionParam center =

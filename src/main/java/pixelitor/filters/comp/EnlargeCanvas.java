@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -90,7 +90,7 @@ public class EnlargeCanvas implements CompAction {
 
         comp.imageChanged(REPAINT, true);
 
-        Messages.showStatusMessage("Canvas enlarged to "
+        Messages.showInStatusBar("Canvas enlarged to "
                 + newCanvasWidth + " x " + newCanvasHeight + " pixels.");
     }
 

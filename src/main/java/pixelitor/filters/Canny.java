@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import java.awt.image.BufferedImage;
  * Canny edge detector - see http://en.wikipedia.org/wiki/Canny_edge_detector
  * based on CannyEdgeDetector by Tom Gibara - http://www.tomgibara.com/computer-vision/canny-edge-detector
  */
-public class Canny extends FilterWithParametrizedGUI {
+public class Canny extends ParametrizedFilter {
     private final RangeParam lowThreshold = new RangeParam("Low Threshold", 1, 250, 1000);
     private final RangeParam highThreshold = new RangeParam("High Threshold", 1, 750, 1000);
     private final RangeParam gaussianKernelWidth = new RangeParam("Gaussian Kernel Width", 2, 16, 50);

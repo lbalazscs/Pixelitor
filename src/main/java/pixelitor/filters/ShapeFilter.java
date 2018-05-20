@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -49,7 +49,7 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 /**
  * Abstract superclass for shape filters
  */
-public abstract class ShapeFilter extends FilterWithParametrizedGUI {
+public abstract class ShapeFilter extends ParametrizedFilter {
     private static final int BG_BLACK = 1;
     private static final int BG_ORIGINAL = 2;
     private static final int BG_TRANSPARENT = 3;

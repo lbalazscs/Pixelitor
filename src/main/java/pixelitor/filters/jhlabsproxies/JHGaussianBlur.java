@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.filters.jhlabsproxies;
 
 
 import com.jhlabs.image.GaussianFilter;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
@@ -31,7 +31,7 @@ import java.awt.image.BufferedImage;
 /**
  * Gaussian Blur filter based on JHLabs GaussianFilter
  */
-public class JHGaussianBlur extends FilterWithParametrizedGUI {
+public class JHGaussianBlur extends ParametrizedFilter {
     public static final String NAME = "Gaussian Blur";
 
     private final RangeParam radius = new RangeParam("Radius", 0, 2, 100);

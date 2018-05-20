@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.TritoneFilter;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
@@ -33,7 +33,7 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
 /**
  * Tritone filter based on the JHLabs TritoneFilter
  */
-public class JHTriTone extends FilterWithParametrizedGUI {
+public class JHTriTone extends ParametrizedFilter {
     public static final String NAME = "Tritone";
 
     private final ColorParam shadowColor = new ColorParam("Shadow Color:", BLACK, NO_OPACITY);

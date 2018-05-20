@@ -479,7 +479,7 @@ public class ImageUtils {
                 reader.dispose();
             }
         }
-        Messages.showStatusMessage(file.getName() + " opened.");
+        Messages.showInStatusBar(file.getName() + " opened.");
         return image;
     }
 

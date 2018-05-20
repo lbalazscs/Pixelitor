@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import java.awt.image.BufferedImage;
 /**
  * Angular waves in a polar coordinate system
  */
-public class AngularWaves extends FilterWithParametrizedGUI {
+public class AngularWaves extends ParametrizedFilter {
     public static final String NAME = "Angular Waves";
 
     private final RangeParam radialWL = new RangeParam("Radial Wavelength", 1, 20, 100);

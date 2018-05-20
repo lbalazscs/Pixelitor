@@ -35,7 +35,7 @@ import java.awt.image.BufferedImage;
  * The advantage is that subclasses don't need to create their own adjustment GUIs,
  * they only specify their ParamSet, and the GUI is built automatically
  */
-public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
+public abstract class ParametrizedFilter extends FilterWithGUI {
     protected ParamSet paramSet;
 
     private BooleanParam showAffectedAreaParam = null;
@@ -43,7 +43,7 @@ public abstract class FilterWithParametrizedGUI extends FilterWithGUI {
     private boolean hasAffectedAreaShapeParam;
     private Shape[] affectedAreaShapes;
 
-    protected FilterWithParametrizedGUI(ShowOriginal addShowOriginal) {
+    protected ParametrizedFilter(ShowOriginal addShowOriginal) {
         this.addShowOriginal = addShowOriginal;
     }
 

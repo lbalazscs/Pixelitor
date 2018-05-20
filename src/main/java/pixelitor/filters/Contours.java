@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import java.awt.image.BufferedImage;
 /**
  * Contours filter
  */
-public class Contours extends FilterWithParametrizedGUI {
+public class Contours extends ParametrizedFilter {
     public static final String NAME = "Contours";
 
     private final RangeParam lineThickness = new RangeParam("Increase Line Thickness", 0, 0, 20);

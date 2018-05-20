@@ -35,7 +35,7 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 /**
  * Flashlight filter
  */
-public class Flashlight extends FilterWithParametrizedGUI {
+public class Flashlight extends ParametrizedFilter {
     public static final String NAME = "Flashlight";
 
     private final ImagePositionParam center = new ImagePositionParam("Center");

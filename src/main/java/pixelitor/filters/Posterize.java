@@ -29,7 +29,7 @@ import java.awt.image.ShortLookupTable;
 /**
  * Posterize filter
  */
-public class Posterize extends FilterWithParametrizedGUI {
+public class Posterize extends ParametrizedFilter {
     private final RangeParam levels = new RangeParam("Levels", 2, 2, 255);
 
     public Posterize() {

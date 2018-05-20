@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import java.awt.image.BufferedImage;
 /**
  * A template for transform filters with polar coordinates
  */
-public class EmptyPolar extends FilterWithParametrizedGUI {
+public class EmptyPolar extends ParametrizedFilter {
     public static final String NAME = "Empty Polar";
 
     private final ImagePositionParam center = new ImagePositionParam("Center");

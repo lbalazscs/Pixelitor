@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ import java.awt.image.BufferedImage;
 /**
  * Glass Tiles filter
  */
-public class GlassTiles extends FilterWithParametrizedGUI {
+public class GlassTiles extends ParametrizedFilter {
     public static final String NAME = "Glass Tiles";
 
     private final GroupedRangeParam size = new GroupedRangeParam("Tile Size", 5, 100, 500);

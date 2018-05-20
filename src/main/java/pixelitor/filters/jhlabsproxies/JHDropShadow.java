@@ -18,7 +18,7 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.ShadowFilter;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.ResizingFilterHelper;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
@@ -41,7 +41,7 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
 /**
  * Drop Shadow filter based on the JHLabs ShadowFilter
  */
-public class JHDropShadow extends FilterWithParametrizedGUI {
+public class JHDropShadow extends ParametrizedFilter {
     public static final String NAME = "Drop Shadow";
 
     private final AngleParam angle = new AngleParam("Angle", ImageUtils.DEG_315_IN_RADIANS);

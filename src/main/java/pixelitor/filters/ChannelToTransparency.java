@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ import java.awt.image.BufferedImage;
 /**
  * Makes pixels transparent proportionally to a channel value
  */
-public class ChannelToTransparency extends FilterWithParametrizedGUI {
+public class ChannelToTransparency extends ParametrizedFilter {
     public static final String NAME = "Channel to Transparency";
 
     private static final int LUMINOSITY = 1;

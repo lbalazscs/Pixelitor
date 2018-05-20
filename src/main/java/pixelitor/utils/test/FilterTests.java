@@ -23,7 +23,7 @@ import pixelitor.filters.Canny;
 import pixelitor.filters.Fade;
 import pixelitor.filters.Filter;
 import pixelitor.filters.FilterUtils;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.RandomFilter;
 import pixelitor.filters.comp.Resize;
 import pixelitor.filters.gui.ParametrizedFilterGUIPanel;
@@ -194,7 +194,7 @@ public class FilterTests {
 
         Filter[] filters = FilterUtils.getFiltersShuffled(
                 f -> (!(f instanceof Fade || f instanceof Canny))
-                        && (f instanceof FilterWithParametrizedGUI));
+                        && (f instanceof ParametrizedFilter));
 
         Map<String, Double> results = new HashMap<>();
 

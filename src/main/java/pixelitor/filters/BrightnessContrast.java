@@ -28,7 +28,7 @@ import java.awt.image.BufferedImage;
 /**
  * The Brightness/Contrast filter
  */
-public class BrightnessContrast extends FilterWithParametrizedGUI {
+public class BrightnessContrast extends ParametrizedFilter {
     public static final String NAME = "Brightness/Contrast";
 
     private final RangeParam power = new RangeParam("Brightness Power (%)", 50, 100, 150);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -98,7 +98,7 @@ public class Resize implements CompAction {
 
         AppLogic.activeCompSizeChanged(comp);
 
-        Messages.showStatusMessage("Image resized to "
+        Messages.showInStatusBar("Image resized to "
                 + canvasTargetWidth + " x " + canvasTargetHeight + " pixels.");
     }
 

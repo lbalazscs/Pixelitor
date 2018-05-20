@@ -56,7 +56,7 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
 /**
  * Photo Collage
  */
-public class PhotoCollage extends FilterWithParametrizedGUI {
+public class PhotoCollage extends ParametrizedFilter {
     public static final String NAME = "Photo Collage";
 
     private final GroupedRangeParam size = new GroupedRangeParam("Photo Size", 40, 200, 999);

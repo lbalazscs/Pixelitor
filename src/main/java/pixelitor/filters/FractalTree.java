@@ -45,7 +45,7 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 /**
  * Renders a fractal tree
  */
-public class FractalTree extends FilterWithParametrizedGUI {
+public class FractalTree extends ParametrizedFilter {
     public static final String NAME = "Fractal Tree";
 
     private static final Color BROWN = new Color(140, 100, 73);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,7 @@ import java.awt.image.ShortLookupTable;
 /**
  * Extract a channel from the image
  */
-public class ExtractChannel extends FilterWithParametrizedGUI {
+public class ExtractChannel extends ParametrizedFilter {
     private static final int RED_CHANNEL = 1;
     private static final int REMOVE_RED_CHANNEL = 2;
 

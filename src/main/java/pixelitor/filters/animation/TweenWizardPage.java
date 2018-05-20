@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import pixelitor.automate.Wizard;
 import pixelitor.automate.WizardPage;
 import pixelitor.filters.FilterAction;
 import pixelitor.filters.FilterUtils;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ParametrizedFilterGUIPanel;
 import pixelitor.layers.Drawable;
 
@@ -61,7 +61,7 @@ public enum TweenWizardPage implements WizardPage {
         @Override
         public void onMovingToTheNext(Wizard wizard, Drawable dr) {
             FilterAction selectedItem = (FilterAction) filtersCB.getSelectedItem();
-            FilterWithParametrizedGUI filter = (FilterWithParametrizedGUI) selectedItem.getFilter();
+            ParametrizedFilter filter = (ParametrizedFilter) selectedItem.getFilter();
             getAnimation(wizard).setFilter(filter);
         }
     }, INITIAL_FILTER_SETTINGS {
@@ -77,7 +77,7 @@ public enum TweenWizardPage implements WizardPage {
 
         @Override
         public JComponent getPanel(Wizard wizard, Drawable dr) {
-            FilterWithParametrizedGUI filter = getAnimation(wizard).getFilter();
+            ParametrizedFilter filter = getAnimation(wizard).getFilter();
             dr.startPreviewing();
 
             return filter.createGUIPanel(dr);
@@ -118,7 +118,7 @@ public enum TweenWizardPage implements WizardPage {
             dr.stopPreviewing(); // stop the initial one
             dr.startPreviewing(); // start the final one
 
-            FilterWithParametrizedGUI filter = getAnimation(wizard).getFilter();
+            ParametrizedFilter filter = getAnimation(wizard).getFilter();
 
             return filter.createGUIPanel(dr);
         }

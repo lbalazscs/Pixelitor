@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,9 @@ import pixelitor.layers.Layer;
 import pixelitor.utils.ImageSwitchListener;
 
 /**
- * Listens to changes and generates events
+ * This class is used for tracking what happens is long-running
+ * automatic tests.
+ * It listens to changes and generates events
  */
 public class PixelitorEventListener implements GlobalLayerChangeListener,
         GlobalLayerMaskChangeListener, ImageSwitchListener {

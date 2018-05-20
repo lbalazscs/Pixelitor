@@ -97,7 +97,7 @@ public class SplashImageCreator {
             });
         }
         msgHandler.stopProgress();
-        msgHandler.showStatusMessage(String.format("Finished saving splash images to %s", lastSaveDir));
+        msgHandler.showInStatusBar(String.format("Finished saving splash images to %s", lastSaveDir));
     }
 
     public static void createSplashImage() {

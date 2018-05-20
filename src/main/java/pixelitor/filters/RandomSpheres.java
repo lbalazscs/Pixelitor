@@ -49,7 +49,7 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 /**
  * Fills the image with random circles
  */
-public class RandomSpheres extends FilterWithParametrizedGUI {
+public class RandomSpheres extends ParametrizedFilter {
     public static final String NAME = "Random Spheres";
 
     private static final double INTUITIVE_RADIANS_45 = 5.497787143782138;

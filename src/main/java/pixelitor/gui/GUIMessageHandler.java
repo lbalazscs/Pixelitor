@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ public class GUIMessageHandler implements MessageHandler {
     }
 
     @Override
-    public void showStatusMessage(String msg) {
+    public void showInStatusBar(String msg) {
         StatusBar.INSTANCE.setMessage(msg);
     }
 

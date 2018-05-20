@@ -34,7 +34,7 @@ import static pixelitor.filters.impl.MorphologyFilter.OP_ERODE;
 /**
  * A morphology filter
  */
-public class Morphology extends FilterWithParametrizedGUI {
+public class Morphology extends ParametrizedFilter {
     public static final String NAME = "Morphology";
 
     private static final int OP_OPEN = 10;

@@ -18,7 +18,7 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.OilFilter;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.ResizingFilterHelper;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
@@ -37,7 +37,7 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 /**
  * Oil Painting filter based on the JHLabs OilFilter
  */
-public class JHOilPainting extends FilterWithParametrizedGUI {
+public class JHOilPainting extends ParametrizedFilter {
     public static final String NAME = "Oil Painting";
 
     private static final int FASTER = 0;

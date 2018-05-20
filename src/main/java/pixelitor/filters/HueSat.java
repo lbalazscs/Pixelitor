@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,7 @@ import java.awt.image.BufferedImage;
 /**
  * Hue-Saturation (and Colorize) filter
  */
-public class HueSat extends FilterWithParametrizedGUI {
+public class HueSat extends ParametrizedFilter {
     public static final String NAME = "Hue/Saturation";
 
     private static final int MIN_HUE = -180;

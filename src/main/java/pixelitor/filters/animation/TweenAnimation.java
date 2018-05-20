@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -16,7 +16,7 @@
  */
 package pixelitor.filters.animation;
 
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ParamSetState;
 import pixelitor.gui.utils.Dialogs;
 
@@ -25,7 +25,7 @@ import java.awt.EventQueue;
 import java.io.File;
 
 public class TweenAnimation {
-    private FilterWithParametrizedGUI filter;
+    private ParametrizedFilter filter;
     private ParamSetState initialState;
     private ParamSetState finalState;
     private int numFrames;
@@ -35,11 +35,11 @@ public class TweenAnimation {
     private File output; // file or directory
     private boolean pingPong;
 
-    public FilterWithParametrizedGUI getFilter() {
+    public ParametrizedFilter getFilter() {
         return filter;
     }
 
-    public void setFilter(FilterWithParametrizedGUI filter) {
+    public void setFilter(ParametrizedFilter filter) {
         this.filter = filter;
     }
 

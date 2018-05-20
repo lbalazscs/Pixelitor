@@ -261,7 +261,7 @@ public class FgBgColorSelector extends JLayeredPane {
     public void setFgColor(Color c) {
         Color newColor;
         if (layerMaskEditing) {
-            maskFgColor = ColorUtils.colorToGray(c);
+            maskFgColor = ColorUtils.toGray(c);
             newColor = maskFgColor;
         } else {
             fgColor = c;
@@ -275,7 +275,7 @@ public class FgBgColorSelector extends JLayeredPane {
     public void setBgColor(Color c) {
         Color newColor;
         if (layerMaskEditing) {
-            maskBgColor = ColorUtils.colorToGray(c);
+            maskBgColor = ColorUtils.toGray(c);
             newColor = maskBgColor;
         } else {
             bgColor = c;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ import static pixelitor.filters.impl.BricTransitionFilter.*;
 /**
  * 2D transitions
  */
-public class Transition2D extends FilterWithParametrizedGUI {
+public class Transition2D extends ParametrizedFilter {
     public static final String NAME = "2D Transitions";
 
     private final RangeParam progress = new RangeParam("Progress (%)", 0, 0, 100);

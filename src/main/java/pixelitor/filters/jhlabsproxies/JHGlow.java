@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.GlowFilter;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
@@ -28,7 +28,7 @@ import java.awt.image.BufferedImage;
 /**
  * Glow filter based on the JHLabs GlowFilter
  */
-public class JHGlow extends FilterWithParametrizedGUI {
+public class JHGlow extends ParametrizedFilter {
     public static final String NAME = "Glow";
 
     private final RangeParam amount = new RangeParam("Amount", 0, 15, 100);

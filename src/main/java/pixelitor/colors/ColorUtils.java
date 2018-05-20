@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -49,7 +49,7 @@ public class ColorUtils {
     private ColorUtils() {
     }
 
-    public static Color interpolateColor(Color startColor, Color endColor, float progress) {
+    public static Color interpolateInRGB(Color startColor, Color endColor, float progress) {
         int initialRGB = startColor.getRGB();
         int finalRGB = endColor.getRGB();
 
@@ -238,7 +238,7 @@ public class ColorUtils {
         return color;
     }
 
-    public static Color colorToGray(Color c) {
+    public static Color toGray(Color c) {
         int rgb = c.getRGB();
 //        int a = (rgb >>> 24) & 0xFF;
         int r = (rgb >>> 16) & 0xFF;
@@ -250,7 +250,7 @@ public class ColorUtils {
         return new Color(0xFF_00_00_00 | (gray << 16) | (gray << 8) | gray);
     }
 
-    public static float[] colorToHSB(Color c) {
+    public static float[] toHSB(Color c) {
         return Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), null);
     }
 

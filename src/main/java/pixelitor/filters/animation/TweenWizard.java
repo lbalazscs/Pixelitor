@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.filters.animation;
 
 import pixelitor.automate.Wizard;
 import pixelitor.automate.WizardPage;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ParametrizedFilterGUIPanel;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.ValidatedForm;
@@ -45,7 +45,7 @@ public class TweenWizard extends Wizard {
     @Override
     protected void finalCleanup() {
         ParametrizedFilterGUIPanel.setResetParams(true);
-        FilterWithParametrizedGUI filter = animation.getFilter();
+        ParametrizedFilter filter = animation.getFilter();
         if (filter != null) { // a filter was already selected
             filter.getParamSet().setFinalAnimationSettingMode(false);
         }

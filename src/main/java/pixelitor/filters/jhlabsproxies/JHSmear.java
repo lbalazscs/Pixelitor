@@ -18,7 +18,7 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.SmearFilter;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
@@ -34,7 +34,7 @@ import java.util.Random;
 /**
  * Smear filter based on the JHLabs SmearFilter
  */
-public class JHSmear extends FilterWithParametrizedGUI {
+public class JHSmear extends ParametrizedFilter {
     public static final String NAME = "Smear";
 
     private final RangeParam distance = new RangeParam("Distance", 0, 15, 100);

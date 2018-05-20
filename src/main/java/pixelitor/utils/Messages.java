@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -49,19 +49,15 @@ public class Messages {
 
     public static void showFileSavedMessage(File file) {
         String msg = "File " + file.getAbsolutePath() + " saved.";
-        showStatusMessage(msg);
+        showInStatusBar(msg);
     }
 
-    public static void showStatusMessage(String msg) {
-        msgHandler.showStatusMessage(msg);
+    public static void showInStatusBar(String msg) {
+        msgHandler.showInStatusBar(msg);
     }
 
     public static void showNotImageLayerError() {
         msgHandler.showNotImageLayerError();
-    }
-
-    public static void showNotImageLayerOrMaskError() {
-        msgHandler.showNotImageLayerOrMaskError();
     }
 
     public static MessageHandler getMessageHandler() {
@@ -76,6 +72,6 @@ public class Messages {
             float seconds = totalTime / 1000.0f;
             msg = String.format("%s took %.1f s", filterName, seconds);
         }
-        showStatusMessage(msg);
+        showInStatusBar(msg);
     }
 }

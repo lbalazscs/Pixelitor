@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -133,7 +133,7 @@ public class ColorParam extends AbstractFilterParam {
         @Override
         public ParamState interpolate(ParamState endState, double progress) {
             Color endColor = ((CState) endState).color;
-            return new CState(ColorUtils.interpolateColor(color, endColor, (float) progress));
+            return new CState(ColorUtils.interpolateInRGB(color, endColor, (float) progress));
         }
     }
 

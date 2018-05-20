@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.PerspectiveFilter;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.FilterGUIPanel;
 import pixelitor.filters.gui.GridAdjustmentPanel;
 import pixelitor.filters.gui.ImagePositionParam;
@@ -32,7 +32,7 @@ import java.awt.image.BufferedImage;
 /**
  * Perspective filter based on the JHLabs PerspectiveFilter
  */
-public class JHPerspective extends FilterWithParametrizedGUI {
+public class JHPerspective extends ParametrizedFilter {
     public static final String NAME = "Perspective";
 
     private final ImagePositionParam northWest = new ImagePositionParam("North West", 0.05f, 0.05f);

@@ -18,7 +18,7 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.SparkleFilter;
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ImagePositionParam;
@@ -36,7 +36,7 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
 /**
  * Sparkle filter based on the JHLabs SparkleFilter
  */
-public class JHSparkle extends FilterWithParametrizedGUI {
+public class JHSparkle extends ParametrizedFilter {
     public static final String NAME = "Sparkle";
 
     private final BooleanParam lightOnly = new BooleanParam("Light Only", false);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -16,7 +16,7 @@
  */
 package pixelitor.filters.levels;
 
-import pixelitor.filters.FilterWithParametrizedGUI;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.FilterGUIPanel;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.levels.gui.LevelsPanel;
@@ -32,7 +32,7 @@ import java.util.Random;
 /**
  * The Levels filter
  */
-public class Levels2 extends FilterWithParametrizedGUI implements LookupFilter {
+public class Levels2 extends ParametrizedFilter implements LookupFilter {
     private RGBLookup rgbLookup;
     private final LevelsModel model;
 

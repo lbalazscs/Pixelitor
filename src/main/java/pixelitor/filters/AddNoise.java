@@ -35,7 +35,7 @@ import java.util.Random;
 /**
  * Add Noise filter
  */
-public class AddNoise extends FilterWithParametrizedGUI {
+public class AddNoise extends ParametrizedFilter {
     public static final String NAME = "Add Noise";
 
     private static final int METHOD_FASTER = 1;
