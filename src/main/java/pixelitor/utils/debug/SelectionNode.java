@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,11 +30,9 @@ public class SelectionNode extends DebugNode {
         super("Selection", selection);
 
         Shape shape = selection.getShape();
-        addStringChild("Shape Class", shape.getClass().getName());
+        addString("Shape Class", shape.getClass().getName());
 
         Rectangle bounds = selection.getShapeBounds();
-        addStringChild("Bounds", bounds.toString());
+        addString("Bounds", bounds.toString());
     }
-
-
 }

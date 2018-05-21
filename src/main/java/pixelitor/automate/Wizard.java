@@ -68,14 +68,14 @@ public abstract class Wizard {
                 "Next", "Cancel") {
 
             @Override
-            protected void dialogCanceled() {
+            protected void cancelAction() {
                 wizardPage.onWizardCanceled(dr);
-                super.dialogCanceled();
+                super.cancelAction();
                 dispose();
             }
 
             @Override
-            protected void dialogAccepted() { // "next" was pressed
+            protected void okAction() { // "next" was pressed
                 if (!mayMoveForwardIfNextPressed(wizardPage, this)) {
                     return;
                 }

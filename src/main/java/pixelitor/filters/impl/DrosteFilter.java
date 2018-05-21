@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,11 @@ import com.jhlabs.image.TransformFilter;
 
 import java.awt.image.BufferedImage;
 
+/**
+ * The implementation of the {@link Droste} filter.
+ * <p>
+ * the "Droste effect" - not finished
+ */
 public class DrosteFilter extends TransformFilter {
     Complex xBounds, yBounds;
     float r1, r2, p1, p2;

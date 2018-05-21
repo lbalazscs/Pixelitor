@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,9 +24,9 @@ import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.CopyBrushType;
 import pixelitor.tools.brushes.SmudgeBrush;
+import pixelitor.utils.Cursors;
 
 import javax.swing.*;
-import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -39,7 +39,7 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 public class SmudgeTool extends AbstractBrushTool {
     public SmudgeTool() {
         super('u', "Smudge", "smudge_tool_icon.png",
-                "click and drag to smudge. Click and Shift-click to smudge along a line.", Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                "click and drag to smudge. Click and Shift-click to smudge along a line.", Cursors.HAND);
         drawStrategy = DrawStrategy.DIRECT;
     }
 

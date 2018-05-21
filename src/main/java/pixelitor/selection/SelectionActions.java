@@ -84,7 +84,7 @@ public final class SelectionActions {
             OKCancelDialog d = new OKCancelDialog(p, PixelitorWindow.getInstance(),
                     "Modify Selection", "Change!", "Close") {
                 @Override
-                protected void dialogAccepted() {
+                protected void okAction() {
                     Selection selection = getActiveCompOrNull().getSelection();
                     SelectionModifyType selectionModifyType = type.getSelected();
                     selection.modify(selectionModifyType, amount.getValue());

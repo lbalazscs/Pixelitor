@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -192,11 +192,11 @@ public class GradientTool extends Tool {
             ZoomLevel zoomLevel = ic.getZoomLevel();
 
             g2.setColor(Color.BLACK);
-            g2.setStroke(zoomLevel.getOuterGeometryStroke());
+            g2.setStroke(zoomLevel.getOuterStroke());
             userDrag.drawLine(g2);
 
             g2.setColor(Color.WHITE);
-            g2.setStroke(zoomLevel.getInnerGeometryStroke());
+            g2.setStroke(zoomLevel.getInnerStroke());
             userDrag.drawLine(g2);
         }
     }
@@ -225,12 +225,12 @@ public class GradientTool extends Tool {
     public DebugNode getDebugNode() {
         DebugNode node = super.getDebugNode();
 
-        node.addStringChild("Type", getType().toString());
-        node.addStringChild("Cycling", getCycleType().toString());
-        node.addQuotedStringChild("Color", getGradientColorType().toString());
-        node.addBooleanChild("Invert", invertCheckBox.isSelected());
-        node.addFloatChild("Opacity", blendingModePanel.getOpacity());
-        node.addQuotedStringChild("Blending Mode", blendingModePanel.getBlendingMode().toString());
+        node.addString("Type", getType().toString());
+        node.addString("Cycling", getCycleType().toString());
+        node.addQuotedString("Color", getGradientColorType().toString());
+        node.addBoolean("Invert", invertCheckBox.isSelected());
+        node.addFloat("Opacity", blendingModePanel.getOpacity());
+        node.addQuotedString("Blending Mode", blendingModePanel.getBlendingMode().toString());
 
         return node;
     }

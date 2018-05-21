@@ -197,7 +197,7 @@ public class Composition implements Serializable {
      */
     public void setIC(ImageComponent ic) {
         this.ic = ic;
-        canvas.setIc(ic);
+        canvas.setIC(ic);
 
         if (selection != null) { // can happen when duplicating
             selection.setIC(ic);
@@ -652,7 +652,7 @@ public class Composition implements Serializable {
         }
         setActiveLayer(layerList.get(newIndex), true);
 
-        assert ConsistencyChecks.fadeCheck(this);
+        assert ConsistencyChecks.fadeWouldWorkOn(this);
     }
 
     public void moveLayerSelectionDown() {
@@ -664,7 +664,7 @@ public class Composition implements Serializable {
 
         setActiveLayer(layerList.get(newIndex), true);
 
-        assert ConsistencyChecks.fadeCheck(this);
+        assert ConsistencyChecks.fadeWouldWorkOn(this);
     }
 
     public BufferedImage calculateCompositeImage() {

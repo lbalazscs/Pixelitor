@@ -15,19 +15,17 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.tools.brushes;
+package pixelitor.utils;
+
+import java.awt.Cursor;
 
 /**
- * A dabs strategy specifies the way the dabs of a
- * DabsBrush are placed in response to GUI events.
- *
- * Unlike brush settings, these objects cannot be shared
- * between symmetry brushes, because they call back a specific brush.
+ * A convenience class for keeping track of used mouse cursors
  */
-public interface DabsStrategy {
-    void onStrokeStart(double x, double y);
-
-    void onNewStrokePoint(double x, double y);
-
-    void settingsChanged();
+public class Cursors {
+    public static final Cursor MOVE = Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR);
+    public static final Cursor HAND = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
+    public static final Cursor DEFAULT = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR);
+    public static final Cursor BUSY = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR);
+    public static final Cursor CROSSHAIR = Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR);
 }

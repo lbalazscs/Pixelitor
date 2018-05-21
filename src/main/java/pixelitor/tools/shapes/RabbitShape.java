@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,8 +19,8 @@ package pixelitor.tools.shapes;
 /**
  * Rabbit shape based on http://commons.wikimedia.org/wiki/File:Lapin01.svg
  */
-public class Rabbit extends GeneralShape {
-    public Rabbit(double x, double y, double width, double height) {
+public class RabbitShape extends AbstractShape {
+    public RabbitShape(double x, double y, double width, double height) {
         double cp1X; // x of control point 1
         double cp1Y; // y of control point 1
         double cp2X; // x of control point 2
@@ -276,5 +276,4 @@ public class Rabbit extends GeneralShape {
         epY = y + 0.9237426f * height;
         path.curveTo(cp1X, cp1Y, cp2X, cp2Y, epX, epY);
     }
-
 }

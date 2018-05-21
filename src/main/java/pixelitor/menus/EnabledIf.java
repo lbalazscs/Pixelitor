@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ enum EnabledIf {
         public JMenuItem getMenuItem(Action a) {
             return new OpenImageEnabledMenuItem(a);
         }
-    }, CAN_REPEAT_OPERATION {
+    }, CAN_REPEAT {
         @Override
         public JMenuItem getMenuItem(Action a) {
             return new RepeatMenuItem(a);
@@ -45,7 +45,12 @@ enum EnabledIf {
         public JMenuItem getMenuItem(Action a) {
             return new RedoMenuItem(a);
         }
-    }, ACTION_ENABLED { // in most cases this means "always"
+    },
+    /**
+     * The enabled state is controlled by the Action - in most cases
+     * this means "always enabled"
+     */
+    ACTION_ENABLED {
         @Override
         public JMenuItem getMenuItem(Action a) {
             return new JMenuItem(a);
@@ -53,5 +58,4 @@ enum EnabledIf {
     };
 
     public abstract JMenuItem getMenuItem(Action a);
-
 }

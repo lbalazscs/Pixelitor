@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,10 +17,13 @@
 
 package pixelitor.utils;
 
+import pixelitor.tools.Symmetry;
+
 /**
  * A mirroring effect achieved with negative scaling
+ * Not to be confused with {@link Symmetry}
  */
-public enum ScalingMirror {
+public enum Mirror {
     NONE("None") {
         @Override
         public double getScaleX(double scaleAbs) {
@@ -55,7 +58,7 @@ public enum ScalingMirror {
 
     private final String guiName;
 
-    ScalingMirror(String guiName) {
+    Mirror(String guiName) {
         this.guiName = guiName;
     }
 

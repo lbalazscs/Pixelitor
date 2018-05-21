@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,6 +28,9 @@ import java.awt.event.ActionListener;
 import java.awt.font.TextAttribute;
 import java.util.Map;
 
+/**
+ * Advanced font attribute settings
+ */
 public class AdvancedTextSettingsDialog extends OKDialog {
     private final JCheckBox underlineCB;
     private final JCheckBox strikeThroughCB;
@@ -97,7 +100,7 @@ public class AdvancedTextSettingsDialog extends OKDialog {
         setupGUI(p);
     }
 
-    public void updateMap(Map<TextAttribute, Object> map) {
+    public void updateFontAttributesMap(Map<TextAttribute, Object> map) {
         Boolean strikeThroughSetting = Boolean.FALSE;
         if (strikeThroughCB.isSelected()) {
             strikeThroughSetting = TextAttribute.STRIKETHROUGH_ON;

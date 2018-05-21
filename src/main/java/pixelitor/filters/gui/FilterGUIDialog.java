@@ -41,14 +41,14 @@ public class FilterGUIDialog extends OKCancelDialog {
     }
 
     @Override
-    public void dialogAccepted() {
+    public void okAction() {
         dr.onDialogAccepted(activeFilter.getName());
 
         close();
     }
 
     @Override
-    public void dialogCanceled() {
+    public void cancelAction() {
         dr.onDialogCanceled();
 
         close();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,13 +21,12 @@ import net.jafama.FastMath;
 import pixelitor.filters.PolarTiles;
 
 /**
- * The implementation for the polar glass tiles filter
+ * The implementation of the {@link PolarTiles} filter.
  */
 public class PolarTilesFilter extends CenteredTransformFilter {
     private float zoom;
     private double rotateResult;
     private float curvature;
-
     private double t;
     private int numADivisions;
     private int numRDivisions;
@@ -46,7 +45,6 @@ public class PolarTilesFilter extends CenteredTransformFilter {
 
         float randomShift = 0;
         if (randomness > 0) {
-//            randomShift = randomness * Noise.noise2((float) angle, (float) (2.0f * r / srcWidth));
             randomShift = randomness * Noise.noise2(dx / srcWidth, dy / srcHeight);
         }
 

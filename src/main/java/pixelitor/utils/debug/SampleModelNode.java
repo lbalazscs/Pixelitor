@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,25 +25,25 @@ public class SampleModelNode extends DebugNode {
 
     public SampleModelNode(SampleModel sampleModel) {
         super("SampleModel", sampleModel);
-        addClassChild();
+        addClass();
 
         int width = sampleModel.getWidth();
-        addIntChild("width", width);
+        addInt("width", width);
 
         int height = sampleModel.getHeight();
-        addIntChild("height", height);
+        addInt("height", height);
 
         int dataType = sampleModel.getDataType();
-        addStringChild("dataType", dataAndTransferTypeToString(dataType));
+        addString("dataType", dataAndTransferTypeToString(dataType));
 
         int numBands = sampleModel.getNumBands();
-        addIntChild("numBands", numBands);
+        addInt("numBands", numBands);
 
         int transferType = sampleModel.getTransferType();
-        addStringChild("transferType", dataAndTransferTypeToString(transferType));
+        addString("transferType", dataAndTransferTypeToString(transferType));
 
         int numDataElements = sampleModel.getNumDataElements();
-        addIntChild("numDataElements", numDataElements);
+        addInt("numDataElements", numDataElements);
     }
 
     // strings based on the constants defined in java.awt.image.DataBuffer

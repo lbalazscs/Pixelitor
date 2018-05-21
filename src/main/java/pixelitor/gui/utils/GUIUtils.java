@@ -119,7 +119,7 @@ public final class GUIUtils {
         for (FilterParam param : params) {
             JComponent control = param.createGUI();
 
-            int numColumns = param.getNrOfGridBagCols();
+            int numColumns = param.getNumGridBagCols();
             if (numColumns == 1) {
                 gbHelper.addOnlyControlToRow(control, row);
             } else if (numColumns == 2) {

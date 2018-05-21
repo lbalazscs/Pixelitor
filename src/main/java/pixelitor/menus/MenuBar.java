@@ -18,7 +18,6 @@
 package pixelitor.menus;
 
 import com.bric.util.JVM;
-import com.jhlabs.composite.MultiplyComposite;
 import pixelitor.AppLogic;
 import pixelitor.Build;
 import pixelitor.Composition;
@@ -91,6 +90,7 @@ import pixelitor.tools.brushes.CopyBrush;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.FilterCreator;
 import pixelitor.utils.Messages;
+import pixelitor.utils.OpenInBrowserAction;
 import pixelitor.utils.Tests3x3;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.AppNode;
@@ -102,8 +102,6 @@ import pixelitor.utils.test.ToolTests;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
-import java.awt.Composite;
-import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -124,7 +122,7 @@ import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
 import static pixelitor.gui.ImageComponents.getActiveCompOrNull;
 import static pixelitor.gui.ImageComponents.getActiveLayerOrNull;
 import static pixelitor.menus.EnabledIf.ACTION_ENABLED;
-import static pixelitor.menus.EnabledIf.CAN_REPEAT_OPERATION;
+import static pixelitor.menus.EnabledIf.CAN_REPEAT;
 import static pixelitor.menus.EnabledIf.REDO_POSSIBLE;
 import static pixelitor.menus.EnabledIf.UNDO_POSSIBLE;
 import static pixelitor.menus.MenuAction.AllowedLayerType.HAS_LAYER_MASK;
@@ -359,7 +357,7 @@ public class MenuBar extends JMenuBar {
 
         // last op
         editMenu.buildAction(RepeatLast.INSTANCE)
-                .enableIf(CAN_REPEAT_OPERATION)
+                .enableIf(CAN_REPEAT)
                 .withKey(CTRL_F)
                 .add();
 
@@ -1132,29 +1130,6 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        developMenu.addAlwaysEnabledAction(new MenuAction("Debug Special") {
-            @Override
-            public void onClick() {
-                BufferedImage img = ImageComponents.getActiveCompositeImage();
-
-                Composite composite = new MultiplyComposite(1.0f);
-
-                long startTime = System.nanoTime();
-
-                int testsRun = 100;
-                for (int i = 0; i < testsRun; i++) {
-                    Graphics2D g = img.createGraphics();
-                    g.setComposite(composite);
-                    g.drawImage(img, 0, 0, null);
-                    g.dispose();
-                }
-
-                long totalTime = (System.nanoTime() - startTime) / 1000000;
-                System.out.println("MenuBar.actionPerformed: it took " + totalTime + " ms, average time = " + totalTime / testsRun);
-
-            }
-        });
-
         developMenu.addAction(new MenuAction("Dump Event Queue") {
             @Override
             public void onClick() {
@@ -1420,7 +1395,6 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(Droste.NAME, Droste::new);
         sub.addFilter(Sphere3D.NAME, Sphere3D::new);
         sub.addFilter("Grid", RenderGrid::new);
-        sub.addFilter(EmptyPolar.NAME, EmptyPolar::new);
         sub.addFilter(JHCheckerFilter.NAME, JHCheckerFilter::new);
 
         return sub;
@@ -1443,6 +1417,8 @@ public class MenuBar extends JMenuBar {
 //        helpMenu.add(sub);
 
         helpMenu.addSeparator();
+
+        helpMenu.add(new OpenInBrowserAction("Report an Issue...", "https://github.com/lbalazscs/Pixelitor/issues"));
 
         helpMenu.add(new MenuAction("Internal State...") {
             @Override

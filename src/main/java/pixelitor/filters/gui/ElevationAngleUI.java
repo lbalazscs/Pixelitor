@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,10 +24,10 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 /**
- * A GUI component that can be used to select an elevation (altitude) angle with the mouse
+ * A GUI component that can be used to select
+ * an elevation (altitude) angle with the mouse
  */
 public class ElevationAngleUI extends AbstractAngleUI {
-
     public ElevationAngleUI(ElevationAngleParam param) {
         super(param);
 

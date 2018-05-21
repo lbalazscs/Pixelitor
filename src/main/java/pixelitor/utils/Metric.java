@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,8 @@
 package pixelitor.utils;
 
 /**
+ * Different ways to define the distance between two points.
+ *
  * https://en.wikipedia.org/wiki/Metric_%28mathematics%29
  */
 public enum Metric {

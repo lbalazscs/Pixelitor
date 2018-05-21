@@ -126,7 +126,7 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
         brushSettingsButton = settingsPanel.addButton("Brush Settings",
                 e -> {
                     BrushType brushType = getBrushType();
-                    JPanel p = brushType.getSettingsPanel(this);
+                    JPanel p = brushType.getConfigPanel(this);
                     toolDialog = new OKDialog(PixelitorWindow.getInstance(), p, "Brush Settings");
                 });
 
@@ -200,8 +200,8 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
     public void drawBrushStrokeProgrammatically(Drawable dr, Point start, Point end) {
         prepareProgrammaticBrushStroke(dr, start);
 
-        brush.onDragStart(start.x, start.y);
-        brush.onNewMousePoint(end.x, end.y);
+        brush.onStrokeStart(start.x, start.y);
+        brush.onNewStrokePoint(end.x, end.y);
 
         finishBrushStroke(dr);
     }
@@ -249,12 +249,12 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
             graphics.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
             if (connectClickWithLine) {
-                brush.onNewMousePoint(x, y);
+                brush.onNewStrokePoint(x, y);
             } else {
-                brush.onDragStart(x, y);
+                brush.onStrokeStart(x, y);
             }
         } else {
-            brush.onNewMousePoint(x, y);
+            brush.onNewStrokePoint(x, y);
         }
     }
 
@@ -340,15 +340,15 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
                     startingX = x;
                     startingY = y;
 
-                    brush.onDragStart(x, y);
+                    brush.onStrokeStart(x, y);
 
                     break;
                 case PathIterator.SEG_LINETO:
-                    brush.onNewMousePoint(x, y);
+                    brush.onNewStrokePoint(x, y);
 
                     break;
                 case PathIterator.SEG_CLOSE:
-                    brush.onNewMousePoint(startingX, startingY);
+                    brush.onNewStrokePoint(startingX, startingY);
                     break;
                 default:
                     throw new IllegalArgumentException("type = " + type);
@@ -406,14 +406,14 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
         DebugNode node = super.getDebugNode();
 
         if (typeSelector != null) { // can be null, for example in Clone
-            node.addStringChild("Brush Type", getBrushType().toString());
+            node.addString("Brush Type", getBrushType().toString());
         }
-        node.addIntChild("Radius", getRadius());
+        node.addInt("Radius", getRadius());
 
         node.add(brush.getDebugNode());
 
         if (symmetryBrush != null) { // can be null, for example in Clone
-            node.addStringChild("Symmetry", getSymmetry().toString());
+            node.addString("Symmetry", getSymmetry().toString());
             if (symmetryBrush != brush) {
                 node.add(symmetryBrush.getDebugNode());
             }

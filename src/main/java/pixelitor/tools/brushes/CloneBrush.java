@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,9 +20,11 @@ package pixelitor.tools.brushes;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+
+import static java.awt.RenderingHints.KEY_INTERPOLATION;
+import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
 
 /**
  * The brush used by the Clone Tool
@@ -34,7 +36,10 @@ public class CloneBrush extends CopyBrush {
     private double dy;
     private boolean aligned = true;
 
-    private boolean firstCloningStart = true;
+    // if a new source point was just set, the distances
+    // have to be recalculated when the painting begins
+    private boolean newSourcePointWasJustSet = true;
+
     private double scaleX;
     private double scaleY;
     private double rotate;
@@ -43,22 +48,23 @@ public class CloneBrush extends CopyBrush {
         super(radius, type, new RadiusRatioSpacing(0.25));
     }
 
-    public void setSource(BufferedImage sourceImage, double srcX, double srcY) {
-        this.sourceImage = sourceImage;
-        this.srcX = srcX;
-        this.srcY = srcY;
-        firstCloningStart = true;
+    public void setSource(BufferedImage image, double x, double y) {
+        this.sourceImage = image;
+        this.srcX = x;
+        this.srcY = y;
+        newSourcePointWasJustSet = true;
     }
 
     // marks the point where the cloning was started
     public void setCloningDestPoint(double destX, double destY) {
         boolean reinitializeDistance = false;
-        // aligned = forces the source point to follow the mouse, even after a stroke is completed
-        // unaligned =  the cloning distance is reinitialized for each stroke
-        if (!aligned || firstCloningStart) {
+        // aligned = forces the source point to follow the mouse,
+        // even after a stroke is completed
+        // unaligned = the cloning distance is reinitialized for each stroke
+        if (!aligned || newSourcePointWasJustSet) {
             reinitializeDistance = true;
         }
-        firstCloningStart = false;
+        newSourcePointWasJustSet = false;
 
         if (reinitializeDistance) {
             this.dx = -srcX + destX + radius;
@@ -72,23 +78,24 @@ public class CloneBrush extends CopyBrush {
 
         type.beforeDrawImage(g);
 
-        // Concatenated transformations have a last-specified-first-applied order,
-        // so start with the last transformation, that works when there is no scaling/rotating
+        // Concatenated transformations have a last-specified-first-applied
+        // order, so start with the last transformation
+        // that works when there is no scaling/rotating
         AffineTransform transform = AffineTransform.getTranslateInstance(
                 (dx - x),
                 (dy - y));
 
         if (scaleX != 1.0 || scaleY != 1.0 || rotate != 0.0) {
-            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            // first we need to scale/rotate the image around the source point
+            g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
+            // we need to scale/rotate the image
+            // around the source point, so translate first
             transform.translate(srcX, srcY);
             transform.scale(scaleX, scaleY);
             transform.rotate(rotate);
             transform.translate(-srcX, -srcY);
         }
 
-        g.drawImage(sourceImage,
-                transform, null);
+        g.drawImage(sourceImage, transform, null);
 
         type.afterDrawImage(g);
 
@@ -127,16 +134,15 @@ public class CloneBrush extends CopyBrush {
     public DebugNode getDebugNode() {
         DebugNode node = super.getDebugNode();
 
-        node.addDoubleChild("srcX", srcX);
-        node.addDoubleChild("srcY", srcY);
-        node.addDoubleChild("dx", dx);
-        node.addDoubleChild("dy", dy);
-        node.addDoubleChild("scaleX", scaleX);
-        node.addDoubleChild("scaleY", scaleY);
-        node.addDoubleChild("rotate", rotate);
-
-        node.addBooleanChild("aligned", aligned);
-        node.addBooleanChild("firstCloningStart", firstCloningStart);
+        node.addDouble("srcX", srcX);
+        node.addDouble("srcY", srcY);
+        node.addDouble("dx", dx);
+        node.addDouble("dy", dy);
+        node.addDouble("scaleX", scaleX);
+        node.addDouble("scaleY", scaleY);
+        node.addDouble("rotate", rotate);
+        node.addBoolean("aligned", aligned);
+        node.addBoolean("newSourcePointWasJustSet", newSourcePointWasJustSet);
 
         return node;
     }

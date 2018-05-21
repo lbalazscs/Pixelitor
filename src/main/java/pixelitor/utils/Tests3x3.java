@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.utils;
 
-import pixelitor.AppLogic;
 import pixelitor.Composition;
 import pixelitor.colors.ColorUtils;
 import pixelitor.gui.ImageComponents;
@@ -130,7 +129,7 @@ public class Tests3x3 {
             LayerMask mask = new LayerMask(comp, maskImg, layer, false);
             layer.addMask(mask);
         }
-        AppLogic.addCompAsNewImage(comp);
+        ImageComponents.addCompAsNewImage(comp);
         comp.getIC().setZoom(ZoomLevel.Z6400, true, null);
     }
 

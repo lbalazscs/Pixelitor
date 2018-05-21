@@ -90,7 +90,7 @@ public class TextLayer extends ContentLayer {
         TextAdjustmentsPanel p = new TextAdjustmentsPanel(textLayer);
         OKCancelDialog d = new OKCancelDialog(p, pw, "Create Text Layer") {
             @Override
-            protected void dialogAccepted() {
+            protected void okAction() {
                 close();
                 textLayer.updateLayerName();
 
@@ -100,7 +100,7 @@ public class TextLayer extends ContentLayer {
             }
 
             @Override
-            protected void dialogCanceled() {
+            protected void cancelAction() {
                 close();
                 comp.deleteLayer(textLayer, false, true);
             }
@@ -117,14 +117,14 @@ public class TextLayer extends ContentLayer {
         TextAdjustmentsPanel p = new TextAdjustmentsPanel(this);
         OKCancelDialog d = new OKCancelDialog(p, pw, "Edit Text Layer") {
             @Override
-            protected void dialogAccepted() {
+            protected void okAction() {
                 close();
 
                 commitSettings(oldSettings);
             }
 
             @Override
-            protected void dialogCanceled() {
+            protected void cancelAction() {
                 close();
 
                 setSettings(oldSettings);

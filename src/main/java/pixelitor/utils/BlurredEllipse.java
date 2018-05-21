@@ -1,11 +1,27 @@
+/*
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.utils;
 
 import net.jafama.FastMath;
 
 /**
- * Calculates whether a point is inside or outside a blurred ellipse.
- * It assumes that the outer/inner radius ratios are the same
- * for the x and y radii.
+ * An ellipse which is blurred in the sense that a floating point value
+ * rather than a boolean describes whether a point is inside or outside it.
  */
 public class BlurredEllipse {
     private final double cx;
@@ -32,6 +48,8 @@ public class BlurredEllipse {
         this.outerRadiusX = outerRadiusX;
         this.outerRadiusY = outerRadiusY;
 
+        // This class assumes that the outer/inner radius ratios are the same
+        // for the x and y radii => no need to compare the outer radii
         linkedRadius = innerRadiusX == innerRadiusY;
 
         if (linkedRadius) {
@@ -49,8 +67,8 @@ public class BlurredEllipse {
     }
 
     /**
-     * Returns 1.0 if the given coordinate is completely inside the ellipse,
-     * 0.0 if it is completely outside, and
+     * Returns 1.0 if the given coordinate is completely outside
+     * the ellipse, 0.0 if it is completely inside, and
      * a number between 0.0 and 1.0 if it is in the blurred area
      */
     public double isOutside(int x, int y) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,6 +31,6 @@ public class TextLayerNode extends ContentLayerNode {
         super(name, layer);
 
         TextSettings settings = layer.getSettings();
-        addStringChild("text", settings == null ? "NO TEXT SETTINGS!" : settings.getText());
+        addString("text", settings == null ? "NO TEXT SETTINGS!" : settings.getText());
     }
 }

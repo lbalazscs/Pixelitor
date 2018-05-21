@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,14 +33,14 @@ public enum ZoomLevel {
 
         @Override
         public ZoomLevel zoomIn() {
-            return Z12plus;
+            return Z18;
         }
 
         @Override
         public ZoomLevel zoomOut() {
             return Z12;
         }
-    }, Z12plus("17.7 %") { // 12.5 * sqrt(2)
+    }, Z18("17.7 %") { // 12.5 * sqrt(2)
         @Override
         public double getPercentValue() {
             return 17.677669529663688110021109052621;
@@ -63,14 +63,14 @@ public enum ZoomLevel {
 
         @Override
         public ZoomLevel zoomIn() {
-            return Z25plus;
+            return Z35;
         }
 
         @Override
         public ZoomLevel zoomOut() {
-            return Z12plus;
+            return Z18;
         }
-    }, Z25plus("35.3 %") {
+    }, Z35("35.3 %") {
         @Override
         public double getPercentValue() {
             return 35.355339059327376220042218105242;
@@ -93,14 +93,14 @@ public enum ZoomLevel {
 
         @Override
         public ZoomLevel zoomIn() {
-            return Z50plus;
+            return Z71;
         }
 
         @Override
         public ZoomLevel zoomOut() {
-            return Z25plus;
+            return Z35;
         }
-    }, Z50plus("70.7 %") {
+    }, Z71("70.7 %") {
         @Override
         public double getPercentValue() {
             return 70.710678118654752440084436210485;
@@ -123,14 +123,14 @@ public enum ZoomLevel {
 
         @Override
         public ZoomLevel zoomIn() {
-            return Z100plus;
+            return Z141;
         }
 
         @Override
         public ZoomLevel zoomOut() {
-            return Z50plus;
+            return Z71;
         }
-    }, Z100plus("141.4 %") {
+    }, Z141("141.4 %") {
         @Override
         public double getPercentValue() {
             return 141.42135623730950488016887242097;
@@ -153,14 +153,14 @@ public enum ZoomLevel {
 
         @Override
         public ZoomLevel zoomIn() {
-            return Z200plus;
+            return Z283;
         }
 
         @Override
         public ZoomLevel zoomOut() {
-            return Z100plus;
+            return Z141;
         }
-    }, Z200plus("282.8 %") {
+    }, Z283("282.8 %") {
         @Override
         public double getPercentValue() {
             return 282.84271247461900976033774484194;
@@ -183,14 +183,14 @@ public enum ZoomLevel {
 
         @Override
         public ZoomLevel zoomIn() {
-            return Z400plus;
+            return Z566;
         }
 
         @Override
         public ZoomLevel zoomOut() {
-            return Z200plus;
+            return Z283;
         }
-    }, Z400plus("565.7 %") {
+    }, Z566("565.7 %") {
         @Override
         public double getPercentValue() {
             return 565.68542494923801952067548968388;
@@ -213,14 +213,14 @@ public enum ZoomLevel {
 
         @Override
         public ZoomLevel zoomIn() {
-            return Z800plus;
+            return Z1131;
         }
 
         @Override
         public ZoomLevel zoomOut() {
-            return Z400plus;
+            return Z566;
         }
-    }, Z800plus("1131.4 %") {
+    }, Z1131("1131.4 %") {
         @Override
         public double getPercentValue() {
             return 1131.3708498984760390413509793678;
@@ -243,14 +243,14 @@ public enum ZoomLevel {
 
         @Override
         public ZoomLevel zoomIn() {
-            return Z1600plus;
+            return Z2263;
         }
 
         @Override
         public ZoomLevel zoomOut() {
-            return Z800plus;
+            return Z1131;
         }
-    }, Z1600plus("2262.7 %") {
+    }, Z2263("2262.7 %") {
         @Override
         public double getPercentValue() {
             return 2262.7416997969520780827019587355;
@@ -273,14 +273,14 @@ public enum ZoomLevel {
 
         @Override
         public ZoomLevel zoomIn() {
-            return Z3200plus;
+            return Z4525;
         }
 
         @Override
         public ZoomLevel zoomOut() {
-            return Z1600plus;
+            return Z2263;
         }
-    }, Z3200plus("4525.5 %") {
+    }, Z4525("4525.5 %") {
         @Override
         public double getPercentValue() {
             return 4525.483399593904156165403917471;
@@ -308,12 +308,12 @@ public enum ZoomLevel {
 
         @Override
         public ZoomLevel zoomOut() {
-            return Z3200plus;
+            return Z4525;
         }
     };
 
-    private BasicStroke outerGeometryStroke;
-    private BasicStroke innerGeometryStroke;
+    private BasicStroke outerStroke;
+    private BasicStroke innerStroke;
     private final String guiName;
 
     ZoomLevel(String guiName) {
@@ -336,18 +336,18 @@ public enum ZoomLevel {
         return menuItem;
     }
 
-    public Stroke getOuterGeometryStroke() {
-        if (outerGeometryStroke == null) {
-            outerGeometryStroke = new BasicStroke((float) (300.0f / getPercentValue()));
+    public Stroke getOuterStroke() {
+        if (outerStroke == null) {
+            outerStroke = new BasicStroke((float) (300.0f / getPercentValue()));
         }
-        return outerGeometryStroke;
+        return outerStroke;
     }
 
-    public Stroke getInnerGeometryStroke() {
-        if (innerGeometryStroke == null) {
-            innerGeometryStroke = new BasicStroke((float) (100.0f / getPercentValue()));
+    public Stroke getInnerStroke() {
+        if (innerStroke == null) {
+            innerStroke = new BasicStroke((float) (100.0f / getPercentValue()));
         }
-        return innerGeometryStroke;
+        return innerStroke;
     }
 
     public abstract double getPercentValue();

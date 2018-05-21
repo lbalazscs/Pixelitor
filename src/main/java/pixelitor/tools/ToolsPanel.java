@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -72,7 +72,7 @@ public class ToolsPanel extends JPanel {
     }
 
     private static void setDefaultTool() {
-        Tools.setCurrent(Tools.BRUSH);
+        Tools.changeTo(Tools.BRUSH);
         Tools.currentTool.getButton().setSelected(true);
     }
 }

@@ -273,8 +273,8 @@ public class SelectionTool extends Tool implements ActiveImageChangeListener {
     public DebugNode getDebugNode() {
         DebugNode node = super.getDebugNode();
 
-        node.addStringChild("Type", typeCombo.getSelectedItem().toString());
-        node.addStringChild("Interaction", interactionCombo.getSelectedItem().toString());
+        node.addString("Type", typeCombo.getSelectedItem().toString());
+        node.addString("Interaction", interactionCombo.getSelectedItem().toString());
 
         return node;
     }

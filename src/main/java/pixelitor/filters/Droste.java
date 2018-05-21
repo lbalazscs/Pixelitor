@@ -28,6 +28,8 @@ import java.awt.image.BufferedImage;
 
 /**
  * Droste based on DrosteFilter
+ *
+ * the "Droste effect" - not finished
  */
 public class Droste extends ParametrizedFilter {
     public static final String NAME = "Droste";

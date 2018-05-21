@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,6 @@
 
 package pixelitor;
 
-import pixelitor.gui.Desktop;
-import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
@@ -27,9 +25,7 @@ import pixelitor.layers.GlobalLayerMaskChangeListener;
 import pixelitor.layers.Layer;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.tools.Symmetry;
-import pixelitor.tools.Tools;
 import pixelitor.utils.AppPreferences;
-import pixelitor.utils.Messages;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -101,19 +97,5 @@ public class AppLogic {
         }
     }
 
-    public static void addCompAsNewImage(Composition comp) {
-        try {
-            assert comp.getIC() == null : "already has ic";
-
-            ImageComponent ic = new ImageComponent(comp);
-            ic.setCursor(Tools.getCurrent().getCursor());
-            ImageComponents.setActiveIC(ic, false);
-            comp.addLayersToGUI();
-
-            Desktop.INSTANCE.addNewImageComponent(ic);
-        } catch (Exception e) {
-            Messages.showException(e);
-        }
-    }
 }
 

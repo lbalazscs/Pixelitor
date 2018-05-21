@@ -81,7 +81,7 @@ public class Crop implements CompAction {
 
         int cropRectWidth = (int) cropRect.getWidth();
         int cropRectHeight = (int) cropRect.getHeight();
-        canvas.updateSize(cropRectWidth, cropRectHeight);
+        canvas.changeSize(cropRectWidth, cropRectHeight);
         comp.updateAllIconImages();
 
         ImageComponent ic = comp.getIC();

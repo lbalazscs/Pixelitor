@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,8 +19,8 @@ package pixelitor.tools.shapes;
 /**
  * A heart shape
  */
-public class Heart extends GeneralShape {
-    public Heart(double x, double y, double width, double height) {
+public class HeartShape extends AbstractShape {
+    public HeartShape(double x, double y, double width, double height) {
         double maxX = x + width;
 
         double centerX = x + width / 2.0f;

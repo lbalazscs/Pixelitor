@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,19 +20,20 @@ package pixelitor.tools;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.utils.Cursors;
 
 import javax.swing.*;
-import java.awt.Cursor;
 import java.awt.event.MouseEvent;
 
 /**
  * The move tool.
  */
 public class MoveTool extends Tool {
+
     public MoveTool() {
         super('v', "Move", "move_tool_icon.png",
                 "drag to move the active layer, Alt-drag (or right-mouse-drag) to move a duplicate of the active layer. Shift-drag to constrain the movement.",
-                Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR), false, true, true, ClipStrategy.IMAGE_ONLY);
+                Cursors.MOVE, false, true, true, ClipStrategy.IMAGE_ONLY);
     }
 
     @Override

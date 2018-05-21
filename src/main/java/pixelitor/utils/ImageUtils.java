@@ -122,14 +122,14 @@ public class ImageUtils {
         return graphicsConfiguration.createCompatibleImage(width, height, Transparency.TRANSLUCENT);
     }
 
-    public static BufferedImage createImageWithSameColorModel(BufferedImage src) {
+    public static BufferedImage createImageWithSameCM(BufferedImage src) {
         ColorModel dstCM = src.getColorModel();
         return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(src.getWidth(), src.getHeight()), dstCM
                 .isAlphaPremultiplied(), null);
     }
 
     // like the above but instead of src width and height, it uses the arguments
-    public static BufferedImage createImageWithSameColorModel(BufferedImage src, int width, int height) {
+    public static BufferedImage createImageWithSameCM(BufferedImage src, int width, int height) {
         ColorModel dstCM = src.getColorModel();
         return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(width, height), dstCM
                 .isAlphaPremultiplied(), null);
@@ -560,7 +560,7 @@ public class ImageUtils {
         return Math.max(columnsX, columnsY);
     }
 
-    public static BufferedImage convertToARGB_PRE(BufferedImage src, boolean oldCanBeFlushed) {
+    public static BufferedImage convertToARGB_PRE(BufferedImage src, boolean flushOld) {
         assert src != null;
 
         BufferedImage dest = new BufferedImage(src.getWidth(), src.getHeight(), TYPE_INT_ARGB_PRE);
@@ -568,14 +568,14 @@ public class ImageUtils {
         g.drawImage(src, 0, 0, null);
         g.dispose();
 
-        if (oldCanBeFlushed) {
+        if (flushOld) {
             src.flush();
         }
 
         return dest;
     }
 
-    public static BufferedImage convertToARGB(BufferedImage src, boolean oldCanBeFlushed) {
+    public static BufferedImage convertToARGB(BufferedImage src, boolean flushOld) {
         assert src != null;
 
         BufferedImage dest = new BufferedImage(src.getWidth(), src.getHeight(), TYPE_INT_ARGB);
@@ -583,14 +583,14 @@ public class ImageUtils {
         g.drawImage(src, 0, 0, null);
         g.dispose();
 
-        if (oldCanBeFlushed) {
+        if (flushOld) {
             src.flush();
         }
 
         return dest;
     }
 
-    public static BufferedImage convertToRGB(BufferedImage src, boolean oldCanBeFlushed) {
+    public static BufferedImage convertToRGB(BufferedImage src, boolean flushOld) {
         assert src != null;
 
         BufferedImage dest = new BufferedImage(src.getWidth(), src.getHeight(), TYPE_INT_RGB);
@@ -598,7 +598,7 @@ public class ImageUtils {
         g.drawImage(src, 0, 0, null);
         g.dispose();
 
-        if (oldCanBeFlushed) {
+        if (flushOld) {
             src.flush();
         }
 
@@ -1111,13 +1111,13 @@ public class ImageUtils {
 
 //        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        g.setStroke(zoomLevel.getOuterGeometryStroke());
+        g.setStroke(zoomLevel.getOuterStroke());
 
         for (Shape shape : shapes) {
             g.draw(shape);
         }
         g.setColor(WHITE);
-        g.setStroke(zoomLevel.getInnerGeometryStroke());
+        g.setStroke(zoomLevel.getInnerStroke());
 
         for (Shape shape : shapes) {
             g.draw(shape);

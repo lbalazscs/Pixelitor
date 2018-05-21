@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,8 @@
 
 package pixelitor.menus.file;
 
-import pixelitor.AppLogic;
 import pixelitor.Composition;
+import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.OKCancelDialog;
@@ -33,7 +33,7 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 
-import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
 /**
  * The screen capture.
@@ -50,7 +50,7 @@ public class ScreenCaptureAction extends AbstractAction {
     public void actionPerformed(ActionEvent e) {
         OKCancelDialog d = new OKCancelDialog(getSettingsPanel(), "Screen Capture") {
             @Override
-            protected void dialogAccepted() {
+            protected void okAction() {
                 capture();
                 close();
             }
@@ -72,7 +72,6 @@ public class ScreenCaptureAction extends AbstractAction {
 
     private void capture() {
         try {
-            Robot robot = new Robot();
             PixelitorWindow window = PixelitorWindow.getInstance();
 
             boolean hidePixelitor = hidePixelitorCB.isSelected();
@@ -81,6 +80,7 @@ public class ScreenCaptureAction extends AbstractAction {
                 Thread.sleep(500);
             }
 
+            Robot robot = new Robot();
             BufferedImage screenCapture = robot.createScreenCapture(
                     new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
 
@@ -88,15 +88,18 @@ public class ScreenCaptureAction extends AbstractAction {
                 window.deiconify();
             }
 
+            // necessary even though Composition.fromImage later calls
+            // toSysCompatibleImage, because without this, the image will
+            // be RGB, with no support for transparency
             int type = screenCapture.getType();
-            if (type != TYPE_INT_ARGB_PRE) {
-                screenCapture = ImageUtils.convertToARGB_PRE(screenCapture, true);
+            if (type != TYPE_INT_ARGB) {
+                screenCapture = ImageUtils.convertToARGB(screenCapture, true);
             }
 
             String name = "Screen Capture " + captureCount;
             Composition comp = Composition.fromImage(screenCapture, null, name);
             comp.setDirty(true);
-            AppLogic.addCompAsNewImage(comp);
+            ImageComponents.addCompAsNewImage(comp);
 
             captureCount++;
         } catch (Exception ex) {

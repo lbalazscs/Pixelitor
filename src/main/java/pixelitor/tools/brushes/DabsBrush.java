@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.tools.brushes;
 import pixelitor.utils.debug.DebugNode;
 
 /**
- * A brush that works by putting down dabs
+ * An abstract superclass for brushes that work by putting down dabs
  */
 public abstract class DabsBrush extends AbstractBrush {
     protected DabsBrushSettings settings;
@@ -55,14 +55,14 @@ public abstract class DabsBrush extends AbstractBrush {
     public abstract void putDab(double x, double y, double theta);
 
     @Override
-    public void onDragStart(double x, double y) {
-        dabsStrategy.onDragStart(x, y);
+    public void onStrokeStart(double x, double y) {
+        dabsStrategy.onStrokeStart(x, y);
         updateComp(x, y);
     }
 
     @Override
-    public void onNewMousePoint(double x, double y) {
-        dabsStrategy.onNewMousePoint(x, y);
+    public void onNewStrokePoint(double x, double y) {
+        dabsStrategy.onNewStrokePoint(x, y);
         updateComp(x, y);
     }
 
@@ -87,13 +87,13 @@ public abstract class DabsBrush extends AbstractBrush {
     public DebugNode getDebugNode() {
         DebugNode node = super.getDebugNode();
 
-        node.addBooleanChild("Angle Aware", settings.isAngleAware());
+        node.addBoolean("Angle Aware", settings.isAngleAware());
 
         AngleSettings angleSettings = settings.getAngleSettings();
-        node.addBooleanChild("Jitter Aware", angleSettings.shouldJitterAngle());
+        node.addBoolean("Jitter Aware", angleSettings.shouldJitterAngle());
 
         SpacingStrategy spacingStrategy = settings.getSpacingStrategy();
-        node.addDoubleChild("Spacing", spacingStrategy.getSpacing(radius));
+        node.addDouble("Spacing", spacingStrategy.getSpacing(radius));
 
         return node;
     }

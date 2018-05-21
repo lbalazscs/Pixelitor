@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,9 +18,10 @@ package pixelitor.filters.impl;
 
 import com.jhlabs.image.TransformFilter;
 import net.jafama.FastMath;
+import pixelitor.filters.Slice;
 
 /**
- * Slice filter implementation
+ * The implementation of the {@link Slice} filter.
  */
 public class SliceFilter extends TransformFilter {
     private double shiftHorizontal;
@@ -39,7 +40,6 @@ public class SliceFilter extends TransformFilter {
 
         x += offset * Math.signum(FastMath.cos(y / (double) size - shiftVertical));
         y += offset * Math.signum(FastMath.cos(x / (double) size - shiftHorizontal));
-
 
         out[0] = x;
         out[1] = y;

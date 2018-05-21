@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -49,7 +49,7 @@ public class CompositionNode extends DebugNode {
                 TextLayerNode node = new TextLayerNode("Text Layer - " + layer.getName(), textLayer);
                 add(node);
             } else {
-                addQuotedStringChild("Layer of class", layer.getClass().getName());
+                addQuotedString("Layer of class", layer.getClass().getName());
             }
         });
 
@@ -57,8 +57,8 @@ public class CompositionNode extends DebugNode {
         BufferedImageNode imageNode = new BufferedImageNode("Composite Image", compositeImage);
         add(imageNode);
 
-        addIntChild("numLayers", comp.getNumLayers());
-        addQuotedStringChild("name", comp.getName());
+        addInt("numLayers", comp.getNumLayers());
+        addQuotedString("name", comp.getName());
 
         String filePath = "";
         File file = comp.getFile();
@@ -66,13 +66,13 @@ public class CompositionNode extends DebugNode {
             filePath = file.getAbsolutePath();
         }
 
-        addQuotedStringChild("file", filePath);
+        addQuotedString("file", filePath);
 
         boolean dirty = comp.isDirty();
-        addBooleanChild("dirty", dirty);
+        addBoolean("dirty", dirty);
 
         boolean hasSelection = comp.hasSelection();
-        addBooleanChild("hasSelection", hasSelection);
+        addBoolean("hasSelection", hasSelection);
 
         if (hasSelection) {
             SelectionNode selectionNode = new SelectionNode(comp.getSelection());
@@ -80,8 +80,8 @@ public class CompositionNode extends DebugNode {
         }
 
         int canvasWidth = comp.getCanvasWidth();
-        addIntChild("canvasWidth", canvasWidth);
+        addInt("canvasWidth", canvasWidth);
         int canvasHeight = comp.getCanvasHeight();
-        addIntChild("canvasHeight", canvasHeight);
+        addInt("canvasHeight", canvasHeight);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 package pixelitor.filters.impl;
 
 import com.jhlabs.image.ImageMath;
+import pixelitor.filters.Magnify;
 import pixelitor.utils.BlurredEllipse;
 
 import java.awt.Shape;
@@ -24,7 +25,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 
 /**
- * The Magnify filter.
+ * The implementation of the {@link Magnify} filter.
  */
 public class MagnifyFilter extends CenteredTransformFilter {
     private float magnification;
@@ -57,7 +58,6 @@ public class MagnifyFilter extends CenteredTransformFilter {
     public void setOuterRadiusY(float radius) {
         this.outerRadiusY = radius;
     }
-
 
     public void setMagnification(float magnification) {
         this.magnification = magnification;
@@ -100,5 +100,4 @@ public class MagnifyFilter extends CenteredTransformFilter {
         Shape outer = new Ellipse2D.Double(cx - outerRadiusX, cy - outerRadiusY, 2 * outerRadiusX, 2 * outerRadiusY);
         return new Shape[] {inner, outer};
     }
-
 }

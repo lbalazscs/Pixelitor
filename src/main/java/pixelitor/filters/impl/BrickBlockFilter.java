@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,14 +18,15 @@
 package pixelitor.filters.impl;
 
 import com.jhlabs.image.AbstractBufferedImageOp;
+import pixelitor.filters.jhlabsproxies.JHPixelate;
 
 import java.awt.image.BufferedImage;
 
 /**
+ * One of the implementations of the {@link JHPixelate} filter.
  * Pixelates in brick-style.
  */
 public class BrickBlockFilter extends AbstractBufferedImageOp {
-
     private int horizontalBlockSize = 10;
     private int verticalBlockSize = 10;
 
@@ -60,7 +61,6 @@ public class BrickBlockFilter extends AbstractBufferedImageOp {
             int hShift = 0;
             if ((verticalCount % 2) == 0) {
                 hShift = (horizontalBlockSize / 2);
-
                 replaceWithAverage(src, dst, width, height, smallPixels, y, 0, horizontalBlockSize / 2, verticalBlockSize);
             }
 

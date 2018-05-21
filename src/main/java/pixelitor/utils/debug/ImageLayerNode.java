@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,8 @@ public class ImageLayerNode extends ContentLayerNode {
 
     public ImageLayerNode(String name, ImageLayer layer) {
         super(name, layer);
+
+        addString("state", layer.getState().toString());
 
         BufferedImage image = layer.getImage();
         add(new BufferedImageNode(image));

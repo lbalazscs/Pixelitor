@@ -276,9 +276,18 @@ public class History {
 
     public static DebugNode getDebugNode() {
         DebugNode node = new DebugNode("History", undoManager);
-        node.addIntChild("Num undone edits", numUndoneEdits);
-        node.addBooleanChild("Ignore edits", ignoreEdits);
-        node.add(undoManager.getDebugNode());
+
+        node.addInt("Num edits", undoManager.getSize());
+        if (undoManager.hasEdits()) {
+            node.add(undoManager.getDebugNode());
+        }
+
+        node.addInt("Num undone edits", numUndoneEdits);
+        node.addBoolean("Ignore edits", ignoreEdits);
+        node.addBoolean("Can undo", History.canUndo());
+        node.addBoolean("Can redo", History.canRedo());
+        node.addBoolean("Can fade", History.canFade());
+        node.addBoolean("Can repeat", History.canRepeatOperation());
 
         return node;
     }

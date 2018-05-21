@@ -94,6 +94,6 @@ public class DeleteActiveLayerAction extends AbstractAction implements ActiveIma
     public void setEnabled(boolean newValue) {
         super.setEnabled(newValue);
 
-        assert ConsistencyChecks.layerDeleteActionEnabledCheck();
+        assert ConsistencyChecks.layerDeleteActionEnabled();
     }
 }

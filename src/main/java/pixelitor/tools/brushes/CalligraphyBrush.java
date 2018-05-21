@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,7 @@ public class CalligraphyBrush extends StrokeBrush {
     }
 
     @Override
-    protected void drawShape(double x, double y) {
+    protected void drawStartShape(double x, double y) {
         // TODO these calculations could be simpler
 
         float projectedShift = diameter / 1.4142f;
@@ -61,6 +61,6 @@ public class CalligraphyBrush extends StrokeBrush {
 
         // for some reason this must be called, otherwise gaps remain
         // TODO still true?
-        drawShape(startX, startY);
+        drawStartShape(startX, startY);
     }
 }

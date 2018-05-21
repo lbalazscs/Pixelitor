@@ -109,13 +109,13 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     @Override
-    public int getNrOfGridBagCols() {
+    public int getNumGridBagCols() {
         return 2;
     }
 
     @Override
     public void randomize() {
-        if (randomizePolicy.allowRandomize()) {
+        if (randomizePolicy.allow()) {
             Color[] randomColors = new Color[defaultThumbPositions.length];
             for (int i = 0; i < randomColors.length; i++) {
                 randomColors[i] = ColorUtils.createRandomColor(false);

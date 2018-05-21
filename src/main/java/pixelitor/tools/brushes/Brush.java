@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,15 +42,15 @@ public interface Brush {
      * @param x        the x of the mouse event (NOT translated with the radius)
      * @param y        the y of the mouse event (NOT translated with the radius)
      */
-    void onDragStart(double x, double y);
+    void onStrokeStart(double x, double y);
 
     /**
-     * A new drawing mouse event has been received;
+     * A new drawing mouse event has been received
      *
      * @param x        the x of the mouse event (NOT translated with the radius)
      * @param y        the y of the mouse event (NOT translated with the radius)
      */
-    void onNewMousePoint(double x, double y);
+    void onNewStrokePoint(double x, double y);
 
     default void dispose() {}
 

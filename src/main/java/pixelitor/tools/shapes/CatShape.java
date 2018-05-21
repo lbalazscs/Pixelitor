@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,11 +17,10 @@
 package pixelitor.tools.shapes;
 
 /**
- * Cat based on http://commons.wikimedia.org/wiki/File:Cat_silhouette.svg
+ * Cat shape based on http://commons.wikimedia.org/wiki/File:Cat_silhouette.svg
  */
-public class Cat extends GeneralShape {
-    public Cat(double x, double y, double width, double height) {
-
+public class CatShape extends AbstractShape {
+    public CatShape(double x, double y, double width, double height) {
         double cp1X; // x of control point 1
         double cp1Y; // y of control point 1
         double cp2X; // x of control point 2

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,20 +18,21 @@
 package pixelitor.filters.gui;
 
 /**
- * Whether a filter parameter is affected when the user presses "Randomize"
+ * Whether a filter parameter should be affected
+ * when the user presses "Randomize"
  */
 public enum RandomizePolicy {
     IGNORE_RANDOMIZE {
         @Override
-        boolean allowRandomize() {
+        boolean allow() {
             return false;
         }
     }, ALLOW_RANDOMIZE {
         @Override
-        boolean allowRandomize() {
+        boolean allow() {
             return true;
         }
     };
 
-    abstract boolean allowRandomize();
+    abstract boolean allow();
 }

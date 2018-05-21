@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,9 @@ import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * The configuration GUI for the export in OpenRaster format
+ */
 public class OpenRasterExportPanel extends JPanel {
     private final JCheckBox mergedLayersCB;
 
@@ -38,7 +41,7 @@ public class OpenRasterExportPanel extends JPanel {
         add(mergedLayersCB);
     }
 
-    private boolean shouldExportMergedImage() {
+    private boolean exportMergedImage() {
         return mergedLayersCB.isSelected();
     }
 
@@ -55,11 +58,11 @@ public class OpenRasterExportPanel extends JPanel {
         OpenRasterExportPanel p = new OpenRasterExportPanel();
         OKCancelDialog d = new OKCancelDialog(p, parent, "Export OpenRaster", "Export", "Cancel", false) {
             @Override
-            protected void dialogAccepted() {
+            protected void okAction() {
                 close();
                 File file = FileChoosers.selectSaveFileForSpecificFormat(FileChoosers.oraFilter);
                 if(file != null) {
-                    boolean addMergedImage = p.shouldExportMergedImage();
+                    boolean addMergedImage = p.exportMergedImage();
                     try {
                         OpenRaster.writeOpenRaster(comp, file, addMergedImage);
                         OpenSaveManager.afterSaveActions(comp, file, true);

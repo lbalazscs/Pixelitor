@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -89,8 +89,14 @@ public enum CopyBrushType {
         this.guiName = guiName;
     }
 
+    /**
+     * Called before g.drawImage with the source image
+     */
     public abstract void beforeDrawImage(Graphics2D g);
 
+    /**
+     * Called after g.drawImage with the source image
+     */
     public abstract void afterDrawImage(Graphics2D g);
 
     public void setSize(int size) {

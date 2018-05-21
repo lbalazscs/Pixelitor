@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,30 +34,30 @@ public class OnePixelBrush extends AbstractBrush {
     }
 
     @Override
-    public void onDragStart(double x, double y) {
+    public void onStrokeStart(double x, double y) {
         updateComp(x, y);
-        setPrevious(x, y);
+        rememberPrevious(x, y);
 
         // make sure a pixel is changed without dragging
-        onNewMousePoint(x, y);
+        onNewStrokePoint(x, y);
     }
 
     @Override
-    public void onNewMousePoint(double x, double y) {
+    public void onNewStrokePoint(double x, double y) {
         if (!settings.hasAA()) {
             targetG.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_OFF);
         }
 
         targetG.drawLine((int) previousX, (int) previousY, (int) x, (int) y);
         updateComp(x, y);
-        setPrevious(x, y);
+        rememberPrevious(x, y);
     }
 
     @Override
     public DebugNode getDebugNode() {
         DebugNode node = super.getDebugNode();
 
-        node.addBooleanChild("Anti-aliasing", settings.hasAA());
+        node.addBoolean("Anti-aliasing", settings.hasAA());
 
         return node;
     }

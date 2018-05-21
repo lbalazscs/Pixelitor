@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,9 +30,9 @@ public class LayerMaskNode extends ImageLayerNode {
         super(name, mask);
 
         boolean enabled = mask.getParent().isMaskEnabled();
-        addBooleanChild("enabled", enabled);
+        addBoolean("enabled", enabled);
 
         boolean linked = mask.isLinked();
-        addBooleanChild("linked", linked);
+        addBoolean("linked", linked);
     }
 }

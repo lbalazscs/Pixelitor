@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,30 +32,30 @@ public class ImageComponentNode extends DebugNode {
         Composition comp = ic.getComp();
         add(new CompositionNode(comp));
 
-        addQuotedStringChild("name", comp.getName());
+        addQuotedString("name", comp.getName());
 
-        addQuotedStringChild("mask view mode", ic.getMaskViewMode().toString());
+        addQuotedString("mask view mode", ic.getMaskViewMode().toString());
 
         int width = ic.getWidth();
-        addIntChild("ic width", width);
+        addInt("ic width", width);
         int height = ic.getHeight();
-        addIntChild("ic height", height);
+        addInt("ic height", height);
 
         ImageFrame frame = ic.getFrame();
         int frameWidth = frame.getWidth();
-        addIntChild("frameWidth", frameWidth);
+        addInt("frameWidth", frameWidth);
         int frameHeight = frame.getHeight();
-        addIntChild("frameHeight", frameHeight);
+        addInt("frameHeight", frameHeight);
 
-        addStringChild("zoom level", ic.getZoomLevel().toString());
+        addString("zoom level", ic.getZoomLevel().toString());
         Canvas canvas = ic.getCanvas();
         int zoomedCanvasWidth = canvas.getZoomedWidth();
-        addIntChild("zoomedCanvasWidth", zoomedCanvasWidth);
+        addInt("zoomedCanvasWidth", zoomedCanvasWidth);
         int zoomedCanvasHeight = canvas.getZoomedHeight();
-        addIntChild("zoomedCanvasHeight", zoomedCanvasHeight);
+        addInt("zoomedCanvasHeight", zoomedCanvasHeight);
 //        boolean bigCanvas = ic.isBigCanvas();
 //        addBooleanChild("bigCanvas", bigCanvas);
         boolean optimizedDrawingEnabled = ic.getFrame().isOptimizedDrawingEnabled();
-        addBooleanChild("optimizedDrawingEnabled", optimizedDrawingEnabled);
+        addBoolean("optimizedDrawingEnabled", optimizedDrawingEnabled);
     }
 }

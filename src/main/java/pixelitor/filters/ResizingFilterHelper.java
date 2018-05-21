@@ -38,7 +38,7 @@ public class ResizingFilterHelper {
         BILINEAR_FAST {
             @Override
             public BufferedImage scaleUp(BufferedImage src, BufferedImage smallDest, double resizeFactor, ProgressTracker pt) {
-                BufferedImage dest = ImageUtils.createImageWithSameColorModel(src);
+                BufferedImage dest = ImageUtils.createImageWithSameCM(src);
                 Graphics2D g2 = dest.createGraphics();
                 g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
                 g2.scale(resizeFactor, resizeFactor);

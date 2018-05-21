@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,6 @@ import java.util.Random;
  */
 public class Tools {
     private Tools() {
-        // utility class
     }
 
     public static final MoveTool MOVE = new MoveTool();
@@ -66,7 +65,7 @@ public class Tools {
         return currentTool;
     }
 
-    public static void setCurrent(Tool newCurrentTool) {
+    public static void changeTo(Tool newCurrentTool) {
         Tools.currentTool.toolEnded();
         Tools.currentTool = newCurrentTool;
         newCurrentTool.toolStarted();
@@ -82,15 +81,13 @@ public class Tools {
 
     public static void increaseActiveBrushSize() {
         if (currentTool instanceof AbstractBrushTool) {
-            AbstractBrushTool brushTool = (AbstractBrushTool) currentTool;
-            brushTool.increaseBrushSize();
+            ((AbstractBrushTool) currentTool).increaseBrushSize();
         }
     }
 
     public static void decreaseActiveBrushSize() {
         if (currentTool instanceof AbstractBrushTool) {
-            AbstractBrushTool brushTool = (AbstractBrushTool) currentTool;
-            brushTool.decreaseBrushSize();
+            ((AbstractBrushTool) currentTool).decreaseBrushSize();
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,6 +48,10 @@ public enum CopySource {
                 canvasSizedImage = ((ImageLayer) layer).getCanvasSizedSubImage();
             }
 
+            // TODO Text layers are rasterized, but they should be probably copied
+            // in other formats as well (as a string, as a serialized object)
+            // and pasting into Pixelitor should choose the serialized object
+            // There could be also an internal clipboard, to handle such cases
             if (layer instanceof TextLayer) {
                 canvasSizedImage = ((TextLayer) layer).createRasterizedImage();
             }

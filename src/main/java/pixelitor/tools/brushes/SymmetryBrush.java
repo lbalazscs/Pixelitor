@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -68,13 +68,13 @@ public class SymmetryBrush implements Brush {
     }
 
     @Override
-    public void onDragStart(double x, double y) {
-        symmetry.onDragStart(this, x, y);
+    public void onStrokeStart(double x, double y) {
+        symmetry.onStrokeStart(this, x, y);
     }
 
     @Override
-    public void onNewMousePoint(double x, double y) {
-        symmetry.onNewMousePoint(this, x, y);
+    public void onNewStrokePoint(double x, double y) {
+        symmetry.onNewStrokePoint(this, x, y);
     }
 
     public void brushTypeChanged(BrushType brushType, int radius) {
@@ -115,14 +115,14 @@ public class SymmetryBrush implements Brush {
         return true;
     }
 
-    public void onDragStart(int brushNo, double x, double y) {
+    public void onStrokeStart(int brushNo, double x, double y) {
         affectedArea.updateAffectedCoordinates(x, y);
-        brushes[brushNo].onDragStart(x, y);
+        brushes[brushNo].onStrokeStart(x, y);
     }
 
-    public void onNewMousePoint(int brushNo, double endX, double endY) {
+    public void onNewStrokePoint(int brushNo, double endX, double endY) {
         affectedArea.updateAffectedCoordinates(endX, endY);
-        brushes[brushNo].onNewMousePoint(endX, endY);
+        brushes[brushNo].onNewStrokePoint(endX, endY);
     }
 
     @Override
@@ -133,8 +133,8 @@ public class SymmetryBrush implements Brush {
             node.add(brushes[i].getDebugNode());
         }
 
-        node.addStringChild("Brush Type", brushType.toString());
-        node.addStringChild("Symmetry", symmetry.toString());
+        node.addString("Brush Type", brushType.toString());
+        node.addString("Symmetry", symmetry.toString());
 
         node.add(affectedArea.getDebugNode());
 

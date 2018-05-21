@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,16 +25,16 @@ import pixelitor.filters.RadialWaves;
 import java.awt.image.BufferedImage;
 
 /**
+ * The implementation of the {@link RadialWaves} filter.
+ *
  * Radial waves in a polar coordinate system
  */
 public class RadialWavesFilter extends CenteredTransformFilter {
     private int angularDivision;
     private double radialAmplitude;
-
     private float phase;
     private float zoom;
     private int waveType;
-
     private int maxSize;
 
     public RadialWavesFilter() {

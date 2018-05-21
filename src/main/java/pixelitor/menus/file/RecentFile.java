@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.menus.file;
 
@@ -22,11 +22,11 @@ import java.io.IOException;
 /**
  * Information about a recently opened file
  */
-public class RecentFileInfo {
+public class RecentFile {
     private final File file;
     private int nr;
 
-    public RecentFileInfo(File file) {
+    public RecentFile(File file) {
         this.file = file;
     }
 
@@ -61,15 +61,13 @@ public class RecentFileInfo {
             return false;
         }
 
-        RecentFileInfo fileInfo = (RecentFileInfo) o;
-
+        RecentFile recentFile = (RecentFile) o;
 
         if (file != null) {
-            return file.equals(fileInfo.file);
+            return file.equals(recentFile.file);
         } else {
-            return fileInfo.file == null;
+            return recentFile.file == null;
         }
-
     }
 
     @Override

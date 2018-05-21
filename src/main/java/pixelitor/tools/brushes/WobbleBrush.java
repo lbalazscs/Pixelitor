@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,7 @@ public class WobbleBrush extends StrokeBrush {
     }
 
     @Override
-    public void drawShape(double x, double y) {
+    public void drawStartShape(double x, double y) {
         float smallThickness = diameter / SIZE_DIVIDING_FACTOR;
 
         if(diameter != lastDiameter) {
@@ -50,7 +50,9 @@ public class WobbleBrush extends StrokeBrush {
     public void drawLine(double startX, double startY, double endX, double endY) {
         int savedRadius = radius;
         radius = (int) (radius / SIZE_DIVIDING_FACTOR);
+
         super.drawLine(startX, startY, endX, endY);
+
         radius = savedRadius;
     }
 }

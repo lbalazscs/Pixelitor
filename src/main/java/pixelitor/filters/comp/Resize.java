@@ -87,7 +87,7 @@ public class Resize implements CompAction {
         MultiLayerEdit edit = new MultiLayerEdit(comp, editName, backup);
         History.addEdit(edit);
 
-        comp.getCanvas().updateSize(canvasTargetWidth, canvasTargetHeight);
+        comp.getCanvas().changeSize(canvasTargetWidth, canvasTargetHeight);
 
         // Only after the shared canvas size was updated
         // The icon image should change if the proportions were

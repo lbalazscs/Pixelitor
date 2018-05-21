@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ public class ContentLayerNode extends LayerNode {
     public ContentLayerNode(String name, ContentLayer layer) {
         super(name, layer);
 
-        addIntChild("translation X", layer.getTX());
-        addIntChild("translation Y", layer.getTY());
+        addInt("translation X", layer.getTX());
+        addInt("translation Y", layer.getTY());
     }
 }

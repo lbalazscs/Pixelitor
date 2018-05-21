@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,9 +25,9 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 /**
- * A custom shape based on a Path2D.Float
+ * An abstract superclass for custom shapes
  */
-public abstract class GeneralShape implements Shape {
+public abstract class AbstractShape implements Shape {
     final Path2D.Float path = new Path2D.Float();
 
     @Override

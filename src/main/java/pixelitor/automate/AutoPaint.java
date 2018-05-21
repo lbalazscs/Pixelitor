@@ -72,7 +72,7 @@ public class AutoPaint {
         ConfigPanel configPanel = new ConfigPanel();
         JDialog d = new OKCancelDialog(configPanel, "Auto Paint") {
             @Override
-            protected void dialogAccepted() {
+            protected void okAction() {
                 close();
                 Settings settings = configPanel.getSettings();
                 paintStrokes(dr, settings);

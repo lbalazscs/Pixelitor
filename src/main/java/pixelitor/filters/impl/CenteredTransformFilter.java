@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import com.jhlabs.image.TransformFilter;
 import java.awt.image.BufferedImage;
 
 /**
- * A transform filter with a center
+ * Abstract superclass for transform filters with a center
  */
 public abstract class CenteredTransformFilter extends TransformFilter {
     // relative center coordinates between 0 and 1

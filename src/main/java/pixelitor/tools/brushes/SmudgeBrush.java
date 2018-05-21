@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,11 @@ public class SmudgeBrush extends CopyBrush {
     private double lastX;
     private double lastY;
 
+    /**
+     * The strength in the GUI, actually the opacity of the brush
+     */
     private float strength;
+
     private boolean firstUsageInStroke = true;
 
     /**
@@ -63,6 +67,7 @@ public class SmudgeBrush extends CopyBrush {
         type.beforeDrawImage(g);
 
         if (firstUsageInStroke && fingerPainting) {
+            // finger painting starts with the foreground color
             g.setColor(FgBgColors.getFG());
             g.fillRect(0, 0, diameter, diameter);
         } else {
@@ -87,7 +92,8 @@ public class SmudgeBrush extends CopyBrush {
                 y - radius
         );
 
-        // does not handle transparency
+        // TODO this does not handle transparency - the Smudge tool
+        // cannot smudge into transparent areas
         targetG.setComposite(AlphaComposite.SrcAtop.derive(strength));
 //        targetG.setComposite(BlendComposite.CrossFade.derive(strength));
 
@@ -107,10 +113,10 @@ public class SmudgeBrush extends CopyBrush {
     public DebugNode getDebugNode() {
         DebugNode node = super.getDebugNode();
 
-        node.addDoubleChild("lastX", lastX);
-        node.addDoubleChild("lastY", lastY);
-        node.addFloatChild("strength", strength);
-        node.addBooleanChild("firstUsageInStroke", firstUsageInStroke);
+        node.addDouble("lastX", lastX);
+        node.addDouble("lastY", lastY);
+        node.addFloat("strength", strength);
+        node.addBoolean("firstUsageInStroke", firstUsageInStroke);
 
         return node;
     }

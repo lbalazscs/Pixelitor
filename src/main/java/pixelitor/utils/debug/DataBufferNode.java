@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,23 +25,21 @@ public class DataBufferNode extends DebugNode {
 
     public DataBufferNode(DataBuffer dataBuffer) {
         super("DataBuffer", dataBuffer);
-        addClassChild();
+        addClass();
 
         int numBanks = dataBuffer.getNumBanks();
-        addIntChild("numBanks", numBanks);
+        addInt("numBanks", numBanks);
 
         int type = dataBuffer.getDataType();
-        addStringChild("type", getDataBufferTypeDescription(type));
+        addString("type", getDataBufferTypeDescription(type));
 
         int size = dataBuffer.getSize();
-        addIntChild("size", size);
+        addInt("size", size);
     }
-
 
     public static String getDataBufferTypeDescription(int type) {
         // The DataBuffer lists the additional types TYPE_SHORT, TYPE_FLOAT, TYPE_DOUBLE, TYPE_UNDEFINED
         // but those are not in use
         return ColorModelNode.getTransferTypeDescription(type);
     }
-
 }

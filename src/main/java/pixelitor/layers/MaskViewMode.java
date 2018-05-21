@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -134,7 +134,7 @@ public enum MaskViewMode {
                 FadeMenuItem.INSTANCE.refresh(canFade);
 
                 if (Build.CURRENT.isDevelopment()) {
-                    assert ConsistencyChecks.fadeCheck(layer.getComp());
+                    assert ConsistencyChecks.fadeWouldWorkOn(layer.getComp());
                 }
             }
         }

@@ -82,7 +82,7 @@ public class EnlargeCanvas implements CompAction {
         Canvas canvas = comp.getCanvas();
         int newCanvasWidth = canvas.getWidth() + east + west;
         int newCanvasHeight = canvas.getHeight() + north + south;
-        canvas.updateSize(newCanvasWidth, newCanvasHeight);
+        canvas.changeSize(newCanvasWidth, newCanvasHeight);
 
         // update the icon images only after the shared canvas size was
         // enlarged, because they are based on the canvas-sized subimage
@@ -107,7 +107,7 @@ public class EnlargeCanvas implements CompAction {
         EnlargeCanvasPanel panel = new EnlargeCanvasPanel();
         OKCancelDialog d = new OKCancelDialog(panel, "Enlarge Canvas") {
             @Override
-            protected void dialogAccepted() {
+            protected void okAction() {
                 Composition comp = ImageComponents.getActiveCompOrNull();
                 new EnlargeCanvas(panel.getNorth(), panel.getEast(), panel.getSouth(), panel.getWest()).process(comp);
                 close();

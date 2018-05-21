@@ -82,7 +82,7 @@ import static pixelitor.layers.ImageLayer.State.SHOW_ORIGINAL;
  * or dialogCanceled() is called.
  */
 public class ImageLayer extends ContentLayer implements Drawable {
-    enum State {
+    public enum State {
         /**
          * The layer is in normal state when no filter is running on it
          */
@@ -560,7 +560,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         int imageWidth = image.getWidth();
         int imageHeight = image.getHeight();
 
-        BufferedImage dest = ImageUtils.createImageWithSameColorModel(image);
+        BufferedImage dest = ImageUtils.createImageWithSameCM(image);
         Graphics2D g2 = dest.createGraphics();
 
         if (direction == HORIZONTAL) {
@@ -672,7 +672,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public BufferedImage createCompositionSizedTmpImage() {
+    public BufferedImage createCanvasSizedTmpImage() {
         int width = canvas.getWidth();
         int height = canvas.getHeight();
         // it is important that the tmp image has transparency
@@ -692,7 +692,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
 
-        assert ConsistencyChecks.imageCoversCanvasCheck(this);
+        assert ConsistencyChecks.imageCoversCanvas(this);
 
         BufferedImage subImage;
         try {
@@ -941,7 +941,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             // and then the result must be composited into the main Graphics,
             // otherwise we don't get the correct result if this layer not the
             // first visible layer and has a blending mode different from normal
-            BufferedImage tmp = createCompositionSizedTmpImage();
+            BufferedImage tmp = createCanvasSizedTmpImage();
             Graphics2D tmpG = tmp.createGraphics();
             tmpG.drawImage(visibleImage, getTX(), getTY(), null);
 
@@ -1013,7 +1013,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
     }
 
-    State getState() {
+    public State getState() {
         return state;
     }
 

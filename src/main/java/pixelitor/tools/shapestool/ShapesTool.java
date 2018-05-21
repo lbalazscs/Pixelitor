@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -122,14 +122,14 @@ public class ShapesTool extends Tool {
 
         effectsDialog = new OKCancelDialog(effectsPanel, "Effects") {
             @Override
-            protected void dialogAccepted() {
+            protected void okAction() {
                 effectsDialog.close();
                 effectsPanel.updateEffectsFromGUI();
             }
 
             @Override
-            protected void dialogCanceled() {
-                super.dialogCanceled();
+            protected void cancelAction() {
+                super.cancelAction();
                 effectsDialog.close();
             }
         };
@@ -319,15 +319,14 @@ public class ShapesTool extends Tool {
                 //g.setPaint(fillType.getPaint(userDrag));
                 fillType.setupPaint(g, userDrag);
                 g.fill(currentShape);
-                fillType.restorePaint(g);
+                fillType.finish(g);
             } else if (!action.hasStroke()) {
                 // special case: a shape that is not closed can be only stroked, even if stroke is disabled
                 // stroke it with the basic stroke
                 g.setStroke(basicStrokeForOpenShapes);
-//                g.setPaint(fillType.getPaint(userDrag));
                 fillType.setupPaint(g, userDrag);
                 g.draw(currentShape);
-                fillType.restorePaint(g);
+                fillType.finish(g);
             }
         }
 
@@ -339,10 +338,9 @@ public class ShapesTool extends Tool {
                 stroke = strokeParam.createStroke();
             }
             g.setStroke(stroke);
-//            g.setPaint(strokeFill.getPaint(userDrag));
             strokeFill.setupPaint(g, userDrag);
             g.draw(currentShape);
-            strokeFill.restorePaint(g);
+            strokeFill.finish(g);
         }
 
         if (action.drawEffects()) {
@@ -435,10 +433,10 @@ public class ShapesTool extends Tool {
     public DebugNode getDebugNode() {
         DebugNode node = super.getDebugNode();
 
-        node.addStringChild("Type", typeModel.getSelectedItem().toString());
-        node.addStringChild("Action", actionModel.getSelectedItem().toString());
-        node.addStringChild("Fill", fillModel.getSelectedItem().toString());
-        node.addStringChild("Stroke", strokeFillModel.getSelectedItem().toString());
+        node.addString("Type", typeModel.getSelectedItem().toString());
+        node.addString("Action", actionModel.getSelectedItem().toString());
+        node.addString("Fill", fillModel.getSelectedItem().toString());
+        node.addString("Stroke", strokeFillModel.getSelectedItem().toString());
         strokeParam.addDebugNodeInfo(node);
 
         return node;

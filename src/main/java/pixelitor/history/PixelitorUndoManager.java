@@ -157,6 +157,10 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
         return selectionModel.getLeadSelectionIndex();
     }
 
+    public boolean hasEdits() {
+        return !edits.isEmpty();
+    }
+
     // ListModel methods
 
     @Override

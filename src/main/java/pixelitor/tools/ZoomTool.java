@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,9 +18,9 @@
 package pixelitor.tools;
 
 import pixelitor.gui.ImageComponent;
+import pixelitor.utils.Cursors;
 
 import javax.swing.*;
-import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 
@@ -30,7 +30,7 @@ import java.awt.event.MouseEvent;
 public class ZoomTool extends Tool {
     ZoomTool() {
         super('z', "Zoom", "zoom_tool_icon.png", "click to zoom in, right-click (or Alt-click) to zoom out",
-                Cursor.getPredefinedCursor(Cursor.HAND_CURSOR), false, true, false, ClipStrategy.IMAGE_ONLY);
+                Cursors.HAND, false, true, false, ClipStrategy.IMAGE_ONLY);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,8 +19,12 @@ package pixelitor.utils;
 import java.util.Random;
 
 /**
- * A random number generator that produces fast cached values for nextFloat
- * and regular (slower but with a big period) integers.
+ * Generating random numbers can be a relatively expensive operation,
+ * and some filters work just fine with a small number of reused
+ * random floats.
+ *
+ * This is a random number generator that produces fast cached values
+ * for nextFloat and regular (slower but with a big period) integers.
  * In a multithreaded environment it is suitable to be used inside a ThreadLocal
  */
 public class CachedFloatRandom {
@@ -60,6 +64,4 @@ public class CachedFloatRandom {
         index = seed % CACHE_SIZE;
         instanceRandom.setSeed(seed);
     }
-
-
 }

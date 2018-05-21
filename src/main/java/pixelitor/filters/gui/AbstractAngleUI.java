@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,16 +32,20 @@ import static java.awt.RenderingHints.KEY_STROKE_CONTROL;
 import static java.awt.RenderingHints.VALUE_STROKE_PURE;
 
 /**
- * An abstract superclass for angle selectors and elevation angle selectors
+ * An abstract superclass for angle selectors ({@link AngleUI})
+ * and elevation angle selectors ({@link ElevationAngleUI})
  */
 public abstract class AbstractAngleUI extends JComponent implements MouseListener, MouseMotionListener {
-    final AngleParam model;
     static final int SIZE = 50;
     private static final Stroke ARROW_STROKE = new BasicStroke(1.7f);
     private static final Color ENABLED_ARROW_COLOR = new Color(45, 66, 85);
     private static final Color DISABLED_ARROW_COLOR = new Color(160, 160, 160);
+
+    final AngleParam model;
     protected boolean enabled = true;
 
+    // the subclasses need to set
+    // the center point
     int cx;
     int cy;
 
@@ -55,6 +59,38 @@ public abstract class AbstractAngleUI extends JComponent implements MouseListene
 
         addMouseListener(this);
         addMouseMotionListener(this);
+    }
+
+    void drawArrow(Graphics2D g2, double angle, float startX, float startY, float endX, float endY) {
+        if (enabled) {
+            g2.setColor(ENABLED_ARROW_COLOR);
+        } else {
+            g2.setColor(DISABLED_ARROW_COLOR);
+        }
+        g2.setStroke(ARROW_STROKE);
+
+        g2.setRenderingHint(KEY_STROKE_CONTROL, VALUE_STROKE_PURE);
+
+        g2.draw(new Line2D.Float(startX, startY, endX, endY));
+
+        double backAngle1 = 2.8797926 + angle;
+        double backAngle2 = 3.4033926 + angle;
+        int arrowRadius = 10;
+
+        float arrowEnd1X = (float) (endX + (arrowRadius * Math.cos(backAngle1)));
+        float arrowEnd1Y = (float) (endY + (arrowRadius * Math.sin(backAngle1)));
+        float arrowEnd2X = (float) (endX + (arrowRadius * Math.cos(backAngle2)));
+        float arrowEnd2Y = (float) (endY + (arrowRadius * Math.sin(backAngle2)));
+
+        g2.draw(new Line2D.Float(endX, endY, arrowEnd1X, arrowEnd1Y));
+        g2.draw(new Line2D.Float(endX, endY, arrowEnd2X, arrowEnd2Y));
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+        super.setEnabled(enabled);
+        repaint();
     }
 
     private void updateAngle(int x, int y, boolean trigger) {
@@ -96,37 +132,5 @@ public abstract class AbstractAngleUI extends JComponent implements MouseListene
 
     @Override
     public void mouseMoved(MouseEvent e) {
-    }
-
-    void drawArrow(Graphics2D g2, double angle, float startX, float startY, float endX, float endY) {
-        if (enabled) {
-            g2.setColor(ENABLED_ARROW_COLOR);
-        } else {
-            g2.setColor(DISABLED_ARROW_COLOR);
-        }
-        g2.setStroke(ARROW_STROKE);
-
-        g2.setRenderingHint(KEY_STROKE_CONTROL, VALUE_STROKE_PURE);
-
-        g2.draw(new Line2D.Float(startX, startY, endX, endY));
-
-        double backAngle1 = 2.8797926 + angle;
-        double backAngle2 = 3.4033926 + angle;
-        int arrowRadius = 10;
-
-        float arrowEnd1X = (float) (endX + (arrowRadius * Math.cos(backAngle1)));
-        float arrowEnd1Y = (float) (endY + (arrowRadius * Math.sin(backAngle1)));
-        float arrowEnd2X = (float) (endX + (arrowRadius * Math.cos(backAngle2)));
-        float arrowEnd2Y = (float) (endY + (arrowRadius * Math.sin(backAngle2)));
-
-        g2.draw(new Line2D.Float(endX, endY, arrowEnd1X, arrowEnd1Y));
-        g2.draw(new Line2D.Float(endX, endY, arrowEnd2X, arrowEnd2Y));
-    }
-
-    @Override
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-        super.setEnabled(enabled);
-        repaint();
     }
 }

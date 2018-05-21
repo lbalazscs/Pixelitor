@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,12 +19,12 @@ package pixelitor.transform;
 
 import pixelitor.gui.ImageComponent;
 import pixelitor.tools.ArrowKey;
+import pixelitor.utils.Cursors;
 import pixelitor.utils.Utils;
 
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.Point;
-import java.awt.Cursor;
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 
@@ -126,9 +126,9 @@ public class TransformSupport {
         boolean isCursorSet = handles.setCursorForPoint(e.getX(), e.getY(), ic);
         if (!isCursorSet) {
             if (compSpaceRect.contains(e.getX(), e.getY())) {
-                ic.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+                ic.setCursor(Cursors.MOVE);
             } else {
-                ic.setCursor(Cursor.getDefaultCursor());
+                ic.setCursor(Cursors.DEFAULT);
             }
         }
     }

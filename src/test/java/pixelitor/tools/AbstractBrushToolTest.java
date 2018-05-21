@@ -98,15 +98,15 @@ public class AbstractBrushToolTest {
         tool.trace(dr, new Rectangle(2, 2, 2, 2));
 
         verify(brushSpy).setTarget(any(), any());
-        verify(brushSpy).onDragStart(2.0, 2.0);
-        verify(brushSpy, times(5)).onNewMousePoint(anyDouble(), anyDouble());
+        verify(brushSpy).onStrokeStart(2.0, 2.0);
+        verify(brushSpy, times(5)).onNewStrokePoint(anyDouble(), anyDouble());
     }
 
     @Test
     public void test_drawBrushStrokeProgrammatically() {
         tool.drawBrushStrokeProgrammatically(dr, new Point(2, 2), new Point(5, 5));
 
-        verify(brushSpy).onDragStart(2.0, 2.0);
-        verify(brushSpy).onNewMousePoint(5.0, 5.0);
+        verify(brushSpy).onStrokeStart(2.0, 2.0);
+        verify(brushSpy).onNewStrokePoint(5.0, 5.0);
     }
 }

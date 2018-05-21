@@ -16,17 +16,24 @@ limitations under the License.
 
 package com.jhlabs.awt;
 
-import java.awt.*;
+import java.awt.Shape;
+import java.awt.Stroke;
 
+/**
+ * See http://www.jhlabs.com/java/java2d/strokes/
+ * <p>
+ * "One interesting thing we can do is take an existing stroke
+ * and draw the outline of the stroke using another stroke."
+ */
 public class CompositeStroke implements Stroke {
-	private Stroke stroke1, stroke2;
+    private Stroke stroke1, stroke2;
 
-	public CompositeStroke( Stroke stroke1, Stroke stroke2 ) {
-		this.stroke1 = stroke1;
-		this.stroke2 = stroke2;
-	}
+    public CompositeStroke(Stroke stroke1, Stroke stroke2 ) {
+        this.stroke1 = stroke1;
+        this.stroke2 = stroke2;
+    }
 
-	public Shape createStrokedShape( Shape shape ) {
-		return stroke2.createStrokedShape( stroke1.createStrokedShape( shape ) );
-	}
+    public Shape createStrokedShape(Shape shape ) {
+        return stroke2.createStrokedShape( stroke1.createStrokedShape( shape ) );
+    }
 }

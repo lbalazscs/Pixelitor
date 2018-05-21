@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,7 +44,6 @@ public class Canvas implements Serializable {
     // for consistency with Pixelitor 2.1.0
     private static final long serialVersionUID = -1459254568616232274L;
 
-
     /**
      * If a Composition is deserialized, then this object is also deserialized,
      * and later associated with the (transient!) ImageComponent
@@ -74,7 +73,7 @@ public class Canvas implements Serializable {
         return new Rectangle(0, 0, width, height);
     }
 
-    public void updateSize(int newWidth, int newHeight) {
+    public void changeSize(int newWidth, int newHeight) {
         width = newWidth;
         height = newHeight;
 
@@ -85,7 +84,7 @@ public class Canvas implements Serializable {
         ic.canvasSizeChanged();
     }
 
-    public void updateForZoom(double viewScale) {
+    public void changeZooming(double viewScale) {
         zoomedWidth = (int) (viewScale * width);
         zoomedHeight = (int) (viewScale * height);
     }
@@ -102,7 +101,7 @@ public class Canvas implements Serializable {
         return zoomedHeight;
     }
 
-    public void setIc(ImageComponent ic) {
+    public void setIC(ImageComponent ic) {
         this.ic = ic;
     }
 

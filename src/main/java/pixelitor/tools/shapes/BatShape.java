@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,8 +19,8 @@ package pixelitor.tools.shapes;
 /**
  * Bat shape based on http://en.wikipedia.org/wiki/File:Bat_shadow_black.svg
  */
-public class Bat extends GeneralShape {
-    public Bat(double x, double y, double width, double height) {
+public class BatShape extends AbstractShape {
+    public BatShape(double x, double y, double width, double height) {
         double cp1X; // x of control point 1
         double cp1Y; // y of control point 1
         double cp2X; // x of control point 2
@@ -283,7 +283,5 @@ public class Bat extends GeneralShape {
         epX = x + 0.48396146f * width;
         epY = y + 0.8711912f * height;
         path.curveTo(cp1X, cp1Y, cp2X, cp2Y, epX, epY);
-
     }
-
 }

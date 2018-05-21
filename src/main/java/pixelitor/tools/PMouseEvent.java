@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,9 @@ import java.awt.event.MouseEvent;
 
 /**
  * A MouseEvent replacement with scaled coordinates
+ *
+ * The original, unfinished idea was to replace all
+ * mouse events in the tools with this.
  */
 public class PMouseEvent {
     private boolean shiftDown;

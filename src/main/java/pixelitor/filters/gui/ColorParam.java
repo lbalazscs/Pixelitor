@@ -66,7 +66,7 @@ public class ColorParam extends AbstractFilterParam {
     }
 
     @Override
-    public int getNrOfGridBagCols() {
+    public int getNumGridBagCols() {
         return 2;
     }
 

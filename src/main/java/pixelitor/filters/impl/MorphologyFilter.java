@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,11 +18,12 @@
 package pixelitor.filters.impl;
 
 import com.jhlabs.image.WholeImageFilter;
+import pixelitor.filters.Morphology;
 
 import java.awt.Rectangle;
 
 /**
- * A morphology filter
+ * The implementation of the {@link Morphology} filter.
  */
 public class MorphologyFilter extends WholeImageFilter {
     private int iterations = 1;

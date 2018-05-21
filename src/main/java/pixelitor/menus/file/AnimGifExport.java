@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,7 +45,7 @@ public class AnimGifExport {
         ExportPanel p = new ExportPanel(comp.getNumLayers());
         OKCancelDialog d = new OKCancelDialog(p, dialogParent, "Export Animated GIF", "Export", "Cancel", false) {
             @Override
-            protected void dialogAccepted() {
+            protected void okAction() {
                 close();
                 export(comp, p.getDelayMillis(), p.isPingPong());
             }

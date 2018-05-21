@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -455,7 +455,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     }
 
     public void canvasSizeChanged() {
-        assert ConsistencyChecks.imageCoversCanvasCheck(comp);
+        assert ConsistencyChecks.imageCoversCanvas(comp);
 
         if (frame != null) {
             frame.setSize(canvas.getZoomedWidth(), canvas.getZoomedHeight(), -1, -1);
@@ -488,7 +488,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         this.zoomLevel = newZoom;
 
         viewScale = newZoom.getViewScale();
-        canvas.updateForZoom(viewScale);
+        canvas.changeZooming(viewScale);
 
         Rectangle areaThatShouldBeVisible = null;
         if (frame != null) {

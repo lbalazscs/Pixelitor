@@ -100,7 +100,6 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
         ImageComponents.addActiveImageChangeListener(this);
     }
 
-
     /**
      * Initialize settings panel controls
      */
@@ -123,7 +122,7 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
         // add crop guidelines type selector
         guidelinesSelector = new JComboBox<>(RectGuidelineType.values());
         guidelinesSelector.setMaximumRowCount(guidelinesSelector.getItemCount());
-        guidelinesSelector.setSelectedItem(RectGuidelineType.RULE_OF_THIRDS);
+//        guidelinesSelector.setSelectedItem(RectGuidelineType.RULE_OF_THIRDS);
         guidelinesSelector.addActionListener(e -> ImageComponents.repaintActive());
 
         settingsPanel.add(new JLabel("Guidelines:"));
@@ -460,9 +459,9 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
     public DebugNode getDebugNode() {
         DebugNode node = super.getDebugNode();
 
-        node.addFloatChild("Mask Opacity", maskOpacity.getValueAsPercentage());
-        node.addBooleanChild("Allow Growing", allowGrowingCB.isSelected());
-        node.addStringChild("State", state.toString());
+        node.addFloat("Mask Opacity", maskOpacity.getValueAsPercentage());
+        node.addBoolean("Allow Growing", allowGrowingCB.isSelected());
+        node.addString("State", state.toString());
 
         return node;
     }

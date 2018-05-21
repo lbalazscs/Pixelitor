@@ -379,7 +379,7 @@ public abstract class Tool implements KeyboardObserver {
 
     public DebugNode getDebugNode() {
         DebugNode toolNode = new DebugNode("Active Tool", this);
-        toolNode.addStringChild("Name", getName());
+        toolNode.addString("Name", getName());
         return toolNode;
     }
 }

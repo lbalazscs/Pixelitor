@@ -18,7 +18,6 @@
 package pixelitor.io;
 
 import org.xml.sax.SAXException;
-import pixelitor.AppLogic;
 import pixelitor.Composition;
 import pixelitor.automate.SingleDirChooserPanel;
 import pixelitor.gui.GlobalKeyboardWatch;
@@ -67,7 +66,7 @@ public class OpenSaveManager {
         Runnable r = () -> {
             Composition comp = createCompositionFromFile(file);
             if(comp != null) { // there was no decoding problem
-                AppLogic.addCompAsNewImage(comp);
+                ImageComponents.addCompAsNewImage(comp);
             }
         };
         Utils.executeWithBusyCursor(r);

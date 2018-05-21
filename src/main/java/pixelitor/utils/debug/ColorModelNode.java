@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,35 +32,35 @@ public class ColorModelNode extends DebugNode {
 
     public ColorModelNode(String name, ColorModel colorModel) {
         super(name, colorModel);
-        addClassChild();
+        addClass();
 
         ColorSpace colorSpace = colorModel.getColorSpace();
         add(new ColorSpaceNode(colorSpace));
 
         int numColorComponents = colorModel.getNumColorComponents();
-        addIntChild("numColorComponents", numColorComponents);
+        addInt("numColorComponents", numColorComponents);
 
         int numComponents = colorModel.getNumComponents();
-        addIntChild("numComponents", numComponents);
+        addInt("numComponents", numComponents);
 
         boolean hasAlpha = colorModel.hasAlpha();
-        addBooleanChild("hasAlpha", hasAlpha);
+        addBoolean("hasAlpha", hasAlpha);
 
         int pixelSize = colorModel.getPixelSize();
-        addIntChild("pixelSize", pixelSize);
+        addInt("pixelSize", pixelSize);
 
         int transferType = colorModel.getTransferType();
         String transferTypeDescription = getTransferTypeDescription(transferType);
-        addStringChild("transferType", transferTypeDescription);
+        addString("transferType", transferTypeDescription);
 
         int transparency = colorModel.getTransparency();
-        addStringChild("transparency", getTransparencyDescription(transparency));
+        addString("transparency", getTransparencyDescription(transparency));
 
         boolean isRGB = isRgbColorModel(colorModel);
-        addBooleanChild("isRGB", isRGB);
+        addBoolean("isRGB", isRGB);
 
         boolean isBGR = isBgrColorModel(colorModel);
-        addBooleanChild("isBGR", isBGR);
+        addBoolean("isBGR", isBGR);
     }
 
     private static boolean isRgbColorModel(ColorModel cm) {
@@ -117,5 +117,4 @@ public class ColorModelNode extends DebugNode {
         }
         return "UNKNOWN";
     }
-
 }

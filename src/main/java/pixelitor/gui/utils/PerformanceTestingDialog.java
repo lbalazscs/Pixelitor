@@ -22,10 +22,10 @@ import pixelitor.filters.FilterAction;
 import pixelitor.filters.FilterUtils;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.layers.Drawable;
+import pixelitor.utils.Cursors;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
-import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Frame;
@@ -136,7 +136,7 @@ public class PerformanceTestingDialog extends JDialog implements ActionListener,
 
             if (executions > 0) {
                 setEnabledWhileRunning();
-                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                setCursor(Cursors.BUSY);
 
                 task = new TestingTask(dr, executions);
                 task.addPropertyChangeListener(this);

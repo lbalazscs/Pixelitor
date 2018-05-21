@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -47,12 +47,12 @@ public class DebugNode extends DefaultMutableTreeNode {
 
         StringBuilder sb = new StringBuilder();
 
-        addIndent(sb, getLevel());
+        indent(sb, getLevel());
         sb.append(name).append(" {");
 
         while (childrenEnum.hasMoreElements()) {
             Object o = childrenEnum.nextElement();
-            addIndent(sb, getLevel() + 1);
+            indent(sb, getLevel() + 1);
 
             DefaultMutableTreeNode t = (DefaultMutableTreeNode) o;
 
@@ -66,41 +66,41 @@ public class DebugNode extends DefaultMutableTreeNode {
             sb.append(info);
         }
 
-        addIndent(sb, getLevel());
+        indent(sb, getLevel());
         sb.append('}');
 
         return sb.toString();
     }
 
-    public void addStringChild(String name, String s) {
+    public void addString(String name, String s) {
         add(new DefaultMutableTreeNode(name + " = " + s));
     }
 
-    public void addQuotedStringChild(String name, String s) {
+    public void addQuotedString(String name, String s) {
         add(new DefaultMutableTreeNode(String.format("%s = \"%s\"", name, s)));
     }
 
-    public void addIntChild(String name, int i) {
+    public void addInt(String name, int i) {
         add(new DefaultMutableTreeNode(name + " = " + i));
     }
 
-    public void addFloatChild(String name, float f) {
+    public void addFloat(String name, float f) {
         add(new DefaultMutableTreeNode(String.format("%s = %.2f", name, f)));
     }
 
-    public void addDoubleChild(String name, double f) {
+    public void addDouble(String name, double f) {
         add(new DefaultMutableTreeNode(String.format("%s = %.2f", name, f)));
     }
 
-    public void addBooleanChild(String name, boolean b) {
+    public void addBoolean(String name, boolean b) {
         add(new DefaultMutableTreeNode(name + " = " + b));
     }
 
-    public void addClassChild() {
+    public void addClass() {
         add(new DefaultMutableTreeNode("Class = " + userObject.getClass().getSimpleName()));
     }
 
-    private static void addIndent(StringBuilder sb, int indentLevel) {
+    private static void indent(StringBuilder sb, int indentLevel) {
         sb.append('\n');
         for (int i = 0; i < indentLevel; i++) {
             sb.append("  ");

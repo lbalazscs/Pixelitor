@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -88,13 +88,13 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
     }
 
     @Override
-    public int getNrOfGridBagCols() {
+    public int getNumGridBagCols() {
         return 2;
     }
 
     @Override
     public void randomize() {
-        if (randomizePolicy.allowRandomize()) {
+        if (randomizePolicy.allow()) {
             Random rnd = new Random();
             int randomIndex = rnd.nextInt(choicesList.size());
             setCurrentChoice(choicesList.get(randomIndex), false);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,9 @@ import java.util.List;
 import static java.awt.Color.GRAY;
 
 /**
- * The desktop area of the app
+ * The desktop area of the app, where the edited images are.
+ * Currently the GUI is a JDesktopPane, but a JTabbedPane
+ * could be an alternative.
  */
 public class Desktop {
     private static final int CASCADE_HORIZONTAL_SHIFT = 15;
@@ -161,7 +163,7 @@ public class Desktop {
         }
     }
 
-    public void addNewImageComponent(ImageComponent ic) {
+    public void addNewIC(ImageComponent ic) {
         int numImages = ImageComponents.getNumOpenImages();
 
         // called deliberately after numImages is set

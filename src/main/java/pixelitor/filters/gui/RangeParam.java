@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -122,7 +122,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     @Override
-    public int getNrOfGridBagCols() {
+    public int getNumGridBagCols() {
         if (textPosition == NONE) {
             return 2;
         }
@@ -131,7 +131,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     @Override
     public void randomize() {
-        if (randomizePolicy.allowRandomize()) {
+        if (randomizePolicy.allow()) {
             int range = maxValue - minValue;
             Random rnd = new Random();
             int newValue = minValue + rnd.nextInt(range);

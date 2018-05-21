@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -113,8 +113,8 @@ public class TranslationEdit extends PixelitorEdit {
     public DebugNode getDebugNode() {
         DebugNode node = super.getDebugNode();
 
-        node.addIntChild("Backup TX", backupTX);
-        node.addIntChild("Backup TY", backupTY);
+        node.addInt("Backup TX", backupTX);
+        node.addInt("Backup TY", backupTY);
 
         return node;
     }

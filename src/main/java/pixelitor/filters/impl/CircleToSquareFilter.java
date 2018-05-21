@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,13 +26,13 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 /**
+ * The implementation of the {@link CircleToSquare} filter.
  * Distorts a circle into a square
  */
 public class CircleToSquareFilter extends CenteredTransformFilter {
     private float radiusX = 500;
     private float radiusY = 500;
     private float radiusRatio;
-
     private float amount = 1.0f;
 
     public CircleToSquareFilter() {
@@ -55,7 +55,6 @@ public class CircleToSquareFilter extends CenteredTransformFilter {
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
         radiusRatio = radiusX / radiusY;
         return super.filter(src, dst);
-
     }
 
     public Shape[] getAffectedAreaShapes() {

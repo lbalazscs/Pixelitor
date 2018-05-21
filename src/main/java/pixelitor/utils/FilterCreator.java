@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -136,8 +136,7 @@ public class FilterCreator extends JPanel {
         FilterCreator filterCreator = new FilterCreator();
         OKCancelDialog d = new OKCancelDialog(filterCreator, owner, "Filter Creator", "Show Source", "Close") {
             @Override
-            protected void dialogAccepted() {
-//                close();
+            protected void okAction() {
                 String s = filterCreator.createFilterSource();
                 JTextArea ta = new JTextArea(s);
                 JScrollPane sp = new JScrollPane(ta);

@@ -104,7 +104,7 @@ public abstract class ShapeFilter extends ParametrizedFilter {
         int srcWidth = src.getWidth();
         int srcHeight = src.getHeight();
 
-        dest = ImageUtils.createImageWithSameColorModel(src);
+        dest = ImageUtils.createImageWithSameCM(src);
         Graphics2D g2 = dest.createGraphics();
 
         int bgVal = background.getValue();

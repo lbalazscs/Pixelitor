@@ -149,8 +149,8 @@ public class PartialImageEdit extends FadeableEdit {
     public DebugNode getDebugNode() {
         DebugNode node = super.getDebugNode();
 
-        node.addIntChild("Backup Image Width", backupRaster.getWidth());
-        node.addIntChild("Backup Image Height", backupRaster.getHeight());
+        node.addInt("Backup Image Width", backupRaster.getWidth());
+        node.addInt("Backup Image Height", backupRaster.getHeight());
 
         return node;
     }

@@ -35,6 +35,7 @@ import static java.awt.Color.WHITE;
 
 /**
  * Pixelate filter based on the JHLabs BlockFilter
+ * (or alternatively on {@link BrickBlockFilter})
  */
 public class JHPixelate extends ParametrizedFilter {
     public static final String NAME = "Pixelate";
@@ -123,7 +124,7 @@ public class JHPixelate extends ParametrizedFilter {
     }
 
     private static BufferedImage createBumpSource(int type, int cellSize, int width, int height, BufferedImage src) {
-        BufferedImage bumpSource = ImageUtils.createImageWithSameColorModel(src);
+        BufferedImage bumpSource = ImageUtils.createImageWithSameCM(src);
 
         int gapWidth;
         if (cellSize < 15) {

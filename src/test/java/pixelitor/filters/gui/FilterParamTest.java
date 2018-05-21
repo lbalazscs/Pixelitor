@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -114,8 +114,8 @@ public class FilterParamTest {
     }
 
     @Test
-    public void test_getNrOfGridBagCols() {
-        int cols = param.getNrOfGridBagCols();
+    public void test_getNumGridBagCols() {
+        int cols = param.getNumGridBagCols();
         assertThat(cols > 0 && cols < 3).isTrue();
         checkThatFilterWasNotCalled();
     }

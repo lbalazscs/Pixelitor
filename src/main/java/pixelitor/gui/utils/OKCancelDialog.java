@@ -104,7 +104,7 @@ public abstract class OKCancelDialog extends JDialog {
         getRootPane().setDefaultButton(okButton);
         okButton.addActionListener(e -> {
             try {
-                dialogAccepted();
+                okAction();
             } catch (Exception ex) {
                 Messages.showException(ex);
             }
@@ -112,7 +112,7 @@ public abstract class OKCancelDialog extends JDialog {
 
         cancelButton.addActionListener(e -> {
             try {
-                dialogCanceled();
+                cancelAction();
             } catch (Exception ex) {
                 Messages.showException(ex);
             }
@@ -124,12 +124,13 @@ public abstract class OKCancelDialog extends JDialog {
             @Override
             public void windowClosing(WindowEvent e) {
                 // the user pressed the X button...
-                dialogCanceled();
+                cancelAction();
             }
         });
 
         // cancel when ESC is pressed
-        ((JComponent) getContentPane()).registerKeyboardAction(e -> dialogCanceled(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        ((JComponent) getContentPane()).registerKeyboardAction(e -> cancelAction(), KeyStroke
+                .getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         pack();
         GUIUtils.centerOnScreen(this);
@@ -149,13 +150,13 @@ public abstract class OKCancelDialog extends JDialog {
         dispose();
     }
 
-    protected abstract void dialogAccepted();
+    protected abstract void okAction();
 
     /**
      * The default implementation only calls close()
      * If overridden, call close() manually
      */
-    protected void dialogCanceled() {
+    protected void cancelAction() {
         close();
     }
 

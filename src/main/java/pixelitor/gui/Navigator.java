@@ -23,12 +23,12 @@ import pixelitor.Composition;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.menus.view.ZoomMenu;
 import pixelitor.utils.ActiveImageChangeListener;
+import pixelitor.utils.Cursors;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -66,9 +66,6 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
     private JScrollPane scrollPane;
     private final AdjustmentListener adjListener;
     private static JDialog dialog;
-
-    private static final Cursor INSIDE_RECT_CURSOR = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
-    private static final Cursor OUTSIDE_RECT_CURSOR = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR);
 
     private Navigator(ImageComponent ic) {
         adjListener = e ->
@@ -323,9 +320,9 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
 
     private void resetCursor(int x, int y) {
         if (redRect.contains(x, y)) {
-            setCursor(INSIDE_RECT_CURSOR);
+            setCursor(Cursors.HAND);
         } else {
-            setCursor(OUTSIDE_RECT_CURSOR);
+            setCursor(Cursors.DEFAULT);
         }
     }
 

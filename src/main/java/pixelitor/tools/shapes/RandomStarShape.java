@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import java.util.Random;
 /**
  * A random star, inspired by http://tips4java.wordpress.com/2013/05/13/playing-with-shapes/
  */
-public class RandomStar implements Shape {
+public class RandomStarShape implements Shape {
     // Warning: don't extend Polygon, because bizarre things (the process starts
     // allocating all the memory, no matter what -Xmx says)
     // can happen when the shape is used for selections - probably some JDK bug
@@ -60,14 +60,13 @@ public class RandomStar implements Shape {
 
         // a random value between 0 and unitAngle
         initialAngle = 2 * random.nextDouble() * unitAngle;
-//        System.out.println(String.format("RandomStar::randomize: unitAngle = %.2f, initialAngle = %.2f", unitAngle, initialAngle));
     }
 
     static {
         randomize();
     }
 
-    public RandomStar(double x, double y, double width, double height) {
+    public RandomStarShape(double x, double y, double width, double height) {
         double centerX = x + width / 2.0;
         double centerY = y + height / 2.0;
         double[] radii = new double[numRadius];
@@ -96,7 +95,6 @@ public class RandomStar implements Shape {
             }
         }
         delegate.closePath();
-
     }
 
     @Override

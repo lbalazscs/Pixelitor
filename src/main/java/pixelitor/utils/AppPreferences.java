@@ -30,7 +30,7 @@ import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.history.History;
 import pixelitor.io.Directories;
 import pixelitor.layers.LayerButtonLayout;
-import pixelitor.menus.file.RecentFileInfo;
+import pixelitor.menus.file.RecentFile;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.menus.view.ShowHideHistogramsAction;
 import pixelitor.menus.view.ShowHideLayersAction;
@@ -153,8 +153,8 @@ public final class AppPreferences {
         window.setSize(width, height);
     }
 
-    public static BoundedUniqueList<RecentFileInfo> loadRecentFiles() {
-        BoundedUniqueList<RecentFileInfo> retVal = new BoundedUniqueList<>(RecentFilesMenu.MAX_RECENT_FILES);
+    public static BoundedUniqueList<RecentFile> loadRecentFiles() {
+        BoundedUniqueList<RecentFile> retVal = new BoundedUniqueList<>(RecentFilesMenu.MAX_RECENT_FILES);
         for (int i = 0; i < RecentFilesMenu.MAX_RECENT_FILES; i++) {
             String key = RECENT_FILE_PREFS_KEY + i;
             String fileName = recentFilesNode.get(key, null);
@@ -164,17 +164,17 @@ public final class AppPreferences {
             File file = new File(fileName);
 
             if (file.exists()) {
-                RecentFileInfo fileInfo = new RecentFileInfo(file);
-                retVal.addIfNotThere(fileInfo);
+                RecentFile recentFile = new RecentFile(file);
+                retVal.addIfNotThere(recentFile);
             }
         }
         return retVal;
     }
 
-    private static void saveRecentFiles(BoundedUniqueList<RecentFileInfo> fileInfos) {
-        for (int i = 0; i < fileInfos.size(); i++) {
+    private static void saveRecentFiles(BoundedUniqueList<RecentFile> recentFiles) {
+        for (int i = 0; i < recentFiles.size(); i++) {
             String key = RECENT_FILE_PREFS_KEY + i;
-            String value = fileInfos.get(i).getSavedName();
+            String value = recentFiles.get(i).getSavedName();
             recentFilesNode.put(key, value);
         }
     }
@@ -442,7 +442,7 @@ public final class AppPreferences {
             Panel p = new Panel();
             OKCancelDialog d = new OKCancelDialog(p, "Preferences") {
                 @Override
-                protected void dialogAccepted() {
+                protected void okAction() {
                     int undoLevels = p.getUndoLevels();
                     History.setUndoLevels(undoLevels);
 

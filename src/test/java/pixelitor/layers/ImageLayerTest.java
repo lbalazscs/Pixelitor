@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -215,7 +215,7 @@ public class ImageLayerTest {
 
     @Test
     public void test_filterWithoutDialogFinished() {
-        assert ConsistencyChecks.imageCoversCanvasCheck(layer);
+        assert ConsistencyChecks.imageCoversCanvas(layer);
 
         BufferedImage dest = ImageUtils.copyImage(layer.getImage());
         layer.filterWithoutDialogFinished(dest,
@@ -285,7 +285,7 @@ public class ImageLayerTest {
 
     @Test
     public void test_createCompositionSizedTmpImage() {
-        BufferedImage image = layer.createCompositionSizedTmpImage();
+        BufferedImage image = layer.createCanvasSizedTmpImage();
         assertThat(image).isNotNull();
         assertThat(image.getWidth()).isEqualTo(layer.canvas.getWidth());
         assertThat(image.getHeight()).isEqualTo(layer.canvas.getHeight());

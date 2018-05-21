@@ -79,7 +79,7 @@ public interface Drawable {
 
     void mergeTmpDrawingLayerDown();
 
-    BufferedImage createCompositionSizedTmpImage();
+    BufferedImage createCanvasSizedTmpImage();
 
     BufferedImage getCanvasSizedSubImage();
 

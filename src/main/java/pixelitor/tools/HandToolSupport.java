@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,9 +17,10 @@
 
 package pixelitor.tools;
 
+import pixelitor.utils.Cursors;
+
 import javax.swing.*;
 import java.awt.Component;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
@@ -73,7 +74,7 @@ public class HandToolSupport {
      * Adds the "hand tool"-like behavior to the given scroll pane
      */
     public static void addBehavior(JScrollPane scrollPane) {
-        scrollPane.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        scrollPane.setCursor(Cursors.HAND);
         HandToolSupport support = new HandToolSupport();
         JViewport viewport = scrollPane.getViewport();
         Component panel = viewport.getView();

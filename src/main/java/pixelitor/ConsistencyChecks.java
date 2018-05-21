@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,8 +30,9 @@ import java.awt.image.BufferedImage;
 import java.util.Optional;
 
 /**
- * Consistency checks that run only in developer mode.
- * They are enabled by the Build setting or by the assertions
+ * Runtime assertions (a kind of "design by contract")
+ * that run only in developer mode.
+ * They are run by the Build setting or by the assertions
  */
 public final class ConsistencyChecks {
     private ConsistencyChecks() { // do not instantiate
@@ -40,28 +41,25 @@ public final class ConsistencyChecks {
     public static void checkAll(Composition comp, boolean checkImageCoversCanvas) {
         assert comp != null;
 
-        selectionCheck(comp);
-        assert fadeCheck(comp);
+        selectionActionsEnabledCheck(comp);
+        assert fadeWouldWorkOn(comp);
         if (checkImageCoversCanvas) {
-            assert imageCoversCanvasCheck(comp);
+            assert imageCoversCanvas(comp);
         }
-        assert layerDeleteActionEnabledCheck();
+        assert layerDeleteActionEnabled();
     }
 
-    public static boolean fadeCheck(Composition comp) {
+    public static boolean fadeWouldWorkOn(Composition comp) {
         Drawable dr = comp.getActiveDrawableOrNull();
         if (dr == null) {
             // nothing to check
             return true;
         }
-        return fadeCheck(dr);
+        return fadeWouldWorkOn(dr);
     }
 
-    /**
-     * Checks whether Fade would work now
-     */
     @SuppressWarnings("SameReturnValue")
-    public static boolean fadeCheck(Drawable dr) {
+    public static boolean fadeWouldWorkOn(Drawable dr) {
         assert dr != null;
         if (!History.canFade(dr)) {
             return true;
@@ -106,7 +104,7 @@ public final class ConsistencyChecks {
         return true;
     }
 
-    private static void selectionCheck(Composition comp) {
+    private static void selectionActionsEnabledCheck(Composition comp) {
         if (!SwingUtilities.isEventDispatchThread()) {
             return;
         }
@@ -121,12 +119,12 @@ public final class ConsistencyChecks {
     }
 
     @SuppressWarnings("SameReturnValue")
-    public static boolean imageCoversCanvasCheck(Composition comp) {
-        comp.forEachDrawable(ConsistencyChecks::imageCoversCanvasCheck);
+    public static boolean imageCoversCanvas(Composition comp) {
+        comp.forEachDrawable(ConsistencyChecks::imageCoversCanvas);
         return true;
     }
 
-    public static boolean imageCoversCanvasCheck(Drawable dr) {
+    public static boolean imageCoversCanvas(Drawable dr) {
         Composition comp = dr.getComp();
         BufferedImage image = dr.getImage();
 
@@ -173,18 +171,19 @@ public final class ConsistencyChecks {
     }
 
     @SuppressWarnings("SameReturnValue")
-    public static boolean layerDeleteActionEnabledCheck() {
+    public static boolean layerDeleteActionEnabled() {
         DeleteActiveLayerAction action = DeleteActiveLayerAction.INSTANCE;
         if (action == null) {
+            // can be null at startup because this check is
+            // called while constructing the DeleteActiveLayerAction
             return true;
         }
+        boolean enabled = action.isEnabled();
 
         Composition comp = ImageComponents.getActiveCompOrNull();
         if (comp == null) {
             return true;
         }
-
-        boolean enabled = action.isEnabled();
 
         int numLayers = comp.getNumLayers();
         if (enabled) {

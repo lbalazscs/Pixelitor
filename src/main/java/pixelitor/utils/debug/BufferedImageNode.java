@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,18 +37,17 @@ public class BufferedImageNode extends DebugNode {
         add(new RasterNode(raster));
 
         String typeDescription = getTypeDescription(image.getType());
-        addStringChild("type", typeDescription);
+        addString("type", typeDescription);
 
         int width = image.getWidth();
-        addIntChild("width", width);
+        addInt("width", width);
 
         int height = image.getHeight();
-        addIntChild("height", height);
+        addInt("height", height);
 
         boolean alphaPremultiplied = image.isAlphaPremultiplied();
-        addBooleanChild("alphaPremultiplied", alphaPremultiplied);
+        addBoolean("alphaPremultiplied", alphaPremultiplied);
     }
-
 
     public static String getTypeDescription(int type) {
         String retVal;

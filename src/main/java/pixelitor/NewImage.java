@@ -18,6 +18,7 @@
 package pixelitor;
 
 import pixelitor.colors.FillType;
+import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.IntTextField;
 import pixelitor.gui.utils.OKCancelDialog;
@@ -47,7 +48,7 @@ public final class NewImage {
 
     public static Composition addNewImage(FillType bg, int width, int height, String title) {
         Composition comp = createNewComposition(bg, width, height, title);
-        AppLogic.addCompAsNewImage(comp);
+        ImageComponents.addCompAsNewImage(comp);
         return comp;
     }
 
@@ -80,7 +81,7 @@ public final class NewImage {
         NewImagePanel p = new NewImagePanel(lastNew.width, lastNew.height);
         OKCancelDialog d = new OKCancelDialog(p, "New Image") {
             @Override
-            public void dialogAccepted() {
+            public void okAction() {
                 int selectedWidth = p.getSelectedWidth();
                 int selectedHeight = p.getSelectedHeight();
                 FillType bg = p.getSelectedBackground();

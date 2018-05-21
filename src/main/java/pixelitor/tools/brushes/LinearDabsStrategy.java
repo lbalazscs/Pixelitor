@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,7 +39,7 @@ public class LinearDabsStrategy implements DabsStrategy {
     }
 
     @Override
-    public void onDragStart(double x, double y) {
+    public void onStrokeStart(double x, double y) {
         brush.setupBrushStamp(x, y);
         distanceFromLastDab = 0; // moved from reset()
 
@@ -57,7 +57,7 @@ public class LinearDabsStrategy implements DabsStrategy {
     }
 
     @Override
-    public void onNewMousePoint(double endX, double endY) {
+    public void onNewStrokePoint(double endX, double endY) {
         double dx = endX - prevX;
         double dy = endY - prevY;
         double lineDistance = Math.sqrt(dx * dx + dy * dy);

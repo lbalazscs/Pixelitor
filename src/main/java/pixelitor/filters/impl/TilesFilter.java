@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,11 +18,14 @@ package pixelitor.filters.impl;
 
 import com.jhlabs.image.TransformFilter;
 import net.jafama.FastMath;
+import pixelitor.filters.GlassTiles;
 
 import java.awt.image.BufferedImage;
 
 /**
- * Tile filter - inspired by the Paint.net tile effect
+ * The implementation of the {@link GlassTiles} filter.
+ *
+ * Inspired by the Paint.net tile effect
  */
 public class TilesFilter extends TransformFilter {
     private float sizeX;
@@ -31,7 +34,6 @@ public class TilesFilter extends TransformFilter {
     private float halfHeight;
     private float curvatureX;
     private float curvatureY;
-
     private float shiftX;
     private float shiftY;
 

@@ -35,7 +35,7 @@ public class OneColorFilter extends Filter {
 
     @Override
     protected BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        dest = ImageUtils.createImageWithSameColorModel(src);
+        dest = ImageUtils.createImageWithSameCM(src);
         Graphics2D g = dest.createGraphics();
         g.setColor(color);
         g.fillRect(0, 0, src.getWidth(), src.getHeight());

@@ -33,12 +33,12 @@ public final class RecentFilesMenu extends JMenu {
 
     private final JMenuItem clearMenuItem;
 
-    private BoundedUniqueList<RecentFileInfo> recentFileInfos;
+    private BoundedUniqueList<RecentFile> recentFiles;
 
     private final ActionListener fileOpener = e -> {
         try {
             RecentFilesMenuItem mi = (RecentFilesMenuItem) e.getSource();
-            File f = mi.getFileInfo().getFile();
+            File f = mi.getRecentFile().getFile();
             if (f.exists()) {
                 OpenSaveManager.openFile(f);
             } else {
@@ -70,7 +70,7 @@ public final class RecentFilesMenu extends JMenu {
 
     private void clear() {
         AppPreferences.removeRecentFiles();
-        recentFileInfos.clear();
+        recentFiles.clear();
         clearGUI();
     }
 
@@ -86,34 +86,34 @@ public final class RecentFilesMenu extends JMenu {
 
     public void addFile(File f) {
         if (f.exists()) {
-            RecentFileInfo fileInfo = new RecentFileInfo(f);
-            recentFileInfos.addToFront(fileInfo);
+            RecentFile recentFile = new RecentFile(f);
+            recentFiles.addToFront(recentFile);
             rebuildGUI();
         }
     }
 
     private void load() {
-        recentFileInfos = AppPreferences.loadRecentFiles();
+        recentFiles = AppPreferences.loadRecentFiles();
     }
 
     private void clearGUI() {
         removeAll();
     }
 
-    public BoundedUniqueList<RecentFileInfo> getRecentFileInfosForSaving() {
-        return recentFileInfos;
+    public BoundedUniqueList<RecentFile> getRecentFileInfosForSaving() {
+        return recentFiles;
     }
 
     private void rebuildGUI() {
         clearGUI();
-        for (int i = 0, recentFileNamesSize = recentFileInfos.size(); i < recentFileNamesSize; i++) {
-            RecentFileInfo fileInfo = recentFileInfos.get(i);
-            fileInfo.setNr(i + 1);
-            RecentFilesMenuItem item = new RecentFilesMenuItem(fileInfo);
+        for (int i = 0, recentFileNamesSize = recentFiles.size(); i < recentFileNamesSize; i++) {
+            RecentFile recentFile = recentFiles.get(i);
+            recentFile.setNr(i + 1);
+            RecentFilesMenuItem item = new RecentFilesMenuItem(recentFile);
             add(item);
             item.addActionListener(fileOpener);
         }
-        if (!recentFileInfos.isEmpty()) {
+        if (!recentFiles.isEmpty()) {
             addSeparator();
             add(clearMenuItem);
         }

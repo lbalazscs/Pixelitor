@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,13 +48,13 @@ public abstract class AbstractBrush implements Brush {
         this.targetG = g;
     }
 
-    // call before setPrevious
+    // always call it before rememberPrevious!
     protected void updateComp(double x, double y) {
         comp.updateRegion(previousX, previousY, x, y, diameter);
     }
 
-    // call after updateComp
-    protected void setPrevious(double x, double y) {
+    // always call it after updateComp!
+    protected void rememberPrevious(double x, double y) {
         this.previousX = x;
         this.previousY = y;
     }
@@ -66,10 +66,10 @@ public abstract class AbstractBrush implements Brush {
     @Override
     public DebugNode getDebugNode() {
         DebugNode node = new DebugNode("Brush", this);
-        node.addClassChild();
-        node.addIntChild("Radius", radius);
-        node.addDoubleChild("PreviousX", previousX);
-        node.addDoubleChild("PreviousY", previousY);
+        node.addClass();
+        node.addInt("Radius", radius);
+        node.addDouble("PreviousX", previousX);
+        node.addDouble("PreviousY", previousY);
 
         return node;
     }

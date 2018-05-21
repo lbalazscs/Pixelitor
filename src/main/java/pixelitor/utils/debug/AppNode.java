@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,7 @@ public class AppNode extends DebugNode {
     public AppNode() {
         super("Pixelitor", PixelitorWindow.getInstance());
 
-        addStringChild("Pixelitor Version", Build.VERSION_NUMBER);
+        addString("Pixelitor Version", Build.VERSION_NUMBER);
         addSystemNode();
         addActiveToolNode();
         addHistoryNode();
@@ -45,11 +45,6 @@ public class AppNode extends DebugNode {
 
 //        addQuotedStringChild("Opening Folder", FileChoosers.getLastOpenDir().getAbsolutePath());
 //        addQuotedStringChild("Saving Folder", FileChoosers.getLastSaveDir().getAbsolutePath());
-
-        addBooleanChild("Can Undo", History.canUndo());
-        addBooleanChild("Can Redo", History.canRedo());
-        addBooleanChild("Can Fade", History.canFade());
-        addBooleanChild("Can Repeat", History.canRepeatOperation());
     }
 
     private void addActiveToolNode() {
@@ -72,7 +67,7 @@ public class AppNode extends DebugNode {
         List<ImageComponent> images = ImageComponents.getICList();
 
         int nrOpenImages = images.size();
-        addIntChild("Number of Open Images", nrOpenImages);
+        addInt("Number of Open Images", nrOpenImages);
 
         ImageComponent activeIC = ImageComponents.getActiveIC();
         for (ImageComponent ic : images) {

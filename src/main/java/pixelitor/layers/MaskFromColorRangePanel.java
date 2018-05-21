@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,13 +24,13 @@ import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.ImagePanel;
 import pixelitor.gui.utils.SliderSpinner;
+import pixelitor.utils.Cursors;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics2D;
@@ -120,7 +120,7 @@ public class MaskFromColorRangePanel extends JPanel {
             }
         });
 
-        colorPickerPanel.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+        colorPickerPanel.setCursor(Cursors.CROSSHAIR);
         colorPickerPanel.setPreferredSize(thumbDim);
         previewPanel.setPreferredSize(thumbDim);
 

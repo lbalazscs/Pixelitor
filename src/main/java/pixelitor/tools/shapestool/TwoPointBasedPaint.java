@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,7 +41,7 @@ import static java.awt.AlphaComposite.SRC_OVER;
  * Used as a fill type in the Shapes Tool.
  */
 enum TwoPointBasedPaint {
-    LINEAR_GRADIENT {
+    LINEAR_GRADIENT("Linear Gradient") {
         @Override
         protected Paint getPaint(UserDrag ud) {
             Color fgColor = FgBgColors.getFG();
@@ -55,12 +55,7 @@ enum TwoPointBasedPaint {
                     (float)ud.getEndY(),
                     bgColor);
         }
-
-        @Override
-        public String toString() {
-            return "Linear Gradient";
-        }
-    }, RADIAL_GRADIENT {
+    }, RADIAL_GRADIENT("Radial Gradient") {
         private final float[] FRACTIONS = {0.0f, 1.0f};
         private final AffineTransform gradientTransform = new AffineTransform();
 
@@ -75,12 +70,7 @@ enum TwoPointBasedPaint {
             return new RadialGradientPaint(center, distance / 2, center, FRACTIONS, new Color[]{fgColor, bgColor},
                     MultipleGradientPaint.CycleMethod.NO_CYCLE, MultipleGradientPaint.ColorSpaceType.SRGB, gradientTransform);
         }
-
-        @Override
-        public String toString() {
-            return "Radial Gradient";
-        }
-    }, ANGLE_GRADIENT {
+    }, ANGLE_GRADIENT("Angle Gradient") {
         @Override
         protected Paint getPaint(UserDrag userDrag) {
             Color fgColor = FgBgColors.getFG();
@@ -91,12 +81,7 @@ enum TwoPointBasedPaint {
 
             return new AngleGradientPaint(centerUserDrag, fgColor, bgColor, MultipleGradientPaint.CycleMethod.NO_CYCLE);
         }
-
-        @Override
-        public String toString() {
-            return "Angle Gradient";
-        }
-    }, SPIRAL_GRADIENT {
+    }, SPIRAL_GRADIENT("Spiral Gradient") {
         @Override
         protected Paint getPaint(UserDrag userDrag) {
             Color fgColor = FgBgColors.getFG();
@@ -107,48 +92,29 @@ enum TwoPointBasedPaint {
 
             return new SpiralGradientPaint(true, centerUserDrag, fgColor, bgColor, MultipleGradientPaint.CycleMethod.NO_CYCLE);
         }
-
-        @Override
-        public String toString() {
-            return "Spiral Gradient";
-        }
-    }, DIAMOND_GRADIENT {
+    }, DIAMOND_GRADIENT("Diamond Gradient") {
         @Override
         protected Paint getPaint(UserDrag userDrag) {
             Color fgColor = FgBgColors.getFG();
             Color bgColor = FgBgColors.getBG();
 
             Point2D center = userDrag.getCenterPoint();
-            UserDrag centerUserDrag = new UserDrag(center.getX(), center.getY(), userDrag.getEndX(), userDrag.getEndY());
+            UserDrag fromCenterDrag = new UserDrag(center.getX(), center.getY(), userDrag.getEndX(), userDrag
+                    .getEndY());
 
-            return new DiamondGradientPaint(centerUserDrag, fgColor, bgColor, MultipleGradientPaint.CycleMethod.NO_CYCLE);
+            return new DiamondGradientPaint(fromCenterDrag, fgColor, bgColor, MultipleGradientPaint.CycleMethod.NO_CYCLE);
         }
-
-        @Override
-        public String toString() {
-            return "Diamond Gradient";
-        }
-    }, FOREGROUND {
+    }, FOREGROUND("Foreground") {
         @Override
         protected Paint getPaint(UserDrag userDrag) {
             return FgBgColors.getFG();
         }
-
-        @Override
-        public String toString() {
-            return "Foreground";
-        }
-    }, BACKGROUND {
+    }, BACKGROUND("Background") {
         @Override
         protected Paint getPaint(UserDrag userDrag) {
             return FgBgColors.getBG();
         }
-
-        @Override
-        public String toString() {
-            return "Background";
-        }
-    }, TRANSPARENT {
+    }, TRANSPARENT("Transparent") {
         @Override
         protected Paint getPaint(UserDrag userDrag) {
             return Color.WHITE; // does not matter
@@ -160,22 +126,35 @@ enum TwoPointBasedPaint {
         }
 
         @Override
-        public void restorePaint(Graphics2D g) {
+        public void finish(Graphics2D g) {
             g.setComposite(AlphaComposite.getInstance(SRC_OVER));
-        }
-
-        @Override
-        public String toString() {
-            return "Transparent";
         }
     };
 
+    private final String guiName;
+
+    TwoPointBasedPaint(String guiName) {
+        this.guiName = guiName;
+    }
+
     protected abstract Paint getPaint(UserDrag userDrag);
 
+    /**
+     * Called before the drawing/filling
+     */
     public void setupPaint(Graphics2D g, UserDrag userDrag) {
         g.setPaint(getPaint(userDrag));
     }
 
-    public void restorePaint(Graphics2D g) {
+    /**
+     * Called after the drawing/filling
+     */
+    public void finish(Graphics2D g) {
+        // by default do nothing
+    }
+
+    @Override
+    public String toString() {
+        return guiName;
     }
 }

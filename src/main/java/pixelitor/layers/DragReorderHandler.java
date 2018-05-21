@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,18 +17,17 @@
 
 package pixelitor.layers;
 
+import pixelitor.utils.Cursors;
+
 import javax.swing.*;
 import javax.swing.event.MouseInputAdapter;
 import java.awt.Component;
-import java.awt.Cursor;
 import java.awt.event.MouseEvent;
 
 /**
  * The MouseListener and MouseMotionListener for the layer buttons for the drag-reordering
  */
 public class DragReorderHandler extends MouseInputAdapter {
-    private static final Cursor MOVE_CURSOR = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
-    private static final Cursor DEFAULT_CURSOR = Cursor.getDefaultCursor();
     private static final int DRAG_X_INDENT = 10;
     private final LayersPanel layersPanel;
     private int dragStartYInButton;
@@ -76,7 +75,7 @@ public class DragReorderHandler extends MouseInputAdapter {
         layersPanel.updateDrag(layerButton, newY, !dragging);
         dragging = true;
 
-        layerButton.setCursor(MOVE_CURSOR);
+        layerButton.setCursor(Cursors.HAND);
         layersPanel.doLayout();
     }
 
@@ -84,7 +83,7 @@ public class DragReorderHandler extends MouseInputAdapter {
     public void mouseReleased(MouseEvent e) {
         LayerButton layerButton = getLayerButtonFromEvent(e);
         if (dragging) {
-            layerButton.setCursor(DEFAULT_CURSOR);
+            layerButton.setCursor(Cursors.DEFAULT);
             layersPanel.dragFinished();
         } else {
             // necessary on Mac so that the layer gets selected

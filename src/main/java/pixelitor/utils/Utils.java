@@ -17,7 +17,6 @@
 
 package pixelitor.utils;
 
-import pixelitor.AppLogic;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.filters.gui.BooleanParam;
@@ -35,7 +34,6 @@ import javax.swing.event.ListDataListener;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -70,17 +68,15 @@ import java.util.function.Predicate;
 
 import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR_PRE;
 
+/**
+ * Utility class with static methods
+ */
 public final class Utils {
     private static final int BYTES_IN_1_KILOBYTE = 1_024;
     private static final int BYTES_IN_1_MEGABYTE = 1_048_576;
 
-    private static final Cursor BUSY_CURSOR = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR);
-    private static final Cursor DEFAULT_CURSOR = Cursor.getDefaultCursor();
     private static final int WAIT_CURSOR_DELAY = 300; // in milliseconds
 
-    /**
-     * Utility class with static methods
-     */
     private Utils() {
     }
 
@@ -93,7 +89,7 @@ public final class Utils {
         TimerTask startBusyCursorTask = new TimerTask() {
             @Override
             public void run() {
-                parent.setCursor(BUSY_CURSOR);
+                parent.setCursor(Cursors.BUSY);
             }
         };
 
@@ -105,7 +101,7 @@ public final class Utils {
         } finally {
             // when the original task has stopped running, the cursor is reset
             timer.cancel();
-            parent.setCursor(DEFAULT_CURSOR);
+            parent.setCursor(Cursors.DEFAULT);
         }
     }
 
@@ -359,7 +355,7 @@ public final class Utils {
             comp.repaint();
         } else {
             Composition comp = Composition.fromImage(copy, null, name);
-            AppLogic.addCompAsNewImage(comp);
+            ImageComponents.addCompAsNewImage(comp);
         }
 
         if (savedIC != null) {

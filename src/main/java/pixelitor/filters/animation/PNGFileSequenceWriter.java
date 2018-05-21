@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,8 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * An AnimationWriter implementation that writes a sequence of PNG files
+ * An {@link AnimationWriter} implementation
+ * that writes a sequence of PNG files
  */
 public class PNGFileSequenceWriter implements AnimationWriter {
     private final File outputDir;

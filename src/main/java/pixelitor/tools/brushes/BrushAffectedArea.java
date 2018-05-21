@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -93,30 +93,30 @@ public class BrushAffectedArea implements Brush {
     }
 
     @Override
-    public void onDragStart(double x, double y) {
+    public void onStrokeStart(double x, double y) {
         updateAffectedCoordinates(x, y);
-        delegate.onDragStart(x, y);
+        delegate.onStrokeStart(x, y);
     }
 
     @Override
-    public void onNewMousePoint(double x, double y) {
+    public void onNewStrokePoint(double x, double y) {
         updateAffectedCoordinates(x, y);
-        delegate.onNewMousePoint(x, y);
+        delegate.onNewStrokePoint(x, y);
     }
 
     @Override
     public DebugNode getDebugNode() {
         DebugNode node = new DebugNode("Brush Affected Area", this);
 
-        node.addDoubleChild("minX", minX);
-        node.addDoubleChild("minY", minY);
-        node.addDoubleChild("maxX", maxX);
-        node.addDoubleChild("maxY", maxY);
+        node.addDouble("minX", minX);
+        node.addDouble("minY", minY);
+        node.addDouble("maxX", maxX);
+        node.addDouble("maxY", maxY);
 
         if (delegate != null) {
             node.add(delegate.getDebugNode());
         } else {
-            node.addStringChild("delegate", "null");
+            node.addString("delegate", "null");
         }
 
         return node;

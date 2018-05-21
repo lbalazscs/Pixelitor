@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -63,38 +63,37 @@ public class Rotate extends SimpleCompAction {
             @SuppressWarnings("SuspiciousNameCombination")
             @Override
             public void changeCanvas(Canvas canvas) {
-                int canvasWidth = canvas.getWidth();
-                int canvasHeight = canvas.getHeight();
-                int newCanvasWidth = canvasHeight;
-                int newCanvasHeight = canvasWidth;
-                canvas.updateSize(newCanvasWidth, newCanvasHeight);
+                // switch width and height
+                int newWidth = canvas.getHeight();
+                int newHeight = canvas.getWidth();
+                canvas.changeSize(newWidth, newHeight);
             }
 
             @Override
             public AffineTransform getCanvasTX(Canvas canvas) {
                 // rotate, then translate to compensate
-                AffineTransform rotTx = AffineTransform.getTranslateInstance(
+                AffineTransform at = AffineTransform.getTranslateInstance(
                         canvas.getHeight(), 0);
-                rotTx.quadrantRotate(1);
-                return rotTx;
+                at.quadrantRotate(1);
+                return at;
             }
 
             @Override
-            public BufferedImage createDestImage(BufferedImage image) {
+            public BufferedImage createDestImage(BufferedImage img) {
                 // switch width and height
-                int newImageWidth = image.getHeight();
-                int newImageHeight = image.getWidth();
+                int newWidth = img.getHeight();
+                int newHeight = img.getWidth();
 
-                return ImageUtils.createImageWithSameColorModel(image, newImageWidth, newImageHeight);
+                return ImageUtils.createImageWithSameCM(img, newWidth, newHeight);
             }
 
             @Override
             public AffineTransform getImageTX(ImageLayer layer) {
                 // rotate, then translate to compensate
-                AffineTransform rotTx = AffineTransform.getTranslateInstance(
+                AffineTransform at = AffineTransform.getTranslateInstance(
                         layer.getImage().getHeight(), 0);
-                rotTx.quadrantRotate(1);
-                return rotTx;
+                at.quadrantRotate(1);
+                return at;
             }
         }, ANGLE_180(180, "Rotate 180\u00B0") {
             @Override
@@ -105,19 +104,19 @@ public class Rotate extends SimpleCompAction {
             @Override
             public AffineTransform getCanvasTX(Canvas canvas) {
                 // rotate, then translate to compensate
-                AffineTransform rotTx = AffineTransform.getTranslateInstance(
+                AffineTransform at = AffineTransform.getTranslateInstance(
                         canvas.getWidth(), canvas.getHeight());
-                rotTx.quadrantRotate(2);
-                return rotTx;
+                at.quadrantRotate(2);
+                return at;
             }
 
             @Override
-            public BufferedImage createDestImage(BufferedImage image) {
+            public BufferedImage createDestImage(BufferedImage img) {
                 // no change in width and height
-                int newImageWidth = image.getWidth();
-                int newImageHeight = image.getHeight();
+                int newWidth = img.getWidth();
+                int newHeight = img.getHeight();
 
-                return ImageUtils.createImageWithSameColorModel(image, newImageWidth, newImageHeight);
+                return ImageUtils.createImageWithSameCM(img, newWidth, newHeight);
             }
 
             @Override
@@ -139,28 +138,28 @@ public class Rotate extends SimpleCompAction {
             @Override
             public AffineTransform getCanvasTX(Canvas canvas) {
                 // rotate, then translate to compensate
-                AffineTransform rotTx = AffineTransform.getTranslateInstance(
+                AffineTransform at = AffineTransform.getTranslateInstance(
                         0, canvas.getWidth());
-                rotTx.quadrantRotate(3);
-                return rotTx;
+                at.quadrantRotate(3);
+                return at;
             }
 
             @Override
-            public BufferedImage createDestImage(BufferedImage image) {
+            public BufferedImage createDestImage(BufferedImage img) {
                 // switch width and height
-                int newImageWidth = image.getHeight();
-                int newImageHeight = image.getWidth();
+                int newWidth = img.getHeight();
+                int newHeight = img.getWidth();
 
-                return ImageUtils.createImageWithSameColorModel(image, newImageWidth, newImageHeight);
+                return ImageUtils.createImageWithSameCM(img, newWidth, newHeight);
             }
 
             @Override
             public AffineTransform getImageTX(ImageLayer layer) {
                 // rotate, then translate to compensate
-                AffineTransform rotTx = AffineTransform.getTranslateInstance(
+                AffineTransform at = AffineTransform.getTranslateInstance(
                         0, layer.getImage().getWidth());
-                rotTx.quadrantRotate(3);
-                return rotTx;
+                at.quadrantRotate(3);
+                return at;
             }
         };
 
@@ -193,6 +192,9 @@ public class Rotate extends SimpleCompAction {
             return angleDegree;
         }
 
-        public abstract BufferedImage createDestImage(BufferedImage image);
+        /**
+         * Creates a new image with the appropriate size
+         */
+        public abstract BufferedImage createDestImage(BufferedImage img);
     }
 }

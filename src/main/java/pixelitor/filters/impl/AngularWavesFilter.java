@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,11 +23,11 @@ import net.jafama.FastMath;
 import pixelitor.filters.AngularWaves;
 
 /**
+ * The implementation of the {@link AngularWaves} filter.
  * Angular waves in a polar coordinate system
  */
 public class AngularWavesFilter extends CenteredTransformFilter {
-    private double radialWL;
-
+    private double radialWL; // Radial Wavelength
     private float phase;
     private float zoom;
     private float amount;

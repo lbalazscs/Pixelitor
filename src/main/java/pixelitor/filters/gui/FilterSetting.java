@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,13 +25,17 @@ import javax.swing.*;
 public interface FilterSetting {
     String getName();
 
+    /**
+     * Usually we want to specify the model in the code, and the
+     * corresponding GUI should be created automatically
+     */
     JComponent createGUI();
 
     /**
      * Should return either 1 or 2.
      * If 2 is returned, then a label based on the name is added.
      */
-    int getNrOfGridBagCols();
+    int getNumGridBagCols();
 
     void setAdjustmentListener(ParamAdjustmentListener listener);
 

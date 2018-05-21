@@ -29,7 +29,7 @@ import pixelitor.filters.impl.LittlePlanetFilter;
 import java.awt.image.BufferedImage;
 
 /**
- * Little Planet
+ * "Little Planet" filter
  */
 public class LittlePlanet extends ParametrizedFilter {
     public static final String NAME = "Little Planet";

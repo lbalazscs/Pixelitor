@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,8 @@ import java.awt.Shape;
 import java.awt.Stroke;
 
 /**
- * The line type that can be selected in the Stroke Settings dialog in the Shapes Tool.
+ * The line type that can be selected in the
+ * Stroke Settings dialog of the Shapes Tool.
  * Some members are also used in some brushes.
  */
 public enum StrokeType {
@@ -89,7 +90,7 @@ public enum StrokeType {
 
         @Override
         public Stroke getInnerStroke() {
-            return null; // TODO this should have one
+            return null;
         }
 
         @Override
@@ -185,9 +186,8 @@ public enum StrokeType {
     }
 
     /**
-     * Some strokes have an inner stoke. They can return here a non-null value
-     *
-     * @return
+     * Composite strokes have an inner stroke.
+     * They can return here a non-null value
      */
     public Stroke getInnerStroke() {
         return null;

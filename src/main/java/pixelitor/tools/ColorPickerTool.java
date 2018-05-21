@@ -20,12 +20,12 @@ package pixelitor.tools;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.ImageComponent;
 import pixelitor.layers.Drawable;
+import pixelitor.utils.Cursors;
 import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
@@ -39,7 +39,7 @@ public class ColorPickerTool extends Tool {
     public ColorPickerTool() {
         super('i', "Color Picker", "color_picker_tool_icon.png",
                 "click to pick the foreground color, Alt-click (or right-click) to pick the background color",
-                Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR), false, true, false, ClipStrategy.IMAGE_ONLY);
+                Cursors.CROSSHAIR, false, true, false, ClipStrategy.IMAGE_ONLY);
     }
 
     @Override
@@ -123,7 +123,7 @@ public class ColorPickerTool extends Tool {
     public DebugNode getDebugNode() {
         DebugNode node = super.getDebugNode();
 
-        node.addBooleanChild(SAMPLE_LABEL_TEXT, sampleLayerOnly.isSelected());
+        node.addBoolean(SAMPLE_LABEL_TEXT, sampleLayerOnly.isSelected());
 
         return node;
     }

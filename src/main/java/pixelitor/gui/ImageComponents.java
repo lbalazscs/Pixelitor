@@ -324,7 +324,7 @@ public class ImageComponents {
         assert activeIC != null;
         Composition newComp = Composition.createCopy(activeIC.getComp(), false);
 
-        AppLogic.addCompAsNewImage(newComp);
+        addCompAsNewImage(newComp);
     }
 
     public static void onActiveIC(Consumer<ImageComponent> action) {
@@ -392,6 +392,21 @@ public class ImageComponents {
         Drawable dr = getActiveDrawableOrNull();
         if (dr != null) {
             action.accept(dr);
+        }
+    }
+
+    public static void addCompAsNewImage(Composition comp) {
+        try {
+            assert comp.getIC() == null : "already has ic";
+
+            ImageComponent ic = new ImageComponent(comp);
+            ic.setCursor(Tools.getCurrent().getCursor());
+            setActiveIC(ic, false);
+            comp.addLayersToGUI();
+
+            Desktop.INSTANCE.addNewIC(ic);
+        } catch (Exception e) {
+            Messages.showException(e);
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,12 +33,12 @@ public class LayerNode extends DebugNode {
             add(new LayerMaskNode(mask));
         }
 
-        addBooleanChild("mask enabled", layer.isMaskEnabled());
-        addBooleanChild("mask editing", layer.isMaskEditing());
-        addBooleanChild("visible", layer.isVisible());
+        addBoolean("mask enabled", layer.isMaskEnabled());
+        addBoolean("mask editing", layer.isMaskEditing());
+        addBoolean("visible", layer.isVisible());
 
-        addFloatChild("opacity", layer.getOpacity());
-        addQuotedStringChild("blending mode", layer.getBlendingMode().toString());
-        addQuotedStringChild("name", layer.getName());
+        addFloat("opacity", layer.getOpacity());
+        addQuotedString("blending mode", layer.getBlendingMode().toString());
+        addQuotedString("name", layer.getName());
     }
 }

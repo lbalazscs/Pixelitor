@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,13 +22,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The settings of a dabs brush.
+ * The settings of a {@link DabsBrush}
  */
 public class DabsBrushSettings implements BrushSettings {
     private AngleSettings angleSettings;
     private SpacingStrategy spacingStrategy;
     private final List<DabsBrush> brushes = new ArrayList<>(4);
-    private JPanel settingsPanel;
+    private JPanel configPanel;
 
     public DabsBrushSettings(AngleSettings angleSettings, SpacingStrategy spacingStrategy) {
         this.angleSettings = angleSettings;
@@ -74,14 +74,14 @@ public class DabsBrushSettings implements BrushSettings {
     }
 
     @Override
-    public JPanel getConfigurationPanel() {
-        if (settingsPanel == null) {
-            settingsPanel = createSettingsPanel();
+    public JPanel getConfigPanel() {
+        if (configPanel == null) {
+            configPanel = createConfigPanel();
         }
-        return settingsPanel;
+        return configPanel;
     }
 
-    protected JPanel createSettingsPanel() {
+    protected JPanel createConfigPanel() {
         return new JPanel();
     }
 }

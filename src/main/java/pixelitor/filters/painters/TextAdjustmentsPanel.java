@@ -297,7 +297,7 @@ public class TextAdjustmentsPanel extends FilterGUI implements ParamAdjustmentLi
         map = new HashMap<>();
 
         if (advancedSettingsDialog != null) {
-            advancedSettingsDialog.updateMap(map);
+            advancedSettingsDialog.updateFontAttributesMap(map);
         } else if (oldMap != null) {
             // no dialog, copy manually the advanced settings
             TextAttribute[] advancedSettings = {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,29 +29,28 @@ import java.awt.image.ColorModel;
  */
 public class SystemNode extends DebugNode {
 
-
     public SystemNode(GraphicsDevice device) {
         super("System", device);
 
-        addStringChild("Java version", System.getProperty("java.version"));
-        addStringChild("Java vendor", System.getProperty("java.vendor"));
-        addStringChild("OS name", System.getProperty("os.name"));
+        addString("Java version", System.getProperty("java.version"));
+        addString("Java vendor", System.getProperty("java.vendor"));
+        addString("OS name", System.getProperty("os.name"));
 
         DisplayMode displayMode = device.getDisplayMode();
 
         int width = displayMode.getWidth();
         int height = displayMode.getHeight();
         int bitDepth = displayMode.getBitDepth();
-        addIntChild("display width", width);
-        addIntChild("display height", height);
-        addIntChild("display bit depth", bitDepth);
+        addInt("display width", width);
+        addInt("display height", height);
+        addInt("display bit depth", bitDepth);
 
         PixelitorWindow pw = PixelitorWindow.getInstance();
-        addIntChild("app window width", pw.getWidth());
-        addIntChild("app window height", pw.getHeight());
+        addInt("app window width", pw.getWidth());
+        addInt("app window height", pw.getHeight());
 
-        addStringChild("max memory", Utils.getMaxHeapInMegabytes() + " Mb");
-        addStringChild("used memory", Utils.getUsedMemoryInMegabytes() + " Mb");
+        addString("max memory", Utils.getMaxHeapInMegabytes() + " Mb");
+        addString("used memory", Utils.getUsedMemoryInMegabytes() + " Mb");
 
         GraphicsConfiguration configuration = device.getDefaultConfiguration();
         ColorModel defaultColorModel = configuration.getColorModel();
@@ -59,5 +58,4 @@ public class SystemNode extends DebugNode {
         ColorModelNode colorModelNode = new ColorModelNode("Default Color Model", defaultColorModel);
         add(colorModelNode);
     }
-
 }

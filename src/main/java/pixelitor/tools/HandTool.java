@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,9 +18,9 @@
 package pixelitor.tools;
 
 import pixelitor.gui.ImageComponent;
+import pixelitor.utils.Cursors;
 
 import javax.swing.*;
-import java.awt.Cursor;
 import java.awt.event.MouseEvent;
 
 /**
@@ -31,7 +31,7 @@ public class HandTool extends Tool {
     
     HandTool() {
         super('h', "Hand", "hand_tool_icon.png", "drag to move the view (if scrollbars are present)",
-                Cursor.getPredefinedCursor(Cursor.HAND_CURSOR), false, false, false, ClipStrategy.IMAGE_ONLY);
+                Cursors.HAND, false, false, false, ClipStrategy.IMAGE_ONLY);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.CloneBrush;
 import pixelitor.tools.brushes.CopyBrushType;
 import pixelitor.utils.Messages;
-import pixelitor.utils.ScalingMirror;
+import pixelitor.utils.Mirror;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.test.RandomGUITest;
@@ -65,7 +65,7 @@ public class CloneTool extends BlendingModeBrushTool {
 
     private final RangeParam scaleParam = new RangeParam("", 10, 100, 400, true, NONE);
     private final RangeParam rotationParam = new RangeParam("", -180, 0, 180, true, NONE);
-    private final EnumParam<ScalingMirror> mirrorParam = new EnumParam<>("", ScalingMirror.class);
+    private final EnumParam<Mirror> mirrorParam = new EnumParam<>("", Mirror.class);
 
     protected CloneTool() {
         super('s', "Clone Stamp", "clone_tool_icon.png",
@@ -94,7 +94,7 @@ public class CloneTool extends BlendingModeBrushTool {
                 selected -> sampleAllLayers = selected);
 
         settingsPanel.addSeparator();
-        settingsPanel.addButton("Transform", e -> {
+        settingsPanel.addButton("Transform...", e -> {
             if (RandomGUITest.isRunning()) {
                 return;
             }
@@ -139,7 +139,7 @@ public class CloneTool extends BlendingModeBrushTool {
         state = CLONING; // must be a new stroke after the source setting
 
         float scaleAbs = scaleParam.getValueAsPercentage();
-        ScalingMirror mirror = mirrorParam.getSelected();
+        Mirror mirror = mirrorParam.getSelected();
         cloneBrush.setScale(
                 mirror.getScaleX(scaleAbs),
                 mirror.getScaleY(scaleAbs));
@@ -226,14 +226,14 @@ public class CloneTool extends BlendingModeBrushTool {
     public DebugNode getDebugNode() {
         DebugNode node = super.getDebugNode();
 
-        node.addStringChild("Brush", cloneBrush.getType().toString());
-        node.addStringChild("State", state.toString());
-        node.addBooleanChild("Sample All Layers", sampleAllLayers);
-        node.addBooleanChild("Aligned", cloneBrush.isAligned());
+        node.addString("Brush", cloneBrush.getType().toString());
+        node.addString("State", state.toString());
+        node.addBoolean("Sample All Layers", sampleAllLayers);
+        node.addBoolean("Aligned", cloneBrush.isAligned());
 
-        node.addFloatChild("Scale", scaleParam.getValueAsPercentage());
-        node.addIntChild("Rotation", rotationParam.getValue());
-        node.addStringChild("Mirror", mirrorParam.getSelected().toString());
+        node.addFloat("Scale", scaleParam.getValueAsPercentage());
+        node.addInt("Rotation", rotationParam.getValue());
+        node.addString("Mirror", mirrorParam.getSelected().toString());
 
         return node;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,10 +19,9 @@ package pixelitor.filters.impl;
 import pixelitor.filters.Mirror;
 
 /**
- * Mirror filter implementation
+ * The implementation of the {@link Mirror} filter.
  */
 public class MirrorFilter extends CenteredTransformFilter {
-
     public static final int LEFT_OVER_RIGHT = 0;
     public static final int RIGHT_OVER_LEFT = 1;
     public static final int BOTTOM_OVER_TOP = 2;
@@ -77,7 +76,6 @@ public class MirrorFilter extends CenteredTransformFilter {
                     out[1] = cy + cy - y;
                 }
                 break;
-        }
-
+        } // end of switch
     }
 }

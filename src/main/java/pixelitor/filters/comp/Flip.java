@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -67,18 +67,18 @@ public class Flip extends SimpleCompAction {
 
             @Override
             public AffineTransform getCanvasTX(Canvas canvas) {
-                AffineTransform flipTx = new AffineTransform();
-                flipTx.translate(canvas.getWidth(), 0);
-                flipTx.scale(-1, 1);
-                return flipTx;
+                AffineTransform at = new AffineTransform();
+                at.translate(canvas.getWidth(), 0);
+                at.scale(-1, 1);
+                return at;
             }
 
             @Override
             public AffineTransform getImageTX(ImageLayer layer) {
-                AffineTransform flipTx = new AffineTransform();
-                flipTx.translate(layer.getImage().getWidth(), 0);
-                flipTx.scale(-1, 1);
-                return flipTx;
+                AffineTransform at = new AffineTransform();
+                at.translate(layer.getImage().getWidth(), 0);
+                at.scale(-1, 1);
+                return at;
             }
         }, VERTICAL {
             @Override
@@ -88,18 +88,18 @@ public class Flip extends SimpleCompAction {
 
             @Override
             public AffineTransform getCanvasTX(Canvas canvas) {
-                AffineTransform flipTx = new AffineTransform();
-                flipTx.translate(0, canvas.getHeight());
-                flipTx.scale(1, -1);
-                return flipTx;
+                AffineTransform at = new AffineTransform();
+                at.translate(0, canvas.getHeight());
+                at.scale(1, -1);
+                return at;
             }
 
             @Override
             public AffineTransform getImageTX(ImageLayer layer) {
-                AffineTransform flipTx = new AffineTransform();
-                flipTx.translate(0, layer.getImage().getHeight());
-                flipTx.scale(1, -1);
-                return flipTx;
+                AffineTransform at = new AffineTransform();
+                at.translate(0, layer.getImage().getHeight());
+                at.scale(1, -1);
+                return at;
             }
         };
 

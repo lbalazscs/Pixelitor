@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Daniel Wreczycki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,18 +8,21 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters.impl;
 
 import com.jhlabs.image.PointFilter;
+import pixelitor.filters.Sepia;
 
 /**
- * Sepia filter implementation
+ * The implementation of the {@link Sepia} filter.
+ *
+ * Originally this was contributed by Daniel Wreczycki
  */
 public class SepiaFilter extends PointFilter {
     private int intensity = 20;

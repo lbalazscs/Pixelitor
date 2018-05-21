@@ -18,7 +18,6 @@
 package pixelitor.utils;
 
 import javax.swing.*;
-import java.awt.Cursor;
 import java.awt.Window;
 
 /**
@@ -44,7 +43,7 @@ public class JProgressBarTracker extends ThresholdProgressTracker {
     void startProgressTracking() {
         assert SwingUtilities.isEventDispatchThread();
 
-        window.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        window.setCursor(Cursors.BUSY);
         progressPanel.showProgressBar();
     }
 
@@ -61,6 +60,6 @@ public class JProgressBarTracker extends ThresholdProgressTracker {
     void finishProgressTracking() {
         progressPanel.setProgress(100);
         progressPanel.hideProgressBar();
-        window.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        window.setCursor(Cursors.DEFAULT);
     }
 }
