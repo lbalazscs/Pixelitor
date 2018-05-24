@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,13 +20,20 @@ package pixelitor.history;
 import javax.swing.*;
 
 /**
- * We don't want to allow the user to simply deselect an item in
- * the history list (for example by Ctrl-clicking on it), on the
- * other hand the list should be able to be deselected in one special
- * case: if all edits are undone.
+ * The ListSelectionModel used by the history JList
  */
 public class HistoryListSelectionModel extends DefaultListSelectionModel {
+    /**
+     * We don't want to allow the user to simply deselect an item in
+     * the history list (for example by Ctrl-clicking on it), on the
+     * other hand the list should be able to be deselected in one special
+     * case: if all edits are undone.
+     */
     private boolean allowDeselect = false;
+
+    public HistoryListSelectionModel() {
+        setSelectionMode(DefaultListSelectionModel.SINGLE_SELECTION);
+    }
 
     @Override
     public void clearSelection() {
@@ -44,5 +51,17 @@ public class HistoryListSelectionModel extends DefaultListSelectionModel {
 
     public void setAllowDeselect(boolean allowDeselect) {
         this.allowDeselect = allowDeselect;
+    }
+
+    public void setSelectedIndex(int index) {
+        setSelectionInterval(index, index);
+    }
+
+    public int getSelectedIndex() {
+        if (isSelectionEmpty()) {
+            return -1;
+        }
+
+        return getLeadSelectionIndex();
     }
 }

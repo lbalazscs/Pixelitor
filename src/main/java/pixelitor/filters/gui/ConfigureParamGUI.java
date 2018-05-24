@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,9 @@ import java.awt.BorderLayout;
 import java.util.function.Function;
 
 /**
- * A button with the "Configure..." text
+ * A button with the "Configure..." text.
+ * It is the GUI of the params with dialog, such as
+ * {@link DialogParam}, {@link EffectsParam}, {@link StrokeParam}.
  */
 public class ConfigureParamGUI extends JPanel implements ParamGUI {
     private final JButton configureButton;

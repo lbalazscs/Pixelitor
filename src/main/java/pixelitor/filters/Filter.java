@@ -32,7 +32,7 @@ import java.awt.Component;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
 
-import static pixelitor.ChangeReason.OP_WITHOUT_DIALOG;
+import static pixelitor.ChangeReason.FILTER_WITHOUT_DIALOG;
 import static pixelitor.ChangeReason.REPEAT_LAST;
 
 /**
@@ -68,25 +68,25 @@ public abstract class Filter implements Serializable {
      * Overwritten for filters with GUI
      */
     public void startOn(Drawable dr) {
-        startOn(dr, OP_WITHOUT_DIALOG);
+        startOn(dr, FILTER_WITHOUT_DIALOG);
     }
 
     public void startOn(Drawable dr, ChangeReason cr) {
-        execute(dr, cr, PixelitorWindow.getInstance());
+        run(dr, cr, PixelitorWindow.getInstance());
     }
 
-    public void execute(Drawable dr, ChangeReason cr, Component busyCursorParent) {
+    public void run(Drawable dr, ChangeReason cr, Component busyCursorParent) {
         String filterName = getName();
 
         long startTime = System.nanoTime();
 
         Runnable task = () -> transformAndHandleExceptions(dr, cr);
-        Utils.executeWithBusyCursor(busyCursorParent, task);
+        Utils.runWithBusyCursor(busyCursorParent, task);
 
         long totalTime = (System.nanoTime() - startTime) / 1_000_000;
         Messages.showPerformanceMessage(filterName, totalTime);
 
-        FilterUtils.setLastExecutedFilter(this);
+        FilterUtils.setLastFilter(this);
         RepeatLast.INSTANCE.setActionName("Repeat " + filterName);
     }
 
@@ -123,7 +123,7 @@ public abstract class Filter implements Serializable {
                 layer = (ImageLayer) layer.getParent();
             }
             String msg = String.format(
-                    "Error while executing the filter '%s'\n" +
+                    "Error while running the filter '%s'\n" +
                             "composition = '%s'\n" +
                             "layer = '%s' (%s)\n" +
                             "hasMask = '%s'\n" +
@@ -169,8 +169,6 @@ public abstract class Filter implements Serializable {
 
         return dest;
     }
-
-    public abstract void randomizeSettings();
 
     public void setFilterAction(FilterAction filterAction) {
         this.filterAction = filterAction;

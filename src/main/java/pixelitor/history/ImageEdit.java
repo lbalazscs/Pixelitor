@@ -38,10 +38,10 @@ public class ImageEdit extends FadeableEdit {
 
     private final boolean canRepeat;
 
-    public ImageEdit(Composition comp, String name, Drawable dr,
+    public ImageEdit(String name, Composition comp, Drawable dr,
                      BufferedImage backupImage,
                      boolean ignoreSelection, boolean canRepeat) {
-        super(comp, dr, name);
+        super(name, comp, dr);
         this.ignoreSelection = ignoreSelection;
 
         assert dr != null;

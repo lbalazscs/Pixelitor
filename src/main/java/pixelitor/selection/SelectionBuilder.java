@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -137,7 +137,7 @@ public class SelectionBuilder {
                 builtSelection.setShape(combinedShape);
                 comp.promoteSelection();
 
-                PixelitorEdit edit = new SelectionChangeEdit(comp, oldShape, selectionInteraction.getNameForUndo());
+                PixelitorEdit edit = new SelectionChangeEdit(selectionInteraction.getNameForUndo(), comp, oldShape);
                 History.addEdit(edit);
             }
         } else {
@@ -154,7 +154,7 @@ public class SelectionBuilder {
 
                 PixelitorEdit edit;
                 if (replacedShape != null) {
-                    edit = new SelectionChangeEdit(comp, replacedShape, selectionInteraction.getNameForUndo());
+                    edit = new SelectionChangeEdit(selectionInteraction.getNameForUndo(), comp, replacedShape);
                 } else {
                     edit = new NewSelectionEdit(comp, builtSelection.getShape());
                 }

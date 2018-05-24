@@ -36,7 +36,7 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
  * Suitable as the model of a JSlider (but usually used as a model of
  * an entire SliderSpinner)
  */
-public class RangeParam extends AbstractFilterParam implements BoundedRangeModel, RangeBasedOnImageSize {
+public class RangeParam extends AbstractFilterParam implements BoundedRangeModel {
     private int minValue;
     private int maxValue;
     private int defaultValue;
@@ -305,10 +305,9 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         }
     }
 
-    @Override
     public RangeParam withAdjustedRange(double ratio) {
         maxToImageSizeRatio = ratio;
-        this.adjustMaxAccordingToImage = true;
+        adjustMaxAccordingToImage = true;
         return this;
     }
 

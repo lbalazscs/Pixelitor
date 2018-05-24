@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,18 +22,23 @@ import net.jafama.FastMath;
 
 import java.awt.Color;
 
+/**
+ * A filter used internally by the "Mask from Color Range".
+ * It creates a grayscale mask.
+ */
 class MaskFromColorRangeFilter extends PointFilter {
-    public static final int MODE_RGB = 1;
-    public static final int MODE_HSB = 2;
-    private int mode = MODE_HSB;
+    public static final int RGB = 1;
+    public static final int HSB = 2;
+    private int interpolation = HSB;
 
-    public static final int WHITE_PIXEL = 0xFF_FF_FF_FF;
-    public static final int BLACK_PIXEL = 0xFF_00_00_00;
-    private double toleranceMin;
-    private double toleranceMax;
+    private static final int WHITE_PIXEL = 0xFF_FF_FF_FF;
+    private static final int BLACK_PIXEL = 0xFF_00_00_00;
 
-    private int refR, refG, refB;
-    private float refHue, refSat, refBri;
+    private double maxTolerance;
+    private double minTolerance;
+
+    private int refR, refG, refB; // the reference color in RGB
+    private float refHue, refSat, refBri; // the reference color in HSB
 
     private boolean invert;
 
@@ -46,7 +51,7 @@ class MaskFromColorRangeFilter extends PointFilter {
         refG = c.getGreen();
         refB = c.getBlue();
 
-        if (mode == MODE_HSB) {
+        if (interpolation == HSB) {
             float[] hsb = Color.RGBtoHSB(refR, refG, refB, null);
             refHue = hsb[0];
             refSat = hsb[1];
@@ -54,16 +59,16 @@ class MaskFromColorRangeFilter extends PointFilter {
         }
     }
 
-    public void setMode(int mode) {
-        this.mode = mode;
+    public void setInterpolation(int interpolation) {
+        this.interpolation = interpolation;
     }
 
     public void setTolerance(double tolerance, double fuzziness) {
         // otherwise tolerance = 0 does not select exact matches - why?
         double adjustedTolerance = tolerance + 0.1;
 
-        this.toleranceMin = adjustedTolerance * (1.0 - fuzziness);
-        this.toleranceMax = adjustedTolerance * (1.0 + fuzziness);
+        this.maxTolerance = adjustedTolerance * (1.0 - fuzziness);
+        this.minTolerance = adjustedTolerance * (1.0 + fuzziness);
     }
 
     public void setInvert(boolean invert) {
@@ -78,13 +83,13 @@ class MaskFromColorRangeFilter extends PointFilter {
         int g = (rgb >> 8) & 0xFF;
         int b = rgb & 0xFF;
 
-        if (mode == MODE_RGB) {
+        if (interpolation == RGB) {
             int deltaR = r - refR;
             int deltaG = g - refG;
             int deltaB = b - refB;
 
             dist = FastMath.sqrtQuick(deltaR * deltaR + deltaG * deltaG + deltaB * deltaB);
-        } else if (mode == MODE_HSB) {
+        } else if (interpolation == HSB) {
             float[] hsb = Color.RGBtoHSB(r, g, b, null);
 
             float deltaHue = hsb[0] - refHue;
@@ -103,16 +108,16 @@ class MaskFromColorRangeFilter extends PointFilter {
 
             dist = 150 * FastMath.sqrtQuick(deltaHue * deltaHue + deltaSat * deltaSat + deltaBri * deltaBri);
         } else {
-            throw new IllegalStateException("mode = " + mode);
+            throw new IllegalStateException("interpolation = " + interpolation);
         }
 
-        if (dist > toleranceMax) {
+        if (dist > minTolerance) {
             if (invert) {
                 return WHITE_PIXEL;
             } else {
                 return BLACK_PIXEL;
             }
-        } else if (dist < toleranceMin) {
+        } else if (dist < maxTolerance) {
             if (invert) {
                 return BLACK_PIXEL;
             } else {
@@ -120,7 +125,7 @@ class MaskFromColorRangeFilter extends PointFilter {
             }
         } else {
             // linear interpolation
-            int v = (int) ((toleranceMax - dist) * 255 / (toleranceMax - toleranceMin));
+            int v = (int) ((minTolerance - dist) * 255 / (minTolerance - maxTolerance));
             if (invert) {
                 v = 255 - v;
             }

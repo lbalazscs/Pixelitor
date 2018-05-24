@@ -218,7 +218,7 @@ public abstract class Tool implements KeyboardObserver {
         BufferedImage copy = comp.getActiveDrawable()
                 .getImageOrSubImageIfSelected(true, true);
 
-        ImageEdit edit = new ImageEdit(comp, getName(),
+        ImageEdit edit = new ImageEdit(getName(), comp,
                 comp.getActiveDrawable(), copy,
                 false, false);
         History.addEdit(edit);
@@ -231,8 +231,8 @@ public abstract class Tool implements KeyboardObserver {
     // TODO currently it does not take the selection into account
     protected void saveSubImageForUndo(BufferedImage originalImage, ToolAffectedArea affectedArea) {
         assert (originalImage != null);
-        Rectangle rectangleAffectedByTool = affectedArea.getRectangle();
-        if (rectangleAffectedByTool.isEmpty()) {
+        Rectangle affectedRect = affectedArea.getRect();
+        if (affectedRect.isEmpty()) {
             return;
         }
 
@@ -240,11 +240,11 @@ public abstract class Tool implements KeyboardObserver {
         Composition comp = dr.getComp();
 
 //        Rectangle fullImageBounds = new Rectangle(0, 0, originalImage.getWidth(), originalImage.getHeight());
-//        Rectangle saveRectangle = rectangleAffectedByTool.intersection(fullImageBounds);
+//        Rectangle saveRectangle = affectedRect.intersection(fullImageBounds);
 
         Rectangle saveRectangle = SwingUtilities.computeIntersection(
                 0, 0, originalImage.getWidth(), originalImage.getHeight(), // full image bounds
-                rectangleAffectedByTool
+                affectedRect
         );
 
         if (!saveRectangle.isEmpty()) {

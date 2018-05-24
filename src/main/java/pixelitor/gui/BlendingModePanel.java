@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,8 @@ import java.awt.FlowLayout;
 import java.util.Random;
 
 /**
- * A GUI selector for opacity and blending mode
+ * A GUI selector for opacity and blending mode.
+ * Used by tools and layers.
  */
 public class BlendingModePanel extends JPanel {
     protected final DropDownSlider opacityDDSlider;
@@ -38,7 +39,7 @@ public class BlendingModePanel extends JPanel {
         setLayout(new FlowLayout(FlowLayout.LEFT));
         opacityLabel = new JLabel("Opacity:");
         add(opacityLabel);
-        opacityDDSlider = new DropDownSlider(100, 0, 100, true);
+        opacityDDSlider = new DropDownSlider(0, 100, 100, true);
 
         if (!forTools) {
             opacityDDSlider.setTFName("layerOpacity");

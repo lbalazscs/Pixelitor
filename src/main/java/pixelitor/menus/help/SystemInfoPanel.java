@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,15 +41,11 @@ class SystemInfoPanel extends JPanel {
     }
 
     private void addMemoryProperties() {
-        MemoryInfo memoryInfo = new MemoryInfo();
-        long freeMemoryMB = memoryInfo.getFreeMemoryMB();
-        long maxMemoryMB = memoryInfo.getMaxMemoryMB();
-        long totalMemoryMB = memoryInfo.getTotalMemoryMB();
-        long usedMemoryMB = memoryInfo.getUsedMemoryMB();
+        MemoryInfo mi = new MemoryInfo();
 
-        gbh.addTwoLabels("Allocated Memory:", totalMemoryMB + " megabytes");
-        gbh.addTwoLabels("Used Memory:", usedMemoryMB + " megabytes");
-        gbh.addTwoLabels("Free Memory:", freeMemoryMB + " megabytes");
-        gbh.addTwoLabels("Max Memory:", maxMemoryMB + " megabytes");
+        gbh.addTwoLabels("Allocated Memory:", mi.getTotalMemory());
+        gbh.addTwoLabels("Used Memory:", mi.getUsedMemory());
+        gbh.addTwoLabels("Free Memory:", mi.getFreeMemory());
+        gbh.addTwoLabels("Max Memory:", mi.getMaxMemory());
     }
 }

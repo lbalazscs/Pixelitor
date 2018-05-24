@@ -29,7 +29,7 @@ import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 /**
  * Two or more range params that are grouped and can be linked.
  */
-public class GroupedRangeParam extends AbstractFilterParam implements RangeBasedOnImageSize {
+public class GroupedRangeParam extends AbstractFilterParam {
     private final RangeParam[] rangeParams;
     private final ButtonModel checkBoxModel;
     private final boolean linkedByDefault;
@@ -189,7 +189,6 @@ public class GroupedRangeParam extends AbstractFilterParam implements RangeBased
         }
     }
 
-    @Override
     public GroupedRangeParam withAdjustedRange(double ratio) {
         for (RangeParam param : rangeParams) {
             param.withAdjustedRange(ratio);

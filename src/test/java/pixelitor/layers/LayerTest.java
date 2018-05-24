@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -72,8 +72,7 @@ public class LayerTest {
         // make sure each test runs with a fresh Layer
         layer = TestHelper.createLayerOfClass(layerClass, comp);
 
-//        LayerUI ui = mock(LayerUI.class);
-        LayerGUI ui = spy(layer.getUI());
+        LayerButton ui = spy(layer.getUI());
         layer.setUI(ui);
 
         comp.addLayerNoGUI(layer);
@@ -102,7 +101,7 @@ public class LayerTest {
 
     @Test
     public void test_setVisible() {
-        LayerGUI layerUI = layer.getUI();
+        LayerButton layerUI = layer.getUI();
         assertThat(layer.isVisible()).isTrue();
         assertThat(layerUI.isVisibilityChecked()).isTrue();
 

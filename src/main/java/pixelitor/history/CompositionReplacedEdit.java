@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,9 @@ public class CompositionReplacedEdit extends PixelitorEdit {
     private ImageComponent ic;
 
     public CompositionReplacedEdit(String name, ImageComponent ic, Composition oldComp, Composition newComp, MaskViewMode oldMode) {
-        super(oldComp, name);
+        super(name, oldComp);
+        assert oldComp.getFile().equals(newComp.getFile());
+
         this.newComp = newComp;
         this.oldMode = oldMode;
         this.ic = ic;

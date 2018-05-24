@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -57,7 +57,7 @@ public class OpenRaster {
     private OpenRaster() {
     }
 
-    public static void writeOpenRaster(Composition comp, File outFile, boolean addMergedImage) throws IOException {
+    public static void write(Composition comp, File outFile, boolean addMergedImage) throws IOException {
         FileOutputStream fos = new FileOutputStream(outFile);
         ZipOutputStream zos = new ZipOutputStream(fos);
 
@@ -115,7 +115,7 @@ public class OpenRaster {
         return stackXML;
     }
 
-    public static Composition readOpenRaster(File file) throws IOException, ParserConfigurationException, SAXException {
+    public static Composition read(File file) throws IOException, ParserConfigurationException, SAXException {
         boolean DEBUG = System.getProperty("openraster.debug", "false").equals("true");
 
         String stackXML = null;

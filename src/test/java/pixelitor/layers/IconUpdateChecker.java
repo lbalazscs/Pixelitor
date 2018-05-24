@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,11 +27,11 @@ import static org.mockito.Mockito.verify;
 public class IconUpdateChecker {
     private final Layer layer;
     private final LayerMask mask;
-    private final LayerGUI ui;
+    private final LayerButton ui;
     private final int layerIconUpdatesAtStart;
     private final int maskIconUpdatesAtStart;
 
-    public IconUpdateChecker(LayerGUI ui, Layer layer, LayerMask mask, int layerIconUpdatesAtStart, int maskIconUpdatesAtStart) {
+    public IconUpdateChecker(LayerButton ui, Layer layer, LayerMask mask, int layerIconUpdatesAtStart, int maskIconUpdatesAtStart) {
         this.ui = ui;
         this.layer = layer;
         this.mask = mask;

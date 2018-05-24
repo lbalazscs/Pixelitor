@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,14 +21,10 @@ import java.awt.image.LookupTable;
 import java.awt.image.ShortLookupTable;
 
 /**
- * A class with static methods that produce LookupTable objects for image
- * filters
+ * A utility class with static methods that create
+ * {@link LookupTable} objects for filters
  */
 public final class LookupFactory {
-
-    /**
-     * Utility class with static methods
-     */
     private LookupFactory() {
     }
 
@@ -63,7 +59,6 @@ public final class LookupFactory {
         lookupData[2] = getNullMapping();
         return new ShortLookupTable(0, lookupData);
     }
-
 
     public static LookupTable createLookupForRemoveBlue() {
         short[][] lookupData = new short[3][256];
@@ -104,6 +99,4 @@ public final class LookupFactory {
         }
         return lookupData;
     }
-
-
 }

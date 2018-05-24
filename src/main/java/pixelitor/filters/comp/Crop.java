@@ -76,7 +76,7 @@ public class Crop implements CompAction {
             }
         });
 
-        MultiLayerEdit edit = new MultiLayerEdit(comp, "Crop", backup);
+        MultiLayerEdit edit = new MultiLayerEdit("Crop", comp, backup);
         History.addEdit(edit);
 
         int cropRectWidth = (int) cropRect.getWidth();

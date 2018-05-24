@@ -77,7 +77,7 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
             }
         });
 
-        MultiLayerEdit edit = new MultiLayerEdit(comp, getEditName(), backup);
+        MultiLayerEdit edit = new MultiLayerEdit(getEditName(), comp, backup);
         History.addEdit(edit);
 
         if (changesCanvasDimensions) {

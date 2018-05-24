@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,10 +25,13 @@ import java.io.IOException;
 public interface AnimationWriter {
     void addFrame(BufferedImage image) throws IOException;
 
-    void finish();
-
     /**
      * Called if the animation rendering was cancelled
      */
     void cancel();
+
+    /**
+     * Called after adding all the frames (if it was not cancelled)
+     */
+    void finish();
 }

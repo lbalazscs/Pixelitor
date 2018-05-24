@@ -27,7 +27,7 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 
-import static pixelitor.ChangeReason.OP_PREVIEW;
+import static pixelitor.ChangeReason.PREVIEWING;
 
 /**
  * The GUI for the Random Filter
@@ -98,7 +98,7 @@ public class RandomFilterGUI extends FilterGUI {
             lastFilterPanel = filterGUI;
         } else {
             lastFilterPanel = null;
-            filter.startOn(dr, OP_PREVIEW);
+            filter.startOn(dr, PREVIEWING);
         }
     }
 }

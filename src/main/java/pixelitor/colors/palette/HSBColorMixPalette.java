@@ -17,21 +17,25 @@
 
 package pixelitor.colors.palette;
 
-import com.jhlabs.image.ImageMath;
 import pixelitor.colors.ColorUtils;
 import pixelitor.colors.FgBgColors;
 
 import java.awt.Color;
+
+import static com.jhlabs.image.ImageMath.lerp;
 
 /**
  * A palette that mixes the foreground color with the background color
  * using the HSB color space to interpolate between them
  */
 public class HSBColorMixPalette extends Palette {
+    // static palette-specific variables so that they
+    // are remembered between dialog sessions
     private static int lastRows = 7;
     private static int lastCols = 10;
 
-    private final boolean fg;
+    private final boolean startWithFg;
+
     private float hue, otherHue;
     private final float sat, bri, otherSat, otherBri;
     private final float averageSat;
@@ -39,12 +43,12 @@ public class HSBColorMixPalette extends Palette {
 
     private static final float MAX_BRI_DEVIATION = 0.5f;
 
-    public HSBColorMixPalette(boolean fg) {
+    public HSBColorMixPalette(boolean startWithFg) {
         super(lastRows, lastCols);
-        this.fg = fg;
+        this.startWithFg = startWithFg;
 
         Color color, otherColor;
-        if (fg) {
+        if (startWithFg) {
             color = FgBgColors.getFG();
             otherColor = FgBgColors.getBG();
         } else {
@@ -91,13 +95,13 @@ public class HSBColorMixPalette extends Palette {
                     float mixFactor = calcMixFactor(x);
                     float h = calcHue(mixFactor);
                     float s = calcSat(mixFactor);
-                    float b = ImageMath.lerp(mixFactor, bri, otherBri);
+                    float b = lerp(mixFactor, bri, otherBri);
                     c = new Color(Color.HSBtoRGB(h, s, b));
                 } else {
                     float mixFactor = calcMixFactor(x);
                     float h = calcHue(mixFactor);
                     float s = calcSat(mixFactor);
-                    float b = ImageMath.lerp(mixFactor, bri, otherBri);
+                    float b = lerp(mixFactor, bri, otherBri);
 
                     float startBri = b - MAX_BRI_DEVIATION;
                     b = startBri + y * briStep;
@@ -125,7 +129,7 @@ public class HSBColorMixPalette extends Palette {
     }
 
     private float calcSat(float mixFactor) {
-        float s = ImageMath.lerp(mixFactor, sat, otherSat) + extraSat;
+        float s = lerp(mixFactor, sat, otherSat) + extraSat;
 
         if (s > 1.0f) {
             s = 1.0f;
@@ -155,6 +159,8 @@ public class HSBColorMixPalette extends Palette {
 
     @Override
     public String getDialogTitle() {
-        return fg ? "HSB Mix with Background" : "HSB Mix with Foreground";
+        return startWithFg ?
+                "HSB Mix with Background" :
+                "HSB Mix with Foreground";
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,12 +39,14 @@ public abstract class ToolHandler {
         if (mousePressed(e, ic)) {
             return;
         }
+
         // forwards the mouse event to the next handler
         successor.handleMousePressed(e, ic);
     }
 
     /**
-     * @return true if the event was handled and it should no be forwarded to the next handler
+     * Returns true if the event was handled and it should
+     * not be forwarded to the next handler
      */
     abstract boolean mousePressed(MouseEvent e, ImageComponent ic);
 
@@ -55,6 +57,10 @@ public abstract class ToolHandler {
         successor.handleMouseDragged(e, ic);
     }
 
+    /**
+     * Returns true if the event was handled and it should
+     * not be forwarded to the next handler
+     */
     abstract boolean mouseDragged(MouseEvent e, ImageComponent ic);
 
     public void handleMouseReleased(MouseEvent e, ImageComponent ic) {
@@ -64,6 +70,9 @@ public abstract class ToolHandler {
         successor.handleMouseReleased(e, ic);
     }
 
+    /**
+     * Returns true if the event was handled and it should
+     * not be forwarded to the next handler
+     */
     abstract boolean mouseReleased(MouseEvent e, ImageComponent ic);
-
 }

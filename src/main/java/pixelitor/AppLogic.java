@@ -62,9 +62,9 @@ public class AppLogic {
     }
 
     // used for GUI updates
-    public static void activeCompLayerCountChanged(Composition comp, int newLayerCount) {
+    public static void numLayersChanged(Composition comp, int newLayerCount) {
         for (GlobalLayerChangeListener listener : layerChangeListeners) {
-            listener.activeCompLayerCountChanged(comp, newLayerCount);
+            listener.numLayersChanged(comp, newLayerCount);
         }
     }
 
@@ -96,6 +96,5 @@ public class AppLogic {
             AppPreferences.savePrefsAndExit();
         }
     }
-
 }
 

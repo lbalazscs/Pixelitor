@@ -60,27 +60,27 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
         // A single TFValidationLayerUI for all the textfields.
         LayerUI<JTextField> tfLayerUI = new TFValidationLayerUI(this);
 
-        GridBagHelper gbHelper = new GridBagHelper(this);
+        GridBagHelper gbh = new GridBagHelper(this);
 
-        addOutputTypeSelector(gbHelper);
-        addAnimationLengthSelector(tfLayerUI, gbHelper);
-        addInterpolationSelector(gbHelper);
-        addPingPongSelector(gbHelper);
-        addFileSelector(tfLayerUI, gbHelper);
+        addOutputTypeSelector(gbh);
+        addAnimationLengthSelector(tfLayerUI, gbh);
+        addInterpolationSelector(gbh);
+        addPingPongSelector(gbh);
+        addFileSelector(tfLayerUI, gbh);
     }
 
-    private void addOutputTypeSelector(GridBagHelper gbHelper) {
+    private void addOutputTypeSelector(GridBagHelper gbh) {
         //noinspection unchecked
         EnumComboBoxModel<TweenOutputType> model = new EnumComboBoxModel(TweenOutputType.class);
         outputTypeCB = new JComboBox<>(model);
         outputTypeCB.addActionListener(e -> outputTypeChanged());
         outputTypeChanged(); // initial setup
 
-        gbHelper.addLabelWithControl("Output Type:", outputTypeCB);
+        gbh.addLabelWithControl("Output Type:", outputTypeCB);
     }
 
-    private void addAnimationLengthSelector(LayerUI<JTextField> tfLayerUI, GridBagHelper gbHelper) {
-        gbHelper.addLabelWithControl("Number of Seconds:",
+    private void addAnimationLengthSelector(LayerUI<JTextField> tfLayerUI, GridBagHelper gbh) {
+        gbh.addLabelWithControl("Number of Seconds:",
                 new JLayer<>(nrSecondsTF, tfLayerUI));
 
         KeyListener keyListener = new KeyAdapter() {
@@ -91,35 +91,35 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
         };
         nrSecondsTF.addKeyListener(keyListener);
 
-        gbHelper.addLabelWithControl("Frames per Second:",
+        gbh.addLabelWithControl("Frames per Second:",
                 new JLayer<>(fpsTF, tfLayerUI));
         fpsTF.addKeyListener(keyListener);
 
         nrFramesLabel = new JLabel();
         updateCalculations();
-        gbHelper.addLabelWithControl("Number of Frames:", nrFramesLabel);
+        gbh.addLabelWithControl("Number of Frames:", nrFramesLabel);
     }
 
-    private void addInterpolationSelector(GridBagHelper gbHelper) {
+    private void addInterpolationSelector(GridBagHelper gbh) {
         EnumComboBoxModel<Interpolation> ipCBM = new EnumComboBoxModel<>(Interpolation.class);
         ipCB = new JComboBox<>(ipCBM);
 
-        gbHelper.addLabelWithControl("Interpolation:", ipCB);
+        gbh.addLabelWithControl("Interpolation:", ipCB);
     }
 
-    private void addPingPongSelector(GridBagHelper gbHelper) {
-        gbHelper.addLabelWithControl("Ping Pong:", pingPongCB);
+    private void addPingPongSelector(GridBagHelper gbh) {
+        gbh.addLabelWithControl("Ping Pong:", pingPongCB);
 
         pingPongCB.addActionListener(e -> updateCalculations());
     }
 
-    private void addFileSelector(LayerUI<JTextField> tfLayerUI, GridBagHelper gbHelper) {
+    private void addFileSelector(LayerUI<JTextField> tfLayerUI, GridBagHelper gbh) {
         JPanel filePanel = new JPanel(new FlowLayout());
         filePanel.setBorder(BorderFactory.createTitledBorder("Output File/Folder"));
         fileNameTF = browseFilesSupport.getNameTF();
         filePanel.add(new JLayer<>(fileNameTF, tfLayerUI));
         filePanel.add(browseFilesSupport.getBrowseButton());
-        gbHelper.addOnlyControlToRow(filePanel, 6);
+        gbh.addOnlyControlToRow(filePanel, 6);
     }
 
     private void outputTypeChanged() {
@@ -176,8 +176,9 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
             return isTextFieldWithDoubleValid(textField);
         } else if (textField == fileNameTF) {
             TweenOutputType outputType = (TweenOutputType) outputTypeCB.getSelectedItem();
-            String errorMessage = outputType.checkFile(new File(textField.getText()
-                    .trim()));
+
+            String fileName = textField.getText().trim();
+            String errorMessage = outputType.isOK(new File(fileName));
             if (errorMessage == null) {
                 return ValidationResult.ok();
             } else {

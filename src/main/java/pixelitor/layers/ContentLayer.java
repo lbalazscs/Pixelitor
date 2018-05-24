@@ -96,7 +96,7 @@ public abstract class ContentLayer extends Layer {
         if (linkedEdit == null) {
             return ownEdit;
         } else {
-            return new LinkedEdit(comp, ContentLayerMoveEdit.NAME, ownEdit, linkedEdit);
+            return new LinkedEdit(ContentLayerMoveEdit.NAME, comp, ownEdit, linkedEdit);
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,8 @@ import java.awt.image.BufferedImage;
 import java.awt.image.RasterFormatException;
 
 /**
- * Copies an image to the system clipboard
+ * Copies the image given by the {@link CopySource}
+ * to the system clipboard
  */
 public class CopyAction extends AbstractAction {
     private final CopySource source;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,12 +24,12 @@ import java.io.File;
  * A save file chooser that confirms before overwriting a file
  */
 public class ConfirmSaveFileChooser extends JFileChooser {
-    public ConfirmSaveFileChooser(File currentDirectory) {
-        super(currentDirectory);
+    public ConfirmSaveFileChooser(File currentDir) {
+        super(currentDir);
     }
 
-    public ConfirmSaveFileChooser(String currentDirectoryPath) {
-        super(currentDirectoryPath);
+    public ConfirmSaveFileChooser(String currentDirPath) {
+        super(currentDirPath);
     }
 
     @Override

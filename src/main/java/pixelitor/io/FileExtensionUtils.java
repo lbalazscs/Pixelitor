@@ -77,7 +77,7 @@ public class FileExtensionUtils {
         return false;
     }
 
-    public static File[] getAllSupportedInputFilesInDir(File dir) {
+    public static File[] listSupportedInputFilesIn(File dir) {
         java.io.FileFilter imageFilter = FileExtensionUtils::hasSupportedInputExt;
         return dir.listFiles(imageFilter);
     }

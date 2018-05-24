@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,15 +8,30 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor.filters;
 
+/**
+ * Used when colors of all pixels have to be changed
+ * uniformly and independently from each other
+ */
 public interface RGBPixelOp {
+    /**
+     * Computes a new color from the given channel values
+     * and returns the changed color in ARGB int format.
+     */
     int changeRGB(int a, int r, int g, int b);
+
+    default FilterAction toFilterAction(String name) {
+        return new FilterAction(name,
+                () -> new ExtractChannelFilter(this))
+                .withoutGUI()
+                .withExtractChannelListName();
+    }
 }

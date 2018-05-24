@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,20 +27,24 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 /**
- *
+ * A UI class for {@link LayerButton}
  */
 public class LayerButtonUI extends BasicToggleButtonUI {
     @Override
     protected void paintButtonPressed(Graphics g, AbstractButton b) {
-        Color oldColor = g.getColor();
-
         Graphics2D g2 = (Graphics2D) g;
+
+        // save Graphics settings
+        Color oldColor = g.getColor();
         Object oldAA = g2.getRenderingHint(KEY_ANTIALIASING);
 
+        // paint a rounded rectangle with the selection color
+        // on the selected layer button
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         g.setColor(LayerButton.SELECTED_COLOR);
         g.fillRoundRect(0, 0, b.getWidth(), b.getHeight(), 10, 10);
 
+        // restore Graphics settings
         g.setColor(oldColor);
         g2.setRenderingHint(KEY_ANTIALIASING, oldAA);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,8 +22,8 @@ import pixelitor.Composition;
  * Actions that are not undoable, such as flatten image
  */
 public class NotUndoableEdit extends PixelitorEdit {
-    public NotUndoableEdit(Composition comp, String presentationName) {
-        super(comp, presentationName);
+    public NotUndoableEdit(String presentationName, Composition comp) {
+        super(presentationName, comp);
     }
 
     @Override

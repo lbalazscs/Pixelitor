@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,8 +29,8 @@ import java.util.List;
 public class ParamSetState implements Iterable<ParamState> {
     private List<ParamState> states = new ArrayList<>();
 
-    public ParamSetState(ParamSet originator) {
-        List<FilterParam> params = originator.getParamList();
+    public ParamSetState(ParamSet paramSet) {
+        List<FilterParam> params = paramSet.getParams();
         for (FilterParam param : params) {
             if(param.canBeAnimated()) {
                 ParamState state = param.copyState();
@@ -54,7 +54,8 @@ public class ParamSetState implements Iterable<ParamState> {
     }
 
     /**
-     * Calculate an interpolated ParamSetState, where the current object is the starting state
+     * Calculate an interpolated ParamSetState,
+     * where the current object is the starting state
      */
     public ParamSetState interpolate(ParamSetState endState, double progress) {
         List<ParamState> interpolatedStates = new ArrayList<>();

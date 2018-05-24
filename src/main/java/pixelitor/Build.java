@@ -46,6 +46,10 @@ public enum Build {
         return development;
     }
 
+    public boolean isFinal() {
+        return !development;
+    }
+
     public static String getPixelitorWindowFixTitle() {
         assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
 

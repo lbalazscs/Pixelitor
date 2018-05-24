@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,10 +36,10 @@ public class DefaultButton extends JButton {
         setPreferredSize(PREFERRED_SIZE);
         addActionListener(e -> resettable.reset(true));
         setToolTipText("Reset the default setting");
-        updateState();
+        updateIcon();
     }
 
-    public void updateState() {
+    public void updateIcon() {
         boolean isSetToDefault = resettable.isSetToDefault();
         setArrowIcon(isSetToDefault);
     }

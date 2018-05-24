@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.selection;
 
@@ -20,10 +20,11 @@ import java.awt.Shape;
 import java.awt.geom.Area;
 
 /**
- * Describes how the new selection is combined with the existing selection
+ * Describes how a new selection is combined with an existing selection.
+ * Corresponds to the "New Selection" combo box in the Selection Tool.
  */
 public enum SelectionInteraction {
-    REPLACE("Replace") {
+    REPLACE("Replace") { 
         @Override
         public Shape combine(Shape oldShape, Shape newShape) {
             return newShape;
@@ -60,6 +61,9 @@ public enum SelectionInteraction {
         this.guiName = guiName;
     }
 
+    /**
+     * Calculates the combined shape from the existing shape and the new one
+     */
     public abstract Shape combine(Shape oldShape, Shape newShape);
 
     @Override

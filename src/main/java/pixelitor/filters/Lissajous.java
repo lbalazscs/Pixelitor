@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,9 @@ import pixelitor.filters.gui.RangeParam;
 import java.awt.geom.Path2D;
 
 /**
- * Renders a Lissajous curve
+ * A shape filter rendering a Lissajous curve
+ *
+ * See https://en.wikipedia.org/wiki/Lissajous_curve
  */
 public class Lissajous extends ShapeFilter {
     private static final int NUMBER_OF_STEPS = 2000;

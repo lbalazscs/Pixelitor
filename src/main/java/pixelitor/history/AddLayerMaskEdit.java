@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,8 +33,8 @@ public class AddLayerMaskEdit extends PixelitorEdit {
     private LayerMask layerMask;
     private MaskViewMode newMode;
 
-    public AddLayerMaskEdit(Composition comp, Layer layer, String name) {
-        super(comp, name);
+    public AddLayerMaskEdit(String name, Composition comp, Layer layer) {
+        super(name, comp);
 
         this.layer = layer;
         this.layerMask = layer.getMask();

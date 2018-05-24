@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -15,31 +15,28 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.filters;
+package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.InvertAlphaFilter;
+import pixelitor.filters.Filter;
 
 import java.awt.image.BufferedImage;
 
 /**
- * Invert Transparency
+ * Invert Transparency filter based on based on
+ * the JHLabs {@link InvertAlphaFilter}
  */
-public class InvertTransparency extends Filter {
+public class JHInvertTransparency extends Filter {
     public static final String NAME = "Invert Transparency";
 
     private final InvertAlphaFilter filter;
 
-    public InvertTransparency() {
+    public JHInvertTransparency() {
         filter = new InvertAlphaFilter(NAME);
     }
 
     @Override
     protected BufferedImage transform(BufferedImage src, BufferedImage dest) {
         return filter.filter(src, dest);
-    }
-
-    @Override
-    public void randomizeSettings() {
-
     }
 }

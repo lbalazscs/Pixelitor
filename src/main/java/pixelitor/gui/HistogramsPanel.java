@@ -64,15 +64,15 @@ public class HistogramsPanel extends JPanel implements ActiveImageChangeListener
         add(scrollPane, BorderLayout.CENTER);
     }
 
-    public boolean areHistogramsShown() {
+    public boolean isShown() {
         return (getParent() != null);
     }
 
     @Override
     public void noOpenImageAnymore() {
-        red.setToNoImage();
-        green.setToNoImage();
-        blue.setToNoImage();
+        red.noOpenImageAnymore();
+        green.noOpenImageAnymore();
+        blue.noOpenImageAnymore();
         repaint();
     }
 
@@ -87,7 +87,7 @@ public class HistogramsPanel extends JPanel implements ActiveImageChangeListener
 
     public void updateFromCompIfShown(Composition comp) {
         Objects.requireNonNull(comp);
-        if (!areHistogramsShown()) {
+        if (!isShown()) {
             return;
         }
         BufferedImage image = comp.getCompositeImage();
@@ -98,18 +98,20 @@ public class HistogramsPanel extends JPanel implements ActiveImageChangeListener
 
         int[] data = ImageUtils.getPixelsAsArray(image);
         for (int rgb : data) {
-            //                int a = (rgb >>> 24) & 0xFF;
-            int r = (rgb >>> 16) & 0xFF;
-            int g = (rgb >>> 8) & 0xFF;
-            int b = (rgb) & 0xFF;
+            int a = (rgb >>> 24) & 0xFF;
+            if (a > 0) {
+                int r = (rgb >>> 16) & 0xFF;
+                int g = (rgb >>> 8) & 0xFF;
+                int b = (rgb) & 0xFF;
 
-            reds[r]++;
-            greens[g]++;
-            blues[b]++;
+                reds[r]++;
+                greens[g]++;
+                blues[b]++;
+            }
         }
 
-        boolean useLogarithm = false;
-        if (useLogarithm) {
+        boolean logarithmic = false;
+        if (logarithmic) {
             for (int i = 0; i < HISTOGRAM_RESOLUTION; i++) {
                 reds[i] = (int) (1000.0 * Math.log(reds[i]));
                 greens[i] = (int) (1000.0 * Math.log(greens[i]));

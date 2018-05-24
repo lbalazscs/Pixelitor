@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,8 +23,9 @@ import pixelitor.tools.Tool;
 import java.awt.event.MouseEvent;
 
 /**
- * At the end of a AbstractToolHandler chain there is always a CurrentToolHandler,
- * which forwards the events to the current tool in order to do the real job of the tool
+ * At the end of a {@link ToolHandler} chain there is always a
+ * {@link CurrentToolHandler}, which forwards the events to the
+ * current tool in order to do the real job of the tool.
  */
 public class CurrentToolHandler extends ToolHandler {
     private final Tool tool;

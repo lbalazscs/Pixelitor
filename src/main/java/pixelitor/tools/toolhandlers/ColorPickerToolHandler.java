@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,8 +23,8 @@ import pixelitor.tools.Tools;
 import java.awt.event.MouseEvent;
 
 /**
- * If Alt is pressed, the color picker will handle the events
- * instead of the current tool
+ * If Alt is pressed, the color picker will handle
+ * the events instead of the current tool
  */
 public class ColorPickerToolHandler extends ToolHandler {
     @Override
@@ -34,7 +34,7 @@ public class ColorPickerToolHandler extends ToolHandler {
             return true;
         }
 
-        // forwards the mouse event to the next handler
+        // forwards the event to the next handler
         return false;
     }
 
@@ -45,11 +45,13 @@ public class ColorPickerToolHandler extends ToolHandler {
             return true;
         }
 
+        // forwards the event to the next handler
         return false;
     }
 
     @Override
     boolean mouseReleased(MouseEvent e, ImageComponent ic) {
+        // always forwards the event to the next handler
         return false;
     }
 }

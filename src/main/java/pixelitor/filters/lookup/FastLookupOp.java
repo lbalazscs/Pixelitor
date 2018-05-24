@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,31 +31,32 @@ import java.awt.image.LookupOp;
 import java.awt.image.ShortLookupTable;
 
 /**
- * Performs 4-5 times faster than java.awt.image.LookupOp
+ * Performs 4-5 times faster than {@link LookupOp} if
+ * the image has packed ints
  */
 public class FastLookupOp implements BufferedImageOp {
-    private final ShortLookupTable lookupTable;
+    private final ShortLookupTable lut;
 
-    public FastLookupOp(ShortLookupTable lookupTable) {
-        this.lookupTable = lookupTable;
+    public FastLookupOp(ShortLookupTable lut) {
+        this.lut = lut;
     }
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
         boolean packedInt = ImageUtils.hasPackedIntArray(src);
         if (packedInt) {
-            boolean simple = !src.isAlphaPremultiplied();
+            boolean notPremultiplied = !src.isAlphaPremultiplied();
 
-            DataBufferInt srcDataBuffer = (DataBufferInt) src.getRaster().getDataBuffer();
-            int[] srcData = srcDataBuffer.getData();
+            int[] srcData = ((DataBufferInt) src.getRaster()
+                    .getDataBuffer()).getData();
 
-            DataBufferInt destDataBuffer = (DataBufferInt) dst.getRaster().getDataBuffer();
-            int[] destData = destDataBuffer.getData();
+            int[] destData = ((DataBufferInt) dst.getRaster()
+                    .getDataBuffer()).getData();
 
             int length = srcData.length;
             assert length == destData.length;
 
-            short[][] table = lookupTable.getTable();
+            short[][] table = lut.getTable();
 
             for (int i = 0; i < length; i++) {
                 int rgb = srcData[i];
@@ -64,7 +65,7 @@ public class FastLookupOp implements BufferedImageOp {
                 int g = (rgb >>> 8) & 0xFF;
                 int b = (rgb) & 0xFF;
 
-                if (a == 255 || simple) {
+                if (a == 255 || notPremultiplied) {
                     r = table[0][r];
                     g = table[1][g];
                     b = table[2][b];
@@ -107,15 +108,13 @@ public class FastLookupOp implements BufferedImageOp {
                 }
                 destData[i] = (a << 24) | (r << 16) | (g << 8) | b;
             }
-
         } else { // fall back to a normal LookupOp
-            BufferedImageOp lookupOp = new LookupOp(lookupTable, null);
+            BufferedImageOp lookupOp = new LookupOp(lut, null);
             lookupOp.filter(src, dst);
         }
 
         return dst;
     }
-
 
     @Override
     public Rectangle2D getBounds2D(BufferedImage src) {

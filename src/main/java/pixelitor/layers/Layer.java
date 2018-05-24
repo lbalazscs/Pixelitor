@@ -75,7 +75,7 @@ public abstract class Layer implements Serializable {
     BlendingMode blendingMode = BlendingMode.NORMAL;
 
     // transient variables from here
-    private transient LayerGUI ui;
+    private transient LayerButton ui;
     protected transient boolean isAdjustment = false;
     private transient List<LayerChangeListener> layerChangeListeners;
 
@@ -98,7 +98,7 @@ public abstract class Layer implements Serializable {
         if (parent != null) { // this is a layer mask
             ui = parent.getUI();
         } else { // normal layer
-            ui = new LayerGUI(this);
+            ui = new LayerButton(this);
         }
         layerChangeListeners = new ArrayList<>();
     }
@@ -110,7 +110,7 @@ public abstract class Layer implements Serializable {
         // We create a layer button only for real layers.
         // For layer masks, we share the button of the real layer.
         if (parent == null) { // not mask
-            ui = new LayerGUI(this);
+            ui = new LayerButton(this);
 
             if (mask != null) {
                 mask.setUI(ui);
@@ -134,11 +134,11 @@ public abstract class Layer implements Serializable {
         History.addEdit(addToHistory, () -> new LayerVisibilityChangeEdit(comp, this, newVisibility));
     }
 
-    public LayerGUI getUI() {
+    public LayerButton getUI() {
         return ui;
     }
 
-    public void setUI(LayerGUI ui) {
+    public void setUI(LayerButton ui) {
         this.ui = ui;
     }
 
@@ -160,7 +160,7 @@ public abstract class Layer implements Serializable {
         comp.imageChanged(FULL);
 
         HistogramsPanel hp = HistogramsPanel.INSTANCE;
-        if (hp.areHistogramsShown()) {
+        if (hp.isShown()) {
             hp.updateFromCompIfShown(comp);
         }
     }
@@ -178,7 +178,7 @@ public abstract class Layer implements Serializable {
         this.opacity = newOpacity;
 
         if (updateGUI) {
-            ui.setOpacityFromModel(newOpacity);
+            LayerBlendingModePanel.INSTANCE.setOpacityFromModel(newOpacity);
         }
         if(updateImage) {
             updateAfterBMorOpacityChange();
@@ -288,13 +288,13 @@ public abstract class Layer implements Serializable {
 
         AppLogic.maskChanged(this);
 
-        PixelitorEdit edit = new AddLayerMaskEdit(comp, this, editName);
+        PixelitorEdit edit = new AddLayerMaskEdit(editName, comp, this);
         if (deselect) {
             Shape backupShape = comp.getSelectionShape();
             comp.deselect(false);
             if (backupShape != null) { // TODO on Mac Random GUI test we can get null here
                 DeselectEdit deselectEdit = new DeselectEdit(comp, backupShape, "nested deselect");
-                edit = new LinkedEdit(comp, editName, edit, deselectEdit);
+                edit = new LinkedEdit(editName, comp, edit, deselectEdit);
             }
         }
 
@@ -444,7 +444,7 @@ public abstract class Layer implements Serializable {
     public void setMaskEditing(boolean b) {
         assert b ? hasMask() : true;
         this.maskEditing = b;
-        ui.setMaskEditing(b); // sets the border around the icon
+        ui.configureBorders(b); // sets the border around the icon
     }
 
     public boolean isMaskEditing() {

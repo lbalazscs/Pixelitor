@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -72,9 +72,14 @@ public abstract class GetImageAction extends AbstractAction {
     }
 
     private void startOnLayer(Layer layer) {
-        if (layer.isMaskEditing() && allowMasks) {
-            BufferedImage image = layer.getMask().getImage();
-            process(layer, image);
+        if (layer.isMaskEditing()) {
+            if (allowMasks) {
+                BufferedImage image = layer.getMask().getImage();
+                process(layer, image);
+            } else {
+                Dialogs.showErrorDialog("Layer Mask",
+                        name + " cannot be applied to layer masks.");
+            }
         } else if (layer instanceof ImageLayer) {
             BufferedImage image = ((ImageLayer) layer).getImage();
             process(layer, image);

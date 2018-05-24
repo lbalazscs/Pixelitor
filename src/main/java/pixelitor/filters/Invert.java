@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,9 @@ import java.awt.image.BufferedImage;
  * Invert filter
  */
 public class Invert extends Filter {
+    // for compatibility with older adjustment layer tests
+    private static final long serialVersionUID = -6279018636064203421L;
+
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         invertImage(src, dest);
@@ -87,11 +90,6 @@ public class Invert extends Filter {
                 destData[i] = (a << 24) | (r << 16) | (g << 8) | b;
             }
         }
-    }
-
-    @Override
-    public void randomizeSettings() {
-        // nothing to randomize
     }
 
     @Override

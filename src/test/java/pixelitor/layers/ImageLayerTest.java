@@ -47,8 +47,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static pixelitor.ChangeReason.OP_PREVIEW;
-import static pixelitor.ChangeReason.OP_WITHOUT_DIALOG;
+import static pixelitor.ChangeReason.FILTER_WITHOUT_DIALOG;
+import static pixelitor.ChangeReason.PREVIEWING;
 import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
 import static pixelitor.layers.ImageLayer.State.NORMAL;
 import static pixelitor.layers.ImageLayer.State.PREVIEW;
@@ -83,7 +83,7 @@ public class ImageLayerTest {
 
         layer = TestHelper.createImageLayer("layer 1", comp);
 
-        LayerGUI ui = mock(LayerGUI.class);
+        LayerButton ui = mock(LayerButton.class);
         layer.setUI(ui);
 
         withMask.init(layer);
@@ -134,6 +134,7 @@ public class ImageLayerTest {
     public void test_startPreviewing_WOSelection() {
         BufferedImage image = layer.getImage();
         layer.startPreviewing();
+
         assertThat(layer.getState()).isEqualTo(PREVIEW);
         assertThat(layer.getPreviewImage()).isSameAs(image);
         iconUpdates.check(0, 0);
@@ -200,14 +201,14 @@ public class ImageLayerTest {
 
     @Test(expected = IllegalStateException.class)
     public void test_changePreviewImage_Fail() {
-        layer.changePreviewImage(TestHelper.createImage(), "filterName", OP_PREVIEW);
+        layer.changePreviewImage(TestHelper.createImage(), "filterName", PREVIEWING);
     }
 
     @Test
     public void test_changePreviewImage_OK() {
         layer.startPreviewing(); // make sure that the layer is in PREVIEW mode
 
-        layer.changePreviewImage(TestHelper.createImage(), "filterName", OP_PREVIEW);
+        layer.changePreviewImage(TestHelper.createImage(), "filterName", PREVIEWING);
         assertThat(layer.getState()).isEqualTo(PREVIEW);
         assertThat(layer.getPreviewImage()).isNotNull();
         iconUpdates.check(0, 0);
@@ -219,7 +220,7 @@ public class ImageLayerTest {
 
         BufferedImage dest = ImageUtils.copyImage(layer.getImage());
         layer.filterWithoutDialogFinished(dest,
-                OP_WITHOUT_DIALOG, "opName");
+                FILTER_WITHOUT_DIALOG, "opName");
         assertThat(layer.getState()).isEqualTo(NORMAL);
 
         iconUpdates.check(1, 0);

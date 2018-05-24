@@ -220,9 +220,9 @@ public class Selection {
         Area outlineArea = new Area(outlineShape);
 
         Shape backupShape = shape;
-        shape = type.createModifiedShape(oldArea, outlineArea);
+        shape = type.modify(oldArea, outlineArea);
 
-        SelectionChangeEdit edit = new SelectionChangeEdit(ic.getComp(), backupShape, "Modify Selection");
+        SelectionChangeEdit edit = new SelectionChangeEdit("Modify Selection", ic.getComp(), backupShape);
         History.addEdit(edit);
     }
 
@@ -234,7 +234,7 @@ public class Selection {
 
     public void nudge(AffineTransform at) {
         Shape backupShape = transform(at);
-        History.addEdit(new SelectionChangeEdit(ic.getComp(), backupShape, "Nudge Selection"));
+        History.addEdit(new SelectionChangeEdit("Nudge Selection", ic.getComp(), backupShape));
     }
 
     public boolean isHidden() {

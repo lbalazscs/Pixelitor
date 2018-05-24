@@ -21,7 +21,7 @@ import pixelitor.layers.Drawable;
 import pixelitor.menus.DrawableAction;
 
 import static pixelitor.ChangeReason.REPEAT_LAST;
-import static pixelitor.filters.FilterUtils.getLastExecutedFilter;
+import static pixelitor.filters.FilterUtils.getLastFilter;
 
 /**
  * The "Repeat" action, which repeats the last edit.
@@ -37,7 +37,7 @@ public class RepeatLast extends DrawableAction {
 
     @Override
     protected void process(Drawable dr) {
-        getLastExecutedFilter()
+        getLastFilter()
                 .ifPresent(filter -> filter.startOn(dr, REPEAT_LAST));
     }
 }

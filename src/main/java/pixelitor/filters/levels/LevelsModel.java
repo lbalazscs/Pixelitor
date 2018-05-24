@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,13 +24,13 @@ import pixelitor.filters.gui.PreviewExecutor;
 import java.util.ArrayList;
 import java.util.List;
 
-import static pixelitor.filters.levels.LevelsAdjustmentType.B;
-import static pixelitor.filters.levels.LevelsAdjustmentType.G;
-import static pixelitor.filters.levels.LevelsAdjustmentType.GB;
-import static pixelitor.filters.levels.LevelsAdjustmentType.R;
-import static pixelitor.filters.levels.LevelsAdjustmentType.RB;
-import static pixelitor.filters.levels.LevelsAdjustmentType.RG;
-import static pixelitor.filters.levels.LevelsAdjustmentType.RGB;
+import static pixelitor.filters.levels.EditedChannelsType.B;
+import static pixelitor.filters.levels.EditedChannelsType.G;
+import static pixelitor.filters.levels.EditedChannelsType.GB;
+import static pixelitor.filters.levels.EditedChannelsType.R;
+import static pixelitor.filters.levels.EditedChannelsType.RB;
+import static pixelitor.filters.levels.EditedChannelsType.RG;
+import static pixelitor.filters.levels.EditedChannelsType.RGB;
 
 public class LevelsModel {
     private final OneChannelLevelsModel rgbModel;
@@ -40,7 +40,7 @@ public class LevelsModel {
     private final OneChannelLevelsModel rgModel;
     private final OneChannelLevelsModel gbModel;
     private final OneChannelLevelsModel rbModel;
-    private final LookupFilter filter;
+    private final Levels filter;
     private PreviewExecutor executor;
 
     /**
@@ -49,7 +49,7 @@ public class LevelsModel {
      */
     private final OneChannelLevelsModel[] subModels;
 
-    public LevelsModel(LookupFilter filter) {
+    public LevelsModel(Levels filter) {
         this.filter = filter;
         this.rgbModel = new OneChannelLevelsModel(RGB, this);
         this.rModel = new OneChannelLevelsModel(R, this);
@@ -69,19 +69,19 @@ public class LevelsModel {
     }
 
     public void adjustmentChanged() {
-        GrayScaleLookup rgb = rgbModel.getAdjustment();
+        GrayScaleLookup rgb = rgbModel.getLookup();
 
-        GrayScaleLookup r = rModel.getAdjustment();
-        GrayScaleLookup g = gModel.getAdjustment();
-        GrayScaleLookup b = bModel.getAdjustment();
+        GrayScaleLookup r = rModel.getLookup();
+        GrayScaleLookup g = gModel.getLookup();
+        GrayScaleLookup b = bModel.getLookup();
 
-        GrayScaleLookup rg = rgModel.getAdjustment();
-        GrayScaleLookup gb = gbModel.getAdjustment();
-        GrayScaleLookup rb = rbModel.getAdjustment();
+        GrayScaleLookup rg = rgModel.getLookup();
+        GrayScaleLookup gb = gbModel.getLookup();
+        GrayScaleLookup rb = rbModel.getLookup();
 
-        RGBLookup unifiedAdjustments = new RGBLookup(rgb, r, g, b, rg, rb, gb);
-        filter.setRGBLookup(unifiedAdjustments);
-        executor.executeFilterPreview();
+        RGBLookup unifiedLookup = new RGBLookup(rgb, r, g, b, rg, rb, gb);
+        filter.setRGBLookup(unifiedLookup);
+        executor.runFilterPreview();
     }
 
     public void resetToDefaultSettings() {

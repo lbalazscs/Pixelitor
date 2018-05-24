@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- * A textfield with a drop down button that shows a slider in a popup window
+ * A textfield with a drop down button
+ * that shows a slider in a popup window
  */
 public class DropDownSlider extends JComponent {
     private static final Icon downIconEnabled = IconUtils.loadIcon("dropdown_enabled.gif");
@@ -40,7 +41,7 @@ public class DropDownSlider extends JComponent {
     private boolean dropDownEnabled = true;
     private final JSlider slider;
 
-    public DropDownSlider(int value, int minValue, int maxValue, boolean limitRange) {
+    public DropDownSlider(int minValue, int value, int maxValue, boolean limitRange) {
         setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         textField = new IntTextField(String.valueOf(value), minValue, maxValue, limitRange, 4);
         add(textField);

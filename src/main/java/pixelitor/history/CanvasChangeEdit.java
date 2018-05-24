@@ -35,8 +35,8 @@ public class CanvasChangeEdit extends PixelitorEdit {
     /**
      * This constructor must be called before the change.
      */
-    public CanvasChangeEdit(Composition comp, String name) {
-        super(comp, name);
+    public CanvasChangeEdit(String name, Composition comp) {
+        super(name, comp);
         embedded = true;
 
         backupCanvasWidth = comp.getCanvasWidth();

@@ -64,7 +64,7 @@ public class EffectsParam extends AbstractFilterParam {
     }
 
     public AreaEffects getEffects() {
-        // if a GUI filter is executing without a GUI
+        // if a GUI filter is running without a GUI
         // (for example in a RandomGUITest), the panel needs to be created here
         if (effectsPanel == null) {
             effectsPanel = new EffectsPanel(adjustmentListener, null);

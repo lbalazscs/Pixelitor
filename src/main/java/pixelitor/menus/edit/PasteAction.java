@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -55,6 +55,7 @@ public class PasteAction extends AbstractAction {
                 if (type != TYPE_INT_ARGB_PRE) {
                     // needs conversion in the case of
                     // images pasted from other apps
+                    // TODO why not convert to sys compatible image?
                     pastedImage = ImageUtils.convertToARGB_PRE(pastedImage, true);
                 } else {
                     // if a layer was pasted from Pixelitor,

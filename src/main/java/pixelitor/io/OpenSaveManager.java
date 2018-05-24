@@ -55,7 +55,7 @@ import java.util.zip.GZIPOutputStream;
  */
 public class OpenSaveManager {
     private static final int CURRENT_PXC_VERSION_NUMBER = 0x03;
-    private static JpegSettings jpegSettings = JpegSettings.getDefaults();
+    private static JpegSettings jpegSettings = JpegSettings.DEFAULTS;
 
     private OpenSaveManager() {
     }
@@ -69,7 +69,7 @@ public class OpenSaveManager {
                 ImageComponents.addCompAsNewImage(comp);
             }
         };
-        Utils.executeWithBusyCursor(r);
+        Utils.runWithBusyCursor(r);
 
         RecentFilesMenu.getInstance().addFile(file);
     }
@@ -118,7 +118,7 @@ public class OpenSaveManager {
                     comp = deserializeComposition(selectedFile);
                     break;
                 case "ora":
-                    comp = OpenRaster.readOpenRaster(selectedFile);
+                    comp = OpenRaster.read(selectedFile);
                     break;
                 default:
                     throw new IllegalStateException("type = " + type);
@@ -171,7 +171,7 @@ public class OpenSaveManager {
                 }
             }
         };
-        Utils.executeWithBusyCursor(r);
+        Utils.runWithBusyCursor(r);
     }
 
     public static void warnAndCloseImage(ImageComponent ic) {
@@ -273,7 +273,7 @@ public class OpenSaveManager {
     }
 
     public static void openAllImagesInDir(File dir) {
-        File[] files = FileExtensionUtils.getAllSupportedInputFilesInDir(dir);
+        File[] files = FileExtensionUtils.listSupportedInputFilesIn(dir);
         if (files != null) {
             for (File file : files) {
                 openFile(file);
@@ -376,7 +376,7 @@ public class OpenSaveManager {
             FileChoosers.showSaveChooserAndSaveComp(ImageComponents.getActiveCompOrNull());
         } finally {
             FileChoosers.setDefaultSaveExtensions();
-            jpegSettings = JpegSettings.getDefaults();
+            jpegSettings = JpegSettings.DEFAULTS;
         }
     }
 

@@ -59,8 +59,8 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
     }
 
     protected void setupGUI(ParamSet params, Object otherInfo, ShowOriginal addShowOriginal) {
-        JPanel filterParamsPanel = createFilterParamsPanel(params.getParamList());
-        JPanel filterActionsPanel = createFilterActionsPanel(params.getActionList(), addShowOriginal, 3);
+        JPanel filterParamsPanel = createFilterParamsPanel(params.getParams());
+        JPanel filterActionsPanel = createFilterActionsPanel(params.getActions(), addShowOriginal, 3);
 
         this.setLayout(new BorderLayout());
         this.add(filterParamsPanel, BorderLayout.CENTER);
@@ -103,9 +103,11 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
     @Override
     public void paramAdjusted() {
         if (hasShowOriginal()) {
+            // if any parameter was changed, the "show original"
+            // mode should be automatically stopped
             showOriginalCB.deselectWithoutTriggering();
         }
-        super.executeFilterPreview();
+        super.runFilterPreview();
     }
 
     private boolean hasShowOriginal() {

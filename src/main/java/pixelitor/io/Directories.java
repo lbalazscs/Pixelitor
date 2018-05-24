@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -49,14 +49,16 @@ public class Directories {
     }
 
     public static void setLastOpenDir(File newOpenDir) {
-        assert newOpenDir.exists() && newOpenDir.isDirectory();
+        assert newOpenDir.exists();
+        assert newOpenDir.isDirectory();
+
         lastOpenDir = newOpenDir;
     }
 
     public static void setLastSaveDir(File newSaveDir) {
-        assert newSaveDir.exists() && newSaveDir.isDirectory();
+        assert newSaveDir.exists();
+        assert newSaveDir.isDirectory();
+
         lastSaveDir = newSaveDir;
     }
-
 }
-

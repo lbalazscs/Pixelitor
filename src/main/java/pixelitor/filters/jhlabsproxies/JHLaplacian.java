@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,8 @@ import pixelitor.filters.Filter;
 import java.awt.image.BufferedImage;
 
 /**
- * Laplacian edge detection filter based on the JHLabs LaplaceFilter
+ * Laplacian edge detection filter based on
+ * the JHLabs {@link LaplaceFilter}
  */
 public class JHLaplacian extends Filter {
     public static final String NAME = "Laplacian";
@@ -38,11 +39,6 @@ public class JHLaplacian extends Filter {
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         dest = filter.filter(src, dest);
         return dest;
-    }
-
-    @Override
-    public void randomizeSettings() {
-        // nothing to randomize
     }
 
     @Override

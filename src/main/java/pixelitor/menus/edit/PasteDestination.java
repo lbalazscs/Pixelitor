@@ -31,7 +31,7 @@ import java.awt.image.BufferedImage;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 
 /**
- * Represents the destination of the pasted image
+ * Represents the destination of a pasted image
  */
 public enum PasteDestination {
     NEW_LAYER {

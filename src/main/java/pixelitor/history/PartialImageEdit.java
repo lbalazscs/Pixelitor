@@ -45,7 +45,7 @@ public class PartialImageEdit extends FadeableEdit {
     private final Drawable dr;
 
     public PartialImageEdit(String name, Composition comp, Drawable dr, BufferedImage image, Rectangle saveRect, boolean canRepeat) {
-        super(comp, dr, name);
+        super(name, comp, dr);
 
         this.canRepeat = canRepeat;
         this.dr = dr;

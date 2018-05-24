@@ -34,7 +34,7 @@ import static java.util.Comparator.comparing;
  */
 public class FilterUtils {
     private static final List<FilterAction> allFilters = new ArrayList<>();
-    private static Filter lastExecutedFilter = null;
+    private static Filter lastFilter = null;
 
     private FilterUtils() {
     }
@@ -74,15 +74,15 @@ public class FilterUtils {
         return filters;
     }
 
-    public static void setLastExecutedFilter(Filter lastExecutedFilter) {
-        if (lastExecutedFilter instanceof Fade) {
+    public static void setLastFilter(Filter lastFilter) {
+        if (lastFilter instanceof Fade) {
             return;
         }
-        FilterUtils.lastExecutedFilter = lastExecutedFilter;
+        FilterUtils.lastFilter = lastFilter;
     }
 
-    public static Optional<Filter> getLastExecutedFilter() {
-        return Optional.ofNullable(lastExecutedFilter);
+    public static Optional<Filter> getLastFilter() {
+        return Optional.ofNullable(lastFilter);
     }
 
     public static BufferedImage runRGBPixelOp(RGBPixelOp pixelOp, BufferedImage src, BufferedImage dest) {

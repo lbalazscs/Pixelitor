@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,11 +36,6 @@ public class ExtractChannelFilter extends Filter {
     }
 
     @Override
-    public void randomizeSettings() {
-        // no settings
-    }
-
-    @Override
     public boolean supportsGray() {
         return false;
     }
@@ -64,7 +59,7 @@ public class ExtractChannelFilter extends Filter {
             return (a << 24) | (r << 16) | (g << 8) | b;
         };
         String name = "Value = max(R,G,B)";
-        return rgbOpToFilterAction(rgbOp, name);
+        return rgbOp.toFilterAction(name);
     }
 
     public static FilterAction getDesaturateChannelFA() {
@@ -87,7 +82,7 @@ public class ExtractChannelFilter extends Filter {
 
             return (a << 24) | (r << 16) | (g << 8) | b;
         };
-        return rgbOpToFilterAction(rgbOp, "Desaturate");
+        return rgbOp.toFilterAction("Desaturate");
     }
 
     public static FilterAction getSaturationChannelFA() {
@@ -113,7 +108,7 @@ public class ExtractChannelFilter extends Filter {
 
             return (a << 24) | (r << 16) | (g << 8) | b;
         };
-        return rgbOpToFilterAction(rgbOp, "Saturation");
+        return rgbOp.toFilterAction("Saturation");
     }
 
     public static FilterAction getHueChannelFA() {
@@ -134,7 +129,7 @@ public class ExtractChannelFilter extends Filter {
                 return (a << 24) | (r << 16) | (g << 8) | b;
             }
         };
-        return rgbOpToFilterAction(rgbOp, "Hue");
+        return rgbOp.toFilterAction("Hue");
     }
 
     public static FilterAction getHueInColorsChannelFA() {
@@ -155,13 +150,6 @@ public class ExtractChannelFilter extends Filter {
                 return (a << 24) | newRGB; // add the real alpha
             }
         };
-        return rgbOpToFilterAction(rgbOp, "Hue (with colors)");
-    }
-
-    private static FilterAction rgbOpToFilterAction(RGBPixelOp rgbOp, String name) {
-        return new FilterAction(name,
-                () -> new ExtractChannelFilter(rgbOp))
-                .withoutGUI()
-                .withExtractChannelListName();
+        return rgbOp.toFilterAction("Hue (with colors)");
     }
 }

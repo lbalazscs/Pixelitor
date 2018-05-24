@@ -767,13 +767,13 @@ public class MenuBar extends JMenuBar {
     private static JMenu createFillSubmenu() {
         PMenu sub = new PMenu("Fill with");
 
-        sub.buildFilter(FOREGROUND.createFillFilterAction())
+        sub.buildFilter(FOREGROUND.asFillFilterAction())
                 .withKey(ALT_BACKSPACE)
                 .add();
-        sub.buildFilter(BACKGROUND.createFillFilterAction())
+        sub.buildFilter(BACKGROUND.asFillFilterAction())
                 .withKey(CTRL_BACKSPACE)
                 .add();
-        sub.addFilter(TRANSPARENT.createFillFilterAction());
+        sub.addFilter(TRANSPARENT.asFillFilterAction());
 
         sub.buildFilter(ColorWheel.NAME, ColorWheel::new)
                 .withFillListName()
@@ -982,7 +982,7 @@ public class MenuBar extends JMenuBar {
         sub.addSeparator();
 
         sub.addFilter(ChannelToTransparency.NAME, ChannelToTransparency::new);
-        sub.buildFilter(InvertTransparency.NAME, InvertTransparency::new)
+        sub.buildFilter(JHInvertTransparency.NAME, JHInvertTransparency::new)
                 .noGUI()
                 .add();
 

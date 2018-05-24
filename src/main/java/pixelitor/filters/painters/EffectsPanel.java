@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.filters.painters;
 
+import org.jdesktop.swingx.painter.effects.AreaEffect;
 import org.jdesktop.swingx.painter.effects.GlowPathEffect;
 import org.jdesktop.swingx.painter.effects.InnerGlowPathEffect;
 import org.jdesktop.swingx.painter.effects.NeonBorderEffect;
@@ -37,7 +38,8 @@ import static java.awt.Color.GREEN;
 import static java.awt.Color.WHITE;
 
 /**
- * Configuration panel for SwingX effects
+ * Configuration panel for SwingX area effects.
+ * See {@link AreaEffect}
  */
 public class EffectsPanel extends JPanel implements Resettable {
     public static final String GLOW_TAB_NAME = "Glow               ";
@@ -96,7 +98,6 @@ public class EffectsPanel extends JPanel implements Resettable {
                 defaultColor = effect.getBrushColor();
                 defaultWidth = effect.getEffectWidth();
             }
-
         }
         glowConfigurator = new SimpleEffectConfiguratorPanel(
                 "Glow", defaultEnabled, defaultColor, defaultWidth);

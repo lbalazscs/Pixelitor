@@ -1040,19 +1040,6 @@ public class ImageUtils {
         return dest;
     }
 
-    /**
-     * Fills the BufferedImage with the specified color
-     */
-    public static void fillImage(BufferedImage img, Color c) {
-        int[] pixels = getPixelsAsArray(img);
-
-        int fillColor = c.getRGB();
-
-        for (int i = 0; i < pixels.length; i++) {
-            pixels[i] = fillColor;
-        }
-    }
-
     public static int premultiply(int rgb) {
         int a = (rgb >>> 24) & 0xFF;
         int r = (rgb >>> 16) & 0xFF;

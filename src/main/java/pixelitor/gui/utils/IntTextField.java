@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 /**
- * A JTextfield that allows only input consisting of numbers and nothing else.
+ * A JTextfield that allows only input consisting
+ * of numbers and nothing else.
  */
 public class IntTextField extends JTextField implements KeyListener {
     private int minValue;
@@ -68,12 +69,10 @@ public class IntTextField extends JTextField implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-
     }
 
     public int getIntValue() {

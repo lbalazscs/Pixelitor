@@ -73,7 +73,7 @@ public enum OutputFormat {
         @Override
         void doSaveComposition(Composition comp, File file) {
             try {
-                OpenRaster.writeOpenRaster(comp, file, false);
+                OpenRaster.write(comp, file, false);
             } catch (IOException e) {
                 Messages.showException(e);
             }

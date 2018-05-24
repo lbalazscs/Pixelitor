@@ -174,11 +174,11 @@ public class ParamSet {
         return Utils.anyMatch(paramList, p -> p instanceof GradientParam);
     }
 
-    public List<FilterAction> getActionList() {
+    public List<FilterAction> getActions() {
         return actionList;
     }
 
-    public List<FilterParam> getParamList() {
+    public List<FilterParam> getParams() {
         return paramList;
     }
 

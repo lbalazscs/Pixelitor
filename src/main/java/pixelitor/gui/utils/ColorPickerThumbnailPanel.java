@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
+/**
+ * The left panel used in the "Mask from Color Range"
+ */
 public class ColorPickerThumbnailPanel extends ImagePanel {
     public ColorPickerThumbnailPanel(BufferedImage img,
                                      ColorSelectionListener changeListener) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,16 +8,17 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package pixelitor.filters.levels;
 
 import pixelitor.filters.lookup.LookupFactory;
+import pixelitor.utils.VisibleForTesting;
 
 import java.awt.image.LookupTable;
 
@@ -102,9 +103,7 @@ public class RGBLookup {
         }
     }
 
-
-    // From here test-only methods
-
+    @VisibleForTesting
     int mapRGBValue(int rgb) {
         int a = (rgb >>> 24) & 0xFF;
         int r = (rgb >>> 16) & 0xFF;
@@ -120,14 +119,17 @@ public class RGBLookup {
         return rgb;
     }
 
+    @VisibleForTesting
     int mapRed(int input) {
         return redMap[input];
     }
 
+    @VisibleForTesting
     int mapGreen(int input) {
         return greenMap[input];
     }
 
+    @VisibleForTesting
     int mapBlue(int input) {
         return blueMap[input];
     }

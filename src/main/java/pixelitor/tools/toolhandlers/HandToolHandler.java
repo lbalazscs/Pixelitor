@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import java.awt.event.MouseEvent;
  */
 public class HandToolHandler extends ToolHandler {
     private boolean handToolForwarding = false;
-    private boolean normalToolUsage = false;
+    private boolean currentToolUsage = false;
     private boolean spaceDown = false;
 
     private final Cursor cursor;
@@ -47,7 +47,7 @@ public class HandToolHandler extends ToolHandler {
             handToolForwarding = true;
             return true;
         }
-        normalToolUsage = true;
+        currentToolUsage = true;
         handToolForwarding = false;
 
         // forwards the mouse event to the next handler
@@ -61,20 +61,19 @@ public class HandToolHandler extends ToolHandler {
             return true;
         }
 
-        normalToolUsage = true;
+        currentToolUsage = true;
 
         return false;
     }
 
     @Override
     boolean mouseReleased(MouseEvent e, ImageComponent ic) {
-        normalToolUsage = false;
+        currentToolUsage = false;
 
         if (handToolForwarding) {
             Tools.HAND.mouseReleased(e, ic);
             handToolForwarding = false;
 
-//            ImageComponents.setCursorForAll(cursor);
             return true;
         }
 
@@ -83,7 +82,7 @@ public class HandToolHandler extends ToolHandler {
 
     public void spacePressed() {
         if (!spaceDown) { // this is called all the time while the space is held down, but we are interested only in ist first call
-            if (!normalToolUsage) {
+            if (!currentToolUsage) {
                 ImageComponents.setCursorForAll(Tools.HAND.getCursor());
             }
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
+import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 
 import javax.swing.*;
@@ -28,8 +29,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * The GUI container for LayerButton objects.
- * Each ImageComponent has its own LayersPanel instance.
+ * The GUI container for {@link LayerButton} objects.
+ * Each {@link ImageComponent} has its own {@link LayersPanel} instance.
  */
 public class LayersPanel extends JLayeredPane {
     private final List<LayerButton> layerButtons = new ArrayList<>();
@@ -41,9 +42,9 @@ public class LayersPanel extends JLayeredPane {
         dragReorderHandler = new DragReorderHandler(this);
     }
 
-    public void addLayerButton(LayerButton button, int newLayerIndex) {
+    public void addLayerButton(LayerButton button, int atIndex) {
         buttonGroup.add(Objects.requireNonNull(button));
-        layerButtons.add(newLayerIndex, button);
+        layerButtons.add(atIndex, button);
 
         add(button, JLayeredPane.DEFAULT_LAYER);
 
@@ -91,8 +92,8 @@ public class LayersPanel extends JLayeredPane {
     }
 
     /**
-     * Override doLayout() so that when the whole window is resized, the
-     * layer buttons are still laid out correctly
+     * Override doLayout() so that when the whole window is
+     * resized, the layer buttons are still laid out correctly
      */
     @Override
     public void doLayout() {

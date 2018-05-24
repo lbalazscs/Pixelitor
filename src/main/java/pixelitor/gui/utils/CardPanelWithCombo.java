@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 /**
- *
+ * A panel with {@link CardLayout}, and a {@link JComboBox}
+ * that can select the current card
  */
 public class CardPanelWithCombo extends JPanel implements ItemListener {
     private final DefaultComboBoxModel<String> selectorModel;

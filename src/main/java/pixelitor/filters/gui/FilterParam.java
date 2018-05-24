@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,14 +29,36 @@ public interface FilterParam extends FilterSetting, Resettable {
      */
     void randomize();
 
+    /**
+     * A filter param can implement this to
+     * adjust the maximum and default values
+     * according to the size of the current image
+     */
     void considerImageSize(Rectangle bounds);
 
+    /**
+     * Captures the state of this parameter into the returned
+     * "memento" object.
+     * Implemented only for parameters that can be animated.
+     */
     ParamState copyState();
 
+    /**
+     * Sets the internal state according to the given {@link ParamState}
+     * Implemented only for parameters that can be animated.
+     */
     void setState(ParamState state);
 
+    /**
+     * True if the value can be interpolated in some useful way.
+     * All implementing classes return either always true or always false.
+     */
     boolean canBeAnimated();
 
+    /**
+     * Whether a filter parameter was configured to be
+     * affected when the user presses "Randomize"
+     */
     boolean ignoresRandomize();
 
     void setToolTip(String tip);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,9 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 
 /**
- * Mystic Rose - https://en.wikipedia.org/wiki/Complete_graph
+ * "Mystic Rose" shape filter
+ *
+ * See https://en.wikipedia.org/wiki/Complete_graph
  */
 public class MysticRose extends ShapeFilter {
     private final RangeParam nrPoints = new RangeParam("Number of Points", 3, 10, 42);

@@ -42,8 +42,4 @@ public class OneColorFilter extends Filter {
         g.dispose();
         return dest;
     }
-
-    @Override
-    public void randomizeSettings() {
-    }
 }

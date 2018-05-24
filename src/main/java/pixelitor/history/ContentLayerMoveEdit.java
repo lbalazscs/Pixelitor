@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,12 +41,12 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
     private final TranslationEdit translationEdit;
 
     public ContentLayerMoveEdit(ContentLayer layer, BufferedImage backupImage, int oldTX, int oldTY) {
-        super(layer.getComp(), NAME);
+        super(NAME, layer.getComp());
 
         this.layer = layer;
 
         if (backupImage != null) {
-            imageEdit = new ImageEdit(comp, "", (ImageLayer) layer,
+            imageEdit = new ImageEdit("", comp, (ImageLayer) layer,
                     backupImage, true, false);
             imageEdit.setEmbedded(true);
         }

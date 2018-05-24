@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,7 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
 /**
- * A GUI element representing a layer in an image
+ * The thing in the "Layers" part of the GUI that represents a layer in a composition
  */
 public class LayerButton extends JToggleButton {
     private static final Icon OPEN_EYE_ICON = IconUtils.loadIcon("eye_open.png");
@@ -48,7 +48,8 @@ public class LayerButton extends JToggleButton {
     public static final int BORDER_WIDTH = 2;
     private DragReorderHandler dragReorderHandler;
 
-    // In pxc files the mask might be added before the drag handler
+    // Most often false, but when opening serialized
+    // pxc files, the mask might be added before the drag handler
     // and in unit tests the drag handler is not added at all.
     private boolean maskAddedBeforeDragHandler;
 
@@ -167,7 +168,6 @@ public class LayerButton extends JToggleButton {
     }
 
     private static void configureLayerIcon(JLabel layerIcon, String name) {
-//        layerIcon.putClientProperty("JComponent.sizeVariant", "mini");
         layerIcon.setName(name);
     }
 
@@ -236,7 +236,7 @@ public class LayerButton extends JToggleButton {
         handler.attachToComponent(layerIconLabel);
 
         if (maskAddedBeforeDragHandler) {
-            assert maskIconLabel != null;
+            assert hasMaskIcon();
             handler.attachToComponent(maskIconLabel);
         }
     }
@@ -246,9 +246,13 @@ public class LayerButton extends JToggleButton {
         handler.detachFromComponent(nameEditor);
         handler.detachFromComponent(layerIconLabel);
 
-        if (maskIconLabel != null) {
+        if (hasMaskIcon()) {
             handler.detachFromComponent(maskIconLabel);
         }
+    }
+
+    private boolean hasMaskIcon() {
+        return maskIconLabel != null;
     }
 
     public int getStaticY() {
@@ -298,7 +302,7 @@ public class LayerButton extends JToggleButton {
 
             Runnable edt = () -> {
                 if (isMask) {
-                    if (maskIconLabel == null) {
+                    if (!hasMaskIcon()) {
                         return;
                     }
                     boolean disabledMask = !layer.getParent().isMaskEnabled();
@@ -419,7 +423,7 @@ public class LayerButton extends JToggleButton {
     public String toString() {
         return "LayerButton{" +
                 "name='" + getLayerName() + '\'' +
-                "is maskIconLabel null: " + (maskIconLabel == null ? "YES" : "NO") +
+                "has mask icon: " + (hasMaskIcon() ? "YES" : "NO") +
                 '}';
     }
 }

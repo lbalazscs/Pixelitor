@@ -124,10 +124,10 @@ public class OptimizedJpegSavePanel extends JPanel {
 
         JpegOutput.ImageWithSize[] imageWithSize = new JpegOutput.ImageWithSize[1];
         Runnable task = () -> imageWithSize[0] = JpegOutput.writeJPGtoPreviewImage(this.image, settings);
-        Utils.executeWithBusyCursor(this, task);
+        Utils.runWithBusyCursor(this, task);
 
         BufferedImage newPreview = imageWithSize[0].getImage();
-        optimized.updateImage(newPreview);
+        optimized.changeImage(newPreview);
 
         int numBytes = imageWithSize[0].getSize();
         sizeLabel.setText("Size: " + Utils.bytesToString(numBytes));

@@ -305,7 +305,7 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
         }
         Convolve kernelFilter = (Convolve) filter;
         kernelFilter.setKernelMatrix(values);
-        super.executeFilterPreview();
+        super.runFilterPreview();
     }
 
     private void setValues(float[] values) {

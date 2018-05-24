@@ -95,7 +95,7 @@ public class TextLayer extends ContentLayer {
                 textLayer.updateLayerName();
 
                 // now it is safe to add it to the history
-                NewLayerEdit newLayerEdit = new NewLayerEdit(comp, textLayer, activeLayerBefore, "New Text Layer", oldViewMode);
+                NewLayerEdit newLayerEdit = new NewLayerEdit("New Text Layer", comp, textLayer, activeLayerBefore, oldViewMode);
                 History.addEdit(newLayerEdit);
             }
 

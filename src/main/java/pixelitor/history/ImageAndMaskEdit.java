@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,16 +36,16 @@ public class ImageAndMaskEdit extends ImageEdit {
     private final boolean canRepeat;
     private final ImageEdit maskImageEdit;
 
-    public ImageAndMaskEdit(Composition comp, String name, ImageLayer layer,
+    public ImageAndMaskEdit(String name, Composition comp, ImageLayer layer,
                             BufferedImage backupImage,
                             BufferedImage maskBackupImage,
                             boolean canRepeat) {
-        super(comp, name, layer, backupImage, true, canRepeat);
+        super(name, comp, layer, backupImage, true, canRepeat);
         this.canRepeat = canRepeat;
 
         assert layer.hasMask();
 
-        maskImageEdit = new ImageEdit(comp, name,
+        maskImageEdit = new ImageEdit(name, comp,
                 layer.getMask(), maskBackupImage, true, canRepeat);
 
         fadeable = false;

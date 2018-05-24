@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,6 +37,7 @@ public class GridBagHelper {
     private static final GridBagConstraints labelConstraint = new GridBagConstraints(0, 0, 1, 1, 0.0, 1.0, EAST, NONE, insets, 0, 0);
     private static final GridBagConstraints nextControlConstraint = new GridBagConstraints(0, 0, 1, 1, 0.0, 1.0, WEST, HORIZONTAL, insets, 0, 0);
     private static final GridBagConstraints nextLastControlConstraint = new GridBagConstraints(0, 0, REMAINDER, 1, 0.0, 1.0, WEST, HORIZONTAL, insets, 0, 0);
+
     private final Container container;
     private int autoIncrementedGridY = 0;
 
@@ -58,10 +59,10 @@ public class GridBagHelper {
     /**
      * Adds the specified control to the right of the last label
      */
-    public void addControl(Component component) {
+    public void addControl(Component c) {
         nextControlConstraint.gridx = labelConstraint.gridx + 1;
         nextControlConstraint.gridy = labelConstraint.gridy;
-        container.add(component, nextControlConstraint);
+        container.add(c, nextControlConstraint);
     }
 
     public void addLabelWithTwoControls(String labelText, Component c1, Component c2) {
@@ -69,9 +70,9 @@ public class GridBagHelper {
         addNextControl(c2);
     }
 
-    public void addLabelWithControlNoFill(String labelText, Component component) {
+    public void addLabelWithControlNoFill(String labelText, Component c) {
         addLabel(labelText, 0, autoIncrementedGridY);
-        addControlNoFill(component);
+        addControlNoFill(c);
         autoIncrementedGridY++;
     }
 
@@ -79,40 +80,40 @@ public class GridBagHelper {
         addLabelWithControl(text1, new JLabel(text2));
     }
 
-    public void addTwoControls(Component comp1, Component comp2) {
-        addTwoControls(comp1, comp2, autoIncrementedGridY);
+    public void addTwoControls(Component c1, Component c2) {
+        addTwoControls(c1, c2, autoIncrementedGridY);
         autoIncrementedGridY++;
     }
 
-    public void addLabelWithControl(String labelText, Component component) {
-        addLabelWithControl(labelText, component, autoIncrementedGridY);
+    public void addLabelWithControl(String labelText, Component c) {
+        addLabelWithControl(labelText, c, autoIncrementedGridY);
         autoIncrementedGridY++;
     }
 
-    public void addLabelWithControl(String labelText, Component component, int gridY) {
+    public void addLabelWithControl(String labelText, Component c, int gridY) {
         JLabel label = new JLabel(labelText, SwingConstants.RIGHT);
-        addTwoControls(label, component, gridY);
+        addTwoControls(label, c, gridY);
     }
 
-    private void addTwoControls(Component comp1, Component comp2, int gridY) {
+    private void addTwoControls(Component c1, Component c2, int gridY) {
         labelConstraint.gridx = 0;
         labelConstraint.gridy = gridY;
-        container.add(comp1, labelConstraint);
+        container.add(c1, labelConstraint);
 
         nextControlConstraint.gridx = 1;
         nextControlConstraint.gridy = gridY;
 
-        container.add(comp2, nextControlConstraint);
+        container.add(c2, nextControlConstraint);
     }
 
     /**
      * Adds the specified control to the right of the last label without stretching
      */
-    public void addControlNoFill(Component component) {
+    public void addControlNoFill(Component c) {
         nextControlConstraint.gridx = labelConstraint.gridx + 1;
         nextControlConstraint.gridy = labelConstraint.gridy;
         nextControlConstraint.fill = NONE;
-        container.add(component, nextControlConstraint);
+        container.add(c, nextControlConstraint);
 
         nextControlConstraint.fill = HORIZONTAL; // reset
     }
@@ -120,26 +121,26 @@ public class GridBagHelper {
     /**
      * Adds the specified control to the right of the last control
      */
-    public void addNextControl(Component component) {
+    public void addNextControl(Component c) {
         nextControlConstraint.gridx++;
-        container.add(component, nextControlConstraint);
+        container.add(c, nextControlConstraint);
     }
 
-    public void addLabelWithLastControl(String name, Component component) {
+    public void addLabelWithLastControl(String name, Component c) {
         addLabel(name, 0, autoIncrementedGridY);
-        addLastControl(component);
+        addLastControl(c);
         autoIncrementedGridY++;
     }
 
-    public void addLastControl(Component component) {
+    public void addLastControl(Component c) {
         nextLastControlConstraint.gridx = labelConstraint.gridx + 1;
         nextLastControlConstraint.gridy = labelConstraint.gridy;
-        container.add(component, nextLastControlConstraint);
+        container.add(c, nextLastControlConstraint);
     }
 
-    public void addOnlyControlToRow(Component component, int row) {
+    public void addOnlyControlToRow(Component c, int row) {
         nextLastControlConstraint.gridx = 0;
         nextLastControlConstraint.gridy = row;
-        container.add(component, nextLastControlConstraint);
+        container.add(c, nextLastControlConstraint);
     }
 }

@@ -115,16 +115,16 @@ public final class GUIUtils {
 
         int row = 0;
 
-        GridBagHelper gbHelper = new GridBagHelper(p);
+        GridBagHelper gbh = new GridBagHelper(p);
         for (FilterParam param : params) {
             JComponent control = param.createGUI();
 
             int numColumns = param.getNumGridBagCols();
             if (numColumns == 1) {
-                gbHelper.addOnlyControlToRow(control, row);
+                gbh.addOnlyControlToRow(control, row);
             } else if (numColumns == 2) {
-                gbHelper.addLabel(param.getName() + ':', 0, row);
-                gbHelper.addLastControl(control);
+                gbh.addLabel(param.getName() + ':', 0, row);
+                gbh.addLastControl(control);
             }
 
             row++;

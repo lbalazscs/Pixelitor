@@ -34,7 +34,7 @@ public class TextLayerRasterizeEdit extends PixelitorEdit {
     private MaskViewMode maskViewMode = null;
 
     public TextLayerRasterizeEdit(Composition comp, TextLayer before, ImageLayer after) {
-        super(comp, "Text Layer Rasterize");
+        super("Text Layer Rasterize", comp);
 
         this.before = before;
         this.after = after;

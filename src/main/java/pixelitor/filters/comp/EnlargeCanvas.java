@@ -76,7 +76,7 @@ public class EnlargeCanvas implements CompAction {
                     AffineTransform.getTranslateInstance(west, north));
         }
 
-        MultiLayerEdit edit = new MultiLayerEdit(comp, editName, backup);
+        MultiLayerEdit edit = new MultiLayerEdit(editName, comp, backup);
         History.addEdit(edit);
 
         Canvas canvas = comp.getCanvas();

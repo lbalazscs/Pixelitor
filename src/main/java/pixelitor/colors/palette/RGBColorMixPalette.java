@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,30 +17,33 @@
 
 package pixelitor.colors.palette;
 
-import com.jhlabs.image.ImageMath;
 import pixelitor.colors.FgBgColors;
 
 import java.awt.Color;
+
+import static com.jhlabs.image.ImageMath.mixColors;
 
 /**
  * A palette that mixes the foreground color with the background color
  * using the RGB color space to interpolate between them
  */
 public class RGBColorMixPalette extends Palette {
+    // static palette-specific variables so that they
+    // are remembered between dialog sessions
     private static int lastRows = 7;
     private static int lastCols = 10;
 
     private static final float MAX_BRI_DEVIATION = 0.5f;
     private final int rgb;
     private final int otherRGB;
-    private final boolean fg;
+    private final boolean startWithFg;
 
-    public RGBColorMixPalette(boolean fg) {
+    public RGBColorMixPalette(boolean startWithFg) {
         super(lastRows, lastCols);
-        this.fg = fg;
+        this.startWithFg = startWithFg;
 
         Color color, otherColor;
-        if (fg) {
+        if (startWithFg) {
             color = FgBgColors.getFG();
             otherColor = FgBgColors.getBG();
         } else {
@@ -68,10 +71,10 @@ public class RGBColorMixPalette extends Palette {
                     int rowsMiddle = numRows / 2;
                     if (y < rowsMiddle) {
                         float mixFactor = (rowsMiddle - y) / (rowsMiddle + 1.0f);
-                        mixed = ImageMath.mixColors(mixFactor, mixed, 0xFF000000);
+                        mixed = mixColors(mixFactor, mixed, 0xFF000000);
                     } else if (y > rowsMiddle) {
                         float mixFactor = (y - rowsMiddle) / (rowsMiddle + 1.0f);
-                        mixed = ImageMath.mixColors(mixFactor, mixed, 0xFFFFFFFF);
+                        mixed = mixColors(mixFactor, mixed, 0xFFFFFFFF);
                     }
                     c = new Color(mixed);
                 }
@@ -82,29 +85,29 @@ public class RGBColorMixPalette extends Palette {
 
     private int getMixed(int x) {
         float mixFactor = calcMixFactor(x);
-        int mixed = ImageMath.mixColors(mixFactor, this.rgb, otherRGB);
+        int mixed = mixColors(mixFactor, this.rgb, otherRGB);
 
         RGBPaletteConfig c = (RGBPaletteConfig) config;
         float cyanRed = c.getCyanRed();
 
         if (cyanRed > 0.5f) {
-            mixed = ImageMath.mixColors(cyanRed - 0.5f, mixed, 0xFF_FF_00_00);
+            mixed = mixColors(cyanRed - 0.5f, mixed, 0xFF_FF_00_00);
         } else {
-            mixed = ImageMath.mixColors(0.5f - cyanRed, mixed, 0xFF_00_FF_FF);
+            mixed = mixColors(0.5f - cyanRed, mixed, 0xFF_00_FF_FF);
         }
 
         float magentaGreen = c.getMagentaGreen();
         if (magentaGreen > 0.5f) {
-            mixed = ImageMath.mixColors(magentaGreen - 0.5f, mixed, 0xFF_00_FF_00);
+            mixed = mixColors(magentaGreen - 0.5f, mixed, 0xFF_00_FF_00);
         } else {
-            mixed = ImageMath.mixColors(0.5f - magentaGreen, mixed, 0xFF_FF_00_FF);
+            mixed = mixColors(0.5f - magentaGreen, mixed, 0xFF_FF_00_FF);
         }
 
         float yellowBlue = c.getYellowBlue();
         if (yellowBlue > 0.5f) {
-            mixed = ImageMath.mixColors(yellowBlue - 0.5f, mixed, 0xFF_00_00_FF);
+            mixed = mixColors(yellowBlue - 0.5f, mixed, 0xFF_00_00_FF);
         } else {
-            mixed = ImageMath.mixColors(0.5f - yellowBlue, mixed, 0xFF_FF_FF_00);
+            mixed = mixColors(0.5f - yellowBlue, mixed, 0xFF_FF_FF_00);
         }
 
         return mixed;
@@ -123,6 +126,8 @@ public class RGBColorMixPalette extends Palette {
 
     @Override
     public String getDialogTitle() {
-        return fg ? "RGB Mix with Background" : "RGB Mix with Foreground";
+        return startWithFg ?
+                "RGB Mix with Background" :
+                "RGB Mix with Foreground";
     }
 }

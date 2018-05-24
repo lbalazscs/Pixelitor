@@ -21,7 +21,7 @@ import javax.swing.*;
 import java.awt.event.ActionListener;
 
 /**
- * Creates a button that executes an action when pushed
+ * Creates a button that runs an action when pushed
  */
 public class FilterAction implements FilterSetting {
     private final ActionListener actionListener;
@@ -106,7 +106,7 @@ public class FilterAction implements FilterSetting {
     }
 
     /**
-     * A button that executes first its ActionListener,
+     * A button that runs first its ActionListener,
      * and after then its ParamAdjustmentListener
      */
     private static class OrderedExecutionButton extends JButton {

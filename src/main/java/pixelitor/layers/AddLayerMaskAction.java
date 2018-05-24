@@ -95,7 +95,7 @@ public class AddLayerMaskAction extends AbstractAction implements ActiveImageCha
     }
 
     @Override
-    public void activeCompLayerCountChanged(Composition comp, int newLayerCount) {
+    public void numLayersChanged(Composition comp, int newLayerCount) {
     }
 
     @Override

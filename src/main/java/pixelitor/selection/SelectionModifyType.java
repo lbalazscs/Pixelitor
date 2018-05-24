@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,30 +26,30 @@ import java.awt.geom.Area;
 public enum SelectionModifyType {
     EXPAND("Expand") {
         @Override
-        public Shape createModifiedShape(Area previous, Area outlineShape) {
+        public Shape modify(Area previous, Area outlineShape) {
             previous.add(outlineShape);
             return previous;
         }
     }, CONTRACT("Contract") {
         @Override
-        public Shape createModifiedShape(Area previous, Area outlineShape) {
+        public Shape modify(Area previous, Area outlineShape) {
             previous.subtract(outlineShape);
             return previous;
         }
     }, BORDER("Border") {
         @Override
-        public Shape createModifiedShape(Area previous, Area outlineShape) {
+        public Shape modify(Area previous, Area outlineShape) {
             return outlineShape;
         }
     }, BORDER_OUT("Border Outwards Only") {
         @Override
-        public Shape createModifiedShape(Area previous, Area outlineShape) {
+        public Shape modify(Area previous, Area outlineShape) {
             outlineShape.subtract(previous);
             return outlineShape;
         }
     }, BORDER_IN("Border Inwards Only") {
         @Override
-        public Shape createModifiedShape(Area previous, Area outlineShape) {
+        public Shape modify(Area previous, Area outlineShape) {
             previous.intersect(outlineShape);
             return previous;
         }
@@ -61,7 +61,11 @@ public enum SelectionModifyType {
         this.guiName = guiName;
     }
 
-    public abstract Shape createModifiedShape(Area previous, Area outlineShape);
+    /**
+     * Calculates a new shape from the existing one
+     * and its stroked outline shape.
+     */
+    public abstract Shape modify(Area previous, Area outlineShape);
 
     @Override
     public String toString() {

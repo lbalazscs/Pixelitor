@@ -37,12 +37,12 @@ public class ChannelMixerGUI extends ParametrizedFilterGUI {
     @Override
     protected void setupGUI(ParamSet params, Object otherInfo, ShowOriginal addShowOriginal) {
         JPanel upperPanel = new JPanel(new FlowLayout());
-        JPanel leftPanel = GUIUtils.arrangeParamsInVerticalGridBag(params.getParamList());
+        JPanel leftPanel = GUIUtils.arrangeParamsInVerticalGridBag(params.getParams());
         JPanel rightPanel = createPresetsPanel((Action[]) otherInfo);
         upperPanel.add(leftPanel);
         upperPanel.add(rightPanel);
 
-        JPanel buttonsPanel = createFilterActionsPanel(params.getActionList(), addShowOriginal, 5);
+        JPanel buttonsPanel = createFilterActionsPanel(params.getActions(), addShowOriginal, 5);
 
         setLayout(new BorderLayout());
         add(upperPanel, BorderLayout.CENTER);

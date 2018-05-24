@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,20 +22,24 @@ import pixelitor.filters.gui.RangeParam;
 
 import java.awt.Color;
 
+/**
+ * The model (the GUI-independent part) of the settings
+ * for one channel in the Levels filter
+ */
 public class OneChannelLevelsModel implements ParamAdjustmentListener {
     private static final int BLACK_DEFAULT = 0;
     private static final int WHITE_DEFAULT = 255;
 
-    private GrayScaleLookup adjustment = GrayScaleLookup.getDefault();
+    private GrayScaleLookup lookup = GrayScaleLookup.getIdentity();
 
     private final RangeParam inputBlack;
     private final RangeParam inputWhite;
     private final RangeParam outputBlack;
     private final RangeParam outputWhite;
-    private final LevelsAdjustmentType type;
+    private final EditedChannelsType type;
     private final LevelsModel bigModel;
 
-    public OneChannelLevelsModel(LevelsAdjustmentType type, LevelsModel bigModel) {
+    public OneChannelLevelsModel(EditedChannelsType type, LevelsModel bigModel) {
         this.type = type;
         this.bigModel = bigModel;
 
@@ -78,8 +82,8 @@ public class OneChannelLevelsModel implements ParamAdjustmentListener {
         return type.getName();
     }
 
-    public GrayScaleLookup getAdjustment() {
-        return adjustment;
+    public GrayScaleLookup getLookup() {
+        return lookup;
     }
 
     @Override
@@ -90,7 +94,7 @@ public class OneChannelLevelsModel implements ParamAdjustmentListener {
     }
 
     private void updateAdjustment() {
-        adjustment = new GrayScaleLookup(
+        lookup = new GrayScaleLookup(
                 inputBlack.getValue(),
                 inputWhite.getValue(),
                 outputBlack.getValue(),

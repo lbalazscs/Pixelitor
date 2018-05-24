@@ -72,7 +72,7 @@ public class DeleteActiveLayerAction extends AbstractAction implements ActiveIma
     }
 
     @Override
-    public void activeCompLayerCountChanged(Composition comp, int newLayerCount) {
+    public void numLayersChanged(Composition comp, int newLayerCount) {
         if (newLayerCount <= 1) {
             setEnabled(false);
         } else {

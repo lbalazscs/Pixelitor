@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * Displays a JComboBox as the GUI for an IntChoiceParam or an EnumParam
+ * Displays a JComboBox as the GUI for an
+ * {@link IntChoiceParam} or an {@link EnumParam}
  */
 public class ComboBoxParamGUI extends JPanel implements ActionListener, ParamGUI {
     private final JComboBox<IntChoiceParam.Value> comboBox;
@@ -75,7 +76,7 @@ public class ComboBoxParamGUI extends JPanel implements ActionListener, ParamGUI
     @Override
     public void actionPerformed(ActionEvent e) {
 //        model.setSelectedItem(comboBox.getSelectedItem());
-        defaultButton.updateState();
+        defaultButton.updateIcon();
     }
 
     @Override

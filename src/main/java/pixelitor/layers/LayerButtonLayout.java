@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ import java.awt.Dimension;
 import java.awt.LayoutManager;
 
 /**
- * A layout manager for a layout button
+ * A layout manager for a {@link LayerButton}
  */
 public class LayerButtonLayout implements LayoutManager {
     private Component nameEditor;
@@ -50,7 +50,7 @@ public class LayerButtonLayout implements LayoutManager {
 
     // The labels will appear to have thumbSize, but in reality
     // they must be larger in order to leave space to the borders
-    public static int labelSize;
+    private static int labelSize;
 
     private static int height;
 
@@ -126,7 +126,7 @@ public class LayerButtonLayout implements LayoutManager {
             // lay out the mask
             if (maskLabel != null) {
                 // no need to add distance between layer and mask icons
-                // because there will be a visual distance because of the borders
+                // because there will be a visual distance due to the borders
                 maskLabel.setBounds(startX, labelStartY, labelSize, labelSize);
                 startX += (labelSize + GAP);
             } else {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * "Flower of Life" filter
+ * "Flower of Life" shape filter
  */
 public class FlowerOfLife extends ShapeFilter {
     private final static int GRID_TYPE_TRIANGULAR = 1;
@@ -86,9 +86,6 @@ public class FlowerOfLife extends ShapeFilter {
                 circles.addAll(neighbors);
             }
         }
-
-//        int numCircles = circles.size();
-//        System.out.println("FlowerOfLife::createShape: numIterations = " + numIterations + ", numCircles = " + numCircles);
 
         for (Circle circle : circles) {
             shape.append(circle.toShape(), false);

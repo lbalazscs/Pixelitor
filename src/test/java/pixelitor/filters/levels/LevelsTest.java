@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -140,7 +140,7 @@ public class LevelsTest {
     }
 
     private RGBLookup getCalculatedLookup() {
-        verify(executor, times(1)).executeFilterPreview();
+        verify(executor, times(1)).runFilterPreview();
         verify(levels, times(1)).setRGBLookup(captor.capture());
         return captor.getValue();
     }

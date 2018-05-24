@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import javax.swing.event.ChangeListener;
 import java.awt.FlowLayout;
 
 /**
- * The GUI for a BooleanParam.
+ * The GUI for a {@link BooleanParam}.
  */
 public class BooleanParamGUI extends JPanel implements ParamGUI {
     private final BooleanParam model;
@@ -49,7 +49,7 @@ public class BooleanParamGUI extends JPanel implements ParamGUI {
             // Swing is not consistent: in the case of JComboBox, action
             // listeners are called when the component is changed indirectly,
             // but not in the case of JCheckBox
-            checkBox.addChangeListener(e -> defaultButton.updateState());
+            checkBox.addChangeListener(e -> defaultButton.updateIcon());
         }
     }
 

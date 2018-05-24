@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,25 +25,27 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
+/**
+ * A panel that shows an image,
+ * optionally on a checkerboard
+ */
 public class ImagePanel extends JPanel {
     protected BufferedImage image;
     private final boolean drawCheckerBoard;
     private CheckerboardPainter checkerboardPainter;
 
-    public ImagePanel(boolean drawCheckerBoard) {
-        this.drawCheckerBoard = drawCheckerBoard;
-        if (drawCheckerBoard) {
+    public ImagePanel(boolean useCheckerBoard) {
+        this.drawCheckerBoard = useCheckerBoard;
+        if (useCheckerBoard) {
             checkerboardPainter = ImageUtils.createCheckerboardPainter();
         }
     }
 
-    // used for the original
     public void setImage(BufferedImage image) {
         this.image = image;
     }
 
-    // used for the preview
-    public void updateImage(BufferedImage newImage) {
+    public void changeImage(BufferedImage newImage) {
         if (image != null) {
             image.flush();
         }

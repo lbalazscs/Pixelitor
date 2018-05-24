@@ -66,16 +66,16 @@ import static pixelitor.layers.ImageLayer.State.SHOW_ORIGINAL;
 /**
  * An image layer.
  * <p>
- * Filters without dialog are executed as ChangeReason.OP_WITHOUT_DIALOG on the EDT.
+ * Filters without dialog are run as ChangeReason.FILTER_WITHOUT_DIALOG on the EDT.
  * The filter asks getFilterSource() in the NORMAL state, and
  * (if there is no selection) the image (not a copy!) is returned as the filter source.
  * The filter transforms the image, and calls filterWithoutDialogFinished
  * with the transformed image.
  * <p>
- * Filters with dialog are executed as ChangeReason.OP_PREVIEW on the EDT.
+ * Filters with dialog are executed as {@link ChangeReason.PREVIEW} on the EDT.
  * startPreviewing() is called when a new dialog appears,
  * right before creating the adjustment panel.
- * Before executing a filter with dialog, startNewPreviewFromDialog() is called
+ * Before running a filter with dialog, startNewPreviewFromDialog() is called
  * (does nothing in the current implementation), then the filter is executed,
  * and each execution is followed by changePreviewImage().
  * At the end, depending on the user action, dialogAccepted()
@@ -304,7 +304,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     public void replaceImage(BufferedImage newImage, String editName) {
         BufferedImage oldImage = image;
         setImage(newImage);
-        ImageEdit edit = new ImageEdit(comp, editName, this, oldImage, true, false);
+        ImageEdit edit = new ImageEdit(editName, comp, this, oldImage, true, false);
         History.addEdit(edit);
 
         updateIconImage();
@@ -351,7 +351,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         assert previewImage != null;
 
         if (imageContentChanged) {
-            ImageEdit edit = new ImageEdit(comp, filterName, this, getImageOrSubImageIfSelected(true, true),
+            ImageEdit edit = new ImageEdit(filterName, comp, this, getImageOrSubImageIfSelected(true, true),
                     false, true);
             History.addEdit(edit);
         }
@@ -469,7 +469,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             throw new IllegalStateException("imageForUndo == image");
         }
         assert imageForUndo != null;
-        ImageEdit edit = new ImageEdit(comp, filterName, this,
+        ImageEdit edit = new ImageEdit(filterName, comp, this,
                 imageForUndo, false, true);
         History.addEdit(edit);
 

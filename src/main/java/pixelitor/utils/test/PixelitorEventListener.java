@@ -28,16 +28,16 @@ import pixelitor.layers.Layer;
 import pixelitor.utils.ActiveImageChangeListener;
 
 /**
- * This class is used for tracking what happens is long-running
- * automatic tests.
+ * This class is used for tracking what happens
+ * in long-running automatic tests.
  * It listens to changes and generates events
  */
 public class PixelitorEventListener implements GlobalLayerChangeListener,
         GlobalLayerMaskChangeListener, ActiveImageChangeListener {
 
     public PixelitorEventListener() {
-        if (Build.CURRENT == Build.FINAL) {
-            throw new IllegalStateException("this should be used for debugging");
+        if (Build.CURRENT.isFinal()) {
+            throw new IllegalStateException("this should be only used for debugging");
         }
     }
 
@@ -48,7 +48,7 @@ public class PixelitorEventListener implements GlobalLayerChangeListener,
     }
 
     @Override
-    public void activeCompLayerCountChanged(Composition comp, int newLayerCount) {
+    public void numLayersChanged(Composition comp, int newLayerCount) {
         Events.postListenerEvent("activeCompLayerCountChanged, newCount = " + newLayerCount, comp, null);
     }
 

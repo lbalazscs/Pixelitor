@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ public class LayerOrderChangeEdit extends PixelitorEdit {
     private final int newLayerIndex;
 
     public LayerOrderChangeEdit(Composition comp, int oldLayerIndex, int newLayerIndex) {
-        super(comp, "Layer Order Change");
+        super("Layer Order Change", comp);
 
         this.oldLayerIndex = oldLayerIndex;
         this.newLayerIndex = newLayerIndex;

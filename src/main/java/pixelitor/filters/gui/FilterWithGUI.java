@@ -28,18 +28,21 @@ public abstract class FilterWithGUI extends Filter {
     }
 
     /**
-     * Creates a new adjustment panel for this GUI filter
+     * Creates a new {@link FilterGUI} for this GUI filter.
      * The panel must be created at the moment of this call (cannot be cached)
-     * Creating an adjustment panel should also automatically execute the first
+     * Creating a {@link FilterGUI} should also automatically run the first
      * preview run of this filter based on the default settings
      */
     public abstract FilterGUI createGUI(Drawable dr);
+
+    public abstract void randomizeSettings();
 
     @Override
     public void startOn(Drawable dr) {
         dr.startPreviewing();
 
-        FilterGUI p = createGUI(dr);
-        FilterGUIDialog.showDialog(p, this, dr);
+        FilterGUI gui = createGUI(dr);
+        FilterDialog dialog = new FilterDialog(gui, this, dr);
+        dialog.setVisible(true);
     }
 }

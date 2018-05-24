@@ -89,7 +89,7 @@ public class LayerMoveAction extends AbstractAction implements ActiveImageChange
     }
 
     @Override
-    public void activeCompLayerCountChanged(Composition comp, int newLayerCount) {
+    public void numLayersChanged(Composition comp, int newLayerCount) {
         enableDisable(comp);
     }
 

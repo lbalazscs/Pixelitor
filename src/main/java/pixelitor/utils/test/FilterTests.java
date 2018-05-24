@@ -26,6 +26,7 @@ import pixelitor.filters.FilterUtils;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.RandomFilter;
 import pixelitor.filters.comp.Resize;
+import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.ParametrizedFilterGUI;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
@@ -43,15 +44,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import static pixelitor.ChangeReason.TEST_WITH_HISTORY_AND_PREVIEW;
+import static pixelitor.ChangeReason.NORMAL_TEST;
 
 /**
- *
+ * Various filter tests (as static methods) from the Develop menu
  */
 public class FilterTests {
-    /**
-     * Utility class with static methods
-     */
     private FilterTests() {
     }
 
@@ -84,15 +82,17 @@ public class FilterTests {
                         System.out.println(String.format("FilterTests::doInBackground: filterName = '%s'", filterName));
 
                         progressMonitor.setProgress((int) ((float) i * 100 / filters.length));
-
-
                         progressMonitor.setNote("Running " + filter.getName());
+
                         if (progressMonitor.isCanceled()) {
                             break;
                         }
 
-                        filter.randomizeSettings();
-                        filter.startOn(dr, TEST_WITH_HISTORY_AND_PREVIEW);
+                        if (filter instanceof FilterWithGUI) {
+                            ((FilterWithGUI) filter).randomizeSettings();
+                        }
+
+                        filter.startOn(dr, NORMAL_TEST);
                         Composition comp = dr.getComp();
                         String fileName = "test_" + Utils.toFileName(filter.getName()) + '.' + outputFormat.toString();
                         File f = new File(selectedDir, fileName);
@@ -153,7 +153,10 @@ public class FilterTests {
                     break;
                 }
 
-                filter.randomizeSettings();
+                if (filter instanceof FilterWithGUI) {
+                    ((FilterWithGUI) filter).randomizeSettings();
+                }
+
                 filter.startOn(dr);
             }
             progressMonitor.close();
@@ -178,7 +181,7 @@ public class FilterTests {
                     times, totalTime, totalTime / times);
             Messages.showInfo("Test Result", msg);
         };
-        Utils.executeWithBusyCursor(task);
+        Utils.runWithBusyCursor(task);
     }
 
     public static void randomResize() {
@@ -204,7 +207,7 @@ public class FilterTests {
         for (Filter filter : filters) {
             System.out.println("Warmup for " + filter.getName());
 
-            filter.startOn(dr, TEST_WITH_HISTORY_AND_PREVIEW);
+            filter.startOn(dr, NORMAL_TEST);
         }
 
         // measuring
@@ -212,7 +215,7 @@ public class FilterTests {
             long startTime = System.nanoTime();
             System.out.println("Testing " + filter.getName());
 
-            filter.startOn(dr, TEST_WITH_HISTORY_AND_PREVIEW);
+            filter.startOn(dr, NORMAL_TEST);
 
             double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
             results.put(filter.getName(), estimatedSeconds);

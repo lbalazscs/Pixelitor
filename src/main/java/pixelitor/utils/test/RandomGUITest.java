@@ -93,8 +93,8 @@ import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import static pixelitor.ChangeReason.OP_PREVIEW;
-import static pixelitor.ChangeReason.OP_WITHOUT_DIALOG;
+import static pixelitor.ChangeReason.FILTER_WITHOUT_DIALOG;
+import static pixelitor.ChangeReason.PREVIEWING;
 import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
 import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
 import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_180;
@@ -391,15 +391,16 @@ public class RandomGUITest {
 
         long runCountBefore = Filter.runCount;
 
-        f.randomizeSettings();
+        if (f instanceof FilterWithGUI) {
+            ((FilterWithGUI) f).randomizeSettings();
+        }
 
         Drawable dr = ImageComponents.getActiveDrawableOrNull();
         if (f instanceof FilterWithGUI) {
             dr.startPreviewing();
 
             try {
-                f.randomizeSettings();
-                f.startOn(dr, OP_PREVIEW);
+                f.startOn(dr, PREVIEWING);
             } catch (Throwable e) {
                 BufferedImage src = dr.getFilterSourceImage();
                 if (f instanceof ParametrizedFilter) {
@@ -423,7 +424,7 @@ public class RandomGUITest {
         } else {
             BufferedImage src = dr.getFilterSourceImage();
             try {
-                f.startOn(dr, OP_WITHOUT_DIALOG);
+                f.startOn(dr, FILTER_WITHOUT_DIALOG);
             } catch (Throwable e) {
                 System.out.println(String.format(
                         "RandomGUITest::randomFilter: name = %s, width = %d, height = %d",
@@ -468,13 +469,13 @@ public class RandomGUITest {
         ParamSetState intermediateState = animation.tween(randomTime);
         paramSet.setState(intermediateState);
 
-        // execute everything without showing a modal dialog
+        // run everything without showing a modal dialog
         dr.tweenCalculatingStarted();
 
         PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
 
         try {
-            filter.execute(dr, OP_PREVIEW, busyCursorParent);
+            filter.run(dr, PREVIEWING, busyCursorParent);
         } catch (Throwable e) {
             BufferedImage src = dr.getFilterSourceImage();
             String msg = String.format(
@@ -633,7 +634,7 @@ public class RandomGUITest {
         fade.setOpacity(opacity);
 
         Drawable dr = ImageComponents.getActiveDrawableOrNull();
-        fade.startOn(dr, OP_WITHOUT_DIALOG);
+        fade.startOn(dr, FILTER_WITHOUT_DIALOG);
     }
 
     private static void randomizeToolSettings() {

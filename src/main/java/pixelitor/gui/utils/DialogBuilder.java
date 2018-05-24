@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,8 +36,8 @@ import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
  * A fluent interface for building JDialogs
  */
 public class DialogBuilder {
-    public static final String DEFAULT_OK_TEXT = UIManager.getString("OptionPane.okButtonText");
-    public static final String DEFAULT_CANCEL_TEXT = UIManager.getString("OptionPane.cancelButtonText");
+    private static final String DEFAULT_OK_TEXT = UIManager.getString("OptionPane.okButtonText");
+    private static final String DEFAULT_CANCEL_TEXT = UIManager.getString("OptionPane.cancelButtonText");
 
     private String okText;
     private String cancelText;
@@ -153,7 +153,6 @@ public class DialogBuilder {
             d.add(form, BorderLayout.CENTER);
         }
 
-
         JButton okButton = null;
         if (addOKButton) {
             okButton = new JButton(okText);
@@ -231,10 +230,6 @@ public class DialogBuilder {
     }
 
     private void setupDefaults() {
-        if (!addCancelButton && cancelAction == null) {
-            // an OK dialog can still be cancelled with Esc/X
-            cancelAction = okAction;
-        }
         if (okText == null) {
             okText = DEFAULT_OK_TEXT;
         }
@@ -243,6 +238,7 @@ public class DialogBuilder {
         }
     }
 
+    // an OK dialog can still be cancelled with Esc/X
     private void cancelDialog(JDialog d, Runnable cancelAction) {
         closeDialog(d);
         if (cancelAction != null) {

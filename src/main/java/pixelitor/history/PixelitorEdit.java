@@ -31,7 +31,7 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
 
     protected boolean embedded; // if true, this is not a standalone edit
 
-    PixelitorEdit(Composition comp, String name) {
+    PixelitorEdit(String name, Composition comp) {
         assert comp != null;
         assert name != null;
 

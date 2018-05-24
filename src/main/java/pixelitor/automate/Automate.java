@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,6 +36,8 @@ import java.awt.EventQueue;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Utility class with static methods to support batch processing
  */
@@ -52,28 +54,23 @@ public class Automate {
     }
 
     /**
-     * Processes each file in the input directory with the given CompAction
+     * Processes each file in the input directory
+     * with the given {@link CompAction}
      */
     public static void processEachFile(CompAction action,
                                        boolean closeImagesAfterDone,
                                        String dialogTitle) {
-        File lastOpenDir = Directories.getLastOpenDir();
-        if (lastOpenDir == null) {
-            throw new IllegalStateException("lastOpenDir is null");
-        }
+        File lastOpenDir = requireNonNull(Directories.getLastOpenDir());
         if (!lastOpenDir.exists()) {
             throw new IllegalStateException("Last open dir " + lastOpenDir.getAbsolutePath() + " does not exist");
         }
 
-        File lastSaveDir = Directories.getLastSaveDir();
-        if (lastSaveDir == null) {
-            throw new IllegalStateException("lastSaveDir is null");
-        }
+        File lastSaveDir = requireNonNull(Directories.getLastSaveDir());
         if (!lastSaveDir.exists()) {
             throw new IllegalStateException("Last save dir " + lastSaveDir.getAbsolutePath() + " does not exist");
         }
 
-        File[] inputFiles = FileExtensionUtils.getAllSupportedInputFilesInDir(lastOpenDir);
+        File[] inputFiles = FileExtensionUtils.listSupportedInputFilesIn(lastOpenDir);
         if (inputFiles.length == 0) {
             Messages.showInfo("No files", "There are no supported files in " + lastOpenDir.getAbsolutePath());
             return;
@@ -119,6 +116,8 @@ public class Automate {
                                     CompAction action,
                                     File lastSaveDir,
                                     boolean closeImagesAfterDone) {
+        assert EventQueue.isDispatchThread();
+
         OpenSaveManager.openFile(file);
         Composition comp = ImageComponents.getActiveCompOrNull();
 

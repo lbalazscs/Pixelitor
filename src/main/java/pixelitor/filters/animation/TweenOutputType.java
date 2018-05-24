@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,7 @@ public enum TweenOutputType {
         }
 
         @Override
-        public String checkFile(File output) {
+        public String isOK(File output) {
             return expectDir(output, this);
         }
 
@@ -53,7 +53,7 @@ public enum TweenOutputType {
         }
 
         @Override
-        public String checkFile(File output) {
+        public String isOK(File output) {
             return expectFileInExistingDir(output, this, "GIF");
         }
 
@@ -68,12 +68,18 @@ public enum TweenOutputType {
         }
     };
 
+    private final String guiName;
+
+    TweenOutputType(String guiName) {
+        this.guiName = guiName;
+    }
+
     abstract AnimationWriter createAnimationWriter(File file, int delayMillis);
 
     /**
      * Returns the error message or null if the argument is OK as output
      */
-    public abstract String checkFile(File output);
+    public abstract String isOK(File output);
 
     public abstract boolean needsDirectory();
 
@@ -106,12 +112,6 @@ public enum TweenOutputType {
             return output.getAbsolutePath() + " does not exist.";
         }
         return null;
-    }
-
-    private final String guiName;
-
-    TweenOutputType(String guiName) {
-        this.guiName = guiName;
     }
 
     public abstract FileNameExtensionFilter getFileFilter();

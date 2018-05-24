@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,9 @@ import pixelitor.utils.VisibleForTesting;
 import javax.swing.*;
 
 /**
- * An action that can be simply renamed
+ * An action that can be simply renamed.
+ * Used for menus that need to change their name according
+ * to some internal state.
  */
 public abstract class NamedAction extends AbstractAction {
     protected NamedAction() {

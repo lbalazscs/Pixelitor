@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ import javax.swing.event.DocumentListener;
 import java.awt.FlowLayout;
 
 /**
- * The GUI for a TextParam
+ * The GUI for a {@link TextParam}
  */
 public class TextParamGUI extends JPanel implements ParamGUI {
     private final JTextField tf;

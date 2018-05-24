@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,9 @@ import javax.swing.*;
 
 import static java.awt.Color.GRAY;
 
+/**
+ * The panel corresponding to one channel in the Levels GUI
+ */
 public class OneChannelLevelsPanel extends CardPanelWithCombo.Card {
     public OneChannelLevelsPanel(OneChannelLevelsModel model) {
         super(model.getName());

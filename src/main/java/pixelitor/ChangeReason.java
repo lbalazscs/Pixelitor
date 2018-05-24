@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,18 +21,25 @@ package pixelitor;
  * The reason for an image change
  */
 public enum ChangeReason {
-    OP_WITHOUT_DIALOG(true, false) {
+    FILTER_WITHOUT_DIALOG(true, false) {
     }, REPEAT_LAST(true, false) {
-    }, OP_PREVIEW(false, true) {
+    },
 
-    }, TEST_NO_HISTORY_NO_PREVIEW(false, false) {
-    }, TEST_WITH_HISTORY_AND_PREVIEW(true, true) {
+    // can't be called "PREVIEW", because it gets
+    // confused with the ImageLayer's PREVIEW state
+    // because of the static imports...
+    PREVIEWING(false, true) {
+
+    }, PERFORMANCE_TEST(false, false) {
+    }, NORMAL_TEST(true, true) { 
 
     }, TWEEN_PREVIEW(false, true) {
     }, BATCH_AUTOMATE(false, false) {
     };
 
     private final boolean makeUndoBackup;
+
+    // whether this is only a preview during a dialog session
     private final boolean preview;
 
     public boolean needsUndo() {

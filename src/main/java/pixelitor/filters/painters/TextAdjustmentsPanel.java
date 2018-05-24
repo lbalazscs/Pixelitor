@@ -343,7 +343,7 @@ public class TextAdjustmentsPanel extends FilterGUI implements ParamAdjustmentLi
 
         if (textFilter != null) { // filter mode
             textFilter.setSettings(settings);
-            super.executeFilterPreview();
+            super.runFilterPreview();
         } else {
             assert textLayer != null;
             textLayer.setSettings(settings);

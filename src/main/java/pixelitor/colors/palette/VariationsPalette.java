@@ -25,6 +25,8 @@ import java.awt.Color;
  * A palette that produces variations around a single color
  */
 public class VariationsPalette extends Palette {
+    // static palette-specific variables so that they
+    // are remembered between dialog sessions
     private static int lastRows = 7;
     private static int lastCols = 10;
 

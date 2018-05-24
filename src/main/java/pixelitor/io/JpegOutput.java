@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,9 +51,11 @@ public final class JpegOutput {
         BufferedImage previewImage = null;
         byte[] bytes = null;
         try {
+            // writes the JPEG format with the given settings to memory...
             ImageOutputStream ios = ImageIO.createImageOutputStream(bos);
             writeJPGtoStream(image, ios, settings);
 
+            // ...then reads it back into an image
             bytes = bos.toByteArray();
             ByteArrayInputStream in = new ByteArrayInputStream(bytes);
             previewImage = ImageIO.read(in);

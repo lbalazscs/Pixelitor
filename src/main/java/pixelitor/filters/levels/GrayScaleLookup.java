@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import com.jhlabs.image.PixelUtils;
  * describing the adjustments made to a single channel
  */
 public class GrayScaleLookup {
-    private static final GrayScaleLookup DEFAULT = new GrayScaleLookup(0, 255, 0, 255);
+    private static final GrayScaleLookup IDENTITY = new GrayScaleLookup(0, 255, 0, 255);
     private final short[] mapping = new short[256];
 
     public GrayScaleLookup(int inputBlackValue, int inputWhiteValue,
@@ -40,7 +40,7 @@ public class GrayScaleLookup {
         return mapping[input];
     }
 
-    public static GrayScaleLookup getDefault() {
-        return DEFAULT;
+    public static GrayScaleLookup getIdentity() {
+        return IDENTITY;
     }
 }

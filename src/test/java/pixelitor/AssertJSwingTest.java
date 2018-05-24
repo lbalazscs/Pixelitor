@@ -2232,7 +2232,10 @@ public class AssertJSwingTest {
 
         DialogFixture dialog = findDialogByTitle("Create Text Layer");
 
-        dialog.textBox("textTF").enterText("some text");
+        dialog.textBox("textTF").
+                requireText("Pixelitor")
+                .deleteText()
+                .enterText("some text");
 
         dialog.button("ok").click();
     }

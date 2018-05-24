@@ -223,7 +223,7 @@ public class ShapesTool extends Tool {
 
                 PixelitorEdit edit;
                 if (backupSelectionShape != null) {
-                    edit = new SelectionChangeEdit(comp, backupSelectionShape, "Selection Change");
+                    edit = new SelectionChangeEdit("Selection Change", comp, backupSelectionShape);
                 } else {
                     edit = new NewSelectionEdit(comp, selection.getShape());
                 }

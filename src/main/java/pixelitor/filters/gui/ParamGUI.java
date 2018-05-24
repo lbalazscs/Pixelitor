@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,11 +18,12 @@
 package pixelitor.filters.gui;
 
 /**
- * The GUI for a filter parameter
+ * The GUI for a {@link FilterParam}
  */
 public interface ParamGUI {
     /**
-     * The model state has been changed and the GUI has to be updated accordingly
+     * The model state has been changed
+     * and the GUI has to be updated accordingly
      */
     void updateGUI();
 

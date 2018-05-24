@@ -88,7 +88,7 @@ public class LayerBlendingModePanel extends BlendingModePanel implements ActiveI
     }
 
     @Override
-    public void activeCompLayerCountChanged(Composition comp, int newLayerCount) {
+    public void numLayersChanged(Composition comp, int newLayerCount) {
     }
 
     @Override

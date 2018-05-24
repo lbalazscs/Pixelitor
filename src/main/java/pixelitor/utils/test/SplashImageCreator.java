@@ -52,7 +52,7 @@ import java.io.File;
 
 import static java.awt.Color.WHITE;
 import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
-import static pixelitor.ChangeReason.OP_WITHOUT_DIALOG;
+import static pixelitor.ChangeReason.FILTER_WITHOUT_DIALOG;
 import static pixelitor.tools.GradientColorType.BLACK_TO_WHITE;
 
 /**
@@ -107,12 +107,12 @@ public class SplashImageCreator {
         ImageLayer layer = (ImageLayer) comp.getLayer(0);
 
         layer.setName("Color Wheel", true);
-        new ColorWheel().startOn(layer, OP_WITHOUT_DIALOG);
+        new ColorWheel().startOn(layer, FILTER_WITHOUT_DIALOG);
 
         layer = addNewLayer(comp, "Value Noise");
         ValueNoise valueNoise = new ValueNoise();
         valueNoise.setDetails(7);
-        valueNoise.startOn(layer, OP_WITHOUT_DIALOG);
+        valueNoise.startOn(layer, FILTER_WITHOUT_DIALOG);
         layer.setOpacity(0.3f, true, true, true);
         layer.setBlendingMode(BlendingMode.SCREEN, true, true, true);
 
@@ -144,7 +144,7 @@ public class SplashImageCreator {
         dropShadow.setDistance(5);
         dropShadow.setSoftness(5);
         dropShadow.setOpacity(0.7f);
-        dropShadow.startOn(layer, OP_WITHOUT_DIALOG);
+        dropShadow.startOn(layer, FILTER_WITHOUT_DIALOG);
     }
 
     private static ImageLayer addNewLayer(Composition comp, String name) {
@@ -173,7 +173,7 @@ public class SplashImageCreator {
                 AbstractLayoutPainter.VerticalAlignment.CENTER, false, 0);
 
         textFilter.setSettings(settings);
-        textFilter.startOn(layer, OP_WITHOUT_DIALOG);
+        textFilter.startOn(layer, FILTER_WITHOUT_DIALOG);
         layer.setTranslation(0, translationY);
 
         layer.enlargeImage(layer.getComp().getCanvasBounds());

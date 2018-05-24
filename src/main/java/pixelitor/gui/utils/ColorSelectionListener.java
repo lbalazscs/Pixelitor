@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,9 @@ package pixelitor.gui.utils;
 
 import java.awt.Color;
 
+/**
+ * Listens to changes in a selected color
+ */
 public interface ColorSelectionListener {
     void selectedColorChanged(Color c);
 }

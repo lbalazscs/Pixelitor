@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,8 @@ import java.awt.Dimension;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
 /**
- * The GUI for an AngleParam
+ * The GUI for an {@link AngleParam}, which can be
+ * an {@link ElevationAngleParam}
  */
 public class AngleParamGUI extends JPanel implements ParamGUI {
     private boolean userChangedSpinner = true;
@@ -35,6 +36,8 @@ public class AngleParamGUI extends JPanel implements ParamGUI {
 
     public AngleParamGUI(AngleParam angleParam) {
         setLayout(new BorderLayout(10, 0));
+
+        // the selector UI depends on the specific class
         selectorUI = angleParam.getAngleSelectorUI();
         add(selectorUI, BorderLayout.WEST);
 

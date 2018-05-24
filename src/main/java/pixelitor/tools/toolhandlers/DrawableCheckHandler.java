@@ -48,7 +48,8 @@ public class DrawableCheckHandler extends ToolHandler {
                 // do nothing
             }
         };
-        // call it only for the dialogs and auto-rasterization
+        // as the action doesn't do anything, the only effects
+        // here are the dialogs and auto-rasterization
         action.actionPerformed(null);
 
         // whatever happened, do not forward this event,

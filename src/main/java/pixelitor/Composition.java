@@ -311,7 +311,7 @@ public class Composition implements Serializable {
         setActiveLayer(newLayer, false);
         ic.addLayerToGUI(newLayer, newLayerIndex);
 
-        History.addEdit(addToHistory, () -> new NewLayerEdit(this, newLayer, activeLayerBefore, historyName, oldViewMode));
+        History.addEdit(addToHistory, () -> new NewLayerEdit(historyName, this, newLayer, activeLayerBefore, oldViewMode));
 
         if (updateHistogram) {
             imageChanged(FULL); // if the histogram is updated, a repaint is also necessary
@@ -368,8 +368,8 @@ public class Composition implements Serializable {
         deleteActiveLayer(updateGUI, false);
 
         // TODO the MaskViewMode should be restored like in TextLayerRasterizeEdit
-        PixelitorEdit edit = new LinkedEdit(this, "Merge Down",
-                new ImageEdit(this, "", target, backupImage, true, false),
+        PixelitorEdit edit = new LinkedEdit("Merge Down", this,
+                new ImageEdit("", this, target, backupImage, true, false),
                 new DeleteLayerEdit(this, mergedLayer, activeIndex)
         );
 
@@ -405,11 +405,11 @@ public class Composition implements Serializable {
         }
 
         if (updateGUI) {
-            LayerButton button = layerToBeDeleted.getUI().getLayerButton();
+            LayerButton button = layerToBeDeleted.getUI();
             ic.deleteLayerButton(button);
 
             if (isActiveComp()) {
-                AppLogic.activeCompLayerCountChanged(this, layerList.size());
+                AppLogic.numLayersChanged(this, layerList.size());
             }
 
             imageChanged(FULL);
@@ -585,10 +585,10 @@ public class Composition implements Serializable {
             deleteLayer(i);
         }
         if (updateGUI) {
-            AppLogic.activeCompLayerCountChanged(this, 1);
+            AppLogic.numLayersChanged(this, 1);
 
             // TODO should have a separate add to history argument?
-            History.addEdit(new NotUndoableEdit(this, "Flatten Image"));
+            History.addEdit(new NotUndoableEdit("Flatten Image", this));
         }
     }
 
@@ -860,7 +860,7 @@ public class Composition implements Serializable {
             Shape backupShape = selection.getShape();
             Shape inverted = canvas.invertShape(backupShape);
             selection.setShape(inverted);
-            SelectionChangeEdit edit = new SelectionChangeEdit(this, backupShape, "Invert Selection");
+            SelectionChangeEdit edit = new SelectionChangeEdit("Invert Selection", this, backupShape);
             History.addEdit(edit);
         }
     }
@@ -946,13 +946,13 @@ public class Composition implements Serializable {
                 maskChanged = mask.cropToCanvasSize();
             }
             if (maskChanged) {
-                imageEdit = new ImageAndMaskEdit(this, editName, layer, backupImage, maskBackupImage, false);
+                imageEdit = new ImageAndMaskEdit(editName, this, layer, backupImage, maskBackupImage, false);
             } else {
                 // no mask or no mask change, a simple ImageEdit will do
-                imageEdit = new ImageEdit(this, editName, layer, backupImage, true, false);
+                imageEdit = new ImageEdit(editName, this, layer, backupImage, true, false);
                 imageEdit.setFadeable(false);
             }
-            History.addEdit(new LinkedEdit(this, editName, translationEdit, imageEdit));
+            History.addEdit(new LinkedEdit(editName, this, translationEdit, imageEdit));
         }
     }
 

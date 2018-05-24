@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,31 +38,33 @@ public class DropListener extends DropTargetAdapter {
     }
 
     @Override
-    public void drop(DropTargetDropEvent dtde) {
-        Transferable transferable = dtde.getTransferable();
+    public void drop(DropTargetDropEvent e) {
+        Transferable transferable = e.getTransferable();
         DataFlavor[] flavors = transferable.getTransferDataFlavors();
         for (DataFlavor flavor : flavors) {
             if (flavor.equals(DataFlavor.imageFlavor)) {
+                // it is unclear how this could be used
                 return;
             }
             if (flavor.isFlavorJavaFileListType()) {
-                dtde.acceptDrop(DnDConstants.ACTION_COPY);
+                // this is where we get after dropping a file or directory
+                e.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
 
                 try {
                     @SuppressWarnings("unchecked")
                     List<File> list = (List<File>) transferable.getTransferData(flavor);
                     dropFiles(list);
-                } catch (UnsupportedFlavorException | IOException e) {
-                    Messages.showException(e);
-                    dtde.rejectDrop();
+                } catch (UnsupportedFlavorException | IOException ex) {
+                    Messages.showException(ex);
+                    e.rejectDrop();
                 }
-                dtde.dropComplete(true);
+                e.dropComplete(true);
                 return;
             }
         }
 
         // DataFlavor not recognized
-        dtde.rejectDrop();
+        e.rejectDrop();
     }
 
     private static void dropFiles(List<File> list) {

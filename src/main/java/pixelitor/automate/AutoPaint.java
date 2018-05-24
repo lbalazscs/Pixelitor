@@ -99,7 +99,7 @@ public class AutoPaint {
             runStrokes(settings, dr, msgHandler);
         } finally {
             History.setIgnoreEdits(false);
-            ImageEdit edit = new ImageEdit(dr.getComp(), "Auto Paint",
+            ImageEdit edit = new ImageEdit("Auto Paint", dr.getComp(),
                     dr, backupImage, false, false);
             History.addEdit(edit);
             msgHandler.stopProgress();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,17 +45,17 @@ public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
 
         distanceParam = new RangeParam("Distance:", 1, defaultDistance, 100);
         SliderSpinner distanceSlider = new SliderSpinner(distanceParam, NONE, false);
-        gbHelper.addLabelWithControl("Distance:", distanceSlider);
+        gbh.addLabelWithControl("Distance:", distanceSlider);
 
         angleParam = new AngleParam("Angle", defaultAngle);
         AngleUI angleSelector = new AngleUI(angleParam);
-        gbHelper.addLabelWithControl("Angle:", angleSelector);
+        gbh.addLabelWithControl("Angle:", angleSelector);
 
         spreadParam = new RangeParam("Spread:", 1, defaultSpread, 100);
         SliderSpinner spreadSlider = new SliderSpinner(spreadParam, NONE, false);
-        gbHelper.addLabelWithControl("Spread:", spreadSlider);
+        gbh.addLabelWithControl("Spread:", spreadSlider);
 
-        ChangeListener changeListener = e -> updateDefaultButtonState();
+        ChangeListener changeListener = e -> updateDefaultButtonIcon();
         distanceParam.addChangeListener(changeListener);
         angleParam.addChangeListener(changeListener);
         spreadParam.addChangeListener(changeListener);

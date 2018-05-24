@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,16 +26,18 @@ import java.awt.Dimension;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NORTH;
 
 /**
- * The GUI component for an ImagePositionParam
+ * The GUI component for an {@link ImagePositionParam}
  */
 public class ImagePositionParamGUI extends JPanel implements ParamGUI {
     private final ImagePositionParam model;
     private final RangeParam xSliderModel;
     private final RangeParam ySliderModel;
-    private final ImagePositionSelector imagePositionSelector;
-    private boolean slidersMovedByUser = true;
+
+    private final ImagePositionSelector imgPosSelector;
     private final JComponent xSlider;
     private final JComponent ySlider;
+
+    private boolean slidersMovedByUser = true;
 
     public ImagePositionParamGUI(ImagePositionParam model, int defaultX, int defaultY) {
         this.model = model;
@@ -47,8 +49,8 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
         setLayout(new BorderLayout(10, 0));
 
         // add the image position selector
-        imagePositionSelector = new ImagePositionSelector(this, model, 100);
-        add(imagePositionSelector, BorderLayout.WEST);
+        imgPosSelector = new ImagePositionSelector(this, model, 100);
+        add(imgPosSelector, BorderLayout.WEST);
 
         // add the two sliders
         Box verticalBox = Box.createVerticalBox();
@@ -79,20 +81,20 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
     private void onXSliderChange(ImagePositionParam model) {
         if (slidersMovedByUser) {
             model.setRelativeX(xSliderModel.getValue() / 100.0f, xSliderModel.getValueIsAdjusting());
-            imagePositionSelector.repaint();
+            imgPosSelector.repaint();
         }
     }
 
     private void onYSliderChange(ImagePositionParam model) {
         if (slidersMovedByUser) {
             model.setRelativeY(ySliderModel.getValue() / 100.0f, ySliderModel.getValueIsAdjusting());
-            imagePositionSelector.repaint();
+            imgPosSelector.repaint();
         }
     }
 
     /**
      * Updates the sliders based on the model changes.
-     * This does not trigger the execution of the filter
+     * This does not trigger the running of the filter
      */
     public void updateSlidersFromModel() {
         slidersMovedByUser = false;
@@ -112,12 +114,12 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
     @Override
     public void updateGUI() {
         updateSlidersFromModel();
-        imagePositionSelector.repaint();
+        imgPosSelector.repaint();
     }
 
     @Override
     public void setEnabled(boolean enabled) {
-        imagePositionSelector.setEnabled(enabled);
+        imgPosSelector.setEnabled(enabled);
         xSlider.setEnabled(enabled);
         ySlider.setEnabled(enabled);
         super.setEnabled(enabled);

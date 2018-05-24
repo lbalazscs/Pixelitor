@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ public class NewSelectionEdit extends PixelitorEdit {
     private final Shape newShape;
 
     public NewSelectionEdit(Composition comp, Shape shape) {
-        super(comp, "Create Selection");
+        super("Create Selection", comp);
 
         newShape = shape;
     }

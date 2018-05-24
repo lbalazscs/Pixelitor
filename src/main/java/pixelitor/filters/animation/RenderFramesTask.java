@@ -119,7 +119,7 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         ParamSetState intermediateState = animation.tween(time);
         filter.getParamSet().setState(intermediateState);
 
-        filter.execute(dr, TWEEN_PREVIEW, busyCursorParent);
+        filter.run(dr, TWEEN_PREVIEW, busyCursorParent);
 
         long runCountAfter = Filter.runCount;
         assert runCountAfter == runCountBefore + 1;

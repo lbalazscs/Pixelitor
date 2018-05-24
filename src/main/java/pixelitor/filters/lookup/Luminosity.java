@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ import pixelitor.utils.ImageUtils;
 import java.awt.image.BufferedImage;
 
 /**
- * Extracts the luminosity channel
+ * A filer which extracts the luminosity channel
  */
 public class Luminosity extends Filter {
     public static final String NAME = "Luminosity";
@@ -45,11 +45,6 @@ public class Luminosity extends Filter {
         }
 
         return dest;
-    }
-
-    @Override
-    public void randomizeSettings() {
-        // nothing to randomize
     }
 
     @Override

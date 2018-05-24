@@ -24,20 +24,15 @@ import pixelitor.layers.Drawable;
 /**
  * A dialog for the filter adjustments
  */
-public class FilterGUIDialog extends OKCancelDialog {
+public class FilterDialog extends OKCancelDialog {
     private final Filter activeFilter;
     private final Drawable dr;
 
-    private FilterGUIDialog(FilterGUI filterGUI, Filter activeFilter, Drawable dr) {
+    public FilterDialog(FilterGUI filterGUI, Filter activeFilter, Drawable dr) {
         super(filterGUI, activeFilter.getName());
         this.activeFilter = activeFilter;
         this.dr = dr;
         setName("filterDialog");
-    }
-
-    public static void showDialog(FilterGUI filterGUI, Filter activeFilter, Drawable dr) {
-        FilterGUIDialog dialog = new FilterGUIDialog(filterGUI, activeFilter, dr);
-        dialog.setVisible(true);
     }
 
     @Override

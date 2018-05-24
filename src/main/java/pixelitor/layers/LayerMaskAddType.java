@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,28 +28,36 @@ import java.awt.image.BufferedImage;
 
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 
+/**
+ * Ways to create a new layer mask
+ */
 public enum LayerMaskAddType {
     REVEAL_ALL("Reveal All", false) {
         @Override
         BufferedImage getBWImage(int width, int height, Selection selection) {
+            // a fully white image
             return createFilledImage(width, height, Color.WHITE, null, null);
         }
     }, HIDE_ALL("Hide All", false) {
         @Override
         BufferedImage getBWImage(int width, int height, Selection selection) {
+            // a fully black image
             return createFilledImage(width, height, Color.BLACK, null, null);
         }
     }, REVEAL_SELECTION("Reveal Selection", true) {
         @Override
         BufferedImage getBWImage(int width, int height, Selection selection) {
+            // back image, but the selection is white
             return createFilledImage(width, height, Color.BLACK, Color.WHITE, selection.getShape());
         }
     }, HIDE_SELECTION("Hide Selection", true) {
         @Override
         BufferedImage getBWImage(int width, int height, Selection selection) {
+            // white image, but the selection is black
             return createFilledImage(width, height, Color.WHITE, Color.BLACK, selection.getShape());
         }
     }, PATTERN ("Pattern", false) { // only for debugging
+
         @Override
         BufferedImage getBWImage(int width, int height, Selection selection) {
             BufferedImage bi = createFilledImage(width, height, Color.WHITE, null, null);

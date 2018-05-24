@@ -67,6 +67,8 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
     private final JButton cancelButton = new JButton("Cancel");
     private JButton cropButton;
 
+    private JLabel widthLabel = new JLabel("Width:");
+    private JLabel heightLabel = new JLabel("Height:");
     private JSpinner wSizeSpinner;
     private JSpinner hSizeSpinner;
     private JComboBox guidelinesSelector;
@@ -124,31 +126,27 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
         guidelinesSelector.setMaximumRowCount(guidelinesSelector.getItemCount());
 //        guidelinesSelector.setSelectedItem(RectGuidelineType.RULE_OF_THIRDS);
         guidelinesSelector.addActionListener(e -> ImageComponents.repaintActive());
-
-        settingsPanel.add(new JLabel("Guidelines:"));
-        settingsPanel.add(guidelinesSelector);
+        settingsPanel.addWithLabel("Guidelines:", guidelinesSelector);
 
         settingsPanel.addSeparator();
 
         // add crop width spinner
         wSizeSpinner = new JSpinner(new SpinnerNumberModel(0, 0, Canvas.MAX_WIDTH, 1));
-        wSizeSpinner.setEnabled(false);
         wSizeSpinner.addChangeListener(whChangeListener);
         wSizeSpinner.setToolTipText("Width of the cropped image (px)");
-        settingsPanel.add(new JLabel("Width:"));
+        settingsPanel.add(widthLabel);
         settingsPanel.add(wSizeSpinner);
 
         // add crop height spinner
         hSizeSpinner = new JSpinner(new SpinnerNumberModel(0, 0, Canvas.MAX_HEIGHT, 1));
-        hSizeSpinner.setEnabled(false);
         hSizeSpinner.addChangeListener(whChangeListener);
         hSizeSpinner.setToolTipText("Height of the cropped image (px)");
-        settingsPanel.add(new JLabel("Height:"));
+        settingsPanel.add(heightLabel);
         settingsPanel.add(hSizeSpinner);
 
         settingsPanel.addSeparator();
 
-        // add growing check box
+        // add allow growing check box
         allowGrowingCB = new JCheckBox("Allow Growing", false);
         allowGrowingCB.setToolTipText("Enables the enlargement of the canvas");
         settingsPanel.add(allowGrowingCB);
@@ -158,13 +156,13 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
         // add crop button
         cropButton = new JButton("Crop");
         cropButton.addActionListener(e -> executeCropCommand());
-        cropButton.setEnabled(false);
         settingsPanel.add(cropButton);
 
         // add cancel button
         cancelButton.addActionListener(e -> executeCloseCommand());
-        cancelButton.setEnabled(false);
         settingsPanel.add(cancelButton);
+
+        enableCropActions(false);
     }
 
     @Override
@@ -203,16 +201,21 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
         if (state == TRANSFORM) {
             assert transformSupport != null;
             transformSupport.mousePressed(e, ic);
-            cropButton.setEnabled(true);
-            cancelButton.setEnabled(true);
-            hSizeSpinner.setEnabled(true);
-            wSizeSpinner.setEnabled(true);
+            enableCropActions(true);
         } else if (state == USER_DRAG) {
-            cropButton.setEnabled(true);
-            cancelButton.setEnabled(true);
-            hSizeSpinner.setEnabled(true);
-            wSizeSpinner.setEnabled(true);
+            enableCropActions(true);
         }
+    }
+
+    private void enableCropActions(boolean b) {
+        widthLabel.setEnabled(b);
+        hSizeSpinner.setEnabled(b);
+
+        heightLabel.setEnabled(b);
+        wSizeSpinner.setEnabled(b);
+
+        cropButton.setEnabled(b);
+        cancelButton.setEnabled(b);
     }
 
     @Override
@@ -384,11 +387,10 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
         ended = true;
         transformSupport = null;
         state = INITIAL;
-        cancelButton.setEnabled(false);
-        cropButton.setEnabled(false);
-        hSizeSpinner.setEnabled(false);
+
+        enableCropActions(false);
+
         hSizeSpinner.setValue(0);
-        wSizeSpinner.setEnabled(false);
         wSizeSpinner.setValue(0);
 
         ImageComponents.repaintActive();

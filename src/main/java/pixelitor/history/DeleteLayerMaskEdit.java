@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,7 @@ public class DeleteLayerMaskEdit extends PixelitorEdit {
     private final MaskViewMode oldMode;
 
     public DeleteLayerMaskEdit(Composition comp, Layer layer, LayerMask oldMask, MaskViewMode oldMode) {
-        super(comp, "Delete Layer Mask");
+        super("Delete Layer Mask", comp);
         this.oldMode = oldMode;
 
         this.layer = layer;

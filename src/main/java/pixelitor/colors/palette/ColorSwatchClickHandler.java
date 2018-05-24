@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import java.awt.event.MouseEvent;
 public interface ColorSwatchClickHandler {
     void onClick(Color newColor, MouseEvent e);
 
-    // the standard click handler sets the foreground color
+    // The standard click handler sets the foreground color
     // for left clicks and the background color for right clicks
     ColorSwatchClickHandler STANDARD = (newColor, e) -> {
         boolean rightClick = SwingUtilities.isRightMouseButton(e);

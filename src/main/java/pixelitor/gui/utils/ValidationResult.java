@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -54,17 +54,21 @@ public class ValidationResult {
         return new ValidationResult(false, msg);
     }
 
+    /**
+     * Returns a composed result that represents a
+     * logical AND of this result and another.
+     */
     public ValidationResult and(ValidationResult other) {
         if (valid) {
             assert this == okInstance;
             if (other.isOK()) {
-                return okInstance;
+                return okInstance; // both are OK
             } else {
-                return other;
+                return other; // with the other's error message
             }
         } else {
             if (other.isOK()) {
-                return this;
+                return this; // with our error message
             } else {
                 return error(errorMsg + "\n" + other.errorMsg);
             }

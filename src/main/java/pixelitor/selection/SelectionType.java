@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,8 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 
 /**
- * The type of a new selection created interactively by the user
+ * The type of a new selection created interactively by the user.
+ * Corresponds to the "Type" combo box in the Selection Tool.
  */
 public enum SelectionType {
     RECTANGLE("Rectangle") {

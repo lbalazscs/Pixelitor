@@ -22,10 +22,10 @@ import pixelitor.layers.Drawable;
 
 import javax.swing.*;
 
-import static pixelitor.ChangeReason.OP_PREVIEW;
+import static pixelitor.ChangeReason.PREVIEWING;
 
 /**
- * The superclass of all filter adjustment panels
+ * The superclass of all filter configuration panels
  */
 public abstract class FilterGUI extends JPanel implements PreviewExecutor {
     protected Filter filter;
@@ -37,8 +37,7 @@ public abstract class FilterGUI extends JPanel implements PreviewExecutor {
     }
 
     @Override
-    public void executeFilterPreview() {
-        filter.execute(dr, OP_PREVIEW, this);
+    public void runFilterPreview() {
+        filter.run(dr, PREVIEWING, this);
     }
-
 }

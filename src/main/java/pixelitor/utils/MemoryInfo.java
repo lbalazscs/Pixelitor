@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,24 +39,24 @@ public class MemoryInfo {
         maxMemoryMB = maxMemory / ONE_MEGABYTE;
     }
 
-    public long getFreeMemoryMB() {
-        return freeMemoryMB;
+    public String getFreeMemory() {
+        return freeMemoryMB + " megabytes";
     }
 
-    public long getTotalMemoryMB() {
-        return totalMemoryMB;
+    public String getTotalMemory() {
+        return totalMemoryMB + " megabytes";
     }
 
-    public long getUsedMemoryMB() {
-        return usedMemoryMB;
+    public String getUsedMemory() {
+        return usedMemoryMB + " megabytes";
     }
 
-    public long getMaxMemoryMB() {
-        return maxMemoryMB;
+    public String getMaxMemory() {
+        return maxMemoryMB + " megabytes";
     }
 
     public long getAvailableMemoryMB() {
-        return maxMemoryMB - usedMemoryMB;
+        return (maxMemoryMB - usedMemoryMB);
     }
 
     @Override

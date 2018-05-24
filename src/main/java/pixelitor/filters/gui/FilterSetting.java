@@ -28,6 +28,10 @@ public interface FilterSetting {
     /**
      * Usually we want to specify the model in the code, and the
      * corresponding GUI should be created automatically
+     *
+     * If this is an instance of {@link FilterParam},
+     * then the returned JComponent must also be
+     * an implementation of {@link ParamGUI}
      */
     JComponent createGUI();
 

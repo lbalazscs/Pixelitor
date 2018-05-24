@@ -18,6 +18,7 @@ package pixelitor.tools.shapes;
 
 import java.awt.geom.Path2D;
 
+// not finished
 public class SkullShape extends AbstractShape {
     public SkullShape(int x, int y, int width, int height) {
         float cp1X; // x of control point 1

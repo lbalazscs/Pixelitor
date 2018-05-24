@@ -80,11 +80,11 @@ public final class Utils {
     private Utils() {
     }
 
-    public static void executeWithBusyCursor(Runnable task) {
-        executeWithBusyCursor(PixelitorWindow.getInstance(), task);
+    public static void runWithBusyCursor(Runnable task) {
+        runWithBusyCursor(PixelitorWindow.getInstance(), task);
     }
 
-    public static void executeWithBusyCursor(Component parent, Runnable task) {
+    public static void runWithBusyCursor(Component parent, Runnable task) {
         Timer timer = new Timer();
         TimerTask startBusyCursorTask = new TimerTask() {
             @Override

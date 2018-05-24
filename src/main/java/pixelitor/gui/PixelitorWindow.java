@@ -175,7 +175,7 @@ public class PixelitorWindow extends JFrame {
     }
 
     public boolean areHistogramsShown() {
-        return histogramsPanel.areHistogramsShown();
+        return histogramsPanel.isShown();
     }
 
     public void setLayersVisibility(boolean v, boolean revalidate) {

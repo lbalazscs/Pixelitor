@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,7 @@ public class JpegSettings {
     private final boolean progressive;
     private static final float DEFAULT_JPEG_QUALITY = 0.87f;
 
-    private static final JpegSettings defaults = new JpegSettings(DEFAULT_JPEG_QUALITY, false);
+    public static final JpegSettings DEFAULTS = new JpegSettings(DEFAULT_JPEG_QUALITY, false);
 
     public JpegSettings(float quality, boolean progressive) {
         this.quality = quality;
@@ -38,9 +38,5 @@ public class JpegSettings {
 
     public boolean isProgressive() {
         return progressive;
-    }
-
-    public static JpegSettings getDefaults() {
-        return defaults;
     }
 }

@@ -169,7 +169,7 @@ public class CompositionCreationTest {
         Composition comp = testMultiLayerRead(f, extraCheck);
 
         File tmp = File.createTempFile("pix_tmp", ".ora");
-        OpenRaster.writeOpenRaster(comp, tmp, true);
+        OpenRaster.write(comp, tmp, true);
 
         // read back and test
         testMultiLayerRead(tmp, extraCheck);

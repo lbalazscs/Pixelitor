@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -52,7 +52,7 @@ public class MultiLayerBackup {
 
         // save canvas dimensions
         if (changesCanvasDimensions) {
-            canvasChangeEdit = new CanvasChangeEdit(comp, editName);
+            canvasChangeEdit = new CanvasChangeEdit(editName, comp);
         }
 
         // save translation
@@ -123,10 +123,10 @@ public class MultiLayerBackup {
 
         ImageEdit edit;
         if (backupMaskImage != null) {
-            edit = new ImageAndMaskEdit(comp, editName, imageLayer,
+            edit = new ImageAndMaskEdit(editName, comp, imageLayer,
                     backupImage, backupMaskImage, false);
         } else {
-            edit = new ImageEdit(comp, editName, imageLayer,
+            edit = new ImageEdit(editName, comp, imageLayer,
                     backupImage, true, false);
         }
         edit.setEmbedded(true);
@@ -137,7 +137,7 @@ public class MultiLayerBackup {
         if (backupMaskImage == currentMaskImage) {
             return null;
         }
-        ImageEdit edit = new ImageEdit(comp, editName, layer.getMask(),
+        ImageEdit edit = new ImageEdit(editName, comp, layer.getMask(),
                 backupMaskImage, true, false);
         edit.setEmbedded(true);
         return edit;
@@ -145,7 +145,7 @@ public class MultiLayerBackup {
 
     public SelectionChangeEdit createSelectionChangeEdit() {
         assert backupShape != null;
-        SelectionChangeEdit edit = new SelectionChangeEdit(comp, backupShape, editName);
+        SelectionChangeEdit edit = new SelectionChangeEdit(editName, comp, backupShape);
         edit.setEmbedded(true);
         return edit;
     }

@@ -59,8 +59,8 @@ public class MaskFromColorRangePanel extends JPanel {
     private static final String PREVIEW_MODE_RUBYLITH = "Rubylith";
 
     private final JComboBox<String> colorSpaceCB = new JComboBox(new Value[]{
-            new Value("HSB", MaskFromColorRangeFilter.MODE_HSB),
-            new Value("RGB", MaskFromColorRangeFilter.MODE_RGB),
+            new Value("HSB", MaskFromColorRangeFilter.HSB),
+            new Value("RGB", MaskFromColorRangeFilter.RGB),
             });
     private final RangeParam tolerance = new RangeParam("Tolerance", 0, 10, 150);
     private final RangeParam softness = new RangeParam("   Softness", 0, 10, 100);
@@ -167,8 +167,8 @@ public class MaskFromColorRangePanel extends JPanel {
     private MaskFromColorRangeFilter createFilterFromSettings(Color c) {
         MaskFromColorRangeFilter filter = new MaskFromColorRangeFilter(NAME);
 
-        Value colorSpace = (Value) colorSpaceCB.getSelectedItem();
-        filter.setMode(colorSpace.getValue());
+        int colorSpace = ((Value) colorSpaceCB.getSelectedItem()).getValue();
+        filter.setInterpolation(colorSpace);
         filter.setColor(c);
         filter.setTolerance(tolerance.getValue(), softness.getValueAsPercentage());
         filter.setInvert(invertCB.isSelected());
@@ -186,7 +186,7 @@ public class MaskFromColorRangePanel extends JPanel {
 
         switch (previewMode) {
             case PREVIEW_MODE_MASK:
-                previewPanel.updateImage(rgbMask);
+                previewPanel.changeImage(rgbMask);
                 break;
             case PREVIEW_MODE_RUBYLITH: {
                 BufferedImage grayMask = ImageUtils.convertToGrayScaleImage(rgbMask);
@@ -196,7 +196,7 @@ public class MaskFromColorRangePanel extends JPanel {
                 g.setComposite(RUBYLITH_COMPOSITE);
                 g.drawImage(ruby, 0, 0, null);
                 g.dispose();
-                previewPanel.updateImage(thumbWithRuby);
+                previewPanel.changeImage(thumbWithRuby);
                 break;
             }
             default:
@@ -225,7 +225,7 @@ public class MaskFromColorRangePanel extends JPanel {
                 previewG.drawImage(thumbWithTransparency, 0, 0, null);
                 previewG.dispose();
 
-                previewPanel.updateImage(preview);
+                previewPanel.changeImage(preview);
                 break;
         }
     }

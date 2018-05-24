@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,6 @@ import java.util.function.Consumer;
 public class ToolSettingsPanel extends JPanel {
     public ToolSettingsPanel() {
         super(new ToolSettingsLayout());
-//        super(new FlowLayout(FlowLayout.LEFT, 5, 0));
     }
 
     public void addSeparator() {
@@ -44,13 +43,13 @@ public class ToolSettingsPanel extends JPanel {
         add(separator);
     }
 
-    public void addWithLabel(String labelText, JComponent component) {
-        add(new JLabel(labelText));
+    public void addWithLabel(String text, JComponent component) {
+        add(new JLabel(text));
         add(component);
     }
 
-    public void addWithLabel(String labelText, JComponent component, String name) {
-        addWithLabel(labelText, component);
+    public void addWithLabel(String text, JComponent component, String name) {
+        addWithLabel(text, component);
         component.setName(name);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ public class LayerOpacityEdit extends PixelitorEdit {
     private float backupOpacity;
 
     public LayerOpacityEdit(Layer layer, float backupOpacity) {
-        super(layer.getComp(), "Layer Opacity Change");
+        super("Layer Opacity Change", layer.getComp());
 
         this.layer = layer;
         this.backupOpacity = backupOpacity;

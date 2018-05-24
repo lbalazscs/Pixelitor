@@ -84,7 +84,7 @@ public class Resize implements CompAction {
 
         resizeLayers(comp, progressiveBilinear);
 
-        MultiLayerEdit edit = new MultiLayerEdit(comp, editName, backup);
+        MultiLayerEdit edit = new MultiLayerEdit(editName, comp, backup);
         History.addEdit(edit);
 
         comp.getCanvas().changeSize(canvasTargetWidth, canvasTargetHeight);

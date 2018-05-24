@@ -29,6 +29,8 @@ import static pixelitor.Composition.ImageChangeActions.FULL;
 
 /**
  * Saves and restores the translation of a ContentLayer.
+ * Not to be confused with {@link ContentLayerMoveEdit}:
+ * this one is used only internally by other edits
  */
 public class TranslationEdit extends PixelitorEdit {
     private ContentLayer layer;
@@ -50,7 +52,8 @@ public class TranslationEdit extends PixelitorEdit {
      * if the mask can be ignored
      */
     public TranslationEdit(Composition comp, ContentLayer layer, int oldTX, int oldTY, boolean considerMask) {
-        super(comp, "");
+        // needs no name, because this is never used alone
+        super("", comp);
 
         this.layer = layer;
         this.backupTX = oldTX;

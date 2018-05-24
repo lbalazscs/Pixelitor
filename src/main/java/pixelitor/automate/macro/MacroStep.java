@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,8 @@ package pixelitor.automate.macro;
  * A step of a recorded macro.
  * Following the Command design pattern it encapsulates
  * a user action that can be replayed.
+ *
+ * The macro functionality is not finished!
  */
 public interface MacroStep {
     void execute();

@@ -38,13 +38,13 @@ import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
  * and optionally an output format
  */
 public class SingleDirChooserPanel extends ValidatedForm {
-    private final BrowseFilesSupport directoryChooser;
+    private final BrowseFilesSupport dirChooser;
     private OutputFormatSelector outputFormatSelector;
 
     private SingleDirChooserPanel(String label, String initialPath, String fileChooserTitle, boolean addOutputChooser) {
-        directoryChooser = new BrowseFilesSupport(initialPath, fileChooserTitle, DIRECTORY);
-        JTextField dirTF = directoryChooser.getNameTF();
-        JButton browseButton = directoryChooser.getBrowseButton();
+        dirChooser = new BrowseFilesSupport(initialPath, fileChooserTitle, DIRECTORY);
+        JTextField dirTF = dirChooser.getNameTF();
+        JButton browseButton = dirChooser.getBrowseButton();
 
         if (addOutputChooser) {
             setLayout(new GridBagLayout());
@@ -67,7 +67,7 @@ public class SingleDirChooserPanel extends ValidatedForm {
     }
 
     private File getSelectedDir() {
-        return directoryChooser.getSelectedFile();
+        return dirChooser.getSelectedFile();
     }
 
     @Override

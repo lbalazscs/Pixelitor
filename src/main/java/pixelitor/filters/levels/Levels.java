@@ -32,7 +32,7 @@ import java.util.Random;
 /**
  * The Levels filter
  */
-public class Levels extends FilterWithGUI implements LookupFilter {
+public class Levels extends FilterWithGUI {
     private RGBLookup rgbLookup;
 
     public Levels() {
@@ -43,7 +43,6 @@ public class Levels extends FilterWithGUI implements LookupFilter {
         return new LevelsGUI(this, dr, new LevelsModel(this));
     }
 
-    @Override
     public void setRGBLookup(RGBLookup rgbLookup) {
         this.rgbLookup = Objects.requireNonNull(rgbLookup);
     }

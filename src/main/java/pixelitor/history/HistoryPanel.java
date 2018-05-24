@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,10 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 
+/**
+ * The UI panel of history: the history list in a scroll pane
+ * and the undo/redo buttons bellow it
+ */
 public class HistoryPanel extends JPanel {
     private final JButton undoButton;
     private final JButton redoButton;
@@ -43,8 +47,8 @@ public class HistoryPanel extends JPanel {
         redoButton = createButton(redoIcon, "redo",
                 "AbstractUndoableEdit.redoText", History.REDO_ACTION);
 
-        History.addUndoableEditListener(e -> updateEnabledState());
-        updateEnabledState();
+        History.addUndoableEditListener(e -> updateButtonsEnabledState());
+        updateButtonsEnabledState();
 
         buttonsPanel.add(undoButton);
         buttonsPanel.add(redoButton);
@@ -59,7 +63,7 @@ public class HistoryPanel extends JPanel {
         return b;
     }
 
-    private void updateEnabledState() {
+    private void updateButtonsEnabledState() {
         undoButton.setEnabled(pum.canUndo());
         redoButton.setEnabled(pum.canRedo());
     }

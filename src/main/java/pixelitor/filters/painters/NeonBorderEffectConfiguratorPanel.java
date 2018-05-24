@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,7 +56,7 @@ public class NeonBorderEffectConfiguratorPanel extends SimpleEffectConfiguratorP
         ColorUtils.setupFilterColorsPopupMenu(this, innerColorSwatch,
                 this::getInnerColor, c -> setNewInnerColor(c, true));
 
-        gbHelper.addLabelWithControl("Inner Color:", innerColorSwatch);
+        gbh.addLabelWithControl("Inner Color:", innerColorSwatch);
     }
 
     private void setNewInnerColor(Color selectedColor, boolean trigger) {
@@ -67,7 +67,7 @@ public class NeonBorderEffectConfiguratorPanel extends SimpleEffectConfiguratorP
         if (trigger && adjustmentListener != null) {
             adjustmentListener.paramAdjusted();
         }
-        updateDefaultButtonState();
+        updateDefaultButtonIcon();
     }
 
     public Color getInnerColor() {

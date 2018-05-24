@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,8 +29,8 @@ import static pixelitor.colors.palette.PaletteConfig.createSlider;
  * a saturation slider
  */
 public class HueSatPaletteConfig implements PaletteConfig {
-    private float saturation = 0.9f;
-    private float hueShift = 0.0f;
+    private float saturation;
+    private float hueShift;
     private JSlider satSlider;
     private JSlider hueSlider;
 

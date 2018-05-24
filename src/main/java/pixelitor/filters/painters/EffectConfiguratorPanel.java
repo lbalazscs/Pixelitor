@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,7 +56,7 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
 
     private final RangeParam opacityRange;
 
-    protected final GridBagHelper gbHelper;
+    protected final GridBagHelper gbh;
 
     EffectConfiguratorPanel(String effectName, boolean defaultEnabled, Color defaultColor) {
         this.defaultEnabled = defaultEnabled;
@@ -70,7 +70,7 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
         enabledCB = new JCheckBox();
         enabledCB.setName("enabledCB");
         enabledCB.setSelected(defaultEnabled);
-        enabledCB.addActionListener(e -> updateDefaultButtonState());
+        enabledCB.addActionListener(e -> updateDefaultButtonIcon());
 
         colorSwatch = new ColorSwatch(defaultColor, BUTTON_SIZE);
         color = defaultColor;
@@ -89,10 +89,10 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
 
         setLayout(new GridBagLayout());
 
-        gbHelper = new GridBagHelper(this);
-        gbHelper.addLabelWithControl("Enabled:", enabledCB);
-        gbHelper.addLabelWithControlNoFill("Color:", colorSwatch);
-        gbHelper.addLabelWithControlNoFill("Opacity:", opacitySlider);
+        gbh = new GridBagHelper(this);
+        gbh.addLabelWithControl("Enabled:", enabledCB);
+        gbh.addLabelWithControlNoFill("Color:", colorSwatch);
+        gbh.addLabelWithControlNoFill("Opacity:", opacitySlider);
     }
 
     private void showColorDialog() {
@@ -107,7 +107,7 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
         colorSwatch.setForeground(color);
         colorSwatch.paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
 
-        updateDefaultButtonState();
+        updateDefaultButtonIcon();
 
         if (trigger && adjustmentListener != null) {
             adjustmentListener.paramAdjusted();
@@ -174,9 +174,9 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
         this.defaultButton = defaultButton;
     }
 
-    protected void updateDefaultButtonState() {
+    protected void updateDefaultButtonIcon() {
         if (defaultButton != null) {
-            defaultButton.updateState();
+            defaultButton.updateIcon();
         }
     }
 }

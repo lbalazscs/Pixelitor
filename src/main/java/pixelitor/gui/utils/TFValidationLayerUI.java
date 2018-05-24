@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,7 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 /**
- * Support class for validating JTextFields.
+ * A {@link LayerUI} support class for validating JTextFields.
  * Paints a red X on the textfield if the content is not valid.
  */
 public class TFValidationLayerUI extends LayerUI<JTextField> {
@@ -44,8 +44,8 @@ public class TFValidationLayerUI extends LayerUI<JTextField> {
 
         JLayer<JTextField> jLayer = (JLayer<JTextField>) c;
         JTextField textField = jLayer.getView();
-        if (!validator.check(textField)
-                .isOK()) {
+        ValidationResult result = validator.check(textField);
+        if (!result.isOK()) {
             Graphics2D g2 = (Graphics2D) g.create();
 
             // Paint the red X.

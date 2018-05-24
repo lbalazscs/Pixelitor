@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,8 +32,8 @@ public class LinkedEdit extends PixelitorEdit {
     private final PixelitorEdit first;
     private final PixelitorEdit second;
 
-    public LinkedEdit(Composition comp, String name, PixelitorEdit first, PixelitorEdit second) {
-        super(comp, name);
+    public LinkedEdit(String name, Composition comp, PixelitorEdit first, PixelitorEdit second) {
+        super(name, comp);
         this.first = first;
         this.second = second;
     }

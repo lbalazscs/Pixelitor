@@ -120,7 +120,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
                     "Reload", this, oldComp, newComp, oldMode);
             if (oldComp.hasSelection()) {
                 DeselectEdit deselectEdit = oldComp.createDeselectEdit();
-                edit = new LinkedEdit(oldComp, "Reload", deselectEdit, replaceEdit);
+                edit = new LinkedEdit("Reload", oldComp, deselectEdit, replaceEdit);
                 oldComp.deselect(false);
             } else {
                 edit = replaceEdit;
@@ -458,7 +458,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         assert ConsistencyChecks.imageCoversCanvas(comp);
 
         if (frame != null) {
-            frame.setSize(canvas.getZoomedWidth(), canvas.getZoomedHeight(), -1, -1);
+            frame.setSize(-1, -1, canvas.getZoomedWidth(), canvas.getZoomedHeight());
         }
         revalidate();
     }
@@ -493,7 +493,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         Rectangle areaThatShouldBeVisible = null;
         if (frame != null) {
             updateTitle();
-            frame.setSize(canvas.getZoomedWidth(), canvas.getZoomedHeight(), -1, -1);
+            frame.setSize(-1, -1, canvas.getZoomedWidth(), canvas.getZoomedHeight());
 
             Rectangle viewRect = getViewRect();
 
@@ -657,11 +657,11 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     }
 
     public void addLayerToGUI(Layer newLayer, int newLayerIndex) {
-        LayerButton layerButton = newLayer.getUI().getLayerButton();
+        LayerButton layerButton = newLayer.getUI();
         layersPanel.addLayerButton(layerButton, newLayerIndex);
 
         if (ImageComponents.isActive(this)) {
-            AppLogic.activeCompLayerCountChanged(comp, comp.getNumLayers());
+            AppLogic.numLayersChanged(comp, comp.getNumLayers());
         }
     }
 

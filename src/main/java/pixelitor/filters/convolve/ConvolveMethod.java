@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ import java.awt.image.Kernel;
  * An algorithm for convolution
  */
 enum ConvolveMethod {
-    JHLabs {
+    JHLabs("JHLabs ConvolveFilter (Better)") {
         @Override
         BufferedImageOp getConvolveOp(Kernel kernel, String filterName) {
             ConvolveFilter filter = new ConvolveFilter(kernel, filterName);
@@ -36,22 +36,28 @@ enum ConvolveMethod {
             filter.setUseAlpha(false);
             return filter;
         }
-
-        @Override
-        public String toString() {
-            return "JHLabs ConvolveFilter (Better)";
-        }
-    }, AWT {
+    },
+    /**
+     * This is about 3x faster, but does not handle the edges,
+     * and it does not work for edge finding
+     */
+    AWT("AWT ConvolveOp (Faster)") {
         @Override
         BufferedImageOp getConvolveOp(Kernel kernel, String filterName) {
             return new ConvolveOp(kernel);
         }
-
-        @Override
-        public String toString() {
-            return "AWT ConvolveOp (Faster)";
-        }
     };
 
+    private final String guiName;
+
+    ConvolveMethod(String guiName) {
+        this.guiName = guiName;
+    }
+
     abstract BufferedImageOp getConvolveOp(Kernel kernel, String filterName);
+
+    @Override
+    public String toString() {
+        return guiName;
+    }
 }

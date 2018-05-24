@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,13 @@ import pixelitor.utils.Messages;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
+/**
+ * An action which is typically added to menus
+ */
 public abstract class MenuAction extends NamedAction {
+    /**
+     * On what layer types is a {@link MenuAction} allowed to run
+     */
     public enum AllowedLayerType {
         ANY(null) {
             @Override
@@ -60,18 +66,18 @@ public abstract class MenuAction extends NamedAction {
             }
         };
 
-        private final String errorTitle;
+        private final String errorDialogTitle;
 
-        AllowedLayerType(String errorTitle) {
-            this.errorTitle = errorTitle;
+        AllowedLayerType(String errorDialogTitle) {
+            this.errorDialogTitle = errorDialogTitle;
         }
 
         abstract boolean isAllowed(Layer layer);
 
         public abstract String getErrorMessage(Layer layer);
 
-        public String getErrorTitle() {
-            return errorTitle;
+        public String getErrorDialogTitle() {
+            return errorDialogTitle;
         }
     }
 
@@ -103,7 +109,7 @@ public abstract class MenuAction extends NamedAction {
                 if (layerType.isAllowed(activeLayer)) {
                     onClick();
                 } else {
-                    String errorTitle = layerType.getErrorTitle();
+                    String errorTitle = layerType.getErrorDialogTitle();
                     String errorMessage = layerType.getErrorMessage(activeLayer);
                     Messages.showInfo(errorTitle, errorMessage);
                 }

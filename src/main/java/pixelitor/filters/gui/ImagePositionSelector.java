@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,13 +35,14 @@ import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 
 /**
- * The image selector part of an ImagePositionPanel
+ * The image selector part of an {@link ImagePositionParamGUI}
  */
 public class ImagePositionSelector extends JComponent implements MouseMotionListener, MouseListener {
+    private static final int CENTRAL_SQUARE_SIZE = 5;
+
     private final ImagePositionParamGUI parentGUI;
     private final ImagePositionParam model;
     private BufferedImage thumb;
-    private static final int CENTRAL_SQUARE_SIZE = 5;
     private boolean enabled = true;
 
     public ImagePositionSelector(ImagePositionParamGUI parentGUI, ImagePositionParam model, int size) {

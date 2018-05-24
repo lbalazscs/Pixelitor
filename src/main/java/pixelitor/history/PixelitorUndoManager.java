@@ -51,8 +51,6 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
 
     public PixelitorUndoManager() {
         selectionModel = new HistoryListSelectionModel();
-        selectionModel.setSelectionMode(DefaultListSelectionModel.SINGLE_SELECTION);
-
         selectionModel.addListSelectionListener(e -> {
             if (!manualSelectionChange) {
                 return;
@@ -85,11 +83,11 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
         // 1. do the actual addEdit
         boolean retVal = super.addEdit(edit);
 
-        // 2. update the selection model
+        // 2. update the GUI
         manualSelectionChange = false;
         int index = edits.size() - 1;
         fireIntervalAdded(this, index, index);
-        selectionModel.setSelectionInterval(index, index);
+        selectionModel.setSelectedIndex(index);
         manualSelectionChange = true;
 
         selectedEdit = (PixelitorEdit) edit;
@@ -109,7 +107,7 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
         int index = getSelectedIndex();
         if (index > 0) {
             int prevIndex = index - 1;
-            selectionModel.setSelectionInterval(prevIndex, prevIndex);
+            selectionModel.setSelectedIndex(prevIndex);
             selectedEdit = (PixelitorEdit) edits.get(prevIndex);
         } else {
             selectionModel.setAllowDeselect(true);
@@ -132,12 +130,12 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
         manualSelectionChange = false;
         if (selectionModel.isSelectionEmpty()) {
             // the first gets selected
-            selectionModel.setSelectionInterval(0, 0);
+            selectionModel.setSelectedIndex(0);
             selectedEdit = (PixelitorEdit) edits.get(0);
         } else {
             int index = getSelectedIndex();
             int nextIndex = index + 1;
-            selectionModel.setSelectionInterval(nextIndex, nextIndex);
+            selectionModel.setSelectedIndex(nextIndex);
             selectedEdit = (PixelitorEdit) edits.get(nextIndex);
         }
         manualSelectionChange = true;
@@ -150,11 +148,7 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
     }
 
     public int getSelectedIndex() {
-        if (selectionModel.isSelectionEmpty()) {
-            return -1;
-        }
-
-        return selectionModel.getLeadSelectionIndex();
+        return selectionModel.getSelectedIndex();
     }
 
     public boolean hasEdits() {

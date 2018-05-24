@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,7 +48,7 @@ public class ImageFrame extends JInternalFrame implements InternalFrameListener 
         this.add(scrollPane);
 
         Dimension ps = ic.getPreferredSize();
-        setSize((int) ps.getWidth(), (int) ps.getHeight(), locX, locY);
+        setSize(locX, locY, (int) ps.getWidth(), (int) ps.getHeight());
         setLocation(locX, locY);
         this.setVisible(true);
     }
@@ -93,10 +93,10 @@ public class ImageFrame extends JInternalFrame implements InternalFrameListener 
         Canvas canvas = ic.getCanvas();
         int zoomedWidth = canvas.getZoomedWidth();
         int zoomedHeight = canvas.getZoomedHeight();
-        setSize(zoomedWidth, zoomedHeight, locX, locY);
+        setSize(locX, locY, zoomedWidth, zoomedHeight);
     }
 
-    public void setSize(int width, int height, int locX, int locY) {
+    public void setSize(int locX, int locY, int width, int height) {
         // if this is a simple resize, then locX and locY are -1
         if (locX == -1) {
             locX = getLocation().x;

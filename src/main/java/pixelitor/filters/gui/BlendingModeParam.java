@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ public class BlendingModeParam extends IntChoiceParam {
     }
 
     public BlendingModeParam(BlendingMode[] blendingModes, RandomizePolicy randomizePolicy) {
-        super("Blending Mode", transformToValues(blendingModes), randomizePolicy);
+        super("Blending Mode", toValues(blendingModes), randomizePolicy);
         this.blendingModes = blendingModes;
     }
 
@@ -39,7 +39,7 @@ public class BlendingModeParam extends IntChoiceParam {
         return blendingModes[super.getValue()];
     }
 
-    private static Value[] transformToValues(BlendingMode... blendingModes) {
+    private static Value[] toValues(BlendingMode... blendingModes) {
         int size = blendingModes.length;
         Value[] retVal = new Value[size];
         for (int i = 0; i < size; i++) {

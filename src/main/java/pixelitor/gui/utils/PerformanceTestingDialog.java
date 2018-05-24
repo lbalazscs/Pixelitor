@@ -34,7 +34,7 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import static pixelitor.ChangeReason.TEST_NO_HISTORY_NO_PREVIEW;
+import static pixelitor.ChangeReason.PERFORMANCE_TEST;
 
 public class PerformanceTestingDialog extends JDialog implements ActionListener, PropertyChangeListener {
     private final JComboBox<FilterAction> opSelector;
@@ -186,7 +186,7 @@ public class PerformanceTestingDialog extends JDialog implements ActionListener,
             for (int i = 0; i < executions; i++) {
                 long individualStartTime = System.nanoTime();
 
-                op.startOn(dr, TEST_NO_HISTORY_NO_PREVIEW);
+                op.startOn(dr, PERFORMANCE_TEST);
 
                 long individualTotalTime = (System.nanoTime() - individualStartTime) / 1000000;
                 if (individualTotalTime < shortestTime) {

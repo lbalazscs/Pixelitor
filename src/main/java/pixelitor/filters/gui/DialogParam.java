@@ -27,7 +27,8 @@ import java.util.Arrays;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
- * A composite FilterParam which can show its children in a dialog
+ * A composite {@link FilterParam} which
+ * can show its children in a dialog
  */
 public class DialogParam extends AbstractFilterParam {
     private final FilterParam[] children;
@@ -112,7 +113,7 @@ public class DialogParam extends AbstractFilterParam {
 
     private void updateDefaultButtonState() {
         if (defaultButton != null) {
-            defaultButton.updateState();
+            defaultButton.updateIcon();
         }
     }
 

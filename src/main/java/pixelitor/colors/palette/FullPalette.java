@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,9 +20,13 @@ package pixelitor.colors.palette;
 import java.awt.Color;
 
 /**
- * A full palette tries to show as many colors as possible
+ * The full color palette tries to show as many colors
+ * as possible (as opposed to other palettes that concentrate
+ * on specific mixes or variations).
  */
 public class FullPalette extends Palette {
+    // static palette-specific variables so that they
+    // are remembered between dialog sessions
     private static int lastRows = 11;
     private static int lastCols = 7;
 

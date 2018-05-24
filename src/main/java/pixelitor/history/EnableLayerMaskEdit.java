@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,8 +30,8 @@ public class EnableLayerMaskEdit extends PixelitorEdit {
     private Layer layer;
 
     public EnableLayerMaskEdit(Composition comp, Layer layer) {
-        super(comp, layer.isMaskEnabled() ?
-                "Enable Layer Mask" : "Disable Layer Mask");
+        super(layer.isMaskEnabled() ?
+                "Enable Layer Mask" : "Disable Layer Mask", comp);
 
         this.layer = layer;
     }

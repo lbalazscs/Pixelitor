@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.utils.test;
 
+import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponents;
 import pixelitor.layers.Layer;
@@ -42,6 +43,7 @@ public class PixelitorEvent {
 
     protected PixelitorEvent(String type, Composition comp, Layer layer) {
         assert type != null;
+        assert Build.CURRENT.isDevelopment();
 
         date = new Date();
         if (SwingUtilities.isEventDispatchThread()) {
@@ -89,9 +91,11 @@ public class PixelitorEvent {
                     layer.isMaskEnabled(), layer.isMaskEditing(), layer.getMask().isLinked());
         }
 
+        String layerType = layer.getClass().getSimpleName();
+        String formattedDate = dateFormatter.format(date);
         return String.format("%s (%s) on \"%s/%s\" (%s, %s, %s) at %s",
                 type, threadName, comp.getName(), layer.getName(),
-                layer.getClass().getSimpleName(), selectionInfo, maskInfo, dateFormatter.format(date));
+                layerType, selectionInfo, maskInfo, formattedDate);
     }
 
     public boolean isComp(Composition c) {
