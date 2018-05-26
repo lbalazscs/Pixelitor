@@ -83,7 +83,7 @@ public class LinearDabsStrategy implements DabsStrategy {
             }
 
             if (angleSettings.shouldJitterAngle()) {
-                theta = angleSettings.calculatePerturbedAngle(theta);
+                theta = angleSettings.calcJitteredAngle(theta);
             }
 
             brush.putDab(x, y, theta);

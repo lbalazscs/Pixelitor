@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,11 +23,12 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
-import java.awt.Color;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static java.awt.Color.BLACK;
 import static java.awt.Color.BLUE;
+import static java.awt.Color.GREEN;
 import static java.awt.Color.RED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
@@ -51,7 +52,7 @@ public class ParamStateTest {
         FilterParam groupedRangeParamStart = new GroupedRangeParam("GroupedRangeParam", 0, 0, 200);
         FilterParam groupedRangeParamEnd = new GroupedRangeParam("GroupedRangeParam", 0, 0, 200);
 
-        FilterParam gradientParamStart = new GradientParam("GradientParam", Color.BLACK, Color.GREEN);
+        FilterParam gradientParamStart = new GradientParam("GradientParam", BLACK, GREEN);
         FilterParam gradientParamEnd = new GradientParam("GradientParam", BLUE, RED);
 
         FilterParam imagePositionParamStart = new ImagePositionParam("ImagePositionParam", 0.1f, 0.0f);

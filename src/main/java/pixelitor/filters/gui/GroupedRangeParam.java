@@ -164,14 +164,14 @@ public class GroupedRangeParam extends AbstractFilterParam {
     }
 
     @Override
-    public void reset(boolean triggerAction) {
+    public void reset(boolean trigger) {
         for (RangeParam param : rangeParams) {
             // call the individual params without trigger...
             param.reset(false);
         }
 
         // ... and then trigger only once
-        if (triggerAction) {
+        if (trigger) {
             adjustmentListener.paramAdjusted();
         }
 

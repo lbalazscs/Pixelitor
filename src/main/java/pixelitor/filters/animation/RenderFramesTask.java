@@ -27,7 +27,7 @@ import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 import static pixelitor.ChangeReason.TWEEN_PREVIEW;
 
@@ -92,11 +92,10 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
                 time = ((double) effectiveFrame) / numFrames;
             }
 
-            BufferedImage image = renderFrame(filter, time, busyCursorParent);
-
             try {
+                BufferedImage image = renderFrame(filter, time, busyCursorParent);
                 animationWriter.addFrame(image);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 canceled = true;
                 Messages.showException(e);
                 break;
@@ -113,13 +112,16 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         }
     }
 
-    private BufferedImage renderFrame(ParametrizedFilter filter, double time, PixelitorWindow busyCursorParent) {
+    private BufferedImage renderFrame(final ParametrizedFilter filter, double time, final PixelitorWindow busyCursorParent) throws InvocationTargetException, InterruptedException {
         long runCountBefore = Filter.runCount;
 
         ParamSetState intermediateState = animation.tween(time);
         filter.getParamSet().setState(intermediateState);
 
-        filter.run(dr, TWEEN_PREVIEW, busyCursorParent);
+        // all sorts of problems can happen
+        // if filters run outside of EDT
+        Runnable filterRunTask = () -> filter.run(dr, TWEEN_PREVIEW, busyCursorParent);
+        SwingUtilities.invokeAndWait(filterRunTask);
 
         long runCountAfter = Filter.runCount;
         assert runCountAfter == runCountBefore + 1;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -47,13 +47,13 @@ public class ZoomMenu extends PMenu {
     private static final KeyStroke CTRL_NUMPAD_0 = KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD0, InputEvent.CTRL_DOWN_MASK);
     private static final KeyStroke CTRL_ALT_NUMPAD_0 = KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD0, InputEvent.CTRL_DOWN_MASK + InputEvent.ALT_MASK);
 
-    private static final Action INCREASE_ACTION = new AbstractAction("Zoom In") {
+    private static final Action ZOOM_IN_ACTION = new AbstractAction("Zoom In") {
         @Override
         public void actionPerformed(ActionEvent e) {
             ImageComponents.getActiveIC().increaseZoom();
         }
     };
-    private static final Action DECREASE_ACTION = new AbstractAction("Zoom Out") {
+    private static final Action ZOOM_OUT_ACTION = new AbstractAction("Zoom Out") {
         @Override
         public void actionPerformed(ActionEvent e) {
             ImageComponents.getActiveIC().decreaseZoom();
@@ -66,9 +66,9 @@ public class ZoomMenu extends PMenu {
     private ZoomMenu() {
         super("Zoom");
 
-        addActionWithKey(INCREASE_ACTION, CTRL_PLUS);
+        addActionWithKey(ZOOM_IN_ACTION, CTRL_PLUS);
 
-        addActionWithKey(DECREASE_ACTION, CTRL_MINUS);
+        addActionWithKey(ZOOM_OUT_ACTION, CTRL_MINUS);
 
         addActionWithKey(AutoZoomActions.ACTUAL_PIXELS_ACTION, AutoZoomActions.ACTUAL_PIXELS_KEY);
 
@@ -95,8 +95,8 @@ public class ZoomMenu extends PMenu {
         inputMap.put(CTRL_SHIFT_EQUALS, ACTION_MAP_KEY_INCREASE);  // + key in English keyboards
         inputMap.put(CTRL_NUMPAD_PLUS, ACTION_MAP_KEY_INCREASE);  // + key on the numpad
         inputMap.put(CTRL_NUMPAD_MINUS, ACTION_MAP_KEY_DECREASE); // - key on the numpad
-        actionMap.put(ACTION_MAP_KEY_INCREASE, INCREASE_ACTION);
-        actionMap.put(ACTION_MAP_KEY_DECREASE, DECREASE_ACTION);
+        actionMap.put(ACTION_MAP_KEY_INCREASE, ZOOM_IN_ACTION);
+        actionMap.put(ACTION_MAP_KEY_DECREASE, ZOOM_OUT_ACTION);
 
         // ctrl + numpad 0 = actual pixels
         inputMap.put(CTRL_NUMPAD_0, ACTION_MAP_KEY_ACTUAL_PIXELS);

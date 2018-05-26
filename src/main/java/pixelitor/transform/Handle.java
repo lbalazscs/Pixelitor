@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,10 @@ import java.awt.Cursor;
 import java.awt.Rectangle;
 import java.awt.Shape;
 
+/**
+ * An individual handle in {@link TransformSupport}
+ * that can be dragged with the mouse
+ */
 public class Handle {
     // All handle coordinates and sizes are in component space
     private static final int RADIUS = 5;
@@ -51,7 +55,7 @@ public class Handle {
     public boolean isOver(int px, int py)  {
         if(Math.abs(px - x) < RADIUS) {
             if(Math.abs(py - y) < RADIUS) {
-               return true;
+                return true;
             }
         }
         return false;

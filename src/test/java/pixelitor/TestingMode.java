@@ -156,7 +156,7 @@ enum TestingMode {
         return viewMode.editMask();
     }
 
-    protected boolean isActualMaskViewMode(MaskViewMode expected) {
+    protected static boolean isActualMaskViewMode(MaskViewMode expected) {
         return ImageComponents.getActiveIC().getMaskViewMode() == expected;
     }
 

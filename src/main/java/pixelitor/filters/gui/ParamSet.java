@@ -116,7 +116,7 @@ public class ParamSet {
         assert before == after : "before = " + before + ", after = " + after;
     }
 
-    public void triggerFilter() {
+    public void runFilter() {
         if (adjustmentListener != null) {
             adjustmentListener.paramAdjusted();
         }

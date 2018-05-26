@@ -80,8 +80,8 @@ public class BooleanParam extends AbstractFilterParam {
     }
 
     @Override
-    public void reset(boolean triggerAction) {
-        setValue(defaultValue, true, triggerAction);
+    public void reset(boolean trigger) {
+        setValue(defaultValue, true, trigger);
     }
 
     @Override

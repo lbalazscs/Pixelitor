@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -8,11 +8,11 @@
  *
  * Pixelitor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Pixelitor.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.tools;
 
@@ -23,7 +23,8 @@ import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
 import java.awt.LinearGradientPaint;
-import java.awt.MultipleGradientPaint;
+import java.awt.MultipleGradientPaint.ColorSpaceType;
+import java.awt.MultipleGradientPaint.CycleMethod;
 import java.awt.Paint;
 import java.awt.RadialGradientPaint;
 import java.awt.geom.AffineTransform;
@@ -35,7 +36,7 @@ import java.awt.geom.Point2D;
 public enum GradientType {
     LINEAR("Linear") {
         @Override
-        public Paint getGradient(UserDrag userDrag, Color[] colors, MultipleGradientPaint.CycleMethod cycleMethod) {
+        public Paint getGradient(UserDrag userDrag, Color[] colors, CycleMethod cycleMethod) {
             Point2D.Double start = userDrag.getStartPoint();
             Point2D.Double end = userDrag.getEndPoint();
 
@@ -43,7 +44,7 @@ public enum GradientType {
         }
     }, RADIAL("Radial") {
         @Override
-        public Paint getGradient(UserDrag userDrag, Color[] colors, MultipleGradientPaint.CycleMethod cycleMethod) {
+        public Paint getGradient(UserDrag userDrag, Color[] colors, CycleMethod cycleMethod) {
             float radius = (float) userDrag.getDistance();
             Point2D.Double center = userDrag.getStartPoint();
 
@@ -51,28 +52,28 @@ public enum GradientType {
         }
     }, ANGLE("Angle") {
         @Override
-        public Paint getGradient(UserDrag userDrag, Color[] colors, MultipleGradientPaint.CycleMethod cycleMethod) {
+        public Paint getGradient(UserDrag userDrag, Color[] colors, CycleMethod cycleMethod) {
             return new AngleGradientPaint(userDrag, colors[0], colors[1], cycleMethod);
         }
     }, SPIRAL_CW("CW Spiral") {
         @Override
-        public Paint getGradient(UserDrag userDrag, Color[] colors, MultipleGradientPaint.CycleMethod cycleMethod) {
+        public Paint getGradient(UserDrag userDrag, Color[] colors, CycleMethod cycleMethod) {
             return new SpiralGradientPaint(true, userDrag, colors[0], colors[1], cycleMethod);
         }
     }, SPIRAL_CCW("CCW Spiral") {
         @Override
-        public Paint getGradient(UserDrag userDrag, Color[] colors, MultipleGradientPaint.CycleMethod cycleMethod) {
+        public Paint getGradient(UserDrag userDrag, Color[] colors, CycleMethod cycleMethod) {
             return new SpiralGradientPaint(false, userDrag, colors[0], colors[1], cycleMethod);
         }
     }, DIAMOND("Diamond") {
         @Override
-        public Paint getGradient(UserDrag userDrag, Color[] colors, MultipleGradientPaint.CycleMethod cycleMethod) {
+        public Paint getGradient(UserDrag userDrag, Color[] colors, CycleMethod cycleMethod) {
             return new DiamondGradientPaint(userDrag, colors[0], colors[1], cycleMethod);
         }
     };
 
     private static final AffineTransform gradientTransform = new AffineTransform();
-    private static final MultipleGradientPaint.ColorSpaceType colorSpaceType = MultipleGradientPaint.ColorSpaceType.SRGB;
+    private static final ColorSpaceType colorSpaceType = ColorSpaceType.SRGB;
 
     private final String guiName;
 
@@ -80,7 +81,7 @@ public enum GradientType {
         this.guiName = guiName;
     }
 
-    public abstract Paint getGradient(UserDrag userDrag, Color[] colors, MultipleGradientPaint.CycleMethod cycleMethod);
+    public abstract Paint getGradient(UserDrag userDrag, Color[] colors, CycleMethod cycleMethod);
 
     @Override
     public String toString() {

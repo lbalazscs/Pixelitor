@@ -257,13 +257,13 @@ public class TestHelper {
         }
     }
 
-    public static void moveLayer(Composition comp, boolean makeDuplicateLayer, int relativeX, int relativeY) {
+    public static void moveLayer(Composition comp, boolean makeDuplicateLayer, int relX, int relY) {
         comp.startMovement(makeDuplicateLayer);
-        comp.moveActiveContentRelative(relativeX, relativeY);
+        comp.moveActiveContentRelative(relX, relY);
         comp.endMovement();
     }
 
-    public static void addRectangleSelection(Composition comp, Rectangle rect) {
+    private static void addRectangleSelection(Composition comp, Rectangle rect) {
 //        comp.startSelection(SelectionType.RECTANGLE, SelectionInteraction.ADD);
         Selection selection = new Selection(rect, comp.getIC());
         comp.setNewSelection(selection);

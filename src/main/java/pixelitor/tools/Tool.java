@@ -75,7 +75,10 @@ public abstract class Tool implements KeyboardObserver {
     // when the user switches to another tool
     protected JDialog toolDialog;
 
-    protected Tool(char activationKeyChar, String name, String iconFileName, String toolMessage, Cursor cursor, boolean allowOnlyImageLayers, boolean handToolForwarding, boolean constrainIfShiftDown, ClipStrategy clipStrategy) {
+    protected Tool(char activationKeyChar, String name, String iconFileName,
+                   String toolMessage, Cursor cursor,
+                   boolean allowOnlyDrawables, boolean handToolForwarding,
+                   boolean constrainIfShiftDown, ClipStrategy clipStrategy) {
         this.activationKeyChar = activationKeyChar;
         this.name = name;
         this.iconFileName = iconFileName;
@@ -84,17 +87,17 @@ public abstract class Tool implements KeyboardObserver {
         this.constrainIfShiftDown = constrainIfShiftDown;
         this.clipStrategy = clipStrategy;
 
-        initHandlerChain(cursor, allowOnlyImageLayers, handToolForwarding);
+        initHandlerChain(cursor, allowOnlyDrawables, handToolForwarding);
     }
 
-    private void initHandlerChain(Cursor cursor, boolean allowOnlyImageLayers, boolean handToolForwarding) {
+    private void initHandlerChain(Cursor cursor, boolean allowOnlyDrawables, boolean handToolForwarding) {
         ToolHandler lastHandler = null;
         if (handToolForwarding) {
             // most tools behave like the hand tool if the space is pressed
             handToolHandler = new HandToolHandler(cursor);
             lastHandler = addHandlerToChain(handToolHandler, lastHandler);
         }
-        if (allowOnlyImageLayers) {
+        if (allowOnlyDrawables) {
             lastHandler = addHandlerToChain(
                     new DrawableCheckHandler(this), lastHandler);
         }
@@ -143,7 +146,7 @@ public abstract class Tool implements KeyboardObserver {
         mouseDown = true;
 
         userDrag = new UserDrag();
-        userDrag.setStartFromMouseEvent(e, ic);
+        userDrag.setStart(e, ic);
 
         handlerChainStart.handleMousePressed(e, ic);
 
@@ -156,7 +159,7 @@ public abstract class Tool implements KeyboardObserver {
         }
         mouseDown = false;
 
-        userDrag.setEndFromMouseEvent(e, ic);
+        userDrag.setEnd(e, ic);
 
         handlerChainStart.handleMouseReleased(e, ic);
 
@@ -176,7 +179,7 @@ public abstract class Tool implements KeyboardObserver {
             userDrag.setConstrainPoints(e.isShiftDown());
         }
 
-        userDrag.setEndFromMouseEvent(e, ic);
+        userDrag.setEnd(e, ic);
 
         if (spaceDragBehavior) {
             if (endPointInitialized && GlobalKeyboardWatch.isSpaceDown()) {
@@ -286,7 +289,7 @@ public abstract class Tool implements KeyboardObserver {
      * A possibility to paint temporarily something (like marching ants) on the ImageComponent
      * after all the layers have been painted.
      */
-    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent callingIC, AffineTransform unscaledTransform) {
+    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent ic, AffineTransform unscaledTransform) {
         // empty for the convenience of subclasses
     }
 

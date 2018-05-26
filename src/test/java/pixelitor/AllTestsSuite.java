@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,9 +36,16 @@ import pixelitor.layers.LayerTest;
 import pixelitor.layers.TextLayerTest;
 import pixelitor.tools.AbstractBrushToolTest;
 import pixelitor.tools.ToolTest;
+import pixelitor.tools.guidelines.RectGuidelineTest;
+import pixelitor.transform.TransformHelperTest;
+import pixelitor.utils.ImageUtilsTest;
+import pixelitor.utils.UtilsTest;
 
 /**
  * Allows the test cases to run from the command line.
+ * For finding all files with unit tests, do
+ * grep -Rl "@Test" . | xargs -L 1 basename | sed -e 's/java/class,/g' | sort
+ * in the test directory
  *
  * See http://stackoverflow.com/questions/24510742/can-you-run-all-junit-tests-in-a-package-from-the-command-line-without-explicitl
  */
@@ -49,24 +56,31 @@ import pixelitor.tools.ToolTest;
 // unpacked on the file system
 //        CompositionCreationTest.class,
 
-        PixelitorUndoManagerTest.class,
-        CompositionTest.class,
-        MultiLayerEditTest.class,
+// also it should not contain itself
+//        AllTestsSuite.class,
+
+        AbstractBrushToolTest.class,
         BooleanParamTest.class,
-        FilterParamTest.class,
-        IntChoiceParamTest.class,
-        ParamSetTest.class,
-        ParamStateTest.class,
-        RangeParamTest.class,
-        LevelsTest.class,
-        RandomFilterSourceTest.class,
+        CompositionTest.class,
         ContentLayerTest.class,
+        FilterParamTest.class,
         ImageLayerTest.class,
+        ImageUtilsTest.class,
+        IntChoiceParamTest.class,
         LayerBlendingModesTest.class,
         LayerTest.class,
+        LevelsTest.class,
+        MultiLayerEditTest.class,
+        ParamSetTest.class,
+        ParamStateTest.class,
+        PixelitorUndoManagerTest.class,
+        RandomFilterSourceTest.class,
+        RangeParamTest.class,
+        RectGuidelineTest.class,
         TextLayerTest.class,
         ToolTest.class,
-        AbstractBrushToolTest.class,
+        TransformHelperTest.class,
+        UtilsTest.class,
 })
 public class AllTestsSuite {
     // empty

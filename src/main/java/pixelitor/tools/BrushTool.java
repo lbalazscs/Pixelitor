@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,10 +21,10 @@ import pixelitor.colors.ColorUtils;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.ImageComponent;
 import pixelitor.layers.Drawable;
+import pixelitor.utils.Cursors;
 
 import javax.swing.*;
 import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Shape;
@@ -39,7 +39,7 @@ public class BrushTool extends BlendingModeBrushTool {
     public BrushTool() {
         super('b', "Brush", "brush_tool_icon.png",
                 "click and drag to draw with the current brush, Shift-click to draw lines, right-click to draw with the background color",
-                Cursor.getDefaultCursor()
+                Cursors.DEFAULT
         );
     }
 

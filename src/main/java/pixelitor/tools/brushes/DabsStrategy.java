@@ -18,8 +18,8 @@
 package pixelitor.tools.brushes;
 
 /**
- * A dabs strategy specifies the way the dabs of a
- * DabsBrush are placed in response to GUI events.
+ * Specifies the way the dabs of a {@link DabsBrush}
+ * are placed in response to mouse events.
  *
  * Unlike brush settings, these objects cannot be shared
  * between symmetry brushes, because they call back a specific brush.

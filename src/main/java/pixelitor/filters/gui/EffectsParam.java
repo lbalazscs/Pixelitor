@@ -113,9 +113,9 @@ public class EffectsParam extends AbstractFilterParam {
     }
 
     @Override
-    public void reset(boolean triggerAction) {
+    public void reset(boolean trigger) {
         if (effectsPanel != null) {
-            effectsPanel.reset(triggerAction);
+            effectsPanel.reset(trigger);
         }
     }
 }

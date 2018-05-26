@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,9 @@
 
 package pixelitor.manual;
 
-import com.jhlabs.image.SparkleFilter;
+import com.jhlabs.image.KaleidoscopeFilter;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.ProgressTracker;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -33,7 +34,10 @@ public class TestFilterPerformance {
     }
 
     public static void main(String[] args) throws IOException {
-        File imgFile = new File("C:\\Users\\Laci\\Desktop\\tmp\\nagy.jpg");
+        if (args.length == 0) {
+            throw new IllegalStateException("missing argument");
+        }
+        File imgFile = new File(args[0]);
         BufferedImage bigImage = ImageIO.read(imgFile);
         bigImage = ImageUtils.toSysCompatibleImage(bigImage);
 
@@ -52,24 +56,12 @@ public class TestFilterPerformance {
         System.exit(0);
     }
 
+    // a place to configure the tested filter
     private static BufferedImageOp getFilter() {
-////        SwirlFilter f = new SwirlFilter();
-//        SwirlFilterD f = new SwirlFilterD();
-//        f.setCenterX(0.5f);
-//        f.setCenterY(0.5f);
-//        f.setZoom(1.0f);
-//        f.setAmount(1.5f);
-//        f.setRadius(1555.0f);
+        KaleidoscopeFilter f = new KaleidoscopeFilter("Kaleidoscope Test");
+        f.setZoom(1.0f);
 
-//        KaleidoscopeFilterD f = new KaleidoscopeFilterD();
-//        f.setZoom(1.0f);
-
-        SparkleFilter f = new SparkleFilter("SparkleFilter test");
-        f.setRadius(518);
-        f.setRays(200);
-        f.setAmount(55);
-        f.setRandomness(25);
-
+        f.setProgressTracker(ProgressTracker.NULL_TRACKER);
         return f;
     }
 
@@ -77,14 +69,6 @@ public class TestFilterPerformance {
         long startTime = System.nanoTime();
 
         op.filter(img, img);
-
-//        try {
-//            File output = new File("C:\\Users\\Laci\\Desktop\\tmp\\nagy_" + new Date().getTime() + ".png");
-//            ImageIO.write(img, "png", output);
-//            System.out.println("TestFilterPerformance::measurePerformance: output = " + output.getAbsolutePath() + (output.exists() ? " - exists" : " - does not exist!"));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
 
         double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
 

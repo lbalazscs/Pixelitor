@@ -61,8 +61,8 @@ public class ColorParam extends AbstractFilterParam {
     }
 
     @Override
-    public void reset(boolean triggerAction) {
-        setColor(defaultColor, triggerAction);
+    public void reset(boolean trigger) {
+        setColor(defaultColor, trigger);
     }
 
     @Override

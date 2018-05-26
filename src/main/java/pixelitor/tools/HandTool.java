@@ -31,7 +31,7 @@ public class HandTool extends Tool {
     
     HandTool() {
         super('h', "Hand", "hand_tool_icon.png", "drag to move the view (if scrollbars are present)",
-                Cursors.HAND, false, false, false, ClipStrategy.IMAGE_ONLY);
+                Cursors.HAND, false, false, false, ClipStrategy.CANVAS);
     }
 
     @Override

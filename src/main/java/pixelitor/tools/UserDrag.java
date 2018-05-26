@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,8 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 /**
- * Represents the mouse drag on the image made by the user while using a tool.
+ * Represents the mouse drag on the image made
+ * by the user while using a tool.
  * The coordinates are in image coordinates.
  */
 public class UserDrag {
@@ -53,12 +54,12 @@ public class UserDrag {
         this.endY = endY;
     }
 
-    public void setStartFromMouseEvent(MouseEvent e, ImageComponent ic) {
+    public void setStart(MouseEvent e, ImageComponent ic) {
         startX = ic.componentXToImageSpace(e.getX());
         startY = ic.componentYToImageSpace(e.getY());
     }
 
-    public void setEndFromMouseEvent(MouseEvent e, ImageComponent ic) {
+    public void setEnd(MouseEvent e, ImageComponent ic) {
         endX = ic.componentXToImageSpace(e.getX());
         endY = ic.componentYToImageSpace(e.getY());
 

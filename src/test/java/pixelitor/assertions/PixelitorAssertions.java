@@ -23,6 +23,7 @@ import pixelitor.Composition;
 import pixelitor.filters.RandomFilterSource;
 import pixelitor.selection.Selection;
 
+@SuppressWarnings("ExtendsUtilityClass")
 public class PixelitorAssertions extends Assertions {
     @org.assertj.core.util.CheckReturnValue
     public static CompositionAssert assertThat(Composition actual) {

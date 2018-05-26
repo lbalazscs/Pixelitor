@@ -25,12 +25,12 @@ import pixelitor.layers.Drawable;
 import pixelitor.layers.LayerMask;
 import pixelitor.layers.TmpDrawingLayer;
 import pixelitor.menus.view.ZoomLevel;
+import pixelitor.utils.Cursors;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.Composite;
-import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.MultipleGradientPaint;
 import java.awt.Paint;
@@ -67,7 +67,7 @@ public class GradientTool extends Tool {
 
     GradientTool() {
         super('g', "Gradient", "gradient_tool_icon.png", "click and drag to draw a gradient, Shift-drag to constrain the direction.",
-                Cursor.getDefaultCursor(), true, true, true, ClipStrategy.IMAGE_ONLY);
+                Cursors.DEFAULT, true, true, true, ClipStrategy.CANVAS);
     }
 
     @Override

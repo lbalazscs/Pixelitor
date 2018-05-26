@@ -63,7 +63,7 @@ public class TextLayerTest {
         LayerButton ui = mock(LayerButton.class);
         layer.setUI(ui);
 
-        withMask.init(layer);
+        withMask.setupFor(layer);
         LayerMask mask = null;
         if (withMask.isYes()) {
             mask = layer.getMask();

@@ -86,13 +86,13 @@ public class ImageLayerTest {
         LayerButton ui = mock(LayerButton.class);
         layer.setUI(ui);
 
-        withMask.init(layer);
+        withMask.setupFor(layer);
         LayerMask mask = null;
         if (withMask.isYes()) {
             mask = layer.getMask();
         }
 
-        withTranslation.init(layer);
+        withTranslation.setupFor(layer);
 
         int layerIconUpdatesAtStart = 0;
         if (withTranslation.isYes()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,45 +19,12 @@ package pixelitor.tools;
 
 import java.awt.geom.AffineTransform;
 
+/**
+ * An enum-like collection of four static classes
+ * that calculate the amount of keyboard nudging
+ * in the move, selection and crop tools.
+ */
 public abstract class ArrowKey {
-    private static final int SHIFT_MULTIPLIER = 10;
-
-    private final boolean shiftDown;
-
-    private ArrowKey(boolean shiftDown) {
-        this.shiftDown = shiftDown;
-    }
-
-    public int getMoveX() {
-        if (shiftDown) {
-            return SHIFT_MULTIPLIER * getDirX();
-        } else {
-            return getDirX();
-        }
-    }
-
-    public int getMoveY() {
-        if (shiftDown) {
-            return SHIFT_MULTIPLIER * getDirY();
-        } else {
-            return getDirY();
-        }
-    }
-
-    public AffineTransform getTransform() {
-        return AffineTransform.getTranslateInstance(getMoveX(), getMoveY());
-    }
-
-    @Override
-    public String toString() {
-        String simpleName = getClass().getSimpleName();
-        return shiftDown ? "SHIFT" + simpleName : simpleName;
-    }
-
-    protected abstract int getDirX();
-
-    protected abstract int getDirY();
-
     public static class UP extends ArrowKey {
         public UP(boolean shiftDown) {
             super(shiftDown);
@@ -121,4 +88,45 @@ public abstract class ArrowKey {
             return 0;
         }
     }
+
+    /**
+     * When Shift is pressed, everything is nudged faster.
+     */
+    private static final int SHIFT_MULTIPLIER = 10;
+
+    private final boolean shiftDown;
+
+    private ArrowKey(boolean shiftDown) {
+        this.shiftDown = shiftDown;
+    }
+
+    public int getMoveX() {
+        if (shiftDown) {
+            return SHIFT_MULTIPLIER * getDirX();
+        } else {
+            return getDirX();
+        }
+    }
+
+    public int getMoveY() {
+        if (shiftDown) {
+            return SHIFT_MULTIPLIER * getDirY();
+        } else {
+            return getDirY();
+        }
+    }
+
+    public AffineTransform getTransform() {
+        return AffineTransform.getTranslateInstance(getMoveX(), getMoveY());
+    }
+
+    @Override
+    public String toString() {
+        String simpleName = getClass().getSimpleName();
+        return shiftDown ? "SHIFT" + simpleName : simpleName;
+    }
+
+    protected abstract int getDirX();
+
+    protected abstract int getDirY();
 }

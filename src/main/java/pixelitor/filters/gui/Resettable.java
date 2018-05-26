@@ -23,5 +23,10 @@ package pixelitor.filters.gui;
 public interface Resettable {
     boolean isSetToDefault();
 
-    void reset(boolean triggerAction);
+    /**
+     * @param trigger If true, then the resetting can trigger
+     *                some GUI update such as the recalculating
+     *                of a filter preview
+     */
+    void reset(boolean trigger);
 }

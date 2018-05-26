@@ -84,7 +84,6 @@ public class TextFilter extends FilterWithGUI {
         assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
 
         if (instance == null) {
-            System.out.println("TextFilter::getInstance: CREATING");
             instance = new TextFilter();
         }
 

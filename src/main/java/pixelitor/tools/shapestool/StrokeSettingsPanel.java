@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,13 +34,16 @@ import static pixelitor.tools.StrokeType.BASIC;
 import static pixelitor.tools.StrokeType.SHAPE;
 import static pixelitor.tools.StrokeType.ZIGZAG;
 
+/**
+ * Stroke configuration used by the shapes tool and by
+ * shape filters
+ */
 public class StrokeSettingsPanel extends JPanel {
     public StrokeSettingsPanel(RangeParam strokeWidthParam,
                                EnumParam<BasicStrokeCap> capParam,
                                EnumParam<BasicStrokeJoin> joinParam,
                                EnumParam<StrokeType> strokeTypeParam,
                                BooleanParam dashedParam, EnumParam<ShapeType> shapeTypeParam) {
-//        super(PixelitorWindow.getInstance(), "Stroke Settings", "Close");
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
@@ -84,8 +87,8 @@ public class StrokeSettingsPanel extends JPanel {
     }
 
     private static JPanel createStrokeTypePanel(EnumParam<StrokeType> strokeTypeParam,
-                                         EnumParam<ShapeType> shapeTypeParam,
-                                         BooleanParam dashedParam) {
+                                                EnumParam<ShapeType> shapeTypeParam,
+                                                BooleanParam dashedParam) {
         JPanel strokeTypePanel = new JPanel();
         strokeTypePanel.setBorder(BorderFactory.createTitledBorder("Stroke Type"));
 

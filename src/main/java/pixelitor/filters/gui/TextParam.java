@@ -52,13 +52,13 @@ public class TextParam extends AbstractFilterParam {
     }
 
     @Override
-    public void reset(boolean triggerAction) {
-        if (triggerAction) {
+    public void reset(boolean trigger) {
+        if (trigger) {
             setValue(defaultValue);
         } else {
-            trigger = false;
+            this.trigger = false;
             setValue(defaultValue);
-            trigger = true;
+            this.trigger = true;
         }
     }
 

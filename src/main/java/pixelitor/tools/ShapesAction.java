@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,7 @@ public enum ShapesAction {
     }, FILL_AND_STROKE(true, true, true, true, true, true, false, "Fill and Stroke") {
     }, EFFECTS_ONLY(false, false, false, false, false, true, false, "Effects Only") {
     }, SELECTION(false, false, false, false, false, false, true, "Selection") {
-    }, SELECTION_FROM_STROKE(false, false, true, false, false, false, true, "Stroked Selection") {
+    }, SELECTION_FROM_STROKE(false, false, true, false, false, false, true, "Selection from Stroke") {
     };
 
     private final boolean enableStrokeSettings;

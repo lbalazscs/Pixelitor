@@ -47,7 +47,7 @@ public class FileChoosers {
     private static final FileFilter pxcFilter = new FileNameExtensionFilter("PXC files", "pxc");
     public static final FileFilter oraFilter = new FileNameExtensionFilter("OpenRaster files", "ora");
 
-    private static FileFilter[] OPEN_SAVE_FILTERS;
+    private static final FileFilter[] OPEN_SAVE_FILTERS;
 
     static {
         if (Utils.getCurrentMainJavaVersion() == 8) {

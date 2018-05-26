@@ -100,11 +100,11 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     /**
      * Resets to the default value.
-     * @param triggerAction should be true if called from a GUI component
+     * @param trigger should be true if called from a GUI component
      */
     @Override
-    public void reset(boolean triggerAction) {
-        setValue(defaultValue, triggerAction);
+    public void reset(boolean trigger) {
+        setValue(defaultValue, trigger);
     }
 
     /**
@@ -195,10 +195,6 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     public void setValue(int n, boolean trigger) {
-// these assertions cannot be made because of swing bugs
-//        assert n <= maxValue : getName() + ": n (" + n + ") > maxValue (" + maxValue + ')';
-//        assert n >= minValue : getName() + ": n (" + n + ") < minValue (" + minValue + ')';
-
         if (n > maxValue) {
             n = maxValue;
         }

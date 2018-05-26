@@ -26,11 +26,11 @@ import pixelitor.selection.SelectionBuilder;
 import pixelitor.selection.SelectionInteraction;
 import pixelitor.selection.SelectionType;
 import pixelitor.utils.ActiveImageChangeListener;
+import pixelitor.utils.Cursors;
 import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
-import java.awt.Cursor;
 import java.awt.event.MouseEvent;
 
 /**
@@ -52,7 +52,7 @@ public class SelectionTool extends Tool implements ActiveImageChangeListener {
     SelectionTool() {
         super('m', "Selection", "selection_tool_icon.png",
                 HELP_TEXT,
-                Cursor.getDefaultCursor(), false, true, false, ClipStrategy.INTERNAL_FRAME);
+                Cursors.DEFAULT, false, true, false, ClipStrategy.INTERNAL_FRAME);
         spaceDragBehavior = true;
         ImageComponents.addActiveImageChangeListener(this);
     }

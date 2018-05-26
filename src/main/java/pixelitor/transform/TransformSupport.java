@@ -29,7 +29,11 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 
 /**
- * Helps with interactive manipulation of selections/transforms
+ * Originally this was intended to be a generic helper class
+ * for interactive manipulation of selections/transforms
+ *
+ * Currently it is used only by the Crop Tool, and it also
+ * became somewhat specific to cropping.
  */
 public class TransformSupport {
 

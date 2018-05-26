@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,24 +51,24 @@ public class ParamSetTest {
     @Test
     public void test_reset() {
         params.reset();
-        checkThatFilterWasNotCalled();
+        verify(adjustmentListener, never()).paramAdjusted();
     }
 
     @Test
     public void test_randomize() {
         params.randomize();
-        checkThatFilterWasNotCalled();
+        verify(adjustmentListener, never()).paramAdjusted();
     }
 
     @Test
     public void testFilterTriggering() {
         extraParam.setValue(42, false);
-        checkThatFilterWasNotCalled();
+        verify(adjustmentListener, never()).paramAdjusted();
 
         extraParam.setValue(43, true);
         verify(adjustmentListener, times(1)).paramAdjusted();
 
-        params.triggerFilter();
+        params.runFilter();
         verify(adjustmentListener, times(2)).paramAdjusted();
     }
 
@@ -77,7 +77,7 @@ public class ParamSetTest {
         ParamSetState state = params.copyState();
         params.setState(state);
 
-        checkThatFilterWasNotCalled();
+        verify(adjustmentListener, never()).paramAdjusted();
     }
 
     @Test
@@ -90,15 +90,11 @@ public class ParamSetTest {
         params.setFinalAnimationSettingMode(false);
         params.setFinalAnimationSettingMode(true);
 
-        checkThatFilterWasNotCalled();
+        verify(adjustmentListener, never()).paramAdjusted();
     }
 
     @Test
     public void test_hasGradient() {
         assertThat(params.hasGradient()).isTrue();
-    }
-
-    private void checkThatFilterWasNotCalled() {
-        verify(adjustmentListener, never()).paramAdjusted();
     }
 }

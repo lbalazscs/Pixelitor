@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.tools.gradientpaints;
 import pixelitor.tools.UserDrag;
 
 import java.awt.Color;
-import java.awt.MultipleGradientPaint;
+import java.awt.MultipleGradientPaint.CycleMethod;
 import java.awt.Paint;
 import java.awt.PaintContext;
 import java.awt.Rectangle;
@@ -40,12 +40,12 @@ public class DiamondGradientPaint implements Paint {
     private final UserDrag userDrag;
     private final Color startColor;
     private final Color endColor;
-    private final MultipleGradientPaint.CycleMethod cycleMethod;
+    private final CycleMethod cycleMethod;
 
     private static final int AA_RES = 4; // the resolution of AA supersampling
     private static final int AA_RES2 = AA_RES * AA_RES;
 
-    public DiamondGradientPaint(UserDrag userDrag, Color startColor, Color endColor, MultipleGradientPaint.CycleMethod cycleMethod) {
+    public DiamondGradientPaint(UserDrag userDrag, Color startColor, Color endColor, CycleMethod cycleMethod) {
         this.userDrag = userDrag;
         this.startColor = startColor;
         this.endColor = endColor;
@@ -72,7 +72,7 @@ public class DiamondGradientPaint implements Paint {
 
     private static class DiamondGradientPaintContext implements PaintContext {
         protected final UserDrag userDrag;
-        protected final MultipleGradientPaint.CycleMethod cycleMethod;
+        protected final CycleMethod cycleMethod;
 
         private final int startAlpha;
         private final int startRed;
@@ -90,7 +90,7 @@ public class DiamondGradientPaint implements Paint {
         protected final float dragRelDY;
         protected final double dragDist;
 
-        private DiamondGradientPaintContext(UserDrag userDrag, Color startColor, Color endColor, ColorModel cm, MultipleGradientPaint.CycleMethod cycleMethod) {
+        private DiamondGradientPaintContext(UserDrag userDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
             this.userDrag = userDrag;
             this.cycleMethod = cycleMethod;
 
@@ -228,7 +228,7 @@ public class DiamondGradientPaint implements Paint {
         private final int startGray;
         private final int endGray;
 
-        private GrayDiamondGradientPaintContext(UserDrag userDrag, Color startColor, Color endColor, ColorModel cm, MultipleGradientPaint.CycleMethod cycleMethod) {
+        private GrayDiamondGradientPaintContext(UserDrag userDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
             super(userDrag, startColor, endColor, cm, cycleMethod);
 
             startGray = startColor.getRed();

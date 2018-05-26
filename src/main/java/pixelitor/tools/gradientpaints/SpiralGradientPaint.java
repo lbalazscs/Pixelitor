@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.tools.gradientpaints;
 import pixelitor.tools.UserDrag;
 
 import java.awt.Color;
-import java.awt.MultipleGradientPaint;
+import java.awt.MultipleGradientPaint.CycleMethod;
 import java.awt.Paint;
 import java.awt.PaintContext;
 import java.awt.Rectangle;
@@ -43,12 +43,12 @@ public class SpiralGradientPaint implements Paint {
     private final UserDrag userDrag;
     private final Color startColor;
     private final Color endColor;
-    protected final MultipleGradientPaint.CycleMethod cycleMethod;
+    private final CycleMethod cycleMethod;
 
-    protected static final int AA_RES = 4; // the resolution of AA supersampling
-    protected static final int AA_RES2 = AA_RES * AA_RES;
+    private static final int AA_RES = 4; // the resolution of AA supersampling
+    private static final int AA_RES2 = AA_RES * AA_RES;
 
-    public SpiralGradientPaint(boolean clockwise, UserDrag userDrag, Color startColor, Color endColor, MultipleGradientPaint.CycleMethod cycleMethod) {
+    public SpiralGradientPaint(boolean clockwise, UserDrag userDrag, Color startColor, Color endColor, CycleMethod cycleMethod) {
         this.clockwise = clockwise;
         this.userDrag = userDrag;
         this.startColor = startColor;
@@ -77,7 +77,7 @@ public class SpiralGradientPaint implements Paint {
     static class SpiralGradientPaintContext implements PaintContext {
         protected final boolean clockwise;
         protected final UserDrag userDrag;
-        protected final MultipleGradientPaint.CycleMethod cycleMethod;
+        protected final CycleMethod cycleMethod;
 
         private final int startAlpha;
         private final int startRed;
@@ -93,7 +93,7 @@ public class SpiralGradientPaint implements Paint {
         protected final double drawAngle;
         protected final double dragDistance;
 
-        private SpiralGradientPaintContext(boolean clockwise, UserDrag userDrag, Color startColor, Color endColor, ColorModel cm, MultipleGradientPaint.CycleMethod cycleMethod) {
+        private SpiralGradientPaintContext(boolean clockwise, UserDrag userDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
             this.clockwise = clockwise;
             this.userDrag = userDrag;
             this.cycleMethod = cycleMethod;
@@ -241,7 +241,7 @@ public class SpiralGradientPaint implements Paint {
         private final int startGray;
         private final int endGray;
 
-        private GraySpiralGradientPaintContext(boolean clockwise, UserDrag userDrag, Color startColor, Color endColor, ColorModel cm, MultipleGradientPaint.CycleMethod cycleMethod) {
+        private GraySpiralGradientPaintContext(boolean clockwise, UserDrag userDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
             super(clockwise, userDrag, startColor, endColor, cm, cycleMethod);
 
             startGray = startColor.getRed();

@@ -299,7 +299,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         int zoomedWidth = canvas.getZoomedWidth();
         int zoomedHeight = canvas.getZoomedHeight();
 
-        Rectangle imageClip = adjustClipBoundsForImage(g, drawStartX, drawStartY, zoomedWidth, zoomedHeight);
+        Rectangle canvasClip = setCanvasClip(g, drawStartX, drawStartY, zoomedWidth, zoomedHeight);
 
         AffineTransform unscaledTransform = g2.getTransform(); // a copy of the transform object
 
@@ -338,10 +338,10 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         // restore original transform
         g2.setTransform(unscaledTransform);
 
-        g2.setClip(imageClip);
+        g2.setClip(canvasClip);
 
         // draw pixel grid
-        if (showPixelGrid && zoomLevel.drawPixelGrid() && !comp.hasSelection()) {
+        if (showPixelGrid && zoomLevel.allowPixelGrid() && !comp.hasSelection()) {
             // TODO why is this very slow if there is selection?
 
             g2.setXORMode(BLACK);
@@ -379,9 +379,9 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     }
 
     /**
-     * Makes sure that not the whole area is repainted, only the image
+     * Makes sure that not the whole area is repainted, only the canvas
      */
-    private static Rectangle adjustClipBoundsForImage(Graphics g, double drawStartX, double drawStartY, int maxWidth, int maxHeight) {
+    private static Rectangle setCanvasClip(Graphics g, double drawStartX, double drawStartY, int maxWidth, int maxHeight) {
         Rectangle clipBounds = g.getClipBounds();
         Rectangle imageRect = new Rectangle((int) drawStartX, (int) drawStartY, maxWidth, maxHeight);
         clipBounds = clipBounds.intersection(imageRect);
@@ -495,15 +495,15 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
             updateTitle();
             frame.setSize(-1, -1, canvas.getZoomedWidth(), canvas.getZoomedHeight());
 
-            Rectangle viewRect = getViewRect();
+            Rectangle visiblePart = getVisiblePart();
 
             // Update the scrollbars.
             Point origin;
             if (mousePos != null) { // we had a mouse click
                 origin = mousePos;
             } else {
-                int cx = viewRect.x + viewRect.width / 2;
-                int cy = viewRect.y + viewRect.height / 2;
+                int cx = visiblePart.x + visiblePart.width / 2;
+                int cy = visiblePart.y + visiblePart.height / 2;
 
                 origin = new Point(cx, cy);
             }
@@ -514,10 +514,10 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
             origin = fromImageToComponentSpace(imageSpaceOrigin, newZoom);
 
             areaThatShouldBeVisible = new Rectangle(
-                    origin.x - viewRect.width / 2,
-                    origin.y - viewRect.height / 2,
-                    viewRect.width,
-                    viewRect.height
+                    origin.x - visiblePart.width / 2,
+                    origin.y - visiblePart.height / 2,
+                    visiblePart.width,
+                    visiblePart.height
             );
         }
 
@@ -649,10 +649,11 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     }
 
     /**
-     * Returns how much of this ImageComponent is currently visible considering that
-     * the JScrollPane might show only a part of it
+     * Returns how much of this ImageComponent is currently
+     * visible considering that the JScrollPane might show
+     * only a part of it
      */
-    public Rectangle getViewRect() {
+    public Rectangle getVisiblePart() {
         return frame.getScrollPane().getViewport().getViewRect();
     }
 
@@ -686,9 +687,15 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     }
 
     public void updateNavigator(boolean newICSize) {
+        assert SwingUtilities.isEventDispatchThread();
         if (navigator != null) {
-            SwingUtilities.invokeLater(() ->
-                    navigator.refreshSizeCalc(this, false, newICSize, false));
+            // defer the navigator stuff until all
+            // pending events have been processed
+            SwingUtilities.invokeLater(() -> {
+                if (navigator != null) { // check again for safety
+                    navigator.refreshSizeCalc(this, false, newICSize, false);
+                }
+            });
         }
     }
 

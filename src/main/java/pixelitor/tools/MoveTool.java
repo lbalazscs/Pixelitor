@@ -33,7 +33,7 @@ public class MoveTool extends Tool {
     public MoveTool() {
         super('v', "Move", "move_tool_icon.png",
                 "drag to move the active layer, Alt-drag (or right-mouse-drag) to move a duplicate of the active layer. Shift-drag to constrain the movement.",
-                Cursors.MOVE, false, true, true, ClipStrategy.IMAGE_ONLY);
+                Cursors.MOVE, false, true, true, ClipStrategy.CANVAS);
     }
 
     @Override
@@ -49,9 +49,9 @@ public class MoveTool extends Tool {
     @Override
     public void mouseDragged(MouseEvent e, ImageComponent ic) {
         Composition c = ic.getComp();
-        double relativeX = userDrag.getDX();
-        double relativeY = userDrag.getDY();
-        c.moveActiveContentRelative(relativeX, relativeY);
+        double relX = userDrag.getDX();
+        double relY = userDrag.getDY();
+        c.moveActiveContentRelative(relX, relY);
     }
 
     @Override
@@ -62,9 +62,9 @@ public class MoveTool extends Tool {
     /**
      * Moves the active layer programmatically.
      */
-    public static void move(Composition comp, int relativeX, int relativeY) {
+    public static void move(Composition comp, int relX, int relY) {
         comp.startMovement(false);
-        comp.moveActiveContentRelative(relativeX, relativeY);
+        comp.moveActiveContentRelative(relX, relY);
         comp.endMovement();
     }
 

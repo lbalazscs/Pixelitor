@@ -111,10 +111,10 @@ public class MultiLayerEditTest {
         layer1 = (ImageLayer) comp.getLayer(0);
         layer2 = (ImageLayer) comp.getLayer(1);
 
-        numLayers.init(comp);
-        withTranslation.init(comp);
-        withSelection.init(comp);
-        withMask.init(comp);
+        numLayers.setupFor(comp);
+        withTranslation.setupFor(comp);
+        withSelection.setupFor(comp);
+        withMask.setupFor(comp);
 
         if (withSelection.isYes()) {
             origSelection = TestHelper.getStandardTestSelectionShape();

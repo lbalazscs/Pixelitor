@@ -81,8 +81,8 @@ public class NeonBorderEffectConfiguratorPanel extends SimpleEffectConfiguratorP
     }
 
     @Override
-    public void reset(boolean triggerAction) {
+    public void reset(boolean trigger) {
         super.reset(false);
-        setNewInnerColor(defaultInnerColor, triggerAction);
+        setNewInnerColor(defaultInnerColor, trigger);
     }
 }

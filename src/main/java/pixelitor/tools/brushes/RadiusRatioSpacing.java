@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,8 @@
 package pixelitor.tools.brushes;
 
 /**
- * A spacing strategy where the spacing is proportional to the radius
+ * A {@link SpacingStrategy} where the spacing between the dabs
+ * is proportional to the radius
  */
 public class RadiusRatioSpacing implements SpacingStrategy {
     private double spacingRatio = 2.0; // the spacing relative to the radius

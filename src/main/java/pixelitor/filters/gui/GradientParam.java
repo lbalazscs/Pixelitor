@@ -168,13 +168,13 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     @Override
-    public void reset(boolean triggerAction) {
-        if (triggerAction) {
+    public void reset(boolean trigger) {
+        if (trigger) {
             gradientSlider.setValues(defaultThumbPositions, defaultColors);
         } else {
-            trigger = false;
+            this.trigger = false;
             gradientSlider.setValues(defaultThumbPositions, defaultColors);
-            trigger = true;
+            this.trigger = true;
         }
     }
 

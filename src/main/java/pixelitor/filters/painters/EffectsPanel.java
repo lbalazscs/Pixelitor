@@ -240,11 +240,11 @@ public class EffectsPanel extends JPanel implements Resettable {
     }
 
     @Override
-    public void reset(boolean triggerAction) {
+    public void reset(boolean trigger) {
         glowConfigurator.reset(false);
         innerGlowConfigurator.reset(false);
         neonBorderConfigurator.reset(false);
-        dropShadowConfigurator.reset(triggerAction);
+        dropShadowConfigurator.reset(trigger);
     }
 
     public void setDefaultButton(DefaultButton button) {

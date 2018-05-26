@@ -221,7 +221,7 @@ public class LayerButton extends JToggleButton {
     }
 
     @VisibleForTesting
-    public boolean hasOpenEye() {
+    public boolean isEyeOpen() {
         return visibilityCB.isSelected();
     }
 

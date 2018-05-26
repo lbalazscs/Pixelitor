@@ -365,7 +365,7 @@ public enum ZoomLevel {
         return getPercentValue() / 100.0;
     }
 
-    public boolean drawPixelGrid() {
+    public boolean allowPixelGrid() {
         return getPercentValue() > 1500;
     }
 }

@@ -80,7 +80,7 @@ public class LayerTest {
         ImageLayer layer2 = TestHelper.createImageLayer("LayerTest layer 2", comp);
         comp.addLayerNoGUI(layer2);
 
-        withMask.init(layer);
+        withMask.setupFor(layer);
         LayerMask mask = null;
         if (withMask.isYes()) {
             mask = layer.getMask();

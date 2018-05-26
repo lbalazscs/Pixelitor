@@ -23,13 +23,13 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.layers.Drawable;
+import pixelitor.utils.Cursors;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.AlphaComposite;
 import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -54,7 +54,7 @@ public class PaintBucketTool extends Tool {
 
     public PaintBucketTool() {
         super('p', "Paint Bucket", "paint_bucket_tool_icon.png", "click to fill with the selected color",
-                Cursor.getDefaultCursor(), true, true, false, ClipStrategy.IMAGE_ONLY);
+                Cursors.DEFAULT, true, true, false, ClipStrategy.CANVAS);
     }
 
     @Override

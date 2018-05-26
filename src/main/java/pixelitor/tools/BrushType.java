@@ -65,8 +65,8 @@ public enum BrushType {
         public Brush createBrush(Tool tool, int radius) {
             ShapeDabsBrushSettings settings = (ShapeDabsBrushSettings) findSettings(tool);
             if (settings == null) {
-                ShapeType shapeType = BrushSettingsPanel.SHAPE_SELECTED_BY_DEFAULT;
-                double spacingRatio = BrushSettingsPanel.DEFAULT_SPACING_RATIO;
+                ShapeType shapeType = ShapeDabsBrushSettingsPanel.SHAPE_SELECTED_BY_DEFAULT;
+                double spacingRatio = ShapeDabsBrushSettingsPanel.DEFAULT_SPACING_RATIO;
                 RadiusRatioSpacing spacing = new RadiusRatioSpacing(spacingRatio);
 
                 ShapeDabsBrush shapeDabsBrush = new ShapeDabsBrush(radius, shapeType, spacing, ANGLE_AWARE_NO_JITTER);

@@ -91,13 +91,13 @@ public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
     }
 
     @Override
-    public void reset(boolean triggerAction) {
+    public void reset(boolean trigger) {
         super.reset(false);
         angleParam.reset(false);
         distanceParam.reset(false);
         spreadParam.reset(false);
 
-        if (triggerAction && adjustmentListener != null) {
+        if (trigger && adjustmentListener != null) {
             adjustmentListener.paramAdjusted();
         }
     }

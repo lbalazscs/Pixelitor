@@ -165,9 +165,9 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
     }
 
     @Override
-    public void reset(boolean triggerAction) {
+    public void reset(boolean trigger) {
         enabledCB.setSelected(defaultEnabled);
-        setColor(defaultColor, triggerAction);
+        setColor(defaultColor, trigger);
     }
 
     public void setDefaultButton(DefaultButton defaultButton) {

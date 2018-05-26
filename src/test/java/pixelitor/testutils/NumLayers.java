@@ -25,13 +25,13 @@ import pixelitor.Composition;
 public enum NumLayers {
     ONE(true) {
         @Override
-        public void init(Composition comp) {
+        public void setupFor(Composition comp) {
             // delete one layer so that we have undo
             comp.deleteLayer(comp.getActiveLayer(), true, false);
         }
     }, MORE(false) {
         @Override
-        public void init(Composition comp) {
+        public void setupFor(Composition comp) {
 
         }
     };
@@ -42,7 +42,7 @@ public enum NumLayers {
         this.canUndo = canUndo;
     }
 
-    public abstract void init(Composition comp);
+    public abstract void setupFor(Composition comp);
 
     public boolean canUndo() {
         return canUndo;

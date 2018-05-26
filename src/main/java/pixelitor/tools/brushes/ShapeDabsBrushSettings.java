@@ -42,6 +42,6 @@ public class ShapeDabsBrushSettings extends DabsBrushSettings {
 
     @Override
     protected JPanel createConfigPanel() {
-        return new BrushSettingsPanel(this);
+        return new ShapeDabsBrushSettingsPanel(this);
     }
 }

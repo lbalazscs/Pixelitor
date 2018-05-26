@@ -160,9 +160,9 @@ public class AngleParam extends AbstractFilterParam {
             // override reset so that the clicking on the default button resets this object
             // this is good because this object has greater precision than the RangeParam
             @Override
-            public void reset(boolean triggerAction) {
+            public void reset(boolean trigger) {
                 if (angleInRadians != defaultInRadians) {
-                    AngleParam.this.reset(triggerAction);
+                    AngleParam.this.reset(trigger);
                 }
             }
         };

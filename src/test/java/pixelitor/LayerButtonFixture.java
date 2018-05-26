@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,10 @@ import pixelitor.layers.LayerButton;
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
 
+/**
+ * Helper class to test {@link LayerButton} objects in
+ * AssertJ Swing tests
+ */
 public class LayerButtonFixture extends JToggleButtonFixture {
     public LayerButtonFixture(Robot robot, LayerButton target) {
         super(robot, target);
@@ -44,7 +48,7 @@ public class LayerButtonFixture extends JToggleButtonFixture {
         }
     }
 
-    public boolean hasOpenEye() {
-        return ((LayerButton) target()).hasOpenEye();
+    public boolean isEyeOpen() {
+        return ((LayerButton) target()).isEyeOpen();
     }
 }

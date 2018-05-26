@@ -548,9 +548,9 @@ public class Composition implements Serializable {
         layer.startMovement();
     }
 
-    public void moveActiveContentRelative(double relativeX, double relativeY) {
+    public void moveActiveContentRelative(double relX, double relY) {
         Layer layer = getActiveMaskOrLayer();
-        layer.moveWhileDragging(relativeX, relativeY);
+        layer.moveWhileDragging(relX, relY);
         imageChanged(FULL);
     }
 

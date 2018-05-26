@@ -79,8 +79,8 @@ import static pixelitor.utils.test.Assertions.thereIsSelection;
 
 
 public class AssertJSwingTest {
-    private static final boolean verbose = true;
-    private static final boolean quick = false;
+    private static boolean verbose = false;
+    private static boolean quick = false;
 
     private static File baseTestingDir;
     private static File cleanerScript;
@@ -109,6 +109,11 @@ public class AssertJSwingTest {
 
     public static void main(String[] args) {
         long startMillis = System.currentTimeMillis();
+
+        // enable quick mode with -Dquick=true
+        quick = System.getProperty("quick").equals("true");
+        // enable quick mode with -Dverbose=true
+        verbose = System.getProperty("verbose").equals("true");
 
         initialize(args);
 
@@ -377,13 +382,13 @@ public class AssertJSwingTest {
         // test visibility change
         LayerButtonFixture layer1CopyButton = findLayerButton("layer 1 copy");
         layer1CopyButton.requireSelected();
-        assertThat(layer1CopyButton.hasOpenEye()).isTrue();
+        assertThat(layer1CopyButton.isEyeOpen()).isTrue();
         layer1CopyButton.setOpenEye(false);
-        assertThat(layer1CopyButton.hasOpenEye()).isFalse();
+        assertThat(layer1CopyButton.isEyeOpen()).isFalse();
         keyboardUndo();
-        assertThat(layer1CopyButton.hasOpenEye()).isTrue();
+        assertThat(layer1CopyButton.isEyeOpen()).isTrue();
         keyboardRedo();
-        assertThat(layer1CopyButton.hasOpenEye()).isFalse();
+        assertThat(layer1CopyButton.isEyeOpen()).isFalse();
 
         findMenuItemByText("Lower Layer").click();
         keyboardUndoRedo();
@@ -1106,7 +1111,9 @@ public class AssertJSwingTest {
 
         ZoomLevel[] values = ZoomLevel.values();
         for (ZoomLevel zoomLevel : values) {
-            runMenuCommand(zoomLevel.toString());
+            if (!skipThis()) {
+                runMenuCommand(zoomLevel.toString());
+            }
         }
     }
 
@@ -2223,7 +2230,7 @@ public class AssertJSwingTest {
         }
     }
 
-    public void deleteLayerMask() {
+    private void deleteLayerMask() {
         runMenuCommand("Delete");
     }
 

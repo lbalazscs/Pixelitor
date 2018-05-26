@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,9 @@
 
 package pixelitor.tools;
 
+import pixelitor.utils.Cursors;
+
 import java.awt.AlphaComposite;
-import java.awt.Cursor;
 import java.awt.Graphics2D;
 
 import static java.awt.AlphaComposite.DST_OUT;
@@ -30,7 +31,7 @@ public class EraserTool extends AbstractBrushTool {
     public EraserTool() {
         super('e', "Eraser", "erase_tool_icon.png",
                 "click and drag to erase pixels",
-                Cursor.getDefaultCursor());
+                Cursors.DEFAULT);
         drawStrategy = DrawStrategy.DIRECT;
     }
 

@@ -29,6 +29,7 @@ import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.CloneBrush;
 import pixelitor.tools.brushes.CopyBrushType;
+import pixelitor.utils.Cursors;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Mirror;
 import pixelitor.utils.VisibleForTesting;
@@ -36,7 +37,6 @@ import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
-import java.awt.Cursor;
 import java.awt.GridBagLayout;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
@@ -70,7 +70,7 @@ public class CloneTool extends BlendingModeBrushTool {
     protected CloneTool() {
         super('s', "Clone Stamp", "clone_tool_icon.png",
                 "Alt-click (or right-click) to select the source, then paint with the copied pixels",
-                Cursor.getDefaultCursor());
+                Cursors.DEFAULT);
     }
 
     @Override

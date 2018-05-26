@@ -27,6 +27,7 @@ import pixelitor.tools.guidelines.RectGuideline;
 import pixelitor.tools.guidelines.RectGuidelineType;
 import pixelitor.transform.TransformSupport;
 import pixelitor.utils.ActiveImageChangeListener;
+import pixelitor.utils.Cursors;
 import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
 
@@ -35,7 +36,6 @@ import javax.swing.event.ChangeListener;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
-import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -67,8 +67,8 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
     private final JButton cancelButton = new JButton("Cancel");
     private JButton cropButton;
 
-    private JLabel widthLabel = new JLabel("Width:");
-    private JLabel heightLabel = new JLabel("Height:");
+    private final JLabel widthLabel = new JLabel("Width:");
+    private final JLabel heightLabel = new JLabel("Height:");
     private JSpinner wSizeSpinner;
     private JSpinner hSizeSpinner;
     private JComboBox guidelinesSelector;
@@ -79,12 +79,12 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
 
     private JCheckBox allowGrowingCB;
 
-    private RectGuideline rectGuideline = new RectGuideline();
+    private final RectGuideline rectGuideline = new RectGuideline();
 
     CropTool() {
         super('c', "Crop", "crop_tool_icon.png",
                 "Click and drag to define the crop area. Hold SPACE down to move the entire region.",
-                Cursor.getDefaultCursor(), false, true, true, ClipStrategy.IMAGE_ONLY);
+                Cursors.DEFAULT, false, true, true, ClipStrategy.CANVAS);
         spaceDragBehavior = true;
         maskOpacity.addChangeListener(e -> {
             float alpha = maskOpacity.getValueAsPercentage();
@@ -264,11 +264,11 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent callingIC, AffineTransform unscaledTransform) {
+    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent ic, AffineTransform unscaledTransform) {
         if (ended) {
             return;
         }
-        if (callingIC != ImageComponents.getActiveIC()) {
+        if (ic != ImageComponents.getActiveIC()) {
             return;
         }
         Rectangle2D cropRect = getCropRect();
@@ -277,37 +277,37 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
         }
 
         // here we have the cropping rectangle in image space, therefore
-        // this is a good opportunity to update the status bar message
+        // this is a good opportunity to update the width/height info
         // even if it has nothing to do with painting
         updateSettingsPanel(cropRect);
 
         // paint the semi-transparent dark area outside the crop rectangle
-        Shape previousClip = g2.getClip();  // save for later use
+        Shape origClip = g2.getClip();  // save for later use
 
         Rectangle canvasBounds = canvas.getBounds();
 
-        // Similar to ClipStrategy.INTERNAL_FRAME, but we need intermediary some variables
+        // Similar to ClipStrategy.INTERNAL_FRAME, but we need some intermediary variables
 
-        Rectangle componentSpaceViewRect = callingIC.getViewRect();
+        Rectangle componentSpaceVisiblePart = ic.getVisiblePart();
         // ...but first get this to image space...
-        Rectangle2D imageSpaceViewRect = callingIC.fromComponentToImageSpace(componentSpaceViewRect);
+        Rectangle2D imageSpaceVisiblePart = ic.fromComponentToImageSpace(componentSpaceVisiblePart);
         // ... and now we can intersect
-        Rectangle2D canvasImgIntersection = canvasBounds.createIntersection(imageSpaceViewRect);
+        Rectangle2D canvasImgIntersection = canvasBounds.createIntersection(imageSpaceVisiblePart);
         Path2D darkAreaClip = new Path2D.Double(Path2D.WIND_EVEN_ODD);
         darkAreaClip.append(canvasImgIntersection, false);
         darkAreaClip.append(cropRect, false);
         g2.setClip(darkAreaClip);
 
-        Color previousColor = g2.getColor();
+        Color origColor = g2.getColor();
         g2.setColor(BLACK);
 
-        Composite previousComposite = g2.getComposite();
+        Composite origComposite = g2.getComposite();
         g2.setComposite(hideComposite);
 
         g2.fill(canvasImgIntersection);
 
-        g2.setColor(previousColor);
-        g2.setComposite(previousComposite);
+        g2.setColor(origColor);
+        g2.setComposite(origComposite);
 
         if (state == TRANSFORM) {
             // Paint the handles.
@@ -316,18 +316,18 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
             g2.setTransform(unscaledTransform);
             // prevents drawing outside the InternalImageFrame/ImageComponent
             // it is important to call this AFTER setting the unscaled transform
-            g2.setClip(componentSpaceViewRect);
+            g2.setClip(componentSpaceVisiblePart);
 
             // draw guidelines
             RectGuidelineType guidelineType = (RectGuidelineType) guidelinesSelector.getSelectedItem();
-            rectGuideline.draw(callingIC.fromImageToComponentSpace(cropRect), guidelineType, g2);
+            rectGuideline.draw(ic.fromImageToComponentSpace(cropRect), guidelineType, g2);
 
             transformSupport.paintHandles(g2);
 
             g2.setTransform(scaledTransform);
         }
 
-        g2.setClip(previousClip);
+        g2.setClip(origClip);
     }
 
     /**
@@ -394,7 +394,7 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
         wSizeSpinner.setValue(0);
 
         ImageComponents.repaintActive();
-        ImageComponents.setCursorForAll(Cursor.getDefaultCursor());
+        ImageComponents.setCursorForAll(Cursors.DEFAULT);
     }
 
     public void icResized(ImageComponent ic) {

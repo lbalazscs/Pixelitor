@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,9 +26,9 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 /**
- * AbstractBrushTool subclasses either draw into a temporary layer
- * (so that the tool can have blending mode and opacity)
- * or directly into the layer image
+ * {@link AbstractBrushTool} subclasses either draw into
+ * a temporary layer (so that the tool can have blending
+ * mode and opacity) or directly into the layer image
  */
 public enum DrawStrategy {
     TMP_LAYER {
@@ -39,7 +39,7 @@ public enum DrawStrategy {
 
         @Override
         public void prepareBrushStroke(Drawable dr) {
-
+            // nothing to be done
         }
 
         @Override
@@ -58,6 +58,7 @@ public enum DrawStrategy {
 
         @Override
         public Graphics2D createDrawGraphics(Drawable dr, Composite composite) {
+            // ignores the composite!
             BufferedImage drawImage = dr.getCanvasSizedSubImage();
             return drawImage.createGraphics();
         }

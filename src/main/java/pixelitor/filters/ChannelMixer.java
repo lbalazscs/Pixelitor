@@ -85,7 +85,7 @@ public class ChannelMixer extends ParametrizedFilter {
             blueFromGreen.setValueNoTrigger(0);
             blueFromBlue.setValueNoTrigger(100);
 
-            getParamSet().triggerFilter();
+            getParamSet().runFilter();
         }
     };
 
@@ -104,7 +104,7 @@ public class ChannelMixer extends ParametrizedFilter {
             blueFromGreen.setValueNoTrigger(0);
             blueFromBlue.setValueNoTrigger(0);
 
-            getParamSet().triggerFilter();
+            getParamSet().runFilter();
         }
     };
 
@@ -123,7 +123,7 @@ public class ChannelMixer extends ParametrizedFilter {
             blueFromGreen.setValueNoTrigger(100);
             blueFromBlue.setValueNoTrigger(0);
 
-            getParamSet().triggerFilter();
+            getParamSet().runFilter();
         }
     };
 
@@ -142,7 +142,7 @@ public class ChannelMixer extends ParametrizedFilter {
             blueFromGreen.setValueNoTrigger(100);
             blueFromBlue.setValueNoTrigger(0);
 
-            getParamSet().triggerFilter();
+            getParamSet().runFilter();
         }
     };
 
@@ -161,7 +161,7 @@ public class ChannelMixer extends ParametrizedFilter {
             blueFromGreen.setValueNoTrigger(0);
             blueFromBlue.setValueNoTrigger(0);
 
-            getParamSet().triggerFilter();
+            getParamSet().runFilter();
         }
     };
 
@@ -180,7 +180,7 @@ public class ChannelMixer extends ParametrizedFilter {
             blueFromGreen.setValueNoTrigger(33);
             blueFromBlue.setValueNoTrigger(33);
 
-            getParamSet().triggerFilter();
+            getParamSet().runFilter();
         }
     };
 
@@ -199,7 +199,7 @@ public class ChannelMixer extends ParametrizedFilter {
             blueFromGreen.setValueNoTrigger(71);
             blueFromBlue.setValueNoTrigger(7);
 
-            getParamSet().triggerFilter();
+            getParamSet().runFilter();
         }
     };
 
@@ -218,7 +218,7 @@ public class ChannelMixer extends ParametrizedFilter {
             blueFromGreen.setValueNoTrigger(53);
             blueFromBlue.setValueNoTrigger(13);
 
-            getParamSet().triggerFilter();
+            getParamSet().runFilter();
         }
     };
 

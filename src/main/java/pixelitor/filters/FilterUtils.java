@@ -34,6 +34,10 @@ import static java.util.Comparator.comparing;
  */
 public class FilterUtils {
     private static final List<FilterAction> allFilters = new ArrayList<>();
+
+    // a performance optimization
+    private static final FilterAction[] EMPTY_FA_ARRAY = new FilterAction[0];
+
     private static Filter lastFilter = null;
 
     private FilterUtils() {
@@ -41,7 +45,7 @@ public class FilterUtils {
 
     // it returns an array because JComboBox does not accept Lists as constructor arguments
     public static FilterAction[] getAllFiltersSorted() {
-        FilterAction[] filters = allFilters.toArray(new FilterAction[allFilters.size()]);
+        FilterAction[] filters = allFilters.toArray(EMPTY_FA_ARRAY);
         Arrays.sort(filters, comparing(FilterAction::getName));
         return filters;
     }

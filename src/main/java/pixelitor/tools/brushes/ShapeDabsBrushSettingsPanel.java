@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,7 @@ import java.awt.GridBagLayout;
 
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
-public class BrushSettingsPanel extends JPanel {
+public class ShapeDabsBrushSettingsPanel extends JPanel {
     public static final ShapeType SHAPE_SELECTED_BY_DEFAULT = ShapeType.ARROW;
     public static final double DEFAULT_SPACING_RATIO = 2.3;
     private final ShapeDabsBrushSettings settings;
@@ -36,7 +36,7 @@ public class BrushSettingsPanel extends JPanel {
     private RangeParam angleJitter;
     private final GridBagHelper gbh;
 
-    public BrushSettingsPanel(ShapeDabsBrushSettings settings) {
+    public ShapeDabsBrushSettingsPanel(ShapeDabsBrushSettings settings) {
         super(new GridBagLayout());
         this.settings = settings;
 

@@ -75,8 +75,8 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
     }
 
     @Override
-    public void reset(boolean triggerAction) {
-        setSelectedItem(defaultChoice, triggerAction);
+    public void reset(boolean trigger) {
+        setSelectedItem(defaultChoice, trigger);
     }
 
     @Override

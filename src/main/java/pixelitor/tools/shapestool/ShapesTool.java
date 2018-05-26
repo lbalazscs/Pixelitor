@@ -39,11 +39,11 @@ import pixelitor.tools.StrokeType;
 import pixelitor.tools.Tool;
 import pixelitor.tools.ToolAffectedArea;
 import pixelitor.tools.UserDrag;
+import pixelitor.utils.Cursors;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.BasicStroke;
-import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -83,7 +83,7 @@ public class ShapesTool extends Tool {
     public ShapesTool() {
         super('u', "Shapes", "shapes_tool_icon.png",
                 "Click and drag to draw a shape. Hold SPACE down while drawing to move the shape. ",
-                Cursor.getDefaultCursor(), true, true, false, ClipStrategy.IMAGE_ONLY);
+                Cursors.DEFAULT, true, true, false, ClipStrategy.CANVAS);
 
         strokeFillModel.setSelectedItem(TwoPointBasedPaint.BACKGROUND);
         strokeFillCombo = new JComboBox<>(strokeFillModel);

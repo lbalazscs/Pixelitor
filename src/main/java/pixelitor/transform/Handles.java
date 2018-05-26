@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,7 @@ import java.awt.BasicStroke;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.Stroke;
 import java.util.Arrays;
 import java.util.List;
@@ -64,9 +65,12 @@ public class Handles {
     private void drawRect(Graphics2D g) {
         Rectangle rect = getSelectedRectInComponentSpace();
 
+        // black at the edges
         g.setColor(BLACK);
         g.setStroke(bigStroke);
         g.draw(rect);
+
+        // white in the middle
         g.setColor(WHITE);
         g.setStroke(smallStroke);
         g.draw(rect);
@@ -74,12 +78,17 @@ public class Handles {
 
     private void drawHandles(Graphics2D g) {
         for (Handle handle : handles) {
+            Shape handleShape = handle.getShape();
+
+            // black at the edges
             g.setStroke(bigStroke);
             g.setColor(BLACK);
-            g.draw(handle.getShape());
+            g.draw(handleShape);
+
+            // white in the middle
             g.setStroke(smallStroke);
             g.setColor(WHITE);
-            g.fill(handle.getShape());
+            g.fill(handleShape);
         }
     }
 
@@ -115,6 +124,7 @@ public class Handles {
         int verticalMidPointY = compSpaceRect.y + (compSpaceRect.height / 2);
         int horizontalEndPointX = compSpaceRect.x + compSpaceRect.width;
         int verticalEndPointY = compSpaceRect.y + compSpaceRect.height;
+
         upperLeft.setPosition(compSpaceRect.x, compSpaceRect.y);
         upper.setPosition(horizontalMidPointX, compSpaceRect.y);
         upperRight.setPosition(horizontalEndPointX, compSpaceRect.y);

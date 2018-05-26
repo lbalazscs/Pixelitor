@@ -90,9 +90,9 @@ public class Events {
     }
 
     /**
-     * Dumps the last events for the given Composition.
+     * Dumps the last events for the active Composition.
      */
-    public static void dumpActive() {
+    public static void dumpForActiveComp() {
         Composition comp = ImageComponents.getActiveCompOrNull();
         eventList.stream()
                 .filter(e -> e.isComp(comp))

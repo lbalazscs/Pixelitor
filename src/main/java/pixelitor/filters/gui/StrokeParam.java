@@ -173,11 +173,11 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     @Override
-    public void reset(boolean triggerAction) {
+    public void reset(boolean trigger) {
         for (FilterParam param : allParams) {
             param.reset(false);
         }
-        if (triggerAction) {
+        if (trigger) {
             adjustmentListener.paramAdjusted();
         } else {
             // this class updates the default button state

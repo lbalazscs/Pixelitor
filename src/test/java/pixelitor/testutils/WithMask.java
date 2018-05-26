@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,24 +24,24 @@ import pixelitor.layers.LayerMaskAddType;
 public enum WithMask {
     YES {
         @Override
-        public void init(Layer layer) {
+        public void setupFor(Layer layer) {
             if (!layer.hasMask()) {
                 layer.addMask(LayerMaskAddType.REVEAL_ALL);
             }
         }
     }, NO {
         @Override
-        public void init(Layer layer) {
+        public void setupFor(Layer layer) {
             if (layer.hasMask()) {
                 layer.deleteMask(false);
             }
         }
     };
 
-    public abstract void init(Layer layer);
+    public abstract void setupFor(Layer layer);
 
-    public void init(Composition comp) {
-        comp.forEachLayer(this::init);
+    public void setupFor(Composition comp) {
+        comp.forEachLayer(this::setupFor);
     }
 
     public boolean isYes() {

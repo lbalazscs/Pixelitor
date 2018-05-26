@@ -62,8 +62,8 @@ public class SimpleEffectConfiguratorPanel extends EffectConfiguratorPanel {
     }
 
     @Override
-    public void reset(boolean triggerAction) {
+    public void reset(boolean trigger) {
         super.reset(false);
-        widthRange.reset(triggerAction);
+        widthRange.reset(trigger);
     }
 }

@@ -36,35 +36,19 @@ public class GUIMessageHandler implements MessageHandler {
 
     @Override
     public void startProgress(String msg, int max) {
-        if (SwingUtilities.isEventDispatchThread()) {
-            StatusBar.INSTANCE.startProgress(msg, max);
-        } else {
-            // for example in the tweening animation export
-            // this code runs in the swing worker background thread
-            SwingUtilities.invokeLater(
-                    () -> StatusBar.INSTANCE.startProgress(msg, max));
-        }
+        assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
+
+        StatusBar.INSTANCE.startProgress(msg, max);
     }
 
     @Override
     public void updateProgress(int value) {
-        if (SwingUtilities.isEventDispatchThread()) {
-            StatusBar.INSTANCE.updateProgress(value);
-        } else {
-            SwingUtilities.invokeLater(
-                    () -> StatusBar.INSTANCE.updateProgress(value));
-        }
-
+        StatusBar.INSTANCE.updateProgress(value);
     }
 
     @Override
     public void stopProgress() {
-        if (SwingUtilities.isEventDispatchThread()) {
-            StatusBar.INSTANCE.stopProgress();
-        } else {
-            SwingUtilities.invokeLater(
-                    StatusBar.INSTANCE::stopProgress);
-        }
+        StatusBar.INSTANCE.stopProgress();
     }
 
     @Override

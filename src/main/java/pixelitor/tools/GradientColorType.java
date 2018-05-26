@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,34 +29,34 @@ import static java.awt.Color.WHITE;
 public enum GradientColorType {
     FG_TO_BG("Foreground to Background") {
         @Override
-        protected Color getA() {
+        protected Color getFirstColor() {
             return FgBgColors.getFG();
         }
 
         @Override
-        protected Color getB() {
+        protected Color getSecondColor() {
             return FgBgColors.getBG();
         }
     }, FG_TO_TRANSPARENT("Foreground to Transparent") {
         private final Color transparentColor = new Color(0, 0, 0, 0);
 
         @Override
-        protected Color getA() {
+        protected Color getFirstColor() {
             return FgBgColors.getFG();
         }
 
         @Override
-        protected Color getB() {
+        protected Color getSecondColor() {
             return transparentColor;
         }
     }, BLACK_TO_WHITE("Black to White") {
         @Override
-        protected Color getA() {
+        protected Color getFirstColor() {
             return BLACK;
         }
 
         @Override
-        protected Color getB() {
+        protected Color getSecondColor() {
             return WHITE;
         }
     };
@@ -67,22 +67,22 @@ public enum GradientColorType {
         this.guiName = guiName;
     }
 
-    protected abstract Color getA();
+    protected abstract Color getFirstColor();
 
-    protected abstract Color getB();
+    protected abstract Color getSecondColor();
 
     public Color getStartColor(boolean invert) {
         if (invert) {
-            return getB();
+            return getSecondColor();
         }
-        return getA();
+        return getFirstColor();
     }
 
     public Color getEndColor(boolean invert) {
         if (invert) {
-            return getA();
+            return getFirstColor();
         }
-        return getB();
+        return getSecondColor();
     }
 
     @Override

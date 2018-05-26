@@ -23,6 +23,7 @@ import pixelitor.Build;
 import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.history.History;
+import pixelitor.utils.Utils;
 import pixelitor.utils.test.Events;
 import pixelitor.utils.test.RandomGUITest;
 
@@ -36,6 +37,7 @@ import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 /**
@@ -150,10 +152,25 @@ public class Dialogs {
         String threadName = thread.getName();
         System.err.printf("Exception in the thread '%s'%n", threadName);
         e.printStackTrace();
+        showMoreDevelopmentInfo();
 
         if(e instanceof InvocationTargetException) {
             e = e.getCause();
         }
+
+        Frame parent = getParent();
+        String basicErrorMessage = "An exception occurred: " + e.getMessage();
+        ErrorInfo ii = new ErrorInfo("Program error", basicErrorMessage, null, null, e, Level.SEVERE, null);
+        JXErrorPane.showDialog(parent, ii);
+    }
+
+    private static void showMoreDevelopmentInfo() {
+        if (Build.CURRENT.isFinal()) {
+            return;
+        }
+        // avoid the mixing of the stack trace with
+        // the event dumps
+        Utils.sleep(2, TimeUnit.SECONDS);
 
         if (RandomGUITest.isRunning()) {
             Events.dumpAll();
@@ -163,13 +180,8 @@ public class Dialogs {
 
             RandomGUITest.stop();
         } else if(Build.CURRENT.isDevelopment()) {
-            Events.dumpActive();
+            Events.dumpForActiveComp();
         }
-
-        Frame parent = getParent();
-        String basicErrorMessage = "An exception occurred: " + e.getMessage();
-        ErrorInfo ii = new ErrorInfo("Program error", basicErrorMessage, null, null, e, Level.SEVERE, null);
-        JXErrorPane.showDialog(parent, ii);
     }
 
     private static void playWarningSound() {

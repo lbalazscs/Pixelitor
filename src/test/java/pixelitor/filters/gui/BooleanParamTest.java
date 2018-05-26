@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,10 @@ package pixelitor.filters.gui;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 public class BooleanParamTest {
@@ -30,5 +34,30 @@ public class BooleanParamTest {
             param.randomize();
             assertThat(param.isChecked()).isTrue();
         }
+    }
+
+    @Test
+    public void test_setValue() {
+        BooleanParam param = new BooleanParam("Test", true);
+        assertThat(param.isChecked()).isTrue();
+        assertThat(param.isSetToDefault()).isTrue();
+
+        ParamAdjustmentListener al = mock(ParamAdjustmentListener.class);
+        param.setAdjustmentListener(al);
+
+        param.setValue(true, false, true);
+        assertThat(param.isSetToDefault()).isTrue();
+        // expect no triggering because the value didn't change
+        verify(al, never()).paramAdjusted();
+
+        param.setValue(false, false, true);
+        assertThat(param.isSetToDefault()).isFalse();
+        // expect one triggering
+        verify(al, times(1)).paramAdjusted();
+
+        param.setValue(true, false, false);
+        assertThat(param.isSetToDefault()).isTrue();
+        // expect no new triggering, because triggering was set to false
+        verify(al, times(1)).paramAdjusted();
     }
 }
