@@ -97,6 +97,9 @@ public class Composition implements Serializable {
     private transient ImageComponent ic;
 
     private transient Selection selection;
+
+    // a temporary, new selection which is currently built
+    // by dragging with a tool, but not finalized yet
     private transient Selection builtSelection;
 
     // A Composition can be created either with one of the following static
@@ -839,6 +842,14 @@ public class Composition implements Serializable {
 
     public boolean hasSelection() {
         return (selection != null);
+    }
+
+    /**
+     * Returns true if visually there are marching ants,
+     * even if the selection is not yet finished
+     */
+    public boolean showsSelection() {
+        return (selection != null || builtSelection != null);
     }
 
     public void applySelectionClipping(Graphics2D g2, AffineTransform at) {

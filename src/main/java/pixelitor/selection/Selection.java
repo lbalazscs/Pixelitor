@@ -120,8 +120,6 @@ public class Selection {
         double viewScale = ic.getViewScale();
         float lineWidth = (float) (DASH_WIDTH / viewScale);
 
-        g2.setPaint(WHITE);
-
         float[] dash;
         if (viewScale == 1.0) { // the most common case
             dash = MARCHING_ANTS_DASH;
@@ -130,6 +128,7 @@ public class Selection {
             dash = new float[]{scaledDashLength, scaledDashLength};
         }
 
+        g2.setPaint(WHITE);
         Stroke stroke = new BasicStroke(lineWidth, CAP_BUTT,
                 JOIN_ROUND, 0.0f, dash,
                 phase);
@@ -164,17 +163,14 @@ public class Selection {
     }
 
     public void repaint() {
-//        Rectangle selBounds = shape.getBounds();
-//
-//        if(lastShape != null) {
-//            Rectangle r = lastShape.getBounds();
-//            selBounds = selBounds.union(r);
-//        }
-//
-//        component.repaint(selBounds.x, selBounds.y, selBounds.width + 1, selBounds.height + 1);
+//        if(shape != null && !hidden) {
+//             Rectangle selBounds = shape.getBounds();
+//             ic.updateRegion(selBounds.x, selBounds.y, selBounds.x + selBounds.width + 1, selBounds.y + selBounds.height + 1, 1);
 
-        // TODO the above optimization is not enough, the previous positions should be also considered for the
-        // case when the selection is shrinking while dragging...
+//             the above optimization is not enough, the previous positions should be also considered for the
+//             case when the selection is shrinking while dragging.
+//             But it does not seem to solve the pixel grid problem anyway
+//        }
 
         ic.repaint();
     }

@@ -299,7 +299,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         int zoomedWidth = canvas.getZoomedWidth();
         int zoomedHeight = canvas.getZoomedHeight();
 
-        Rectangle canvasClip = setCanvasClip(g, drawStartX, drawStartY, zoomedWidth, zoomedHeight);
+        Rectangle canvasClip = setVisibleCanvasClip(g, drawStartX, drawStartY, zoomedWidth, zoomedHeight);
 
         AffineTransform unscaledTransform = g2.getTransform(); // a copy of the transform object
 
@@ -340,50 +340,54 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
         g2.setClip(canvasClip);
 
-        // draw pixel grid
-        if (showPixelGrid && zoomLevel.allowPixelGrid() && !comp.hasSelection()) {
-            // TODO why is this very slow if there is selection?
-
-            g2.setXORMode(BLACK);
-            double pixelSize = zoomLevel.getViewScale();
-//            assert pixelSize > 0;
-
-//            System.out.println("ImageComponent::paintComponent: START zoomLevel = " + zoomLevel
-//                    + ", pixelSize = " + pixelSize
-//                    + ", width = " + zoomedWidth + ", height = " + zoomedHeight
-//                    + ", comp = " + comp.getName());
-//            long startTime = System.nanoTime();
-
-            int startX = (int) this.drawStartX;
-            int startY = (int) this.drawStartY;
-
-            int endX = zoomedWidth + startX;
-            int endY = zoomedHeight + startY;
-
-            // vertical lines
-            for (double i = pixelSize; i < zoomedWidth; i += pixelSize) {
-                int x = (int) (drawStartX + i);
-                g2.drawLine(x, startY, x, endY);
-            }
-            // horizontal lines
-            for (double i = pixelSize; i < zoomedHeight; i += pixelSize) {
-                int y = (int) (drawStartY + i);
-                g2.drawLine(startX, y, endX, y);
-            }
-
-//            double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
-//            System.out.println(String.format("ImageComponent::paintComponent: FINISHED estimatedSeconds = '%.2f'", estimatedSeconds));
+        if (showPixelGrid && zoomLevel.allowPixelGrid() && !comp.showsSelection()) {
+//        if (showPixelGrid && zoomLevel.allowPixelGrid()) {
+            // for some reason this very slow if there is selection visible
+            // and the pixel grid might now be shown anyway
+            drawPixelGrid(g2);
         }
 
         g2.setClip(originalClip);
     }
 
+    private void drawPixelGrid(Graphics2D g2) {
+        g2.setXORMode(BLACK);
+        double pixelSize = zoomLevel.getViewScale();
+
+        Rectangle r = getVisiblePart();
+
+        int startX = r.x;
+        int endX = r.x + r.width;
+        int startY = r.y;
+        int endY = r.y + r.height;
+
+        // vertical lines
+        double skipVer = Math.ceil(startX / pixelSize);
+        for (double i = pixelSize * skipVer; i < endX; i += pixelSize) {
+            int x = (int) (drawStartX + i);
+            g2.drawLine(x, startY, x, endY);
+        }
+
+        // horizontal lines
+        double skipHor = Math.ceil(startY / pixelSize);
+        for (double i = skipHor * pixelSize; i < endY; i += pixelSize) {
+            int y = (int) (drawStartY + i);
+            g2.drawLine(startX, y, endX, y);
+        }
+    }
+
     /**
-     * Makes sure that not the whole area is repainted, only the canvas
+     * Makes sure that not the whole area is repainted, only the canvas and that only
+     * inside the visible area of scrollbars
      */
-    private static Rectangle setCanvasClip(Graphics g, double drawStartX, double drawStartY, int maxWidth, int maxHeight) {
+    private static Rectangle setVisibleCanvasClip(Graphics g, double drawStartX, double drawStartY, int maxWidth, int maxHeight) {
+        // if there are scollbars, this is the visible area
         Rectangle clipBounds = g.getClipBounds();
+
         Rectangle imageRect = new Rectangle((int) drawStartX, (int) drawStartY, maxWidth, maxHeight);
+
+        // now we are definitely not drawing neither outside
+        // the canvas nor outside the scrollbars visible area
         clipBounds = clipBounds.intersection(imageRect);
 
         g.setClip(clipBounds);
