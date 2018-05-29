@@ -26,6 +26,8 @@ import pixelitor.utils.Utils;
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.GraphicsEnvironment;
@@ -130,5 +132,16 @@ public final class GUIUtils {
             row++;
         }
         return p;
+    }
+
+    public static Container getTopContainer(Container c) {
+        while (c.getParent() != null) {
+            c = c.getParent();
+            if (c instanceof Dialog) {
+                // don't jump from dialogs to their parents
+                return c;
+            }
+        }
+        return c;
     }
 }

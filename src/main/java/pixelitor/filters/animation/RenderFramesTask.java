@@ -27,6 +27,7 @@ import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 import static pixelitor.ChangeReason.TWEEN_PREVIEW;
@@ -86,15 +87,28 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
             } else { // pong: animating backwards
                 // TODO we are calculating the same frames again
                 // they could be cached somewhere
-                // perhaps in an array of soft references with the calculated frames
-                // or on the disk
+                // perhaps in an array of soft references with the
+                // calculated frames or in the case of file sequence
+                // output one could simply make copies of the files.
                 int effectiveFrame = 2 * (numFrames - 1) - frameNr;
                 time = ((double) effectiveFrame) / numFrames;
             }
 
             try {
                 BufferedImage image = renderFrame(filter, time, busyCursorParent);
-                animationWriter.addFrame(image);
+
+                Runnable r = () -> {
+                    try {
+                        // TODO ideally while writing out the frame,
+                        // the rendering of the next frame should be
+                        // started on another thread
+                        animationWriter.addFrame(image);
+                    } catch (IOException e) {
+                        Messages.showException(e);
+                    }
+                };
+                SwingUtilities.invokeAndWait(r);
+
             } catch (Exception e) {
                 canceled = true;
                 Messages.showException(e);

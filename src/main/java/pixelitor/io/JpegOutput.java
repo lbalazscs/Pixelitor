@@ -17,7 +17,12 @@
 
 package pixelitor.io;
 
+import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
+import pixelitor.utils.ProgressTracker;
+import pixelitor.utils.StatusBarProgressTracker;
+import pixelitor.utils.SubtaskProgressTracker;
+import pixelitor.utils.TrackerWriteProgressListener;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -42,23 +47,32 @@ public final class JpegOutput {
     public static void writeJPG(BufferedImage image, File file, JpegSettings settings) throws IOException {
         ImageOutputStream ios = ImageIO.createImageOutputStream(file);
         if (ios != null) {
-            writeJPGtoStream(image, ios, settings);
+            ProgressTracker tracker = new StatusBarProgressTracker("Writing " + file.getName(), 100);
+            writeJPGtoStream(image, ios, settings, tracker);
         }
     }
 
-    public static ImageWithSize writeJPGtoPreviewImage(BufferedImage image, JpegSettings settings) {
+    public static ImageWithSize writeJPGtoPreviewImage(BufferedImage image, JpegSettings settings, ProgressTracker pt) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream(32768);
         BufferedImage previewImage = null;
         byte[] bytes = null;
         try {
             // writes the JPEG format with the given settings to memory...
+            // approximately 70% of the total time is spent here
             ImageOutputStream ios = ImageIO.createImageOutputStream(bos);
-            writeJPGtoStream(image, ios, settings);
+            ProgressTracker pt1 = new SubtaskProgressTracker(0.7, pt);
+            writeJPGtoStream(image, ios, settings, pt1);
 
             // ...then reads it back into an image
+            // approximately 30% of the total time is spent here
             bytes = bos.toByteArray();
             ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-            previewImage = ImageIO.read(in);
+            ProgressTracker pt2 = new SubtaskProgressTracker(0.3, pt);
+            try (ImageInputStream iis = ImageIO.createImageInputStream(in)) {
+                previewImage = ImageUtils.readStreamImageWithProgressTracking(iis, pt2);
+            }
+
+            pt.finish();
         } catch (IOException e) {
             Messages.showException(e);
         }
@@ -68,7 +82,7 @@ public final class JpegOutput {
         return new ImageWithSize(previewImage, sizeInBytes);
     }
 
-    private static void writeJPGtoStream(BufferedImage image, ImageInputStream ios, JpegSettings jpegSettings) throws IOException {
+    private static void writeJPGtoStream(BufferedImage image, ImageInputStream ios, JpegSettings jpegSettings, ProgressTracker tracker) throws IOException {
         Iterator<ImageWriter> jpgWriters = ImageIO.getImageWritersByFormatName("jpg");
         if (!jpgWriters.hasNext()) {
             throw new IllegalStateException("No JPG writers found");
@@ -89,6 +103,9 @@ public final class JpegOutput {
         IIOImage iioImage = new IIOImage(image, null, null);
 
         writer.setOutput(ios);
+        if (tracker != null) {
+            writer.addIIOWriteProgressListener(new TrackerWriteProgressListener(tracker));
+        }
         writer.write(null, iioImage, imageWriteParam);
 
         ios.flush();

@@ -34,7 +34,10 @@ import pixelitor.utils.debug.BufferedImageNode;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
+import javax.imageio.ImageTypeSpecifier;
+import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageInputStream;
+import javax.imageio.stream.ImageOutputStream;
 import javax.swing.*;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
@@ -454,32 +457,69 @@ public class ImageUtils {
         return image;
     }
 
+    public static void writeImageWithStatusBarProgressTracking(BufferedImage img, String formatName, File file) throws IOException {
+        try (ImageOutputStream ios = ImageIO.createImageOutputStream(file)) {
+            ImageTypeSpecifier type =
+                    ImageTypeSpecifier.createFromRenderedImage(img);
+            Iterator<ImageWriter> writers = ImageIO.getImageWriters(type, formatName);
+
+            if (!writers.hasNext()) {
+                throw new IOException("No writer found for " + formatName);
+            }
+            ImageWriter writer = writers.next();
+            try {
+                writer.setOutput(ios);
+
+                // register the status bar progress tracking
+                ProgressTracker tracker = new StatusBarProgressTracker("Writing " + file.getName(), 100);
+                writer.addIIOWriteProgressListener(new TrackerWriteProgressListener(tracker));
+
+                writer.write(img);
+            } finally {
+                writer.dispose();
+            }
+        }
+    }
+
     public static BufferedImage readImageWithStatusBarProgressTracking(File file) throws IOException {
+        ProgressTracker tracker = new StatusBarProgressTracker("Reading " + file.getName(), 100);
+
+        BufferedImage image = readImageWithProgressTracking(file, tracker);
+
+        Messages.showInStatusBar(file.getName() + " opened.");
+        return image;
+    }
+
+    public static BufferedImage readImageWithProgressTracking(File file, ProgressTracker tracker) throws IOException {
         BufferedImage image;
 
         try (ImageInputStream iis = ImageIO.createImageInputStream(file)) {
-            Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
-
-            if (!readers.hasNext()) {
-                return null;
-            }
-
-            ImageReader reader = readers.next();
-
-            try {
-                reader.setInput(iis);
-
-                // register the status bar progress tracking
-                ProgressTracker tracker = new StatusBarProgressTracker("Reading " + file.getName(), 100);
-                reader.addIIOReadProgressListener(new TrackerReadProgressListener(tracker));
-
-                ImageReadParam param = reader.getDefaultReadParam();
-                image = reader.read(0, param);
-            } finally {
-                reader.dispose();
-            }
+            image = readStreamImageWithProgressTracking(iis, tracker);
         }
-        Messages.showInStatusBar(file.getName() + " opened.");
+        return image;
+    }
+
+    public static BufferedImage readStreamImageWithProgressTracking(ImageInputStream iis, ProgressTracker tracker) throws IOException {
+        BufferedImage image;
+        Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
+
+        if (!readers.hasNext()) {
+            return null;
+        }
+
+        ImageReader reader = readers.next();
+
+        try {
+            reader.setInput(iis);
+
+            reader.addIIOReadProgressListener(new TrackerReadProgressListener(tracker));
+
+            ImageReadParam param = reader.getDefaultReadParam();
+            image = reader.read(0, param);
+        } finally {
+            reader.dispose();
+        }
+
         return image;
     }
 

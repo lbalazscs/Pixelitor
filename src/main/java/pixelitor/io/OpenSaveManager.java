@@ -32,7 +32,6 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.image.BufferedImage;
@@ -158,7 +157,8 @@ public class OpenSaveManager {
                 if (format == OutputFormat.JPG) {
                     JpegOutput.writeJPG(image, selectedFile, jpegSettings);
                 } else {
-                    ImageIO.write(image, format.toString(), selectedFile);
+//                    ImageIO.write(image, format.toString(), selectedFile);
+                    ImageUtils.writeImageWithStatusBarProgressTracking(image, format.toString(), selectedFile);
                 }
             } catch (IOException e) {
                 if (e.getMessage().contains("another process")) {

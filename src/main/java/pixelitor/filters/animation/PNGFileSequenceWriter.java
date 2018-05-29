@@ -17,7 +17,8 @@
 
 package pixelitor.filters.animation;
 
-import javax.imageio.ImageIO;
+import pixelitor.utils.ImageUtils;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -39,7 +40,9 @@ public class PNGFileSequenceWriter implements AnimationWriter {
         String fileName = String.format("frame_%05d.png", fileSequenceNumber);
         fileSequenceNumber++;
         File outputFile = new File(outputDir, fileName);
-        ImageIO.write(image, "PNG", outputFile);
+        //ImageIO.write(image, "PNG", outputFile);
+
+        ImageUtils.writeImageWithStatusBarProgressTracking(image, "PNG", outputFile);
     }
 
     @Override

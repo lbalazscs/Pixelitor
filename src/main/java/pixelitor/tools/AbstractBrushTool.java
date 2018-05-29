@@ -218,6 +218,7 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
         Composition comp = dr.getComp();
         Composite composite = getComposite();
         Graphics2D g = drawStrategy.createDrawGraphics(dr, composite);
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         initializeGraphics(g);
         if (respectSelection) {
             comp.applySelectionClipping(g, null);
