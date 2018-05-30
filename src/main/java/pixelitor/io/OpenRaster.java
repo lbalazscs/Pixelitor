@@ -28,9 +28,11 @@ import pixelitor.layers.BlendingMode;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.ProgressTracker;
+import pixelitor.utils.StatusBarProgressTracker;
+import pixelitor.utils.SubtaskProgressTracker;
 import pixelitor.utils.Utils;
 
-import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -54,10 +56,15 @@ import java.util.zip.ZipOutputStream;
  * Only image layers are saved as the format does not cover other layer types.
  */
 public class OpenRaster {
+
+    public static final String MERGED_IMAGE_NAME = "mergedimage.png";
+
     private OpenRaster() {
     }
 
     public static void write(Composition comp, File outFile, boolean addMergedImage) throws IOException {
+        ProgressTracker pt = new StatusBarProgressTracker("Writing " + outFile.getName(), 100);
+
         FileOutputStream fos = new FileOutputStream(outFile);
         ZipOutputStream zos = new ZipOutputStream(fos);
 
@@ -66,16 +73,28 @@ public class OpenRaster {
                 "<stack>\n", comp.getCanvasWidth(), comp.getCanvasHeight());
 
         int numLayers = comp.getNumLayers();
+        int numImageLayers = comp.getNumImageLayers();
+        if (addMergedImage) {
+            numImageLayers++;
+        }
+        double workRatio = 1.0 / numImageLayers;
 
         // Reverse iteration: in stack.xml the first element in a stack is the uppermost.
         for (int i = numLayers - 1; i >= 0; i--) {
             Layer layer = comp.getLayer(i);
-            stackXML += writeLayer(zos, i, layer);
+            if (layer instanceof ImageLayer) {
+                ImageLayer imageLayer = (ImageLayer) layer;
+                ProgressTracker spt = new SubtaskProgressTracker(workRatio, pt);
+                stackXML += writeLayer(zos, i, imageLayer, spt);
+            }
         }
 
         if(addMergedImage) {
-            zos.putNextEntry(new ZipEntry("mergedimage.png"));
-            ImageIO.write(comp.getCompositeImage(), "PNG", zos);
+            zos.putNextEntry(new ZipEntry(MERGED_IMAGE_NAME));
+            ProgressTracker subTaskTracker = new SubtaskProgressTracker(workRatio, pt);
+//            ImageIO.write(comp.getCompositeImage(), "PNG", zos);
+            BufferedImage img = comp.getCompositeImage();
+            TrackedIO.writeToStream(img, zos, "PNG", subTaskTracker);
             zos.closeEntry();
         }
 
@@ -91,26 +110,27 @@ public class OpenRaster {
         zos.write("image/openraster".getBytes("UTF-8"));
         zos.closeEntry();
         zos.close();
+
+        pt.finish();
     }
 
-    private static String writeLayer(ZipOutputStream zos, int layerIndex, Layer layer) throws IOException {
-        if (!(layer instanceof ImageLayer)) {
-            return ""; // currently only image layers are supported
-        }
-        ImageLayer imageLayer = (ImageLayer) layer;
-
+    private static String writeLayer(ZipOutputStream zos, int layerIndex,
+                                     ImageLayer layer, ProgressTracker pt) throws IOException {
         String stackXML = String.format(Locale.ENGLISH, "<layer name=\"%s\" visibility=\"%s\" composite-op=\"%s\" opacity=\"%f\" src=\"data/%d.png\" x=\"%d\" y=\"%d\"/>\n",
                 layer.getName(),
                 layer.getVisibilityAsORAString(),
                 layer.getBlendingMode().toSVGName(),
                 layer.getOpacity(),
                 layerIndex,
-                imageLayer.getTX(),
-                imageLayer.getTY());
+                layer.getTX(),
+                layer.getTY());
         ZipEntry entry = new ZipEntry(String.format("data/%d.png", layerIndex));
         zos.putNextEntry(entry);
-        BufferedImage image = imageLayer.getImage();
-        ImageIO.write(image, "PNG", zos);
+        BufferedImage image = layer.getImage();
+
+//        ImageIO.write(image, "PNG", zos);
+        TrackedIO.writeToStream(image, zos, "PNG", pt);
+
         zos.closeEntry();
         return stackXML;
     }
@@ -118,22 +138,40 @@ public class OpenRaster {
     public static Composition read(File file) throws IOException, ParserConfigurationException, SAXException {
         boolean DEBUG = System.getProperty("openraster.debug", "false").equals("true");
 
+        ProgressTracker pt = new StatusBarProgressTracker("Reading " + file.getName(), 100);
+
         String stackXML = null;
         Map<String, BufferedImage> images = new HashMap<>();
         try (ZipFile zipFile = new ZipFile(file)) {
+            // first iterate to count the image files...
             Enumeration<? extends ZipEntry> fileEntries = zipFile.entries();
+            int numImageFiles = 0;
+            while (fileEntries.hasMoreElements()) {
+                ZipEntry entry = fileEntries.nextElement();
+                String name = entry.getName().toLowerCase();
+                if (name.endsWith("png") && !name.equals(MERGED_IMAGE_NAME)) {
+                    numImageFiles++;
+                }
+            }
+            double workRatio = 1.0 / numImageFiles;
+
+            // ...then iterate again to actually read the image files
+            fileEntries = zipFile.entries();
             while (fileEntries.hasMoreElements()) {
                 ZipEntry entry = fileEntries.nextElement();
                 String name = entry.getName();
 
                 if (name.equalsIgnoreCase("stack.xml")) {
                     stackXML = extractString(zipFile.getInputStream(entry));
-                } else if (name.equalsIgnoreCase("mergedimage.png")) {
+                } else if (name.equalsIgnoreCase(MERGED_IMAGE_NAME)) {
                     // no need for that
                 } else {
                     String extension = FileExtensionUtils.getExt(name);
                     if ("png".equalsIgnoreCase(extension)) {
-                        BufferedImage image = ImageIO.read(zipFile.getInputStream(entry));
+                        ProgressTracker spt = new SubtaskProgressTracker(workRatio, pt);
+                        InputStream stream = zipFile.getInputStream(entry);
+//                        BufferedImage image = ImageIO.read(stream);
+                        BufferedImage image = TrackedIO.readFromStream(stream, spt);
                         images.put(name, image);
                         if (DEBUG) {
                             System.out.println(String.format("OpenRaster::readOpenRaster: found png image in zip file at the path '%s'", name));
@@ -218,6 +256,9 @@ public class OpenRaster {
             comp.addLayerNoGUI(layer);
         }
         comp.setActiveLayer(comp.getLayer(0), false);
+
+        pt.finish();
+
         return comp;
     }
 

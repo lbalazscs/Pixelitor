@@ -28,7 +28,6 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.TextLayer;
 import pixelitor.menus.file.RecentFilesMenu;
-import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
@@ -73,14 +72,20 @@ public class OpenSaveManager {
     }
 
     public static Composition createCompositionFromFile(File file) {
+        Composition comp;
         String ext = FileExtensionUtils.getExt(file.getName());
         if ("pxc".equals(ext)) {
-            return openLayered(file, "pxc");
+            comp = openLayered(file, "pxc");
         } else if ("ora".equals(ext)) {
-            return openLayered(file, "ora");
+            comp = openLayered(file, "ora");
         } else {
-            return openSimpleFile(file);
+            comp = openSimpleFile(file);
         }
+
+        if (comp != null) {
+            Messages.showInStatusBar(file.getName() + " opened.");
+        }
+        return comp;
     }
 
     // opens an a file with a single-layer image format
@@ -88,7 +93,7 @@ public class OpenSaveManager {
         BufferedImage img = null;
         try {
 //            img = ImageIO.read(file);
-            img = ImageUtils.readImageWithStatusBarProgressTracking(file);
+            img = TrackedIO.read(file);
         } catch (IOException ex) {
             Messages.showException(ex);
         }
@@ -158,7 +163,7 @@ public class OpenSaveManager {
                     JpegOutput.writeJPG(image, selectedFile, jpegSettings);
                 } else {
 //                    ImageIO.write(image, format.toString(), selectedFile);
-                    ImageUtils.writeImageWithStatusBarProgressTracking(image, format.toString(), selectedFile);
+                    TrackedIO.write(image, format.toString(), selectedFile);
                 }
             } catch (IOException e) {
                 if (e.getMessage().contains("another process")) {
@@ -287,6 +292,7 @@ public class OpenSaveManager {
         }
 
         Composition comp = ImageComponents.getActiveCompOrNull();
+        int numSavedImages = 0;
 
         for (int layerIndex = 0; layerIndex < comp.getNumLayers(); layerIndex++) {
             Layer layer = comp.getLayer(layerIndex);
@@ -295,15 +301,19 @@ public class OpenSaveManager {
                 BufferedImage image = imageLayer.getImage();
 
                 saveImage(layerIndex, layer, image);
+                numSavedImages++;
             } else if (layer instanceof TextLayer) {
                 TextLayer textLayer = (TextLayer) layer;
                 BufferedImage image = textLayer.createRasterizedImage();
 
                 saveImage(layerIndex, layer, image);
+                numSavedImages++;
             }
             // TODO what about masks? Either they should be applied
             // or they should be saved as images
         }
+        Messages.showInStatusBar("Saved " + numSavedImages
+                + " images to " + Directories.getLastSaveDir());
     }
 
     private static void saveImage(int layerIndex, Layer layer, BufferedImage image) {

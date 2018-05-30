@@ -18,22 +18,23 @@
 package pixelitor.utils;
 
 import org.junit.Test;
+import pixelitor.io.TrackedIO;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link ImageUtils}
+ * Tests for {@link TrackedIO}
  */
-public class ImageUtilsTest {
+public class TrackedIOTest {
     @Test
     public void testCalcSubsamplingCols() {
-        int cols = ImageUtils.calcSubsamplingCols(5000, 2000, 100, 100);
+        int cols = TrackedIO.calcSubsamplingCols(5000, 2000, 100, 100);
         assertThat(cols).isEqualTo(50);
 
-        cols = ImageUtils.calcSubsamplingCols(2000, 5000, 100, 100);
+        cols = TrackedIO.calcSubsamplingCols(2000, 5000, 100, 100);
         assertThat(cols).isEqualTo(50);
 
-        cols = ImageUtils.calcSubsamplingCols(250, 250, 100, 100);
+        cols = TrackedIO.calcSubsamplingCols(250, 250, 100, 100);
         assertThat(cols).isEqualTo(3);
     }
 }

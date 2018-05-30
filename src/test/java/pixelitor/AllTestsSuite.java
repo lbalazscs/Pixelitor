@@ -38,7 +38,7 @@ import pixelitor.tools.AbstractBrushToolTest;
 import pixelitor.tools.ToolTest;
 import pixelitor.tools.guidelines.RectGuidelineTest;
 import pixelitor.transform.TransformHelperTest;
-import pixelitor.utils.ImageUtilsTest;
+import pixelitor.utils.TrackedIOTest;
 import pixelitor.utils.UtilsTest;
 
 /**
@@ -65,7 +65,7 @@ import pixelitor.utils.UtilsTest;
         ContentLayerTest.class,
         FilterParamTest.class,
         ImageLayerTest.class,
-        ImageUtilsTest.class,
+        TrackedIOTest.class,
         IntChoiceParamTest.class,
         LayerBlendingModesTest.class,
         LayerTest.class,

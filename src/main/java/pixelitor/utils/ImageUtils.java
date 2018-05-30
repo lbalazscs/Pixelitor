@@ -27,17 +27,10 @@ import pixelitor.colors.ColorUtils;
 import pixelitor.filters.Invert;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.gui.utils.ThumbInfo;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.utils.debug.BufferedImageNode;
 
 import javax.imageio.ImageIO;
-import javax.imageio.ImageReadParam;
-import javax.imageio.ImageReader;
-import javax.imageio.ImageTypeSpecifier;
-import javax.imageio.ImageWriter;
-import javax.imageio.stream.ImageInputStream;
-import javax.imageio.stream.ImageOutputStream;
 import javax.swing.*;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
@@ -59,12 +52,10 @@ import java.awt.image.DataBufferInt;
 import java.awt.image.PixelGrabber;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
-import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URL;
-import java.util.Iterator;
 import java.util.Random;
 
 import static java.awt.AlphaComposite.SRC_OVER;
@@ -455,149 +446,6 @@ public class ImageUtils {
             Messages.showException(e);
         }
         return image;
-    }
-
-    public static void writeImageWithStatusBarProgressTracking(BufferedImage img, String formatName, File file) throws IOException {
-        try (ImageOutputStream ios = ImageIO.createImageOutputStream(file)) {
-            ImageTypeSpecifier type =
-                    ImageTypeSpecifier.createFromRenderedImage(img);
-            Iterator<ImageWriter> writers = ImageIO.getImageWriters(type, formatName);
-
-            if (!writers.hasNext()) {
-                throw new IOException("No writer found for " + formatName);
-            }
-            ImageWriter writer = writers.next();
-            try {
-                writer.setOutput(ios);
-
-                // register the status bar progress tracking
-                ProgressTracker tracker = new StatusBarProgressTracker("Writing " + file.getName(), 100);
-                writer.addIIOWriteProgressListener(new TrackerWriteProgressListener(tracker));
-
-                writer.write(img);
-            } finally {
-                writer.dispose();
-            }
-        }
-    }
-
-    public static BufferedImage readImageWithStatusBarProgressTracking(File file) throws IOException {
-        ProgressTracker tracker = new StatusBarProgressTracker("Reading " + file.getName(), 100);
-
-        BufferedImage image = readImageWithProgressTracking(file, tracker);
-
-        Messages.showInStatusBar(file.getName() + " opened.");
-        return image;
-    }
-
-    public static BufferedImage readImageWithProgressTracking(File file, ProgressTracker tracker) throws IOException {
-        BufferedImage image;
-
-        try (ImageInputStream iis = ImageIO.createImageInputStream(file)) {
-            image = readStreamImageWithProgressTracking(iis, tracker);
-        }
-        return image;
-    }
-
-    public static BufferedImage readStreamImageWithProgressTracking(ImageInputStream iis, ProgressTracker tracker) throws IOException {
-        BufferedImage image;
-        Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
-
-        if (!readers.hasNext()) {
-            return null;
-        }
-
-        ImageReader reader = readers.next();
-
-        try {
-            reader.setInput(iis);
-
-            reader.addIIOReadProgressListener(new TrackerReadProgressListener(tracker));
-
-            ImageReadParam param = reader.getDefaultReadParam();
-            image = reader.read(0, param);
-        } finally {
-            reader.dispose();
-        }
-
-        return image;
-    }
-
-    /**
-     * Reads a subsampled image. It requires far less memory,
-     * can be almost twice as fast as reading all pixels,
-     * and it does not need to be resized later.
-     * <p>
-     * Idea from https://stackoverflow.com/questions/3294388/make-a-bufferedimage-use-less-ram
-     */
-    public static ThumbInfo readSubsampledThumb(File file, int thumbMaxWidth, int thumbMaxHeight, ProgressTracker tracker) throws IOException {
-        ThumbInfo thumbInfo;
-        try (ImageInputStream iis = ImageIO.createImageInputStream(file)) {
-            Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
-
-            if (!readers.hasNext()) {
-                return null;
-            }
-
-            ImageReader reader = readers.next();
-
-            try {
-                reader.setInput(iis, true);
-
-                if (tracker != null) {
-                    // register the progress tracking
-                    reader.addIIOReadProgressListener(new TrackerReadProgressListener(tracker));
-                }
-
-                // Once the reader has its input source set,
-                // we can use it to obtain information about
-                // the image without necessarily causing image data
-                // to be read into memory
-                int imgWidth = reader.getWidth(0);
-                int imgHeight = reader.getHeight(0);
-
-                if (imgWidth < 2 * thumbMaxWidth || imgHeight < 2 * thumbMaxHeight) {
-                    // subsampling only makes sense when
-                    // the image is shrunk by 2x or greater
-                    BufferedImage image = reader.read(0);
-                    BufferedImage thumb = createThumbnail(image, Math.min(thumbMaxWidth, thumbMaxHeight), null);
-                    return new ThumbInfo(thumb, imgWidth, imgHeight);
-                }
-
-// TODO in principle a thumbnail could be in the file already
-// see https://docs.oracle.com/javase/7/docs/technotes/guides/imageio/spec/apps.fm3.html
-//                boolean hasThumbs = reader.hasThumbnails(0);
-//                if(hasThumbs) {
-//                    BufferedImage bi = reader.readThumbnail(0, 0);
-//                }
-
-                ImageReadParam imageReaderParams = reader.getDefaultReadParam();
-                int subsampling = calcSubsamplingCols(imgWidth, imgHeight, thumbMaxWidth, thumbMaxHeight);
-
-                imageReaderParams.setSourceSubsampling(subsampling, subsampling, 0, 0);
-                BufferedImage image = reader.read(0, imageReaderParams);
-                thumbInfo = new ThumbInfo(image, imgWidth, imgHeight);
-            } finally {
-                reader.dispose();
-            }
-        }
-        return thumbInfo;
-    }
-
-    /**
-     * Calculates the number of columns to advance between pixels while subsampling.
-     * In order to preserve the aspect ratio, the same number is used
-     * for the horizontal and vertical subsampling.
-     */
-    @VisibleForTesting
-    public static int calcSubsamplingCols(int imgWidth, int imgHeight, int thumbMaxWidth, int thumbMaxHeight) {
-        assert imgWidth >= thumbMaxWidth * 2;
-        assert imgHeight >= thumbMaxHeight * 2;
-
-        int columnsX = (int) Math.ceil(imgWidth / (double) thumbMaxWidth);
-        int columnsY = (int) Math.ceil(imgHeight / (double) thumbMaxHeight);
-
-        return Math.max(columnsX, columnsY);
     }
 
     public static BufferedImage convertToARGB_PRE(BufferedImage src, boolean flushOld) {

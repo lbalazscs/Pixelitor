@@ -17,7 +17,6 @@
 
 package pixelitor.io;
 
-import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.StatusBarProgressTracker;
@@ -69,7 +68,7 @@ public final class JpegOutput {
             ByteArrayInputStream in = new ByteArrayInputStream(bytes);
             ProgressTracker pt2 = new SubtaskProgressTracker(0.3, pt);
             try (ImageInputStream iis = ImageIO.createImageInputStream(in)) {
-                previewImage = ImageUtils.readStreamImageWithProgressTracking(iis, pt2);
+                previewImage = TrackedIO.readFromIIS(iis, pt2);
             }
 
             pt.finish();

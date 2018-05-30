@@ -1017,6 +1017,16 @@ public class Composition implements Serializable {
         return true;
     }
 
+    public int getNumImageLayers() {
+        int count = 0;
+        for (Layer layer : layerList) {
+            if (layer instanceof ImageLayer) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     public enum ImageChangeActions {
         INVALIDATE_CACHE(false, false) {
         }, REPAINT(true, false) {
