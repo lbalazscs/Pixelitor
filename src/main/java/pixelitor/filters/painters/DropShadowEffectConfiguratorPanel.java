@@ -101,4 +101,9 @@ public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
             adjustmentListener.paramAdjusted();
         }
     }
+
+    @Override
+    public String getResetToolTip() {
+        return "Reset the default effect settings";
+    }
 }

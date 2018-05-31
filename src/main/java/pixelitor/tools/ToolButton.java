@@ -67,7 +67,7 @@ public class ToolButton extends JToggleButton implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         Tools.changeTo(tool);
 
-        String msg = tool.getName() + " Tool: " + tool.getToolMessage();
+        String msg = "<html>" + tool.getName() + " Tool: " + tool.getToolMessage();
         Messages.showInStatusBar(msg);
     }
 }

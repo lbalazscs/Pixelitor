@@ -32,7 +32,7 @@ public class MoveTool extends Tool {
 
     public MoveTool() {
         super('v', "Move", "move_tool_icon.png",
-                "drag to move the active layer, Alt-drag (or right-mouse-drag) to move a duplicate of the active layer. Shift-drag to constrain the movement.",
+                "<b>drag</b> to move the active layer, <b>Alt-drag</b> (or <b>right-mouse-drag</b>) to move a duplicate of the active layer. <b>Shift-drag</b> to constrain the movement.",
                 Cursors.MOVE, false, true, true, ClipStrategy.CANVAS);
     }
 

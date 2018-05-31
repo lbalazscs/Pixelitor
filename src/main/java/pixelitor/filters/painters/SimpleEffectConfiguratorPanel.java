@@ -66,4 +66,9 @@ public class SimpleEffectConfiguratorPanel extends EffectConfiguratorPanel {
         super.reset(false);
         widthRange.reset(trigger);
     }
+
+    @Override
+    public String getResetToolTip() {
+        return "Reset the default effect settings";
+    }
 }

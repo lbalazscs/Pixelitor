@@ -29,7 +29,8 @@ import java.awt.event.MouseEvent;
  */
 public class ZoomTool extends Tool {
     ZoomTool() {
-        super('z', "Zoom", "zoom_tool_icon.png", "click to zoom in, right-click (or Alt-click) to zoom out",
+        super('z', "Zoom", "zoom_tool_icon.png",
+                "<b>click</b> to zoom in, <b>right-click</b> (or <b>Alt-click</b>) to zoom out.",
                 Cursors.HAND, false, true, false, ClipStrategy.CANVAS);
     }
 

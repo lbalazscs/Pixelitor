@@ -347,6 +347,11 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     @Override
+    public String getResetToolTip() {
+        return super.getResetToolTip() + " to " + defaultValue;
+    }
+
+    @Override
     public String toString() {
         return String.format("%s[name = '%s', value = %.2f]",
                 getClass().getSimpleName(), getName(), value);

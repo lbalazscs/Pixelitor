@@ -35,7 +35,7 @@ public class DefaultButton extends JButton {
         this.resettable = resettable;
         setPreferredSize(PREFERRED_SIZE);
         addActionListener(e -> resettable.reset(true));
-        setToolTipText("Reset the default setting");
+        setToolTipText(resettable.getResetToolTip());
         updateIcon();
     }
 

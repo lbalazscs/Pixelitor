@@ -253,5 +253,10 @@ public class EffectsPanel extends JPanel implements Resettable {
         neonBorderConfigurator.setDefaultButton(button);
         dropShadowConfigurator.setDefaultButton(button);
     }
+
+    @Override
+    public String getResetToolTip() {
+        return "Reset the default effect settings";
+    }
 }
 

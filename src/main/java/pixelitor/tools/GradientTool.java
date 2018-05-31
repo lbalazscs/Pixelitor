@@ -66,7 +66,8 @@ public class GradientTool extends Tool {
     private BlendingModePanel blendingModePanel;
 
     GradientTool() {
-        super('g', "Gradient", "gradient_tool_icon.png", "click and drag to draw a gradient, Shift-drag to constrain the direction.",
+        super('g', "Gradient", "gradient_tool_icon.png",
+                "<b>click</b> and <b>drag</b> to draw a gradient, <b>Shift-drag</b> to constrain the direction.",
                 Cursors.DEFAULT, true, true, true, ClipStrategy.CANVAS);
     }
 

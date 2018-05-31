@@ -30,7 +30,8 @@ public class HandTool extends Tool {
     private final HandToolSupport handToolSupport = new HandToolSupport();
     
     HandTool() {
-        super('h', "Hand", "hand_tool_icon.png", "drag to move the view (if scrollbars are present)",
+        super('h', "Hand", "hand_tool_icon.png",
+                "<b>drag</b> to move the view (if scrollbars are present).",
                 Cursors.HAND, false, false, false, ClipStrategy.CANVAS);
     }
 

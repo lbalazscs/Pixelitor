@@ -92,4 +92,9 @@ public abstract class AbstractFilterParam implements FilterParam {
             paramGUI.setToolTip(tip);
         }
     }
+
+    @Override
+    public String getResetToolTip() {
+        return "<html>Reset the value of <b>" + name + "</b>";
+    }
 }

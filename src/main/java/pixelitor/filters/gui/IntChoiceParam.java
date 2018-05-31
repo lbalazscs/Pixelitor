@@ -326,6 +326,11 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
     }
 
     @Override
+    public String getResetToolTip() {
+        return super.getResetToolTip() + " to " + defaultChoice.toString();
+    }
+
+    @Override
     public String toString() {
         return String.format("%s[name = '%s', selected = '%s']",
                 getClass().getSimpleName(), getName(), currentChoice.toString());

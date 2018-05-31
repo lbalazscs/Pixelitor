@@ -83,7 +83,7 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
 
     CropTool() {
         super('c', "Crop", "crop_tool_icon.png",
-                "Click and drag to define the crop area. Hold SPACE down to move the entire region.",
+                "<b>drag</b> to define the crop area. Hold <b>SPACE</b> down to move the entire region. <b>Shift-drag</b> the handles to keep the aspect ratio.",
                 Cursors.DEFAULT, false, true, true, ClipStrategy.CANVAS);
         spaceDragBehavior = true;
         maskOpacity.addChangeListener(e -> {

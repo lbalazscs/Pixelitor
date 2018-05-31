@@ -82,7 +82,7 @@ public class ShapesTool extends Tool {
 
     public ShapesTool() {
         super('u', "Shapes", "shapes_tool_icon.png",
-                "Click and drag to draw a shape. Hold SPACE down while drawing to move the shape. ",
+                "<b>drag</b> to draw a shape. Hold <b>SPACE</b> down while drawing to move the shape. ",
                 Cursors.DEFAULT, true, true, false, ClipStrategy.CANVAS);
 
         strokeFillModel.setSelectedItem(TwoPointBasedPaint.BACKGROUND);

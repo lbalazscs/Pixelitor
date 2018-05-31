@@ -83,7 +83,7 @@ public class OpenSaveManager {
         }
 
         if (comp != null) {
-            Messages.showInStatusBar(file.getName() + " opened.");
+            Messages.showInStatusBar("<html><b>" + file.getName() + "</b> was opened.");
         }
         return comp;
     }

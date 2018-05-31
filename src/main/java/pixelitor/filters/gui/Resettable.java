@@ -29,4 +29,6 @@ public interface Resettable {
      *                of a filter preview
      */
     void reset(boolean trigger);
+
+    String getResetToolTip();
 }

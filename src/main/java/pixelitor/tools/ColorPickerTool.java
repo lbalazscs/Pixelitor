@@ -38,7 +38,7 @@ public class ColorPickerTool extends Tool {
 
     public ColorPickerTool() {
         super('i', "Color Picker", "color_picker_tool_icon.png",
-                "click to pick the foreground color, Alt-click (or right-click) to pick the background color",
+                "<b>click</b> to pick the foreground color, <b>Alt-click</b> (or <b>right-click</b>) to pick the background color.",
                 Cursors.CROSSHAIR, false, true, false, ClipStrategy.CANVAS);
     }
 

@@ -30,7 +30,7 @@ import static java.awt.AlphaComposite.DST_OUT;
 public class EraserTool extends AbstractBrushTool {
     public EraserTool() {
         super('e', "Eraser", "erase_tool_icon.png",
-                "click and drag to erase pixels",
+                "<b>click and drag</b> to erase pixels.",
                 Cursors.DEFAULT);
         drawStrategy = DrawStrategy.DIRECT;
     }

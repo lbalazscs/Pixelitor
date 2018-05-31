@@ -69,7 +69,7 @@ public class CloneTool extends BlendingModeBrushTool {
 
     protected CloneTool() {
         super('s', "Clone Stamp", "clone_tool_icon.png",
-                "Alt-click (or right-click) to select the source, then paint with the copied pixels",
+                "<b>Alt-click</b> (or <b>right-click</b>) to select the source, then <b>drag</b> to paint with the copied pixels.",
                 Cursors.DEFAULT);
     }
 
