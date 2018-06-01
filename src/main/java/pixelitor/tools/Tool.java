@@ -73,6 +73,7 @@ public abstract class Tool implements KeyboardObserver {
 
     // a dialog with more settings that will be closed automatically
     // when the user switches to another tool
+    // TODO this should be refactored since the shapes tool has multiple dialogs
     protected JDialog toolDialog;
 
     protected Tool(char activationKeyChar, String name, String iconFileName,

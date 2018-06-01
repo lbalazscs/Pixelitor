@@ -74,9 +74,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static pixelitor.TestingMode.NO_MASK;
 import static pixelitor.utils.test.Assertions.canvasSizeIs;
 import static pixelitor.utils.test.Assertions.numLayersIs;
+import static pixelitor.utils.test.Assertions.numOpenImagesIs;
+import static pixelitor.utils.test.Assertions.numOpenImagesIsAtLeast;
 import static pixelitor.utils.test.Assertions.thereIsNoSelection;
 import static pixelitor.utils.test.Assertions.thereIsSelection;
-
 
 public class AssertJSwingTest {
     private static boolean verbose = false;
@@ -111,9 +112,9 @@ public class AssertJSwingTest {
         long startMillis = System.currentTimeMillis();
 
         // enable quick mode with -Dquick=true
-        quick = System.getProperty("quick").equals("true");
-        // enable quick mode with -Dverbose=true
-        verbose = System.getProperty("verbose").equals("true");
+        quick = "true".equals(System.getProperty("quick"));
+        // enable verbose mode with -Dverbose=true
+        verbose = "true".equals(System.getProperty("verbose"));
 
         initialize(args);
 
@@ -124,7 +125,7 @@ public class AssertJSwingTest {
         if (testOneMethodSlowly) {
             test.robot.settings().delayBetweenEvents(ROBOT_DELAY_MILLIS_SLOW);
 
-            test.testFilterWithDialog("Hue/Saturation...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+            test.testSelectionToolAndMenus();
 
         } else {
             TestingMode[] testingModes = getTestingModes();
@@ -703,11 +704,13 @@ public class AssertJSwingTest {
     }
 
     private void testDuplicateImage() {
-        checkNumOpenImagesIs(1);
+        assert numOpenImagesIs(1);
+
         runMenuCommand("Duplicate");
-        checkNumOpenImagesIs(2);
+        assert numOpenImagesIs(2);
+
         closeOneOfTwo();
-        checkNumOpenImagesIs(1);
+        assert numOpenImagesIs(1);
     }
 
     private void testResize() {
@@ -908,20 +911,20 @@ public class AssertJSwingTest {
 
     private void closeOneOfTwo() {
         log(1, "testing close one of two");
+        assert numOpenImagesIs(2);
 
-        checkNumOpenImagesIs(2);
         boolean dirty = ImageComponents.getActiveCompOrNull().isDirty();
 
         runMenuCommand("Close");
 
-        // we might get a "Do you want to save changes" dialog
         if (dirty) {
+            // we get a "Do you want to save changes" dialog
             JOptionPaneFixture optionPane = findJOptionPane();
             JButtonMatcher matcher = JButtonMatcher.withText("Don't Save").andShowing();
             optionPane.button(matcher).click();
         }
 
-        checkNumOpenImagesIs(1);
+        assert numOpenImagesIs(1);
 
         testingMode.set(this);
         assert checkConsistency();
@@ -930,11 +933,10 @@ public class AssertJSwingTest {
     private void testCloseAll() {
         log(1, "testing close all");
 
-        assertThat(ImageComponents.getNumOpenImages() > 1);
+        assert numOpenImagesIsAtLeast(1);
 
         closeAll();
-
-        assertThat(ImageComponents.getNumOpenImages() == 0);
+        assert numOpenImagesIs(0);
 
         assert checkConsistency();
     }
@@ -1657,20 +1659,35 @@ public class AssertJSwingTest {
     }
 
     private void testWithSimpleSelection() {
+        assert thereIsNoSelection();
+
         moveTo(200, 200);
         dragTo(400, 400);
+        assert thereIsSelection();
+
         keyboardNudge();
+        assert thereIsSelection();
+
         keyboardUndoRedoUndo();
+
+        // only the nudge was undone
+        assert thereIsSelection();
 
         //pw.button("brushTraceButton").click();
         findButtonByText(pw, "Stroke with Current Brush").click();
 
         keyboardDeselect();
-        keyboardUndo(); // keyboardUndo deselection
-        keyboardUndo(); // keyboardUndo tracing
+        assert thereIsNoSelection();
+
+        keyboardUndo(); // undo deselection
+        assert thereIsSelection();
+
+        keyboardUndo(); // undo tracing
+        assert thereIsSelection();
     }
 
     private void testWithTwoEclipseSelections() {
+        assert thereIsSelection();
         pw.comboBox("selectionTypeCombo").selectItem("Ellipse");
 
         // replace current selection with the first ellipse
@@ -1680,6 +1697,7 @@ public class AssertJSwingTest {
         int e1Height = 200;
         moveTo(e1X, e1Y);
         dragTo(e1X + e1Width, e1Y + e1Height);
+        assert thereIsSelection();
 
         // add second ellipse
         pw.comboBox("selectionInteractionCombo").selectItem("Add");
@@ -1689,6 +1707,7 @@ public class AssertJSwingTest {
         int e2Height = 100;
         moveTo(e2X, e2Y);
         dragTo(e2X + e2Width, e2Y + e2Height);
+        assert thereIsSelection();
 
         Composition comp = ImageComponents.getActiveCompOrNull();
         Canvas canvas = comp.getCanvas();
@@ -1696,7 +1715,6 @@ public class AssertJSwingTest {
         int origCanvasHeight = canvas.getHeight();
         assert canvasSizeIs(origCanvasWidth, origCanvasHeight);
 
-        assert thereIsSelection();
         Selection selection = comp.getSelection();
         Rectangle selectionBounds = selection.getShapeBounds();
         int selectionWidth = selectionBounds.width;
@@ -1729,6 +1747,7 @@ public class AssertJSwingTest {
         runMenuCommand("Stroke with Current Brush");
         runMenuCommand("Stroke with Current Eraser");
         assert thereIsSelection();
+
         runMenuCommand("Deselect");
         assert thereIsNoSelection();
     }
@@ -2029,7 +2048,6 @@ public class AssertJSwingTest {
         return menuItemFixture;
     }
 
-
     private static JButtonFixture findButtonByActionName(ComponentContainerFixture container, String actionName) {
         JButtonFixture buttonFixture = container.button(
                 new GenericTypeMatcher<JButton>(JButton.class) {
@@ -2078,7 +2096,6 @@ public class AssertJSwingTest {
 
         return buttonFixture;
     }
-
 
     private JOptionPaneFixture findJOptionPane() {
         return JOptionPaneFinder.findOptionPane().withTimeout(10, SECONDS).using(robot);
@@ -2301,11 +2318,7 @@ public class AssertJSwingTest {
             }
         }
 
-        checkNumOpenImagesIs(0);
-    }
-
-    private static void checkNumOpenImagesIs(int expected) {
-        assertThat(ImageComponents.getNumOpenImages()).isEqualTo(expected);
+        assert numOpenImagesIs(0);
     }
 
     private static void processCLArguments(String[] args) {

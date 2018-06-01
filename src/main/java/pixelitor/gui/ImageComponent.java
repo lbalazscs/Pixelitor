@@ -39,8 +39,8 @@ import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
-import pixelitor.utils.Utils;
 import pixelitor.utils.debug.ImageComponentNode;
+import pixelitor.utils.test.Assertions;
 
 import javax.swing.*;
 import java.awt.Dimension;
@@ -445,7 +445,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     public boolean setMaskViewMode(MaskViewMode maskViewMode) {
         // it is important not to call this directly,
         // it should be a part of a mask activation
-        assert Utils.callingClassIs("MaskViewMode");
+        assert Assertions.callingClassIs("MaskViewMode");
         assert maskViewMode.checkOnAssignment(comp.getActiveLayer());
 
         MaskViewMode oldMode = this.maskViewMode;

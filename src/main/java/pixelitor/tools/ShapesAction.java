@@ -63,15 +63,15 @@ public enum ShapesAction {
         }
     }
 
-    public boolean enableStrokeSettings() {
+    public boolean hasStrokeSettings() {
         return enableStrokeSettings;
     }
 
-    public boolean enableFillPaintSelection() {
+    public boolean hasFillPaintSelection() {
         return enableFillPaintSelection;
     }
 
-    public boolean enableStrokePaintSelection() {
+    public boolean hasStrokePaintSelection() {
         return enableStrokePaintSelection;
     }
 
@@ -83,7 +83,7 @@ public enum ShapesAction {
         return fill;
     }
 
-    public boolean drawEffects() {
+    public boolean drawsEffects() {
         return drawEffects;
     }
 

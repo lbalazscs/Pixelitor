@@ -68,7 +68,7 @@ public class ShapesTool extends Tool {
     private final StrokeParam strokeParam = new StrokeParam("");
 
     private JButton strokeSettingsButton;
-    private BasicStroke basicStrokeForOpenShapes;
+    private BasicStroke strokeForOpenShapes;
     private final JComboBox<TwoPointBasedPaint> strokeFillCombo;
     private final JComboBox<TwoPointBasedPaint> fillCombo = new JComboBox<>(fillModel);
     private JButton effectsButton;
@@ -100,7 +100,7 @@ public class ShapesTool extends Tool {
 
         JComboBox<ShapesAction> actionCB = new JComboBox<>(actionModel);
         settingsPanel.addWithLabel("Action:", actionCB, "actionCB");
-        actionCB.addActionListener(e -> updateWhichSettingsAreEnabled());
+        actionCB.addActionListener(e -> updateEnabledState());
 
         settingsPanel.addWithLabel("Fill:", fillCombo);
 
@@ -112,7 +112,7 @@ public class ShapesTool extends Tool {
         effectsButton = settingsPanel.addButton("Effects...",
                 e -> showEffectsDialog());
 
-        updateWhichSettingsAreEnabled();
+        updateEnabledState();
     }
 
     private void showEffectsDialog() {
@@ -148,7 +148,7 @@ public class ShapesTool extends Tool {
         // from negative coordinates bug
         // TODO investigate
         ShapesAction action = actionModel.getSelectedItem();
-        if(action.drawEffects() && effectsPanel != null) {
+        if (action.drawsEffects() && effectsPanel != null) {
             AreaEffects effects = effectsPanel.getEffects();
             if(effects.hasAny()) {
                 if (userDrag.getStartX() < 0) {
@@ -184,7 +184,7 @@ public class ShapesTool extends Tool {
 
             int thickness = 0;
             int extraStrokeThickness = 0;
-            if (action.enableStrokePaintSelection()) {
+            if (action.hasStrokePaintSelection()) {
                 thickness = strokeParam.getStrokeWidth();
 
                 StrokeType strokeType = strokeParam.getStrokeType();
@@ -235,12 +235,13 @@ public class ShapesTool extends Tool {
         stroke = null;
     }
 
-    private void updateWhichSettingsAreEnabled() {
+    private void updateEnabledState() {
         ShapesAction action = actionModel.getSelectedItem();
-        enableEffectSettings(action.drawEffects());
-        enableStrokeSettings(action.enableStrokeSettings());
-        enableFillPaintSelection(action.enableFillPaintSelection());
-        enableStrokePaintSelection(action.enableStrokePaintSelection());
+
+        enableEffectSettings(action.drawsEffects());
+        enableStrokeSettings(action.hasStrokeSettings());
+        fillCombo.setEnabled(action.hasFillPaintSelection());
+        strokeFillCombo.setEnabled(action.hasStrokePaintSelection());
     }
 
     private void initAndShowStrokeSettingsDialog() {
@@ -294,16 +295,16 @@ public class ShapesTool extends Tool {
     }
 
     /**
-     * Paints the selected shape on the given Graphics2D within the bounds of the given UserDrag
-     * Called by paintOnImage while dragging, and by paintShapeOnIC on mouse release
+     * Paints the selected shape on the given Graphics2D
+     * within the bounds of the given UserDrag
      */
     private void paintShape(Graphics2D g, UserDrag userDrag, Composition comp) {
         if (userDrag.isClick()) {
             return;
         }
 
-        if (basicStrokeForOpenShapes == null) {
-            basicStrokeForOpenShapes = new BasicStroke(1);
+        if (strokeForOpenShapes == null) {
+            strokeForOpenShapes = new BasicStroke(1);
         }
 
         ShapeType shapeType = typeModel.getSelectedItem();
@@ -316,14 +317,13 @@ public class ShapesTool extends Tool {
         if (action.hasFill()) {
             TwoPointBasedPaint fillType = fillModel.getSelectedItem();
             if (shapeType.isClosed()) {
-                //g.setPaint(fillType.getPaint(userDrag));
                 fillType.setupPaint(g, userDrag);
                 g.fill(currentShape);
                 fillType.finish(g);
             } else if (!action.hasStroke()) {
-                // special case: a shape that is not closed can be only stroked, even if stroke is disabled
-                // stroke it with the basic stroke
-                g.setStroke(basicStrokeForOpenShapes);
+                // special case: a shape that is not closed
+                // can be only stroked, even if stroke is disabled
+                g.setStroke(strokeForOpenShapes);
                 fillType.setupPaint(g, userDrag);
                 g.draw(currentShape);
                 fillType.finish(g);
@@ -343,7 +343,7 @@ public class ShapesTool extends Tool {
             strokeFill.finish(g);
         }
 
-        if (action.drawEffects()) {
+        if (action.drawsEffects()) {
             if (effectsPanel != null) {
                 AreaEffect[] areaEffects = effectsPanel.getEffects().asArray();
                 for (AreaEffect effect : areaEffects) {
@@ -363,16 +363,16 @@ public class ShapesTool extends Tool {
 
         if (action.createSelection()) {
             Shape selectionShape;
-            if (action.enableStrokeSettings()) {
+            if (action.hasStrokeSettings()) {
                 if (stroke == null) {
                     stroke = strokeParam.createStroke();
                 }
                 selectionShape = stroke.createStrokedShape(currentShape);
             } else if (!shapeType.isClosed()) {
-                if (basicStrokeForOpenShapes == null) {
+                if (strokeForOpenShapes == null) {
                     throw new IllegalStateException("action = " + action + ", shapeType = " + shapeType);
                 }
-                selectionShape = basicStrokeForOpenShapes.createStrokedShape(currentShape);
+                selectionShape = strokeForOpenShapes.createStrokedShape(currentShape);
             } else {
                 selectionShape = currentShape;
             }
@@ -405,14 +405,6 @@ public class ShapesTool extends Tool {
         if (!b) {
             closeEffectsDialog();
         }
-    }
-
-    private void enableStrokePaintSelection(boolean b) {
-        strokeFillCombo.setEnabled(b);
-    }
-
-    private void enableFillPaintSelection(boolean b) {
-        fillCombo.setEnabled(b);
     }
 
     /**

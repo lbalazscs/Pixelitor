@@ -33,6 +33,10 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
 
+/**
+ * Static methods boolean-returning method that
+ * can be conveniently used after the assert keyword
+ */
 public class Assertions {
     private Assertions() {
     }
@@ -157,5 +161,15 @@ public class Assertions {
 
     public static boolean numOpenImagesIs(int expected) {
         return ImageComponents.getNumOpenImages() == expected;
+    }
+
+    public static boolean numOpenImagesIsAtLeast(int expected) {
+        return ImageComponents.getNumOpenImages() >= expected;
+    }
+
+    public static boolean callingClassIs(String name) {
+        // it checks the caller of the caller
+        String callingClassName = new Exception().getStackTrace()[2].getClassName();
+        return callingClassName.contains(name);
     }
 }

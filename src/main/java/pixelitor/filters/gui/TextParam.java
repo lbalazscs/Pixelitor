@@ -70,7 +70,7 @@ public class TextParam extends AbstractFilterParam {
     @Override
     public void randomize() {
         trigger = false;
-        setValue(Utils.getRandomString(15));
+        setValue(Utils.createRandomString(15));
         trigger = true;
     }
 

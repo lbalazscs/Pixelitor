@@ -145,7 +145,7 @@ public class TextSettings implements Serializable {
     }
 
     public static TextSettings createRandomSettings(Random rand) {
-        return new TextSettings(Utils.getRandomString(10),
+        return new TextSettings(Utils.createRandomString(10),
                 new Font(Font.SANS_SERIF, Font.BOLD, 100),
                 ColorUtils.createRandomColor(false),
                 AreaEffects.createRandom(rand),

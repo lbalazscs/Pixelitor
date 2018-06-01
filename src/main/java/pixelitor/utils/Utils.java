@@ -437,7 +437,7 @@ public final class Utils {
         return unitArrow;
     }
 
-    public static String getRandomString(int length) {
+    public static String createRandomString(int length) {
         char[] chars = "abcdefghijklmnopqrstuvwxyz -".toCharArray();
         StringBuilder sb = new StringBuilder(length);
         Random random = new Random();
@@ -489,13 +489,6 @@ public final class Utils {
         long m = (seconds / 60) % 60;
         long h = (seconds / (60 * 60)) % 24;
         return String.format("%d:%02d:%02d", h, m, s);
-    }
-
-    public static boolean callingClassIs(String name) {
-        // designed to be used in assertions:
-        // it checks the caller of the caller
-        String callingClassName = new Exception().getStackTrace()[2].getClassName();
-        return callingClassName.contains(name);
     }
 
     public static <T> void setupDisableOtherIf(ComboBoxModel<T> current, FilterSetting other, Predicate<T> condition) {
