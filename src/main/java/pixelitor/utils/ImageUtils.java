@@ -53,8 +53,6 @@ import java.awt.image.PixelGrabber;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.util.Random;
 
@@ -507,42 +505,6 @@ public class ImageUtils {
         int clipX2 = clipX + clipWidth;
         int clipY2 = clipY + clipHeight;
         g.drawImage(img, clipX, clipY, clipX2, clipY2, clipX, clipY, clipX2, clipY2, null);
-    }
-
-    public static void serializeImage(ObjectOutputStream out, BufferedImage img) throws IOException {
-        assert img != null;
-        int imgType = img.getType();
-        int imgWidth = img.getWidth();
-        int imgHeight = img.getHeight();
-
-        out.writeInt(imgWidth);
-        out.writeInt(imgHeight);
-        out.writeInt(imgType);
-
-        if (imgType == BufferedImage.TYPE_BYTE_GRAY) {
-            ImageIO.write(img, "PNG", out);
-        } else {
-            int[] pixelsAsArray = getPixelsAsArray(img);
-            for (int pixel : pixelsAsArray) {
-                out.writeInt(pixel);
-            }
-        }
-    }
-
-    public static BufferedImage deserializeImage(ObjectInputStream in) throws IOException {
-        int width = in.readInt();
-        int height = in.readInt();
-        int type = in.readInt();
-        if (type == BufferedImage.TYPE_BYTE_GRAY) {
-            return ImageIO.read(in);
-        } else {
-            BufferedImage img = new BufferedImage(width, height, type);
-            int[] pixelsAsArray = getPixelsAsArray(img);
-            for (int i = 0; i < pixelsAsArray.length; i++) {
-                pixelsAsArray[i] = in.readInt();
-            }
-            return img;
-        }
     }
 
     public static BufferedImage createThumbnail(BufferedImage src, int size, CheckerboardPainter painter) {

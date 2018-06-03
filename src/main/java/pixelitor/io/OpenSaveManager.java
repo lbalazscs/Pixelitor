@@ -35,24 +35,15 @@ import javax.swing.*;
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * Utility class with static methods related to opening and saving files.
  */
 public class OpenSaveManager {
-    private static final int CURRENT_PXC_VERSION_NUMBER = 0x03;
     private static JpegSettings jpegSettings = JpegSettings.DEFAULTS;
 
     private OpenSaveManager() {
@@ -118,7 +109,7 @@ public class OpenSaveManager {
         try {
             switch (type) {
                 case "pxc":
-                    comp = deserializeComposition(selectedFile);
+                    comp = PXCFormat.read(selectedFile);
                     break;
                 case "ora":
                     comp = OpenRaster.read(selectedFile);
@@ -220,60 +211,6 @@ public class OpenSaveManager {
         for (ImageComponent component : tmpCopy) {
             warnAndCloseImage(component);
         }
-    }
-
-    public static void serializePXC(Composition comp, File f) {
-        try (FileOutputStream fos = new FileOutputStream(f)) {
-            fos.write(new byte[]{(byte) 0xAB, (byte) 0xC4, CURRENT_PXC_VERSION_NUMBER});
-
-            try (GZIPOutputStream gz = new GZIPOutputStream(fos)) {
-                try (ObjectOutput oos = new ObjectOutputStream(gz)) {
-                    oos.writeObject(comp);
-                    oos.flush();
-                }
-            }
-        } catch (IOException e) {
-            Messages.showException(e);
-        }
-    }
-
-    private static Composition deserializeComposition(File file) throws NotPxcFormatException {
-        Composition comp = null;
-        try (FileInputStream fis = new FileInputStream(file)) {
-            int firstByte = fis.read();
-            int secondByte = fis.read();
-            if (firstByte == 0xAB && secondByte == 0xC4) {
-                // identification bytes OK
-            } else {
-                throw new NotPxcFormatException(file.getName() + " is not in the pxc format.");
-            }
-            int versionByte = fis.read();
-            if (versionByte == 0) {
-                throw new NotPxcFormatException(file.getName() + " is in an obsolete pxc format, it can only be opened in the old beta Pixelitor versions 0.9.2-0.9.7");
-            }
-            if (versionByte == 1) {
-                throw new NotPxcFormatException(file.getName() + " is in an obsolete pxc format, it can only be opened in the old beta Pixelitor version 0.9.8");
-            }
-            if (versionByte == 2) {
-                throw new NotPxcFormatException(file.getName() + " is in an obsolete pxc format, it can only be opened in the old Pixelitor versions 0.9.9-1.1.2");
-            }
-            if (versionByte > 3) {
-                throw new NotPxcFormatException(file.getName() + " has unknown version byte " + versionByte);
-            }
-
-            try (GZIPInputStream gs = new GZIPInputStream(fis)) {
-                try (ObjectInput ois = new ObjectInputStream(gs)) {
-                    comp = (Composition) ois.readObject();
-
-                    // file is transient in Composition because the pxc file can be renamed
-                    comp.setFile(file);
-                }
-            }
-        } catch (IOException | ClassNotFoundException e) {
-            Messages.showException(e);
-        }
-
-        return comp;
     }
 
     public static void openAllImagesInDir(File dir) {

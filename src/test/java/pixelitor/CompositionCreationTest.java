@@ -21,6 +21,7 @@ import org.junit.Test;
 import pixelitor.colors.FillType;
 import pixelitor.io.OpenRaster;
 import pixelitor.io.OpenSaveManager;
+import pixelitor.io.PXCFormat;
 import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.ImageLayer;
@@ -144,7 +145,7 @@ public class CompositionCreationTest {
 
                 // write to tmp file
                 File tmp = File.createTempFile("pix_tmp", ".pxc");
-                OpenSaveManager.serializePXC(comp, tmp);
+                PXCFormat.write(comp, tmp);
 
                 // read back and test
                 testMultiLayerRead(tmp, extraChecks.get(i));

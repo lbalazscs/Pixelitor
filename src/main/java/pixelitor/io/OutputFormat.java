@@ -67,7 +67,7 @@ public enum OutputFormat {
     }, PXC {
         @Override
         public void doSaveComposition(Composition comp, File file) {
-            OpenSaveManager.serializePXC(comp, file);
+            PXCFormat.write(comp, file);
         }
     }, ORA {
         @Override

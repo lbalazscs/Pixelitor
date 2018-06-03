@@ -48,7 +48,7 @@ public class Messages {
     }
 
     public static void showFileSavedMessage(File file) {
-        String msg = "File " + file.getAbsolutePath() + " was saved.";
+        String msg = "<html><b>" + file.getAbsolutePath() + "</b> was saved.";
         showInStatusBar(msg);
     }
 

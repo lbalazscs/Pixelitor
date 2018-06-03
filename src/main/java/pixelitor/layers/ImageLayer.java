@@ -28,6 +28,7 @@ import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.history.PixelitorEdit;
+import pixelitor.io.PXCFormat;
 import pixelitor.selection.Selection;
 import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
@@ -211,13 +212,13 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
-        ImageUtils.serializeImage(out, image);
+        PXCFormat.serializeImage(out, image);
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         state = NORMAL;
         in.defaultReadObject();
-        setImage(ImageUtils.deserializeImage(in));
+        setImage(PXCFormat.deserializeImage(in));
         imageContentChanged = false;
     }
 

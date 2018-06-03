@@ -34,7 +34,7 @@ import java.awt.Shape;
 import java.awt.image.BufferedImage;
 
 /**
- * Static methods boolean-returning method that
+ * Static, boolean-returning methods that
  * can be conveniently used after the assert keyword
  */
 public class Assertions {
