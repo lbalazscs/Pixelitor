@@ -78,6 +78,7 @@ import static pixelitor.utils.test.Assertions.numOpenImagesIs;
 import static pixelitor.utils.test.Assertions.numOpenImagesIsAtLeast;
 import static pixelitor.utils.test.Assertions.thereIsNoSelection;
 import static pixelitor.utils.test.Assertions.thereIsSelection;
+import static pixelitor.utils.test.Assertions.zoomIs;
 
 public class AssertJSwingTest {
     private static boolean verbose = false;
@@ -125,7 +126,7 @@ public class AssertJSwingTest {
         if (testOneMethodSlowly) {
             test.robot.settings().delayBetweenEvents(ROBOT_DELAY_MILLIS_SLOW);
 
-            test.testSelectionToolAndMenus();
+            test.testMouseWheelZooming();
 
         } else {
             TestingMode[] testingModes = getTestingModes();
@@ -1106,15 +1107,24 @@ public class AssertJSwingTest {
     }
 
     private void testZoomCommands() {
+        ZoomLevel startingZoom = ImageComponents.getActiveIC().getZoomLevel();
+
         runMenuCommand("Zoom In");
+        assert zoomIs(startingZoom.zoomIn());
+
         runMenuCommand("Zoom Out");
+        assert zoomIs(startingZoom.zoomIn().zoomOut());
+
         runMenuCommand("Actual Pixels");
+        assert zoomIs(ZoomLevel.Z100);
+
         runMenuCommand("Fit Screen");
 
         ZoomLevel[] values = ZoomLevel.values();
         for (ZoomLevel zoomLevel : values) {
             if (!skipThis()) {
                 runMenuCommand(zoomLevel.toString());
+                assert zoomIs(zoomLevel);
             }
         }
     }
@@ -1832,14 +1842,20 @@ public class AssertJSwingTest {
 
     private void testZoomTool() {
         log(1, "testing the zoom tool");
-
         pw.toggleButton("Zoom Tool Button").click();
+
+        ZoomLevel startingZoom = ImageComponents.getActiveIC().getZoomLevel();
+
         moveTo(300, 300);
 
         click();
+        assert zoomIs(startingZoom.zoomIn());
         click();
+        assert zoomIs(startingZoom.zoomIn().zoomIn());
         altClick();
+        assert zoomIs(startingZoom.zoomIn().zoomIn().zoomOut());
         altClick();
+        assert zoomIs(startingZoom.zoomIn().zoomIn().zoomOut().zoomOut());
 
         testMouseWheelZooming();
         testControlPlusMinusZooming();
@@ -1849,8 +1865,13 @@ public class AssertJSwingTest {
     }
 
     private void testControlPlusMinusZooming() {
+        ZoomLevel startingZoom = ImageComponents.getActiveIC().getZoomLevel();
+
         pressCtrlPlus(pw, 2);
+        assert zoomIs(startingZoom.zoomIn().zoomIn());
+
         pressCtrlMinus(pw, 2);
+        assert zoomIs(startingZoom.zoomIn().zoomIn().zoomOut().zoomOut());
     }
 
     private void testZoomControlAndNavigatorZooming() {
@@ -1860,18 +1881,32 @@ public class AssertJSwingTest {
                 return s.getParent() == ZoomControl.INSTANCE;
             }
         });
+        ZoomLevel[] zoomLevels = ZoomLevel.values();
+
         slider.slideToMinimum();
+        assert zoomIs(zoomLevels[0]);
 
         findButtonByText(pw, "100%").click();
+        assert zoomIs(ZoomLevel.Z100);
+
         slider.slideToMaximum();
+        assert zoomIs(zoomLevels[zoomLevels.length - 1]);
+
         findButtonByText(pw, "Fit").click();
 
         runMenuCommand("Show Navigator...");
         DialogFixture navigatorDialog = findDialogByTitle("Navigator");
         navigatorDialog.resizeTo(new Dimension(500, 400));
 
+        ZoomLevel startingZoom = ImageComponents.getActiveIC().getZoomLevel();
+
         pressCtrlPlus(navigatorDialog, 4);
+        ZoomLevel expectedZoomIn = startingZoom.zoomIn().zoomIn().zoomIn().zoomIn();
+        assert zoomIs(expectedZoomIn);
+
         pressCtrlMinus(navigatorDialog, 2);
+        ZoomLevel expectedZoomOut = expectedZoomIn.zoomOut().zoomOut();
+        assert zoomIs(expectedZoomOut);
 
         // navigate
         Dialog realDialog = navigatorDialog.target();
@@ -1910,9 +1945,15 @@ public class AssertJSwingTest {
 
     private void testMouseWheelZooming() {
         pw.pressKey(VK_CONTROL);
+        ZoomLevel startingZoom = ImageComponents.getActiveIC().getZoomLevel();
         ImageComponent ic = ImageComponents.getActiveIC();
+
         robot.rotateMouseWheel(ic, 2);
+        assert zoomIs(startingZoom.zoomOut());
+
         robot.rotateMouseWheel(ic, -2);
+        assert zoomIs(startingZoom.zoomOut().zoomIn());
+
         pw.releaseKey(VK_CONTROL);
     }
 

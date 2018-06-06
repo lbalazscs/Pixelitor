@@ -80,6 +80,10 @@ public class SelectionTool extends Tool implements ActiveImageChangeListener {
 
         settingsPanel.addButton(SelectionActions.getTraceWithBrush());
         settingsPanel.addButton(SelectionActions.getTraceWithEraser());
+
+// TODO why doesn't this work?
+//        settingsPanel.addButton(SelectionActions.getTraceWithSmudge());
+        
         settingsPanel.addButton(SelectionActions.getCrop());
     }
 

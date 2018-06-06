@@ -935,6 +935,7 @@ public class Composition implements Serializable {
 
     public void activeLayerToCanvasSize() {
         if (!(activeLayer instanceof ImageLayer)) {
+            // TODO or maybe it should also be allowed for masks
             Messages.showNotImageLayerError();
             return;
         }

@@ -29,7 +29,6 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.layers.TextLayer;
-import pixelitor.menus.view.ZoomLevel;
 import pixelitor.menus.view.ZoomMenu;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
@@ -272,15 +271,9 @@ public class ImageComponents {
         }
     }
 
-    public static void fitActiveToScreen() {
+    public static void fitActiveTo(AutoZoom autoZoom) {
         if (activeIC != null) {
-            activeIC.zoomToFitScreen();
-        }
-    }
-
-    public static void fitActiveToActualPixels() {
-        if (activeIC != null) {
-            activeIC.setZoomAtCenter(ZoomLevel.Z100);
+            activeIC.zoomToFit(autoZoom);
         }
     }
 

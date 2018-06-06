@@ -40,7 +40,7 @@ public interface MessageHandler {
 
     void showNotImageLayerError();
 
-    void showNotImageLayerOrMaskError();
+    void showNotDrawableError();
 
     void showException(Throwable e);
 

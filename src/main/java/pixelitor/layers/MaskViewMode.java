@@ -153,7 +153,7 @@ public enum MaskViewMode {
     }
 
     // used in asserts
-    public boolean checkOnAssignment(Layer layer) {
+    public boolean canBeAssignedTo(Layer layer) {
         if (editMask || showMask) {
             return layer.hasMask();
         }

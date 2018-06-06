@@ -70,6 +70,7 @@ public final class SelectionActions {
 
     private static final Action traceWithBrush = new TraceAction("Stroke with Current Brush", Tools.BRUSH);
     private static final Action traceWithEraser = new TraceAction("Stroke with Current Eraser", Tools.ERASER);
+//    private static final Action traceWithSmudge = new TraceAction("Stroke with Current Smudge", Tools.SMUDGE);
 
     private static final Action modify = new MenuAction("Modify...") {
         @Override
@@ -144,6 +145,10 @@ public final class SelectionActions {
         return traceWithEraser;
     }
 
+//    public static Action getTraceWithSmudge() {
+//        return traceWithSmudge;
+//    }
+
     public static Action getDeselect() {
         return deselect;
     }
@@ -161,7 +166,7 @@ public final class SelectionActions {
     }
 
     /**
-     * Strokes a selection with the current brush or eraser
+     * Strokes a selection with an {@link AbstractBrushTool}
      */
     private static class TraceAction extends MenuAction {
         private final AbstractBrushTool brushTool;
@@ -173,12 +178,12 @@ public final class SelectionActions {
 
         @Override
         public void onClick() {
-            ImageComponents.onActiveComp(this::traceComp);
+            ImageComponents.onActiveComp(this::trace);
         }
 
-        private void traceComp(Composition comp) {
+        private void trace(Composition comp) {
             if (!comp.activeIsDrawable()) {
-                Messages.showNotImageLayerError();
+                Messages.showNotDrawableError();
                 return;
             }
 

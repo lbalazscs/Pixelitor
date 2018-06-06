@@ -83,23 +83,27 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
 
     CropTool() {
         super('c', "Crop", "crop_tool_icon.png",
-                "<b>drag</b> to define the crop area. Hold <b>SPACE</b> down to move the entire region. <b>Shift-drag</b> the handles to keep the aspect ratio.",
+                "<b>drag</b> to start, hold down <b>SPACE</b> to move the entire region. After the handles appear: <b>Shift-drag</b> the handles to keep the aspect ratio. <b>Double-click</b> to crop, or press <b>Esc</b> to cancel.",
                 Cursors.DEFAULT, false, true, true, ClipStrategy.CANVAS);
         spaceDragBehavior = true;
-        maskOpacity.addChangeListener(e -> {
-            float alpha = maskOpacity.getValueAsPercentage();
-            // because of a swing bug, the slider can get out of range
-            if (alpha < 0.0f) {
-                alpha = 0.0f;
-                maskOpacity.setValue(0);
-            } else if (alpha > 1.0f) {
-                alpha = 1.0f;
-                maskOpacity.setValue(100);
-            }
-            hideComposite = AlphaComposite.getInstance(SRC_OVER, alpha);
-            ImageComponents.repaintActive();
-        });
+
+        maskOpacity.addChangeListener(e -> maskOpacityChanged());
+
         ImageComponents.addActiveImageChangeListener(this);
+    }
+
+    private void maskOpacityChanged() {
+        float alpha = maskOpacity.getValueAsPercentage();
+        // because of a swing bug, the slider can get out of range
+        if (alpha < 0.0f) {
+            alpha = 0.0f;
+            maskOpacity.setValue(0);
+        } else if (alpha > 1.0f) {
+            alpha = 1.0f;
+            maskOpacity.setValue(100);
+        }
+        hideComposite = AlphaComposite.getInstance(SRC_OVER, alpha);
+        ImageComponents.repaintActive();
     }
 
     /**
@@ -123,10 +127,11 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
 
         // add crop guidelines type selector
         guidelinesSelector = new JComboBox<>(RectGuidelineType.values());
+        guidelinesSelector.setToolTipText("Composition guides");
         guidelinesSelector.setMaximumRowCount(guidelinesSelector.getItemCount());
 //        guidelinesSelector.setSelectedItem(RectGuidelineType.RULE_OF_THIRDS);
         guidelinesSelector.addActionListener(e -> ImageComponents.repaintActive());
-        settingsPanel.addWithLabel("Guidelines:", guidelinesSelector);
+        settingsPanel.addWithLabel("Guides:", guidelinesSelector);
 
         settingsPanel.addSeparator();
 

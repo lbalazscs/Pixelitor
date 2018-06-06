@@ -96,7 +96,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         this.canvas = comp.getCanvas();
         comp.setIC(this);
 
-        ZoomLevel fitZoom = Desktop.calcFitScreenZoom(canvas.getWidth(), canvas.getHeight(), false);
+        ZoomLevel fitZoom = AutoZoom.SCREEN.calcZoom(canvas, false);
         setZoom(fitZoom, true, null);
 
         layersPanel = new LayersPanel();
@@ -446,7 +446,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         // it is important not to call this directly,
         // it should be a part of a mask activation
         assert Assertions.callingClassIs("MaskViewMode");
-        assert maskViewMode.checkOnAssignment(comp.getActiveLayer());
+        assert maskViewMode.canBeAssignedTo(comp.getActiveLayer());
 
         MaskViewMode oldMode = this.maskViewMode;
         this.maskViewMode = maskViewMode;
@@ -471,12 +471,9 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         return canvas;
     }
 
-    public void zoomToFitScreen() {
-        BufferedImage image = comp.getCompositeImage();
-        int width = image.getWidth();
-        int height = image.getHeight();
-        ZoomLevel fitZoom = Desktop.calcFitScreenZoom(width, height, true);
-        setZoom(fitZoom, false, null);
+    public void zoomToFit(AutoZoom autoZoom) {
+        ZoomLevel zoomLevel = autoZoom.calcZoom(canvas, true);
+        setZoom(zoomLevel, true, null);
     }
 
     /**
@@ -485,7 +482,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     public void setZoom(ZoomLevel newZoom, boolean forceSettingSize, Point mousePos) {
         ZoomLevel oldZoom = zoomLevel;
         if (oldZoom == newZoom && !forceSettingSize) {
-            // forceSettingSize is set at initial creation and at F5 reload
+            // if forceSettingSize is true, we continue
+            // in order to set the frame size
             return;
         }
 
@@ -497,7 +495,9 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         Rectangle areaThatShouldBeVisible = null;
         if (frame != null) {
             updateTitle();
-            frame.setSize(-1, -1, canvas.getZoomedWidth(), canvas.getZoomedHeight());
+            int newFrameWidth = canvas.getZoomedWidth();
+            int newFrameHeight = canvas.getZoomedHeight();
+            frame.setSize(-1, -1, newFrameWidth, newFrameHeight);
 
             Rectangle visiblePart = getVisiblePart();
 

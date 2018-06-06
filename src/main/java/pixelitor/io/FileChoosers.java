@@ -216,7 +216,7 @@ public class FileChoosers {
     }
 
     public static void setOnlyOneOpenExtension(FileFilter filter) {
-        setupFilterToOnlyOneFormat(saveChooser, filter);
+        setupFilterToOnlyOneFormat(openChooser, filter);
     }
 
     private static void addDefaultFilters(JFileChooser chooser) {
@@ -258,5 +258,4 @@ public class FileChoosers {
             setDefaultSaveExtensions();
         }
     }
-
 }

@@ -52,7 +52,7 @@ public class TestMessageHandler implements MessageHandler {
     }
 
     @Override
-    public void showNotImageLayerOrMaskError() {
+    public void showNotDrawableError() {
         throw new AssertionError("not image layer or mask");
     }
 

@@ -137,7 +137,7 @@ public class Dialogs {
         }
     }
 
-    public static void showNotImageLayerOrMaskDialog() {
+    public static void showNotDrawableDialog() {
         if (!RandomGUITest.isRunning()) {
             showErrorDialog("Not an image layer or mask", "The active layer is not an image layer or mask.");
         }

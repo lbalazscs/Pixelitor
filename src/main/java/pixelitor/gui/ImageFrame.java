@@ -111,9 +111,16 @@ public class ImageFrame extends JInternalFrame implements InternalFrameListener 
 
         if (width > maxWidth) {
             width = maxWidth;
+
+            height += 15; // correction for the horizontal scrollbar
         }
         if (height > maxHeight) {
             height = maxHeight;
+
+            width += 15; // correction for the vertical scrollbar
+            if (width > maxWidth) { // check again
+                width = maxWidth;
+            }
         }
 
         setSize(width + NIMBUS_HORIZONTAL_ADJUSTMENT, height + NIMBUS_VERTICAL_ADJUSTMENT);

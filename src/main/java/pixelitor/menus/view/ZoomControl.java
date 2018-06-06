@@ -26,15 +26,14 @@ import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 
-import static pixelitor.tools.AutoZoomActions.ACTUAL_PIXELS_ACTION;
-import static pixelitor.tools.AutoZoomActions.ACTUAL_PIXELS_TOOLTIP;
-import static pixelitor.tools.AutoZoomActions.FIT_SCREEN_ACTION;
-import static pixelitor.tools.AutoZoomActions.FIT_SCREEN_TOOLTIP;
+import static pixelitor.gui.AutoZoom.ACTUAL_PIXELS_ACTION;
+import static pixelitor.gui.AutoZoom.FIT_SCREEN_ACTION;
 
 /**
  * The zoom widget in the status bar
  */
 public class ZoomControl extends JPanel implements ActiveImageChangeListener {
+
     public static final ZoomControl INSTANCE = new ZoomControl();
 
     private static final int PREFERRED_HEIGHT = 17;
@@ -79,8 +78,8 @@ public class ZoomControl extends JPanel implements ActiveImageChangeListener {
         add(zoomDisplay);
 
         Dimension buttonSize = new Dimension(60, PREFERRED_HEIGHT);
-        fitButton = addZoomButton(buttonSize, "Fit", FIT_SCREEN_ACTION, FIT_SCREEN_TOOLTIP);
-        actualPixelsButton = addZoomButton(buttonSize, "100%", ACTUAL_PIXELS_ACTION, ACTUAL_PIXELS_TOOLTIP);
+        fitButton = addZoomButton(buttonSize, "Fit", FIT_SCREEN_ACTION, ZoomMenu.FIT_SCREEN_TOOLTIP);
+        actualPixelsButton = addZoomButton(buttonSize, "100%", ACTUAL_PIXELS_ACTION, ZoomMenu.ACTUAL_PIXELS_TOOLTIP);
 
         setLookIfNoImage();
         ImageComponents.addActiveImageChangeListener(this);

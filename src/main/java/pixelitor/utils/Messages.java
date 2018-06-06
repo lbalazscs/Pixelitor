@@ -60,6 +60,10 @@ public class Messages {
         msgHandler.showNotImageLayerError();
     }
 
+    public static void showNotDrawableError() {
+        msgHandler.showNotDrawableError();
+    }
+
     public static MessageHandler getMessageHandler() {
         return msgHandler;
     }

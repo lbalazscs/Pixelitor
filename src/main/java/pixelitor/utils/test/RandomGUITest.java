@@ -38,6 +38,7 @@ import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ParamSetState;
 import pixelitor.filters.painters.TextSettings;
+import pixelitor.gui.AutoZoom;
 import pixelitor.gui.Desktop;
 import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.ImageComponent;
@@ -492,13 +493,20 @@ public class RandomGUITest {
         }
     }
 
-    private static void randomFitToScreen() {
-        if (Math.random() > 0.1) {
-            log("fitActiveToScreen");
-            ImageComponents.fitActiveToScreen();
+    private static void randomFitTo() {
+        double r = Math.random();
+        if (r > 0.75) {
+            log("fitActiveTo SCREEN");
+            ImageComponents.fitActiveTo(AutoZoom.SCREEN);
+        } else if (r > 0.5) {
+            log("fitActiveTo WIDTH");
+            ImageComponents.fitActiveTo(AutoZoom.WIDTH);
+        } else if (r > 0.25) {
+            log("fitActiveTo HEIGHT");
+            ImageComponents.fitActiveTo(AutoZoom.HEIGHT);
         } else {
             log("fitActiveToActualPixels");
-            ImageComponents.fitActiveToActualPixels();
+            ImageComponents.fitActiveTo(AutoZoom.ACTUAL);
         }
     }
 
@@ -1025,7 +1033,7 @@ public class RandomGUITest {
         weightedCaller.registerCallback(1, RandomGUITest::randomColors);
         weightedCaller.registerCallback(5, RandomGUITest::randomFilter);
         weightedCaller.registerCallback(25, RandomGUITest::randomTween);
-        weightedCaller.registerCallback(10, RandomGUITest::randomFitToScreen);
+        weightedCaller.registerCallback(10, RandomGUITest::randomFitTo);
         weightedCaller.registerCallback(3, () -> randomKey(r));
         weightedCaller.registerCallback(1, () -> reload(r));
         weightedCaller.registerCallback(1, RandomGUITest::randomZoom);

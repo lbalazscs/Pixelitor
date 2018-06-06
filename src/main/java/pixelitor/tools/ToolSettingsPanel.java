@@ -18,6 +18,7 @@
 package pixelitor.tools;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
+import pixelitor.gui.AutoZoom;
 import pixelitor.tools.brushes.CopyBrushType;
 import pixelitor.tools.brushes.CopyBrushTypeChangedListener;
 import pixelitor.utils.ToolSettingsLayout;
@@ -88,10 +89,9 @@ public class ToolSettingsPanel extends JPanel {
     }
 
     public void addAutoZoomButtons() {
-        JButton actualPixelsButton = new JButton(AutoZoomActions.ACTUAL_PIXELS_ACTION);
-        add(actualPixelsButton);
-
-        JButton fitScreenButton = new JButton(AutoZoomActions.FIT_SCREEN_ACTION);
-        add(fitScreenButton);
+        add(new JButton(AutoZoom.ACTUAL_PIXELS_ACTION));
+        add(new JButton(AutoZoom.FIT_SCREEN_ACTION));
+        add(new JButton(AutoZoom.FIT_WIDTH_ACTION));
+        add(new JButton(AutoZoom.FIT_HEIGHT_ACTION));
     }
 }
