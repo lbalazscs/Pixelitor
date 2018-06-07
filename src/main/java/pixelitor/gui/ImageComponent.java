@@ -693,13 +693,18 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     public void updateNavigator(boolean newICSize) {
         assert SwingUtilities.isEventDispatchThread();
         if (navigator != null) {
-            // defer the navigator stuff until all
-            // pending events have been processed
-            SwingUtilities.invokeLater(() -> {
-                if (navigator != null) { // check again for safety
-                    navigator.refreshSizeCalc(this, false, newICSize, false);
-                }
-            });
+            if (newICSize) {
+                // defer until all
+                // pending events have been processed
+                SwingUtilities.invokeLater(() -> {
+                    if (navigator != null) { // check again for safety
+                        navigator.recalculateSize(this, false, true, false);
+                    }
+                });
+            } else {
+                // call here, painting calls will be coalesced anyway
+                navigator.repaint();
+            }
         }
     }
 

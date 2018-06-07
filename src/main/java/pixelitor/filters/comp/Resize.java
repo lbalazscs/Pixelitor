@@ -27,7 +27,7 @@ import pixelitor.utils.Messages;
 
 import java.awt.geom.AffineTransform;
 
-import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
+import static pixelitor.Composition.ImageChangeActions.REPAINT;
 
 /**
  * Resizes all content layers of a composition
@@ -94,7 +94,7 @@ public class Resize implements CompAction {
         // changed or if it was resized to a very small size
         comp.updateAllIconImages();
 
-        comp.imageChanged(INVALIDATE_CACHE, true);
+        comp.imageChanged(REPAINT, true);
 
         AppLogic.activeCompSizeChanged(comp);
 

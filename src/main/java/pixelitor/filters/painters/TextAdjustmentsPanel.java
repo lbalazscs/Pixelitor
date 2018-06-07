@@ -26,6 +26,7 @@ import pixelitor.filters.gui.ColorParamGUI;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.layers.Drawable;
@@ -35,7 +36,6 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.Color;
-import java.awt.Dialog;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
@@ -262,8 +262,8 @@ public class TextAdjustmentsPanel extends FilterGUI implements ParamAdjustmentLi
 
     private void onAdvancedSettingsClick() {
         if (advancedSettingsDialog == null) {
-            Dialog parentDialog = (Dialog) SwingUtilities.getWindowAncestor(this);
-            advancedSettingsDialog = new AdvancedTextSettingsDialog(parentDialog, this, map);
+            JDialog owner = GUIUtils.getDialogAncestor(this);
+            advancedSettingsDialog = new AdvancedTextSettingsDialog(owner, this, map);
         }
         advancedSettingsDialog.setVisible(true);
     }

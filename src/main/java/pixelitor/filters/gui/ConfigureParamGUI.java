@@ -17,6 +17,8 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.gui.utils.GUIUtils;
+
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.util.function.Function;
@@ -41,7 +43,7 @@ public class ConfigureParamGUI extends JPanel implements ParamGUI {
     }
 
     private void createAndShowDialog(Function<JDialog, JDialog> dialogFactory) {
-        JDialog owner = (JDialog) SwingUtilities.getWindowAncestor(configureButton);
+        JDialog owner = GUIUtils.getDialogAncestor(configureButton);
         JDialog dialog = dialogFactory.apply(owner);
         dialog.setVisible(true);
     }

@@ -29,6 +29,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 
@@ -54,6 +55,8 @@ public class DialogBuilder {
     private Runnable okAction;
     private Runnable cancelAction;
     private Predicate<JDialog> validator;
+
+    private Supplier<JDialog> dialogFactory;
 
     public DialogBuilder() {
     }
@@ -131,20 +134,33 @@ public class DialogBuilder {
         return this;
     }
 
+    public DialogBuilder dialogFactory(Supplier<JDialog> dialogFactory) {
+        this.dialogFactory = dialogFactory;
+        return this;
+    }
+
     public JDialog show() {
         assert form != null : "no form";
 
         setupDefaults();
 
         JDialog d;
-        if (frameParent != null) {
-            d = new JDialog(frameParent, title, modal);
-        } else if (dialogParent != null) {
-            d = new JDialog(dialogParent, title, modal);
+        if (dialogFactory != null) {
+            d = dialogFactory.get();
         } else {
-            PixelitorWindow pw = PixelitorWindow.getInstance();
-            d = new JDialog(pw, title, modal);
+            if (frameParent != null) {
+                d = new JDialog(frameParent);
+            } else if (dialogParent != null) {
+                d = new JDialog(dialogParent);
+            } else {
+                PixelitorWindow pw = PixelitorWindow.getInstance();
+                d = new JDialog(pw);
+            }
         }
+
+        d.setTitle(title);
+        d.setModal(modal);
+
         d.setLayout(new BorderLayout());
         if (addScrollBars) {
             JScrollPane scrollPane = new JScrollPane(form, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);

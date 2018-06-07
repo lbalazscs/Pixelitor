@@ -144,4 +144,8 @@ public final class GUIUtils {
         }
         return c;
     }
+
+    public static JDialog getDialogAncestor(Component c) {
+        return (JDialog) SwingUtilities.getWindowAncestor(c);
+    }
 }
