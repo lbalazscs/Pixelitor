@@ -19,6 +19,7 @@ package pixelitor.filters.painters;
 
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
+import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
 import pixelitor.Composition;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ColorParam;
@@ -31,6 +32,7 @@ import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.TextLayer;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -43,10 +45,11 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.font.TextAttribute;
+import java.awt.geom.Point2D;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.awt.Color.BLACK;
+import static java.awt.Color.WHITE;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
@@ -67,8 +70,8 @@ public class TextAdjustmentsPanel extends FilterGUI implements ParamAdjustmentLi
     private ColorParam color;
 
     private EffectsPanel effectsPanel;
-    private JComboBox<VerticalAlignment> verticalAlignmentCombo;
-    private JComboBox<HorizontalAlignment> horizontalAlignmentCombo;
+    private JComboBox<VerticalAlignment> vAlignmentCB;
+    private JComboBox<HorizontalAlignment> hAlignmentCB;
 
     private JCheckBox watermarkCB;
 
@@ -137,7 +140,7 @@ public class TextAdjustmentsPanel extends FilterGUI implements ParamAdjustmentLi
         gbh.addLastControl(textTF);
 
         gbh.addLabel("Color:", 0, 1);
-        Color defaultColor = settings == null ? BLACK : settings.getColor();
+        Color defaultColor = settings == null ? WHITE : settings.getColor();
         color = new ColorParam("Color", defaultColor, USER_ONLY_OPACITY);
         ColorParamGUI colorParamGUI = new ColorParamGUI(color);
         gbh.addControl(colorParamGUI);
@@ -153,20 +156,20 @@ public class TextAdjustmentsPanel extends FilterGUI implements ParamAdjustmentLi
         rotationParam.setAdjustmentListener(this);
         gbh.addControl(rotationParam.createGUI());
 
-        verticalAlignmentCombo = new JComboBox(VerticalAlignment.values());
-        horizontalAlignmentCombo = new JComboBox(HorizontalAlignment.values());
+        vAlignmentCB = new JComboBox(VerticalAlignment.values());
+        hAlignmentCB = new JComboBox(HorizontalAlignment.values());
         if (settings != null) {
-            verticalAlignmentCombo.setSelectedItem(settings.getVerticalAlignment());
-            horizontalAlignmentCombo.setSelectedItem(settings.getHorizontalAlignment());
+            vAlignmentCB.setSelectedItem(settings.getVerticalAlignment());
+            hAlignmentCB.setSelectedItem(settings.getHorizontalAlignment());
         }
 
         gbh.addLabel("Horizontal Alignment:", 0, 2);
-        horizontalAlignmentCombo.addActionListener(this);
-        gbh.addControl(horizontalAlignmentCombo);
+        hAlignmentCB.addActionListener(this);
+        gbh.addControl(hAlignmentCB);
 
         gbh.addLabel("Vertical Alignment:", 0, 3);
-        verticalAlignmentCombo.addActionListener(this);
-        gbh.addControl(verticalAlignmentCombo);
+        vAlignmentCB.addActionListener(this);
+        gbh.addControl(vAlignmentCB);
 
         return textPanel;
     }
@@ -246,10 +249,10 @@ public class TextAdjustmentsPanel extends FilterGUI implements ParamAdjustmentLi
         }
 
         gbh.addLabel("Bold:", 0, 2);
-        boldCB = createAndAddEmphasisCheckBox("boldCB", gbh, defaultBold);
+        boldCB = createCheckBox("boldCB", gbh, defaultBold);
 
         gbh.addLabel("   Italic:", 2, 2);
-        italicCB = createAndAddEmphasisCheckBox("italicCB", gbh, defaultItalic);
+        italicCB = createCheckBox("italicCB", gbh, defaultItalic);
 
         JButton showAdvancedSettingsButton = new JButton("Advanced...");
         showAdvancedSettingsButton.addActionListener(e -> onAdvancedSettingsClick());
@@ -268,7 +271,7 @@ public class TextAdjustmentsPanel extends FilterGUI implements ParamAdjustmentLi
         advancedSettingsDialog.setVisible(true);
     }
 
-    private JCheckBox createAndAddEmphasisCheckBox(String name, GridBagHelper gbh, boolean selected) {
+    private JCheckBox createCheckBox(String name, GridBagHelper gbh, boolean selected) {
         JCheckBox cb = new JCheckBox("", selected);
         cb.setName(name);
         cb.addActionListener(this);
@@ -328,18 +331,31 @@ public class TextAdjustmentsPanel extends FilterGUI implements ParamAdjustmentLi
         lastText = text;
 
         AreaEffects areaEffects = null;
+        double textRotationAngle = rotationParam.getValueInRadians();
         if (effectsPanel != null) {
             effectsPanel.updateEffectsFromGUI();
             areaEffects = effectsPanel.getEffects();
+
+            // adjust the drop shadow angle so that it is
+            // in the right direction even if the text is rotated
+            ShadowPathEffect dropShadowEffect = areaEffects.getDropShadowEffect();
+            if (dropShadowEffect != null && textRotationAngle != 0) {
+                Point2D offset = dropShadowEffect.getOffset();
+                double distance = offset.distance(0, 0);
+                double angle = Math.atan2(offset.getY(), offset.getX());
+                angle -= textRotationAngle;
+                Point2D adjustedOffset = Utils.calculateOffset(distance, angle);
+                dropShadowEffect.setOffset(adjustedOffset);
+            }
         }
 
         Font selectedFont = getSelectedFont();
 
         TextSettings settings = new TextSettings(
                 text, selectedFont, color.getColor(), areaEffects,
-                (HorizontalAlignment) horizontalAlignmentCombo.getSelectedItem(),
-                (VerticalAlignment) verticalAlignmentCombo.getSelectedItem(),
-                watermarkCB.isSelected(), rotationParam.getValueInRadians());
+                (HorizontalAlignment) hAlignmentCB.getSelectedItem(),
+                (VerticalAlignment) vAlignmentCB.getSelectedItem(),
+                watermarkCB.isSelected(), textRotationAngle);
 
         if (textFilter != null) { // filter mode
             textFilter.setSettings(settings);

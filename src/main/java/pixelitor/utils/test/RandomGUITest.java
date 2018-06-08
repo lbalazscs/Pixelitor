@@ -496,8 +496,8 @@ public class RandomGUITest {
     private static void randomFitTo() {
         double r = Math.random();
         if (r > 0.75) {
-            log("fitActiveTo SCREEN");
-            ImageComponents.fitActiveTo(AutoZoom.SCREEN);
+            log("fitActiveTo SPACE");
+            ImageComponents.fitActiveTo(AutoZoom.SPACE);
         } else if (r > 0.5) {
             log("fitActiveTo WIDTH");
             ImageComponents.fitActiveTo(AutoZoom.WIDTH);

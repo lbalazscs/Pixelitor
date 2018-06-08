@@ -96,7 +96,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         this.canvas = comp.getCanvas();
         comp.setIC(this);
 
-        ZoomLevel fitZoom = AutoZoom.SCREEN.calcZoom(canvas, false);
+        ZoomLevel fitZoom = AutoZoom.SPACE.calcZoom(canvas, false);
         setZoom(fitZoom, true, null);
 
         layersPanel = new LayersPanel();

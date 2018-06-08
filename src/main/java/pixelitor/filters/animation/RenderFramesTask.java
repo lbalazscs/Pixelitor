@@ -49,14 +49,14 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
     protected Void doInBackground() {
         try {
             renderFrames();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             SwingUtilities.invokeLater(() -> Messages.showException(e));
         }
 
         return null;
     }
 
-    private void renderFrames() {
+    private void renderFrames() throws InvocationTargetException, InterruptedException {
         int numFrames = animation.getNumFrames();
         ParametrizedFilter filter = animation.getFilter();
 
@@ -65,7 +65,7 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
 
         PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
 
-        dr.tweenCalculatingStarted();
+        SwingUtilities.invokeAndWait(dr::tweenCalculatingStarted);
 
         int numTotalFrames = numFrames;
         boolean pingPong = animation.isPingPong() && numFrames > 2;
@@ -95,9 +95,11 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
             }
 
             try {
+                // first render the frame...
                 BufferedImage image = renderFrame(filter, time, busyCursorParent);
 
-                Runnable r = () -> {
+                // ...then write the file
+                SwingUtilities.invokeAndWait(() -> {
                     try {
                         // TODO ideally while writing out the frame,
                         // the rendering of the next frame should be
@@ -106,9 +108,7 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
                     } catch (IOException e) {
                         Messages.showException(e);
                     }
-                };
-                SwingUtilities.invokeAndWait(r);
-
+                });
             } catch (Exception e) {
                 canceled = true;
                 Messages.showException(e);
@@ -117,13 +117,16 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         }
 
         setProgress(100);
-        dr.tweenCalculatingEnded();
 
-        if (canceled) {
-            animationWriter.cancel();
-        } else {
-            animationWriter.finish();
-        }
+        boolean finalCanceled = canceled;
+        SwingUtilities.invokeLater(() -> {
+            dr.tweenCalculatingEnded();
+            if (finalCanceled) {
+                animationWriter.cancel();
+            } else {
+                animationWriter.finish();
+            }
+        });
     }
 
     private BufferedImage renderFrame(final ParametrizedFilter filter, double time, final PixelitorWindow busyCursorParent) throws InvocationTargetException, InterruptedException {

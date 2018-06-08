@@ -31,6 +31,8 @@ public class GUIMessageHandler implements MessageHandler {
 
     @Override
     public void showInStatusBar(String msg) {
+        assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
+
         StatusBar.INSTANCE.setMessage(msg);
     }
 

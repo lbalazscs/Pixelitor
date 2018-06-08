@@ -133,7 +133,7 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
 
         exactZoom = zoom; // set the the exact zoom only temporarily
 
-        // force pack to use the newest preferred
+        // force pack() to use the current preferred
         // size instead of some cached value
         invalidate();
 
@@ -187,7 +187,7 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
                 .noOKButton()
                 .noCancelButton()
                 .noGlobalKeyChange()
-                .okAction(navigator::dispose)
+                .cancelAction(navigator::dispose) // when it is closed with X
 //                .dialogFactory(dialogFactory)
                 .show();
     }
@@ -215,9 +215,11 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
         }
 
         if (newIC) {
-            reCalcScaling(ic, DEFAULT_NAVIGATOR_SIZE, DEFAULT_NAVIGATOR_SIZE);
+            recalculateScaling(ic, DEFAULT_NAVIGATOR_SIZE, DEFAULT_NAVIGATOR_SIZE);
         } else if (icSizeChanged || navigatorResized) {
-            reCalcScaling(ic, getWidth(), getHeight());
+            recalculateScaling(ic, getWidth(), getHeight());
+        } else {
+            throw new IllegalStateException();
         }
 
         preferredWidth = thumbWidth;
@@ -337,12 +339,12 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
         if (dragStartPoint != null) {
             assert dragging;
 
-            Point eventPoint = e.getPoint();
-            int relX = eventPoint.x - dragStartPoint.x;
-            int relY = eventPoint.y - dragStartPoint.y;
+            Point mouseNow = e.getPoint();
+            int dx = mouseNow.x - dragStartPoint.x;
+            int dy = mouseNow.y - dragStartPoint.y;
 
-            int newBoxX = origRectLoc.x + relX;
-            int newBoxY = origRectLoc.y + relY;
+            int newBoxX = origRectLoc.x + dx;
+            int newBoxY = origRectLoc.y + dy;
 
             // make sure that the view box does not leave the thumb
             if (newBoxX < 0) {
@@ -370,7 +372,7 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
         }
     }
 
-    private void reCalcScaling(ImageComponent ic, int width, int height) {
+    private void recalculateScaling(ImageComponent ic, int width, int height) {
         Canvas canvas = ic.getCanvas();
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
@@ -434,7 +436,8 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
         recalculateSize(newIC, true, true, false);
     }
 
-    // called when this navigator instance is no longer needed
+    // called when the dialog is closed - then this
+    // navigator instance is no longer needed
     private void dispose() {
         ImageComponents.removeActiveImageChangeListener(this);
     }

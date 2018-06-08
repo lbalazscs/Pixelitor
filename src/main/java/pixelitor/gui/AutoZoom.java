@@ -29,7 +29,7 @@ import java.awt.event.ActionEvent;
  * Automatically calculated zoom levels
  */
 public enum AutoZoom {
-    SCREEN("Fit Screen", ZoomMenu.FIT_SCREEN_TOOLTIP) {
+    SPACE("Fit Space", ZoomMenu.FIT_SPACE_TOOLTIP) {
         @Override
         public double calcImageToDesktopRatio(double hor, double ver) {
             return Math.max(hor, ver);
@@ -54,7 +54,7 @@ public enum AutoZoom {
     public static final Action ACTUAL_PIXELS_ACTION = ACTUAL.asAction();
     public static final Action FIT_HEIGHT_ACTION = HEIGHT.asAction();
     public static final Action FIT_WIDTH_ACTION = WIDTH.asAction();
-    public static final Action FIT_SCREEN_ACTION = SCREEN.asAction();
+    public static final Action FIT_SPACE_ACTION = SPACE.asAction();
 
     private final String guiName;
     private final String toolTip;
@@ -77,7 +77,7 @@ public enum AutoZoom {
         return action;
     }
 
-    public ZoomLevel calcZoom(Canvas canvas, boolean alsoZoomInToFitScreen) {
+    public ZoomLevel calcZoom(Canvas canvas, boolean zoomInToFitSpace) {
         if (this == ACTUAL) {
             return ZoomLevel.Z100;
         }
@@ -110,15 +110,15 @@ public enum AutoZoom {
                 // found one that is too much zoomed in
                 return lastOK;
             }
-            if (!alsoZoomInToFitScreen) { // we don't want to zoom in more than 100%
+            if (!zoomInToFitSpace) { // we don't want to zoom in more than 100%
                 if (lastOK == ZoomLevel.Z100) {
                     return lastOK;
                 }
             }
             lastOK = level;
         }
-        // if we get here, it means that the image is so small that even at maximal zoom
-        // it fits the screen, set it then to the maximal zoom
+        // if we get here, the image is so small that even at maximal zoom
+        // it fits the available space: set it then to the maximal zoom
         return lastOK;
     }
 }

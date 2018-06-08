@@ -381,12 +381,14 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     @Override
     public void tweenCalculatingStarted() {
+        assert SwingUtilities.isEventDispatchThread();
         assert state == NORMAL;
         startPreviewing();
     }
 
     @Override
     public void tweenCalculatingEnded() {
+        assert SwingUtilities.isEventDispatchThread();
         assert state == PREVIEW;
         stopPreviewing();
     }

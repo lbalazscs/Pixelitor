@@ -52,6 +52,12 @@ public class Messages {
         showInStatusBar(msg);
     }
 
+    public static void showFilesSavedMessage(int numFiles, File dir) {
+        assert dir.isDirectory();
+        String msg = numFiles + " files saved to " + dir.getAbsolutePath();
+        showInStatusBar(msg);
+    }
+
     public static void showInStatusBar(String msg) {
         msgHandler.showInStatusBar(msg);
     }

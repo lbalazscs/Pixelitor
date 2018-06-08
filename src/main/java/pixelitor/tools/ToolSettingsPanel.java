@@ -90,7 +90,7 @@ public class ToolSettingsPanel extends JPanel {
 
     public void addAutoZoomButtons() {
         add(new JButton(AutoZoom.ACTUAL_PIXELS_ACTION));
-        add(new JButton(AutoZoom.FIT_SCREEN_ACTION));
+        add(new JButton(AutoZoom.FIT_SPACE_ACTION));
         add(new JButton(AutoZoom.FIT_WIDTH_ACTION));
         add(new JButton(AutoZoom.FIT_HEIGHT_ACTION));
     }

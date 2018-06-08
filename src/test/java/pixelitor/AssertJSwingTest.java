@@ -1118,7 +1118,9 @@ public class AssertJSwingTest {
         runMenuCommand("Actual Pixels");
         assert zoomIs(ZoomLevel.Z100);
 
-        runMenuCommand("Fit Screen");
+        runMenuCommand("Fit Space");
+        runMenuCommand("Fit Width");
+        runMenuCommand("Fit Height");
 
         ZoomLevel[] values = ZoomLevel.values();
         for (ZoomLevel zoomLevel : values) {
@@ -1429,6 +1431,8 @@ public class AssertJSwingTest {
 
         moveRandom();
         dragRandom();
+
+        testAutoZoomButtons();
 
         assert checkConsistency();
     }
@@ -1860,6 +1864,7 @@ public class AssertJSwingTest {
         testMouseWheelZooming();
         testControlPlusMinusZooming();
         testZoomControlAndNavigatorZooming();
+        testAutoZoomButtons();
 
         assert checkConsistency();
     }
@@ -1923,6 +1928,13 @@ public class AssertJSwingTest {
 
         navigatorDialog.close();
         findButtonByText(pw, "Fit").click();
+    }
+
+    private void testAutoZoomButtons() {
+        findButtonByText(pw, "Actual Pixels").click();
+        findButtonByText(pw, "Fit Space").click();
+        findButtonByText(pw, "Fit Width").click();
+        findButtonByText(pw, "Fit Height").click();
     }
 
     private static void pressCtrlPlus(AbstractWindowFixture window, int times) {

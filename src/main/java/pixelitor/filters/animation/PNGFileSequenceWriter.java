@@ -18,6 +18,7 @@
 package pixelitor.filters.animation;
 
 import pixelitor.io.TrackedIO;
+import pixelitor.utils.Messages;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -30,6 +31,7 @@ import java.io.IOException;
 public class PNGFileSequenceWriter implements AnimationWriter {
     private final File outputDir;
     private int fileSequenceNumber;
+    private int numWrittenImages = 0;
 
     public PNGFileSequenceWriter(File outputDir) {
         this.outputDir = outputDir;
@@ -40,14 +42,14 @@ public class PNGFileSequenceWriter implements AnimationWriter {
         String fileName = String.format("frame_%05d.png", fileSequenceNumber);
         fileSequenceNumber++;
         File outputFile = new File(outputDir, fileName);
-        //ImageIO.write(image, "PNG", outputFile);
 
         TrackedIO.write(image, "PNG", outputFile);
+        numWrittenImages++;
     }
 
     @Override
     public void finish() {
-
+        Messages.showFilesSavedMessage(numWrittenImages, outputDir);
     }
 
     @Override

@@ -37,18 +37,18 @@ public class ZoomMenu extends PMenu {
     public static final String ACTUAL_PIXELS_TOOLTIP = String.format("Set the zoom level to 100%% (%s)",
             Utils.keystrokeAsText(ACTUAL_PIXELS_KEY));
 
-    private static final KeyStroke FIT_SCREEN_KEY = KeyStroke
+    private static final KeyStroke FIT_SPACE_KEY = KeyStroke
             .getKeyStroke(KeyEvent.VK_0, MENU_SHORTCUT_KEY_MASK + InputEvent.ALT_MASK);
-    public static final String FIT_SCREEN_TOOLTIP = String
+    public static final String FIT_SPACE_TOOLTIP = String
             .format("Display the image at the largest zoom that can fit in the available space (%s)",
-                    Utils.keystrokeAsText(FIT_SCREEN_KEY));
+                    Utils.keystrokeAsText(FIT_SPACE_KEY));
 
     private static final ButtonGroup radioGroup = new ButtonGroup();
 
     private static final String ACTION_MAP_KEY_INCREASE = "increase";
     private static final String ACTION_MAP_KEY_DECREASE = "decrease";
     private static final String ACTION_MAP_KEY_ACTUAL_PIXELS = "actual pixels";
-    private static final String ACTION_MAP_KEY_FIT_SCREEN = "fit screen";
+    private static final String ACTION_MAP_KEY_FIT_SPACE = "fit space";
 
     private static final KeyStroke CTRL_PLUS = KeyStroke.getKeyStroke(KeyEvent.VK_PLUS, MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_MINUS = KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, MENU_SHORTCUT_KEY_MASK);
@@ -83,7 +83,10 @@ public class ZoomMenu extends PMenu {
 
         addActionWithKey(AutoZoom.ACTUAL_PIXELS_ACTION, ACTUAL_PIXELS_KEY);
 
-        addActionWithKey(AutoZoom.FIT_SCREEN_ACTION, FIT_SCREEN_KEY);
+        addActionWithKey(AutoZoom.FIT_SPACE_ACTION, FIT_SPACE_KEY);
+
+        addAction(AutoZoom.FIT_WIDTH_ACTION);
+        addAction(AutoZoom.FIT_HEIGHT_ACTION);
 
         addSeparator();
         setupZoomKeys(this);
@@ -114,8 +117,8 @@ public class ZoomMenu extends PMenu {
         actionMap.put(ACTION_MAP_KEY_ACTUAL_PIXELS, AutoZoom.ACTUAL_PIXELS_ACTION);
 
         // ctrl + alt + numpad 0 = fit screen
-        inputMap.put(CTRL_ALT_NUMPAD_0, ACTION_MAP_KEY_FIT_SCREEN);
-        actionMap.put(ACTION_MAP_KEY_FIT_SCREEN, AutoZoom.FIT_SCREEN_ACTION);
+        inputMap.put(CTRL_ALT_NUMPAD_0, ACTION_MAP_KEY_FIT_SPACE);
+        actionMap.put(ACTION_MAP_KEY_FIT_SPACE, AutoZoom.FIT_SPACE_ACTION);
     }
 
     /**
