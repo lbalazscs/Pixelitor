@@ -18,7 +18,7 @@ package pixelitor.filters.impl;
 
 import com.jhlabs.image.ImageMath;
 import pixelitor.filters.Magnify;
-import pixelitor.utils.BlurredEllipse;
+import pixelitor.utils.BlurredShape;
 
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
@@ -37,7 +37,8 @@ public class MagnifyFilter extends CenteredTransformFilter {
 
     private float radiusRatio;
 
-    private BlurredEllipse ellipse;
+    private BlurredShape shape;
+    private boolean invert;
 
     public MagnifyFilter(String filterName) {
         super(filterName);
@@ -65,10 +66,6 @@ public class MagnifyFilter extends CenteredTransformFilter {
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        // called twice (also in super), but there is no better solution
-        calcAbsoluteCenter(src);
-
-        ellipse = new BlurredEllipse(cx, cy, innerRadiusX, innerRadiusY, outerRadiusX, outerRadiusY);
         radiusRatio = 1 / magnification;
 
         return super.filter(src, dst);
@@ -76,8 +73,11 @@ public class MagnifyFilter extends CenteredTransformFilter {
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {
-        double outside = ellipse.isOutside(x, y);
-
+        double outside = shape.isOutside(x, y);
+        if (invert) {
+            outside = 1.0 - outside;
+        }
+        
         if (outside == 1.0) { // outside
             out[0] = x;
             out[1] = y;
@@ -99,5 +99,16 @@ public class MagnifyFilter extends CenteredTransformFilter {
         Shape inner = new Ellipse2D.Double(cx - innerRadiusX, cy - innerRadiusY, 2 * innerRadiusX, 2 * innerRadiusY);
         Shape outer = new Ellipse2D.Double(cx - outerRadiusX, cy - outerRadiusY, 2 * outerRadiusX, 2 * outerRadiusY);
         return new Shape[] {inner, outer};
+    }
+
+    // must be called after the shape arguments!
+    public void setShape(int type) {
+        shape = BlurredShape.create(type, cx, cy,
+                innerRadiusX, innerRadiusY,
+                outerRadiusX, outerRadiusY);
+    }
+
+    public void setInvert(boolean invert) {
+        this.invert = invert;
     }
 }

@@ -41,12 +41,18 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.Transparency;
+import java.awt.color.ColorSpace;
+import java.awt.color.ICC_ColorSpace;
+import java.awt.color.ICC_Profile;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
 import java.awt.image.PixelGrabber;
@@ -410,12 +416,28 @@ public class ImageUtils {
         return pixels;
     }
 
-    public static byte[] getPixelsAsByteArray(BufferedImage src) {
-        assert src.getType() == BufferedImage.TYPE_BYTE_GRAY;
+    public static byte[] getGrayPixelsAsByteArray(BufferedImage img) {
+        assert img.getType() == BufferedImage.TYPE_BYTE_GRAY;
 
-        WritableRaster raster = src.getRaster();
+        WritableRaster raster = img.getRaster();
         DataBufferByte db = (DataBufferByte) raster.getDataBuffer();
+
         return db.getData();
+    }
+
+    public static BufferedImage getGrayImageFromByteArray(byte[] pixels, int width, int height) {
+        assert pixels.length == width * height;
+
+        DataBuffer data = new DataBufferByte(pixels, 1);
+        WritableRaster raster = Raster.createInterleavedRaster(
+                data,
+                width, height, width, 1, new int[]{0}, new Point(0, 0));
+
+        ColorSpace cs = new ICC_ColorSpace(ICC_Profile.getInstance(ColorSpace.CS_GRAY));
+        ComponentColorModel cm = new ComponentColorModel(cs,
+                false, false,
+                Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
+        return new BufferedImage(cm, raster, false, null);
     }
 
     public static URL resourcePathToURL(String fileName) {
@@ -1025,5 +1047,17 @@ public class ImageUtils {
         BufferedImage img = createSysCompatibleImage(1, 1);
         img.setRGB(0, 0, ColorUtils.toPackedInt(a, r, g, b));
         return img;
+    }
+
+    public static void paintBlurredGlow(Shape shape, Graphics2D g, int numSteps, float effectWidth) {
+        float brushAlpha = 1f / numSteps;
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, brushAlpha));
+//        g.setComposite(new AddComposite(brushAlpha));
+        for (float i = 0; i < numSteps; i = i + 1f) {
+            float brushWidth = i * effectWidth / numSteps;
+            g.setStroke(new BasicStroke(brushWidth,
+                    BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g.draw(shape);
+        }
     }
 }

@@ -158,8 +158,8 @@ public class AddNoise extends ParametrizedFilter {
     }
 
     private static BufferedImage addNoiseToGray(BufferedImage src, BufferedImage dest, int opacityValue, float coverageValue, Random rand) {
-        byte[] srcPixels = ImageUtils.getPixelsAsByteArray(src);
-        byte[] destPixels = ImageUtils.getPixelsAsByteArray(dest);
+        byte[] srcPixels = ImageUtils.getGrayPixelsAsByteArray(src);
+        byte[] destPixels = ImageUtils.getGrayPixelsAsByteArray(dest);
 
         // fill the dest with random values
         rand.nextBytes(destPixels);

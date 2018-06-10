@@ -36,6 +36,7 @@ public class TilesFilter extends TransformFilter {
     private float curvatureY;
     private float shiftX;
     private float shiftY;
+    private double angle;
 
     public TilesFilter(String filterName) {
         super(filterName);
@@ -67,14 +68,39 @@ public class TilesFilter extends TransformFilter {
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {
-        float i = x - halfWidth;
-        float j = y - halfHeight;
+        double i = x - halfWidth;
+        double j = y - halfHeight;
 
-        float sampleX = (float) (i + (curvatureX * FastMath.tan(i * sizeX - shiftX/(double)sizeX)));
-        float sampleY = (float) (j + (curvatureY * FastMath.tan(j * sizeY - shiftY/(double)sizeY)));
+        double ii, jj;
+        double cos = 1.0;
+        double sin = 0.0;
+        if (angle != 0) {
+            cos = FastMath.cos(angle);
+            sin = FastMath.sin(angle);
+            ii = i * cos - j * sin;
+            jj = j * cos + i * sin;
+        } else {
+            ii = i;
+            jj = j;
+        }
 
-        out[0] = halfWidth + sampleX;
-        out[1] = halfHeight + sampleY;
+        double sampleX = ii + (curvatureX * FastMath.tan(ii * sizeX - shiftX / (double) sizeX));
+        double sampleY = jj + (curvatureY * FastMath.tan(jj * sizeY - shiftY / (double) sizeY));
+
+        // So far we have rotated both the tiles
+        // distortion and the background.
+        // Now rotate the background back.
+        double sampleXX, sampleYY;
+        if (angle != 0) {
+            sampleXX = sampleX * cos + sampleY * sin;
+            sampleYY = sampleY * cos - sampleX * sin;
+        } else {
+            sampleXX = sampleX;
+            sampleYY = sampleY;
+        }
+
+        out[0] = (float) (halfWidth + sampleXX);
+        out[1] = (float) (halfHeight + sampleYY);
     }
 
     public void setShiftX(float shiftX) {
@@ -83,5 +109,9 @@ public class TilesFilter extends TransformFilter {
 
     public void setShiftY(float shiftY) {
         this.shiftY = shiftY;
+    }
+
+    public void setAngle(double angle) {
+        this.angle = angle;
     }
 }

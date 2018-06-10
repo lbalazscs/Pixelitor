@@ -20,10 +20,9 @@ package pixelitor.utils;
 import net.jafama.FastMath;
 
 /**
- * An ellipse which is blurred in the sense that a floating point value
- * rather than a boolean describes whether a point is inside or outside it.
+ * An ellipse-shaped {@link BlurredShape}
  */
-public class BlurredEllipse {
+public class BlurredEllipse implements BlurredShape {
     private final double cx;
     private final double cy;
 
@@ -66,11 +65,7 @@ public class BlurredEllipse {
         yRadiusDifference = outerRadiusY - innerRadiusY;
     }
 
-    /**
-     * Returns 1.0 if the given coordinate is completely outside
-     * the ellipse, 0.0 if it is completely inside, and
-     * a number between 0.0 and 1.0 if it is in the blurred area
-     */
+    @Override
     public double isOutside(int x, int y) {
         double dx = x - cx;
         double dy = y - cy;

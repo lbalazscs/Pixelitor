@@ -16,6 +16,7 @@
  */
 package pixelitor.filters;
 
+import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
@@ -33,6 +34,7 @@ public class GlassTiles extends ParametrizedFilter {
     private final GroupedRangeParam size = new GroupedRangeParam("Tile Size", 5, 100, 500);
     private final GroupedRangeParam curvature = new GroupedRangeParam("Curvature", 0, 10, 20);
     private final GroupedRangeParam phase = new GroupedRangeParam("Move Tiles", 0, 0, 10, false);
+    private final AngleParam angle = new AngleParam("Rotate Tiles", 0);
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction(true);
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
@@ -45,6 +47,7 @@ public class GlassTiles extends ParametrizedFilter {
                 size.withAdjustedRange(0.5),
                 curvature,
                 phase.setLinkable(false),
+                angle,
                 edgeAction,
                 interpolation
         ));
@@ -60,6 +63,7 @@ public class GlassTiles extends ParametrizedFilter {
         filter.setSizeY(size.getValue(1));
         filter.setCurvatureX(curvature.getValue(0));
         filter.setCurvatureY(curvature.getValue(1));
+        filter.setAngle(angle.getValueInIntuitiveRadians());
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
         filter.setShiftX(phase.getValueAsPercentage(0));

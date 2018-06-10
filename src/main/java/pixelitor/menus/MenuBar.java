@@ -148,7 +148,7 @@ public class MenuBar extends JMenuBar {
     private static final KeyStroke CTRL_H = KeyStroke.getKeyStroke('H', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_I = KeyStroke.getKeyStroke('I', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_J = KeyStroke.getKeyStroke('J', MENU_SHORTCUT_KEY_MASK);
-    //    private static final KeyStroke CTRL_K = KeyStroke.getKeyStroke('K', MENU_SHORTCUT_KEY_MASK);
+    private static final KeyStroke CTRL_K = KeyStroke.getKeyStroke('K', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_L = KeyStroke.getKeyStroke('L', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_M = KeyStroke.getKeyStroke('M', MENU_SHORTCUT_KEY_MASK);
     private static final KeyStroke CTRL_N = KeyStroke.getKeyStroke('N', MENU_SHORTCUT_KEY_MASK);
@@ -1391,6 +1391,13 @@ public class MenuBar extends JMenuBar {
 
         sub.addFilter(Contours.NAME, Contours::new);
         sub.addSeparator();
+
+        sub.addFilter(BlurredShapeTester.NAME, BlurredShapeTester::new);
+
+        sub.buildFilter(XYZTest.NAME, XYZTest::new)
+                .withKey(CTRL_K)
+                .add();
+
 
         sub.addFilter(Droste.NAME, Droste::new);
         sub.addFilter(Sphere3D.NAME, Sphere3D::new);

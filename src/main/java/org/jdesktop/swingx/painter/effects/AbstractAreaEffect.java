@@ -91,6 +91,10 @@ public class AbstractAreaEffect implements AreaEffect {
             BufferedImage clipImage = getClipImage(effectBounds);
             Graphics2D g2 = clipImage.createGraphics();
 
+            // lbalazscs: moved here from getClipImage
+            // in order to avoid two createGraphics calls
+            g2.clearRect(0, 0, clipImage.getWidth(), clipImage.getHeight());
+
             try {
                 // clear the buffer
                 g2.setPaint(Color.BLACK);
@@ -152,7 +156,6 @@ public class AbstractAreaEffect implements AreaEffect {
                     effectBounds.width,
                     effectBounds.height, BufferedImage.TYPE_INT_ARGB);
         }
-        _clipImage.getGraphics().clearRect(0, 0, _clipImage.getWidth(), _clipImage.getHeight());
         return _clipImage;
     }
 

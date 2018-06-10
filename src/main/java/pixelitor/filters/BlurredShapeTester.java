@@ -19,11 +19,9 @@ package pixelitor.filters;
 
 import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.PointFilter;
-import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
@@ -31,37 +29,27 @@ import pixelitor.utils.BlurredShape;
 
 import java.awt.image.BufferedImage;
 
-import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
-
 /**
- * Flashlight filter
+ * Development filter for testing blurred shapes
  */
-public class Flashlight extends ParametrizedFilter {
-    public static final String NAME = "Flashlight";
+public class BlurredShapeTester extends ParametrizedFilter {
+    public static final String NAME = "Blurred Shape Tester";
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 1, 200, 1000, false);
     private final RangeParam softness = new RangeParam("Softness", 0, 20, 99);
     private final IntChoiceParam shape = BlurredShape.getChoices();
-    private final IntChoiceParam bg = new IntChoiceParam("Background", new Value[]{
-            new Value("Black", Impl.BG_BLACK),
-            new Value("White", Impl.BG_WHITE),
-            new Value("Transparent", Impl.BG_TRANSPARENT),
-    }, IGNORE_RANDOMIZE);
-    private final BooleanParam invert = new BooleanParam("Invert", false);
 
     private Impl filter;
 
-    public Flashlight() {
+    public BlurredShapeTester() {
         super(ShowOriginal.YES);
 
         setParamSet(new ParamSet(
                 center,
                 radius.withAdjustedRange(1.0),
                 softness,
-                shape,
-                invert,
-                bg
+                shape
         ));
     }
 
@@ -82,17 +70,12 @@ public class Flashlight extends ParametrizedFilter {
         filter.setRadius(radiusX, radiusY, softnessFactor);
 
         filter.setShape(shape.getValue());
-        filter.setBG(bg.getValue());
-        filter.setInvert(invert.isChecked());
 
         dest = filter.filter(src, dest);
 
         return dest;
     }
 
-    /**
-     * Flashlight implementation
-     */
     private static class Impl extends PointFilter {
         private double cx;
         private double cy;
@@ -105,9 +88,10 @@ public class Flashlight extends ParametrizedFilter {
         public static final int BG_WHITE = 1;
         public static final int BG_TRANSPARENT = 2;
 
-        private int bgPixel;
+        private static final int RGB_BLACK = 0xFF000000;
+        private static final int RGB_WHITE = 0xFFFFFFFF;
+
         private BlurredShape shape;
-        private boolean invert;
 
         public Impl() {
             super(NAME);
@@ -121,15 +105,12 @@ public class Flashlight extends ParametrizedFilter {
         @Override
         public int filterRGB(int x, int y, int rgb) {
             double outside = shape.isOutside(x, y);
-            if (invert) {
-                outside = 1.0 - outside;
-            }
             if (outside == 1.0) {
-                return bgPixel;
+                return RGB_BLACK;
             } else if (outside == 0.0) {
-                return rgb;
+                return RGB_WHITE;
             } else {
-                return ImageMath.mixColors((float) outside, rgb, bgPixel);
+                return ImageMath.mixColors((float) outside, RGB_WHITE, RGB_BLACK);
             }
         }
 
@@ -146,27 +127,11 @@ public class Flashlight extends ParametrizedFilter {
             this.outerRadiusY = radiusY + radiusY * softness;
         }
 
-        public void setBG(int bg) {
-            if (bg == BG_BLACK) {
-                bgPixel = 0xFF000000;
-            } else if (bg == BG_WHITE) {
-                bgPixel = 0xFFFFFFFF;
-            } else if (bg == BG_TRANSPARENT) {
-                bgPixel = 0;
-            } else {
-                throw new IllegalArgumentException("bg = " + bg);
-            }
-        }
-
         // must be called after the shape arguments!
         public void setShape(int type) {
             shape = BlurredShape.create(type, cx, cy,
                     innerRadiusX, innerRadiusY,
                     outerRadiusX, outerRadiusY);
-        }
-
-        public void setInvert(boolean invert) {
-            this.invert = invert;
         }
     }
 }

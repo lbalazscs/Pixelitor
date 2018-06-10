@@ -29,6 +29,7 @@ public class MarbleFilter extends TransformFilter {
     private float scale = 4;
     private float amount = 4;
     private float turbulence = 1;
+    private float time;
 
     public MarbleFilter(String filterName) {
         super(filterName);
@@ -114,7 +115,7 @@ public class MarbleFilter extends TransformFilter {
     }
 
     private int displacementMap(int x, int y) {
-        float noise = Noise.noise2(x / scale, y / scale); // mostly between -1 and 1 but not distributed uniformly
+        float noise = Noise.noise3(x / scale, y / scale, time); // mostly between -1 and 1 but not distributed uniformly
         return PixelUtils.clamp((int) (127 * (1 + noise)));
     }
 
@@ -135,4 +136,8 @@ public class MarbleFilter extends TransformFilter {
 	public String toString() {
 		return "Distort/Marble...";
 	}
+
+    public void setTime(float time) {
+        this.time = time;
+    }
 }
