@@ -203,7 +203,7 @@ public class Marble extends ParametrizedFilter {
             ny /= zoom;
 
             float c;
-            float f = strength * (noise2(nx * 0.1f, ny * 0.1f));
+            float f = strength * noise2(nx * 0.1f, ny * 0.1f);
             if (smoothDetails) {
                 f += detailsStrength * turbulence2B(nx * 0.2f, ny * 0.2f, octaves);
             } else {

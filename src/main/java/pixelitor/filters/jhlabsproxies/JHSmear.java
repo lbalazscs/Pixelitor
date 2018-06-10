@@ -47,6 +47,7 @@ public class JHSmear extends ParametrizedFilter {
             new Value("Crosses", SmearFilter.CROSSES),
             new Value("Circles", SmearFilter.CIRCLES),
             new Value("Squares", SmearFilter.SQUARES),
+            new Value("Diamonds", SmearFilter.DIAMONDS),
     };
     private final IntChoiceParam shape = new IntChoiceParam("Shape", shapeChoices);
 
@@ -58,8 +59,8 @@ public class JHSmear extends ParametrizedFilter {
         setParamSet(new ParamSet(
                 distance.withAdjustedRange(0.1),
                 shape.withAction(ReseedSupport.createAction()),
-                density,
                 angle,
+                density,
                 mix
         ));
 

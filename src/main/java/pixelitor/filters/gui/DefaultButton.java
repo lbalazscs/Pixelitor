@@ -42,6 +42,7 @@ public class DefaultButton extends JButton {
     public void updateIcon() {
         boolean isSetToDefault = resettable.isSetToDefault();
         setArrowIcon(isSetToDefault);
+        setEnabled(!isSetToDefault);
     }
 
     private void setArrowIcon(boolean isSetToDefault) {
@@ -50,5 +51,9 @@ public class DefaultButton extends JButton {
         } else {
             setIcon(WEST_ARROW_ICON);
         }
+    }
+
+    public boolean shouldBeEnabled() {
+        return !resettable.isSetToDefault();
     }
 }

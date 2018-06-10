@@ -198,7 +198,14 @@ public class Noise implements Function1D, Function2D, Function3D {
         v = rx1 * q[0] + ry1 * q[1];
         b = lerp(sx, u, v);
 
-        return 1.5f * lerp(sy, a, b);
+        float rv = 1.5f * lerp(sy, a, b);
+        if (rv == Float.NaN) {
+            // it seems that this is very rarely, but happening when rendering marble
+            System.out.printf("Noise::noise2: failed for x = %.5f, y = %.5f%n", x, y);
+            rv = 0.0f;
+        }
+
+        return rv;
     }
 
 

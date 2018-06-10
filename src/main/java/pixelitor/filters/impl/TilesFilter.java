@@ -36,7 +36,10 @@ public class TilesFilter extends TransformFilter {
     private float curvatureY;
     private float shiftX;
     private float shiftY;
+
     private double angle;
+    private double cos = 1.0;
+    private double sin = 0.0;
 
     public TilesFilter(String filterName) {
         super(filterName);
@@ -72,11 +75,8 @@ public class TilesFilter extends TransformFilter {
         double j = y - halfHeight;
 
         double ii, jj;
-        double cos = 1.0;
-        double sin = 0.0;
         if (angle != 0) {
-            cos = FastMath.cos(angle);
-            sin = FastMath.sin(angle);
+            // rotate the sampling coordinates around the center
             ii = i * cos - j * sin;
             jj = j * cos + i * sin;
         } else {
@@ -113,5 +113,9 @@ public class TilesFilter extends TransformFilter {
 
     public void setAngle(double angle) {
         this.angle = angle;
+        if (angle != 0) {
+            cos = FastMath.cos(angle);
+            sin = FastMath.sin(angle);
+        }
     }
 }

@@ -26,6 +26,7 @@ import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.utils.Utils;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -63,6 +64,8 @@ public class JHPlasma extends ParametrizedFilter {
     public JHPlasma() {
         super(ShowOriginal.NO);
 
+        Utils.setupEnableOtherIf(type, gradient,
+                v -> v.getValue() == GRADIENT_COLORS);
         setParamSet(new ParamSet(
                 turbulence,
                 type,

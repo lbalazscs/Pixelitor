@@ -24,6 +24,7 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
+import java.awt.FlowLayout;
 import java.awt.Rectangle;
 import java.util.Random;
 
@@ -40,6 +41,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     private int minValue;
     private int maxValue;
     private int defaultValue;
+    private FilterAction action;
 
     /**
      * This is not stored as an int in order to enable animation interpolations
@@ -86,6 +88,15 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         SliderSpinner sliderSpinner = new SliderSpinner(this, textPosition, addDefaultButton);
         paramGUI = sliderSpinner;
         setParamGUIEnabledState();
+
+        if (action != null) {
+            JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            JComponent actionGUI = action.createGUI();
+            p.add(sliderSpinner);
+            p.add(actionGUI);
+            return p;
+        }
+
         return sliderSpinner;
     }
 
@@ -344,6 +355,19 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         public double getValue() {
             return value;
         }
+    }
+
+    @Override
+    public void setAdjustmentListener(ParamAdjustmentListener listener) {
+        super.setAdjustmentListener(listener);
+        if (action != null) {
+            action.setAdjustmentListener(listener);
+        }
+    }
+
+    public RangeParam withAction(FilterAction action) {
+        this.action = action;
+        return this;
     }
 
     @Override

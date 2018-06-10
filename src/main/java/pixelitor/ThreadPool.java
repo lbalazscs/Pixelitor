@@ -59,7 +59,7 @@ public class ThreadPool {
      * computation, and updates the given
      * {@link ProgressTracker} in the meantime.
      */
-    public static void waitForFutures(Future<?>[] futures, ProgressTracker pt) {
+    public static void waitForFutures(Iterable<Future<?>> futures, ProgressTracker pt) {
         assert pt != null;
 
         for (Future<?> future : futures) {
@@ -69,6 +69,20 @@ public class ThreadPool {
                 // not completely accurate because the submit order is not
                 // necessarily the same as the finish order, but
                 // good enough in practice
+                pt.unitDone();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // same as the above, but with array argument
+    public static void waitForFutures(Future<?>[] futures, ProgressTracker pt) {
+        assert pt != null;
+
+        for (Future<?> future : futures) {
+            try {
+                future.get();
                 pt.unitDone();
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();

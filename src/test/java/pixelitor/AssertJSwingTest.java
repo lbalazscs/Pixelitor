@@ -126,8 +126,7 @@ public class AssertJSwingTest {
         if (testOneMethodSlowly) {
             test.robot.settings().delayBetweenEvents(ROBOT_DELAY_MILLIS_SLOW);
 
-            test.testMouseWheelZooming();
-
+            test.stressTestFilterWithDialog("Marble...", Randomize.YES, Reseed.YES, true);
         } else {
             TestingMode[] testingModes = getTestingModes();
             String target = getTarget();
@@ -715,18 +714,22 @@ public class AssertJSwingTest {
     }
 
     private void testResize() {
+        resize(622);
+
+        keyboardUndoRedoUndo();
+    }
+
+    private void resize(int targetWidth) {
         runMenuCommand("Resize...");
         DialogFixture resizeDialog = findDialogByTitle("Resize");
 
         JTextComponentFixture widthTF = resizeDialog.textBox("widthTF");
-        widthTF.deleteText().enterText("622");
+        widthTF.deleteText().enterText(String.valueOf(targetWidth));
 
         // no need to also set the height, because
         // constrain proportions is checked by default
 
         resizeDialog.button("ok").click();
-
-        keyboardUndoRedoUndo();
     }
 
     private void testEnlargeCanvas() {
@@ -1421,6 +1424,35 @@ public class AssertJSwingTest {
         keyboardUndoRedoUndo();
 
         assert checkConsistency();
+    }
+
+    private void stressTestFilterWithDialog(String name, Randomize randomize, Reseed reseed, boolean resizeToSmall) {
+        if (resizeToSmall) {
+            resize(200);
+            runMenuCommand("Zoom In");
+            runMenuCommand("Zoom In");
+        }
+
+        String nameWithoutDots = name.substring(0, name.length() - 3);
+        log(1, "testing the filter " + nameWithoutDots);
+
+        findMenuItemByText(name).click();
+        DialogFixture dialog = WindowFinder.findDialog("filterDialog").using(robot);
+
+        int max = 1000;
+        for (int i = 0; i < max; i++) {
+            System.out.println("AssertJSwingTest stress testing " + nameWithoutDots + ": " + (i + 1) + " of " + max);
+            if (randomize == Randomize.YES) {
+                findButtonByText(dialog, "Randomize Settings").click();
+            }
+            if (reseed == Reseed.YES) {
+                findButtonByText(dialog, "Reseed").click();
+                findButtonByText(dialog, "Reseed").click();
+                findButtonByText(dialog, "Reseed").click();
+            }
+        }
+
+        dialog.button("ok").click();
     }
 
     private void testHandTool() {
