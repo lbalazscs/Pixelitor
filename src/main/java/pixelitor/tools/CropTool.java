@@ -252,7 +252,10 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
                 if (transformSupport != null) {
                     throw new IllegalStateException();
                 }
-                Rectangle2D imageSpaceRect = userDrag.createPositiveRect();
+                Rectangle2D imageSpaceRect = userDrag.toImDrag().createPositiveRect();
+
+                // TODO all the info is in the userDrag, calculate directly,
+                // without rounding errors
                 Rectangle compSpaceRect = ic.fromImageToComponentSpace(imageSpaceRect);
 
                 transformSupport = new TransformSupport(compSpaceRect, imageSpaceRect);
@@ -269,7 +272,9 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent ic, AffineTransform unscaledTransform) {
+    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent ic,
+                               AffineTransform componentTransform,
+                               AffineTransform imageTransform) {
         if (ended) {
             return;
         }
@@ -280,6 +285,9 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
         if (cropRect == null) {
             return;
         }
+
+        // TODO done for compatibility. The whole code should be re-evaluated
+        g2.setTransform(imageTransform);
 
         // here we have the cropping rectangle in image space, therefore
         // this is a good opportunity to update the width/height info
@@ -314,11 +322,11 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
         g2.setColor(origColor);
         g2.setComposite(origComposite);
 
+        g2.setTransform(componentTransform);
         if (state == TRANSFORM) {
             // Paint the handles.
             // The zooming is temporarily reset because the transformSupport works in component space
-            AffineTransform scaledTransform = g2.getTransform();
-            g2.setTransform(unscaledTransform);
+
             // prevents drawing outside the InternalImageFrame/ImageComponent
             // it is important to call this AFTER setting the unscaled transform
             g2.setClip(componentSpaceVisiblePart);
@@ -328,8 +336,6 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
             rectGuideline.draw(ic.fromImageToComponentSpace(cropRect), guidelineType, g2);
 
             transformSupport.paintHandles(g2);
-
-            g2.setTransform(scaledTransform);
         }
 
         g2.setClip(origClip);
@@ -356,7 +362,7 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
                 lastCropRect = null;
                 break;
             case USER_DRAG:
-                lastCropRect = userDrag.createPositiveRect();
+                lastCropRect = userDrag.toImDrag().createPositiveRect();
                 break;
             case TRANSFORM:
                 lastCropRect = transformSupport.getImageSpaceRect();
@@ -379,13 +385,17 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
 
     @Override
     public void newImageOpened(Composition comp) {
-        resetStateToInitial();
+        if (Tools.currentTool == this) {
+            resetStateToInitial();
+        }
     }
 
     @Override
     public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
-        oldIC.repaint();
-        resetStateToInitial();
+        if (Tools.currentTool == this) {
+            oldIC.repaint();
+            resetStateToInitial();
+        }
     }
 
     private void resetStateToInitial() {

@@ -32,6 +32,11 @@ public abstract class AbstractFilterParam implements FilterParam {
     protected ParamGUI paramGUI;
     protected RandomizePolicy randomizePolicy;
 
+    // an extra action button to the right of the normal GUI,
+    // typically some randomization, which will be enabled
+    // only for certain values of this param
+    protected FilterAction action;
+
     AbstractFilterParam(String name, RandomizePolicy randomizePolicy) {
         this.name = Objects.requireNonNull(name);
         this.randomizePolicy = randomizePolicy;
@@ -40,6 +45,14 @@ public abstract class AbstractFilterParam implements FilterParam {
     @Override
     public void setAdjustmentListener(ParamAdjustmentListener listener) {
         this.adjustmentListener = listener;
+        if (action != null) {
+            action.setAdjustmentListener(listener);
+        }
+    }
+
+    public FilterParam withAction(FilterAction action) {
+        this.action = action;
+        return this;
     }
 
     @Override

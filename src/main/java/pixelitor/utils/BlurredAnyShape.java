@@ -18,8 +18,8 @@
 package pixelitor.utils;
 
 import com.jhlabs.image.BoxBlurFilter;
+import pixelitor.tools.ImDrag;
 import pixelitor.tools.ShapeType;
-import pixelitor.tools.UserDrag;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -92,7 +92,7 @@ public class BlurredAnyShape implements BlurredShape {
         double shapeEndX = 2 * outerRadiusX - shapeStartX;
         double shapeEndY = 2 * outerRadiusY - shapeStartY;
 
-        Shape shape = shapeType.getShape(new UserDrag(shapeStartX, shapeStartY, shapeEndX, shapeEndY));
+        Shape shape = shapeType.getShape(new ImDrag(shapeStartX, shapeStartY, shapeEndX, shapeEndY));
         g2.setClip(shape);
         g2.setColor(Color.BLACK);
         g2.fillRect(0, 0, imgWidth, imgHeight);

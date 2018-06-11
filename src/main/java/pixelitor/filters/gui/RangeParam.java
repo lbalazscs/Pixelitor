@@ -41,7 +41,6 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     private int minValue;
     private int maxValue;
     private int defaultValue;
-    private FilterAction action;
 
     /**
      * This is not stored as an int in order to enable animation interpolations
@@ -355,19 +354,6 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         public double getValue() {
             return value;
         }
-    }
-
-    @Override
-    public void setAdjustmentListener(ParamAdjustmentListener listener) {
-        super.setAdjustmentListener(listener);
-        if (action != null) {
-            action.setAdjustmentListener(listener);
-        }
-    }
-
-    public RangeParam withAction(FilterAction action) {
-        this.action = action;
-        return this;
     }
 
     @Override

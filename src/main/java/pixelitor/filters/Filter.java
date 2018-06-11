@@ -55,11 +55,12 @@ public abstract class Filter implements Serializable {
     protected abstract BufferedImage transform(BufferedImage src, BufferedImage dest);
 
     /**
-     * Should a default destination buffer be created before
-     * running the op or null can be passed and the op will take care of that
+     * Should a default destination image be created before
+     * running the filter. If this returns false,
+     * null will be passed and the filter will take care of that
      */
     @SuppressWarnings("WeakerAccess")
-    protected boolean createDefaultDestBuffer() {
+    protected boolean createDefaultDestImg() {
         return true;
     }
 
@@ -153,7 +154,7 @@ public abstract class Filter implements Serializable {
         }
 
         BufferedImage dest = null;
-        if (createDefaultDestBuffer()) {
+        if (createDefaultDestImg()) {
             dest = ImageUtils.createImageWithSameCM(src);
         }
 

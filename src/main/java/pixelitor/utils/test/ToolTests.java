@@ -22,10 +22,10 @@ import pixelitor.Composition;
 import pixelitor.NewImage;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.AbstractBrushTool;
+import pixelitor.tools.ImDrag;
 import pixelitor.tools.MoveTool;
 import pixelitor.tools.ShapeType;
 import pixelitor.tools.Tools;
-import pixelitor.tools.UserDrag;
 import pixelitor.tools.shapestool.ShapesTool;
 
 import java.awt.Point;
@@ -72,10 +72,12 @@ public class ToolTests {
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
 
-        UserDrag userDrag = new UserDrag((int) (canvasWidth * 0.25), (int) (canvasHeight * 0.25), (int) (canvasWidth * 0.75), (int) (canvasHeight * 0.75));
+        ImDrag imDrag = new ImDrag(canvasWidth * 0.25, canvasHeight * 0.25,
+                canvasWidth * 0.75, canvasHeight * 0.75);
 
-        shapesTool.setShapeType(ShapeType.HEART);
-        shapesTool.paintShapeOnIC(dr, userDrag);
+        ShapeType shapeType = ShapeType.HEART;
+        shapesTool.setShapeType(shapeType);
+        shapesTool.paintShape(dr, shapeType.getShape(imDrag));
     }
 
     private static void paintDiagonals(AbstractBrushTool eraseTool, Drawable dr, int xDistanceFormEdge, int yDistanceFormEdge) {

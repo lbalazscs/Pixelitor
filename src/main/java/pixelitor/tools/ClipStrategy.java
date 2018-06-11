@@ -36,7 +36,7 @@ public enum ClipStrategy {
      */
     INTERNAL_FRAME {
         @Override
-        public void setClip(Graphics2D g, ImageComponent ic) {
+        public void setClipFor(Graphics2D g, ImageComponent ic) {
             // We have to work in image space because g has the transforms applied.
             // canvas.getBounds() is not reliable because the internal frame might be
             // smaller so we have to use the view rectangle...
@@ -52,7 +52,7 @@ public enum ClipStrategy {
      */
     CANVAS {
         @Override
-        public void setClip(Graphics2D g, ImageComponent ic) {
+        public void setClipFor(Graphics2D g, ImageComponent ic) {
             // empty: the canvas clipping has been already set
         }
     };
@@ -60,5 +60,5 @@ public enum ClipStrategy {
     /**
      * Called when the active {@link ImageComponent} is painted
      */
-    public abstract void setClip(Graphics2D g, ImageComponent ic);
+    public abstract void setClipFor(Graphics2D g, ImageComponent ic);
 }

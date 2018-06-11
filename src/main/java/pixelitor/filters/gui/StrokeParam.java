@@ -47,6 +47,7 @@ public class StrokeParam extends AbstractFilterParam {
     private final EnumParam<ShapeType> shapeTypeParam = new EnumParam<>("", ShapeType.class);
     private final BooleanParam dashedParam = new BooleanParam("", false);
     private DefaultButton defaultButton;
+    private JComponent previewer;
 
     private final FilterParam[] allParams = {strokeWidthParam,
             strokeCapParam, strokeJoinParam,
@@ -74,6 +75,9 @@ public class StrokeParam extends AbstractFilterParam {
     public void setAdjustmentListener(ParamAdjustmentListener listener) {
         ParamAdjustmentListener decoratedListener = () -> {
             updateDefaultButtonState();
+            if (previewer != null) {
+                previewer.repaint();
+            }
             listener.paramAdjusted();
         };
 
@@ -116,8 +120,7 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     private JPanel createStrokeSettingsPanel() {
-        return new StrokeSettingsPanel(strokeWidthParam, strokeCapParam,
-                strokeJoinParam, strokeTypeParam, dashedParam, shapeTypeParam);
+        return new StrokeSettingsPanel(this);
     }
 
     public Stroke createStroke() {
@@ -191,6 +194,34 @@ public class StrokeParam extends AbstractFilterParam {
         if (defaultButton != null) {
             defaultButton.updateIcon();
         }
+    }
+
+    public RangeParam getStrokeWidthParam() {
+        return strokeWidthParam;
+    }
+
+    public EnumParam<BasicStrokeCap> getStrokeCapParam() {
+        return strokeCapParam;
+    }
+
+    public EnumParam<BasicStrokeJoin> getStrokeJoinParam() {
+        return strokeJoinParam;
+    }
+
+    public EnumParam<StrokeType> getStrokeTypeParam() {
+        return strokeTypeParam;
+    }
+
+    public EnumParam<ShapeType> getShapeTypeParam() {
+        return shapeTypeParam;
+    }
+
+    public BooleanParam getDashedParam() {
+        return dashedParam;
+    }
+
+    public void setPreviewer(JComponent previewer) {
+        this.previewer = previewer;
     }
 
     public void addDebugNodeInfo(DebugNode node) {

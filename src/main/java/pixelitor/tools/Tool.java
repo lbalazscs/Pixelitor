@@ -71,11 +71,6 @@ public abstract class Tool implements KeyboardObserver {
     protected ToolSettingsPanel settingsPanel;
     protected boolean ended = false;
 
-    // a dialog with more settings that will be closed automatically
-    // when the user switches to another tool
-    // TODO this should be refactored since the shapes tool has multiple dialogs
-    protected JDialog toolDialog;
-
     protected Tool(char activationKeyChar, String name, String iconFileName,
                    String toolMessage, Cursor cursor,
                    boolean allowOnlyDrawables, boolean handToolForwarding,
@@ -141,7 +136,7 @@ public abstract class Tool implements KeyboardObserver {
         if (mouseDown) {
             // can happen if the tool is changed while drawing, and then changed back
             MouseEvent fake = new MouseEvent((Component) e.getSource(), e.getID(), e.getWhen(), e.getModifiers(),
-                    (int)userDrag.getEndX(), (int)userDrag.getEndY(), 1, false);
+                    userDrag.getCoEndX(), userDrag.getCoEndY(), 1, false);
             dispatchMouseReleased(fake, ic); // try to clean-up
         }
         mouseDown = true;
@@ -261,21 +256,17 @@ public abstract class Tool implements KeyboardObserver {
         ended = false;
 
         GlobalKeyboardWatch.setObserver(this);
-        
         ImageComponents.setCursorForAll(cursor);
     }
 
     protected void toolEnded() {
         ended = true;
 
-        closeToolDialog();
+        closeToolDialogs();
     }
 
-    protected void closeToolDialog() {
-        if (toolDialog != null && toolDialog.isVisible()) {
-            toolDialog.setVisible(false);
-            toolDialog.dispose();
-        }
+    protected void closeToolDialogs() {
+        // empty instead of abstract for the convenience of subclasses
     }
 
     public Cursor getCursor() {
@@ -283,19 +274,19 @@ public abstract class Tool implements KeyboardObserver {
     }
 
     public void paintOverLayer(Graphics2D g, Composition comp) {
-        // empty for the convenience of subclasses
+        // empty instead of abstract for the convenience of subclasses
     }
 
     /**
-     * A possibility to paint temporarily something (like marching ants) on the ImageComponent
-     * after all the layers have been painted.
+     * A possibility to paint temporarily something on the
+     * {@link ImageComponent} after all the layers have been painted.
      */
-    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent ic, AffineTransform unscaledTransform) {
-        // empty for the convenience of subclasses
+    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent ic, AffineTransform componentTransform, AffineTransform imageTransform) {
+        // empty instead of abstract for the convenience of subclasses
     }
 
     public void dispatchMouseMoved(MouseEvent e, ImageComponent ic) {
-        // empty for the convenience of subclasses
+        // empty instead of abstract for the convenience of subclasses
     }
 
     public abstract void mousePressed(MouseEvent e, ImageComponent ic);
@@ -312,12 +303,8 @@ public abstract class Tool implements KeyboardObserver {
         Utils.randomizeGUIWidgetsOn(settingsPanel);
     }
 
-    public UserDrag getUserDrag() {
-        return userDrag;
-    }
-
-    public void setClip(Graphics2D g, ImageComponent ic) {
-        clipStrategy.setClip(g, ic);
+    public void setClipFor(Graphics2D g, ImageComponent ic) {
+        clipStrategy.setClipFor(g, ic);
     }
 
     @Override

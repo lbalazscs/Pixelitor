@@ -17,7 +17,7 @@
 
 package pixelitor.tools.gradientpaints;
 
-import pixelitor.tools.UserDrag;
+import pixelitor.tools.ImDrag;
 
 import java.awt.Color;
 import java.awt.MultipleGradientPaint.CycleMethod;
@@ -40,7 +40,7 @@ import static java.awt.MultipleGradientPaint.CycleMethod.REPEAT;
  */
 public class SpiralGradientPaint implements Paint {
     private final boolean clockwise;
-    private final UserDrag userDrag;
+    private final ImDrag imDrag;
     private final Color startColor;
     private final Color endColor;
     private final CycleMethod cycleMethod;
@@ -48,9 +48,9 @@ public class SpiralGradientPaint implements Paint {
     private static final int AA_RES = 4; // the resolution of AA supersampling
     private static final int AA_RES2 = AA_RES * AA_RES;
 
-    public SpiralGradientPaint(boolean clockwise, UserDrag userDrag, Color startColor, Color endColor, CycleMethod cycleMethod) {
+    public SpiralGradientPaint(boolean clockwise, ImDrag imDrag, Color startColor, Color endColor, CycleMethod cycleMethod) {
         this.clockwise = clockwise;
-        this.userDrag = userDrag;
+        this.imDrag = imDrag;
         this.startColor = startColor;
         this.endColor = endColor;
         this.cycleMethod = cycleMethod;
@@ -61,10 +61,10 @@ public class SpiralGradientPaint implements Paint {
         int numComponents = cm.getNumComponents();
 
         if (numComponents == 1) {
-            return new GraySpiralGradientPaintContext(clockwise, userDrag, startColor, endColor, cm, cycleMethod);
+            return new GraySpiralGradientPaintContext(clockwise, imDrag, startColor, endColor, cm, cycleMethod);
         }
 
-        return new SpiralGradientPaintContext(clockwise, userDrag, startColor, endColor, cm, cycleMethod);
+        return new SpiralGradientPaintContext(clockwise, imDrag, startColor, endColor, cm, cycleMethod);
     }
 
     @Override
@@ -76,7 +76,7 @@ public class SpiralGradientPaint implements Paint {
 
     static class SpiralGradientPaintContext implements PaintContext {
         protected final boolean clockwise;
-        protected final UserDrag userDrag;
+        protected final ImDrag imDrag;
         protected final CycleMethod cycleMethod;
 
         private final int startAlpha;
@@ -93,9 +93,9 @@ public class SpiralGradientPaint implements Paint {
         protected final double drawAngle;
         protected final double dragDistance;
 
-        private SpiralGradientPaintContext(boolean clockwise, UserDrag userDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
+        private SpiralGradientPaintContext(boolean clockwise, ImDrag imDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
             this.clockwise = clockwise;
-            this.userDrag = userDrag;
+            this.imDrag = imDrag;
             this.cycleMethod = cycleMethod;
 
             startAlpha = startColor.getAlpha();
@@ -109,9 +109,9 @@ public class SpiralGradientPaint implements Paint {
             endBlue = endColor.getBlue();
 
             this.cm = cm;
-            drawAngle = userDrag.getDrawAngle() + Math.PI;  // between 0 and 2*PI
+            drawAngle = imDrag.getDrawAngle() + Math.PI;  // between 0 and 2*PI
 
-            dragDistance = userDrag.getDistance();
+            dragDistance = imDrag.getDistance();
         }
 
         @Override
@@ -197,7 +197,7 @@ public class SpiralGradientPaint implements Paint {
         }
 
         public double getInterpolationValue(double x, double y) {
-            double renderAngle = userDrag.getAngleFromStartTo(x, y) + Math.PI;
+            double renderAngle = imDrag.getAngleFromStartTo(x, y) + Math.PI;
             double relativeAngle;
             if (clockwise) {
                 relativeAngle = renderAngle - drawAngle;
@@ -210,7 +210,7 @@ public class SpiralGradientPaint implements Paint {
             relativeAngle /= (2.0 * Math.PI);
 
 //                    double renderDist = Math.sqrt(renderRelativeX*renderRelativeX + renderRelativeY*renderRelativeY);
-            double renderDist = userDrag.getStartDistanceFrom(x, y);
+            double renderDist = imDrag.getStartDistanceFrom(x, y);
 
             double relativeDist = renderDist / dragDistance;
 
@@ -241,8 +241,8 @@ public class SpiralGradientPaint implements Paint {
         private final int startGray;
         private final int endGray;
 
-        private GraySpiralGradientPaintContext(boolean clockwise, UserDrag userDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
-            super(clockwise, userDrag, startColor, endColor, cm, cycleMethod);
+        private GraySpiralGradientPaintContext(boolean clockwise, ImDrag imDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
+            super(clockwise, imDrag, startColor, endColor, cm, cycleMethod);
 
             startGray = startColor.getRed();
             endGray = endColor.getRed();

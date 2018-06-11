@@ -34,8 +34,8 @@ import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.AbstractBrushTool;
+import pixelitor.tools.ImDrag;
 import pixelitor.tools.Tool;
-import pixelitor.tools.UserDrag;
 import pixelitor.tools.shapestool.ShapesTool;
 import pixelitor.utils.Messages;
 
@@ -157,7 +157,7 @@ public class AutoPaint {
                 abt.drawBrushStrokeProgrammatically(dr, start, end);
             } else if (tool instanceof ShapesTool) {
                 ShapesTool st = (ShapesTool) tool;
-                st.paintShapeOnIC(dr, new UserDrag(start.x, start.y, end.x, end.y));
+                st.paintDrag(dr, new ImDrag(start.x, start.y, end.x, end.y));
             } else {
                 throw new IllegalStateException("tool = " + tool.getClass().getName());
             }

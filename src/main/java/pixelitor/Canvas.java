@@ -61,18 +61,6 @@ public class Canvas implements Serializable {
         this.zoomedHeight = orig.zoomedHeight;
     }
 
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public Rectangle getBounds() {
-        return new Rectangle(0, 0, width, height);
-    }
-
     public void changeSize(int newWidth, int newHeight) {
         width = newWidth;
         height = newHeight;
@@ -89,14 +77,44 @@ public class Canvas implements Serializable {
         zoomedHeight = (int) (viewScale * height);
     }
 
+    /**
+     * Returns the bounds in image space, relative to the canvas
+     */
+    public Rectangle getBounds() {
+        return new Rectangle(0, 0, width, height);
+    }
+
+    /**
+     * Returns the width in image space
+     */
+    public int getWidth() {
+        return width;
+    }
+
+    /**
+     * Returns the height in image space
+     */
+    public int getHeight() {
+        return height;
+    }
+
+    /**
+     * Returns the size in component space
+     */
     public Dimension getZoomedSize() {
         return new Dimension(zoomedWidth, zoomedHeight);
     }
 
+    /**
+     * Returns the width in component space
+     */
     public int getZoomedWidth() {
         return zoomedWidth;
     }
 
+    /**
+     * Returns the height in component space
+     */
     public int getZoomedHeight() {
         return zoomedHeight;
     }

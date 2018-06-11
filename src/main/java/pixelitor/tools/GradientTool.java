@@ -24,7 +24,6 @@ import pixelitor.gui.ImageComponent;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.LayerMask;
 import pixelitor.layers.TmpDrawingLayer;
-import pixelitor.menus.view.ZoomLevel;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.debug.DebugNode;
 
@@ -32,7 +31,7 @@ import javax.swing.*;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics2D;
-import java.awt.MultipleGradientPaint;
+import java.awt.MultipleGradientPaint.CycleMethod;
 import java.awt.Paint;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -44,12 +43,43 @@ import static java.awt.MultipleGradientPaint.CycleMethod.REPEAT;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.Composition.ImageChangeActions.FULL;
+import static pixelitor.tools.GradientTool.GradientToolState.DRAGGING;
+import static pixelitor.tools.GradientTool.GradientToolState.INITIAL;
 
 /**
  * The gradient tool
  */
 public class GradientTool extends Tool {
-    private boolean thereWasDragging = false;
+//    private boolean thereWasDragging = false;
+
+    enum GradientToolState {
+        INITIAL {
+            @Override
+            boolean showHandles() {
+                return false;
+            }
+        },
+        DRAGGING {
+            @Override
+            boolean showHandles() {
+                return true;
+            }
+        },
+        /**
+         * After the dragging was finished,
+         * the handles are still shown for a short time
+         */
+        STILL_HANDLES {
+            @Override
+            boolean showHandles() {
+                return true;
+            }
+        };
+
+        abstract boolean showHandles();
+    }
+
+    GradientToolState state = INITIAL;
 
     private static final String NO_CYCLE_AS_STRING = "No Cycle";
     private static final String REFLECT_AS_STRING = "Reflect";
@@ -101,13 +131,13 @@ public class GradientTool extends Tool {
 
     @Override
     public void mouseDragged(MouseEvent e, ImageComponent ic) {
-        thereWasDragging = true;  // the gradient will be drawn only when the mouse is released
+        state = DRAGGING;  // the gradient will be drawn only when the mouse is released
         ic.repaint();
     }
 
     @Override
     public void mouseReleased(MouseEvent e, ImageComponent ic) {
-        if (thereWasDragging) {
+        if (state == DRAGGING) {
             Composition comp = ic.getComp();
 
             saveFullImageForUndo(comp);
@@ -116,16 +146,16 @@ public class GradientTool extends Tool {
                     getGradientColorType(),
                     getCycleType(),
                     blendingModePanel.getComposite(),
-                    userDrag,
+                    userDrag.toImDrag(),
                     invertCheckBox.isSelected()
             );
 
-            thereWasDragging = false;
+            state = INITIAL;
             comp.imageChanged(FULL);
         }
     }
 
-    private MultipleGradientPaint.CycleMethod getCycleType() {
+    private CycleMethod getCycleType() {
         return getCycleMethodFromString((String) cycleMethodSelector.getSelectedItem());
     }
 
@@ -142,12 +172,16 @@ public class GradientTool extends Tool {
         if (super.dispatchMouseClicked(e, ic)) {
             return true;
         }
-        thereWasDragging = false;
+        state = INITIAL;
         return false;
     }
 
-    public static void drawGradient(Drawable dr, GradientType gradientType, GradientColorType colorType, MultipleGradientPaint.CycleMethod cycleMethod, Composite composite, UserDrag userDrag, boolean invert) {
-        if (userDrag.isClick()) {
+    public static void drawGradient(Drawable dr, GradientType gradientType,
+                                    GradientColorType colorType,
+                                    CycleMethod cycleMethod,
+                                    Composite composite,
+                                    ImDrag imDrag, boolean invert) {
+        if (imDrag.isClick()) {
             return;
         }
 
@@ -175,7 +209,7 @@ public class GradientTool extends Tool {
         assert endColor != null;
         Color[] colors = {startColor, endColor};
 
-        Paint gradient = gradientType.getGradient(userDrag, colors, cycleMethod);
+        Paint gradient = gradientType.getGradient(imDrag, colors, cycleMethod);
 
         g.setPaint(gradient);
 
@@ -186,23 +220,13 @@ public class GradientTool extends Tool {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent ic, AffineTransform unscaledTransform) {
-        if (thereWasDragging) {
-            g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-
-            ZoomLevel zoomLevel = ic.getZoomLevel();
-
-            g2.setColor(Color.BLACK);
-            g2.setStroke(zoomLevel.getOuterStroke());
-            userDrag.drawLine(g2);
-
-            g2.setColor(Color.WHITE);
-            g2.setStroke(zoomLevel.getInnerStroke());
-            userDrag.drawLine(g2);
+    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent ic, AffineTransform componentTransform, AffineTransform imageTransform) {
+        if (state.showHandles()) {
+            userDrag.drawGradientToolHelper(g2);
         }
     }
 
-    private static MultipleGradientPaint.CycleMethod getCycleMethodFromString(String s) {
+    private static CycleMethod getCycleMethodFromString(String s) {
         switch (s) {
             case NO_CYCLE_AS_STRING:
                 return NO_CYCLE;

@@ -156,7 +156,7 @@ public class RandomGUITest {
         GlobalKeyboardWatch.addKeyboardShortCut(stopKeyStroke, "stopTest", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.err.println("RandomGUITest: \"" + stopKeyStroke + "\" pressed");
+                System.err.println("\nRandomGUITest: \"" + stopKeyStroke + "\" pressed");
                 continueRunning = false;
             }
         });
@@ -167,7 +167,8 @@ public class RandomGUITest {
         GlobalKeyboardWatch.addKeyboardShortCut(exitKeyStroke, "exit", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.err.println("RandomGUITest: exiting app because '" + exitKeyStroke.getKeyChar() + "' was pressed");
+                System.err.println("\nRandomGUITest: exiting app because '" + exitKeyStroke
+                        .getKeyChar() + "' was pressed");
                 System.exit(1);
             }
         });

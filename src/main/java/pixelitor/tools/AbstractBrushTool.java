@@ -18,12 +18,14 @@
 package pixelitor.tools;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
+import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.filters.gui.FilterSetting;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.OKDialog;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.layers.Drawable;
@@ -41,6 +43,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Shape;
 import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.PathIterator;
 import java.awt.image.BufferedImage;
@@ -74,6 +77,8 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
     private boolean firstMouseDown = true; // for the first click don't draw lines even if it is a shift-click
     private JButton brushSettingsButton;
 
+    private JDialog settingsDialog;
+
     DrawStrategy drawStrategy;
 
     AbstractBrushTool(char activationKeyChar, String name, String iconFileName, String toolMessage, Cursor cursor) {
@@ -94,7 +99,7 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
         typeSelector = new JComboBox<>(BrushType.values());
         settingsPanel.addWithLabel("Type:", typeSelector, "brushTypeSelector");
         typeSelector.addActionListener(e -> {
-            closeToolDialog();
+            closeToolDialogs();
 
             BrushType brushType = getBrushType();
             symmetryBrush.brushTypeChanged(brushType, getRadius());
@@ -127,7 +132,7 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
                 e -> {
                     BrushType brushType = getBrushType();
                     JPanel p = brushType.getConfigPanel(this);
-                    toolDialog = new OKDialog(PixelitorWindow.getInstance(), p, "Brush Settings");
+                    settingsDialog = new OKDialog(PixelitorWindow.getInstance(), p, "Brush Settings");
                 });
 
         brushSettingsButton.setEnabled(false);
@@ -136,8 +141,8 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
     @Override
     public void mousePressed(MouseEvent e, ImageComponent ic) {
         boolean withLine = withLine(e);
-        double x = userDrag.getStartX();
-        double y = userDrag.getStartY();
+        double x = userDrag.getImStartX();
+        double y = userDrag.getImStartY();
 
         newMousePoint(ic.getComp().getActiveDrawable(), x, y, withLine);
         firstMouseDown = false;
@@ -155,8 +160,8 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
 
     @Override
     public void mouseDragged(MouseEvent e, ImageComponent ic) {
-        double x = userDrag.getEndX();
-        double y = userDrag.getEndY();
+        double x = userDrag.getImEndX();
+        double y = userDrag.getImEndY();
 
         // at this point x and y are already scaled according to the zoom level
         // (unlike e.getX(), e.getY())
@@ -400,6 +405,30 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
 
     private BrushType getBrushType() {
         return (BrushType) typeSelector.getSelectedItem();
+    }
+
+    // TODO indicate the size of the brush
+    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent ic, AffineTransform componentTransform, AffineTransform imageTransform) {
+//        if(userDrag != null) {
+//            int x = userDrag.getCoEndX();
+//            int y = userDrag.getCoEndY();
+//            double radius = getRadius() * ic.getViewScale();
+//            double diameter = 2 * radius;
+//            Ellipse2D.Double shape = new Ellipse2D.Double(x - radius, y - radius, diameter, diameter);
+//            g2.setStroke(stroke3);
+//            g2.setColor(Color.BLACK);
+//            g2.draw(shape);
+//            g2.setStroke(stroke1);
+//            g2.setColor(Color.WHITE);
+//            g2.draw(shape);
+//        }
+    }
+//    private static final Stroke stroke3 = new BasicStroke(3);
+//    private static final Stroke stroke1 = new BasicStroke(1);
+
+    @Override
+    protected void closeToolDialogs() {
+        GUIUtils.closeDialog(settingsDialog);
     }
 
     @Override

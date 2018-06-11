@@ -27,7 +27,8 @@ public class FilterAction implements FilterSetting {
     private final ActionListener actionListener;
     private final Icon icon;
     private final String toolTipText;
-    private final String name;
+    private final String lookupName; // the button can be found in AssertJSwing tests by this
+    private final String text;
     private ParamAdjustmentListener adjustmentListener;
     private OrderedExecutionButton button;
 
@@ -37,24 +38,28 @@ public class FilterAction implements FilterSetting {
     // most actions should be available in the final animation settings
     private boolean ignoreFinalAnimationSettingMode = true;
 
-    public FilterAction(String name, ActionListener actionListener, String toolTipText) {
-        this(name, actionListener, null, toolTipText);
+    public FilterAction(String text, ActionListener actionListener, String toolTipText, String lookupName) {
+        this(text, actionListener, null, toolTipText, lookupName);
     }
 
-    public FilterAction(String name, ActionListener actionListener, Icon icon, String toolTipText) {
-        this.name = name;
+    public FilterAction(String text, ActionListener actionListener, Icon icon, String toolTipText, String lookupName) {
+        this.text = text;
         this.actionListener = actionListener;
         this.icon = icon;
         this.toolTipText = toolTipText;
+        this.lookupName = lookupName;
     }
 
     @Override
     public JComponent createGUI() {
-        button = new OrderedExecutionButton(getName(), actionListener, adjustmentListener, icon);
+        button = new OrderedExecutionButton(text, actionListener, adjustmentListener, icon);
         if(toolTipText != null) {
             button.setToolTipText(toolTipText);
         }
         button.setEnabled(shouldBeEnabled());
+        if (lookupName != null) {
+            button.setName(lookupName);
+        }
         return button;
     }
 
@@ -96,7 +101,7 @@ public class FilterAction implements FilterSetting {
 
     @Override
     public String getName() {
-        return name;
+        return text;
     }
 
     @Override

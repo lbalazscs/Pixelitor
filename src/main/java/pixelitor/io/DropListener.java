@@ -25,6 +25,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTargetAdapter;
+import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +39,24 @@ public class DropListener extends DropTargetAdapter {
     }
 
     @Override
+    public void dragEnter(DropTargetDragEvent dtde) {
+        handleOngoingDrag(dtde);
+    }
+
+    @Override
+    public void dragOver(DropTargetDragEvent dtde) {
+        handleOngoingDrag(dtde);
+    }
+
+    private void handleOngoingDrag(DropTargetDragEvent dtde) {
+        if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+            dtde.acceptDrag(DnDConstants.ACTION_COPY);
+        } else {
+            dtde.rejectDrag();
+        }
+    }
+
+    @Override
     public void drop(DropTargetDropEvent e) {
         Transferable transferable = e.getTransferable();
         DataFlavor[] flavors = transferable.getTransferDataFlavors();
@@ -48,7 +67,7 @@ public class DropListener extends DropTargetAdapter {
             }
             if (flavor.isFlavorJavaFileListType()) {
                 // this is where we get after dropping a file or directory
-                e.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+                e.acceptDrop(DnDConstants.ACTION_COPY);
 
                 try {
                     @SuppressWarnings("unchecked")

@@ -37,7 +37,7 @@ public class JHTurbulentDistortion extends ParametrizedFilter {
     private final RangeParam scale = new RangeParam("Size", 2, 20, 100);
     private final RangeParam amount = new RangeParam("Amount", 1, 10, 100);
     private final RangeParam turbulence = new RangeParam("Turbulence", 1, 50, 100);
-    private final RangeParam time = new RangeParam("Time", 0, 0, 500);
+    private final RangeParam time = new RangeParam("Time", 0, 0, 100);
 
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
@@ -66,7 +66,7 @@ public class JHTurbulentDistortion extends ParametrizedFilter {
         filter.setTurbulence(turbulence.getValueAsPercentage());
         filter.setScale(scale.getValueAsFloat());
         filter.setAmount(amount.getValueAsFloat());
-        filter.setTime(time.getValueAsPercentage());
+        filter.setTime(time.getValueAsPercentage() * 5);
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 

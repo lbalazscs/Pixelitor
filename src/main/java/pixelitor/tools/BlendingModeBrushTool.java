@@ -24,8 +24,8 @@ import java.awt.Composite;
 import java.awt.Cursor;
 
 /**
- * A brush tool that can have blending mode controls. The blending mode
- * is disabled when editing layer masks.
+ * An {@link AbstractBrushTool} tool that can have blending mode controls.
+ * The blending mode controls are disabled when editing layer masks.
  */
 public abstract class BlendingModeBrushTool extends AbstractBrushTool {
     private BlendingModePanel blendingModePanel;

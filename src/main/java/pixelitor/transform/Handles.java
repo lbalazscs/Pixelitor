@@ -24,7 +24,6 @@ import java.awt.BasicStroke;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.Shape;
 import java.awt.Stroke;
 import java.util.Arrays;
 import java.util.List;
@@ -48,13 +47,11 @@ public class Handles {
     private final List<Handle> handles = Arrays.asList(upperLeft, upperRight, lowerRight, lowerLeft,
             right, upper, lower, left);
 
-    private final Stroke bigStroke;
-    private final Stroke smallStroke;
+    private static final Stroke bigStroke = new BasicStroke(3);
+    private static final Stroke smallStroke = new BasicStroke(1);
 
     public Handles(Rectangle compSpaceRect) {
         updateRect(compSpaceRect);
-        bigStroke = new BasicStroke(3);
-        smallStroke = new BasicStroke(1);
     }
 
     public void paint(Graphics2D g) {
@@ -78,17 +75,7 @@ public class Handles {
 
     private void drawHandles(Graphics2D g) {
         for (Handle handle : handles) {
-            Shape handleShape = handle.getShape();
-
-            // black at the edges
-            g.setStroke(bigStroke);
-            g.setColor(BLACK);
-            g.draw(handleShape);
-
-            // white in the middle
-            g.setStroke(smallStroke);
-            g.setColor(WHITE);
-            g.fill(handleShape);
+            handle.draw(g, bigStroke, smallStroke);
         }
     }
 

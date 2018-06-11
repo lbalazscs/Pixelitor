@@ -28,7 +28,7 @@ import pixelitor.filters.gui.ShowOriginal;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
-import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
+import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 
@@ -38,7 +38,7 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 public class JHCaustics extends ParametrizedFilter {
     public static final String NAME = "Caustics";
 
-    private final ColorParam bgColor = new ColorParam("Background Color", new Color(0, 200, 175), NO_OPACITY);
+    private final ColorParam bgColor = new ColorParam("Background Color", new Color(0, 200, 175), USER_ONLY_OPACITY);
     private final RangeParam scale = new RangeParam("Zoom", 1, 100, 500);
     private final RangeParam brightness = new RangeParam("Brightness", 0, 7, 20);
     private final RangeParam focus = new RangeParam("Focus", 0, 50, 100);

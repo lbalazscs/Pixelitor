@@ -36,39 +36,39 @@ import java.awt.geom.Point2D;
 public enum GradientType {
     LINEAR("Linear") {
         @Override
-        public Paint getGradient(UserDrag userDrag, Color[] colors, CycleMethod cycleMethod) {
-            Point2D.Double start = userDrag.getStartPoint();
-            Point2D.Double end = userDrag.getEndPoint();
+        public Paint getGradient(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod) {
+            Point2D.Double start = imDrag.getStartPoint();
+            Point2D.Double end = imDrag.getEndPoint();
 
             return new LinearGradientPaint(start, end, ImageUtils.FRACTIONS_2_COLOR_UNIFORM, colors, cycleMethod, colorSpaceType, gradientTransform);
         }
     }, RADIAL("Radial") {
         @Override
-        public Paint getGradient(UserDrag userDrag, Color[] colors, CycleMethod cycleMethod) {
-            float radius = (float) userDrag.getDistance();
-            Point2D.Double center = userDrag.getStartPoint();
+        public Paint getGradient(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod) {
+            float radius = (float) imDrag.getDistance();
+            Point2D.Double center = imDrag.getStartPoint();
 
             return new RadialGradientPaint(center, radius, center, ImageUtils.FRACTIONS_2_COLOR_UNIFORM, colors, cycleMethod, colorSpaceType, gradientTransform);
         }
     }, ANGLE("Angle") {
         @Override
-        public Paint getGradient(UserDrag userDrag, Color[] colors, CycleMethod cycleMethod) {
-            return new AngleGradientPaint(userDrag, colors[0], colors[1], cycleMethod);
+        public Paint getGradient(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod) {
+            return new AngleGradientPaint(imDrag, colors[0], colors[1], cycleMethod);
         }
     }, SPIRAL_CW("CW Spiral") {
         @Override
-        public Paint getGradient(UserDrag userDrag, Color[] colors, CycleMethod cycleMethod) {
-            return new SpiralGradientPaint(true, userDrag, colors[0], colors[1], cycleMethod);
+        public Paint getGradient(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod) {
+            return new SpiralGradientPaint(true, imDrag, colors[0], colors[1], cycleMethod);
         }
     }, SPIRAL_CCW("CCW Spiral") {
         @Override
-        public Paint getGradient(UserDrag userDrag, Color[] colors, CycleMethod cycleMethod) {
-            return new SpiralGradientPaint(false, userDrag, colors[0], colors[1], cycleMethod);
+        public Paint getGradient(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod) {
+            return new SpiralGradientPaint(false, imDrag, colors[0], colors[1], cycleMethod);
         }
     }, DIAMOND("Diamond") {
         @Override
-        public Paint getGradient(UserDrag userDrag, Color[] colors, CycleMethod cycleMethod) {
-            return new DiamondGradientPaint(userDrag, colors[0], colors[1], cycleMethod);
+        public Paint getGradient(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod) {
+            return new DiamondGradientPaint(imDrag, colors[0], colors[1], cycleMethod);
         }
     };
 
@@ -81,7 +81,7 @@ public enum GradientType {
         this.guiName = guiName;
     }
 
-    public abstract Paint getGradient(UserDrag userDrag, Color[] colors, CycleMethod cycleMethod);
+    public abstract Paint getGradient(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod);
 
     @Override
     public String toString() {

@@ -25,7 +25,7 @@ import java.util.Random;
  * The available zoom levels
  */
 public enum ZoomLevel {
-    Z12("12.5 %") {
+    Z12("12.5%") {
         @Override
         public double getPercentValue() {
             return 12.5;
@@ -40,7 +40,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z12;
         }
-    }, Z18("17.7 %") { // 12.5 * sqrt(2)
+    }, Z18("17.7%") { // 12.5 * sqrt(2)
         @Override
         public double getPercentValue() {
             return 17.677669529663688110021109052621;
@@ -55,7 +55,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z12;
         }
-    }, Z25("25 %") {
+    }, Z25("25%") {
         @Override
         public double getPercentValue() {
             return 25;
@@ -70,7 +70,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z18;
         }
-    }, Z35("35.3 %") {
+    }, Z35("35.3%") {
         @Override
         public double getPercentValue() {
             return 35.355339059327376220042218105242;
@@ -85,7 +85,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z25;
         }
-    }, Z50("50 %") {
+    }, Z50("50%") {
         @Override
         public double getPercentValue() {
             return 50;
@@ -100,7 +100,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z35;
         }
-    }, Z71("70.7 %") {
+    }, Z71("70.7%") {
         @Override
         public double getPercentValue() {
             return 70.710678118654752440084436210485;
@@ -115,7 +115,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z50;
         }
-    }, Z100("100 %") {
+    }, Z100("100%") {
         @Override
         public double getPercentValue() {
             return 100;
@@ -130,7 +130,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z71;
         }
-    }, Z141("141.4 %") {
+    }, Z141("141.4%") {
         @Override
         public double getPercentValue() {
             return 141.42135623730950488016887242097;
@@ -145,7 +145,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z100;
         }
-    }, Z200("200 %") {
+    }, Z200("200%") {
         @Override
         public double getPercentValue() {
             return 200;
@@ -160,7 +160,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z141;
         }
-    }, Z283("282.8 %") {
+    }, Z283("282.8%") {
         @Override
         public double getPercentValue() {
             return 282.84271247461900976033774484194;
@@ -175,7 +175,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z200;
         }
-    }, Z400("400 %") {
+    }, Z400("400%") {
         @Override
         public double getPercentValue() {
             return 400;
@@ -190,7 +190,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z283;
         }
-    }, Z566("565.7 %") {
+    }, Z566("565.7%") {
         @Override
         public double getPercentValue() {
             return 565.68542494923801952067548968388;
@@ -205,7 +205,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z400;
         }
-    }, Z800("800 %") {
+    }, Z800("800%") {
         @Override
         public double getPercentValue() {
             return 800;
@@ -220,7 +220,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z566;
         }
-    }, Z1131("1131.4 %") {
+    }, Z1131("1131.4%") {
         @Override
         public double getPercentValue() {
             return 1131.3708498984760390413509793678;
@@ -235,7 +235,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z800;
         }
-    }, Z1600("1600 %") {
+    }, Z1600("1600%") {
         @Override
         public double getPercentValue() {
             return 1600;
@@ -250,7 +250,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z1131;
         }
-    }, Z2263("2262.7 %") {
+    }, Z2263("2262.7%") {
         @Override
         public double getPercentValue() {
             return 2262.7416997969520780827019587355;
@@ -265,7 +265,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z1600;
         }
-    }, Z3200("3200 %") {
+    }, Z3200("3200%") {
         @Override
         public double getPercentValue() {
             return 3200;
@@ -280,7 +280,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z2263;
         }
-    }, Z4525("4525.5 %") {
+    }, Z4525("4525.5%") {
         @Override
         public double getPercentValue() {
             return 4525.483399593904156165403917471;
@@ -295,7 +295,7 @@ public enum ZoomLevel {
         public ZoomLevel zoomOut() {
             return Z3200;
         }
-    }, Z6400("6400 %") {
+    }, Z6400("6400%") {
         @Override
         public double getPercentValue() {
             return 6400;

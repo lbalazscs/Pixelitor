@@ -115,7 +115,7 @@ public class SelectionTool extends Tool implements ActiveImageChangeListener {
 
         userDrag.setStartFromCenter(startFromCenter);
 
-        selectionBuilder.updateSelection(userDrag);
+        selectionBuilder.updateSelection(userDrag.toImDrag());
     }
 
     @Override
@@ -155,7 +155,7 @@ public class SelectionTool extends Tool implements ActiveImageChangeListener {
             boolean startFromCenter = (!altMeansSubtract) && e.isAltDown();
             userDrag.setStartFromCenter(startFromCenter);
 
-            selectionBuilder.updateSelection(userDrag);
+            selectionBuilder.updateSelection(userDrag.toImDrag());
             selectionBuilder.combineShapes();
             stopBuildingSelection();
         }

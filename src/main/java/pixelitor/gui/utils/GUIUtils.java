@@ -148,4 +148,16 @@ public final class GUIUtils {
     public static JDialog getDialogAncestor(Component c) {
         return (JDialog) SwingUtilities.getWindowAncestor(c);
     }
+
+    public static void showDialog(JDialog d) {
+        centerOnScreen(d);
+        d.setVisible(true);
+    }
+
+    public static void closeDialog(JDialog d) {
+        if (d != null && d.isVisible()) {
+            d.setVisible(false);
+            d.dispose();
+        }
+    }
 }

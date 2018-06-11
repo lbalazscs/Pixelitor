@@ -46,7 +46,6 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
     private Value currentChoice;
 
     private final EventListenerList listenerList = new EventListenerList();
-    private FilterAction action;
 
     public IntChoiceParam(String name, Value[] choices) {
         this(name, choices, ALLOW_RANDOMIZE);
@@ -77,14 +76,6 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
     @Override
     public void reset(boolean trigger) {
         setSelectedItem(defaultChoice, trigger);
-    }
-
-    @Override
-    public void setAdjustmentListener(ParamAdjustmentListener listener) {
-        super.setAdjustmentListener(listener);
-        if (action != null) {
-            action.setAdjustmentListener(listener);
-        }
     }
 
     @Override
@@ -154,11 +145,6 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
     @Override
     public void removeListDataListener(ListDataListener l) {
         listenerList.remove(ListDataListener.class, l);
-    }
-
-    public IntChoiceParam withAction(FilterAction action) {
-        this.action = action;
-        return this;
     }
 
     /**

@@ -87,8 +87,8 @@ public class SmudgeTool extends AbstractBrushTool {
         // with the translation.
         BufferedImage sourceImage = dr.getCanvasSizedSubImage();
 
-        double x = userDrag.getStartX();
-        double y = userDrag.getStartY();
+        double x = userDrag.getImStartX();
+        double y = userDrag.getImStartY();
         if (!e.isShiftDown()) { // not a line-click
             initStroke(sourceImage, x, y);
         }

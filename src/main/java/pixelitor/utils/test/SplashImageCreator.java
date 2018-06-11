@@ -41,7 +41,7 @@ import pixelitor.layers.Drawable;
 import pixelitor.layers.ImageLayer;
 import pixelitor.tools.GradientTool;
 import pixelitor.tools.GradientType;
-import pixelitor.tools.UserDrag;
+import pixelitor.tools.ImDrag;
 import pixelitor.utils.Messages;
 
 import java.awt.AlphaComposite;
@@ -213,7 +213,7 @@ public class SplashImageCreator {
                 BLACK_TO_WHITE,
                 REFLECT,
                 AlphaComposite.SrcOver,
-                new UserDrag(startX, startY, endX, endY),
+                new ImDrag(startX, startY, endX, endY),
                 false);
     }
 }

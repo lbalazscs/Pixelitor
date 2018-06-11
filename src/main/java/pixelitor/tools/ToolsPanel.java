@@ -41,7 +41,7 @@ public class ToolsPanel extends JPanel {
         }
 
         add(verticalBox);
-        setDefaultTool();
+        Tools.setDefaultTool();
 
         // in the menu it was added using T, not t
         Action textToolAction = new AbstractAction() {
@@ -71,8 +71,4 @@ public class ToolsPanel extends JPanel {
         GlobalKeyboardWatch.addKeyboardShortCut(activationChar, true, toolName, pressToolAction);
     }
 
-    private static void setDefaultTool() {
-        Tools.changeTo(Tools.BRUSH);
-        Tools.currentTool.getButton().setSelected(true);
-    }
 }

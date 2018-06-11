@@ -23,6 +23,7 @@ import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.OKDialog;
 import pixelitor.layers.Drawable;
@@ -60,6 +61,7 @@ public class CloneTool extends BlendingModeBrushTool {
 
     private State state = NO_SOURCE;
     private boolean sampleAllLayers = false;
+    private JDialog transformDialog;
 
     private CloneBrush cloneBrush;
 
@@ -70,7 +72,7 @@ public class CloneTool extends BlendingModeBrushTool {
     protected CloneTool() {
         super('s', "Clone Stamp", "clone_tool_icon.png",
                 "<b>Alt-click</b> (or <b>right-click</b>) to select the source, then <b>drag</b> to paint with the copied pixels.",
-                Cursors.DEFAULT);
+                Cursors.CROSSHAIR);
     }
 
     @Override
@@ -104,7 +106,7 @@ public class CloneTool extends BlendingModeBrushTool {
             gbh.addLabelWithControl("Scale (%):", scaleParam.createGUI());
             gbh.addLabelWithControl("Rotate (Degrees):", rotationParam.createGUI());
             gbh.addLabelWithControl("Mirror:", mirrorParam.createGUI());
-            toolDialog = new OKDialog(PixelitorWindow.getInstance(), p, "Clone Transform", "Close");
+            transformDialog = new OKDialog(PixelitorWindow.getInstance(), p, "Clone Transform", "Close");
         });
     }
 
@@ -117,8 +119,8 @@ public class CloneTool extends BlendingModeBrushTool {
 
     @Override
     public void mousePressed(MouseEvent e, ImageComponent ic) {
-        double x = userDrag.getStartX();
-        double y = userDrag.getStartY();
+        double x = userDrag.getImStartX();
+        double y = userDrag.getImStartY();
 
         if (e.isAltDown() || SwingUtilities.isRightMouseButton(e)) {
             setCloningSource(ic, x, y);
@@ -220,6 +222,12 @@ public class CloneTool extends BlendingModeBrushTool {
 
         setCloningSource(comp.getIC(), sourceX, sourceY);
         startNewCloningStroke(start.x, start.y, true);
+    }
+
+    @Override
+    protected void closeToolDialogs() {
+        super.closeToolDialogs();
+        GUIUtils.closeDialog(transformDialog);
     }
 
     @Override

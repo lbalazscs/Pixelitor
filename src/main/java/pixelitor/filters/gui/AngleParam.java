@@ -53,8 +53,8 @@ public class AngleParam extends AbstractFilterParam {
         return (JComponent) paramGUI;
     }
 
-    public void setValueInDegrees(int d, boolean trigger) {
-        int degrees = d;
+    public void setValueInDegrees(double d, boolean trigger) {
+        double degrees = d;
         if (degrees < 0) {
             degrees = -degrees;
         } else {
@@ -179,12 +179,14 @@ public class AngleParam extends AbstractFilterParam {
 
     @Override
     public ParamState copyState() {
-        return new APState(angleInRadians);
+        // save the degrees so that the interpolation
+        // does not confuse the user
+        return new APState(getValueInDegrees());
     }
 
     @Override
     public void setState(ParamState state) {
-        angleInRadians = ((APState)state).angle;
+        setValueInDegrees(((APState) state).angle, false);
     }
 
     private static class APState implements ParamState {

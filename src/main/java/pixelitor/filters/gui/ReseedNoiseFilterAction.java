@@ -38,7 +38,8 @@ public class ReseedNoiseFilterAction extends FilterAction {
     }
 
     public ReseedNoiseFilterAction(String name, String toolTip) {
-        super(name, e -> Noise.reseed(), IconUtils.getDice2Icon(), toolTip);
+        super(name, e -> Noise.reseed(),
+                IconUtils.getDice2Icon(), toolTip, "reseed");
         setIgnoreFinalAnimationSettingMode(false);
     }
 
@@ -54,7 +55,8 @@ public class ReseedNoiseFilterAction extends FilterAction {
     }
 
     public ReseedNoiseFilterAction(String name, String toolTipText, ActionListener actionListener) {
-        super(name, actionListener, IconUtils.getDice2Icon(), toolTipText);
+        super(name, actionListener, IconUtils.getDice2Icon(),
+                toolTipText, "reseed");
         setIgnoreFinalAnimationSettingMode(false);
     }
 }

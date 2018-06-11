@@ -109,8 +109,7 @@ public abstract class Wizard {
         // and anyway we don't know the size of the filter dialogs in advance
         dialog.setSize(initialDialogWidth, initialDialogHeight);
 
-        GUIUtils.centerOnScreen(dialog);
-        dialog.setVisible(true);
+        GUIUtils.showDialog(dialog);
     }
 
     protected abstract boolean mayMoveForwardIfNextPressed(WizardPage wizardPage, Component dialogParent);

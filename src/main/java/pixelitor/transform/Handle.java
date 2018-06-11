@@ -18,8 +18,12 @@
 package pixelitor.transform;
 
 import java.awt.Cursor;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.Stroke;
+
+import static java.awt.Color.BLACK;
+import static java.awt.Color.WHITE;
 
 /**
  * An individual handle in {@link TransformSupport}
@@ -40,8 +44,16 @@ public class Handle {
         this.cursor = Cursor.getPredefinedCursor(cursorType);
     }
 
-    public Shape getShape() {
-        return shape;
+    public void draw(Graphics2D g, Stroke bigStroke, Stroke smallStroke) {
+        // black at the edges
+        g.setStroke(bigStroke);
+        g.setColor(BLACK);
+        g.draw(shape);
+
+        // white in the middle
+        g.setStroke(smallStroke);
+        g.setColor(WHITE);
+        g.fill(shape);
     }
 
     public int getX() {

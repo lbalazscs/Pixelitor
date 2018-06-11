@@ -52,7 +52,7 @@ public class BooleanParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
-        BooleanParamGUI gui = new BooleanParamGUI(this, addDefaultButton);
+        BooleanParamGUI gui = new BooleanParamGUI(this, addDefaultButton, action);
         paramGUI = gui;
         setParamGUIEnabledState();
 

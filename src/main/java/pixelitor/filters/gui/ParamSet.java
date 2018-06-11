@@ -61,12 +61,24 @@ public class ParamSet {
     }
 
     public ParamSet addCommonActions(FilterAction... actions) {
-        if (paramList.size() > 1) { // no need for "randomize"/"reset all" if the filter has only one parameter
-            for (FilterAction action : actions) {
-                if(action != null) {
-                    actionList.add(action);
-                }
+        for (FilterAction action : actions) {
+            if (action != null) {
+                actionList.add(action);
             }
+        }
+
+        // no need for "randomize"/"reset all"
+        // if the filter has only one parameter...
+        boolean addRandomizeAndResetAll = paramList.size() > 1;
+
+        // ...except if that parameter is grouped
+        if (!addRandomizeAndResetAll) {
+            FilterParam param = paramList.get(0);
+            if (param instanceof GroupedRangeParam) {
+                addRandomizeAndResetAll = true;
+            }
+        }
+        if (addRandomizeAndResetAll) {
             addRandomizeAction();
             addResetAllAction();
         }
@@ -77,7 +89,8 @@ public class ParamSet {
         FilterAction randomizeAction = new FilterAction("Randomize Settings",
                 e -> randomize(),
                 IconUtils.getDiceIcon(),
-                "Randomize the settings for this filter.");
+                "Randomize the settings for this filter.",
+                "randomize");
         actionList.add(randomizeAction);
     }
 
@@ -85,7 +98,8 @@ public class ParamSet {
         FilterAction resetAllAction = new FilterAction("Reset All",
                 e -> reset(),
                 IconUtils.getWestArrowIcon(),
-                "Reset all settings to their default values.");
+                "Reset all settings to their default values.",
+                "resetAll");
         actionList.add(resetAllAction);
     }
 

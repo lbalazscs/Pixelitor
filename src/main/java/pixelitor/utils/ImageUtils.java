@@ -392,8 +392,11 @@ public class ImageUtils {
 
         int[] pixels;
 
-        boolean fastWay = hasPackedIntArray(src);
-        if (fastWay) {
+        boolean packedInt = hasPackedIntArray(src);
+        if (packedInt) {
+            assert src.getRaster().getTransferType() == DataBuffer.TYPE_INT;
+            assert src.getRaster().getNumDataElements() == 1;
+
             DataBufferInt srcDataBuffer = (DataBufferInt) src.getRaster().getDataBuffer();
             pixels = srcDataBuffer.getData();
         } else if (src.getType() == BufferedImage.TYPE_BYTE_GRAY) {

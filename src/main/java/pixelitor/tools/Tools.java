@@ -46,7 +46,6 @@ public class Tools {
     public static final HandTool HAND = new HandTool();
     public static final ZoomTool ZOOM = new ZoomTool();
 
-
     static Tool currentTool = BRUSH;
 
     /**
@@ -57,12 +56,9 @@ public class Tools {
                     SMUDGE,
                     GRADIENT, PAINT_BUCKET, COLOR_PICKER, SHAPES, HAND, ZOOM};
 
-    public static Tool[] getAll() {
-        return allTools;
-    }
-
-    public static Tool getCurrent() {
-        return currentTool;
+    public static void setDefaultTool() {
+        changeTo(BRUSH);
+        currentTool.getButton().setSelected(true);
     }
 
     public static void changeTo(Tool newCurrentTool) {
@@ -70,6 +66,14 @@ public class Tools {
         Tools.currentTool = newCurrentTool;
         newCurrentTool.toolStarted();
         ToolSettingsPanelContainer.INSTANCE.showSettingsFor(newCurrentTool);
+    }
+
+    public static Tool[] getAll() {
+        return allTools;
+    }
+
+    public static Tool getCurrent() {
+        return currentTool;
     }
 
     public static boolean isShapesDrawing() {

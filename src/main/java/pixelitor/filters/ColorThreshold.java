@@ -31,9 +31,9 @@ import java.awt.image.BufferedImage;
 public class ColorThreshold extends ParametrizedFilter {
     public static final String NAME = "Color Threshold";
 
-    private final RangeParam redThreshold = new RangeParam("Red", 0, 128, 255);
-    private final RangeParam greenThreshold = new RangeParam("Green", 0, 128, 255);
-    private final RangeParam blueThreshold = new RangeParam("Blue", 0, 128, 255);
+    private final RangeParam redThreshold = new RangeParam("Red", 0, 128, 256);
+    private final RangeParam greenThreshold = new RangeParam("Green", 0, 128, 256);
+    private final RangeParam blueThreshold = new RangeParam("Blue", 0, 128, 256);
 
     public ColorThreshold() {
         super(ShowOriginal.YES);
@@ -65,9 +65,9 @@ public class ColorThreshold extends ParametrizedFilter {
             int g = (srcPixel >>> 8) & 0xFF;
             int b = srcPixel & 0xFF;
 
-            r = r > redTh ? 0xFF : 0;
-            g = g > greenTh ? 0xFF : 0;
-            b = b > blueTh ? 0xFF : 0;
+            r = r >= redTh ? 0xFF : 0;
+            g = g >= greenTh ? 0xFF : 0;
+            b = b >= blueTh ? 0xFF : 0;
 
             destData[i] = (a << 24) | (r << 16) | (g << 8) | b;
         }

@@ -24,6 +24,7 @@ import pixelitor.layers.DeleteActiveLayerAction;
 import pixelitor.layers.Drawable;
 import pixelitor.selection.SelectionActions;
 import pixelitor.utils.Utils;
+import pixelitor.utils.test.Events;
 
 import javax.swing.*;
 import java.awt.image.BufferedImage;
@@ -78,10 +79,12 @@ public final class ConsistencyChecks {
             boolean differentWidth = current.getWidth() != previous.getWidth();
             boolean differentHeight = current.getHeight() != previous.getHeight();
             if (differentWidth || differentHeight) {
+                Composition comp = dr.getComp();
+                Events.postProgramError("fadeWouldWorkOn problem", comp, null);
+
                 Utils.debugImage(current, "current");
                 Utils.debugImage(previous, "previous");
                 String lastFadeableOp = History.getLastEditName();
-                Composition comp = dr.getComp();
 
                 String historyCompName = fadeableEdit.getComp().getName();
                 String activeCompName = ImageComponents.getActiveCompOrNull().getName();

@@ -17,8 +17,8 @@
 
 package pixelitor.selection;
 
+import pixelitor.tools.ImDrag;
 import pixelitor.tools.PMouseEvent;
-import pixelitor.tools.UserDrag;
 
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
@@ -33,20 +33,20 @@ public enum SelectionType {
     RECTANGLE("Rectangle") {
         @Override
         public Shape createShape(Object mouseInfo, Shape oldShape) {
-            UserDrag userDrag = (UserDrag) mouseInfo;
-            return userDrag.createPositiveRect();
+            ImDrag imDrag = (ImDrag) mouseInfo;
+            return imDrag.createPositiveRect();
         }
     }, ELLIPSE("Ellipse") {
         @Override
         public Shape createShape(Object mouseInfo, Shape oldShape) {
-            UserDrag userDrag = (UserDrag) mouseInfo;
-            Rectangle2D dr = userDrag.createPositiveRect();
+            ImDrag imDrag = (ImDrag) mouseInfo;
+            Rectangle2D dr = imDrag.createPositiveRect();
             return new Ellipse2D.Double(dr.getX(), dr.getY(), dr.getWidth(), dr.getHeight());
         }
     }, LASSO("Freehand") {
         @Override
         public Shape createShape(Object mouseInfo, Shape oldShape) {
-            UserDrag userDrag = (UserDrag) mouseInfo;
+            ImDrag imDrag = (ImDrag) mouseInfo;
             boolean createNew;
             if (oldShape == null) {
                 createNew = true;
@@ -58,12 +58,12 @@ public enum SelectionType {
 
             if (createNew) {
                 GeneralPath p = new GeneralPath();
-                p.moveTo(userDrag.getStartX(), userDrag.getStartY());
-                p.lineTo(userDrag.getEndX(), userDrag.getEndY());
+                p.moveTo(imDrag.getStartX(), imDrag.getStartY());
+                p.lineTo(imDrag.getEndX(), imDrag.getEndY());
                 return p;
             } else {
                 GeneralPath gp = (GeneralPath) oldShape;
-                gp.lineTo(userDrag.getEndX(), userDrag.getEndY());
+                gp.lineTo(imDrag.getEndX(), imDrag.getEndY());
 
                 return gp;
             }

@@ -100,8 +100,7 @@ public class PerformanceTestingDialog extends JDialog implements ActionListener,
         add(centralPanel, BorderLayout.CENTER);
         add(southPanel, BorderLayout.SOUTH);
         pack();
-        GUIUtils.centerOnScreen(this);
-        setVisible(true);
+        GUIUtils.showDialog(this);
     }
 
     private void setEnabledWhileRunning() {

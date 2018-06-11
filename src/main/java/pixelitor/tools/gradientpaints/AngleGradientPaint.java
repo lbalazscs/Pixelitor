@@ -17,7 +17,7 @@
 
 package pixelitor.tools.gradientpaints;
 
-import pixelitor.tools.UserDrag;
+import pixelitor.tools.ImDrag;
 
 import java.awt.Color;
 import java.awt.MultipleGradientPaint.CycleMethod;
@@ -38,7 +38,7 @@ import static java.awt.MultipleGradientPaint.CycleMethod.REPEAT;
  * A Paint that creates an "angle gradient"
  */
 public class AngleGradientPaint implements Paint {
-    private final UserDrag userDrag;
+    private final ImDrag imDrag;
     private final Color startColor;
     private final Color endColor;
     private final CycleMethod cycleMethod;
@@ -46,8 +46,8 @@ public class AngleGradientPaint implements Paint {
     private static final int AA_RES = 4; // the resolution of AA supersampling
     private static final int AA_RES2 = AA_RES * AA_RES;
 
-    public AngleGradientPaint(UserDrag userDrag, Color startColor, Color endColor, CycleMethod cycleMethod) {
-        this.userDrag = userDrag;
+    public AngleGradientPaint(ImDrag imDrag, Color startColor, Color endColor, CycleMethod cycleMethod) {
+        this.imDrag = imDrag;
         this.startColor = startColor;
         this.endColor = endColor;
         this.cycleMethod = cycleMethod;
@@ -58,10 +58,10 @@ public class AngleGradientPaint implements Paint {
         int numComponents = cm.getNumComponents();
 
         if (numComponents == 1) {
-            return new GrayAngleGradientPaintContext(userDrag, startColor, endColor, cm, cycleMethod);
+            return new GrayAngleGradientPaintContext(imDrag, startColor, endColor, cm, cycleMethod);
         }
 
-        return new AngleGradientPaintContext(userDrag, startColor, endColor, cm, cycleMethod);
+        return new AngleGradientPaintContext(imDrag, startColor, endColor, cm, cycleMethod);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class AngleGradientPaint implements Paint {
     }
 
     private static class AngleGradientPaintContext implements PaintContext {
-        protected final UserDrag userDrag;
+        protected final ImDrag imDrag;
         protected final CycleMethod cycleMethod;
 
         private final int startAlpha;
@@ -88,8 +88,8 @@ public class AngleGradientPaint implements Paint {
         protected final ColorModel cm;
         protected final double drawAngle;
 
-        private AngleGradientPaintContext(UserDrag userDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
-            this.userDrag = userDrag;
+        private AngleGradientPaintContext(ImDrag imDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
+            this.imDrag = imDrag;
             this.cycleMethod = cycleMethod;
 
             startAlpha = startColor.getAlpha();
@@ -103,7 +103,7 @@ public class AngleGradientPaint implements Paint {
             endBlue = endColor.getBlue();
 
             this.cm = cm;
-            drawAngle = userDrag.getDrawAngle();
+            drawAngle = imDrag.getDrawAngle();
         }
 
         @Override
@@ -131,7 +131,7 @@ public class AngleGradientPaint implements Paint {
 
                     boolean needsAA = false;
                     if (cycleMethod != REFLECT) {
-                        double distance = userDrag.taxiCabMetric(x, y);
+                        double distance = imDrag.taxiCabMetric(x, y);
                         double threshold = 0.2 / distance;
                         needsAA = interpolationValue > (1.0 - threshold) || interpolationValue < threshold;
                     }
@@ -183,7 +183,7 @@ public class AngleGradientPaint implements Paint {
         }
 
         public double getInterpolationValue(double x, double y) {
-            double relativeAngle = userDrag.getAngleFromStartTo(x, y) - drawAngle;
+            double relativeAngle = imDrag.getAngleFromStartTo(x, y) - drawAngle;
 
             // relativeAngle is now between -2*PI and 2*PI, and the -2*PI..0 range is the same as 0..2*PI
 
@@ -211,8 +211,8 @@ public class AngleGradientPaint implements Paint {
         private final int startGray;
         private final int endGray;
 
-        private GrayAngleGradientPaintContext(UserDrag userDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
-            super(userDrag, startColor, endColor, cm, cycleMethod);
+        private GrayAngleGradientPaintContext(ImDrag imDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
+            super(imDrag, startColor, endColor, cm, cycleMethod);
 
             startGray = startColor.getRed();
             endGray = endColor.getRed();
@@ -232,7 +232,7 @@ public class AngleGradientPaint implements Paint {
 
                     boolean needsAA = false;
                     if (cycleMethod != REFLECT) {
-                        double distance = userDrag.taxiCabMetric(x, y);
+                        double distance = imDrag.taxiCabMetric(x, y);
                         double threshold = 0.2 / distance;
                         needsAA = interpolationValue > (1.0 - threshold) || interpolationValue < threshold;
                     }

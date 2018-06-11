@@ -19,9 +19,9 @@ package pixelitor;
 
 import pixelitor.colors.FillType;
 import pixelitor.gui.ImageComponents;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.IntTextField;
-import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.ImageUtils;
 
@@ -74,29 +74,27 @@ public final class NewImage {
     private static void showInDialog() {
         assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
 
-        if(lastNew == null) {
+        if (lastNew == null) {
             //noinspection NonThreadSafeLazyInitialization
             lastNew = AppPreferences.getNewImageSize();
         }
+
         NewImagePanel p = new NewImagePanel(lastNew.width, lastNew.height);
-        OKCancelDialog d = new OKCancelDialog(p, "New Image") {
-            @Override
-            public void okAction() {
-                int selectedWidth = p.getSelectedWidth();
-                int selectedHeight = p.getSelectedHeight();
-                FillType bg = p.getSelectedBackground();
+        new DialogBuilder()
+                .title("New Image")
+                .form(p)
+                .okAction(() -> {
+                    int selectedWidth = p.getSelectedWidth();
+                    int selectedHeight = p.getSelectedHeight();
+                    FillType bg = p.getSelectedBackground();
 
-                String title = "Untitled" + untitledCount;
-                addNewImage(bg, selectedWidth, selectedHeight, title);
-                untitledCount++;
+                    String title = "Untitled" + untitledCount;
+                    addNewImage(bg, selectedWidth, selectedHeight, title);
+                    untitledCount++;
 
-                lastNew.width = selectedWidth;
-                lastNew.height = selectedHeight;
-
-                close();
-            }
-        };
-        d.setVisible(true);
+                    lastNew.width = selectedWidth;
+                    lastNew.height = selectedHeight;
+                }).show();
     }
 
     public static Action getAction() {

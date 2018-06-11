@@ -122,11 +122,12 @@ public class AssertJSwingTest {
         AssertJSwingTest test = new AssertJSwingTest();
         test.setUp();
 
-        boolean testOneMethodSlowly = false;
+        boolean testOneMethodSlowly = false; // TODO should be property
         if (testOneMethodSlowly) {
             test.robot.settings().delayBetweenEvents(ROBOT_DELAY_MILLIS_SLOW);
 
-            test.stressTestFilterWithDialog("Marble...", Randomize.YES, Reseed.YES, true);
+            //test.stressTestFilterWithDialog("Marble...", Randomize.YES, Reseed.YES, true);
+            test.testNavigatorRightClickPopupMenu();
         } else {
             TestingMode[] testingModes = getTestingModes();
             String target = getTarget();
@@ -1208,8 +1209,9 @@ public class AssertJSwingTest {
         testNoDialogFilter("Hue (with colors)");
         testNoDialogFilter("Saturation");
         testFilterWithDialog("Quantize...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Posterize...", Randomize.NO, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Posterize...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Threshold...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Color Threshold...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Tritone...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Gradient Map...", Randomize.NO, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Color Halftone...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
@@ -1405,9 +1407,9 @@ public class AssertJSwingTest {
         }
 
         if (randomize == Randomize.YES) {
-            findButtonByText(dialog, "Randomize Settings").click();
-            findButtonByText(dialog, "Reset All").click();
-            findButtonByText(dialog, "Randomize Settings").click();
+            dialog.button("randomize").click();
+            dialog.button("resetAll").click();
+            dialog.button("randomize").click();
         }
 
         if (checkShowOriginal.isYes()) {
@@ -1416,7 +1418,7 @@ public class AssertJSwingTest {
         }
 
         if (reseed == Reseed.YES) {
-            findButtonByText(dialog, "Reseed").click();
+            dialog.button("reseed").click();
         }
 
         dialog.button("ok").click();
@@ -1896,6 +1898,7 @@ public class AssertJSwingTest {
         testMouseWheelZooming();
         testControlPlusMinusZooming();
         testZoomControlAndNavigatorZooming();
+        testNavigatorRightClickPopupMenu();
         testAutoZoomButtons();
 
         assert checkConsistency();
@@ -1932,34 +1935,58 @@ public class AssertJSwingTest {
         findButtonByText(pw, "Fit").click();
 
         runMenuCommand("Show Navigator...");
-        DialogFixture navigatorDialog = findDialogByTitle("Navigator");
-        navigatorDialog.resizeTo(new Dimension(500, 400));
+        DialogFixture navigator = findDialogByTitle("Navigator");
+        navigator.resizeTo(new Dimension(500, 400));
 
         ZoomLevel startingZoom = ImageComponents.getActiveIC().getZoomLevel();
 
-        pressCtrlPlus(navigatorDialog, 4);
+        pressCtrlPlus(navigator, 4);
         ZoomLevel expectedZoomIn = startingZoom.zoomIn().zoomIn().zoomIn().zoomIn();
         assert zoomIs(expectedZoomIn);
 
-        pressCtrlMinus(navigatorDialog, 2);
+        pressCtrlMinus(navigator, 2);
         ZoomLevel expectedZoomOut = expectedZoomIn.zoomOut().zoomOut();
         assert zoomIs(expectedZoomOut);
+        findButtonByText(pw, "Fit").click();
 
         // navigate
-        Dialog realDialog = navigatorDialog.target();
-        int mouseStartX = realDialog.getWidth() / 2;
-        int mouseStartY = realDialog.getHeight() / 2;
-        robot.moveMouse(realDialog, mouseStartX, mouseStartY);
-        robot.pressMouse(MouseButton.LEFT_BUTTON);
-        robot.moveMouse(realDialog, mouseStartX - 30, mouseStartY + 30);
-        robot.releaseMouse(MouseButton.LEFT_BUTTON);
+        int mouseStartX = navigator.target().getWidth() / 2;
+        int mouseStartY = navigator.target().getHeight() / 2;
 
-        robot.pressMouse(MouseButton.LEFT_BUTTON);
-        robot.moveMouse(realDialog, mouseStartX, mouseStartY);
-        robot.releaseMouse(MouseButton.LEFT_BUTTON);
+        moveTo(navigator, mouseStartX, mouseStartY);
+        dragTo(navigator, mouseStartX - 30, mouseStartY + 30);
+        dragTo(navigator, mouseStartX, mouseStartY);
+
+        navigator.close();
+    }
+
+    private void testNavigatorRightClickPopupMenu() {
+        runMenuCommand("Show Navigator...");
+        DialogFixture navigatorDialog = findDialogByTitle("Navigator");
+        navigatorDialog.resizeTo(new Dimension(500, 400));
+
+        JPopupMenuFixture popupMenu = navigatorDialog.showPopupMenu();
+        findPopupMenuFixtureByText(popupMenu, "Navigator Zoom: 100%").click();
+
+        popupMenu = navigatorDialog.showPopupMenu();
+        findPopupMenuFixtureByText(popupMenu, "Navigator Zoom: 50%").click();
+
+        popupMenu = navigatorDialog.showPopupMenu();
+        findPopupMenuFixtureByText(popupMenu, "Navigator Zoom: 25%").click();
+
+        popupMenu = navigatorDialog.showPopupMenu();
+        findPopupMenuFixtureByText(popupMenu, "Navigator Zoom: 12.5%").click();
+
+        navigatorDialog.resizeTo(new Dimension(500, 400));
+        popupMenu = navigatorDialog.showPopupMenu();
+        findPopupMenuFixtureByText(popupMenu, "View Box Color...").click();
+
+        DialogFixture colorSelector = findDialogByTitle("Navigator");
+        moveTo(colorSelector, 100, 150);
+        dragTo(colorSelector, 100, 300);
+        findButtonByText(colorSelector, "OK").click();
 
         navigatorDialog.close();
-        findButtonByText(pw, "Fit").click();
     }
 
     private void testAutoZoomButtons() {
@@ -2077,6 +2104,20 @@ public class AssertJSwingTest {
     private void dragTo(int x, int y) {
         robot.pressMouse(MouseButton.LEFT_BUTTON);
         robot.moveMouse(x, y);
+        robot.releaseMouse(MouseButton.LEFT_BUTTON);
+    }
+
+    private void moveTo(DialogFixture dialog, int x, int y) {
+        Dialog c = dialog.target();
+
+        robot.moveMouse(c, x, y);
+    }
+
+    private void dragTo(DialogFixture dialog, int x, int y) {
+        Dialog c = dialog.target();
+
+        robot.pressMouse(MouseButton.LEFT_BUTTON);
+        robot.moveMouse(c, x, y);
         robot.releaseMouse(MouseButton.LEFT_BUTTON);
     }
 
@@ -2320,7 +2361,7 @@ public class AssertJSwingTest {
             ImageComponent ic = ImageComponents.getActiveIC();
             if (ic.getZoomLevel() != ZoomLevel.Z100) {
                 // otherwise location on screen can lead to crazy results
-                runMenuCommand("100 %");
+                runMenuCommand("100%");
             }
 
             Canvas canvas = ic.getComp().getCanvas();

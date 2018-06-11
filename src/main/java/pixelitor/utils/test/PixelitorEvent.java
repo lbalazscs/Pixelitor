@@ -43,7 +43,9 @@ public class PixelitorEvent {
 
     protected PixelitorEvent(String type, Composition comp, Layer layer) {
         assert type != null;
-        assert Build.CURRENT.isDevelopment();
+        if (!Build.CURRENT.isDevelopment()) {
+            throw new IllegalStateException("should be used only for development");
+        }
 
         date = new Date();
         if (SwingUtilities.isEventDispatchThread()) {

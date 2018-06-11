@@ -49,8 +49,9 @@ public class MoveTool extends Tool {
     @Override
     public void mouseDragged(MouseEvent e, ImageComponent ic) {
         Composition c = ic.getComp();
-        double relX = userDrag.getDX();
-        double relY = userDrag.getDY();
+        ImDrag imDrag = userDrag.toImDrag();
+        double relX = imDrag.getDX();
+        double relY = imDrag.getDY();
         c.moveActiveContentRelative(relX, relY);
     }
 

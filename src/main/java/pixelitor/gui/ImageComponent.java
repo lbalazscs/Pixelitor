@@ -301,7 +301,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
         Rectangle canvasClip = setVisibleCanvasClip(g, drawStartX, drawStartY, zoomedWidth, zoomedHeight);
 
-        AffineTransform unscaledTransform = g2.getTransform(); // a copy of the transform object
+        AffineTransform componentTransform = g2.getTransform(); // a copy of the transform object
 
         g2.translate(drawStartX, drawStartY);
 
@@ -311,14 +311,15 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         }
 
         g2.scale(viewScale, viewScale);
+        // after the translation and scaling, we are in "image space"
 
         if (showMask) {
             LayerMask mask = comp.getActiveLayer().getMask();
             assert mask != null : "no mask in " + maskViewMode;
             mask.paintLayerOnGraphics(g2, true);
         } else {
-            BufferedImage drawnImage = comp.getCompositeImage();
-            ImageUtils.drawImageWithClipping(g2, drawnImage);
+            BufferedImage compositeImage = comp.getCompositeImage();
+            ImageUtils.drawImageWithClipping(g2, compositeImage);
 
             if (maskViewMode.showRuby()) {
                 LayerMask mask = comp.getActiveLayer().getMask();
@@ -327,23 +328,25 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
             }
         }
 
-        // possibly allow a larger clip for the selections and tools
         Tool currentTool = Tools.getCurrent();
-        currentTool.setClip(g2, this);
+        // possibly allow a larger clip for the selections and tools
+        currentTool.setClipFor(g2, this);
 
         comp.paintSelection(g2);
 
-        currentTool.paintOverImage(g2, canvas, this, unscaledTransform);
+        AffineTransform imageTransform = g2.getTransform();
 
-        // restore original transform
-        g2.setTransform(unscaledTransform);
+        // restore the original transform
+        g2.setTransform(componentTransform);
+
+        currentTool.paintOverImage(g2, canvas, this, componentTransform, imageTransform);
 
         g2.setClip(canvasClip);
 
         if (showPixelGrid && zoomLevel.allowPixelGrid() && !comp.showsSelection()) {
 //        if (showPixelGrid && zoomLevel.allowPixelGrid()) {
-            // for some reason this very slow if there is selection visible
-            // and the pixel grid might now be shown anyway
+            // for some reason this very slow if there is a selection visible
+            // and the pixel grid might not be shown anyway
             drawPixelGrid(g2);
         }
 

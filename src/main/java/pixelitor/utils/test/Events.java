@@ -28,7 +28,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Events happening inside the app - used for debugging
+ * Events happening inside the app - used for debugging.
+ * The goal is to reproduce what exactly happened before
+ * az unexpected problem occurred.
  */
 public class Events {
     private static final boolean VERBOSE = false;
@@ -87,6 +89,10 @@ public class Events {
      */
     public static void postRandomTestEvent(String description) {
         post(new PixelitorEvent("[RAND] " + description, null, null));
+    }
+
+    public static void postProgramError(String s, Composition comp, Layer layer) {
+        post(new PixelitorEvent("[PROGRAM ERROR: " + s + "]", null, null));
     }
 
     /**

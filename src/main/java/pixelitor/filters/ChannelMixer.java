@@ -227,7 +227,8 @@ public class ChannelMixer extends ParametrizedFilter {
     public ChannelMixer() {
         super(ShowOriginal.YES);
 
-        FilterAction normalize = new FilterAction("Normalize", normalizeAction, "Makes sure that the sum of the channel contributions is 100%");
+        FilterAction normalize = new FilterAction("Normalize", normalizeAction,
+                "Makes sure that the sum of the channel contributions is 100%", null);
         FilterParam[] params = {
                 redFromRed,
                 redFromGreen,
@@ -249,7 +250,7 @@ public class ChannelMixer extends ParametrizedFilter {
                 e -> {
                     paramSet.randomize();
                     normalizeAction.actionPerformed(null);
-                }, "Randomizes settings and normalizes the brightness");
+                }, "Randomizes settings and normalizes the brightness", null);
         // insert it right after "Randomize Settings"
         paramSet.insertAction(randomizeAndNormalize, 2);
     }

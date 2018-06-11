@@ -71,7 +71,7 @@ public class JHGaussianBlur extends ParametrizedFilter {
     }
 
     @Override
-    protected boolean createDefaultDestBuffer() {
+    protected boolean createDefaultDestImg() {
         return false;
     }
 

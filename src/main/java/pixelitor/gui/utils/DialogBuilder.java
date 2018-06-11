@@ -176,6 +176,7 @@ public class DialogBuilder {
             okButton.addActionListener(e -> {
                 if (validator != null) {
                     if (!validator.test(d)) {
+                        // keep the dialog open
                         return;
                     }
                 }
@@ -239,9 +240,7 @@ public class DialogBuilder {
 
 
         d.pack();
-        GUIUtils.centerOnScreen(d);
-
-        d.setVisible(true);
+        GUIUtils.showDialog(d);
         return d;
     }
 

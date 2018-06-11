@@ -18,7 +18,7 @@
 package pixelitor.tools.shapestool;
 
 import pixelitor.colors.FgBgColors;
-import pixelitor.tools.UserDrag;
+import pixelitor.tools.ImDrag;
 import pixelitor.tools.gradientpaints.AngleGradientPaint;
 import pixelitor.tools.gradientpaints.DiamondGradientPaint;
 import pixelitor.tools.gradientpaints.SpiralGradientPaint;
@@ -43,16 +43,16 @@ import static java.awt.AlphaComposite.SRC_OVER;
 enum TwoPointBasedPaint {
     LINEAR_GRADIENT("Linear Gradient") {
         @Override
-        protected Paint getPaint(UserDrag ud) {
+        protected Paint getPaint(ImDrag imDrag) {
             Color fgColor = FgBgColors.getFG();
             Color bgColor = FgBgColors.getBG();
 
             return new GradientPaint(
-                    (float)ud.getStartXFromCenter(),
-                    (float)ud.getStartYFromCenter(),
+                    (float) imDrag.getStartXFromCenter(),
+                    (float) imDrag.getStartYFromCenter(),
                     fgColor,
-                    (float)ud.getEndX(),
-                    (float)ud.getEndY(),
+                    (float) imDrag.getEndX(),
+                    (float) imDrag.getEndY(),
                     bgColor);
         }
     }, RADIAL_GRADIENT("Radial Gradient") {
@@ -60,68 +60,64 @@ enum TwoPointBasedPaint {
         private final AffineTransform gradientTransform = new AffineTransform();
 
         @Override
-        protected Paint getPaint(UserDrag userDrag) {
+        protected Paint getPaint(ImDrag imDrag) {
             Color fgColor = FgBgColors.getFG();
             Color bgColor = FgBgColors.getBG();
 
-            Point2D center = userDrag.getCenterPoint();
-            float distance = (float) userDrag.getDistance();
+            Point2D center = imDrag.getCenterPoint();
+            float distance = (float) imDrag.getDistance();
 
             return new RadialGradientPaint(center, distance / 2, center, FRACTIONS, new Color[]{fgColor, bgColor},
                     MultipleGradientPaint.CycleMethod.NO_CYCLE, MultipleGradientPaint.ColorSpaceType.SRGB, gradientTransform);
         }
     }, ANGLE_GRADIENT("Angle Gradient") {
         @Override
-        protected Paint getPaint(UserDrag userDrag) {
+        protected Paint getPaint(ImDrag imDrag) {
             Color fgColor = FgBgColors.getFG();
             Color bgColor = FgBgColors.getBG();
 
-            Point2D center = userDrag.getCenterPoint();
-            UserDrag centerUserDrag = new UserDrag(center.getX(), center.getY(), userDrag.getEndX(), userDrag.getEndY());
+            ImDrag centerUserDrag = imDrag.getCenterDrag();
 
             return new AngleGradientPaint(centerUserDrag, fgColor, bgColor, MultipleGradientPaint.CycleMethod.NO_CYCLE);
         }
     }, SPIRAL_GRADIENT("Spiral Gradient") {
         @Override
-        protected Paint getPaint(UserDrag userDrag) {
+        protected Paint getPaint(ImDrag imDrag) {
             Color fgColor = FgBgColors.getFG();
             Color bgColor = FgBgColors.getBG();
 
-            Point2D center = userDrag.getCenterPoint();
-            UserDrag centerUserDrag = new UserDrag(center.getX(), center.getY(), userDrag.getEndX(), userDrag.getEndY());
+            ImDrag centerUserDrag = imDrag.getCenterDrag();
 
             return new SpiralGradientPaint(true, centerUserDrag, fgColor, bgColor, MultipleGradientPaint.CycleMethod.NO_CYCLE);
         }
     }, DIAMOND_GRADIENT("Diamond Gradient") {
         @Override
-        protected Paint getPaint(UserDrag userDrag) {
+        protected Paint getPaint(ImDrag imDrag) {
             Color fgColor = FgBgColors.getFG();
             Color bgColor = FgBgColors.getBG();
 
-            Point2D center = userDrag.getCenterPoint();
-            UserDrag fromCenterDrag = new UserDrag(center.getX(), center.getY(), userDrag.getEndX(), userDrag
-                    .getEndY());
+            ImDrag centerUserDrag = imDrag.getCenterDrag();
 
-            return new DiamondGradientPaint(fromCenterDrag, fgColor, bgColor, MultipleGradientPaint.CycleMethod.NO_CYCLE);
+            return new DiamondGradientPaint(centerUserDrag, fgColor, bgColor, MultipleGradientPaint.CycleMethod.NO_CYCLE);
         }
     }, FOREGROUND("Foreground") {
         @Override
-        protected Paint getPaint(UserDrag userDrag) {
+        protected Paint getPaint(ImDrag imDrag) {
             return FgBgColors.getFG();
         }
     }, BACKGROUND("Background") {
         @Override
-        protected Paint getPaint(UserDrag userDrag) {
+        protected Paint getPaint(ImDrag imDrag) {
             return FgBgColors.getBG();
         }
     }, TRANSPARENT("Transparent") {
         @Override
-        protected Paint getPaint(UserDrag userDrag) {
+        protected Paint getPaint(ImDrag imDrag) {
             return Color.WHITE; // does not matter
         }
 
         @Override
-        public void setupPaint(Graphics2D g, UserDrag userDrag) {
+        public void setupPaint(Graphics2D g, ImDrag imDrag) {
             g.setComposite(AlphaComposite.getInstance(DST_OUT));
         }
 
@@ -137,13 +133,13 @@ enum TwoPointBasedPaint {
         this.guiName = guiName;
     }
 
-    protected abstract Paint getPaint(UserDrag userDrag);
+    protected abstract Paint getPaint(ImDrag imDrag);
 
     /**
      * Called before the drawing/filling
      */
-    public void setupPaint(Graphics2D g, UserDrag userDrag) {
-        g.setPaint(getPaint(userDrag));
+    public void setupPaint(Graphics2D g, ImDrag imDrag) {
+        g.setPaint(getPaint(imDrag));
     }
 
     /**

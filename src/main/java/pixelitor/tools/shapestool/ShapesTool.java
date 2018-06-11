@@ -20,12 +20,13 @@ package pixelitor.tools.shapestool;
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import org.jdesktop.swingx.painter.effects.AreaEffect;
 import pixelitor.Composition;
+import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.StrokeParam;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.gui.ImageComponent;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.history.History;
 import pixelitor.history.NewSelectionEdit;
 import pixelitor.history.PixelitorEdit;
@@ -33,12 +34,12 @@ import pixelitor.history.SelectionChangeEdit;
 import pixelitor.layers.Drawable;
 import pixelitor.selection.Selection;
 import pixelitor.tools.ClipStrategy;
+import pixelitor.tools.ImDrag;
 import pixelitor.tools.ShapeType;
 import pixelitor.tools.ShapesAction;
 import pixelitor.tools.StrokeType;
 import pixelitor.tools.Tool;
 import pixelitor.tools.ToolAffectedArea;
-import pixelitor.tools.UserDrag;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.debug.DebugNode;
 
@@ -72,7 +73,8 @@ public class ShapesTool extends Tool {
     private final JComboBox<TwoPointBasedPaint> strokeFillCombo;
     private final JComboBox<TwoPointBasedPaint> fillCombo = new JComboBox<>(fillModel);
     private JButton effectsButton;
-    private OKCancelDialog effectsDialog;
+    private JDialog effectsDialog;
+    private JDialog strokeSettingsDialog;
     private EffectsPanel effectsPanel;
 
     private Shape backupSelectionShape = null;
@@ -89,6 +91,10 @@ public class ShapesTool extends Tool {
         strokeFillCombo = new JComboBox<>(strokeFillModel);
 
         spaceDragBehavior = true;
+
+        // we don't want any instant feedback in the image, but
+        // we want feedback as a side-effect in the stroke preview
+        strokeParam.setAdjustmentListener(ParamAdjustmentListener.EMPTY);
     }
 
     @Override
@@ -117,23 +123,17 @@ public class ShapesTool extends Tool {
 
     private void showEffectsDialog() {
         if (effectsPanel == null) {
-            effectsPanel = new EffectsPanel(null, null);
+            effectsPanel = new EffectsPanel(
+                    () -> effectsPanel.updateEffectsFromGUI(), null);
         }
 
-        effectsDialog = new OKCancelDialog(effectsPanel, "Effects") {
-            @Override
-            protected void okAction() {
-                effectsDialog.close();
-                effectsPanel.updateEffectsFromGUI();
-            }
-
-            @Override
-            protected void cancelAction() {
-                super.cancelAction();
-                effectsDialog.close();
-            }
-        };
-        effectsDialog.setVisible(true);
+        effectsDialog = new DialogBuilder()
+                .form(effectsPanel)
+                .title("Effects")
+                .notModal()
+                .okText("Close")
+                .noCancelButton()
+                .show();
     }
 
     @Override
@@ -150,11 +150,11 @@ public class ShapesTool extends Tool {
         ShapesAction action = actionModel.getSelectedItem();
         if (action.drawsEffects() && effectsPanel != null) {
             AreaEffects effects = effectsPanel.getEffects();
-            if(effects.hasAny()) {
-                if (userDrag.getStartX() < 0) {
+            if (effects.hasAny()) {
+                if (userDrag.getImStartX() < 0) {
                     return;
                 }
-                if (userDrag.getStartY() < 0) {
+                if (userDrag.getImStartY() < 0) {
                     return;
                 }
             }
@@ -205,7 +205,7 @@ public class ShapesTool extends Tool {
             }
 
             ShapeType shapeType = typeModel.getSelectedItem();
-            Shape currentShape = shapeType.getShape(userDrag);
+            Shape currentShape = shapeType.getShape(userDrag.toImDrag());
             Rectangle shapeBounds = currentShape.getBounds();
             shapeBounds.grow(thickness, thickness);
 
@@ -213,7 +213,7 @@ public class ShapesTool extends Tool {
                 ToolAffectedArea affectedArea = new ToolAffectedArea(dr, shapeBounds, false);
                 saveSubImageForUndo(dr.getImage(), affectedArea);
             }
-            paintShapeOnIC(dr, userDrag);
+            paintShape(dr, currentShape);
 
             comp.imageChanged(FULL);
             dr.updateIconImage();
@@ -245,24 +245,24 @@ public class ShapesTool extends Tool {
     }
 
     private void initAndShowStrokeSettingsDialog() {
-        if (toolDialog == null) {
-            toolDialog = strokeParam.createSettingsDialogForShapesTool();
+        if (strokeSettingsDialog == null) {
+            strokeSettingsDialog = strokeParam.createSettingsDialogForShapesTool();
         }
 
-        GUIUtils.centerOnScreen(toolDialog);
-        toolDialog.setVisible(true);
+        GUIUtils.showDialog(strokeSettingsDialog);
     }
 
     private void closeEffectsDialog() {
-        if (effectsDialog != null) {
-            effectsDialog.setVisible(false);
-            effectsDialog.dispose();
-        }
+        GUIUtils.closeDialog(effectsDialog);
+    }
+
+    private void closeStrokeDialog() {
+        GUIUtils.closeDialog(strokeSettingsDialog);
     }
 
     @Override
-    protected void toolEnded() {
-        super.toolEnded();
+    protected void closeToolDialogs() {
+        closeStrokeDialog();
         closeEffectsDialog();
     }
 
@@ -270,15 +270,24 @@ public class ShapesTool extends Tool {
     public void paintOverLayer(Graphics2D g, Composition comp) {
         if (drawing) {
             // updates continuously the shape while drawing
-            paintShape(g, userDrag, comp);
+            Shape currentShape = typeModel.getSelectedItem().getShape(userDrag.toImDrag());
+            paintShape(g, currentShape, comp);
         }
+    }
+
+    /**
+     * Programmatically draw the current shape type with the given drag
+     */
+    public void paintDrag(Drawable dr, ImDrag imDrag) {
+        Shape shape = typeModel.getSelectedItem().getShape(imDrag);
+        paintShape(dr, shape);
     }
 
     /**
      * Paint a shape on the given Drawable. Can be used programmatically.
      * The start and end point points are given relative to the Composition (not Layer)
      */
-    public void paintShapeOnIC(Drawable dr, UserDrag userDrag) {
+    public void paintShape(Drawable dr, Shape shape) {
         int tx = -dr.getTX();
         int ty = -dr.getTY();
 
@@ -290,7 +299,7 @@ public class ShapesTool extends Tool {
 
         comp.applySelectionClipping(g2, null);
 
-        paintShape(g2, userDrag, comp);
+        paintShape(g2, shape, comp);
         g2.dispose();
     }
 
@@ -298,17 +307,17 @@ public class ShapesTool extends Tool {
      * Paints the selected shape on the given Graphics2D
      * within the bounds of the given UserDrag
      */
-    private void paintShape(Graphics2D g, UserDrag userDrag, Composition comp) {
+    private void paintShape(Graphics2D g, Shape shape, Composition comp) {
         if (userDrag.isClick()) {
             return;
         }
+        ImDrag imDrag = userDrag.toImDrag();
 
         if (strokeForOpenShapes == null) {
             strokeForOpenShapes = new BasicStroke(1);
         }
 
         ShapeType shapeType = typeModel.getSelectedItem();
-        Shape currentShape = shapeType.getShape(userDrag);
 
         ShapesAction action = actionModel.getSelectedItem();
 
@@ -317,15 +326,15 @@ public class ShapesTool extends Tool {
         if (action.hasFill()) {
             TwoPointBasedPaint fillType = fillModel.getSelectedItem();
             if (shapeType.isClosed()) {
-                fillType.setupPaint(g, userDrag);
-                g.fill(currentShape);
+                fillType.setupPaint(g, imDrag);
+                g.fill(shape);
                 fillType.finish(g);
             } else if (!action.hasStroke()) {
                 // special case: a shape that is not closed
                 // can be only stroked, even if stroke is disabled
                 g.setStroke(strokeForOpenShapes);
-                fillType.setupPaint(g, userDrag);
-                g.draw(currentShape);
+                fillType.setupPaint(g, imDrag);
+                g.draw(shape);
                 fillType.finish(g);
             }
         }
@@ -338,8 +347,8 @@ public class ShapesTool extends Tool {
                 stroke = strokeParam.createStroke();
             }
             g.setStroke(stroke);
-            strokeFill.setupPaint(g, userDrag);
-            g.draw(currentShape);
+            strokeFill.setupPaint(g, imDrag);
+            g.draw(shape);
             strokeFill.finish(g);
         }
 
@@ -348,14 +357,14 @@ public class ShapesTool extends Tool {
                 AreaEffect[] areaEffects = effectsPanel.getEffects().asArray();
                 for (AreaEffect effect : areaEffects) {
                     if (action.hasFill()) {
-                        effect.apply(g, currentShape, 0, 0);
+                        effect.apply(g, shape, 0, 0);
                     } else if (action.hasStroke()) { // special case if there is only stroke
                         if (stroke == null) {
                             stroke = strokeParam.createStroke();
                         }
-                        effect.apply(g, stroke.createStrokedShape(currentShape), 0, 0);
+                        effect.apply(g, stroke.createStrokedShape(shape), 0, 0);
                     } else { // "effects only"
-                        effect.apply(g, currentShape, 0, 0);
+                        effect.apply(g, shape, 0, 0);
                     }
                 }
             }
@@ -367,14 +376,14 @@ public class ShapesTool extends Tool {
                 if (stroke == null) {
                     stroke = strokeParam.createStroke();
                 }
-                selectionShape = stroke.createStrokedShape(currentShape);
+                selectionShape = stroke.createStrokedShape(shape);
             } else if (!shapeType.isClosed()) {
                 if (strokeForOpenShapes == null) {
                     throw new IllegalStateException("action = " + action + ", shapeType = " + shapeType);
                 }
-                selectionShape = strokeForOpenShapes.createStrokedShape(currentShape);
+                selectionShape = strokeForOpenShapes.createStrokedShape(shape);
             } else {
-                selectionShape = currentShape;
+                selectionShape = shape;
             }
 
             Selection selection = comp.getSelection();
@@ -395,7 +404,7 @@ public class ShapesTool extends Tool {
         strokeSettingsButton.setEnabled(b);
 
         if (!b) {
-            closeToolDialog();
+            closeStrokeDialog();
         }
     }
 

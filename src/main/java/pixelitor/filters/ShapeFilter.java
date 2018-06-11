@@ -87,8 +87,8 @@ public abstract class ShapeFilter extends ParametrizedFilter {
         super(ShowOriginal.NO);
 
         setParamSet(new ParamSet(
-                foreground,
                 background,
+                foreground,
                 new DialogParam("Transform", center, scale),
                 strokeParam,
                 effectsParam
@@ -107,8 +107,8 @@ public abstract class ShapeFilter extends ParametrizedFilter {
         dest = ImageUtils.createImageWithSameCM(src);
         Graphics2D g2 = dest.createGraphics();
 
-        int bgVal = background.getValue();
-        switch (bgVal) {
+        int bg = background.getValue();
+        switch (bg) {
             case BG_BLACK:
                 g2.setColor(BLACK);
                 g2.fillRect(0, 0, srcWidth, srcHeight);
@@ -125,8 +125,8 @@ public abstract class ShapeFilter extends ParametrizedFilter {
                 break;
         }
 
-        int fgVal = foreground.getValue();
-        switch (fgVal) {
+        int fg = foreground.getValue();
+        switch (fg) {
             case FG_WHITE:
                 g2.setColor(WHITE);
                 break;
@@ -187,4 +187,9 @@ public abstract class ShapeFilter extends ParametrizedFilter {
     }
 
     protected abstract Shape createShape(int width, int height);
+
+    @Override
+    protected boolean createDefaultDestImg() {
+        return false;
+    }
 }

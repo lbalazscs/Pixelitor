@@ -781,9 +781,6 @@ public class MenuBar extends JMenuBar {
                 .add();
         sub.buildFilter(JHFourColorGradient.NAME, JHFourColorGradient::new)
                 .withFillListName().add();
-        sub.buildFilter(Starburst.NAME, Starburst::new)
-                .withFillListName()
-                .add();
 
         return sub;
     }
@@ -921,6 +918,7 @@ public class MenuBar extends JMenuBar {
 
         sub.addSeparator();
 
+        sub.add(createRenderGeometrySubmenu());
         sub.add(createRenderShapesSubmenu());
 
         return sub;
@@ -932,6 +930,12 @@ public class MenuBar extends JMenuBar {
         sub.addFilter("Lissajous Curve", Lissajous::new);
         sub.addFilter("Mystic Rose", MysticRose::new);
         sub.addFilter("Spirograph", Spirograph::new);
+        return sub;
+    }
+
+    private static JMenu createRenderGeometrySubmenu() {
+        PMenu sub = new PMenu("Geometry");
+        sub.addFilter(Starburst.NAME, Starburst::new);
         return sub;
     }
 

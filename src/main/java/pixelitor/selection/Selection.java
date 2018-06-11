@@ -45,7 +45,8 @@ public class Selection {
     private ImageComponent ic;
     private Timer marchingAntsTimer;
 
-    // the shape that is currently drawn
+    // The shape that is currently drawn.
+    // The coordinates are in image space, relative to the canvas.
     private Shape shape;
 
     private static final double DASH_WIDTH = 1.0;
@@ -117,6 +118,9 @@ public class Selection {
     }
 
     private void paintAnts(Graphics2D g2, Shape shape, float phase) {
+        // As the selection coordinates are in image space, this is
+        // called with a Graphics2D transformed into image space.
+        // The line width has to be scaled to compensate.
         double viewScale = ic.getViewScale();
         float lineWidth = (float) (DASH_WIDTH / viewScale);
 
@@ -141,18 +145,6 @@ public class Selection {
                 (float) (phase + DASH_LENGTH / viewScale));
         g2.setStroke(stroke2);
         g2.draw(shape);
-    }
-
-    /**
-     * Inverts the selection shape.
-     */
-    public void invert(Rectangle fullImage) {
-        if (shape != null) {
-            Area area = new Area(shape);
-            Area fullArea = new Area(fullImage);
-            fullArea.subtract(area);
-            shape = fullArea;
-        }
     }
 
     public void die() {
