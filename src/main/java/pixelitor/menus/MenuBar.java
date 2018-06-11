@@ -748,8 +748,9 @@ public class MenuBar extends JMenuBar {
         PMenu sub = new PMenu("Reduce Colors");
 
         sub.addFilter(JHQuantize.NAME, JHQuantize::new);
-        sub.addFilter("Posterize", Posterize::new);
+        sub.addFilter(Posterize.NAME, Posterize::new);
         sub.addFilter(Threshold.NAME, Threshold::new);
+        sub.addFilter(ColorThreshold.NAME, ColorThreshold::new);
 
         sub.addSeparator();
 

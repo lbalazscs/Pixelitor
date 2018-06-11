@@ -94,11 +94,17 @@ public class RGBLookup {
         return LookupFactory.createLookupFrom3Arrays(redMap, greenMap, blueMap);
     }
 
-    public void initFromPosterize(int numLevels) {
+    public void initFromPosterize(int numRedLevels, int numGreenLevels, int numBlueLevels) {
         for (int i = 0; i < ARRAY_LENGTH; i++) {
-            int mapping = (ARRAY_LENGTH - 1) * (numLevels * i / ARRAY_LENGTH) / (numLevels - 1);
+            int mapping = (ARRAY_LENGTH - 1) * (numRedLevels * i / ARRAY_LENGTH) / (numRedLevels - 1);
             redMap[i] = (short) mapping;
+        }
+        for (int i = 0; i < ARRAY_LENGTH; i++) {
+            int mapping = (ARRAY_LENGTH - 1) * (numGreenLevels * i / ARRAY_LENGTH) / (numGreenLevels - 1);
             greenMap[i] = (short) mapping;
+        }
+        for (int i = 0; i < ARRAY_LENGTH; i++) {
+            int mapping = (ARRAY_LENGTH - 1) * (numBlueLevels * i / ARRAY_LENGTH) / (numBlueLevels - 1);
             blueMap[i] = (short) mapping;
         }
     }
