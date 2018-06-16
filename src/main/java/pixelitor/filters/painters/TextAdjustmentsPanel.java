@@ -103,6 +103,7 @@ public class TextAdjustmentsPanel extends FilterGUI implements ParamAdjustmentLi
     }
 
     private void createGUI(TextSettings settings) {
+        // TODO a GridBagLayout would handle the extra space better
         Box verticalBox = Box.createVerticalBox();
         verticalBox.add(createTextPanel(settings));
         verticalBox.add(createFontPanel(settings));

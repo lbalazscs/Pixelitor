@@ -124,6 +124,7 @@ public class Composition implements Serializable {
             // one of the file and name arguments must be given
             throw new IllegalArgumentException("no name could be set");
         }
+        assert comp.getName() != null;
         return comp;
     }
 

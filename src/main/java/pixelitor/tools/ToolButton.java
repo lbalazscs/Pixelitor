@@ -50,7 +50,7 @@ public class ToolButton extends JToggleButton implements ActionListener {
 
         char c = tool.getActivationKeyChar();
         String s = new String(new char[]{c}).toUpperCase();
-        setToolTipText(tool.getName() + " Tool (" + s + ')');
+        setToolTipText("<html>" + tool.getName() + " Tool (<b>" + s + "</b>)");
 
         setMargin(new Insets(0, 0, 0, 0));
         setBorderPainted(true);

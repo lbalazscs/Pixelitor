@@ -27,7 +27,7 @@ import pixelitor.io.Directories;
 import pixelitor.io.OutputFormat;
 
 import javax.swing.*;
-import java.awt.FlowLayout;
+import java.awt.BorderLayout;
 import java.awt.GridBagLayout;
 import java.io.File;
 
@@ -55,10 +55,10 @@ public class SingleDirChooserPanel extends ValidatedForm {
 
             gbh.addLabelWithControlNoFill("Output Format:", outputFormatSelector);
         } else {
-            setLayout(new FlowLayout(FlowLayout.LEFT));
-            add(new JLabel(label));
-            add(dirTF);
-            add(browseButton);
+            setLayout(new BorderLayout());
+            add(new JLabel(label), BorderLayout.WEST);
+            add(dirTF, BorderLayout.CENTER);
+            add(browseButton, BorderLayout.EAST);
         }
     }
 
@@ -72,6 +72,7 @@ public class SingleDirChooserPanel extends ValidatedForm {
 
     @Override
     public ValidationResult checkValidity() {
+        // TODO
         return ValidationResult.ok();
     }
 
@@ -84,6 +85,7 @@ public class SingleDirChooserPanel extends ValidatedForm {
     public static boolean selectOutputDir(boolean addOutputChooser) {
         SingleDirChooserPanel chooserPanel = new SingleDirChooserPanel("Output Folder:", Directories.getLastSaveDir()
                 .getAbsolutePath(), "Select Output Folder", addOutputChooser);
+
         ValidatedDialog chooser = new ValidatedDialog(chooserPanel, PixelitorWindow.getInstance(), "Select Output Folder");
         chooser.setVisible(true);
 

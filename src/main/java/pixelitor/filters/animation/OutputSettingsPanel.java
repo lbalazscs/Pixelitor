@@ -43,10 +43,10 @@ import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.FILE;
  * The settings for the tweening animation output
  */
 public class OutputSettingsPanel extends ValidatedForm implements TextFieldValidator {
-    private final JTextField nrSecondsTF = new JTextField("2", 3);
+    private final JTextField numSecondsTF = new JTextField("2", 3);
     private final JTextField fpsTF = new JTextField("24", 3);
     private int nrFrames;
-    private JLabel nrFramesLabel;
+    private JLabel numFramesLabel = new JLabel();
     private double fps;
     private JComboBox<Interpolation> ipCB;
     private JComboBox<TweenOutputType> outputTypeCB;
@@ -56,6 +56,10 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
 
     public OutputSettingsPanel() {
         super(new GridBagLayout());
+
+        numSecondsTF.setName("numSecondsTF");
+        fpsTF.setName("fpsTF");
+        numFramesLabel.setName("numFramesLabel");
 
         // A single TFValidationLayerUI for all the textfields.
         LayerUI<JTextField> tfLayerUI = new TFValidationLayerUI(this);
@@ -81,7 +85,7 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
 
     private void addAnimationLengthSelector(LayerUI<JTextField> tfLayerUI, GridBagHelper gbh) {
         gbh.addLabelWithControl("Number of Seconds:",
-                new JLayer<>(nrSecondsTF, tfLayerUI));
+                new JLayer<>(numSecondsTF, tfLayerUI));
 
         KeyListener keyListener = new KeyAdapter() {
             @Override
@@ -89,15 +93,14 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
                 updateCalculations();
             }
         };
-        nrSecondsTF.addKeyListener(keyListener);
+        numSecondsTF.addKeyListener(keyListener);
 
         gbh.addLabelWithControl("Frames per Second:",
                 new JLayer<>(fpsTF, tfLayerUI));
         fpsTF.addKeyListener(keyListener);
 
-        nrFramesLabel = new JLabel();
         updateCalculations();
-        gbh.addLabelWithControl("Number of Frames:", nrFramesLabel);
+        gbh.addLabelWithControl("Number of Frames:", numFramesLabel);
     }
 
     private void addInterpolationSelector(GridBagHelper gbh) {
@@ -139,18 +142,18 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
 
     private void updateCalculations() {
         try {
-            nrFramesLabel.setText(calculateNrFramesText());
+            numFramesLabel.setText(calculateNrFramesText());
         } catch (NumberFormatException e) {
             // expected behaviour, we can swallow the exception
-            nrFramesLabel.setText("??");
+            numFramesLabel.setText("??");
         } catch (Exception e) {
             Messages.showException(e);
-            nrFramesLabel.setText("??");
+            numFramesLabel.setText("??");
         }
     }
 
     private String calculateNrFramesText() {
-        double nrSeconds = Double.parseDouble(nrSecondsTF.getText().trim());
+        double nrSeconds = Double.parseDouble(numSecondsTF.getText().trim());
         fps = Double.parseDouble(fpsTF.getText().trim());
         nrFrames = (int) (nrSeconds * fps);
         String labelText = String.valueOf(nrFrames);
@@ -165,14 +168,14 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
 
     @Override
     public ValidationResult checkValidity() {
-        return check(nrSecondsTF)
+        return check(numSecondsTF)
                 .and(check(fpsTF))
                 .and(check(fileNameTF));
     }
 
     @Override
     public ValidationResult check(JTextField textField) {
-        if (textField == nrSecondsTF || textField == fpsTF) {
+        if (textField == numSecondsTF || textField == fpsTF) {
             return isTextFieldWithDoubleValid(textField);
         } else if (textField == fileNameTF) {
             TweenOutputType outputType = (TweenOutputType) outputTypeCB.getSelectedItem();

@@ -275,6 +275,10 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         return comp;
     }
 
+    public String getName() {
+        return comp.getName();
+    }
+
     public void changeLayerOrderInTheGUI(int oldIndex, int newIndex) {
         layersPanel.changeLayerOrderInTheGUI(oldIndex, newIndex);
     }

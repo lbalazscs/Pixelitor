@@ -93,6 +93,7 @@ public class GradientParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
+        // TODO why not add a default button?
         return gradientSlider;
     }
 

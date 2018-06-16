@@ -41,7 +41,7 @@ public class AddLayerMaskAction extends AbstractAction implements ActiveImageCha
 
     private AddLayerMaskAction() {
         super("Add Layer Mask", IconUtils.loadIcon("add_layer_mask.png"));
-        putValue(Action.SHORT_DESCRIPTION, "<html>Adds a layer mask to the active layer. <br>Ctrl-click to add an inverted layer mask.");
+        putValue(Action.SHORT_DESCRIPTION, "<html>Adds a layer mask to the active layer. <br><b>Ctrl-click</b> to add an inverted layer mask.");
         setEnabled(false);
         ImageComponents.addActiveImageChangeListener(this);
         AppLogic.addLayerChangeListener(this);

@@ -126,7 +126,7 @@ public class LayerButton extends JToggleButton {
         if (layer instanceof TextLayer) {
             Icon textLayerIcon = IconUtils.getTextLayerIcon();
             layerIconLabel = new JLabel(textLayerIcon);
-            layerIconLabel.setToolTipText("Double-click to edit the text layer.");
+            layerIconLabel.setToolTipText("<html><b>Double-click</b> to edit the text layer.");
         } else if (layer instanceof AdjustmentLayer) {
             Icon adjLayerIcon = IconUtils.getAdjLayerIcon();
             layerIconLabel = new JLabel(adjLayerIcon);
@@ -186,7 +186,7 @@ public class LayerButton extends JToggleButton {
         visibilityCB.setRolloverIcon(CLOSED_EYE_ICON);
 
         visibilityCB.setSelected(true);
-        visibilityCB.setToolTipText("Click to hide/show this layer.");
+        visibilityCB.setToolTipText("<html><b>Click</b> to hide/show this layer.");
         visibilityCB.setSelectedIcon(OPEN_EYE_ICON);
         add(visibilityCB, LayerButtonLayout.CHECKBOX);
 
@@ -322,7 +322,8 @@ public class LayerButton extends JToggleButton {
 
     public void addMaskIconLabel() {
         maskIconLabel = new JLabel("", null, CENTER);
-        maskIconLabel.setToolTipText("<html>Shift-click to disable/enable,<br>Alt-click to show mask/layer,<br>Right-click for more options");
+        maskIconLabel
+                .setToolTipText("<html><b>Shift-click</b> to disable/enable,<br><b>Alt-click</b> to show mask/layer,<br><b>Right-click</b> for more options");
 
         LayerMaskActions.addPopupMenu(maskIconLabel, layer);
         configureLayerIcon(maskIconLabel, "maskIcon");

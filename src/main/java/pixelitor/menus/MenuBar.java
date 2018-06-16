@@ -180,9 +180,9 @@ public class MenuBar extends JMenuBar {
     private static final KeyStroke CTRL_SHIFT_OPEN_BRACKET = KeyStroke.getKeyStroke('[', MENU_SHORTCUT_KEY_MASK + InputEvent.SHIFT_MASK);
     private static final KeyStroke ALT_CLOSE_BRACKET = KeyStroke.getKeyStroke(']', InputEvent.ALT_MASK);
     private static final KeyStroke ALT_OPEN_BRACKET = KeyStroke.getKeyStroke('[', InputEvent.ALT_MASK);
-    private static final KeyStroke F5 = KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0);
     private static final KeyStroke F6 = KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0);
     private static final KeyStroke F7 = KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0);
+    private static final KeyStroke F12 = KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0);
     private static final KeyStroke TAB = KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0);
     private static final KeyStroke CTRL_ALT_R = KeyStroke.getKeyStroke('R', MENU_SHORTCUT_KEY_MASK + InputEvent.ALT_MASK);
 
@@ -294,7 +294,7 @@ public class MenuBar extends JMenuBar {
             public void onClick() {
                 ImageComponents.reloadActiveFromFile();
             }
-        }, F5);
+        }, F12);
 
         fileMenu.addSeparator();
 
@@ -509,7 +509,7 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        sub.addActionWithKey(new GetImageAction(MaskFromColorRangePanel.NAME, true, false) {
+        sub.addActionWithKey(new GetImageAction("Add from Color Range", true, false) {
             @Override
             protected void process(Layer layer, BufferedImage image) {
                 MaskFromColorRangePanel.showInDialog(layer, image);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -55,10 +55,8 @@ public abstract class Palette {
     public abstract String getDialogTitle();
 
     public String getStatusHelp() {
-        return getDialogTitle() + ": enlarge for more colors, "
-                + "click to set the foreground color, "
-                + "right-click to set the background color, "
-                + "Ctrl-click to clear the marking";
+        return "<html>" + getDialogTitle() + ": enlarge for more colors, "
+                + ColorSwatchClickHandler.STANDARD_HTML_HELP;
     }
 }
 

@@ -48,6 +48,7 @@ public class StatusBar extends JPanel {
     }
 
     public void setMessage(String msg) {
+        assert msg != null;
         if (inProgress) {
             // ignore any messages
         } else {
@@ -56,6 +57,7 @@ public class StatusBar extends JPanel {
     }
 
     public void startProgress(String msg, int max) {
+        assert msg != null;
         assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
 
         statusBarLabel.setText(msg);

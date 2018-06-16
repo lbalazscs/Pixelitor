@@ -39,4 +39,11 @@ public interface ColorSwatchClickHandler {
             FgBgColors.setFG(newColor);
         }
     };
+
+    String STANDARD_HTML_HELP = "<b>click</b> to set the foreground color, "
+            + "<b>right-click</b> to set the background color, "
+            + "<b>Ctrl-click</b> to clear the marking";
+
+    String FILTER_HTML_HELP = "<b>click</b> to set the filter color, "
+            + "<b>Ctrl-click</b> to clear the marking";
 }

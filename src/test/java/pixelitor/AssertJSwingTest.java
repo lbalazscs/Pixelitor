@@ -92,8 +92,8 @@ public class AssertJSwingTest {
     private static File batchFilterOutputDir;
 
     private Robot robot;
-    private static final int ROBOT_DELAY_MILLIS_DEFAULT = 100;
-    private static final int ROBOT_DELAY_MILLIS_SLOW = 500;
+    private static final int ROBOT_DELAY_DEFAULT = 100; // millis
+    private static final int ROBOT_DELAY_SLOW = 500; // millis
 
     private FrameFixture pw;
     private final Random random = new Random();
@@ -124,10 +124,10 @@ public class AssertJSwingTest {
 
         boolean testOneMethodSlowly = false; // TODO should be property
         if (testOneMethodSlowly) {
-            test.robot.settings().delayBetweenEvents(ROBOT_DELAY_MILLIS_SLOW);
+            test.robot.settings().delayBetweenEvents(ROBOT_DELAY_SLOW);
 
             //test.stressTestFilterWithDialog("Marble...", Randomize.YES, Reseed.YES, true);
-            test.testNavigatorRightClickPopupMenu();
+            test.testSelectionToolAndMenus();
         } else {
             TestingMode[] testingModes = getTestingModes();
             String target = getTarget();
@@ -274,7 +274,7 @@ public class AssertJSwingTest {
         // the command line to slow it down
         String s = System.getProperty("robot.delay.millis");
         if (s == null) {
-            robot.settings().delayBetweenEvents(ROBOT_DELAY_MILLIS_DEFAULT);
+            robot.settings().delayBetweenEvents(ROBOT_DELAY_DEFAULT);
         } else {
             int delay = Integer.parseInt(s);
             robot.settings().delayBetweenEvents(delay);
@@ -293,8 +293,10 @@ public class AssertJSwingTest {
         // make sure we have a big internal frame for the tool tests
         keyboardActualPixels();
 
-        // test first because it can lead to problems on Linux
-        testSelectionToolAndMenus();
+        if (!JVM.isLinux) {
+            // TODO investigate - maybe just a vmware problem
+            testSelectionToolAndMenus();
+        }
 
         testMoveTool();
         testCropTool();
@@ -363,10 +365,14 @@ public class AssertJSwingTest {
         assert checkConsistency();
 
         // test delete layer
+        layer2Button.requireSelected();
         deleteLayerButton.click();
         layer1Button.requireSelected();
         keyboardUndo();
+
+        // TODO problem on Linux
         layer2Button.requireSelected();
+
         keyboardRedo();
         layer1Button.requireSelected();
         testingMode.set(this);
@@ -498,7 +504,7 @@ public class AssertJSwingTest {
             return;
         }
 
-        runMenuCommand("Mask from Color Range...");
+        runMenuCommand("Add from Color Range...");
 
         DialogFixture dialog = findDialogByTitle("Mask from Color Range");
 
@@ -903,7 +909,21 @@ public class AssertJSwingTest {
         dialog.button("ok").click(); // next
         findButtonByText(dialog, "Randomize Settings").click();
         dialog.button("ok").click(); // next
-        dialog.button("ok").click(); // render
+
+        dialog.textBox("numSecondsTF").requireText("2");
+        dialog.textBox("fpsTF").requireText("24");
+        dialog.label("numFramesLabel").requireText("48");
+        if (quick) {
+            dialog.textBox("numSecondsTF").deleteText().enterText("1");
+            dialog.textBox("fpsTF").deleteText().enterText("4");
+            dialog.label("numFramesLabel").requireText("4");
+        } else {
+            dialog.textBox("numSecondsTF").deleteText().enterText("3");
+            dialog.textBox("fpsTF").deleteText().enterText("5");
+            dialog.label("numFramesLabel").requireText("15");
+        }
+
+        dialog.button("ok").click(); // render button
 
         // say OK to the folder not empty question
         JOptionPaneFixture optionPane = findJOptionPane();
@@ -1731,11 +1751,11 @@ public class AssertJSwingTest {
         assert thereIsSelection();
 
         keyboardUndo(); // undo tracing
+
         assert thereIsSelection();
     }
 
     private void testWithTwoEclipseSelections() {
-        assert thereIsSelection();
         pw.comboBox("selectionTypeCombo").selectItem("Ellipse");
 
         // replace current selection with the first ellipse

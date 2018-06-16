@@ -53,7 +53,8 @@ public class AboutDialog extends OKDialog {
     private static JPanel createCreditsPanel() {
         JPanel p = new JPanel();
         p.add(new JLabel("<html>Pixelitor was written by <b>L\u00e1szl\u00f3 Bal\u00e1zs-Cs\u00edki</b>." +
-                "<br><br>The Sepia filter was contributed by <b>Daniel Wreczycki</b>." +
+                "<br><br><b>\"LucasTheCure\"</b> contributed improvements to <br>the Crop Tool (see the release notes)</b>." +
+                "<br>The Sepia filter was contributed by <b>Daniel Wreczycki</b>." +
                 "<br><br>Pixelitor uses <ul><li>the image filter library by <b>Jerry Huxtable</b> " +
                 "<li>many components by <b>Jeremy Wood</b>" +
                 "<li>the fast math library by <b>Jeff Hain</b>" +

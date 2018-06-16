@@ -35,8 +35,8 @@ import static java.awt.GridBagConstraints.WEST;
 public class GridBagHelper {
     private static final Insets insets = new Insets(2, 2, 2, 2);
     private static final GridBagConstraints labelConstraint = new GridBagConstraints(0, 0, 1, 1, 0.0, 1.0, EAST, NONE, insets, 0, 0);
-    private static final GridBagConstraints nextControlConstraint = new GridBagConstraints(0, 0, 1, 1, 0.0, 1.0, WEST, HORIZONTAL, insets, 0, 0);
-    private static final GridBagConstraints nextLastControlConstraint = new GridBagConstraints(0, 0, REMAINDER, 1, 0.0, 1.0, WEST, HORIZONTAL, insets, 0, 0);
+    private static final GridBagConstraints nextControlConstraint = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, WEST, HORIZONTAL, insets, 0, 0);
+    private static final GridBagConstraints nextLastControlConstraint = new GridBagConstraints(0, 0, REMAINDER, 1, 1.0, 1.0, WEST, HORIZONTAL, insets, 0, 0);
 
     private final Container container;
     private int autoIncrementedGridY = 0;

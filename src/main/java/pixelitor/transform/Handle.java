@@ -44,7 +44,7 @@ public class Handle {
         this.cursor = Cursor.getPredefinedCursor(cursorType);
     }
 
-    public void draw(Graphics2D g, Stroke bigStroke, Stroke smallStroke) {
+    public void paint(Graphics2D g, Stroke bigStroke, Stroke smallStroke) {
         // black at the edges
         g.setStroke(bigStroke);
         g.setColor(BLACK);
@@ -86,7 +86,7 @@ public class Handle {
         if(shape == null) {
             shape = new Rectangle(x - RADIUS, y - RADIUS, DIAMETER, DIAMETER);
         } else {
-            shape.setBounds(x - RADIUS, y - RADIUS, DIAMETER, DIAMETER);
+            shape.setLocation(x - RADIUS, y - RADIUS);
         }
     }
 

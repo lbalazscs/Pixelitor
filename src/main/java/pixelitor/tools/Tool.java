@@ -141,7 +141,7 @@ public abstract class Tool implements KeyboardObserver {
         }
         mouseDown = true;
 
-        userDrag = new UserDrag();
+        userDrag = new UserDrag(this);
         userDrag.setStart(e, ic);
 
         handlerChainStart.handleMousePressed(e, ic);

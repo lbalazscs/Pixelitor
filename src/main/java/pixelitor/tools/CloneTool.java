@@ -71,7 +71,7 @@ public class CloneTool extends BlendingModeBrushTool {
 
     protected CloneTool() {
         super('s', "Clone Stamp", "clone_tool_icon.png",
-                "<b>Alt-click</b> (or <b>right-click</b>) to select the source, then <b>drag</b> to paint with the copied pixels.",
+                "<b>Alt-click</b> (or <b>right-click</b>) to select the source, then <b>drag</b> to paint.",
                 Cursors.CROSSHAIR);
     }
 
@@ -165,11 +165,12 @@ public class CloneTool extends BlendingModeBrushTool {
             // just act as if this was an alt-click
             setCloningSource(ic, x, y);
         } else {
-            String msg = "Define a source point first with Alt-Click (or with right-click).";
+            String msg = "<html>Define a source point first with <b>Alt-Click</b> or with <b>right-click</b>.";
             if (JVM.isLinux) {
-                msg += "\n(For Alt-Click you might need to disable Alt-Click for window dragging in the window manager)";
+                msg += "<br><br>(For <b>Alt-Click</b> you might need to disable " +
+                        "<br><b>Alt-Click</b> for window dragging in the window manager)";
             }
-            Messages.showError("No source", msg);
+            Messages.showError("No source point", msg);
         }
     }
 

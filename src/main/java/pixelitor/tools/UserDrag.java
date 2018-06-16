@@ -34,6 +34,7 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
  * by the user while using a tool.
  */
 public class UserDrag {
+    private final Tool tool;
     // The coordinates in the component (mouse) space.
     private int coStartX;
     private int coEndX;
@@ -54,10 +55,13 @@ public class UserDrag {
     private boolean constrainPoints = false;
     private boolean startFromCenter;
 
-    public UserDrag() {
+    public UserDrag(Tool tool) {
+        this.tool = tool;
     }
 
     public void setStart(MouseEvent e, ImageComponent ic) {
+        assert ic != null;
+
         coStartX = e.getX();
         coStartY = e.getY();
         this.ic = ic;
@@ -67,7 +71,11 @@ public class UserDrag {
     }
 
     public void setEnd(MouseEvent e, ImageComponent ic) {
-        assert this.ic == ic;
+        assert ic != null;
+        assert this.ic == ic : "ic changed for " + tool.getName()
+                + ", was " + this.ic.getName()
+                + ", is " + ic.getName();
+
         coEndX = e.getX();
         coEndY = e.getY();
 

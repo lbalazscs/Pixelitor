@@ -36,7 +36,7 @@ public class AddNewLayerAction extends AbstractAction implements ActiveImageChan
 
     private AddNewLayerAction() {
         super("Add New Layer", IconUtils.loadIcon("add_layer.gif"));
-        putValue(SHORT_DESCRIPTION, "<html>Adds a new empty image layer.<br>Ctrl-click to add the new layer bellow the active one.");
+        putValue(SHORT_DESCRIPTION, "<html>Adds a new empty image layer.<br><b>Ctrl-click</b> to add the new layer bellow the active one.");
         setEnabled(false);
         ImageComponents.addActiveImageChangeListener(this);
     }

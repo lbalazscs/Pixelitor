@@ -75,7 +75,7 @@ public class Handles {
 
     private void drawHandles(Graphics2D g) {
         for (Handle handle : handles) {
-            handle.draw(g, bigStroke, smallStroke);
+            handle.paint(g, bigStroke, smallStroke);
         }
     }
 
