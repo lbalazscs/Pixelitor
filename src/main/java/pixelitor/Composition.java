@@ -838,7 +838,7 @@ public class Composition implements Serializable {
     public void promoteSelection() {
         assert selection == null || !selection.isAlive() : "selection = " + selection;
         setNewSelection(builtSelection);
-        builtSelection = null;
+        setBuiltSelection(null);
     }
 
     public boolean hasSelection() {

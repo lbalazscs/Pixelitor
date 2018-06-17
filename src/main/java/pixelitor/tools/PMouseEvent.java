@@ -17,39 +17,133 @@
 
 package pixelitor.tools;
 
+import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 
+import javax.swing.*;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 
 /**
- * A MouseEvent replacement with scaled coordinates
- *
- * The original, unfinished idea was to replace all
- * mouse events in the tools with this.
+ * The "Pixelitor Mouse Event" is a wrapper around
+ * the standard {@link MouseEvent} with some
+ * practical added functionality
  */
 public class PMouseEvent {
-    private boolean shiftDown;
-
     // event coordinates in image space
-    private final double x;
-    private final double y;
+    private double imX;
+    private double imY;
+    // event coordinates in component (MouseEvent) space
+    private final int coX;
+    private final int coY;
+
+    private final ImageComponent ic;
+    private final MouseEvent e;
+
+    boolean xConverted = false;
+    boolean yConverted = false;
 
     public PMouseEvent(MouseEvent e, ImageComponent ic) {
-        int mouseX = e.getX();
-        int mouseY = e.getY();
-        x = ic.componentXToImageSpace(mouseX);
-        y = ic.componentYToImageSpace(mouseY);
+        assert e.getSource() == ic;
+
+        this.e = e;
+        this.ic = ic;
+
+        coX = e.getX();
+        coY = e.getY();
+//        imX = ic.componentXToImageSpace(coX);
+//        imY = ic.componentYToImageSpace(coY);
     }
 
-    public double getX() {
-        return x;
+    /**
+     * Returns the x event coordinate in component space
+     */
+    public int getCoX() {
+        return coX;
     }
 
-    public double getY() {
-        return y;
+    /**
+     * Returns the y event coordinate in component space
+     */
+    public int getCoY() {
+        return coY;
     }
 
-    boolean wasShiftDown() {
-        return shiftDown;
+    /**
+     * Returns the x event coordinate in image space
+     */
+    public double getImX() {
+        if (!xConverted) {
+            imX = ic.componentXToImageSpace(coX);
+            xConverted = true;
+        }
+        return imX;
+    }
+
+    /**
+     * Returns the y event coordinate in image space
+     */
+    public double getImY() {
+        if (!yConverted) {
+            imY = ic.componentYToImageSpace(coY);
+            yConverted = true;
+        }
+        return imY;
+    }
+
+    public ImageComponent getIC() {
+        return ic;
+    }
+
+    public JViewport getViewport() {
+        return (JViewport) ic.getParent();
+    }
+
+    public Composition getComp() {
+        return ic.getComp();
+    }
+
+    public MouseEvent getOrigEvent() {
+        return e;
+    }
+
+    public Point getPoint() {
+        return e.getPoint();
+    }
+
+    public boolean isConsumed() {
+        return e.isConsumed();
+    }
+
+    public void consume() {
+        e.consume();
+    }
+
+    public int getClickCount() {
+        return e.getClickCount();
+    }
+
+    public boolean isShiftDown() {
+        return e.isShiftDown();
+    }
+
+    public boolean isControlDown() {
+        return e.isControlDown();
+    }
+
+    public boolean isAltDown() {
+        return e.isAltDown();
+    }
+
+    public boolean isLeft() {
+        return SwingUtilities.isLeftMouseButton(e);
+    }
+
+    public boolean isMiddle() {
+        return SwingUtilities.isMiddleMouseButton(e);
+    }
+
+    public boolean isRight() {
+        return SwingUtilities.isRightMouseButton(e);
     }
 }

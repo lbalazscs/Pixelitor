@@ -35,15 +35,16 @@ import pixelitor.testutils.WithTranslation;
 import pixelitor.tools.Alt;
 import pixelitor.tools.Ctrl;
 import pixelitor.tools.MouseButton;
+import pixelitor.tools.PMouseEvent;
 import pixelitor.tools.Shift;
 import pixelitor.utils.Messages;
 import pixelitor.utils.test.Assertions;
 
 import javax.swing.*;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
@@ -62,7 +63,6 @@ import static pixelitor.layers.MaskViewMode.NORMAL;
 public class TestHelper {
     private static final int TEST_WIDTH = 20;
     private static final int TEST_HEIGHT = 10;
-    private static final Component eventSource = new JPanel();
     private static boolean initialized = false;
 
     // all coordinates and distances must be even here because of the resize test
@@ -187,7 +187,7 @@ public class TestHelper {
         return layer;
     }
 
-    public static MouseEvent createEvent(int id, Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton, int x, int y) {
+    public static PMouseEvent createEvent(ImageComponent ic, int id, Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton, int x, int y) {
         int modifiers = 0;
         modifiers = alt.modify(modifiers);
         modifiers = ctrl.modify(modifiers);
@@ -198,7 +198,7 @@ public class TestHelper {
             popupTrigger = true;
         }
         //noinspection MagicConstant
-        return new MouseEvent(eventSource,
+        MouseEvent e = new MouseEvent(ic,
                 id,
                 System.currentTimeMillis(),
                 modifiers,
@@ -207,6 +207,7 @@ public class TestHelper {
                 1, // click count
                 popupTrigger
         );
+        return new PMouseEvent(e, ic);
     }
 
     public static ImageComponent setupAnActiveICFor(Composition comp) {
@@ -227,6 +228,9 @@ public class TestHelper {
             return new Rectangle((int) in.getX(), (int) in.getY(), (int) in.getWidth(), (int) in.getHeight());
         });
 
+        Point fakeLocationOnScreen = new Point(0, 0);
+        when(ic.getLocationOnScreen()).thenReturn(fakeLocationOnScreen);
+        
         Cursor cursor = Cursor.getDefaultCursor();
         when(ic.getCursor()).thenReturn(cursor);
 

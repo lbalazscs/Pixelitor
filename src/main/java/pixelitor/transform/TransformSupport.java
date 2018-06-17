@@ -19,6 +19,7 @@ package pixelitor.transform;
 
 import pixelitor.gui.ImageComponent;
 import pixelitor.tools.ArrowKey;
+import pixelitor.tools.PMouseEvent;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Utils;
 
@@ -74,7 +75,8 @@ public class TransformSupport {
         handles.paint(g);
     }
 
-    public void mousePressed(MouseEvent e, ImageComponent ic) {
+    public void mousePressed(PMouseEvent e) {
+        ImageComponent ic = e.getIC();
         dragStart = e.getPoint();
         dragStartRect = new Rectangle(compSpaceRect);
         dragStartCursorType = ic.getCursor().getType();
@@ -91,14 +93,14 @@ public class TransformSupport {
         }
     }
 
-    public void mouseDragged(MouseEvent e, ImageComponent ic) {
+    public void mouseDragged(PMouseEvent e) {
         if (transformMode == MODE_NONE) {
             return;
         }
 
         // reset rect
         compSpaceRect.setRect(dragStartRect);
-        Point mouseOffset = new Point(e.getX() - dragStart.x, e.getY() - dragStart.y);
+        Point mouseOffset = new Point(e.getCoX() - dragStart.x, e.getCoY() - dragStart.y);
 
         if (transformMode == MODE_RESIZE) {
             TransformHelper.resize(compSpaceRect, dragStartCursorType, mouseOffset);
@@ -112,15 +114,15 @@ public class TransformSupport {
 
         adjusting = true;
         handles.updateRect(compSpaceRect);
-        recalculateImageSpaceRect(ic);
+        recalculateImageSpaceRect(e.getIC());
     }
 
-    public void mouseReleased(MouseEvent e, ImageComponent ic) {
+    public void mouseReleased(PMouseEvent e) {
         // we need to ensure that after resize rectangle has
         // positive width and height (required for Rectangle.contain testing)
         compSpaceRect = Utils.toPositiveRect(compSpaceRect);
         handles.updateRect(compSpaceRect);
-        handles.setCursorForPoint(e.getX(), e.getY(), ic);
+        handles.setCursorForPoint(e.getCoX(), e.getCoY(), e.getIC());
 
         adjusting = false;
         transformMode = MODE_NONE;

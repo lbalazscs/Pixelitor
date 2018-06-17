@@ -83,11 +83,11 @@ public enum SelectionType {
 
             if (createNew) {
                 GeneralPath p = new GeneralPath();
-                p.moveTo(pe.getX(), pe.getY());
+                p.moveTo(pe.getImX(), pe.getImY());
                 return p;
             } else {
                 GeneralPath gp = (GeneralPath) oldShape;
-                gp.lineTo(pe.getX(), pe.getY());
+                gp.lineTo(pe.getImX(), pe.getImY());
 
                 return gp;
             }

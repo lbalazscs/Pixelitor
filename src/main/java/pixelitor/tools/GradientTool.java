@@ -21,6 +21,7 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.ImageComponent;
+import pixelitor.history.History;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.LayerMask;
 import pixelitor.layers.TmpDrawingLayer;
@@ -33,7 +34,6 @@ import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.MultipleGradientPaint.CycleMethod;
 import java.awt.Paint;
-import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
@@ -49,7 +49,7 @@ import static pixelitor.tools.GradientTool.GradientToolState.INITIAL;
 /**
  * The gradient tool
  */
-public class GradientTool extends Tool {
+public class GradientTool extends DragTool {
 //    private boolean thereWasDragging = false;
 
     enum GradientToolState {
@@ -125,22 +125,22 @@ public class GradientTool extends Tool {
     }
 
     @Override
-    public void mousePressed(MouseEvent e, ImageComponent ic) {
+    public void dragStarted(PMouseEvent e) {
 
     }
 
     @Override
-    public void mouseDragged(MouseEvent e, ImageComponent ic) {
+    public void ongoingDrag(PMouseEvent e) {
         state = DRAGGING;  // the gradient will be drawn only when the mouse is released
-        ic.repaint();
+        e.getIC().repaint();
     }
 
     @Override
-    public void mouseReleased(MouseEvent e, ImageComponent ic) {
+    public void dragFinished(PMouseEvent e) {
         if (state == DRAGGING) {
-            Composition comp = ic.getComp();
+            Composition comp = e.getComp();
 
-            saveFullImageForUndo(comp);
+            History.addImageEdit(getName(), comp);
             drawGradient(comp.getActiveDrawable(),
                     getType(),
                     getGradientColorType(),
@@ -168,8 +168,8 @@ public class GradientTool extends Tool {
     }
 
     @Override
-    public boolean dispatchMouseClicked(MouseEvent e, ImageComponent ic) {
-        if (super.dispatchMouseClicked(e, ic)) {
+    public boolean mouseClicked(PMouseEvent e) {
+        if (super.mouseClicked(e)) {
             return true;
         }
         state = INITIAL;

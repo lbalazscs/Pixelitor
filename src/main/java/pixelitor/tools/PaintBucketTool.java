@@ -20,7 +20,6 @@ package pixelitor.tools;
 import pixelitor.Composition;
 import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.ImageComponent;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.Cursors;
@@ -32,7 +31,6 @@ import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.ArrayDeque;
@@ -65,7 +63,7 @@ public class PaintBucketTool extends Tool {
         super('p', "Paint Bucket",
                 "paint_bucket_tool_icon.png",
                 "<b>click</b> to fill with the selected color.",
-                Cursors.DEFAULT, true, true, false, ClipStrategy.CANVAS);
+                Cursors.DEFAULT, true, true, ClipStrategy.CANVAS);
     }
 
     @Override
@@ -77,21 +75,21 @@ public class PaintBucketTool extends Tool {
     }
 
     @Override
-    public void mousePressed(MouseEvent e, ImageComponent ic) {
+    public void mousePressed(PMouseEvent e) {
         // do nothing
     }
 
     @Override
-    public void mouseDragged(MouseEvent e, ImageComponent ic) {
+    public void mouseDragged(PMouseEvent e) {
         // do nothing
     }
 
     @Override
-    public void mouseReleased(MouseEvent e, ImageComponent ic) {
-        int x = (int) userDrag.getImEndX();
-        int y = (int) userDrag.getImEndY();
+    public void mouseReleased(PMouseEvent e) {
+        int x = (int) e.getImX();
+        int y = (int) e.getImY();
 
-        Composition comp = ic.getComp();
+        Composition comp = e.getComp();
         Drawable dr = comp.getActiveDrawable();
 
         int tx = dr.getTX();
@@ -158,8 +156,9 @@ public class PaintBucketTool extends Tool {
         }
 
         if (replacedArea != null) { // something was replaced
-            ToolAffectedArea affectedArea = new ToolAffectedArea(dr, replacedArea, true);
-            saveSubImageForUndo(original, affectedArea);
+            ToolAffectedArea affectedArea = new ToolAffectedArea(replacedArea,
+                    original, dr, true, getName());
+            affectedArea.addToHistory();
 
             Graphics2D g = image.createGraphics();
             comp.applySelectionClipping(g, translationTransform);

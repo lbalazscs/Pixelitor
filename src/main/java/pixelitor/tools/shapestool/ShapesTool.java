@@ -24,7 +24,6 @@ import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.StrokeParam;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.EffectsPanel;
-import pixelitor.gui.ImageComponent;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.history.History;
@@ -34,11 +33,12 @@ import pixelitor.history.SelectionChangeEdit;
 import pixelitor.layers.Drawable;
 import pixelitor.selection.Selection;
 import pixelitor.tools.ClipStrategy;
+import pixelitor.tools.DragTool;
 import pixelitor.tools.ImDrag;
+import pixelitor.tools.PMouseEvent;
 import pixelitor.tools.ShapeType;
 import pixelitor.tools.ShapesAction;
 import pixelitor.tools.StrokeType;
-import pixelitor.tools.Tool;
 import pixelitor.tools.ToolAffectedArea;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.debug.DebugNode;
@@ -49,7 +49,6 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.Stroke;
-import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
@@ -60,7 +59,7 @@ import static pixelitor.Composition.ImageChangeActions.REPAINT;
 /**
  * The Shapes Tool
  */
-public class ShapesTool extends Tool {
+public class ShapesTool extends DragTool {
     private final EnumComboBoxModel<ShapesAction> actionModel = new EnumComboBoxModel<>(ShapesAction.class);
     private final EnumComboBoxModel<ShapeType> typeModel = new EnumComboBoxModel<>(ShapeType.class);
     private final EnumComboBoxModel<TwoPointBasedPaint> fillModel = new EnumComboBoxModel<>(TwoPointBasedPaint.class);
@@ -84,7 +83,7 @@ public class ShapesTool extends Tool {
 
     public ShapesTool() {
         super('u', "Shapes", "shapes_tool_icon.png",
-                "<b>drag</b> to draw a shape. Hold <b>SPACE</b> down while drawing to move the shape. ",
+                "<b>drag</b> to draw a shape. Hold <b>Alt</b> down to drag from the center. Hold <b>SPACE</b> down while drawing to move the shape. ",
                 Cursors.DEFAULT, true, true, false, ClipStrategy.CANVAS);
 
         strokeFillModel.setSelectedItem(TwoPointBasedPaint.BACKGROUND);
@@ -137,13 +136,13 @@ public class ShapesTool extends Tool {
     }
 
     @Override
-    public void mousePressed(MouseEvent e, ImageComponent ic) {
-        Composition comp = ic.getComp();
+    public void dragStarted(PMouseEvent e) {
+        Composition comp = e.getComp();
         backupSelectionShape = comp.getSelectionShape();
     }
 
     @Override
-    public void mouseDragged(MouseEvent e, ImageComponent ic) {
+    public void ongoingDrag(PMouseEvent e) {
         // hack to prevent AssertionError when dragging started
         // from negative coordinates bug
         // TODO investigate
@@ -164,17 +163,17 @@ public class ShapesTool extends Tool {
         drawing = true;
         userDrag.setStartFromCenter(e.isAltDown());
 
-        Composition comp = ic.getComp();
+        Composition comp = e.getComp();
 
         // this will trigger paintOverLayer, therefore the continuous drawing of the shape
         comp.imageChanged(REPAINT); // TODO optimize, the whole image should not be repainted
     }
 
     @Override
-    public void mouseReleased(MouseEvent e, ImageComponent ic) {
+    public void dragFinished(PMouseEvent e) {
         userDrag.setStartFromCenter(e.isAltDown());
 
-        Composition comp = ic.getComp();
+        Composition comp = e.getComp();
         Drawable dr = comp.getActiveDrawable();
 
         ShapesAction action = actionModel.getSelectedItem();
@@ -210,8 +209,10 @@ public class ShapesTool extends Tool {
             shapeBounds.grow(thickness, thickness);
 
             if (!shapeBounds.isEmpty()) {
-                ToolAffectedArea affectedArea = new ToolAffectedArea(dr, shapeBounds, false);
-                saveSubImageForUndo(dr.getImage(), affectedArea);
+                BufferedImage originalImage = dr.getImage();
+                ToolAffectedArea affectedArea = new ToolAffectedArea(shapeBounds,
+                        originalImage, dr, false, getName());
+                affectedArea.addToHistory();
             }
             paintShape(dr, currentShape);
 

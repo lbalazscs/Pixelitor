@@ -19,16 +19,13 @@ package pixelitor.tools;
 
 import pixelitor.colors.ColorUtils;
 import pixelitor.colors.FgBgColors;
-import pixelitor.gui.ImageComponent;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.Cursors;
 
-import javax.swing.*;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Shape;
-import java.awt.event.MouseEvent;
 
 /**
  * The brush tool
@@ -57,9 +54,9 @@ public class BrushTool extends BlendingModeBrushTool {
     }
 
     @Override
-    public void mousePressed(MouseEvent e, ImageComponent ic) {
+    public void mousePressed(PMouseEvent e) {
         setupDrawingColor(e);
-        super.mousePressed(e, ic);
+        super.mousePressed(e);
     }
 
     @Override
@@ -74,10 +71,10 @@ public class BrushTool extends BlendingModeBrushTool {
         graphics.setColor(FgBgColors.getFG());
     }
 
-    private void setupDrawingColor(MouseEvent e) {
-        if (SwingUtilities.isRightMouseButton(e)) {
+    private void setupDrawingColor(PMouseEvent e) {
+        if (e.isRight()) {
             drawingColor = FgBgColors.getBG();
-        } else if (SwingUtilities.isMiddleMouseButton(e)) {
+        } else if (e.isMiddle()) {
             // TODO we never get here because isAltDown is always true for middle-button events, even if Alt is not pressed?
             // See source comment in java.awt.Event for ALT_MASK
             Color fg = FgBgColors.getFG();

@@ -26,7 +26,6 @@ import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.Color;
-import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
 /**
@@ -39,7 +38,7 @@ public class ColorPickerTool extends Tool {
     public ColorPickerTool() {
         super('i', "Color Picker", "color_picker_tool_icon.png",
                 "<b>click</b> to pick the foreground color, <b>Alt-click</b> (or <b>right-click</b>) to pick the background color.",
-                Cursors.CROSSHAIR, false, true, false, ClipStrategy.CANVAS);
+                Cursors.CROSSHAIR, false, true, ClipStrategy.CANVAS);
     }
 
     @Override
@@ -49,24 +48,25 @@ public class ColorPickerTool extends Tool {
 
 
     @Override
-    public void mousePressed(MouseEvent e, ImageComponent ic) {
-        sampleColor(e, ic, e.isAltDown() || SwingUtilities.isRightMouseButton(e));
+    public void mousePressed(PMouseEvent e) {
+        sampleColor(e, e.isAltDown() || e.isRight());
     }
 
 
     @Override
-    public void mouseDragged(MouseEvent e, ImageComponent ic) {
-        sampleColor(e, ic, e.isAltDown() || SwingUtilities.isRightMouseButton(e));
+    public void mouseDragged(PMouseEvent e) {
+        sampleColor(e, e.isAltDown() || e.isRight());
     }
 
     @Override
-    public void mouseReleased(MouseEvent e, ImageComponent ic) {
+    public void mouseReleased(PMouseEvent e) {
 
     }
 
-    public void sampleColor(MouseEvent e, ImageComponent ic, boolean selectBackground) {
-        int x = (int) ic.componentXToImageSpace(e.getX());
-        int y = (int) ic.componentYToImageSpace(e.getY());
+    public void sampleColor(PMouseEvent e, boolean selectBackground) {
+        ImageComponent ic = e.getIC();
+        int x = (int) e.getImX();
+        int y = (int) e.getImY();
 
         BufferedImage img;
         boolean isGray = false;

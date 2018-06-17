@@ -40,7 +40,6 @@ import pixelitor.utils.test.RandomGUITest;
 import javax.swing.*;
 import java.awt.GridBagLayout;
 import java.awt.Point;
-import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
@@ -118,22 +117,22 @@ public class CloneTool extends BlendingModeBrushTool {
     }
 
     @Override
-    public void mousePressed(MouseEvent e, ImageComponent ic) {
-        double x = userDrag.getImStartX();
-        double y = userDrag.getImStartY();
+    public void mousePressed(PMouseEvent e) {
+        double x = e.getImX();
+        double y = e.getImY();
 
-        if (e.isAltDown() || SwingUtilities.isRightMouseButton(e)) {
-            setCloningSource(ic, x, y);
+        if (e.isAltDown() || e.isRight()) {
+            setCloningSource(e.getIC(), x, y);
         } else {
             boolean notWithLine = !withLine(e);
 
             if (state == NO_SOURCE) {
-                handleUndefinedSource(ic, x, y);
+                handleUndefinedSource(e.getIC(), x, y);
                 return;
             }
             startNewCloningStroke(x, y, notWithLine);
 
-            super.mousePressed(e, ic);
+            super.mousePressed(e);
         }
     }
 
@@ -153,9 +152,9 @@ public class CloneTool extends BlendingModeBrushTool {
     }
 
     @Override
-    public void mouseDragged(MouseEvent e, ImageComponent ic) {
+    public void mouseDragged(PMouseEvent e) {
         if (state == CLONING) { // make sure that the first source-setting stroke does not clone
-            super.mouseDragged(e, ic);
+            super.mouseDragged(e);
         }
     }
 
@@ -191,7 +190,7 @@ public class CloneTool extends BlendingModeBrushTool {
     }
 
     @Override
-    protected boolean doColorPickerForwarding() {
+    public boolean doColorPickerForwarding() {
         return false; // this tool uses Alt-click for source selection
     }
 

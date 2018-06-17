@@ -17,7 +17,7 @@
 
 package pixelitor.tools;
 
-public interface KeyboardObserver {
+public interface KeyListener {
     void spacePressed();
 
     void spaceReleased();

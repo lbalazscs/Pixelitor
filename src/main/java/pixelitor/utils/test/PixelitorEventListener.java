@@ -79,6 +79,9 @@ public class PixelitorEventListener implements GlobalLayerChangeListener,
 
     @Override
     public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
-        Events.postListenerEvent("activeImageHasChanged", newIC.getComp(), null);
+        Events.postListenerEvent(
+                String.format("activeImageHasChanged %s => %s",
+                        oldIC.getName(), newIC.getName()),
+                newIC.getComp(), null);
     }
 }

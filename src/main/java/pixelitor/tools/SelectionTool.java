@@ -31,12 +31,11 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
-import java.awt.event.MouseEvent;
 
 /**
  * The selection tool
  */
-public class SelectionTool extends Tool implements ActiveImageChangeListener {
+public class SelectionTool extends DragTool implements ActiveImageChangeListener {
     private static final String HELP_TEXT = "<b>click and drag</b> to select an area. Hold <b>SPACE</b> down to move the entire selection. <b>Shift-drag</b> adds to an existing selection, <b>Alt-drag</b> removes from it, <b>Shift+Alt drag</b> intersects.";
     private static final String POLY_HELP_TEXT = "<html>Polygonal selection: <b>click</b> to add points, <b>double-click</b> (or <b>right-click</b>) to finish the selection.";
 
@@ -88,7 +87,7 @@ public class SelectionTool extends Tool implements ActiveImageChangeListener {
     }
 
     @Override
-    public void mousePressed(MouseEvent e, ImageComponent ic) {
+    public void dragStarted(PMouseEvent e) {
         if (polygonal) {
             return; // ignore mouse pressed
         }
@@ -97,14 +96,14 @@ public class SelectionTool extends Tool implements ActiveImageChangeListener {
 
         SelectionType selectionType = (SelectionType) typeCombo.getSelectedItem();
         SelectionInteraction selectionInteraction = (SelectionInteraction) interactionCombo.getSelectedItem();
-        Composition comp = ic.getComp();
+        Composition comp = e.getComp();
         selectionBuilder = new SelectionBuilder(selectionType, selectionInteraction, comp);
     }
 
     @Override
-    public void mouseDragged(MouseEvent e, ImageComponent ic) {
+    public void ongoingDrag(PMouseEvent e) {
         if (polygonal) {
-            return; // ignore mouseDragged
+            return; // ignore dragging
         }
 
         boolean altDown = e.isAltDown();
@@ -119,32 +118,30 @@ public class SelectionTool extends Tool implements ActiveImageChangeListener {
     }
 
     @Override
-    public void mouseReleased(MouseEvent e, ImageComponent ic) {
-        // TODO
+    public void dragFinished(PMouseEvent e) {
         if (userDrag.isClick() && !polygonal) { // will be handled by mouseClicked
             return;
         }
 
-        Composition comp = ic.getComp();
-        Selection selection = comp.getBuiltSelection();
-        if (selection == null && !polygonal) {
-            System.err.println("SelectionTool::mouseReleased: no built selection");
+        Composition comp = e.getComp();
+        Selection builtSelection = comp.getBuiltSelection();
+        if (builtSelection == null && !polygonal) {
+            // can happen, if we called stopBuildingSelection()
+            // for some exceptional reason
             return;
         }
 
         if (polygonal) {
-            PMouseEvent pe = new PMouseEvent(e, ic);
-
             if (selectionBuilder == null) {
                 setupInteractionWithKeyModifiers(e);
                 SelectionType selectionType = (SelectionType) typeCombo.getSelectedItem();
                 SelectionInteraction selectionInteraction = (SelectionInteraction) interactionCombo.getSelectedItem();
                 selectionBuilder = new SelectionBuilder(selectionType, selectionInteraction, comp);
-                selectionBuilder.updateSelection(pe);
+                selectionBuilder.updateSelection(e);
                 restoreInteraction();
             } else {
-                selectionBuilder.updateSelection(pe);
-                if (SwingUtilities.isRightMouseButton(e)) {
+                selectionBuilder.updateSelection(e);
+                if (e.isRight()) {
                     selectionBuilder.combineShapes();
                     stopBuildingSelection();
                 }
@@ -164,12 +161,11 @@ public class SelectionTool extends Tool implements ActiveImageChangeListener {
     }
 
     @Override
-    public boolean dispatchMouseClicked(MouseEvent e, ImageComponent ic) {
+    public boolean mouseClicked(PMouseEvent e) {
         if (polygonal) {
             if (selectionBuilder != null && e.getClickCount() > 1) {
                 // finish polygonal for double-click
-                PMouseEvent pe = new PMouseEvent(e, ic);
-                selectionBuilder.updateSelection(pe);
+                selectionBuilder.updateSelection(e);
                 selectionBuilder.combineShapes();
                 stopBuildingSelection();
                 return false;
@@ -179,18 +175,16 @@ public class SelectionTool extends Tool implements ActiveImageChangeListener {
             }
         }
 
-        super.dispatchMouseClicked(e, ic);
+        super.mouseClicked(e);
 
-        deselect(ic, true);
+        deselect(e.getComp(), true);
 
         altMeansSubtract = false;
 
         return false;
     }
 
-    private static void deselect(ImageComponent ic, boolean addToHistory) {
-        Composition comp = ic.getComp();
-
+    private static void deselect(Composition comp, boolean addToHistory) {
         if (comp.hasSelection()) {
             comp.deselect(addToHistory);
         }
@@ -210,7 +204,7 @@ public class SelectionTool extends Tool implements ActiveImageChangeListener {
         return false;
     }
 
-    private void setupInteractionWithKeyModifiers(MouseEvent e) {
+    private void setupInteractionWithKeyModifiers(PMouseEvent e) {
         boolean shiftDown = e.isShiftDown();
         boolean altDown = e.isAltDown();
 
@@ -235,12 +229,6 @@ public class SelectionTool extends Tool implements ActiveImageChangeListener {
             interactionCombo.setSelectedItem(originalSelectionInteraction);
             originalSelectionInteraction = null;
         }
-    }
-
-    @Override
-    protected void toolEnded() {
-        super.toolEnded();
-        stopBuildingSelection();
     }
 
     @Override

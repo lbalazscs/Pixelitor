@@ -71,7 +71,7 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
     private final AdjustmentListener adjListener;
     private static JDialog dialog;
     private JPopupMenu popup;
-    private Color viewBoxColor = Color.RED;
+    private static Color viewBoxColor = Color.RED;
 
     private int preferredWidth;
     private int preferredHeight;

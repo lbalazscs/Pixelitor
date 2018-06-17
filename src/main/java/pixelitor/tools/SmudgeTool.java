@@ -18,7 +18,6 @@
 package pixelitor.tools;
 
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.ImageComponent;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.BrushAffectedArea;
@@ -28,7 +27,6 @@ import pixelitor.utils.Cursors;
 
 import javax.swing.*;
 import java.awt.Point;
-import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
@@ -79,20 +77,20 @@ public class SmudgeTool extends AbstractBrushTool {
     }
 
     @Override
-    public void mousePressed(MouseEvent e, ImageComponent ic) {
-        Drawable dr = ic.getComp().getActiveDrawable();
+    public void mousePressed(PMouseEvent e) {
+        Drawable dr = e.getComp().getActiveDrawable();
 
         // We could also pass the full image and the translation
         // and the smudge brush could always adjust the last sampling point
         // with the translation.
         BufferedImage sourceImage = dr.getCanvasSizedSubImage();
 
-        double x = userDrag.getImStartX();
-        double y = userDrag.getImStartY();
+        double x = e.getImX();
+        double y = e.getImY();
         if (!e.isShiftDown()) { // not a line-click
             initStroke(sourceImage, x, y);
         }
-        super.mousePressed(e, ic);
+        super.mousePressed(e);
     }
 
     private void initStroke(BufferedImage sourceImage, double x, double y) {

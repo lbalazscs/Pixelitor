@@ -17,11 +17,7 @@
 
 package pixelitor.tools;
 
-import pixelitor.gui.ImageComponent;
 import pixelitor.utils.Cursors;
-
-import javax.swing.*;
-import java.awt.event.MouseEvent;
 
 /**
  * The Hand Tool
@@ -32,7 +28,7 @@ public class HandTool extends Tool {
     HandTool() {
         super('h', "Hand", "hand_tool_icon.png",
                 "<b>drag</b> to move the view (if scrollbars are present).",
-                Cursors.HAND, false, false, false, ClipStrategy.CANVAS);
+                Cursors.HAND, false, false, ClipStrategy.CANVAS);
     }
 
     @Override
@@ -41,19 +37,17 @@ public class HandTool extends Tool {
     }
 
     @Override
-    public void mousePressed(MouseEvent e, ImageComponent ic) {
-        JViewport viewport = (JViewport) ic.getParent();
-        handToolSupport.mousePressed(e, viewport);
+    public void mousePressed(PMouseEvent e) {
+        handToolSupport.mousePressed(e.getOrigEvent(), e.getViewport());
     }
 
     @Override
-    public void mouseDragged(MouseEvent e, ImageComponent ic) {
-        JViewport viewport = (JViewport) ic.getParent();
-        handToolSupport.mouseDragged(e, viewport);
+    public void mouseDragged(PMouseEvent e) {
+        handToolSupport.mouseDragged(e.getOrigEvent(), e.getViewport());
     }
 
     @Override
-    public void mouseReleased(MouseEvent e, ImageComponent ic) {
+    public void mouseReleased(PMouseEvent e) {
 
     }
 

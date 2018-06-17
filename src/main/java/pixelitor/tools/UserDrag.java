@@ -23,7 +23,6 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
-import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
@@ -31,10 +30,12 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 /**
  * Represents the mouse drag on the image made
- * by the user while using a tool.
+ * by the user while using a {@link DragTool}.
+ * Only the start and end points are relevant.
  */
 public class UserDrag {
-    private final Tool tool;
+    private final DragTool tool;
+
     // The coordinates in the component (mouse) space.
     private int coStartX;
     private int coEndX;
@@ -53,40 +54,65 @@ public class UserDrag {
     private ImageComponent ic;
 
     private boolean constrainPoints = false;
-    private boolean startFromCenter;
+    private boolean startFromCenter = false;
 
-    public UserDrag(Tool tool) {
+    public UserDrag(DragTool tool) {
         this.tool = tool;
     }
 
-    public void setStart(MouseEvent e, ImageComponent ic) {
-        assert ic != null;
+    public void setStart(PMouseEvent e) {
+        assert e.getIC() != null;
+        this.ic = e.getIC();
 
-        coStartX = e.getX();
-        coStartY = e.getY();
-        this.ic = ic;
+        coStartX = e.getCoX();
+        coStartY = e.getCoY();
 
-        imStartX = ic.componentXToImageSpace(coStartX);
-        imStartY = ic.componentYToImageSpace(coStartY);
+        imStartX = e.getImX();
+        imStartY = e.getImY();
     }
 
-    public void setEnd(MouseEvent e, ImageComponent ic) {
+    public void setEnd(PMouseEvent e) {
         assert ic != null;
-        assert this.ic == ic : "ic changed for " + tool.getName()
+        assert this.ic == e.getIC() : "ic changed for " + tool.getName()
                 + ", was " + this.ic.getName()
                 + ", is " + ic.getName();
 
-        coEndX = e.getX();
-        coEndY = e.getY();
+        coEndX = e.getCoX();
+        coEndY = e.getCoY();
 
         if (constrainPoints) {
-            int dx = Math.abs(coEndX - coStartX);
-            int dy = Math.abs(coEndY - coStartY);
+            int dx = coEndX - coStartX;
+            int dy = coEndY - coStartY;
 
-            if (dx > dy) {
+            int adx = Math.abs(dx);
+            int ady = Math.abs(dy);
+
+            if (adx > 2 * ady) {
                 coEndY = coStartY;
-            } else {
+            } else if (ady > 2 * adx) {
                 coEndX = coStartX;
+            } else {
+                if (dx > 0) {
+                    if (dy > 0) {
+                        int avg = (dx + dy) / 2;
+                        coEndX = coStartX + avg;
+                        coEndY = coStartY + avg;
+                    } else {
+                        int avg = (dx - dy) / 2;
+                        coEndX = coStartX + avg;
+                        coEndY = coStartY - avg;
+                    }
+                } else { // dx <= 0
+                    if (dy > 0) {
+                        int avg = (-dx + dy) / 2;
+                        coEndX = coStartX - avg;
+                        coEndY = coStartY + avg;
+                    } else {
+                        int avg = (-dx - dy) / 2;
+                        coEndX = coStartX - avg;
+                        coEndY = coStartY - avg;
+                    }
+                }
             }
         }
 

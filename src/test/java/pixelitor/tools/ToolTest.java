@@ -108,8 +108,11 @@ public class ToolTest {
     }
 
     private void stroke(Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton) {
-        tool.dispatchMousePressed(TestHelper.createEvent(MOUSE_PRESSED, alt, ctrl, shift, mouseButton, 2, 2), ic);
-        tool.dispatchMouseDragged(TestHelper.createEvent(MOUSE_DRAGGED, alt, ctrl, shift, mouseButton, 4, 4), ic);
-        tool.dispatchMouseReleased(TestHelper.createEvent(MOUSE_RELEASED, alt, ctrl, shift, mouseButton, 6, 6), ic);
+        tool.handlerChain
+                .handleMousePressed(TestHelper.createEvent(ic, MOUSE_PRESSED, alt, ctrl, shift, mouseButton, 2, 2));
+        tool.handlerChain
+                .handleMouseDragged(TestHelper.createEvent(ic, MOUSE_DRAGGED, alt, ctrl, shift, mouseButton, 4, 4));
+        tool.handlerChain
+                .handleMouseReleased(TestHelper.createEvent(ic, MOUSE_RELEASED, alt, ctrl, shift, mouseButton, 6, 6));
     }
 }

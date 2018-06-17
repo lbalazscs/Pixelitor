@@ -61,11 +61,13 @@ public class Tools {
         currentTool.getButton().setSelected(true);
     }
 
-    public static void changeTo(Tool newCurrentTool) {
-        Tools.currentTool.toolEnded();
-        Tools.currentTool = newCurrentTool;
-        newCurrentTool.toolStarted();
-        ToolSettingsPanelContainer.INSTANCE.showSettingsFor(newCurrentTool);
+    public static void changeTo(Tool newTool) {
+        Tool previousTool = Tools.currentTool;
+        previousTool.toolEnded();
+        Tools.currentTool = newTool;
+        newTool.toolStarted();
+        EventDispatcher.toolChanged(previousTool, newTool);
+        ToolSettingsPanelContainer.INSTANCE.showSettingsFor(newTool);
     }
 
     public static Tool[] getAll() {
@@ -101,27 +103,51 @@ public class Tools {
     }
 
     public static class EventDispatcher {
+        private static boolean mouseDown = false;
+        private static PMouseEvent lastEvent;
+
         private EventDispatcher() {
         }
 
-        public static void mouseClicked(MouseEvent e, ImageComponent ic) {
-            currentTool.dispatchMouseClicked(e, ic);
-        }
-
         public static void mousePressed(MouseEvent e, ImageComponent ic) {
-            currentTool.dispatchMousePressed(e, ic);
+            lastEvent = new PMouseEvent(e, ic);
+            currentTool.handlerChain.handleMousePressed(lastEvent);
+            mouseDown = true;
         }
 
         public static void mouseReleased(MouseEvent e, ImageComponent ic) {
-            currentTool.dispatchMouseReleased(e, ic);
+            lastEvent = new PMouseEvent(e, ic);
+            currentTool.handlerChain.handleMouseReleased(lastEvent);
+            mouseDown = false;
         }
 
         public static void mouseDragged(MouseEvent e, ImageComponent ic) {
-            currentTool.dispatchMouseDragged(e, ic);
+            lastEvent = new PMouseEvent(e, ic);
+            currentTool.handlerChain.handleMouseDragged(lastEvent);
+        }
+
+        public static void mouseClicked(MouseEvent e, ImageComponent ic) {
+            lastEvent = new PMouseEvent(e, ic);
+            // doesn't need to go through the handler chain
+            currentTool.mouseClicked(lastEvent);
+            mouseDown = false;
         }
 
         public static void mouseMoved(MouseEvent e, ImageComponent ic) {
-            currentTool.dispatchMouseMoved(e, ic);
+            // doesn't need to go through the handler chain
+            currentTool.mouseMoved(e, ic);
+        }
+
+        public static void toolChanged(Tool oldTool, Tool newTool) {
+            if (mouseDown) {
+                // We switched tools via keyboard in the middle of a drag
+                // In order to avoid broken internal tool states,
+                // simulate a mouse release for the old tool...
+                oldTool.handlerChain.handleMouseReleased(lastEvent);
+
+                // ...and a mouse pressed for the new one
+                newTool.handlerChain.handleMousePressed(lastEvent);
+            }
         }
     }
 }

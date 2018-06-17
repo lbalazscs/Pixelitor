@@ -34,6 +34,7 @@ import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMaskAddType;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.tools.Tool;
+import pixelitor.tools.Tools;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
@@ -42,6 +43,9 @@ import javax.swing.plaf.MenuBarUI;
 import java.awt.EventQueue;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The main class
@@ -169,6 +173,7 @@ public class Pixelitor {
             return;
         }
 
+//        keepSwitchingToolsRandomly();
 //        startFilter(new Marble());
 
 //        Navigator.showInDialog(pw);
@@ -204,8 +209,7 @@ public class Pixelitor {
     }
 
     private static void clickTool(Tool tool) {
-        tool.getButton()
-                .doClick();
+        tool.getButton().doClick();
     }
 
     private static void startFilter(Filter filter) {
@@ -218,15 +222,27 @@ public class Pixelitor {
                 .addMask(LayerMaskAddType.PATTERN);
     }
 
+    private static void keepSwitchingToolsRandomly() {
+        Runnable backgroundTask = () -> {
+            while (true) {
+                Utils.sleep(1, TimeUnit.SECONDS);
+                // this will run on a background thread
+                // and keeps putting this EDT task on the EDT
+                Runnable switchTask = () -> {
+                    Tool newTool = Tools.getRandomTool(new Random());
+                    clickTool(newTool);
+                };
+                try {
+                    SwingUtilities.invokeAndWait(switchTask);
+                } catch (InterruptedException | InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        new Thread(backgroundTask).start();
+    }
+
     public static String getLFClassName() {
         return "javax.swing.plaf.nimbus.NimbusLookAndFeel";
-
-//        UIManager.LookAndFeelInfo[] lookAndFeels = UIManager.getInstalledLookAndFeels();
-//        for (UIManager.LookAndFeelInfo lookAndFeel : lookAndFeels) {
-//            if (lookAndFeel.getName().equals("Nimbus")) {
-//                return lookAndFeel.getClassName();
-//            }
-//        }
-//        return UIManager.getSystemLookAndFeelClassName();
     }
 }

@@ -55,7 +55,7 @@ import static pixelitor.tools.CropToolState.USER_DRAG;
 /**
  * The crop tool
  */
-public class CropTool extends Tool implements ActiveImageChangeListener {
+public class CropTool extends DragTool implements ActiveImageChangeListener {
     private CropToolState state = INITIAL;
 
     private TransformSupport transformSupport;
@@ -84,7 +84,7 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
     CropTool() {
         super('c', "Crop", "crop_tool_icon.png",
                 "<b>drag</b> to start, hold down <b>SPACE</b> to move the entire region. After the handles appear: <b>Shift-drag</b> the handles to keep the aspect ratio. <b>Double-click</b> to crop, or press <b>Esc</b> to cancel.",
-                Cursors.DEFAULT, false, true, true, ClipStrategy.CANVAS);
+                Cursors.DEFAULT, false, true, false, ClipStrategy.CANVAS);
         spaceDragBehavior = true;
 
         maskOpacity.addChangeListener(e -> maskOpacityChanged());
@@ -171,7 +171,7 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
     }
 
     @Override
-    public boolean dispatchMouseClicked(MouseEvent e, ImageComponent ic) {
+    public boolean mouseClicked(PMouseEvent e) {
         if (e.getClickCount() == 2 && !e.isConsumed()) {
             return mouseDoubleClicked(e);
         }
@@ -179,7 +179,7 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
         return false;
     }
 
-    private boolean mouseDoubleClicked(MouseEvent e) {
+    private boolean mouseDoubleClicked(PMouseEvent e) {
         // if user double clicked inside selection then accept cropping
 
         if (state != TRANSFORM) {
@@ -196,7 +196,7 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
     }
 
     @Override
-    public void mousePressed(MouseEvent e, ImageComponent ic) {
+    public void dragStarted(PMouseEvent e) {
         // in case of crop/image change the ended is set to true even if the tool is not ended
         // if a new drag is started, then reset it
         ended = false;
@@ -205,44 +205,32 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
 
         if (state == TRANSFORM) {
             assert transformSupport != null;
-            transformSupport.mousePressed(e, ic);
+            transformSupport.mousePressed(e);
             enableCropActions(true);
         } else if (state == USER_DRAG) {
             enableCropActions(true);
         }
     }
 
-    private void enableCropActions(boolean b) {
-        widthLabel.setEnabled(b);
-        hSizeSpinner.setEnabled(b);
-
-        heightLabel.setEnabled(b);
-        wSizeSpinner.setEnabled(b);
-
-        cropButton.setEnabled(b);
-        cancelButton.setEnabled(b);
-    }
-
     @Override
-    public void mouseDragged(MouseEvent e, ImageComponent ic) {
+    public void ongoingDrag(PMouseEvent e) {
         if (state == TRANSFORM) {
-            transformSupport.mouseDragged(e, ic);
+            transformSupport.mouseDragged(e);
         }
-        ic.repaint();
+        e.getIC().repaint();
     }
 
-    // TODO: this is done directly with the dispatch mechanism
     @Override
-    public void dispatchMouseMoved(MouseEvent e, ImageComponent ic) {
-        super.dispatchMouseMoved(e, ic);
+    public void mouseMoved(MouseEvent e, ImageComponent ic) {
+        super.mouseMoved(e, ic);
         if (state == TRANSFORM) {
             transformSupport.mouseMoved(e, ic);
         }
     }
 
     @Override
-    public void mouseReleased(MouseEvent e, ImageComponent ic) {
-        Composition comp = ic.getComp();
+    public void dragFinished(PMouseEvent e) {
+        Composition comp = e.getComp();
         comp.imageChanged(FULL);
 
         switch (state) {
@@ -256,7 +244,7 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
 
                 // TODO all the info is in the userDrag, calculate directly,
                 // without rounding errors
-                Rectangle compSpaceRect = ic.fromImageToComponentSpace(imageSpaceRect);
+                Rectangle compSpaceRect = e.getIC().fromImageToComponentSpace(imageSpaceRect);
 
                 transformSupport = new TransformSupport(compSpaceRect, imageSpaceRect);
 
@@ -266,7 +254,7 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
                 if (transformSupport == null) {
                     throw new IllegalStateException();
                 }
-                transformSupport.mouseReleased(e, ic);
+                transformSupport.mouseReleased(e);
                 break;
         }
     }
@@ -339,6 +327,17 @@ public class CropTool extends Tool implements ActiveImageChangeListener {
         }
 
         g2.setClip(origClip);
+    }
+
+    private void enableCropActions(boolean b) {
+        widthLabel.setEnabled(b);
+        hSizeSpinner.setEnabled(b);
+
+        heightLabel.setEnabled(b);
+        wSizeSpinner.setEnabled(b);
+
+        cropButton.setEnabled(b);
+        cancelButton.setEnabled(b);
     }
 
     /**

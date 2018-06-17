@@ -25,6 +25,7 @@ import pixelitor.gui.utils.Dialogs;
 import pixelitor.layers.LayersContainer;
 import pixelitor.menus.MenuBar;
 import pixelitor.tools.ToolSettingsPanelContainer;
+import pixelitor.tools.Tools;
 import pixelitor.tools.ToolsPanel;
 import pixelitor.utils.AppPreferences;
 
@@ -56,6 +57,7 @@ public class PixelitorWindow extends JFrame {
         addDesktopArea();
         addLayersAndHistograms();
         addToolsPanel();
+        Tools.setDefaultTool();
         addStatusBar();
 
         setupFrameIcons();

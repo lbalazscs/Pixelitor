@@ -17,10 +17,8 @@
 
 package pixelitor.tools.toolhandlers;
 
-import pixelitor.gui.ImageComponent;
+import pixelitor.tools.PMouseEvent;
 import pixelitor.tools.Tool;
-
-import java.awt.event.MouseEvent;
 
 /**
  * At the end of a {@link ToolHandler} chain there is always a
@@ -35,21 +33,21 @@ public class CurrentToolHandler extends ToolHandler {
     }
 
     @Override
-    boolean mousePressed(MouseEvent e, ImageComponent ic) {
-        tool.mousePressed(e, ic);
+    boolean mousePressed(PMouseEvent e) {
+        tool.mousePressed(e);
         // this is the last handler in the chain, therefore it always returns true
         return true;
     }
 
     @Override
-    boolean mouseDragged(MouseEvent e, ImageComponent ic) {
-        tool.mouseDragged(e, ic);
+    boolean mouseDragged(PMouseEvent e) {
+        tool.mouseDragged(e);
         return true;
     }
 
     @Override
-    boolean mouseReleased(MouseEvent e, ImageComponent ic) {
-        tool.mouseReleased(e, ic);
+    boolean mouseReleased(PMouseEvent e) {
+        tool.mouseReleased(e);
         return true;
     }
 }

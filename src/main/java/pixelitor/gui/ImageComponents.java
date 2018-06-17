@@ -205,7 +205,7 @@ public class ImageComponents {
     }
 
     /**
-     * When a new tool is activated, the cursor has to be changed for each image
+     * Changes the cursor for all images
      */
     public static void setCursorForAll(Cursor cursor) {
         for (ImageComponent ic : icList) {
@@ -393,7 +393,7 @@ public class ImageComponents {
             assert comp.getIC() == null : "already has ic";
 
             ImageComponent ic = new ImageComponent(comp);
-            ic.setCursor(Tools.getCurrent().getCursor());
+            ic.setCursor(Tools.getCurrent().getStartingCursor());
             setActiveIC(ic, false);
             comp.addLayersToGUI();
 

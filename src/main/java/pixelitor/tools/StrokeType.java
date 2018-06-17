@@ -89,11 +89,6 @@ public enum StrokeType {
         }
 
         @Override
-        public Stroke getInnerStroke() {
-            return null;
-        }
-
-        @Override
         public int getExtraWidth(int specifiedWidth) {
             return (int) (specifiedWidth * 1.5);
         }

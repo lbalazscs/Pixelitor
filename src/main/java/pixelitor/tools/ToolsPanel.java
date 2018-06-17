@@ -41,15 +41,13 @@ public class ToolsPanel extends JPanel {
         }
 
         add(verticalBox);
-        Tools.setDefaultTool();
 
+        // there is not text tool, but pressing T should add a text layer
         // in the menu it was added using T, not t
         Action textToolAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 AddTextLayerAction.INSTANCE.actionPerformed(null);
-//                    TextLayer.createNew(PixelitorWindow.getInstance());
-//                    TextFilter.getInstance().execute();
             }
         };
         GlobalKeyboardWatch.addKeyboardShortCut('t', true, "text", textToolAction);

@@ -17,40 +17,69 @@
 
 package pixelitor.tools;
 
+import pixelitor.Composition;
+import pixelitor.history.History;
+import pixelitor.history.PartialImageEdit;
 import pixelitor.layers.Drawable;
 
+import javax.swing.*;
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 
 /**
- * Represents the area affected by a tool.
- * It can be relative to the image or to the canvas
+ * Represents the area affected by a tool
+ * in image space, relative to the image.
  */
 public class ToolAffectedArea {
-    private final Rectangle rect;
+    private final String toolName;
+    private Rectangle rect;
     private final Drawable dr;
+    private final BufferedImage originalImage;
 
-    public ToolAffectedArea(Drawable dr, Rectangle rect, boolean relativeToImage) {
+    public ToolAffectedArea(Rectangle rect, BufferedImage originalImage, Drawable dr,
+                            boolean relativeToImage, String toolName) {
         assert rect.width > 0 : "rectangle.width = " + rect.width;
         assert rect.height > 0 : "rectangle.height = " + rect.height;
 
+        this.toolName = toolName;
         this.dr = dr;
         this.rect = rect;
+        this.originalImage = originalImage;
 
         if (!relativeToImage) {
+            // if the coordinates are relative to the canvas,
+            // translate them to be relative to the image
             int dx = -dr.getTX();
             int dy = -dr.getTY();
             this.rect.translate(dx, dy);
         }
-    }
 
-    /**
-     * @return The affected rectangle relative to the image
-     */
-    public Rectangle getRect() {
-        return rect;
+        this.rect = SwingUtilities.computeIntersection(
+                0, 0, originalImage.getWidth(), originalImage.getHeight(), // full image bounds
+                this.rect
+        );
+
     }
 
     public Drawable getDrawable() {
         return dr;
+    }
+
+    /**
+     * Save only the affected area for undo.
+     */
+    public void addToHistory() {
+        assert (originalImage != null);
+        if (rect.isEmpty()) {
+            return;
+        }
+
+        Composition comp = dr.getComp();
+
+        // we could intersect with the selection bounds,
+        // but typically the extra savings would be minimal
+
+        PartialImageEdit edit = new PartialImageEdit(toolName, comp, dr, originalImage, rect, false);
+        History.addEdit(edit);
     }
 }

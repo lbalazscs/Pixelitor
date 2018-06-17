@@ -42,7 +42,6 @@ import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Shape;
-import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.PathIterator;
@@ -54,7 +53,7 @@ import static pixelitor.Composition.ImageChangeActions.HISTOGRAM;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 
 /**
- * Abstract superclass for tools like brush, erase, clone.
+ * Abstract superclass for all the brush-like tools.
  */
 public abstract class AbstractBrushTool extends Tool implements ActiveImageChangeListener {
     private static final int MIN_BRUSH_RADIUS = 1;
@@ -83,7 +82,7 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
 
     AbstractBrushTool(char activationKeyChar, String name, String iconFileName, String toolMessage, Cursor cursor) {
         super(activationKeyChar, name, iconFileName, toolMessage,
-                cursor, true, true, false, ClipStrategy.CANVAS);
+                cursor, true, true, ClipStrategy.CANVAS);
         ImageComponents.addActiveImageChangeListener(this);
         initBrushVariables();
     }
@@ -139,12 +138,12 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
     }
 
     @Override
-    public void mousePressed(MouseEvent e, ImageComponent ic) {
+    public void mousePressed(PMouseEvent e) {
         boolean withLine = withLine(e);
-        double x = userDrag.getImStartX();
-        double y = userDrag.getImStartY();
+        double x = e.getImX();
+        double y = e.getImY();
 
-        newMousePoint(ic.getComp().getActiveDrawable(), x, y, withLine);
+        newMousePoint(e.getComp().getActiveDrawable(), x, y, withLine);
         firstMouseDown = false;
 
         if (withLine) {
@@ -154,23 +153,23 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
         }
     }
 
-    protected boolean withLine(MouseEvent e) {
+    protected boolean withLine(PMouseEvent e) {
         return !firstMouseDown && e.isShiftDown();
     }
 
     @Override
-    public void mouseDragged(MouseEvent e, ImageComponent ic) {
-        double x = userDrag.getImEndX();
-        double y = userDrag.getImEndY();
+    public void mouseDragged(PMouseEvent e) {
+        double x = e.getImX();
+        double y = e.getImY();
 
         // at this point x and y are already scaled according to the zoom level
         // (unlike e.getX(), e.getY())
 
-        newMousePoint(ic.getComp().getActiveDrawable(), x, y, false);
+        newMousePoint(e.getComp().getActiveDrawable(), x, y, false);
     }
 
     @Override
-    public void mouseReleased(MouseEvent e, ImageComponent ic) {
+    public void mouseReleased(PMouseEvent e) {
         if (graphics == null) {
             // we can get here if the mousePressed was an Alt-press, therefore
             // consumed by the color picker. Nothing was drawn, therefore
@@ -179,16 +178,18 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
             return;
         }
 
-        Composition comp = ic.getComp();
+        Composition comp = e.getComp();
         finishBrushStroke(comp.getActiveDrawable());
     }
 
     private void finishBrushStroke(Drawable dr) {
         int radius = getRadius();
-        ToolAffectedArea affectedArea = new ToolAffectedArea(dr,
-                brushAffectedArea.getRectangleAffectedByBrush(radius), false);
         BufferedImage originalImage = drawStrategy.getOriginalImage(dr, this);
-        saveSubImageForUndo(originalImage, affectedArea);
+        ToolAffectedArea affectedArea = new ToolAffectedArea(
+                brushAffectedArea.getRectangleAffectedByBrush(radius),
+                originalImage, dr,
+                false, getName());
+        affectedArea.addToHistory();
 
         if (graphics != null) {
             graphics.dispose();
@@ -389,7 +390,7 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
     }
 
     @Override
-    protected boolean doColorPickerForwarding() {
+    public boolean doColorPickerForwarding() {
         return true;
     }
 
@@ -408,6 +409,7 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
     }
 
     // TODO indicate the size of the brush
+    @Override
     public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent ic, AffineTransform componentTransform, AffineTransform imageTransform) {
 //        if(userDrag != null) {
 //            int x = userDrag.getCoEndX();

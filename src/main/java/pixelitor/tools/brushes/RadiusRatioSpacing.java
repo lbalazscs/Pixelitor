@@ -22,7 +22,7 @@ package pixelitor.tools.brushes;
  * is proportional to the radius
  */
 public class RadiusRatioSpacing implements SpacingStrategy {
-    private double spacingRatio = 2.0; // the spacing relative to the radius
+    private final double spacingRatio; // the spacing relative to the radius
 
     public RadiusRatioSpacing(double spacingRatio) {
         this.spacingRatio = spacingRatio;

@@ -17,10 +17,8 @@
 
 package pixelitor.tools.toolhandlers;
 
-import pixelitor.gui.ImageComponent;
+import pixelitor.tools.PMouseEvent;
 import pixelitor.tools.Tools;
-
-import java.awt.event.MouseEvent;
 
 /**
  * If Alt is pressed, the color picker will handle
@@ -28,9 +26,9 @@ import java.awt.event.MouseEvent;
  */
 public class ColorPickerToolHandler extends ToolHandler {
     @Override
-    boolean mousePressed(MouseEvent e, ImageComponent ic) {
+    boolean mousePressed(PMouseEvent e) {
         if (e.isAltDown()) {
-            Tools.COLOR_PICKER.sampleColor(e, ic, false);
+            Tools.COLOR_PICKER.sampleColor(e, false);
             return true;
         }
 
@@ -39,9 +37,9 @@ public class ColorPickerToolHandler extends ToolHandler {
     }
 
     @Override
-    boolean mouseDragged(MouseEvent e, ImageComponent ic) {
+    boolean mouseDragged(PMouseEvent e) {
         if (e.isAltDown()) {
-            Tools.COLOR_PICKER.sampleColor(e, ic, false);
+            Tools.COLOR_PICKER.sampleColor(e, false);
             return true;
         }
 
@@ -50,7 +48,7 @@ public class ColorPickerToolHandler extends ToolHandler {
     }
 
     @Override
-    boolean mouseReleased(MouseEvent e, ImageComponent ic) {
+    boolean mouseReleased(PMouseEvent e) {
         // always forwards the event to the next handler
         return false;
     }

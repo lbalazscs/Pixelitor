@@ -36,6 +36,7 @@ import javax.swing.event.UndoableEditListener;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEditSupport;
+import java.awt.image.BufferedImage;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -104,6 +105,20 @@ public class History {
             Events.postAddToHistoryEvent(edit);
             ConsistencyChecks.checkAll(edit.getComp(), false);
         }
+    }
+
+    /**
+     * Saves an image for undo. If there is a selection,
+     * only the bounds of the selected area is saved.
+     */
+    public static void addImageEdit(String editName, Composition comp) {
+        BufferedImage copy = comp.getActiveDrawable()
+                .getImageOrSubImageIfSelected(true, true);
+
+        ImageEdit edit = new ImageEdit(editName, comp,
+                comp.getActiveDrawable(), copy,
+                false, false);
+        addEdit(edit);
     }
 
     public static String getUndoPresentationName() {

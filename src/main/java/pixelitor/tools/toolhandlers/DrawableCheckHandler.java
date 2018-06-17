@@ -17,12 +17,10 @@
 
 package pixelitor.tools.toolhandlers;
 
-import pixelitor.gui.ImageComponent;
 import pixelitor.layers.Drawable;
 import pixelitor.menus.DrawableAction;
+import pixelitor.tools.PMouseEvent;
 import pixelitor.tools.Tool;
-
-import java.awt.event.MouseEvent;
 
 /**
  * Checks whether the active edited object is
@@ -36,8 +34,8 @@ public class DrawableCheckHandler extends ToolHandler {
     }
 
     @Override
-    boolean mousePressed(MouseEvent e, ImageComponent ic) {
-        if (ic.activeIsDrawable()) {
+    boolean mousePressed(PMouseEvent e) {
+        if (e.getIC().activeIsDrawable()) {
             // forwards the mouse event to the next handler
             return false;
         }
@@ -58,12 +56,12 @@ public class DrawableCheckHandler extends ToolHandler {
     }
 
     @Override
-    boolean mouseDragged(MouseEvent e, ImageComponent ic) {
-        return !ic.activeIsDrawable();
+    boolean mouseDragged(PMouseEvent e) {
+        return !e.getIC().activeIsDrawable();
     }
 
     @Override
-    boolean mouseReleased(MouseEvent e, ImageComponent ic) {
-        return !ic.activeIsDrawable();
+    boolean mouseReleased(PMouseEvent e) {
+        return !e.getIC().activeIsDrawable();
     }
 }
