@@ -18,15 +18,11 @@
 package pixelitor.tools;
 
 import pixelitor.gui.ImageComponent;
+import pixelitor.utils.Shapes;
+import pixelitor.utils.Utils;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Stroke;
-import java.awt.geom.Line2D;
-
-import static java.awt.RenderingHints.KEY_ANTIALIASING;
-import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import java.awt.Point;
 
 /**
  * Represents the mouse drag on the image made
@@ -35,6 +31,7 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
  */
 public class UserDrag {
     private final DragTool tool;
+    private boolean finished;
 
     // The coordinates in the component (mouse) space.
     private int coStartX;
@@ -81,39 +78,9 @@ public class UserDrag {
         coEndY = e.getCoY();
 
         if (constrainPoints) {
-            int dx = coEndX - coStartX;
-            int dy = coEndY - coStartY;
-
-            int adx = Math.abs(dx);
-            int ady = Math.abs(dy);
-
-            if (adx > 2 * ady) {
-                coEndY = coStartY;
-            } else if (ady > 2 * adx) {
-                coEndX = coStartX;
-            } else {
-                if (dx > 0) {
-                    if (dy > 0) {
-                        int avg = (dx + dy) / 2;
-                        coEndX = coStartX + avg;
-                        coEndY = coStartY + avg;
-                    } else {
-                        int avg = (dx - dy) / 2;
-                        coEndX = coStartX + avg;
-                        coEndY = coStartY - avg;
-                    }
-                } else { // dx <= 0
-                    if (dy > 0) {
-                        int avg = (-dx + dy) / 2;
-                        coEndX = coStartX - avg;
-                        coEndY = coStartY + avg;
-                    } else {
-                        int avg = (-dx - dy) / 2;
-                        coEndX = coStartX - avg;
-                        coEndY = coStartY - avg;
-                    }
-                }
-            }
+            Point constrainedEnd = Utils.constrainEndPoint(coStartX, coStartY, coEndX, coEndY);
+            coEndX = constrainedEnd.x;
+            coEndY = constrainedEnd.y;
         }
 
         imEndX = ic.componentXToImageSpace(coEndX);
@@ -140,6 +107,16 @@ public class UserDrag {
         return imEndY;
     }
 
+    // returns the start x coordinate in component space
+    public int getCoStartX() {
+        return coStartX;
+    }
+
+    // returns the start y coordinate in component space
+    public int getCoStartY() {
+        return coStartY;
+    }
+
     // returns the end x coordinate in component space
     public int getCoEndX() {
         return coEndX;
@@ -164,21 +141,8 @@ public class UserDrag {
         this.constrainPoints = constrainPoints;
     }
 
-    private static final Stroke stroke3 = new BasicStroke(3);
-    private static final Stroke stroke1 = new BasicStroke(1);
-
-    public void drawGradientToolHelper(Graphics2D g) {
-        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-
-        Line2D line = new Line2D.Double(coStartX, coStartY, coEndX, coEndY);
-
-        g.setColor(Color.BLACK);
-        g.setStroke(stroke3);
-        g.draw(line);
-
-        g.setColor(Color.WHITE);
-        g.setStroke(stroke1);
-        g.draw(line);
+    public void drawGradientArrow(Graphics2D g) {
+        Shapes.drawGradientArrow(g, coStartX, coStartY, coEndX, coEndY);
     }
 
     public void saveEndValues() {
@@ -203,6 +167,13 @@ public class UserDrag {
         this.startFromCenter = startFromCenter;
     }
 
+    public boolean isFinished() {
+        return finished;
+    }
+
+    public void setFinished(boolean finished) {
+        this.finished = finished;
+    }
 
     //    public Rectangle getAffectedStrokedRect(int thickness) {
 //        Rectangle r = createPositiveRect();

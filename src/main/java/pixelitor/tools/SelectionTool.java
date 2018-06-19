@@ -25,7 +25,6 @@ import pixelitor.selection.SelectionActions;
 import pixelitor.selection.SelectionBuilder;
 import pixelitor.selection.SelectionInteraction;
 import pixelitor.selection.SelectionType;
-import pixelitor.utils.ActiveImageChangeListener;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
@@ -35,7 +34,7 @@ import javax.swing.*;
 /**
  * The selection tool
  */
-public class SelectionTool extends DragTool implements ActiveImageChangeListener {
+public class SelectionTool extends DragTool {
     private static final String HELP_TEXT = "<b>click and drag</b> to select an area. Hold <b>SPACE</b> down to move the entire selection. <b>Shift-drag</b> adds to an existing selection, <b>Alt-drag</b> removes from it, <b>Shift+Alt drag</b> intersects.";
     private static final String POLY_HELP_TEXT = "<html>Polygonal selection: <b>click</b> to add points, <b>double-click</b> (or <b>right-click</b>) to finish the selection.";
 
@@ -53,7 +52,6 @@ public class SelectionTool extends DragTool implements ActiveImageChangeListener
                 HELP_TEXT,
                 Cursors.DEFAULT, false, true, false, ClipStrategy.INTERNAL_FRAME);
         spaceDragBehavior = true;
-        ImageComponents.addActiveImageChangeListener(this);
     }
 
     @Override

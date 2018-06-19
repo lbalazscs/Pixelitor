@@ -39,9 +39,9 @@ import pixelitor.io.OutputFormat;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.ImageLayer;
-import pixelitor.tools.GradientTool;
-import pixelitor.tools.GradientType;
 import pixelitor.tools.ImDrag;
+import pixelitor.tools.gradient.GradientTool;
+import pixelitor.tools.gradient.GradientType;
 import pixelitor.utils.Messages;
 
 import java.awt.AlphaComposite;
@@ -53,7 +53,7 @@ import java.io.File;
 import static java.awt.Color.WHITE;
 import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
 import static pixelitor.ChangeReason.FILTER_WITHOUT_DIALOG;
-import static pixelitor.tools.GradientColorType.BLACK_TO_WHITE;
+import static pixelitor.tools.gradient.GradientColorType.BLACK_TO_WHITE;
 
 /**
  * Static methods for creating the splash images

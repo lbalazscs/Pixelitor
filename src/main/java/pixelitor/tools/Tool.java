@@ -222,4 +222,36 @@ public abstract class Tool implements KeyListener {
         toolNode.addString("Name", getName());
         return toolNode;
     }
+
+    public void noOpenImageAnymore() {
+        resetStateToInitial();
+    }
+
+    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
+        assert Tools.currentTool == this;
+        oldIC.repaint();
+        resetStateToInitial();
+    }
+
+    public void newImageOpened(Composition comp) {
+        assert Tools.currentTool == this;
+        resetStateToInitial();
+    }
+
+    public void resetStateToInitial() {
+        // empty instead of abstract for the convenience of subclasses
+    }
+
+    public void fgBgColorsChanged() {
+        // empty instead of abstract for the convenience of subclasses
+    }
+
+    // A lot of events can trigger this, such as image resizing,
+    // image zoom, or simply changing the drawStartX in the ImageComponent
+    // TODO image resizing cannot be handled by simply passing the new ImageComponent,
+    // and only the selections are resized (they are called explicitly)
+    // but no other tool
+    public void icSizeChanged(ImageComponent ic) {
+        // empty instead of abstract for the convenience of subclasses
+    }
 }

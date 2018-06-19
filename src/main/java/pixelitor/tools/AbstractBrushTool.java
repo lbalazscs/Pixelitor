@@ -23,7 +23,6 @@ import pixelitor.Composition;
 import pixelitor.filters.gui.FilterSetting;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.OKDialog;
@@ -32,7 +31,6 @@ import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.Brush;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.SymmetryBrush;
-import pixelitor.utils.ActiveImageChangeListener;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
@@ -55,7 +53,7 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 /**
  * Abstract superclass for all the brush-like tools.
  */
-public abstract class AbstractBrushTool extends Tool implements ActiveImageChangeListener {
+public abstract class AbstractBrushTool extends Tool {
     private static final int MIN_BRUSH_RADIUS = 1;
     public static final int MAX_BRUSH_RADIUS = 100;
     public static final int DEFAULT_BRUSH_RADIUS = 10;
@@ -83,7 +81,6 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
     AbstractBrushTool(char activationKeyChar, String name, String iconFileName, String toolMessage, Cursor cursor) {
         super(activationKeyChar, name, iconFileName, toolMessage,
                 cursor, true, true, ClipStrategy.CANVAS);
-        ImageComponents.addActiveImageChangeListener(this);
         initBrushVariables();
     }
 

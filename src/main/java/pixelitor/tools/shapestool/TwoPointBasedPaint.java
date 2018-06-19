@@ -19,9 +19,9 @@ package pixelitor.tools.shapestool;
 
 import pixelitor.colors.FgBgColors;
 import pixelitor.tools.ImDrag;
-import pixelitor.tools.gradientpaints.AngleGradientPaint;
-import pixelitor.tools.gradientpaints.DiamondGradientPaint;
-import pixelitor.tools.gradientpaints.SpiralGradientPaint;
+import pixelitor.tools.gradient.paints.AngleGradientPaint;
+import pixelitor.tools.gradient.paints.DiamondGradientPaint;
+import pixelitor.tools.gradient.paints.SpiralGradientPaint;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;

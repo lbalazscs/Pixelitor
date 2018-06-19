@@ -23,6 +23,7 @@ import pixelitor.layers.BlendingMode;
 import javax.swing.*;
 import java.awt.Composite;
 import java.awt.FlowLayout;
+import java.awt.event.ActionListener;
 import java.util.Random;
 
 /**
@@ -91,5 +92,10 @@ public class BlendingModePanel extends JPanel {
         opacityDDSlider.setEnabled(b);
         bmLabel.setEnabled(b);
         bmCombo.setEnabled(b);
+    }
+
+    public void addActionListener(ActionListener al) {
+        opacityDDSlider.addActionListener(al);
+        bmCombo.addActionListener(al);
     }
 }

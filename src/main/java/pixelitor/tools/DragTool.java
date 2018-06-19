@@ -76,6 +76,7 @@ public abstract class DragTool extends Tool {
     @Override
     public void mouseReleased(PMouseEvent e) {
         userDrag.setEnd(e);
+        userDrag.setFinished(true);
         dragFinished(e);
         endPointInitialized = false;
     }

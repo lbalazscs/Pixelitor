@@ -15,7 +15,7 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.tools.gradientpaints;
+package pixelitor.tools.gradient.paints;
 
 import pixelitor.tools.ImDrag;
 
@@ -31,12 +31,13 @@ import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 
+import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
 import static java.awt.MultipleGradientPaint.CycleMethod.REPEAT;
 
 /**
- * A Paint that creates a "diamond gradient"
+ * A Paint that creates an "angle gradient"
  */
-public class DiamondGradientPaint implements Paint {
+public class AngleGradientPaint implements Paint {
     private final ImDrag imDrag;
     private final Color startColor;
     private final Color endColor;
@@ -45,7 +46,7 @@ public class DiamondGradientPaint implements Paint {
     private static final int AA_RES = 4; // the resolution of AA supersampling
     private static final int AA_RES2 = AA_RES * AA_RES;
 
-    public DiamondGradientPaint(ImDrag imDrag, Color startColor, Color endColor, CycleMethod cycleMethod) {
+    public AngleGradientPaint(ImDrag imDrag, Color startColor, Color endColor, CycleMethod cycleMethod) {
         this.imDrag = imDrag;
         this.startColor = startColor;
         this.endColor = endColor;
@@ -57,10 +58,10 @@ public class DiamondGradientPaint implements Paint {
         int numComponents = cm.getNumComponents();
 
         if (numComponents == 1) {
-            return new GrayDiamondGradientPaintContext(imDrag, startColor, endColor, cm, cycleMethod);
+            return new GrayAngleGradientPaintContext(imDrag, startColor, endColor, cm, cycleMethod);
         }
 
-        return new DiamondGradientPaintContext(imDrag, startColor, endColor, cm, cycleMethod);
+        return new AngleGradientPaintContext(imDrag, startColor, endColor, cm, cycleMethod);
     }
 
     @Override
@@ -70,7 +71,7 @@ public class DiamondGradientPaint implements Paint {
         return (((a1 & a2) == 0xFF) ? OPAQUE : TRANSLUCENT);
     }
 
-    private static class DiamondGradientPaintContext implements PaintContext {
+    private static class AngleGradientPaintContext implements PaintContext {
         protected final ImDrag imDrag;
         protected final CycleMethod cycleMethod;
 
@@ -85,12 +86,9 @@ public class DiamondGradientPaint implements Paint {
         private final int endBlue;
 
         protected final ColorModel cm;
+        protected final double drawAngle;
 
-        protected final float dragRelDX;
-        protected final float dragRelDY;
-        protected final double dragDist;
-
-        private DiamondGradientPaintContext(ImDrag imDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
+        private AngleGradientPaintContext(ImDrag imDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
             this.imDrag = imDrag;
             this.cycleMethod = cycleMethod;
 
@@ -105,11 +103,7 @@ public class DiamondGradientPaint implements Paint {
             endBlue = endColor.getBlue();
 
             this.cm = cm;
-
-            dragDist = imDrag.getDistance();
-            double dragDistSqr = dragDist * dragDist;
-            dragRelDX = (float) (imDrag.getDX() / dragDistSqr);
-            dragRelDY = (float) (imDrag.getDY() / dragDistSqr);
+            drawAngle = imDrag.getDrawAngle();
         }
 
         @Override
@@ -133,12 +127,12 @@ public class DiamondGradientPaint implements Paint {
                 for (int i = 0; i < width; i++) {
                     int base = (j * width + i) * 4;
                     int x = startX + i;
-
                     double interpolationValue = getInterpolationValue(x, y);
 
                     boolean needsAA = false;
-                    if (cycleMethod == REPEAT) {
-                        double threshold = 1.0 / dragDist;
+                    if (cycleMethod != REFLECT) {
+                        double distance = imDrag.taxiCabMetric(x, y);
+                        double threshold = 0.2 / distance;
                         needsAA = interpolationValue > (1.0 - threshold) || interpolationValue < threshold;
                     }
 
@@ -149,9 +143,9 @@ public class DiamondGradientPaint implements Paint {
                         int b = 0;
 
                         for (int m = 0; m < AA_RES; m++) {
-                            float yy = (y + 1.0f / AA_RES * m - 0.5f);
+                            double yy = y + 1.0 / AA_RES * m - 0.5;
                             for (int n = 0; n < AA_RES; n++) {
-                                float xx = x + 1.0f / AA_RES * n - 0.5f;
+                                double xx = x + 1.0 / AA_RES * n - 0.5;
 
                                 double interpolationValueAA = getInterpolationValue(xx, yy);
 
@@ -189,46 +183,35 @@ public class DiamondGradientPaint implements Paint {
         }
 
         public double getInterpolationValue(double x, double y) {
-            double dx = x - imDrag.getStartX();
-            double dy = y - imDrag.getStartY();
+            double relativeAngle = imDrag.getAngleFromStartTo(x, y) - drawAngle;
 
-            double v1 = Math.abs((dx * this.dragRelDX) + (dy * this.dragRelDY));
-            double v2 = Math.abs((dx * this.dragRelDY) - (dy * this.dragRelDX));
+            // relativeAngle is now between -2*PI and 2*PI, and the -2*PI..0 range is the same as 0..2*PI
 
-            double interpolationValue = v1 + v2;
+            double interpolationValue = (relativeAngle / (Math.PI * 2)) + 1.0; // between 0..2
+            interpolationValue %= 1.0f; // between 0..1
 
-            switch (cycleMethod) {
-                case NO_CYCLE:
-                    if (interpolationValue > 1.0) {
-                        interpolationValue = 1.0f;
-                    }
-                    break;
-                case REFLECT:
-                    interpolationValue %= 1.0;
-                    if (interpolationValue < 0.5) {
-                        interpolationValue = 2.0f * interpolationValue;
-                    } else {
-                        interpolationValue = 2.0f * (1 - interpolationValue);
-                    }
-                    break;
-                case REPEAT:
-                    interpolationValue %= 1.0;
-                    if (interpolationValue < 0.5) {
-                        interpolationValue = 2.0f * interpolationValue;
-                    } else {
-                        interpolationValue = 2.0f * (interpolationValue - 0.5f);
-                    }
-                    break;
+            if (cycleMethod == REFLECT) {
+                if (interpolationValue < 0.5) {
+                    interpolationValue = 2.0f * interpolationValue;
+                } else {
+                    interpolationValue = 2.0f * (1 - interpolationValue);
+                }
+            } else if (cycleMethod == REPEAT) {
+                if (interpolationValue < 0.5) {
+                    interpolationValue = 2.0f * interpolationValue;
+                } else {
+                    interpolationValue = 2.0f * (interpolationValue - 0.5);
+                }
             }
             return interpolationValue;
         }
     }
 
-    private static class GrayDiamondGradientPaintContext extends DiamondGradientPaintContext {
+    private static class GrayAngleGradientPaintContext extends AngleGradientPaintContext {
         private final int startGray;
         private final int endGray;
 
-        private GrayDiamondGradientPaintContext(ImDrag imDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
+        private GrayAngleGradientPaintContext(ImDrag imDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
             super(imDrag, startColor, endColor, cm, cycleMethod);
 
             startGray = startColor.getRed();
@@ -245,12 +228,12 @@ public class DiamondGradientPaint implements Paint {
                 for (int i = 0; i < width; i++) {
                     int base = (j * width + i);
                     int x = startX + i;
-
                     double interpolationValue = getInterpolationValue(x, y);
 
                     boolean needsAA = false;
-                    if (cycleMethod == REPEAT) {
-                        double threshold = 1.0 / dragDist;
+                    if (cycleMethod != REFLECT) {
+                        double distance = imDrag.taxiCabMetric(x, y);
+                        double threshold = 0.2 / distance;
                         needsAA = interpolationValue > (1.0 - threshold) || interpolationValue < threshold;
                     }
 
@@ -258,9 +241,9 @@ public class DiamondGradientPaint implements Paint {
                         int g = 0;
 
                         for (int m = 0; m < AA_RES; m++) {
-                            float yy = (y + 1.0f / AA_RES * m - 0.5f);
+                            double yy = y + 1.0 / AA_RES * m - 0.5;
                             for (int n = 0; n < AA_RES; n++) {
-                                float xx = x + 1.0f / AA_RES * n - 0.5f;
+                                double xx = x + 1.0 / AA_RES * n - 0.5;
 
                                 double interpolationValueAA = getInterpolationValue(xx, yy);
 

@@ -36,6 +36,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.Toolkit;
@@ -657,6 +658,43 @@ public final class Utils {
             return 8;
         }
         return asInt;
+    }
+
+    public static Point constrainEndPoint(int startX, int startY, int endX, int endY) {
+        int dx = endX - startX;
+        int dy = endY - startY;
+
+        int adx = Math.abs(dx);
+        int ady = Math.abs(dy);
+
+        if (adx > 2 * ady) {
+            endY = startY;
+        } else if (ady > 2 * adx) {
+            endX = startX;
+        } else {
+            if (dx > 0) {
+                if (dy > 0) {
+                    int avg = (dx + dy) / 2;
+                    endX = startX + avg;
+                    endY = startY + avg;
+                } else {
+                    int avg = (dx - dy) / 2;
+                    endX = startX + avg;
+                    endY = startY - avg;
+                }
+            } else { // dx <= 0
+                if (dy > 0) {
+                    int avg = (-dx + dy) / 2;
+                    endX = startX - avg;
+                    endY = startY + avg;
+                } else {
+                    int avg = (-dx - dy) / 2;
+                    endX = startX - avg;
+                    endY = startY - avg;
+                }
+            }
+        }
+        return new Point(endX, endY);
     }
 }
 

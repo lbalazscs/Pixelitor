@@ -22,6 +22,7 @@ import pixelitor.colors.palette.PalettePanel;
 import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.menus.MenuAction;
+import pixelitor.tools.Tools;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.test.RandomGUITest;
 
@@ -169,6 +170,7 @@ public class FgBgColorSelector extends JLayeredPane {
             public void actionPerformed(ActionEvent e) {
                 setFgColor(BLACK);
                 setBgColor(WHITE);
+                Tools.fgBgColorsChanged();
             }
         };
         defaultsButton.addActionListener(resetToDefaultAction);
@@ -189,6 +191,7 @@ public class FgBgColorSelector extends JLayeredPane {
                     setFgColor(bgColor);
                     setBgColor(tmpFgColor);
                 }
+                Tools.fgBgColorsChanged();
             }
         };
         swapButton.addActionListener(swapColorsAction);
@@ -202,6 +205,8 @@ public class FgBgColorSelector extends JLayeredPane {
             public void actionPerformed(ActionEvent e) {
                 setFgColor(ColorUtils.createRandomColor(false));
                 setBgColor(ColorUtils.createRandomColor(false));
+
+                Tools.fgBgColorsChanged();
             }
         };
         randomizeButton.addActionListener(randomizeColorsAction);

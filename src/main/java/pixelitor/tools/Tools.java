@@ -17,8 +17,12 @@
 
 package pixelitor.tools;
 
+import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
+import pixelitor.tools.gradient.GradientTool;
 import pixelitor.tools.shapestool.ShapesTool;
+import pixelitor.utils.ActiveImageChangeListener;
 
 import java.awt.event.MouseEvent;
 import java.util.Random;
@@ -47,6 +51,25 @@ public class Tools {
     public static final ZoomTool ZOOM = new ZoomTool();
 
     static Tool currentTool = BRUSH;
+
+    static {
+        ImageComponents.addActiveImageChangeListener(new ActiveImageChangeListener() {
+            @Override
+            public void noOpenImageAnymore() {
+                currentTool.noOpenImageAnymore();
+            }
+
+            @Override
+            public void newImageOpened(Composition comp) {
+                currentTool.newImageOpened(comp);
+            }
+
+            @Override
+            public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
+                currentTool.activeImageHasChanged(oldIC, newIC);
+            }
+        });
+    }
 
     /**
      * All the subclass tools in an array.
@@ -78,6 +101,10 @@ public class Tools {
         return currentTool;
     }
 
+    public static boolean currentIs(Tool t) {
+        return currentTool == t;
+    }
+
     public static boolean isShapesDrawing() {
         if (currentTool != SHAPES) {
             return false;
@@ -100,6 +127,14 @@ public class Tools {
     public static Tool getRandomTool(Random rand) {
         int index = rand.nextInt(allTools.length);
         return allTools[index];
+    }
+
+    public static void fgBgColorsChanged() {
+        currentTool.fgBgColorsChanged();
+    }
+
+    public static void icSizeChanged(ImageComponent ic) {
+        currentTool.icSizeChanged(ic);
     }
 
     public static class EventDispatcher {

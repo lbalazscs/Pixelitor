@@ -15,7 +15,7 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.tools.gradientpaints;
+package pixelitor.tools.gradient.paints;
 
 import pixelitor.tools.ImDrag;
 
@@ -31,15 +31,12 @@ import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 
-import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
-import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
 import static java.awt.MultipleGradientPaint.CycleMethod.REPEAT;
 
 /**
- * A Paint that creates an "spiral gradient"
+ * A Paint that creates a "diamond gradient"
  */
-public class SpiralGradientPaint implements Paint {
-    private final boolean clockwise;
+public class DiamondGradientPaint implements Paint {
     private final ImDrag imDrag;
     private final Color startColor;
     private final Color endColor;
@@ -48,8 +45,7 @@ public class SpiralGradientPaint implements Paint {
     private static final int AA_RES = 4; // the resolution of AA supersampling
     private static final int AA_RES2 = AA_RES * AA_RES;
 
-    public SpiralGradientPaint(boolean clockwise, ImDrag imDrag, Color startColor, Color endColor, CycleMethod cycleMethod) {
-        this.clockwise = clockwise;
+    public DiamondGradientPaint(ImDrag imDrag, Color startColor, Color endColor, CycleMethod cycleMethod) {
         this.imDrag = imDrag;
         this.startColor = startColor;
         this.endColor = endColor;
@@ -61,10 +57,10 @@ public class SpiralGradientPaint implements Paint {
         int numComponents = cm.getNumComponents();
 
         if (numComponents == 1) {
-            return new GraySpiralGradientPaintContext(clockwise, imDrag, startColor, endColor, cm, cycleMethod);
+            return new GrayDiamondGradientPaintContext(imDrag, startColor, endColor, cm, cycleMethod);
         }
 
-        return new SpiralGradientPaintContext(clockwise, imDrag, startColor, endColor, cm, cycleMethod);
+        return new DiamondGradientPaintContext(imDrag, startColor, endColor, cm, cycleMethod);
     }
 
     @Override
@@ -74,8 +70,7 @@ public class SpiralGradientPaint implements Paint {
         return (((a1 & a2) == 0xFF) ? OPAQUE : TRANSLUCENT);
     }
 
-    static class SpiralGradientPaintContext implements PaintContext {
-        protected final boolean clockwise;
+    private static class DiamondGradientPaintContext implements PaintContext {
         protected final ImDrag imDrag;
         protected final CycleMethod cycleMethod;
 
@@ -90,11 +85,12 @@ public class SpiralGradientPaint implements Paint {
         private final int endBlue;
 
         protected final ColorModel cm;
-        protected final double drawAngle;
-        protected final double dragDistance;
 
-        private SpiralGradientPaintContext(boolean clockwise, ImDrag imDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
-            this.clockwise = clockwise;
+        protected final float dragRelDX;
+        protected final float dragRelDY;
+        protected final double dragDist;
+
+        private DiamondGradientPaintContext(ImDrag imDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
             this.imDrag = imDrag;
             this.cycleMethod = cycleMethod;
 
@@ -109,9 +105,11 @@ public class SpiralGradientPaint implements Paint {
             endBlue = endColor.getBlue();
 
             this.cm = cm;
-            drawAngle = imDrag.getDrawAngle() + Math.PI;  // between 0 and 2*PI
 
-            dragDistance = imDrag.getDistance();
+            dragDist = imDrag.getDistance();
+            double dragDistSqr = dragDist * dragDist;
+            dragRelDX = (float) (imDrag.getDX() / dragDistSqr);
+            dragRelDY = (float) (imDrag.getDY() / dragDistSqr);
         }
 
         @Override
@@ -131,22 +129,16 @@ public class SpiralGradientPaint implements Paint {
             int[] rasterData = new int[width * height * 4];
 
             for (int j = 0; j < height; j++) {
+                int y = startY + j;
                 for (int i = 0; i < width; i++) {
                     int base = (j * width + i) * 4;
-
                     int x = startX + i;
-                    int y = startY + j;
 
                     double interpolationValue = getInterpolationValue(x, y);
 
                     boolean needsAA = false;
-                    if (cycleMethod != REFLECT) {
-                        double threshold;
-                        if (cycleMethod == NO_CYCLE) {
-                            threshold = 0.5 / dragDistance;
-                        } else { // REPEAT
-                            threshold = 1.0 / dragDistance;
-                        }
+                    if (cycleMethod == REPEAT) {
+                        double threshold = 1.0 / dragDist;
                         needsAA = interpolationValue > (1.0 - threshold) || interpolationValue < threshold;
                     }
 
@@ -157,9 +149,9 @@ public class SpiralGradientPaint implements Paint {
                         int b = 0;
 
                         for (int m = 0; m < AA_RES; m++) {
-                            double yy = y + 1.0 / AA_RES * m - 0.5;
+                            float yy = (y + 1.0f / AA_RES * m - 0.5f);
                             for (int n = 0; n < AA_RES; n++) {
-                                double xx = x + 1.0 / AA_RES * n - 0.5;
+                                float xx = x + 1.0f / AA_RES * n - 0.5f;
 
                                 double interpolationValueAA = getInterpolationValue(xx, yy);
 
@@ -197,52 +189,47 @@ public class SpiralGradientPaint implements Paint {
         }
 
         public double getInterpolationValue(double x, double y) {
-            double renderAngle = imDrag.getAngleFromStartTo(x, y) + Math.PI;
-            double relativeAngle;
-            if (clockwise) {
-                relativeAngle = renderAngle - drawAngle;
-            } else {
-                relativeAngle = drawAngle - renderAngle;
-            }
-            if (relativeAngle < 0) {
-                relativeAngle += (2 * Math.PI);
-            }
-            relativeAngle /= (2.0 * Math.PI);
+            double dx = x - imDrag.getStartX();
+            double dy = y - imDrag.getStartY();
 
-//                    double renderDist = Math.sqrt(renderRelativeX*renderRelativeX + renderRelativeY*renderRelativeY);
-            double renderDist = imDrag.getStartDistanceFrom(x, y);
+            double v1 = Math.abs((dx * this.dragRelDX) + (dy * this.dragRelDY));
+            double v2 = Math.abs((dx * this.dragRelDY) - (dy * this.dragRelDX));
 
-            double relativeDist = renderDist / dragDistance;
+            double interpolationValue = v1 + v2;
 
-            // relativeAngle alone would be a kind of angle gradient, and relativeDist alone would ne a kind of radial gradient
-            // but together...
-            double interpolationValue = relativeAngle + relativeDist;
-
-            interpolationValue %= 1.0f; // between 0..1
-
-            if (cycleMethod == REFLECT) {
-                if (interpolationValue < 0.5) {
-                    interpolationValue = 2.0f * interpolationValue;
-                } else {
-                    interpolationValue = 2.0f * (1 - interpolationValue);
-                }
-            } else if (cycleMethod == REPEAT) {
-                if (interpolationValue < 0.5) {
-                    interpolationValue = 2.0f * interpolationValue;
-                } else {
-                    interpolationValue = 2.0f * (interpolationValue - 0.5);
-                }
+            switch (cycleMethod) {
+                case NO_CYCLE:
+                    if (interpolationValue > 1.0) {
+                        interpolationValue = 1.0f;
+                    }
+                    break;
+                case REFLECT:
+                    interpolationValue %= 1.0;
+                    if (interpolationValue < 0.5) {
+                        interpolationValue = 2.0f * interpolationValue;
+                    } else {
+                        interpolationValue = 2.0f * (1 - interpolationValue);
+                    }
+                    break;
+                case REPEAT:
+                    interpolationValue %= 1.0;
+                    if (interpolationValue < 0.5) {
+                        interpolationValue = 2.0f * interpolationValue;
+                    } else {
+                        interpolationValue = 2.0f * (interpolationValue - 0.5f);
+                    }
+                    break;
             }
             return interpolationValue;
         }
     }
 
-    private static class GraySpiralGradientPaintContext extends SpiralGradientPaintContext {
+    private static class GrayDiamondGradientPaintContext extends DiamondGradientPaintContext {
         private final int startGray;
         private final int endGray;
 
-        private GraySpiralGradientPaintContext(boolean clockwise, ImDrag imDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
-            super(clockwise, imDrag, startColor, endColor, cm, cycleMethod);
+        private GrayDiamondGradientPaintContext(ImDrag imDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
+            super(imDrag, startColor, endColor, cm, cycleMethod);
 
             startGray = startColor.getRed();
             endGray = endColor.getRed();
@@ -254,22 +241,16 @@ public class SpiralGradientPaint implements Paint {
             int[] rasterData = new int[width * height];
 
             for (int j = 0; j < height; j++) {
+                int y = startY + j;
                 for (int i = 0; i < width; i++) {
                     int base = (j * width + i);
-
                     int x = startX + i;
-                    int y = startY + j;
 
                     double interpolationValue = getInterpolationValue(x, y);
 
                     boolean needsAA = false;
-                    if (cycleMethod != REFLECT) {
-                        double threshold;
-                        if (cycleMethod == NO_CYCLE) {
-                            threshold = 0.5 / dragDistance;
-                        } else { // REPEAT
-                            threshold = 1.0 / dragDistance;
-                        }
+                    if (cycleMethod == REPEAT) {
+                        double threshold = 1.0 / dragDist;
                         needsAA = interpolationValue > (1.0 - threshold) || interpolationValue < threshold;
                     }
 
@@ -277,9 +258,9 @@ public class SpiralGradientPaint implements Paint {
                         int g = 0;
 
                         for (int m = 0; m < AA_RES; m++) {
-                            double yy = y + 1.0 / AA_RES * m - 0.5;
+                            float yy = (y + 1.0f / AA_RES * m - 0.5f);
                             for (int n = 0; n < AA_RES; n++) {
-                                double xx = x + 1.0 / AA_RES * n - 0.5;
+                                float xx = x + 1.0f / AA_RES * n - 0.5f;
 
                                 double interpolationValueAA = getInterpolationValue(xx, yy);
 

@@ -14,11 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
-package pixelitor.tools;
+package pixelitor.tools.gradient;
 
-import pixelitor.tools.gradientpaints.AngleGradientPaint;
-import pixelitor.tools.gradientpaints.DiamondGradientPaint;
-import pixelitor.tools.gradientpaints.SpiralGradientPaint;
+import pixelitor.tools.ImDrag;
+import pixelitor.tools.gradient.paints.AngleGradientPaint;
+import pixelitor.tools.gradient.paints.DiamondGradientPaint;
+import pixelitor.tools.gradient.paints.SpiralGradientPaint;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;

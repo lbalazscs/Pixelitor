@@ -15,7 +15,7 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.tools.gradientpaints;
+package pixelitor.tools.gradient.paints;
 
 import pixelitor.tools.ImDrag;
 
@@ -31,13 +31,15 @@ import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 
+import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
 import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
 import static java.awt.MultipleGradientPaint.CycleMethod.REPEAT;
 
 /**
- * A Paint that creates an "angle gradient"
+ * A Paint that creates an "spiral gradient"
  */
-public class AngleGradientPaint implements Paint {
+public class SpiralGradientPaint implements Paint {
+    private final boolean clockwise;
     private final ImDrag imDrag;
     private final Color startColor;
     private final Color endColor;
@@ -46,7 +48,8 @@ public class AngleGradientPaint implements Paint {
     private static final int AA_RES = 4; // the resolution of AA supersampling
     private static final int AA_RES2 = AA_RES * AA_RES;
 
-    public AngleGradientPaint(ImDrag imDrag, Color startColor, Color endColor, CycleMethod cycleMethod) {
+    public SpiralGradientPaint(boolean clockwise, ImDrag imDrag, Color startColor, Color endColor, CycleMethod cycleMethod) {
+        this.clockwise = clockwise;
         this.imDrag = imDrag;
         this.startColor = startColor;
         this.endColor = endColor;
@@ -58,10 +61,10 @@ public class AngleGradientPaint implements Paint {
         int numComponents = cm.getNumComponents();
 
         if (numComponents == 1) {
-            return new GrayAngleGradientPaintContext(imDrag, startColor, endColor, cm, cycleMethod);
+            return new GraySpiralGradientPaintContext(clockwise, imDrag, startColor, endColor, cm, cycleMethod);
         }
 
-        return new AngleGradientPaintContext(imDrag, startColor, endColor, cm, cycleMethod);
+        return new SpiralGradientPaintContext(clockwise, imDrag, startColor, endColor, cm, cycleMethod);
     }
 
     @Override
@@ -71,7 +74,8 @@ public class AngleGradientPaint implements Paint {
         return (((a1 & a2) == 0xFF) ? OPAQUE : TRANSLUCENT);
     }
 
-    private static class AngleGradientPaintContext implements PaintContext {
+    static class SpiralGradientPaintContext implements PaintContext {
+        protected final boolean clockwise;
         protected final ImDrag imDrag;
         protected final CycleMethod cycleMethod;
 
@@ -87,8 +91,10 @@ public class AngleGradientPaint implements Paint {
 
         protected final ColorModel cm;
         protected final double drawAngle;
+        protected final double dragDistance;
 
-        private AngleGradientPaintContext(ImDrag imDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
+        private SpiralGradientPaintContext(boolean clockwise, ImDrag imDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
+            this.clockwise = clockwise;
             this.imDrag = imDrag;
             this.cycleMethod = cycleMethod;
 
@@ -103,7 +109,9 @@ public class AngleGradientPaint implements Paint {
             endBlue = endColor.getBlue();
 
             this.cm = cm;
-            drawAngle = imDrag.getDrawAngle();
+            drawAngle = imDrag.getDrawAngle() + Math.PI;  // between 0 and 2*PI
+
+            dragDistance = imDrag.getDistance();
         }
 
         @Override
@@ -123,16 +131,22 @@ public class AngleGradientPaint implements Paint {
             int[] rasterData = new int[width * height * 4];
 
             for (int j = 0; j < height; j++) {
-                int y = startY + j;
                 for (int i = 0; i < width; i++) {
                     int base = (j * width + i) * 4;
+
                     int x = startX + i;
+                    int y = startY + j;
+
                     double interpolationValue = getInterpolationValue(x, y);
 
                     boolean needsAA = false;
                     if (cycleMethod != REFLECT) {
-                        double distance = imDrag.taxiCabMetric(x, y);
-                        double threshold = 0.2 / distance;
+                        double threshold;
+                        if (cycleMethod == NO_CYCLE) {
+                            threshold = 0.5 / dragDistance;
+                        } else { // REPEAT
+                            threshold = 1.0 / dragDistance;
+                        }
                         needsAA = interpolationValue > (1.0 - threshold) || interpolationValue < threshold;
                     }
 
@@ -183,11 +197,27 @@ public class AngleGradientPaint implements Paint {
         }
 
         public double getInterpolationValue(double x, double y) {
-            double relativeAngle = imDrag.getAngleFromStartTo(x, y) - drawAngle;
+            double renderAngle = imDrag.getAngleFromStartTo(x, y) + Math.PI;
+            double relativeAngle;
+            if (clockwise) {
+                relativeAngle = renderAngle - drawAngle;
+            } else {
+                relativeAngle = drawAngle - renderAngle;
+            }
+            if (relativeAngle < 0) {
+                relativeAngle += (2 * Math.PI);
+            }
+            relativeAngle /= (2.0 * Math.PI);
 
-            // relativeAngle is now between -2*PI and 2*PI, and the -2*PI..0 range is the same as 0..2*PI
+//                    double renderDist = Math.sqrt(renderRelativeX*renderRelativeX + renderRelativeY*renderRelativeY);
+            double renderDist = imDrag.getStartDistanceFrom(x, y);
 
-            double interpolationValue = (relativeAngle / (Math.PI * 2)) + 1.0; // between 0..2
+            double relativeDist = renderDist / dragDistance;
+
+            // relativeAngle alone would be a kind of angle gradient, and relativeDist alone would ne a kind of radial gradient
+            // but together...
+            double interpolationValue = relativeAngle + relativeDist;
+
             interpolationValue %= 1.0f; // between 0..1
 
             if (cycleMethod == REFLECT) {
@@ -207,12 +237,12 @@ public class AngleGradientPaint implements Paint {
         }
     }
 
-    private static class GrayAngleGradientPaintContext extends AngleGradientPaintContext {
+    private static class GraySpiralGradientPaintContext extends SpiralGradientPaintContext {
         private final int startGray;
         private final int endGray;
 
-        private GrayAngleGradientPaintContext(ImDrag imDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
-            super(imDrag, startColor, endColor, cm, cycleMethod);
+        private GraySpiralGradientPaintContext(boolean clockwise, ImDrag imDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
+            super(clockwise, imDrag, startColor, endColor, cm, cycleMethod);
 
             startGray = startColor.getRed();
             endGray = endColor.getRed();
@@ -224,16 +254,22 @@ public class AngleGradientPaint implements Paint {
             int[] rasterData = new int[width * height];
 
             for (int j = 0; j < height; j++) {
-                int y = startY + j;
                 for (int i = 0; i < width; i++) {
                     int base = (j * width + i);
+
                     int x = startX + i;
+                    int y = startY + j;
+
                     double interpolationValue = getInterpolationValue(x, y);
 
                     boolean needsAA = false;
                     if (cycleMethod != REFLECT) {
-                        double distance = imDrag.taxiCabMetric(x, y);
-                        double threshold = 0.2 / distance;
+                        double threshold;
+                        if (cycleMethod == NO_CYCLE) {
+                            threshold = 0.5 / dragDistance;
+                        } else { // REPEAT
+                            threshold = 1.0 / dragDistance;
+                        }
                         needsAA = interpolationValue > (1.0 - threshold) || interpolationValue < threshold;
                     }
 

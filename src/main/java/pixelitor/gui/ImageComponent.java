@@ -166,9 +166,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
             public void componentResized(ComponentEvent e) {
                 updateDrawStart();
 
-                if (Tools.getCurrent() == Tools.CROP) {
-                    Tools.CROP.icResized(ImageComponent.this);
-                }
+                Tools.icSizeChanged(ImageComponent.this);
                 repaint();
             }
         });

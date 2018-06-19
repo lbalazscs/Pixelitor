@@ -26,7 +26,6 @@ import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.tools.guidelines.RectGuideline;
 import pixelitor.tools.guidelines.RectGuidelineType;
 import pixelitor.transform.TransformSupport;
-import pixelitor.utils.ActiveImageChangeListener;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
@@ -55,7 +54,7 @@ import static pixelitor.tools.CropToolState.USER_DRAG;
 /**
  * The crop tool
  */
-public class CropTool extends DragTool implements ActiveImageChangeListener {
+public class CropTool extends DragTool {
     private CropToolState state = INITIAL;
 
     private TransformSupport transformSupport;
@@ -88,8 +87,6 @@ public class CropTool extends DragTool implements ActiveImageChangeListener {
         spaceDragBehavior = true;
 
         maskOpacity.addChangeListener(e -> maskOpacityChanged());
-
-        ImageComponents.addActiveImageChangeListener(this);
     }
 
     private void maskOpacityChanged() {
@@ -217,7 +214,7 @@ public class CropTool extends DragTool implements ActiveImageChangeListener {
         if (state == TRANSFORM) {
             transformSupport.mouseDragged(e);
         }
-        e.getIC().repaint();
+        e.repaint();
     }
 
     @Override
@@ -377,27 +374,7 @@ public class CropTool extends DragTool implements ActiveImageChangeListener {
         resetStateToInitial();
     }
 
-    @Override
-    public void noOpenImageAnymore() {
-        resetStateToInitial();
-    }
-
-    @Override
-    public void newImageOpened(Composition comp) {
-        if (Tools.currentTool == this) {
-            resetStateToInitial();
-        }
-    }
-
-    @Override
-    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
-        if (Tools.currentTool == this) {
-            oldIC.repaint();
-            resetStateToInitial();
-        }
-    }
-
-    private void resetStateToInitial() {
+    public void resetStateToInitial() {
         ended = true;
         transformSupport = null;
         state = INITIAL;
@@ -411,7 +388,7 @@ public class CropTool extends DragTool implements ActiveImageChangeListener {
         ImageComponents.setCursorForAll(Cursors.DEFAULT);
     }
 
-    public void icResized(ImageComponent ic) {
+    public void icSizeChanged(ImageComponent ic) {
         if (transformSupport != null && lastCropRect != null && state == TRANSFORM) {
             transformSupport.setComponentSpaceRect(ic.fromImageToComponentSpace(lastCropRect));
         }

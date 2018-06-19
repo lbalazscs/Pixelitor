@@ -40,8 +40,8 @@ public class PMouseEvent {
     private final ImageComponent ic;
     private final MouseEvent e;
 
-    boolean xConverted = false;
-    boolean yConverted = false;
+    private boolean xConverted = false;
+    private boolean yConverted = false;
 
     public PMouseEvent(MouseEvent e, ImageComponent ic) {
         assert e.getSource() == ic;
@@ -145,5 +145,9 @@ public class PMouseEvent {
 
     public boolean isRight() {
         return SwingUtilities.isRightMouseButton(e);
+    }
+
+    public void repaint() {
+        ic.repaint();
     }
 }
