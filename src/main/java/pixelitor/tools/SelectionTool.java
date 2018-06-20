@@ -159,17 +159,17 @@ public class SelectionTool extends DragTool {
     }
 
     @Override
-    public boolean mouseClicked(PMouseEvent e) {
+    public void mouseClicked(PMouseEvent e) {
         if (polygonal) {
             if (selectionBuilder != null && e.getClickCount() > 1) {
                 // finish polygonal for double-click
                 selectionBuilder.updateSelection(e);
                 selectionBuilder.combineShapes();
                 stopBuildingSelection();
-                return false;
+                return;
             } else {
                 // ignore otherwise: will be handled in mouse released
-                return false;
+                return;
             }
         }
 
@@ -178,8 +178,6 @@ public class SelectionTool extends DragTool {
         deselect(e.getComp(), true);
 
         altMeansSubtract = false;
-
-        return false;
     }
 
     private static void deselect(Composition comp, boolean addToHistory) {

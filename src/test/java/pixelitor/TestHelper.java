@@ -18,6 +18,7 @@
 package pixelitor;
 
 import org.mockito.MockingDetails;
+import org.mockito.stubbing.Answer;
 import pixelitor.colors.FgBgColorSelector;
 import pixelitor.colors.FgBgColors;
 import pixelitor.filters.Invert;
@@ -54,6 +55,7 @@ import java.util.Random;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.when;
@@ -217,6 +219,19 @@ public class TestHelper {
     }
 
     public static ImageComponent setupAnICFor(Composition comp) {
+        ImageComponent ic = createICWithoutComp();
+
+        when(ic.activeIsDrawable()).thenAnswer(
+                invocation -> comp.activeIsDrawable());
+
+        when(ic.getComp()).thenReturn(comp);
+
+        comp.setIC(ic);
+
+        return ic;
+    }
+
+    public static ImageComponent createICWithoutComp() {
         ImageComponent ic = mock(ImageComponent.class);
 
         when(ic.fromComponentToImageSpace(any())).then(returnsFirstArg());
@@ -228,23 +243,24 @@ public class TestHelper {
             return new Rectangle((int) in.getX(), (int) in.getY(), (int) in.getWidth(), (int) in.getHeight());
         });
 
+        Answer<Double> intToDoubleConverter = invocation -> {
+            Integer argument = invocation.getArgument(0);
+            return (double) argument;
+        };
+        when(ic.componentXToImageSpace(anyInt())).thenAnswer(intToDoubleConverter);
+        when(ic.componentYToImageSpace(anyInt())).thenAnswer(intToDoubleConverter);
+
         Point fakeLocationOnScreen = new Point(0, 0);
         when(ic.getLocationOnScreen()).thenReturn(fakeLocationOnScreen);
-        
+
         Cursor cursor = Cursor.getDefaultCursor();
         when(ic.getCursor()).thenReturn(cursor);
-
-        when(ic.activeIsDrawable()).thenAnswer(
-                invocation -> comp.activeIsDrawable());
 
         JViewport parent = new JViewport();
         when(ic.getParent()).thenReturn(parent);
 
-        when(ic.getComp()).thenReturn(comp);
         when(ic.isMock()).thenReturn(true);
         when(ic.getMaskViewMode()).thenReturn(NORMAL);
-
-        comp.setIC(ic);
 
         return ic;
     }

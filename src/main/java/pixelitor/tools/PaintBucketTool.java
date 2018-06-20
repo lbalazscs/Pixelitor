@@ -60,7 +60,7 @@ public class PaintBucketTool extends Tool {
             new String[]{ACTION_LOCAL, ACTION_GLOBAL});
 
     public PaintBucketTool() {
-        super('p', "Paint Bucket",
+        super('n', "Paint Bucket",
                 "paint_bucket_tool_icon.png",
                 "<b>click</b> to fill with the selected color.",
                 Cursors.DEFAULT, true, true, ClipStrategy.CANVAS);

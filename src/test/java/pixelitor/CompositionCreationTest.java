@@ -17,6 +17,7 @@
 
 package pixelitor;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import pixelitor.colors.FillType;
 import pixelitor.io.OpenRaster;
@@ -27,6 +28,7 @@ import pixelitor.layers.BlendingMode;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.TextLayer;
+import pixelitor.utils.Messages;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,8 +41,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
 public class CompositionCreationTest {
-    static {
-        TestHelper.initTesting();
+    @BeforeClass
+    public static void setup() {
+        Messages.setMessageHandler(new TestMessageHandler());
     }
 
     @Test

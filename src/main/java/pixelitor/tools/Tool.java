@@ -77,9 +77,8 @@ public abstract class Tool implements KeyListener {
         return toolMessage;
     }
 
-    public boolean mouseClicked(PMouseEvent e) {
+    public void mouseClicked(PMouseEvent e) {
         // empty for the convenience of subclasses
-        return false;
     }
 
     void setButton(ToolButton toolButton) {

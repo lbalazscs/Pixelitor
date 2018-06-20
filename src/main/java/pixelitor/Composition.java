@@ -780,7 +780,9 @@ public class Composition implements Serializable {
                     SelectionActions.getShowHide()
                             .setHideName();
                 }
-                SelectionActions.setEnabled(false, this);
+                if (!ic.isMock()) {
+                    SelectionActions.setEnabled(false, this);
+                }
             } else {
                 // we can get here from a DeselectEdit.redo on a non-active composition
             }
@@ -888,7 +890,7 @@ public class Composition implements Serializable {
     public void setNewSelection(Selection selection) {
         assert selection != null;
         this.selection = selection;
-        if (isActiveComp()) {
+        if (isActiveComp() && !ic.isMock()) {
             SelectionActions.setEnabled(true, this);
         }
     }

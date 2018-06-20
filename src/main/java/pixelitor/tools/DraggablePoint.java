@@ -20,16 +20,18 @@ package pixelitor.tools;
 import pixelitor.gui.ImageComponent;
 import pixelitor.utils.Shapes;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 
 /**
  * A point that can be dragged with the help of a handle.
- * All coordinates are in component space unless otherwise stated.
+ * All coordinates are in component space unless otherwise noted.
  * <p>
- * It has an API compatible with {@link Point}, but
+ * It has an API similar to the {@link Point} methods, but
  * it does not extend it in order to avoid overriding
  * all the setLocation variations in the subclasses.
  */
@@ -40,12 +42,13 @@ public class DraggablePoint {
 
     private final String name; // used only for debugging
 
+    // Coordinates in component space
     public int x;
     public int y;
 
     // Coordinates in image space
-    private double imX;
-    private double imY;
+    public double imX;
+    public double imY;
 
     protected int dragStartX;
     protected int dragStartY;
@@ -62,6 +65,7 @@ public class DraggablePoint {
 
     private final Rectangle shape;
     private final Rectangle shadow;
+    private final static Composite shadowComposite = AlphaComposite.SrcOver.derive(0.7f);
 
     public DraggablePoint(String name, int x, int y, ImageComponent ic, Color color, Color activeColor) {
         this.name = name;
@@ -99,12 +103,20 @@ public class DraggablePoint {
         setLocation(x + dx, y + dy);
     }
 
+    public final void translateOnlyThis(int dx, int dy) {
+        setLocationOnlyForThis(x + dx, y + dy);
+    }
+
     public boolean handleContains(int x, int y) {
         return shape.contains(x, y);
     }
 
     public void paintHandle(Graphics2D g) {
+        Composite c = g.getComposite();
+        g.setComposite(shadowComposite);
         Shapes.fillVisible(g, shadow, Color.BLACK);
+        g.setComposite(c);
+
         if (active) {
             Shapes.fillVisible(g, shape, activeColor);
         } else {
@@ -184,8 +196,11 @@ public class DraggablePoint {
             return false;
         }
         DraggablePoint that = (DraggablePoint) o;
-        return x == that.x &&
-                y == that.y;
+        return samePositionAs(that);
+    }
+
+    public boolean samePositionAs(DraggablePoint that) {
+        return this.x == that.x && this.y == that.y;
     }
 
     @Override
@@ -195,17 +210,7 @@ public class DraggablePoint {
 
     @Override
     public String toString() {
-        String sb = "DraggablePoint{x=" + x +
-                ", y=" + y +
-                '}';
+        String sb = String.format("%s {x = %d, y = %d}{imX = %.2f, imY = %.2f}", name, x, y, imX, imY);
         return sb;
-    }
-
-    public void assertLocationIs(int x, int y) {
-        if ((this.x != x) || (this.y != y)) {
-            throw new AssertionError(String.format(
-                    "found (%d, %d) instead of the expected (%d, %d)",
-                    this.x, this.y, x, y));
-        }
     }
 }

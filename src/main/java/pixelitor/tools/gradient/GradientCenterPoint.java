@@ -48,8 +48,8 @@ public class GradientCenterPoint extends DraggablePoint {
         int dy = y - oldY;
 
         // also move the start and end points
-        start.translate(dx, dy);
-        end.translate(dx, dy);
+        start.translateOnlyThis(dx, dy);
+        end.translateOnlyThis(dx, dy);
     }
 
     public void setLocationWithoutMovingChildren(int cx, int cy) {

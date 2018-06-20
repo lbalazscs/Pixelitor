@@ -21,6 +21,7 @@ import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.tools.gradient.GradientTool;
+import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.shapestool.ShapesTool;
 import pixelitor.utils.ActiveImageChangeListener;
 
@@ -46,6 +47,7 @@ public class Tools {
     public static final GradientTool GRADIENT = new GradientTool();
     public static final PaintBucketTool PAINT_BUCKET = new PaintBucketTool();
     public static final ColorPickerTool COLOR_PICKER = new ColorPickerTool();
+    public static final PenTool PEN = new PenTool();
     public static final ShapesTool SHAPES = new ShapesTool();
     public static final HandTool HAND = new HandTool();
     public static final ZoomTool ZOOM = new ZoomTool();
@@ -76,8 +78,8 @@ public class Tools {
      */
     private static final Tool[] allTools =
             {MOVE, CROP, SELECTION, BRUSH, CLONE, ERASER,
-                    SMUDGE,
-                    GRADIENT, PAINT_BUCKET, COLOR_PICKER, SHAPES, HAND, ZOOM};
+                    SMUDGE, GRADIENT, PAINT_BUCKET, COLOR_PICKER,
+                    PEN, SHAPES, HAND, ZOOM};
 
     public static void setDefaultTool() {
         changeTo(BRUSH);

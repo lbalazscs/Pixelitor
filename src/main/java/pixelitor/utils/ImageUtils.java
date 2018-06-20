@@ -790,6 +790,7 @@ public class ImageUtils {
         g.dispose();
 
         BoxBlurFilter blur = new BoxBlurFilter(softness, softness, 1, null);
+        blur.setProgressTracker(ProgressTracker.NULL_TRACKER);
         brushImage = blur.filter(brushImage, brushImage);
 
         return brushImage;

@@ -26,6 +26,12 @@ import pixelitor.MessageHandler;
 public class StatusBarProgressTracker extends ThresholdProgressTracker {
     private static final MessageHandler messageHandler = Messages.getMessageHandler();
 
+    static {
+        if (messageHandler == null) {
+            throw new IllegalStateException("this class should not be used before Messages initialization");
+        }
+    }
+
     private final String name;
 
     public StatusBarProgressTracker(String name, int numComputationUnits) {

@@ -168,28 +168,25 @@ public class CropTool extends DragTool {
     }
 
     @Override
-    public boolean mouseClicked(PMouseEvent e) {
+    public void mouseClicked(PMouseEvent e) {
         if (e.getClickCount() == 2 && !e.isConsumed()) {
-            return mouseDoubleClicked(e);
+            mouseDoubleClicked(e);
         }
-
-        return false;
     }
 
-    private boolean mouseDoubleClicked(PMouseEvent e) {
+    private void mouseDoubleClicked(PMouseEvent e) {
         // if user double clicked inside selection then accept cropping
 
         if (state != TRANSFORM) {
-            return false;
+            return;
         }
 
         if (!transformSupport.getComponentSpaceRect().contains(e.getPoint())) {
-            return false;
+            return;
         }
 
         e.consume();
         executeCropCommand();
-        return true;
     }
 
     @Override

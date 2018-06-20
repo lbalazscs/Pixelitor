@@ -19,8 +19,10 @@ package pixelitor.tools.gradient;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
+import pixelitor.TestHelper;
 import pixelitor.gui.ImageComponent;
+
+import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 public class GradientPointsTest {
 
@@ -37,15 +39,21 @@ public class GradientPointsTest {
 
     @Before
     public void setup() {
-        ImageComponent ic = Mockito.mock(ImageComponent.class);
+        ImageComponent ic = TestHelper.createICWithoutComp();
         GradientPoints gp = new GradientPoints(START_X_FOR_START, START_Y_FOR_START, START_X_FOR_END, START_Y_FOR_END, ic);
         start = gp.getStart();
         end = gp.getEnd();
         middle = gp.getMiddle();
 
-        start.assertLocationIs(START_X_FOR_START, START_Y_FOR_START);
-        end.assertLocationIs(START_X_FOR_END, START_Y_FOR_END);
-        middle.assertLocationIs(START_X_FOR_MIDDLE, START_Y_FOR_MIDDLE);
+        assertThat(start)
+                .locIs(START_X_FOR_START, START_Y_FOR_START)
+                .imLocIs(START_X_FOR_START, START_Y_FOR_START);
+        assertThat(end)
+                .locIs(START_X_FOR_END, START_Y_FOR_END)
+                .imLocIs(START_X_FOR_END, START_Y_FOR_END);
+        assertThat(middle)
+                .locIs(START_X_FOR_MIDDLE, START_Y_FOR_MIDDLE)
+                .imLocIs(START_X_FOR_MIDDLE, START_Y_FOR_MIDDLE);
     }
 
     @Test
@@ -60,9 +68,15 @@ public class GradientPointsTest {
         middle.mouseDragged(dragStartX + dx / 2, dragStartY + dy / 2);
         middle.mouseReleased(dragStartX + dx, dragStartY + dy);
 
-        start.assertLocationIs(START_X_FOR_START + dx, START_Y_FOR_START + dy);
-        end.assertLocationIs(START_X_FOR_END + dx, START_Y_FOR_END + dy);
-        middle.assertLocationIs(START_X_FOR_MIDDLE + dx, START_Y_FOR_MIDDLE + dy);
+        assertThat(start)
+                .locIs(START_X_FOR_START + dx, START_Y_FOR_START + dy)
+                .imLocIs(START_X_FOR_START + dx, START_Y_FOR_START + dy);
+        assertThat(end)
+                .locIs(START_X_FOR_END + dx, START_Y_FOR_END + dy)
+                .imLocIs(START_X_FOR_END + dx, START_Y_FOR_END + dy);
+        assertThat(middle)
+                .locIs(START_X_FOR_MIDDLE + dx, START_Y_FOR_MIDDLE + dy)
+                .imLocIs(START_X_FOR_MIDDLE + dx, START_Y_FOR_MIDDLE + dy);
     }
 
     @Test
@@ -77,9 +91,15 @@ public class GradientPointsTest {
         end.mouseDragged(dragStartX + dx / 2, dragStartY + dy / 2);
         end.mouseReleased(dragStartX + dx, dragStartY + dy);
 
-        end.assertLocationIs(START_X_FOR_END + dx, START_Y_FOR_END + dy);
-        start.assertLocationIs(START_X_FOR_START, START_Y_FOR_START);
-        middle.assertLocationIs(START_X_FOR_MIDDLE + dx / 2, START_Y_FOR_MIDDLE + dy / 2);
+        assertThat(end)
+                .locIs(START_X_FOR_END + dx, START_Y_FOR_END + dy)
+                .imLocIs(START_X_FOR_END + dx, START_Y_FOR_END + dy);
+        assertThat(start)
+                .locIs(START_X_FOR_START, START_Y_FOR_START)
+                .imLocIs(START_X_FOR_START, START_Y_FOR_START);
+        assertThat(middle)
+                .locIs(START_X_FOR_MIDDLE + dx / 2, START_Y_FOR_MIDDLE + dy / 2)
+                .imLocIs(START_X_FOR_MIDDLE + dx / 2.0, START_Y_FOR_MIDDLE + dy / 2.0);
     }
 
 }

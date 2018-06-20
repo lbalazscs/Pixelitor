@@ -178,7 +178,7 @@ public class Pixelitor {
 
 //        Navigator.showInDialog(pw);
 
-//        clickTool(Tools.SELECTION);
+        clickTool(Tools.PEN);
 //        addMaskAndShowIt();
 
 //        showAddTextLayerDialog();

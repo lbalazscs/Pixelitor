@@ -178,14 +178,6 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public boolean mouseClicked(PMouseEvent e) {
-        if (super.mouseClicked(e)) {
-            return true;
-        }
-        return false;
-    }
-
-    @Override
     public void mouseMoved(MouseEvent e, ImageComponent ic) {
         if (handles == null) {
             // in this method we only want to highlight the
