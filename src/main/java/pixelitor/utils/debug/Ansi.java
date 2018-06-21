@@ -15,23 +15,19 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.tools.pen;
+package pixelitor.utils.debug;
 
-import pixelitor.gui.ImageComponent;
-import pixelitor.tools.PMouseEvent;
-
-import java.awt.Graphics2D;
-import java.awt.event.MouseEvent;
-
-public interface PenToolMode {
-    void mousePressed(PMouseEvent e);
-
-    void mouseDragged(PMouseEvent e);
-
-    void mouseReleased(PMouseEvent e);
-
-    // return true if needs repainting
-    boolean mouseMoved(MouseEvent e, ImageComponent ic);
-
-    void paint(Graphics2D g);
+/**
+ * Helper class with ANSI colors for debugging
+ */
+public class Ansi {
+    public static final String RESET = "\u001B[0m";
+    public static final String BLACK = "\u001B[30m";
+    public static final String RED = "\u001B[31m";
+    public static final String GREEN = "\u001B[32m";
+    public static final String YELLOW = "\u001B[33m";
+    public static final String BLUE = "\u001B[34m";
+    public static final String PURPLE = "\u001B[35m";
+    public static final String CYAN = "\u001B[36m";
+    public static final String WHITE = "\u001B[37m";
 }

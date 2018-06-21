@@ -57,4 +57,12 @@ public class ControlPoint extends DraggablePoint {
             sibling.calcImCoords();
         }
     }
+
+    @Override
+    public String toString() {
+        if (samePositionAs(curvePoint)) {
+            return super.toString() + " same pos as the curve point!";
+        }
+        return super.toString();
+    }
 }

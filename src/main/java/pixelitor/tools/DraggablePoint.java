@@ -187,6 +187,10 @@ public class DraggablePoint {
         this.active = active;
     }
 
+    public boolean isActive() {
+        return active;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -210,7 +214,9 @@ public class DraggablePoint {
 
     @Override
     public String toString() {
-        String sb = String.format("%s {x = %d, y = %d}{imX = %.2f, imY = %.2f}", name, x, y, imX, imY);
+        String sb = String
+                .format("\u001B[32m%s\u001B[0m {x = \u001B[33m%d\u001B[0m, y = \u001B[33m%d\u001B[0m}{imX = \u001B[36m%.1f\u001B[0m, imY = \u001B[36m%.1f\u001B[0m}",
+                        name, x, y, imX, imY);
         return sb;
     }
 }

@@ -94,8 +94,4 @@ public class PathEditor implements PenToolMode {
         }
         return false;
     }
-
-    @Override
-    public void mouseClicked(PMouseEvent e) {
-    }
 }

@@ -32,7 +32,7 @@ import java.awt.Rectangle;
  */
 public class ImageFrame extends JInternalFrame implements InternalFrameListener {
     private static final int NIMBUS_HORIZONTAL_ADJUSTMENT = 18;
-    private static final int NIMBUS_VERTICAL_ADJUSTMENT = 38;
+    private static final int NIMBUS_VERTICAL_ADJUSTMENT = 37;
 
     private final ImageComponent ic;
     private final JScrollPane scrollPane;

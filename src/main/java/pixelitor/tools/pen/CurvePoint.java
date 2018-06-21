@@ -53,7 +53,7 @@ public class CurvePoint extends DraggablePoint {
         ctrlOut.setSibling(ctrlIn);
     }
 
-    public void drawHandles(Graphics2D g, boolean paintIn, boolean paintOut) {
+    public void paintHandles(Graphics2D g, boolean paintIn, boolean paintOut) {
         if (paintIn && !this.samePositionAs(ctrlIn)) {
             Line2D.Double lineIn = new Line2D.Double(x, y, ctrlIn.x, ctrlIn.y);
             Shapes.drawVisible(g, lineIn);
@@ -81,7 +81,7 @@ public class CurvePoint extends DraggablePoint {
         ctrlIn.translateOnlyThis(dx, dy);
     }
 
-    public DraggablePoint handleWasHit(int x, int y) {
+    public DraggablePoint handleOrCtrlHandleWasHit(int x, int y) {
         if (handleContains(x, y)) {
             return this;
         }

@@ -23,6 +23,7 @@ import pixelitor.Composition;
 import pixelitor.filters.RandomFilterSource;
 import pixelitor.selection.Selection;
 import pixelitor.tools.DraggablePoint;
+import pixelitor.tools.pen.Path;
 
 @SuppressWarnings("ExtendsUtilityClass")
 public class PixelitorAssertions extends Assertions {
@@ -49,5 +50,10 @@ public class PixelitorAssertions extends Assertions {
     @org.assertj.core.util.CheckReturnValue
     public static DraggablePointAssert assertThat(DraggablePoint actual) {
         return new DraggablePointAssert(actual);
+    }
+
+    @org.assertj.core.util.CheckReturnValue
+    public static PathAssert assertThat(Path actual) {
+        return new PathAssert(actual);
     }
 }

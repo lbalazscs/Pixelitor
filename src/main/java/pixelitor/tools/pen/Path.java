@@ -20,6 +20,7 @@ package pixelitor.tools.pen;
 import pixelitor.gui.ImageComponent;
 import pixelitor.tools.DraggablePoint;
 import pixelitor.utils.Shapes;
+import pixelitor.utils.debug.Ansi;
 
 import java.awt.Graphics2D;
 import java.awt.Shape;
@@ -28,7 +29,7 @@ import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import static pixelitor.tools.pen.PathBuilder.State.DRAGGING_THE_CONTROLS;
+import static pixelitor.tools.pen.PathBuilder.State.DRAGGING_THE_CONTROL_OF_LAST;
 import static pixelitor.tools.pen.PathBuilder.State.INITIAL;
 import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_CURVE_POINT;
 
@@ -41,13 +42,43 @@ import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_CURVE_POINT;
  */
 public class Path {
     private final List<CurvePoint> curvePoints = new ArrayList<>();
-    private CurvePoint last;
-    private CurvePoint lastButOne;
+    // The curve point which is currently moving while the path is being built
+    private CurvePoint moving;
 
-    public void addPoint(CurvePoint p) {
+    // The curve point which was added first
+    // Relevant for closing
+    private CurvePoint first;
+
+    // The curve point which was finalized last
+    // Relevant because its handle is dragged while the path is being built
+    private CurvePoint last;
+
+    private boolean closed = false;
+
+    public void addFirstPoint(CurvePoint p) {
         curvePoints.add(p);
-        lastButOne = last;
+        first = p;
         last = p;
+    }
+
+    public void setMovingPoint(CurvePoint p) {
+        moving = p;
+    }
+
+    public void finalizeMovingPoint(int x, int y) {
+        moving.setLocation(x, y);
+        moving.calcImCoords();
+        curvePoints.add(moving);
+        last = moving;
+        moving = null;
+    }
+
+    public CurvePoint getMoving() {
+        return moving;
+    }
+
+    public CurvePoint getFirst() {
+        return first;
     }
 
     public CurvePoint getLast() {
@@ -74,24 +105,36 @@ public class Path {
                         point.ctrlIn.x,
                         point.ctrlIn.y,
                         point.x,
-                        point.y
-                );
+                        point.y);
             }
         }
+        if (moving != null) {
+            path.curveTo(last.ctrlOut.x,
+                    last.ctrlOut.y,
+                    moving.ctrlIn.x,
+                    moving.ctrlIn.y,
+                    moving.x,
+                    moving.y);
+        }
+
+        // for closed paths the last control point instance
+        // is the same as the first one, so the closing is
+        // included in the loop
 
         return path;
     }
 
     public void paintForBuilding(Graphics2D g, PathBuilder.State state) {
+        // paint the shape
         if (state != INITIAL) {
             Shapes.drawVisible(g, toShape());
         }
 
+        // paint the handles
         int numPoints = getNumPoints();
-
-        if (state == DRAGGING_THE_CONTROLS) {
+        if (state == DRAGGING_THE_CONTROL_OF_LAST) {
             if (numPoints > 1) {
-                last.drawHandles(g, true, true);
+                last.paintHandles(g, true, true);
             } else {
                 // special case: only one point, no shape
                 if (!last.samePositionAs(last.ctrlOut)) {
@@ -105,34 +148,40 @@ public class Path {
             if (numPoints <= 2) {
                 paintIn = false;
             }
-            lastButOne.drawHandles(g, paintIn, true);
+            last.paintHandles(g, paintIn, true);
+            if (first.isActive()) {
+//                first.paintHandle(g);
+                first.paintHandles(g, true, false);
+            }
         }
     }
 
     public void paintForEditing(Graphics2D g) {
+        // paint the shape
         Shapes.drawVisible(g, toShape());
 
+        // paint the handles
         int numPoints = curvePoints.size();
         for (int i = 0; i < numPoints; i++) {
             boolean paintIn = true;
             boolean paintOut = true;
-            if (i == 0) {
+            if (!closed && (i == 0)) {
                 // don't paint the in control handle for the first point
                 paintIn = false;
             }
-            if (i == numPoints - 1) {
+            if (!closed && (i == numPoints - 1)) {
                 // don't paint the out control handle for the last point
                 paintOut = false;
             }
 
             CurvePoint point = curvePoints.get(i);
-            point.drawHandles(g, paintIn, paintOut);
+            point.paintHandles(g, paintIn, paintOut);
         }
     }
 
     public DraggablePoint handleWasHit(int x, int y) {
         for (CurvePoint point : curvePoints) {
-            DraggablePoint draggablePoint = point.handleWasHit(x, y);
+            DraggablePoint draggablePoint = point.handleOrCtrlHandleWasHit(x, y);
             if (draggablePoint != null) {
                 return draggablePoint;
             }
@@ -143,8 +192,19 @@ public class Path {
     public void resetToInitialState() {
         assert curvePoints.size() == 1;
         curvePoints.remove(0);
+        moving = null;
         last = null;
-        lastButOne = null;
+    }
+
+    public void close() {
+        assert getNumPoints() > 2;
+        curvePoints.add(first);
+        moving = null; // can be ignored in this case
+        closed = true;
+    }
+
+    public boolean isClosed() {
+        return closed;
     }
 
     public void icResized(ImageComponent ic) {
@@ -156,12 +216,21 @@ public class Path {
     }
 
     public void dump() {
-        for (int i = 0; i < curvePoints.size(); i++) {
+        int numPoints = curvePoints.size();
+        if (numPoints == 0) {
+            System.out.println("Empty path");
+        }
+        for (int i = 0; i < numPoints; i++) {
             CurvePoint point = curvePoints.get(i);
-            System.out.println("Point " + i + ":");
-            System.out.println("    " + point.toString());
-            System.out.println("    " + point.ctrlIn.toString());
-            System.out.println("    " + point.ctrlOut.toString());
+            System.out.print(Ansi.PURPLE + "Point " + i + ":" + Ansi.RESET);
+            if (i != 0 && point == first) {
+                System.out.println(" same as the first");
+            } else {
+                System.out.println();
+                System.out.println("    " + point.toString());
+                System.out.println("    " + point.ctrlIn.toString());
+                System.out.println("    " + point.ctrlOut.toString());
+            }
         }
     }
 

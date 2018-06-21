@@ -23,7 +23,7 @@ import pixelitor.tools.PMouseEvent;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 
-import static pixelitor.tools.pen.PathBuilder.State.DRAGGING_THE_CONTROLS;
+import static pixelitor.tools.pen.PathBuilder.State.DRAGGING_THE_CONTROL_OF_LAST;
 import static pixelitor.tools.pen.PathBuilder.State.FINISHED;
 import static pixelitor.tools.pen.PathBuilder.State.INITIAL;
 import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_CURVE_POINT;
@@ -34,14 +34,14 @@ import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_CURVE_POINT;
 public class PathBuilder implements PenToolMode {
     enum State {
         INITIAL {
-        }, DRAGGING_THE_CONTROLS {
+        }, DRAGGING_THE_CONTROL_OF_LAST {
         }, MOVING_TO_NEXT_CURVE_POINT {
         }, FINISHED {
         }
     }
 
-    private int lastMousePressX;
-    private int lastMousePressY;
+//    private int lastMousePressX;
+//    private int lastMousePressY;
 
     private State state;
 
@@ -52,13 +52,31 @@ public class PathBuilder implements PenToolMode {
         state = INITIAL;
     }
 
+    private void setState(State state) {
+        if (this.state == FINISHED) {
+            throw new IllegalStateException();
+        }
+        this.state = state;
+    }
+
     @Override
     public void mousePressed(PMouseEvent e) {
+        if (state == FINISHED) {
+            return;
+        }
+
         int x = e.getCoX();
         int y = e.getCoY();
 
-        lastMousePressX = x;
-        lastMousePressY = y;
+        if (e.isControlDown()) {
+            finish(x, y);
+            return;
+        }
+
+//        System.out.printf("PathBuilder::mousePressed: x = %d, y = %d, state = %s%n", x, y, state);
+
+//        lastMousePressX = x;
+//        lastMousePressY = y;
 
         assert state == INITIAL
                 || state == MOVING_TO_NEXT_CURVE_POINT
@@ -69,61 +87,61 @@ public class PathBuilder implements PenToolMode {
             // in the initial mode. Normally points
             // are added in mouseReleased
             CurvePoint p = new CurvePoint(x, y, e.getIC());
-            path.addPoint(p);
+            path.addFirstPoint(p);
         } else if (state == MOVING_TO_NEXT_CURVE_POINT) {
-            // fix the final position of the moved curve point
-            CurvePoint last = path.getLast();
-            last.setLocation(x, y);
-            last.calcImCoords();
+            CurvePoint first = path.getFirst();
+            if (first.handleContains(x, y) && path.getNumPoints() > 2) {
+                first.setActive(false);
+                path.close();
+                setState(FINISHED);
+                return;
+            } else {
+                // fix the final position of the moved curve point
+                path.finalizeMovingPoint(x, y);
+            }
         }
-        state = DRAGGING_THE_CONTROLS;
+        setState(DRAGGING_THE_CONTROL_OF_LAST);
     }
 
     @Override
     public void mouseDragged(PMouseEvent e) {
-        assert state == DRAGGING_THE_CONTROLS : "state = " + state;
+        if (state == FINISHED) {
+            return;
+        }
+        assert state == DRAGGING_THE_CONTROL_OF_LAST : "state = " + state;
 
         int x = e.getCoX();
         int y = e.getCoY();
         ControlPoint p = path.getLast().ctrlOut;
         p.setLocation(x, y);
 
-        state = DRAGGING_THE_CONTROLS;
+        setState(DRAGGING_THE_CONTROL_OF_LAST);
     }
 
     @Override
     public void mouseReleased(PMouseEvent e) {
-        int x = e.getCoX();
-        int y = e.getCoY();
-
-        if (wasClick(x, y)) {
-            // set the state as if mousePressed didn't happen
-            state = MOVING_TO_NEXT_CURVE_POINT;
-            if (path.getNumPoints() == 1) {
-                // if there is only one point, it means
-                // that it was added in mousePressed
-                path.resetToInitialState();
-            }
-            return;
-        }
-
         if (state == FINISHED) {
             return;
         }
 
-        assert state == DRAGGING_THE_CONTROLS : "state = " + state;
+        int x = e.getCoX();
+        int y = e.getCoY();
+
+//        System.out.printf("PathBuilder::mouseReleased: x = %d, y = %d, state = %s%n", x, y, state);
+
+        assert state == DRAGGING_THE_CONTROL_OF_LAST : "state = " + state;
 
         ControlPoint ctrlOut = path.getLast().ctrlOut;
         ctrlOut.setLocation(x, y);
         ctrlOut.afterMouseReleasedActions();
 
-        path.addPoint(new CurvePoint(x, y, e.getIC()));
-        state = MOVING_TO_NEXT_CURVE_POINT;
+        path.setMovingPoint(new CurvePoint(x, y, e.getIC()));
+        setState(MOVING_TO_NEXT_CURVE_POINT);
     }
 
-    private boolean wasClick(int x, int y) {
-        return x == lastMousePressX && y == lastMousePressY;
-    }
+//    private boolean wasClick(int x, int y) {
+//        return x == lastMousePressX && y == lastMousePressY;
+//    }
 
     @Override
     public boolean mouseMoved(MouseEvent e, ImageComponent ic) {
@@ -135,19 +153,20 @@ public class PathBuilder implements PenToolMode {
 
         int x = e.getX();
         int y = e.getY();
-        path.getLast().setLocation(x, y);
 
-        state = MOVING_TO_NEXT_CURVE_POINT;
-        return true;
-    }
+//        System.out.printf("PathBuilder::mouseMoved: x = %d, y = %d, state = %s%n", x, y, state);
 
-    @Override
-    public void mouseClicked(PMouseEvent e) {
-        if (e.getClickCount() >= 2) {
-            int x = e.getCoX();
-            int y = e.getCoY();
-            finish(x, y);
+        path.getMoving().setLocation(x, y);
+
+        CurvePoint first = path.getFirst();
+        if (first.handleContains(x, y)) {
+            first.setActive(true);
+        } else {
+            first.setActive(false);
         }
+
+        setState(MOVING_TO_NEXT_CURVE_POINT);
+        return true;
     }
 
     @Override
@@ -160,21 +179,19 @@ public class PathBuilder implements PenToolMode {
     }
 
     public void finish(int x, int y) {
-        if (state == DRAGGING_THE_CONTROLS) {
+//        System.out.printf("PathBuilder::finish: x = %d, y = %d, state = %s%n", x, y, state);
+
+        if (state == DRAGGING_THE_CONTROL_OF_LAST) {
             ControlPoint p = path.getLast().ctrlOut;
             p.setLocation(x, y);
             p.calcImCoords();
+        } else if (state == MOVING_TO_NEXT_CURVE_POINT) {
+            path.finalizeMovingPoint(x, y);
         }
-        state = FINISHED;
+        setState(FINISHED);
     }
 
     public void assertStateIs(State s) {
         assert state == s : "state = " + state;
-    }
-
-    public void assertNumCurvePointsIs(int expected) {
-        int actual = path.getNumPoints();
-        assert actual == expected
-                : "numPoints is " + actual + ", expecting " + expected;
     }
 }

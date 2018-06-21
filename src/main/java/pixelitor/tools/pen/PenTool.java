@@ -28,6 +28,7 @@ import pixelitor.utils.Cursors;
 
 import javax.swing.*;
 import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 
@@ -40,6 +41,7 @@ import static pixelitor.tools.pen.PenTool.State.EDITING;
  * The Pen Tool
  */
 public class PenTool extends Tool {
+
     enum State {BUILDING, EDITING}
 
     private State state = BUILDING;
@@ -50,7 +52,7 @@ public class PenTool extends Tool {
 
     public PenTool() {
         super('p', "Pen", "pen_tool_icon.png",
-                "<b>click</b> and <b>drag</b> to create a Bezier curve. <b>Double-click</b> to finish. Press <b>Esc</b> to start from scratch.", Cursors.DEFAULT, false, true, ClipStrategy.INTERNAL_FRAME);
+                "<b>click</b> and <b>drag</b> to create a Bezier curve. <b>Ctrl-click</b> to finish. Press <b>Esc</b> to start from scratch.", Cursors.DEFAULT, false, true, ClipStrategy.INTERNAL_FRAME);
     }
 
     @Override
@@ -64,6 +66,13 @@ public class PenTool extends Tool {
             }
         });
         settingsPanel.addWithLabel("Mode:", modeChooser);
+
+        settingsPanel.addButton(new AbstractAction("dump") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                path.dump();
+            }
+        });
     }
 
     public void setState(State state) {
@@ -97,11 +106,6 @@ public class PenTool extends Tool {
         if (mode.mouseMoved(e, ic)) {
             ic.repaint();
         }
-    }
-
-    @Override
-    public void mouseClicked(PMouseEvent e) {
-        mode.mouseClicked(e);
     }
 
     @Override
