@@ -80,8 +80,8 @@ public class EnlargeCanvas implements CompAction {
         History.addEdit(edit);
 
         Canvas canvas = comp.getCanvas();
-        int newCanvasWidth = canvas.getWidth() + east + west;
-        int newCanvasHeight = canvas.getHeight() + north + south;
+        int newCanvasWidth = canvas.getImWidth() + east + west;
+        int newCanvasHeight = canvas.getImHeight() + north + south;
         canvas.changeSize(newCanvasWidth, newCanvasHeight);
 
         // update the icon images only after the shared canvas size was

@@ -147,11 +147,6 @@ public class JHFocus extends ParametrizedFilter {
             return (float) outside;
         }
 
-        @Override
-        public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-            return super.filter(src, dst);
-        }
-
         public void setInverted(boolean inverted) {
             this.inverted = inverted;
         }

@@ -26,6 +26,7 @@ import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
+import java.awt.geom.PathIterator;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,6 +94,11 @@ public class Path {
         // TODO cache, but one must be careful to
         // re-create after any editing
         GeneralPath path = new GeneralPath();
+
+        if (first == null) { // TODO maybe a Path should be created only when there is at least one node
+            return path;
+        }
+
         path.moveTo(first.x, first.y);
         AnchorPoint prevPoint = first;
 
@@ -124,6 +130,11 @@ public class Path {
 
     public Shape toImageSpaceShape() {
         GeneralPath path = new GeneralPath();
+
+        if (first == null) { // TODO maybe a Path should be created only when there is at least one node
+            return path;
+        }
+
         path.moveTo(first.imX, first.imY);
         AnchorPoint prevPoint = first;
 
@@ -138,6 +149,47 @@ public class Path {
             prevPoint = point;
         }
         assert moving == null;
+        return path;
+    }
+
+    public static Path fromShape(Shape shape, ImageComponent ic) {
+        Path path = new Path();
+        PathIterator it = shape.getPathIterator(null);
+        float[] coords = new float[6];
+        while (!it.isDone()) {
+            int type = it.currentSegment(coords);
+            float x = coords[0];
+            float y = coords[1];
+            float xx = coords[2];
+            float yy = coords[3];
+            float xxx = coords[4];
+            float yyy = coords[5];
+
+            switch (type) {
+                case PathIterator.SEG_MOVETO:
+                    System.out.printf("Path::fromShape: SEG_MOVETO x = %.2f, y = %.2f%n", x, y);
+                    path.addFirstPoint(new AnchorPoint(x, y, ic));
+                    break;
+                case PathIterator.SEG_LINETO:
+                    System.out.printf("Path::fromShape: SEG_LINETO x = %.2f, y = %.2f%n", x, y);
+                    break;
+                case PathIterator.SEG_QUADTO:
+                    System.out
+                            .printf("Path::fromShape: SEG_QUADTO x = %.2f, y = %.2f, xx = %.2f, yy = %.2f%n", x, y, xx, yy);
+                    break;
+                case PathIterator.SEG_CUBICTO:
+                    System.out
+                            .printf("Path::fromShape: SEG_CUBICTO x = %.2f, y = %.2f, xx = %.2f, yy = %.2f, xxx = %.2f, yyy = %.2f%n", x, y, xx, yy, xxx, yyy);
+                    break;
+                case PathIterator.SEG_CLOSE:
+                    System.out.printf("Path::fromShape: SEG_CLOSE%n");
+                    break;
+                default:
+                    throw new IllegalArgumentException("type = " + type);
+            }
+
+            it.next();
+        }
         return path;
     }
 

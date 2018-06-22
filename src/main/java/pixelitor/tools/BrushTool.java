@@ -24,7 +24,6 @@ import pixelitor.utils.Cursors;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.Shape;
 
 /**
@@ -66,7 +65,7 @@ public class BrushTool extends BlendingModeBrushTool {
     }
 
     @Override
-    protected void prepareProgrammaticBrushStroke(Drawable dr, Point start) {
+    protected void prepareProgrammaticBrushStroke(Drawable dr, PPoint start) {
         super.prepareProgrammaticBrushStroke(dr, start);
         graphics.setColor(FgBgColors.getFG());
     }

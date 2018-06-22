@@ -18,6 +18,7 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.Composition;
+import pixelitor.tools.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Graphics2D;
@@ -44,7 +45,9 @@ public class BrushAffectedArea implements Brush {
     public BrushAffectedArea() {
     }
 
-    public void updateAffectedCoordinates(double x, double y) {
+    public void updateAffectedCoordinates(PPoint p) {
+        double x = p.getImX();
+        double y = p.getImY();
         if(x > maxX) {
             maxX = x;
         } else if(x < minX) {
@@ -58,7 +61,9 @@ public class BrushAffectedArea implements Brush {
         }
     }
 
-    public void initAffectedCoordinates(double x, double y) {
+    public void initAffectedCoordinates(PPoint p) {
+        double x = p.getImX();
+        double y = p.getImY();
         minX = x;
         minY = y;
         maxX = x;
@@ -93,15 +98,15 @@ public class BrushAffectedArea implements Brush {
     }
 
     @Override
-    public void onStrokeStart(double x, double y) {
-        updateAffectedCoordinates(x, y);
-        delegate.onStrokeStart(x, y);
+    public void onStrokeStart(PPoint p) {
+        updateAffectedCoordinates(p);
+        delegate.onStrokeStart(p);
     }
 
     @Override
-    public void onNewStrokePoint(double x, double y) {
-        updateAffectedCoordinates(x, y);
-        delegate.onNewStrokePoint(x, y);
+    public void onNewStrokePoint(PPoint p) {
+        updateAffectedCoordinates(p);
+        delegate.onNewStrokePoint(p);
     }
 
     @Override

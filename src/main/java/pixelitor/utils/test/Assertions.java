@@ -88,14 +88,14 @@ public class Assertions {
     }
 
     @SuppressWarnings("SameReturnValue")
-    public static boolean canvasSizeIs(int width, int height) {
+    public static boolean canvasImSizeIs(int width, int height) {
         Composition comp = ImageComponents.getActiveCompOrNull();
         if (comp == null) {
             throw new IllegalStateException();
         }
         Canvas canvas = comp.getCanvas();
-        int actualWidth = canvas.getWidth();
-        int actualHeight = canvas.getHeight();
+        int actualWidth = canvas.getImWidth();
+        int actualHeight = canvas.getImHeight();
         if (actualWidth == width && actualHeight == height) {
             return true;
         } else {

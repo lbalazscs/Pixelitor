@@ -50,6 +50,9 @@ public class PXCFormat {
 
     private static double workRatioForOneImage;
 
+    private PXCFormat() {
+    }
+
     public static Composition read(File file) throws NotPxcFormatException {
         long fileSize = file.length();
         mainPT = new StatusBarProgressTracker("Reading " + file.getName(), (int) fileSize);

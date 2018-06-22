@@ -64,8 +64,8 @@ public class Rotate extends SimpleCompAction {
             @Override
             public void changeCanvas(Canvas canvas) {
                 // switch width and height
-                int newWidth = canvas.getHeight();
-                int newHeight = canvas.getWidth();
+                int newWidth = canvas.getImHeight();
+                int newHeight = canvas.getImWidth();
                 canvas.changeSize(newWidth, newHeight);
             }
 
@@ -73,7 +73,7 @@ public class Rotate extends SimpleCompAction {
             public AffineTransform getCanvasTX(Canvas canvas) {
                 // rotate, then translate to compensate
                 AffineTransform at = AffineTransform.getTranslateInstance(
-                        canvas.getHeight(), 0);
+                        canvas.getImHeight(), 0);
                 at.quadrantRotate(1);
                 return at;
             }
@@ -105,7 +105,7 @@ public class Rotate extends SimpleCompAction {
             public AffineTransform getCanvasTX(Canvas canvas) {
                 // rotate, then translate to compensate
                 AffineTransform at = AffineTransform.getTranslateInstance(
-                        canvas.getWidth(), canvas.getHeight());
+                        canvas.getImWidth(), canvas.getImHeight());
                 at.quadrantRotate(2);
                 return at;
             }
@@ -139,7 +139,7 @@ public class Rotate extends SimpleCompAction {
             public AffineTransform getCanvasTX(Canvas canvas) {
                 // rotate, then translate to compensate
                 AffineTransform at = AffineTransform.getTranslateInstance(
-                        0, canvas.getWidth());
+                        0, canvas.getImWidth());
                 at.quadrantRotate(3);
                 return at;
             }

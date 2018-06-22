@@ -271,8 +271,8 @@ public class CompositionTest {
         Canvas canvas = comp.getCanvas();
         assertThat(canvas)
                 .isNotNull()
-                .hasWidth(20)
-                .hasHeight(10);
+                .hasImWidth(20)
+                .hasImHeight(10);
 
         comp.checkInvariant();
     }
@@ -402,7 +402,7 @@ public class CompositionTest {
 
     @Test
     public void testGetCanvasBounds() {
-        Rectangle bounds = comp.getCanvasBounds();
+        Rectangle bounds = comp.getCanvasImBounds();
 
         assertThat(bounds)
                 .isNotNull()
@@ -551,7 +551,7 @@ public class CompositionTest {
 
         assertThat(comp.getSelection())
                 .isNotNull()
-                .hasShapeBounds(comp.getCanvasBounds()); // the whole canvas!
+                .hasShapeBounds(comp.getCanvasImBounds()); // the whole canvas!
         History.assertNumEditsIs(1);
         History.assertLastEditNameIs("Invert Selection");
 
@@ -563,7 +563,7 @@ public class CompositionTest {
         History.redo();
         assertThat(comp.getSelection())
                 .isNotNull()
-                .hasShapeBounds(comp.getCanvasBounds()); // the whole canvas!
+                .hasShapeBounds(comp.getCanvasImBounds()); // the whole canvas!
     }
 
     @Test

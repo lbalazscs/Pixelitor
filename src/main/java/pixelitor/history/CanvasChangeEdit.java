@@ -39,8 +39,8 @@ public class CanvasChangeEdit extends PixelitorEdit {
         super(name, comp);
         embedded = true;
 
-        backupCanvasWidth = comp.getCanvasWidth();
-        backupCanvasHeight = comp.getCanvasHeight();
+        backupCanvasWidth = comp.getCanvasImWidth();
+        backupCanvasHeight = comp.getCanvasImHeight();
     }
 
     @Override
@@ -58,8 +58,8 @@ public class CanvasChangeEdit extends PixelitorEdit {
     private void swapCanvasDimensions() {
         Canvas canvas = comp.getCanvas();
 
-        int tmpCanvasWidth = canvas.getWidth();
-        int tmpCanvasHeight = canvas.getHeight();
+        int tmpCanvasWidth = canvas.getImWidth();
+        int tmpCanvasHeight = canvas.getImHeight();
 
         canvas.changeSize(backupCanvasWidth, backupCanvasHeight);
 

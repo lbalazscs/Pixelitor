@@ -178,7 +178,7 @@ public class Pixelitor {
 
 //        Navigator.showInDialog(pw);
 
-        clickTool(Tools.PEN);
+//        clickTool(Tools.PEN);
 //        addMaskAndShowIt();
 
 //        showAddTextLayerDialog();
@@ -224,6 +224,7 @@ public class Pixelitor {
 
     private static void keepSwitchingToolsRandomly() {
         Runnable backgroundTask = () -> {
+            //noinspection InfiniteLoopStatement
             while (true) {
                 Utils.sleep(1, TimeUnit.SECONDS);
                 // this will run on a background thread

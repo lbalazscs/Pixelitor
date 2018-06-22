@@ -19,6 +19,7 @@ package pixelitor.tools.brushes;
 
 import pixelitor.Composition;
 import pixelitor.tools.BrushType;
+import pixelitor.tools.PPoint;
 import pixelitor.tools.Symmetry;
 import pixelitor.tools.Tool;
 import pixelitor.utils.debug.DebugNode;
@@ -68,13 +69,13 @@ public class SymmetryBrush implements Brush {
     }
 
     @Override
-    public void onStrokeStart(double x, double y) {
-        symmetry.onStrokeStart(this, x, y);
+    public void onStrokeStart(PPoint p) {
+        symmetry.onStrokeStart(this, p);
     }
 
     @Override
-    public void onNewStrokePoint(double x, double y) {
-        symmetry.onNewStrokePoint(this, x, y);
+    public void onNewStrokePoint(PPoint p) {
+        symmetry.onNewStrokePoint(this, p);
     }
 
     public void brushTypeChanged(BrushType brushType, int radius) {
@@ -115,14 +116,14 @@ public class SymmetryBrush implements Brush {
         return true;
     }
 
-    public void onStrokeStart(int brushNo, double x, double y) {
-        affectedArea.updateAffectedCoordinates(x, y);
-        brushes[brushNo].onStrokeStart(x, y);
+    public void onStrokeStart(int brushNo, PPoint p) {
+        affectedArea.updateAffectedCoordinates(p);
+        brushes[brushNo].onStrokeStart(p);
     }
 
-    public void onNewStrokePoint(int brushNo, double endX, double endY) {
-        affectedArea.updateAffectedCoordinates(endX, endY);
-        brushes[brushNo].onNewStrokePoint(endX, endY);
+    public void onNewStrokePoint(int brushNo, PPoint p) {
+        affectedArea.updateAffectedCoordinates(p);
+        brushes[brushNo].onNewStrokePoint(p);
     }
 
     @Override

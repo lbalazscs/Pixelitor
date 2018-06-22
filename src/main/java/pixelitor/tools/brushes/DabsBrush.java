@@ -17,6 +17,7 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.tools.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
 /**
@@ -50,20 +51,22 @@ public abstract class DabsBrush extends AbstractBrush {
      * Sets up the brush stamp. Depending on the type of brush, it can be
      * called at the beginning of a stroke or before each dab.
      */
-    abstract void setupBrushStamp(double x, double y);
+    abstract void setupBrushStamp(PPoint p);
 
-    public abstract void putDab(double x, double y, double theta);
+    public abstract void putDab(PPoint p, double theta);
 
     @Override
-    public void onStrokeStart(double x, double y) {
-        dabsStrategy.onStrokeStart(x, y);
-        updateComp(x, y);
+    public void onStrokeStart(PPoint p) {
+        super.onStrokeStart(p);
+        dabsStrategy.onStrokeStart(p);
+        updateComp(p);
     }
 
     @Override
-    public void onNewStrokePoint(double x, double y) {
-        dabsStrategy.onNewStrokePoint(x, y);
-        updateComp(x, y);
+    public void onNewStrokePoint(PPoint p) {
+        dabsStrategy.onNewStrokePoint(p);
+        updateComp(p);
+        rememberPrevious(p);
     }
 
     public DabsBrushSettings getSettings() {

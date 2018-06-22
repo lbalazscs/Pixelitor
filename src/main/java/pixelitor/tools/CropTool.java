@@ -279,7 +279,7 @@ public class CropTool extends DragTool {
         // paint the semi-transparent dark area outside the crop rectangle
         Shape origClip = g2.getClip();  // save for later use
 
-        Rectangle canvasBounds = canvas.getBounds();
+        Rectangle canvasBounds = canvas.getImBounds();
 
         // Similar to ClipStrategy.INTERNAL_FRAME, but we need some intermediary variables
 
@@ -371,6 +371,7 @@ public class CropTool extends DragTool {
         resetStateToInitial();
     }
 
+    @Override
     public void resetStateToInitial() {
         ended = true;
         transformSupport = null;

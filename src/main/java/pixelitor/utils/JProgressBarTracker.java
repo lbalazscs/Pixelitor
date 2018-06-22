@@ -32,7 +32,7 @@ import java.awt.Container;
 public class JProgressBarTracker extends ThresholdProgressTracker {
     private final ProgressPanel progressPanel;
 
-    private Container topContainer;
+    private final Container topContainer;
 
     public JProgressBarTracker(ProgressPanel progressPanel) {
         super(100);

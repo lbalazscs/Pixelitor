@@ -26,16 +26,15 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
+import pixelitor.gui.ImageComponent;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.Brush;
 
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.Collection;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -56,6 +55,7 @@ public class AbstractBrushToolTest {
     private Brush origBrush;
 
     private Drawable dr;
+    private ImageComponent ic;
 
     @Parameters(name = "{index}: {0}, mask = {1}")
     public static Collection<Object[]> instancesToTest() {
@@ -76,6 +76,8 @@ public class AbstractBrushToolTest {
     @Before
     public void setUp() {
         Composition comp = TestHelper.create2LayerComposition(false);
+        ic = TestHelper.setupAnActiveICFor(comp);
+
         dr = comp.getActiveDrawable();
 
         origBrush = tool.getBrush();
@@ -98,15 +100,17 @@ public class AbstractBrushToolTest {
         tool.trace(dr, new Rectangle(2, 2, 2, 2));
 
         verify(brushSpy).setTarget(any(), any());
-        verify(brushSpy).onStrokeStart(2.0, 2.0);
-        verify(brushSpy, times(5)).onNewStrokePoint(anyDouble(), anyDouble());
+        verify(brushSpy).onStrokeStart(any());
+        verify(brushSpy, times(5)).onNewStrokePoint(any());
     }
 
     @Test
     public void test_drawBrushStrokeProgrammatically() {
-        tool.drawBrushStrokeProgrammatically(dr, new Point(2, 2), new Point(5, 5));
+        PPoint start = new PPoint.Image(ic, 2.0, 2.0);
+        PPoint end = new PPoint.Image(ic, 5.0, 5.0);
+        tool.drawBrushStrokeProgrammatically(dr, start, end);
 
-        verify(brushSpy).onStrokeStart(2.0, 2.0);
-        verify(brushSpy).onNewStrokePoint(5.0, 5.0);
+        verify(brushSpy).onStrokeStart(any());
+        verify(brushSpy).onNewStrokePoint(any());
     }
 }

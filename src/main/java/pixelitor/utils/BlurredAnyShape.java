@@ -40,7 +40,7 @@ public class BlurredAnyShape implements BlurredShape {
     private final double innerRadiusY;
     private final double outerRadiusX;
     private final double outerRadiusY;
-    byte[] pixels;
+    final byte[] pixels;
 
     private static WeakReference<BlurredAnyShape> lastRef;
 

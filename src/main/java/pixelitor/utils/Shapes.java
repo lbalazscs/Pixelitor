@@ -77,7 +77,9 @@ public class Shapes {
         g.fill(shape);
     }
 
-    public static void drawGradientArrow(Graphics2D g, int startX, int startY, int endX, int endY) {
+    public static void drawGradientArrow(Graphics2D g,
+                                         double startX, double startY,
+                                         double endX, double endY) {
         Line2D line = new Line2D.Double(startX, startY, endX, endY);
         Shapes.drawVisible(g, line);
 

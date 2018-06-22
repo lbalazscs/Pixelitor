@@ -79,9 +79,9 @@ public class CompositionNode extends DebugNode {
             add(selectionNode);
         }
 
-        int canvasWidth = comp.getCanvasWidth();
+        int canvasWidth = comp.getCanvasImWidth();
         addInt("canvasWidth", canvasWidth);
-        int canvasHeight = comp.getCanvasHeight();
+        int canvasHeight = comp.getCanvasImHeight();
         addInt("canvasHeight", canvasHeight);
     }
 }

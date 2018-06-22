@@ -30,4 +30,7 @@ public class Ansi {
     public static final String PURPLE = "\u001B[35m";
     public static final String CYAN = "\u001B[36m";
     public static final String WHITE = "\u001B[37m";
+
+    private Ansi() {
+    }
 }

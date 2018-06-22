@@ -49,7 +49,7 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
         ParamSet params = filter.getParamSet();
         if (resetParams) {
             params.reset();
-            params.considerImageSize(dr.getComp().getCanvas().getBounds());
+            params.considerImageSize(dr.getComp().getCanvas().getImBounds());
         }
         params.setAdjustmentListener(this);
 

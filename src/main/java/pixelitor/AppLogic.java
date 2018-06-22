@@ -44,7 +44,7 @@ public class AppLogic {
     }
 
     public static void activeCompSizeChanged(Composition comp) {
-        Symmetry.setCompositionSize(comp.getCanvasWidth(), comp.getCanvasHeight());
+        Symmetry.setCompositionSize(comp.getCanvasImWidth(), comp.getCanvasImHeight());
     }
 
     public static void addLayerChangeListener(GlobalLayerChangeListener listener) {

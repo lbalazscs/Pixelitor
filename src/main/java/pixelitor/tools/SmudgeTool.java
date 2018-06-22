@@ -26,7 +26,6 @@ import pixelitor.tools.brushes.SmudgeBrush;
 import pixelitor.utils.Cursors;
 
 import javax.swing.*;
-import java.awt.Point;
 import java.awt.image.BufferedImage;
 
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
@@ -85,16 +84,14 @@ public class SmudgeTool extends AbstractBrushTool {
         // with the translation.
         BufferedImage sourceImage = dr.getCanvasSizedSubImage();
 
-        double x = e.getImX();
-        double y = e.getImY();
         if (!e.isShiftDown()) { // not a line-click
-            initStroke(sourceImage, x, y);
+            initStroke(sourceImage, e);
         }
         super.mousePressed(e);
     }
 
-    private void initStroke(BufferedImage sourceImage, double x, double y) {
-        smudgeBrush.setSource(sourceImage, x, y, strengthParam.getValueAsPercentage());
+    private void initStroke(BufferedImage sourceImage, PPoint p) {
+        smudgeBrush.setSource(sourceImage, p, strengthParam.getValueAsPercentage());
     }
 
     @Override
@@ -103,10 +100,10 @@ public class SmudgeTool extends AbstractBrushTool {
     }
 
     @Override
-    protected void prepareProgrammaticBrushStroke(Drawable dr, Point start) {
+    protected void prepareProgrammaticBrushStroke(Drawable dr, PPoint start) {
         super.prepareProgrammaticBrushStroke(dr, start);
 
         BufferedImage sourceImg = dr.getCanvasSizedSubImage();
-        initStroke(sourceImg, start.x, start.y);
+        initStroke(sourceImg, start);
     }
 }

@@ -82,8 +82,8 @@ public enum AutoZoom {
             return ZoomLevel.Z100;
         }
 
-        int canvasWidth = canvas.getWidth();
-        int canvasHeight = canvas.getHeight();
+        int canvasWidth = canvas.getImWidth();
+        int canvasHeight = canvas.getImHeight();
 
         Dimension desktopSize = Desktop.INSTANCE.getDesktopSize();
         double desktopWidth = desktopSize.getWidth();
@@ -112,7 +112,7 @@ public enum AutoZoom {
             }
             if (!zoomInToFitSpace) { // we don't want to zoom in more than 100%
                 if (lastOK == ZoomLevel.Z100) {
-                    return lastOK;
+                    return ZoomLevel.Z100;
                 }
             }
             lastOK = level;

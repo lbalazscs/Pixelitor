@@ -18,6 +18,7 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.Composition;
+import pixelitor.tools.PPoint;
 import pixelitor.tools.ShapeType;
 
 import java.awt.Graphics2D;
@@ -51,7 +52,9 @@ public class ShapeDabsBrush extends DabsBrush {
     }
 
     @Override
-    public void putDab(double x, double y, double theta) {
+    public void putDab(PPoint p, double theta) {
+        double x = p.getImX();
+        double y = p.getImY();
         ShapeType shapeType = ((ShapeDabsBrushSettings)settings).getShapeType();
         if (theta != 0) {
             Shape shape = shapeType.getShape(x - radius, y - radius, diameter);
@@ -62,11 +65,11 @@ public class ShapeDabsBrush extends DabsBrush {
             Shape shape = shapeType.getShape(x - radius, y - radius, diameter);
             targetG.fill(shape);
         }
-        updateComp((int) x, (int) y);
+        updateComp(p);
     }
 
     @Override
-    void setupBrushStamp(double x, double y) {
+    void setupBrushStamp(PPoint p) {
         // no setup is necessary for shape brushes
     }
 }

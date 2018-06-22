@@ -184,7 +184,7 @@ public class TextLayer extends ContentLayer {
     }
 
     public BufferedImage createRasterizedImage() {
-        BufferedImage img = ImageUtils.createSysCompatibleImage(canvas.getWidth(), canvas.getHeight());
+        BufferedImage img = ImageUtils.createSysCompatibleImage(canvas.getImWidth(), canvas.getImHeight());
         Graphics2D g = img.createGraphics();
         applyLayer(g, true, img);
         g.dispose();
@@ -194,7 +194,7 @@ public class TextLayer extends ContentLayer {
     @Override
     public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
         painter.setFillPaint(settings.getColor());
-        painter.paint(g, null, comp.getCanvasWidth(), comp.getCanvasHeight());
+        painter.paint(g, null, comp.getCanvasImWidth(), comp.getCanvasImHeight());
     }
 
     @Override
@@ -297,8 +297,8 @@ public class TextLayer extends ContentLayer {
         // calculate the corresponding margins...
         int northMargin = (int) cropRect.getY();
         int westMargin = (int) cropRect.getX();
-        int southMargin = (int) (canvas.getHeight() - cropRect.getHeight() - cropRect.getY());
-        int eastMargin = (int) (canvas.getWidth() - cropRect.getWidth() - cropRect.getX());
+        int southMargin = (int) (canvas.getImHeight() - cropRect.getHeight() - cropRect.getY());
+        int eastMargin = (int) (canvas.getImWidth() - cropRect.getWidth() - cropRect.getX());
 
         // ...and do a negative enlargement
         enlargeCanvas(-northMargin, -eastMargin, -southMargin, -westMargin);

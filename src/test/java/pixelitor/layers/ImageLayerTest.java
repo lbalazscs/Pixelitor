@@ -242,9 +242,9 @@ public class ImageLayerTest {
         assertThat(bounds).isNotNull();
 
         if (withTranslation == WithTranslation.NO) {
-            assertThat(bounds).isEqualTo(layer.canvas.getBounds());
+            assertThat(bounds).isEqualTo(layer.canvas.getImBounds());
         } else {
-            assertThat(bounds).isNotEqualTo(layer.canvas.getBounds());
+            assertThat(bounds).isNotEqualTo(layer.canvas.getImBounds());
         }
         iconUpdates.check(0, 0);
     }
@@ -277,8 +277,8 @@ public class ImageLayerTest {
         TmpDrawingLayer tmpDrawingLayer
                 = layer.createTmpDrawingLayer(AlphaComposite.SrcOver);
         assertThat(tmpDrawingLayer).isNotNull();
-        assertThat(tmpDrawingLayer.getWidth()).isEqualTo(layer.canvas.getWidth());
-        assertThat(tmpDrawingLayer.getHeight()).isEqualTo(layer.canvas.getHeight());
+        assertThat(tmpDrawingLayer.getWidth()).isEqualTo(layer.canvas.getImWidth());
+        assertThat(tmpDrawingLayer.getHeight()).isEqualTo(layer.canvas.getImHeight());
 
         layer.mergeTmpDrawingLayerDown();
         iconUpdates.check(0, 0);
@@ -288,8 +288,8 @@ public class ImageLayerTest {
     public void test_createCompositionSizedTmpImage() {
         BufferedImage image = layer.createCanvasSizedTmpImage();
         assertThat(image).isNotNull();
-        assertThat(image.getWidth()).isEqualTo(layer.canvas.getWidth());
-        assertThat(image.getHeight()).isEqualTo(layer.canvas.getHeight());
+        assertThat(image.getWidth()).isEqualTo(layer.canvas.getImWidth());
+        assertThat(image.getHeight()).isEqualTo(layer.canvas.getImHeight());
         iconUpdates.check(0, 0);
     }
 
@@ -298,8 +298,8 @@ public class ImageLayerTest {
         BufferedImage image = layer.getCanvasSizedSubImage();
         assertThat(image).isNotNull();
         Canvas canvas = layer.getComp().getCanvas();
-        assert image.getWidth() == canvas.getWidth();
-        assert image.getHeight() == canvas.getHeight();
+        assert image.getWidth() == canvas.getImWidth();
+        assert image.getHeight() == canvas.getImHeight();
         iconUpdates.check(0, 0);
     }
 
@@ -349,8 +349,8 @@ public class ImageLayerTest {
 
         Canvas canvas = layer.getComp().getCanvas();
         BufferedImage image = layer.getImage();
-        assert image.getWidth() == canvas.getWidth();
-        assert image.getHeight() == canvas.getHeight();
+        assert image.getWidth() == canvas.getImWidth();
+        assert image.getHeight() == canvas.getImHeight();
         iconUpdates.check(0, 0);
     }
 

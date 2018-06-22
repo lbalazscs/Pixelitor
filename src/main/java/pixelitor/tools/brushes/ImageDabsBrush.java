@@ -17,6 +17,7 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.tools.PPoint;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
@@ -50,7 +51,7 @@ public class ImageDabsBrush extends DabsBrush {
     }
 
     @Override
-    void setupBrushStamp(double x, double y) {
+    void setupBrushStamp(PPoint p) {
         assert diameter > 0 : "zero diameter in " + getClass().getName();
         Color c = targetG.getColor();
 
@@ -112,7 +113,9 @@ public class ImageDabsBrush extends DabsBrush {
     }
 
     @Override
-    public void putDab(double x, double y, double theta) {
+    public void putDab(PPoint p, double theta) {
+        double x = p.getImX();
+        double y = p.getImY();
         if (!settings.isAngleAware() || theta == 0) {
             targetG.drawImage(finalScaledImage, (int) x - radius, (int) y - radius, null);
         } else {
@@ -122,6 +125,6 @@ public class ImageDabsBrush extends DabsBrush {
             targetG.drawImage(finalScaledImage, (int) x - radius, (int) y - radius, null);
             targetG.setTransform(oldTransform);
         }
-        updateComp((int) x, (int) y);
+        updateComp(p);
     }
 }

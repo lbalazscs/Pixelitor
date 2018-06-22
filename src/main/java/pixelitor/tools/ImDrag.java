@@ -43,6 +43,13 @@ public class ImDrag {
         this.endY = endY;
     }
 
+    public ImDrag(PPoint start, PPoint end) {
+        this.startX = start.getImX();
+        this.startY = start.getImY();
+        this.endX = end.getImX();
+        this.endY = end.getImY();
+    }
+
     public double getStartX() {
         return startX;
     }

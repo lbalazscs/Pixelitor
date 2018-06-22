@@ -29,70 +29,14 @@ import java.awt.event.MouseEvent;
  * the standard {@link MouseEvent} with some
  * practical added functionality
  */
-public class PMouseEvent {
-    // event coordinates in image space
-    private double imX;
-    private double imY;
-    // event coordinates in component (MouseEvent) space
-    private final int coX;
-    private final int coY;
-
-    private final ImageComponent ic;
+public class PMouseEvent extends PPoint.Lazy {
     private final MouseEvent e;
 
-    private boolean xConverted = false;
-    private boolean yConverted = false;
-
     public PMouseEvent(MouseEvent e, ImageComponent ic) {
+        super(ic, e.getX(), e.getY());
         assert e.getSource() == ic;
 
         this.e = e;
-        this.ic = ic;
-
-        coX = e.getX();
-        coY = e.getY();
-//        imX = ic.componentXToImageSpace(coX);
-//        imY = ic.componentYToImageSpace(coY);
-    }
-
-    /**
-     * Returns the x event coordinate in component space
-     */
-    public int getCoX() {
-        return coX;
-    }
-
-    /**
-     * Returns the y event coordinate in component space
-     */
-    public int getCoY() {
-        return coY;
-    }
-
-    /**
-     * Returns the x event coordinate in image space
-     */
-    public double getImX() {
-        if (!xConverted) {
-            imX = ic.componentXToImageSpace(coX);
-            xConverted = true;
-        }
-        return imX;
-    }
-
-    /**
-     * Returns the y event coordinate in image space
-     */
-    public double getImY() {
-        if (!yConverted) {
-            imY = ic.componentYToImageSpace(coY);
-            yConverted = true;
-        }
-        return imY;
-    }
-
-    public ImageComponent getIC() {
-        return ic;
     }
 
     public JViewport getViewport() {

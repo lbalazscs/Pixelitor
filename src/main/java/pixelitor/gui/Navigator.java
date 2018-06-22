@@ -125,8 +125,8 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
     private void setNavigatorSizeFromZoom(ZoomLevel zoom) {
         Canvas canvas = ic.getCanvas();
         double scale = zoom.getViewScale();
-        preferredWidth = (int) (scale * canvas.getWidth());
-        preferredHeight = (int) (scale * canvas.getHeight());
+        preferredWidth = (int) (scale * canvas.getImWidth());
+        preferredHeight = (int) (scale * canvas.getImHeight());
 
         JDialog dialog = GUIUtils.getDialogAncestor(this);
         dialog.setTitle("Navigator - " + zoom.toString());
@@ -374,8 +374,8 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
 
     private void recalculateScaling(ImageComponent ic, int width, int height) {
         Canvas canvas = ic.getCanvas();
-        int canvasWidth = canvas.getWidth();
-        int canvasHeight = canvas.getHeight();
+        int canvasWidth = canvas.getImWidth();
+        int canvasHeight = canvas.getImHeight();
 
         if (exactZoom != null) {
             imgScalingRatio = exactZoom.getViewScale();

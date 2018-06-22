@@ -22,7 +22,7 @@ import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
 
 import java.awt.Graphics2D;
-import java.awt.Point;
+import java.awt.geom.Point2D;
 
 /**
  * Represents the mouse drag on the image made
@@ -78,9 +78,9 @@ public class UserDrag {
         coEndY = e.getCoY();
 
         if (constrainPoints) {
-            Point constrainedEnd = Utils.constrainEndPoint(coStartX, coStartY, coEndX, coEndY);
-            coEndX = constrainedEnd.x;
-            coEndY = constrainedEnd.y;
+            Point2D constrainedEnd = Utils.constrainEndPoint(coStartX, coStartY, coEndX, coEndY);
+            coEndX = (int) constrainedEnd.getX();
+            coEndY = (int) constrainedEnd.getY();
         }
 
         imEndX = ic.componentXToImageSpace(coEndX);

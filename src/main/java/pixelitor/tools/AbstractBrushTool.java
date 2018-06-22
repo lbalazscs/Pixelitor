@@ -38,7 +38,6 @@ import javax.swing.*;
 import java.awt.Composite;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.FlatteningPathIterator;
@@ -137,16 +136,14 @@ public abstract class AbstractBrushTool extends Tool {
     @Override
     public void mousePressed(PMouseEvent e) {
         boolean withLine = withLine(e);
-        double x = e.getImX();
-        double y = e.getImY();
 
-        newMousePoint(e.getComp().getActiveDrawable(), x, y, withLine);
+        newMousePoint(e.getComp().getActiveDrawable(), e, withLine);
         firstMouseDown = false;
 
         if (withLine) {
-            brushAffectedArea.updateAffectedCoordinates(x, y);
+            brushAffectedArea.updateAffectedCoordinates(e);
         } else {
-            brushAffectedArea.initAffectedCoordinates(x, y);
+            brushAffectedArea.initAffectedCoordinates(e);
         }
     }
 
@@ -156,13 +153,7 @@ public abstract class AbstractBrushTool extends Tool {
 
     @Override
     public void mouseDragged(PMouseEvent e) {
-        double x = e.getImX();
-        double y = e.getImY();
-
-        // at this point x and y are already scaled according to the zoom level
-        // (unlike e.getX(), e.getY())
-
-        newMousePoint(e.getComp().getActiveDrawable(), x, y, false);
+        newMousePoint(e.getComp().getActiveDrawable(), e, false);
     }
 
     @Override
@@ -171,7 +162,7 @@ public abstract class AbstractBrushTool extends Tool {
             // we can get here if the mousePressed was an Alt-press, therefore
             // consumed by the color picker. Nothing was drawn, therefore
             // there is no need to save a backup, we can just return
-            // TODO is this true after all the refactorings?
+            // TODO is this still true after all the refactorings?
             return;
         }
 
@@ -200,16 +191,16 @@ public abstract class AbstractBrushTool extends Tool {
         dr.getComp().imageChanged(HISTOGRAM);
     }
 
-    public void drawBrushStrokeProgrammatically(Drawable dr, Point start, Point end) {
+    public void drawBrushStrokeProgrammatically(Drawable dr, PPoint start, PPoint end) {
         prepareProgrammaticBrushStroke(dr, start);
 
-        brush.onStrokeStart(start.x, start.y);
-        brush.onNewStrokePoint(end.x, end.y);
+        brush.onStrokeStart(start);
+        brush.onNewStrokePoint(end);
 
         finishBrushStroke(dr);
     }
 
-    protected void prepareProgrammaticBrushStroke(Drawable dr, Point start) {
+    protected void prepareProgrammaticBrushStroke(Drawable dr, PPoint start) {
         drawStrategy.prepareBrushStroke(dr);
         graphics = createGraphicsForNewBrushStroke(dr);
     }
@@ -246,19 +237,19 @@ public abstract class AbstractBrushTool extends Tool {
     /**
      * Called from mousePressed, mouseDragged
      */
-    private void newMousePoint(Drawable dr, double x, double y, boolean connectClickWithLine) {
+    private void newMousePoint(Drawable dr, PPoint p, boolean connectClickWithLine) {
         if (graphics == null) { // a new brush stroke has to be initialized
             drawStrategy.prepareBrushStroke(dr);
             graphics = createGraphicsForNewBrushStroke(dr);
             graphics.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
             if (connectClickWithLine) {
-                brush.onNewStrokePoint(x, y);
+                brush.onNewStrokePoint(p);
             } else {
-                brush.onStrokeStart(x, y);
+                brush.onStrokeStart(p);
             }
         } else {
-            brush.onNewStrokePoint(x, y);
+            brush.onNewStrokePoint(p);
         }
     }
 
@@ -319,7 +310,8 @@ public abstract class AbstractBrushTool extends Tool {
 
             graphics = createGraphicsForNewBrushStroke(dr);
 
-            doTraceAfterSetup(shape);
+            ImageComponent ic = dr.getComp().getIC();
+            doTraceAfterSetup(shape, ic);
 
             finishBrushStroke(dr);
         } finally {
@@ -327,32 +319,28 @@ public abstract class AbstractBrushTool extends Tool {
         }
     }
 
-    private void doTraceAfterSetup(Shape shape) {
-        int startingX = 0;
-        int startingY = 0;
+    private void doTraceAfterSetup(Shape shape, ImageComponent ic) {
+        PPoint startingPoint = null;
 
         PathIterator fpi = new FlatteningPathIterator(shape.getPathIterator(null), 1.0);
         float[] coords = new float[2];
         while (!fpi.isDone()) {
             int type = fpi.currentSegment(coords);
-            int x = (int) coords[0];
-            int y = (int) coords[1];
-            brushAffectedArea.updateAffectedCoordinates(x, y);
+            double x = coords[0];
+            double y = coords[1];
+            PPoint p = new PPoint.Image(ic, x, y);
+            brushAffectedArea.updateAffectedCoordinates(p);
 
             switch (type) {
                 case PathIterator.SEG_MOVETO:
-                    startingX = x;
-                    startingY = y;
-
-                    brush.onStrokeStart(x, y);
-
+                    startingPoint = p;
+                    brush.onStrokeStart(p);
                     break;
                 case PathIterator.SEG_LINETO:
-                    brush.onNewStrokePoint(x, y);
-
+                    brush.onNewStrokePoint(p);
                     break;
                 case PathIterator.SEG_CLOSE:
-                    brush.onNewStrokePoint(startingX, startingY);
+                    brush.onNewStrokePoint(startingPoint);
                     break;
                 default:
                     throw new IllegalArgumentException("type = " + type);

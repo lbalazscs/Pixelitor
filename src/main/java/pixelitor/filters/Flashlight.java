@@ -114,11 +114,6 @@ public class Flashlight extends ParametrizedFilter {
         }
 
         @Override
-        public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-            return super.filter(src, dst);
-        }
-
-        @Override
         public int filterRGB(int x, int y, int rgb) {
             double outside = shape.isOutside(x, y);
             if (invert) {

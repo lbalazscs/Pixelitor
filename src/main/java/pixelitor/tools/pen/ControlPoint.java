@@ -21,6 +21,8 @@ import pixelitor.gui.ImageComponent;
 import pixelitor.tools.DraggablePoint;
 
 import java.awt.Color;
+import java.awt.Shape;
+import java.awt.geom.Ellipse2D;
 
 /**
  * A control point of a {@link AnchorPoint}
@@ -33,9 +35,14 @@ public class ControlPoint extends DraggablePoint {
     // drifting for smooth anchors because of accumulating rounding errors
     private double rememberedDistanceFromAnchor;
 
-    public ControlPoint(String name, int x, int y, ImageComponent ic, AnchorPoint anchor, Color color, Color activeColor) {
+    public ControlPoint(String name, double x, double y, ImageComponent ic, AnchorPoint anchor, Color color, Color activeColor) {
         super(name, x, y, ic, color, activeColor);
         this.anchor = anchor;
+    }
+
+    @Override
+    protected Shape createShape(double startX, double startY, double size) {
+        return new Ellipse2D.Double(startX, startY, size, size);
     }
 
     public void setSibling(ControlPoint sibling) {
@@ -43,7 +50,7 @@ public class ControlPoint extends DraggablePoint {
     }
 
     @Override
-    public void setLocation(int x, int y) {
+    public void setLocation(double x, double y) {
         anchor.getType().setLocationOfOtherControl(x, y, anchor, sibling);
 
         super.setLocation(x, y);

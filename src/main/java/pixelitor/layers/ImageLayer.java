@@ -200,7 +200,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     public ImageLayer(Composition comp, String name) {
         super(comp, name == null ? comp.generateNewLayerName() : name, null);
 
-        BufferedImage emptyImage = createEmptyImageForLayer(canvas.getWidth(), canvas.getHeight());
+        BufferedImage emptyImage = createEmptyImageForLayer(canvas.getImWidth(), canvas.getImHeight());
         setImage(emptyImage);
         checkConstructorPostConditions();
     }
@@ -506,7 +506,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     @Override
     public boolean checkImageDoesNotCoverCanvas() {
-        Rectangle canvasBounds = comp.getCanvasBounds();
+        Rectangle canvasBounds = comp.getCanvasImBounds();
         Rectangle imageBounds = getImageBounds();
         boolean needsEnlarging = !(imageBounds.contains(canvasBounds));
         return needsEnlarging;
@@ -560,8 +560,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
         int newTXAbs;
         int newTYAbs;
 
-        int canvasWidth = canvas.getWidth();
-        int canvasHeight = canvas.getHeight();
+        int canvasWidth = canvas.getImWidth();
+        int canvasHeight = canvas.getImHeight();
         int imageWidth = image.getWidth();
         int imageHeight = image.getHeight();
 
@@ -597,8 +597,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
         int imageWidth = image.getWidth();
         int imageHeight = image.getHeight();
 
-        int canvasWidth = canvas.getWidth();
-        int canvasHeight = canvas.getHeight();
+        int canvasWidth = canvas.getImWidth();
+        int canvasHeight = canvas.getImHeight();
 
         int angleDegree = angle.getAngleDegree();
         if (angleDegree == 90) {
@@ -678,8 +678,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     @Override
     public BufferedImage createCanvasSizedTmpImage() {
-        int width = canvas.getWidth();
-        int height = canvas.getHeight();
+        int width = canvas.getImWidth();
+        int height = canvas.getImHeight();
         // it is important that the tmp image has transparency
         // even for layer masks, otherwise drawing is not possible
         return ImageUtils.createSysCompatibleImage(width, height);
@@ -694,8 +694,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
         int x = -getTX();
         int y = -getTY();
 
-        int canvasWidth = canvas.getWidth();
-        int canvasHeight = canvas.getHeight();
+        int canvasWidth = canvas.getImWidth();
+        int canvasHeight = canvas.getImHeight();
 
         assert ConsistencyChecks.imageCoversCanvas(this);
 
@@ -779,8 +779,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
     public boolean cropToCanvasSize() {
         int imageWidth = image.getWidth();
         int imageHeight = image.getHeight();
-        int canvasWidth = canvas.getWidth();
-        int canvasHeight = canvas.getHeight();
+        int canvasWidth = canvas.getImWidth();
+        int canvasHeight = canvas.getImHeight();
 
         if ((imageWidth > canvasWidth) || (imageHeight > canvasHeight)) {
             BufferedImage newImage = ImageUtils.crop(image, -getTX(), -getTY(), canvasWidth, canvasHeight);
@@ -800,7 +800,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         // all coordinates in this method are
         // relative to the previous state of the canvas
         Rectangle imageBounds = getImageBounds();
-        Rectangle canvasBounds = comp.getCanvasBounds();
+        Rectangle canvasBounds = comp.getCanvasImBounds();
 
         int newX = canvasBounds.x - west;
         int newY = canvasBounds.y - north;
@@ -823,7 +823,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         boolean needsEnlarging = checkImageDoesNotCoverCanvas();
         if (needsEnlarging) {
             BufferedImage backupImage = getImage();
-            enlargeImage(comp.getCanvasBounds());
+            enlargeImage(comp.getCanvasImBounds());
             edit = new ContentLayerMoveEdit(this, backupImage, oldTX, oldTY);
         } else {
             edit = new ContentLayerMoveEdit(this, null, oldTX, oldTY);
@@ -845,8 +845,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
         int newTx = 0, newTy = 0; // used only for big layers
 
         if (bigLayer) {
-            horizontalResizeRatio = ((double) canvasTargetWidth) / canvas.getWidth();
-            verticalResizeRatio = ((double) canvasTargetHeight) / canvas.getHeight();
+            horizontalResizeRatio = ((double) canvasTargetWidth) / canvas.getImWidth();
+            verticalResizeRatio = ((double) canvasTargetHeight) / canvas.getImHeight();
             imgTargetWidth = (int) (image.getWidth() * horizontalResizeRatio);
             imgTargetHeight = (int) (image.getHeight() * verticalResizeRatio);
 
@@ -873,7 +873,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     @Override
     public boolean isBigLayer() {
-        Rectangle canvasBounds = canvas.getBounds();
+        Rectangle canvasBounds = canvas.getImBounds();
         Rectangle layerBounds = getImageBounds();
         return !canvasBounds.contains(layerBounds);
     }
@@ -1078,8 +1078,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     public String toDebugCanvasString() {
-        return "{canvasWidth=" + canvas.getWidth()
-                + ", canvasHeight=" + canvas.getHeight()
+        return "{canvasWidth=" + canvas.getImWidth()
+                + ", canvasHeight=" + canvas.getImHeight()
                 + ", tx=" + translationX
                 + ", ty=" + translationY
                 + ", imgWidth=" + image.getWidth()

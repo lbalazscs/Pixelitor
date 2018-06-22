@@ -18,7 +18,6 @@
 package pixelitor;
 
 import org.mockito.MockingDetails;
-import org.mockito.stubbing.Answer;
 import pixelitor.colors.FgBgColorSelector;
 import pixelitor.colors.FgBgColors;
 import pixelitor.filters.Invert;
@@ -55,7 +54,7 @@ import java.util.Random;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.when;
@@ -124,9 +123,9 @@ public class TestHelper {
 
         Canvas canvas = new Canvas(TEST_WIDTH, TEST_HEIGHT);
         when(comp.getCanvas()).thenReturn(canvas);
-        when(comp.getCanvasBounds()).thenReturn(new Rectangle(0, 0, TEST_WIDTH, TEST_HEIGHT));
-        when(comp.getCanvasWidth()).thenReturn(TEST_WIDTH);
-        when(comp.getCanvasHeight()).thenReturn(TEST_HEIGHT);
+        when(comp.getCanvasImBounds()).thenReturn(new Rectangle(0, 0, TEST_WIDTH, TEST_HEIGHT));
+        when(comp.getCanvasImWidth()).thenReturn(TEST_WIDTH);
+        when(comp.getCanvasImHeight()).thenReturn(TEST_HEIGHT);
 
         ImageComponent ic = mock(ImageComponent.class);
         when(ic.getComp()).thenReturn(comp);
@@ -243,12 +242,8 @@ public class TestHelper {
             return new Rectangle((int) in.getX(), (int) in.getY(), (int) in.getWidth(), (int) in.getHeight());
         });
 
-        Answer<Double> intToDoubleConverter = invocation -> {
-            Integer argument = invocation.getArgument(0);
-            return (double) argument;
-        };
-        when(ic.componentXToImageSpace(anyInt())).thenAnswer(intToDoubleConverter);
-        when(ic.componentYToImageSpace(anyInt())).thenAnswer(intToDoubleConverter);
+        when(ic.componentXToImageSpace(anyDouble())).then(returnsFirstArg());
+        when(ic.componentYToImageSpace(anyDouble())).then(returnsFirstArg());
 
         Point fakeLocationOnScreen = new Point(0, 0);
         when(ic.getLocationOnScreen()).thenReturn(fakeLocationOnScreen);

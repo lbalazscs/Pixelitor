@@ -18,6 +18,7 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.colors.FgBgColors;
+import pixelitor.tools.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.AlphaComposite;
@@ -34,8 +35,7 @@ public class SmudgeBrush extends CopyBrush {
      * the last mouse coordinates and puts the pixels to
      * the current coordinates.
      */
-    private double lastX;
-    private double lastY;
+    private PPoint last;
 
     /**
      * The strength in the GUI, actually the opacity of the brush
@@ -53,16 +53,15 @@ public class SmudgeBrush extends CopyBrush {
         super(radius, type, new FixedDistanceSpacing(1.0));
     }
 
-    public void setSource(BufferedImage sourceImage, double srcX, double srcY, float strength) {
+    public void setSource(BufferedImage sourceImage, PPoint src, float strength) {
         this.sourceImage = sourceImage;
-        lastX = srcX;
-        lastY = srcY;
+        last = src;
         this.strength = strength;
         firstUsageInStroke = true;
     }
 
     @Override
-    void setupBrushStamp(double x, double y) {
+    void setupBrushStamp(PPoint p) {
         Graphics2D g = brushImage.createGraphics();
         type.beforeDrawImage(g);
 
@@ -74,8 +73,8 @@ public class SmudgeBrush extends CopyBrush {
             // samples the source image at lastX, lastY into the brush image
             g.drawImage(sourceImage,
                     AffineTransform.getTranslateInstance(
-                            -lastX + radius,
-                            -lastY + radius), null);
+                            -last.getImX() + radius,
+                            -last.getImY() + radius), null);
         }
 
         type.afterDrawImage(g);
@@ -86,10 +85,10 @@ public class SmudgeBrush extends CopyBrush {
     }
 
     @Override
-    public void putDab(double x, double y, double theta) {
+    public void putDab(PPoint p, double theta) {
         AffineTransform transform = AffineTransform.getTranslateInstance(
-                x - radius,
-                y - radius
+                p.getImX() - radius,
+                p.getImY() - radius
         );
 
         // TODO this does not handle transparency - the Smudge tool
@@ -99,10 +98,9 @@ public class SmudgeBrush extends CopyBrush {
 
         targetG.drawImage(brushImage, transform, null);
 
-        lastX = x;
-        lastY = y;
+        last = p;
 
-        updateComp((int) x, (int) y);
+        updateComp(p);
     }
 
     public void setFingerPainting(boolean fingerPainting) {
@@ -113,8 +111,8 @@ public class SmudgeBrush extends CopyBrush {
     public DebugNode getDebugNode() {
         DebugNode node = super.getDebugNode();
 
-        node.addDouble("lastX", lastX);
-        node.addDouble("lastY", lastY);
+        node.addDouble("lastImX", last.getImX());
+        node.addDouble("lastImY", last.getImY());
         node.addFloat("strength", strength);
         node.addBoolean("firstUsageInStroke", firstUsageInStroke);
 

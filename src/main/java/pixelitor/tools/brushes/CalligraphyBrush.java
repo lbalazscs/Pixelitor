@@ -17,10 +17,12 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.tools.PPoint;
 import pixelitor.tools.StrokeType;
 
 import java.awt.BasicStroke;
 import java.awt.Stroke;
+import java.awt.geom.Line2D;
 
 /**
  * The calligraphy brush based on CalligraphyStroke
@@ -33,22 +35,28 @@ public class CalligraphyBrush extends StrokeBrush {
     }
 
     @Override
-    protected void drawStartShape(double x, double y) {
+    protected void drawStartShape(PPoint p) {
         // TODO these calculations could be simpler
 
         float projectedShift = diameter / 1.4142f;
         float projectedStart = (diameter - projectedShift) / 2.0f;
         float projectedEnd = projectedStart + projectedShift;
 
-        int startX = (int) (x + projectedStart) - radius;
-        int startY = (int) (y + projectedEnd) - radius;
-        int endX = (int) (x + projectedEnd) - radius;
-        int endY = (int) (y + projectedStart) - radius;
+        double x = p.getImX();
+        double y = p.getImY();
+
+        double startX = x + projectedStart - radius;
+        double startY = y + projectedEnd - radius;
+        double endX = x + projectedEnd - radius;
+        double endY = y + projectedStart - radius;
 
         targetG.setStroke(pointStroke);
 
         // for some reasons (rounding errors previously?) these ones have to be added and subtracted
-        targetG.drawLine(startX + 1, startY - 1, endX - 1, endY + 1);
+//        targetG.drawLine(startX + 1, startY - 1, endX - 1, endY + 1);
+        // TODO is this necessary after the PPoint refactoring?
+        Line2D.Double line = new Line2D.Double(startX + 1, startY - 1, endX - 1, endY + 1);
+        targetG.draw(line);
 
         if (currentStroke != null) {
             targetG.setStroke(currentStroke);
@@ -56,11 +64,11 @@ public class CalligraphyBrush extends StrokeBrush {
     }
 
     @Override
-    public void drawLine(double startX, double startY, double endX, double endY) {
-        super.drawLine(startX, startY, endX, endY);
+    public void drawLine(PPoint start, PPoint end) {
+        super.drawLine(start, end);
 
         // for some reason this must be called, otherwise gaps remain
         // TODO still true?
-        drawStartShape(startX, startY);
+        drawStartShape(start);
     }
 }

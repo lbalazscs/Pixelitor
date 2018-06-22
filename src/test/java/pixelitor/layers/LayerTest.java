@@ -237,8 +237,8 @@ public class LayerTest {
     @Test
     public void test_resize() {
         Canvas canvas = layer.getComp().getCanvas();
-        int canvasWidth = canvas.getWidth();
-        int canvasHeight = canvas.getHeight();
+        int canvasWidth = canvas.getImWidth();
+        int canvasHeight = canvas.getImHeight();
 
         layer.resize(canvasWidth, canvasHeight, true);
 

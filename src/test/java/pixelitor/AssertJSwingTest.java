@@ -72,7 +72,7 @@ import static java.awt.event.KeyEvent.*;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static pixelitor.TestingMode.NO_MASK;
-import static pixelitor.utils.test.Assertions.canvasSizeIs;
+import static pixelitor.utils.test.Assertions.canvasImSizeIs;
 import static pixelitor.utils.test.Assertions.numLayersIs;
 import static pixelitor.utils.test.Assertions.numOpenImagesIs;
 import static pixelitor.utils.test.Assertions.numOpenImagesIsAtLeast;
@@ -1787,14 +1787,14 @@ public class AssertJSwingTest {
 
         Composition comp = ImageComponents.getActiveCompOrNull();
         Canvas canvas = comp.getCanvas();
-        int origCanvasWidth = canvas.getWidth();
-        int origCanvasHeight = canvas.getHeight();
-        assert canvasSizeIs(origCanvasWidth, origCanvasHeight);
+        int origCanvasWidth = canvas.getImWidth();
+        int origCanvasHeight = canvas.getImHeight();
+        assert canvasImSizeIs(origCanvasWidth, origCanvasHeight);
 
         Selection selection = comp.getSelection();
         Rectangle selectionBounds = selection.getShapeBounds();
-        int selectionWidth = selectionBounds.width;
-        int selectionHeight = selectionBounds.height;
+        int selWidth = selectionBounds.width;
+        int selHeight = selectionBounds.height;
 
         //pw.button("eraserTraceButton").click();
         findButtonByText(pw, "Stroke with Current Eraser").click();
@@ -1802,19 +1802,19 @@ public class AssertJSwingTest {
         // crop using the "Crop" button in the selection tool
         assert thereIsSelection();
         findButtonByText(pw, "Crop").click();
-        assert canvasSizeIs(selectionWidth, selectionHeight);
+        assert canvasImSizeIs(selWidth, selHeight);
         assert thereIsNoSelection() : "selected after crop";
         keyboardUndoRedoUndo();
         assert thereIsSelection() : "no selection after crop undo";
-        assert canvasSizeIs(origCanvasWidth, origCanvasHeight);
+        assert canvasImSizeIs(origCanvasWidth, origCanvasHeight);
 
         // crop from the menu
         runMenuCommand("Crop");
         assert thereIsNoSelection();
-        assert canvasSizeIs(selectionWidth, selectionHeight);
+        assert canvasImSizeIs(selWidth, selHeight);
         keyboardUndoRedoUndo();
         assert thereIsSelection();
-        assert canvasSizeIs(origCanvasWidth, origCanvasHeight);
+        assert canvasImSizeIs(origCanvasWidth, origCanvasHeight);
 
         testSelectionModifyMenu();
         assert thereIsSelection();
@@ -1829,7 +1829,7 @@ public class AssertJSwingTest {
     }
 
     private void testSelectionModifyMenu() {
-        runMenuCommand("Modify...");
+        runMenuCommand("Modify Selection...");
         DialogFixture dialog = findDialogByTitle("Modify Selection");
 
         findButtonByText(dialog, "Change!").click();
@@ -2393,8 +2393,8 @@ public class AssertJSwingTest {
             }
 
             Canvas canvas = ic.getComp().getCanvas();
-            int width = canvas.getZoomedWidth();
-            int height = canvas.getZoomedHeight();
+            int width = canvas.getCoWidth();
+            int height = canvas.getCoHeight();
             Point onScreen = ic.getLocationOnScreen();
             moveTo(onScreen.x + width / 2, onScreen.y + height / 2);
             dragTo(onScreen.x + width, onScreen.y + height / 2);

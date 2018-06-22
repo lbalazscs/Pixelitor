@@ -18,6 +18,7 @@
 package pixelitor.tools.brushes;
 
 import com.jhlabs.awt.WobbleStroke;
+import pixelitor.tools.PPoint;
 import pixelitor.tools.StrokeType;
 
 import java.awt.Shape;
@@ -34,7 +35,9 @@ public class WobbleBrush extends StrokeBrush {
     }
 
     @Override
-    public void drawStartShape(double x, double y) {
+    public void drawStartShape(PPoint p) {
+        double x = p.getImX();
+        double y = p.getImY();
         float smallThickness = diameter / SIZE_DIVIDING_FACTOR;
 
         if(diameter != lastDiameter) {
@@ -47,11 +50,11 @@ public class WobbleBrush extends StrokeBrush {
     }
 
     @Override
-    public void drawLine(double startX, double startY, double endX, double endY) {
+    public void drawLine(PPoint start, PPoint end) {
         int savedRadius = radius;
         radius = (int) (radius / SIZE_DIVIDING_FACTOR);
 
-        super.drawLine(startX, startY, endX, endY);
+        super.drawLine(start, end);
 
         radius = savedRadius;
     }

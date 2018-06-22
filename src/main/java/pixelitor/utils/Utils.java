@@ -36,7 +36,6 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.Toolkit;
@@ -660,12 +659,12 @@ public final class Utils {
         return asInt;
     }
 
-    public static Point constrainEndPoint(int startX, int startY, int endX, int endY) {
-        int dx = endX - startX;
-        int dy = endY - startY;
+    public static Point2D constrainEndPoint(double startX, double startY, double endX, double endY) {
+        double dx = endX - startX;
+        double dy = endY - startY;
 
-        int adx = Math.abs(dx);
-        int ady = Math.abs(dy);
+        double adx = Math.abs(dx);
+        double ady = Math.abs(dy);
 
         if (adx > 2 * ady) {
             endY = startY;
@@ -674,27 +673,27 @@ public final class Utils {
         } else {
             if (dx > 0) {
                 if (dy > 0) {
-                    int avg = (dx + dy) / 2;
+                    double avg = (dx + dy) / 2.0;
                     endX = startX + avg;
                     endY = startY + avg;
                 } else {
-                    int avg = (dx - dy) / 2;
+                    double avg = (dx - dy) / 2.0;
                     endX = startX + avg;
                     endY = startY - avg;
                 }
             } else { // dx <= 0
                 if (dy > 0) {
-                    int avg = (-dx + dy) / 2;
+                    double avg = (-dx + dy) / 2.0;
                     endX = startX - avg;
                     endY = startY + avg;
                 } else {
-                    int avg = (-dx - dy) / 2;
+                    double avg = (-dx - dy) / 2.0;
                     endX = startX - avg;
                     endY = startY - avg;
                 }
             }
         }
-        return new Point(endX, endY);
+        return new Point2D.Double(endX, endY);
     }
 }
 

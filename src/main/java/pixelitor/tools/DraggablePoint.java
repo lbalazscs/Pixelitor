@@ -26,6 +26,7 @@ import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Shape;
 
 /**
  * A point that can be dragged with the help of a handle.
@@ -42,9 +43,12 @@ public class DraggablePoint {
 
     private final String name; // used only for debugging
 
-    // Coordinates in component space
-    public int x;
-    public int y;
+    // Coordinates in component space.
+    // Most of the time they will be ints as they originate from
+    // mouse events, but sometimes they can be floating point,
+    // for example when paths are created in other ways.
+    public double x;
+    public double y;
 
     // Coordinates in image space
     public double imX;
@@ -53,8 +57,8 @@ public class DraggablePoint {
     protected int dragStartX;
     protected int dragStartY;
 
-    private int origX;
-    private int origY;
+    private double origX;
+    private double origY;
 
     private final Color color;
     private final Color activeColor;
@@ -63,11 +67,11 @@ public class DraggablePoint {
 
     private final ImageComponent ic;
 
-    private final Rectangle shape;
-    private final Rectangle shadow;
+    private Shape shape;
+    private Shape shadow;
     private final static Composite shadowComposite = AlphaComposite.SrcOver.derive(0.7f);
 
-    public DraggablePoint(String name, int x, int y, ImageComponent ic, Color color, Color activeColor) {
+    public DraggablePoint(String name, double x, double y, ImageComponent ic, Color color, Color activeColor) {
         this.name = name;
         this.x = x;
         this.y = y;
@@ -75,39 +79,51 @@ public class DraggablePoint {
 
         this.color = color;
         this.activeColor = activeColor;
-        shape = new Rectangle(x - HANDLE_RADIUS, y - HANDLE_RADIUS, HANDLE_DIAMETER, HANDLE_DIAMETER);
-        shadow = new Rectangle(x - HANDLE_RADIUS + SHADOW_OFFSET, y - HANDLE_RADIUS + SHADOW_OFFSET, HANDLE_DIAMETER, HANDLE_DIAMETER);
+        setShapes();
         calcImCoords();
     }
 
-    public void setLocation(int x, int y) {
+    public void setLocation(double x, double y) {
         setLocationOnlyForThis(x, y);
     }
 
     // setLocation is overridden in subclasses to also move related points,
     // but we also need a pure version
-    public final void setLocationOnlyForThis(int x, int y) {
+    public final void setLocationOnlyForThis(double x, double y) {
         this.x = x;
         this.y = y;
-        shape.setLocation(x - HANDLE_RADIUS, y - HANDLE_RADIUS);
-        shadow.setLocation(x - HANDLE_RADIUS + SHADOW_OFFSET, y - HANDLE_RADIUS + SHADOW_OFFSET);
+
+        setShapes();
     }
 
-    public void setConstrainedLocation(int mouseX, int mouseY) {
+    private void setShapes() {
+        double shapeStartX = this.x - HANDLE_RADIUS;
+        double shapeStartY = this.y - HANDLE_RADIUS;
+        double shadowStartX = shapeStartX + SHADOW_OFFSET;
+        double shadowStartY = shapeStartY + SHADOW_OFFSET;
+        shape = createShape(shapeStartX, shapeStartY, HANDLE_DIAMETER);
+        shadow = createShape(shadowStartX, shadowStartY, HANDLE_DIAMETER);
+    }
+
+    protected Shape createShape(double startX, double startY, double size) {
+        return new Rectangle.Double(startX, startY, size, size);
+    }
+
+    public void setConstrainedLocation(double mouseX, double mouseY) {
         // can be implemented only in subclasses,
         // but we don't want to make this class abstract
         throw new UnsupportedOperationException();
     }
 
-    public void translate(int dx, int dy) {
+    public void translate(double dx, double dy) {
         setLocation(x + dx, y + dy);
     }
 
-    public final void translateOnlyThis(int dx, int dy) {
+    public final void translateOnlyThis(double dx, double dy) {
         setLocationOnlyForThis(x + dx, y + dy);
     }
 
-    public boolean handleContains(int x, int y) {
+    public boolean handleContains(double x, double y) {
         return shape.contains(x, y);
     }
 
@@ -133,19 +149,19 @@ public class DraggablePoint {
         origY = this.y;
     }
 
-    public void mouseDragged(int x, int y) {
-        int dx = x - dragStartX;
-        int dy = y - dragStartY;
-        int newX = origX + dx;
-        int newY = origY + dy;
+    public void mouseDragged(double x, double y) {
+        double dx = x - dragStartX;
+        double dy = y - dragStartY;
+        double newX = origX + dx;
+        double newY = origY + dy;
         setLocation(newX, newY);
     }
 
     public void mouseDragged(int x, int y, boolean constrained) {
-        int dx = x - dragStartX;
-        int dy = y - dragStartY;
-        int newX = origX + dx;
-        int newY = origY + dy;
+        double dx = x - dragStartX;
+        double dy = y - dragStartY;
+        double newX = origX + dx;
+        double newY = origY + dy;
         if (constrained) {
             setConstrainedLocation(newX, newY);
         } else {
@@ -170,17 +186,13 @@ public class DraggablePoint {
     public void calcImCoords() {
         imX = ic.componentXToImageSpace(x);
         imY = ic.componentYToImageSpace(y);
-//        System.out.printf("DraggablePoint::calcImCoords: '%s' (%d, %d) => (%.2f, %.2f) %n",
-//                name, x, y, imX, imY);
     }
 
     public void restoreCoordsFromImSpace(ImageComponent ic) {
         assert this.ic == ic;
-        int newX = ic.imageXToComponentSpace(imX);
-        int newY = ic.imageYToComponentSpace(imY);
+        double newX = ic.imageXToComponentSpace(imX);
+        double newY = ic.imageYToComponentSpace(imY);
         setLocationOnlyForThis(newX, newY);
-//        System.out.printf("DraggablePoint::restoreCoordsFromImSpace: '%s' (%.2f, %.2f) => (%d, %d) %n",
-//                name, imX, imY, newX, newY);
     }
 
     public void setActive(boolean active) {
@@ -192,8 +204,8 @@ public class DraggablePoint {
     }
 
     public double distanceFrom(DraggablePoint other) {
-        int dx = other.x - this.x;
-        int dy = other.y - this.y;
+        double dx = other.x - this.x;
+        double dy = other.y - this.y;
         return Math.sqrt(dx * dx + dy * dy);
     }
 
@@ -215,7 +227,7 @@ public class DraggablePoint {
 
     @Override
     public int hashCode() {
-        return 31 * x + y;
+        return (int) (31 * x + y);
     }
 
     @Override

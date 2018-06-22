@@ -17,6 +17,7 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.tools.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Graphics2D;
@@ -73,7 +74,7 @@ public class CloneBrush extends CopyBrush {
     }
 
     @Override
-    void setupBrushStamp(double x, double y) {
+    void setupBrushStamp(PPoint p) {
         Graphics2D g = brushImage.createGraphics();
 
         type.beforeDrawImage(g);
@@ -82,8 +83,8 @@ public class CloneBrush extends CopyBrush {
         // order, so start with the last transformation
         // that works when there is no scaling/rotating
         AffineTransform transform = AffineTransform.getTranslateInstance(
-                (dx - x),
-                (dy - y));
+                (dx - p.getImX()),
+                (dy - p.getImY()));
 
         if (scaleX != 1.0 || scaleY != 1.0 || rotate != 0.0) {
             g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
@@ -104,13 +105,13 @@ public class CloneBrush extends CopyBrush {
     }
 
     @Override
-    public void putDab(double x, double y, double theta) {
+    public void putDab(PPoint p, double theta) {
         AffineTransform transform = AffineTransform.getTranslateInstance(
-                x - radius,
-                y - radius
+                p.getImX() - radius,
+                p.getImY() - radius
         );
         targetG.drawImage(brushImage, transform, null);
-        updateComp((int) x, (int) y);
+        updateComp(p);
     }
 
     public void setAligned(boolean aligned) {

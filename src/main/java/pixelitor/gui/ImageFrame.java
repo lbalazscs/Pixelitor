@@ -91,8 +91,8 @@ public class ImageFrame extends JInternalFrame implements InternalFrameListener 
 
     public void setToNaturalSize(int locX, int locY) {
         Canvas canvas = ic.getCanvas();
-        int zoomedWidth = canvas.getZoomedWidth();
-        int zoomedHeight = canvas.getZoomedHeight();
+        int zoomedWidth = canvas.getCoWidth();
+        int zoomedHeight = canvas.getCoHeight();
         setSize(locX, locY, zoomedWidth, zoomedHeight);
     }
 

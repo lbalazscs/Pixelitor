@@ -1054,10 +1054,10 @@ public class ImageUtils {
     }
 
     public static void paintBlurredGlow(Shape shape, Graphics2D g, int numSteps, float effectWidth) {
-        float brushAlpha = 1f / numSteps;
+        float brushAlpha = 1.0f / numSteps;
         g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, brushAlpha));
 //        g.setComposite(new AddComposite(brushAlpha));
-        for (float i = 0; i < numSteps; i = i + 1f) {
+        for (float i = 0; i < numSteps; i = i + 1.0f) {
             float brushWidth = i * effectWidth / numSteps;
             g.setStroke(new BasicStroke(brushWidth,
                     BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));

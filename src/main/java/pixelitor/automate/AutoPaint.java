@@ -35,6 +35,7 @@ import pixelitor.history.ImageEdit;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.ImDrag;
+import pixelitor.tools.PPoint;
 import pixelitor.tools.Tool;
 import pixelitor.tools.shapestool.ShapesTool;
 import pixelitor.utils.Messages;
@@ -42,7 +43,6 @@ import pixelitor.utils.Messages;
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.GridBagLayout;
-import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -56,8 +56,8 @@ import static pixelitor.tools.Tools.SMUDGE;
  * The "Auto Paint" functionality
  */
 public class AutoPaint {
-    //    public static final Tool[] ALLOWED_TOOLS = {SMUDGE, BRUSH, CLONE, ERASER, SHAPES};
-    public static final Tool[] ALLOWED_TOOLS = {SMUDGE, BRUSH, CLONE, ERASER};
+    public static final Tool[] ALLOWED_TOOLS = {
+            SMUDGE, BRUSH, CLONE, ERASER};
     private static Color origFg;
     private static Color origBg;
 
@@ -113,7 +113,9 @@ public class AutoPaint {
         }
     }
 
-    private static void runStrokes(Settings settings, Drawable dr, MessageHandler msgHandler) {
+    private static void runStrokes(Settings settings,
+                                   Drawable dr,
+                                   MessageHandler msgHandler) {
         Random random = new Random();
 
         Composition comp = dr.getComp();
@@ -124,12 +126,15 @@ public class AutoPaint {
         for (int i = 0; i < numStrokes; i++) {
             msgHandler.updateProgress(i);
 
-            paintSingleStroke(dr, settings, comp.getCanvas(), random);
+            paintSingleStroke(dr, settings, comp, random);
             ic.paintImmediately(ic.getBounds());
         }
     }
 
-    private static void paintSingleStroke(Drawable dr, Settings settings, Canvas canvas, Random rand) {
+    private static void paintSingleStroke(Drawable dr,
+                                          Settings settings,
+                                          Composition comp,
+                                          Random rand) {
         if (settings.useRandomColors()) {
             FgBgColors.randomize();
         } else if (settings.useInterpolatedColors()) {
@@ -140,14 +145,18 @@ public class AutoPaint {
 
         int strokeLength = settings.genStrokeLength();
 
-        int canvasWidth = canvas.getWidth();
-        int canvasHeight = canvas.getHeight();
-        Point start = new Point(rand.nextInt(canvasWidth), rand.nextInt(canvasHeight));
-        double randomAngle = rand.nextDouble() * 2 * Math.PI;
-        int endX = (int) (start.x + strokeLength * FastMath.cos(randomAngle));
-        int endY = (int) (start.y + strokeLength * FastMath.sin(randomAngle));
+        ImageComponent ic = comp.getIC();
+        Canvas canvas = comp.getCanvas();
+        int canvasWidth = canvas.getImWidth();
+        int canvasHeight = canvas.getImHeight();
+        PPoint start = new PPoint.Image(ic,
+                rand.nextInt(canvasWidth),
+                rand.nextInt(canvasHeight));
 
-        Point end = new Point(endX, endY);
+        double angle = rand.nextDouble() * 2 * Math.PI;
+        double endX = start.getImX() + strokeLength * FastMath.cos(angle);
+        double endY = start.getImY() + strokeLength * FastMath.sin(angle);
+        PPoint end = new PPoint.Image(ic, endX, endY);
 
         try {
             Tool tool = settings.getTool();
@@ -157,9 +166,10 @@ public class AutoPaint {
                 abt.drawBrushStrokeProgrammatically(dr, start, end);
             } else if (tool instanceof ShapesTool) {
                 ShapesTool st = (ShapesTool) tool;
-                st.paintDrag(dr, new ImDrag(start.x, start.y, end.x, end.y));
+                st.paintDrag(dr, new ImDrag(start, end));
             } else {
-                throw new IllegalStateException("tool = " + tool.getClass().getName());
+                throw new IllegalStateException("tool = "
+                        + tool.getClass().getName());
             }
         } catch (Exception e) {
             Messages.showException(e);
@@ -174,7 +184,8 @@ public class AutoPaint {
         private static final String COL_FOREGROUND = "Foreground";
         private static final String COL_INTERPOLATED = "Foreground-Background Mix";
         private static final String COL_RANDOM = "Random";
-        public static final String[] COLOR_SETTINGS = {COL_FOREGROUND, COL_INTERPOLATED, COL_RANDOM};
+        public static final String[] COLOR_SETTINGS = {
+                COL_FOREGROUND, COL_INTERPOLATED, COL_RANDOM};
 
         private final JComboBox<Tool> toolSelector;
         private static Tool defaultTool = SMUDGE;
@@ -189,7 +200,8 @@ public class AutoPaint {
         private final JLabel colorsLabel;
 
         private static int defaultLengthVariability = 50;
-        private final RangeParam lengthVariability = new RangeParam("", 0, defaultLengthVariability, 100);
+        private final RangeParam lengthVariability =
+                new RangeParam("", 0, defaultLengthVariability, 100);
 
         private static String defaultColors = COL_INTERPOLATED;
 
@@ -255,7 +267,8 @@ public class AutoPaint {
             float lengthRandomnessPercentage = lengthVariability.getValueAsPercentage();
             defaultLengthVariability = lengthVariability.getValue();
 
-            return new Settings(tool, numStrokes, strokeLength, randomColors, lengthRandomnessPercentage, interpolatedColors);
+            return new Settings(tool, numStrokes, strokeLength,
+                    randomColors, lengthRandomnessPercentage, interpolatedColors);
         }
     }
 
@@ -270,7 +283,8 @@ public class AutoPaint {
         private final boolean randomColors;
         private final boolean interpolatedColors;
 
-        private Settings(Tool tool, int numStrokes, int strokeLength, boolean randomColors, float lengthVariability, boolean interpolatedColors) {
+        private Settings(Tool tool, int numStrokes, int strokeLength,
+                         boolean randomColors, float lengthVariability, boolean interpolatedColors) {
             this.tool = tool;
             this.numStrokes = numStrokes;
 
@@ -298,7 +312,8 @@ public class AutoPaint {
             if (minStrokeLength == maxStrokeLength) {
                 return minStrokeLength;
             } else {
-                return ThreadLocalRandom.current().nextInt(minStrokeLength, maxStrokeLength + 1);
+                ThreadLocalRandom rnd = ThreadLocalRandom.current();
+                return rnd.nextInt(minStrokeLength, maxStrokeLength + 1);
             }
         }
 

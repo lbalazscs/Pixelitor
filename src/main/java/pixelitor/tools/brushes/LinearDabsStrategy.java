@@ -17,6 +17,8 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.tools.PPoint;
+
 /**
  * The simplest dabs strategy: it places the dabs along the lines
  * connecting the mouse events with a uniform spacing between them
@@ -28,8 +30,7 @@ public class LinearDabsStrategy implements DabsStrategy {
     private AngleSettings angleSettings;
     private final boolean refreshBrushForEachDab;
 
-    private double prevX = 0;
-    private double prevY = 0;
+    PPoint prev;
 
     public LinearDabsStrategy(DabsBrush brush, SpacingStrategy spacingStrategy, AngleSettings angleSettings, boolean refreshBrushForEachDab) {
         this.brush = brush;
@@ -39,12 +40,11 @@ public class LinearDabsStrategy implements DabsStrategy {
     }
 
     @Override
-    public void onStrokeStart(double x, double y) {
-        brush.setupBrushStamp(x, y);
+    public void onStrokeStart(PPoint p) {
+        brush.setupBrushStamp(p);
         distanceFromLastDab = 0; // moved from reset()
 
-        prevX = x;
-        prevY = y;
+        prev = p;
         if (angleSettings.isAngleAware()) {
             // For angle-aware brushes we don't draw a dab in this
             // method because we have no angle information.
@@ -52,14 +52,20 @@ public class LinearDabsStrategy implements DabsStrategy {
             // so that a dab is drawn soon
             distanceFromLastDab = spacingStrategy.getSpacing(brush.getRadius()) * 0.8;
         } else {
-            brush.putDab(x, y, 0);
+            brush.putDab(p, 0);
         }
     }
 
     @Override
-    public void onNewStrokePoint(double endX, double endY) {
+    public void onNewStrokePoint(PPoint end) {
+        double endX = end.getImX();
+        double endY = end.getImY();
+        double prevX = prev.getImX();
+        double prevY = prev.getImY();
+
         double dx = endX - prevX;
         double dy = endY - prevY;
+        // TODO distance should be a method in PPoint
         double lineDistance = Math.sqrt(dx * dx + dy * dy);
 
         double spacing = spacingStrategy.getSpacing(brush.getRadius());
@@ -77,16 +83,20 @@ public class LinearDabsStrategy implements DabsStrategy {
         for(double t = initialRelativeSpacingDistance; t < 1.0; t += relativeSpacingDistance) {
             x = prevX + t * dx;
             y = prevY + t * dy;
+            PPoint p = new PPoint.Image(end.getIC(), x, y);
 
             if(refreshBrushForEachDab) {
-                brush.setupBrushStamp(x, y);
+                brush.setupBrushStamp(p);
             }
 
             if (angleSettings.shouldJitterAngle()) {
                 theta = angleSettings.calcJitteredAngle(theta);
             }
 
-            brush.putDab(x, y, theta);
+            // TODO perhaps this could be optimized if instead of putDab
+            // we called a special version that does not update the region
+            // and then we updated the region at the end
+            brush.putDab(p, theta);
             drew = true;
         }
 
@@ -98,8 +108,7 @@ public class LinearDabsStrategy implements DabsStrategy {
             distanceFromLastDab += lineDistance;
         }
 
-        prevX = endX;
-        prevY = endY;
+        prev = end;
     }
 
     @Override

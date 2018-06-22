@@ -17,6 +17,7 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.tools.PPoint;
 import pixelitor.tools.StrokeType;
 
 /**
@@ -29,7 +30,10 @@ public class IdealBrush extends StrokeBrush {
     }
 
     @Override
-    public void drawStartShape(double x, double y) {
+    public void drawStartShape(PPoint p) {
+        double x = p.getImX();
+        double y = p.getImY();
+
         targetG.fillOval((int) x - radius, (int) y - radius, diameter, diameter);
     }
 }

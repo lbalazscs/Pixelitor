@@ -70,7 +70,7 @@ public class OpenRaster {
 
         String stackXML = String.format("<?xml version='1.0' encoding='UTF-8'?>\n" +
                 "<image w=\"%d\" h=\"%d\">\n" +
-                "<stack>\n", comp.getCanvasWidth(), comp.getCanvasHeight());
+                "<stack>\n", comp.getCanvasImWidth(), comp.getCanvasImHeight());
 
         int numLayers = comp.getNumLayers();
         int numImageLayers = comp.getNumImageLayers();

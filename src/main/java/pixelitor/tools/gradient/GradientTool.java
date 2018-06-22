@@ -164,8 +164,6 @@ public class GradientTool extends DragTool {
             int x = e.getCoX();
             int y = e.getCoY();
             activeHandle.mouseReleased(x, y, e.isShiftDown());
-            activeHandle.setActive(false);
-            activeHandle = null;
 
             imDrag = handles.toImDrag(e.getIC());
         } else { // a gradient was dragged

@@ -176,7 +176,7 @@ public class SplashImageCreator {
         textFilter.startOn(layer, FILTER_WITHOUT_DIALOG);
         layer.setTranslation(0, translationY);
 
-        layer.enlargeImage(layer.getComp().getCanvasBounds());
+        layer.enlargeImage(layer.getComp().getCanvasImBounds());
 
         layer.setOpacity(opacity, true, true, true);
         layer.setBlendingMode(blendingMode, true, true, true);
@@ -186,8 +186,8 @@ public class SplashImageCreator {
 
     public static void addRadialBWGradientToActiveDrawable(Drawable dr, boolean radial) {
         Canvas canvas = dr.getComp().getCanvas();
-        int canvasWidth = canvas.getWidth();
-        int canvasHeight = canvas.getHeight();
+        int canvasWidth = canvas.getImWidth();
+        int canvasHeight = canvas.getImHeight();
 
         int startX = canvasWidth / 2;
         int startY = canvasHeight / 2;

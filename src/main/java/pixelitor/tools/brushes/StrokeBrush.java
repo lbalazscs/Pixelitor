@@ -17,6 +17,7 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.tools.PPoint;
 import pixelitor.tools.StrokeType;
 import pixelitor.utils.debug.DebugNode;
 
@@ -48,29 +49,30 @@ public abstract class StrokeBrush extends AbstractBrush {
     }
 
     @Override
-    public void onStrokeStart(double x, double y) {
-        drawStartShape(x, y);
-        updateComp(x, y);
-        rememberPrevious(x, y);
+    public void onStrokeStart(PPoint p) {
+        super.onStrokeStart(p);
+        drawStartShape(p);
+        updateComp(p);
+        rememberPrevious(p);
     }
 
     @Override
-    public void onNewStrokePoint(double x, double y) {
-        drawLine(previousX, previousY, x, y);
-        updateComp(x, y);
-        rememberPrevious(x, y);
+    public void onNewStrokePoint(PPoint p) {
+        drawLine(previous, p);
+        updateComp(p);
+        rememberPrevious(p);
     }
 
     /**
      * The ability to draw something sensible immediately
      * when the user has just clicked but didn't drag the mouse yet.
      */
-    abstract void drawStartShape(double x, double y);
+    abstract void drawStartShape(PPoint p);
 
     /**
      * Connects the two points with a line, using the stroke
      */
-    protected void drawLine(double startX, double startY, double endX, double endY) {
+    protected void drawLine(PPoint start, PPoint end) {
         int thickness = 2*radius;
         if(thickness != lastDiameter) {
             currentStroke = strokeType.getStroke(thickness, cap, join, null);
@@ -78,7 +80,7 @@ public abstract class StrokeBrush extends AbstractBrush {
         }
 
         targetG.setStroke(currentStroke);
-        targetG.drawLine((int) startX, (int) startY, (int) endX, (int) endY);
+        start.drawLineTo(end, targetG);
     }
 
     @Override

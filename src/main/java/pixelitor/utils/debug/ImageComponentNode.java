@@ -49,9 +49,9 @@ public class ImageComponentNode extends DebugNode {
 
         addString("zoom level", ic.getZoomLevel().toString());
         Canvas canvas = ic.getCanvas();
-        int zoomedCanvasWidth = canvas.getZoomedWidth();
+        int zoomedCanvasWidth = canvas.getCoWidth();
         addInt("zoomedCanvasWidth", zoomedCanvasWidth);
-        int zoomedCanvasHeight = canvas.getZoomedHeight();
+        int zoomedCanvasHeight = canvas.getCoHeight();
         addInt("zoomedCanvasHeight", zoomedCanvasHeight);
 //        boolean bigCanvas = ic.isBigCanvas();
 //        addBooleanChild("bigCanvas", bigCanvas);

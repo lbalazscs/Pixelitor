@@ -260,8 +260,8 @@ public abstract class Layer implements Serializable {
             return;
         }
 
-        int canvasWidth = canvas.getWidth();
-        int canvasHeight = canvas.getHeight();
+        int canvasWidth = canvas.getImWidth();
+        int canvasHeight = canvas.getImHeight();
 
         BufferedImage bwMask = addType.getBWImage(canvasWidth, canvasHeight, selection);
 
@@ -377,7 +377,7 @@ public abstract class Layer implements Serializable {
 
         // 1. create the masked image
         // TODO the masked image should be cached
-        BufferedImage maskedImage = new BufferedImage(canvas.getWidth(), canvas.getHeight(), TYPE_INT_ARGB);
+        BufferedImage maskedImage = new BufferedImage(canvas.getImWidth(), canvas.getImHeight(), TYPE_INT_ARGB);
         Graphics2D mig = maskedImage.createGraphics();
         paintLayerOnGraphics(mig, firstVisibleLayer);
         mig.setComposite(DstIn);

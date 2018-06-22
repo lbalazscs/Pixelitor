@@ -59,8 +59,8 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
     private static final int NR_OF_COLUMNS = 5;
 
     private ResizePanel(Composition comp) {
-        oldWidth = comp.getCanvasWidth();
-        oldHeight = comp.getCanvasHeight();
+        oldWidth = comp.getCanvasImWidth();
+        oldHeight = comp.getCanvasImHeight();
 
         origProportion = ((double) oldWidth) / oldHeight;
         newWidth = oldWidth;

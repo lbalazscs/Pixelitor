@@ -18,6 +18,7 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.Composition;
+import pixelitor.tools.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Graphics2D;
@@ -37,20 +38,18 @@ public interface Brush {
     void setRadius(int radius);
 
     /**
-     * The start of a new brush stroke
+     * The start of a new brush stroke.
      *
-     * @param x        the x of the mouse event (NOT translated with the radius)
-     * @param y        the y of the mouse event (NOT translated with the radius)
+     * The given mouse event point is NOT translated with the radius.
      */
-    void onStrokeStart(double x, double y);
+    void onStrokeStart(PPoint p);
 
     /**
-     * A new drawing mouse event has been received
+     * A new drawing mouse event has been received.
      *
-     * @param x        the x of the mouse event (NOT translated with the radius)
-     * @param y        the y of the mouse event (NOT translated with the radius)
+     * The given mouse event point is NOT translated with the radius.
      */
-    void onNewStrokePoint(double x, double y);
+    void onNewStrokePoint(PPoint p);
 
     default void dispose() {}
 

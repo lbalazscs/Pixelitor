@@ -232,7 +232,7 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         String assertjErrorMessage = "\nExpecting canvasWidth of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
         // check
-        int actualCanvasWidth = actual.getCanvasWidth();
+        int actualCanvasWidth = actual.getCanvasImWidth();
         if (actualCanvasWidth != canvasWidth) {
             failWithMessage(assertjErrorMessage, actual, canvasWidth, actualCanvasWidth);
         }
@@ -254,7 +254,7 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         String assertjErrorMessage = "\nExpecting canvasHeight of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
         // check
-        int actualCanvasHeight = actual.getCanvasHeight();
+        int actualCanvasHeight = actual.getCanvasImHeight();
         if (actualCanvasHeight != canvasHeight) {
             failWithMessage(assertjErrorMessage, actual, canvasHeight, actualCanvasHeight);
         }

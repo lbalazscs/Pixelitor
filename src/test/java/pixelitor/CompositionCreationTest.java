@@ -51,8 +51,8 @@ public class CompositionCreationTest {
         Composition comp = NewImage.createNewComposition(FillType.WHITE, 20, 20, "New Image");
         comp.checkInvariant();
         assertThat(comp.getNumLayers()).isEqualTo(1);
-        assertThat(comp.getCanvasWidth()).isEqualTo(20);
-        assertThat(comp.getCanvasHeight()).isEqualTo(20);
+        assertThat(comp.getCanvasImWidth()).isEqualTo(20);
+        assertThat(comp.getCanvasImHeight()).isEqualTo(20);
         assertThat(comp.getCompositeImage()).isNotNull();
     }
 
@@ -60,8 +60,8 @@ public class CompositionCreationTest {
         Composition comp = OpenSaveManager.createCompositionFromFile(f);
         comp.checkInvariant();
         assertThat(comp.getNumLayers()).isEqualTo(1);
-        assertThat(comp.getCanvasWidth()).isEqualTo(10);
-        assertThat(comp.getCanvasHeight()).isEqualTo(10);
+        assertThat(comp.getCanvasImWidth()).isEqualTo(10);
+        assertThat(comp.getCanvasImHeight()).isEqualTo(10);
         assertThat(comp.getCompositeImage()).isNotNull();
     }
 
@@ -69,8 +69,8 @@ public class CompositionCreationTest {
         Composition comp = OpenSaveManager.createCompositionFromFile(f);
         comp.checkInvariant();
         assertThat(comp.getNumLayers()).isEqualTo(2);
-        assertThat(comp.getCanvasWidth()).isEqualTo(10);
-        assertThat(comp.getCanvasHeight()).isEqualTo(10);
+        assertThat(comp.getCanvasImWidth()).isEqualTo(10);
+        assertThat(comp.getCanvasImHeight()).isEqualTo(10);
         assertThat(comp.getCompositeImage()).isNotNull();
 
         Layer secondLayer = comp.getLayer(1);

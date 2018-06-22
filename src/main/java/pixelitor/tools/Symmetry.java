@@ -17,6 +17,7 @@
 
 package pixelitor.tools;
 
+import pixelitor.gui.ImageComponent;
 import pixelitor.tools.brushes.SymmetryBrush;
 
 /**
@@ -25,65 +26,65 @@ import pixelitor.tools.brushes.SymmetryBrush;
 public enum Symmetry {
     NONE("None", 1) {
         @Override
-        public void onStrokeStart(SymmetryBrush brush, double x, double y) {
-            brush.onStrokeStart(0, x, y);
+        public void onStrokeStart(SymmetryBrush brush, PPoint p) {
+            brush.onStrokeStart(0, p);
         }
 
         @Override
-        public void onNewStrokePoint(SymmetryBrush brush, double x, double y) {
-            brush.onNewStrokePoint(0, x, y);
+        public void onNewStrokePoint(SymmetryBrush brush, PPoint p) {
+            brush.onNewStrokePoint(0, p);
         }
     }, VERTICAL_MIRROR("Vertical", 2) {
         @Override
-        public void onStrokeStart(SymmetryBrush brush, double x, double y) {
-            brush.onStrokeStart(0, x, y);
-            brush.onStrokeStart(1, compWidth - x, y);
+        public void onStrokeStart(SymmetryBrush brush, PPoint p) {
+            brush.onStrokeStart(0, p);
+            brush.onStrokeStart(1, p.mirrorVertically(compWidth));
         }
 
         @Override
-        public void onNewStrokePoint(SymmetryBrush brush, double x, double y) {
-            brush.onNewStrokePoint(0, x, y);
-            brush.onNewStrokePoint(1, compWidth - x, y);
+        public void onNewStrokePoint(SymmetryBrush brush, PPoint p) {
+            brush.onNewStrokePoint(0, p);
+            brush.onNewStrokePoint(1, p.mirrorVertically(compWidth));
         }
     }, HORIZONTAL_MIRROR("Horizontal", 2) {
         @Override
-        public void onStrokeStart(SymmetryBrush brush, double x, double y) {
-            brush.onStrokeStart(0, x, y);
-            brush.onStrokeStart(1, x, compHeight - y);
+        public void onStrokeStart(SymmetryBrush brush, PPoint p) {
+            brush.onStrokeStart(0, p);
+            brush.onStrokeStart(1, p.mirrorHorizontally(compHeight));
         }
 
         @Override
-        public void onNewStrokePoint(SymmetryBrush brush, double x, double y) {
-            brush.onNewStrokePoint(0, x, y);
-            brush.onNewStrokePoint(1, x, compHeight - y);
+        public void onNewStrokePoint(SymmetryBrush brush, PPoint p) {
+            brush.onNewStrokePoint(0, p);
+            brush.onNewStrokePoint(1, p.mirrorHorizontally(compHeight));
         }
     }, TWO_MIRRORS("Two Mirrors", 4) {
         @Override
-        public void onStrokeStart(SymmetryBrush brush, double x, double y) {
-            brush.onStrokeStart(0, x, y);
-            brush.onStrokeStart(1, compWidth - x, y);
-            brush.onStrokeStart(2, x, compHeight - y);
-            brush.onStrokeStart(3, compWidth - x, compHeight - y);
+        public void onStrokeStart(SymmetryBrush brush, PPoint p) {
+            brush.onStrokeStart(0, p);
+            brush.onStrokeStart(1, p.mirrorVertically(compWidth));
+            brush.onStrokeStart(2, p.mirrorHorizontally(compHeight));
+            brush.onStrokeStart(3, p.mirrorBoth(compWidth, compHeight));
         }
 
         @Override
-        public void onNewStrokePoint(SymmetryBrush brush, double x, double y) {
-            brush.onNewStrokePoint(0, x, y);
-            brush.onNewStrokePoint(1, compWidth - x, y);
-            brush.onNewStrokePoint(2, x, compHeight - y);
-            brush.onNewStrokePoint(3, compWidth - x, compHeight - y);
+        public void onNewStrokePoint(SymmetryBrush brush, PPoint p) {
+            brush.onNewStrokePoint(0, p);
+            brush.onNewStrokePoint(1, p.mirrorVertically(compWidth));
+            brush.onNewStrokePoint(2, p.mirrorHorizontally(compHeight));
+            brush.onNewStrokePoint(3, p.mirrorBoth(compWidth, compHeight));
         }
     }, CENTRAL_SYMMETRY("Central Symmetry", 2) {
         @Override
-        public void onStrokeStart(SymmetryBrush brush, double x, double y) {
-            brush.onStrokeStart(0, x, y);
-            brush.onStrokeStart(1, compWidth - x, compHeight - y);
+        public void onStrokeStart(SymmetryBrush brush, PPoint p) {
+            brush.onStrokeStart(0, p);
+            brush.onStrokeStart(1, p.mirrorBoth(compWidth, compHeight));
         }
 
         @Override
-        public void onNewStrokePoint(SymmetryBrush brush, double x, double y) {
-            brush.onNewStrokePoint(0, x, y);
-            brush.onNewStrokePoint(1, compWidth - x, compHeight - y);
+        public void onNewStrokePoint(SymmetryBrush brush, PPoint p) {
+            brush.onNewStrokePoint(0, p);
+            brush.onNewStrokePoint(1, p.mirrorBoth(compWidth, compHeight));
         }
     }, CENTRAL_3("Central 3", 3) {
         private static final double cos120 = -0.5;
@@ -92,56 +93,63 @@ public enum Symmetry {
         private static final double sin240 = -sin120;
 
         @Override
-        public void onStrokeStart(SymmetryBrush brush, double x, double y) {
-            brush.onStrokeStart(0, x, y);
+        public void onStrokeStart(SymmetryBrush brush, PPoint p) {
+            brush.onStrokeStart(0, p);
 
+            double x = p.getImX();
+            double y = p.getImY();
             // coordinates relative to the center
             double relX = x - compCenterX;
             double relY = compCenterY - y; // calculate in upwards looking coords
 
+            ImageComponent ic = p.getIC();
+
+            PPoint p1 = getRotatedPoint1(ic, relX, relY);
+            brush.onStrokeStart(1, p1);
+
+            PPoint finalPos = getRotatedPoint2(ic, relX, relY);
+            brush.onStrokeStart(2, finalPos);
+        }
+
+        private PPoint getRotatedPoint1(ImageComponent ic, double relX, double relY) {
             // coordinates rotated with 120 degrees
             double rotX = relX * cos120 - relY * sin120;
             double rotY = relX * sin120 + relY * cos120;
 
             // translate back to the original coordinate system
-            int finalX = (int) (compCenterX + rotX);
-            int finalY = (int) (compCenterY - rotY);
+            double finalX = compCenterX + rotX;
+            double finalY = compCenterY - rotY;
+            return new PPoint.Image(ic, finalX, finalY);
+        }
 
-            brush.onStrokeStart(1, finalX, finalY);
-
+        private PPoint getRotatedPoint2(ImageComponent ic, double relX, double relY) {
             // coordinates rotated with 240 degrees
-            rotX = relX * cos240 - relY * sin240;
-            rotY = relX * sin240 + relY * cos240;
+            double rotX = relX * cos240 - relY * sin240;
+            double rotY = relX * sin240 + relY * cos240;
 
             // translate back to the original coordinate system
-            finalX = (int) (compCenterX + rotX);
-            finalY = (int) (compCenterY - rotY);
-
-            brush.onStrokeStart(2, finalX, finalY);
+            double finalX = (int) (compCenterX + rotX);
+            double finalY = (int) (compCenterY - rotY);
+            return new PPoint.Image(ic, finalX, finalY);
         }
 
         @Override
-        public void onNewStrokePoint(SymmetryBrush brush, double x, double y) {
-            brush.onNewStrokePoint(0, x, y);
+        public void onNewStrokePoint(SymmetryBrush brush, PPoint p) {
+            brush.onNewStrokePoint(0, p);
 
+            double x = p.getImX();
+            double y = p.getImY();
+            // coordinates relative to the center
             double relX = x - compCenterX;
-            double relY = compCenterY - y;
+            double relY = compCenterY - y; // calculate in upwards looking coords
 
-            double rotX = relX * cos120 - relY * sin120;
-            double rotY = relX * sin120 + relY * cos120;
+            ImageComponent ic = p.getIC();
 
-            int finalEndX = (int) (compCenterX + rotX);
-            int finalEndY = (int) (compCenterY - rotY);
+            PPoint p1 = getRotatedPoint1(ic, relX, relY);
+            brush.onNewStrokePoint(1, p1);
 
-            brush.onNewStrokePoint(1, finalEndX, finalEndY);
-
-            rotX = relX * cos240 - relY * sin240;
-            rotY = relX * sin240 + relY * cos240;
-
-            finalEndX = (int) (compCenterX + rotX);
-            finalEndY = (int) (compCenterY - rotY);
-
-            brush.onNewStrokePoint(2, finalEndX, finalEndY);
+            PPoint finalPos = getRotatedPoint2(ic, relX, relY);
+            brush.onNewStrokePoint(2, finalPos);
         }
     };
 
@@ -165,9 +173,9 @@ public enum Symmetry {
         this.numBrushes = numBrushes;
     }
 
-    public abstract void onStrokeStart(SymmetryBrush brush, double x, double y);
+    public abstract void onStrokeStart(SymmetryBrush symmetryBrush, PPoint p);
 
-    public abstract void onNewStrokePoint(SymmetryBrush brush, double x, double y);
+    public abstract void onNewStrokePoint(SymmetryBrush brush, PPoint p);
 
     public int getNumBrushes() {
         return numBrushes;

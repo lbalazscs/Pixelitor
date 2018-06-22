@@ -32,7 +32,7 @@ public class HistogramPainter extends JComponent {
 
     private int[] values = null;
     private int maxValue = 0;
-    private Color color;
+    private final Color color;
 
     public HistogramPainter(Color color) {
         this.color = color;

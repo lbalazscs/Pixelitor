@@ -43,6 +43,7 @@ import pixelitor.layers.MaskViewMode;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.selection.SelectionInteraction;
+import pixelitor.tools.PPoint;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 
@@ -219,16 +220,16 @@ public class Composition implements Serializable {
         this.canvas = canvas;
     }
 
-    public Rectangle getCanvasBounds() {
-        return canvas.getBounds();
+    public Rectangle getCanvasImBounds() {
+        return canvas.getImBounds();
     }
 
-    public int getCanvasWidth() {
-        return canvas.getWidth();
+    public int getCanvasImWidth() {
+        return canvas.getImWidth();
     }
 
-    public int getCanvasHeight() {
-        return canvas.getHeight();
+    public int getCanvasImHeight() {
+        return canvas.getImHeight();
     }
 
     public void setDirty(boolean dirty) {
@@ -680,7 +681,7 @@ public class Composition implements Serializable {
 //        BufferedImage imageSoFar = ImageUtils.createCompatibleImage(getCanvasWidth(), getCanvasHeight());
 
         BufferedImage imageSoFar = new BufferedImage(
-                canvas.getWidth(), canvas.getHeight(), TYPE_INT_ARGB_PRE);
+                canvas.getImWidth(), canvas.getImHeight(), TYPE_INT_ARGB_PRE);
         Graphics2D g = imageSoFar.createGraphics();
 
         boolean firstVisibleLayer = true;
@@ -709,9 +710,9 @@ public class Composition implements Serializable {
         return retVal;
     }
 
-    public void updateRegion(double startX, double startY, double endX, double endY, int thickness) {
+    public void updateRegion(PPoint start, PPoint end, int thickness) {
         compositeImageUpToDate = false;
-        ic.updateRegion(startX, startY, endX, endY, thickness);
+        ic.updateRegion(start, end, thickness);
         ic.updateNavigator(false);
     }
 

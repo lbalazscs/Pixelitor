@@ -80,42 +80,42 @@ public class Canvas implements Serializable {
     /**
      * Returns the bounds in image space, relative to the canvas
      */
-    public Rectangle getBounds() {
+    public Rectangle getImBounds() {
         return new Rectangle(0, 0, width, height);
     }
 
     /**
      * Returns the width in image space
      */
-    public int getWidth() {
+    public int getImWidth() {
         return width;
     }
 
     /**
      * Returns the height in image space
      */
-    public int getHeight() {
+    public int getImHeight() {
         return height;
     }
 
     /**
      * Returns the size in component space
      */
-    public Dimension getZoomedSize() {
+    public Dimension getCoSize() {
         return new Dimension(zoomedWidth, zoomedHeight);
     }
 
     /**
      * Returns the width in component space
      */
-    public int getZoomedWidth() {
+    public int getCoWidth() {
         return zoomedWidth;
     }
 
     /**
      * Returns the height in component space
      */
-    public int getZoomedHeight() {
+    public int getCoHeight() {
         return zoomedHeight;
     }
 
@@ -125,7 +125,7 @@ public class Canvas implements Serializable {
 
     public Shape invertShape(Shape shape) {
         Area area = new Area(shape);
-        Area fullArea = new Area(getBounds());
+        Area fullArea = new Area(getImBounds());
         fullArea.subtract(area);
         return fullArea;
     }
@@ -133,7 +133,7 @@ public class Canvas implements Serializable {
     public Shape clipShapeToBounds(Shape shape) {
         assert shape != null;
 
-        Area compBounds = new Area(getBounds());
+        Area compBounds = new Area(getImBounds());
         Area result = new Area(shape);
         result.intersect(compBounds);
         return result;

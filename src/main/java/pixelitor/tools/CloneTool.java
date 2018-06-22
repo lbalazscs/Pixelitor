@@ -39,7 +39,6 @@ import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import java.awt.GridBagLayout;
-import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
@@ -205,23 +204,23 @@ public class CloneTool extends BlendingModeBrushTool {
     }
 
     @Override
-    protected void prepareProgrammaticBrushStroke(Drawable dr, Point start) {
+    protected void prepareProgrammaticBrushStroke(Drawable dr, PPoint start) {
         super.prepareProgrammaticBrushStroke(dr, start);
 
         setupRandomSource(dr, start);
     }
 
-    private void setupRandomSource(Drawable dr, Point start) {
+    private void setupRandomSource(Drawable dr, PPoint start) {
         Composition comp = dr.getComp();
 
-        int canvasWidth = comp.getCanvasWidth();
-        int canvasHeight = comp.getCanvasHeight();
+        int canvasWidth = comp.getCanvasImWidth();
+        int canvasHeight = comp.getCanvasImHeight();
         Random rand = new Random();
         int sourceX = rand.nextInt(canvasWidth);
         int sourceY = rand.nextInt(canvasHeight);
 
         setCloningSource(comp.getIC(), sourceX, sourceY);
-        startNewCloningStroke(start.x, start.y, true);
+        startNewCloningStroke(start.getImX(), start.getImY(), true);
     }
 
     @Override

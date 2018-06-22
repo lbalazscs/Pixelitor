@@ -19,6 +19,7 @@ package pixelitor.tools.brushes;
 
 import pixelitor.Composition;
 import pixelitor.tools.AbstractBrushTool;
+import pixelitor.tools.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Graphics2D;
@@ -29,8 +30,7 @@ public abstract class AbstractBrush implements Brush {
 
     protected int radius = AbstractBrushTool.DEFAULT_BRUSH_RADIUS;
     protected int diameter;
-    protected double previousX;
-    protected double previousY;
+    protected PPoint previous;
 
     protected AbstractBrush(int radius) {
         setRadius(radius);
@@ -49,14 +49,21 @@ public abstract class AbstractBrush implements Brush {
     }
 
     // always call it before rememberPrevious!
-    protected void updateComp(double x, double y) {
-        comp.updateRegion(previousX, previousY, x, y, diameter);
+    protected void updateComp(PPoint p) {
+        comp.updateRegion(previous, p, diameter);
     }
 
     // always call it after updateComp!
-    protected void rememberPrevious(double x, double y) {
-        this.previousX = x;
-        this.previousY = y;
+    protected void rememberPrevious(PPoint p) {
+        this.previous = p;
+    }
+
+    @Override
+    public void onStrokeStart(PPoint p) {
+        // when starting a new stroke, the previous
+        // variables should not be set to 0, 0
+        // because it causes unnecessary repainting
+        rememberPrevious(p);
     }
 
     public int getRadius() {
@@ -68,8 +75,8 @@ public abstract class AbstractBrush implements Brush {
         DebugNode node = new DebugNode("Brush", this);
         node.addClass();
         node.addInt("Radius", radius);
-        node.addDouble("PreviousX", previousX);
-        node.addDouble("PreviousY", previousY);
+        node.addDouble("PreviousX", previous.getImX());
+        node.addDouble("PreviousY", previous.getImY());
 
         return node;
     }

@@ -129,7 +129,7 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         });
     }
 
-    private BufferedImage renderFrame(final ParametrizedFilter filter, double time, final PixelitorWindow busyCursorParent) throws InvocationTargetException, InterruptedException {
+    private BufferedImage renderFrame(ParametrizedFilter filter, double time, PixelitorWindow busyCursorParent) throws InvocationTargetException, InterruptedException {
         long runCountBefore = Filter.runCount;
 
         ParamSetState intermediateState = animation.tween(time);

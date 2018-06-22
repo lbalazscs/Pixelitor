@@ -46,7 +46,7 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
     private final JTextField numSecondsTF = new JTextField("2", 3);
     private final JTextField fpsTF = new JTextField("24", 3);
     private int nrFrames;
-    private JLabel numFramesLabel = new JLabel();
+    private final JLabel numFramesLabel = new JLabel();
     private double fps;
     private JComboBox<Interpolation> ipCB;
     private JComboBox<TweenOutputType> outputTypeCB;

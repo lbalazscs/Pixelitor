@@ -35,6 +35,7 @@ import pixelitor.layers.LayersPanel;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.menus.view.ZoomControl;
 import pixelitor.menus.view.ZoomLevel;
+import pixelitor.tools.PPoint;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
@@ -181,7 +182,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         if (comp.isEmpty()) {
             return super.getPreferredSize();
         } else {
-            return canvas.getZoomedSize();
+            return canvas.getCoSize();
         }
     }
 
@@ -273,6 +274,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         return comp;
     }
 
+    @Override
     public String getName() {
         return comp.getName();
     }
@@ -298,8 +300,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
         Graphics2D g2 = (Graphics2D) g;
 
-        int zoomedWidth = canvas.getZoomedWidth();
-        int zoomedHeight = canvas.getZoomedHeight();
+        int zoomedWidth = canvas.getCoWidth();
+        int zoomedHeight = canvas.getCoHeight();
 
         Rectangle canvasClip = setVisibleCanvasClip(g, drawStartX, drawStartY, zoomedWidth, zoomedHeight);
 
@@ -402,39 +404,37 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     /**
      * Repaints only a region of the image, called from the brush tools
      */
-    public void updateRegion(double startX, double startY, double endX, double endY, int thickness) {
-        if (zoomLevel != ZoomLevel.Z100) { // not the 100% view
-            startX = (int) (drawStartX + viewScale * startX);
-            startY = (int) (drawStartY + viewScale * startY);
-            endX = (int) (drawStartX + viewScale * endX);
-            endY = (int) (drawStartY + viewScale * endY);
-            thickness = (int) (viewScale * thickness);
-        } else { // drawStartX drawStartY has to be adjusted anyway
-            startX = (int) (drawStartX + startX);
-            startY = (int) (drawStartY + startY);
-            endX = (int) (drawStartX + endX);
-            endY = (int) (drawStartY + endY);
-        }
+    public void updateRegion(PPoint start, PPoint end, int thickness) {
+        int startX = start.getCoX();
+        int startY = start.getCoY();
+        int endX = end.getCoX();
+        int endY = end.getCoY();
 
+        // make sure that the start coordinates are smaller
         if (endX < startX) {
-            double tmp = startX;
+            int tmp = startX;
             startX = endX;
             endX = tmp;
         }
         if (endY < startY) {
-            double tmp = startY;
+            int tmp = startY;
             startY = endY;
             endY = tmp;
         }
+
+        // the thickness is derived from the brush radius, therefore
+        // it still needs to be converted into component space
+        thickness = (int) (viewScale * thickness);
+
         startX -= thickness;
         endX += thickness;
         startY -= thickness;
         endY += thickness;
 
-        double repWidth = endX - startX;
-        double repHeight = endY - startY;
+        int repWidth = endX - startX;
+        int repHeight = endY - startY;
 
-        repaint((int) startX, (int) startY, (int) repWidth, (int) repHeight);
+        repaint(startX, startY, repWidth, repHeight);
     }
 
     public void makeSureItIsVisible() {
@@ -467,7 +467,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         assert ConsistencyChecks.imageCoversCanvas(comp);
 
         if (frame != null) {
-            frame.setSize(-1, -1, canvas.getZoomedWidth(), canvas.getZoomedHeight());
+            frame.setSize(-1, -1, canvas.getCoWidth(), canvas.getCoHeight());
         }
         revalidate();
     }
@@ -477,8 +477,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     }
 
     public void zoomToFit(AutoZoom autoZoom) {
-        ZoomLevel zoomLevel = autoZoom.calcZoom(canvas, true);
-        setZoom(zoomLevel, true, null);
+        ZoomLevel bestZoom = autoZoom.calcZoom(canvas, true);
+        setZoom(bestZoom, true, null);
     }
 
     /**
@@ -500,8 +500,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         Rectangle areaThatShouldBeVisible = null;
         if (frame != null) {
             updateTitle();
-            int newFrameWidth = canvas.getZoomedWidth();
-            int newFrameHeight = canvas.getZoomedHeight();
+            int newFrameWidth = canvas.getCoWidth();
+            int newFrameHeight = canvas.getCoHeight();
             frame.setSize(-1, -1, newFrameWidth, newFrameHeight);
 
             Rectangle visiblePart = getVisiblePart();
@@ -579,19 +579,19 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
     public void updateDrawStart() {
         int width = getWidth();
-        int canvasZoomedWidth = canvas.getZoomedWidth();
+        int canvasZoomedWidth = canvas.getCoWidth();
         int height = getHeight();
-        int canvasZoomedHeight = canvas.getZoomedHeight();
+        int canvasZoomedHeight = canvas.getCoHeight();
 
         drawStartX = (width - canvasZoomedWidth) / 2.0;
         drawStartY = (height - canvasZoomedHeight) / 2.0;
     }
 
-    public double componentXToImageSpace(int mouseX) {
+    public double componentXToImageSpace(double mouseX) {
         return ((mouseX - drawStartX) / viewScale);
     }
 
-    public double componentYToImageSpace(int mouseY) {
+    public double componentYToImageSpace(double mouseY) {
         return ((mouseY - drawStartY) / viewScale);
     }
 

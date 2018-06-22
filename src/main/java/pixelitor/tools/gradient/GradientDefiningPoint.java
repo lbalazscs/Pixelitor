@@ -22,7 +22,7 @@ import pixelitor.tools.DraggablePoint;
 import pixelitor.utils.Utils;
 
 import java.awt.Color;
-import java.awt.Point;
+import java.awt.geom.Point2D;
 
 /**
  * Either a gradient start point or a gradient end point
@@ -44,21 +44,21 @@ public class GradientDefiningPoint extends DraggablePoint {
     }
 
     @Override
-    public void setLocation(int x, int y) {
+    public void setLocation(double x, double y) {
         super.setLocation(x, y);
 
         // also move the center point
-        int cx = (x + other.x) / 2;
-        int cy = (y + other.y) / 2;
+        double cx = (x + other.x) / 2.0;
+        double cy = (y + other.y) / 2.0;
         center.setLocationWithoutMovingChildren(cx, cy);
     }
 
     @Override
-    public void setConstrainedLocation(int mouseX, int mouseY) {
+    public void setConstrainedLocation(double mouseX, double mouseY) {
         // constrain it relative to the other point:
         // it seems more useful than constraining it relative to its own drag start
-        Point p = Utils.constrainEndPoint(other.x, other.y, mouseX, mouseY);
-        setLocation(p.x, p.y);
+        Point2D p = Utils.constrainEndPoint(other.x, other.y, mouseX, mouseY);
+        setLocation(p.getX(), p.getY());
     }
 
     @Override

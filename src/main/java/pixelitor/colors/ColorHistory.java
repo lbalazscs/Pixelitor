@@ -46,7 +46,7 @@ public class ColorHistory {
             }
         };
 
-        String title;
+        final String title;
 
         Type(String title) {
             this.title = title;

@@ -17,6 +17,7 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.tools.PPoint;
 import pixelitor.tools.StrokeType;
 
 import java.awt.Shape;
@@ -35,7 +36,9 @@ public class OutlineSquareBrush extends StrokeBrush {
     }
 
     @Override
-    public void drawStartShape(double x, double y) {
+    public void drawStartShape(PPoint p) {
+        double x = p.getImX();
+        double y = p.getImY();
         Stroke savedStroke = targetG.getStroke();
 
         Shape rect = new Rectangle2D.Double(x - radius, y - radius, diameter, diameter);

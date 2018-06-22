@@ -94,7 +94,7 @@ public final class ConsistencyChecks {
                         + "history dimensions: " + previous.getWidth() + "x" + previous.getHeight()
                         + "\nchecked composition = " + comp.getName() + "(hasSelection = " + comp.hasSelection()
                         + (comp.hasSelection() ? ", selection bounds = " + comp.getSelection().getShapeBounds() : "") + ")"
-                        + "\nchecked composition canvas = " + comp.getCanvas().getBounds()
+                        + "\nchecked composition canvas = " + comp.getCanvas().getImBounds()
                         + "\nhistory composition = " + historyCompName
                         + "\nactive composition = " + activeCompName
                         + "\n"
@@ -136,8 +136,8 @@ public final class ConsistencyChecks {
             // can happen during the loading of pxc files
             return true;
         }
-        int canvasWidth = canvas.getWidth();
-        int canvasHeight = canvas.getHeight();
+        int canvasWidth = canvas.getImWidth();
+        int canvasHeight = canvas.getImHeight();
 
         int txAbs = -dr.getTX();
 
@@ -158,11 +158,11 @@ public final class ConsistencyChecks {
 
     private static boolean throwImageDoesNotCoverCanvasException(Drawable dr) {
         Composition comp = dr.getComp();
-        BufferedImage bufferedImage = dr.getImage();
-        int canvasWidth = comp.getCanvasWidth();
-        int canvasHeight = comp.getCanvasHeight();
-        int imageWidth = bufferedImage.getWidth();
-        int imageHeight = bufferedImage.getHeight();
+        BufferedImage img = dr.getImage();
+        int canvasWidth = comp.getCanvasImWidth();
+        int canvasHeight = comp.getCanvasImHeight();
+        int imageWidth = img.getWidth();
+        int imageHeight = img.getHeight();
         int tx = dr.getTX();
         int ty = dr.getTY();
         String className = dr.getClass().getSimpleName();

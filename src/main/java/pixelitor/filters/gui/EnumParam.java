@@ -150,6 +150,7 @@ public class EnumParam<E extends Enum<E>> extends AbstractFilterParam implements
         }
     }
 
+    @Override
     public EnumParam withAction(FilterAction action) {
         this.action = action;
         return this;

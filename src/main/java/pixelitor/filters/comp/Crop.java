@@ -49,7 +49,7 @@ public class Crop implements CompAction {
     public void process(Composition comp) {
         Canvas canvas = comp.getCanvas();
         if (!allowGrowing) {
-            cropRect = cropRect.createIntersection(canvas.getBounds());
+            cropRect = cropRect.createIntersection(canvas.getImBounds());
         }
 
         if (cropRect.isEmpty()) {

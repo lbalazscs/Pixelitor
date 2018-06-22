@@ -48,8 +48,8 @@ public class Resize implements CompAction {
 
     @Override
     public void process(Composition comp) {
-        int canvasCurrWidth = comp.getCanvasWidth();
-        int canvasCurrHeight = comp.getCanvasHeight();
+        int canvasCurrWidth = comp.getCanvasImWidth();
+        int canvasCurrHeight = comp.getCanvasImHeight();
 
         if ((canvasCurrWidth == canvasTargetWidth) && (canvasCurrHeight == canvasTargetHeight)) {
             return;
