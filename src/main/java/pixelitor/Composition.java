@@ -52,7 +52,6 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -790,13 +789,7 @@ public class Composition implements Serializable {
     }
 
     public Shape clipShapeToCanvasSize(Shape shape) {
-        assert shape != null;
-
-        Area compBounds = new Area(new Rectangle(0, 0, canvas.getWidth(), canvas.getHeight()));
-        Area result = new Area(shape);
-        result.intersect(compBounds);
-
-        return result;
+        return canvas.clipShapeToBounds(shape);
     }
 
     public DeselectEdit createDeselectEdit() {
@@ -879,12 +872,13 @@ public class Composition implements Serializable {
         }
     }
 
-    public void createSelectionFromShape(Shape selectionShape) {
+    public Selection createSelectionFromShape(Shape selectionShape) {
         if (selection != null) {
             throw new IllegalStateException("createSelectionFromShape called while there was a selection: " + selection
                     .toString());
         }
         setNewSelection(new Selection(selectionShape, ic));
+        return selection;
     }
 
     public void setNewSelection(Selection selection) {

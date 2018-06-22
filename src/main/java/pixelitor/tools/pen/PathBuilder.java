@@ -86,10 +86,10 @@ public class PathBuilder implements PenToolMode {
             // only add a point if previously we were
             // in the initial mode. Normally points
             // are added in mouseReleased
-            CurvePoint p = new CurvePoint(x, y, e.getIC());
+            AnchorPoint p = new AnchorPoint(x, y, e.getIC());
             path.addFirstPoint(p);
         } else if (state == MOVING_TO_NEXT_CURVE_POINT) {
-            CurvePoint first = path.getFirst();
+            AnchorPoint first = path.getFirst();
             if (first.handleContains(x, y) && path.getNumPoints() > 2) {
                 first.setActive(false);
                 path.close();
@@ -135,7 +135,7 @@ public class PathBuilder implements PenToolMode {
         ctrlOut.setLocation(x, y);
         ctrlOut.afterMouseReleasedActions();
 
-        path.setMovingPoint(new CurvePoint(x, y, e.getIC()));
+        path.setMovingPoint(new AnchorPoint(x, y, e.getIC()));
         setState(MOVING_TO_NEXT_CURVE_POINT);
     }
 
@@ -158,7 +158,7 @@ public class PathBuilder implements PenToolMode {
 
         path.getMoving().setLocation(x, y);
 
-        CurvePoint first = path.getFirst();
+        AnchorPoint first = path.getFirst();
         if (first.handleContains(x, y)) {
             first.setActive(true);
         } else {

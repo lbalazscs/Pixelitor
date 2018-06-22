@@ -51,8 +51,8 @@ public class PathBuilderTest {
         pb.mousePressed(createPMouseEvent(10, 10));
         pb.assertStateIs(DRAGGING_THE_CONTROL_OF_LAST);
         assertThat(path).numPointsIs(1);
-        CurvePoint firstCurvePoint = path.getPoint(0);
-        assertThat(firstCurvePoint)
+        AnchorPoint firstAnchorPoint = path.getPoint(0);
+        assertThat(firstAnchorPoint)
                 .locIs(10, 10)
                 .imLocIs(10, 10);
         pb.paint(g);
@@ -60,7 +60,7 @@ public class PathBuilderTest {
         // drag towards right
         pb.mouseDragged(createPMouseEvent(20, 10));
         pb.assertStateIs(DRAGGING_THE_CONTROL_OF_LAST);
-        assertThat(firstCurvePoint.ctrlOut)
+        assertThat(firstAnchorPoint.ctrlOut)
                 .locIs(20, 10)
                 .imLocIs(10, 10);
 
@@ -78,7 +78,7 @@ public class PathBuilderTest {
         pb.assertStateIs(MOVING_TO_NEXT_CURVE_POINT);
         assertThat(path).numPointsIs(1);
         pb.paint(g);
-        assertThat(firstCurvePoint.ctrlOut)
+        assertThat(firstAnchorPoint.ctrlOut)
                 .locIs(50, 10)
                 .imLocIs(50, 10);
 
@@ -99,7 +99,7 @@ public class PathBuilderTest {
         pb.assertStateIs(DRAGGING_THE_CONTROL_OF_LAST);
         assertThat(path).numPointsIs(2);
         pb.paint(g);
-        CurvePoint secondPoint = path.getPoint(1);
+        AnchorPoint secondPoint = path.getPoint(1);
         assertThat(secondPoint)
                 .locIs(50, 50)
                 .imLocIs(50, 50);
@@ -137,7 +137,7 @@ public class PathBuilderTest {
         // press to finalize the third path point at 90, 10
         pb.mousePressed(createPMouseEvent(90, 10));
         assertThat(path).numPointsIs(3);
-        CurvePoint thirdPoint = path.getPoint(2);
+        AnchorPoint thirdPoint = path.getPoint(2);
         assertThat(thirdPoint)
                 .locIs(90, 10)
                 .imLocIs(90, 10);

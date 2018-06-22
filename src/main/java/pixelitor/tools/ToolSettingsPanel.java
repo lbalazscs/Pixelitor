@@ -67,6 +67,13 @@ public class ToolSettingsPanel extends JPanel {
         return button;
     }
 
+    public JButton addButton(Action action, String toolTip) {
+        JButton button = new JButton(action);
+        button.setToolTipText(toolTip);
+        add(button);
+        return button;
+    }
+
     public JCheckBox addCheckBox(String text, boolean selected, String name, Consumer<Boolean> consumer) {
         JCheckBox checkBox = new JCheckBox(text, selected);
         checkBox.setName(name);

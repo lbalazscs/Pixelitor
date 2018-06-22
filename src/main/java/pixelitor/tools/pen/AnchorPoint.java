@@ -25,17 +25,71 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 
+import static pixelitor.tools.pen.AnchorPoint.Type.SMOOTH;
+import static pixelitor.tools.pen.AnchorPoint.Type.SYMMETRIC;
+
 /**
  * A point on a {@link Path}
  */
-public class CurvePoint extends DraggablePoint {
+public class AnchorPoint extends DraggablePoint {
     final ControlPoint ctrlIn;
     final ControlPoint ctrlOut;
 
-    // TODO other constrained modes are also possible, such as
-    // smooth (collinear, but the handles don't necessarily
-    // have the same length), and auto-smooth
-    private boolean symmetric = true;
+    enum Type {
+        SYMMETRIC(true) {
+            @Override
+            void setLocationOfOtherControl(int x, int y, AnchorPoint anchor, ControlPoint other) {
+                int dx = x - anchor.x;
+                int dy = y - anchor.y;
+
+                other.setLocationOnlyForThis(anchor.x - dx, anchor.y - dy);
+            }
+        },
+        /**
+         * Collinear, but the handles don't necessarily have the same length
+         */
+        SMOOTH(true) {
+            @Override
+            void setLocationOfOtherControl(int x, int y, AnchorPoint anchor, ControlPoint other) {
+                // keep the distance, but adjust the angle to the new angle
+                double dist = other.getRememberedDistanceFromAnchor();
+                double newAngle = Math.PI + Math.atan2(y - anchor.y, x - anchor.x);
+
+                // The magic experimental constants 0.65 try to compensate for the
+                // rounding errors but they are not very good, because they
+                // should be distance dependent.
+                // The real solution for the distance drifting is the
+                // "remembered distance from anchor", but this also
+                // should help a bit the precision
+                int newX = anchor.x + (int) (0.65 + dist * Math.cos(newAngle));
+                int newY = anchor.y + (int) (0.65 + dist * Math.sin(newAngle));
+                other.setLocationOnlyForThis(newX, newY);
+            }
+        },
+        /**
+         * The two control handles are totally independent
+         */
+        CUSP(false) {
+            @Override
+            void setLocationOfOtherControl(int x, int y, AnchorPoint anchor, ControlPoint other) {
+                // do nothing: the control points are independent
+            }
+        };
+
+        private final boolean dependent;
+
+        Type(boolean dependent) {
+            this.dependent = dependent;
+        }
+
+        public boolean isDependent() {
+            return dependent;
+        }
+
+        abstract void setLocationOfOtherControl(int x, int y, AnchorPoint anchor, ControlPoint other);
+    }
+
+    private Type type = SYMMETRIC;
 
     private static final Color CURVE_COLOR = Color.WHITE;
     private static final Color CURVE_ACTIVE_COLOR = Color.RED;
@@ -44,7 +98,7 @@ public class CurvePoint extends DraggablePoint {
     private static final Color CTRL_OUT_COLOR = Color.WHITE;
     private static final Color CTRL_OUT_ACTIVE_COLOR = Color.RED;
 
-    public CurvePoint(int x, int y, ImageComponent ic) {
+    public AnchorPoint(int x, int y, ImageComponent ic) {
         super("curve", x, y, ic, CURVE_COLOR, CURVE_ACTIVE_COLOR);
 
         ctrlIn = new ControlPoint("ctrlIn", x, y, ic, this, CTRL_IN_COLOR, CTRL_IN_ACTIVE_COLOR);
@@ -94,8 +148,8 @@ public class CurvePoint extends DraggablePoint {
         return null;
     }
 
-    public boolean isSymmetric() {
-        return symmetric;
+    public Type getType() {
+        return type;
     }
 
     @Override
@@ -103,5 +157,11 @@ public class CurvePoint extends DraggablePoint {
         calcImCoords();
         ctrlIn.calcImCoords();
         ctrlOut.calcImCoords();
+    }
+
+    public void changeTypeFromSymmetricToSmooth() {
+        if (type == SYMMETRIC) {
+            type = SMOOTH;
+        }
     }
 }

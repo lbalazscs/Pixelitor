@@ -390,6 +390,8 @@ public class ShapesTool extends DragTool {
             Selection selection = comp.getSelection();
 
             if (selection != null) {
+                // this code is called for each drag event:
+                // update the selection shape
                 selection.setShape(selectionShape);
             } else {
                 comp.createSelectionFromShape(selectionShape);

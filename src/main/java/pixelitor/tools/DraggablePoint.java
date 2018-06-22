@@ -191,6 +191,12 @@ public class DraggablePoint {
         return active;
     }
 
+    public double distanceFrom(DraggablePoint other) {
+        int dx = other.x - this.x;
+        int dy = other.y - this.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

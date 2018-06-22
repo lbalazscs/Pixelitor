@@ -130,6 +130,15 @@ public class Canvas implements Serializable {
         return fullArea;
     }
 
+    public Shape clipShapeToBounds(Shape shape) {
+        assert shape != null;
+
+        Area compBounds = new Area(getBounds());
+        Area result = new Area(shape);
+        result.intersect(compBounds);
+        return result;
+    }
+
     @Override
     public String toString() {
         return "Canvas{width=" + width

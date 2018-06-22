@@ -41,72 +41,70 @@ import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_CURVE_POINT;
  * https://en.wikipedia.org/wiki/Composite_B%C3%A9zier_curve
  */
 public class Path {
-    private final List<CurvePoint> curvePoints = new ArrayList<>();
+    private final List<AnchorPoint> anchorPoints = new ArrayList<>();
     // The curve point which is currently moving while the path is being built
-    private CurvePoint moving;
+    private AnchorPoint moving;
 
     // The curve point which was added first
     // Relevant for closing
-    private CurvePoint first;
+    private AnchorPoint first;
 
     // The curve point which was finalized last
     // Relevant because its handle is dragged while the path is being built
-    private CurvePoint last;
+    private AnchorPoint last;
 
     private boolean closed = false;
 
-    public void addFirstPoint(CurvePoint p) {
-        curvePoints.add(p);
+    public void addFirstPoint(AnchorPoint p) {
+        anchorPoints.add(p);
         first = p;
         last = p;
     }
 
-    public void setMovingPoint(CurvePoint p) {
+    public void setMovingPoint(AnchorPoint p) {
         moving = p;
     }
 
     public void finalizeMovingPoint(int x, int y) {
         moving.setLocation(x, y);
         moving.calcImCoords();
-        curvePoints.add(moving);
+        anchorPoints.add(moving);
         last = moving;
         moving = null;
     }
 
-    public CurvePoint getMoving() {
+    public AnchorPoint getMoving() {
         return moving;
     }
 
-    public CurvePoint getFirst() {
+    public AnchorPoint getFirst() {
         return first;
     }
 
-    public CurvePoint getLast() {
+    public AnchorPoint getLast() {
         return last;
     }
 
     public int getNumPoints() {
-        return curvePoints.size();
+        return anchorPoints.size();
     }
 
-    public Shape toShape() {
+    public Shape toComponentSpaceShape() {
         // TODO cache, but one must be careful to
         // re-create after any editing
         GeneralPath path = new GeneralPath();
+        path.moveTo(first.x, first.y);
+        AnchorPoint prevPoint = first;
 
-        for (int i = 0; i < curvePoints.size(); i++) {
-            CurvePoint point = curvePoints.get(i);
-            if (i == 0) {
-                path.moveTo(point.x, point.y);
-            } else {
-                CurvePoint prevPoint = curvePoints.get(i - 1);
-                path.curveTo(prevPoint.ctrlOut.x,
-                        prevPoint.ctrlOut.y,
-                        point.ctrlIn.x,
-                        point.ctrlIn.y,
-                        point.x,
-                        point.y);
-            }
+        for (int i = 1; i < anchorPoints.size(); i++) {
+            AnchorPoint point = anchorPoints.get(i);
+            path.curveTo(prevPoint.ctrlOut.x,
+                    prevPoint.ctrlOut.y,
+                    point.ctrlIn.x,
+                    point.ctrlIn.y,
+                    point.x,
+                    point.y);
+            prevPoint = point;
         }
         if (moving != null) {
             path.curveTo(last.ctrlOut.x,
@@ -124,10 +122,29 @@ public class Path {
         return path;
     }
 
+    public Shape toImageSpaceShape() {
+        GeneralPath path = new GeneralPath();
+        path.moveTo(first.imX, first.imY);
+        AnchorPoint prevPoint = first;
+
+        for (int i = 1; i < anchorPoints.size(); i++) {
+            AnchorPoint point = anchorPoints.get(i);
+            path.curveTo(prevPoint.ctrlOut.imX,
+                    prevPoint.ctrlOut.imY,
+                    point.ctrlIn.imX,
+                    point.ctrlIn.imY,
+                    point.imX,
+                    point.imY);
+            prevPoint = point;
+        }
+        assert moving == null;
+        return path;
+    }
+
     public void paintForBuilding(Graphics2D g, PathBuilder.State state) {
         // paint the shape
         if (state != INITIAL) {
-            Shapes.drawVisible(g, toShape());
+            Shapes.drawVisible(g, toComponentSpaceShape());
         }
 
         // paint the handles
@@ -158,10 +175,10 @@ public class Path {
 
     public void paintForEditing(Graphics2D g) {
         // paint the shape
-        Shapes.drawVisible(g, toShape());
+        Shapes.drawVisible(g, toComponentSpaceShape());
 
         // paint the handles
-        int numPoints = curvePoints.size();
+        int numPoints = anchorPoints.size();
         for (int i = 0; i < numPoints; i++) {
             boolean paintIn = true;
             boolean paintOut = true;
@@ -174,13 +191,13 @@ public class Path {
                 paintOut = false;
             }
 
-            CurvePoint point = curvePoints.get(i);
+            AnchorPoint point = anchorPoints.get(i);
             point.paintHandles(g, paintIn, paintOut);
         }
     }
 
     public DraggablePoint handleWasHit(int x, int y) {
-        for (CurvePoint point : curvePoints) {
+        for (AnchorPoint point : anchorPoints) {
             DraggablePoint draggablePoint = point.handleOrCtrlHandleWasHit(x, y);
             if (draggablePoint != null) {
                 return draggablePoint;
@@ -190,15 +207,15 @@ public class Path {
     }
 
     public void resetToInitialState() {
-        assert curvePoints.size() == 1;
-        curvePoints.remove(0);
+        assert anchorPoints.size() == 1;
+        anchorPoints.remove(0);
         moving = null;
         last = null;
     }
 
     public void close() {
         assert getNumPoints() > 2;
-        curvePoints.add(first);
+        anchorPoints.add(first);
         moving = null; // can be ignored in this case
         closed = true;
     }
@@ -208,7 +225,7 @@ public class Path {
     }
 
     public void icResized(ImageComponent ic) {
-        for (CurvePoint point : curvePoints) {
+        for (AnchorPoint point : anchorPoints) {
             point.restoreCoordsFromImSpace(ic);
             point.ctrlIn.restoreCoordsFromImSpace(ic);
             point.ctrlOut.restoreCoordsFromImSpace(ic);
@@ -216,12 +233,12 @@ public class Path {
     }
 
     public void dump() {
-        int numPoints = curvePoints.size();
+        int numPoints = anchorPoints.size();
         if (numPoints == 0) {
             System.out.println("Empty path");
         }
         for (int i = 0; i < numPoints; i++) {
-            CurvePoint point = curvePoints.get(i);
+            AnchorPoint point = anchorPoints.get(i);
             System.out.print(Ansi.PURPLE + "Point " + i + ":" + Ansi.RESET);
             if (i != 0 && point == first) {
                 System.out.println(" same as the first");
@@ -234,7 +251,14 @@ public class Path {
         }
     }
 
-    public CurvePoint getPoint(int index) {
-        return curvePoints.get(index);
+    public AnchorPoint getPoint(int index) {
+        return anchorPoints.get(index);
     }
+
+    public void changeTypeFromSymmetricToSmooth() {
+        for (AnchorPoint point : anchorPoints) {
+            point.changeTypeFromSymmetricToSmooth();
+        }
+    }
+
 }

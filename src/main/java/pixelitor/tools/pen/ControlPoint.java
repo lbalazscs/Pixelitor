@@ -23,29 +23,28 @@ import pixelitor.tools.DraggablePoint;
 import java.awt.Color;
 
 /**
- * A control point of a {@link CurvePoint}
+ * A control point of a {@link AnchorPoint}
  */
 public class ControlPoint extends DraggablePoint {
-    private final CurvePoint curvePoint;
+    private final AnchorPoint anchor;
     private ControlPoint sibling;
 
-    public ControlPoint(String name, int x, int y, ImageComponent ic, CurvePoint curvePoint, Color color, Color activeColor) {
+    // this needs to be remembered because otherwise the distance keeps
+    // drifting for smooth anchors because of accumulating rounding errors
+    private double rememberedDistanceFromAnchor;
+
+    public ControlPoint(String name, int x, int y, ImageComponent ic, AnchorPoint anchor, Color color, Color activeColor) {
         super(name, x, y, ic, color, activeColor);
-        this.curvePoint = curvePoint;
+        this.anchor = anchor;
     }
 
     public void setSibling(ControlPoint sibling) {
         this.sibling = sibling;
     }
 
-    // the third argument is needed to avoid infinite loops
+    @Override
     public void setLocation(int x, int y) {
-        if (curvePoint.isSymmetric()) {
-            int dx = x - curvePoint.x;
-            int dy = y - curvePoint.y;
-
-            sibling.setLocationOnlyForThis(curvePoint.x - dx, curvePoint.y - dy);
-        }
+        anchor.getType().setLocationOfOtherControl(x, y, anchor, sibling);
 
         super.setLocation(x, y);
     }
@@ -53,15 +52,25 @@ public class ControlPoint extends DraggablePoint {
     @Override
     protected void afterMouseReleasedActions() {
         calcImCoords();
-        if (curvePoint.isSymmetric()) {
+        rememberDistFromAnchor();
+        if (anchor.getType().isDependent()) {
             sibling.calcImCoords();
+            sibling.rememberDistFromAnchor();
         }
+    }
+
+    private void rememberDistFromAnchor() {
+        rememberedDistanceFromAnchor = distanceFrom(anchor);
+    }
+
+    public double getRememberedDistanceFromAnchor() {
+        return rememberedDistanceFromAnchor;
     }
 
     @Override
     public String toString() {
-        if (samePositionAs(curvePoint)) {
-            return super.toString() + " same pos as the curve point!";
+        if (samePositionAs(anchor)) {
+            return super.toString() + " retracted!";
         }
         return super.toString();
     }

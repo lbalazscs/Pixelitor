@@ -35,6 +35,7 @@ public class PathEditor implements PenToolMode {
         this.path = path;
     }
 
+    @Override
     public void paint(Graphics2D g) {
         path.paintForEditing(g);
     }
@@ -70,20 +71,20 @@ public class PathEditor implements PenToolMode {
         if (activeDraggablePoint != null) {
             activeDraggablePoint.mouseReleased(x, y);
         }
-        if (activeDraggablePoint != null) {
-            activeDraggablePoint.setActive(false);
-        }
-        activeDraggablePoint = null;
+//        if (activeDraggablePoint != null) {
+//            activeDraggablePoint.setActive(false);
+//        }
+//        activeDraggablePoint = null;
     }
 
     @Override
     public boolean mouseMoved(MouseEvent e, ImageComponent ic) {
         int x = e.getX();
         int y = e.getY();
-        DraggablePoint draggablePoint = path.handleWasHit(x, y);
-        if (draggablePoint != null) {
-            draggablePoint.setActive(true);
-            activeDraggablePoint = draggablePoint;
+        DraggablePoint hitPoint = path.handleWasHit(x, y);
+        if (hitPoint != null) {
+            hitPoint.setActive(true);
+            activeDraggablePoint = hitPoint;
             return true;
         } else {
             if (activeDraggablePoint != null) {

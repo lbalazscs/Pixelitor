@@ -17,10 +17,16 @@
 
 package pixelitor.tools.pen;
 
+import pixelitor.Build;
 import pixelitor.Canvas;
+import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
-import pixelitor.tools.ArrowKey;
+import pixelitor.history.History;
+import pixelitor.history.NewSelectionEdit;
+import pixelitor.history.PixelitorEdit;
+import pixelitor.history.SelectionChangeEdit;
+import pixelitor.selection.Selection;
 import pixelitor.tools.ClipStrategy;
 import pixelitor.tools.PMouseEvent;
 import pixelitor.tools.Tool;
@@ -28,6 +34,7 @@ import pixelitor.utils.Cursors;
 
 import javax.swing.*;
 import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -47,12 +54,43 @@ public class PenTool extends Tool {
     private State state = BUILDING;
 
     private JComboBox<String> modeChooser;
+    private final AbstractAction toSelectionAction;
     private Path path = new Path();
     private PenToolMode mode = new PathBuilder(path);
 
     public PenTool() {
         super('p', "Pen", "pen_tool_icon.png",
                 "<b>click</b> and <b>drag</b> to create a Bezier curve. <b>Ctrl-click</b> to finish. Press <b>Esc</b> to start from scratch.", Cursors.DEFAULT, false, true, ClipStrategy.INTERNAL_FRAME);
+        toSelectionAction = new AbstractAction("Convert to Selection") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Shape shape = path.toImageSpaceShape();
+                Composition comp = ImageComponents.getActiveCompOrNull();
+                if (comp != null) {
+                    Selection selection = comp.getSelection();
+                    PixelitorEdit edit;
+                    if (selection != null) {
+                        Shape backupSelectionShape = selection.getShape();
+                        selection.setShape(shape);
+                        boolean stillThereIsSelection = selection.clipToCompSize(comp);
+                        if (!stillThereIsSelection) {
+                            return;
+                        }
+                        edit = new SelectionChangeEdit("Selection Change", comp, backupSelectionShape);
+                    } else {
+                        selection = comp.createSelectionFromShape(shape);
+                        boolean stillThereIsSelection = selection.clipToCompSize(comp);
+                        if (!stillThereIsSelection) {
+                            return;
+                        }
+                        edit = new NewSelectionEdit(comp, selection.getShape());
+                    }
+                    History.addEdit(edit);
+                }
+                resetStateToInitial();
+            }
+        };
+        toSelectionAction.setEnabled(false);
     }
 
     @Override
@@ -67,21 +105,27 @@ public class PenTool extends Tool {
         });
         settingsPanel.addWithLabel("Mode:", modeChooser);
 
-        settingsPanel.addButton(new AbstractAction("dump") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                path.dump();
-            }
-        });
+        settingsPanel.addButton(toSelectionAction,
+                "Convert the active path to a selection");
+
+        if (Build.CURRENT.isDevelopment()) {
+            settingsPanel.addButton(new AbstractAction("dump") {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    path.dump();
+                }
+            });
+        }
     }
 
-    public void setState(State state) {
+    private void setState(State state) {
         this.state = state;
         if (state == EDITING) {
+            path.changeTypeFromSymmetricToSmooth();
             mode = new PathEditor(path);
+            toSelectionAction.setEnabled(true);
             ImageComponents.repaintActive();
         }
-
     }
 
     @Override
@@ -126,15 +170,9 @@ public class PenTool extends Tool {
     }
 
     @Override
-    public boolean arrowKeyPressed(ArrowKey key) {
-        // TODO delete
-        path.dump();
-        return true;
-    }
-
-    @Override
     public void resetStateToInitial() {
         modeChooser.setSelectedIndex(0);
+        toSelectionAction.setEnabled(false);
         state = BUILDING;
         path = new Path();
         mode = new PathBuilder(path);

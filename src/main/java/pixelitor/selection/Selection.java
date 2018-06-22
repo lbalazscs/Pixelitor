@@ -172,11 +172,13 @@ public class Selection {
     }
 
     /**
-     * Intersects the selection shape with the composition bounds
+     * Restricts the selection shape to be within the canvas bounds.
+     * This must be always called for new or changed selections.
      *
      * @return true if something is still selected
      */
     public boolean clipToCompSize(Composition comp) {
+        assert comp == ic.getComp();
         if (shape != null) {
             shape = comp.clipShapeToCanvasSize(shape);
 
@@ -210,8 +212,14 @@ public class Selection {
         Shape backupShape = shape;
         shape = type.modify(oldArea, outlineArea);
 
-        SelectionChangeEdit edit = new SelectionChangeEdit("Modify Selection", ic.getComp(), backupShape);
-        History.addEdit(edit);
+        Composition comp = ic.getComp();
+        boolean stillSelection = clipToCompSize(comp);
+        if (stillSelection) {
+            SelectionChangeEdit edit = new SelectionChangeEdit("Modify Selection", comp, backupShape);
+            History.addEdit(edit);
+        } else {
+            comp.deselect(true);
+        }
     }
 
     public Shape transform(AffineTransform at) {

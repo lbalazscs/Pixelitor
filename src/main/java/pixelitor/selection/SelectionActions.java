@@ -72,7 +72,7 @@ public final class SelectionActions {
     private static final Action traceWithEraser = new TraceAction("Stroke with Current Eraser", Tools.ERASER);
 //    private static final Action traceWithSmudge = new TraceAction("Stroke with Current Smudge", Tools.SMUDGE);
 
-    private static final Action modify = new MenuAction("Modify...") {
+    private static final Action modify = new MenuAction("Modify Selection...") {
         @Override
         public void onClick() {
             JPanel p = new JPanel(new GridBagLayout());
@@ -88,7 +88,12 @@ public final class SelectionActions {
                 protected void okAction() {
                     Selection selection = getActiveCompOrNull().getSelection();
                     SelectionModifyType selectionModifyType = type.getSelected();
-                    selection.modify(selectionModifyType, amount.getValue());
+                    if (selection != null) {
+                        selection.modify(selectionModifyType, amount.getValue());
+                    } else {
+                        // TODO - we modified it so much that it disappeared
+                        // at least the change button should be disabled
+                    }
                 }
             };
             d.setVisible(true);
