@@ -19,6 +19,9 @@ package pixelitor.assertions;
 
 import org.assertj.core.api.AbstractAssert;
 import pixelitor.tools.DraggablePoint;
+import pixelitor.tools.pen.AnchorPoint;
+import pixelitor.tools.pen.AnchorPointType;
+import pixelitor.tools.pen.ControlPoint;
 
 /**
  * Custom AssertJ assertions for {@link DraggablePoint} objects.
@@ -28,12 +31,14 @@ public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, D
         super(actual, DraggablePointAssert.class);
     }
 
-    public DraggablePointAssert locIs(int x, int y) {
+    public DraggablePointAssert locIs(double x, double y) {
         isNotNull();
 
-        if ((actual.x != x) || (actual.y != y)) {
+        double dx = Math.abs(actual.x - x);
+        double dy = Math.abs(actual.y - y);
+        if ((dx > 0.1) || (dy > 0.1)) {
             throw new AssertionError(String.format(
-                    "found (%d, %d) instead of the expected (%d, %d)",
+                    "found (%.2f, %.2f) instead of the expected (%.2f, %.2f)",
                     actual.x, actual.y, x, y));
         }
 
@@ -54,4 +59,35 @@ public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, D
         return this;
     }
 
+    // can be called only on an AnchorPoint
+    public DraggablePointAssert anchorPointTypeIs(AnchorPointType expected) {
+        isNotNull();
+
+        if (!(actual instanceof AnchorPoint)) {
+            throw new AssertionError("This is not an AnchorPoint");
+        }
+
+        AnchorPointType type = ((AnchorPoint) actual).getType();
+        if (type != expected) {
+            throw new AssertionError("Type is " + type + ", expected " + expected);
+        }
+
+        return this;
+    }
+
+    // can be called only on a ControlPoint
+    public DraggablePointAssert isRetracted() {
+        isNotNull();
+
+        if (!(actual instanceof ControlPoint)) {
+            throw new AssertionError("This is not an ControlPoint");
+        }
+
+        ControlPoint cp = (ControlPoint) actual;
+        if (!cp.isRetracted()) {
+            throw new AssertionError("not retracted");
+        }
+
+        return this;
+    }
 }

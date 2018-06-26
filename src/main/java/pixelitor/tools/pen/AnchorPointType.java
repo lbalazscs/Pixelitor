@@ -17,18 +17,22 @@
 
 package pixelitor.tools.pen;
 
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+
 /**
  * The type of an anchor point determines how its control
  * handles behave relative to each other.
  */
-enum AnchorPointType {
+public enum AnchorPointType {
     /**
      * The control handles are both collinear and equidistant.
      */
-    SYMMETRIC(true) {
+    SYMMETRIC("Symmetric", true) {
         @Override
         void setLocationOfOtherControl(double x, double y,
-                                       AnchorPoint anchor, ControlPoint other) {
+                                       AnchorPoint anchor,
+                                       ControlPoint other) {
             double dx = x - anchor.x;
             double dy = y - anchor.y;
 
@@ -38,10 +42,11 @@ enum AnchorPointType {
     /**
      * Collinear, but the handles don't necessarily have the same length
      */
-    SMOOTH(true) {
+    SMOOTH("Smooth", true) {
         @Override
         void setLocationOfOtherControl(double x, double y,
-                                       AnchorPoint anchor, ControlPoint other) {
+                                       AnchorPoint anchor,
+                                       ControlPoint other) {
             // keep the distance, but adjust the angle to the new angle
             double dist = other.getRememberedDistanceFromAnchor();
             double newAngle = Math.PI + Math.atan2(y - anchor.y, x - anchor.x);
@@ -52,20 +57,22 @@ enum AnchorPointType {
         }
     },
     /**
-     * The two control handles are totally independent,
-     * making sharp corners possible
+     * The two control handles are totally independent.
      */
-    CUSP(false) {
+    CUSP("Cusp (free handles)", false) {
         @Override
         void setLocationOfOtherControl(double x, double y,
-                                       AnchorPoint anchor, ControlPoint other) {
+                                       AnchorPoint anchor,
+                                       ControlPoint other) {
             // do nothing: the control points are independent
         }
     };
 
+    private final String guiName;
     private final boolean dependent;
 
-    AnchorPointType(boolean dependent) {
+    AnchorPointType(String guiName, boolean dependent) {
+        this.guiName = guiName;
         this.dependent = dependent;
     }
 
@@ -74,5 +81,36 @@ enum AnchorPointType {
     }
 
     abstract void setLocationOfOtherControl(double x, double y,
-                                            AnchorPoint anchor, ControlPoint other);
+                                            AnchorPoint anchor,
+                                            ControlPoint other);
+
+    private JRadioButtonMenuItem createTypeMenuItem(AnchorPoint ap) {
+        return new AnchorPointTypeMenuItem(ap, this);
+    }
+
+    @Override
+    public String toString() {
+        return guiName;
+    }
+
+    static class AnchorPointTypeMenuItem extends JRadioButtonMenuItem {
+        public AnchorPointTypeMenuItem(AnchorPoint ap, AnchorPointType type) {
+            super(new AbstractAction(type.toString()) {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    ap.setType(type);
+                }
+            });
+            if (ap.getType() == type) {
+                setSelected(true);
+            }
+        }
+    }
+
+    public static void addTypePopupItems(AnchorPoint ap, JPopupMenu p) {
+        AnchorPointType[] types = AnchorPointType.values();
+        for (AnchorPointType type : types) {
+            p.add(type.createTypeMenuItem(ap));
+        }
+    }
 }

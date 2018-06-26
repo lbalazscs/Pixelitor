@@ -45,7 +45,8 @@ public class PathBuilder implements PenToolMode {
 
     private State state;
 
-    private Path path;
+    private SubPath activeSubPath;
+    private final Path path;
 
     public PathBuilder(Path path) {
         this.path = path;
@@ -87,17 +88,19 @@ public class PathBuilder implements PenToolMode {
             // in the initial mode. Normally points
             // are added in mouseReleased
             AnchorPoint p = new AnchorPoint(x, y, e.getIC());
-            path.addFirstPoint(p);
+
+            path.startNewSubPath(p);
+            this.activeSubPath = path.getActiveSubpath();
         } else if (state == MOVING_TO_NEXT_CURVE_POINT) {
-            AnchorPoint first = path.getFirst();
-            if (first.handleContains(x, y) && path.getNumPoints() > 2) {
+            AnchorPoint first = activeSubPath.getFirst();
+            if (first.handleContains(x, y) && activeSubPath.getNumPoints() > 2) {
                 first.setActive(false);
-                path.close();
+                activeSubPath.close();
                 setState(FINISHED);
                 return;
             } else {
                 // fix the final position of the moved curve point
-                path.finalizeMovingPoint(x, y);
+                activeSubPath.finalizeMovingPoint(x, y);
             }
         }
         setState(DRAGGING_THE_CONTROL_OF_LAST);
@@ -112,7 +115,7 @@ public class PathBuilder implements PenToolMode {
 
         int x = e.getCoX();
         int y = e.getCoY();
-        ControlPoint p = path.getLast().ctrlOut;
+        ControlPoint p = activeSubPath.getLast().ctrlOut;
         p.setLocation(x, y);
 
         setState(DRAGGING_THE_CONTROL_OF_LAST);
@@ -131,11 +134,11 @@ public class PathBuilder implements PenToolMode {
 
         assert state == DRAGGING_THE_CONTROL_OF_LAST : "state = " + state;
 
-        ControlPoint ctrlOut = path.getLast().ctrlOut;
+        ControlPoint ctrlOut = activeSubPath.getLast().ctrlOut;
         ctrlOut.setLocation(x, y);
         ctrlOut.afterMouseReleasedActions();
 
-        path.setMovingPoint(new AnchorPoint(x, y, e.getIC()));
+        activeSubPath.setMovingPoint(new AnchorPoint(x, y, e.getIC()));
         setState(MOVING_TO_NEXT_CURVE_POINT);
     }
 
@@ -156,9 +159,9 @@ public class PathBuilder implements PenToolMode {
 
 //        System.out.printf("PathBuilder::mouseMoved: x = %d, y = %d, state = %s%n", x, y, state);
 
-        path.getMoving().setLocation(x, y);
+        activeSubPath.getMoving().setLocation(x, y);
 
-        AnchorPoint first = path.getFirst();
+        AnchorPoint first = activeSubPath.getFirst();
         if (first.handleContains(x, y)) {
             first.setActive(true);
         } else {
@@ -174,19 +177,19 @@ public class PathBuilder implements PenToolMode {
         path.paintForBuilding(g, state);
     }
 
-    public Path getPath() {
-        return path;
+    public SubPath getActiveSubPath() {
+        return activeSubPath;
     }
 
     public void finish(int x, int y) {
 //        System.out.printf("PathBuilder::finish: x = %d, y = %d, state = %s%n", x, y, state);
 
         if (state == DRAGGING_THE_CONTROL_OF_LAST) {
-            ControlPoint p = path.getLast().ctrlOut;
+            ControlPoint p = activeSubPath.getLast().ctrlOut;
             p.setLocation(x, y);
             p.calcImCoords();
         } else if (state == MOVING_TO_NEXT_CURVE_POINT) {
-            path.finalizeMovingPoint(x, y);
+            activeSubPath.finalizeMovingPoint(x, y);
         }
         setState(FINISHED);
     }

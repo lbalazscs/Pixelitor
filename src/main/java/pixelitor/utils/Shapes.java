@@ -17,6 +17,11 @@
 
 package pixelitor.utils;
 
+import pixelitor.gui.ImageComponent;
+import pixelitor.tools.pen.AnchorPoint;
+import pixelitor.tools.pen.ControlPoint;
+import pixelitor.tools.pen.Path;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -25,11 +30,13 @@ import java.awt.Stroke;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
+import java.awt.geom.PathIterator;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static pixelitor.tools.pen.AnchorPointType.SMOOTH;
 
 /**
  * Static shape-related utility methods
@@ -40,6 +47,123 @@ public class Shapes {
 
     private Shapes() {
         // do not instantiate
+    }
+
+    /**
+     * Converts the given {@link Shape}, assumed to be
+     * in image coordinates, to a {@link Path}
+     */
+    public static Path shapeToPath(Shape shape, ImageComponent ic) {
+        Path path = new Path();
+        PathIterator it = shape.getPathIterator(null);
+        double[] coords = new double[6];
+        while (!it.isDone()) {
+            int type = it.currentSegment(coords);
+            double x = coords[0];
+            double y = coords[1];
+            double xx = coords[2];
+            double yy = coords[3];
+            double xxx = coords[4];
+            double yyy = coords[5];
+
+            switch (type) {
+                case PathIterator.SEG_MOVETO:
+                    startNewSubpath(path, x, y, ic);
+                    break;
+                case PathIterator.SEG_LINETO:
+                    addLineToPath(path, x, y, ic);
+                    break;
+                case PathIterator.SEG_QUADTO:
+                    addQuadCurveToPath(path, x, y, xx, yy, ic);
+                    break;
+                case PathIterator.SEG_CUBICTO:
+                    addCubicCurveToPath(path, x, y, xx, yy, xxx, yyy, ic);
+                    break;
+                case PathIterator.SEG_CLOSE:
+                    path.close();
+                    break;
+                default:
+                    throw new IllegalArgumentException("type = " + type);
+            }
+
+            it.next();
+        }
+        assert path.checkWiring();
+        return path;
+    }
+
+    private static void startNewSubpath(Path path, double x, double y, ImageComponent ic) {
+        x = ic.imageXToComponentSpace(x);
+        y = ic.imageYToComponentSpace(y);
+        AnchorPoint first = new AnchorPoint(x, y, ic);
+        first.setType(SMOOTH);
+        path.startNewSubPath(first);
+    }
+
+    private static void addLineToPath(Path path, double newX, double newY, ImageComponent ic) {
+        newX = ic.imageXToComponentSpace(newX);
+        newY = ic.imageYToComponentSpace(newY);
+        AnchorPoint ap = new AnchorPoint(newX, newY, ic);
+        path.addPoint(ap);
+    }
+
+    private static void addQuadCurveToPath(Path path, double cx, double cy,
+                                           double newX, double newY, ImageComponent ic) {
+        cx = ic.imageXToComponentSpace(cx);
+        cy = ic.imageYToComponentSpace(cy);
+        newX = ic.imageXToComponentSpace(newX);
+        newY = ic.imageYToComponentSpace(newY);
+        AnchorPoint last = path.getLast();
+
+        // convert the quadratic bezier (with one control point)
+        // into a cubic one (with two control points), see
+        // https://stackoverflow.com/questions/3162645/convert-a-quadratic-bezier-to-a-cubic
+        double qp1x = cx;
+        double qp1y = cy;
+        double qp0x = last.x;
+        double qp0y = last.y;
+        double qp2x = newX;
+        double qp2y = newY;
+
+        double twoThirds = 2.0 / 3.0;
+        double cp1x = qp0x + twoThirds * (qp1x - qp0x);
+        double cp1y = qp0y + twoThirds * (qp1y - qp0y);
+        double cp2x = qp2x + twoThirds * (qp1x - qp2x);
+        double cp2y = qp2y + twoThirds * (qp1y - qp2y);
+
+        ControlPoint lastOut = last.ctrlOut;
+        lastOut.setLocationOnlyForThis(cp1x, cp1y);
+        lastOut.afterMovingActionsForThis();
+
+        AnchorPoint next = new AnchorPoint(newX, newY, ic);
+        path.addPoint(next);
+        next.setType(SMOOTH);
+
+        ControlPoint nextIn = next.ctrlIn;
+        nextIn.setLocationOnlyForThis(cp2x, cp2y);
+        nextIn.afterMovingActionsForThis();
+    }
+
+    private static void addCubicCurveToPath(Path path, double c1x, double c1y,
+                                            double c2x, double c2y,
+                                            double newX, double newY, ImageComponent ic) {
+        ControlPoint lastOut = path.getLast().ctrlOut;
+        c1x = ic.imageXToComponentSpace(c1x);
+        c1y = ic.imageYToComponentSpace(c1y);
+        lastOut.setLocationOnlyForThis(c1x, c1y);
+        lastOut.afterMovingActionsForThis();
+
+        newX = ic.imageXToComponentSpace(newX);
+        newY = ic.imageYToComponentSpace(newY);
+        AnchorPoint next = new AnchorPoint(newX, newY, ic);
+        path.addPoint(next);
+        next.setType(SMOOTH);
+
+        c2x = ic.imageXToComponentSpace(c2x);
+        c2y = ic.imageYToComponentSpace(c2y);
+        ControlPoint nextIn = next.ctrlIn;
+        nextIn.setLocationOnlyForThis(c2x, c2y);
+        nextIn.afterMovingActionsForThis();
     }
 
     public static void drawVisible(Graphics2D g, Shape shape) {

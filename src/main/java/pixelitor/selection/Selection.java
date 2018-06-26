@@ -177,7 +177,7 @@ public class Selection {
      *
      * @return true if something is still selected
      */
-    public boolean clipToCompSize(Composition comp) {
+    public boolean clipToCanvasSize(Composition comp) {
         assert comp == ic.getComp();
         if (shape != null) {
             shape = comp.clipShapeToCanvasSize(shape);
@@ -213,7 +213,7 @@ public class Selection {
         shape = type.modify(oldArea, outlineArea);
 
         Composition comp = ic.getComp();
-        boolean stillSelection = clipToCompSize(comp);
+        boolean stillSelection = clipToCanvasSize(comp);
         if (stillSelection) {
             SelectionChangeEdit edit = new SelectionChangeEdit("Modify Selection", comp, backupShape);
             History.addEdit(edit);

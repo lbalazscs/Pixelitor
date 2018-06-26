@@ -50,8 +50,9 @@ public class PathBuilderTest {
         // start the curve
         pb.mousePressed(createPMouseEvent(10, 10));
         pb.assertStateIs(DRAGGING_THE_CONTROL_OF_LAST);
-        assertThat(path).numPointsIs(1);
-        AnchorPoint firstAnchorPoint = path.getPoint(0);
+        SubPath sp = path.getActiveSubpath();
+        assertThat(sp).numPointsIs(1);
+        AnchorPoint firstAnchorPoint = sp.getPoint(0);
         assertThat(firstAnchorPoint)
                 .locIs(10, 10)
                 .imLocIs(10, 10);
@@ -70,13 +71,13 @@ public class PathBuilderTest {
         pb.paint(g);
         pb.mouseDragged(createPMouseEvent(40, 10));
         pb.assertStateIs(DRAGGING_THE_CONTROL_OF_LAST);
-        assertThat(path).numPointsIs(1);
+        assertThat(sp).numPointsIs(1);
         pb.paint(g);
 
         // release to set the final value of the control point
         pb.mouseReleased(createPMouseEvent(50, 10));
         pb.assertStateIs(MOVING_TO_NEXT_CURVE_POINT);
-        assertThat(path).numPointsIs(1);
+        assertThat(sp).numPointsIs(1);
         pb.paint(g);
         assertThat(firstAnchorPoint.ctrlOut)
                 .locIs(50, 10)
@@ -91,15 +92,15 @@ public class PathBuilderTest {
         pb.paint(g);
         pb.mouseMoved(createMouseEvent(50, 40), ic);
         pb.assertStateIs(MOVING_TO_NEXT_CURVE_POINT);
-        assertThat(path).numPointsIs(1);
+        assertThat(sp).numPointsIs(1);
         pb.paint(g);
 
         // press to fix the second path point
         pb.mousePressed(createPMouseEvent(50, 50));
         pb.assertStateIs(DRAGGING_THE_CONTROL_OF_LAST);
-        assertThat(path).numPointsIs(2);
+        assertThat(sp).numPointsIs(2);
         pb.paint(g);
-        AnchorPoint secondPoint = path.getPoint(1);
+        AnchorPoint secondPoint = sp.getPoint(1);
         assertThat(secondPoint)
                 .locIs(50, 50)
                 .imLocIs(50, 50);
@@ -113,13 +114,13 @@ public class PathBuilderTest {
         pb.paint(g);
         pb.mouseDragged(createPMouseEvent(80, 50));
         pb.assertStateIs(DRAGGING_THE_CONTROL_OF_LAST);
-        assertThat(path).numPointsIs(2);
+        assertThat(sp).numPointsIs(2);
         pb.paint(g);
 
         // release to fix the control points
         pb.mouseReleased(createPMouseEvent(90, 50));
         pb.assertStateIs(MOVING_TO_NEXT_CURVE_POINT);
-        assertThat(path).numPointsIs(2);
+        assertThat(sp).numPointsIs(2);
         pb.paint(g);
         assertThat(secondPoint.ctrlOut)
                 .locIs(90, 50)
@@ -131,13 +132,13 @@ public class PathBuilderTest {
         pb.mouseMoved(createMouseEvent(90, 30), ic);
         pb.paint(g);
         pb.mouseMoved(createMouseEvent(90, 20), ic);
-        assertThat(path).numPointsIs(2);
+        assertThat(sp).numPointsIs(2);
         pb.paint(g);
 
         // press to finalize the third path point at 90, 10
         pb.mousePressed(createPMouseEvent(90, 10));
-        assertThat(path).numPointsIs(3);
-        AnchorPoint thirdPoint = path.getPoint(2);
+        assertThat(sp).numPointsIs(3);
+        AnchorPoint thirdPoint = sp.getPoint(2);
         assertThat(thirdPoint)
                 .locIs(90, 10)
                 .imLocIs(90, 10);
@@ -147,32 +148,32 @@ public class PathBuilderTest {
         pb.mouseDragged(createPMouseEvent(110, 10));
         pb.mouseDragged(createPMouseEvent(120, 10));
         pb.mouseReleased(createPMouseEvent(120, 10)); // finalized
-        assertThat(path).numPointsIs(3);
+        assertThat(sp).numPointsIs(3);
         assertThat(thirdPoint.ctrlOut)
                 .locIs(120, 10)
                 .imLocIs(120, 10);
 
         // move towards the starting point (10, 10)
         // in order to close
-        assertThat(path)
+        assertThat(sp)
                 .isNotClosed()
                 .firstIsNotActive();
         pb.mouseMoved(createMouseEvent(100, 10), ic);
         pb.mouseMoved(createMouseEvent(50, 10), ic);
-        assertThat(path)
+        assertThat(sp)
                 .isNotClosed()
                 .firstIsNotActive();
         pb.mouseMoved(createMouseEvent(12, 10), ic);
         // we are close, the first should become active
-        assertThat(path)
+        assertThat(sp)
                 .isNotClosed()
                 .firstIsActive();
         // now close it
         pb.mousePressed(createPMouseEvent(11, 10));
-        assertThat(path)
+        assertThat(sp)
                 .isClosed()
                 .firstIsNotActive()
-                .numPointsIs(4); // first point added twice
+                .numPointsIs(3);
     }
 
     private PMouseEvent createPMouseEvent(int x, int y) {

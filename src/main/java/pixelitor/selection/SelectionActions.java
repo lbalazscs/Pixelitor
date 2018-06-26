@@ -30,7 +30,9 @@ import pixelitor.menus.view.ShowHideAction;
 import pixelitor.menus.view.ShowHideSelectionAction;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.Tools;
+import pixelitor.tools.pen.Path;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Shapes;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
@@ -71,6 +73,20 @@ public final class SelectionActions {
     private static final Action traceWithBrush = new TraceAction("Stroke with Current Brush", Tools.BRUSH);
     private static final Action traceWithEraser = new TraceAction("Stroke with Current Eraser", Tools.ERASER);
 //    private static final Action traceWithSmudge = new TraceAction("Stroke with Current Smudge", Tools.SMUDGE);
+
+    private static final Action convertToPath = new AbstractAction("Convert to Path") {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            Composition comp = ImageComponents.getActiveCompOrNull();
+            Shape shape = comp.getSelection().getShape();
+            comp.deselect(true);
+            Path path = Shapes.shapeToPath(shape, comp.getIC());
+            Tools.PEN.setPath(path);
+            Tools.PEN.startEditing(false);
+            Tools.PEN.getButton().doClick();
+        }
+    };
+
 
     private static final Action modify = new MenuAction("Modify Selection...") {
         @Override
@@ -132,6 +148,7 @@ public final class SelectionActions {
         invert.setEnabled(b);
         showHide.setEnabled(b);
         modify.setEnabled(b);
+        convertToPath.setEnabled(b);
     }
 
     public static boolean areEnabled() {
@@ -164,6 +181,10 @@ public final class SelectionActions {
 
     public static ShowHideAction getShowHide() {
         return showHide;
+    }
+
+    public static Action getConvertToPath() {
+        return convertToPath;
     }
 
     public static Action getModify() {

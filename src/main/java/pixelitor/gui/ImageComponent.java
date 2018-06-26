@@ -595,12 +595,12 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         return ((mouseY - drawStartY) / viewScale);
     }
 
-    public int imageXToComponentSpace(double mouseX) {
-        return (int) (drawStartX + mouseX * viewScale);
+    public double imageXToComponentSpace(double x) {
+        return drawStartX + x * viewScale;
     }
 
-    public int imageYToComponentSpace(double mouseY) {
-        return (int) (drawStartY + mouseY * viewScale);
+    public double imageYToComponentSpace(double y) {
+        return drawStartY + y * viewScale;
     }
 
     public Point fromComponentToImageSpace(Point input, ZoomLevel zoom) {
@@ -630,8 +630,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
     public Rectangle fromImageToComponentSpace(Rectangle2D input) {
         return new Rectangle(
-                imageXToComponentSpace(input.getX()),
-                imageYToComponentSpace(input.getY()),
+                (int) imageXToComponentSpace(input.getX()),
+                (int) imageYToComponentSpace(input.getY()),
                 (int) (input.getWidth() * viewScale),
                 (int) (input.getHeight() * viewScale)
         );

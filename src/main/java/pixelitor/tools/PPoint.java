@@ -155,8 +155,8 @@ public abstract class PPoint {
             super(ic);
             this.imX = imX;
             this.imY = imY;
-            this.coX = ic.imageXToComponentSpace(imX);
-            this.coY = ic.imageXToComponentSpace(imY);
+            this.coX = (int) ic.imageXToComponentSpace(imX);
+            this.coY = (int) ic.imageXToComponentSpace(imY);
         }
     }
 }

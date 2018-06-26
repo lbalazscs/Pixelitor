@@ -125,11 +125,11 @@ public class GradientTool extends DragTool {
         int x = e.getCoX();
         int y = e.getCoY();
         if (handles != null) {
-            DraggablePoint draggablePoint = handles.handleWasHit(x, y);
-            if (draggablePoint != null) {
-                activeHandle = draggablePoint;
-                draggablePoint.setActive(true);
-                draggablePoint.mousePressed(x, y);
+            DraggablePoint handle = handles.handleWasHit(x, y);
+            if (handle != null) {
+                activeHandle = handle;
+                handle.setActive(true);
+                handle.mousePressed(x, y);
             }
             e.repaint();
         }
@@ -184,10 +184,10 @@ public class GradientTool extends DragTool {
         }
         int x = e.getX();
         int y = e.getY();
-        DraggablePoint draggablePoint = handles.handleWasHit(x, y);
-        if (draggablePoint != null) {
-            draggablePoint.setActive(true);
-            activeHandle = draggablePoint;
+        DraggablePoint handle = handles.handleWasHit(x, y);
+        if (handle != null) {
+            handle.setActive(true);
+            activeHandle = handle;
             ic.repaint();
         } else {
             if (activeHandle != null) {

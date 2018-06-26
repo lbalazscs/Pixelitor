@@ -43,8 +43,10 @@ public enum PasteDestination {
         @Override
         void addImage(BufferedImage pastedImage) {
             Composition comp = ImageComponents.getActiveCompOrNull();
-            Layer newLayer = new ImageLayer(comp, pastedImage, "Pasted Layer", comp.getCanvasImWidth(), comp
-                    .getCanvasImHeight());
+            int width = comp.getCanvasImWidth();
+            int height = comp.getCanvasImHeight();
+            Layer newLayer = new ImageLayer(comp, pastedImage,
+                    "Pasted Layer", width, height);
 
             comp.addLayer(newLayer, true, "New Pasted Layer", true, false);
         }
@@ -82,7 +84,8 @@ public enum PasteDestination {
             int imgWidth = pastedImage.getWidth();
             int imgHeight = pastedImage.getHeight();
 
-            BufferedImage bwImage = new BufferedImage(width, height, TYPE_BYTE_GRAY);
+            BufferedImage bwImage = new BufferedImage(width, height,
+                    TYPE_BYTE_GRAY);
             Graphics2D g = bwImage.createGraphics();
 
             if (imgWidth < width || imgHeight < height) {

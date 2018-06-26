@@ -82,6 +82,8 @@ public class SelectionTool extends DragTool {
 //        settingsPanel.addButton(SelectionActions.getTraceWithSmudge());
         
         settingsPanel.addButton(SelectionActions.getCrop());
+
+        settingsPanel.addButton(SelectionActions.getConvertToPath());
     }
 
     @Override

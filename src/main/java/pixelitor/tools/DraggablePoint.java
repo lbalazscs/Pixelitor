@@ -63,9 +63,10 @@ public class DraggablePoint {
     private final Color color;
     private final Color activeColor;
 
-    private boolean active = false;
+    //    private boolean active = false;
+    private static DraggablePoint activePoint = null;
 
-    private final ImageComponent ic;
+    protected final ImageComponent ic;
 
     private Shape shape;
     private Shape shadow;
@@ -87,8 +88,8 @@ public class DraggablePoint {
         setLocationOnlyForThis(x, y);
     }
 
-    // setLocation is overridden in subclasses to also move related points,
-    // but we also need a pure version
+    // setLocation is overridden in subclasses to also move related
+    // points, but we also need a pure version, which is final
     public final void setLocationOnlyForThis(double x, double y) {
         this.x = x;
         this.y = y;
@@ -124,7 +125,10 @@ public class DraggablePoint {
     }
 
     public boolean handleContains(double x, double y) {
-        return shape.contains(x, y);
+        return (x > (this.x - HANDLE_RADIUS))
+                && (x < (this.x + HANDLE_RADIUS))
+                && (y > (this.y - HANDLE_RADIUS))
+                && (y < (this.y + HANDLE_RADIUS));
     }
 
     public void paintHandle(Graphics2D g) {
@@ -133,7 +137,7 @@ public class DraggablePoint {
         Shapes.fillVisible(g, shadow, Color.BLACK);
         g.setComposite(c);
 
-        if (active) {
+        if (isActive()) {
             Shapes.fillVisible(g, shape, activeColor);
         } else {
             Shapes.fillVisible(g, shape, color);
@@ -196,11 +200,16 @@ public class DraggablePoint {
     }
 
     public void setActive(boolean active) {
-        this.active = active;
+//        this.active = active;
+        if (active) {
+            DraggablePoint.activePoint = this;
+        } else {
+            DraggablePoint.activePoint = null;
+        }
     }
 
     public boolean isActive() {
-        return active;
+        return this == activePoint;
     }
 
     public double distanceFrom(DraggablePoint other) {
@@ -225,15 +234,33 @@ public class DraggablePoint {
         return this.x == that.x && this.y == that.y;
     }
 
+    public boolean samePositionAs(DraggablePoint that, double epsilon) {
+        return Math.abs(this.x - that.x) < epsilon
+                && Math.abs(this.y - that.y) < epsilon;
+    }
+
+    public void copyPositionFrom(DraggablePoint that) {
+        setLocationOnlyForThis(that.x, that.y);
+        this.imX = that.imX;
+        this.imY = that.imY;
+    }
+
     @Override
     public int hashCode() {
         return (int) (31 * x + y);
     }
 
+    public String toColoredString() {
+        String sb = String
+                .format("\u001B[32m%s\u001B[0m {x = \u001B[33m%.2f\u001B[0m, y = \u001B[33m%.2f\u001B[0m}{imX = \u001B[36m%.1f\u001B[0m, imY = \u001B[36m%.1f\u001B[0m}",
+                        name, x, y, imX, imY);
+        return sb;
+    }
+
     @Override
     public String toString() {
         String sb = String
-                .format("\u001B[32m%s\u001B[0m {x = \u001B[33m%d\u001B[0m, y = \u001B[33m%d\u001B[0m}{imX = \u001B[36m%.1f\u001B[0m, imY = \u001B[36m%.1f\u001B[0m}",
+                .format("%s {x = %.2f, y = %.2f}{imX = %.1f, imY = %.1f}",
                         name, x, y, imX, imY);
         return sb;
     }

@@ -35,13 +35,16 @@ import pixelitor.layers.LayerMaskAddType;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
+import pixelitor.tools.pen.Path;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.plaf.MenuBarUI;
 import java.awt.EventQueue;
 import java.awt.GraphicsEnvironment;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Random;
@@ -173,6 +176,8 @@ public class Pixelitor {
             return;
         }
 
+//        addTestPath();
+
 //        keepSwitchingToolsRandomly();
 //        startFilter(new Marble());
 
@@ -194,6 +199,15 @@ public class Pixelitor {
 //        new TweenWizard().start(pw);
 
 //        pw.dispatchEvent(new KeyEvent(pw, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), KeyEvent.CTRL_MASK, KeyEvent.VK_T, 'T'));
+    }
+
+    private static void addTestPath() {
+        Rectangle2D.Double shape = new Rectangle2D.Double(100, 100, 300, 100);
+
+        Path path = Shapes.shapeToPath(shape, ImageComponents.getActiveIC());
+        Tools.PEN.setPath(path);
+        Tools.PEN.startEditing(false);
+        Tools.PEN.getButton().doClick();
     }
 
     private static void showAddTextLayerDialog() {

@@ -29,6 +29,7 @@ import pixelitor.history.LayerOrderChangeEdit;
 import pixelitor.history.LayerSelectionChangeEdit;
 import pixelitor.history.LinkedEdit;
 import pixelitor.history.NewLayerEdit;
+import pixelitor.history.NewSelectionEdit;
 import pixelitor.history.NotUndoableEdit;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.history.SelectionChangeEdit;
@@ -825,6 +826,28 @@ public class Composition implements Serializable {
 
     public void setBuiltSelection(Selection selection) {
         this.builtSelection = selection;
+    }
+
+    // this is the "complete" method for setting a selection
+    // from shape in the sense that it handles
+    // everything: existing selections, history management
+    public void setSelectionFromShapeComplete(Shape shape) {
+        PixelitorEdit edit;
+        shape = canvas.clipShapeToBounds(shape);
+        if (shape.getBounds().isEmpty()) {
+            // the new selection was outside the canvas
+            return;
+        }
+
+        if (selection != null) {
+            Shape backupSelectionShape = selection.getShape();
+            selection.setShape(shape);
+            edit = new SelectionChangeEdit("Selection Change", this, backupSelectionShape);
+        } else {
+            selection = createSelectionFromShape(shape);
+            edit = new NewSelectionEdit(this, selection.getShape());
+        }
+        History.addEdit(edit);
     }
 
     public void setSelection(Selection selection) {

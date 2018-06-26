@@ -244,6 +244,8 @@ public class TestHelper {
 
         when(ic.componentXToImageSpace(anyDouble())).then(returnsFirstArg());
         when(ic.componentYToImageSpace(anyDouble())).then(returnsFirstArg());
+        when(ic.imageXToComponentSpace(anyDouble())).then(returnsFirstArg());
+        when(ic.imageYToComponentSpace(anyDouble())).then(returnsFirstArg());
 
         Point fakeLocationOnScreen = new Point(0, 0);
         when(ic.getLocationOnScreen()).thenReturn(fakeLocationOnScreen);

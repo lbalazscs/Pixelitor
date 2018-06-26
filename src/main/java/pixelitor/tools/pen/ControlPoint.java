@@ -19,6 +19,7 @@ package pixelitor.tools.pen;
 
 import pixelitor.gui.ImageComponent;
 import pixelitor.tools.DraggablePoint;
+import pixelitor.utils.debug.Ansi;
 
 import java.awt.Color;
 import java.awt.Shape;
@@ -58,12 +59,15 @@ public class ControlPoint extends DraggablePoint {
 
     @Override
     protected void afterMouseReleasedActions() {
+        afterMovingActionsForThis();
+        if (anchor.getType().isDependent()) {
+            sibling.afterMovingActionsForThis();
+        }
+    }
+
+    public void afterMovingActionsForThis() {
         calcImCoords();
         rememberDistFromAnchor();
-        if (anchor.getType().isDependent()) {
-            sibling.calcImCoords();
-            sibling.rememberDistFromAnchor();
-        }
     }
 
     private void rememberDistFromAnchor() {
@@ -74,11 +78,48 @@ public class ControlPoint extends DraggablePoint {
         return rememberedDistanceFromAnchor;
     }
 
+    public AnchorPoint getAnchor() {
+        return anchor;
+    }
+
+    public ControlPoint getSibling() {
+        return sibling;
+    }
+
+    @Override
+    public void copyPositionFrom(DraggablePoint that) {
+        super.copyPositionFrom(that);
+        if (that instanceof ControlPoint) { // should be always the case
+            rememberedDistanceFromAnchor = ((ControlPoint) that).getRememberedDistanceFromAnchor();
+        }
+    }
+
+    public boolean isRetracted() {
+        return samePositionAs(anchor);
+    }
+
+    public boolean isRetracted(double epsilon) {
+        return samePositionAs(anchor, epsilon);
+    }
+
+    @Override
+    public String toColoredString() {
+        if (isRetracted()) {
+            return super.toColoredString() + Ansi.RED + " retracted!" + Ansi.RESET;
+        }
+        return super.toColoredString();
+    }
+
     @Override
     public String toString() {
-        if (samePositionAs(anchor)) {
+        if (isRetracted()) {
             return super.toString() + " retracted!";
         }
         return super.toString();
+    }
+
+    void retract() {
+        setLocationOnlyForThis(anchor.x, anchor.y);
+        rememberedDistanceFromAnchor = 0;
     }
 }

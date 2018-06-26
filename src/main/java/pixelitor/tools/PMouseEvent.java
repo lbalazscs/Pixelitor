@@ -75,6 +75,10 @@ public class PMouseEvent extends PPoint.Lazy {
         return e.isControlDown();
     }
 
+    public boolean isPopupTrigger() {
+        return e.isPopupTrigger();
+    }
+
     public boolean isAltDown() {
         return e.isAltDown();
     }

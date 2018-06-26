@@ -22,14 +22,10 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
-import pixelitor.history.History;
-import pixelitor.history.NewSelectionEdit;
-import pixelitor.history.PixelitorEdit;
-import pixelitor.history.SelectionChangeEdit;
-import pixelitor.selection.Selection;
 import pixelitor.tools.ClipStrategy;
 import pixelitor.tools.PMouseEvent;
 import pixelitor.tools.Tool;
+import pixelitor.tools.Tools;
 import pixelitor.utils.Cursors;
 
 import javax.swing.*;
@@ -41,22 +37,19 @@ import java.awt.geom.AffineTransform;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static pixelitor.tools.pen.PenTool.State.BUILDING;
-import static pixelitor.tools.pen.PenTool.State.EDITING;
 
 /**
  * The Pen Tool
  */
 public class PenTool extends Tool {
-
-    enum State {BUILDING, EDITING}
-
-    private State state = BUILDING;
+    private static final String MODE_BUILD = "Build";
+    private static final String MODE_EDIT = "Edit";
 
     private JComboBox<String> modeChooser;
     private final AbstractAction toSelectionAction;
     private Path path = new Path();
     private PenToolMode mode = new PathBuilder(path);
+    private boolean ignoreModeChooserAction = false;
 
     public PenTool() {
         super('p', "Pen", "pen_tool_icon.png",
@@ -64,43 +57,33 @@ public class PenTool extends Tool {
         toSelectionAction = new AbstractAction("Convert to Selection") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Shape shape = path.toImageSpaceShape();
-                Composition comp = ImageComponents.getActiveCompOrNull();
-                if (comp != null) {
-                    Selection selection = comp.getSelection();
-                    PixelitorEdit edit;
-                    if (selection != null) {
-                        Shape backupSelectionShape = selection.getShape();
-                        selection.setShape(shape);
-                        boolean stillThereIsSelection = selection.clipToCompSize(comp);
-                        if (!stillThereIsSelection) {
-                            return;
-                        }
-                        edit = new SelectionChangeEdit("Selection Change", comp, backupSelectionShape);
-                    } else {
-                        selection = comp.createSelectionFromShape(shape);
-                        boolean stillThereIsSelection = selection.clipToCompSize(comp);
-                        if (!stillThereIsSelection) {
-                            return;
-                        }
-                        edit = new NewSelectionEdit(comp, selection.getShape());
-                    }
-                    History.addEdit(edit);
-                }
-                resetStateToInitial();
+                convertToSelection();
             }
         };
         toSelectionAction.setEnabled(false);
     }
 
+    private void convertToSelection() {
+        Shape shape = path.toImageSpaceShape();
+        Composition comp = ImageComponents.getActiveCompOrNull();
+        if (comp != null) {
+            comp.setSelectionFromShapeComplete(shape);
+        }
+        resetStateToInitial();
+        Tools.SELECTION.getButton().doClick();
+    }
+
     @Override
     public void initSettingsPanel() {
-        modeChooser = new JComboBox<>(new String[]{"Build", "Edit"});
+        modeChooser = new JComboBox<>(new String[]{MODE_BUILD, MODE_EDIT});
         modeChooser.addActionListener(e -> {
+            if (ignoreModeChooserAction) {
+                return;
+            }
             if (modeChooser.getSelectedItem().equals("Build")) {
-                setState(BUILDING);
+                resetStateToInitial();
             } else {
-                setState(EDITING);
+                startEditing(true);
             }
         });
         settingsPanel.addWithLabel("Mode:", modeChooser);
@@ -118,14 +101,27 @@ public class PenTool extends Tool {
         }
     }
 
-    private void setState(State state) {
-        this.state = state;
-        if (state == EDITING) {
-            path.changeTypeFromSymmetricToSmooth();
-            mode = new PathEditor(path);
-            toSelectionAction.setEnabled(true);
-            ImageComponents.repaintActive();
-        }
+    public void startEditing(boolean pathWasBuiltInteractively) {
+        ignoreModeChooserAction = true;
+        modeChooser.setSelectedItem(MODE_EDIT);
+        ignoreModeChooserAction = false;
+
+        path.changeTypesForEditing(pathWasBuiltInteractively);
+        mode = new PathEditor(path);
+        toSelectionAction.setEnabled(true);
+        ImageComponents.repaintActive();
+    }
+
+    @Override
+    public void resetStateToInitial() {
+        ignoreModeChooserAction = true;
+        modeChooser.setSelectedItem(MODE_BUILD);
+        ignoreModeChooserAction = false;
+
+        toSelectionAction.setEnabled(false);
+        path = new Path();
+        mode = new PathBuilder(path);
+        ImageComponents.repaintActive();
     }
 
     @Override
@@ -169,13 +165,7 @@ public class PenTool extends Tool {
         resetStateToInitial();
     }
 
-    @Override
-    public void resetStateToInitial() {
-        modeChooser.setSelectedIndex(0);
-        toSelectionAction.setEnabled(false);
-        state = BUILDING;
-        path = new Path();
-        mode = new PathBuilder(path);
-        ImageComponents.repaintActive();
+    public void setPath(Path path) {
+        this.path = path;
     }
 }

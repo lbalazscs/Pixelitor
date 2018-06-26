@@ -48,11 +48,11 @@ public class FgBgColors {
     }
 
     public static void setFG(Color c) {
-        selector.setFgColor(c);
+        selector.setFgColor(c, true);
     }
 
     public static void setBG(Color c) {
-        selector.setBgColor(c);
+        selector.setBgColor(c, true);
     }
 
     public static void randomize() {

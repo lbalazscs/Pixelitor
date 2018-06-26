@@ -18,17 +18,17 @@
 package pixelitor.assertions;
 
 import org.assertj.core.api.AbstractAssert;
-import pixelitor.tools.pen.Path;
+import pixelitor.tools.pen.SubPath;
 
 /**
- * Custom AssertJ assertions for {@link Path} objects.
+ * Custom AssertJ assertions for {@link SubPath} objects.
  */
-public class PathAssert extends AbstractAssert<PathAssert, Path> {
-    public PathAssert(Path actual) {
-        super(actual, PathAssert.class);
+public class SubPathAssert extends AbstractAssert<SubPathAssert, SubPath> {
+    public SubPathAssert(SubPath actual) {
+        super(actual, SubPathAssert.class);
     }
 
-    public PathAssert isClosed() {
+    public SubPathAssert isClosed() {
         isNotNull();
 
         if (!actual.isClosed()) {
@@ -38,7 +38,7 @@ public class PathAssert extends AbstractAssert<PathAssert, Path> {
         return this;
     }
 
-    public PathAssert isNotClosed() {
+    public SubPathAssert isNotClosed() {
         isNotNull();
 
         if (actual.isClosed()) {
@@ -48,7 +48,7 @@ public class PathAssert extends AbstractAssert<PathAssert, Path> {
         return this;
     }
 
-    public PathAssert firstIsActive() {
+    public SubPathAssert firstIsActive() {
         isNotNull();
 
         if (!actual.getFirst().isActive()) {
@@ -58,7 +58,7 @@ public class PathAssert extends AbstractAssert<PathAssert, Path> {
         return this;
     }
 
-    public PathAssert firstIsNotActive() {
+    public SubPathAssert firstIsNotActive() {
         isNotNull();
 
         if (actual.getFirst().isActive()) {
@@ -68,7 +68,7 @@ public class PathAssert extends AbstractAssert<PathAssert, Path> {
         return this;
     }
 
-    public PathAssert numPointsIs(int expected) {
+    public SubPathAssert numPointsIs(int expected) {
         isNotNull();
 
         int numPoints = actual.getNumPoints();

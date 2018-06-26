@@ -28,7 +28,7 @@ import java.awt.event.MouseEvent;
  * A pen tool interaction mode where a path can be edited
  */
 public class PathEditor implements PenToolMode {
-    private Path path;
+    private final Path path;
     private DraggablePoint activeDraggablePoint;
 
     public PathEditor(Path path) {
@@ -45,7 +45,7 @@ public class PathEditor implements PenToolMode {
         int x = e.getCoX();
         int y = e.getCoY();
 
-        DraggablePoint draggablePoint = path.handleWasHit(x, y);
+        DraggablePoint draggablePoint = path.handleWasHit(x, y, e.isAltDown());
         if (draggablePoint != null) {
             activeDraggablePoint = draggablePoint;
             draggablePoint.setActive(true);
@@ -69,19 +69,20 @@ public class PathEditor implements PenToolMode {
         int y = e.getCoY();
 
         if (activeDraggablePoint != null) {
-            activeDraggablePoint.mouseReleased(x, y);
+            if (e.isPopupTrigger() && activeDraggablePoint instanceof AnchorPoint) {
+                AnchorPoint ap = (AnchorPoint) activeDraggablePoint;
+                ap.showPopup(x, y);
+            } else {
+                activeDraggablePoint.mouseReleased(x, y);
+            }
         }
-//        if (activeDraggablePoint != null) {
-//            activeDraggablePoint.setActive(false);
-//        }
-//        activeDraggablePoint = null;
     }
 
     @Override
     public boolean mouseMoved(MouseEvent e, ImageComponent ic) {
         int x = e.getX();
         int y = e.getY();
-        DraggablePoint hitPoint = path.handleWasHit(x, y);
+        DraggablePoint hitPoint = path.handleWasHit(x, y, e.isAltDown());
         if (hitPoint != null) {
             hitPoint.setActive(true);
             activeDraggablePoint = hitPoint;

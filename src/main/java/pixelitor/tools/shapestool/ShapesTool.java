@@ -220,7 +220,7 @@ public class ShapesTool extends DragTool {
             dr.updateIconImage();
         } else { // selection mode
             comp.onSelection(selection -> {
-                selection.clipToCompSize(comp); // the selection can be too big
+                selection.clipToCanvasSize(comp); // the selection can be too big
 
                 PixelitorEdit edit;
                 if (backupSelectionShape != null) {
