@@ -25,7 +25,7 @@ import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.tools.guidelines.RectGuideline;
 import pixelitor.tools.guidelines.RectGuidelineType;
-import pixelitor.transform.TransformSupport;
+import pixelitor.transform.CropBox;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
@@ -57,7 +57,7 @@ import static pixelitor.tools.CropToolState.USER_DRAG;
 public class CropTool extends DragTool {
     private CropToolState state = INITIAL;
 
-    private TransformSupport transformSupport;
+    private CropBox cropBox;
 
     private final RangeParam maskOpacity = new RangeParam("Mask Opacity (%)", 0, 75, 100);
 
@@ -72,10 +72,6 @@ public class CropTool extends DragTool {
     private JSpinner hSizeSpinner;
     private JComboBox guidelinesSelector;
 
-    // The crop rectangle in image space.
-    // This variable is used only while the image component is resized
-    private Rectangle2D lastCropRect;
-
     private JCheckBox allowGrowingCB;
 
     private final RectGuideline rectGuideline = new RectGuideline();
@@ -84,7 +80,7 @@ public class CropTool extends DragTool {
         super('c', "Crop", "crop_tool_icon.png",
                 "<b>drag</b> to start, hold down <b>SPACE</b> to move the entire region. After the handles appear: <b>Shift-drag</b> the handles to keep the aspect ratio. <b>Double-click</b> to crop, or press <b>Esc</b> to cancel.",
                 Cursors.DEFAULT, false, true, false, ClipStrategy.CANVAS);
-        spaceDragBehavior = true;
+        spaceDragStartPoint = true;
 
         maskOpacity.addChangeListener(e -> maskOpacityChanged());
     }
@@ -112,8 +108,8 @@ public class CropTool extends DragTool {
         settingsPanel.add(maskOpacitySpinner);
 
         ChangeListener whChangeListener = e -> {
-            if (state == TRANSFORM && !transformSupport.isAdjusting()) {
-                transformSupport.setSize(
+            if (state == TRANSFORM && !cropBox.isAdjusting()) {
+                cropBox.setImSize(
                     (int) wSizeSpinner.getValue(),
                     (int) hSizeSpinner.getValue(),
                     ImageComponents.getActiveIC()
@@ -161,7 +157,7 @@ public class CropTool extends DragTool {
         settingsPanel.add(cropButton);
 
         // add cancel button
-        cancelButton.addActionListener(e -> executeCloseCommand());
+        cancelButton.addActionListener(e -> executeCancelCommand());
         settingsPanel.add(cancelButton);
 
         enableCropActions(false);
@@ -181,7 +177,7 @@ public class CropTool extends DragTool {
             return;
         }
 
-        if (!transformSupport.getComponentSpaceRect().contains(e.getPoint())) {
+        if (!cropBox.getRect().containsCo(e.getPoint())) {
             return;
         }
 
@@ -198,8 +194,8 @@ public class CropTool extends DragTool {
         state = state.getNextAfterMousePressed();
 
         if (state == TRANSFORM) {
-            assert transformSupport != null;
-            transformSupport.mousePressed(e);
+            assert cropBox != null;
+            cropBox.mousePressed(e);
             enableCropActions(true);
         } else if (state == USER_DRAG) {
             enableCropActions(true);
@@ -209,7 +205,7 @@ public class CropTool extends DragTool {
     @Override
     public void ongoingDrag(PMouseEvent e) {
         if (state == TRANSFORM) {
-            transformSupport.mouseDragged(e);
+            cropBox.mouseDragged(e);
         }
         e.repaint();
     }
@@ -218,7 +214,7 @@ public class CropTool extends DragTool {
     public void mouseMoved(MouseEvent e, ImageComponent ic) {
         super.mouseMoved(e, ic);
         if (state == TRANSFORM) {
-            transformSupport.mouseMoved(e, ic);
+            cropBox.mouseMoved(e, ic);
         }
     }
 
@@ -231,24 +227,22 @@ public class CropTool extends DragTool {
             case INITIAL:
                 break;
             case USER_DRAG:
-                if (transformSupport != null) {
+                if (cropBox != null) {
                     throw new IllegalStateException();
                 }
-                Rectangle2D imageSpaceRect = userDrag.toImDrag().createPositiveRect();
 
-                // TODO all the info is in the userDrag, calculate directly,
-                // without rounding errors
-                Rectangle compSpaceRect = e.getIC().fromImageToComponentSpace(imageSpaceRect);
+                Rectangle r = userDrag.toCoRect();
+                PRectangle rect = PRectangle.positiveFromCo(r, e.getIC());
 
-                transformSupport = new TransformSupport(compSpaceRect, imageSpaceRect);
+                cropBox = new CropBox(rect, e.getIC());
 
                 state = TRANSFORM;
                 break;
             case TRANSFORM:
-                if (transformSupport == null) {
+                if (cropBox == null) {
                     throw new IllegalStateException();
                 }
-                transformSupport.mouseReleased(e);
+                cropBox.mouseReleased(e);
                 break;
         }
     }
@@ -263,7 +257,7 @@ public class CropTool extends DragTool {
         if (ic != ImageComponents.getActiveIC()) {
             return;
         }
-        Rectangle2D cropRect = getCropRect();
+        PRectangle cropRect = getCropRect();
         if (cropRect == null) {
             return;
         }
@@ -274,7 +268,7 @@ public class CropTool extends DragTool {
         // here we have the cropping rectangle in image space, therefore
         // this is a good opportunity to update the width/height info
         // even if it has nothing to do with painting
-        updateSettingsPanel(cropRect);
+        updateSettingsPanel(cropRect.getIm());
 
         // paint the semi-transparent dark area outside the crop rectangle
         Shape origClip = g2.getClip();  // save for later use
@@ -290,7 +284,7 @@ public class CropTool extends DragTool {
         Rectangle2D canvasImgIntersection = canvasBounds.createIntersection(imageSpaceVisiblePart);
         Path2D darkAreaClip = new Path2D.Double(Path2D.WIND_EVEN_ODD);
         darkAreaClip.append(canvasImgIntersection, false);
-        darkAreaClip.append(cropRect, false);
+        darkAreaClip.append(cropRect.getIm(), false);
         g2.setClip(darkAreaClip);
 
         Color origColor = g2.getColor();
@@ -315,9 +309,9 @@ public class CropTool extends DragTool {
 
             // draw guidelines
             RectGuidelineType guidelineType = (RectGuidelineType) guidelinesSelector.getSelectedItem();
-            rectGuideline.draw(ic.fromImageToComponentSpace(cropRect), guidelineType, g2);
+            rectGuideline.draw(cropRect.getCo(), guidelineType, g2);
 
-            transformSupport.paintHandles(g2);
+            cropBox.paintHandles(g2);
         }
 
         g2.setClip(origClip);
@@ -347,22 +341,16 @@ public class CropTool extends DragTool {
     }
 
     /**
-     * Returns the crop rectangle in image space
+     * Returns the crop rectangle
      */
-    public Rectangle2D getCropRect() {
-        switch (state) {
-            case INITIAL:
-                lastCropRect = null;
-                break;
-            case USER_DRAG:
-                lastCropRect = userDrag.toImDrag().createPositiveRect();
-                break;
-            case TRANSFORM:
-                lastCropRect = transformSupport.getImageSpaceRect();
-                break;
+    public PRectangle getCropRect() {
+        if (state == USER_DRAG) {
+            return userDrag.toPosPRect();
+        } else if (state == TRANSFORM) {
+            return cropBox.getRect();
         }
-
-        return lastCropRect;
+        // initial state
+        return null;
     }
 
     @Override
@@ -374,7 +362,7 @@ public class CropTool extends DragTool {
     @Override
     public void resetStateToInitial() {
         ended = true;
-        transformSupport = null;
+        cropBox = null;
         state = INITIAL;
 
         enableCropActions(false);
@@ -387,8 +375,8 @@ public class CropTool extends DragTool {
     }
 
     public void icSizeChanged(ImageComponent ic) {
-        if (transformSupport != null && lastCropRect != null && state == TRANSFORM) {
-            transformSupport.setComponentSpaceRect(ic.fromImageToComponentSpace(lastCropRect));
+        if (cropBox != null && state == TRANSFORM) {
+            cropBox.icSizeChanged(ic);
         }
     }
 
@@ -397,7 +385,7 @@ public class CropTool extends DragTool {
         if (state == TRANSFORM) {
             ImageComponent ic = ImageComponents.getActiveIC();
             if (ic != null) {
-                transformSupport.arrowKeyPressed(key, ic);
+                cropBox.arrowKeyPressed(key, ic);
                 return true;
             }
         }
@@ -406,7 +394,7 @@ public class CropTool extends DragTool {
 
     @Override
     public void escPressed() {
-        executeCloseCommand();
+        executeCancelCommand();
     }
 
     private void executeCropCommand() {
@@ -419,7 +407,7 @@ public class CropTool extends DragTool {
         resetStateToInitial();
     }
 
-    private void executeCloseCommand() {
+    private void executeCancelCommand() {
         if (state != TRANSFORM) {
             return;
         }
@@ -434,7 +422,7 @@ public class CropTool extends DragTool {
             return;
         }
 
-        transformSupport.setUseAspectRatio(true);
+        cropBox.setUseAspectRatio(true);
     }
 
     @Override
@@ -443,7 +431,7 @@ public class CropTool extends DragTool {
             return;
         }
 
-        transformSupport.setUseAspectRatio(false);
+        cropBox.setUseAspectRatio(false);
     }
 
     @Override

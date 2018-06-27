@@ -22,6 +22,7 @@ import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
 
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 
 /**
@@ -42,11 +43,11 @@ public class UserDrag {
     // The coordinates in image space
     private double imStartX;
     private double imStartY;
-    private double imEndX;
-    private double imEndY;
+//    private double imEndX;
+//    private double imEndY;
 
-    private double oldImEndX;
-    private double oldImEndY;
+    private int prevCoEndX;
+    private int prevCoEndY;
 
     private ImageComponent ic;
 
@@ -83,8 +84,8 @@ public class UserDrag {
             coEndY = (int) constrainedEnd.getY();
         }
 
-        imEndX = ic.componentXToImageSpace(coEndX);
-        imEndY = ic.componentYToImageSpace(coEndY);
+//        imEndX = ic.componentXToImageSpace(coEndX);
+//        imEndY = ic.componentYToImageSpace(coEndY);
     }
 
     // returns the start x coordinate in image space
@@ -95,16 +96,6 @@ public class UserDrag {
     // returns the start y coordinate in image space
     public double getImStartY() {
         return imStartY;
-    }
-
-    // returns the end x coordinate in image space
-    public double getImEndX() {
-        return imEndX;
-    }
-
-    // returns the end y coordinate in image space
-    public double getImEndY() {
-        return imEndY;
     }
 
     // returns the start x coordinate in component space
@@ -132,6 +123,9 @@ public class UserDrag {
     }
 
     public ImDrag toImDrag() {
+        double imEndX = ic.componentXToImageSpace(coEndX);
+        double imEndY = ic.componentYToImageSpace(coEndY);
+
         ImDrag d = new ImDrag(imStartX, imStartY, imEndX, imEndY);
         d.setStartFromCenter(startFromCenter);
         return d;
@@ -146,21 +140,19 @@ public class UserDrag {
     }
 
     public void saveEndValues() {
-        oldImEndX = imEndX;
-        oldImEndY = imEndY;
-        // it is not necessary to save
-        // the component end coordinates for space-down move
+        prevCoEndX = coEndX;
+        prevCoEndY = coEndY;
     }
 
-    public void adjustStartForSpaceDownMove() {
-        double dx = imEndX - oldImEndX;
-        double dy = imEndY - oldImEndY;
+    public void adjustStartForSpaceDownDrag() {
+        int dx = coEndX - prevCoEndX;
+        int dy = coEndY - prevCoEndY;
 
-        imStartX += dx;
-        imStartY += dy;
+        coStartX += dx;
+        coStartY += dy;
 
-        // it is not necessary to update
-        // the component coordinates for space-down move
+        imStartX = ic.componentXToImageSpace(coStartX);
+        imStartY = ic.componentYToImageSpace(coStartY);
     }
 
     public void setStartFromCenter(boolean startFromCenter) {
@@ -173,6 +165,14 @@ public class UserDrag {
 
     public void setFinished(boolean finished) {
         this.finished = finished;
+    }
+
+    public Rectangle toCoRect() {
+        return new Rectangle(coStartX, coStartY, coEndX - coStartX, coEndY - coStartY);
+    }
+
+    public PRectangle toPosPRect() {
+        return PRectangle.positiveFromCo(toCoRect(), ic);
     }
 
     //    public Rectangle getAffectedStrokedRect(int thickness) {

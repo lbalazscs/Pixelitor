@@ -26,6 +26,7 @@ import pixelitor.tools.pen.AnchorPoint;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.SubPath;
 
+import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
@@ -141,5 +142,40 @@ public class ShapesTest {
         assertThat(p4).locIs(7, 2);
         assertThat(p4.ctrlOut).locIs(9.76, 2);
         assertThat(p4.ctrlIn).locIs(4.24, 2);
+    }
+
+    @Test
+    public void toPositiveRect_fromRectangle_whenWidthHeightPositive() {
+        Rectangle rect = new Rectangle(30, 40, 10, 20);
+        Rectangle rectOut = Shapes.toPositiveRect(rect);
+
+        assertThat(rectOut).isEqualTo(rect);
+    }
+
+    @Test
+    public void toPositiveRect_fromRectangle_whenWidthNegative() {
+        Rectangle rect = new Rectangle(30, 40, -10, 20);
+        Rectangle rectExcepted = new Rectangle(20, 40, 10, 20);
+
+        Rectangle rectOut = Shapes.toPositiveRect(rect);
+        assertThat(rectOut).isEqualTo(rectExcepted);
+    }
+
+    @Test
+    public void toPositiveRect_fromRectangle_whenHeightNegative() {
+        Rectangle rect = new Rectangle(30, 40, 10, -20);
+        Rectangle rectExcepted = new Rectangle(30, 20, 10, 20);
+
+        Rectangle rectOut = Shapes.toPositiveRect(rect);
+        assertThat(rectOut).isEqualTo(rectExcepted);
+    }
+
+    @Test
+    public void toPositiveRect_fromRectangle_whenWidthHeightNegative() {
+        Rectangle rect = new Rectangle(30, 40, -10, -20);
+        Rectangle rectExcepted = new Rectangle(20, 20, 10, 20);
+
+        Rectangle rectOut = Shapes.toPositiveRect(rect);
+        assertThat(rectOut).isEqualTo(rectExcepted);
     }
 }

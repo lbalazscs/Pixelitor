@@ -48,7 +48,6 @@ import java.awt.event.KeyEvent;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.ComponentColorModel;
@@ -245,83 +244,6 @@ public final class Utils {
         double offsetY = distance * Math.sin(angle);
 
         return new Point2D.Double(offsetX, offsetY);
-    }
-
-    // makes sure that the returned rectangle has positive width, height
-    public static Rectangle toPositiveRect(int x1, int x2, int y1, int y2) {
-        int topX, topY, width, height;
-
-        if (x2 >= x1) {
-            topX = x1;
-            width = x2 - x1;
-        } else {
-            topX = x2;
-            width = x1 - x2;
-        }
-
-        if (y2 >= y1) {
-            topY = y1;
-            height = y2 - y1;
-        } else {
-            topY = y2;
-            height = y1 - y2;
-        }
-
-        return new Rectangle(topX, topY, width, height);
-    }
-
-    // makes sure that the returned rectangle has positive width, height
-    public static Rectangle2D toPositiveRect(Rectangle2D input) {
-        double inX = input.getX();
-        double inY = input.getY();
-        double inWidth = input.getWidth();
-        double inHeight = input.getHeight();
-
-        if (inWidth >= 0) {
-            if (inHeight >= 0) {
-                return input; // should be the most common case
-            } else { // negative height
-                double newY = inY + inHeight;
-                return new Rectangle2D.Double(inX, newY, inWidth, -inHeight);
-            }
-        } else { // negative width
-            if (inHeight >= 0) {
-                double newX = inX + inWidth;
-                return new Rectangle2D.Double(newX, inY, -inWidth, inHeight);
-            } else { // negative height
-                double newX = inX + inWidth;
-                double newY = inY + inHeight;
-                return new Rectangle2D.Double(newX, newY, -inWidth, -inHeight);
-            }
-        }
-    }
-
-    // makes sure that the returned rectangle has positive width, height
-    public static Rectangle toPositiveRect(Rectangle rect) {
-        int width = rect.width;
-        int height = rect.height;
-
-        if (width >= 0) {
-            if (height >= 0) {
-                return rect;
-            } else {
-                rect.y += height;
-                rect.height = -height;
-                return rect;
-            }
-        } else {
-            if (height >= 0) {
-                rect.x += width;
-                rect.width = -width;
-                return rect;
-            } else {
-                rect.x += width;
-                rect.y += height;
-                rect.width = -width;
-                rect.height = -height;
-                return rect;
-            }
-        }
     }
 
     public static float parseFloat(String input, float defaultValue) {

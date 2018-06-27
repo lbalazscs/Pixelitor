@@ -46,7 +46,8 @@ public class DraggablePoint {
     // Coordinates in component space.
     // Most of the time they will be ints as they originate from
     // mouse events, but sometimes they can be floating point,
-    // for example when paths are created in other ways.
+    // for example when paths aren't created interactively,
+    // but converted from shapes.
     public double x;
     public double y;
 

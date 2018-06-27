@@ -89,7 +89,7 @@ public class ShapesTool extends DragTool {
         strokeFillModel.setSelectedItem(TwoPointBasedPaint.BACKGROUND);
         strokeFillCombo = new JComboBox<>(strokeFillModel);
 
-        spaceDragBehavior = true;
+        spaceDragStartPoint = true;
 
         // we don't want any instant feedback in the image, but
         // we want feedback as a side-effect in the stroke preview

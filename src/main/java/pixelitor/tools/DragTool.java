@@ -30,7 +30,7 @@ public abstract class DragTool extends Tool {
     protected UserDrag userDrag;
 
     private boolean endPointInitialized = false;
-    protected boolean spaceDragBehavior = false;
+    protected boolean spaceDragStartPoint = false;
 
     // subclasses will automatically support constrained
     // movement when Shift is pressed if this is set to true
@@ -53,7 +53,7 @@ public abstract class DragTool extends Tool {
 
     @Override
     public void mouseDragged(PMouseEvent e) {
-        if (spaceDragBehavior) {
+        if (spaceDragStartPoint) {
             userDrag.saveEndValues();
         }
         if (constrainIfShiftDown) {
@@ -62,9 +62,9 @@ public abstract class DragTool extends Tool {
 
         userDrag.setEnd(e);
 
-        if (spaceDragBehavior) {
+        if (spaceDragStartPoint) {
             if (endPointInitialized && GlobalKeyboardWatch.isSpaceDown()) {
-                userDrag.adjustStartForSpaceDownMove();
+                userDrag.adjustStartForSpaceDownDrag();
             }
 
             endPointInitialized = true;
