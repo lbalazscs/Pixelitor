@@ -56,7 +56,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyVetoException;
@@ -66,7 +65,7 @@ import static java.awt.Color.BLACK;
 /**
  * The GUI component that shows a composition
  */
-public class ImageComponent extends JComponent implements MouseListener, MouseMotionListener {
+public class ImageComponent extends JComponent implements MouseListener, MouseMotionListener, View {
     private double viewScale = 1.0f;
     private Canvas canvas;
     private ZoomLevel zoomLevel = ZoomLevel.Z100;
@@ -85,6 +84,9 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     // than the canvas, and the image needs to be centralized
     private double drawStartX;
     private double drawStartY;
+
+    private AffineTransform coToIm;
+    private AffineTransform imToCo;
 
     private Navigator navigator;
 
@@ -496,6 +498,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
         viewScale = newZoom.getViewScale();
         canvas.changeZooming(viewScale);
+        imToCo = null;
+        coToIm = null;
 
         Rectangle areaThatShouldBeVisible = null;
         if (frame != null) {
@@ -585,20 +589,26 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
         drawStartX = (width - canvasZoomedWidth) / 2.0;
         drawStartY = (height - canvasZoomedHeight) / 2.0;
+        imToCo = null;
+        coToIm = null;
     }
 
+    @Override
     public double componentXToImageSpace(double mouseX) {
         return ((mouseX - drawStartX) / viewScale);
     }
 
+    @Override
     public double componentYToImageSpace(double mouseY) {
         return ((mouseY - drawStartY) / viewScale);
     }
 
+    @Override
     public double imageXToComponentSpace(double x) {
         return drawStartX + x * viewScale;
     }
 
+    @Override
     public double imageYToComponentSpace(double y) {
         return drawStartY + y * viewScale;
     }
@@ -619,6 +629,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         );
     }
 
+    @Override
     public Rectangle2D fromComponentToImageSpace(Rectangle input) {
         return new Rectangle.Double(
                 componentXToImageSpace(input.x),
@@ -628,6 +639,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         );
     }
 
+    @Override
     public Rectangle fromImageToComponentSpace(Rectangle2D input) {
         return new Rectangle(
                 (int) imageXToComponentSpace(input.getX()),
@@ -637,24 +649,25 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         );
     }
 
-    // TODO untested
+    @Override
     public AffineTransform getImageToComponentTransform() {
-        AffineTransform t = new AffineTransform();
-        t.translate(drawStartX, drawStartY);
-        t.scale(viewScale, viewScale);
-        return t;
+        if (imToCo == null) {
+            imToCo = new AffineTransform();
+            imToCo.translate(drawStartX, drawStartY);
+            imToCo.scale(viewScale, viewScale);
+        }
+        return imToCo;
     }
 
-    // TODO untested
+    @Override
     public AffineTransform getComponentToImageTransform() {
-        AffineTransform inverse = null;
-        try {
-            inverse = getImageToComponentTransform().createInverse();
-        } catch (NoninvertibleTransformException e) {
-            // should not happen
-            e.printStackTrace();
+        if (coToIm == null) {
+            coToIm = new AffineTransform();
+            double s = 1.0 / viewScale;
+            coToIm.scale(s, s);
+            coToIm.translate(-drawStartX, -drawStartY);
         }
-        return inverse;
+        return coToIm;
     }
 
     /**

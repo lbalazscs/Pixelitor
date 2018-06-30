@@ -32,6 +32,7 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 import static java.awt.Color.BLACK;
@@ -300,5 +301,12 @@ public class Shapes {
                 return rect;
             }
         }
+    }
+
+    public static Point2D calcCenter(Point2D p1, Point2D p2) {
+        return new Point2D.Double(
+                (p1.getX() + p2.getX()) / 2.0,
+                (p1.getY() + p2.getY()) / 2.0
+        );
     }
 }

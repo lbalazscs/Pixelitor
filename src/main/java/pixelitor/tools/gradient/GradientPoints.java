@@ -18,6 +18,7 @@
 package pixelitor.tools.gradient;
 
 import pixelitor.gui.ImageComponent;
+import pixelitor.gui.View;
 import pixelitor.tools.DraggablePoint;
 import pixelitor.tools.ImDrag;
 import pixelitor.utils.Shapes;
@@ -82,11 +83,11 @@ public class GradientPoints {
         return imDrag;
     }
 
-    public void icResized(ImageComponent ic) {
-        assert ic == this.ic;
-        start.restoreCoordsFromImSpace(ic);
-        end.restoreCoordsFromImSpace(ic);
-        middle.restoreCoordsFromImSpace(ic);
+    public void viewSizeChanged(View view) {
+        assert view == this.ic;
+        start.restoreCoordsFromImSpace(view);
+        end.restoreCoordsFromImSpace(view);
+        middle.restoreCoordsFromImSpace(view);
     }
 
     @VisibleForTesting

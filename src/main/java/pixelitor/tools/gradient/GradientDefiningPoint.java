@@ -17,7 +17,7 @@
 
 package pixelitor.tools.gradient;
 
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.View;
 import pixelitor.tools.DraggablePoint;
 import pixelitor.utils.Utils;
 
@@ -31,8 +31,9 @@ public class GradientDefiningPoint extends DraggablePoint {
     private GradientDefiningPoint other;
     private GradientCenterPoint center;
 
-    public GradientDefiningPoint(String name, int x, int y, ImageComponent ic, Color color, Color activeColor) {
-        super(name, x, y, ic, color, activeColor);
+    public GradientDefiningPoint(String name, int x, int y,
+                                 View view, Color color, Color activeColor) {
+        super(name, x, y, view, color, activeColor);
     }
 
     public void setOther(GradientDefiningPoint other) {

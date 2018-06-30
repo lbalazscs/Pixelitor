@@ -17,7 +17,7 @@
 
 package pixelitor.tools;
 
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.View;
 import pixelitor.utils.Shapes;
 
 import java.awt.Point;
@@ -40,33 +40,41 @@ public class PRectangle {
     /**
      * Creates a {@link PRectangle} from a component-space input
      */
-    public static PRectangle fromCo(Rectangle coRect, ImageComponent ic) {
-        Rectangle2D imRect = ic.fromComponentToImageSpace(coRect);
+    public static PRectangle fromCo(Rectangle coRect, View view) {
+        Rectangle2D imRect = view.fromComponentToImageSpace(coRect);
         return new PRectangle(coRect, imRect);
     }
 
     /**
      * Creates a positive {@link PRectangle} from a component-space input
      */
-    public static PRectangle positiveFromCo(Rectangle coRect, ImageComponent ic) {
+    public static PRectangle positiveFromCo(Rectangle coRect, View view) {
         coRect = Shapes.toPositiveRect(coRect);
-        return fromCo(coRect, ic);
+        return fromCo(coRect, view);
     }
 
     /**
      * Creates a {@link PRectangle} from an image-space input
      */
-    public static PRectangle fromIm(Rectangle2D imRect, ImageComponent ic) {
-        Rectangle coRect = ic.fromImageToComponentSpace(imRect);
+    public static PRectangle fromIm(Rectangle2D imRect, View view) {
+        Rectangle coRect = view.fromImageToComponentSpace(imRect);
         return new PRectangle(coRect, imRect);
+    }
+
+    /**
+     * Creates a {@link PRectangle} from image-space input
+     */
+    public static PRectangle fromIm(double x, double y, double w, double h, View view) {
+        Rectangle2D.Double rect = new Rectangle2D.Double(x, y, w, h);
+        return fromIm(rect, view);
     }
 
     /**
      * Creates a positive {@link PRectangle} from an image-space input
      */
-    public static PRectangle positiveFromIm(Rectangle2D imRect, ImageComponent ic) {
+    public static PRectangle positiveFromIm(Rectangle2D imRect, View view) {
         imRect = Shapes.toPositiveRect(imRect);
-        return fromIm(imRect, ic);
+        return fromIm(imRect, view);
     }
 
     public Rectangle getCo() {
@@ -89,15 +97,15 @@ public class PRectangle {
         coRect = Shapes.toPositiveRect(coRect);
     }
 
-    public void icSizeChanged(ImageComponent ic) {
-        recalcCo(ic);
+    public void viewSizeChanged(View view) {
+        recalcCo(view);
     }
 
-    public void recalcCo(ImageComponent ic) {
-        coRect = ic.fromImageToComponentSpace(imRect);
+    public void recalcCo(View view) {
+        coRect = view.fromImageToComponentSpace(imRect);
     }
 
-    public void recalcIm(ImageComponent ic) {
-        imRect = ic.fromComponentToImageSpace(coRect);
+    public void recalcIm(View view) {
+        imRect = view.fromComponentToImageSpace(coRect);
     }
 }

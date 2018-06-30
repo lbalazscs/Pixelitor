@@ -17,7 +17,7 @@
 
 package pixelitor.tools.pen;
 
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.View;
 import pixelitor.tools.DraggablePoint;
 import pixelitor.utils.debug.Ansi;
 
@@ -36,8 +36,9 @@ public class ControlPoint extends DraggablePoint {
     // drifting for smooth anchors because of accumulating rounding errors
     private double rememberedDistanceFromAnchor;
 
-    public ControlPoint(String name, double x, double y, ImageComponent ic, AnchorPoint anchor, Color color, Color activeColor) {
-        super(name, x, y, ic, color, activeColor);
+    public ControlPoint(String name, double x, double y, View view,
+                        AnchorPoint anchor, Color color, Color activeColor) {
+        super(name, x, y, view, color, activeColor);
         this.anchor = anchor;
     }
 

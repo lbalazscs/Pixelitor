@@ -17,7 +17,7 @@
 
 package pixelitor.tools.pen;
 
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.View;
 import pixelitor.tools.DraggablePoint;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.Ansi;
@@ -264,11 +264,11 @@ public class SubPath {
         return closed;
     }
 
-    public void icResized(ImageComponent ic) {
+    public void viewSizeChanged(View view) {
         for (AnchorPoint point : anchorPoints) {
-            point.restoreCoordsFromImSpace(ic);
-            point.ctrlIn.restoreCoordsFromImSpace(ic);
-            point.ctrlOut.restoreCoordsFromImSpace(ic);
+            point.restoreCoordsFromImSpace(view);
+            point.ctrlIn.restoreCoordsFromImSpace(view);
+            point.ctrlOut.restoreCoordsFromImSpace(view);
         }
     }
 

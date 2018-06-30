@@ -17,39 +17,31 @@
 
 package pixelitor.tools;
 
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.View;
 import pixelitor.utils.Shapes;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.Point2D;
 
 /**
  * A point that can be dragged with the help of a handle.
  * All coordinates are in component space unless otherwise noted.
- * <p>
- * It has an API similar to the {@link Point} methods, but
- * it does not extend it in order to avoid overriding
- * all the setLocation variations in the subclasses.
+ *
+ * The x, y coordinates will be ints most of the time as they
+ * originate from mouse events, but sometimes they can be doubles,
+ * for example when paths are created in other ways.
  */
-public class DraggablePoint {
+public class DraggablePoint extends Point2D.Double {
     private static final int HANDLE_RADIUS = 5;
     private static final int HANDLE_DIAMETER = 2 * HANDLE_RADIUS;
     private static final int SHADOW_OFFSET = 1;
 
     private final String name; // used only for debugging
-
-    // Coordinates in component space.
-    // Most of the time they will be ints as they originate from
-    // mouse events, but sometimes they can be floating point,
-    // for example when paths aren't created interactively,
-    // but converted from shapes.
-    public double x;
-    public double y;
 
     // Coordinates in image space
     public double imX;
@@ -58,8 +50,8 @@ public class DraggablePoint {
     protected int dragStartX;
     protected int dragStartY;
 
-    private double origX;
-    private double origY;
+    protected double origX;
+    protected double origY;
 
     private final Color color;
     private final Color activeColor;
@@ -67,17 +59,17 @@ public class DraggablePoint {
     //    private boolean active = false;
     private static DraggablePoint activePoint = null;
 
-    protected final ImageComponent ic;
+    protected final View view;
 
     private Shape shape;
     private Shape shadow;
     private final static Composite shadowComposite = AlphaComposite.SrcOver.derive(0.7f);
 
-    public DraggablePoint(String name, double x, double y, ImageComponent ic, Color color, Color activeColor) {
+    public DraggablePoint(String name, double x, double y, View view, Color color, Color activeColor) {
         this.name = name;
         this.x = x;
         this.y = y;
-        this.ic = ic;
+        this.view = view;
 
         this.color = color;
         this.activeColor = activeColor;
@@ -85,6 +77,7 @@ public class DraggablePoint {
         calcImCoords();
     }
 
+    @Override
     public void setLocation(double x, double y) {
         setLocationOnlyForThis(x, y);
     }
@@ -189,14 +182,14 @@ public class DraggablePoint {
     }
 
     public void calcImCoords() {
-        imX = ic.componentXToImageSpace(x);
-        imY = ic.componentYToImageSpace(y);
+        imX = view.componentXToImageSpace(x);
+        imY = view.componentYToImageSpace(y);
     }
 
-    public void restoreCoordsFromImSpace(ImageComponent ic) {
-        assert this.ic == ic;
-        double newX = ic.imageXToComponentSpace(imX);
-        double newY = ic.imageYToComponentSpace(imY);
+    public void restoreCoordsFromImSpace(View view) {
+        assert this.view == view;
+        double newX = view.imageXToComponentSpace(imX);
+        double newY = view.imageYToComponentSpace(imY);
         setLocationOnlyForThis(newX, newY);
     }
 
@@ -235,6 +228,10 @@ public class DraggablePoint {
         return this.x == that.x && this.y == that.y;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public boolean samePositionAs(DraggablePoint that, double epsilon) {
         return Math.abs(this.x - that.x) < epsilon
                 && Math.abs(this.y - that.y) < epsilon;
@@ -244,6 +241,10 @@ public class DraggablePoint {
         setLocationOnlyForThis(that.x, that.y);
         this.imX = that.imX;
         this.imY = that.imY;
+    }
+
+    public Point2D getLocationCopy() {
+        return new Point2D.Double(x, y);
     }
 
     @Override
@@ -266,3 +267,4 @@ public class DraggablePoint {
         return sb;
     }
 }
+

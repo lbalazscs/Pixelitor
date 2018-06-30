@@ -157,7 +157,7 @@ public class PenTool extends Tool {
 
     @Override
     public void icSizeChanged(ImageComponent ic) {
-        path.icResized(ic);
+        path.viewSizeChanged(ic);
     }
 
     @Override

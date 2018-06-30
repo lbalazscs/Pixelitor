@@ -17,7 +17,7 @@
 
 package pixelitor.tools.pen;
 
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.View;
 import pixelitor.tools.DraggablePoint;
 import pixelitor.utils.Shapes;
 
@@ -124,9 +124,9 @@ public class Path {
         }
     }
 
-    public void icResized(ImageComponent ic) {
+    public void viewSizeChanged(View view) {
         for (SubPath sp : subPaths) {
-            sp.icResized(ic);
+            sp.viewSizeChanged(view);
         }
     }
 }

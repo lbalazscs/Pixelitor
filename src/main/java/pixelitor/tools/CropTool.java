@@ -268,7 +268,9 @@ public class CropTool extends DragTool {
         // here we have the cropping rectangle in image space, therefore
         // this is a good opportunity to update the width/height info
         // even if it has nothing to do with painting
-        updateSettingsPanel(cropRect.getIm());
+        // TODO now with PRectangle, we can find another place
+        Rectangle2D cropRectIm = cropRect.getIm();
+        updateSettingsPanel(cropRectIm);
 
         // paint the semi-transparent dark area outside the crop rectangle
         Shape origClip = g2.getClip();  // save for later use
@@ -284,7 +286,8 @@ public class CropTool extends DragTool {
         Rectangle2D canvasImgIntersection = canvasBounds.createIntersection(imageSpaceVisiblePart);
         Path2D darkAreaClip = new Path2D.Double(Path2D.WIND_EVEN_ODD);
         darkAreaClip.append(canvasImgIntersection, false);
-        darkAreaClip.append(cropRect.getIm(), false);
+
+        darkAreaClip.append(cropRectIm, false);
         g2.setClip(darkAreaClip);
 
         Color origColor = g2.getColor();
@@ -374,9 +377,10 @@ public class CropTool extends DragTool {
         ImageComponents.setCursorForAll(Cursors.DEFAULT);
     }
 
+    @Override
     public void icSizeChanged(ImageComponent ic) {
         if (cropBox != null && state == TRANSFORM) {
-            cropBox.icSizeChanged(ic);
+            cropBox.viewSizeChanged(ic);
         }
     }
 

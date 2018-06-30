@@ -18,6 +18,7 @@
 package pixelitor.transform;
 
 import pixelitor.gui.ImageComponent;
+import pixelitor.gui.View;
 import pixelitor.tools.ArrowKey;
 import pixelitor.tools.PMouseEvent;
 import pixelitor.tools.PRectangle;
@@ -42,16 +43,16 @@ public class CropBox {
     private static final int MODE_RELOCATE = 1;
     private static final int MODE_RESIZE = 2;
 
-    private final Handle upperLeft;
-    private final Handle upper;
-    private final Handle upperRight;
-    private final Handle right;
-    private final Handle left;
-    private final Handle lowerLeft;
-    private final Handle lower;
-    private final Handle lowerRight;
+    private final CropHandle upperLeft;
+    private final CropHandle upper;
+    private final CropHandle upperRight;
+    private final CropHandle right;
+    private final CropHandle left;
+    private final CropHandle lowerLeft;
+    private final CropHandle lower;
+    private final CropHandle lowerRight;
 
-    private final List<Handle> handles;
+    private final List<CropHandle> handles;
 
     private final PRectangle rect;
     private int dragStartCursorType;
@@ -73,14 +74,14 @@ public class CropBox {
     public CropBox(PRectangle rect, ImageComponent ic) {
         this.rect = rect;
 
-        upperLeft = new Handle("NW", Cursor.NW_RESIZE_CURSOR, ic);
-        upper = new Handle("N", Cursor.N_RESIZE_CURSOR, ic);
-        upperRight = new Handle("NE", Cursor.NE_RESIZE_CURSOR, ic);
-        right = new Handle("E", Cursor.E_RESIZE_CURSOR, ic);
-        left = new Handle("W", Cursor.W_RESIZE_CURSOR, ic);
-        lowerLeft = new Handle("SW", Cursor.SW_RESIZE_CURSOR, ic);
-        lower = new Handle("S", Cursor.S_RESIZE_CURSOR, ic);
-        lowerRight = new Handle("SE", Cursor.SE_RESIZE_CURSOR, ic);
+        upperLeft = new CropHandle("NW", Cursor.NW_RESIZE_CURSOR, ic);
+        upper = new CropHandle("N", Cursor.N_RESIZE_CURSOR, ic);
+        upperRight = new CropHandle("NE", Cursor.NE_RESIZE_CURSOR, ic);
+        right = new CropHandle("E", Cursor.E_RESIZE_CURSOR, ic);
+        left = new CropHandle("W", Cursor.W_RESIZE_CURSOR, ic);
+        lowerLeft = new CropHandle("SW", Cursor.SW_RESIZE_CURSOR, ic);
+        lower = new CropHandle("S", Cursor.S_RESIZE_CURSOR, ic);
+        lowerRight = new CropHandle("SE", Cursor.SE_RESIZE_CURSOR, ic);
 
         handles = Arrays.asList(upperLeft, upperRight, lowerRight, lowerLeft,
                 right, upper, lower, left);
@@ -104,16 +105,16 @@ public class CropBox {
     }
 
     private void drawHandles(Graphics2D g) {
-        for (Handle handle : handles) {
+        for (CropHandle handle : handles) {
             handle.paintHandle(g);
         }
     }
 
     private Rectangle getSelectedRectInComponentSpace() {
-        int upperLeftX = upperLeft.getX();
-        int upperRightX = upperRight.getX();
-        int upperLeftY = upperLeft.getY();
-        int lowerLeftY = lowerLeft.getY();
+        int upperLeftX = (int) upperLeft.getX();
+        int upperRightX = (int) upperRight.getX();
+        int upperLeftY = (int) upperLeft.getY();
+        int lowerLeftY = (int) lowerLeft.getY();
 
         return Shapes.toPositiveRect(upperLeftX, upperRightX, upperLeftY, lowerLeftY);
     }
@@ -125,7 +126,7 @@ public class CropBox {
      * @return true if cursor was set on any handle, false otherwise
      */
     public boolean setCursorForPoint(int x, int y, ImageComponent c) {
-        for (Handle handle : handles) {
+        for (CropHandle handle : handles) {
             if (handle.handleContains(x, y)) {
                 c.setCursor(handle.getCursor());
                 return true;
@@ -223,8 +224,8 @@ public class CropBox {
         return rect;
     }
 
-    public void icSizeChanged(ImageComponent ic) {
-        rect.icSizeChanged(ic);
+    public void viewSizeChanged(View ic) {
+        rect.viewSizeChanged(ic);
         update(rect);
     }
 

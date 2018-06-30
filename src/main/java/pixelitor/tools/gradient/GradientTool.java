@@ -213,7 +213,7 @@ public class GradientTool extends DragTool {
     @Override
     public void icSizeChanged(ImageComponent ic) {
         if (handles != null) {
-            handles.icResized(ic);
+            handles.viewSizeChanged(ic);
         }
     }
 

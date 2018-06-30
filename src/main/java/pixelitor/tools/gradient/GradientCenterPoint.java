@@ -17,7 +17,7 @@
 
 package pixelitor.tools.gradient;
 
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.View;
 import pixelitor.tools.DraggablePoint;
 import pixelitor.utils.Utils;
 
@@ -32,8 +32,13 @@ public class GradientCenterPoint extends DraggablePoint {
     private final GradientDefiningPoint start;
     private final GradientDefiningPoint end;
 
-    public GradientCenterPoint(GradientDefiningPoint start, GradientDefiningPoint end, ImageComponent ic, Color color, Color activeColor) {
-        super("center", (start.x + end.x) / 2, (start.y + end.y) / 2, ic, color, activeColor);
+    public GradientCenterPoint(GradientDefiningPoint start,
+                               GradientDefiningPoint end,
+                               View view, Color color, Color activeColor) {
+        super("center",
+                (start.x + end.x) / 2,
+                (start.y + end.y) / 2,
+                view, color, activeColor);
         this.start = start;
         this.end = end;
     }

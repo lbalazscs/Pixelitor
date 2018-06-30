@@ -17,7 +17,7 @@
 
 package pixelitor.tools.pen;
 
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.View;
 import pixelitor.tools.DraggablePoint;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.Ansi;
@@ -42,18 +42,18 @@ public class AnchorPoint extends DraggablePoint {
 
     private AnchorPointType type = SYMMETRIC;
 
-    private static final Color CURVE_COLOR = Color.WHITE;
-    private static final Color CURVE_ACTIVE_COLOR = Color.RED;
+    private static final Color ANCHOR_COLOR = Color.WHITE;
+    private static final Color ANCHOR_ACTIVE_COLOR = Color.RED;
     private static final Color CTRL_IN_COLOR = Color.WHITE;
     private static final Color CTRL_IN_ACTIVE_COLOR = Color.RED;
     private static final Color CTRL_OUT_COLOR = Color.WHITE;
     private static final Color CTRL_OUT_ACTIVE_COLOR = Color.RED;
 
-    public AnchorPoint(double x, double y, ImageComponent ic) {
-        super("anchor", x, y, ic, CURVE_COLOR, CURVE_ACTIVE_COLOR);
+    public AnchorPoint(double x, double y, View view) {
+        super("anchor", x, y, view, ANCHOR_COLOR, ANCHOR_ACTIVE_COLOR);
 
-        ctrlIn = new ControlPoint("ctrlIn", x, y, ic, this, CTRL_IN_COLOR, CTRL_IN_ACTIVE_COLOR);
-        ctrlOut = new ControlPoint("ctrlOut", x, y, ic, this, CTRL_OUT_COLOR, CTRL_OUT_ACTIVE_COLOR);
+        ctrlIn = new ControlPoint("ctrlIn", x, y, view, this, CTRL_IN_COLOR, CTRL_IN_ACTIVE_COLOR);
+        ctrlOut = new ControlPoint("ctrlOut", x, y, view, this, CTRL_OUT_COLOR, CTRL_OUT_ACTIVE_COLOR);
         ctrlIn.setSibling(ctrlOut);
         ctrlOut.setSibling(ctrlIn);
     }
@@ -206,14 +206,14 @@ public class AnchorPoint extends DraggablePoint {
                 AnchorPoint.this.retractHandles();
             }
         });
-        p.show(ic, x, y);
+        p.show((JComponent) view, x, y);
     }
 
     private void retractHandles() {
         ctrlIn.retract();
         ctrlOut.retract();
         setType(SYMMETRIC);
-        ic.repaint();
+        view.repaint();
     }
 
     public void setPath(SubPath path) {
@@ -222,7 +222,7 @@ public class AnchorPoint extends DraggablePoint {
 
     private void delete() {
         path.deletePoint(this);
-        ic.repaint();
+        view.repaint();
     }
 
     public void dump() {

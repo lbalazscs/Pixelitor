@@ -17,7 +17,7 @@
 
 package pixelitor.transform;
 
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.View;
 import pixelitor.tools.DraggablePoint;
 
 import java.awt.Color;
@@ -27,25 +27,17 @@ import java.awt.Cursor;
  * An individual handle in the {@link CropBox}
  * that can be dragged with the mouse
  */
-public class Handle extends DraggablePoint {
+public class CropHandle extends DraggablePoint {
     // All handle coordinates and sizes are in component space
 
     private final Cursor cursor;
 
-    public Handle(String name, int cursorType, ImageComponent ic) {
-        super(name, 0, 0, ic, Color.WHITE, Color.RED);
+    public CropHandle(String name, int cursorType, View view) {
+        super(name, 0, 0, view, Color.WHITE, Color.RED);
         this.cursor = Cursor.getPredefinedCursor(cursorType);
     }
 
     public Cursor getCursor() {
         return cursor;
-    }
-
-    public int getX() {
-        return (int) x;
-    }
-
-    public int getY() {
-        return (int) y;
     }
 }
