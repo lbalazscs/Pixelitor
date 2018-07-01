@@ -20,7 +20,9 @@ package pixelitor.tools.transform;
 import pixelitor.gui.View;
 import pixelitor.tools.DraggablePoint;
 import pixelitor.utils.Shapes;
+import pixelitor.utils.VisibleForTesting;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
@@ -28,18 +30,17 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * A widget that calculates an {@link AffineTransform}
+ * based on the interactive movement of handles
+ */
 public class TransformBox {
     private static final int ROT_HANDLE_DISTANCE = 20;
-
-//    /**
-//     * This transforms the original box into its current shape
-//     * in component space.
-//     */
-//    private AffineTransform coTransform = new AffineTransform();
 
     private final TransformHandle nw;
     private final TransformHandle ne;
@@ -48,7 +49,7 @@ public class TransformBox {
     private final RotationHandle rot;
     private final Consumer<AffineTransform> transformListener;
     private final List<DraggablePoint> handles;
-    private final View ic;
+    private final View view;
 
     private Point2D origNW;
     private Point2D origNE;
@@ -57,51 +58,49 @@ public class TransformBox {
 
     // the starting position of the box, corresponding to
     // the default size of the transformed object
-    private final Rectangle origRect;
+    private final Rectangle origCoRect;
+    private final Rectangle2D origImRect;
 
     private DraggablePoint activeHandle;
 
-    // the final transformation will be calculated
-    // as first a translation, then a scale, and then a rotation
-    private double tx;
-    private double ty;
-    private double scaleX;
-    private double scaleY;
     private double angle = 0.0;
     private double sin = 0.0;
     private double cos = 1.0;
-    private GeneralPath boxShape;
-    //    private AffineTransform rotate = new AffineTransform();
-//    private AffineTransform translationScale = new AffineTransform();
 
-    public TransformBox(Rectangle start, View ic,
+    // the box shape in component coordinates
+    private GeneralPath boxShape;
+
+    private boolean globalDrag = false;
+    private int globalDragStartX;
+    private int globalDragStartY;
+
+    public TransformBox(Rectangle start, View view,
                         Consumer<AffineTransform> transformListener) {
-        this.origRect = start;
-        this.ic = ic;
+        this.origCoRect = start;
+        origImRect = view.componentToImageSpace(origCoRect);
+        this.view = view;
 
         int eastX = start.x + start.width;
         int southY = start.y + start.height;
 
         nw = new TransformHandle("NW", this,
                 new Point2D.Double(start.x, start.y),
-                ic);
+                view, Color.WHITE);
         ne = new TransformHandle("NE", this,
                 new Point2D.Double(eastX, start.y),
-                ic);
+                view, Color.WHITE);
         se = new TransformHandle("SE", this,
                 new Point2D.Double(eastX, southY),
-                ic);
+                view, Color.WHITE);
         sw = new TransformHandle("SW", this,
                 new Point2D.Double(start.x, southY),
-                ic);
+                view, Color.WHITE);
 
         Point2D center = Shapes.calcCenter(ne, sw);
 
         rot = new RotationHandle("rot", this,
-                new Point2D.Double(center.getX(), ne.getY() - ROT_HANDLE_DISTANCE), ic);
+                new Point2D.Double(center.getX(), ne.getY() - ROT_HANDLE_DISTANCE), view);
         this.transformListener = transformListener;
-        nw.setOpposite(se, true);
-        ne.setOpposite(sw, true);
 
         nw.setVerNeighbor(sw, true);
         nw.setHorNeighbor(ne, true);
@@ -117,24 +116,58 @@ public class TransformBox {
     public void rotate(AffineTransform rotate) {
 //        this.rotate = rotate;
         rotateHandlePositions(rotate);
-        transformListener.accept(getCoTransform());
-        ic.repaint();
+        view.repaint();
     }
-//
-//    public void setTranslationScale(AffineTransform translationScale) {
-//        this.translationScale = translationScale;
-//        transformListener.accept(getCoTransform());
-//        ic.repaint();
-//    }
 
-    public AffineTransform getCoTransform() {
+    public AffineTransform getImTransform() {
         AffineTransform at = new AffineTransform();
-//        at.concatenate(rotate);
-//        at.concatenate(translationScale);
+
+        if (angle != 0) {
+            // rotate with origin at NW
+            at.rotate(angle, nw.imX, nw.imY);
+        }
+
+        // scale with origin at NW
+        at.translate(nw.imX, nw.imY);
+        double scaleX = calcImWidth() / origImRect.getWidth();
+        double scaleY = calcImHeight() / origImRect.getHeight();
+        at.scale(scaleX, scaleY);
+//        at.translate(-nw.imX, -nw.imY);
+//
+//        // first step: translate
+//        double tx = nw.imX - origImRect.getX();
+//        double ty = nw.imY - origImRect.getY();
+//        at.translate(tx, ty);
+
+        // the two commented out translates above merged into one
+        at.translate(-origImRect.getX(), -origImRect.getY());
+
         return at;
     }
 
-    public void prepareRotation() {
+    // calculate the width of the rotated rectangle in image space
+    private double calcImWidth() {
+        if (cos > sin) {
+            return (ne.imX - nw.imX) / cos;
+        } else {
+            // precision is better if the calculation
+            // is based on y coordinates
+            return (ne.imY - nw.imY) / sin;
+        }
+    }
+
+    // calculate the height of the rotated rectangle in image space
+    private double calcImHeight() {
+        if (cos > sin) {
+            return (sw.imY - nw.imY) / cos;
+        } else {
+            // precision is better if the calculation
+            // is based on x coordinates
+            return (nw.imX - sw.imX) / sin;
+        }
+    }
+
+    public void copyHandleLocations() {
         origNW = nw.getLocationCopy();
         origNE = ne.getLocationCopy();
         origSE = se.getLocationCopy();
@@ -147,26 +180,29 @@ public class TransformBox {
         at.transform(origSE, se);
         at.transform(origSW, sw);
 
+        handlePositionsChanged();
+    }
+
+    public void handlePositionsChanged() {
         updateRotLocation();
         updateBoxShape();
+        transformListener.accept(getImTransform());
     }
 
     public void updateRotLocation() {
         Point2D northCenter = Shapes.calcCenter(nw, ne);
-        double rotX = northCenter.getX() + ROT_HANDLE_DISTANCE * sin;
-        double rotY = northCenter.getY() - ROT_HANDLE_DISTANCE * cos;
+
+        double rotDistX = ROT_HANDLE_DISTANCE * sin;
+        double rotDistY = ROT_HANDLE_DISTANCE * cos;
+        if (calcImHeight() < 0) {
+            rotDistX *= -1;
+            rotDistY *= -1;
+        }
+
+        double rotX = northCenter.getX() + rotDistX;
+        double rotY = northCenter.getY() - rotDistY;
         rot.setLocation(new Point2D.Double(rotX, rotY));
     }
-
-//    public void applyCurrentTransform() {
-//        System.out.println("TransformBox::applyCurrentTransform: CALLED");
-//        assert draggedRotatedRect != null;
-//
-//        rotatedRect = draggedRotatedRect;
-//        draggedRotatedRect = null;
-//        coTransformSoFar.preConcatenate(currentCoTransform);
-//        currentCoTransform = null;
-//    }
 
     public void paint(Graphics2D g) {
         // paint the lines
@@ -207,18 +243,24 @@ public class TransformBox {
             handle.setActive(true);
             handle.mousePressed(x, y);
             activeHandle = handle;
-            ic.repaint();
+            view.repaint();
         } else {
             activeHandle = null;
+            if (boxShape.contains(x, y)) {
+                globalDrag = true;
+                globalDragStartX = x;
+                globalDragStartY = y;
+                copyHandleLocations();
+            }
         }
     }
 
     public void mouseDragged(MouseEvent e) {
         if (activeHandle != null) {
-            int x = e.getX();
-            int y = e.getY();
-            activeHandle.mouseDragged(x, y);
-            ic.repaint();
+            activeHandle.mouseDragged(e.getX(), e.getY());
+            view.repaint();
+        } else if (globalDrag) {
+            dragAll(e.getX(), e.getY());
         }
     }
 
@@ -227,8 +269,30 @@ public class TransformBox {
             int x = e.getX();
             int y = e.getY();
             activeHandle.mouseReleased(x, y);
-            ic.repaint();
+            if (!activeHandle.handleContains(x, y)) {
+                // we can get here if the handle has a
+                // constrained position
+                activeHandle.setActive(false);
+                activeHandle = null;
+            }
+            view.repaint();
+        } else if (globalDrag) {
+            dragAll(e.getX(), e.getY());
+            globalDrag = false;
         }
+    }
+
+    private void dragAll(int x, int y) {
+        int dx = x - globalDragStartX;
+        int dy = y - globalDragStartY;
+
+        nw.setLocation(origNW.getX() + dx, origNW.getY() + dy);
+        ne.setLocation(origNE.getX() + dx, origNE.getY() + dy);
+        se.setLocation(origSE.getX() + dx, origSE.getY() + dy);
+        sw.setLocation(origSW.getX() + dx, origSW.getY() + dy);
+
+        handlePositionsChanged();
+        view.repaint();
     }
 
     public void mouseMoved(MouseEvent e) {
@@ -238,30 +302,14 @@ public class TransformBox {
         if (handle != null) {
             handle.setActive(true);
             activeHandle = handle;
-            ic.repaint();
+            view.repaint();
         } else {
             if (activeHandle != null) {
                 activeHandle.setActive(false);
-                ic.repaint();
                 activeHandle = null;
+                view.repaint();
             }
         }
-    }
-
-    public TransformHandle getNW() {
-        return nw;
-    }
-
-    public TransformHandle getNE() {
-        return ne;
-    }
-
-    public TransformHandle getSE() {
-        return se;
-    }
-
-    public TransformHandle getSW() {
-        return sw;
     }
 
     public Point2D getCenter() {
@@ -287,5 +335,25 @@ public class TransformBox {
 
     public double getCos() {
         return cos;
+    }
+
+    @VisibleForTesting
+    public TransformHandle getNW() {
+        return nw;
+    }
+
+    @VisibleForTesting
+    public TransformHandle getNE() {
+        return ne;
+    }
+
+    @VisibleForTesting
+    public TransformHandle getSE() {
+        return se;
+    }
+
+    @VisibleForTesting
+    public TransformHandle getSW() {
+        return sw;
     }
 }

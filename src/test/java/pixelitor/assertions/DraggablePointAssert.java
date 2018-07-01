@@ -31,7 +31,7 @@ public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, D
         super(actual, DraggablePointAssert.class);
     }
 
-    public DraggablePointAssert locIs(double x, double y) {
+    public DraggablePointAssert isAt(double x, double y) {
         isNotNull();
 
         double dx = Math.abs(actual.x - x);
@@ -45,15 +45,15 @@ public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, D
         return this;
     }
 
-    public DraggablePointAssert imLocIs(double imX, double imY) {
+    public DraggablePointAssert isAtIm(double x, double y) {
         isNotNull();
 
-        double dImX = Math.abs(actual.imX - imX);
-        double dImY = Math.abs(actual.imY - imY);
+        double dImX = Math.abs(actual.imX - x);
+        double dImY = Math.abs(actual.imY - y);
         if (dImX > 2 || dImY > 2) {
             throw new AssertionError(String.format(
                     "found image coords (%.2f, %.2f) instead of the expected (%.2f, %.2f)",
-                    actual.imX, actual.imY, imX, imY));
+                    actual.imX, actual.imY, x, y));
         }
 
         return this;

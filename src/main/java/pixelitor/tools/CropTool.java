@@ -281,7 +281,7 @@ public class CropTool extends DragTool {
 
         Rectangle componentSpaceVisiblePart = ic.getVisiblePart();
         // ...but first get this to image space...
-        Rectangle2D imageSpaceVisiblePart = ic.fromComponentToImageSpace(componentSpaceVisiblePart);
+        Rectangle2D imageSpaceVisiblePart = ic.componentToImageSpace(componentSpaceVisiblePart);
         // ... and now we can intersect
         Rectangle2D canvasImgIntersection = canvasBounds.createIntersection(imageSpaceVisiblePart);
         Path2D darkAreaClip = new Path2D.Double(Path2D.WIND_EVEN_ODD);

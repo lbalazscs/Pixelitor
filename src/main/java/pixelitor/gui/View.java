@@ -21,6 +21,12 @@ import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
+/**
+ * A component that maintains a component coordinate system
+ * and an image coordinate system, and can convert between the two.
+ * The image coordinate system might be zoomed and/or translated relative
+ * to the component.
+ */
 public interface View {
     double componentXToImageSpace(double mouseX);
 
@@ -30,9 +36,9 @@ public interface View {
 
     double imageYToComponentSpace(double y);
 
-    Rectangle2D fromComponentToImageSpace(Rectangle input);
+    Rectangle2D componentToImageSpace(Rectangle input);
 
-    Rectangle fromImageToComponentSpace(Rectangle2D input);
+    Rectangle imageToComponentSpace(Rectangle2D input);
 
     AffineTransform getImageToComponentTransform();
 

@@ -23,9 +23,11 @@ import pixelitor.tools.DraggablePoint;
 import java.awt.Color;
 import java.awt.geom.Point2D;
 
+/**
+ * A corner handle of a {@link TransformBox}
+ */
 public class TransformHandle extends DraggablePoint {
     private final TransformBox box;
-    private TransformHandle opposite;
     private TransformHandle verNeighbor;
     private TransformHandle horNeighbor;
 
@@ -36,9 +38,18 @@ public class TransformHandle extends DraggablePoint {
     private double horOrigX;
     private double horOrigY;
 
-    public TransformHandle(String name, TransformBox box, Point2D pos, View ic) {
-        super(name, pos.getX(), pos.getY(), ic, Color.WHITE, Color.RED);
+    public TransformHandle(String name, TransformBox box, Point2D pos, View view, Color c) {
+        super(name, pos.getX(), pos.getY(), view, c, Color.RED);
         this.box = box;
+    }
+
+    @Override
+    public void setLocation(double x, double y) {
+        super.setLocation(x, y);
+
+        // the image space coordinates need to be updated continuously
+        // because the transform calculations are based on them
+        calcImCoords();
     }
 
     @Override
@@ -61,30 +72,23 @@ public class TransformHandle extends DraggablePoint {
         double newY = origY + dy;
         setLocation(newX, newY);
 
-        // in order to constrain the neighbors, we need the
-        // deltas in the original coordinates
+        // calculate the deltas in the original coordinate system
         double odx = dx * cos + dy * sin;
         double ody = -dx * sin + dy * cos;
 
-        // the vertical neighbor is moved by odx
+        // the vertical neighbor is moved only by odx
         verNeighbor.setLocation(verOrigX + odx * cos, verOrigY + odx * sin);
-        // the horizontal neighbor is moved by ody
+
+        // the horizontal neighbor is moved only by ody
         horNeighbor.setLocation(horOrigX - ody * sin, horOrigY + ody * cos);
 
-        box.updateRotLocation();
-        box.updateBoxShape();
+        box.handlePositionsChanged();
     }
 
     @Override
     public void mouseReleased(int x, int y) {
         super.mouseReleased(x, y);
-    }
 
-    public void setOpposite(TransformHandle opposite, boolean propagate) {
-        this.opposite = opposite;
-        if (propagate) {
-            opposite.setOpposite(this, false);
-        }
     }
 
     public void setVerNeighbor(TransformHandle verNeighbor, boolean propagate) {

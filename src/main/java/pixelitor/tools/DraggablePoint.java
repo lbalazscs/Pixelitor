@@ -186,6 +186,11 @@ public class DraggablePoint extends Point2D.Double {
         imY = view.componentYToImageSpace(y);
     }
 
+    /**
+     * This should be called when the view size or zooming changes: the
+     * component space coordinates are recalculated based on the
+     * image space coordinates so that they adapt to the view.
+     */
     public void restoreCoordsFromImSpace(View view) {
         assert this.view == view;
         double newX = view.imageXToComponentSpace(imX);

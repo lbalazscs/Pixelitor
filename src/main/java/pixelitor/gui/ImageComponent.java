@@ -630,7 +630,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     }
 
     @Override
-    public Rectangle2D fromComponentToImageSpace(Rectangle input) {
+    public Rectangle2D componentToImageSpace(Rectangle input) {
         return new Rectangle.Double(
                 componentXToImageSpace(input.x),
                 componentYToImageSpace(input.y),
@@ -640,7 +640,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     }
 
     @Override
-    public Rectangle fromImageToComponentSpace(Rectangle2D input) {
+    public Rectangle imageToComponentSpace(Rectangle2D input) {
         return new Rectangle(
                 (int) imageXToComponentSpace(input.getX()),
                 (int) imageYToComponentSpace(input.getY()),

@@ -233,11 +233,11 @@ public class TestHelper {
     public static ImageComponent createICWithoutComp() {
         ImageComponent ic = mock(ImageComponent.class);
 
-        when(ic.fromComponentToImageSpace(any())).then(returnsFirstArg());
+        when(ic.componentToImageSpace(any())).then(returnsFirstArg());
 
         // can't just return the argument because this method returns a
         // Rectangle (subclass) from a Rectangle2D (superclass)
-        when(ic.fromImageToComponentSpace(any())).thenAnswer(invocation -> {
+        when(ic.imageToComponentSpace(any())).thenAnswer(invocation -> {
             Rectangle2D in = invocation.getArgument(0);
             return new Rectangle((int) in.getX(), (int) in.getY(), (int) in.getWidth(), (int) in.getHeight());
         });

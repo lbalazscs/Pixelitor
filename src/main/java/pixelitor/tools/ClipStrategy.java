@@ -42,7 +42,7 @@ public enum ClipStrategy {
             // smaller so we have to use the view rectangle...
             Rectangle componentSpaceVisiblePart = ic.getVisiblePart();
             // ...but first get this to image space...
-            Rectangle2D imageSpaceVisiblePart = ic.fromComponentToImageSpace(componentSpaceVisiblePart);
+            Rectangle2D imageSpaceVisiblePart = ic.componentToImageSpace(componentSpaceVisiblePart);
             g.setClip(imageSpaceVisiblePart);
         }
     },

@@ -44,10 +44,17 @@ public class ImDrag {
     }
 
     public ImDrag(PPoint start, PPoint end) {
-        this.startX = start.getImX();
-        this.startY = start.getImY();
-        this.endX = end.getImX();
-        this.endY = end.getImY();
+        startX = start.getImX();
+        startY = start.getImY();
+        endX = end.getImX();
+        endY = end.getImY();
+    }
+
+    public ImDrag(Rectangle2D r) {
+        startX = r.getX();
+        startY = r.getY();
+        endX = startX + r.getWidth();
+        endY = startY + r.getHeight();
     }
 
     public double getStartX() {

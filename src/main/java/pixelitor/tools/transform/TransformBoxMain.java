@@ -19,8 +19,10 @@ package pixelitor.tools.transform;
 
 import pixelitor.gui.View;
 import pixelitor.tools.PRectangle;
+import pixelitor.tools.ShapeType;
 
 import javax.swing.*;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -28,12 +30,17 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
+/**
+ * Independent test program for a {@link TransformBox}
+ */
 public class TransformBoxMain {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(TransformBoxMain::buildGUI);
@@ -98,12 +105,14 @@ public class TransformBoxMain {
         private double viewScale = 1.0f;
         private double drawStartX;
         private double drawStartY;
-        private final int canvasWidth = 300;
-        private final int canvasHeight = 300;
+        private static final int canvasWidth = 300;
+        private static final int canvasHeight = 300;
         private final Dimension size = new Dimension(600, 400);
 
         PRectangle prect;
         TransformBox transformBox;
+
+        Shape unTransformedShape;
         Shape transformedShape;
 
         public TestView() {
@@ -116,23 +125,21 @@ public class TransformBoxMain {
             calcDrawStart();
 
             prect = PRectangle.fromIm(50, 50, 200, 100, this);
-            transformedShape = prect.getIm();
             Rectangle compSpaceRect = prect.getCo();
 
+            unTransformedShape = ShapeType.CAT.getShape(prect.toImDrag());
+            transformedShape = unTransformedShape;
             transformBox = new TransformBox(compSpaceRect, this,
-                    currCo -> {
-                        AffineTransform imToCo = getImageToComponentTransform();
-                        AffineTransform coToIm = getComponentToImageTransform();
-//                    currCo.concatenate(coToIm);
+                    at -> transformedShape =
+                            at.createTransformedShape(unTransformedShape));
 
-                        AffineTransform at = new AffineTransform();
-                        at.concatenate(coToIm); // then go back to image space
-                        at.concatenate(currCo); // then apply the component-space transform
-                        at.concatenate(imToCo); // first go to component space
-
-                        transformedShape =
-                                at.createTransformedShape(prect.getIm());
-                    });
+            addComponentListener(new ComponentAdapter() {
+                @Override
+                public void componentResized(ComponentEvent e) {
+                    transformBox.viewSizeChanged(TestView.this);
+                    repaint();
+                }
+            });
         }
 
         private void addListeners() {
@@ -168,24 +175,24 @@ public class TransformBoxMain {
 
             // set up image space
             Graphics2D g2 = (Graphics2D) g;
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
 
-//        AffineTransform origTransform = g2.getTransform();
-//        g2.translate(drawStartX, drawStartY);
-//        g2.scale(viewScale, viewScale);
-//
-//        // fill background with white
-//        g2.setColor(Color.WHITE);
-//        g2.fillRect(0, 0, canvasWidth, canvasHeight);
-//
-//
-//        // fill the shape with pink
-//        g2.setColor(new Color(255, 191, 141));
-//        g2.fill(transformedShape);
+            AffineTransform origTransform = g2.getTransform();
+            g2.translate(drawStartX, drawStartY);
+            g2.scale(viewScale, viewScale);
 
-//        g2.setTransform(origTransform);
+            // fill background with white
+            g2.setColor(Color.WHITE);
+            g2.fillRect(0, 0, canvasWidth, canvasHeight);
 
-//        g2.transform(transformBox.getTransform());
+
+            // fill the shape with pink
+            g2.setColor(new Color(255, 191, 141));
+            g2.fill(transformedShape);
+
+            g2.setTransform(origTransform);
+
             transformBox.paint(g2);
 
         }
@@ -226,7 +233,7 @@ public class TransformBoxMain {
         }
 
         @Override
-        public Rectangle2D fromComponentToImageSpace(Rectangle input) {
+        public Rectangle2D componentToImageSpace(Rectangle input) {
             return new Rectangle.Double(
                     componentXToImageSpace(input.x),
                     componentYToImageSpace(input.y),
@@ -236,7 +243,7 @@ public class TransformBoxMain {
         }
 
         @Override
-        public Rectangle fromImageToComponentSpace(Rectangle2D input) {
+        public Rectangle imageToComponentSpace(Rectangle2D input) {
             return new Rectangle(
                     (int) imageXToComponentSpace(input.getX()),
                     (int) imageYToComponentSpace(input.getY()),

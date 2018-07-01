@@ -46,14 +46,14 @@ public class GradientPointsTest {
         middle = gp.getMiddle();
 
         assertThat(start)
-                .locIs(START_X_FOR_START, START_Y_FOR_START)
-                .imLocIs(START_X_FOR_START, START_Y_FOR_START);
+                .isAt(START_X_FOR_START, START_Y_FOR_START)
+                .isAtIm(START_X_FOR_START, START_Y_FOR_START);
         assertThat(end)
-                .locIs(START_X_FOR_END, START_Y_FOR_END)
-                .imLocIs(START_X_FOR_END, START_Y_FOR_END);
+                .isAt(START_X_FOR_END, START_Y_FOR_END)
+                .isAtIm(START_X_FOR_END, START_Y_FOR_END);
         assertThat(middle)
-                .locIs(START_X_FOR_MIDDLE, START_Y_FOR_MIDDLE)
-                .imLocIs(START_X_FOR_MIDDLE, START_Y_FOR_MIDDLE);
+                .isAt(START_X_FOR_MIDDLE, START_Y_FOR_MIDDLE)
+                .isAtIm(START_X_FOR_MIDDLE, START_Y_FOR_MIDDLE);
     }
 
     @Test
@@ -69,14 +69,14 @@ public class GradientPointsTest {
         middle.mouseReleased(dragStartX + dx, dragStartY + dy);
 
         assertThat(start)
-                .locIs(START_X_FOR_START + dx, START_Y_FOR_START + dy)
-                .imLocIs(START_X_FOR_START + dx, START_Y_FOR_START + dy);
+                .isAt(START_X_FOR_START + dx, START_Y_FOR_START + dy)
+                .isAtIm(START_X_FOR_START + dx, START_Y_FOR_START + dy);
         assertThat(end)
-                .locIs(START_X_FOR_END + dx, START_Y_FOR_END + dy)
-                .imLocIs(START_X_FOR_END + dx, START_Y_FOR_END + dy);
+                .isAt(START_X_FOR_END + dx, START_Y_FOR_END + dy)
+                .isAtIm(START_X_FOR_END + dx, START_Y_FOR_END + dy);
         assertThat(middle)
-                .locIs(START_X_FOR_MIDDLE + dx, START_Y_FOR_MIDDLE + dy)
-                .imLocIs(START_X_FOR_MIDDLE + dx, START_Y_FOR_MIDDLE + dy);
+                .isAt(START_X_FOR_MIDDLE + dx, START_Y_FOR_MIDDLE + dy)
+                .isAtIm(START_X_FOR_MIDDLE + dx, START_Y_FOR_MIDDLE + dy);
     }
 
     @Test
@@ -92,14 +92,14 @@ public class GradientPointsTest {
         end.mouseReleased(dragStartX + dx, dragStartY + dy);
 
         assertThat(end)
-                .locIs(START_X_FOR_END + dx, START_Y_FOR_END + dy)
-                .imLocIs(START_X_FOR_END + dx, START_Y_FOR_END + dy);
+                .isAt(START_X_FOR_END + dx, START_Y_FOR_END + dy)
+                .isAtIm(START_X_FOR_END + dx, START_Y_FOR_END + dy);
         assertThat(start)
-                .locIs(START_X_FOR_START, START_Y_FOR_START)
-                .imLocIs(START_X_FOR_START, START_Y_FOR_START);
+                .isAt(START_X_FOR_START, START_Y_FOR_START)
+                .isAtIm(START_X_FOR_START, START_Y_FOR_START);
         assertThat(middle)
-                .locIs(START_X_FOR_MIDDLE + dx / 2, START_Y_FOR_MIDDLE + dy / 2)
-                .imLocIs(START_X_FOR_MIDDLE + dx / 2.0, START_Y_FOR_MIDDLE + dy / 2.0);
+                .isAt(START_X_FOR_MIDDLE + dx / 2, START_Y_FOR_MIDDLE + dy / 2)
+                .isAtIm(START_X_FOR_MIDDLE + dx / 2.0, START_Y_FOR_MIDDLE + dy / 2.0);
     }
 
 }

@@ -54,16 +54,16 @@ public class PathBuilderTest {
         assertThat(sp).numPointsIs(1);
         AnchorPoint firstAnchorPoint = sp.getPoint(0);
         assertThat(firstAnchorPoint)
-                .locIs(10, 10)
-                .imLocIs(10, 10);
+                .isAt(10, 10)
+                .isAtIm(10, 10);
         pb.paint(g);
 
         // drag towards right
         pb.mouseDragged(createPMouseEvent(20, 10));
         pb.assertStateIs(DRAGGING_THE_CONTROL_OF_LAST);
         assertThat(firstAnchorPoint.ctrlOut)
-                .locIs(20, 10)
-                .imLocIs(10, 10);
+                .isAt(20, 10)
+                .isAtIm(10, 10);
 
         pb.paint(g);
         pb.mouseDragged(createPMouseEvent(30, 10));
@@ -80,8 +80,8 @@ public class PathBuilderTest {
         assertThat(sp).numPointsIs(1);
         pb.paint(g);
         assertThat(firstAnchorPoint.ctrlOut)
-                .locIs(50, 10)
-                .imLocIs(50, 10);
+                .isAt(50, 10)
+                .isAtIm(50, 10);
 
         // move down towards the second path point
         pb.mouseMoved(createMouseEvent(50, 20), ic);
@@ -102,8 +102,8 @@ public class PathBuilderTest {
         pb.paint(g);
         AnchorPoint secondPoint = sp.getPoint(1);
         assertThat(secondPoint)
-                .locIs(50, 50)
-                .imLocIs(50, 50);
+                .isAt(50, 50)
+                .isAtIm(50, 50);
 
         // drag towards right to drag out the control points
         pb.mouseDragged(createPMouseEvent(60, 50));
@@ -123,8 +123,8 @@ public class PathBuilderTest {
         assertThat(sp).numPointsIs(2);
         pb.paint(g);
         assertThat(secondPoint.ctrlOut)
-                .locIs(90, 50)
-                .imLocIs(90, 50);
+                .isAt(90, 50)
+                .isAtIm(90, 50);
 
         // move up towards the next path point
         pb.mouseMoved(createMouseEvent(90, 40), ic);
@@ -140,8 +140,8 @@ public class PathBuilderTest {
         assertThat(sp).numPointsIs(3);
         AnchorPoint thirdPoint = sp.getPoint(2);
         assertThat(thirdPoint)
-                .locIs(90, 10)
-                .imLocIs(90, 10);
+                .isAt(90, 10)
+                .isAtIm(90, 10);
 
         // drag to the right to finalize the control points of the third point
         pb.mouseDragged(createPMouseEvent(100, 10));
@@ -150,8 +150,8 @@ public class PathBuilderTest {
         pb.mouseReleased(createPMouseEvent(120, 10)); // finalized
         assertThat(sp).numPointsIs(3);
         assertThat(thirdPoint.ctrlOut)
-                .locIs(120, 10)
-                .imLocIs(120, 10);
+                .isAt(120, 10)
+                .isAtIm(120, 10);
 
         // move towards the starting point (10, 10)
         // in order to close

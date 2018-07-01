@@ -87,22 +87,22 @@ public class ShapesTest {
                 .isClosed();
 
         AnchorPoint p1 = sp.getPoint(0);
-        assertThat(p1).locIs(2, 2);
+        assertThat(p1).isAt(2, 2);
         assertThat(p1.ctrlOut).isRetracted();
         assertThat(p1.ctrlIn).isRetracted();
 
         AnchorPoint p2 = sp.getPoint(1);
-        assertThat(p2).locIs(12, 2);
+        assertThat(p2).isAt(12, 2);
         assertThat(p2.ctrlOut).isRetracted();
         assertThat(p2.ctrlIn).isRetracted();
 
         AnchorPoint p3 = sp.getPoint(2);
-        assertThat(p3).locIs(12, 12);
+        assertThat(p3).isAt(12, 12);
         assertThat(p3.ctrlOut).isRetracted();
         assertThat(p3.ctrlIn).isRetracted();
 
         AnchorPoint p4 = sp.getPoint(3);
-        assertThat(p4).locIs(2, 12);
+        assertThat(p4).isAt(2, 12);
         assertThat(p4.ctrlOut).isRetracted();
         assertThat(p4.ctrlIn).isRetracted();
     }
@@ -123,25 +123,25 @@ public class ShapesTest {
 
         AnchorPoint p1 = sp.getPoint(0);
         assertThat(p1)
-                .locIs(12, 7)
+                .isAt(12, 7)
                 .anchorPointTypeIs(SMOOTH);
-        assertThat(p1.ctrlOut).locIs(12, 9.76);
-        assertThat(p1.ctrlIn).locIs(12, 4.24);
+        assertThat(p1.ctrlOut).isAt(12, 9.76);
+        assertThat(p1.ctrlIn).isAt(12, 4.24);
 
         AnchorPoint p2 = sp.getPoint(1);
-        assertThat(p2).locIs(7, 12);
-        assertThat(p2.ctrlOut).locIs(4.24, 12.00);
-        assertThat(p2.ctrlIn).locIs(9.76, 12);
+        assertThat(p2).isAt(7, 12);
+        assertThat(p2.ctrlOut).isAt(4.24, 12.00);
+        assertThat(p2.ctrlIn).isAt(9.76, 12);
 
         AnchorPoint p3 = sp.getPoint(2);
-        assertThat(p3).locIs(2, 7);
-        assertThat(p3.ctrlOut).locIs(2, 4.24);
-        assertThat(p3.ctrlIn).locIs(2, 9.76);
+        assertThat(p3).isAt(2, 7);
+        assertThat(p3.ctrlOut).isAt(2, 4.24);
+        assertThat(p3.ctrlIn).isAt(2, 9.76);
 
         AnchorPoint p4 = sp.getPoint(3);
-        assertThat(p4).locIs(7, 2);
-        assertThat(p4.ctrlOut).locIs(9.76, 2);
-        assertThat(p4.ctrlIn).locIs(4.24, 2);
+        assertThat(p4).isAt(7, 2);
+        assertThat(p4.ctrlOut).isAt(9.76, 2);
+        assertThat(p4.ctrlIn).isAt(4.24, 2);
     }
 
     @Test

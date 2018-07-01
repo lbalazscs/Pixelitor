@@ -25,7 +25,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
 /**
- * The handle that can be used to rotate a transform box
+ * The handle that can be used to rotate a {@link TransformBox}
  */
 public class RotationHandle extends DraggablePoint {
     private final TransformBox box;
@@ -46,8 +46,10 @@ public class RotationHandle extends DraggablePoint {
 
         cx = c.getX();
         cy = c.getY();
-        box.prepareRotation();
-        rotStartAngle = angle;
+        box.copyHandleLocations();
+
+        // recalculate because a flipping might have occurred
+        rotStartAngle = Math.atan2(this.y - cy, this.x - cx) + Math.PI / 2;
     }
 
     @Override

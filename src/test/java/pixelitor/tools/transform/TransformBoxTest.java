@@ -26,18 +26,22 @@ import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
+import static org.junit.Assert.assertEquals;
+import static pixelitor.assertions.PixelitorAssertions.assertThat;
+
 public class TransformBoxTest {
     private Rectangle originalRect = new Rectangle(200, 100, 200, 100);
-    private View ic;
+    private View view;
 
     @Before
     public void setUp() throws Exception {
-        ic = TestHelper.createICWithoutComp();
+        view = TestHelper.createICWithoutComp();
     }
 
     @Test
     public void moveNWFromInitialState() {
-        TransformBox box = new TransformBox(originalRect, ic, at -> {
+        TransformBox box = new TransformBox(originalRect,
+                view, at -> {
         });
         TransformHandle nw = box.getNW();
         TransformHandle sw = box.getSW();
@@ -45,44 +49,44 @@ public class TransformBoxTest {
         TransformHandle se = box.getSE();
 
         // check the handles original state
-        assertHandleIsAt(nw, 200, 100);
-        assertHandleIsAt(sw, 200, 200);
-        assertHandleIsAt(ne, 400, 100);
-        assertHandleIsAt(se, 400, 200);
+        assertThat(nw).isAt(200, 100);
+        assertThat(sw).isAt(200, 200);
+        assertThat(ne).isAt(400, 100);
+        assertThat(se).isAt(400, 200);
 
         nw.mousePressed(202, 100);
         nw.mouseDragged(222, 100); // dragged 20 pixels horizontally to the right
 
-        // check that both SW and SW moved
-        assertHandleIsAt(nw, 220, 100);
-        assertHandleIsAt(sw, 220, 200);
+        // check that both NW and SW moved
+        assertThat(nw).isAt(220, 100);
+        assertThat(sw).isAt(220, 200);
         // and the other two didn't move
-        assertHandleIsAt(ne, 400, 100);
-        assertHandleIsAt(se, 400, 200);
+        assertThat(ne).isAt(400, 100);
+        assertThat(se).isAt(400, 200);
 
         // drag additional 20 pixels to the right, but also 10 pixels down
         nw.mouseDragged(242, 110);
+        nw.mouseReleased(242, 110);
 
         // check that NW followed the mouse
-        assertHandleIsAt(nw, 240, 110);
+        assertThat(nw).isAt(240, 110);
         // and SW moved only horizontally
-        assertHandleIsAt(sw, 240, 200);
+        assertThat(sw).isAt(240, 200);
         // and NE moved only vertically
-        assertHandleIsAt(ne, 400, 110);
+        assertThat(ne).isAt(400, 110);
         // and SE didn't move at all
-        assertHandleIsAt(se, 400, 200);
+        assertThat(se).isAt(400, 200);
 
         // check that the transform behaves like the handles
-// TODO
-//        AffineTransform at = box.getCoTransform();
-//        checkTransform(at,
-//                new Rectangle(200, 100, 200, 100),
-//                new Rectangle(240, 110, 160, 90));
+        AffineTransform at = box.getImTransform();
+        checkTransform(at,
+                new Rectangle(200, 100, 200, 100),
+                new Rectangle(240, 110, 160, 90));
     }
 
     @Test
     public void moveSEFromInitialState() {
-        TransformBox box = new TransformBox(originalRect, ic, at -> {
+        TransformBox box = new TransformBox(originalRect, view, at -> {
         });
         TransformHandle nw = box.getNW();
         TransformHandle sw = box.getSW();
@@ -90,49 +94,134 @@ public class TransformBoxTest {
         TransformHandle se = box.getSE();
 
         // check the handles original state
-        assertHandleIsAt(nw, 200, 100);
-        assertHandleIsAt(sw, 200, 200);
-        assertHandleIsAt(ne, 400, 100);
-        assertHandleIsAt(se, 400, 200);
+        assertThat(nw).isAt(200, 100);
+        assertThat(sw).isAt(200, 200);
+        assertThat(ne).isAt(400, 100);
+        assertThat(se).isAt(400, 200);
 
         se.mousePressed(402, 202);
         se.mouseDragged(382, 202); // dragged 20 pixels horizontally to the left
 
         // check that both SE and NE moved
-        assertHandleIsAt(se, 380, 200);
-        assertHandleIsAt(ne, 380, 100);
+        assertThat(se).isAt(380, 200);
+        assertThat(ne).isAt(380, 100);
         // and the other two didn't move
-        assertHandleIsAt(nw, 200, 100);
-        assertHandleIsAt(sw, 200, 200);
+        assertThat(nw).isAt(200, 100);
+        assertThat(sw).isAt(200, 200);
 
         // drag additional 20 pixels to the left, but also 10 pixels up
         se.mouseDragged(362, 192);
+        se.mouseReleased(362, 192);
 
         // check that SE followed the mouse
-        assertHandleIsAt(se, 360, 190);
+        assertThat(se).isAt(360, 190);
         // and NE moved only horizontally
-        assertHandleIsAt(ne, 360, 100);
+        assertThat(ne).isAt(360, 100);
         // and SW moved only vertically
-        assertHandleIsAt(sw, 200, 190);
+        assertThat(sw).isAt(200, 190);
         // and NW didn't move at all
-        assertHandleIsAt(nw, 200, 100);
+        assertThat(nw).isAt(200, 100);
 
         // check that the transform behaves like the handles
-// TODO
-//        AffineTransform at = box.getCoTransform();
-//        checkTransform(at,
-//                new Rectangle(200, 100, 200, 100),
-//                new Rectangle(200, 100, 160, 90));
+        AffineTransform at = box.getImTransform();
+        checkTransform(at,
+                new Rectangle(200, 100, 200, 100),
+                new Rectangle(200, 100, 160, 90));
+    }
+
+    @Test
+    public void pureTranslation() {
+        TransformBox box = new TransformBox(originalRect,
+                view, at -> {
+        });
+        TransformHandle nw = box.getNW();
+        TransformHandle sw = box.getSW();
+        TransformHandle ne = box.getNE();
+        TransformHandle se = box.getSE();
+
+        // check the handles original state
+        assertThat(nw).isAt(200, 100);
+        assertThat(sw).isAt(200, 200);
+        assertThat(ne).isAt(400, 100);
+        assertThat(se).isAt(400, 200);
+
+        // translate NW by 30, 20
+        nw.mousePressed(200, 100);
+        nw.mouseDragged(210, 110);
+        nw.mouseDragged(220, 115);
+        nw.mouseReleased(230, 120);
+
+        // also translate SE by the same amount (30, 20)
+        se.mousePressed(400, 200);
+        se.mouseDragged(415, 210);
+        se.mouseDragged(430, 220);
+        se.mouseReleased(430, 220);
+
+        AffineTransform at = box.getImTransform();
+        // should be a pure (30, 20) translation and nothing else
+        assertEquals(AffineTransform.TYPE_TRANSLATION, at.getType());
+        checkTransform(at, 100, 100, 130, 120);
+    }
+
+    @Test
+    public void pureScaling() {
+        TransformBox box = new TransformBox(originalRect,
+                view, at -> {
+        });
+        TransformHandle nw = box.getNW();
+        TransformHandle sw = box.getSW();
+        TransformHandle ne = box.getNE();
+        TransformHandle se = box.getSE();
+
+        // check the handles original state
+        assertThat(nw).isAt(200, 100).isAtIm(200, 100);
+        assertThat(sw).isAt(200, 200).isAtIm(200, 200);
+        assertThat(ne).isAt(400, 100).isAtIm(400, 100);
+        assertThat(se).isAt(400, 200).isAtIm(400, 200);
+
+        // translate SE from 400, 200 to 600, 400
+        // so that the width becomes 200->400, (xScale = 2)
+        // and the height becomes 100->300 (yScale = 3)
+        se.mousePressed(400, 200);
+        se.mouseDragged(500, 250);
+        se.mouseDragged(600, 300);
+        se.mouseReleased(600, 400);
+
+        assertThat(se).isAt(600, 400).isAtIm(600, 400);
+        assertThat(ne).isAt(600, 100).isAtIm(600, 100);
+
+        AffineTransform at = box.getImTransform();
+        // check that a point at NE does not move...
+        checkTransform(at, 200, 100, 200, 100);
+        // ...and that a point at SE transforms like SE
+        checkTransform(at, 400, 200, 600, 400);
+    }
+
+    @Test
+    public void pureRotation() {
+    }
+
+    private void checkTransform(AffineTransform at, double startX, double startY,
+                                double expectedX, double expectedY) {
+        checkTransform(at,
+                new Point2D.Double(startX, startY),
+                new Point2D.Double(expectedX, expectedY));
+    }
+
+    private void checkTransform(AffineTransform at, Point2D start, Point2D expected) {
+        Point2D found = at.transform(start, null);
+        if (!found.equals(expected)) {
+            throw new AssertionError(String.format(
+                    "Expected (%.1f, %.1f), found (%.1f, %.1f)",
+                    expected.getX(), expected.getY(),
+                    found.getX(), found.getY()));
+        }
     }
 
     private void checkTransform(AffineTransform at, Rectangle start, Rectangle end) {
         Point2D.Double topLeftStart = new Point2D.Double(start.x, start.y);
         Point2D.Double topLeftExpected = new Point2D.Double(end.x, end.y);
-        Point2D transformedTopLeft = at.transform(topLeftStart, null);
-        if (!transformedTopLeft.equals(topLeftExpected)) {
-            throw new AssertionError("Expected top left " + topLeftExpected
-                    + ", found " + transformedTopLeft);
-        }
+        checkTransform(at, topLeftStart, topLeftExpected);
 
         Point2D.Double bottomRightStart = new Point2D.Double(
                 start.x + start.width,
@@ -140,19 +229,6 @@ public class TransformBoxTest {
         Point2D.Double bottomRightExpected = new Point2D.Double(
                 end.x + end.width,
                 end.y + end.height);
-        Point2D transformedBottomRight = at.transform(bottomRightStart, null);
-        if (!transformedBottomRight.equals(bottomRightExpected)) {
-            throw new AssertionError("Expected bottom right " + bottomRightExpected
-                    + ", found " + transformedBottomRight);
-        }
-    }
-
-    private void assertHandleIsAt(TransformHandle th, double x, double y) {
-        if (Math.abs(th.x - x) > 0.1 || Math.abs(th.y - y) > 0.1) {
-            System.out.printf("TransformBoxTest::assertHandleIsAt: x = %.2f, y = %.2f%n", x, y);
-            throw new AssertionError(String.format(
-                    "For the handle %s expected pos (%.2f, %.2f), found (%.2f, %.2f)",
-                    th.getName(), x, y, th.x, th.y));
-        }
+        checkTransform(at, bottomRightStart, bottomRightExpected);
     }
 }

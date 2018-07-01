@@ -41,7 +41,7 @@ public class PRectangle {
      * Creates a {@link PRectangle} from a component-space input
      */
     public static PRectangle fromCo(Rectangle coRect, View view) {
-        Rectangle2D imRect = view.fromComponentToImageSpace(coRect);
+        Rectangle2D imRect = view.componentToImageSpace(coRect);
         return new PRectangle(coRect, imRect);
     }
 
@@ -57,7 +57,7 @@ public class PRectangle {
      * Creates a {@link PRectangle} from an image-space input
      */
     public static PRectangle fromIm(Rectangle2D imRect, View view) {
-        Rectangle coRect = view.fromImageToComponentSpace(imRect);
+        Rectangle coRect = view.imageToComponentSpace(imRect);
         return new PRectangle(coRect, imRect);
     }
 
@@ -102,10 +102,14 @@ public class PRectangle {
     }
 
     public void recalcCo(View view) {
-        coRect = view.fromImageToComponentSpace(imRect);
+        coRect = view.imageToComponentSpace(imRect);
     }
 
     public void recalcIm(View view) {
-        imRect = view.fromComponentToImageSpace(coRect);
+        imRect = view.componentToImageSpace(coRect);
+    }
+
+    public ImDrag toImDrag() {
+        return new ImDrag(imRect);
     }
 }
