@@ -30,6 +30,8 @@ import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.CloneBrush;
 import pixelitor.tools.brushes.CopyBrushType;
+import pixelitor.tools.util.PMouseEvent;
+import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Mirror;

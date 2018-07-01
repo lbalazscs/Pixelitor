@@ -17,7 +17,7 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.tools.PPoint;
+import pixelitor.tools.util.PPoint;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;

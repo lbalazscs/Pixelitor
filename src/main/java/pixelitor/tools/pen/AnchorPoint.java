@@ -18,7 +18,7 @@
 package pixelitor.tools.pen;
 
 import pixelitor.gui.View;
-import pixelitor.tools.DraggablePoint;
+import pixelitor.tools.util.DraggablePoint;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.Ansi;
 

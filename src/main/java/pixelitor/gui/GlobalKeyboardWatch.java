@@ -18,9 +18,9 @@
 package pixelitor.gui;
 
 import pixelitor.menus.view.ShowHideAllAction;
-import pixelitor.tools.ArrowKey;
-import pixelitor.tools.KeyListener;
 import pixelitor.tools.Tools;
+import pixelitor.tools.util.ArrowKey;
+import pixelitor.tools.util.KeyListener;
 
 import javax.swing.*;
 import java.awt.AWTEvent;

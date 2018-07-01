@@ -16,10 +16,10 @@
  */
 package pixelitor.tools.gradient;
 
-import pixelitor.tools.ImDrag;
 import pixelitor.tools.gradient.paints.AngleGradientPaint;
 import pixelitor.tools.gradient.paints.DiamondGradientPaint;
 import pixelitor.tools.gradient.paints.SpiralGradientPaint;
+import pixelitor.tools.util.ImDrag;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;

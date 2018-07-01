@@ -18,7 +18,7 @@
 package pixelitor.tools.transform;
 
 import pixelitor.gui.View;
-import pixelitor.tools.DraggablePoint;
+import pixelitor.tools.util.DraggablePoint;
 
 import java.awt.Color;
 import java.awt.geom.AffineTransform;

@@ -18,7 +18,7 @@
 package pixelitor.tools.gradient;
 
 import pixelitor.gui.View;
-import pixelitor.tools.DraggablePoint;
+import pixelitor.tools.util.DraggablePoint;
 import pixelitor.utils.Utils;
 
 import java.awt.Color;

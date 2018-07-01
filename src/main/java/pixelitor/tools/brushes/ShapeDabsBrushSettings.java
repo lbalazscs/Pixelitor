@@ -17,7 +17,7 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.tools.ShapeType;
+import pixelitor.tools.shapes.ShapeType;
 
 import javax.swing.*;
 

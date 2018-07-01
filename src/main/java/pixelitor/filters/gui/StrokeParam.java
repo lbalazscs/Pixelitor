@@ -20,11 +20,11 @@ package pixelitor.filters.gui;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.OKDialog;
-import pixelitor.tools.ShapeType;
-import pixelitor.tools.StrokeType;
-import pixelitor.tools.shapestool.BasicStrokeCap;
-import pixelitor.tools.shapestool.BasicStrokeJoin;
-import pixelitor.tools.shapestool.StrokeSettingsPanel;
+import pixelitor.tools.shapes.BasicStrokeCap;
+import pixelitor.tools.shapes.BasicStrokeJoin;
+import pixelitor.tools.shapes.ShapeType;
+import pixelitor.tools.shapes.StrokeSettingsPanel;
+import pixelitor.tools.shapes.StrokeType;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;

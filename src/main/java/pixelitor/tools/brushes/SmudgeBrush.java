@@ -18,7 +18,7 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.colors.FgBgColors;
-import pixelitor.tools.PPoint;
+import pixelitor.tools.util.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.AlphaComposite;

@@ -17,8 +17,8 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.tools.PPoint;
-import pixelitor.tools.StrokeType;
+import pixelitor.tools.shapes.StrokeType;
+import pixelitor.tools.util.PPoint;
 
 import java.awt.BasicStroke;
 import java.awt.Stroke;

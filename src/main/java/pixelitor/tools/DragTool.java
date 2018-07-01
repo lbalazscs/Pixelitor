@@ -18,6 +18,8 @@
 package pixelitor.tools;
 
 import pixelitor.gui.GlobalKeyboardWatch;
+import pixelitor.tools.util.PMouseEvent;
+import pixelitor.tools.util.UserDrag;
 
 import java.awt.Cursor;
 

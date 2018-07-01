@@ -29,6 +29,8 @@ import pixelitor.TestHelper;
 import pixelitor.gui.ImageComponent;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.Brush;
+import pixelitor.tools.gui.ToolSettingsPanel;
+import pixelitor.tools.util.PPoint;
 
 import java.awt.Rectangle;
 import java.util.Arrays;

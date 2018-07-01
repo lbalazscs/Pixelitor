@@ -21,7 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import pixelitor.TestHelper;
 import pixelitor.gui.ImageComponent;
-import pixelitor.tools.PMouseEvent;
+import pixelitor.tools.util.PMouseEvent;
 
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;

@@ -17,7 +17,7 @@
 
 package pixelitor.tools.gradient.paints;
 
-import pixelitor.tools.ImDrag;
+import pixelitor.tools.util.ImDrag;
 
 import java.awt.Color;
 import java.awt.MultipleGradientPaint.CycleMethod;

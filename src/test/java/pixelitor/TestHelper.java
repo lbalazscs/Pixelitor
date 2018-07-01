@@ -35,8 +35,8 @@ import pixelitor.testutils.WithTranslation;
 import pixelitor.tools.Alt;
 import pixelitor.tools.Ctrl;
 import pixelitor.tools.MouseButton;
-import pixelitor.tools.PMouseEvent;
 import pixelitor.tools.Shift;
+import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Messages;
 import pixelitor.utils.test.Assertions;
 

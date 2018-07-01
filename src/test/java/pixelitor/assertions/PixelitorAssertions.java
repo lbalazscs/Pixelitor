@@ -22,8 +22,8 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.filters.RandomFilterSource;
 import pixelitor.selection.Selection;
-import pixelitor.tools.DraggablePoint;
 import pixelitor.tools.pen.SubPath;
+import pixelitor.tools.util.DraggablePoint;
 
 @SuppressWarnings("ExtendsUtilityClass")
 public class PixelitorAssertions extends Assertions {

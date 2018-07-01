@@ -19,9 +19,9 @@ package pixelitor.tools.brushes;
 
 import pixelitor.Composition;
 import pixelitor.tools.BrushType;
-import pixelitor.tools.PPoint;
 import pixelitor.tools.Symmetry;
 import pixelitor.tools.Tool;
+import pixelitor.tools.util.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Graphics2D;

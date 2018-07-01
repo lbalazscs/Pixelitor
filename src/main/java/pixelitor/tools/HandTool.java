@@ -17,6 +17,7 @@
 
 package pixelitor.tools;
 
+import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 
 /**

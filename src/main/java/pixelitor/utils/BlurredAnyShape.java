@@ -18,8 +18,8 @@
 package pixelitor.utils;
 
 import com.jhlabs.image.BoxBlurFilter;
-import pixelitor.tools.ImDrag;
-import pixelitor.tools.ShapeType;
+import pixelitor.tools.shapes.ShapeType;
+import pixelitor.tools.util.ImDrag;
 
 import java.awt.Color;
 import java.awt.Graphics2D;

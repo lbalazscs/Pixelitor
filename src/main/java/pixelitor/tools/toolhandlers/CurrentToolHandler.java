@@ -17,8 +17,8 @@
 
 package pixelitor.tools.toolhandlers;
 
-import pixelitor.tools.PMouseEvent;
 import pixelitor.tools.Tool;
+import pixelitor.tools.util.PMouseEvent;
 
 /**
  * At the end of a {@link ToolHandler} chain there is always a

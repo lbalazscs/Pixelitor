@@ -20,9 +20,12 @@ package pixelitor.tools;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.tools.crop.CropTool;
 import pixelitor.tools.gradient.GradientTool;
+import pixelitor.tools.gui.ToolSettingsPanelContainer;
 import pixelitor.tools.pen.PenTool;
-import pixelitor.tools.shapestool.ShapesTool;
+import pixelitor.tools.shapes.ShapesTool;
+import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.ActiveImageChangeListener;
 
 import java.awt.event.MouseEvent;
@@ -52,7 +55,7 @@ public class Tools {
     public static final HandTool HAND = new HandTool();
     public static final ZoomTool ZOOM = new ZoomTool();
 
-    static Tool currentTool = BRUSH;
+    public static Tool currentTool = BRUSH;
 
     static {
         ImageComponents.addActiveImageChangeListener(new ActiveImageChangeListener() {

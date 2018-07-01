@@ -19,7 +19,7 @@ package pixelitor.tools.brushes;
 
 import pixelitor.Composition;
 import pixelitor.tools.AbstractBrushTool;
-import pixelitor.tools.PPoint;
+import pixelitor.tools.util.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Graphics2D;

@@ -19,6 +19,9 @@ package pixelitor.tools;
 
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponents;
+import pixelitor.tools.util.ArrowKey;
+import pixelitor.tools.util.ImDrag;
+import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 
 /**

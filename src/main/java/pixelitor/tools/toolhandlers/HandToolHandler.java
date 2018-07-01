@@ -19,8 +19,8 @@ package pixelitor.tools.toolhandlers;
 
 import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.ImageComponents;
-import pixelitor.tools.PMouseEvent;
 import pixelitor.tools.Tools;
+import pixelitor.tools.util.PMouseEvent;
 
 import java.awt.Cursor;
 

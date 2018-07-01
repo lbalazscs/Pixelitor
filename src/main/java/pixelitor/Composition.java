@@ -44,7 +44,7 @@ import pixelitor.layers.MaskViewMode;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.selection.SelectionInteraction;
-import pixelitor.tools.PPoint;
+import pixelitor.tools.util.PPoint;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 

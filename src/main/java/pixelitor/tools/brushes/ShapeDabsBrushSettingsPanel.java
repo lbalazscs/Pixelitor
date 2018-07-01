@@ -21,7 +21,7 @@ import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.tools.ShapeType;
+import pixelitor.tools.shapes.ShapeType;
 
 import javax.swing.*;
 import java.awt.GridBagLayout;

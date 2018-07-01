@@ -20,6 +20,8 @@ package pixelitor.tools;
 import pixelitor.colors.ColorUtils;
 import pixelitor.colors.FgBgColors;
 import pixelitor.layers.Drawable;
+import pixelitor.tools.util.PMouseEvent;
+import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Cursors;
 
 import java.awt.Color;

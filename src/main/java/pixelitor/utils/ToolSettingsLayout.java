@@ -17,7 +17,7 @@
 
 package pixelitor.utils;
 
-import pixelitor.tools.ToolSettingsPanel;
+import pixelitor.tools.gui.ToolSettingsPanel;
 
 import java.awt.Component;
 import java.awt.Container;

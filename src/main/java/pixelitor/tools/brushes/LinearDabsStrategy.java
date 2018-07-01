@@ -17,7 +17,7 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.tools.PPoint;
+import pixelitor.tools.util.PPoint;
 
 /**
  * The simplest dabs strategy: it places the dabs along the lines

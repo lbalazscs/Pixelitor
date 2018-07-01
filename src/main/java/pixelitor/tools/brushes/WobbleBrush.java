@@ -18,8 +18,8 @@
 package pixelitor.tools.brushes;
 
 import com.jhlabs.awt.WobbleStroke;
-import pixelitor.tools.PPoint;
-import pixelitor.tools.StrokeType;
+import pixelitor.tools.shapes.StrokeType;
+import pixelitor.tools.util.PPoint;
 
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;

@@ -22,7 +22,12 @@ import pixelitor.Composition;
 import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.tools.gui.ToolButton;
+import pixelitor.tools.gui.ToolSettingsPanel;
 import pixelitor.tools.toolhandlers.ToolHandlerChain;
+import pixelitor.tools.util.ArrowKey;
+import pixelitor.tools.util.KeyListener;
+import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
 
@@ -81,7 +86,7 @@ public abstract class Tool implements KeyListener {
         // empty for the convenience of subclasses
     }
 
-    void setButton(ToolButton toolButton) {
+    public void setButton(ToolButton toolButton) {
         this.toolButton = toolButton;
     }
 
@@ -95,7 +100,7 @@ public abstract class Tool implements KeyListener {
         return name;
     }
 
-    protected String getIconFileName() {
+    public String getIconFileName() {
         return iconFileName;
     }
 

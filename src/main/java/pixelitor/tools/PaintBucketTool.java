@@ -22,6 +22,8 @@ import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.layers.Drawable;
+import pixelitor.tools.util.PMouseEvent;
+import pixelitor.tools.util.ToolAffectedArea;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.debug.DebugNode;

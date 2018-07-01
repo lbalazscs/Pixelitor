@@ -17,7 +17,7 @@
 
 package pixelitor.tools.toolhandlers;
 
-import pixelitor.tools.PMouseEvent;
+import pixelitor.tools.util.PMouseEvent;
 
 /**
  * Can be used to handle the mouse events instead of the current tool.

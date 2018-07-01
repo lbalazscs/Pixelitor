@@ -31,6 +31,9 @@ import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.Brush;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.SymmetryBrush;
+import pixelitor.tools.util.PMouseEvent;
+import pixelitor.tools.util.PPoint;
+import pixelitor.tools.util.ToolAffectedArea;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 

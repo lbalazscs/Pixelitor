@@ -19,8 +19,8 @@ package pixelitor.tools.toolhandlers;
 
 import pixelitor.layers.Drawable;
 import pixelitor.menus.DrawableAction;
-import pixelitor.tools.PMouseEvent;
 import pixelitor.tools.Tool;
+import pixelitor.tools.util.PMouseEvent;
 
 /**
  * Checks whether the active edited object is

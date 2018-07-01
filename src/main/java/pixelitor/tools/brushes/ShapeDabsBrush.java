@@ -18,8 +18,8 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.Composition;
-import pixelitor.tools.PPoint;
-import pixelitor.tools.ShapeType;
+import pixelitor.tools.shapes.ShapeType;
+import pixelitor.tools.util.PPoint;
 
 import java.awt.Graphics2D;
 import java.awt.Shape;

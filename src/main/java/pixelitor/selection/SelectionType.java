@@ -17,8 +17,8 @@
 
 package pixelitor.selection;
 
-import pixelitor.tools.ImDrag;
-import pixelitor.tools.PMouseEvent;
+import pixelitor.tools.util.ImDrag;
+import pixelitor.tools.util.PMouseEvent;
 
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;

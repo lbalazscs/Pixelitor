@@ -17,8 +17,8 @@
 
 package pixelitor.tools.toolhandlers;
 
-import pixelitor.tools.PMouseEvent;
 import pixelitor.tools.Tool;
+import pixelitor.tools.util.PMouseEvent;
 
 import java.awt.Cursor;
 

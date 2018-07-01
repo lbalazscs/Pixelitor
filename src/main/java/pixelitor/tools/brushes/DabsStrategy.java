@@ -17,7 +17,7 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.tools.PPoint;
+import pixelitor.tools.util.PPoint;
 
 /**
  * Specifies the way the dabs of a {@link DabsBrush}

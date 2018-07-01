@@ -18,6 +18,7 @@
 package pixelitor.tools;
 
 import pixelitor.tools.brushes.*;
+import pixelitor.tools.shapes.ShapeType;
 
 import javax.swing.*;
 import java.util.IdentityHashMap;

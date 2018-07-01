@@ -23,9 +23,9 @@ import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.tools.ClipStrategy;
-import pixelitor.tools.PMouseEvent;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
+import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 
 import javax.swing.*;

@@ -18,10 +18,10 @@
 package pixelitor.assertions;
 
 import org.assertj.core.api.AbstractAssert;
-import pixelitor.tools.DraggablePoint;
 import pixelitor.tools.pen.AnchorPoint;
 import pixelitor.tools.pen.AnchorPointType;
 import pixelitor.tools.pen.ControlPoint;
+import pixelitor.tools.util.DraggablePoint;
 
 /**
  * Custom AssertJ assertions for {@link DraggablePoint} objects.

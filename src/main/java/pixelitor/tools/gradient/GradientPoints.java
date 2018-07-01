@@ -19,8 +19,8 @@ package pixelitor.tools.gradient;
 
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.View;
-import pixelitor.tools.DraggablePoint;
-import pixelitor.tools.ImDrag;
+import pixelitor.tools.util.DraggablePoint;
+import pixelitor.tools.util.ImDrag;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.VisibleForTesting;
 

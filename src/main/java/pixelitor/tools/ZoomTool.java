@@ -18,6 +18,7 @@
 package pixelitor.tools;
 
 import pixelitor.gui.ImageComponent;
+import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 
 import java.awt.Point;

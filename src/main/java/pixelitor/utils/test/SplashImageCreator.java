@@ -39,9 +39,9 @@ import pixelitor.io.OutputFormat;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.ImageLayer;
-import pixelitor.tools.ImDrag;
 import pixelitor.tools.gradient.GradientTool;
 import pixelitor.tools.gradient.GradientType;
+import pixelitor.tools.util.ImDrag;
 import pixelitor.utils.Messages;
 
 import java.awt.AlphaComposite;

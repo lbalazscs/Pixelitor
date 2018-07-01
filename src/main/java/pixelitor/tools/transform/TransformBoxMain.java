@@ -18,8 +18,8 @@
 package pixelitor.tools.transform;
 
 import pixelitor.gui.View;
-import pixelitor.tools.PRectangle;
-import pixelitor.tools.ShapeType;
+import pixelitor.tools.shapes.ShapeType;
+import pixelitor.tools.util.PRectangle;
 
 import javax.swing.*;
 import java.awt.Color;

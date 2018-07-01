@@ -20,6 +20,7 @@ package pixelitor.tools;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.ImageComponent;
 import pixelitor.layers.Drawable;
+import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;

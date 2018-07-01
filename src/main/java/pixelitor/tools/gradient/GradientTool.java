@@ -28,9 +28,9 @@ import pixelitor.layers.LayerMask;
 import pixelitor.layers.TmpDrawingLayer;
 import pixelitor.tools.ClipStrategy;
 import pixelitor.tools.DragTool;
-import pixelitor.tools.DraggablePoint;
-import pixelitor.tools.ImDrag;
-import pixelitor.tools.PMouseEvent;
+import pixelitor.tools.util.DraggablePoint;
+import pixelitor.tools.util.ImDrag;
+import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.debug.DebugNode;
 

@@ -17,8 +17,8 @@
 
 package pixelitor.tools.toolhandlers;
 
-import pixelitor.tools.PMouseEvent;
 import pixelitor.tools.Tools;
+import pixelitor.tools.util.PMouseEvent;
 
 /**
  * If Alt is pressed, the color picker will handle

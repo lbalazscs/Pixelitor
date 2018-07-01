@@ -23,6 +23,8 @@ import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.CopyBrushType;
 import pixelitor.tools.brushes.SmudgeBrush;
+import pixelitor.tools.util.PMouseEvent;
+import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Cursors;
 
 import javax.swing.*;

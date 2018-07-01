@@ -27,6 +27,7 @@ import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.gui.ImageComponent;
+import pixelitor.tools.gui.ToolSettingsPanel;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;

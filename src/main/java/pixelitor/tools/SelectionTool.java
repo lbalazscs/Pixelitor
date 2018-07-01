@@ -25,6 +25,8 @@ import pixelitor.selection.SelectionActions;
 import pixelitor.selection.SelectionBuilder;
 import pixelitor.selection.SelectionInteraction;
 import pixelitor.selection.SelectionType;
+import pixelitor.tools.util.ArrowKey;
+import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;

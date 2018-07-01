@@ -19,6 +19,7 @@ package pixelitor.tools;
 
 import pixelitor.gui.ImageComponent;
 import pixelitor.tools.brushes.SymmetryBrush;
+import pixelitor.tools.util.PPoint;
 
 /**
  * The "Mirror" option for brushes

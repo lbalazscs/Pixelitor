@@ -23,12 +23,12 @@ import pixelitor.NewImage;
 import pixelitor.gui.ImageComponent;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.AbstractBrushTool;
-import pixelitor.tools.ImDrag;
 import pixelitor.tools.MoveTool;
-import pixelitor.tools.PPoint;
-import pixelitor.tools.ShapeType;
 import pixelitor.tools.Tools;
-import pixelitor.tools.shapestool.ShapesTool;
+import pixelitor.tools.shapes.ShapeType;
+import pixelitor.tools.shapes.ShapesTool;
+import pixelitor.tools.util.ImDrag;
+import pixelitor.tools.util.PPoint;
 
 import static pixelitor.colors.FillType.WHITE;
 

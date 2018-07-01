@@ -24,9 +24,9 @@ import pixelitor.colors.FgBgColors;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.layers.LayersContainer;
 import pixelitor.menus.MenuBar;
-import pixelitor.tools.ToolSettingsPanelContainer;
 import pixelitor.tools.Tools;
-import pixelitor.tools.ToolsPanel;
+import pixelitor.tools.gui.ToolSettingsPanelContainer;
+import pixelitor.tools.gui.ToolsPanel;
 import pixelitor.utils.AppPreferences;
 
 import javax.swing.*;

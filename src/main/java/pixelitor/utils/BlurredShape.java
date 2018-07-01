@@ -19,7 +19,7 @@ package pixelitor.utils;
 
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.tools.ShapeType;
+import pixelitor.tools.shapes.ShapeType;
 
 /**
  * A shape which is blurred in the sense that a floating point value

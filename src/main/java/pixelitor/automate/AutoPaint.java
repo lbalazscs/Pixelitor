@@ -34,10 +34,10 @@ import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.AbstractBrushTool;
-import pixelitor.tools.ImDrag;
-import pixelitor.tools.PPoint;
 import pixelitor.tools.Tool;
-import pixelitor.tools.shapestool.ShapesTool;
+import pixelitor.tools.shapes.ShapesTool;
+import pixelitor.tools.util.ImDrag;
+import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
