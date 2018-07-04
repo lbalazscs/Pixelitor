@@ -18,6 +18,7 @@
 package pixelitor.filters;
 
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.RandomUtils;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -50,6 +51,12 @@ public class FilterUtils {
         return filters;
     }
 
+    public static FilterAction[] getAnimationFilters() {
+        return allFilters.stream()
+                .filter(FilterAction::isAnimationFilter)
+                .toArray(FilterAction[]::new);
+    }
+
     public static FilterAction[] getAnimationFiltersSorted() {
         return allFilters.stream()
                 .filter(FilterAction::isAnimationFilter)
@@ -62,7 +69,7 @@ public class FilterUtils {
         FilterAction filterAction;
         do {
             // try a random filter until all conditions are true
-            filterAction = allFilters.get((int) (Math.random() * allFilters.size()));
+            filterAction = RandomUtils.chooseFrom(allFilters);
         } while (!conditions.test(filterAction.getFilter()));
 
         return filterAction.getFilter();

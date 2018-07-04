@@ -19,6 +19,7 @@ package pixelitor.gui;
 
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 /**
@@ -32,9 +33,13 @@ public interface View {
 
     double componentYToImageSpace(double mouseY);
 
+    Point2D componentToImageSpace(Point2D p);
+
     double imageXToComponentSpace(double x);
 
     double imageYToComponentSpace(double y);
+
+    Point2D imageToComponentSpace(Point2D p);
 
     Rectangle2D componentToImageSpace(Rectangle input);
 

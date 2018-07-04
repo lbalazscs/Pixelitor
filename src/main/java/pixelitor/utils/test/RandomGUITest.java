@@ -74,6 +74,7 @@ import pixelitor.tools.gui.ToolSettingsPanelContainer;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.MemoryInfo;
 import pixelitor.utils.Messages;
+import pixelitor.utils.RandomUtils;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -112,7 +113,7 @@ import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_90;
 public class RandomGUITest {
     final static Random rand = new Random();
 
-    private static final Tool preferredTool = null; // set to null to select random tools
+    private static final Tool preferredTool = Tools.GRADIENT; // set to null to select random tools
 
     private static final boolean singleImageTest = false;
     private static final boolean noHideShow = true; // no view operations if set to true
@@ -246,7 +247,7 @@ public class RandomGUITest {
                         break;
                     }
 
-                    r.delay(100 + rand.nextInt(400));
+                    r.delay(RandomUtils.intInRange(100, 500));
 
                     Runnable runnable = () -> {
                         try {
@@ -359,7 +360,7 @@ public class RandomGUITest {
     }
 
     private static void click(Robot r) {
-        log("click");
+        log(Tools.getCurrent().getName() + " Tool click");
 
         r.mousePress(InputEvent.BUTTON1_MASK);
         r.delay(50);
@@ -367,7 +368,7 @@ public class RandomGUITest {
     }
 
     private static void randomRightClick(Robot r) {
-        log("right click");
+        log(Tools.getCurrent().getName() + " Tool right click");
 
         r.mousePress(InputEvent.BUTTON3_MASK);
         r.delay(50);
@@ -456,8 +457,7 @@ public class RandomGUITest {
         TweenAnimation animation = new TweenAnimation();
         animation.setFilter(filter);
 
-        Interpolation[] interpolations = Interpolation.values();
-        Interpolation randomInterpolation = interpolations[(int) (Math.random() * interpolations.length)];
+        Interpolation randomInterpolation = RandomUtils.chooseFrom(Interpolation.values());
         animation.setInterpolation(randomInterpolation);
 
         ParamSet paramSet = filter.getParamSet();
@@ -511,19 +511,26 @@ public class RandomGUITest {
         }
     }
 
-    private static final int[] keyEvents = {KeyEvent.VK_1, KeyEvent.VK_A,
+    private static final int[] keyEvents = {KeyEvent.VK_1,
             KeyEvent.VK_ENTER, KeyEvent.VK_ESCAPE, KeyEvent.VK_BACK_SPACE,
-            KeyEvent.VK_M, KeyEvent.VK_C, KeyEvent.VK_Z,
-            KeyEvent.VK_G, KeyEvent.VK_B,
-            KeyEvent.VK_E, KeyEvent.VK_I,
-            KeyEvent.VK_S, KeyEvent.VK_Q,
-            KeyEvent.VK_R, KeyEvent.VK_D,
-            KeyEvent.VK_X, KeyEvent.VK_H,
-            KeyEvent.VK_P, KeyEvent.VK_B,
+            KeyEvent.VK_A, KeyEvent.VK_B, KeyEvent.VK_C,
+            KeyEvent.VK_D, KeyEvent.VK_E, KeyEvent.VK_F,
+            KeyEvent.VK_G, KeyEvent.VK_H, KeyEvent.VK_I,
+            // skip J, because it is the exit keystroke
+            KeyEvent.VK_K, KeyEvent.VK_L,
+            KeyEvent.VK_M, KeyEvent.VK_N, KeyEvent.VK_O,
+            KeyEvent.VK_P, KeyEvent.VK_Q, KeyEvent.VK_R,
+            KeyEvent.VK_S,
+            // skip T, because it brings up the text layer dialog
+            KeyEvent.VK_U,
+            // skip V, because too much Move Tool consumes all the memory
+            // skip W, because it is the stop keystroke
+            KeyEvent.VK_Z,
+            KeyEvent.VK_X,
+            KeyEvent.VK_Y,
             KeyEvent.VK_ALT, KeyEvent.VK_TAB,
             KeyEvent.VK_COMMA, KeyEvent.VK_HOME,
             KeyEvent.VK_RIGHT, KeyEvent.VK_LEFT, KeyEvent.VK_UP, KeyEvent.VK_DOWN
-//            , KeyEvent.VK_V, // do not trigger move tool
     };
 
     private static void randomKey(Robot r) {
@@ -557,7 +564,7 @@ public class RandomGUITest {
 
             double percentValue = 0;
             while (percentValue < 49) {
-                randomZoomLevel = ZoomLevel.getRandomZoomLevel(rand);
+                randomZoomLevel = ZoomLevel.getRandomZoomLevel();
                 percentValue = randomZoomLevel.getPercentValue();
             }
 
@@ -566,13 +573,13 @@ public class RandomGUITest {
             if (rand.nextBoolean()) {
                 ic.setZoom(randomZoomLevel, false, null);
             } else {
-                Point mousePos = getRandomPointOnIC(ic);
+                Point mousePos = pickRandomPointOn(ic);
                 ic.setZoom(randomZoomLevel, false, mousePos);
             }
         }
     }
 
-    private static Point getRandomPointOnIC(ImageComponent ic) {
+    private static Point pickRandomPointOn(ImageComponent ic) {
         int randX = rand.nextInt(ic.getWidth());
         int randY = rand.nextInt(ic.getWidth());
         return new Point(randX, randY);
@@ -587,14 +594,14 @@ public class RandomGUITest {
             if (rand.nextBoolean()) {
                 ic.setZoom(newZoom, false, null);
             } else {
-                Point mousePos = getRandomPointOnIC(ic);
+                Point mousePos = pickRandomPointOn(ic);
                 ic.setZoom(newZoom, false, mousePos);
             }
         }
     }
 
     private static void repeat() {
-        log("repeat");
+        log("repeat (dispatch Ctrl-F)");
 
         PixelitorWindow pw = PixelitorWindow.getInstance();
         pw.dispatchEvent(new KeyEvent(pw, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), KeyEvent.CTRL_MASK, KeyEvent.VK_F, 'F'));
@@ -859,9 +866,8 @@ public class RandomGUITest {
             }
         } else {
             log("change layer blending mode");
-            BlendingMode[] blendingModes = BlendingMode.values();
-            BlendingMode randomBlendingMode = blendingModes[rand.nextInt(blendingModes.length)];
-            layer.setBlendingMode(randomBlendingMode, true, true, true);
+            BlendingMode randomBM = RandomUtils.chooseFrom(BlendingMode.values());
+            layer.setBlendingMode(randomBM, true, true, true);
         }
     }
 
@@ -888,7 +894,7 @@ public class RandomGUITest {
         if (preferredTool != null) {
             tool = preferredTool;
         } else {
-            tool = Tools.getRandomTool(rand);
+            tool = Tools.getRandomTool();
 
             // The move tool can cause out of memory errors, so don't test it
             if (tool == Tools.MOVE) {
@@ -992,8 +998,8 @@ public class RandomGUITest {
     }
 
     private static ParametrizedFilter getRandomTweenFilter() {
-        FilterAction[] filterActions = FilterUtils.getAnimationFiltersSorted();
-        FilterAction filterAction = filterActions[(int) (Math.random() * filterActions.length)];
+        FilterAction[] filterActions = FilterUtils.getAnimationFilters();
+        FilterAction filterAction = RandomUtils.chooseFrom(filterActions);
         return (ParametrizedFilter) filterAction.getFilter();
     }
 

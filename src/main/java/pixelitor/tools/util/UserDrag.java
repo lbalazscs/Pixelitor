@@ -33,7 +33,8 @@ import java.awt.geom.Point2D;
  */
 public class UserDrag {
     private final DragTool tool;
-    private boolean finished;
+
+    private boolean dragging;
 
     // The coordinates in the component (mouse) space.
     private int coStartX;
@@ -73,8 +74,8 @@ public class UserDrag {
     public void setEnd(PMouseEvent e) {
         assert ic != null;
         assert this.ic == e.getIC() : "ic changed for " + tool.getName()
-                + ", was " + this.ic.getName()
-                + ", is " + ic.getName();
+                + " Tool, was " + this.ic.getName()
+                + ", is " + e.getIC().getName();
 
         coEndX = e.getCoX();
         coEndY = e.getCoY();
@@ -85,6 +86,7 @@ public class UserDrag {
             coEndY = (int) constrainedEnd.getY();
         }
 
+        dragging = true;
 //        imEndX = ic.componentXToImageSpace(coEndX);
 //        imEndY = ic.componentYToImageSpace(coEndY);
     }
@@ -160,12 +162,12 @@ public class UserDrag {
         this.startFromCenter = startFromCenter;
     }
 
-    public boolean isFinished() {
-        return finished;
+    public boolean isDragging() {
+        return dragging;
     }
 
-    public void setFinished(boolean finished) {
-        this.finished = finished;
+    public void mouseReleased() {
+        this.dragging = false;
     }
 
     public Rectangle toCoRect() {

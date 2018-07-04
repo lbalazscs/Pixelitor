@@ -27,9 +27,9 @@ import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.shapes.ShapesTool;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.ActiveImageChangeListener;
+import pixelitor.utils.RandomUtils;
 
 import java.awt.event.MouseEvent;
-import java.util.Random;
 
 /**
  * Tool-related static utility methods
@@ -129,9 +129,8 @@ public class Tools {
         }
     }
 
-    public static Tool getRandomTool(Random rand) {
-        int index = rand.nextInt(allTools.length);
-        return allTools[index];
+    public static Tool getRandomTool() {
+        return RandomUtils.chooseFrom(allTools);
     }
 
     public static void fgBgColorsChanged() {

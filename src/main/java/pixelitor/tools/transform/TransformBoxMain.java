@@ -36,6 +36,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 /**
@@ -230,6 +231,20 @@ public class TransformBoxMain {
         @Override
         public double imageYToComponentSpace(double y) {
             return drawStartY + y * viewScale;
+        }
+
+        @Override
+        public Point2D componentToImageSpace(Point2D p) {
+            return new Point2D.Double(
+                    componentXToImageSpace(p.getX()),
+                    componentYToImageSpace(p.getY()));
+        }
+
+        @Override
+        public Point2D imageToComponentSpace(Point2D p) {
+            return new Point2D.Double(
+                    imageXToComponentSpace(p.getX()),
+                    imageYToComponentSpace(p.getY()));
         }
 
         @Override

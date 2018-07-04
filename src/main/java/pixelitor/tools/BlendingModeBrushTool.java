@@ -35,7 +35,7 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
         drawStrategy = DrawStrategy.TMP_LAYER;
     }
 
-    public void setupMaskDrawing(boolean isMask) {
+    public void setupMaskEditing(boolean isMask) {
         if (isMask) {
             drawStrategy = DrawStrategy.DIRECT;
             blendingModePanel.setEnabled(false);

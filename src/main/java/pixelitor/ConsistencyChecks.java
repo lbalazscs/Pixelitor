@@ -181,13 +181,13 @@ public final class ConsistencyChecks {
             // called while constructing the DeleteActiveLayerAction
             return true;
         }
-        boolean enabled = action.isEnabled();
 
         Composition comp = ImageComponents.getActiveCompOrNull();
         if (comp == null) {
             return true;
         }
 
+        boolean enabled = action.isEnabled();
         int numLayers = comp.getNumLayers();
         if (enabled) {
             if (numLayers <= 1) {

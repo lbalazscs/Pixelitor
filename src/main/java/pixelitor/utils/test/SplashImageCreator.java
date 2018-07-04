@@ -39,12 +39,11 @@ import pixelitor.io.OutputFormat;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.ImageLayer;
-import pixelitor.tools.gradient.GradientTool;
+import pixelitor.tools.gradient.Gradient;
 import pixelitor.tools.gradient.GradientType;
 import pixelitor.tools.util.ImDrag;
 import pixelitor.utils.Messages;
 
-import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -208,12 +207,11 @@ public class SplashImageCreator {
             gradientType = GradientType.SPIRAL_CW;
         }
 
-        GradientTool.drawGradient(dr,
-                gradientType,
-                BLACK_TO_WHITE,
-                REFLECT,
-                AlphaComposite.SrcOver,
+        Gradient gradient = new Gradient(
                 new ImDrag(startX, startY, endX, endY),
-                false);
+                gradientType, REFLECT, BLACK_TO_WHITE,
+                false,
+                BlendingMode.NORMAL, 1.0f);
+        gradient.drawOn(dr);
     }
 }

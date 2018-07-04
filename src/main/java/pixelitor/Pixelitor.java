@@ -47,7 +47,6 @@ import java.awt.GraphicsEnvironment;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -244,7 +243,7 @@ public class Pixelitor {
                 // this will run on a background thread
                 // and keeps putting this EDT task on the EDT
                 Runnable switchTask = () -> {
-                    Tool newTool = Tools.getRandomTool(new Random());
+                    Tool newTool = Tools.getRandomTool();
                     clickTool(newTool);
                 };
                 try {

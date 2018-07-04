@@ -17,6 +17,8 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.utils.RandomUtils;
+
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
 import java.awt.Rectangle;
@@ -92,7 +94,7 @@ public class BooleanParam extends AbstractFilterParam {
     @Override
     public void randomize() {
         if (randomizePolicy.allow()) {
-            boolean randomValue = Math.random() > 0.5;
+            boolean randomValue = RandomUtils.nextBoolean();
             setValue(randomValue, true, false);
         }
     }

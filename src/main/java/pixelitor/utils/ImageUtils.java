@@ -625,7 +625,7 @@ public class ImageUtils {
     /**
      * In contrast to BufferedImage.getSubimage, this method creates a copy of the data
      */
-    public static BufferedImage getUnSharedSubimage(BufferedImage src, Rectangle bounds) {
+    public static BufferedImage getCopyOfSubimage(BufferedImage src, Rectangle bounds) {
         assert src != null;
         assert bounds != null;
 

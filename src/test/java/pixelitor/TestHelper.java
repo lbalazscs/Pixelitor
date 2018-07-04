@@ -47,6 +47,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
@@ -233,11 +234,12 @@ public class TestHelper {
     public static ImageComponent createICWithoutComp() {
         ImageComponent ic = mock(ImageComponent.class);
 
-        when(ic.componentToImageSpace(any())).then(returnsFirstArg());
+        when(ic.componentToImageSpace(any(Point2D.class))).then(returnsFirstArg());
+        when(ic.componentToImageSpace(any(Rectangle.class))).then(returnsFirstArg());
 
         // can't just return the argument because this method returns a
         // Rectangle (subclass) from a Rectangle2D (superclass)
-        when(ic.imageToComponentSpace(any())).thenAnswer(invocation -> {
+        when(ic.imageToComponentSpace(any(Rectangle2D.class))).thenAnswer(invocation -> {
             Rectangle2D in = invocation.getArgument(0);
             return new Rectangle((int) in.getX(), (int) in.getY(), (int) in.getWidth(), (int) in.getHeight());
         });

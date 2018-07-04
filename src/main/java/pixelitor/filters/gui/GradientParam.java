@@ -21,6 +21,7 @@ import com.bric.swing.GradientSlider;
 import com.jhlabs.image.Colormap;
 import com.jhlabs.image.ImageMath;
 import pixelitor.colors.ColorUtils;
+import pixelitor.utils.RandomUtils;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -119,7 +120,7 @@ public class GradientParam extends AbstractFilterParam {
         if (randomizePolicy.allow()) {
             Color[] randomColors = new Color[defaultThumbPositions.length];
             for (int i = 0; i < randomColors.length; i++) {
-                randomColors[i] = ColorUtils.createRandomColor(false);
+                randomColors[i] = RandomUtils.createRandomColor(false);
             }
 
             trigger = false;

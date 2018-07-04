@@ -24,36 +24,51 @@ import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 
 /**
- * When painting the active {@link ImageComponent}, the clip
- * must be set differently for different tools. Each tool
- * has a {@link ClipStrategy} to decide how to set the clip.
+ * How the clipping shape of {@link Graphics2D} is set when painting the
+ * active {@link ImageComponent}.
+ * Each tool has its own {@link ClipStrategy}.
  */
 public enum ClipStrategy {
     /**
-     * Make sure that the painting does not leave the internal frame,
-     * even if there are scrollbars. Necessary because we had overridden
-     * the clipping previously.
+     * The painting is allowed to leave the canvas,
+     * but not the internal frame.
+     * Necessary because the clipping was overridden previously
+     * in {@link ImageComponent}.
+     *
+     * TODO probably restoring Swing's original clip shape
+     * would have the same effect
      */
     INTERNAL_FRAME {
         @Override
         public void setClipFor(Graphics2D g, ImageComponent ic) {
-            // We have to work in image space because g has the transforms applied.
-            // canvas.getBounds() is not reliable because the internal frame might be
-            // smaller so we have to use the view rectangle...
+            // Note that the internal frame might be
+            // smaller than the ImageComponent when there are scrollbars,
+            // so we have to use the view rectangle:
             Rectangle componentSpaceVisiblePart = ic.getVisiblePart();
-            // ...but first get this to image space...
+
+            // We are in image space because g has the transforms applied.
             Rectangle2D imageSpaceVisiblePart = ic.componentToImageSpace(componentSpaceVisiblePart);
             g.setClip(imageSpaceVisiblePart);
         }
     },
     /**
-     * Most tools act on the image, so it is OK
-     * if the clip is restricted to the canvas
+     * The painting is not allowed to leave the canvas.
+     * This should be used if a tool only acts on the image,
+     * without helper handles that can be outside the canvas.
      */
     CANVAS {
         @Override
         public void setClipFor(Graphics2D g, ImageComponent ic) {
             // empty: the canvas clipping has been already set
+        }
+    },
+    /**
+     * The tool itself will set its own custom clipping.
+     */
+    CUSTOM {
+        @Override
+        public void setClipFor(Graphics2D g, ImageComponent ic) {
+            // empty: it will be set later in the tool
         }
     };
 

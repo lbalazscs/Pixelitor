@@ -32,9 +32,10 @@ import java.awt.geom.Point2D;
  * A point that can be dragged with the help of a handle.
  * All coordinates are in component space unless otherwise noted.
  *
- * The x, y coordinates will be ints most of the time as they
- * originate from mouse events, but sometimes they can be doubles,
- * for example when paths are created in other ways.
+ * The x, y coordinates will be integers most of the time as they
+ * originate from mouse events, but sometimes they can be
+ * fractional values, for example when paths are created from selections
+ * or when shape handles are rotated.
  */
 public class DraggablePoint extends Point2D.Double {
     private static final int HANDLE_RADIUS = 5;
@@ -89,6 +90,10 @@ public class DraggablePoint extends Point2D.Double {
         this.y = y;
 
         setShapes();
+    }
+
+    public final void setLocationOnlyForThis(Point2D p) {
+        setLocationOnlyForThis(p.getX(), p.getY());
     }
 
     private void setShapes() {

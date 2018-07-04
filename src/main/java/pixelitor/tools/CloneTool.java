@@ -35,6 +35,7 @@ import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Mirror;
+import pixelitor.utils.RandomUtils;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.test.RandomGUITest;
@@ -42,7 +43,6 @@ import pixelitor.utils.test.RandomGUITest;
 import javax.swing.*;
 import java.awt.GridBagLayout;
 import java.awt.image.BufferedImage;
-import java.util.Random;
 
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 import static pixelitor.tools.CloneTool.State.CLONING;
@@ -217,9 +217,8 @@ public class CloneTool extends BlendingModeBrushTool {
 
         int canvasWidth = comp.getCanvasImWidth();
         int canvasHeight = comp.getCanvasImHeight();
-        Random rand = new Random();
-        int sourceX = rand.nextInt(canvasWidth);
-        int sourceY = rand.nextInt(canvasHeight);
+        int sourceX = RandomUtils.nextInt(canvasWidth);
+        int sourceY = RandomUtils.nextInt(canvasHeight);
 
         setCloningSource(comp.getIC(), sourceX, sourceY);
         startNewCloningStroke(start.getImX(), start.getImY(), true);

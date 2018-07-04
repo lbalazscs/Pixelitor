@@ -17,7 +17,7 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.utils.Utils;
+import pixelitor.utils.RandomUtils;
 
 import javax.swing.*;
 import java.awt.Rectangle;
@@ -70,7 +70,7 @@ public class TextParam extends AbstractFilterParam {
     @Override
     public void randomize() {
         trigger = false;
-        setValue(Utils.createRandomString(15));
+        setValue(RandomUtils.createRandomString(15));
         trigger = true;
     }
 

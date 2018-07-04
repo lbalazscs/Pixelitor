@@ -19,6 +19,7 @@ package pixelitor.filters.gui;
 
 import com.jhlabs.image.ImageMath;
 import pixelitor.gui.utils.SliderSpinner;
+import pixelitor.utils.RandomUtils;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -26,7 +27,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 import java.awt.FlowLayout;
 import java.awt.Rectangle;
-import java.util.Random;
 
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
@@ -143,8 +143,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     public void randomize() {
         if (randomizePolicy.allow()) {
             int range = maxValue - minValue;
-            Random rnd = new Random();
-            int newValue = minValue + rnd.nextInt(range);
+            int newValue = minValue + RandomUtils.nextInt(range);
 
             setValueNoTrigger(newValue);
         }

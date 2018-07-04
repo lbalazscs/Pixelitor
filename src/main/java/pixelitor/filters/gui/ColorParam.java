@@ -19,6 +19,7 @@ package pixelitor.filters.gui;
 
 import pixelitor.colors.ColorHistory;
 import pixelitor.colors.ColorUtils;
+import pixelitor.utils.RandomUtils;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -72,7 +73,7 @@ public class ColorParam extends AbstractFilterParam {
 
     @Override
     public void randomize() {
-        Color c = ColorUtils.createRandomColor(opacitySetting.allowOpacityAtRandomize);
+        Color c = RandomUtils.createRandomColor(opacitySetting.allowOpacityAtRandomize);
         setColor(c, false);
     }
 

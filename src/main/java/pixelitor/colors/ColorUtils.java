@@ -36,7 +36,6 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
-import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -179,24 +178,6 @@ public class ColorUtils {
         } else {
             throw new IllegalStateException("should not get here");
         }
-    }
-
-    public static Color createRandomColor(boolean randomAlpha) {
-        Random rnd = new Random();
-        return createRandomColor(rnd, randomAlpha);
-    }
-
-    public static Color createRandomColor(Random rnd, boolean randomAlpha) {
-        int r = rnd.nextInt(256);
-        int g = rnd.nextInt(256);
-        int b = rnd.nextInt(256);
-
-        if (randomAlpha) {
-            int a = rnd.nextInt(256);
-            return new Color(r, g, b, a);
-        }
-
-        return new Color(r, g, b);
     }
 
     public static String rgbIntToString(int rgb) {

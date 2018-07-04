@@ -56,6 +56,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyVetoException;
@@ -169,7 +170,12 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
             public void componentResized(ComponentEvent e) {
                 updateDrawStart();
 
-                Tools.icSizeChanged(ImageComponent.this);
+                // one can zoom an inactive image with the mouse wheel,
+                // but the tools expect an active image
+                if (ImageComponents.isActive(ImageComponent.this)) {
+                    Tools.icSizeChanged(ImageComponent.this);
+                }
+                
                 repaint();
             }
         });
@@ -345,8 +351,10 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         // restore the original transform
         g2.setTransform(componentTransform);
 
-        currentTool.paintOverImage(g2, canvas, this, componentTransform, imageTransform);
-
+        if (ImageComponents.isActive(this)) {
+            currentTool.paintOverImage(g2, canvas, this, componentTransform, imageTransform);
+        }
+        
         g2.setClip(canvasClip);
 
         if (showPixelGrid && zoomLevel.allowPixelGrid() && !comp.showsSelection()) {
@@ -611,6 +619,20 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     @Override
     public double imageYToComponentSpace(double y) {
         return drawStartY + y * viewScale;
+    }
+
+    @Override
+    public Point2D componentToImageSpace(Point2D p) {
+        return new Point2D.Double(
+                componentXToImageSpace(p.getX()),
+                componentYToImageSpace(p.getY()));
+    }
+
+    @Override
+    public Point2D imageToComponentSpace(Point2D p) {
+        return new Point2D.Double(
+                imageXToComponentSpace(p.getX()),
+                imageYToComponentSpace(p.getY()));
     }
 
     public Point fromComponentToImageSpace(Point input, ZoomLevel zoom) {

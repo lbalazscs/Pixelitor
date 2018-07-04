@@ -17,9 +17,10 @@
 
 package pixelitor.menus.view;
 
+import pixelitor.utils.RandomUtils;
+
 import java.awt.BasicStroke;
 import java.awt.Stroke;
-import java.util.Random;
 
 /**
  * The available zoom levels
@@ -356,9 +357,8 @@ public enum ZoomLevel {
 
     public abstract ZoomLevel zoomOut();
 
-    public static ZoomLevel getRandomZoomLevel(Random rand) {
-        int index = rand.nextInt(values().length);
-        return values()[index];
+    public static ZoomLevel getRandomZoomLevel() {
+        return RandomUtils.chooseFrom(values());
     }
 
     public double getViewScale() {

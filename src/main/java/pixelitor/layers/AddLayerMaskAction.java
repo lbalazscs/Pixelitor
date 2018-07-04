@@ -90,8 +90,15 @@ public class AddLayerMaskAction extends AbstractAction implements ActiveImageCha
     }
 
     @Override
-    public void maskAddedOrDeleted(Layer affectedLayer) {
-        setEnabled(!affectedLayer.hasMask());
+    public void maskAddedTo(Layer layer) {
+        assert layer.hasMask();
+        setEnabled(false);
+    }
+
+    @Override
+    public void maskDeletedFrom(Layer layer) {
+        assert !layer.hasMask();
+        setEnabled(true);
     }
 
     @Override

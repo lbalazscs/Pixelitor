@@ -24,6 +24,7 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.menus.MenuAction;
 import pixelitor.tools.Tools;
 import pixelitor.utils.AppPreferences;
+import pixelitor.utils.RandomUtils;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
@@ -201,9 +202,9 @@ public class FgBgColorSelector extends JLayeredPane {
         randomizeColorsAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Color rndColor1 = ColorUtils.createRandomColor(false);
+                Color rndColor1 = RandomUtils.createRandomColor(false);
                 setFgColor(rndColor1, false);
-                Color rndColor2 = ColorUtils.createRandomColor(false);
+                Color rndColor2 = RandomUtils.createRandomColor(false);
                 setBgColor(rndColor2, true);
             }
         };
@@ -309,10 +310,10 @@ public class FgBgColorSelector extends JLayeredPane {
             // force the redrawing of colors
             if (layerMaskEditing) {
                 setFgColor(maskFgColor, false);
-                setBgColor(maskBgColor, true);
+                setBgColor(maskBgColor, false);
             } else {
                 setFgColor(fgColor, false);
-                setBgColor(bgColor, true);
+                setBgColor(bgColor, false);
             }
         }
     }

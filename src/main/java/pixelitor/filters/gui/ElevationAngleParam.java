@@ -17,7 +17,7 @@
 
 package pixelitor.filters.gui;
 
-import java.util.Random;
+import pixelitor.utils.RandomUtils;
 
 /**
  * A filter parameter for selecting the
@@ -54,7 +54,7 @@ public class ElevationAngleParam extends AngleParam {
 
     @Override
     public void randomize() {
-        Random r = new Random();
-        setValueInDegrees(r.nextInt(90), false);
+        int val = RandomUtils.nextInt(90);
+        setValueInDegrees(val, false);
     }
 }

@@ -31,7 +31,7 @@ public class GradientDefiningPoint extends DraggablePoint {
     private GradientDefiningPoint other;
     private GradientCenterPoint center;
 
-    public GradientDefiningPoint(String name, int x, int y,
+    public GradientDefiningPoint(String name, double x, double y,
                                  View view, Color color, Color activeColor) {
         super(name, x, y, view, color, activeColor);
     }
@@ -51,7 +51,7 @@ public class GradientDefiningPoint extends DraggablePoint {
         // also move the center point
         double cx = (x + other.x) / 2.0;
         double cy = (y + other.y) / 2.0;
-        center.setLocationWithoutMovingChildren(cx, cy);
+        center.setLocationOnlyForThis(cx, cy);
     }
 
     @Override

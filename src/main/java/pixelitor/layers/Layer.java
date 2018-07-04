@@ -286,7 +286,7 @@ public abstract class Layer implements Serializable {
 
         comp.imageChanged(FULL);
 
-        AppLogic.maskChanged(this);
+        AppLogic.maskAddedTo(this);
 
         PixelitorEdit edit = new AddLayerMaskEdit(editName, comp, this);
         if (deselect) {
@@ -321,7 +321,7 @@ public abstract class Layer implements Serializable {
         this.mask = mask;
         comp.imageChanged(FULL);
         ui.addMaskIconLabel();
-        AppLogic.maskChanged(this);
+        AppLogic.maskAddedTo(this);
         mask.updateIconImage();
     }
 
@@ -336,7 +336,7 @@ public abstract class Layer implements Serializable {
 
         History.addEdit(addToHistory, () -> new DeleteLayerMaskEdit(comp, this, oldMask, oldMode));
 
-        AppLogic.maskChanged(this);
+        AppLogic.maskDeletedFrom(this);
         ui.deleteMaskIconLabel();
 
         MaskViewMode.NORMAL.activate(ic, this);

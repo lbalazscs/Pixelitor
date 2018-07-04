@@ -22,12 +22,14 @@ import pixelitor.Composition;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.layers.Drawable;
-import pixelitor.layers.LayerMask;
-import pixelitor.layers.TmpDrawingLayer;
 import pixelitor.tools.ClipStrategy;
 import pixelitor.tools.DragTool;
+import pixelitor.tools.gradient.history.GradientChangeEdit;
+import pixelitor.tools.gradient.history.GradientHandlesHiddenEdit;
+import pixelitor.tools.gradient.history.NewGradientEdit;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.ImDrag;
 import pixelitor.tools.util.PMouseEvent;
@@ -35,27 +37,21 @@ import pixelitor.utils.Cursors;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
-import java.awt.Color;
-import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.MultipleGradientPaint.CycleMethod;
-import java.awt.Paint;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
 
 import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
 import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
 import static java.awt.MultipleGradientPaint.CycleMethod.REPEAT;
-import static java.awt.RenderingHints.KEY_ANTIALIASING;
-import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 
 /**
  * The gradient tool
  */
 public class GradientTool extends DragTool {
-    private GradientPoints handles;
+    private GradientHandles handles;
     private DraggablePoint activeHandle;
 
     private static final String NO_CYCLE_AS_STRING = "No Cycle";
@@ -72,41 +68,52 @@ public class GradientTool extends DragTool {
     private JCheckBox invertCheckBox;
     private BlendingModePanel blendingModePanel;
 
+    private Gradient lastGradient;
+    private boolean ignoreRegenerate = false;
+
     public GradientTool() {
         super('g', "Gradient", "gradient_tool_icon.png",
                 "<b>click</b> and <b>drag</b> to draw a gradient, <b>Shift-drag</b> to constrain the direction. Press <b>Esc</b> to hide the handles and the arrow.",
-                Cursors.DEFAULT, true, true, true, ClipStrategy.CANVAS);
+                Cursors.DEFAULT, true, true, true, ClipStrategy.INTERNAL_FRAME);
     }
 
     @Override
     public void initSettingsPanel() {
         typeSelector = new JComboBox<>(GradientType.values());
-        typeSelector.addActionListener(e -> regenerateGradient());
+        typeSelector.addActionListener(e -> regenerateGradient(true));
         settingsPanel.addWithLabel("Type: ", typeSelector, "gradientTypeSelector");
 
         // cycle methods cannot be put directly in the JComboBox, because they would be all uppercase
         cycleMethodSelector = new JComboBox<>(CYCLE_METHODS);
-        cycleMethodSelector.addActionListener(e -> regenerateGradient());
+        cycleMethodSelector.addActionListener(e -> regenerateGradient(true));
         settingsPanel.addWithLabel("Cycling: ", cycleMethodSelector, "gradientCycleMethodSelector");
 
         settingsPanel.addSeparator();
 
         colorTypeSelector = new JComboBox<>(GradientColorType.values());
-        colorTypeSelector.addActionListener(e -> regenerateGradient());
+        colorTypeSelector.addActionListener(e -> regenerateGradient(true));
         settingsPanel.addWithLabel("Color: ", colorTypeSelector, "gradientColorTypeSelector");
 
         invertCheckBox = new JCheckBox();
-        invertCheckBox.addActionListener(e -> regenerateGradient());
+        invertCheckBox.addActionListener(e -> regenerateGradient(true));
         settingsPanel.addWithLabel("Invert: ", invertCheckBox, "gradientInvert");
 
         settingsPanel.addSeparator();
 
         blendingModePanel = new BlendingModePanel(true);
-        blendingModePanel.addActionListener(e -> regenerateGradient());
+        blendingModePanel.addActionListener(e -> regenerateGradient(true));
         settingsPanel.add(blendingModePanel);
     }
 
-    public void regenerateGradient() {
+    private void regenerateGradient(boolean addToHistory) {
+        if (ignoreRegenerate) {
+            return;
+        }
+
+        // TODO if in the meantime the active layer is not drawable
+        // there should be an error message instead of
+        // quietly ignoring it in drawGradient
+
         // regenerate the gradient if a tool setting
         // was changed while handles are present
         if (handles != null) {
@@ -114,7 +121,7 @@ public class GradientTool extends DragTool {
             if (ic != null) {
                 ImDrag imDrag = handles.toImDrag(ic);
                 if (!imDrag.isClick()) {
-                    drawGradient(ic.getComp(), imDrag);
+                    drawGradient(ic.getComp(), imDrag, addToHistory);
                 }
             }
         }
@@ -158,7 +165,6 @@ public class GradientTool extends DragTool {
         if (userDrag.isClick()) {
             return;
         }
-        Composition comp = e.getComp();
         ImDrag imDrag;
         if (activeHandle != null) { // a handle was dragged
             int x = e.getCoX();
@@ -172,13 +178,18 @@ public class GradientTool extends DragTool {
             }
 
             imDrag = handles.toImDrag(e.getIC());
+            if (imDrag.isClick()) {
+                return;
+            }
         } else { // a gradient was dragged
             imDrag = userDrag.toImDrag();
-            handles = new GradientPoints(
+            handles = new GradientHandles(
                     userDrag.getCoStartX(), userDrag.getCoStartY(),
                     userDrag.getCoEndX(), userDrag.getCoEndY(), e.getIC());
         }
-        drawGradient(e.getComp(), imDrag);
+        Composition comp = e.getComp();
+
+        drawGradient(comp, imDrag, true);
     }
 
     @Override
@@ -213,7 +224,7 @@ public class GradientTool extends DragTool {
 
     @Override
     public void fgBgColorsChanged() {
-        regenerateGradient();
+        regenerateGradient(true);
     }
 
     @Override
@@ -232,25 +243,19 @@ public class GradientTool extends DragTool {
 
     @Override
     public void escPressed() {
-        // hide the handles
         if (handles != null) {
-            handles = null;
-            activeHandle = null;
-            ImageComponents.repaintActive();
+            Composition comp = ImageComponents.getActiveCompOrNull();
+            History.addEdit(new GradientHandlesHiddenEdit(comp, lastGradient));
+
+            hideHandles(comp.getIC());
         }
     }
 
-    private void drawGradient(Composition comp, ImDrag imDrag) {
-        History.addImageEdit(getName(), comp);
-        drawGradient(comp.getActiveDrawable(),
-                getType(),
-                getGradientColorType(),
-                getCycleType(),
-                blendingModePanel.getComposite(),
-                imDrag,
-                invertCheckBox.isSelected()
-        );
-        comp.imageChanged(FULL);
+    public void hideHandles(View view) {
+        handles = null;
+        activeHandle = null;
+        lastGradient = null;
+        view.repaint();
     }
 
     private CycleMethod getCycleType() {
@@ -265,47 +270,31 @@ public class GradientTool extends DragTool {
         return (GradientType) typeSelector.getSelectedItem();
     }
 
-    public static void drawGradient(Drawable dr, GradientType gradientType,
-                                    GradientColorType colorType,
-                                    CycleMethod cycleMethod,
-                                    Composite composite,
-                                    ImDrag imDrag, boolean invert) {
-        if (imDrag.isClick()) {
+    private void drawGradient(Composition comp, ImDrag imDrag, boolean addToHistory) {
+        Gradient gradient = new Gradient(imDrag,
+                getType(), getCycleType(), getGradientColorType(),
+                invertCheckBox.isSelected(),
+                blendingModePanel.getBlendingMode(),
+                blendingModePanel.getOpacity());
+
+
+        if (addToHistory) {
+            boolean isFirst = lastGradient == null;
+            if (isFirst) {
+                History.addEdit(new NewGradientEdit(comp, gradient));
+            } else {
+                History.addEdit(new GradientChangeEdit(comp, lastGradient, gradient));
+            }
+        }
+
+        Drawable dr = comp.getActiveDrawableOrNull();
+        if (dr == null) {
+            // the active layer is no longer a Drawable
             return;
         }
-
-        Graphics2D g;
-        int width;
-        int height;
-        if (dr instanceof LayerMask) {
-            BufferedImage subImage = dr.getCanvasSizedSubImage();
-            g = subImage.createGraphics();
-            width = subImage.getWidth();
-            height = subImage.getHeight();
-        } else {
-            TmpDrawingLayer tmpDrawingLayer = dr.createTmpDrawingLayer(composite);
-            g = tmpDrawingLayer.getGraphics();
-            width = tmpDrawingLayer.getWidth();
-            height = tmpDrawingLayer.getHeight();
-        }
-        dr.getComp().applySelectionClipping(g, null);
-        // repeated gradients are still jaggy
-        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-
-        Color startColor = colorType.getStartColor(invert);
-        Color endColor = colorType.getEndColor(invert);
-        assert startColor != null;
-        assert endColor != null;
-        Color[] colors = {startColor, endColor};
-
-        Paint gradient = gradientType.getGradient(imDrag, colors, cycleMethod);
-
-        g.setPaint(gradient);
-
-        g.fillRect(0, 0, width, height);
-        g.dispose();
-        dr.mergeTmpDrawingLayerDown();
-        dr.updateIconImage();
+        gradient.drawOn(dr);
+        comp.imageChanged(FULL);
+        lastGradient = gradient;
     }
 
     @Override
@@ -313,7 +302,9 @@ public class GradientTool extends DragTool {
         if (handles != null) {
             handles.paint(g2);
         } else {
-            if (userDrag != null && !userDrag.isFinished()) {
+            if (userDrag != null && userDrag.isDragging()) {
+                // during the first drag, when there are no handles yet,
+                // paint only the arrow
                 userDrag.drawGradientArrow(g2);
             }
         }
@@ -331,12 +322,54 @@ public class GradientTool extends DragTool {
         throw new IllegalStateException("should not get here");
     }
 
-    public void setupMaskDrawing(boolean editMask) {
+    private static String cycleMethodAsString(CycleMethod cm) {
+        switch (cm) {
+            case NO_CYCLE:
+                return NO_CYCLE_AS_STRING;
+            case REFLECT:
+                return REFLECT_AS_STRING;
+            case REPEAT:
+                return REPEAT_AS_STRING;
+        }
+        throw new IllegalStateException("should not get here");
+    }
+
+    public void setupMaskEditing(boolean editMask) {
         if (editMask) {
             blendingModePanel.setEnabled(false);
         } else {
             blendingModePanel.setEnabled(true);
         }
+    }
+
+    // called only by history edits
+    public void setGradient(Gradient gradient, boolean regenerate, View view) {
+        if (gradient == null) {
+            hideHandles(view);
+            return;
+        }
+
+        assert gradient != null;
+        handles = gradient.createHandles(view);
+
+        // set the settings
+        ignoreRegenerate = true;
+
+        colorTypeSelector.setSelectedItem(gradient.getColorType());
+        typeSelector.setSelectedItem(gradient.getType());
+        cycleMethodSelector.setSelectedItem(
+                cycleMethodAsString(gradient.getCycleMethod()));
+        invertCheckBox.setSelected(gradient.isInverted());
+        blendingModePanel.setBlendingMode(gradient.getBlendingMode());
+        blendingModePanel.setOpacity(gradient.getOpacity());
+
+        ignoreRegenerate = false;
+        if (regenerate) {
+            regenerateGradient(false);
+        }
+
+        lastGradient = gradient;
+        view.repaint();
     }
 
     @Override

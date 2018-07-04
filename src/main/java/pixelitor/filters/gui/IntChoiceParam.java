@@ -20,6 +20,7 @@ package pixelitor.filters.gui;
 import com.jhlabs.image.CellularFilter;
 import com.jhlabs.image.TransformFilter;
 import com.jhlabs.image.WaveType;
+import pixelitor.utils.RandomUtils;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -30,7 +31,6 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.APP_LOGIC;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
@@ -86,9 +86,8 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
     @Override
     public void randomize() {
         if (randomizePolicy.allow()) {
-            Random rnd = new Random();
-            int randomIndex = rnd.nextInt(choicesList.size());
-            setCurrentChoice(choicesList.get(randomIndex), false);
+            Value choice = RandomUtils.chooseFrom(choicesList);
+            setCurrentChoice(choice, false);
         }
     }
 

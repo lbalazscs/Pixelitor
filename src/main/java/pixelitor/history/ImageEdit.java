@@ -55,12 +55,28 @@ public class ImageEdit extends FadeableEdit {
         checkBackupDifferentFromActive();
     }
 
+    public static ImageEdit create(Composition comp, String name, boolean embedded) {
+        // If there is a selection, only the bounds of the selected area is saved.
+        BufferedImage copy = comp.getActiveDrawable()
+                .getImageOrSubImageIfSelected(true, true);
+
+        ImageEdit edit = new ImageEdit(name, comp,
+                comp.getActiveDrawable(), copy,
+                false, false);
+
+        if (embedded) {
+            edit.setEmbedded(true);
+        }
+
+        return edit;
+    }
+
+    // the backup should never be identical to the active image
+    // otherwise the backup might be also edited
     private void checkBackupDifferentFromActive() {
-        // the backup should never be identical to the active image
-        // otherwise the backup might be also edited
         BufferedImage layerImage = dr.getImage();
         if (layerImage == imgRef.get()) {
-            throw new IllegalStateException("backup BufferedImage is identical to the active one");
+            throw new IllegalStateException("backup image is identical to the active one");
         }
     }
 

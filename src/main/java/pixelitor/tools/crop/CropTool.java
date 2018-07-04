@@ -83,7 +83,7 @@ public class CropTool extends DragTool {
     public CropTool() {
         super('c', "Crop", "crop_tool_icon.png",
                 "<b>drag</b> to start, hold down <b>SPACE</b> to move the entire region. After the handles appear: <b>Shift-drag</b> the handles to keep the aspect ratio. <b>Double-click</b> to crop, or press <b>Esc</b> to cancel.",
-                Cursors.DEFAULT, false, true, false, ClipStrategy.CANVAS);
+                Cursors.DEFAULT, false, true, false, ClipStrategy.CUSTOM);
         spaceDragStartPoint = true;
 
         maskOpacity.addChangeListener(e -> maskOpacityChanged());

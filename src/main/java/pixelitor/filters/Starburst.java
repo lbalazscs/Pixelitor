@@ -17,7 +17,6 @@
 
 package pixelitor.filters;
 
-import pixelitor.colors.ColorUtils;
 import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
@@ -29,6 +28,7 @@ import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.RandomUtils;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.Utils;
 
@@ -148,7 +148,7 @@ public class Starburst extends ParametrizedFilter {
             triangle.closePath();
 
             if (useRandomColors) {
-                g.setColor(ColorUtils.createRandomColor(rand, false));
+                g.setColor(RandomUtils.createRandomColor(rand, false));
             }
 
             g.fill(triangle);

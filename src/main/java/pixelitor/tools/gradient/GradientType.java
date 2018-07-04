@@ -37,7 +37,7 @@ import java.awt.geom.Point2D;
 public enum GradientType {
     LINEAR("Linear") {
         @Override
-        public Paint getGradient(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod) {
+        public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod) {
             Point2D.Double start = imDrag.getStartPoint();
             Point2D.Double end = imDrag.getEndPoint();
 
@@ -45,7 +45,7 @@ public enum GradientType {
         }
     }, RADIAL("Radial") {
         @Override
-        public Paint getGradient(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod) {
+        public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod) {
             float radius = (float) imDrag.getDistance();
             Point2D.Double center = imDrag.getStartPoint();
 
@@ -53,22 +53,22 @@ public enum GradientType {
         }
     }, ANGLE("Angle") {
         @Override
-        public Paint getGradient(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod) {
+        public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod) {
             return new AngleGradientPaint(imDrag, colors[0], colors[1], cycleMethod);
         }
     }, SPIRAL_CW("CW Spiral") {
         @Override
-        public Paint getGradient(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod) {
+        public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod) {
             return new SpiralGradientPaint(true, imDrag, colors[0], colors[1], cycleMethod);
         }
     }, SPIRAL_CCW("CCW Spiral") {
         @Override
-        public Paint getGradient(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod) {
+        public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod) {
             return new SpiralGradientPaint(false, imDrag, colors[0], colors[1], cycleMethod);
         }
     }, DIAMOND("Diamond") {
         @Override
-        public Paint getGradient(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod) {
+        public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod) {
             return new DiamondGradientPaint(imDrag, colors[0], colors[1], cycleMethod);
         }
     };
@@ -82,7 +82,7 @@ public enum GradientType {
         this.guiName = guiName;
     }
 
-    public abstract Paint getGradient(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod);
+    public abstract Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod);
 
     @Override
     public String toString() {

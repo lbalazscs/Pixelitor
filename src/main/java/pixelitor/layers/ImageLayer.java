@@ -17,6 +17,7 @@
 
 package pixelitor.layers;
 
+import pixelitor.Build;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
@@ -735,13 +736,14 @@ public class ImageLayer extends ContentLayer implements Drawable {
     @Override
     public BufferedImage getImageOrSubImageIfSelected(boolean copyIfNoSelection, boolean copyAndTranslateIfSelected) {
         Selection selection = comp.getSelection();
-        if (selection == null) {
+        if (selection == null) { // no selection => return full image
             if (copyIfNoSelection) {
                 return ImageUtils.copyImage(image);
             }
             return image;
         }
 
+        // there is selection
         return getSelectionSizedPartFrom(image, selection, copyAndTranslateIfSelected);
     }
 
@@ -749,15 +751,23 @@ public class ImageLayer extends ContentLayer implements Drawable {
     public BufferedImage getSelectionSizedPartFrom(BufferedImage src, Selection selection, boolean copy) {
         assert selection != null;
 
-        Rectangle bounds = selection.getShapeBounds(); // relative to the composition
+        Rectangle bounds = selection.getShapeBounds(); // relative to the canvas
 
-        bounds.translate(-getTX(), -getTY()); // relative to the image
+        bounds.translate(-getTX(), -getTY()); // now relative to the image
 
+        // the intersection of the selection with the image
         bounds = SwingUtilities.computeIntersection(
                 0, 0, src.getWidth(), src.getHeight(), // image bounds
                 bounds);
 
         if (bounds.isEmpty()) { // the selection is outside the image
+            // this should not happen, because the selection should be
+            // always within the canvas
+            if (Build.CURRENT.isDevelopment()) {
+                throw new IllegalStateException();
+            }
+            // it is questionable to return everything when
+            // logically nothing should be returned
             if (copy) {
                 return ImageUtils.copyImage(src);
             } else {
@@ -766,8 +776,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
 
         if (copy) {
-            return ImageUtils.getUnSharedSubimage(src, bounds);
+            return ImageUtils.getCopyOfSubimage(src, bounds);
         } else {
+            // return a subimage with shared pixels
             return src.getSubimage(bounds.x, bounds.y, bounds.width, bounds.height);
         }
     }

@@ -54,7 +54,9 @@ public class PixelitorEventListener implements GlobalLayerChangeListener,
 
     @Override
     public void activeLayerChanged(Layer newActiveLayer) {
-        Events.postListenerEvent("activeLayerChanged", newActiveLayer.getComp(), newActiveLayer);
+        Events.postListenerEvent("activeLayerChanged to "
+                        + newActiveLayer.getName(),
+                newActiveLayer.getComp(), newActiveLayer);
     }
 
     @Override
@@ -63,8 +65,13 @@ public class PixelitorEventListener implements GlobalLayerChangeListener,
     }
 
     @Override
-    public void maskAddedOrDeleted(Layer affectedLayer) {
-        Events.postListenerEvent("maskAddedOrDeleted", affectedLayer.getComp(), affectedLayer);
+    public void maskAddedTo(Layer layer) {
+        Events.postListenerEvent("maskAdded", layer.getComp(), layer);
+    }
+
+    @Override
+    public void maskDeletedFrom(Layer layer) {
+        Events.postListenerEvent("maskDeleted", layer.getComp(), layer);
     }
 
     @Override
@@ -79,8 +86,7 @@ public class PixelitorEventListener implements GlobalLayerChangeListener,
 
     @Override
     public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
-        Events.postListenerEvent(
-                String.format("activeImageHasChanged %s => %s",
+        Events.postListenerEvent(String.format("activeImageHasChanged %s => %s",
                         oldIC.getName(), newIC.getName()),
                 newIC.getComp(), null);
     }

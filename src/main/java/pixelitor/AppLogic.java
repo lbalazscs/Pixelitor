@@ -55,9 +55,15 @@ public class AppLogic {
         layerMaskChangeListeners.add(listener);
     }
 
-    public static void maskChanged(Layer affectedLayer) {
+    public static void maskAddedTo(Layer layer) {
         for (GlobalLayerMaskChangeListener listener : layerMaskChangeListeners) {
-            listener.maskAddedOrDeleted(affectedLayer);
+            listener.maskAddedTo(layer);
+        }
+    }
+
+    public static void maskDeletedFrom(Layer layer) {
+        for (GlobalLayerMaskChangeListener listener : layerMaskChangeListeners) {
+            listener.maskDeletedFrom(layer);
         }
     }
 

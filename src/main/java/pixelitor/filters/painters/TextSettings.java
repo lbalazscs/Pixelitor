@@ -19,9 +19,8 @@ package pixelitor.filters.painters;
 
 import org.jdesktop.swingx.painter.AbstractLayoutPainter;
 import org.jdesktop.swingx.painter.TextPainter;
-import pixelitor.colors.ColorUtils;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Utils;
+import pixelitor.utils.RandomUtils;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -111,8 +110,7 @@ public class TextSettings implements Serializable {
     }
 
     public void randomizeText() {
-        Random random = new Random();
-        text = Long.toHexString(random.nextLong());
+        text = Long.toHexString(RandomUtils.nextLong());
     }
 
     public void configurePainter(TranslatedTextPainter painter) {
@@ -145,9 +143,9 @@ public class TextSettings implements Serializable {
     }
 
     public static TextSettings createRandomSettings(Random rand) {
-        return new TextSettings(Utils.createRandomString(10),
+        return new TextSettings(RandomUtils.createRandomString(10),
                 new Font(Font.SANS_SERIF, Font.BOLD, 100),
-                ColorUtils.createRandomColor(false),
+                RandomUtils.createRandomColor(false),
                 AreaEffects.createRandom(rand),
                 AbstractLayoutPainter.HorizontalAlignment.CENTER,
                 AbstractLayoutPainter.VerticalAlignment.CENTER,

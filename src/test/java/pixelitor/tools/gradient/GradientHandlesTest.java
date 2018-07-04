@@ -24,7 +24,7 @@ import pixelitor.gui.ImageComponent;
 
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
-public class GradientPointsTest {
+public class GradientHandlesTest {
 
     private static final int START_X_FOR_END = 30;
     private static final int START_Y_FOR_END = 50;
@@ -40,10 +40,10 @@ public class GradientPointsTest {
     @Before
     public void setup() {
         ImageComponent ic = TestHelper.createICWithoutComp();
-        GradientPoints gp = new GradientPoints(START_X_FOR_START, START_Y_FOR_START, START_X_FOR_END, START_Y_FOR_END, ic);
-        start = gp.getStart();
-        end = gp.getEnd();
-        middle = gp.getMiddle();
+        GradientHandles gh = new GradientHandles(START_X_FOR_START, START_Y_FOR_START, START_X_FOR_END, START_Y_FOR_END, ic);
+        start = gh.getStart();
+        end = gh.getEnd();
+        middle = gh.getMiddle();
 
         assertThat(start)
                 .isAt(START_X_FOR_START, START_Y_FOR_START)

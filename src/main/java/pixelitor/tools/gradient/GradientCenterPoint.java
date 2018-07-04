@@ -36,8 +36,8 @@ public class GradientCenterPoint extends DraggablePoint {
                                GradientDefiningPoint end,
                                View view, Color color, Color activeColor) {
         super("center",
-                (start.x + end.x) / 2,
-                (start.y + end.y) / 2,
+                (start.x + end.x) / 2.0,
+                (start.y + end.y) / 2.0,
                 view, color, activeColor);
         this.start = start;
         this.end = end;
@@ -55,10 +55,6 @@ public class GradientCenterPoint extends DraggablePoint {
         // also move the start and end points
         start.translateOnlyThis(dx, dy);
         end.translateOnlyThis(dx, dy);
-    }
-
-    public void setLocationWithoutMovingChildren(double cx, double cy) {
-        super.setLocation(cx, cy);
     }
 
     @Override

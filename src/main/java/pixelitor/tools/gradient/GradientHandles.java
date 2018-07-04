@@ -26,25 +26,30 @@ import pixelitor.utils.VisibleForTesting;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.geom.Point2D;
 
 /**
- * The three points that can be used to manipulate
- * a gradient by dragging handles
+ * The three handles that can be used to manipulate
+ * a gradient by dragging
  */
-public class GradientPoints {
+public class GradientHandles {
     private final GradientDefiningPoint start;
     private final GradientDefiningPoint end;
     private final GradientCenterPoint middle;
-    private final ImageComponent ic;
+    private final View view;
 
-    public GradientPoints(int startX, int startY, int endX, int endY, ImageComponent ic) {
-        this.ic = ic;
+    public GradientHandles(Point2D start, Point2D end, View view) {
+        this(start.getX(), start.getY(), end.getX(), end.getY(), view);
+    }
+
+    public GradientHandles(double startX, double startY, double endX, double endY, View view) {
+        this.view = view;
         Color defaultColor = Color.WHITE;
         Color activeColor = Color.RED;
 
-        start = new GradientDefiningPoint("start", startX, startY, ic, defaultColor, activeColor);
-        end = new GradientDefiningPoint("end", endX, endY, ic, defaultColor, activeColor);
-        middle = new GradientCenterPoint(start, end, ic, defaultColor, activeColor);
+        start = new GradientDefiningPoint("start", startX, startY, view, defaultColor, activeColor);
+        end = new GradientDefiningPoint("end", endX, endY, view, defaultColor, activeColor);
+        middle = new GradientCenterPoint(start, end, view, defaultColor, activeColor);
 
         end.setOther(start);
         end.setCenter(middle);
@@ -84,7 +89,7 @@ public class GradientPoints {
     }
 
     public void viewSizeChanged(View view) {
-        assert view == this.ic;
+        assert view == this.view;
         start.restoreCoordsFromImSpace(view);
         end.restoreCoordsFromImSpace(view);
         middle.restoreCoordsFromImSpace(view);

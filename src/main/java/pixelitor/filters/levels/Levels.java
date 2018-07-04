@@ -22,12 +22,12 @@ import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.levels.gui.LevelsGUI;
 import pixelitor.filters.lookup.FastLookupOp;
 import pixelitor.layers.Drawable;
+import pixelitor.utils.RandomUtils;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ShortLookupTable;
 import java.util.Objects;
-import java.util.Random;
 
 /**
  * The Levels filter
@@ -62,12 +62,10 @@ public class Levels extends FilterWithGUI {
 
     @Override
     public void randomizeSettings() {
-        Random r = new Random();
-
-        int inputBlackValue = r.nextInt(255);
-        int inputWhiteValue = r.nextInt(255);
-        int outputBlackValue = r.nextInt(255);
-        int outputWhiteValue = r.nextInt(255);
+        int inputBlackValue = RandomUtils.nextInt(255);
+        int inputWhiteValue = RandomUtils.nextInt(255);
+        int outputBlackValue = RandomUtils.nextInt(255);
+        int outputWhiteValue = RandomUtils.nextInt(255);
         GrayScaleLookup g = new GrayScaleLookup(inputBlackValue, inputWhiteValue, outputBlackValue, outputWhiteValue);
         rgbLookup = new RGBLookup(g, g, g, g, g, g, g);
     }

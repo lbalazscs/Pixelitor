@@ -35,6 +35,7 @@ import pixelitor.io.Directories;
 import pixelitor.io.OutputFormat;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.Messages;
+import pixelitor.utils.RandomUtils;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -186,8 +187,8 @@ public class FilterTests {
 
     public static void randomResize() {
         ImageComponents.onActiveComp(comp -> {
-            int targetWidth = 10 + RandomGUITest.rand.nextInt(1200);
-            int targetHeight = 10 + RandomGUITest.rand.nextInt(800);
+            int targetWidth = RandomUtils.intInRange(10, 1200);
+            int targetHeight = RandomUtils.intInRange(10, 800);
             new Resize(targetWidth, targetHeight, false).process(comp);
         });
     }

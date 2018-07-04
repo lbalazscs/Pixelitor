@@ -18,11 +18,11 @@
 package pixelitor.filters.gui;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
+import pixelitor.utils.RandomUtils;
 
 import javax.swing.*;
 import javax.swing.event.ListDataListener;
 import java.awt.Rectangle;
-import java.util.Random;
 
 /**
  * Just like IntChoiceParam, this is a model for a JComboBox,
@@ -51,10 +51,9 @@ public class EnumParam<E extends Enum<E>> extends AbstractFilterParam implements
 
     @Override
     public void randomize() {
-        Random rnd = new Random();
-
-        int randomIndex = rnd.nextInt(enumConstants.length);
-        setSelectedItem(enumConstants[randomIndex], false);
+        setSelectedItem(
+                RandomUtils.chooseFrom(enumConstants),
+                false);
     }
 
     @Override
