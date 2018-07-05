@@ -17,7 +17,9 @@
 
 package pixelitor.tools.util;
 
+import pixelitor.Composition;
 import pixelitor.gui.View;
+import pixelitor.history.HandleMovedEdit;
 import pixelitor.utils.Shapes;
 
 import java.awt.AlphaComposite;
@@ -27,6 +29,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Point2D;
+import java.util.Optional;
 
 /**
  * A point that can be dragged with the help of a handle.
@@ -255,6 +258,18 @@ public class DraggablePoint extends Point2D.Double {
 
     public Point2D getLocationCopy() {
         return new Point2D.Double(x, y);
+    }
+
+    // this is supposed to be called after a mouse released event
+    public Optional<HandleMovedEdit> createMovedEdit(Composition comp) {
+        if (x == origX && y == origY) {
+            return Optional.empty();
+        }
+
+        Point2D before = new Point2D.Double(origX, origY);
+        HandleMovedEdit edit = new HandleMovedEdit(
+                "Handle Moved", this, before, comp);
+        return Optional.of(edit);
     }
 
     @Override

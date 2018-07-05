@@ -18,6 +18,7 @@
 package pixelitor.tools.pen;
 
 import pixelitor.gui.ImageComponent;
+import pixelitor.history.History;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
 
@@ -74,6 +75,9 @@ public class PathEditor implements PenToolMode {
                 ap.showPopup(x, y);
             } else {
                 activeDraggablePoint.mouseReleased(x, y);
+                activeDraggablePoint
+                        .createMovedEdit(e.getComp())
+                        .ifPresent(History::addEdit);
             }
         }
     }
