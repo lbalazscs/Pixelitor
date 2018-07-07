@@ -44,10 +44,6 @@ public class DeselectEdit extends PixelitorEdit {
         assert !comp.hasSelection();
 
         comp.createSelectionFromShape(backupShape);
-
-        if (!embedded) {
-            History.notifyMenus(this);
-        }
     }
 
     @Override
@@ -55,10 +51,6 @@ public class DeselectEdit extends PixelitorEdit {
         super.redo();
 
         comp.deselect(false);
-
-        if (!embedded) {
-            History.notifyMenus(this);
-        }
     }
 
     @Override

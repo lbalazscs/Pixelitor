@@ -125,7 +125,7 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
             super(text);
             addActionListener(e -> {
                 if (trigger) {
-                    ImageComponents.getActiveDrawableOrNull()
+                    ImageComponents.getActiveDrawableOrThrow()
                             .setShowOriginal(isSelected());
                 }
             });

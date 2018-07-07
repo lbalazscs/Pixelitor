@@ -182,7 +182,6 @@ public class MultiLayerEdit extends PixelitorEdit {
         if (layer.hasMask()) {
             layer.getMask().updateIconImage();
         }
-        History.notifyMenus(this);
     }
 
     @Override

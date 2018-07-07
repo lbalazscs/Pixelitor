@@ -79,7 +79,7 @@ public class SmudgeTool extends AbstractBrushTool {
 
     @Override
     public void mousePressed(PMouseEvent e) {
-        Drawable dr = e.getComp().getActiveDrawable();
+        Drawable dr = e.getComp().getActiveDrawableOrThrow();
 
         // We could also pass the full image and the translation
         // and the smudge brush could always adjust the last sampling point

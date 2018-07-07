@@ -181,7 +181,7 @@ public class CloneTool extends BlendingModeBrushTool {
         if (sampleAllLayers) {
             sourceImage = ic.getComp().getCompositeImage();
         } else {
-            Drawable dr = ic.getComp().getActiveDrawable();
+            Drawable dr = ic.getComp().getActiveDrawableOrThrow();
             sourceImage = dr.getImage();
             dx = -dr.getTX();
             dy = -dr.getTY();

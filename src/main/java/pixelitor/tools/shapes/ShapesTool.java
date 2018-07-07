@@ -171,7 +171,7 @@ public class ShapesTool extends DragTool {
         userDrag.setStartFromCenter(e.isAltDown());
 
         Composition comp = e.getComp();
-        Drawable dr = comp.getActiveDrawable();
+        Drawable dr = comp.getActiveDrawableOrThrow();
 
         ShapesAction action = actionModel.getSelectedItem();
         boolean selectionMode = action.createSelection();

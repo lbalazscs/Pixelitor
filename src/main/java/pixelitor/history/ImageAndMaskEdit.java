@@ -85,7 +85,6 @@ public class ImageAndMaskEdit extends ImageEdit {
             comp.imageChanged(FULL);
             dr.updateIconImage();
             ((ImageLayer) dr).getMask().updateIconImage();
-            History.notifyMenus(this);
         }
     }
 }

@@ -45,8 +45,6 @@ public class HandleMovedEdit extends PixelitorEdit {
 
         handle.setLocation(before);
         comp.repaint();
-
-        History.notifyMenus(this);
     }
 
     @Override
@@ -55,7 +53,5 @@ public class HandleMovedEdit extends PixelitorEdit {
 
         handle.setLocation(after);
         comp.repaint();
-
-        History.notifyMenus(this);
     }
 }

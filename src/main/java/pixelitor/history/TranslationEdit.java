@@ -98,7 +98,6 @@ public class TranslationEdit extends PixelitorEdit {
 
         if (!embedded) {
             layer.getComp().imageChanged(FULL);
-            History.notifyMenus(this);
         }
     }
 

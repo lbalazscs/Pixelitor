@@ -76,10 +76,7 @@ public class HistogramsPanel extends JPanel implements ActiveImageChangeListener
             boolean newValue = selected.equals(TYPE_LOGARITHMIC);
             if (newValue != logarithmic) {
                 logarithmic = newValue;
-                Composition comp = ImageComponents.getActiveCompOrNull();
-                if (comp != null) {
-                    updateFromCompIfShown(comp);
-                }
+                ImageComponents.getActiveComp().ifPresent(this::updateFromCompIfShown);
             }
         });
 

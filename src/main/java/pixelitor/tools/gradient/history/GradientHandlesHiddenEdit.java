@@ -18,7 +18,6 @@
 package pixelitor.tools.gradient.history;
 
 import pixelitor.Composition;
-import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.tools.Tools;
 import pixelitor.tools.gradient.Gradient;
@@ -39,8 +38,6 @@ public class GradientHandlesHiddenEdit extends PixelitorEdit {
         super.undo();
 
         Tools.GRADIENT.setGradient(gradient, false, comp.getIC());
-
-        History.notifyMenus(this);
     }
 
     @Override
@@ -48,7 +45,5 @@ public class GradientHandlesHiddenEdit extends PixelitorEdit {
         super.redo();
 
         Tools.GRADIENT.setGradient(null, false, comp.getIC());
-
-        History.notifyMenus(this);
     }
 }

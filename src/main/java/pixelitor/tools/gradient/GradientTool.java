@@ -23,6 +23,7 @@ import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.History;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.ClipStrategy;
@@ -110,6 +111,12 @@ public class GradientTool extends DragTool {
             return;
         }
 
+        Drawable dr = ImageComponents.getActiveDrawableOrNull();
+        if (dr == null) {
+            Dialogs.showNotDrawableDialog();
+            return;
+        }
+
         // TODO if in the meantime the active layer is not drawable
         // there should be an error message instead of
         // quietly ignoring it in drawGradient
@@ -121,7 +128,7 @@ public class GradientTool extends DragTool {
             if (ic != null) {
                 ImDrag imDrag = handles.toImDrag(ic);
                 if (!imDrag.isClick()) {
-                    drawGradient(ic.getComp(), imDrag, addToHistory);
+                    drawGradient(dr, imDrag, addToHistory);
                 }
             }
         }
@@ -187,9 +194,10 @@ public class GradientTool extends DragTool {
                     userDrag.getCoStartX(), userDrag.getCoStartY(),
                     userDrag.getCoEndX(), userDrag.getCoEndY(), e.getIC());
         }
-        Composition comp = e.getComp();
 
-        drawGradient(comp, imDrag, true);
+        Composition comp = e.getComp();
+        Drawable dr = comp.getActiveDrawableOrThrow();
+        drawGradient(dr, imDrag, true);
     }
 
     @Override
@@ -270,7 +278,7 @@ public class GradientTool extends DragTool {
         return (GradientType) typeSelector.getSelectedItem();
     }
 
-    private void drawGradient(Composition comp, ImDrag imDrag, boolean addToHistory) {
+    private void drawGradient(Drawable dr, ImDrag imDrag, boolean addToHistory) {
         Gradient gradient = new Gradient(imDrag,
                 getType(), getCycleType(), getGradientColorType(),
                 invertCheckBox.isSelected(),
@@ -281,19 +289,14 @@ public class GradientTool extends DragTool {
         if (addToHistory) {
             boolean isFirst = lastGradient == null;
             if (isFirst) {
-                History.addEdit(new NewGradientEdit(comp, gradient));
+                History.addEdit(new NewGradientEdit(dr, gradient));
             } else {
-                History.addEdit(new GradientChangeEdit(comp, lastGradient, gradient));
+                History.addEdit(new GradientChangeEdit(dr, lastGradient, gradient));
             }
         }
 
-        Drawable dr = comp.getActiveDrawableOrNull();
-        if (dr == null) {
-            // the active layer is no longer a Drawable
-            return;
-        }
         gradient.drawOn(dr);
-        comp.imageChanged(FULL);
+        dr.getComp().imageChanged(FULL);
         lastGradient = gradient;
     }
 

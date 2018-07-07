@@ -42,8 +42,6 @@ public class DeleteLayerEdit extends PixelitorEdit {
         super.undo();
 
         comp.addLayer(layer, false, null, true, layerIndex);
-
-        History.notifyMenus(this);
     }
 
     @Override
@@ -51,8 +49,6 @@ public class DeleteLayerEdit extends PixelitorEdit {
         super.redo();
 
         comp.deleteLayer(layer, false, true);
-
-        History.notifyMenus(this);
     }
 
     @Override

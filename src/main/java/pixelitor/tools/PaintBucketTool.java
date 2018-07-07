@@ -92,7 +92,7 @@ public class PaintBucketTool extends Tool {
         int y = (int) e.getImY();
 
         Composition comp = e.getComp();
-        Drawable dr = comp.getActiveDrawable();
+        Drawable dr = comp.getActiveDrawableOrThrow();
 
         int tx = dr.getTX();
         int ty = dr.getTY();

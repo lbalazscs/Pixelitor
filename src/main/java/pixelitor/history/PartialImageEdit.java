@@ -91,8 +91,6 @@ public class PartialImageEdit extends FadeableEdit {
 
         comp.imageChanged(FULL);
         dr.updateIconImage();
-
-        History.notifyMenus(this);
     }
 
     private static void debugRaster(String name, Raster raster) {

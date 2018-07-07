@@ -46,7 +46,6 @@ public class CompositionReplacedEdit extends PixelitorEdit {
         super.undo();
 
         ic.replaceComp(comp, false, oldMode);
-        History.notifyMenus(this);
     }
 
     @Override
@@ -54,7 +53,6 @@ public class CompositionReplacedEdit extends PixelitorEdit {
         super.redo();
 
         ic.replaceComp(newComp, false, MaskViewMode.NORMAL);
-        History.notifyMenus(this);
     }
 
     @Override

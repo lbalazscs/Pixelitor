@@ -57,8 +57,6 @@ public class LayerOpacityEdit extends PixelitorEdit {
         assert layer.getOpacity() == backupOpacity : "backupOpacity = " + backupOpacity + ", current = " + layer.getOpacity();
 
         backupOpacity = tmp;
-
-        History.notifyMenus(this);
     }
 
     @Override

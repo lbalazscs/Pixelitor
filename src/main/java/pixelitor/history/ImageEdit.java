@@ -55,18 +55,15 @@ public class ImageEdit extends FadeableEdit {
         checkBackupDifferentFromActive();
     }
 
-    public static ImageEdit create(Composition comp, String name, boolean embedded) {
+    public static ImageEdit createEmbedded(Drawable dr) {
         // If there is a selection, only the bounds of the selected area is saved.
-        BufferedImage copy = comp.getActiveDrawable()
-                .getImageOrSubImageIfSelected(true, true);
+        BufferedImage copy = dr.getImageOrSubImageIfSelected(true, true);
 
-        ImageEdit edit = new ImageEdit(name, comp,
-                comp.getActiveDrawable(), copy,
+        ImageEdit edit = new ImageEdit("", dr.getComp(),
+                dr, copy,
                 false, false);
 
-        if (embedded) {
-            edit.setEmbedded(true);
-        }
+        edit.setEmbedded(true);
 
         return edit;
     }
@@ -121,7 +118,6 @@ public class ImageEdit extends FadeableEdit {
         if(!embedded) {
             comp.imageChanged(FULL);
             dr.updateIconImage();
-            History.notifyMenus(this);
         }
 
         checkBackupDifferentFromActive();

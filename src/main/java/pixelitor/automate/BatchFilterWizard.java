@@ -53,7 +53,7 @@ public class BatchFilterWizard extends Wizard {
         String dialogTitle = "Batch Filter Progress";
 
         Automate.processEachFile(comp -> filter.run(
-                comp.getActiveDrawable(),
+                comp.getActiveDrawableOrThrow(),
                 BATCH_AUTOMATE, busyCursorParent),
                 closeImagesAfterDone, dialogTitle);
     }

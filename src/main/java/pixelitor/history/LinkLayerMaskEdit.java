@@ -41,8 +41,6 @@ public class LinkLayerMaskEdit extends PixelitorEdit {
         super.undo();
 
         mask.setLinked(!mask.isLinked(), false);
-
-        History.notifyMenus(this);
     }
 
     @Override
@@ -50,8 +48,6 @@ public class LinkLayerMaskEdit extends PixelitorEdit {
         super.redo();
 
         mask.setLinked(!mask.isLinked(), false);
-
-        History.notifyMenus(this);
     }
 
     @Override

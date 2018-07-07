@@ -88,7 +88,7 @@ public class RandomFilterGUI extends FilterGUI {
             if (filterSource.getLastFilter() != null) { // there was a filter before
                 // need to clear the preview of the previous filters
                 // so that the image position selectors show the original image
-                Drawable dr = ImageComponents.getActiveDrawableOrNull();
+                Drawable dr = ImageComponents.getActiveDrawableOrThrow();
                 dr.stopPreviewing(); // stop the last one
                 dr.startPreviewing(); // start the new one
             }

@@ -41,8 +41,6 @@ public class LayerSelectionChangeEdit extends PixelitorEdit {
         super.undo();
 
         comp.setActiveLayer(oldLayer, false);
-
-        History.notifyMenus(this);
     }
 
     @Override
@@ -50,8 +48,6 @@ public class LayerSelectionChangeEdit extends PixelitorEdit {
         super.redo();
 
         comp.setActiveLayer(newLayer, false);
-
-        History.notifyMenus(this);
     }
 
     @Override

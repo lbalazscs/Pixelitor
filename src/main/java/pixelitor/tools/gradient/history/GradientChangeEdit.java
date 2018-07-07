@@ -17,10 +17,9 @@
 
 package pixelitor.tools.gradient.history;
 
-import pixelitor.Composition;
-import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.history.PixelitorEdit;
+import pixelitor.layers.Drawable;
 import pixelitor.tools.Tools;
 import pixelitor.tools.gradient.Gradient;
 
@@ -33,15 +32,15 @@ public class GradientChangeEdit extends PixelitorEdit {
     private ImageEdit imageEdit;
     private final boolean imageEditNeeded;
 
-    public GradientChangeEdit(Composition comp, Gradient before, Gradient after) {
-        super("Gradient Change", comp);
+    public GradientChangeEdit(Drawable dr, Gradient before, Gradient after) {
+        super("Change Gradient", dr.getComp());
         this.before = before;
         this.after = after;
 
         imageEditNeeded = !before.fullyCovers() || !after.fullyCovers();
 
         if (imageEditNeeded) {
-            imageEdit = ImageEdit.create(comp, "", true);
+            imageEdit = ImageEdit.createEmbedded(dr);
         }
     }
 
@@ -54,8 +53,6 @@ public class GradientChangeEdit extends PixelitorEdit {
         }
 
         Tools.GRADIENT.setGradient(before, !imageEditNeeded, comp.getIC());
-
-        History.notifyMenus(this);
     }
 
     @Override
@@ -67,8 +64,6 @@ public class GradientChangeEdit extends PixelitorEdit {
         }
 
         Tools.GRADIENT.setGradient(after, !imageEditNeeded, comp.getIC());
-
-        History.notifyMenus(this);
     }
 
     @Override

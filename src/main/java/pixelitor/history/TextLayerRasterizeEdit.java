@@ -55,8 +55,6 @@ public class TextLayerRasterizeEdit extends PixelitorEdit {
         if (before.hasMask()) {
             maskViewMode.activate(before);
         }
-
-        History.notifyMenus(this);
     }
 
     @Override
@@ -65,8 +63,6 @@ public class TextLayerRasterizeEdit extends PixelitorEdit {
 
         comp.addLayer(after, false, null, false, false);
         comp.deleteLayer(before, false, true);
-
-        History.notifyMenus(this);
     }
 
     @Override

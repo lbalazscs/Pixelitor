@@ -71,7 +71,7 @@ public class TransformLayer extends ParametrizedFilter {
 
         double theta = angleParam.getValueInRadians();
 
-        Drawable dr = ImageComponents.getActiveDrawableOrNull();
+        Drawable dr = ImageComponents.getActiveDrawableOrThrow();
 
         float relativeX = centerParam.getRelativeX();
         float relativeY = centerParam.getRelativeY();

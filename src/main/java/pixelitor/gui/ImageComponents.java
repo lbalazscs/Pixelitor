@@ -112,8 +112,7 @@ public class ImageComponents {
     public static Optional<Composition> findCompositionByName(String name) {
         return icList.stream()
                 .map(ImageComponent::getComp)
-                .filter(c -> c.getName()
-                        .equals(name))
+                .filter(c -> c.getName().equals(name))
                 .findFirst();
     }
 
@@ -137,6 +136,15 @@ public class ImageComponents {
         }
 
         return null;
+    }
+
+    public static Drawable getActiveDrawableOrThrow() {
+        if (activeIC != null) {
+            Composition comp = activeIC.getComp();
+            return comp.getActiveDrawableOrThrow();
+        }
+
+        throw new IllegalStateException("no active image");
     }
 
     public static int getNumOpenImages() {
@@ -285,7 +293,8 @@ public class ImageComponents {
         Composition comp = activeIC.getComp();
         File file = comp.getFile();
         if (file == null) {
-            String msg = String.format("The image '%s' cannot be reloaded because it was not yet saved.", comp.getName());
+            String msg = String
+                    .format("The image '%s' cannot be reloaded because it was not yet saved.", comp.getName());
             Messages.showError("No file", msg);
             return;
         }

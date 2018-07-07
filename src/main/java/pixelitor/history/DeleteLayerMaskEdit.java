@@ -47,8 +47,6 @@ public class DeleteLayerMaskEdit extends PixelitorEdit {
 
         layer.addMask(oldMask);
         oldMode.activate(comp, layer);
-
-        History.notifyMenus(this);
     }
 
     @Override
@@ -56,8 +54,6 @@ public class DeleteLayerMaskEdit extends PixelitorEdit {
         super.redo();
 
         layer.deleteMask(false);
-
-        History.notifyMenus(this);
     }
 
     @Override

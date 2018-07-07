@@ -53,8 +53,6 @@ public class EnableLayerMaskEdit extends PixelitorEdit {
     private void changeEnabledState() {
         boolean newEnabled = !layer.isMaskEnabled();
         layer.setMaskEnabled(newEnabled, false);
-
-        History.notifyMenus(this);
     }
 
     @Override

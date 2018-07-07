@@ -80,7 +80,7 @@ public class AbstractBrushToolTest {
         Composition comp = TestHelper.create2LayerComposition(false);
         ic = TestHelper.setupAnActiveICFor(comp);
 
-        dr = comp.getActiveDrawable();
+        dr = comp.getActiveDrawableOrThrow();
 
         origBrush = tool.getBrush();
         brushSpy = spy(origBrush);

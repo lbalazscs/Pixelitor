@@ -216,7 +216,7 @@ public final class SelectionActions {
             if (comp.hasSelection()) {
                 Shape shape = comp.getSelectionShape();
                 if (shape != null) {
-                    Drawable dr = comp.getActiveDrawable();
+                    Drawable dr = comp.getActiveDrawableOrThrow();
                     brushTool.trace(dr, shape);
                 }
             }

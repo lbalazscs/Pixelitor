@@ -271,10 +271,10 @@ public final class Utils {
         ImageComponent savedIC = ImageComponents.getActiveIC();
 
         Optional<Composition> debugCompOpt = ImageComponents.findCompositionByName(name);
-        if (debugCompOpt.isPresent()) {
+        if (debugCompOpt.isPresent()) { // TODO after Java 9: ifPresentOrElse​
             // if we already have a debug composition, simply replace the image
             Composition comp = debugCompOpt.get();
-            comp.getActiveDrawable().setImage(copy);
+            comp.getActiveDrawableOrThrow().setImage(copy);
             comp.repaint();
         } else {
             Composition comp = Composition.fromImage(copy, null, name);

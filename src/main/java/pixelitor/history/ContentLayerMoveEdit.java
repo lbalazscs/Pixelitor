@@ -65,7 +65,6 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
 
         if (!embedded) {
             layer.getComp().imageChanged(FULL);
-            History.notifyMenus(this);
         }
     }
 
@@ -80,7 +79,6 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
 
         if (!embedded) {
             layer.getComp().imageChanged(FULL);
-            History.notifyMenus(this);
         }
     }
 

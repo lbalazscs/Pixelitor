@@ -140,7 +140,7 @@ public abstract class AbstractBrushTool extends Tool {
     public void mousePressed(PMouseEvent e) {
         boolean withLine = withLine(e);
 
-        newMousePoint(e.getComp().getActiveDrawable(), e, withLine);
+        newMousePoint(e.getComp().getActiveDrawableOrThrow(), e, withLine);
         firstMouseDown = false;
 
         if (withLine) {
@@ -156,7 +156,7 @@ public abstract class AbstractBrushTool extends Tool {
 
     @Override
     public void mouseDragged(PMouseEvent e) {
-        newMousePoint(e.getComp().getActiveDrawable(), e, false);
+        newMousePoint(e.getComp().getActiveDrawableOrThrow(), e, false);
     }
 
     @Override
@@ -170,7 +170,7 @@ public abstract class AbstractBrushTool extends Tool {
         }
 
         Composition comp = e.getComp();
-        finishBrushStroke(comp.getActiveDrawable());
+        finishBrushStroke(comp.getActiveDrawableOrThrow());
     }
 
     private void finishBrushStroke(Drawable dr) {

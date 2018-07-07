@@ -55,7 +55,7 @@ public class Fade extends ParametrizedFilter {
         assert History.canFade();
 
         BufferedImage previous = ImageComponents.getActiveComp()
-                .map(Composition::getActiveDrawable)
+                .flatMap(Composition::getActiveDrawable)
                 .flatMap(History::getPreviousEditForFade)
                 .orElseThrow(() -> new IllegalStateException("no FadeableEdit"))
                 .getBackupImage();

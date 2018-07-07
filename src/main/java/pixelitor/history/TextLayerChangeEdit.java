@@ -66,7 +66,6 @@ public class TextLayerChangeEdit extends PixelitorEdit {
         layer.updateLayerName();
 
         layer.getComp().imageChanged(FULL);
-        History.notifyMenus(this);
     }
 
     @Override

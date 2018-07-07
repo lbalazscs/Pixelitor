@@ -29,6 +29,7 @@ import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
+import java.util.Optional;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 
@@ -47,42 +48,43 @@ public class PasteAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
-            BufferedImage pastedImage = getImageFromClipboard();
-            if (pastedImage != null) {
-                // pastedImage = ImageUtils.toCompatibleImage(pastedImage);
-
-                int type = pastedImage.getType();
-                if (type != TYPE_INT_ARGB_PRE) {
-                    // needs conversion in the case of
-                    // images pasted from other apps
-                    // TODO why not convert to sys compatible image?
-                    pastedImage = ImageUtils.convertToARGB_PRE(pastedImage, true);
-                } else {
-                    // if a layer was pasted from Pixelitor,
-                    // then we get back here the same object reference
-                    try {
-                        pastedImage = ImageUtils.copyImage(pastedImage);
-                    } catch (IllegalArgumentException ex) {
-                        WritableRaster raster = pastedImage.getRaster();
-                        int minX = raster.getMinX();
-                        int minY = raster.getMinY();
-                        System.out.println("PasteAction.actionPerformed minX = " + minX + ", minY = " + minY);
-                        throw ex;
-                    }
-                }
-
-                destination.addImage(pastedImage);
-            }
+            getImageFromClipboard().ifPresent(this::pasteImage);
         } catch (Exception ex) {
             Messages.showException(ex);
         }
     }
 
-    private static BufferedImage getImageFromClipboard() {
+    private void pasteImage(BufferedImage pastedImage) {
+        // pastedImage = ImageUtils.toCompatibleImage(pastedImage);
+
+        int type = pastedImage.getType();
+        if (type != TYPE_INT_ARGB_PRE) {
+            // needs conversion in the case of
+            // images pasted from other apps
+            // TODO why not convert to sys compatible image?
+            pastedImage = ImageUtils.convertToARGB_PRE(pastedImage, true);
+        } else {
+            // if a layer was pasted from Pixelitor,
+            // then we get back here the same object reference
+            try {
+                pastedImage = ImageUtils.copyImage(pastedImage);
+            } catch (IllegalArgumentException ex) {
+                WritableRaster raster = pastedImage.getRaster();
+                int minX = raster.getMinX();
+                int minY = raster.getMinY();
+                System.out.println("PasteAction.actionPerformed minX = " + minX + ", minY = " + minY);
+                throw ex;
+            }
+        }
+
+        destination.addImage(pastedImage);
+    }
+
+    private static Optional<BufferedImage> getImageFromClipboard() {
         Transferable clipboardContents = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
         if (clipboardContents == null) {
             Messages.showInfo("Paste", "There is nothing to paste.");
-            return null;
+            return Optional.empty();
         }
 
         BufferedImage pastedImage = null;
@@ -94,8 +96,8 @@ public class PasteAction extends AbstractAction {
             }
         } else {
             Messages.showInfo("Paste", "The clipboard content is not an image.");
-            return null;
+            return Optional.empty();
         }
-        return pastedImage;
+        return Optional.of(pastedImage);
     }
 }

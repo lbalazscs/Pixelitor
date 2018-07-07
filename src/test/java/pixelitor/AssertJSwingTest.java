@@ -1882,7 +1882,7 @@ public class AssertJSwingTest {
             altDragTo(300, 300);
         } else {
             ImageComponent ic = ImageComponents.getActiveIC();
-            Drawable dr = ic.getComp().getActiveDrawable();
+            Drawable dr = ic.getComp().getActiveDrawableOrThrow();
             int tx = dr.getTX();
             int ty = dr.getTY();
             assert tx == 0 : "tx = " + tx;

@@ -381,7 +381,8 @@ public class RandomGUITest {
     }
 
     private static void randomFilter() {
-        if (!ImageComponents.getActiveIC().activeIsDrawable()) {
+        Drawable dr = ImageComponents.getActiveDrawableOrNull();
+        if (dr == null) {
             return;
         }
 
@@ -398,7 +399,6 @@ public class RandomGUITest {
             ((FilterWithGUI) f).randomizeSettings();
         }
 
-        Drawable dr = ImageComponents.getActiveDrawableOrNull();
         if (f instanceof FilterWithGUI) {
             dr.startPreviewing();
 
@@ -649,7 +649,7 @@ public class RandomGUITest {
         Fade fade = new Fade();
         fade.setOpacity(opacity);
 
-        Drawable dr = ImageComponents.getActiveDrawableOrNull();
+        Drawable dr = ImageComponents.getActiveDrawableOrThrow();
         fade.startOn(dr, FILTER_WITHOUT_DIALOG);
     }
 

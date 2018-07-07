@@ -76,7 +76,7 @@ public class ColorPickerTool extends Tool {
                 return;
             }
 
-            Drawable dr = ic.getComp().getActiveDrawable();
+            Drawable dr = ic.getComp().getActiveDrawableOrThrow();
             img = dr.getImage();
             isGray = img.getType() == BufferedImage.TYPE_BYTE_GRAY;
 

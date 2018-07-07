@@ -51,8 +51,6 @@ public class NewLayerEdit extends PixelitorEdit {
         comp.setActiveLayer(activeLayerBefore, false);
 
         oldViewMode.activate(comp, activeLayerBefore);
-
-        History.notifyMenus(this);
     }
 
     @Override
@@ -60,8 +58,6 @@ public class NewLayerEdit extends PixelitorEdit {
         super.redo();
 
         comp.addLayer(newLayer, false, null, true, newLayerIndex);
-
-        History.notifyMenus(this);
     }
 
     @Override

@@ -65,7 +65,7 @@ public class AutoPaint {
     }
 
     public static void showDialog() {
-        showDialog(ImageComponents.getActiveDrawableOrNull());
+        showDialog(ImageComponents.getActiveDrawableOrThrow());
     }
 
     public static void showDialog(Drawable dr) {

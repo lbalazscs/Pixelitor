@@ -17,6 +17,7 @@
 
 package pixelitor.tools.util;
 
+import pixelitor.Build;
 import pixelitor.gui.ImageComponent;
 import pixelitor.tools.DragTool;
 import pixelitor.utils.Shapes;
@@ -73,9 +74,13 @@ public class UserDrag {
 
     public void setEnd(PMouseEvent e) {
         assert ic != null;
-        assert this.ic == e.getIC() : "ic changed for " + tool.getName()
-                + " Tool, was " + this.ic.getName()
-                + ", is " + e.getIC().getName();
+
+        if (this.ic != e.getIC()) { // TODO happened in random tests
+            if (Build.CURRENT.isDevelopment()) {
+                System.out.println("UserDrag::setEnd: another ic x = " + e.getCoX() + ", y = " + e.getCoY());
+            }
+            return;
+        }
 
         coEndX = e.getCoX();
         coEndY = e.getCoY();

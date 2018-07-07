@@ -49,8 +49,6 @@ public class AddLayerMaskEdit extends PixelitorEdit {
         newMode = comp.getIC().getMaskViewMode();
 
         layer.deleteMask(false);
-
-        History.notifyMenus(this);
     }
 
     @Override
@@ -61,8 +59,6 @@ public class AddLayerMaskEdit extends PixelitorEdit {
 
         assert newMode != null;
         newMode.activate(comp, layer);
-
-        History.notifyMenus(this);
     }
 
     @Override

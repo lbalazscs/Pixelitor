@@ -68,7 +68,6 @@ public class CanvasChangeEdit extends PixelitorEdit {
 
         if (!embedded) {
             comp.updateAllIconImages();
-            History.notifyMenus(this);
         }
     }
 }

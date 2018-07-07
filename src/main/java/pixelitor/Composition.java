@@ -63,6 +63,7 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -531,11 +532,15 @@ public class Composition implements Serializable {
         return null;
     }
 
+    public Optional<Drawable> getActiveDrawable() {
+        return Optional.ofNullable(getActiveDrawableOrNull());
+    }
+
     /**
-     * Returns the active mask or image layer
-     * This method assumes that the active layer is an image layer
+     * Returns the active mask or image layer.
+     * Calling this method assumes that the active layer is a Drawable.
      */
-    public Drawable getActiveDrawable() {
+    public Drawable getActiveDrawableOrThrow() {
         Drawable dr = getActiveDrawableOrNull();
         if (dr == null) {
             throw new IllegalStateException("The active layer is not an image layer or a mask, it is "

@@ -226,7 +226,7 @@ public class Pixelitor {
     }
 
     private static void startFilter(Filter filter) {
-        filter.startOn(ImageComponents.getActiveDrawableOrNull());
+        filter.startOn(ImageComponents.getActiveDrawableOrThrow());
     }
 
     private static void addNewImage() {

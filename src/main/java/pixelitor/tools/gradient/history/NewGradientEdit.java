@@ -17,10 +17,9 @@
 
 package pixelitor.tools.gradient.history;
 
-import pixelitor.Composition;
-import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.history.PixelitorEdit;
+import pixelitor.layers.Drawable;
 import pixelitor.tools.Tools;
 import pixelitor.tools.gradient.Gradient;
 
@@ -31,11 +30,11 @@ public class NewGradientEdit extends PixelitorEdit {
     private final Gradient gradient;
     private final ImageEdit imageEdit;
 
-    public NewGradientEdit(Composition comp, Gradient gradient) {
-        super("Create Gradient", comp);
+    public NewGradientEdit(Drawable dr, Gradient gradient) {
+        super("Create Gradient", dr.getComp());
         this.gradient = gradient;
 
-        imageEdit = ImageEdit.create(comp, "", true);
+        imageEdit = ImageEdit.createEmbedded(dr);
     }
 
     @Override
@@ -44,8 +43,6 @@ public class NewGradientEdit extends PixelitorEdit {
 
         Tools.GRADIENT.setGradient(null, false, comp.getIC());
         imageEdit.undo();
-
-        History.notifyMenus(this);
     }
 
     @Override
@@ -58,7 +55,5 @@ public class NewGradientEdit extends PixelitorEdit {
 
         // set the handles
         Tools.GRADIENT.setGradient(gradient, false, comp.getIC());
-
-        History.notifyMenus(this);
     }
 }
