@@ -50,7 +50,6 @@ import java.awt.image.BufferedImage;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
 
 /**
@@ -213,7 +212,7 @@ public class ShapesTool extends DragTool {
             }
             paintShape(dr, currentShape);
 
-            comp.imageChanged(FULL);
+            comp.imageChanged();
             dr.updateIconImage();
         } else { // selection mode
             comp.onSelection(selection -> {
@@ -282,8 +281,8 @@ public class ShapesTool extends DragTool {
     }
 
     /**
-     * Paint a shape on the given Drawable. Can be used programmatically.
-     * The start and end point points are given relative to the Composition (not Layer)
+     * Paints a shape on the given Drawable. Can be used programmatically.
+     * The start and end point points are given relative to the canvas.
      */
     public void paintShape(Drawable dr, Shape shape) {
         int tx = -dr.getTX();

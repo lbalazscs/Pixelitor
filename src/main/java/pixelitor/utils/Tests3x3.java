@@ -129,7 +129,7 @@ public class Tests3x3 {
             LayerMask mask = new LayerMask(comp, maskImg, layer, false);
             layer.addMask(mask);
         }
-        ImageComponents.addCompAsNewImage(comp);
+        ImageComponents.addAsNewImage(comp);
         comp.getIC().setZoom(ZoomLevel.Z6400, true, null);
     }
 

@@ -55,7 +55,7 @@ public class OpenSaveManager {
         Runnable r = () -> {
             Composition comp = createCompositionFromFile(file);
             if(comp != null) { // there was no decoding problem
-                ImageComponents.addCompAsNewImage(comp);
+                ImageComponents.addAsNewImage(comp);
                 RecentFilesMenu.getInstance().addFile(file);
             }
         };

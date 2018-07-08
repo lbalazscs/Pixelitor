@@ -104,8 +104,8 @@ public class TransformBoxMain {
 
     static class TestView extends JComponent implements View {
         private double viewScale = 1.0f;
-        private double drawStartX;
-        private double drawStartY;
+        private double canvasStartX;
+        private double canvasStartY;
         private static final int canvasWidth = 300;
         private static final int canvasHeight = 300;
         private final Dimension size = new Dimension(600, 400);
@@ -123,7 +123,7 @@ public class TransformBoxMain {
 
         private void init() {
             setSize(size);
-            calcDrawStart();
+            calcCanvasStart();
 
             prect = PRectangle.fromIm(50, 50, 200, 100, this);
             Rectangle compSpaceRect = prect.getCo();
@@ -172,7 +172,7 @@ public class TransformBoxMain {
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
 
-            calcDrawStart();
+            calcCanvasStart();
 
             // set up image space
             Graphics2D g2 = (Graphics2D) g;
@@ -180,7 +180,7 @@ public class TransformBoxMain {
                     RenderingHints.VALUE_ANTIALIAS_ON);
 
             AffineTransform origTransform = g2.getTransform();
-            g2.translate(drawStartX, drawStartY);
+            g2.translate(canvasStartX, canvasStartY);
             g2.scale(viewScale, viewScale);
 
             // fill background with white
@@ -198,9 +198,9 @@ public class TransformBoxMain {
 
         }
 
-        private void calcDrawStart() {
-            drawStartX = (getWidth() - canvasWidth) / 2.0;
-            drawStartY = (getHeight() - canvasHeight) / 2.0;
+        private void calcCanvasStart() {
+            canvasStartX = (getWidth() - canvasWidth) / 2.0;
+            canvasStartY = (getHeight() - canvasHeight) / 2.0;
         }
 
         @Override
@@ -214,56 +214,56 @@ public class TransformBoxMain {
         }
 
         @Override
-        public double componentXToImageSpace(double mouseX) {
-            return ((mouseX - drawStartX) / viewScale);
+        public double componentXToImageSpace(double coX) {
+            return ((coX - canvasStartX) / viewScale);
         }
 
         @Override
-        public double componentYToImageSpace(double mouseY) {
-            return ((mouseY - drawStartY) / viewScale);
+        public double componentYToImageSpace(double coY) {
+            return ((coY - canvasStartY) / viewScale);
         }
 
         @Override
-        public double imageXToComponentSpace(double x) {
-            return drawStartX + x * viewScale;
+        public double imageXToComponentSpace(double imX) {
+            return canvasStartX + imX * viewScale;
         }
 
         @Override
-        public double imageYToComponentSpace(double y) {
-            return drawStartY + y * viewScale;
+        public double imageYToComponentSpace(double imY) {
+            return canvasStartY + imY * viewScale;
         }
 
         @Override
-        public Point2D componentToImageSpace(Point2D p) {
+        public Point2D componentToImageSpace(Point2D co) {
             return new Point2D.Double(
-                    componentXToImageSpace(p.getX()),
-                    componentYToImageSpace(p.getY()));
+                    componentXToImageSpace(co.getX()),
+                    componentYToImageSpace(co.getY()));
         }
 
         @Override
-        public Point2D imageToComponentSpace(Point2D p) {
+        public Point2D imageToComponentSpace(Point2D im) {
             return new Point2D.Double(
-                    imageXToComponentSpace(p.getX()),
-                    imageYToComponentSpace(p.getY()));
+                    imageXToComponentSpace(im.getX()),
+                    imageYToComponentSpace(im.getY()));
         }
 
         @Override
-        public Rectangle2D componentToImageSpace(Rectangle input) {
+        public Rectangle2D componentToImageSpace(Rectangle co) {
             return new Rectangle.Double(
-                    componentXToImageSpace(input.x),
-                    componentYToImageSpace(input.y),
-                    (input.getWidth() / viewScale),
-                    (input.getHeight() / viewScale)
+                    componentXToImageSpace(co.x),
+                    componentYToImageSpace(co.y),
+                    (co.getWidth() / viewScale),
+                    (co.getHeight() / viewScale)
             );
         }
 
         @Override
-        public Rectangle imageToComponentSpace(Rectangle2D input) {
+        public Rectangle imageToComponentSpace(Rectangle2D im) {
             return new Rectangle(
-                    (int) imageXToComponentSpace(input.getX()),
-                    (int) imageYToComponentSpace(input.getY()),
-                    (int) (input.getWidth() * viewScale),
-                    (int) (input.getHeight() * viewScale)
+                    (int) imageXToComponentSpace(im.getX()),
+                    (int) imageYToComponentSpace(im.getY()),
+                    (int) (im.getWidth() * viewScale),
+                    (int) (im.getHeight() * viewScale)
             );
         }
 
@@ -271,7 +271,7 @@ public class TransformBoxMain {
         @Override
         public AffineTransform getImageToComponentTransform() {
             AffineTransform t = new AffineTransform();
-            t.translate(drawStartX, drawStartY);
+            t.translate(canvasStartX, canvasStartY);
             t.scale(viewScale, viewScale);
             return t;
         }
@@ -282,7 +282,7 @@ public class TransformBoxMain {
             AffineTransform t = new AffineTransform();
             double s = 1.0 / viewScale;
             t.scale(s, s);
-            t.translate(-drawStartX, -drawStartY);
+            t.translate(-canvasStartX, -canvasStartY);
             return t;
         }
 

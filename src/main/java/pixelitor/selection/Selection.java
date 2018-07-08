@@ -196,7 +196,7 @@ public class Selection {
     /**
      * Returns the shape bounds of the selection
      * Like everything else in this class, this is in image coordinates
-     * (but relative to the composition, not to the image)
+     * (but relative to the canvas, not to the image)
      */
     public Rectangle getShapeBounds() {
         return shape.getBounds();

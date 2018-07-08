@@ -28,7 +28,6 @@ import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.LayerMask;
-import pixelitor.selection.Selection;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
@@ -70,10 +69,9 @@ public class EnlargeCanvas implements CompAction {
             }
         });
 
-        Selection selection = comp.getSelection();
-        if (selection != null && (north > 0 || west > 0)) {
-            selection.transform(
-                    AffineTransform.getTranslateInstance(west, north));
+        if (north > 0 || west > 0) {
+            comp.transformSelection(
+                    () -> AffineTransform.getTranslateInstance(west, north));
         }
 
         MultiLayerEdit edit = new MultiLayerEdit(editName, comp, backup);

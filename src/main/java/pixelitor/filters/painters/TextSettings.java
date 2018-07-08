@@ -109,7 +109,8 @@ public class TextSettings implements Serializable {
         return rotation;
     }
 
-    public void randomizeText() {
+    public void randomize() {
+        // TODO randomize the other fields as well
         text = Long.toHexString(RandomUtils.nextLong());
     }
 

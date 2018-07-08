@@ -251,7 +251,7 @@ public abstract class Tool implements KeyListener {
     }
 
     // A lot of events can trigger this, such as image resizing,
-    // image zoom, or simply changing the drawStartX in the ImageComponent
+    // image zoom, or simply changing the canvasStartX in the ImageComponent
     // TODO image resizing cannot be handled by simply passing the new ImageComponent,
     // and only the selections are resized (they are called explicitly)
     // but no other tool

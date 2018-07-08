@@ -95,6 +95,9 @@ public interface Drawable {
 
     void resize(int canvasTargetWidth, int canvasTargetHeight, boolean progressiveBilinear);
 
+    /**
+     * Returns true if the layer image is bigger than the canvas
+     */
     boolean isBigLayer();
 
     void crop(Rectangle2D cropRect);

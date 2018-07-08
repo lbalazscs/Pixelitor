@@ -81,10 +81,10 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
     private MaskViewMode maskViewMode;
 
-    // the start of the image if the ImageComponent is resized to bigger
-    // than the canvas, and the image needs to be centralized
-    private double drawStartX;
-    private double drawStartY;
+    // the start coordinates of the canvas if the ImageComponent is bigger
+    // than the canvas, and the canvas needs to be centralized
+    private double canvasStartX;
+    private double canvasStartY;
 
     private AffineTransform coToIm;
     private AffineTransform imToCo;
@@ -141,7 +141,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
         // refresh the layer buttons
         layersPanel = new LayersPanel();
-        comp.addLayersToGUI();
+        comp.addAllLayersToGUI();
         LayersContainer.showLayersPanel(layersPanel);
 
         newMaskViewMode.activate(this, comp.getActiveLayer());
@@ -168,7 +168,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                updateDrawStart();
+                updateCanvasLocation();
 
                 // one can zoom an inactive image with the mouse wheel,
                 // but the tools expect an active image
@@ -287,8 +287,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         return comp.getName();
     }
 
-    public void changeLayerOrderInTheGUI(int oldIndex, int newIndex) {
-        layersPanel.changeLayerOrderInTheGUI(oldIndex, newIndex);
+    public void changeLayerButtonOrder(int oldIndex, int newIndex) {
+        layersPanel.changeLayerButtonOrder(oldIndex, newIndex);
     }
 
     @Override
@@ -308,18 +308,21 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
         Graphics2D g2 = (Graphics2D) g;
 
-        int zoomedWidth = canvas.getCoWidth();
-        int zoomedHeight = canvas.getCoHeight();
+        int canvasCoWidth = canvas.getCoWidth();
+        int canvasCoHeight = canvas.getCoHeight();
 
-        Rectangle canvasClip = setVisibleCanvasClip(g, drawStartX, drawStartY, zoomedWidth, zoomedHeight);
+        Rectangle canvasClip = setVisibleCanvasClip(g,
+                canvasStartX, canvasStartY,
+                canvasCoWidth, canvasCoHeight);
 
-        AffineTransform componentTransform = g2.getTransform(); // a copy of the transform object
+        // make a copy of the transform object
+        AffineTransform componentTransform = g2.getTransform();
 
-        g2.translate(drawStartX, drawStartY);
+        g2.translate(canvasStartX, canvasStartY);
 
         boolean showMask = maskViewMode.showMask();
         if (!showMask) {
-            checkerBoardPainter.paint(g2, this, zoomedWidth, zoomedHeight);
+            checkerBoardPainter.paint(g2, this, canvasCoWidth, canvasCoHeight);
         }
 
         g2.scale(viewScale, viewScale);
@@ -381,14 +384,14 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         // vertical lines
         double skipVer = Math.ceil(startX / pixelSize);
         for (double i = pixelSize * skipVer; i < endX; i += pixelSize) {
-            int x = (int) (drawStartX + i);
+            int x = (int) (canvasStartX + i);
             g2.drawLine(x, startY, x, endY);
         }
 
         // horizontal lines
         double skipHor = Math.ceil(startY / pixelSize);
         for (double i = skipHor * pixelSize; i < endY; i += pixelSize) {
-            int y = (int) (drawStartY + i);
+            int y = (int) (canvasStartY + i);
             g2.drawLine(startX, y, endX, y);
         }
     }
@@ -397,11 +400,11 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
      * Makes sure that not the whole area is repainted, only the canvas and that only
      * inside the visible area of scrollbars
      */
-    private static Rectangle setVisibleCanvasClip(Graphics g, double drawStartX, double drawStartY, int maxWidth, int maxHeight) {
+    private static Rectangle setVisibleCanvasClip(Graphics g, double canvasStartX, double canvasStartY, int maxWidth, int maxHeight) {
         // if there are scollbars, this is the visible area
         Rectangle clipBounds = g.getClipBounds();
 
-        Rectangle imageRect = new Rectangle((int) drawStartX, (int) drawStartY, maxWidth, maxHeight);
+        Rectangle imageRect = new Rectangle((int) canvasStartX, (int) canvasStartY, maxWidth, maxHeight);
 
         // now we are definitely not drawing neither outside
         // the canvas nor outside the scrollbars visible area
@@ -554,7 +557,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         // because then this component will have the final size
         // and updateDrawStart can calculate correct results
         SwingUtilities.invokeLater(() -> {
-            updateDrawStart();
+            updateCanvasLocation();
             if (finalRect != null) {
                 scrollRectToVisible(finalRect);
             }
@@ -589,85 +592,82 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         setZoom(newZoom, false, mousePos);
     }
 
-    public void updateDrawStart() {
-        int width = getWidth();
-        int canvasZoomedWidth = canvas.getCoWidth();
-        int height = getHeight();
-        int canvasZoomedHeight = canvas.getCoHeight();
+    public void updateCanvasLocation() {
+        canvasStartX = (getWidth() - canvas.getCoWidth()) / 2.0;
+        canvasStartY = (getHeight() - canvas.getCoHeight()) / 2.0;
 
-        drawStartX = (width - canvasZoomedWidth) / 2.0;
-        drawStartY = (height - canvasZoomedHeight) / 2.0;
+        // make the transforms invalid
         imToCo = null;
         coToIm = null;
     }
 
     @Override
-    public double componentXToImageSpace(double mouseX) {
-        return ((mouseX - drawStartX) / viewScale);
+    public double componentXToImageSpace(double coX) {
+        return ((coX - canvasStartX) / viewScale);
     }
 
     @Override
-    public double componentYToImageSpace(double mouseY) {
-        return ((mouseY - drawStartY) / viewScale);
+    public double componentYToImageSpace(double coY) {
+        return ((coY - canvasStartY) / viewScale);
     }
 
     @Override
-    public double imageXToComponentSpace(double x) {
-        return drawStartX + x * viewScale;
+    public double imageXToComponentSpace(double imX) {
+        return canvasStartX + imX * viewScale;
     }
 
     @Override
-    public double imageYToComponentSpace(double y) {
-        return drawStartY + y * viewScale;
+    public double imageYToComponentSpace(double imY) {
+        return canvasStartY + imY * viewScale;
     }
 
     @Override
-    public Point2D componentToImageSpace(Point2D p) {
+    public Point2D componentToImageSpace(Point2D co) {
         return new Point2D.Double(
-                componentXToImageSpace(p.getX()),
-                componentYToImageSpace(p.getY()));
+                componentXToImageSpace(co.getX()),
+                componentYToImageSpace(co.getY()));
     }
 
     @Override
-    public Point2D imageToComponentSpace(Point2D p) {
+    public Point2D imageToComponentSpace(Point2D im) {
         return new Point2D.Double(
-                imageXToComponentSpace(p.getX()),
-                imageYToComponentSpace(p.getY()));
+                imageXToComponentSpace(im.getX()),
+                imageYToComponentSpace(im.getY()));
     }
 
-    public Point fromComponentToImageSpace(Point input, ZoomLevel zoom) {
+    public Point fromComponentToImageSpace(Point co, ZoomLevel zoom) {
         double zoomViewScale = zoom.getViewScale();
         return new Point(
-                (int) ((input.x - drawStartX) / zoomViewScale),
-                (int) ((input.y - drawStartY) / zoomViewScale)
+                (int) ((co.x - canvasStartX) / zoomViewScale),
+                (int) ((co.y - canvasStartY) / zoomViewScale)
         );
     }
 
-    public Point fromImageToComponentSpace(Point input, ZoomLevel zoom) {
+    public Point fromImageToComponentSpace(Point im, ZoomLevel zoom) {
         double zoomViewScale = zoom.getViewScale();
         return new Point(
-                (int) (drawStartX + input.x * zoomViewScale),
-                (int) (drawStartY + input.y * zoomViewScale)
+                (int) (canvasStartX + im.x * zoomViewScale),
+                (int) (canvasStartY + im.y * zoomViewScale)
         );
     }
 
     @Override
-    public Rectangle2D componentToImageSpace(Rectangle input) {
+    public Rectangle2D componentToImageSpace(Rectangle co) {
         return new Rectangle.Double(
-                componentXToImageSpace(input.x),
-                componentYToImageSpace(input.y),
-                (input.getWidth() / viewScale),
-                (input.getHeight() / viewScale)
+                componentXToImageSpace(co.x),
+                componentYToImageSpace(co.y),
+                (co.getWidth() / viewScale),
+                (co.getHeight() / viewScale)
         );
     }
 
     @Override
-    public Rectangle imageToComponentSpace(Rectangle2D input) {
+    public Rectangle imageToComponentSpace(Rectangle2D im) {
         return new Rectangle(
-                (int) imageXToComponentSpace(input.getX()),
-                (int) imageYToComponentSpace(input.getY()),
-                (int) (input.getWidth() * viewScale),
-                (int) (input.getHeight() * viewScale)
+                (int) imageXToComponentSpace(im.getX()),
+                (int) imageYToComponentSpace(im.getY()),
+                (int) (im.getWidth() * viewScale),
+                (int) (im.getHeight() * viewScale)
         );
     }
 
@@ -675,7 +675,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     public AffineTransform getImageToComponentTransform() {
         if (imToCo == null) {
             imToCo = new AffineTransform();
-            imToCo.translate(drawStartX, drawStartY);
+            imToCo.translate(canvasStartX, canvasStartY);
             imToCo.scale(viewScale, viewScale);
         }
         return imToCo;
@@ -687,7 +687,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
             coToIm = new AffineTransform();
             double s = 1.0 / viewScale;
             coToIm.scale(s, s);
-            coToIm.translate(-drawStartX, -drawStartY);
+            coToIm.translate(-canvasStartX, -canvasStartY);
         }
         return coToIm;
     }
@@ -730,10 +730,10 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         this.navigator = navigator;
     }
 
-    public void updateNavigator(boolean newICSize) {
+    public void updateNavigator(boolean icSizeChanged) {
         assert SwingUtilities.isEventDispatchThread();
         if (navigator != null) {
-            if (newICSize) {
+            if (icSizeChanged) {
                 // defer until all
                 // pending events have been processed
                 SwingUtilities.invokeLater(() -> {

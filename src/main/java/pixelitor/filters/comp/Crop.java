@@ -90,7 +90,7 @@ public class Crop implements CompAction {
             ic.revalidate();
             ic.makeSureItIsVisible();
 
-            ic.updateDrawStart();
+            ic.updateCanvasLocation();
         }
         comp.imageChanged(FULL, true);
 

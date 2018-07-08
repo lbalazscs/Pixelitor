@@ -128,7 +128,7 @@ public class TextLayer extends ContentLayer {
                 close();
 
                 setSettings(oldSettings);
-                comp.imageChanged(Composition.ImageChangeActions.FULL);
+                comp.imageChanged();
             }
         };
         d.setVisible(true);

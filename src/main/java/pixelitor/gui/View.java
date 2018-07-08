@@ -29,21 +29,21 @@ import java.awt.geom.Rectangle2D;
  * to the component.
  */
 public interface View {
-    double componentXToImageSpace(double mouseX);
+    double componentXToImageSpace(double coX);
 
-    double componentYToImageSpace(double mouseY);
+    double componentYToImageSpace(double coY);
 
-    Point2D componentToImageSpace(Point2D p);
+    Point2D componentToImageSpace(Point2D co);
 
-    double imageXToComponentSpace(double x);
+    double imageXToComponentSpace(double imX);
 
-    double imageYToComponentSpace(double y);
+    double imageYToComponentSpace(double imY);
 
-    Point2D imageToComponentSpace(Point2D p);
+    Point2D imageToComponentSpace(Point2D im);
 
-    Rectangle2D componentToImageSpace(Rectangle input);
+    Rectangle2D componentToImageSpace(Rectangle co);
 
-    Rectangle imageToComponentSpace(Rectangle2D input);
+    Rectangle imageToComponentSpace(Rectangle2D im);
 
     AffineTransform getImageToComponentTransform();
 

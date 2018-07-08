@@ -99,7 +99,7 @@ public class ScreenCaptureAction extends AbstractAction {
             String name = "Screen Capture " + captureCount;
             Composition comp = Composition.fromImage(screenCapture, null, name);
             comp.setDirty(true);
-            ImageComponents.addCompAsNewImage(comp);
+            ImageComponents.addAsNewImage(comp);
 
             captureCount++;
         } catch (Exception ex) {

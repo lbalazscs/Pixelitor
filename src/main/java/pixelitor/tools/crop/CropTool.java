@@ -49,7 +49,6 @@ import java.awt.geom.Rectangle2D;
 
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.Color.BLACK;
-import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 import static pixelitor.tools.crop.CropToolState.INITIAL;
 import static pixelitor.tools.crop.CropToolState.TRANSFORM;
@@ -225,7 +224,7 @@ public class CropTool extends DragTool {
     @Override
     public void dragFinished(PMouseEvent e) {
         Composition comp = e.getComp();
-        comp.imageChanged(FULL);
+        comp.imageChanged();
 
         switch (state) {
             case INITIAL:

@@ -26,7 +26,6 @@ import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.LayerMask;
-import pixelitor.selection.Selection;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -58,13 +57,7 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
     public void process(Composition comp) {
         MultiLayerBackup backup = new MultiLayerBackup(comp, getEditName(), changesCanvasDimensions);
 
-        Canvas canvas = comp.getCanvas();
-        AffineTransform canvasTX = createTransform(canvas);
-
-        if (comp.hasSelection()) {
-            Selection selection = comp.getSelection();
-            selection.transform(canvasTX);
-        }
+        comp.transformSelection(() -> createCanvasTX(comp.getCanvas()));
 
         comp.forEachLayer(layer -> {
             if (layer instanceof ContentLayer) {
@@ -97,5 +90,5 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
 
     protected abstract void applyTx(ContentLayer contentLayer);
 
-    protected abstract AffineTransform createTransform(Canvas canvas);
+    protected abstract AffineTransform createCanvasTX(Canvas canvas);
 }

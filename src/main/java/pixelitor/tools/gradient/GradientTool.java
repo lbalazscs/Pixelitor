@@ -46,7 +46,6 @@ import java.awt.geom.AffineTransform;
 import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
 import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
 import static java.awt.MultipleGradientPaint.CycleMethod.REPEAT;
-import static pixelitor.Composition.ImageChangeActions.FULL;
 
 /**
  * The gradient tool
@@ -296,7 +295,7 @@ public class GradientTool extends DragTool {
         }
 
         gradient.drawOn(dr);
-        dr.getComp().imageChanged(FULL);
+        dr.getComp().imageChanged();
         lastGradient = gradient;
     }
 

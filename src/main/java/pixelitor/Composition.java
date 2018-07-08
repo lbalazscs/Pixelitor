@@ -65,6 +65,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
@@ -289,9 +290,14 @@ public class Composition implements Serializable {
 
     public void addLayer(Layer newLayer, boolean addToHistory, String historyName,
                          boolean updateHistogram, boolean bellowActive) {
+        int newLayerIndex = calcIndexOfNewLayer(bellowActive);
+
+        addLayer(newLayer, addToHistory, historyName, updateHistogram, newLayerIndex);
+    }
+
+    private int calcIndexOfNewLayer(boolean bellowActive) {
         int activeLayerIndex = layerList.indexOf(activeLayer);
         int newLayerIndex;
-
         if (activeLayerIndex == -1) { // no active layer yet
             assert layerList.isEmpty();
             newLayerIndex = 0;
@@ -302,8 +308,7 @@ public class Composition implements Serializable {
                 newLayerIndex = activeLayerIndex + 1;
             }
         }
-
-        addLayer(newLayer, addToHistory, historyName, updateHistogram, newLayerIndex);
+        return newLayerIndex;
     }
 
     /**
@@ -320,14 +325,14 @@ public class Composition implements Serializable {
         History.addEdit(addToHistory, () -> new NewLayerEdit(historyName, this, newLayer, activeLayerBefore, oldViewMode));
 
         if (updateHistogram) {
-            imageChanged(FULL); // if the histogram is updated, a repaint is also necessary
+            imageChanged(); // if the histogram is updated, a repaint is also necessary
         } else {
             imageChanged(INVALIDATE_CACHE);
         }
         assert checkInvariant();
     }
 
-    public void addLayersToGUI() {
+    public void addAllLayersToGUI() {
         assert checkInvariant();
 
         // when adding layer buttons the last layer always gets active
@@ -341,7 +346,6 @@ public class Composition implements Serializable {
 
     private void addLayerToGUI(Layer layer) {
         int layerIndex = layerList.indexOf(layer);
-//        setActiveLayer(layer, false);
         ic.addLayerToGUI(layer, layerIndex);
     }
 
@@ -418,7 +422,7 @@ public class Composition implements Serializable {
                 AppLogic.numLayersChanged(this, layerList.size());
             }
 
-            imageChanged(FULL);
+            imageChanged();
         }
     }
 
@@ -561,7 +565,7 @@ public class Composition implements Serializable {
     public void moveActiveContentRelative(double relX, double relY) {
         Layer layer = getActiveMaskOrLayer();
         layer.moveWhileDragging(relX, relY);
-        imageChanged(FULL);
+        imageChanged();
     }
 
     public void endMovement() {
@@ -572,7 +576,7 @@ public class Composition implements Serializable {
             // We always should get here except if an adjustment
             // layer without a mask was moved.
             History.addEdit(edit);
-            imageChanged(FULL);
+            imageChanged();
         }
     }
 
@@ -606,14 +610,14 @@ public class Composition implements Serializable {
         assert checkInvariant();
 
         int oldIndex = layerList.indexOf(activeLayer);
-        swapLayers(oldIndex, oldIndex + 1, true);
+        changeLayerOrder(oldIndex, oldIndex + 1, true);
     }
 
     public void moveActiveLayerDown() {
         assert checkInvariant();
 
         int oldIndex = layerList.indexOf(activeLayer);
-        swapLayers(oldIndex, oldIndex - 1, true);
+        changeLayerOrder(oldIndex, oldIndex - 1, true);
     }
 
     public void moveActiveLayerToTop() {
@@ -621,17 +625,17 @@ public class Composition implements Serializable {
 
         int oldIndex = layerList.indexOf(activeLayer);
         int newIndex = layerList.size() - 1;
-        swapLayers(oldIndex, newIndex, true);
+        changeLayerOrder(oldIndex, newIndex, true);
     }
 
     public void moveActiveLayerToBottom() {
         assert checkInvariant();
 
         int oldIndex = layerList.indexOf(activeLayer);
-        swapLayers(oldIndex, 0, true);
+        changeLayerOrder(oldIndex, 0, true);
     }
 
-    public void swapLayers(int oldIndex, int newIndex, boolean addToHistory) {
+    public void changeLayerOrder(int oldIndex, int newIndex, boolean addToHistory) {
         if (newIndex < 0) {
             return;
         }
@@ -643,11 +647,11 @@ public class Composition implements Serializable {
         }
 
         Layer layer = layerList.get(oldIndex);
-        layerList.remove(layer);
+        layerList.remove(oldIndex);
         layerList.add(newIndex, layer);
 
-        ic.changeLayerOrderInTheGUI(oldIndex, newIndex);
-        imageChanged(FULL);
+        ic.changeLayerButtonOrder(oldIndex, newIndex);
+        imageChanged();
         AppLogic.layerOrderChanged(this);
 
         History.addEdit(addToHistory, () -> new LayerOrderChangeEdit(this, oldIndex, newIndex));
@@ -814,6 +818,12 @@ public class Composition implements Serializable {
         }
     }
 
+    public void transformSelection(Supplier<AffineTransform> at) {
+        if (selection != null) {
+            selection.transform(at.get());
+        }
+    }
+
     public Selection getSelection() {
         return selection;
     }
@@ -882,6 +892,7 @@ public class Composition implements Serializable {
             Shape shape;
             if (at != null) {
                 Path2D.Float pathShape = new Path2D.Float(selection.getShape());
+                // TODO why not simply at.transform the original?
                 pathShape.transform(at);
                 shape = pathShape;
             } else { // relative to the composition
@@ -932,6 +943,10 @@ public class Composition implements Serializable {
         return cachedCompositeImage;
     }
 
+    public void imageChanged() {
+        imageChanged(FULL);
+    }
+
     public void imageChanged(ImageChangeActions actions) {
         imageChanged(actions, false);
     }
@@ -943,14 +958,14 @@ public class Composition implements Serializable {
     public void imageChanged(ImageChangeActions actions, boolean sizeChanged) {
         compositeImageUpToDate = false;
 
-        if (actions.isRepaint()) {
+        if (actions.repaintNeeded()) {
             if (ic != null) {
                 ic.repaint();
                 ic.updateNavigator(sizeChanged);
             }
         }
 
-        if (actions.isUpdateHistogram()) {
+        if (actions.histogramChanged()) {
             HistogramsPanel.INSTANCE.updateFromCompIfShown(this);
         }
     }
@@ -1000,7 +1015,7 @@ public class Composition implements Serializable {
     public void dragFinished(Layer layer, int newIndex) {
         layerList.remove(layer);
         layerList.add(newIndex, layer);
-        imageChanged(FULL);
+        imageChanged();
     }
 
     public void repaint() {
@@ -1082,11 +1097,11 @@ public class Composition implements Serializable {
             this.updateHistogram = updateHistogram;
         }
 
-        private boolean isRepaint() {
+        private boolean repaintNeeded() {
             return repaint;
         }
 
-        private boolean isUpdateHistogram() {
+        private boolean histogramChanged() {
             return updateHistogram;
         }
     }

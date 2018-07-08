@@ -365,7 +365,7 @@ public class CompositionTest {
                 .layerNamesAre("layer 1", "layer 2")
                 .secondLayerIsActive();
 
-        comp.swapLayers(0, 1, true);
+        comp.changeLayerOrder(0, 1, true);
 
         assertThat(comp)
                 .layerNamesAre("layer 2", "layer 1")

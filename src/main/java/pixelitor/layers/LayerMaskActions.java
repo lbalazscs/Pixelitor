@@ -25,8 +25,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import static pixelitor.Composition.ImageChangeActions.FULL;
-
 public class LayerMaskActions {
     private LayerMaskActions() {
     }
@@ -118,7 +116,7 @@ public class LayerMaskActions {
 
             ((ImageLayer) layer).applyLayerMask(true);
 
-            layer.getComp().imageChanged(FULL);
+            layer.getComp().imageChanged();
         }
     }
 

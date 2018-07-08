@@ -48,7 +48,7 @@ public final class NewImage {
 
     public static Composition addNewImage(FillType bg, int width, int height, String title) {
         Composition comp = createNewComposition(bg, width, height, title);
-        ImageComponents.addCompAsNewImage(comp);
+        ImageComponents.addAsNewImage(comp);
         return comp;
     }
 

@@ -25,8 +25,6 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import java.awt.image.BufferedImage;
 
-import static pixelitor.Composition.ImageChangeActions.FULL;
-
 /**
  * A PixelitorEdit hat represents the movement of a content layer.
  * (Move Tool)
@@ -64,7 +62,7 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
         translationEdit.undo();
 
         if (!embedded) {
-            layer.getComp().imageChanged(FULL);
+            layer.getComp().imageChanged();
         }
     }
 
@@ -78,7 +76,7 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
         translationEdit.redo();
 
         if (!embedded) {
-            layer.getComp().imageChanged(FULL);
+            layer.getComp().imageChanged();
         }
     }
 

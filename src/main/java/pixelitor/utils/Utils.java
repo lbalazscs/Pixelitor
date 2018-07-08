@@ -278,7 +278,7 @@ public final class Utils {
             comp.repaint();
         } else {
             Composition comp = Composition.fromImage(copy, null, name);
-            ImageComponents.addCompAsNewImage(comp);
+            ImageComponents.addAsNewImage(comp);
         }
 
         if (savedIC != null) {

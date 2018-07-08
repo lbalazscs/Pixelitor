@@ -293,13 +293,15 @@ public class ImageComponents {
         Composition comp = activeIC.getComp();
         File file = comp.getFile();
         if (file == null) {
-            String msg = String
-                    .format("The image '%s' cannot be reloaded because it was not yet saved.", comp.getName());
+            String msg = String.format(
+                    "The image '%s' cannot be reloaded because it was not yet saved.",
+                    comp.getName());
             Messages.showError("No file", msg);
             return;
         }
         if (!file.exists()) {
-            String msg = String.format("The image '%s' cannot be reloaded because the file\n" +
+            String msg = String.format(
+                    "The image '%s' cannot be reloaded because the file\n" +
                             "%s\n" +
                             "does not exist anymore.",
                     comp.getName(), file.getAbsolutePath());
@@ -317,7 +319,8 @@ public class ImageComponents {
         assert edit != null;
         History.addEdit(edit);
 
-        String msg = String.format("The image '%s' was reloaded from the file %s.",
+        String msg = String.format(
+                "The image '%s' was reloaded from the file %s.",
                 comp.getName(), file.getAbsolutePath());
         Messages.showInStatusBar(msg);
     }
@@ -326,7 +329,7 @@ public class ImageComponents {
         assert activeIC != null;
         Composition newComp = Composition.createCopy(activeIC.getComp(), false);
 
-        addCompAsNewImage(newComp);
+        addAsNewImage(newComp);
     }
 
     public static void onActiveIC(Consumer<ImageComponent> action) {
@@ -397,14 +400,14 @@ public class ImageComponents {
         }
     }
 
-    public static void addCompAsNewImage(Composition comp) {
+    public static void addAsNewImage(Composition comp) {
         try {
             assert comp.getIC() == null : "already has ic";
 
             ImageComponent ic = new ImageComponent(comp);
             ic.setCursor(Tools.getCurrent().getStartingCursor());
             setActiveIC(ic, false);
-            comp.addLayersToGUI();
+            comp.addAllLayersToGUI();
 
             Desktop.INSTANCE.addNewIC(ic);
         } catch (Exception e) {

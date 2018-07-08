@@ -51,7 +51,6 @@ import java.util.List;
 import static java.awt.AlphaComposite.DstIn;
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
-import static pixelitor.Composition.ImageChangeActions.FULL;
 
 /**
  * The abstract superclass of all layer classes
@@ -128,7 +127,7 @@ public abstract class Layer implements Serializable {
         }
 
         this.visible = newVisibility;
-        comp.imageChanged(FULL);
+        comp.imageChanged();
         ui.setOpenEye(newVisibility);
 
         History.addEdit(addToHistory, () -> new LayerVisibilityChangeEdit(comp, this, newVisibility));
@@ -157,7 +156,7 @@ public abstract class Layer implements Serializable {
     }
 
     private void updateAfterBMorOpacityChange() {
-        comp.imageChanged(FULL);
+        comp.imageChanged();
 
         HistogramsPanel hp = HistogramsPanel.INSTANCE;
         if (hp.isShown()) {
@@ -284,7 +283,7 @@ public abstract class Layer implements Serializable {
         // mask constructor already will try to update the image
         ui.addMaskIconLabel();
 
-        comp.imageChanged(FULL);
+        comp.imageChanged();
 
         AppLogic.maskAddedTo(this);
 
@@ -319,7 +318,7 @@ public abstract class Layer implements Serializable {
         assert mask.getParent() == this;
 
         this.mask = mask;
-        comp.imageChanged(FULL);
+        comp.imageChanged();
         ui.addMaskIconLabel();
         AppLogic.maskAddedTo(this);
         mask.updateIconImage();
@@ -332,7 +331,7 @@ public abstract class Layer implements Serializable {
         mask = null;
         maskEditing = false;
 
-        comp.imageChanged(FULL);
+        comp.imageChanged();
 
         History.addEdit(addToHistory, () -> new DeleteLayerMaskEdit(comp, this, oldMask, oldMode));
 
@@ -534,7 +533,7 @@ public abstract class Layer implements Serializable {
         assert mask != null;
         this.maskEnabled = maskEnabled;
 
-        comp.imageChanged(FULL);
+        comp.imageChanged();
         mask.updateIconImage();
         notifyLayerChangeListeners();
 

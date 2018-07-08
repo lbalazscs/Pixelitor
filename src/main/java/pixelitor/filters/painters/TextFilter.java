@@ -71,7 +71,7 @@ public class TextFilter extends FilterWithGUI {
     @Override
     public void randomizeSettings() {
         if(settings != null) {
-            settings.randomizeText();
+            settings.randomize();
         }
     }
 

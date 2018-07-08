@@ -97,9 +97,9 @@ public class SingleDirChooserPanel extends ValidatedForm {
         if (!chooser.isOkPressed()) {
             return false;
         }
-        File selectedDir = chooserPanel.getSelectedDir();
-        if (selectedDir != null) {
-            Directories.setLastSaveDir(selectedDir);
+        File dir = chooserPanel.getSelectedDir();
+        if (dir.exists() && dir.isDirectory()) {
+            Directories.setLastSaveDir(dir);
             return true;
         }
 

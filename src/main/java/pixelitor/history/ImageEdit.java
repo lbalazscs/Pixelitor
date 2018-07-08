@@ -26,8 +26,6 @@ import javax.swing.undo.CannotUndoException;
 import java.awt.image.BufferedImage;
 import java.lang.ref.SoftReference;
 
-import static pixelitor.Composition.ImageChangeActions.FULL;
-
 /**
  * A PixelitorEdit that represents the changes made to an image.
  */
@@ -116,7 +114,7 @@ public class ImageEdit extends FadeableEdit {
         imgRef = new SoftReference<>(tmp);
 
         if(!embedded) {
-            comp.imageChanged(FULL);
+            comp.imageChanged();
             dr.updateIconImage();
         }
 

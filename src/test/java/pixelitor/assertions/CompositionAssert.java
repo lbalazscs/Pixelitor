@@ -22,7 +22,6 @@ import org.assertj.core.util.Objects;
 import pixelitor.Composition;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
-import pixelitor.layers.Layer;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -144,12 +143,11 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
                     actual.getNumLayers(), expectedLayerCount));
         }
         for (int i = 0; i < expectedLayerCount; i++) {
-            Layer layer = actual.getLayer(i);
-            if (!layer.getName()
-                    .equals(expected[i])) {
+            String layerName = actual.getLayer(i).getName();
+            if (!layerName.equals(expected[i])) {
                 failWithMessage(String.format(
                         "\nIn layer nr. %d the layer name was '%s', while expecting '%s'.",
-                        i, layer.getName(), expected[i]));
+                        i, layerName, expected[i]));
             }
         }
 

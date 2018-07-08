@@ -73,11 +73,10 @@ public enum MaskViewMode {
         Action action = new MenuAction(guiName, allowedLayerType) {
             @Override
             public void onClick() {
-                ImageComponent ic = ImageComponents.getActiveIC();
-                if (ic != null) {
+                ImageComponents.onActiveIC(ic -> {
                     Layer activeLayer = ic.getComp().getActiveLayer();
                     activate(ic, activeLayer);
-                }
+                });
             }
         };
         sub.addActionWithKey(action, keyStroke);
@@ -105,37 +104,38 @@ public enum MaskViewMode {
     }
 
     public void activate(ImageComponent ic, Layer layer) {
-        if (ic != null) {
-            if (Build.CURRENT != Build.FINAL) {
-                Events.postMaskViewActivate(this, ic, layer);
+        if (ic == null) { // can happen at startup
+            return;
+        }
+        if (Build.CURRENT != Build.FINAL) {
+            Events.postMaskViewActivate(this, ic, layer);
+        }
+
+        boolean change = ic.setMaskViewMode(this);
+        layer.setMaskEditing(editMask);
+        if (change) {
+            FgBgColors.setLayerMaskEditing(editMask);
+
+            if (!ic.isMock()) {
+                Tools.BRUSH.setupMaskEditing(editMask);
+                Tools.CLONE.setupMaskEditing(editMask);
+                Tools.GRADIENT.setupMaskEditing(editMask);
             }
 
-            boolean change = ic.setMaskViewMode(this);
-            layer.setMaskEditing(editMask);
-            if (change) {
-                FgBgColors.setLayerMaskEditing(editMask);
-
-                if (!ic.isMock()) {
-                    Tools.BRUSH.setupMaskEditing(editMask);
-                    Tools.CLONE.setupMaskEditing(editMask);
-                    Tools.GRADIENT.setupMaskEditing(editMask);
-                }
-
-                boolean canFade;
-                if (editMask) {
-                    canFade = History.canFade(layer.getMask());
+            boolean canFade;
+            if (editMask) {
+                canFade = History.canFade(layer.getMask());
+            } else {
+                if (layer instanceof ImageLayer) {
+                    canFade = History.canFade((ImageLayer) layer);
                 } else {
-                    if (layer instanceof ImageLayer) {
-                        canFade = History.canFade((ImageLayer) layer);
-                    } else {
-                        canFade = false;
-                    }
+                    canFade = false;
                 }
-                FadeMenuItem.INSTANCE.refresh(canFade);
+            }
+            FadeMenuItem.INSTANCE.refresh(canFade);
 
-                if (Build.CURRENT.isDevelopment()) {
-                    assert ConsistencyChecks.fadeWouldWorkOn(layer.getComp());
-                }
+            if (Build.CURRENT.isDevelopment()) {
+                assert ConsistencyChecks.fadeWouldWorkOn(layer.getComp());
             }
         }
     }

@@ -525,7 +525,7 @@ public class MenuBar extends JMenuBar {
 
                 layer.deleteMask(true);
 
-                comp.imageChanged(FULL);
+                comp.imageChanged();
             }
         });
 
@@ -543,7 +543,7 @@ public class MenuBar extends JMenuBar {
                 ((ImageLayer) layer).applyLayerMask(true);
 
                 // TODO actually this should not be necessary
-                layer.getComp().imageChanged(FULL);
+                layer.getComp().imageChanged();
             }
         });
 
@@ -1173,7 +1173,7 @@ public class MenuBar extends JMenuBar {
                 ImageLayer imageLayer = (ImageLayer) getActiveLayerOrNull();
                 if (imageLayer.hasMask()) {
                     imageLayer.getMask().updateFromBWImage();
-                    imageLayer.getComp().imageChanged(FULL);
+                    imageLayer.getComp().imageChanged();
                 } else {
                     Messages.showInfo("No Mask in Current image", "Error");
                 }
@@ -1266,7 +1266,7 @@ public class MenuBar extends JMenuBar {
                 if (layer.hasMask()) {
                     layer.getMask().setTranslation(0, 0);
                 }
-                comp.imageChanged(FULL);
+                comp.imageChanged();
             }
         });
 

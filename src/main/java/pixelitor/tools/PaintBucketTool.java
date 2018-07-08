@@ -38,7 +38,6 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 
 /**
@@ -168,7 +167,7 @@ public class PaintBucketTool extends Tool {
             g.drawImage(workingCopy, 0, 0, null);
             g.dispose();
 
-            comp.imageChanged(FULL);
+            comp.imageChanged();
             dr.updateIconImage();
         }
 

@@ -82,11 +82,12 @@ class OpenSaveDirsPanel extends ValidatedForm {
 
     public void saveValues() {
         File in = inputChooser.getSelectedFile();
-        if (in != null) {
+        if (in.exists() && in.isDirectory()) {
             Directories.setLastOpenDir(in);
         }
+
         File out = outputChooser.getSelectedFile();
-        if (out != null) {
+        if (out.exists() && out.isDirectory()) {
             Directories.setLastSaveDir(out);
         }
 

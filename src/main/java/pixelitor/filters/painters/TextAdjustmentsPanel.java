@@ -20,7 +20,6 @@ package pixelitor.filters.painters;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
-import pixelitor.Composition;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ColorParamGUI;
@@ -364,7 +363,7 @@ public class TextAdjustmentsPanel extends FilterGUI implements ParamAdjustmentLi
         } else {
             assert textLayer != null;
             textLayer.setSettings(settings);
-            textLayer.getComp().imageChanged(Composition.ImageChangeActions.FULL);
+            textLayer.getComp().imageChanged();
         }
     }
 }

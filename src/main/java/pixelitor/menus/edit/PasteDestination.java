@@ -65,7 +65,7 @@ public enum PasteDestination {
             Composition comp = Composition.fromImage(pastedImage,
                     null, title);
 
-            ImageComponents.addCompAsNewImage(comp);
+            ImageComponents.addAsNewImage(comp);
             pastedCount++;
         }
     }, MASK {

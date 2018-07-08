@@ -22,7 +22,6 @@ import pixelitor.Composition;
 import pixelitor.history.History;
 import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
-import pixelitor.selection.Selection;
 import pixelitor.utils.Messages;
 
 import java.awt.geom.AffineTransform;
@@ -73,14 +72,11 @@ public class Resize implements CompAction {
         String editName = "Resize";
         MultiLayerBackup backup = new MultiLayerBackup(comp, editName, true);
 
-        if (comp.hasSelection()) {
-            Selection selection = comp.getSelection();
-
+        comp.transformSelection(() -> {
             double sx = ((double) canvasTargetWidth) / canvasCurrWidth;
             double sy = ((double) canvasTargetHeight) / canvasCurrHeight;
-            AffineTransform tx = AffineTransform.getScaleInstance(sx, sy);
-            selection.transform(tx);
-        }
+            return AffineTransform.getScaleInstance(sx, sy);
+        });
 
         resizeLayers(comp, progressiveBilinear);
 

@@ -61,15 +61,13 @@ public class ZoomControl extends JPanel implements ActiveImageChangeListener {
         Dimension preferredSize = new Dimension(70, (int) preferredHeight);
         zoomDisplay.setPreferredSize(preferredSize);
 
-        zoomSlider.addChangeListener(e -> {
-            int selectedZoomIndex = zoomSlider.getValue();
-            ZoomLevel value = values[selectedZoomIndex];
-            ImageComponent activeIC = ImageComponents.getActiveIC();
-            if (activeIC != null) {
-                activeIC.setZoomAtCenter(value);
-                setNewZoomText(value);
-            }
-        });
+        zoomSlider.addChangeListener(e ->
+                ImageComponents.onActiveIC(ic -> {
+                    int sliderValue = zoomSlider.getValue();
+                    ZoomLevel zoomLevel = values[sliderValue];
+                    ic.setZoomAtCenter(zoomLevel);
+                    setNewZoomText(zoomLevel);
+                }));
 
         zoomLabel = new JLabel("  Zoom: ");
 
@@ -138,8 +136,8 @@ public class ZoomControl extends JPanel implements ActiveImageChangeListener {
         setNewZoomText(newZoom);
     }
 
-    private void setNewZoomText(ZoomLevel value) {
-        zoomDisplay.setText(" " + value.toString());
+    private void setNewZoomText(ZoomLevel zoomLevel) {
+        zoomDisplay.setText(" " + zoomLevel.toString());
     }
 
     @Override

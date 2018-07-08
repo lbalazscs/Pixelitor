@@ -31,8 +31,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
 
-import static pixelitor.Composition.ImageChangeActions.FULL;
-
 /**
  * Represents the changes made to a part of an image (for example brush strokes).
  * Only the affected pixels are saved in order to reduce overall memory usage
@@ -89,7 +87,7 @@ public class PartialImageEdit extends FadeableEdit {
 
         backupRaster = tmpRaster;
 
-        comp.imageChanged(FULL);
+        comp.imageChanged();
         dr.updateIconImage();
     }
 

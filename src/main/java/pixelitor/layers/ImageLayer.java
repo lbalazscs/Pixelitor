@@ -57,7 +57,6 @@ import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
 import static java.util.Objects.requireNonNull;
 import static pixelitor.ChangeReason.REPEAT_LAST;
-import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
 import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
@@ -125,13 +124,13 @@ public class ImageLayer extends ContentLayer implements Drawable {
     protected transient BufferedImage image = null;
 
     /**
-     * The image shown during previews
+     * The image shown during filter previews.
      */
     private transient BufferedImage previewImage;
 
     /**
      * The source image passed to the filters.
-     * This is different than image if there is a selection.
+     * This is different from the image if there is a selection.
      */
     private transient BufferedImage filterSourceImage;
 
@@ -344,7 +343,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         imageRefChanged();
 
         previewImage = null;
-        comp.imageChanged(FULL);
+        comp.imageChanged();
     }
 
     @Override
@@ -371,7 +370,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         setState(NORMAL);
 
         if (wasShowOriginal) {
-            comp.imageChanged(FULL);
+            comp.imageChanged();
         }
     }
 
@@ -407,14 +406,12 @@ public class ImageLayer extends ContentLayer implements Drawable {
         } else if (state == NORMAL) {
             throw new IllegalStateException(String.format(
                     "change preview in normal state, filter = %s, changeReason = %s, class = %s)",
-                    filterName, cr, this.getClass()
-                            .getSimpleName()));
+                    filterName, cr, this.getClass().getSimpleName()));
         }
 
         assert previewImage != null :
                 String.format("previewImage was null with %s, changeReason = %s, class = %s",
-                        filterName, cr, this.getClass()
-                                .getSimpleName());
+                        filterName, cr, this.getClass().getSimpleName());
         assert img != null;
 
         if (img == image) {
@@ -431,7 +428,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
             if (shouldRefresh) {
                 imageRefChanged();
-                comp.imageChanged(FULL);
+                comp.imageChanged();
             }
         } else {
             imageContentChanged = true; // history will be necessary
@@ -439,7 +436,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             setPreviewWithSelection(img);
             setState(PREVIEW);
             imageRefChanged();
-            comp.imageChanged(FULL);
+            comp.imageChanged();
         }
     }
 
@@ -483,7 +480,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         // not the actual one
         filterSourceImage = null;
         updateIconImage();
-        comp.imageChanged(FULL);
+        comp.imageChanged();
     }
 
     @Override
@@ -619,7 +616,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         // nearest neighbor should be ok for 90, 180, 270 degrees
         g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
 
-        g2.setTransform(angle.getImageTX(this));
+        g2.setTransform(angle.createImageTX(this));
 
         g2.drawImage(image, 0, 0, imageWidth, imageHeight, null);
         g2.dispose();
@@ -631,7 +628,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     private BufferedImage getMaskedImage() {
-        if(mask == null || !isMaskEnabled()) {
+        if (mask == null || !isMaskEnabled()) {
             return image;
         } else {
             BufferedImage copy = ImageUtils.copyImage(image);
@@ -874,7 +871,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
             }
         }
 
-        BufferedImage resizedImg = ImageUtils.getFasterScaledInstance(image, imgTargetWidth, imgTargetHeight, VALUE_INTERPOLATION_BICUBIC, progressiveBilinear);
+        BufferedImage resizedImg = ImageUtils.getFasterScaledInstance(
+                image, imgTargetWidth, imgTargetHeight,
+                VALUE_INTERPOLATION_BICUBIC, progressiveBilinear);
         setImage(resizedImg);
 
         if (bigLayer) {
@@ -896,12 +895,10 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         BufferedImage img = getImage();
 
-        // the selectionBounds is in image space except for the translation
-        int transX = getTX();
-        int transY = getTY();
-
-        int cropX = (int) (cropRect.getX() - transX);
-        int cropY = (int) (cropRect.getY() - transY);
+        // the cropRect is in image space, but relative to the canvas,
+        // so it is translated to get the correct image coordinates
+        int cropX = (int) (cropRect.getX() - getTX());
+        int cropY = (int) (cropRect.getY() - getTY());
 
         BufferedImage dest = ImageUtils.crop(img, cropX, cropY, cropWidth, cropHeight);
         setImage(dest);
@@ -920,7 +917,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
                 tmpDrawingLayer.paintLayer(g, 0, 0);
             } else { // layer is not in normal mode
                 // first create a merged layer-brush image
-                BufferedImage mergedLayerBrushImg = ImageUtils.copyImage(visibleImage); // TODO a canvas-sized image is enough and then less translating is necessary
+                BufferedImage mergedLayerBrushImg = ImageUtils.copyImage(visibleImage);
+                // TODO a canvas-sized image is enough and then less translating is necessary
                 Graphics2D mergedLayerBrushG = mergedLayerBrushImg.createGraphics();
 
                 tmpDrawingLayer.paintLayer(mergedLayerBrushG, -getTX(), -getTY()); // draw the brush on the layer
@@ -955,7 +953,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             // the image pixels.
             // But, until then, the image and the shape have to be mixed first
             // and then the result must be composited into the main Graphics,
-            // otherwise we don't get the correct result if this layer not the
+            // otherwise we don't get the correct result if this layer is not the
             // first visible layer and has a blending mode different from normal
             BufferedImage tmp = createCanvasSizedTmpImage();
             Graphics2D tmpG = tmp.createGraphics();
@@ -1041,8 +1039,10 @@ public class ImageLayer extends ContentLayer implements Drawable {
         return ImageUtils.createSysCompatibleImage(width, height);
     }
 
+    // called when the image variable points to a new reference
     protected void imageRefChanged() {
-        // overridden in LayerMask
+        // empty here, but overridden in LayerMask
+        // to update the transparency image
     }
 
     @Override
