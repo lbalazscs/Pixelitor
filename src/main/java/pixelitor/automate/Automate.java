@@ -21,7 +21,6 @@ import pixelitor.Composition;
 import pixelitor.filters.comp.CompAction;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
-import pixelitor.gui.ImageFrame;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.ValidatedDialog;
 import pixelitor.io.Directories;
@@ -122,8 +121,11 @@ public class Automate {
         Composition comp = ImageComponents.getActiveCompOrNull();
 
         ImageComponent ic = comp.getIC();
-        ImageFrame frame = ic.getFrame();
-        frame.paintImmediately(frame.getBounds());
+
+        // TODO why did we paint formerly the ImageFrame
+        ic.paintImmediately(ic.getBounds());
+//        ImageFrame frame = ic.getImageWindow();
+//        frame.paintImmediately(frame.getBounds());
 
         action.process(comp);
 
@@ -171,7 +173,9 @@ public class Automate {
                     return;
             }
         } else { // the file does not exist or overwrite all was pressed previously
-            frame.paintImmediately(frame.getBounds());
+            // TODO 
+            ic.paintImmediately(ic.getBounds());
+//            frame.paintImmediately(frame.getBounds());
             outputFormat.saveComp(comp, outputFile, false);
         }
         if (closeImagesAfterDone) {

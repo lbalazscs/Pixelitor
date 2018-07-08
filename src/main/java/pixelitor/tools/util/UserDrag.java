@@ -19,6 +19,7 @@ package pixelitor.tools.util;
 
 import pixelitor.Build;
 import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
 import pixelitor.tools.DragTool;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
@@ -63,6 +64,8 @@ public class UserDrag {
 
     public void setStart(PMouseEvent e) {
         assert e.getIC() != null;
+        assert ImageComponents.isActive(e.getIC());
+
         this.ic = e.getIC();
 
         coStartX = e.getCoX();
@@ -75,9 +78,16 @@ public class UserDrag {
     public void setEnd(PMouseEvent e) {
         assert ic != null;
 
-        if (this.ic != e.getIC()) { // TODO happened in random tests
+        if (this.ic != e.getIC()) { // TODO happens in random tests
             if (Build.CURRENT.isDevelopment()) {
-                System.out.println("UserDrag::setEnd: another ic x = " + e.getCoX() + ", y = " + e.getCoY());
+                System.out.println("\nUserDrag::setEnd: " +
+                        "another ic x = " + e.getCoX() + ", y = " + e
+                        .getCoY() + ", tool name = " + tool.getName());
+                boolean thisIsActive = ImageComponents.isActive(this.ic);
+                boolean thatIsActive = ImageComponents.isActive(e.getIC());
+                System.out.println("UserDrag::setEnd: "
+                        + "thisIsActive = " + thisIsActive
+                        + ", thatIsActive = " + thatIsActive);
             }
             return;
         }

@@ -18,15 +18,12 @@
 package pixelitor.gui;
 
 import pixelitor.io.DropListener;
-import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.dnd.DropTarget;
-import java.beans.PropertyVetoException;
-import java.util.List;
 
-import static java.awt.Color.GRAY;
+import static pixelitor.gui.Desktop.Mode.FRAMES;
 
 /**
  * The desktop area of the app, where the edited images are.
@@ -34,127 +31,60 @@ import static java.awt.Color.GRAY;
  * could be an alternative.
  */
 public class Desktop {
-    private static final int CASCADE_HORIZONTAL_SHIFT = 15;
-    private static final int CASCADE_VERTICAL_SHIFT = 25;
+    enum Mode {
+        FRAMES, TABS;
+    }
+
+    Mode mode = Mode.TABS;
+
 
     public static final Desktop INSTANCE = new Desktop();
 
-    private final JDesktopPane desktopPane;
+    private DesktopUI ui;
 
     private Desktop() {
-        desktopPane = new JDesktopPane();
-        GlobalKeyboardWatch.setAlwaysVisibleComponent(desktopPane);
+        if (mode == FRAMES) {
+            ui = new FramesUI();
+        } else {
+            ui = new TabsUI();
+        }
+        JComponent component = (JComponent) ui;
+        GlobalKeyboardWatch.setAlwaysVisibleComponent(component);
         GlobalKeyboardWatch.registerBrushSizeActions();
-        new DropTarget(desktopPane, new DropListener());
-
-        desktopPane.setBackground(GRAY);
+        new DropTarget(component, new DropListener());
     }
 
-    public JDesktopPane getDesktopPane() {
-        return desktopPane;
+    public JComponent getUI() {
+        return (JComponent) ui;
     }
 
-    public void activateImageFrame(ImageFrame frame) {
-        assert frame != null;
-        desktopPane.getDesktopManager().activateFrame(frame);
+    public void activateIC(ImageComponent ic) {
+        ui.activateIC(ic);
+    }
+
+    public void addNewIC(ImageComponent ic) {
+        ui.addNewIC(ic);
+    }
+
+    public Dimension getDesktopSize() {
+        return ui.getSize();
     }
 
     public void cascadeWindows() {
-        List<ImageComponent> icList = ImageComponents.getICList();
-        int locX = 0;
-        int locY = 0;
-        for (ImageComponent ic : icList) {
-            ImageFrame frame = ic.getFrame();
-            frame.setLocation(locX, locY);
-            frame.setToNaturalSize(locX, locY);
-            try {
-                frame.setIcon(false);
-                frame.setMaximum(false);
-            } catch (PropertyVetoException e) {
-                e.printStackTrace();
-            }
-
-            locX += CASCADE_HORIZONTAL_SHIFT;
-            locY += CASCADE_VERTICAL_SHIFT;
-
-            // wrap
-            int maxWidth = desktopPane.getWidth() - CASCADE_HORIZONTAL_SHIFT;
-            int maxHeight = desktopPane.getHeight() - CASCADE_VERTICAL_SHIFT;
-
-            if (locX > maxWidth) {
-                locX = 0;
-            }
-            if (locY > maxHeight) {
-                locY = 0;
-            }
+        if (mode == FRAMES) {
+            FramesUI framesUI = (FramesUI) ui;
+            framesUI.cascadeWindows();
+        } else {
+            // TODO
         }
     }
 
     public void tileWindows() {
-        List<ImageComponent> icList = ImageComponents.getICList();
-        int numWindows = icList.size();
-
-        int numRows = (int) Math.sqrt(numWindows);
-        int numCols = numWindows / numRows;
-        int extra = numWindows % numRows;
-
-        int frameWidth = desktopPane.getWidth() / numCols;
-        int frameHeight = desktopPane.getHeight() / numRows;
-        int currRow = 0;
-        int currCol = 0;
-
-        for (ImageComponent ic : icList) {
-            ImageFrame frame = ic.getFrame();
-            try {
-                frame.setIcon(false);
-                frame.setMaximum(false);
-            } catch (PropertyVetoException e) {
-                e.printStackTrace();
-            }
-            int frameX = currCol * frameWidth;
-            int frameY = currRow * frameHeight;
-            frame.reshape(frameX, frameY, frameWidth, frameHeight);
-            currRow++;
-            if (currRow == numRows) {
-                currRow = 0;
-                currCol++;
-                if (currCol == numCols - extra) {
-                    numRows++;
-                    frameHeight = desktopPane.getHeight() / numRows;
-                }
-            }
+        if (mode == FRAMES) {
+            FramesUI framesUI = (FramesUI) ui;
+            framesUI.tileWindows();
+        } else {
+            // TODO
         }
-    }
-
-    public void addNewIC(ImageComponent ic) {
-        int numImages = ImageComponents.getNumOpenImages();
-
-        // called deliberately after numImages is set
-        ImageComponents.addIC(ic);
-
-        int locX = CASCADE_HORIZONTAL_SHIFT * numImages;
-        int locY = CASCADE_VERTICAL_SHIFT * numImages;
-
-        int maxWidth = desktopPane.getWidth() - CASCADE_HORIZONTAL_SHIFT;
-        locX %= maxWidth;
-
-        int maxHeight = desktopPane.getHeight() - CASCADE_VERTICAL_SHIFT;
-        locY %= maxHeight;
-
-        ImageFrame frame = new ImageFrame(ic, locX, locY);
-        ic.setFrame(frame);
-
-        desktopPane.add(frame);
-        try {
-            frame.setSelected(true);
-            desktopPane.getDesktopManager().activateFrame(frame);
-            ImageComponents.newImageOpened(ic.getComp());
-        } catch (PropertyVetoException e) {
-            Messages.showException(e);
-        }
-    }
-
-    public Dimension getDesktopSize() {
-        return desktopPane.getSize();
     }
 }

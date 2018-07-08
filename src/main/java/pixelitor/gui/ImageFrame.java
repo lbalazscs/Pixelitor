@@ -30,7 +30,7 @@ import java.awt.Rectangle;
 /**
  * A JInternalFrame for displaying the compositions
  */
-public class ImageFrame extends JInternalFrame implements InternalFrameListener {
+public class ImageFrame extends JInternalFrame implements ImageWindow, InternalFrameListener {
     private static final int NIMBUS_HORIZONTAL_ADJUSTMENT = 18;
     private static final int NIMBUS_VERTICAL_ADJUSTMENT = 37;
 
@@ -55,7 +55,7 @@ public class ImageFrame extends JInternalFrame implements InternalFrameListener 
 
     @Override
     public void internalFrameActivated(InternalFrameEvent e) {
-        ImageComponents.activeImageHasChanged(ic);
+        ImageComponents.userChangedActiveImage(ic);
         ic.onActivation();
     }
 
@@ -96,6 +96,7 @@ public class ImageFrame extends JInternalFrame implements InternalFrameListener 
         setSize(locX, locY, zoomedWidth, zoomedHeight);
     }
 
+    @Override
     public void setSize(int locX, int locY, int width, int height) {
         // if this is a simple resize, then locX and locY are -1
         if (locX == -1) {
@@ -126,6 +127,7 @@ public class ImageFrame extends JInternalFrame implements InternalFrameListener 
         setSize(width + NIMBUS_HORIZONTAL_ADJUSTMENT, height + NIMBUS_VERTICAL_ADJUSTMENT);
     }
 
+    @Override
     public void makeSureItIsVisible() {
         Rectangle bounds = getBounds();
         if (bounds.x < 0 || bounds.y < 0) {
@@ -135,6 +137,7 @@ public class ImageFrame extends JInternalFrame implements InternalFrameListener 
         }
     }
 
+    @Override
     public JScrollPane getScrollPane() {
         return scrollPane;
     }

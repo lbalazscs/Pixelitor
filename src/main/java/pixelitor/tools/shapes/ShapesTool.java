@@ -22,7 +22,6 @@ import org.jdesktop.swingx.painter.effects.AreaEffect;
 import pixelitor.Composition;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.StrokeParam;
-import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
@@ -142,18 +141,18 @@ public class ShapesTool extends DragTool {
         // hack to prevent AssertionError when dragging started
         // from negative coordinates bug
         // TODO investigate
-        ShapesAction action = actionModel.getSelectedItem();
-        if (action.drawsEffects() && effectsPanel != null) {
-            AreaEffects effects = effectsPanel.getEffects();
-            if (effects.hasAny()) {
-                if (userDrag.getImStartX() < 0) {
-                    return;
-                }
-                if (userDrag.getImStartY() < 0) {
-                    return;
-                }
-            }
-        }
+//        ShapesAction action = actionModel.getSelectedItem();
+//        if (action.drawsEffects() && effectsPanel != null) {
+//            AreaEffects effects = effectsPanel.getEffects();
+//            if (effects.hasAny()) {
+//                if (userDrag.getImStartX() < 0) {
+//                    return;
+//                }
+//                if (userDrag.getImStartY() < 0) {
+//                    return;
+//                }
+//            }
+//        }
         // end hack
 
         drawing = true;

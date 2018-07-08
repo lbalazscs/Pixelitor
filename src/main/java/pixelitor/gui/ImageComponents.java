@@ -35,6 +35,7 @@ import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tools;
 import pixelitor.utils.ActiveImageChangeListener;
 import pixelitor.utils.Messages;
+import pixelitor.utils.RandomUtils;
 
 import java.awt.Cursor;
 import java.awt.geom.Rectangle2D;
@@ -206,8 +207,7 @@ public class ImageComponents {
                 throw new IllegalStateException("cannot activate null imageComponent");
             }
             // activate is always false in unit tests
-            ImageFrame frame = ic.getFrame();
-            Desktop.INSTANCE.activateImageFrame(frame);
+            Desktop.INSTANCE.activateIC(ic);
             ic.onActivation();
         }
     }
@@ -242,7 +242,7 @@ public class ImageComponents {
     /**
      * Another image became active
      */
-    public static void activeImageHasChanged(ImageComponent ic) {
+    public static void userChangedActiveImage(ImageComponent ic) {
         ImageComponent oldIC = activeIC;
 
         setActiveIC(ic, false);
@@ -250,17 +250,17 @@ public class ImageComponents {
             listener.activeImageHasChanged(oldIC, ic);
         }
 
-        Composition newActiveComp = ic.getComp();
-        Layer layer = newActiveComp.getActiveLayer();
+        Composition comp = ic.getComp();
+        Layer layer = comp.getActiveLayer();
         AppLogic.activeLayerChanged(layer);
 
-        SelectionActions.setEnabled(newActiveComp.hasSelection(), newActiveComp);
+        SelectionActions.setEnabled(comp.hasSelection(), comp);
         ZoomMenu.zoomChanged(ic.getZoomLevel());
 
-        AppLogic.activeCompSizeChanged(newActiveComp);
-        PixelitorWindow.getInstance()
-                .setTitle(ic.getComp()
-                        .getName() + " - " + Build.getPixelitorWindowFixTitle());
+        AppLogic.activeCompSizeChanged(comp);
+        String title = comp.getName()
+                + " - " + Build.getPixelitorWindowFixTitle();
+        PixelitorWindow.getInstance().setTitle(title);
     }
 
     public static void newImageOpened(Composition comp) {
@@ -406,12 +406,20 @@ public class ImageComponents {
 
             ImageComponent ic = new ImageComponent(comp);
             ic.setCursor(Tools.getCurrent().getStartingCursor());
+            ImageComponents.addIC(ic);
             setActiveIC(ic, false);
             comp.addAllLayersToGUI();
 
             Desktop.INSTANCE.addNewIC(ic);
         } catch (Exception e) {
             Messages.showException(e);
+        }
+    }
+
+    public static void activateRandomIC() {
+        ImageComponent ic = RandomUtils.chooseFrom(icList);
+        if (ic != activeIC) {
+            setActiveIC(ic, true);
         }
     }
 }

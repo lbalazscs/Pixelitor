@@ -86,7 +86,7 @@ public class PixelitorWindow extends JFrame {
     }
 
     private void addDesktopArea() {
-        add(Desktop.INSTANCE.getDesktopPane(), BorderLayout.CENTER);
+        add(Desktop.INSTANCE.getUI(), BorderLayout.CENTER);
     }
 
     private void addLayersAndHistograms() {

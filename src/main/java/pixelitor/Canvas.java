@@ -33,9 +33,11 @@ public class Canvas implements Serializable {
     public static final int MAX_WIDTH = 9_999;
     public static final int MAX_HEIGHT = 9_999;
 
+    // size in image space
     private int width;
     private int height;
 
+    // size in component space
     private int zoomedWidth;
     private int zoomedHeight;
 
@@ -49,9 +51,9 @@ public class Canvas implements Serializable {
      * and later associated with the (transient!) ImageComponent
      * In the case of a new image, this object is first created in ImageComponent
      */
-    public Canvas(int width, int height) {
-        this.width = width;
-        this.height = height;
+    public Canvas(int imWidth, int imHeight) {
+        this.width = imWidth;
+        this.height = imHeight;
     }
 
     public Canvas(Canvas orig) {
@@ -61,20 +63,22 @@ public class Canvas implements Serializable {
         this.zoomedHeight = orig.zoomedHeight;
     }
 
-    public void changeSize(int newWidth, int newHeight) {
-        width = newWidth;
-        height = newHeight;
+    public void changeSize(int newImWidth, int newImHeight) {
+        width = newImWidth;
+        height = newImHeight;
 
         double viewScale = ic.getViewScale();
-        zoomedWidth = (int) (viewScale * newWidth);
-        zoomedHeight = (int) (viewScale * newHeight);
+        zoomedWidth = (int) (viewScale * newImWidth);
+        zoomedHeight = (int) (viewScale * newImHeight);
 
-        ic.canvasSizeChanged();
+        ic.canvasCoSizeChanged();
     }
 
     public void changeZooming(double viewScale) {
         zoomedWidth = (int) (viewScale * width);
         zoomedHeight = (int) (viewScale * height);
+
+        ic.canvasCoSizeChanged();
     }
 
     /**

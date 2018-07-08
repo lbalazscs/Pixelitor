@@ -71,7 +71,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     private Canvas canvas;
     private ZoomLevel zoomLevel = ZoomLevel.Z100;
 
-    private ImageFrame frame = null;
+    private ImageWindow imageWindow = null;
 
     private static final CheckerboardPainter checkerBoardPainter = ImageUtils.createCheckerboardPainter();
 
@@ -168,6 +168,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
+                // TODO this is now also done in setSize
                 updateCanvasLocation();
 
                 // one can zoom an inactive image with the mouse wheel,
@@ -229,26 +230,26 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         Tools.EventDispatcher.mouseMoved(e, this);
     }
 
-    public void setFrame(ImageFrame frame) {
-        this.frame = frame;
+    public void setImageWindow(ImageWindow window) {
+        this.imageWindow = window;
     }
 
-    public ImageFrame getFrame() {
-        return frame;
+    public ImageWindow getImageWindow() {
+        return imageWindow;
     }
 
     public void close() {
-        if (frame != null) {
+        if (imageWindow != null) {
             // this will also cause the calling of AppLogic.imageClosed via
             // InternalImageFrame.internalFrameClosed
-            frame.dispose();
+            imageWindow.dispose();
         }
         comp.dispose();
     }
 
     public void onActivation() {
         try {
-            getFrame().setSelected(true);
+            getImageWindow().setSelected(true);
         } catch (PropertyVetoException e) {
             Messages.showException(e);
         }
@@ -260,9 +261,9 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     }
 
     public void updateTitle() {
-        if (frame != null) {
+        if (imageWindow != null) {
             String frameTitle = createFrameTitle();
-            frame.setTitle(frameTitle);
+            imageWindow.setTitle(frameTitle);
         }
     }
 
@@ -451,8 +452,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     }
 
     public void makeSureItIsVisible() {
-        if (frame != null) {
-            frame.makeSureItIsVisible();
+        if (imageWindow != null) {
+            imageWindow.makeSureItIsVisible();
         }
     }
 
@@ -476,13 +477,14 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         return change;
     }
 
-    public void canvasSizeChanged() {
+    public void canvasCoSizeChanged() {
         assert ConsistencyChecks.imageCoversCanvas(comp);
 
-        if (frame != null) {
-            frame.setSize(-1, -1, canvas.getCoWidth(), canvas.getCoHeight());
+        if (imageWindow != null && imageWindow instanceof ImageFrame) {
+            imageWindow.setSize(-1, -1, canvas.getCoWidth(), canvas.getCoHeight());
         }
-        revalidate();
+        updateCanvasLocation();
+        revalidate(); // TODO also necessary with tabs?
     }
 
     public Canvas getCanvas() {
@@ -513,11 +515,11 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         coToIm = null;
 
         Rectangle areaThatShouldBeVisible = null;
-        if (frame != null) {
+        if (imageWindow != null) {
             updateTitle();
             int newFrameWidth = canvas.getCoWidth();
             int newFrameHeight = canvas.getCoHeight();
-            frame.setSize(-1, -1, newFrameWidth, newFrameHeight);
+            imageWindow.setSize(-1, -1, newFrameWidth, newFrameHeight);
 
             Rectangle visiblePart = getVisiblePart();
 
@@ -545,19 +547,21 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
             );
         }
 
+        // TODO is this necessary? - could call validate instead of revalidate
+        // some flickering is present either way
         revalidate();
 
         Rectangle finalRect = areaThatShouldBeVisible;
 
-        // TODO is this necessary? - could call validate instead of revalidate
-        // some flickering is present either way
 
         // we are already on the EDT, but we want to call this code
         // only after all pending AWT events have been processed
         // because then this component will have the final size
-        // and updateDrawStart can calculate correct results
+        // and updateCanvasLocation can calculate correct results
+
+        // TODO updateCanvasLocation moved from here - scrollRectToVisible and
+        // repaint still needs to run later?
         SwingUtilities.invokeLater(() -> {
-            updateCanvasLocation();
             if (finalRect != null) {
                 scrollRectToVisible(finalRect);
             }
@@ -568,6 +572,12 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
             ZoomControl.INSTANCE.setToNewZoom(zoomLevel);
             zoomLevel.getMenuItem().setSelected(true);
         }
+    }
+
+    @Override
+    public void setSize(int width, int height) {
+        super.setSize(width, height);
+        updateCanvasLocation();
     }
 
     public void setZoomAtCenter(ZoomLevel newZoom) {
@@ -698,7 +708,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
      * only a part of it
      */
     public Rectangle getVisiblePart() {
-        return frame.getScrollPane().getViewport().getViewRect();
+        return imageWindow.getScrollPane().getViewport().getViewRect();
     }
 
     public void addLayerToGUI(Layer newLayer, int newLayerIndex) {

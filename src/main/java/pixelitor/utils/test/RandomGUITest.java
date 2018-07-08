@@ -83,6 +83,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -558,16 +559,8 @@ public class RandomGUITest {
     }
 
     private static void randomZoom() {
-        ImageComponent ic = ImageComponents.getActiveIC();
-        if (ic != null) {
-            ZoomLevel randomZoomLevel = null;
-
-            double percentValue = 0;
-            while (percentValue < 49) {
-                randomZoomLevel = ZoomLevel.getRandomZoomLevel();
-                percentValue = randomZoomLevel.getPercentValue();
-            }
-
+        ImageComponents.onActiveIC(ic -> {
+            ZoomLevel randomZoomLevel = getRandomZoomLevel();
             log("zoom zoomLevel = " + randomZoomLevel);
 
             if (rand.nextBoolean()) {
@@ -576,12 +569,23 @@ public class RandomGUITest {
                 Point mousePos = pickRandomPointOn(ic);
                 ic.setZoom(randomZoomLevel, false, mousePos);
             }
+        });
+    }
+
+    private static ZoomLevel getRandomZoomLevel() {
+        double percentValue = 0;
+        ZoomLevel level = null;
+        while (percentValue < 49) {
+            level = ZoomLevel.getRandomZoomLevel();
+            percentValue = level.getPercentValue();
         }
+        return level;
     }
 
     private static Point pickRandomPointOn(ImageComponent ic) {
-        int randX = rand.nextInt(ic.getWidth());
-        int randY = rand.nextInt(ic.getWidth());
+        Rectangle vp = ic.getVisiblePart();
+        int randX = RandomUtils.intInRange(vp.x + 1, vp.x + vp.width - 2);
+        int randY = RandomUtils.intInRange(vp.y + 1, vp.y + vp.height - 2);
         return new Point(randX, randY);
     }
 
@@ -738,6 +742,11 @@ public class RandomGUITest {
 
 
         action.actionPerformed(new ActionEvent("", 0, ""));
+    }
+
+    private static void activateRandomIC() {
+        log("activate random ic");
+        ImageComponents.activateRandomIC();
     }
 
     private static void layerOrderChange() {
@@ -1052,6 +1061,7 @@ public class RandomGUITest {
         weightedCaller.registerCallback(1, RandomGUITest::traceWithCurrentBrush);
         weightedCaller.registerCallback(1, RandomGUITest::traceWithCurrentEraser);
         weightedCaller.registerCallback(1, RandomGUITest::randomRotateFlip);
+        weightedCaller.registerCallback(5, RandomGUITest::activateRandomIC);
         weightedCaller.registerCallback(1, RandomGUITest::layerOrderChange);
         weightedCaller.registerCallback(5, RandomGUITest::layerMerge);
         weightedCaller.registerCallback(3, RandomGUITest::layerAddDelete);

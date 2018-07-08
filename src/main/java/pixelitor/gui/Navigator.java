@@ -204,7 +204,7 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
             }
 
             this.ic = ic;
-            scrollPane = ic.getFrame().getScrollPane();
+            scrollPane = ic.getImageWindow().getScrollPane();
         }
 
         if (exactZoom == null) {
