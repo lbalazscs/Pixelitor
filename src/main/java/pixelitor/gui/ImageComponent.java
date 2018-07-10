@@ -196,6 +196,11 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     }
 
     @Override
+    public Dimension getMinimumSize() {
+        return getPreferredSize();
+    }
+
+    @Override
     public void mouseClicked(MouseEvent e) {
         Tools.EventDispatcher.mouseClicked(e, this);
     }
@@ -232,6 +237,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
     public void setImageWindow(ImageWindow window) {
         this.imageWindow = window;
+        setImageWindowSize();
     }
 
     public ImageWindow getImageWindow() {
@@ -480,11 +486,15 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     public void canvasCoSizeChanged() {
         assert ConsistencyChecks.imageCoversCanvas(comp);
 
-        if (imageWindow != null && imageWindow instanceof ImageFrame) {
-            imageWindow.setSize(-1, -1, canvas.getCoWidth(), canvas.getCoHeight());
-        }
+        setImageWindowSize();
         updateCanvasLocation();
         revalidate(); // TODO also necessary with tabs?
+    }
+
+    public void setImageWindowSize() {
+        if (imageWindow != null && imageWindow instanceof ImageFrame) {
+            imageWindow.setSize(canvas.getCoWidth(), canvas.getCoHeight());
+        }
     }
 
     public Canvas getCanvas() {
@@ -519,7 +529,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
             updateTitle();
             int newFrameWidth = canvas.getCoWidth();
             int newFrameHeight = canvas.getCoHeight();
-            imageWindow.setSize(-1, -1, newFrameWidth, newFrameHeight);
+            imageWindow.setSize(newFrameWidth, newFrameHeight);
 
             Rectangle visiblePart = getVisiblePart();
 
@@ -734,6 +744,10 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
     public LayersPanel getLayersPanel() {
         return layersPanel;
+    }
+
+    public double getCanvasStartX() {
+        return canvasStartX;
     }
 
     public void setNavigator(Navigator navigator) {

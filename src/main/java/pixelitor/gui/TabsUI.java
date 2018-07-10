@@ -37,7 +37,7 @@ import java.awt.event.MouseListener;
 /**
  * An user interface where the edited images are in tabs
  */
-public class TabsUI extends JTabbedPane implements DesktopUI {
+public class TabsUI extends JTabbedPane implements ImageAreaUI {
     private boolean userInitiated = true;
 
     public TabsUI() {

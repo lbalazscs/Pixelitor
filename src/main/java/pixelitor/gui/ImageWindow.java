@@ -22,15 +22,15 @@ import java.beans.PropertyVetoException;
 
 /**
  * A component that contains an {@link ImageComponent}
- * (not directly, but inside a JScrollPane)
+ * (not directly, but inside a JScrollPane).
  * It can be either a JInternalFrame or a tab in a JTabbedPane.
  * Some of the methods make sense only for internal frames, not for tabs.
  */
 public interface ImageWindow {
     /**
-     * Sets the location and size of the internal frame.
+     * Sets the size of the internal frame.
      */
-    void setSize(int locX, int locY, int width, int height);
+    void setSize(int width, int height);
 
     JScrollPane getScrollPane();
 

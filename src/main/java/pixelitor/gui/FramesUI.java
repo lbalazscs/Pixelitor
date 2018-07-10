@@ -26,9 +26,11 @@ import java.util.List;
 /**
  * An user interface where the edited images are in internal frames
  */
-public class FramesUI extends JDesktopPane implements DesktopUI {
+public class FramesUI extends JDesktopPane implements ImageAreaUI {
     private static final int CASCADE_HORIZONTAL_SHIFT = 15;
     private static final int CASCADE_VERTICAL_SHIFT = 25;
+
+    public static int cascadeIndex = 0;
 
     public FramesUI() {
     }
@@ -42,10 +44,8 @@ public class FramesUI extends JDesktopPane implements DesktopUI {
 
     @Override
     public void addNewIC(ImageComponent ic) {
-        int numImages = ImageComponents.getNumOpenImages();
-
-        int locX = CASCADE_HORIZONTAL_SHIFT * (numImages - 1);
-        int locY = CASCADE_VERTICAL_SHIFT * (numImages - 1);
+        int locX = CASCADE_HORIZONTAL_SHIFT * cascadeIndex;
+        int locY = CASCADE_VERTICAL_SHIFT * cascadeIndex;
 
         int maxWidth = this.getWidth() - CASCADE_HORIZONTAL_SHIFT;
         locX %= maxWidth;
@@ -64,6 +64,8 @@ public class FramesUI extends JDesktopPane implements DesktopUI {
         } catch (PropertyVetoException e) {
             Messages.showException(e);
         }
+
+        cascadeIndex++;
     }
 
     public void cascadeWindows() {
@@ -73,7 +75,7 @@ public class FramesUI extends JDesktopPane implements DesktopUI {
         for (ImageComponent ic : icList) {
             ImageFrame frame = (ImageFrame) ic.getImageWindow();
             frame.setLocation(locX, locY);
-            frame.setToNaturalSize(locX, locY);
+            frame.setToNaturalSize();
             try {
                 frame.setIcon(false);
                 frame.setMaximum(false);

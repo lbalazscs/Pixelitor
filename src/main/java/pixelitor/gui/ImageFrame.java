@@ -25,10 +25,11 @@ import javax.swing.*;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.Rectangle;
 
 /**
- * A JInternalFrame for displaying the compositions
+ * An {@link ImageWindow} used in the "internal frames" UI.
  */
 public class ImageFrame extends JInternalFrame implements ImageWindow, InternalFrameListener {
     private static final int NIMBUS_HORIZONTAL_ADJUSTMENT = 18;
@@ -47,9 +48,8 @@ public class ImageFrame extends JInternalFrame implements ImageWindow, InternalF
         scrollPane = new JScrollPane(this.ic);
         this.add(scrollPane);
 
-        Dimension ps = ic.getPreferredSize();
-        setSize(locX, locY, (int) ps.getWidth(), (int) ps.getHeight());
         setLocation(locX, locY);
+        setToNaturalSize();
         this.setVisible(true);
     }
 
@@ -89,24 +89,20 @@ public class ImageFrame extends JInternalFrame implements ImageWindow, InternalF
     public void internalFrameOpened(InternalFrameEvent e) {
     }
 
-    public void setToNaturalSize(int locX, int locY) {
+    public void setToNaturalSize() {
         Canvas canvas = ic.getCanvas();
         int zoomedWidth = canvas.getCoWidth();
         int zoomedHeight = canvas.getCoHeight();
-        setSize(locX, locY, zoomedWidth, zoomedHeight);
+        setSize(zoomedWidth, zoomedHeight);
     }
 
     @Override
-    public void setSize(int locX, int locY, int width, int height) {
-        // if this is a simple resize, then locX and locY are -1
-        if (locX == -1) {
-            locX = getLocation().x;
-        }
-        if (locY == -1) {
-            locY = getLocation().y;
-        }
+    public void setSize(int width, int height) {
+        Point loc = getLocation();
+        int locX = loc.x;
+        int locY = loc.y;
 
-        Dimension desktopSize = Desktop.INSTANCE.getDesktopSize();
+        Dimension desktopSize = ImageArea.INSTANCE.getSize();
         int maxWidth = Math.max(0, desktopSize.width - 20 - locX);
         int maxHeight = Math.max(0, desktopSize.height - 40 - locY);
 
@@ -124,7 +120,7 @@ public class ImageFrame extends JInternalFrame implements ImageWindow, InternalF
             }
         }
 
-        setSize(width + NIMBUS_HORIZONTAL_ADJUSTMENT, height + NIMBUS_VERTICAL_ADJUSTMENT);
+        super.setSize(width + NIMBUS_HORIZONTAL_ADJUSTMENT, height + NIMBUS_VERTICAL_ADJUSTMENT);
     }
 
     @Override

@@ -22,7 +22,7 @@ import pixelitor.Pixelitor;
 import pixelitor.TipsOfTheDay;
 import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.gui.Desktop;
+import pixelitor.gui.ImageArea;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.IntTextField;
@@ -60,6 +60,7 @@ public final class AppPreferences {
 
     private static final String NEW_IMAGE_WIDTH = "new_image_width";
     private static final String NEW_IMAGE_HEIGHT = "new_image_height";
+    private static final String UI_KEY = "ui";
     private static Dimension newImageSize = null;
 
     private static final String RECENT_FILE_PREFS_KEY = "recent_file_";
@@ -106,7 +107,7 @@ public final class AppPreferences {
     private static void loadNewImageSize() {
         int defaultWidth = 600;
         int defaultHeight = 400;
-        Dimension desktopSize = Desktop.INSTANCE.getDesktopSize();
+        Dimension desktopSize = ImageArea.INSTANCE.getSize();
         if (desktopSize != null) {
             defaultWidth = Math.max(600, desktopSize.width - 30);
             defaultHeight = Math.max(400, desktopSize.height - 50);
@@ -255,6 +256,7 @@ public final class AppPreferences {
     }
 
     private static void savePreferencesBeforeExit() {
+        saveDesktopMode();
         saveRecentFiles(RecentFilesMenu.getInstance().getRecentFileInfosForSaving());
         saveFramePosition(PixelitorWindow.getInstance());
         saveLastOpenDir();
@@ -299,6 +301,15 @@ public final class AppPreferences {
 
         // rounds up to the nearest multiple of 5
         return ((retVal + 4) / 5) * 5;
+    }
+
+    public static ImageArea.Mode loadDesktopMode() {
+        String value = mainNode.get(UI_KEY, "Tabs");
+        return ImageArea.Mode.fromString(value);
+    }
+
+    private static void saveDesktopMode() {
+        mainNode.put(UI_KEY, ImageArea.INSTANCE.getMode().toString());
     }
 
     /**
@@ -408,6 +419,14 @@ public final class AppPreferences {
         Panel() {
             setLayout(new GridBagLayout());
             GridBagHelper gbh = new GridBagHelper(this);
+
+            JComboBox uiChooser = new JComboBox(ImageArea.Mode.values());
+            uiChooser.setSelectedItem(ImageArea.INSTANCE.getMode());
+            gbh.addLabelWithControl("Images In: ", uiChooser);
+            uiChooser.addActionListener(e -> {
+                ImageArea.Mode mode = (ImageArea.Mode) uiChooser.getSelectedItem();
+                ImageArea.INSTANCE.changeUI(mode);
+            });
 
             undoLevelsTF = new IntTextField(3);
             undoLevelsTF.setText(String.valueOf(History.getUndoLevels()));

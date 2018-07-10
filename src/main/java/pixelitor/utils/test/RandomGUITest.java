@@ -39,8 +39,9 @@ import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ParamSetState;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.AutoZoom;
-import pixelitor.gui.Desktop;
+import pixelitor.gui.GlobalKey;
 import pixelitor.gui.GlobalKeyboardWatch;
+import pixelitor.gui.ImageArea;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
@@ -103,6 +104,8 @@ import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
 import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_180;
 import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_270;
 import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_90;
+import static pixelitor.gui.ImageArea.Mode.FRAMES;
+import static pixelitor.gui.ImageArea.Mode.TABS;
 
 /**
  * An automatic test using java.awt.Robot, which performs
@@ -155,25 +158,25 @@ public class RandomGUITest {
 
         // make sure it can be stopped by pressing a key
         stopKeyStroke = KeyStroke.getKeyStroke('w');
-        GlobalKeyboardWatch.addKeyboardShortCut(stopKeyStroke, "stopTest", new AbstractAction() {
+        GlobalKeyboardWatch.add(new GlobalKey(stopKeyStroke, "stopTest", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.err.println("\nRandomGUITest: \"" + stopKeyStroke + "\" pressed");
                 continueRunning = false;
             }
-        });
+        }));
         continueRunning = true;
 
         // This key not only stops the testing, but also exits the app
         KeyStroke exitKeyStroke = KeyStroke.getKeyStroke('j');
-        GlobalKeyboardWatch.addKeyboardShortCut(exitKeyStroke, "exit", new AbstractAction() {
+        GlobalKeyboardWatch.add(new GlobalKey(exitKeyStroke, "exit", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.err.println("\nRandomGUITest: exiting app because '" + exitKeyStroke
                         .getKeyChar() + "' was pressed");
                 System.exit(1);
             }
-        });
+        }));
 
         System.out.printf("RandomGUITest.runTest CALLED at %s, the '%s' key stops, the '%s' key exits.%n",
                 DATE_FORMAT.format(new Date()),
@@ -666,10 +669,19 @@ public class RandomGUITest {
         double r = Math.random();
         if (r < 0.8) {
             log("arrange windows - tile");
-            Desktop.INSTANCE.tileWindows();
+            ImageArea.INSTANCE.tileWindows();
         } else {
             log("arrange windows - cascade");
-            Desktop.INSTANCE.cascadeWindows();
+            ImageArea.INSTANCE.cascadeWindows();
+        }
+    }
+
+    private static void changeImageArea() {
+        ImageArea.Mode current = ImageArea.INSTANCE.getMode();
+        if (current == FRAMES) {
+            ImageArea.INSTANCE.changeUI(TABS);
+        } else {
+            ImageArea.INSTANCE.changeUI(FRAMES);
         }
     }
 
@@ -1046,6 +1058,7 @@ public class RandomGUITest {
         weightedCaller.registerCallback(1, RandomGUITest::randomFade);
         weightedCaller.registerCallback(2, RandomGUITest::randomizeToolSettings);
         weightedCaller.registerCallback(1, RandomGUITest::arrangeWindows);
+        weightedCaller.registerCallback(3, RandomGUITest::changeImageArea);
         weightedCaller.registerCallback(1, RandomGUITest::randomColors);
         weightedCaller.registerCallback(5, RandomGUITest::randomFilter);
         weightedCaller.registerCallback(25, RandomGUITest::randomTween);

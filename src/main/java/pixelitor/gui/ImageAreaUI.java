@@ -23,7 +23,7 @@ import java.awt.Dimension;
  * A common interface for the two UI modes
  * (internal frames and tabs)
  */
-public interface DesktopUI {
+public interface ImageAreaUI {
     void activateIC(ImageComponent ic);
 
     void addNewIC(ImageComponent ic);

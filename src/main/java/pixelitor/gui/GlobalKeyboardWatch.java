@@ -29,6 +29,8 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A global listener for keyboard events
@@ -39,10 +41,28 @@ public class GlobalKeyboardWatch {
     private static JComponent alwaysVisibleComponent;
     private static KeyListener keyListener;
 
+    private static final List<GlobalKey> globalKeys = new ArrayList<>();
+
+    private static final Action INCREASE_ACTIVE_BRUSH_SIZE_ACTION = new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            Tools.increaseActiveBrushSize();
+        }
+    };
+
+    private static final Action DECREASE_ACTIVE_BRUSH_SIZE_ACTION = new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            Tools.decreaseActiveBrushSize();
+        }
+    };
+
     private GlobalKeyboardWatch() {
+        // do not instantiate: only static utility methods
     }
 
-    public static void init() {
+    public static void initTab() {
+        // we want to use the tab key as "hide all", but
         // tab is the focus traversal key, it must be handled before it gets consumed
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(e -> {
             int id = e.getID();
@@ -152,45 +172,29 @@ public class GlobalKeyboardWatch {
         GlobalKeyboardWatch.alwaysVisibleComponent = alwaysVisibleComponent;
     }
 
-    public static void addKeyboardShortCut(char activationChar, boolean caseInsensitive, String actionMapKey, Action action) {
-        InputMap inputMap = alwaysVisibleComponent.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+    public static void add(GlobalKey key) {
+        // since the "always visible component" can change, we only
+        // store the keys, and re-register them after every change
+        globalKeys.add(key);
+    }
 
-        if (caseInsensitive) {
-            char activationLC = Character.toLowerCase(activationChar);
-            char activationUC = Character.toUpperCase(activationChar);
+    public static void registerKeysOnAlwaysVisibleComponent() {
+        InputMap inputMap = alwaysVisibleComponent.getInputMap(
+                JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = alwaysVisibleComponent.getActionMap();
 
-            inputMap.put(KeyStroke.getKeyStroke(activationLC), actionMapKey);
-            inputMap.put(KeyStroke.getKeyStroke(activationUC), actionMapKey);
-        } else {
-            inputMap.put(KeyStroke.getKeyStroke(activationChar), actionMapKey);
+        for (GlobalKey key : globalKeys) {
+            key.registerOn(inputMap, actionMap);
         }
-
-        alwaysVisibleComponent.getActionMap().put(actionMapKey, action);
     }
 
-    public static void addKeyboardShortCut(KeyStroke keyStroke, String actionMapKey, Action action) {
-        InputMap inputMap = alwaysVisibleComponent.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-        inputMap.put(keyStroke, actionMapKey);
-        alwaysVisibleComponent.getActionMap().put(actionMapKey, action);
-    }
-
-    public static void registerBrushSizeActions() {
-        Action increaseActiveBrushSizeAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Tools.increaseActiveBrushSize();
-            }
-        };
-
-        Action decreaseActiveBrushSizeAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Tools.decreaseActiveBrushSize();
-            }
-        };
-
-        GlobalKeyboardWatch.addKeyboardShortCut(']', false, "increment", increaseActiveBrushSizeAction);
-        GlobalKeyboardWatch.addKeyboardShortCut('[', false, "decrement", decreaseActiveBrushSizeAction);
+    public static void addBrushSizeActions() {
+        GlobalKeyboardWatch.add(
+                new GlobalKey(']', false,
+                        "increment", INCREASE_ACTIVE_BRUSH_SIZE_ACTION));
+        GlobalKeyboardWatch.add(
+                new GlobalKey('[', false,
+                        "decrement", DECREASE_ACTIVE_BRUSH_SIZE_ACTION));
     }
 
     public static void registerDebugMouseWatching() {
@@ -198,13 +202,22 @@ public class GlobalKeyboardWatch {
             MouseEvent m = (MouseEvent) event;
             String compClass = m.getComponent().getClass().getName();
             if (m.getID() == MouseEvent.MOUSE_CLICKED) {
-                System.out.println("GlobalKeyboardWatch:MOUSE_CLICKED x = " + m.getX() + ", y = " + m.getY() + ", click count = " + m.getClickCount() + ", comp class = " + compClass);
+                System.out.println("GlobalKeyboardWatch:MOUSE_CLICKED" +
+                        " x = " + m.getX() + ", y = " + m.getY()
+                        + ", click count = " + m.getClickCount()
+                        + ", comp class = " + compClass);
             } else if (m.getID() == MouseEvent.MOUSE_DRAGGED) {
-                System.out.println("GlobalKeyboardWatch:MOUSE_DRAGGED x = " + m.getX() + ", y = " + m.getY() + ", comp class = " + compClass);
+                System.out.println("GlobalKeyboardWatch:MOUSE_DRAGGED" +
+                        " x = " + m.getX() + ", y = " + m.getY()
+                        + ", comp class = " + compClass);
             } else if (m.getID() == MouseEvent.MOUSE_PRESSED) {
-                System.out.println("GlobalKeyboardWatch:MOUSE_PRESSED x = " + m.getX() + ", y = " + m.getY() + ", comp class = " + compClass);
+                System.out.println("GlobalKeyboardWatch:MOUSE_PRESSED" +
+                        " x = " + m.getX() + ", y = " + m.getY()
+                        + ", comp class = " + compClass);
             } else if (m.getID() == MouseEvent.MOUSE_RELEASED) {
-                System.out.println("GlobalKeyboardWatch:MOUSE_RELEASED x = " + m.getX() + ", y = " + m.getY() + ", comp class = " + compClass);
+                System.out.println("GlobalKeyboardWatch:MOUSE_RELEASED" +
+                        " x = " + m.getX() + ", y = " + m.getY()
+                        + ", comp class = " + compClass);
             }
         }, AWTEvent.MOUSE_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK);
     }

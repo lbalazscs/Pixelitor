@@ -32,6 +32,7 @@ import org.fest.util.Files;
 import pixelitor.automate.AutoPaint;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.painters.EffectsPanel;
+import pixelitor.gui.ImageArea;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
@@ -72,6 +73,8 @@ import static java.awt.event.KeyEvent.*;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static pixelitor.TestingMode.NO_MASK;
+import static pixelitor.gui.ImageArea.Mode.FRAMES;
+import static pixelitor.gui.ImageArea.Mode.TABS;
 import static pixelitor.utils.test.Assertions.canvasImSizeIs;
 import static pixelitor.utils.test.Assertions.numLayersIs;
 import static pixelitor.utils.test.Assertions.numOpenImagesIs;
@@ -313,7 +316,7 @@ public class AssertJSwingTest {
         testPaintBucketTool();
         testColorPickerTool();
         testShapesTool();
-        testReload(); // file menu, but better here
+        testReload(); // file menu, but more practical to test it here
         testHandTool();
         testZoomTool();
 
@@ -1571,9 +1574,9 @@ public class AssertJSwingTest {
         pw.toggleButton("Color Picker Tool Button").click();
         randomAltClick();
 
-        moveTo(300, 300);
+        moveTo(getExtraX() + 300, 300);
         pw.click();
-        dragTo(400, 400);
+        dragTo(getExtraX() + 400, 400);
 
         assert checkConsistency();
     }
@@ -1584,7 +1587,7 @@ public class AssertJSwingTest {
         pw.toggleButton("Paint Bucket Tool Button").click();
         randomAltClick();
 
-        moveTo(300, 300);
+        moveTo(getExtraX() + 300, 300);
         pw.click();
 
         keyboardUndoRedoUndo();
@@ -1602,6 +1605,8 @@ public class AssertJSwingTest {
         pw.toggleButton("Gradient Tool Button").click();
         randomAltClick();
 
+        int extraX = getExtraX();
+
         for (GradientType gradientType : GradientType.values()) {
             pw.comboBox("gradientTypeSelector").selectItem(gradientType.toString());
             for (String cycleMethod : GradientTool.CYCLE_METHODS) {
@@ -1613,11 +1618,11 @@ public class AssertJSwingTest {
                     }
                     pw.comboBox("gradientColorTypeSelector").selectItem(colorType.toString());
                     pw.checkBox("gradientInvert").uncheck();
-                    moveTo(200, 200);
-                    dragTo(400, 400);
+                    moveTo(extraX + 200, 200);
+                    dragTo(extraX + 400, 400);
                     pw.checkBox("gradientInvert").check();
-                    moveTo(200, 200);
-                    dragTo(400, 400);
+                    moveTo(extraX + 200, 200);
+                    dragTo(extraX + 400, 400);
                 }
             }
         }
@@ -1686,10 +1691,12 @@ public class AssertJSwingTest {
 
         pw.toggleButton("Clone Stamp Tool Button").click();
 
-        testClone(false, false, 100);
-        testClone(false, true, 200);
-        testClone(true, false, 300);
-        testClone(true, true, 400);
+        int extraX = getExtraX();
+
+        testClone(false, false, extraX + 100);
+        testClone(false, true, extraX + 200);
+        testClone(true, false, extraX + 300);
+        testClone(true, true, extraX + 400);
 
         assert checkConsistency();
     }
@@ -1707,10 +1714,11 @@ public class AssertJSwingTest {
             pw.checkBox("sampleAllLayersCB").uncheck();
         }
 
-        moveTo(300, 300);
-
+        // set the source point
+        moveTo(getExtraX() + 300, 300);
         altClick();
 
+        // do some cloning
         moveTo(startX, 300);
         for (int i = 1; i <= 5; i++) {
             int x = startX + i * 10;
@@ -1737,8 +1745,9 @@ public class AssertJSwingTest {
     private void testWithSimpleSelection() {
         assert thereIsNoSelection();
 
-        moveTo(200, 200);
-        dragTo(400, 400);
+        int extraX = getExtraX();
+        moveTo(extraX + 200, 200);
+        dragTo(extraX + 400, 400);
         assert thereIsSelection();
 
         keyboardNudge();
@@ -1766,8 +1775,9 @@ public class AssertJSwingTest {
     private void testWithTwoEclipseSelections() {
         pw.comboBox("selectionTypeCombo").selectItem("Ellipse");
 
+        int extraX = getExtraX();
         // replace current selection with the first ellipse
-        int e1X = 200;
+        int e1X = extraX + 200;
         int e1Y = 200;
         int e1Width = 200;
         int e1Height = 200;
@@ -1777,7 +1787,7 @@ public class AssertJSwingTest {
 
         // add second ellipse
         pw.comboBox("selectionInteractionCombo").selectItem("Add");
-        int e2X = 400;
+        int e2X = extraX + 400;
         int e2Y = 200;
         int e2Width = 100;
         int e2Height = 100;
@@ -1842,12 +1852,14 @@ public class AssertJSwingTest {
     private void testCropTool() {
         log(1, "testing the crop tool");
 
+        int extraX = getExtraX();
+
         pw.toggleButton("Crop Tool Button").click();
-        moveTo(200, 200);
-        dragTo(400, 400);
-        dragTo(450, 450);
-        moveTo(200, 200);
-        dragTo(150, 150);
+        moveTo(extraX + 200, 200);
+        dragTo(extraX + 400, 400);
+        dragTo(extraX + 450, 450);
+        moveTo(extraX + 200, 200);
+        dragTo(extraX + 150, 150);
         Utils.sleep(1, SECONDS);
 
         keyboardNudge();
@@ -1876,10 +1888,11 @@ public class AssertJSwingTest {
     }
 
     private void testMoveToolImpl(boolean altDrag) {
-        moveTo(400, 400);
+        int extraX = getExtraX();
+        moveTo(extraX + 400, 400);
         click();
         if (altDrag) {
-            altDragTo(300, 300);
+            altDragTo(extraX + 300, 300);
         } else {
             ImageComponent ic = ImageComponents.getActiveIC();
             Drawable dr = ic.getComp().getActiveDrawableOrThrow();
@@ -1888,7 +1901,7 @@ public class AssertJSwingTest {
             assert tx == 0 : "tx = " + tx;
             assert ty == 0 : "ty = " + tx;
 
-            dragTo(200, 300);
+            dragTo(extraX + 200, 300);
 
             tx = dr.getTX();
             ty = dr.getTY();
@@ -1912,7 +1925,7 @@ public class AssertJSwingTest {
 
         ZoomLevel startingZoom = ImageComponents.getActiveIC().getZoomLevel();
 
-        moveTo(300, 300);
+        moveTo(getRandomX(), getRandomY());
 
         click();
         assert zoomIs(startingZoom.zoomIn());
@@ -2109,23 +2122,43 @@ public class AssertJSwingTest {
     }
 
     private void moveRandom() {
-        int x = 200 + random.nextInt(400);
-        int y = 200 + random.nextInt(400);
+        int x = getRandomX();
+        int y = getRandomY();
         moveTo(x, y);
+    }
+
+    private int getExtraX() {
+        int extraX = 0;
+        if (ImageArea.INSTANCE.getMode() == TABS) {
+            extraX = (int) ImageComponents.getActiveIC().getCanvasStartX();
+        }
+        return extraX;
+    }
+
+    private int getRandomX() {
+        if (ImageArea.INSTANCE.getMode() == FRAMES) {
+            return 200 + random.nextInt(400);
+        } else {
+            return 400 + random.nextInt(500);
+        }
+    }
+
+    private int getRandomY() {
+        return 200 + random.nextInt(400);
     }
 
     private void shiftMoveClickRandom() {
         pw.pressKey(VK_SHIFT);
-        int x = 200 + random.nextInt(400);
-        int y = 200 + random.nextInt(400);
+        int x = getRandomX();
+        int y = getRandomY();
         moveTo(x, y);
         click();
         pw.releaseKey(VK_SHIFT);
     }
 
     private void dragRandom() {
-        int x = 200 + random.nextInt(400);
-        int y = 200 + random.nextInt(400);
+        int x = getRandomX();
+        int y = getRandomY();
         dragTo(x, y);
     }
 

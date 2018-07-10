@@ -17,6 +17,8 @@
 
 package pixelitor.gui.utils;
 
+import pixelitor.filters.gui.FilterParam;
+
 import javax.swing.*;
 import java.awt.Component;
 import java.awt.Container;
@@ -142,5 +144,22 @@ public class GridBagHelper {
         nextLastControlConstraint.gridx = 0;
         nextLastControlConstraint.gridy = row;
         container.add(c, nextLastControlConstraint);
+    }
+
+    public void addOnlyControl(Component c) {
+        nextLastControlConstraint.gridx = 0;
+        nextLastControlConstraint.gridy = autoIncrementedGridY;
+        autoIncrementedGridY++;
+
+        container.add(c, nextLastControlConstraint);
+    }
+
+    public void addParam(FilterParam param) {
+        int cols = param.getNumGridBagCols();
+        if (cols == 2) {
+            addLabelWithControl(param.getName(), param.createGUI());
+        } else if (cols == 1) {
+            addOnlyControl(param.createGUI());
+        }
     }
 }

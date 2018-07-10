@@ -21,10 +21,13 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.beans.PropertyVetoException;
 
+/**
+ * An {@link ImageWindow} used in the tabs UI.
+ */
 public class ImageTab extends JComponent implements ImageWindow {
     private final ImageComponent ic;
     private final JScrollPane scrollPane;
-    private TabsUI tabsUI;
+    private final TabsUI tabsUI;
 
     public ImageTab(ImageComponent ic, TabsUI tabsUI) {
         this.ic = ic;
@@ -32,11 +35,6 @@ public class ImageTab extends JComponent implements ImageWindow {
         scrollPane = new JScrollPane(this.ic);
         setLayout(new BorderLayout());
         this.add(scrollPane, BorderLayout.CENTER);
-    }
-
-    @Override
-    public void setSize(int locX, int locY, int width, int height) {
-        // not applicable for tabs
     }
 
     @Override

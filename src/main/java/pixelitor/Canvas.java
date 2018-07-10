@@ -33,6 +33,10 @@ public class Canvas implements Serializable {
     public static final int MAX_WIDTH = 9_999;
     public static final int MAX_HEIGHT = 9_999;
 
+    // implementation note: some non-transient field names are inconsistent
+    // with their getters, but they cannot be renamed without breaking
+    // serialization compatibility with old pxc files
+
     // size in image space
     private int width;
     private int height;
@@ -43,7 +47,7 @@ public class Canvas implements Serializable {
 
     private transient ImageComponent ic;
 
-    // for consistency with Pixelitor 2.1.0
+    // for compatibility with Pixelitor 2.1.0
     private static final long serialVersionUID = -1459254568616232274L;
 
     /**

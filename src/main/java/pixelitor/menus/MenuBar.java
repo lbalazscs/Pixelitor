@@ -41,8 +41,8 @@ import pixelitor.filters.levels.Levels;
 import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.filters.lookup.Luminosity;
 import pixelitor.filters.painters.TextFilter;
-import pixelitor.gui.Desktop;
 import pixelitor.gui.HistogramsPanel;
+import pixelitor.gui.ImageArea;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.Navigator;
@@ -1106,14 +1106,14 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("Cascade") {
             @Override
             public void onClick() {
-                Desktop.INSTANCE.cascadeWindows();
+                ImageArea.INSTANCE.cascadeWindows();
             }
         });
 
         sub.addAction(new MenuAction("Tile") {
             @Override
             public void onClick() {
-                Desktop.INSTANCE.tileWindows();
+                ImageArea.INSTANCE.tileWindows();
             }
         });
 

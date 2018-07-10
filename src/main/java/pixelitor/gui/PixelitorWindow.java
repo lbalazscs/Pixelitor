@@ -54,7 +54,7 @@ public class PixelitorWindow extends JFrame {
         setupWindowClosing();
 
         addMenus();
-        addDesktopArea();
+        addImagesArea();
         addLayersAndHistograms();
         addToolsPanel();
         Tools.setDefaultTool();
@@ -62,7 +62,9 @@ public class PixelitorWindow extends JFrame {
 
         setupFrameIcons();
 
-        GlobalKeyboardWatch.init();
+        GlobalKeyboardWatch.initTab();
+        GlobalKeyboardWatch.addBrushSizeActions();
+        GlobalKeyboardWatch.registerKeysOnAlwaysVisibleComponent();
 
         AppPreferences.loadFramePosition(this);
         setVisible(true);
@@ -85,8 +87,12 @@ public class PixelitorWindow extends JFrame {
         setJMenuBar(menuBar);
     }
 
-    private void addDesktopArea() {
-        add(Desktop.INSTANCE.getUI(), BorderLayout.CENTER);
+    public void addImagesArea() {
+        add(ImageArea.INSTANCE.getUI(), BorderLayout.CENTER);
+    }
+
+    public void removeImagesArea(JComponent c) {
+        remove(c);
     }
 
     private void addLayersAndHistograms() {

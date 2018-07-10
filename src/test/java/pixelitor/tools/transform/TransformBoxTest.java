@@ -30,7 +30,7 @@ import static org.junit.Assert.assertEquals;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 public class TransformBoxTest {
-    private Rectangle originalRect = new Rectangle(200, 100, 200, 100);
+    private final Rectangle originalRect = new Rectangle(200, 100, 200, 100);
     private View view;
 
     @Before
@@ -41,8 +41,7 @@ public class TransformBoxTest {
     @Test
     public void moveNWFromInitialState() {
         TransformBox box = new TransformBox(originalRect,
-                view, at -> {
-        });
+                view, at -> {});
         TransformHandle nw = box.getNW();
         TransformHandle sw = box.getSW();
         TransformHandle ne = box.getNE();
@@ -86,8 +85,7 @@ public class TransformBoxTest {
 
     @Test
     public void moveSEFromInitialState() {
-        TransformBox box = new TransformBox(originalRect, view, at -> {
-        });
+        TransformBox box = new TransformBox(originalRect, view, at -> {});
         TransformHandle nw = box.getNW();
         TransformHandle sw = box.getSW();
         TransformHandle ne = box.getNE();
@@ -132,8 +130,7 @@ public class TransformBoxTest {
     @Test
     public void pureTranslation() {
         TransformBox box = new TransformBox(originalRect,
-                view, at -> {
-        });
+                view, at -> {});
         TransformHandle nw = box.getNW();
         TransformHandle sw = box.getSW();
         TransformHandle ne = box.getNE();
@@ -166,8 +163,7 @@ public class TransformBoxTest {
     @Test
     public void pureScaling() {
         TransformBox box = new TransformBox(originalRect,
-                view, at -> {
-        });
+                view, at -> {});
         TransformHandle nw = box.getNW();
         TransformHandle sw = box.getSW();
         TransformHandle ne = box.getNE();

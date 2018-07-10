@@ -207,7 +207,7 @@ public class ImageComponents {
                 throw new IllegalStateException("cannot activate null imageComponent");
             }
             // activate is always false in unit tests
-            Desktop.INSTANCE.activateIC(ic);
+            ImageArea.INSTANCE.activateIC(ic);
             ic.onActivation();
         }
     }
@@ -410,7 +410,7 @@ public class ImageComponents {
             setActiveIC(ic, false);
             comp.addAllLayersToGUI();
 
-            Desktop.INSTANCE.addNewIC(ic);
+            ImageArea.INSTANCE.addNewIC(ic);
         } catch (Exception e) {
             Messages.showException(e);
         }
