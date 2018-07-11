@@ -24,9 +24,11 @@ import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.DialogBuilder;
+import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.IntTextField;
-import pixelitor.gui.utils.OKCancelDialog;
+import pixelitor.gui.utils.TFValidationLayerUI;
+import pixelitor.gui.utils.TextFieldValidator;
 import pixelitor.history.History;
 import pixelitor.io.Directories;
 import pixelitor.layers.LayerButtonLayout;
@@ -39,6 +41,7 @@ import pixelitor.menus.view.ShowHideToolsAction;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
+import javax.swing.plaf.LayerUI;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
@@ -47,6 +50,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
 import java.io.File;
+import java.util.function.Predicate;
 import java.util.prefs.Preferences;
 
 /**
@@ -428,9 +432,12 @@ public final class AppPreferences {
                 ImageArea.INSTANCE.changeUI(mode);
             });
 
-            undoLevelsTF = new IntTextField(3);
+            undoLevelsTF = new JTextField(3);
             undoLevelsTF.setText(String.valueOf(History.getUndoLevels()));
-            gbh.addLabelWithControl("Undo/Redo Levels: ", undoLevelsTF);
+            LayerUI<JTextField> tfLayerUI = new TFValidationLayerUI(
+                    TextFieldValidator::hasValidInt);
+            gbh.addLabelWithControl("Undo/Redo Levels: ",
+                    new JLayer<>(undoLevelsTF, tfLayerUI));
 
             Value[] thumbSizes = {
                     new Value("24x24 pixels", 24),
@@ -458,19 +465,37 @@ public final class AppPreferences {
         }
 
         public static void showInDialog() {
-            Panel p = new Panel();
-            OKCancelDialog d = new OKCancelDialog(p, "Preferences") {
-                @Override
-                protected void okAction() {
-                    int undoLevels = p.getUndoLevels();
+            Panel panel = new Panel();
+
+            // we don't want to continuously set the undo levels
+            // as the user edits the text field, because low levels
+            // erase the history, so we set it in the validator
+            Predicate<JDialog> validator = d -> {
+                int undoLevels = 0;
+                boolean couldParse = true;
+                try {
+                    undoLevels = panel.getUndoLevels();
+                } catch (NumberFormatException ex) {
+                    couldParse = false;
+                }
+                if (couldParse) {
                     History.setUndoLevels(undoLevels);
-
-                    p.updateThumbSize();
-
-                    close();
+                    return true;
+                } else {
+                    Dialogs.showErrorDialog(d, "Error",
+                            "<html>The <b>Undo/Redo Levels</b> must be an integer.");
+                    return false;
                 }
             };
-            d.setVisible(true);
+
+            new DialogBuilder()
+                    .form(panel)
+                    .noCancelButton()
+                    .title("Preferences")
+                    .okText("Close")
+                    .validator(validator)
+                    .validateWhenCanceled()
+                    .show();
         }
     }
 }

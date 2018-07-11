@@ -125,7 +125,7 @@ public class Assertions {
         if (ic == null) {
             throw new IllegalStateException();
         }
-        return Tools.CROP.getCropRect().equals(new Rectangle(x, y, w, h));
+        return Tools.CROP.getCropRect().getCo().equals(new Rectangle(x, y, w, h));
     }
 
     public static boolean selectedToolIs(Tool expected) {

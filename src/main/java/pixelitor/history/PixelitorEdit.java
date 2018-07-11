@@ -35,7 +35,7 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
     // not added to the history by itself
     protected boolean embedded;
 
-    public PixelitorEdit(String name, Composition comp) {
+    protected PixelitorEdit(String name, Composition comp) {
         assert comp != null;
         assert name != null;
 

@@ -17,8 +17,8 @@
 
 package pixelitor.tools.gui;
 
-import pixelitor.gui.GlobalKey;
 import pixelitor.gui.GlobalKeyboardWatch;
+import pixelitor.gui.MappedKey;
 import pixelitor.layers.AddTextLayerAction;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
@@ -53,7 +53,7 @@ public class ToolsPanel extends JPanel {
                 AddTextLayerAction.INSTANCE.actionPerformed(null);
             }
         };
-        GlobalKeyboardWatch.add(new GlobalKey('t', true, "text", textToolAction));
+        GlobalKeyboardWatch.add(MappedKey.fromChar('t', true, "text", textToolAction));
     }
 
     private static void setupKeyboardShortcut(Tool tool) {
@@ -69,7 +69,7 @@ public class ToolsPanel extends JPanel {
         String toolName = tool.getName();
         char activationChar = tool.getActivationKeyChar();
 
-        GlobalKeyboardWatch.add(new GlobalKey(activationChar, true, toolName, pressToolAction));
+        GlobalKeyboardWatch.add(MappedKey.fromChar(activationChar, true, toolName, pressToolAction));
     }
 
 }

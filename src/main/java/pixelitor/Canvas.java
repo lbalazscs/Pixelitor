@@ -28,6 +28,9 @@ import java.io.Serializable;
 /**
  * The painting canvas represents the size of the composition.
  * A layer can be bigger than the canvas if it is partially hidden.
+ *
+ * If a Composition is deserialized, then the Canvas is also deserialized,
+ * and later associated with the (transient!) ImageComponent
  */
 public class Canvas implements Serializable {
     public static final int MAX_WIDTH = 9_999;
@@ -50,11 +53,6 @@ public class Canvas implements Serializable {
     // for compatibility with Pixelitor 2.1.0
     private static final long serialVersionUID = -1459254568616232274L;
 
-    /**
-     * If a Composition is deserialized, then this object is also deserialized,
-     * and later associated with the (transient!) ImageComponent
-     * In the case of a new image, this object is first created in ImageComponent
-     */
     public Canvas(int imWidth, int imHeight) {
         this.width = imWidth;
         this.height = imHeight;
@@ -67,18 +65,22 @@ public class Canvas implements Serializable {
         this.zoomedHeight = orig.zoomedHeight;
     }
 
-    public void changeSize(int newImWidth, int newImHeight) {
+    /**
+     * Changes the size with values given in image space
+     */
+    public void changeImSize(int newImWidth, int newImHeight) {
         width = newImWidth;
         height = newImHeight;
 
-        double viewScale = ic.getViewScale();
-        zoomedWidth = (int) (viewScale * newImWidth);
-        zoomedHeight = (int) (viewScale * newImHeight);
-
-        ic.canvasCoSizeChanged();
+        // also update the component space values
+        recalcCoSize();
     }
 
-    public void changeZooming(double viewScale) {
+    /**
+     * Recalculates the component-space (zoomed) size
+     */
+    public void recalcCoSize() {
+        double viewScale = ic.getViewScale();
         zoomedWidth = (int) (viewScale * width);
         zoomedHeight = (int) (viewScale * height);
 
@@ -107,7 +109,7 @@ public class Canvas implements Serializable {
     }
 
     /**
-     * Returns the size in component space
+     * Returns the (zoomed) size in component space
      */
     public Dimension getCoSize() {
         return new Dimension(zoomedWidth, zoomedHeight);
@@ -129,6 +131,9 @@ public class Canvas implements Serializable {
 
     public void setIC(ImageComponent ic) {
         this.ic = ic;
+        if (ic != null) {
+            recalcCoSize();
+        }
     }
 
     public Shape invertShape(Shape shape) {

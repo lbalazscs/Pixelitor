@@ -40,5 +40,8 @@ public interface ImageWindow {
 
     void setTitle(String title);
 
-    void makeSureItIsVisible();
+    /**
+     * Important only for the cropping with internal frames.
+     */
+    void ensurePositiveLocation();
 }

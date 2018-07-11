@@ -26,7 +26,6 @@ import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
 import pixelitor.utils.Messages;
 
-import java.awt.Dimension;
 import java.awt.geom.Rectangle2D;
 
 import static pixelitor.Composition.ImageChangeActions.FULL;
@@ -35,12 +34,14 @@ import static pixelitor.Composition.ImageChangeActions.FULL;
  * A cropping action on all layers of a composition
  */
 public class Crop implements CompAction {
-    private Rectangle2D cropRect;
+    // the crop rectangle in image space
+    private Rectangle2D imCropRect;
+
     private final boolean selectionCrop;
     private final boolean allowGrowing;
 
-    public Crop(Rectangle2D cropRect, boolean selectionCrop, boolean allowGrowing) {
-        this.cropRect = cropRect;
+    public Crop(Rectangle2D imCropRect, boolean selectionCrop, boolean allowGrowing) {
+        this.imCropRect = imCropRect;
         this.selectionCrop = selectionCrop;
         this.allowGrowing = allowGrowing;
     }
@@ -49,10 +50,10 @@ public class Crop implements CompAction {
     public void process(Composition comp) {
         Canvas canvas = comp.getCanvas();
         if (!allowGrowing) {
-            cropRect = cropRect.createIntersection(canvas.getImBounds());
+            imCropRect = imCropRect.createIntersection(canvas.getImBounds());
         }
 
-        if (cropRect.isEmpty()) {
+        if (imCropRect.isEmpty()) {
             // empty selection, can't do anything useful
             return;
         }
@@ -66,36 +67,37 @@ public class Crop implements CompAction {
             // if this is a crop started from the crop tool
             // we still could have a selection that needs to be
             // cropped
-            comp.cropSelection(cropRect);
+            comp.cropSelection(imCropRect);
         }
 
         comp.forEachLayer(layer -> {
-            layer.crop(cropRect);
+            layer.crop(imCropRect);
             if (layer.hasMask()) {
-                layer.getMask().crop(cropRect);
+                layer.getMask().crop(imCropRect);
             }
         });
 
         MultiLayerEdit edit = new MultiLayerEdit("Crop", comp, backup);
         History.addEdit(edit);
 
-        int cropRectWidth = (int) cropRect.getWidth();
-        int cropRectHeight = (int) cropRect.getHeight();
-        canvas.changeSize(cropRectWidth, cropRectHeight);
+        int newWidth = (int) imCropRect.getWidth();
+        int newHeight = (int) imCropRect.getHeight();
+        canvas.changeImSize(newWidth, newHeight);
         comp.updateAllIconImages();
 
         ImageComponent ic = comp.getIC();
         if (!ic.isMock()) { // not in a test
-            ic.setPreferredSize(new Dimension(cropRectWidth, cropRectHeight));
             ic.revalidate();
-            ic.makeSureItIsVisible();
 
-//            ic.updateCanvasLocation();
+            // otherwise if before the crop the internal frame started
+            // at large negative coordinates, after the crop it
+            // could become unreachable
+            ic.ensurePositiveLocation();
         }
         comp.imageChanged(FULL, true);
 
         AppLogic.activeCompSizeChanged(comp);
         Messages.showInStatusBar("Image cropped to "
-                + cropRectWidth + " x " + cropRectHeight + " pixels.");
+                + newWidth + " x " + newHeight + " pixels.");
     }
 }

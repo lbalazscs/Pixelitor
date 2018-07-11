@@ -124,7 +124,7 @@ public class ImageFrame extends JInternalFrame implements ImageWindow, InternalF
     }
 
     @Override
-    public void makeSureItIsVisible() {
+    public void ensurePositiveLocation() {
         Rectangle bounds = getBounds();
         if (bounds.x < 0 || bounds.y < 0) {
             int newX = bounds.x < 0 ? 0 : bounds.x;

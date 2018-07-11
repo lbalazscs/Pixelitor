@@ -60,13 +60,12 @@ public class Rotate extends SimpleCompAction {
 
     public enum SpecialAngle {
         ANGLE_90(90, "Rotate 90\u00B0 CW") {
-            @SuppressWarnings("SuspiciousNameCombination")
             @Override
             public void changeCanvas(Canvas canvas) {
                 // switch width and height
                 int newWidth = canvas.getImHeight();
                 int newHeight = canvas.getImWidth();
-                canvas.changeSize(newWidth, newHeight);
+                canvas.changeImSize(newWidth, newHeight);
             }
 
             @Override

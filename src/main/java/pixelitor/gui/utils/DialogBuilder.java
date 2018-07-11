@@ -56,6 +56,13 @@ public class DialogBuilder {
     private Runnable cancelAction;
     private Predicate<JDialog> validator;
 
+    // normally a dialog is validated only when OK is pressed,
+    // but sometimes (for example if the OK button text is "Close",
+    // and there is no Cancel button, but the dialog can still be
+    // canceled with X or Esc) we just don't want to allow
+    // closing it without validating.
+    private boolean validateWhenCanceled = false;
+
     private Supplier<JDialog> dialogFactory;
 
     public DialogBuilder() {
@@ -96,6 +103,11 @@ public class DialogBuilder {
 
     public DialogBuilder notModal() {
         this.modal = false;
+        return this;
+    }
+
+    public DialogBuilder validateWhenCanceled() {
+        this.validateWhenCanceled = true;
         return this;
     }
 
@@ -255,6 +267,12 @@ public class DialogBuilder {
 
     // an OK dialog can still be cancelled with Esc/X
     private void cancelDialog(JDialog d, Runnable cancelAction) {
+        if (validateWhenCanceled && validator != null) {
+            if (!validator.test(d)) {
+                // keep the dialog open
+                return;
+            }
+        }
         closeDialog(d);
         if (cancelAction != null) {
             cancelAction.run();

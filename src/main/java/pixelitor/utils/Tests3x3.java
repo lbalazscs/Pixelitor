@@ -130,7 +130,7 @@ public class Tests3x3 {
             layer.addMask(mask);
         }
         ImageComponents.addAsNewImage(comp);
-        comp.getIC().setZoom(ZoomLevel.Z6400, true, null);
+        comp.getIC().setZoom(ZoomLevel.Z6400, null);
     }
 
     // creates expected results from actual ones for regression tests

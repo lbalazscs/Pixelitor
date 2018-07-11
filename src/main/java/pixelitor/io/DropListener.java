@@ -48,7 +48,7 @@ public class DropListener extends DropTargetAdapter {
         handleOngoingDrag(dtde);
     }
 
-    private void handleOngoingDrag(DropTargetDragEvent dtde) {
+    private static void handleOngoingDrag(DropTargetDragEvent dtde) {
         if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
             dtde.acceptDrag(DnDConstants.ACTION_COPY);
         } else {

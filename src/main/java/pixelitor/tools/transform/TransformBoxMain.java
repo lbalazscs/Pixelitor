@@ -43,6 +43,9 @@ import java.awt.geom.Rectangle2D;
  * Independent test program for a {@link TransformBox}
  */
 public class TransformBoxMain {
+    private TransformBoxMain() {
+    }
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(TransformBoxMain::buildGUI);
     }

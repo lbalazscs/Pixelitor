@@ -43,6 +43,7 @@ import pixelitor.filters.lookup.Luminosity;
 import pixelitor.filters.painters.TextFilter;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageArea;
+import pixelitor.gui.ImageArea.Mode;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.Navigator;
@@ -119,6 +120,8 @@ import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_270;
 import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_90;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.MOTION_BLUR;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
+import static pixelitor.gui.ImageArea.Mode.FRAMES;
+import static pixelitor.gui.ImageArea.Mode.TABS;
 import static pixelitor.gui.ImageComponents.getActiveCompOrNull;
 import static pixelitor.gui.ImageComponents.getActiveLayerOrNull;
 import static pixelitor.menus.EnabledIf.ACTION_ENABLED;
@@ -1234,6 +1237,18 @@ public class MenuBar extends JMenuBar {
             }
         });
 
+        developMenu.addAlwaysEnabledAction(new MenuAction("Change UI") {
+            @Override
+            public void onClick() {
+                Mode mode = ImageArea.INSTANCE.getMode();
+                if (mode == TABS) {
+                    ImageArea.INSTANCE.changeUI(FRAMES);
+                } else {
+                    ImageArea.INSTANCE.changeUI(TABS);
+                }
+            }
+        }, CTRL_K);
+
         return developMenu;
     }
 
@@ -1399,9 +1414,7 @@ public class MenuBar extends JMenuBar {
 
         sub.addFilter(BlurredShapeTester.NAME, BlurredShapeTester::new);
 
-        sub.buildFilter(XYZTest.NAME, XYZTest::new)
-                .withKey(CTRL_K)
-                .add();
+        sub.addFilter(XYZTest.NAME, XYZTest::new);
 
 
         sub.addFilter(Droste.NAME, Droste::new);

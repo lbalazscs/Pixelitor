@@ -19,7 +19,6 @@ package pixelitor.gui;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
-import java.beans.PropertyVetoException;
 
 /**
  * An {@link ImageWindow} used in the tabs UI.
@@ -48,7 +47,7 @@ public class ImageTab extends JComponent implements ImageWindow {
     }
 
     @Override
-    public void setSelected(boolean b) throws PropertyVetoException {
+    public void setSelected(boolean b) {
         // TODO
     }
 
@@ -58,8 +57,8 @@ public class ImageTab extends JComponent implements ImageWindow {
     }
 
     @Override
-    public void makeSureItIsVisible() {
-        // TODO
+    public void ensurePositiveLocation() {
+        // nothing to do
     }
 
     public void onActivation() {

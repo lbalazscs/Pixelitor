@@ -176,7 +176,7 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
     @Override
     public ValidationResult check(JTextField textField) {
         if (textField == numSecondsTF || textField == fpsTF) {
-            return isTextFieldWithDoubleValid(textField);
+            return TextFieldValidator.hasValidDouble(textField);
         } else if (textField == fileNameTF) {
             TweenOutputType outputType = (TweenOutputType) outputTypeCB.getSelectedItem();
 
@@ -190,17 +190,6 @@ public class OutputSettingsPanel extends ValidatedForm implements TextFieldValid
         } else {
             throw new IllegalStateException("unexpected JTextField");
         }
-    }
-
-    private static ValidationResult isTextFieldWithDoubleValid(JTextField textField) {
-        String text = textField.getText().trim();
-        try {
-            //noinspection ResultOfMethodCallIgnored
-            Double.parseDouble(text);
-        } catch (NumberFormatException ex) {
-            return ValidationResult.error(text + " is not a valid number.");
-        }
-        return ValidationResult.ok();
     }
 
     public void copySettingsInto(TweenAnimation animation) {

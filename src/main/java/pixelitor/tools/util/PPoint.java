@@ -44,7 +44,7 @@ public abstract class PPoint {
     protected int coX;
     protected int coY;
 
-    public PPoint(ImageComponent ic) {
+    protected PPoint(ImageComponent ic) {
         assert ic != null;
         this.ic = ic;
     }
@@ -156,7 +156,7 @@ public abstract class PPoint {
             this.imX = imX;
             this.imY = imY;
             this.coX = (int) ic.imageXToComponentSpace(imX);
-            this.coY = (int) ic.imageXToComponentSpace(imY);
+            this.coY = (int) ic.imageYToComponentSpace(imY);
         }
     }
 }

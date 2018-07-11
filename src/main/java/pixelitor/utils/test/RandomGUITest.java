@@ -39,11 +39,11 @@ import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ParamSetState;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.AutoZoom;
-import pixelitor.gui.GlobalKey;
 import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.gui.MappedKey;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.history.History;
@@ -158,7 +158,7 @@ public class RandomGUITest {
 
         // make sure it can be stopped by pressing a key
         stopKeyStroke = KeyStroke.getKeyStroke('w');
-        GlobalKeyboardWatch.add(new GlobalKey(stopKeyStroke, "stopTest", new AbstractAction() {
+        GlobalKeyboardWatch.add(MappedKey.fromKeyStroke(stopKeyStroke, "stopTest", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.err.println("\nRandomGUITest: \"" + stopKeyStroke + "\" pressed");
@@ -169,7 +169,7 @@ public class RandomGUITest {
 
         // This key not only stops the testing, but also exits the app
         KeyStroke exitKeyStroke = KeyStroke.getKeyStroke('j');
-        GlobalKeyboardWatch.add(new GlobalKey(exitKeyStroke, "exit", new AbstractAction() {
+        GlobalKeyboardWatch.add(MappedKey.fromKeyStroke(exitKeyStroke, "exit", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.err.println("\nRandomGUITest: exiting app because '" + exitKeyStroke
@@ -567,10 +567,10 @@ public class RandomGUITest {
             log("zoom zoomLevel = " + randomZoomLevel);
 
             if (rand.nextBoolean()) {
-                ic.setZoom(randomZoomLevel, false, null);
+                ic.setZoom(randomZoomLevel, null);
             } else {
                 Point mousePos = pickRandomPointOn(ic);
-                ic.setZoom(randomZoomLevel, false, mousePos);
+                ic.setZoom(randomZoomLevel, mousePos);
             }
         });
     }
@@ -599,10 +599,10 @@ public class RandomGUITest {
         if (ic != null) {
             ZoomLevel newZoom = ic.getZoomLevel().zoomOut();
             if (rand.nextBoolean()) {
-                ic.setZoom(newZoom, false, null);
+                ic.setZoom(newZoom, null);
             } else {
                 Point mousePos = pickRandomPointOn(ic);
-                ic.setZoom(newZoom, false, mousePos);
+                ic.setZoom(newZoom, mousePos);
             }
         }
     }

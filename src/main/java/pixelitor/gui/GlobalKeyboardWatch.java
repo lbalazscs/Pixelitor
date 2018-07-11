@@ -41,7 +41,7 @@ public class GlobalKeyboardWatch {
     private static JComponent alwaysVisibleComponent;
     private static KeyListener keyListener;
 
-    private static final List<GlobalKey> globalKeys = new ArrayList<>();
+    private static final List<MappedKey> mappedKeys = new ArrayList<>();
 
     private static final Action INCREASE_ACTIVE_BRUSH_SIZE_ACTION = new AbstractAction() {
         @Override
@@ -172,10 +172,10 @@ public class GlobalKeyboardWatch {
         GlobalKeyboardWatch.alwaysVisibleComponent = alwaysVisibleComponent;
     }
 
-    public static void add(GlobalKey key) {
+    public static void add(MappedKey key) {
         // since the "always visible component" can change, we only
         // store the keys, and re-register them after every change
-        globalKeys.add(key);
+        mappedKeys.add(key);
     }
 
     public static void registerKeysOnAlwaysVisibleComponent() {
@@ -183,17 +183,17 @@ public class GlobalKeyboardWatch {
                 JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap actionMap = alwaysVisibleComponent.getActionMap();
 
-        for (GlobalKey key : globalKeys) {
+        for (MappedKey key : mappedKeys) {
             key.registerOn(inputMap, actionMap);
         }
     }
 
     public static void addBrushSizeActions() {
         GlobalKeyboardWatch.add(
-                new GlobalKey(']', false,
+                MappedKey.fromChar(']', false,
                         "increment", INCREASE_ACTIVE_BRUSH_SIZE_ACTION));
         GlobalKeyboardWatch.add(
-                new GlobalKey('[', false,
+                MappedKey.fromChar('[', false,
                         "decrement", DECREASE_ACTIVE_BRUSH_SIZE_ACTION));
     }
 
@@ -202,21 +202,21 @@ public class GlobalKeyboardWatch {
             MouseEvent m = (MouseEvent) event;
             String compClass = m.getComponent().getClass().getName();
             if (m.getID() == MouseEvent.MOUSE_CLICKED) {
-                System.out.println("GlobalKeyboardWatch:MOUSE_CLICKED" +
-                        " x = " + m.getX() + ", y = " + m.getY()
+                System.out.println("GlobalKeyboardWatch:MOUSE_CLICKED"
+                        + " x = " + m.getX() + ", y = " + m.getY()
                         + ", click count = " + m.getClickCount()
                         + ", comp class = " + compClass);
             } else if (m.getID() == MouseEvent.MOUSE_DRAGGED) {
-                System.out.println("GlobalKeyboardWatch:MOUSE_DRAGGED" +
-                        " x = " + m.getX() + ", y = " + m.getY()
+                System.out.println("GlobalKeyboardWatch:MOUSE_DRAGGED"
+                        + " x = " + m.getX() + ", y = " + m.getY()
                         + ", comp class = " + compClass);
             } else if (m.getID() == MouseEvent.MOUSE_PRESSED) {
-                System.out.println("GlobalKeyboardWatch:MOUSE_PRESSED" +
-                        " x = " + m.getX() + ", y = " + m.getY()
+                System.out.println("GlobalKeyboardWatch:MOUSE_PRESSED"
+                        + " x = " + m.getX() + ", y = " + m.getY()
                         + ", comp class = " + compClass);
             } else if (m.getID() == MouseEvent.MOUSE_RELEASED) {
-                System.out.println("GlobalKeyboardWatch:MOUSE_RELEASED" +
-                        " x = " + m.getX() + ", y = " + m.getY()
+                System.out.println("GlobalKeyboardWatch:MOUSE_RELEASED"
+                        + " x = " + m.getX() + ", y = " + m.getY()
                         + ", comp class = " + compClass);
             }
         }, AWTEvent.MOUSE_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK);

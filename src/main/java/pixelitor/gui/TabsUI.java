@@ -79,7 +79,7 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
         ImageComponents.newImageOpened(ic.getComp());
     }
 
-    public void warnAndCloseTab(ImageTab tab) {
+    public static void warnAndCloseTab(ImageTab tab) {
         if (!RandomGUITest.isRunning()) {
             // this will call closeTab
             OpenSaveManager.warnAndCloseImage(tab.getIC());
@@ -107,26 +107,29 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
 
             gbc.gridx++;
             gbc.weightx = 0;
-            add(new CloseTabButton(pane, this, tab), gbc);
+            add(new CloseTabButton(pane, tab), gbc);
         }
     }
 
     static class CloseTabButton extends JButton {
         private final static MouseListener buttonMouseListener = new MouseAdapter() {
+            @Override
             public void mouseEntered(MouseEvent e) {
                 CloseTabButton button = (CloseTabButton) e.getComponent();
                 button.setBorderPainted(true);
             }
 
+            @Override
             public void mouseExited(MouseEvent e) {
                 CloseTabButton button = (CloseTabButton) e.getComponent();
                 button.setBorderPainted(false);
             }
         };
+        public static final int MARGIN = 5;
+        public static final int SIZE = 17;
 
-        public CloseTabButton(TabsUI pane, TabTitleRenderer renderer, ImageTab tab) {
-            int size = 17;
-            setPreferredSize(new Dimension(size, size));
+        public CloseTabButton(TabsUI pane, ImageTab tab) {
+            setPreferredSize(new Dimension(SIZE, SIZE));
             setToolTipText("Close this tab");
             setUI(new BasicButtonUI());
             setContentAreaFilled(false);
@@ -135,30 +138,26 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
             setBorderPainted(false);
             addMouseListener(buttonMouseListener);
             setRolloverEnabled(true);
-            addActionListener(e -> pane.warnAndCloseTab(tab));
+            addActionListener(e -> TabsUI.warnAndCloseTab(tab));
         }
 
+        @Override
         public void updateUI() {
         }
 
-        //paint the cross
+        @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            //shift the image for pressed buttons
-            if (getModel().isPressed()) {
-                g2.translate(1, 1);
-            }
             g2.setStroke(new BasicStroke(2));
             if (getModel().isRollover()) {
                 g2.setColor(Color.RED);
             } else {
                 g2.setColor(Color.BLACK);
             }
-            int delta = 6;
-            g2.drawLine(delta, delta, getWidth() - delta - 1, getHeight() - delta - 1);
-            g2.drawLine(getWidth() - delta - 1, delta, delta, getHeight() - delta - 1);
+            g2.drawLine(MARGIN, MARGIN, SIZE - MARGIN - 1, SIZE - MARGIN - 1);
+            g2.drawLine(SIZE - MARGIN - 1, MARGIN, MARGIN, SIZE - MARGIN - 1);
             g2.dispose();
         }
     }

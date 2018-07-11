@@ -19,8 +19,8 @@ package pixelitor.colors;
 
 import pixelitor.colors.palette.ColorSwatchClickHandler;
 import pixelitor.colors.palette.PalettePanel;
-import pixelitor.gui.GlobalKey;
 import pixelitor.gui.GlobalKeyboardWatch;
+import pixelitor.gui.MappedKey;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.menus.MenuAction;
 import pixelitor.tools.Tools;
@@ -213,12 +213,12 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void setupSize() {
-        int preferredHorizontalSize = (int) (BIG_BUTTON_SIZE * 1.5);
-        int preferredVerticalSize = preferredHorizontalSize + SMALL_BUTTON_VERTICAL_SPACE;
-        Dimension preferredDim = new Dimension(preferredHorizontalSize, preferredVerticalSize);
-        setPreferredSize(preferredDim);
-        setMinimumSize(preferredDim);
-        setMaximumSize(preferredDim);
+        int preferredWidth = (int) (BIG_BUTTON_SIZE * 1.5);
+        int preferredHeight = preferredWidth + SMALL_BUTTON_VERTICAL_SPACE;
+        Dimension dim = new Dimension(preferredWidth, preferredHeight);
+        setPreferredSize(dim);
+        setMinimumSize(dim);
+        setMaximumSize(dim);
     }
 
     private JButton initButton(String toolTip, int size, int layer) {
@@ -298,9 +298,9 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void setupKeyboardShortcuts() {
-        GlobalKeyboardWatch.add(new GlobalKey('d', true, "reset", resetToDefaultAction));
-        GlobalKeyboardWatch.add(new GlobalKey('x', true, "switch", swapColorsAction));
-        GlobalKeyboardWatch.add(new GlobalKey('r', true, "randomize", randomizeColorsAction));
+        GlobalKeyboardWatch.add(MappedKey.fromChar('d', true, "reset", resetToDefaultAction));
+        GlobalKeyboardWatch.add(MappedKey.fromChar('x', true, "switch", swapColorsAction));
+        GlobalKeyboardWatch.add(MappedKey.fromChar('r', true, "randomize", randomizeColorsAction));
     }
 
     public void setLayerMaskEditing(boolean layerMaskEditing) {

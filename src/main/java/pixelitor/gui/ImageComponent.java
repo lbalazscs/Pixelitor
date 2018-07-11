@@ -98,10 +98,10 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
         this.comp = comp;
         this.canvas = comp.getCanvas();
-        comp.setIC(this);
+        comp.setIC(this); // also sets the ic in the canvas
 
         ZoomLevel fitZoom = AutoZoom.SPACE.calcZoom(canvas, false);
-        setZoom(fitZoom, true, null);
+        setZoom(fitZoom, null);
 
         layersPanel = new LayersPanel();
 
@@ -137,7 +137,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
         // keep the zoom level, but reinitialize the
         // internal frame size
-        setZoom(zoomLevel, true, null);
+        setZoom(zoomLevel, null);
 
         // refresh the layer buttons
         layersPanel = new LayersPanel();
@@ -176,7 +176,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
                 if (ImageComponents.isActive(ImageComponent.this)) {
                     Tools.icSizeChanged(ImageComponent.this);
                 }
-                
+
                 repaint();
             }
         });
@@ -364,7 +364,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         if (ImageComponents.isActive(this)) {
             currentTool.paintOverImage(g2, canvas, this, componentTransform, imageTransform);
         }
-        
+
         g2.setClip(canvasClip);
 
         if (showPixelGrid && zoomLevel.allowPixelGrid() && !comp.showsSelection()) {
@@ -457,9 +457,9 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         repaint(startX, startY, repWidth, repHeight);
     }
 
-    public void makeSureItIsVisible() {
+    public void ensurePositiveLocation() {
         if (imageWindow != null) {
-            imageWindow.makeSureItIsVisible();
+            imageWindow.ensurePositiveLocation();
         }
     }
 
@@ -488,12 +488,13 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
         setImageWindowSize();
         updateCanvasLocation();
-        revalidate(); // TODO also necessary with tabs?
     }
 
     public void setImageWindowSize() {
-        if (imageWindow != null && imageWindow instanceof ImageFrame) {
-            imageWindow.setSize(canvas.getCoWidth(), canvas.getCoHeight());
+        if (imageWindow instanceof ImageFrame) {
+            int windowWidth = canvas.getCoWidth();
+            int windowHeight = canvas.getCoHeight();
+            imageWindow.setSize(windowWidth, windowHeight);
         }
     }
 
@@ -503,95 +504,73 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
     public void zoomToFit(AutoZoom autoZoom) {
         ZoomLevel bestZoom = autoZoom.calcZoom(canvas, true);
-        setZoom(bestZoom, true, null);
+        setZoom(bestZoom, null);
+    }
+
+    public void setZoomAtCenter(ZoomLevel newZoom) {
+        setZoom(newZoom, null);
     }
 
     /**
      * Sets the new zoom level
      */
-    public void setZoom(ZoomLevel newZoom, boolean forceSettingSize, Point mousePos) {
+    public void setZoom(ZoomLevel newZoom, Point mousePos) {
         ZoomLevel oldZoom = zoomLevel;
-        if (oldZoom == newZoom && !forceSettingSize) {
-            // if forceSettingSize is true, we continue
-            // in order to set the frame size
+        if (oldZoom == newZoom) {
             return;
         }
 
-        this.zoomLevel = newZoom;
+        setZoomLevel(newZoom);
 
-        viewScale = newZoom.getViewScale();
-        canvas.changeZooming(viewScale);
-        imToCo = null;
-        coToIm = null;
-
-        Rectangle areaThatShouldBeVisible = null;
-        if (imageWindow != null) {
-            updateTitle();
-            int newFrameWidth = canvas.getCoWidth();
-            int newFrameHeight = canvas.getCoHeight();
-            imageWindow.setSize(newFrameWidth, newFrameHeight);
-
-            Rectangle visiblePart = getVisiblePart();
-
-            // Update the scrollbars.
-            Point origin;
-            if (mousePos != null) { // we had a mouse click
-                origin = mousePos;
-            } else {
-                int cx = visiblePart.x + visiblePart.width / 2;
-                int cy = visiblePart.y + visiblePart.height / 2;
-
-                origin = new Point(cx, cy);
-            }
-            // the x, y coordinates were generated BEFORE the zooming
-            // so we need to find the corresponding coordinates after zooming
-            // TODO maybe this would not be necessary if we did this earlier?
-            Point imageSpaceOrigin = fromComponentToImageSpace(origin, oldZoom);
-            origin = fromImageToComponentSpace(imageSpaceOrigin, newZoom);
-
-            areaThatShouldBeVisible = new Rectangle(
-                    origin.x - visiblePart.width / 2,
-                    origin.y - visiblePart.height / 2,
-                    visiblePart.width,
-                    visiblePart.height
-            );
-        }
-
-        // TODO is this necessary? - could call validate instead of revalidate
-        // some flickering is present either way
+        // otherwise the scrollbars don't appear
+        // when using the tabbed UI
         revalidate();
 
-        Rectangle finalRect = areaThatShouldBeVisible;
+        if (imageWindow != null) {
+            moveScrollbarsAfterZoom(oldZoom, newZoom, mousePos);
+        }
 
-
-        // we are already on the EDT, but we want to call this code
-        // only after all pending AWT events have been processed
-        // because then this component will have the final size
-        // and updateCanvasLocation can calculate correct results
-
-        // TODO updateCanvasLocation moved from here - scrollRectToVisible and
-        // repaint still needs to run later?
-        SwingUtilities.invokeLater(() -> {
-            if (finalRect != null) {
-                scrollRectToVisible(finalRect);
-            }
-            repaint();
-        });
-
-        if (ImageComponents.getActiveIC() == this) {
+        if (ImageComponents.isActive(this)) {
             ZoomControl.INSTANCE.setToNewZoom(zoomLevel);
             zoomLevel.getMenuItem().setSelected(true);
         }
     }
 
-    @Override
-    public void setSize(int width, int height) {
-        super.setSize(width, height);
-        updateCanvasLocation();
+    private void moveScrollbarsAfterZoom(ZoomLevel oldZoom,
+                                         ZoomLevel newZoom,
+                                         Point mousePos) {
+        Rectangle visiblePart = getVisiblePart();
+        Point zoomOrigin;
+        if (mousePos != null) { // we had a mouse event
+            zoomOrigin = mousePos;
+        } else {
+            int cx = visiblePart.x + visiblePart.width / 2;
+            int cy = visiblePart.y + visiblePart.height / 2;
+
+            zoomOrigin = new Point(cx, cy);
+        }
+        // the x, y coordinates were generated BEFORE the zooming
+        // so we need to find the corresponding coordinates after zooming
+        // TODO maybe this would not be necessary if we did this earlier?
+        Point imageSpaceOrigin = fromComponentToImageSpace(zoomOrigin, oldZoom);
+        zoomOrigin = fromImageToComponentSpace(imageSpaceOrigin, newZoom);
+
+        Rectangle areaThatShouldBeVisible = new Rectangle(
+                zoomOrigin.x - visiblePart.width / 2,
+                zoomOrigin.y - visiblePart.height / 2,
+                visiblePart.width,
+                visiblePart.height
+        );
+
+        scrollRectToVisible(areaThatShouldBeVisible);
+        repaint();
     }
 
-    public void setZoomAtCenter(ZoomLevel newZoom) {
-        setZoom(newZoom, false, null);
+    public void setZoomLevel(ZoomLevel zoomLevel) {
+        this.zoomLevel = zoomLevel;
+        this.viewScale = zoomLevel.getViewScale();
+        canvas.recalcCoSize();
+        updateTitle();
     }
 
     public void increaseZoom() {
@@ -600,7 +579,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
     public void increaseZoom(Point mousePos) {
         ZoomLevel newZoom = zoomLevel.zoomIn();
-        setZoom(newZoom, false, mousePos);
+        setZoom(newZoom, mousePos);
     }
 
     public void decreaseZoom() {
@@ -609,7 +588,13 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
     public void decreaseZoom(Point mousePos) {
         ZoomLevel newZoom = zoomLevel.zoomOut();
-        setZoom(newZoom, false, mousePos);
+        setZoom(newZoom, mousePos);
+    }
+
+    @Override
+    public void setSize(int width, int height) {
+        super.setSize(width, height);
+        updateCanvasLocation();
     }
 
     public void updateCanvasLocation() {
@@ -655,7 +640,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
                 imageYToComponentSpace(im.getY()));
     }
 
-    public Point fromComponentToImageSpace(Point co, ZoomLevel zoom) {
+    private Point fromComponentToImageSpace(Point co, ZoomLevel zoom) {
         double zoomViewScale = zoom.getViewScale();
         return new Point(
                 (int) ((co.x - canvasStartX) / zoomViewScale),
@@ -663,7 +648,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         );
     }
 
-    public Point fromImageToComponentSpace(Point im, ZoomLevel zoom) {
+    private Point fromImageToComponentSpace(Point im, ZoomLevel zoom) {
         double zoomViewScale = zoom.getViewScale();
         return new Point(
                 (int) (canvasStartX + im.x * zoomViewScale),

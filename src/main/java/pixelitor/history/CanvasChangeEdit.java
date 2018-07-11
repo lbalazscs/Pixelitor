@@ -29,8 +29,8 @@ import javax.swing.undo.CannotUndoException;
  * Always part of a MultiLayerEdit.
  */
 public class CanvasChangeEdit extends PixelitorEdit {
-    private int backupCanvasWidth;
-    private int backupCanvasHeight;
+    private int backupWidth;
+    private int backupHeight;
 
     /**
      * This constructor must be called before the change.
@@ -39,8 +39,8 @@ public class CanvasChangeEdit extends PixelitorEdit {
         super(name, comp);
         embedded = true;
 
-        backupCanvasWidth = comp.getCanvasImWidth();
-        backupCanvasHeight = comp.getCanvasImHeight();
+        backupWidth = comp.getCanvasImWidth();
+        backupHeight = comp.getCanvasImHeight();
     }
 
     @Override
@@ -58,13 +58,13 @@ public class CanvasChangeEdit extends PixelitorEdit {
     private void swapCanvasDimensions() {
         Canvas canvas = comp.getCanvas();
 
-        int tmpCanvasWidth = canvas.getImWidth();
-        int tmpCanvasHeight = canvas.getImHeight();
+        int tmpWidth = canvas.getImWidth();
+        int tmpHeight = canvas.getImHeight();
 
-        canvas.changeSize(backupCanvasWidth, backupCanvasHeight);
+        canvas.changeImSize(backupWidth, backupHeight);
 
-        backupCanvasWidth = tmpCanvasWidth;
-        backupCanvasHeight = tmpCanvasHeight;
+        backupWidth = tmpWidth;
+        backupHeight = tmpHeight;
 
         if (!embedded) {
             comp.updateAllIconImages();

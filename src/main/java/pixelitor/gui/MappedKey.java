@@ -20,13 +20,13 @@ package pixelitor.gui;
 import javax.swing.*;
 
 /**
- * Represents a keyboard shortcut that is always working,
- * except when a dialog is active
+ * Represents a keyboard shortcut that can be added
+ * to an InputMap/ActionMap pair
  */
-public class GlobalKey {
+public class MappedKey {
     // fields common to the two types
-    private final String actionMapKey;
-    private final Action action;
+    private String actionMapKey;
+    private Action action;
 
     // fields for char-based shortcuts
     private char activationChar;
@@ -35,23 +35,34 @@ public class GlobalKey {
     // field for KeyStroke-based shortcuts
     private KeyStroke keyStroke;
 
-    /**
-     * Constructor for char-based shortcuts
-     */
-    public GlobalKey(char activationChar, boolean caseInsensitive, String actionMapKey, Action action) {
-        this.activationChar = activationChar;
-        this.caseInsensitive = caseInsensitive;
-        this.actionMapKey = actionMapKey;
-        this.action = action;
+    private MappedKey() {
+        // private because the factory methods should be used
     }
 
-    /**
-     * Constructor for KeyStroke-based shortcuts
-     */
-    public GlobalKey(KeyStroke keyStroke, String actionMapKey, Action action) {
-        this.keyStroke = keyStroke;
-        this.actionMapKey = actionMapKey;
-        this.action = action;
+    public static MappedKey fromKeyStroke(KeyStroke keyStroke,
+                                          String actionMapKey,
+                                          Action action) {
+        MappedKey key = new MappedKey();
+
+        key.keyStroke = keyStroke;
+        key.actionMapKey = actionMapKey;
+        key.action = action;
+
+        return key;
+    }
+
+    public static MappedKey fromChar(char activationChar,
+                                     boolean caseInsensitive,
+                                     String actionMapKey,
+                                     Action action) {
+        MappedKey key = new MappedKey();
+
+        key.activationChar = activationChar;
+        key.caseInsensitive = caseInsensitive;
+        key.actionMapKey = actionMapKey;
+        key.action = action;
+
+        return key;
     }
 
     public void registerOn(InputMap inputMap, ActionMap actionMap) {

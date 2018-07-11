@@ -37,27 +37,28 @@ public class PMenu extends JMenu {
         setMnemonic(c);
     }
 
-    /**
-     * Simple add without a builder
-     */
+    // Simple add without a builder
     public void addAction(Action action) {
         JMenuItem menuItem = EnabledIf.THERE_IS_OPEN_IMAGE.getMenuItem(action);
         add(menuItem);
     }
 
-    /**
-     * Simple add without a builder
-     */
+    // Simple add without a builder
+    public void addActionWithKey(Action action, KeyStroke keyStroke) {
+        JMenuItem menuItem = EnabledIf.THERE_IS_OPEN_IMAGE.getMenuItem(action);
+        menuItem.setAccelerator(keyStroke);
+        add(menuItem);
+    }
+
+    // Simple add without a builder
     public void addAlwaysEnabledAction(Action action) {
         JMenuItem menuItem = EnabledIf.ACTION_ENABLED.getMenuItem(action);
         add(menuItem);
     }
 
-    /**
-     * Maybe it is not worth creating a builder for this frequent case...
-     */
-    public void addActionWithKey(Action action, KeyStroke keyStroke) {
-        JMenuItem menuItem = EnabledIf.THERE_IS_OPEN_IMAGE.getMenuItem(action);
+    // Simple add without a builder
+    public void addAlwaysEnabledAction(Action action, KeyStroke keyStroke) {
+        JMenuItem menuItem = EnabledIf.ACTION_ENABLED.getMenuItem(action);
         menuItem.setAccelerator(keyStroke);
         add(menuItem);
     }
