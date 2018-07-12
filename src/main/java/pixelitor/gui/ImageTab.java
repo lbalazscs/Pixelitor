@@ -53,7 +53,8 @@ public class ImageTab extends JComponent implements ImageWindow {
 
     @Override
     public void setTitle(String title) {
-        // TODO
+        // the title for tabs should not be updated
+        throw new UnsupportedOperationException("tabs");
     }
 
     @Override

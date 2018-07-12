@@ -82,8 +82,8 @@ public class GridBagHelper {
         addLabelWithControl(text1, new JLabel(text2));
     }
 
-    public void addTwoControls(Component c1, Component c2) {
-        addTwoControls(c1, c2, autoIncrementedGridY);
+    public void addTwoComponents(Component c1, Component c2) {
+        addTwoComponents(c1, c2, autoIncrementedGridY);
         autoIncrementedGridY++;
     }
 
@@ -94,10 +94,10 @@ public class GridBagHelper {
 
     public void addLabelWithControl(String labelText, Component c, int gridY) {
         JLabel label = new JLabel(labelText, SwingConstants.RIGHT);
-        addTwoControls(label, c, gridY);
+        addTwoComponents(label, c, gridY);
     }
 
-    private void addTwoControls(Component c1, Component c2, int gridY) {
+    private void addTwoComponents(Component c1, Component c2, int gridY) {
         labelConstraint.gridx = 0;
         labelConstraint.gridy = gridY;
         container.add(c1, labelConstraint);

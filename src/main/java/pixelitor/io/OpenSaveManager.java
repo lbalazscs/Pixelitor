@@ -26,6 +26,7 @@ import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
+import pixelitor.layers.LayerMask;
 import pixelitor.layers.TextLayer;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.utils.Messages;
@@ -237,25 +238,29 @@ public class OpenSaveManager {
                 ImageLayer imageLayer = (ImageLayer) layer;
                 BufferedImage image = imageLayer.getImage();
 
-                saveImage(layerIndex, layer, image);
+                saveImage(image, layer.getName(), layerIndex);
                 numSavedImages++;
             } else if (layer instanceof TextLayer) {
                 TextLayer textLayer = (TextLayer) layer;
                 BufferedImage image = textLayer.createRasterizedImage();
 
-                saveImage(layerIndex, layer, image);
+                saveImage(image, layer.getName(), layerIndex);
                 numSavedImages++;
             }
-            // TODO what about masks? Either they should be applied
-            // or they should be saved as images
+            if (layer.hasMask()) {
+                LayerMask mask = layer.getMask();
+                BufferedImage image = mask.getImage();
+                saveImage(image, layer.getName() + "_mask", layerIndex);
+                numSavedImages++;
+            }
         }
         Messages.showInStatusBar("Saved " + numSavedImages
                 + " images to " + Directories.getLastSaveDir());
     }
 
-    private static void saveImage(int layerIndex, Layer layer, BufferedImage image) {
+    private static void saveImage(BufferedImage image, String layerName, int layerIndex) {
         File outputDir = Directories.getLastSaveDir();
-        String fileName = String.format("%03d_%s.%s", layerIndex, Utils.toFileName(layer.getName()), "png");
+        String fileName = String.format("%03d_%s.%s", layerIndex, Utils.toFileName(layerName), "png");
         File file = new File(outputDir, fileName);
         saveImageToFile(file, image, OutputFormat.PNG);
     }

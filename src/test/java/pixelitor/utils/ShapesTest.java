@@ -39,7 +39,7 @@ public class ShapesTest {
 
     @Before
     public void setup() {
-        ic = TestHelper.createICWithoutComp();
+        ic = TestHelper.createMockICWithoutComp();
     }
 
     @Test

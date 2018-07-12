@@ -20,8 +20,9 @@ package pixelitor;
 import pixelitor.colors.FillType;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.DialogBuilder;
+import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.IntTextField;
+import pixelitor.gui.utils.TextFieldValidator;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.ImageUtils;
 
@@ -94,7 +95,24 @@ public final class NewImage {
 
                     lastNew.width = selectedWidth;
                     lastNew.height = selectedHeight;
-                }).show();
+                })
+                .validator(d -> {
+                    boolean couldParse = true;
+                    try {
+                        p.getSelectedWidth();
+                        p.getSelectedHeight();
+                    } catch (NumberFormatException e) {
+                        couldParse = false;
+                    }
+                    if (couldParse) {
+                        return true;
+                    } else {
+                        Dialogs.showErrorDialog(d, "Error",
+                                "The width and height must be integers.");
+                        return false;
+                    }
+                })
+                .show();
     }
 
     public static Action getAction() {
@@ -127,24 +145,28 @@ public final class NewImage {
             //noinspection SuspiciousNameCombination
             setBorder(BorderFactory.createEmptyBorder(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH));
 
-            widthTF = new IntTextField(String.valueOf(defaultWidth));
+            widthTF = new JTextField(String.valueOf(defaultWidth));
             widthTF.setName("widthTF");
-            gbh.addLabelWithControl("Width:", widthTF);
+            gbh.addLabelWithTwoControls("Width:",
+                    TextFieldValidator.createIntOnlyLayerFor(widthTF),
+                    new JLabel("pixels"));
 
-            heightTF = new IntTextField(String.valueOf(defaultHeight));
+            heightTF = new JTextField(String.valueOf(defaultHeight));
             heightTF.setName("heightTF");
-            gbh.addLabelWithControl("Height:", heightTF);
+            gbh.addLabelWithTwoControls("Height:",
+                    TextFieldValidator.createIntOnlyLayerFor(heightTF),
+                    new JLabel("pixels"));
 
             backgroundSelector = new JComboBox(FillType.values());
-            gbh.addLabelWithControl("Fill:", backgroundSelector);
+            gbh.addLabelWithLastControl("Fill:", backgroundSelector);
         }
 
         private int getSelectedWidth() {
-            return Integer.parseInt(widthTF.getText());
+            return Integer.parseInt(widthTF.getText().trim());
         }
 
         private int getSelectedHeight() {
-            return Integer.parseInt(heightTF.getText());
+            return Integer.parseInt(heightTF.getText().trim());
         }
 
         private FillType getSelectedBackground() {

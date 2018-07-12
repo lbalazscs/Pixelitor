@@ -92,10 +92,6 @@ public class LayerTest {
 
         assert comp.getNumLayers() == 2 : "found " + comp.getNumLayers() + " layers";
 
-        // TODO this should be automatic for all tests
-        // or should be avoidable
-        TestHelper.setupAnActiveICFor(comp);
-
         History.clear();
     }
 
@@ -240,12 +236,12 @@ public class LayerTest {
         int canvasWidth = canvas.getImWidth();
         int canvasHeight = canvas.getImHeight();
 
-        layer.resize(canvasWidth, canvasHeight, true);
+        layer.resize(canvasWidth, canvasHeight);
 
-        layer.resize(30, 25, true);
-        layer.resize(25, 30, false);
+        layer.resize(30, 25);
+        layer.resize(25, 30);
 
-        layer.resize(canvasWidth, canvasHeight, true);
+        layer.resize(canvasWidth, canvasHeight);
         iconUpdates.check(0, 0);
     }
 

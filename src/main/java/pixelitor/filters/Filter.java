@@ -33,7 +33,6 @@ import java.awt.image.BufferedImage;
 import java.io.Serializable;
 
 import static pixelitor.ChangeReason.FILTER_WITHOUT_DIALOG;
-import static pixelitor.ChangeReason.REPEAT_LAST;
 
 /**
  * The superclass of all Pixelitor filters and color adjustments
@@ -77,18 +76,15 @@ public abstract class Filter implements Serializable {
     }
 
     public void run(Drawable dr, ChangeReason cr, Component busyCursorParent) {
-        String filterName = getName();
-
         long startTime = System.nanoTime();
 
         Runnable task = () -> transformAndHandleExceptions(dr, cr);
         Utils.runWithBusyCursor(busyCursorParent, task);
 
         long totalTime = (System.nanoTime() - startTime) / 1_000_000;
-        Messages.showPerformanceMessage(filterName, totalTime);
+        Messages.showPerformanceMessage(getName(), totalTime);
 
         FilterUtils.setLastFilter(this);
-        RepeatLast.INSTANCE.setActionName("Repeat " + filterName);
     }
 
     private void transformAndHandleExceptions(Drawable dr, ChangeReason cr) {
@@ -96,14 +92,7 @@ public abstract class Filter implements Serializable {
 
         try {
             if (dr == null) {
-                if (cr == REPEAT_LAST) {
-                    // TODO bug: the repeat last menu is not
-                    // always deactivated for text layers
-                    return;
-                } else {
-                    // all other cases should work
-                    throw new IllegalStateException("not image layer or mask");
-                }
+                throw new IllegalStateException("not image layer or mask");
             }
 
             BufferedImage src = dr.getFilterSourceImage();

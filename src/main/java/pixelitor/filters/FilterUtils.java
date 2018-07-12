@@ -90,6 +90,7 @@ public class FilterUtils {
             return;
         }
         FilterUtils.lastFilter = lastFilter;
+        RepeatLast.INSTANCE.setActionName("Repeat " + lastFilter.getName());
     }
 
     public static Optional<Filter> getLastFilter() {

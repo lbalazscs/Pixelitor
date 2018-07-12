@@ -21,6 +21,7 @@ import pixelitor.menus.view.ShowHideAllAction;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.KeyListener;
+import pixelitor.utils.VisibleForTesting;
 
 import javax.swing.*;
 import java.awt.AWTEvent;
@@ -158,6 +159,11 @@ public class GlobalKeyboardWatch {
 
     public static boolean isSpaceDown() {
         return spaceDown;
+    }
+
+    @VisibleForTesting
+    public static void setSpaceDown(boolean spaceDown) {
+        GlobalKeyboardWatch.spaceDown = spaceDown;
     }
 
     /**

@@ -231,7 +231,7 @@ public class AutoPaint {
             colorsCB = new JComboBox(COLOR_SETTINGS);
             colorsCB.setName("colorsCB");
             colorsCB.setSelectedItem(defaultColors);
-            gbh.addTwoControls(colorsLabel, colorsCB);
+            gbh.addTwoComponents(colorsLabel, colorsCB);
 
             toolSelector.addActionListener(e -> updateRandomColorsEnabledState());
             updateRandomColorsEnabledState();

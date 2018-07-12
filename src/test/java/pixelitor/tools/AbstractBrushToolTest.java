@@ -78,7 +78,7 @@ public class AbstractBrushToolTest {
     @Before
     public void setUp() {
         Composition comp = TestHelper.create2LayerComposition(false);
-        ic = TestHelper.setupAnActiveICFor(comp);
+        ic = comp.getIC();
 
         dr = comp.getActiveDrawableOrThrow();
 

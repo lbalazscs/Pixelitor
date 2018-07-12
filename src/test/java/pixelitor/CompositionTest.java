@@ -291,7 +291,7 @@ public class CompositionTest {
                 .isNotDirty()
                 .layerNamesAre("layer 1", "layer 2");
 
-        comp.flattenImage(false);
+        comp.flattenImage(false, true);
 
         assertThat(comp)
                 .isDirty()

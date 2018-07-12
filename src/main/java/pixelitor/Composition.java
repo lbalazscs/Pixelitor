@@ -580,7 +580,7 @@ public class Composition implements Serializable {
         }
     }
 
-    public void flattenImage(boolean updateGUI) {
+    public void flattenImage(boolean updateGUI, boolean addToHistory) {
         if (updateGUI) {
             assert isActiveComp();
         }
@@ -600,8 +600,8 @@ public class Composition implements Serializable {
         }
         if (updateGUI) {
             AppLogic.numLayersChanged(this, 1);
-
-            // TODO should have a separate add to history argument?
+        }
+        if (addToHistory) {
             History.addEdit(new NotUndoableEdit("Flatten Image", this));
         }
     }
@@ -976,7 +976,6 @@ public class Composition implements Serializable {
 
     public void activeLayerToCanvasSize() {
         if (!(activeLayer instanceof ImageLayer)) {
-            // TODO or maybe it should also be allowed for masks
             Messages.showNotImageLayerError();
             return;
         }

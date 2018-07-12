@@ -165,7 +165,6 @@ public abstract class AbstractBrushTool extends Tool {
             // we can get here if the mousePressed was an Alt-press, therefore
             // consumed by the color picker. Nothing was drawn, therefore
             // there is no need to save a backup, we can just return
-            // TODO is this still true after all the refactorings?
             return;
         }
 
@@ -309,12 +308,7 @@ public abstract class AbstractBrushTool extends Tool {
         try {
             respectSelection = false;
 
-            drawStrategy.prepareBrushStroke(dr);
-
-            graphics = createGraphicsForNewBrushStroke(dr);
-
-            ImageComponent ic = dr.getComp().getIC();
-            doTraceAfterSetup(shape, ic);
+            doTrace(dr, shape);
 
             finishBrushStroke(dr);
         } finally {
@@ -322,7 +316,8 @@ public abstract class AbstractBrushTool extends Tool {
         }
     }
 
-    private void doTraceAfterSetup(Shape shape, ImageComponent ic) {
+    private void doTrace(Drawable dr, Shape shape) {
+        ImageComponent ic = dr.getComp().getIC();
         PPoint startingPoint = null;
 
         PathIterator fpi = new FlatteningPathIterator(shape.getPathIterator(null), 1.0);
@@ -337,6 +332,7 @@ public abstract class AbstractBrushTool extends Tool {
             switch (type) {
                 case PathIterator.SEG_MOVETO:
                     startingPoint = p;
+                    prepareProgrammaticBrushStroke(dr, p);
                     brush.onStrokeStart(p);
                     break;
                 case PathIterator.SEG_LINETO:

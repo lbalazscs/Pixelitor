@@ -26,15 +26,12 @@ import java.awt.geom.Rectangle2D;
  * here everything is stored exclusively in image space.
  */
 public class ImDrag {
-    private double startX;
-    private double startY;
-    private double endX;
-    private double endY;
+    private final double startX;
+    private final double startY;
+    private final double endX;
+    private final double endY;
 
     private boolean startFromCenter;
-
-    public ImDrag() {
-    }
 
     public ImDrag(double startX, double startY, double endX, double endY) {
         this.startX = startX;

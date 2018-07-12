@@ -283,7 +283,7 @@ public class LayerButton extends JToggleButton {
         return visibilityCB.isSelected();
     }
 
-    public void changeNameProgrammatically(String newName) {
+    public void setLayerName(String newName) {
         nameEditor.setText(newName);
     }
 

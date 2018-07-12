@@ -800,7 +800,7 @@ public class RandomGUITest {
             comp.mergeActiveLayerDown(true);
         } else {
             log("layer flatten image");
-            comp.flattenImage(true);
+            comp.flattenImage(true, true);
         }
     }
 

@@ -112,9 +112,10 @@ public class TestHelper {
 
     public static Composition createEmptyComposition() {
         Composition comp = Composition.createEmpty(TEST_WIDTH, TEST_HEIGHT);
-        setupAnICFor(comp);
+        setupAMockICFor(comp);
 
         comp.setName("Test");
+        setupAMockICFor(comp);
 
         return comp;
     }
@@ -163,6 +164,7 @@ public class TestHelper {
         assert layer2 == c.getLayer(1);
 
         c.setDirty(false);
+        setupAMockICFor(c);
 
         return c;
     }
@@ -212,26 +214,23 @@ public class TestHelper {
         return new PMouseEvent(e, ic);
     }
 
-    public static ImageComponent setupAnActiveICFor(Composition comp) {
-        ImageComponent ic = setupAnICFor(comp);
-        ImageComponents.setActiveIC(ic, false);
-        return ic;
-    }
+    public static ImageComponent setupAMockICFor(Composition comp) {
+        ImageComponent ic = createMockICWithoutComp();
 
-    public static ImageComponent setupAnICFor(Composition comp) {
-        ImageComponent ic = createICWithoutComp();
-
+        when(ic.getComp()).thenReturn(comp);
         when(ic.activeIsDrawable()).thenAnswer(
                 invocation -> comp.activeIsDrawable());
 
-        when(ic.getComp()).thenReturn(comp);
-
         comp.setIC(ic);
+
+        // set it to active only after the comp is set
+        // because the active ic should return non-null in ic.getComp()
+        ImageComponents.setActiveIC(ic, false);
 
         return ic;
     }
 
-    public static ImageComponent createICWithoutComp() {
+    public static ImageComponent createMockICWithoutComp() {
         ImageComponent ic = mock(ImageComponent.class);
 
         when(ic.componentToImageSpace(any(Point2D.class))).then(returnsFirstArg());

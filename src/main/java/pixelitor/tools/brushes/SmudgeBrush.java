@@ -53,7 +53,7 @@ public class SmudgeBrush extends CopyBrush {
         super(radius, type, new FixedDistanceSpacing(1.0));
     }
 
-    public void setSource(BufferedImage sourceImage, PPoint src, float strength) {
+    public void setupFirstPoint(BufferedImage sourceImage, PPoint src, float strength) {
         this.sourceImage = sourceImage;
         last = src;
         this.strength = strength;
@@ -91,9 +91,14 @@ public class SmudgeBrush extends CopyBrush {
                 p.getImY() - radius
         );
 
-        // TODO this does not handle transparency - the Smudge tool
-        // cannot smudge into transparent areas
-        targetG.setComposite(AlphaComposite.SrcAtop.derive(strength));
+        // TODO SrcOver allows to smudge into transparent areas, but transparency
+        // cannot be smudged into non-transparent areas
+        // DstOver allows only smudging into transparent
+        targetG.setComposite(AlphaComposite.SrcOver.derive(strength));
+
+// SrcAtop: cannot smudge into transparent areas
+//        targetG.setComposite(AlphaComposite.SrcAtop.derive(strength));
+
 //        targetG.setComposite(BlendComposite.CrossFade.derive(strength));
 
         targetG.drawImage(brushImage, transform, null);

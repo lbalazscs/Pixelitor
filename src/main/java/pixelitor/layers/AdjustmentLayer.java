@@ -64,7 +64,7 @@ public class AdjustmentLayer extends Layer {
     }
 
     @Override
-    public void resize(int targetWidth, int targetHeight, boolean progressiveBilinear) {
+    public void resize(int targetWidth, int targetHeight) {
         // do nothing
     }
 

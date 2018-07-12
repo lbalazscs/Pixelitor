@@ -780,9 +780,23 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
     }
 
-    /**
-     * Returns true if something was changed
-     */
+    @Override
+    public void crop(Rectangle2D cropRect) {
+        int cropWidth = (int) cropRect.getWidth();
+        int cropHeight = (int) cropRect.getHeight();
+
+        BufferedImage img = getImage();
+
+        // the cropRect is in image space, but relative to the canvas,
+        // so it is translated to get the correct image coordinates
+        int cropX = (int) (cropRect.getX() - getTX());
+        int cropY = (int) (cropRect.getY() - getTY());
+
+        BufferedImage dest = ImageUtils.crop(img, cropX, cropY, cropWidth, cropHeight);
+        setImage(dest);
+        setTranslation(0, 0);
+    }
+
     @Override
     public boolean cropToCanvasSize() {
         int imageWidth = image.getWidth();
@@ -841,25 +855,22 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public void resize(int canvasTargetWidth, int canvasTargetHeight, boolean progressiveBilinear) {
+    public void resize(int canvasTargetWidth, int canvasTargetHeight) {
         boolean bigLayer = isBigLayer();
 
         int imgTargetWidth = canvasTargetWidth;
         int imgTargetHeight = canvasTargetHeight;
 
-        double horizontalResizeRatio = 1.0;
-        double verticalResizeRatio = 1.0;
-
         int newTx = 0, newTy = 0; // used only for big layers
 
         if (bigLayer) {
-            horizontalResizeRatio = ((double) canvasTargetWidth) / canvas.getImWidth();
-            verticalResizeRatio = ((double) canvasTargetHeight) / canvas.getImHeight();
-            imgTargetWidth = (int) (image.getWidth() * horizontalResizeRatio);
-            imgTargetHeight = (int) (image.getHeight() * verticalResizeRatio);
+            double horRatio = ((double) canvasTargetWidth) / canvas.getImWidth();
+            double verRatio = ((double) canvasTargetHeight) / canvas.getImHeight();
+            imgTargetWidth = (int) (image.getWidth() * horRatio);
+            imgTargetHeight = (int) (image.getHeight() * verRatio);
 
-            newTx = (int) (getTX() * horizontalResizeRatio);
-            newTy = (int) (getTY() * verticalResizeRatio);
+            newTx = (int) (getTX() * horRatio);
+            newTy = (int) (getTY() * verRatio);
 
             // correct rounding problems that can cause
             // "image does dot cover canvas" errors
@@ -873,7 +884,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         BufferedImage resizedImg = ImageUtils.getFasterScaledInstance(
                 image, imgTargetWidth, imgTargetHeight,
-                VALUE_INTERPOLATION_BICUBIC, progressiveBilinear);
+                VALUE_INTERPOLATION_BICUBIC);
         setImage(resizedImg);
 
         if (bigLayer) {
@@ -886,23 +897,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
         Rectangle canvasBounds = canvas.getImBounds();
         Rectangle layerBounds = getImageBounds();
         return !canvasBounds.contains(layerBounds);
-    }
-
-    @Override
-    public void crop(Rectangle2D cropRect) {
-        int cropWidth = (int) cropRect.getWidth();
-        int cropHeight = (int) cropRect.getHeight();
-
-        BufferedImage img = getImage();
-
-        // the cropRect is in image space, but relative to the canvas,
-        // so it is translated to get the correct image coordinates
-        int cropX = (int) (cropRect.getX() - getTX());
-        int cropY = (int) (cropRect.getY() - getTY());
-
-        BufferedImage dest = ImageUtils.crop(img, cropX, cropY, cropWidth, cropHeight);
-        setImage(dest);
-        setTranslation(0, 0);
     }
 
     @Override

@@ -116,10 +116,6 @@ public class GradientTool extends DragTool {
             return;
         }
 
-        // TODO if in the meantime the active layer is not drawable
-        // there should be an error message instead of
-        // quietly ignoring it in drawGradient
-
         // regenerate the gradient if a tool setting
         // was changed while handles are present
         if (handles != null) {

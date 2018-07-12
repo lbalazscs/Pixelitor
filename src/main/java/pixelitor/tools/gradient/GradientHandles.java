@@ -18,6 +18,7 @@
 package pixelitor.tools.gradient;
 
 import pixelitor.Build;
+import pixelitor.gui.ImageArea;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.View;
 import pixelitor.tools.util.DraggablePoint;
@@ -96,7 +97,8 @@ public class GradientHandles {
             middle.restoreCoordsFromImSpace(view);
         } else { // in random tests they can be different
             if (Build.CURRENT.isDevelopment()) {
-                System.out.println("GradientHandles::viewSizeChanged: different views");
+                System.out.println("GradientHandles::viewSizeChanged: different views, ui = "
+                        + ImageArea.INSTANCE.getMode());
             }
         }
     }

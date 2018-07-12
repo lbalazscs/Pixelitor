@@ -50,8 +50,6 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -163,23 +161,6 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
                 }
             }
         });
-
-        // make sure that the image is drawn at the middle
-        addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                // TODO this is now also done in setSize
-                updateCanvasLocation();
-
-                // one can zoom an inactive image with the mouse wheel,
-                // but the tools expect an active image
-                if (ImageComponents.isActive(ImageComponent.this)) {
-                    Tools.icSizeChanged(ImageComponent.this);
-                }
-
-                repaint();
-            }
-        });
     }
 
     public boolean isDirty() {
@@ -267,7 +248,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     }
 
     public void updateTitle() {
-        if (imageWindow != null) {
+        if (imageWindow instanceof ImageFrame) {
             String frameTitle = createFrameTitle();
             imageWindow.setTitle(frameTitle);
         }
@@ -591,15 +572,40 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         setZoom(newZoom, mousePos);
     }
 
+    // it seems that all Swing resizing goes through this method, so we don't
+    // have to listen to componentResized events, which might come too late
     @Override
     public void setSize(int width, int height) {
         super.setSize(width, height);
         updateCanvasLocation();
+
+        // one can zoom an inactive image with the mouse wheel,
+        // but the tools are interested only active image
+        if (ImageComponents.isActive(this)) {
+            Tools.icSizeChanged(this);
+        }
+
+        repaint();
     }
 
     public void updateCanvasLocation() {
-        canvasStartX = (getWidth() - canvas.getCoWidth()) / 2.0;
-        canvasStartY = (getHeight() - canvas.getCoHeight()) / 2.0;
+        int myWidth = getWidth();
+        int myHeight = getHeight();
+        int canvasCoWidth = canvas.getCoWidth();
+        int canvasCoHeight = canvas.getCoHeight();
+
+        // ensure this component is at least as big as the canvas
+        if (myWidth < canvasCoWidth || myHeight < canvasCoHeight) {
+            setSize(Math.max(myWidth, canvasCoWidth),
+                    Math.max(myHeight, canvasCoHeight));
+
+            // setSize will call us again after setting the size
+            return;
+        }
+
+        // centralize the canvas within this component
+        canvasStartX = (myWidth - canvasCoWidth) / 2.0;
+        canvasStartY = (myHeight - canvasCoHeight) / 2.0;
 
         // make the transforms invalid
         imToCo = null;

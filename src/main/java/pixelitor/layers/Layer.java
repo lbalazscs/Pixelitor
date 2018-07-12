@@ -205,7 +205,7 @@ public abstract class Layer implements Serializable {
             return;
         }
 
-        ui.changeNameProgrammatically(newName);
+        ui.setLayerName(newName);
 
         History.addEdit(addToHistory, () -> new LayerRenameEdit(this, previousName, name));
     }
@@ -223,10 +223,9 @@ public abstract class Layer implements Serializable {
     }
 
     public void mergeDownOn(ImageLayer bellow) {
-        // TODO what about translations of the bellow layer
-
         BufferedImage bellowImage = bellow.getImage();
         Graphics2D g = bellowImage.createGraphics();
+        g.translate(-bellow.getTX(), -bellow.getTY());
         BufferedImage result = applyLayer(g, false, bellowImage);
         if(result != null) {  // this was an adjustment
             bellow.setImage(result);
@@ -416,7 +415,7 @@ public abstract class Layer implements Serializable {
      */
     protected abstract BufferedImage actOnImageFromLayerBellow(BufferedImage src);
 
-    public abstract void resize(int targetWidth, int targetHeight, boolean progressiveBilinear);
+    public abstract void resize(int targetWidth, int targetHeight);
 
     /**
      * The given crop rectangle is given in image space,

@@ -39,7 +39,7 @@ public class GradientHandlesTest {
 
     @Before
     public void setup() {
-        ImageComponent ic = TestHelper.createICWithoutComp();
+        ImageComponent ic = TestHelper.createMockICWithoutComp();
         GradientHandles gh = new GradientHandles(START_X_FOR_START, START_Y_FOR_START, START_X_FOR_END, START_Y_FOR_END, ic);
         start = gh.getStart();
         end = gh.getEnd();

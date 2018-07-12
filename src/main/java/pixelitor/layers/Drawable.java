@@ -89,18 +89,21 @@ public interface Drawable {
 
     BufferedImage getSelectionSizedPartFrom(BufferedImage src, Selection selection, boolean copy);
 
+    void crop(Rectangle2D cropRect);
+
+    /**
+     * Returns true if something was changed
+     */
     boolean cropToCanvasSize();
 
     void enlargeCanvas(int north, int east, int south, int west);
 
-    void resize(int canvasTargetWidth, int canvasTargetHeight, boolean progressiveBilinear);
+    void resize(int canvasTargetWidth, int canvasTargetHeight);
 
     /**
      * Returns true if the layer image is bigger than the canvas
      */
     boolean isBigLayer();
-
-    void crop(Rectangle2D cropRect);
 
     void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer);
 

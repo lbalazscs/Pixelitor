@@ -27,7 +27,6 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.TFValidationLayerUI;
 import pixelitor.gui.utils.TextFieldValidator;
 import pixelitor.history.History;
 import pixelitor.io.Directories;
@@ -41,7 +40,6 @@ import pixelitor.menus.view.ShowHideToolsAction;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
-import javax.swing.plaf.LayerUI;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
@@ -434,10 +432,8 @@ public final class AppPreferences {
 
             undoLevelsTF = new JTextField(3);
             undoLevelsTF.setText(String.valueOf(History.getUndoLevels()));
-            LayerUI<JTextField> tfLayerUI = new TFValidationLayerUI(
-                    TextFieldValidator::hasValidInt);
             gbh.addLabelWithControl("Undo/Redo Levels: ",
-                    new JLayer<>(undoLevelsTF, tfLayerUI));
+                    TextFieldValidator.createIntOnlyLayerFor(undoLevelsTF));
 
             Value[] thumbSizes = {
                     new Value("24x24 pixels", 24),

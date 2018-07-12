@@ -134,8 +134,19 @@ public class ImageUtils {
     }
 
 
-    // From the Filthy Rich Clients book
+    public static BufferedImage getFasterScaledInstance(BufferedImage img,
+                                                        int targetWidth,
+                                                        int targetHeight,
+                                                        Object hint) {
+        boolean progressiveBilinear = false;
+        if ((targetWidth < (img.getWidth() / 2))
+                || (targetHeight < (img.getHeight() / 2))) {
+            progressiveBilinear = true;
+        }
+        return getFasterScaledInstance(img, targetWidth, targetHeight, hint, progressiveBilinear);
+    }
 
+    // From the Filthy Rich Clients book
     /**
      * Convenience method that returns a scaled instance of the
      * provided BufferedImage.

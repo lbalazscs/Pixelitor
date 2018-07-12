@@ -18,6 +18,7 @@
 package pixelitor.tools.util;
 
 import pixelitor.Build;
+import pixelitor.gui.ImageArea;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.tools.DragTool;
@@ -87,7 +88,8 @@ public class UserDrag {
                 boolean thatIsActive = ImageComponents.isActive(e.getIC());
                 System.out.println("UserDrag::setEnd: "
                         + "thisIsActive = " + thisIsActive
-                        + ", thatIsActive = " + thatIsActive);
+                        + ", thatIsActive = " + thatIsActive
+                        + ", ui = " + ImageArea.INSTANCE.getMode());
             }
             return;
         }

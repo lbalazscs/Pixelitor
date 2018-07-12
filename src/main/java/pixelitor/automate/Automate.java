@@ -92,9 +92,15 @@ public class Automate {
 
                     System.out.println("Processing " + file.getName());
 
-                    Runnable edtTask = () -> processFile(file, action, lastSaveDir, closeImagesAfterDone);
+                    // do it in two separate EDT tasks so that
+                    // it is visible what is happening
+                    Runnable edtOpenFile = () -> OpenSaveManager.openFile(file);
+                    Runnable edtProcess = () -> processFile(file, action, lastSaveDir, closeImagesAfterDone);
                     try {
-                        EventQueue.invokeAndWait(edtTask);
+                        EventQueue.invokeAndWait(edtOpenFile);
+                        // the second task runs only after all the
+                        // EDT painting from the first one is finished
+                        EventQueue.invokeAndWait(edtProcess);
                     } catch (InterruptedException | InvocationTargetException e) {
                         Messages.showException(e);
                     }
@@ -117,17 +123,13 @@ public class Automate {
                                     boolean closeImagesAfterDone) {
         assert EventQueue.isDispatchThread();
 
-        OpenSaveManager.openFile(file);
         Composition comp = ImageComponents.getActiveCompOrNull();
 
         ImageComponent ic = comp.getIC();
 
-        // TODO why did we paint formerly the ImageFrame
         ic.paintImmediately(ic.getBounds());
-//        ImageFrame frame = ic.getImageWindow();
-//        frame.paintImmediately(frame.getBounds());
-
         action.process(comp);
+        ic.paintImmediately(ic.getBounds());
 
         OutputFormat outputFormat = OutputFormat.getLastUsed();
 
@@ -173,9 +175,7 @@ public class Automate {
                     return;
             }
         } else { // the file does not exist or overwrite all was pressed previously
-            // TODO 
             ic.paintImmediately(ic.getBounds());
-//            frame.paintImmediately(frame.getBounds());
             outputFormat.saveComp(comp, outputFile, false);
         }
         if (closeImagesAfterDone) {

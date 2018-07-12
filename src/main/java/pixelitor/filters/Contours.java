@@ -32,7 +32,7 @@ import java.awt.image.BufferedImage;
 public class Contours extends ParametrizedFilter {
     public static final String NAME = "Contours";
 
-    private final RangeParam lineThickness = new RangeParam("Increase Line Thickness", 0, 0, 20);
+    private final RangeParam lineThickness = new RangeParam("Extra Line Thickness", 0, 0, 20);
 
     public Contours() {
         super(ShowOriginal.YES);

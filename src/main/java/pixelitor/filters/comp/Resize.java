@@ -63,12 +63,6 @@ public class Resize implements CompAction {
             canvasTargetHeight = (int) (scale * (double) canvasCurrHeight);
         }
 
-        boolean progressiveBilinear = false;
-        if ((canvasTargetWidth < (canvasCurrWidth / 2))
-                || (canvasTargetHeight < (canvasCurrHeight / 2))) {
-            progressiveBilinear = true;
-        }
-
         String editName = "Resize";
         MultiLayerBackup backup = new MultiLayerBackup(comp, editName, true);
 
@@ -78,7 +72,7 @@ public class Resize implements CompAction {
             return AffineTransform.getScaleInstance(sx, sy);
         });
 
-        resizeLayers(comp, progressiveBilinear);
+        resizeLayers(comp);
 
         MultiLayerEdit edit = new MultiLayerEdit(editName, comp, backup);
         History.addEdit(edit);
@@ -98,11 +92,11 @@ public class Resize implements CompAction {
                 + canvasTargetWidth + " x " + canvasTargetHeight + " pixels.");
     }
 
-    private void resizeLayers(Composition comp, boolean progressiveBilinear) {
+    private void resizeLayers(Composition comp) {
         comp.forEachLayer(layer -> {
-            layer.resize(canvasTargetWidth, canvasTargetHeight, progressiveBilinear);
+            layer.resize(canvasTargetWidth, canvasTargetHeight);
             if (layer.hasMask()) {
-                layer.getMask().resize(canvasTargetWidth, canvasTargetHeight, progressiveBilinear);
+                layer.getMask().resize(canvasTargetWidth, canvasTargetHeight);
             }
         });
     }

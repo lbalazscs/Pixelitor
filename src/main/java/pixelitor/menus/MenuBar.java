@@ -425,7 +425,7 @@ public class MenuBar extends JMenuBar {
         layersMenu.addAction(new MenuAction("Flatten Image") {
             @Override
             public void onClick() {
-                getActiveCompOrNull().flattenImage(true);
+                getActiveCompOrNull().flattenImage(true, true);
             }
         });
 

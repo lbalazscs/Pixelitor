@@ -51,7 +51,7 @@ public class LayerBlendingModesTest {
     @Before
     public void setUp() {
         comp = fromImage(create1x1Image(lowerColor), null, "test");
-        TestHelper.setupAnICFor(comp);
+        TestHelper.setupAMockICFor(comp);
 
         this.upperLayer = new ImageLayer(comp, create1x1Image(upperColor), "Layer 2", null);
         comp.addLayerNoGUI(upperLayer);

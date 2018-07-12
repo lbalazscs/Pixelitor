@@ -26,6 +26,7 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
+import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.ImageComponent;
 import pixelitor.tools.gui.ToolSettingsPanel;
 
@@ -73,7 +74,7 @@ public class ToolTest {
         tool.toolStarted();
         Composition comp = TestHelper.create2LayerComposition(true);
 
-        ic = TestHelper.setupAnActiveICFor(comp);
+        ic = comp.getIC();
     }
 
     @After
@@ -85,7 +86,10 @@ public class ToolTest {
     public void simpleStroke() {
         strokeMouseLeftRight();
 
-        // TODO space should also be tested
+        // also test with space down
+        GlobalKeyboardWatch.setSpaceDown(true);
+        strokeMouseLeftRight();
+        GlobalKeyboardWatch.setSpaceDown(false);
     }
 
     private void strokeMouseLeftRight() {

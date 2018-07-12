@@ -47,4 +47,10 @@ public interface TextFieldValidator {
         }
         return ValidationResult.ok();
     }
+
+    static JLayer<JTextField> createIntOnlyLayerFor(JTextField textField) {
+        TFValidationLayerUI layerUI = new TFValidationLayerUI(
+                TextFieldValidator::hasValidInt);
+        return new JLayer<>(textField, layerUI);
+    }
 }

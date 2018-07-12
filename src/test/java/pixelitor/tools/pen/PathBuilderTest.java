@@ -37,7 +37,7 @@ public class PathBuilderTest {
 
     @Before
     public void setup() {
-        ic = TestHelper.createICWithoutComp();
+        ic = TestHelper.createMockICWithoutComp();
     }
 
     @Test
